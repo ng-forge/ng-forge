@@ -1,3 +1,15 @@
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+
+  &:focus-visible {
+    outline: 2px solid #ff8c42;
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+}
+
 .ng-doc-header-controls {
   display: flex;
   flex-shrink: 0;
@@ -6,14 +18,5 @@
   button[ng-doc-button-icon],
   ng-doc-theme-toggle {
     margin-left: calc(var(--ng-doc-base-gutter) * 2);
-  }
-
-  // Reduce spacing on narrow screens to prevent overflow
-  @media (max-width: 480px) {
-    a[ng-doc-button-icon],
-    button[ng-doc-button-icon],
-    ng-doc-theme-toggle {
-      margin-left: calc(var(--ng-doc-base-gutter) * 1);
-    }
   }
 }

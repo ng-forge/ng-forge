@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { IonicTextareaProps, IonicTextareaField } from './ionic-textarea.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // IonicTextareaProps - Whitelist Test
@@ -21,7 +21,7 @@ describe('IonicTextareaProps - Exhaustive Whitelist', () => {
     | 'fill'
     | 'shape'
     | 'labelPlacement'
-    | 'helperText'
+    | 'hint'
     | 'errorText'
     | 'color'
     | 'placeholder';
@@ -68,8 +68,8 @@ describe('IonicTextareaProps - Exhaustive Whitelist', () => {
       expectTypeOf<IonicTextareaProps['labelPlacement']>().toEqualTypeOf<'start' | 'end' | 'fixed' | 'stacked' | 'floating' | undefined>();
     });
 
-    it('helperText', () => {
-      expectTypeOf<IonicTextareaProps['helperText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<IonicTextareaProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('errorText', () => {
@@ -105,6 +105,7 @@ describe('IonicTextareaField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -249,7 +250,7 @@ describe('IonicTextareaField - Usage Tests', () => {
         fill: 'solid',
         shape: 'round',
         labelPlacement: 'floating',
-        helperText: 'Enter a detailed description',
+        hint: 'Enter a detailed description',
         errorText: 'Description is required',
         color: 'primary',
         placeholder: 'Type here...',
@@ -394,12 +395,12 @@ describe('IonicTextareaField - Usage Tests', () => {
       type: 'textarea',
       key: 'feedback',
       props: {
-        helperText: 'Please provide feedback',
+        hint: 'Please provide feedback',
         errorText: 'Feedback is required',
       },
     } as const satisfies IonicTextareaField;
 
-    expectTypeOf(field.props?.helperText).toEqualTypeOf<'Please provide feedback'>();
+    expectTypeOf(field.props?.hint).toEqualTypeOf<'Please provide feedback'>();
     expectTypeOf(field.props?.errorText).toEqualTypeOf<'Feedback is required'>();
   });
 });

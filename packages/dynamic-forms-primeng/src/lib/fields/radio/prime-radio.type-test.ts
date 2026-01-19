@@ -12,7 +12,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { PrimeRadioProps, PrimeRadioField } from './prime-radio.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // PrimeRadioProps - Whitelist Test
@@ -62,6 +62,7 @@ describe('PrimeRadioField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // From FieldWithValidation
     | 'required'
     | 'email'

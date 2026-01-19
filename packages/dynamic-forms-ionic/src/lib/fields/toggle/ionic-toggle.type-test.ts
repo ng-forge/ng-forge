@@ -5,14 +5,14 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { IonicToggleProps, IonicToggleField } from './ionic-toggle.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // IonicToggleProps - Whitelist Test
 // ============================================================================
 
 describe('IonicToggleProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'enableOnOffLabels';
+  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'enableOnOffLabels' | 'hint';
   type ActualKeys = keyof IonicToggleProps;
 
   it('should have exactly the expected keys', () => {
@@ -61,6 +61,7 @@ describe('IonicToggleField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // From FieldWithValidation
     | 'required'
     | 'email'

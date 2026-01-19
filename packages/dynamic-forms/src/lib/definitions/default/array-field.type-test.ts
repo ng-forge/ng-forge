@@ -4,16 +4,29 @@
 import { expectTypeOf } from 'vitest';
 import type { ArrayField, ArrayComponent } from './array-field';
 import type { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
-import type { RequiredKeys } from '../../../../testing/src/type-test-utils';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // ArrayField - Whitelist Test
 // ============================================================================
 
 describe('ArrayField - Exhaustive Whitelist', () => {
-  // ArrayField extends FieldDef<never> and adds: fields, label?: never
-  // From FieldDef: key, type, label, props, className, disabled, readonly, hidden, tabIndex, col
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'fields';
+  // ArrayField extends FieldDef<never> and adds: fields, label?: never, meta?: never
+  // From FieldDef: key, type, label, props, className, disabled, readonly, hidden, tabIndex, col, meta
+  // Note: 'meta' is overridden to 'never' because containers don't have native form elements
+  type ExpectedKeys =
+    | 'key'
+    | 'type'
+    | 'label'
+    | 'props'
+    | 'className'
+    | 'disabled'
+    | 'readonly'
+    | 'hidden'
+    | 'tabIndex'
+    | 'col'
+    | 'meta'
+    | 'fields';
 
   type ActualKeys = keyof ArrayField;
 
@@ -43,6 +56,10 @@ describe('ArrayField - Exhaustive Whitelist', () => {
 
     it('props is never', () => {
       expectTypeOf<ArrayField['props']>().toEqualTypeOf<never | undefined>();
+    });
+
+    it('meta is never (arrays have no native form element)', () => {
+      expectTypeOf<ArrayField['meta']>().toEqualTypeOf<never | undefined>();
     });
 
     it('className', () => {

@@ -1,0 +1,18 @@
+// ============================================
+// NG-FORGE STYLING LIBRARY
+// ============================================
+// Main entry point - forwards all modules
+//
+// Usage:
+//   @use 'styling' as *;        // Import everything
+//   @use 'styling/tokens';      // Just tokens
+//   @use 'styling/mixins';      // Just mixins
+//   @use 'styling/themes';      // Just themes
+
+// Forward all modules for direct access
+@forward 'tokens';
+@forward 'themes';
+@forward 'animations';
+@forward 'mixins';
+@forward 'icons';
+@forward 'examples';

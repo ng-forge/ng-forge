@@ -18,7 +18,7 @@ const config = {
       label: 'Required Field',
       required: true,
       props: {
-        helpText: 'This field is required for submission',
+        hint: 'This field is required for submission',
       },
     },
     {
@@ -28,7 +28,7 @@ const config = {
       required: true,
       props: {
         type: 'email',
-        helpText: 'Enter your email address',
+        hint: 'Enter your email address',
       },
     },
     {
@@ -36,7 +36,7 @@ const config = {
       type: 'input',
       label: 'Optional Field',
       props: {
-        helpText: 'This field is optional',
+        hint: 'This field is optional',
       },
     },
     {

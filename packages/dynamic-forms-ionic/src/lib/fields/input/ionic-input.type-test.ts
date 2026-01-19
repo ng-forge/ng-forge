@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { IonicInputProps, IonicInputField } from './ionic-input.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // IonicInputProps - Whitelist Test
@@ -17,7 +17,7 @@ describe('IonicInputProps - Exhaustive Whitelist', () => {
     | 'shape'
     | 'labelPlacement'
     | 'color'
-    | 'helperText'
+    | 'hint'
     | 'errorText'
     | 'counter'
     | 'maxlength'
@@ -53,8 +53,8 @@ describe('IonicInputProps - Exhaustive Whitelist', () => {
       >();
     });
 
-    it('helperText', () => {
-      expectTypeOf<IonicInputProps['helperText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<IonicInputProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('errorText', () => {
@@ -100,6 +100,7 @@ describe('IonicInputField (String) - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -243,6 +244,7 @@ describe('IonicInputField (Number) - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     | 'required'
     | 'email'
     | 'min'
@@ -334,7 +336,7 @@ describe('IonicInputField - Discriminated Union', () => {
         shape: 'round',
         labelPlacement: 'floating',
         color: 'primary',
-        helperText: 'Enter your email',
+        hint: 'Enter your email',
         errorText: 'Invalid email',
         counter: true,
         maxlength: 50,

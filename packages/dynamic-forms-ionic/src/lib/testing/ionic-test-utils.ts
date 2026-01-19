@@ -263,7 +263,7 @@ export class IonicFormTestUtils {
     let checkboxElement: Element | null = null;
 
     // Handle complex selectors with multi-checkbox components
-    if (selector.includes('df-ionic-multi-checkbox') && selector.includes('ion-checkbox:last-of-type')) {
+    if (selector.includes('df-ion-multi-checkbox') && selector.includes('ion-checkbox:last-of-type')) {
       const parts = selector.split(' ');
       const multiCheckboxSelector = parts[0];
       const multiCheckboxElement = fixture.nativeElement.querySelector(multiCheckboxSelector);
@@ -397,7 +397,7 @@ export class IonicFormTestUtils {
    * Gets all Ionic field elements from the fixture
    */
   static getIonicFieldElements(fixture: ComponentFixture<DynamicForm>, fieldType: string): NodeListOf<Element> {
-    return fixture.nativeElement.querySelectorAll(`df-ionic-${fieldType}`);
+    return fixture.nativeElement.querySelectorAll(`df-ion-${fieldType}`);
   }
 
   /**

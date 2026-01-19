@@ -1,33 +1,43 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonNote } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicToggleComponent, IonicToggleProps } from './ionic-toggle.type';
 import { IonicToggleControlComponent } from './ionic-toggle-control.component';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
-  selector: 'df-ionic-toggle',
-  imports: [IonicToggleControlComponent, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  selector: 'df-ion-toggle',
+  imports: [IonicToggleControlComponent, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let toggleId = key() + '-toggle';
 
-    <df-ionic-toggle-control
-      [field]="f"
+    <df-ion-toggle-control
+      [id]="toggleId"
+      [formField]="f"
+      [meta]="meta()"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"
       [justify]="props()?.justify"
       [color]="props()?.color ?? 'primary'"
       [enableOnOffLabels]="props()?.enableOnOffLabels ?? false"
       [tabIndex]="tabIndex()"
+      [ariaDescribedBy]="ariaDescribedBy()"
     >
       {{ label() | dynamicText | async }}
-    </df-ionic-toggle-control>
+    </df-ion-toggle-control>
 
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+      <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    } @empty {
+      @if (props()?.hint; as hint) {
+        <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
+      }
     }
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
       :host {
@@ -48,6 +58,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicToggleFieldComponent implements IonicToggleComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<boolean>>();
   readonly key = input.required<string>();
 
@@ -57,8 +69,13 @@ export default class IonicToggleFieldComponent implements IonicToggleComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<IonicToggleProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta);
+  }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
@@ -70,5 +87,16 @@ export default class IonicToggleFieldComponent implements IonicToggleComponent {
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Base ID for error elements */
-  readonly errorId = computed(() => `${this.key()}-error`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** Unique ID for the helper text element */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
+
+  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

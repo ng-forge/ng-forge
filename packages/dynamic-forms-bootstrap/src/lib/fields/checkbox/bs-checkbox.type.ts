@@ -6,7 +6,7 @@ export interface BsCheckboxProps {
   inline?: boolean;
   reverse?: boolean;
   indeterminate?: boolean;
-  helpText?: DynamicText;
+  hint?: DynamicText;
 }
 
 export type BsCheckboxField = CheckboxField<BsCheckboxProps>;

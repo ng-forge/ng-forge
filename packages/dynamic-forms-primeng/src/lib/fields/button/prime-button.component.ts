@@ -19,7 +19,9 @@ import { PrimeButtonComponent, PrimeButtonProps } from './prime-button.type';
   imports: [ButtonDirective, DynamicTextPipe, AsyncPipe],
   host: {
     '[id]': '`${key()}`',
+    '[class]': 'className()',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'hidden() || null',
   },
   template: `
     <button
@@ -30,7 +32,6 @@ import { PrimeButtonComponent, PrimeButtonProps } from './prime-button.type';
       [outlined]="props()?.outlined || false"
       [raised]="props()?.raised || false"
       [rounded]="props()?.rounded || false"
-      [class]="className() || ''"
       [disabled]="disabled()"
       [attr.data-testid]="buttonTestId()"
       (click)="onClick()"

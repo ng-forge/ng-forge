@@ -21,7 +21,7 @@ export class MultiCheckboxIframeDemoComponent {
   ],
   props: {
     inline: false,
-    helpText: 'Select all that apply',
+    hint: 'Select all that apply',
   },
 }`;
 }

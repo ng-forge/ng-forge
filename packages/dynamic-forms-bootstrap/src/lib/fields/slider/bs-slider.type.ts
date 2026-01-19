@@ -5,7 +5,7 @@ export interface BsSliderProps {
   showValue?: boolean;
   valuePrefix?: string;
   valueSuffix?: string;
-  helpText?: DynamicText;
+  hint?: DynamicText;
   min?: number;
   max?: number;
   step?: number;

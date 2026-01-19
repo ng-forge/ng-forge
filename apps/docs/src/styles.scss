@@ -1,75 +1,670 @@
-@use '@ng-doc/app/styles/global';
-@use '@ng-doc/app/styles/themes/dark.css';
+// ============================================
+// ICON SYSTEM
+// ============================================
+@use 'icons';
+
+// ============================================
+// CSS LAYER ORDER
+// ============================================
+// Define layer order - later layers have higher priority
+// ng-doc styles are in lowest priority layer so they don't
+// affect landing page or other non-docs pages
+@layer ng-doc, material, app;
+
+// ============================================
+// NG-DOC STYLES (scoped to ng-doc layer)
+// ============================================
+@import '@ng-doc/app/styles/global.css' layer(ng-doc);
+@import '@ng-doc/app/styles/themes/dark.css' layer(ng-doc);
 
 // ============================================
 // MATERIAL THEME (for docs UI only)
 // ============================================
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import '@angular/material/prebuilt-themes/indigo-pink.css' layer(material);
 
 // ============================================
-// THEME-AWARE LOGO
+// NG-DOC EMBER THEME OVERRIDES
 // ============================================
-// Show light logo by default
-.logo-light {
-  display: block !important;
-}
-.logo-dark {
-  display: none !important;
+// Override ng-doc's default colors to match landing page forge aesthetic
+
+// Ember colors (matching landing page)
+$ember-core: #ff4d00;
+$ember-hot: #ff6b2b;
+$ember-glow: #ff8c42;
+$molten: #ffb627;
+
+// Forge dark theme colors (matching landing page)
+$bg-void: #000000;
+$bg-deep: #0a0908;
+$bg-surface: #131210;
+$bg-elevated: #1a1916;
+$steel: #e8e4de;
+$steel-mid: #9a958c;
+$steel-dim: #5c5850;
+$steel-dark: #2a2824;
+
+// Light theme - ember colors with light backgrounds
+:root {
+  // Ember primary colors
+  --ng-doc-primary: #{$ember-core};
+  --ng-doc-primary-rgb: 255, 77, 0;
+  --ng-doc-primary-hover: #{$ember-hot};
+
+  // Links use ember colors
+  --ng-doc-link-color: #{$ember-core};
+  --ng-doc-link-hover-color: #{$ember-hot};
+
+  // Selection highlight
+  --ng-doc-selection-background: rgba(255, 77, 0, 0.15);
+
+  // Active/selected states
+  --ng-doc-sidebar-category-color: #{$ember-core};
+
+  // Light mode backgrounds (default ng-doc light theme)
+  --ng-doc-base-0: #ffffff;
+  --ng-doc-base-1: #fafafa;
+  --ng-doc-base-2: #f5f5f5;
+  --ng-doc-base-3: #e5e5e5;
+  --ng-doc-base-4: #d4d4d4;
+
+  // Light mode text
+  --ng-doc-text: #1a1a1a;
+  --ng-doc-text-muted: #666666;
+
+  // Light mode borders
+  --ng-doc-border-color: #e0e0e0;
 }
 
-// Swap to dark logo when system prefers dark (only in auto mode - no explicit theme set)
+// Dark mode - only when explicitly set or auto mode with dark system preference
+// NgDoc uses: no data-theme = light, data-theme='dark' = dark, data-theme='auto' = system
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme]) .logo-light,
-  body:not([data-theme]) .logo-light {
-    display: none !important;
+  html[data-theme='auto'] {
+    // Ember accent colors
+    --ng-doc-primary: #{$ember-glow};
+    --ng-doc-primary-rgb: 255, 140, 66;
+    --ng-doc-primary-hover: #{$ember-core};
+    --ng-doc-link-color: #{$ember-glow};
+    --ng-doc-link-hover-color: #{$molten};
+    --ng-doc-selection-background: rgba(255, 140, 66, 0.2);
+    --ng-doc-sidebar-category-color: #{$ember-glow};
+
+    // Background colors - match landing page forge aesthetic
+    --ng-doc-base-0: #{$bg-deep};
+    --ng-doc-base-1: #{$bg-surface};
+    --ng-doc-base-2: #{$bg-elevated};
+    --ng-doc-base-3: #{$steel-dark};
+    --ng-doc-base-4: #{$steel-dim};
+
+    // Text colors - match landing page
+    --ng-doc-text: #{$steel};
+    --ng-doc-text-muted: #{$steel-mid};
+
+    // Border colors
+    --ng-doc-border-color: #{$steel-dark};
+
+    // Code block styling
+    --ng-doc-code-background: #{$bg-surface};
+
+    // Sidebar
+    --ng-doc-sidebar-background: #{$bg-deep};
+
+    // Navbar
+    --ng-doc-navbar-background: #{$bg-deep};
   }
-  html:not([data-theme]) .logo-dark,
-  body:not([data-theme]) .logo-dark {
-    display: block !important;
+}
+
+// Explicit dark theme - match landing page exactly
+html[data-theme='dark'] {
+  // Ember accent colors
+  --ng-doc-primary: #{$ember-glow};
+  --ng-doc-primary-rgb: 255, 140, 66;
+  --ng-doc-primary-hover: #{$ember-core};
+  --ng-doc-link-color: #{$ember-glow};
+  --ng-doc-link-hover-color: #{$molten};
+  --ng-doc-selection-background: rgba(255, 140, 66, 0.2);
+  --ng-doc-sidebar-category-color: #{$ember-glow};
+
+  // Background colors - match landing page forge aesthetic
+  --ng-doc-base-0: #{$bg-deep};
+  --ng-doc-base-1: #{$bg-surface};
+  --ng-doc-base-2: #{$bg-elevated};
+  --ng-doc-base-3: #{$steel-dark};
+  --ng-doc-base-4: #{$steel-dim};
+
+  // Text colors - match landing page
+  --ng-doc-text: #{$steel};
+  --ng-doc-text-muted: #{$steel-mid};
+
+  // Border colors
+  --ng-doc-border-color: #{$steel-dark};
+
+  // Code block styling
+  --ng-doc-code-background: #{$bg-surface};
+
+  // Sidebar
+  --ng-doc-sidebar-background: #{$bg-deep};
+
+  // Navbar
+  --ng-doc-navbar-background: #{$bg-deep};
+}
+
+// ============================================
+// THEME TOGGLE AUTO MODE ICON
+// ============================================
+// Replace the default "A" letter with a computer/monitor icon for auto mode
+ng-doc-theme-toggle .letter {
+  font-size: 0 !important; // Hide the "A" text
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  &::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='3' width='20' height='14' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='8' y1='21' x2='16' y2='21'%3E%3C/line%3E%3Cline x1='12' y1='17' x2='12' y2='21'%3E%3C/line%3E%3C/svg%3E");
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='3' width='20' height='14' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='8' y1='21' x2='16' y2='21'%3E%3C/line%3E%3Cline x1='12' y1='17' x2='12' y2='21'%3E%3C/line%3E%3C/svg%3E");
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
   }
 }
 
-// Explicit dark theme
-[data-theme='dark'] .logo-light,
-html[data-theme='dark'] .logo-light,
-body[data-theme='dark'] .logo-light {
-  display: none !important;
+// ============================================
+// NAVBAR STYLING
+// ============================================
+:root {
+  --ng-doc-navbar-height: calc(8px * 9); // Increased from 7 to 9 (72px)
 }
 
-[data-theme='dark'] .logo-dark,
-html[data-theme='dark'] .logo-dark,
-body[data-theme='dark'] .logo-dark {
-  display: block !important;
+ng-doc-navbar {
+  border-bottom: none !important;
 }
 
-// Explicit light theme
-[data-theme='light'] .logo-light,
-html[data-theme='light'] .logo-light,
-body[data-theme='light'] .logo-light {
-  display: block !important;
+// ============================================
+// NAVBAR RIGHT CONTAINER
+// ============================================
+// Add gap between search and header controls (theme toggle, GitHub)
+.ng-doc-navbar-right {
+  gap: 0.75rem !important;
+
+  // Remove ng-doc's default margin on burger menu
+  .ng-doc-menu {
+    margin-left: 0 !important;
+  }
 }
 
-[data-theme='light'] .logo-dark,
-html[data-theme='light'] .logo-dark,
-body[data-theme='light'] .logo-dark {
-  display: none !important;
+// ============================================
+// NAVBAR ICON BUTTONS (match landing page style)
+// ============================================
+// Style the ng-doc header controls to look like landing page nav buttons
+.ng-doc-header-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+
+  // Remove ng-doc's default margin-left on children (we use gap instead)
+  > * {
+    margin-left: 0 !important;
+  }
+
+  // GitHub link button (same as landing page nav-btn style)
+  .nav-btn.github-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--ng-doc-base-2);
+    border: 1px solid var(--ng-doc-border-color);
+    color: var(--ng-doc-text-muted);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: var(--ng-doc-base-1);
+      border-color: #{$ember-glow};
+      color: #{$ember-glow};
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  // Style all icon buttons (theme toggle, GitHub, etc.)
+  // Need to override ng-doc's encapsulated styles
+  > *,
+  a,
+  button,
+  [ng-doc-button-icon],
+  ng-doc-theme-toggle,
+  ng-doc-theme-toggle button,
+  ng-doc-theme-toggle [ng-doc-button-icon] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    border-radius: 50% !important;
+    background: var(--ng-doc-base-2) !important;
+    border: 1px solid var(--ng-doc-border-color) !important;
+    color: var(--ng-doc-text-muted) !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+
+    &:hover {
+      background: var(--ng-doc-base-1) !important;
+      border-color: #{$ember-glow} !important;
+      color: #{$ember-glow} !important;
+      transform: translateY(-2px) !important;
+
+      // Ensure icons inside also get ember color on hover
+      ng-doc-icon,
+      .ng-doc-icon,
+      svg {
+        color: #{$ember-glow} !important;
+        fill: #{$ember-glow} !important;
+      }
+    }
+
+    &:active {
+      transform: translateY(0) !important;
+    }
+
+    ng-doc-icon,
+    .ng-doc-icon {
+      width: 20px !important;
+      height: 20px !important;
+      transition: color 0.2s ease !important;
+    }
+  }
+
+  // Ensure theme toggle wrapper doesn't break layout
+  ng-doc-theme-toggle {
+    background: transparent !important;
+    border: none !important;
+
+    button,
+    [ng-doc-button-icon] {
+      background: var(--ng-doc-base-2) !important;
+      border: 1px solid var(--ng-doc-border-color) !important;
+
+      &:hover {
+        ng-doc-icon,
+        .ng-doc-icon,
+        svg {
+          color: #{$ember-glow} !important;
+          fill: #{$ember-glow} !important;
+        }
+      }
+    }
+  }
+}
+
+// ============================================
+// SEARCH BUTTON STYLING (match header buttons)
+// ============================================
+// Style search buttons, but hide the icon button on desktop (we have the search input)
+// Only show the icon button on mobile where the input is hidden
+ng-doc-search {
+  // Style for buttons inside ng-doc-search (applies to modal trigger buttons)
+  button,
+  [ng-doc-button-icon] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    border-radius: 50% !important;
+    background: var(--ng-doc-base-2) !important;
+    border: 1px solid var(--ng-doc-border-color) !important;
+    color: var(--ng-doc-text-muted) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+
+    &:hover {
+      background: var(--ng-doc-base-1) !important;
+      border-color: #{$ember-glow} !important;
+      color: #{$ember-glow} !important;
+      transform: translateY(-2px) !important;
+
+      ng-doc-icon,
+      .ng-doc-icon,
+      svg {
+        color: #{$ember-glow} !important;
+        fill: #{$ember-glow} !important;
+      }
+    }
+
+    &:active {
+      transform: translateY(0) !important;
+    }
+
+    ng-doc-icon,
+    .ng-doc-icon {
+      width: 20px !important;
+      height: 20px !important;
+      transition: color 0.2s ease !important;
+    }
+  }
+
+  // The direct child button is the search icon - hide when input is visible
+  // ng-doc shows the search input at 1025px and above
+  // Must use attribute selector for higher specificity than [ng-doc-button-icon]
+  @media (min-width: 1025px) {
+    > button[ng-doc-button-icon] {
+      display: none !important;
+    }
+  }
+}
+
+// Dark theme icon button styling (auto mode with dark system preference)
+@media (prefers-color-scheme: dark) {
+  html[data-theme='auto'] .ng-doc-header-controls {
+    > *,
+    a,
+    button,
+    [ng-doc-button-icon],
+    ng-doc-theme-toggle button,
+    ng-doc-theme-toggle [ng-doc-button-icon] {
+      background: #{$bg-surface} !important;
+      border-color: #{$steel-dark} !important;
+      color: #{$steel-mid} !important;
+
+      &:hover {
+        background: #{$bg-elevated} !important;
+        border-color: #{$ember-glow} !important;
+        color: #{$ember-glow} !important;
+
+        ng-doc-icon,
+        .ng-doc-icon,
+        svg {
+          color: #{$ember-glow} !important;
+          fill: #{$ember-glow} !important;
+        }
+      }
+    }
+
+    // GitHub icon should be white in dark mode
+    a[href*='github'] {
+      color: #ffffff !important;
+
+      ng-doc-icon,
+      .ng-doc-icon,
+      svg {
+        color: #ffffff !important;
+        fill: #ffffff !important;
+      }
+
+      &:hover {
+        color: #{$ember-glow} !important;
+
+        ng-doc-icon,
+        .ng-doc-icon,
+        svg {
+          color: #{$ember-glow} !important;
+          fill: #{$ember-glow} !important;
+        }
+      }
+    }
+
+    ng-doc-theme-toggle {
+      background: transparent !important;
+      border: none !important;
+
+      button,
+      [ng-doc-button-icon] {
+        background: #{$bg-surface} !important;
+        border: 1px solid #{$steel-dark} !important;
+
+        &:hover {
+          ng-doc-icon,
+          .ng-doc-icon,
+          svg {
+            color: #{$ember-glow} !important;
+            fill: #{$ember-glow} !important;
+          }
+        }
+      }
+    }
+  }
+
+  // Dark mode search button styling
+  html[data-theme='auto'] ng-doc-search {
+    button,
+    [ng-doc-button-icon] {
+      background: #{$bg-surface} !important;
+      border-color: #{$steel-dark} !important;
+      color: #{$steel-mid} !important;
+
+      &:hover {
+        background: #{$bg-elevated} !important;
+        border-color: #{$ember-glow} !important;
+        color: #{$ember-glow} !important;
+
+        ng-doc-icon,
+        .ng-doc-icon,
+        svg {
+          color: #{$ember-glow} !important;
+          fill: #{$ember-glow} !important;
+        }
+      }
+    }
+  }
+}
+
+html[data-theme='dark'] .ng-doc-header-controls {
+  > *,
+  a,
+  button,
+  [ng-doc-button-icon],
+  ng-doc-theme-toggle button,
+  ng-doc-theme-toggle [ng-doc-button-icon] {
+    background: #{$bg-surface} !important;
+    border-color: #{$steel-dark} !important;
+    color: #{$steel-mid} !important;
+
+    &:hover {
+      background: #{$bg-elevated} !important;
+      border-color: #{$ember-glow} !important;
+      color: #{$ember-glow} !important;
+
+      ng-doc-icon,
+      .ng-doc-icon,
+      svg {
+        color: #{$ember-glow} !important;
+        fill: #{$ember-glow} !important;
+      }
+    }
+  }
+
+  // GitHub icon should be white in dark mode
+  a[href*='github'] {
+    color: #ffffff !important;
+
+    ng-doc-icon,
+    .ng-doc-icon,
+    svg {
+      color: #ffffff !important;
+      fill: #ffffff !important;
+    }
+
+    &:hover {
+      color: #{$ember-glow} !important;
+
+      ng-doc-icon,
+      .ng-doc-icon,
+      svg {
+        color: #{$ember-glow} !important;
+        fill: #{$ember-glow} !important;
+      }
+    }
+  }
+
+  ng-doc-theme-toggle {
+    background: transparent !important;
+    border: none !important;
+
+    button,
+    [ng-doc-button-icon] {
+      background: #{$bg-surface} !important;
+      border: 1px solid #{$steel-dark} !important;
+
+      &:hover {
+        ng-doc-icon,
+        .ng-doc-icon,
+        svg {
+          color: #{$ember-glow} !important;
+          fill: #{$ember-glow} !important;
+        }
+      }
+    }
+  }
+}
+
+// Dark mode search button styling
+html[data-theme='dark'] ng-doc-search {
+  button,
+  [ng-doc-button-icon] {
+    background: #{$bg-surface} !important;
+    border-color: #{$steel-dark} !important;
+    color: #{$steel-mid} !important;
+
+    &:hover {
+      background: #{$bg-elevated} !important;
+      border-color: #{$ember-glow} !important;
+      color: #{$ember-glow} !important;
+
+      ng-doc-icon,
+      .ng-doc-icon,
+      svg {
+        color: #{$ember-glow} !important;
+        fill: #{$ember-glow} !important;
+      }
+    }
+  }
 }
 
 // ============================================
 // RESPONSIVE NAVBAR
 // ============================================
-// On very narrow screens, hide search and reduce spacing to make room for hamburger menu
-@media (max-width: 400px) {
-  ng-doc-navbar {
-    // Hide the search component on very narrow screens
-    ng-doc-search {
-      display: none !important;
+// On mobile/tablet (below 1025px), show search icon button
+// ng-doc hides the search component and input on smaller screens
+// At 1025px and above, ng-doc shows the search input, so we hide the button
+@media (max-width: 1024px) {
+  ng-doc-search {
+    // Override ng-doc's hiding of the search component
+    display: flex !important;
+
+    // Show the search icon button
+    > button[ng-doc-button-icon] {
+      display: flex !important;
     }
 
-    // Reduce navbar padding
+    // Keep the input wrapper hidden (ng-doc's default behavior below 1025px)
+    ng-doc-input-wrapper {
+      display: none !important;
+    }
+  }
+}
+
+// On very narrow screens, scale down navbar elements
+@media (max-width: 400px) {
+  ng-doc-navbar {
     .navbar-container {
       padding-inline: calc(var(--ng-doc-base-gutter) * 1) !important;
     }
+
+    // Scale down logo
+    .navbar-logo app-logo .logo-svg {
+      height: 48px !important;
+    }
+  }
+
+  // Scale down header control buttons
+  .ng-doc-header-controls {
+    gap: 0.5rem !important;
+
+    > *,
+    a,
+    button,
+    [ng-doc-button-icon],
+    ng-doc-theme-toggle,
+    ng-doc-theme-toggle button,
+    ng-doc-theme-toggle [ng-doc-button-icon] {
+      width: 34px !important;
+      height: 34px !important;
+      min-width: 34px !important;
+      min-height: 34px !important;
+
+      ng-doc-icon,
+      .ng-doc-icon {
+        width: 17px !important;
+        height: 17px !important;
+      }
+    }
+  }
+
+  // Scale down search button
+  ng-doc-search {
+    button,
+    [ng-doc-button-icon] {
+      width: 34px !important;
+      height: 34px !important;
+      min-width: 34px !important;
+      min-height: 34px !important;
+
+      ng-doc-icon,
+      .ng-doc-icon {
+        width: 17px !important;
+        height: 17px !important;
+      }
+    }
+  }
+
+  // Scale down burger menu button
+  .ng-doc-menu button,
+  .ng-doc-menu [ng-doc-button-icon] {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+
+    ng-doc-icon,
+    .ng-doc-icon {
+      width: 17px !important;
+      height: 17px !important;
+    }
+  }
+
+  // Reduce gap between navbar-right elements
+  .ng-doc-navbar-right {
+    gap: 0.5rem !important;
   }
 }
 
@@ -102,5 +697,309 @@ ng-doc-demo-displayer {
   ::ng-deep ng-doc-code,
   ::ng-deep .ng-doc-code-viewer {
     display: none !important;
+  }
+}
+
+// ============================================
+// GLOBAL SCROLLBAR STYLING
+// ============================================
+// Custom ember-themed scrollbar applied globally
+// Respects light/dark mode
+
+// Light mode scrollbar (default)
+:root {
+  scrollbar-width: thin;
+  scrollbar-color: #{$ember-core} #f5f5f5;
+}
+
+html {
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f5f5f5;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #{$ember-hot}, #{$ember-core});
+    border-radius: 5px;
+    border: 2px solid #f5f5f5;
+
+    &:hover {
+      background: linear-gradient(180deg, #{$ember-glow}, #{$ember-hot});
+    }
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: #f5f5f5;
+  }
+}
+
+// Inner scrollbars (code blocks, etc.) - light mode
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #{$ember-hot}, #{$ember-core});
+  border-radius: 5px;
+  border: 2px solid #f0f0f0;
+
+  &:hover {
+    background: linear-gradient(180deg, #{$ember-glow}, #{$ember-hot});
+  }
+}
+
+*::-webkit-scrollbar-corner {
+  background: #f0f0f0;
+}
+
+// Dark mode scrollbar (auto mode with dark system preference)
+@media (prefers-color-scheme: dark) {
+  html[data-theme='auto'] {
+    scrollbar-color: #{$ember-core} #{$bg-deep};
+
+    &::-webkit-scrollbar-track {
+      background: #{$bg-deep};
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-color: #{$bg-deep};
+    }
+
+    &::-webkit-scrollbar-corner {
+      background: #{$bg-deep};
+    }
+  }
+
+  html[data-theme='auto'] *::-webkit-scrollbar-track {
+    background: #{$bg-deep};
+  }
+
+  html[data-theme='auto'] *::-webkit-scrollbar-thumb {
+    border-color: #{$bg-deep};
+  }
+
+  html[data-theme='auto'] *::-webkit-scrollbar-corner {
+    background: #{$bg-deep};
+  }
+}
+
+// Explicit dark mode scrollbar
+html[data-theme='dark'] {
+  scrollbar-color: #{$ember-core} #{$bg-deep};
+
+  &::-webkit-scrollbar-track {
+    background: #{$bg-deep};
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-color: #{$bg-deep};
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: #{$bg-deep};
+  }
+}
+
+html[data-theme='dark'] *::-webkit-scrollbar-track {
+  background: #{$bg-deep};
+}
+
+html[data-theme='dark'] *::-webkit-scrollbar-thumb {
+  border-color: #{$bg-deep};
+}
+
+html[data-theme='dark'] *::-webkit-scrollbar-corner {
+  background: #{$bg-deep};
+}
+
+// Landing page is always dark (override any theme)
+html:has(app-landing) {
+  scrollbar-color: #{$ember-core} #{$bg-deep} !important;
+
+  &::-webkit-scrollbar-track {
+    background: #{$bg-deep} !important;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-color: #{$bg-deep} !important;
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: #{$bg-deep} !important;
+  }
+}
+
+html:has(app-landing) *::-webkit-scrollbar-track {
+  background: #{$bg-deep} !important;
+}
+
+html:has(app-landing) *::-webkit-scrollbar-thumb {
+  border-color: #{$bg-deep} !important;
+}
+
+html:has(app-landing) *::-webkit-scrollbar-corner {
+  background: #{$bg-deep} !important;
+}
+
+// ============================================
+// LANDING PAGE SEARCH (always dark)
+// ============================================
+// Force dark theme for all search elements when on landing page
+// regardless of system color scheme preference
+html:has(app-landing) {
+  // Search input in navbar - high specificity to override ng-doc
+  ng-doc-navbar ng-doc-search ng-doc-input-wrapper,
+  .ng-doc-navbar ng-doc-search ng-doc-input-wrapper,
+  ng-doc-search ng-doc-input-wrapper {
+    background: #{$bg-surface} !important;
+    border: 1px solid #{$steel-mid} !important;
+    border-radius: 8px !important;
+
+    &:hover,
+    &:focus-within {
+      border-color: #{$ember-glow} !important;
+    }
+
+    // The inner input container label - this is what was showing white
+    .ng-doc-input-container,
+    label.ng-doc-input-container {
+      background: transparent !important;
+
+      &::after {
+        border: none !important;
+      }
+    }
+
+    input,
+    input[type='text'],
+    .ng-doc-input {
+      color: #{$steel} !important;
+      background: transparent !important;
+      -webkit-text-fill-color: #{$steel} !important;
+
+      &::placeholder {
+        color: #{$steel-dim} !important;
+        -webkit-text-fill-color: #{$steel-dim} !important;
+      }
+    }
+
+    ng-doc-icon,
+    .ng-doc-icon,
+    svg {
+      color: #{$steel-mid} !important;
+    }
+
+    ng-doc-tag,
+    .ng-doc-tag {
+      background: #{$bg-elevated} !important;
+      color: #{$steel-dim} !important;
+      border: 1px solid #{$steel-dark} !important;
+    }
+  }
+}
+
+// Search dialog styling for landing page
+html:has(app-landing) {
+  // Search dialog overlay
+  .ng-doc-search-dialog,
+  ng-doc-search-dialog,
+  .cdk-overlay-container ng-doc-search-dialog {
+    background: #{$bg-deep} !important;
+    border: none !important;
+
+    // The input container label inside the dialog - this shows white
+    .ng-doc-input-container,
+    label.ng-doc-input-container {
+      background: transparent !important;
+
+      &::after {
+        border: none !important;
+      }
+    }
+
+    // Input wrapper
+    ng-doc-input-wrapper {
+      background: #{$bg-surface} !important;
+      border: 1px solid #{$steel-mid} !important;
+      border-radius: 8px !important;
+
+      &:hover,
+      &:focus-within {
+        border-color: #{$ember-glow} !important;
+      }
+    }
+
+    // Search input inside dialog
+    input {
+      background: transparent !important;
+      color: #{$steel} !important;
+
+      &::placeholder {
+        color: #{$steel-dim} !important;
+      }
+    }
+
+    // Search results
+    .ng-doc-search-result,
+    .ng-doc-search-item {
+      background: #{$bg-surface} !important;
+      color: #{$steel} !important;
+      border-color: #{$steel-dark} !important;
+
+      &:hover {
+        background: #{$bg-elevated} !important;
+      }
+    }
+
+    // Text and icons
+    .ng-doc-text,
+    .ng-doc-search-title,
+    .ng-doc-search-category {
+      color: #{$steel} !important;
+    }
+
+    .ng-doc-text-muted {
+      color: #{$steel-mid} !important;
+    }
+
+    ng-doc-icon,
+    .ng-doc-icon {
+      color: #{$steel-mid} !important;
+    }
+
+    // Keyboard hints
+    ng-doc-tag,
+    .ng-doc-tag {
+      background: #{$bg-elevated} !important;
+      color: #{$steel-dim} !important;
+      border: 1px solid #{$steel-dark} !important;
+    }
+  }
+
+  // CDK overlay backdrop
+  .cdk-overlay-backdrop {
+    background: rgba(0, 0, 0, 0.7) !important;
+  }
+}
+
+// ============================================
+// LANDING PAGE BODY BACKGROUND
+// ============================================
+// Ensure black background on html/body for landing page
+// Prevents white showing through on overscroll
+html:has(app-landing) {
+  background: #{$bg-void} !important;
+
+  body {
+    background: #{$bg-void} !important;
   }
 }

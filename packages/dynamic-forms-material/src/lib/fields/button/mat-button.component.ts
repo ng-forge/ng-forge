@@ -21,10 +21,13 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'hidden() || null',
   },
   template: `
+    @let buttonId = key() + '-button';
     <button
       mat-raised-button
+      [id]="buttonId"
       [type]="buttonType()"
       [color]="props()?.color || 'primary'"
       [disabled]="disabled()"
@@ -34,12 +37,9 @@ import { AsyncPipe } from '@angular/common';
       {{ label() | dynamicText | async }}
     </button>
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
-      :host {
-        display: block;
-      }
-
       button {
         min-width: fit-content;
       }

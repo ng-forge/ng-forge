@@ -33,6 +33,7 @@ export const appConfig: ApplicationConfig = {
     provideNgDocContext(),
     provideNgDocApp({
       shiki: {
+        themes: [import('shiki/themes/material-theme-darker.mjs'), import('shiki/themes/material-theme-lighter.mjs')],
         theme: {
           dark: 'material-theme-darker',
           light: 'material-theme-lighter',

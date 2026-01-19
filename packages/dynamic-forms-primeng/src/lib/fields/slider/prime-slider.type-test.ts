@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { PrimeSliderProps, PrimeSliderField } from './prime-slider.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // PrimeSliderProps - Whitelist Test
@@ -71,6 +71,7 @@ describe('PrimeSliderField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // From FieldWithValidation
     | 'required'
     | 'email'

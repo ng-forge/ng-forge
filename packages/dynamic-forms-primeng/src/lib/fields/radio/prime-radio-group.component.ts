@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
-import type { FormValueControl } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-forms';
+import type { FormValueControl } from '@angular/forms/signals';
+import { DynamicTextPipe, FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 import { RadioButton } from 'primeng/radiobutton';
 
@@ -23,7 +24,7 @@ export interface PrimeRadioGroupProps {
             [name]="name()"
             [value]="option.value"
             [ngModel]="value()"
-            (ngModelChange)="onRadioChange($event)"
+            (ngModelChange)="value.set($event)"
             [disabled]="disabled() || option.disabled || false"
             [inputId]="name() + '_' + i"
             [styleClass]="properties()?.styleClass"
@@ -59,9 +60,11 @@ export interface PrimeRadioGroupProps {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PrimeRadioGroupComponent<T = unknown> implements FormValueControl<T> {
-  // Required by FormValueControl
-  readonly value = model.required<T>();
+export class PrimeRadioGroupComponent implements FormValueControl<ValueType | undefined> {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
+  // Value model - FormField directive binds form value to this
+  readonly value = model<ValueType | undefined>(undefined);
 
   // Optional FormValueControl properties - Field directive will bind these
   readonly disabled = input<boolean>(false);
@@ -70,15 +73,15 @@ export class PrimeRadioGroupComponent<T = unknown> implements FormValueControl<T
   readonly name = input<string>('');
 
   // Component-specific inputs
-  readonly options = input.required<FieldOption<T>[]>();
+  readonly options = input.required<FieldOption<ValueType>[]>();
   readonly properties = input<PrimeRadioGroupProps>();
+  readonly meta = input<FieldMeta>();
 
-  /**
-   * Handle radio button change event
-   */
-  protected onRadioChange(newValue: T): void {
-    if (!this.disabled() && !this.readonly()) {
-      this.value.set(newValue);
-    }
+  constructor() {
+    // Apply meta attributes to all radio inputs, re-apply when options change
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'input[type="radio"]',
+      dependents: [this.options],
+    });
   }
 }

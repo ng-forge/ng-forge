@@ -1,20 +1,20 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatInputComponent, MatInputProps } from './mat-input.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-input',
-  imports: [MatFormField, MatLabel, MatInput, MatHint, Field, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatFormField, MatLabel, MatInput, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let inputId = key() + '-input';
 
     <mat-form-field [appearance]="effectiveAppearance()" [subscriptSizing]="effectiveSubscriptSizing()">
       @if (label()) {
@@ -23,33 +23,27 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       <input
         #inputRef
         matInput
-        [type]="inputType()"
-        [field]="f"
+        [id]="inputId"
+        [formField]="f"
+        [type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
       />
-      @if (props()?.hint; as hint) {
-        <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
-      }
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
+      } @empty {
+        @if (props()?.hint; as hint) {
+          <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
+        }
       }
     </mat-form-field>
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
-      :host {
-        display: block;
-        width: 100%;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-
       mat-form-field {
         width: 100%;
       }
@@ -65,9 +59,23 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 })
 export default class MatInputFieldComponent implements MatInputComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
+
+  readonly label = input<DynamicText>();
+  readonly placeholder = input<DynamicText>();
+  readonly className = input<string>('');
+  readonly tabIndex = input<number>();
+  readonly props = input<MatInputProps>();
+  readonly meta = input<InputMeta>();
+  readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+  }
 
   /**
    * Reference to the native input element.
@@ -109,20 +117,9 @@ export default class MatInputFieldComponent implements MatInputComponent {
     },
   });
 
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
-  readonly props = input<MatInputProps>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
-
   readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
 
   readonly effectiveSubscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');
-
-  /** Computed input type - defaults to 'text' if not specified in props */
-  readonly inputType = computed(() => this.props()?.type ?? 'text');
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
@@ -151,18 +148,10 @@ export default class MatInputFieldComponent implements MatInputComponent {
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

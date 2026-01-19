@@ -24,7 +24,15 @@ export type {
   InputProps,
   InputType,
   InputTypeToValueType,
+  InferInputValue,
+  NumericInputType,
   StringInputType,
+  HtmlInputType,
+  InputMeta,
+  AutocompleteValue,
+  InputMode,
+  EnterKeyHint,
+  Autocapitalize,
   MultiCheckboxField,
   RadioField,
   SelectField,
@@ -32,6 +40,8 @@ export type {
   SliderField,
   TextareaField,
   TextareaProps,
+  TextareaMeta,
+  TextareaWrap,
   ToggleField,
 } from './definitions';
 
@@ -64,7 +74,8 @@ export type { ResolvedError } from './utils';
 export { isEqual } from './utils';
 
 // =============================================================================
-// Pipes
+// Meta Tracking Utilities
 // =============================================================================
 
-export { ValueInArrayPipe } from './pipes';
+export { setupMetaTracking } from './utils';
+export type { MetaTrackingOptions } from './utils';

@@ -1,18 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeTextareaControlComponent } from './prime-textarea-control.component';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-textarea',
-  imports: [DynamicTextPipe, AsyncPipe, Field, PrimeTextareaControlComponent],
+  imports: [DynamicTextPipe, AsyncPipe, FormField, PrimeTextareaControlComponent],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="df-prime-field">
       @if (label()) {
@@ -21,22 +21,24 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
 
       <df-prime-textarea-control
         [id]="inputId()"
-        [field]="f"
+        [formField]="f"
+        [meta]="meta()"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
         [maxlength]="props()?.maxlength"
         [tabIndex]="tabIndex()"
         [autoResize]="props()?.autoResize ?? false"
-        [ariaDescribedBy]="ariaDescribedBy"
+        [ariaDescribedBy]="ariaDescribedBy()"
         [styleClass]="textareaClasses()"
       />
 
-      @if (props()?.hint; as hint) {
-        <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
-      }
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
+      } @empty {
+        @if (props()?.hint; as hint) {
+          <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
+        }
       }
     </div>
   `,
@@ -56,6 +58,8 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
   ],
 })
 export default class PrimeTextareaFieldComponent implements PrimeTextareaComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
@@ -64,8 +68,13 @@ export default class PrimeTextareaFieldComponent implements PrimeTextareaCompone
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeTextareaProps>();
+  readonly meta = input<TextareaMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'textarea' });
+  }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
@@ -101,18 +110,10 @@ export default class PrimeTextareaFieldComponent implements PrimeTextareaCompone
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

@@ -1,19 +1,22 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonNote, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicSelectComponent, IonicSelectProps } from './ionic-select.type';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
-  selector: 'df-ionic-select',
-  imports: [IonSelect, IonSelectOption, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  selector: 'df-ion-select',
+  imports: [IonSelect, IonSelectOption, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let selectId = key() + '-select';
 
     <ion-select
-      [field]="f"
+      [id]="selectId"
+      [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
       [placeholder]="(placeholder() ?? props()?.placeholder | dynamicText | async) ?? ''"
@@ -27,22 +30,23 @@ import { AsyncPipe } from '@angular/common';
       [fill]="props()?.fill ?? 'outline'"
       [shape]="props()?.shape"
       [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="isAriaInvalid()"
-      [attr.aria-required]="isRequired() || null"
-      [class.ion-invalid]="f().invalid()"
-      [class.ion-touched]="f().touched()"
+      [attr.aria-invalid]="ariaInvalid()"
+      [attr.aria-required]="ariaRequired()"
+      [attr.aria-describedby]="ariaDescribedBy()"
     >
       @for (option of options(); track option.value) {
         <ion-select-option [value]="option.value" [disabled]="option.disabled || false">
           {{ option.label | dynamicText | async }}
         </ion-select-option>
       }
-      <div slot="error">
-        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-          <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
-        }
-      </div>
     </ion-select>
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    } @empty {
+      @if (props()?.hint; as hint) {
+        <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
+      }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -51,6 +55,7 @@ import { AsyncPipe } from '@angular/common';
     '[class]': 'className()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
       :host([hidden]) {
@@ -59,8 +64,10 @@ import { AsyncPipe } from '@angular/common';
     `,
   ],
 })
-export default class IonicSelectFieldComponent<T> implements IonicSelectComponent<T> {
-  readonly field = input.required<FieldTree<T>>();
+export default class IonicSelectFieldComponent implements IonicSelectComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
+  readonly field = input.required<FieldTree<ValueType>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
@@ -69,10 +76,15 @@ export default class IonicSelectFieldComponent<T> implements IonicSelectComponen
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<FieldOption<T>[]>([]);
-  readonly props = input<IonicSelectProps<T>>();
+  readonly options = input<FieldOption<ValueType>[]>([]);
+  readonly props = input<IonicSelectProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta);
+  }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
@@ -86,16 +98,27 @@ export default class IonicSelectFieldComponent<T> implements IonicSelectComponen
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Base ID for error elements */
-  readonly errorId = computed(() => `${this.key()}-error`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** Unique ID for the helper text element */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
 
   /** Whether the field is currently in an invalid state (invalid AND touched) */
-  readonly isAriaInvalid = computed(() => {
+  protected readonly ariaInvalid = computed(() => {
     const fieldState = this.field()();
     return fieldState.invalid() && fieldState.touched();
   });
 
   /** Whether the field has a required validator */
-  readonly isRequired = computed(() => {
-    return this.field()().required?.() === true;
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
   });
+
+  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

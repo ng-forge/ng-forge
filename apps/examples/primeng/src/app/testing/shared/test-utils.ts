@@ -1,15 +1,16 @@
 import { expect, Locator, Page } from '@playwright/test';
+import { logTestResult } from '@ng-forge/examples-shared-testing';
 
 /**
  * Base URL for the test application
  */
-export const BASE_URL = 'http://localhost:4202';
+// BASE_URL is now derived from APP_PORTS in fixtures.ts
 
 /**
  * Creates a URL for a specific test route
  */
 export function testUrl(path: string): string {
-  return `${BASE_URL}/#${path}`;
+  return `/#${path}`;
 }
 
 /**
@@ -131,11 +132,5 @@ export async function waitForFieldHidden(field: Locator, timeout = 5000): Promis
   await expect(field).not.toBeVisible({ timeout });
 }
 
-/**
- * Logs test result on pass (for use in afterEach)
- */
-export function logTestResult(testInfo: { status?: string; title: string }): void {
-  if (testInfo.status === 'passed') {
-    console.info(`✅ TEST PASSED: ${testInfo.title}`);
-  }
-}
+// Re-export for convenience
+export { logTestResult };

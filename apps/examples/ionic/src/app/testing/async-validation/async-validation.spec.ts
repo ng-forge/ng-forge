@@ -1,5 +1,4 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
-import { testUrl } from '../shared/test-utils';
 import { ionBlur } from '../shared/test-utils';
 
 setupTestLogging();
@@ -41,7 +40,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('http-get-validator-test');
-      await page.goto(testUrl('/async-validation/http-get-validator'));
+      await page.goto('/#/testing/async-validation/http-get-validator');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -109,7 +108,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('http-post-validator-test');
-      await page.goto(testUrl('/async-validation/http-post-validator'));
+      await page.goto('/#/testing/async-validation/http-post-validator');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -154,7 +153,7 @@ test.describe('Async Validation Tests', () => {
   test.describe('Resource-Based Async Validator', () => {
     test('should validate product code using resource-based async validator', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('async-resource-validator-test');
-      await page.goto(testUrl('/async-validation/async-resource-validator'));
+      await page.goto('/#/testing/async-validation/async-resource-validator');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -203,7 +202,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('http-error-handling-test');
-      await page.goto(testUrl('/async-validation/http-error-handling'));
+      await page.goto('/#/testing/async-validation/http-error-handling');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -242,7 +241,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('multiple-validators-test');
-      await page.goto(testUrl('/async-validation/multiple-validators'));
+      await page.goto('/#/testing/async-validation/multiple-validators');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 

@@ -1,23 +1,22 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsSliderComponent, BsSliderProps } from './bs-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-bs-slider',
-  imports: [Field, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
+  imports: [FormField, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let f = field(); @let inputId = key() + '-input';
 
     <div class="mb-3">
       @if (label(); as label) {
-        <label [for]="key()" class="form-label">
+        <label [for]="inputId" class="form-label">
           {{ label | dynamicText | async }}
           @if (props()?.showValue) {
             <span class="ms-2 badge bg-secondary"> {{ props()?.valuePrefix }}{{ f().value() }}{{ props()?.valueSuffix }} </span>
@@ -28,25 +27,24 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
       <input
         type="range"
         dfBsInputConstraints
-        [field]="f"
-        [id]="key()"
+        [formField]="f"
+        [id]="inputId"
         [dfMin]="props()?.min ?? min()"
         [dfMax]="props()?.max ?? max()"
         [dfStep]="props()?.step ?? step()"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
         class="form-range"
       />
 
-      @if (props()?.helpText; as helpText) {
-        <div class="form-text" [id]="helpTextId()">
-          {{ helpText | dynamicText | async }}
-        </div>
-      }
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
+      } @empty {
+        @if (props()?.hint; as hint) {
+          <div class="form-text" [id]="hintId()">{{ hint | dynamicText | async }}</div>
+        }
       }
     </div>
   `,
@@ -70,6 +68,8 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BsSliderFieldComponent implements BsSliderComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<number>>();
   readonly key = input.required<string>();
 
@@ -86,17 +86,22 @@ export default class BsSliderFieldComponent implements BsSliderComponent {
   readonly props = input<BsSliderProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+  readonly meta = input<InputMeta>();
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Accessibility
   // ─────────────────────────────────────────────────────────────────────────────
 
-  protected readonly helpTextId = computed(() => `${this.key()}-help`);
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
   protected readonly ariaInvalid = computed(() => {
@@ -108,15 +113,10 @@ export default class BsSliderFieldComponent implements BsSliderComponent {
     return this.field()().required?.() === true ? true : null;
   });
 
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-    if (this.props()?.helpText) {
-      ids.push(this.helpTextId());
-    }
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

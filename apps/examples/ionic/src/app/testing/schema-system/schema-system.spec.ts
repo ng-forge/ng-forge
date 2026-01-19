@@ -1,5 +1,4 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
-import { testUrl } from '../shared/test-utils';
 import { ionBlur } from '../shared/test-utils';
 
 setupTestLogging();
@@ -12,7 +11,7 @@ test.describe('Schema System E2E Tests', () => {
 
   test.describe('Apply Schema', () => {
     test('should apply reusable requiredEmail schema to field', async ({ page, helpers }) => {
-      await page.goto(testUrl('/schema-system/apply-schema'));
+      await page.goto('/#/testing/schema-system/apply-schema');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('apply-schema-test');
@@ -53,7 +52,7 @@ test.describe('Schema System E2E Tests', () => {
 
   test.describe('Apply When Schema', () => {
     test('should conditionally apply schema when checkbox is checked', async ({ page, helpers }) => {
-      await page.goto(testUrl('/schema-system/apply-when-schema'));
+      await page.goto('/#/testing/schema-system/apply-when-schema');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('apply-when-schema-test');
@@ -117,7 +116,7 @@ test.describe('Schema System E2E Tests', () => {
     });
 
     test('should re-apply schema when checkbox is checked again', async ({ page, helpers }) => {
-      await page.goto(testUrl('/schema-system/apply-when-schema'));
+      await page.goto('/#/testing/schema-system/apply-when-schema');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('apply-when-schema-test');

@@ -24,7 +24,7 @@ import { derivedFromDeferred } from './utils/derived-from-deferred/derived-from-
 import { reconcileFields, ResolvedField, resolveField } from './utils/resolve-field/resolve-field';
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
 import { keyBy, memoize, isEqual } from './utils/object-utils';
-import { FIELD_SIGNAL_CONTEXT } from './models/field-signal-context.token';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from './models/field-signal-context.token';
 import { FieldTypeDefinition } from './models/field-type';
 import { FormConfig, FormOptions } from './models/form-config';
 import { RegisteredFieldTypes } from './models/registry/field-registry';
@@ -92,9 +92,32 @@ import { DynamicFormLogger } from './providers/features/logger/logger.token';
     }
   `,
   styleUrl: './dynamic-form.component.scss',
-  providers: [EventBus, SchemaRegistryService, FunctionRegistryService, RootFormRegistryService, FieldContextRegistryService],
+  providers: [
+    EventBus,
+    SchemaRegistryService,
+    FunctionRegistryService,
+    RootFormRegistryService,
+    FieldContextRegistryService,
+    // Form-level config tokens provided via useFactory to enable reactive updates
+    {
+      provide: DEFAULT_PROPS,
+      useFactory: (form: DynamicForm) => computed(() => form.config().defaultProps),
+      deps: [DynamicForm],
+    },
+    {
+      provide: DEFAULT_VALIDATION_MESSAGES,
+      useFactory: (form: DynamicForm) => computed(() => form.config().defaultValidationMessages),
+      deps: [DynamicForm],
+    },
+    {
+      provide: FORM_OPTIONS,
+      useFactory: (form: DynamicForm) => form.effectiveFormOptions,
+      deps: [DynamicForm],
+    },
+  ],
   host: {
     class: 'df-dynamic-form df-form',
+    novalidate: '', // Disable browser validation - Angular Signal Forms handles validation
     '[class.disabled]': 'disabled()',
     '[class.df-form-paged]': 'formModeDetection().mode === "paged"',
     '[class.df-form-non-paged]': 'formModeDetection().mode === "non-paged"',
@@ -247,19 +270,16 @@ export class DynamicForm<
     value: this.value,
     defaultValues: this.defaultValues,
     form: this.form(),
-    defaultValidationMessages: this.config().defaultValidationMessages,
-    formOptions: this.effectiveFormOptions(),
   }));
 
+  /**
+   * Injector for field components with FIELD_SIGNAL_CONTEXT.
+   * Other form-level tokens (DEFAULT_PROPS, etc.) are provided at component level.
+   */
   private readonly fieldInjector = computed(() =>
     Injector.create({
       parent: this.injector,
-      providers: [
-        {
-          provide: FIELD_SIGNAL_CONTEXT,
-          useValue: this.fieldSignalContext(),
-        },
-      ],
+      providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: this.fieldSignalContext() }],
     }),
   );
 

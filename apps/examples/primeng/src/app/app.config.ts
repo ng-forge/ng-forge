@@ -2,7 +2,7 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessC
 import { provideRouter, withHashLocation } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeuix/themes/aura';
+import { PRIMENG_EMBER_THEME } from '@ng-forge/styling';
 import { appRoutes } from './app.routes';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
@@ -14,12 +14,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(appRoutes, withHashLocation()),
     provideAnimations(),
     providePrimeNG({
-      theme: {
-        preset: Aura,
-        options: {
-          darkModeSelector: '[data-theme="dark"]',
-        },
-      },
+      theme: PRIMENG_EMBER_THEME,
     }),
     provideDynamicForm(...withPrimeNGFields()),
   ],

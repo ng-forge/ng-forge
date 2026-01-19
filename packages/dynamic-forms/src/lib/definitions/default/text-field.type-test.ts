@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { TextField, TextProps, TextElementType } from './text-field';
 import type { DynamicText } from '../../models/types/dynamic-text';
 import type { LogicConfig } from '../../models/logic';
-import type { RequiredKeys } from '../../../../testing/src/type-test-utils';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // TextElementType - Whitelist Test
@@ -87,7 +87,19 @@ describe('TextProps - Exhaustive Whitelist', () => {
 describe('TextField - Exhaustive Whitelist', () => {
   // TextField extends FieldDef<TextProps> and adds: logic
   // From FieldDef: key, type, label, props, className, disabled, readonly, hidden, tabIndex, col
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'logic';
+  type ExpectedKeys =
+    | 'key'
+    | 'type'
+    | 'label'
+    | 'props'
+    | 'className'
+    | 'disabled'
+    | 'readonly'
+    | 'hidden'
+    | 'tabIndex'
+    | 'col'
+    | 'meta'
+    | 'logic';
 
   type ActualKeys = keyof TextField;
 

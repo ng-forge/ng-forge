@@ -1,5 +1,4 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
-import { testUrl } from '../shared/test-utils';
 import { ionBlur } from '../shared/test-utils';
 
 setupTestLogging();
@@ -13,7 +12,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Multi-Page Registration Wizard', () => {
     test('should complete full 3-page registration workflow', async ({ page, helpers }) => {
       // Navigate to the multi-page registration component
-      await page.goto(testUrl('/multi-page-navigation/multi-page-registration'));
+      await page.goto('/#/testing/multi-page-navigation/multi-page-registration');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
@@ -24,6 +23,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       // Wait for and verify we're on page 1 by checking for username field
       await page.waitForSelector('[data-testid="multi-page-registration"] #username input', { state: 'visible', timeout: 10000 });
       await expect(scenario.locator('#username input')).toBeVisible({ timeout: 10000 });
+
+      // Screenshot: Page 1 empty state
+      await helpers.expectScreenshotMatch(scenario, 'ionic-multi-page-registration-page1-empty');
 
       // Fill page 1 fields (blur triggers validation)
       const usernameInput = scenario.locator('#username input');
@@ -46,6 +48,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       await expect(confirmPasswordInput).toHaveValue('securepassword123', { timeout: 5000 });
       await ionBlur(confirmPasswordInput);
 
+      // Screenshot: Page 1 filled state
+      await helpers.expectScreenshotMatch(scenario, 'ionic-multi-page-registration-page1-filled');
+
       // Wait for form to be valid (button enabled) before clicking
       await page.waitForSelector('[data-testid="multi-page-registration"] #nextToPersonalPage ion-button:not([aria-disabled="true"])', {
         state: 'visible',
@@ -57,6 +62,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       // Wait for and verify we're on page 2 by checking for firstName field
       await page.waitForSelector('[data-testid="multi-page-registration"] #firstName input', { state: 'visible', timeout: 10000 });
       await expect(scenario.locator('#firstName input')).toBeVisible({ timeout: 10000 });
+
+      // Screenshot: Page 2 empty state
+      await helpers.expectScreenshotMatch(scenario, 'ionic-multi-page-registration-page2-empty');
 
       // Fill page 2 fields (blur triggers validation)
       const firstNameInput = scenario.locator('#firstName input');
@@ -77,6 +85,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       await expect(phoneNumberInput).toHaveValue('+1-555-123-4567', { timeout: 5000 });
       await ionBlur(phoneNumberInput);
 
+      // Screenshot: Page 2 filled state
+      await helpers.expectScreenshotMatch(scenario, 'ionic-multi-page-registration-page2-filled');
+
       // Wait for form to be valid (button enabled) before clicking
       await page.waitForSelector('[data-testid="multi-page-registration"] #nextToPreferencesPage ion-button:not([aria-disabled="true"])', {
         state: 'visible',
@@ -91,6 +102,9 @@ test.describe('Multi-Page Navigation Tests', () => {
         timeout: 10000,
       });
       await expect(scenario.locator('#newsletter ion-checkbox')).toBeVisible({ timeout: 10000 });
+
+      // Screenshot: Page 3 empty state
+      await helpers.expectScreenshotMatch(scenario, 'ionic-multi-page-registration-page3-empty');
 
       // Fill page 3 fields
       const newsletterCheckbox = scenario.locator('#newsletter ion-checkbox');
@@ -107,6 +121,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       const termsCheckbox = scenario.locator('#terms ion-checkbox');
       await termsCheckbox.click();
       await expect(termsCheckbox).toBeChecked({ timeout: 5000 });
+
+      // Screenshot: Page 3 filled state
+      await helpers.expectScreenshotMatch(scenario, 'ionic-multi-page-registration-page3-filled');
 
       // Set up event listener BEFORE clicking submit
       const submittedDataPromise = page.evaluate(
@@ -151,7 +168,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Validation-Based Navigation', () => {
     test('should prevent navigation with invalid required fields', async ({ page, helpers }) => {
       // Navigate to the validation navigation component
-      await page.goto(testUrl('/multi-page-navigation/validation-navigation'));
+      await page.goto('/#/testing/multi-page-navigation/validation-navigation');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
@@ -231,7 +248,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Backward Navigation and Data Persistence', () => {
     test('should navigate backward and preserve data', async ({ page, helpers }) => {
       // Navigate to the backward navigation component
-      await page.goto(testUrl('/multi-page-navigation/backward-navigation'));
+      await page.goto('/#/testing/multi-page-navigation/backward-navigation');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
@@ -246,6 +263,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       await field1Input.fill('Data from step 1');
       await expect(field1Input).toHaveValue('Data from step 1', { timeout: 5000 });
       await ionBlur(field1Input);
+
+      // Screenshot: Page 1 filled
+      await helpers.expectScreenshotMatch(scenario, 'ionic-backward-nav-page1');
 
       await page.waitForSelector('[data-testid="backward-navigation"] #nextToPage2 ion-button:not([aria-disabled="true"])', {
         state: 'visible',
@@ -262,6 +282,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       await expect(field2Input).toHaveValue('Data from step 2', { timeout: 5000 });
       await ionBlur(field2Input);
 
+      // Screenshot: Page 2 filled
+      await helpers.expectScreenshotMatch(scenario, 'ionic-backward-nav-page2');
+
       await page.waitForSelector('[data-testid="backward-navigation"] #nextToPage3 ion-button:not([aria-disabled="true"])', {
         state: 'visible',
         timeout: 10000,
@@ -277,6 +300,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       await expect(field3Input).toHaveValue('Data from step 3', { timeout: 5000 });
       await ionBlur(field3Input);
 
+      // Screenshot: Page 3 filled
+      await helpers.expectScreenshotMatch(scenario, 'ionic-backward-nav-page3');
+
       // Test backward navigation
       const backButtonFromPage3 = scenario.locator('#previousToPage2 ion-button');
       await expect(backButtonFromPage3).toBeVisible({ timeout: 10000 });
@@ -287,6 +313,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       await expect(scenario.locator('#field2 input')).toBeVisible({ timeout: 10000 });
       await expect(scenario.locator('#field2 input')).toHaveValue('Data from step 2', { timeout: 5000 });
 
+      // Screenshot: Back to page 2 with data preserved
+      await helpers.expectScreenshotMatch(scenario, 'ionic-backward-nav-back-to-page2');
+
       // Go back one more time (different button - now on page 2)
       const backButtonFromPage2 = scenario.locator('#previousToPage1 ion-button');
       await backButtonFromPage2.click();
@@ -295,6 +324,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       await page.waitForSelector('[data-testid="backward-navigation"] #field1 input', { state: 'visible', timeout: 10000 });
       await expect(scenario.locator('#field1 input')).toBeVisible({ timeout: 10000 });
       await expect(scenario.locator('#field1 input')).toHaveValue('Data from step 1', { timeout: 5000 });
+
+      // Screenshot: Back to page 1 with data preserved
+      await helpers.expectScreenshotMatch(scenario, 'ionic-backward-nav-back-to-page1');
 
       // Navigate forward again to verify data persists
       await scenario.locator('#nextToPage2 ion-button').click();
@@ -340,7 +372,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Direct Page Navigation', () => {
     test('should allow direct navigation to specific pages', async ({ page, helpers }) => {
       // Navigate to the direct navigation component
-      await page.goto(testUrl('/multi-page-navigation/direct-navigation'));
+      await page.goto('/#/testing/multi-page-navigation/direct-navigation');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
@@ -433,7 +465,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Page Transitions and Loading States', () => {
     test('should handle smooth page transitions with large data', async ({ page, helpers }) => {
       // Navigate to the page transitions component
-      await page.goto(testUrl('/multi-page-navigation/page-transitions'));
+      await page.goto('/#/testing/multi-page-navigation/page-transitions');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario

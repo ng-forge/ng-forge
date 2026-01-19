@@ -11,12 +11,15 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Comprehensive Fields Test', () => {
     test('should test all basic field types', async ({ page, helpers }) => {
       // Navigate to the comprehensive fields component
-      await page.goto('http://localhost:4202/#/test/comprehensive-field-tests/comprehensive-fields');
+      await page.goto('/#/test/comprehensive-field-tests/comprehensive-fields');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
       const scenario = helpers.getScenario('comprehensive-fields-test');
       await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Visual regression: empty form state
+      await helpers.expectScreenshotMatch(scenario, 'primeng-comprehensive-fields-empty');
 
       // Test Text Input
       await page.waitForSelector('[data-testid="comprehensive-fields-test"] #textInput input', { state: 'visible', timeout: 10000 });
@@ -116,6 +119,9 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
       // For PrimeNG slider, we interact with the slider element directly
       await scenario.locator('#sliderField p-slider').click();
 
+      // Visual regression: filled form state
+      await helpers.expectScreenshotMatch(scenario, 'primeng-comprehensive-fields-filled');
+
       // Set up event listener BEFORE clicking submit
       const submittedDataPromise = page.evaluate(
         () =>
@@ -157,7 +163,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Validation Test', () => {
     test('should handle field validation errors', async ({ page, helpers }) => {
       // Navigate to the validation test component
-      await page.goto('http://localhost:4202/#/test/comprehensive-field-tests/validation');
+      await page.goto('/#/test/comprehensive-field-tests/validation');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -198,6 +204,9 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
       // Button should still be disabled due to validation errors
       await expect(submitButton).toBeDisabled({ timeout: 10000 });
 
+      // Visual regression: validation errors state
+      await helpers.expectScreenshotMatch(scenario, 'primeng-validation-with-errors');
+
       // Now fill with valid data
       await requiredTextInput.fill('Valid text input');
       await expect(requiredTextInput).toHaveValue('Valid text input', { timeout: 5000 });
@@ -221,6 +230,9 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
         timeout: 10000,
       });
       await expect(submitButton).toBeEnabled({ timeout: 10000 });
+
+      // Visual regression: valid form state
+      await helpers.expectScreenshotMatch(scenario, 'primeng-validation-valid');
 
       // Set up event listener BEFORE clicking submit
       const submittedDataPromise = page.evaluate(
@@ -253,7 +265,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Grid Layout Test', () => {
     test('should test responsive grid layout', async ({ page, helpers }) => {
       // Navigate to the grid layout test component
-      await page.goto('http://localhost:4202/#/test/comprehensive-field-tests/grid-layout');
+      await page.goto('/#/test/comprehensive-field-tests/grid-layout');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -306,8 +318,14 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
       await expect(thirdWidth3Input).toHaveValue('Third 3', { timeout: 5000 });
       await thirdWidth3Input.blur();
 
+      // Visual regression: grid layout desktop
+      await helpers.expectScreenshotMatch(scenario, 'primeng-grid-layout-desktop');
+
       // Test mobile layout
       await page.setViewportSize({ width: 375, height: 667 }); // iPhone 6/7/8 size
+
+      // Visual regression: grid layout mobile
+      await helpers.expectScreenshotMatch(scenario, 'primeng-grid-layout-mobile');
 
       // Fields should still be visible and functional on mobile
       await expect(scenario.getByTestId('fullWidth')).toBeVisible({ timeout: 10000 });
@@ -382,7 +400,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('State Management Test', () => {
     test('should test form state management', async ({ page, helpers }) => {
       // Navigate to the state management test component
-      await page.goto('http://localhost:4202/#/test/comprehensive-field-tests/state-management');
+      await page.goto('/#/test/comprehensive-field-tests/state-management');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario

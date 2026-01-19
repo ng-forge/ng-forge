@@ -1,19 +1,19 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-slider',
-  imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe, Field],
+  imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe, FormField],
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let inputId = key() + '-input';
 
     @if (label(); as label) {
       <div class="slider-label">{{ label | dynamicText | async }}</div>
@@ -30,31 +30,25 @@ import { AsyncPipe } from '@angular/common';
     >
       <input
         matSliderThumb
-        [field]="f"
+        [id]="inputId"
+        [formField]="f"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-describedby]="ariaDescribedBy()"
       />
     </mat-slider>
 
-    @if (props()?.hint; as hint) {
-      <div class="mat-hint" [id]="hintId()">{{ hint | dynamicText | async }}</div>
-    }
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
       <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
+    } @empty {
+      @if (props()?.hint; as hint) {
+        <div class="mat-hint" [id]="hintId()">{{ hint | dynamicText | async }}</div>
+      }
     }
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
-      :host {
-        display: block;
-        width: 100%;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-
       .slider-container {
         width: 100%;
       }
@@ -69,8 +63,14 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatSliderFieldComponent implements MatSliderComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+  }
 
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();
@@ -79,6 +79,7 @@ export default class MatSliderFieldComponent implements MatSliderComponent {
   readonly tabIndex = input<number>();
 
   readonly props = input<MatSliderProps>();
+  readonly meta = input<InputMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
@@ -104,18 +105,10 @@ export default class MatSliderFieldComponent implements MatSliderComponent {
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

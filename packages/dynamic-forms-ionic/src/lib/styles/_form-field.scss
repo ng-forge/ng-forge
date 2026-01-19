@@ -1,34 +1,118 @@
 /**
  * Ionic Form Field Styling
  *
- * Customizable styles for form field layouts.
+ * Customizable styles for Ionic form field components.
  * Override CSS variables to customize:
  *
- * --df-ionic-field-gap: gap between label, input, and hint (default: 0.5rem)
- * --df-ionic-label-font-weight: label font weight (default: 500)
- * --df-ionic-hint-color: hint text color (default: --ion-color-medium or #92949c)
- * --df-ionic-hint-font-size: hint text size (default: 0.875rem)
+ * --df-field-gap: gap between label, input, and hint (default: 0.5rem)
+ * --df-label-font-weight: label font weight (default: 500)
+ * --df-label-color: label text color (default: inherit)
+ * --df-hint-color: hint text color (default: --ion-color-medium)
+ * --df-hint-font-size: hint text size (default: 0.875rem)
+ * --df-error-color: error text color (default: --ion-color-danger)
+ * --df-error-font-size: error text size (default: 0.875rem)
  */
 
+// ============================================
+// CSS Variables (Ionic-themed defaults)
+// ============================================
+
 :host {
-  --df-ionic-field-gap: 0.5rem;
-  --df-ionic-label-font-weight: 500;
-  --df-ionic-hint-color: var(--ion-color-medium, #92949c);
-  --df-ionic-hint-font-size: 0.875rem;
+  --df-field-gap: 0.5rem;
+  --df-label-font-weight: 500;
+  --df-label-color: inherit;
+  --df-hint-color: var(--ion-color-medium, #92949c);
+  --df-hint-font-size: 0.875rem;
+  --df-error-color: var(--ion-color-danger, #eb445a);
+  --df-error-font-size: 0.875rem;
 }
 
-.df-ionic-field {
+// ============================================
+// Field Layout
+// ============================================
+
+.df-ion-field {
   display: flex;
   flex-direction: column;
-  gap: var(--df-ionic-field-gap);
+  gap: var(--df-field-gap);
   width: 100%;
 }
 
-.df-ionic-label {
-  font-weight: var(--df-ionic-label-font-weight);
+.df-ion-label {
+  font-weight: var(--df-label-font-weight);
+  color: var(--df-label-color);
 }
 
-.df-ionic-hint {
-  color: var(--df-ionic-hint-color);
-  font-size: var(--df-ionic-hint-font-size);
+.df-ion-hint {
+  display: block;
+  color: var(--df-hint-color);
+  font-size: var(--df-hint-font-size);
+}
+
+.df-ion-error {
+  display: block;
+  color: var(--df-error-color);
+  font-size: var(--df-error-font-size);
+}
+
+// ============================================
+// Hidden State
+// ============================================
+
+:host([hidden]) {
+  display: none !important;
+}
+
+// ============================================
+// Error State Styling
+// ============================================
+
+/**
+ * Angular Signal Forms applies ng-* classes (ng-invalid, ng-touched, etc.) directly
+ * to form field elements via provideSignalFormsConfig with NG_STATUS_CLASSES.
+ *
+ * We apply error styles when both .ng-invalid AND .ng-touched are present,
+ * which aligns with standard UX: show errors only after user interaction.
+ *
+ * Each Ionic component exposes CSS custom properties for theming, which we override
+ * to show the danger color when in error state.
+ */
+
+// Text inputs
+ion-input.ng-invalid.ng-touched,
+ion-textarea.ng-invalid.ng-touched {
+  --highlight-color: var(--ion-color-danger);
+  --border-color: var(--ion-color-danger);
+}
+
+// Select dropdown
+ion-select.ng-invalid.ng-touched {
+  --highlight-color: var(--ion-color-danger);
+  --border-color: var(--ion-color-danger);
+}
+
+// Checkbox
+ion-checkbox.ng-invalid.ng-touched {
+  --checkbox-background-checked: var(--ion-color-danger);
+  --border-color: var(--ion-color-danger);
+  --border-color-checked: var(--ion-color-danger);
+}
+
+// Radio buttons
+ion-radio.ng-invalid.ng-touched {
+  --color: var(--ion-color-danger);
+  --color-checked: var(--ion-color-danger);
+}
+
+// Range slider
+ion-range.ng-invalid.ng-touched {
+  --bar-background: var(--ion-color-danger);
+  --knob-background: var(--ion-color-danger);
+}
+
+// Toggle switch
+ion-toggle.ng-invalid.ng-touched {
+  --track-background: var(--ion-color-danger-tint);
+  --track-background-checked: var(--ion-color-danger);
+  --handle-background-checked: var(--ion-color-danger-contrast);
 }

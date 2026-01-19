@@ -1,35 +1,34 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { FormField, FieldTree } from '@angular/forms/signals';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsSelectComponent, BsSelectProps } from './bs-select.type';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-bs-select',
-  imports: [Field, DynamicTextPipe, AsyncPipe],
+  imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let f = field(); @let selectId = key() + '-select';
 
     <div class="mb-3">
       @if (label(); as label) {
-        <label [for]="key()" class="form-label">{{ label | dynamicText | async }}</label>
+        <label [for]="selectId" class="form-label">{{ label | dynamicText | async }}</label>
       }
       <select
-        [field]="f"
-        [id]="key()"
+        [formField]="f"
+        [id]="selectId"
         class="form-select"
         [class.form-select-sm]="props()?.size === 'sm'"
         [class.form-select-lg]="props()?.size === 'lg'"
         [class.is-invalid]="f().invalid() && f().touched()"
         [multiple]="props()?.multiple || false"
         [size]="props()?.htmlSize"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
       >
         @if (placeholder(); as placeholder) {
           <option value="" disabled [selected]="!f().value()">{{ placeholder | dynamicText | async }}</option>
@@ -41,11 +40,12 @@ import { AsyncPipe } from '@angular/common';
         }
       </select>
 
-      @if (props()?.helpText; as helpText) {
-        <div class="form-text" [id]="helpTextId()">{{ helpText | dynamicText | async }}</div>
-      }
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
+      } @empty {
+        @if (props()?.hint; as hint) {
+          <div class="form-text" [id]="hintId()">{{ hint | dynamicText | async }}</div>
+        }
       }
     </div>
   `,
@@ -64,8 +64,10 @@ import { AsyncPipe } from '@angular/common';
     `,
   ],
 })
-export default class BsSelectFieldComponent<T extends string = string> implements BsSelectComponent<T> {
-  readonly field = input.required<FieldTree<T>>();
+export default class BsSelectFieldComponent implements BsSelectComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
+  readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
@@ -74,19 +76,24 @@ export default class BsSelectFieldComponent<T extends string = string> implement
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<FieldOption<T>[]>([]);
-  readonly props = input<BsSelectProps<T>>();
+  readonly options = input<FieldOption<string>[]>([]);
+  readonly props = input<BsSelectProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+  readonly meta = input<FieldMeta>();
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'select' });
+  }
+
   defaultCompare = Object.is;
 
-  protected isSelected(optionValue: T, fieldValue: T | T[] | null): boolean {
+  protected isSelected(optionValue: string, fieldValue: string | string[] | null): boolean {
     const compareWith = this.props()?.compareWith || this.defaultCompare;
 
     if (Array.isArray(fieldValue)) {
@@ -100,7 +107,7 @@ export default class BsSelectFieldComponent<T extends string = string> implement
   // Accessibility
   // ─────────────────────────────────────────────────────────────────────────────
 
-  protected readonly helpTextId = computed(() => `${this.key()}-help`);
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
   protected readonly ariaInvalid = computed(() => {
@@ -112,15 +119,10 @@ export default class BsSelectFieldComponent<T extends string = string> implement
     return this.field()().required?.() === true ? true : null;
   });
 
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-    if (this.props()?.helpText) {
-      ids.push(this.helpTextId());
-    }
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

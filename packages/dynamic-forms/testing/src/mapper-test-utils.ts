@@ -1,8 +1,9 @@
-import { Injector, runInInjectionContext, signal, WritableSignal } from '@angular/core';
+import { Injector, runInInjectionContext, signal, StaticProvider, WritableSignal } from '@angular/core';
 import { form } from '@angular/forms/signals';
-import { FieldSignalContext } from '@ng-forge/dynamic-forms';
-import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
-import { ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from '../../src/lib/models/field-signal-context.token';
+import { FieldSignalContext } from '../../src/lib/mappers/types';
+import { FormOptions } from '../../src/lib/models/form-config';
+import { ValidationMessages } from '../../src/lib/models/validation-types';
 
 /**
  * Configuration for creating a test form injector with field signal context
@@ -25,8 +26,15 @@ export interface TestFieldContextConfig<TModel extends Record<string, unknown> =
 
   /**
    * Default validation messages for the form.
+   * Provided via DEFAULT_VALIDATION_MESSAGES injection token.
    */
   defaultValidationMessages?: ValidationMessages;
+
+  /**
+   * Form options for button disabled state defaults.
+   * Provided via FORM_OPTIONS injection token.
+   */
+  formOptions?: FormOptions;
 
   /**
    * Custom value signal. If provided, this will be used instead of creating a new one.
@@ -68,6 +76,7 @@ export function createTestFormInjector<TModel extends Record<string, unknown> = 
     initialValue = {} as Partial<TModel>,
     defaultValues = () => initialValue as TModel,
     defaultValidationMessages,
+    formOptions,
     valueSignal,
     form: customForm,
   } = config;
@@ -84,24 +93,29 @@ export function createTestFormInjector<TModel extends Record<string, unknown> = 
     formInstance = runInInjectionContext(tempInjector, () => form(value)) as ReturnType<typeof form<TModel>>;
   }
 
-  // Create field signal context
+  // Create field signal context (form-level config now provided via dedicated tokens)
   const fieldSignalContext: FieldSignalContext<TModel> = {
     injector: parentInjector || Injector.create({ providers: [] }),
     value,
     defaultValues,
     form: formInstance,
-    defaultValidationMessages,
   };
 
-  // Create injector with context
+  // Build providers array with all tokens
+  const providers: StaticProvider[] = [{ provide: FIELD_SIGNAL_CONTEXT, useValue: fieldSignalContext }];
+
+  if (defaultValidationMessages !== undefined) {
+    providers.push({ provide: DEFAULT_VALIDATION_MESSAGES, useValue: defaultValidationMessages });
+  }
+
+  if (formOptions !== undefined) {
+    providers.push({ provide: FORM_OPTIONS, useValue: formOptions });
+  }
+
+  // Create injector with context and tokens
   return Injector.create({
     parent: parentInjector,
-    providers: [
-      {
-        provide: FIELD_SIGNAL_CONTEXT,
-        useValue: fieldSignalContext,
-      },
-    ],
+    providers,
   });
 }
 
@@ -160,7 +174,6 @@ export function createTestFieldContext<TModel extends Record<string, unknown> = 
     parentInjector,
     initialValue = {} as Partial<TModel>,
     defaultValues = () => initialValue as TModel,
-    defaultValidationMessages,
     valueSignal,
     form: customForm,
   } = config;
@@ -175,11 +188,12 @@ export function createTestFieldContext<TModel extends Record<string, unknown> = 
     formInstance = runInInjectionContext(injector, () => form(value)) as ReturnType<typeof form<TModel>>;
   }
 
+  // Note: defaultValidationMessages and formOptions are no longer in FieldSignalContext
+  // They should be provided via their respective injection tokens
   return {
     injector,
     value,
     defaultValues,
     form: formInstance,
-    defaultValidationMessages,
   };
 }

@@ -21,7 +21,7 @@ describe('pageFieldMapper', () => {
     expect(inputs).toHaveProperty('field');
   });
 
-  it('should create inputs with key and field regardless of additional properties', () => {
+  it('should create inputs with key, field, and className when className is provided', () => {
     const fieldDef: PageField = {
       key: 'page2',
       type: 'page',
@@ -34,9 +34,10 @@ describe('pageFieldMapper', () => {
 
     const inputsSignal = pageFieldMapper(fieldDef);
     const inputs = inputsSignal(); // Call signal to get inputs
-    expect(Object.keys(inputs)).toHaveLength(2);
+    expect(Object.keys(inputs)).toHaveLength(3);
     expect(inputs).toHaveProperty('key');
     expect(inputs).toHaveProperty('field');
+    expect(inputs).toHaveProperty('className', 'page-class');
   });
 
   it('should handle nested fields of various types', () => {

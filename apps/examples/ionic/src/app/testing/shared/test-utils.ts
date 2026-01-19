@@ -1,9 +1,10 @@
 import { expect, Locator, Page } from '@playwright/test';
+import { logTestResult } from '@ng-forge/examples-shared-testing';
 
 /**
  * Base URL for the test application
  */
-export const BASE_URL = 'http://localhost:4203';
+// BASE_URL is now derived from APP_PORTS in fixtures.ts
 
 /**
  * Base path for testing routes
@@ -17,7 +18,7 @@ export const TESTING_BASE_PATH = '/testing';
 export function testUrl(path: string): string {
   // If path already starts with /testing, use as-is; otherwise prepend TESTING_BASE_PATH
   const fullPath = path.startsWith(TESTING_BASE_PATH) ? path : `${TESTING_BASE_PATH}${path}`;
-  return `${BASE_URL}/#${fullPath}`;
+  return `/#${fullPath}`;
 }
 
 /**
@@ -163,11 +164,5 @@ export async function ionBlur(input: Locator): Promise<void> {
   await input.page().waitForTimeout(200); // Wait for validation to trigger
 }
 
-/**
- * Logs test result on pass (for use in afterEach)
- */
-export function logTestResult(testInfo: { status?: string; title: string }): void {
-  if (testInfo.status === 'passed') {
-    console.info(`✅ TEST PASSED: ${testInfo.title}`);
-  }
-}
+// Re-export for convenience
+export { logTestResult };

@@ -17,7 +17,7 @@ export class UserRegistrationIframeDemoComponent {
     props: {
       floatingLabel: true,
       size: 'lg',
-      helpText: 'Choose a unique username',
+      hint: 'Choose a unique username',
     },
   },
   {
@@ -29,7 +29,7 @@ export class UserRegistrationIframeDemoComponent {
     props: {
       type: 'email',
       floatingLabel: true,
-      helpText: 'We will send a confirmation email',
+      hint: 'We will send a confirmation email',
     },
   },
   {
@@ -41,7 +41,7 @@ export class UserRegistrationIframeDemoComponent {
     props: {
       type: 'password',
       floatingLabel: true,
-      helpText: 'Minimum 8 characters',
+      hint: 'Minimum 8 characters',
     },
   },
   {

@@ -1,4 +1,4 @@
-import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueFieldComponent, ValueType } from '@ng-forge/dynamic-forms';
 import { MultiCheckboxField } from '@ng-forge/dynamic-forms/integration';
 import { ThemePalette } from '@angular/material/core';
 
@@ -12,4 +12,4 @@ export interface MatMultiCheckboxProps {
 
 export type MatMultiCheckboxField<T> = MultiCheckboxField<T, MatMultiCheckboxProps>;
 
-export type MatMultiCheckboxComponent<T> = ValueFieldComponent<MatMultiCheckboxField<T>>;
+export type MatMultiCheckboxComponent = ValueFieldComponent<MatMultiCheckboxField<ValueType>>;

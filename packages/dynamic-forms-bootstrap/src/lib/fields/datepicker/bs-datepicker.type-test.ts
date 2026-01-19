@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { BsDatepickerProps, BsDatepickerField } from './bs-datepicker.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // BsDatepickerProps - Whitelist Test
@@ -16,7 +16,7 @@ describe('BsDatepickerProps - Exhaustive Whitelist', () => {
     | 'useNgBootstrap'
     | 'size'
     | 'floatingLabel'
-    | 'helpText'
+    | 'hint'
     | 'validFeedback'
     | 'invalidFeedback'
     | 'displayMonths'
@@ -47,8 +47,8 @@ describe('BsDatepickerProps - Exhaustive Whitelist', () => {
       expectTypeOf<BsDatepickerProps['floatingLabel']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('helpText', () => {
-      expectTypeOf<BsDatepickerProps['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<BsDatepickerProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('validFeedback', () => {
@@ -98,6 +98,7 @@ describe('BsDatepickerField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // From FieldWithValidation
     | 'required'
     | 'email'

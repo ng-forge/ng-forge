@@ -82,6 +82,33 @@
 - **Remove redundant code when refactoring.** Do not leave dead code, unused imports, or commented-out code behind.
 - **Update related documentation and imports accordingly.** When renaming, moving, or deleting code, ensure all references are updated.
 
+## E2E Testing and Screenshots
+
+- **E2E tests use Playwright** and are located in `apps/examples/*/src/app/testing/`.
+- **Screenshots MUST be updated in Docker** to ensure cross-platform consistency. Font rendering differs between macOS, Linux, and CI environments.
+- **Use the provided scripts** in `package.json`:
+
+  ```bash
+  # Run E2E tests in Docker (validates screenshots)
+  pnpm e2e:material
+  pnpm e2e:bootstrap
+  pnpm e2e:primeng
+  pnpm e2e:ionic
+
+  # Update screenshots in Docker (when visual changes are intentional)
+  pnpm e2e:material:update
+  pnpm e2e:bootstrap:update
+  pnpm e2e:primeng:update
+  pnpm e2e:ionic:update
+
+  # Run all E2E tests sequentially
+  pnpm e2e:all
+  pnpm e2e:all:update
+  ```
+
+- **Never run `--update-snapshots` locally** outside Docker, as this will create platform-specific screenshots that fail in CI.
+- The Docker script is at `scripts/playwright-docker.sh` and uses `docker-compose.playwright.yml`.
+
 ## Commit Messages
 
 **You MUST use Angular-style conventional commits for PR titles.** PRs are squash-merged, so only the PR title matters for the changelog. PR titles are validated by commitlint in CI.
@@ -132,6 +159,173 @@ feat(dynamic-forms): add async validator support
 fix(primeng): correct select option binding
 docs: update contributing guidelines
 chore(deps): update angular to v21
+```
+
+---
+
+# Docs App Styling Guidelines
+
+The docs app (`apps/docs`) uses a custom "Forge" design language - a dark industrial aesthetic with ember/fire accents representing the creative process of forging dynamic forms.
+
+## Theme System Location
+
+All reusable styles are in `apps/docs/src/styles/`:
+
+- `_variables.scss` - Design tokens (colors, spacing, typography, etc.)
+- `_mixins.scss` - Reusable SCSS mixins for common patterns
+- `_animations.scss` - Keyframe animations and animation utilities
+- `_index.scss` - Main entry point that forwards all modules
+
+## Using the Theme
+
+Import the theme modules in component SCSS files (no path adjustment needed - `includePaths` is configured in `project.json`):
+
+```scss
+@use 'variables' as *; // All design tokens available without prefix
+@use 'mixins' as mix; // Use mix.card(), mix.btn-primary(), etc.
+@use 'animations' as anim; // Use anim.shimmer-border, etc.
+
+.my-card {
+  @include mix.card($with-ember-border: true);
+  padding: $space-6;
+}
+```
+
+## Color Palette
+
+### Background Colors (Dark to Light)
+
+| Variable       | Hex       | Use                         |
+| -------------- | --------- | --------------------------- |
+| `$bg-void`     | `#000000` | Absolute black, sparingly   |
+| `$bg-deep`     | `#0a0908` | Primary dark background     |
+| `$bg-surface`  | `#131210` | Headers, panels             |
+| `$bg-elevated` | `#1a1916` | Cards, interactive elements |
+
+### Ember/Fire Palette (Primary Accent)
+
+| Variable      | Hex       | Use                       |
+| ------------- | --------- | ------------------------- |
+| `$ember-core` | `#ff4d00` | Primary action color      |
+| `$ember-hot`  | `#ff6b2b` | Hover/active states       |
+| `$ember-glow` | `#ff8c42` | Highlights, links, code   |
+| `$molten`     | `#ffb627` | Gold accent, premium feel |
+
+### Steel Palette (Text & Borders)
+
+| Variable      | Hex       | Use                          |
+| ------------- | --------- | ---------------------------- |
+| `$steel`      | `#e8e4de` | Primary text                 |
+| `$steel-mid`  | `#9a958c` | Secondary text, descriptions |
+| `$steel-dim`  | `#5c5850` | Muted text, placeholders     |
+| `$steel-dark` | `#2a2824` | Borders, dividers            |
+
+## Typography
+
+- **Primary font**: `$font-primary` - 'Space Grotesk', sans-serif
+- **Monospace font**: `$font-mono` - 'JetBrains Mono', monospace
+
+## Key Mixins
+
+Use `@use 'mixins' as mix;` then call with `@include mix.mixin-name();`
+
+### Cards
+
+```scss
+@include mix.card; // Basic card with hover transform
+@include mix.card($with-ember-border: true); // Card with gradient top border
+@include mix.card-static; // Card without hover effects
+```
+
+### Buttons
+
+```scss
+@include mix.btn-primary; // Ember gradient button
+@include mix.btn-secondary; // Outlined button with border
+```
+
+### Code Blocks
+
+```scss
+@include mix.code-block; // Container with ember accent
+@include mix.code-header; // Header with traffic light dots
+@include mix.code-body; // Content area with proper font
+```
+
+### Links
+
+```scss
+@include mix.link-inline; // Link with animated underline
+@include mix.link-nav; // Navigation link with hover underline
+```
+
+### Sections
+
+```scss
+@include mix.section-container; // Max-width container with padding
+@include mix.section-label; // "FEATURES" style label
+@include mix.section-title; // Large section heading
+@include mix.section-desc; // Section description text
+```
+
+### Animations
+
+Use `@use 'animations' as anim;` then call with `@include anim.mixin-name();`
+
+```scss
+@include anim.animated-border; // Shimmer gradient border
+@include anim.pulse-rings; // Radiating pulse effect
+@include anim.spinner($size: 24px); // Loading spinner
+@include anim.skeleton; // Loading skeleton effect
+```
+
+## Design Principles
+
+1. **Dark-first**: All backgrounds are dark; light text provides contrast
+2. **Ember accents**: Use ember colors for CTAs, links, and interactive states
+3. **Subtle animations**: Hover transforms, border shimmers, pulse effects
+4. **Glass effects**: Use `@include glass-panel` for floating navigation
+5. **Consistent spacing**: Use `$space-*` variables, never arbitrary values
+6. **Mobile-responsive**: Use `@include mobile { }` for responsive overrides
+
+## Example Component
+
+```scss
+@use 'variables' as *;
+@use 'mixins' as mix;
+
+:host {
+  display: block;
+  font-family: $font-primary;
+  color: $steel;
+}
+
+.feature-card {
+  @include mix.card($with-ember-border: true);
+  padding: $space-6;
+
+  h3 {
+    color: $steel;
+    margin-bottom: $space-2;
+  }
+
+  p {
+    color: $steel-mid;
+    font-size: $text-sm;
+  }
+
+  code {
+    font-family: $font-mono;
+    color: $ember-glow;
+    background: $bg-elevated;
+    padding: $space-1 $space-2;
+    border-radius: $radius-sm;
+  }
+
+  @include mix.mobile {
+    padding: $space-4;
+  }
+}
 ```
 
 ---

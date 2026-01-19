@@ -6,7 +6,7 @@ setupConsoleCheck();
 test.describe('Accessibility Tests', () => {
   test.describe('All Fields ARIA Attributes', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4202/#/test/accessibility/all-fields-aria');
+      await page.goto('/#/test/accessibility/all-fields-aria');
       await page.waitForLoadState('networkidle');
     });
 
@@ -239,7 +239,7 @@ test.describe('Accessibility Tests', () => {
 
   test.describe('ARIA Attributes', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4202/#/test/accessibility/aria-attributes');
+      await page.goto('/#/test/accessibility/aria-attributes');
       await page.waitForLoadState('networkidle');
     });
 
@@ -333,7 +333,7 @@ test.describe('Accessibility Tests', () => {
 
   test.describe('Error Announcements', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4202/#/test/accessibility/error-announcements');
+      await page.goto('/#/test/accessibility/error-announcements');
       await page.waitForLoadState('networkidle');
     });
 
@@ -388,7 +388,7 @@ test.describe('Accessibility Tests', () => {
 
   test.describe('Keyboard Navigation', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4202/#/test/accessibility/keyboard-navigation');
+      await page.goto('/#/test/accessibility/keyboard-navigation');
       await page.waitForLoadState('networkidle');
     });
 
@@ -522,7 +522,7 @@ test.describe('Accessibility Tests', () => {
 
   test.describe('Focus Management', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4202/#/test/accessibility/focus-management');
+      await page.goto('/#/test/accessibility/focus-management');
       await page.waitForLoadState('networkidle');
     });
 
@@ -597,6 +597,113 @@ test.describe('Accessibility Tests', () => {
       // Shift+Tab to first
       await page.keyboard.press('Shift+Tab');
       await expect(field1).toBeFocused();
+    });
+  });
+
+  test.describe('Hint and Error Display', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/#/test/accessibility/aria-attributes');
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('hint should be visible when field has no errors', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('aria-attributes');
+      await expect(scenario).toBeVisible();
+
+      const hint = scenario.locator('#requiredField .df-prime-hint');
+      await expect(hint).toBeVisible();
+      await expect(hint).toHaveText('This field is required for submission');
+    });
+
+    test('hint should be hidden when field displays errors', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('aria-attributes');
+      await expect(scenario).toBeVisible();
+
+      const input = scenario.locator('#requiredField input');
+      const hint = scenario.locator('#requiredField .df-prime-hint');
+      const error = scenario.locator('#requiredField .p-error');
+
+      // Initially hint is visible
+      await expect(hint).toBeVisible();
+
+      // Trigger validation error (touch and blur empty required field)
+      await input.focus();
+      await input.blur();
+      await page.waitForTimeout(200);
+
+      // Error should be visible, hint should be hidden
+      await expect(error).toBeVisible();
+      await expect(hint).not.toBeVisible();
+    });
+
+    test('hint should reappear when errors are cleared', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('aria-attributes');
+      await expect(scenario).toBeVisible();
+
+      const input = scenario.locator('#requiredField input');
+      const hint = scenario.locator('#requiredField .df-prime-hint');
+      const error = scenario.locator('#requiredField .p-error');
+
+      // Trigger validation error
+      await input.focus();
+      await input.blur();
+      await page.waitForTimeout(200);
+      await expect(error).toBeVisible();
+      await expect(hint).not.toBeVisible();
+
+      // Fix the error by entering a value
+      await input.fill('valid value');
+      await page.waitForTimeout(200);
+
+      // Error should be hidden, hint should reappear
+      await expect(error).not.toBeVisible();
+      await expect(hint).toBeVisible();
+    });
+
+    test('aria-describedby should switch from hint to error when errors appear', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('aria-attributes');
+      await expect(scenario).toBeVisible();
+
+      const input = scenario.locator('#requiredField input');
+
+      // Initially aria-describedby references hint
+      let ariaDescribedBy = await input.getAttribute('aria-describedby');
+      expect(ariaDescribedBy).toContain('requiredField-hint');
+      expect(ariaDescribedBy).not.toContain('requiredField-error');
+
+      // Trigger validation error
+      await input.focus();
+      await input.blur();
+      await page.waitForTimeout(200);
+
+      // Now aria-describedby should reference error
+      ariaDescribedBy = await input.getAttribute('aria-describedby');
+      expect(ariaDescribedBy).toContain('requiredField-error');
+      expect(ariaDescribedBy).not.toContain('requiredField-hint');
+    });
+
+    test('aria-describedby should switch back to hint when errors are cleared', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('aria-attributes');
+      await expect(scenario).toBeVisible();
+
+      const input = scenario.locator('#requiredField input');
+
+      // Trigger error
+      await input.focus();
+      await input.blur();
+      await page.waitForTimeout(200);
+
+      let ariaDescribedBy = await input.getAttribute('aria-describedby');
+      expect(ariaDescribedBy).toContain('requiredField-error');
+
+      // Clear error
+      await input.fill('valid value');
+      await page.waitForTimeout(200);
+
+      // aria-describedby should reference hint again
+      ariaDescribedBy = await input.getAttribute('aria-describedby');
+      expect(ariaDescribedBy).toContain('requiredField-hint');
+      expect(ariaDescribedBy).not.toContain('requiredField-error');
     });
   });
 });

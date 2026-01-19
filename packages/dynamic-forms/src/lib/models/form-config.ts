@@ -32,12 +32,14 @@ import { SubmissionConfig } from './submission-config';
  *
  * @typeParam TFields - Array of registered field types available for this form
  * @typeParam TValue - The strongly-typed interface for form values
+ * @typeParam TProps - The type for form-level default props (library-specific)
  *
  * @public
  */
 export interface FormConfig<
   TFields extends NarrowFields | RegisteredFieldTypes[] = RegisteredFieldTypes[],
   TValue = InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>,
+  TProps extends object = Record<string, unknown>,
 > {
   /**
    * Array of field definitions that define the form structure.
@@ -155,6 +157,33 @@ export interface FormConfig<
    * ```
    */
   submission?: SubmissionConfig<TValue>;
+
+  /**
+   * Default props applied to all fields in the form.
+   *
+   * These props serve as defaults that can be overridden at the field level.
+   * Useful for setting consistent styling across the entire form (e.g., appearance,
+   * size, or other UI library-specific props).
+   *
+   * The cascade order is: Library config → Form defaultProps → Field props
+   * Each level can override the previous one.
+   *
+   * @example
+   * ```typescript
+   * // Material example
+   * const config: MatFormConfig = {
+   *   defaultProps: {
+   *     appearance: 'outline',
+   *     subscriptSizing: 'dynamic',
+   *   },
+   *   fields: [
+   *     { type: 'input', key: 'name', label: 'Name' },  // Uses defaultProps
+   *     { type: 'input', key: 'email', props: { appearance: 'fill' } },  // Override
+   *   ],
+   * };
+   * ```
+   */
+  defaultProps?: TProps;
 }
 
 /**

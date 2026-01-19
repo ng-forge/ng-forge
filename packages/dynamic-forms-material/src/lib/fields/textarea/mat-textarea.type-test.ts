@@ -6,7 +6,7 @@ import type { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { MatTextareaProps, MatTextareaField } from './mat-textarea.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // MatTextareaProps - Whitelist Test
@@ -76,6 +76,7 @@ describe('MatTextareaField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // From FieldWithValidation
     | 'required'
     | 'email'

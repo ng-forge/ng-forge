@@ -16,7 +16,7 @@ describe('arrayFieldMapper', () => {
     expect(inputs).toHaveProperty('field');
   });
 
-  it('should create inputs with key and field regardless of additional properties', () => {
+  it('should create inputs with key, field, and className when className is provided', () => {
     const fieldDef: ArrayField = {
       key: 'complexArray',
       type: 'array',
@@ -27,9 +27,10 @@ describe('arrayFieldMapper', () => {
 
     const inputsSignal = arrayFieldMapper(fieldDef);
     const inputs = inputsSignal();
-    expect(Object.keys(inputs)).toHaveLength(2);
+    expect(Object.keys(inputs)).toHaveLength(3);
     expect(inputs).toHaveProperty('key');
     expect(inputs).toHaveProperty('field');
+    expect(inputs).toHaveProperty('className', 'array-class');
   });
 
   it('should handle group fields for object arrays', () => {

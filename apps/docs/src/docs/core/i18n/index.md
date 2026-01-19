@@ -1,8 +1,8 @@
-ng-forge supports internationalization through Angular's reactive primitives: **Observables** and **Signals**. It's framework-agnostic - use any translation library that provides these types.
+Dynamic Forms supports internationalization through Angular's reactive primitives: **Observables** and **Signals**. It's framework-agnostic - use any translation library that provides these types.
 
 ## How i18n Works
 
-ng-forge uses the `DynamicText` type for all text properties:
+Dynamic Forms uses the `DynamicText` type for all text properties:
 
 ```typescript
 type DynamicText = string | Observable<string> | Signal<string>;
@@ -268,7 +268,7 @@ Options also support `DynamicText`:
 
 ## Other Translation Libraries
 
-ng-forge works with any library that provides Observables or Signals:
+Dynamic Forms works with any library that provides Observables or Signals:
 
 **ngx-translate:**
 

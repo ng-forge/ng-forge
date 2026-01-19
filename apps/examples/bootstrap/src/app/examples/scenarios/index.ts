@@ -10,6 +10,7 @@ export { sliderScenario } from './slider.scenario';
 export { buttonScenario } from './button.scenario';
 export { completeFormScenario } from './complete-form.scenario';
 export { userRegistrationScenario } from './user-registration.scenario';
+export { defaultPropsScenario } from './default-props.scenario';
 
 import { inputScenario } from './input.scenario';
 import { checkboxScenario } from './checkbox.scenario';
@@ -23,6 +24,7 @@ import { sliderScenario } from './slider.scenario';
 import { buttonScenario } from './button.scenario';
 import { completeFormScenario } from './complete-form.scenario';
 import { userRegistrationScenario } from './user-registration.scenario';
+import { defaultPropsScenario } from './default-props.scenario';
 import { ExampleScenario } from '../shared/types';
 
 export const ALL_SCENARIOS: ExampleScenario[] = [
@@ -38,6 +40,7 @@ export const ALL_SCENARIOS: ExampleScenario[] = [
   buttonScenario,
   completeFormScenario,
   userRegistrationScenario,
+  defaultPropsScenario,
 ];
 
 export function getScenarioById(id: string): ExampleScenario | undefined {

@@ -4,16 +4,29 @@
 import { expectTypeOf } from 'vitest';
 import type { GroupField, GroupComponent } from './group-field';
 import type { GroupAllowedChildren } from '../../models/types/nesting-constraints';
-import type { RequiredKeys } from '../../../../testing/src/type-test-utils';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // GroupField - Whitelist Test
 // ============================================================================
 
 describe('GroupField - Exhaustive Whitelist', () => {
-  // GroupField extends FieldDef<never> and adds: fields, label?: never
-  // From FieldDef: key, type, label, props, className, disabled, readonly, hidden, tabIndex, col
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'fields';
+  // GroupField extends FieldDef<never> and adds: fields, label?: never, meta?: never
+  // From FieldDef: key, type, label, props, className, disabled, readonly, hidden, tabIndex, col, meta
+  // Note: 'meta' is overridden to 'never' because containers don't have native form elements
+  type ExpectedKeys =
+    | 'key'
+    | 'type'
+    | 'label'
+    | 'props'
+    | 'className'
+    | 'disabled'
+    | 'readonly'
+    | 'hidden'
+    | 'tabIndex'
+    | 'col'
+    | 'meta'
+    | 'fields';
 
   type ActualKeys = keyof GroupField;
 
@@ -43,6 +56,10 @@ describe('GroupField - Exhaustive Whitelist', () => {
 
     it('props is never', () => {
       expectTypeOf<GroupField['props']>().toEqualTypeOf<never | undefined>();
+    });
+
+    it('meta is never (groups have no native form element)', () => {
+      expectTypeOf<GroupField['meta']>().toEqualTypeOf<never | undefined>();
     });
 
     it('className', () => {

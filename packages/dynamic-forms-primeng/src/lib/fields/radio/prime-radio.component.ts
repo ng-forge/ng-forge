@@ -1,29 +1,36 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { FormField, FieldTree } from '@angular/forms/signals';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeRadioComponent, PrimeRadioProps } from './prime-radio.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeRadioGroupComponent } from './prime-radio-group.component';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-radio',
-  imports: [PrimeRadioGroupComponent, Field, DynamicTextPipe, AsyncPipe],
+  imports: [PrimeRadioGroupComponent, FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaDescribedBy = this.ariaDescribedBy();
     @if (label()) {
       <div class="radio-label">{{ label() | dynamicText | async }}</div>
     }
 
-    <df-prime-radio-group [field]="$any(f)" [options]="options()" [properties]="props()" [attr.aria-describedby]="ariaDescribedBy" />
+    <df-prime-radio-group
+      [formField]="f"
+      [options]="options()"
+      [properties]="props()"
+      [meta]="meta()"
+      [attr.aria-describedby]="ariaDescribedBy()"
+    />
 
-    @if (props()?.hint; as hint) {
-      <small class="p-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
-    }
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
       <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
+    } @empty {
+      @if (props()?.hint; as hint) {
+        <small class="p-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
+      }
     }
   `,
   styles: [
@@ -50,8 +57,10 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<T> {
-  readonly field = input.required<FieldTree<T>>();
+export default class PrimeRadioFieldComponent implements PrimeRadioComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
+  readonly field = input.required<FieldTree<ValueType>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
@@ -60,10 +69,18 @@ export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<FieldOption<T>[]>([]);
+  readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<PrimeRadioProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'input[type="radio"]',
+      dependents: [this.options],
+    });
+  }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
@@ -81,18 +98,10 @@ export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

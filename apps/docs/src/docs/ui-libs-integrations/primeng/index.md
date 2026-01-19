@@ -133,6 +133,36 @@ export class ContactFormComponent {
 }
 ```
 
+## Configuration Options
+
+Configure default props at the library, form, or field level. See [Configuration](../../deep-dive/configuration) for the full cascade behavior and examples.
+
+Use `PrimeFormConfig` for type-safe form configurations with PrimeNG-specific props.
+
+### Available Options
+
+| Option     | Type                                                                                            | Default      | Description            |
+| ---------- | ----------------------------------------------------------------------------------------------- | ------------ | ---------------------- |
+| `size`     | `'small' \| 'large'`                                                                            | -            | Component size         |
+| `variant`  | `'outlined' \| 'filled'`                                                                        | `'outlined'` | Input visual style     |
+| `severity` | `'primary' \| 'secondary' \| 'success' \| 'info' \| 'warn' \| 'danger' \| 'help' \| 'contrast'` | `'primary'`  | Button color           |
+| `text`     | `boolean`                                                                                       | `false`      | Text-only button style |
+| `outlined` | `boolean`                                                                                       | `false`      | Outlined button style  |
+| `raised`   | `boolean`                                                                                       | `false`      | Raised button style    |
+| `rounded`  | `boolean`                                                                                       | `false`      | Rounded button style   |
+
+---
+
+## Type Augmentation
+
+Importing this package automatically extends `@ng-forge/dynamic-forms` with PrimeNG-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:
+
+```typescript
+import '@ng-forge/dynamic-forms-primeng';
+```
+
+---
+
 ## Complete Form Example
 
 Here's a full registration form showcasing multiple PrimeNG field types:

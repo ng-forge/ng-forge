@@ -5,14 +5,14 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { BsInputProps, BsInputField } from './bs-input.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // BsInputProps - Whitelist Test
 // ============================================================================
 
 describe('BsInputProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'size' | 'floatingLabel' | 'helpText' | 'validFeedback' | 'invalidFeedback' | 'plaintext' | 'type' | 'placeholder';
+  type ExpectedKeys = 'size' | 'floatingLabel' | 'hint' | 'validFeedback' | 'invalidFeedback' | 'plaintext' | 'type' | 'placeholder';
   type ActualKeys = keyof BsInputProps;
 
   it('should have exactly the expected keys', () => {
@@ -32,8 +32,8 @@ describe('BsInputProps - Exhaustive Whitelist', () => {
       expectTypeOf<BsInputProps['floatingLabel']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('helpText', () => {
-      expectTypeOf<BsInputProps['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<BsInputProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('validFeedback', () => {
@@ -75,6 +75,7 @@ describe('BsInputField (String) - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -218,6 +219,7 @@ describe('BsInputField (Number) - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     | 'required'
     | 'email'
     | 'min'
@@ -307,7 +309,7 @@ describe('BsInputField - Discriminated Union', () => {
         type: 'email',
         size: 'lg',
         floatingLabel: true,
-        helpText: 'Enter your email',
+        hint: 'Enter your email',
         validFeedback: 'Looks good!',
         invalidFeedback: 'Please enter a valid email',
       },

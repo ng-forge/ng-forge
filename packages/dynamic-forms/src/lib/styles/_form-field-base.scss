@@ -1,0 +1,38 @@
+/**
+ * Dynamic Form Field Base Styles (Reference)
+ *
+ * This file documents the shared CSS variable conventions used across
+ * all UI library implementations. Each UI library defines these variables
+ * with framework-appropriate defaults.
+ *
+ * CSS Variable Convention:
+ * --df-field-gap: gap between label, input, and hint/error (default: 0.5rem)
+ * --df-label-font-weight: label font weight (default: 500)
+ * --df-hint-color: hint text color
+ * --df-hint-font-size: hint text size (default: 0.875rem)
+ * --df-error-color: error text color
+ * --df-error-font-size: error text size (default: 0.875rem)
+ *
+ * Class Naming Convention:
+ * - .df-{lib}-field: Main field container (flex column layout)
+ * - .df-{lib}-label: Label element styling
+ * - .df-{lib}-hint: Hint text styling
+ * - .df-{lib}-error: Error message styling
+ *
+ * Error State Styling:
+ * Angular Signal Forms applies ng-* classes via NG_STATUS_CLASSES:
+ * - ng-invalid: Field has validation errors
+ * - ng-valid: Field passes all validations
+ * - ng-touched: Field has been blurred
+ * - ng-pristine: Field value unchanged
+ * - ng-dirty: Field value changed
+ *
+ * Error styling is typically applied when both .ng-invalid and .ng-touched
+ * are present, aligning with standard UX.
+ *
+ * UI Library Implementations:
+ * - Bootstrap: Uses native Bootstrap classes (is-invalid, form-control)
+ * - Ionic: Uses CSS custom properties on ion-* components
+ * - PrimeNG: Uses ::ng-deep to override p-invalid styling until touched
+ * - Material: Uses Angular Material's built-in form field styling
+ */

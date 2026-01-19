@@ -66,4 +66,9 @@ export default [
     loadComponent: () => import('./shared/example-scenario.component'),
     data: { scenario: getScenarioById('user-registration') },
   },
+  {
+    path: 'default-props',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('default-props') },
+  },
 ] satisfies Route[];

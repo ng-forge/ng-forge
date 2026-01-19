@@ -55,6 +55,7 @@ export type { MaterialConfig } from './models';
 
 // Types and constants
 export { MatField, type MatFieldType } from './types/types';
+export type { MatFormProps, MatFormConfig } from './types/form-config';
 
 // Module augmentation for global types
 import './types/registry-augmentation';

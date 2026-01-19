@@ -3,7 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { LogicConfig } from '@ng-forge/dynamic-forms';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 import type {
   PrimeButtonProps,
@@ -72,7 +72,19 @@ describe('PrimeButtonProps - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('PrimeSubmitButtonField - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'logic';
+  type ExpectedKeys =
+    | 'key'
+    | 'type'
+    | 'label'
+    | 'props'
+    | 'className'
+    | 'disabled'
+    | 'readonly'
+    | 'hidden'
+    | 'tabIndex'
+    | 'col'
+    | 'meta'
+    | 'logic';
 
   type ActualKeys = keyof PrimeSubmitButtonField;
 
@@ -136,7 +148,19 @@ describe('PrimeSubmitButtonField - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('PrimeNextButtonField - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'logic';
+  type ExpectedKeys =
+    | 'key'
+    | 'type'
+    | 'label'
+    | 'props'
+    | 'className'
+    | 'disabled'
+    | 'readonly'
+    | 'hidden'
+    | 'tabIndex'
+    | 'col'
+    | 'meta'
+    | 'logic';
 
   type ActualKeys = keyof PrimeNextButtonField;
 
@@ -182,7 +206,7 @@ describe('PrimeNextButtonField - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('PrimePreviousButtonField - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col';
+  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'meta';
 
   type ActualKeys = keyof PrimePreviousButtonField;
 
@@ -235,6 +259,7 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     | 'arrayKey';
 
   type ActualKeys = keyof AddArrayItemButtonField;
@@ -292,6 +317,7 @@ describe('RemoveArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     | 'arrayKey';
 
   type ActualKeys = keyof RemoveArrayItemButtonField;

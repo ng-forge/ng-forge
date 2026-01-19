@@ -532,6 +532,56 @@ test.describe('Submission Behavior Tests', () => {
     });
   });
 
+  test.describe('Submit Button Inside Group', () => {
+    test.beforeEach(async ({ helpers }) => {
+      await helpers.navigateToScenario('/test/submission-behavior/submit-inside-group');
+    });
+
+    test('should disable submit button inside group when form is invalid (issue #157)', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('submit-inside-group');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Wait for fields to be ready
+      await page.waitForSelector('[data-testid="submit-inside-group"] #email input', { state: 'visible', timeout: 10000 });
+      await page.waitForSelector('[data-testid="submit-inside-group"] #name input', { state: 'visible', timeout: 10000 });
+
+      // Submit button inside group should be disabled initially (form is empty/invalid)
+      const submitButton = scenario.locator('#submitInGroup button');
+      await expect(submitButton).toBeDisabled({ timeout: 10000 });
+
+      // Fill one field (still invalid)
+      const emailInput = helpers.getInput(scenario, 'email');
+      await emailInput.fill('test@example.com');
+      await expect(emailInput).toHaveValue('test@example.com', { timeout: 5000 });
+      await emailInput.blur();
+
+      // Button should still be disabled (name field is empty)
+      await expect(submitButton).toBeDisabled({ timeout: 10000 });
+
+      // Fill all required fields (now valid)
+      const nameInput = helpers.getInput(scenario, 'name');
+      await nameInput.fill('Test User');
+      await expect(nameInput).toHaveValue('Test User', { timeout: 5000 });
+      await nameInput.blur();
+
+      // Wait for submit button to be enabled
+      await page.waitForSelector('[data-testid="submit-inside-group"] #submitInGroup button:not([disabled])', {
+        state: 'visible',
+        timeout: 10000,
+      });
+
+      // Submit button should be enabled now
+      await expect(submitButton).toBeEnabled({ timeout: 10000 });
+
+      // Clear one field to make form invalid again
+      await emailInput.clear();
+      await emailInput.blur();
+
+      // Submit button should be disabled again
+      await expect(submitButton).toBeDisabled({ timeout: 10000 });
+    });
+  });
+
   test.describe('Hidden Field', () => {
     test.beforeEach(async ({ helpers, mockApi }) => {
       await mockApi.mockSuccess('/api/hidden-field-submit', { delay: 300 });

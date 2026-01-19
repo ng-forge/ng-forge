@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { IonicDatepickerProps, IonicDatepickerField } from './ionic-datepicker.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // IonicDatepickerProps - Whitelist Test
@@ -24,7 +24,8 @@ describe('IonicDatepickerProps - Exhaustive Whitelist', () => {
     | 'cancelText'
     | 'size'
     | 'color'
-    | 'placeholder';
+    | 'placeholder'
+    | 'hint';
   type ActualKeys = keyof IonicDatepickerProps;
 
   it('should have exactly the expected keys', () => {
@@ -107,6 +108,7 @@ describe('IonicDatepickerField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // From FieldWithValidation
     | 'required'
     | 'email'

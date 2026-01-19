@@ -1,8 +1,10 @@
-<ng-doc-root>
+@if (isLandingPage()) {
+<router-outlet />
+} @else {
+<ng-doc-root class="docs">
   <ng-doc-navbar>
-    <a href="/dynamic-forms/" style="display: flex; align-items: center; text-decoration: none" ngDocNavbarLeft>
-      <img src="logo-light.svg" alt="ng-forge" style="height: 116px; width: auto" class="logo-light" />
-      <img src="logo-dark.svg" alt="ng-forge" style="height: 116px; width: auto; display: none" class="logo-dark" />
+    <a routerLink="/" class="navbar-logo" ngDocNavbarLeft>
+      <app-logo size="lg" />
     </a>
     <div class="ng-doc-header-controls" ngDocNavbarRight>
       <ng-doc-theme-toggle />
@@ -14,3 +16,4 @@
   <ng-doc-sidebar />
   <router-outlet />
 </ng-doc-root>
+}

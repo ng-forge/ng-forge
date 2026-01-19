@@ -34,6 +34,9 @@
           }
         ],
         "styles": ["apps/docs/src/styles.scss"],
+        "stylePreprocessorOptions": {
+          "includePaths": ["internal/styling/src"]
+        },
         "allowedCommonJsDependencies": ["dayjs", "@braintree/sanitize-url", "dompurify", "cytoscape-cose-bilkent", "elkjs", "@ng-doc/core"]
       },
       "configurations": {

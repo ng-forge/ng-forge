@@ -1,19 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { FormField, FieldTree } from '@angular/forms/signals';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeSliderComponent, PrimeSliderProps } from './prime-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { Slider } from 'primeng/slider';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-slider',
-  imports: [Slider, Field, DynamicTextPipe, AsyncPipe],
+  imports: [Slider, FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="df-prime-field">
       @if (label(); as label) {
@@ -22,22 +21,23 @@ import { Slider } from 'primeng/slider';
 
       <p-slider
         [id]="key()"
-        [field]="f"
+        [formField]="f"
         [step]="props()?.step ?? 1"
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
         [styleClass]="sliderClasses()"
       />
 
-      @if (props()?.hint; as hint) {
-        <small class="p-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
-      }
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
+      } @empty {
+        @if (props()?.hint; as hint) {
+          <small class="p-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
+        }
       }
     </div>
   `,
@@ -57,6 +57,8 @@ import { Slider } from 'primeng/slider';
   ],
 })
 export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<number>>();
   readonly key = input.required<string>();
 
@@ -66,8 +68,13 @@ export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
   readonly tabIndex = input<number>();
 
   readonly props = input<PrimeSliderProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+  }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
@@ -82,11 +89,7 @@ export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
       classes.push(styleClass);
     }
 
-    // Add p-invalid class when there are errors to display
-    if (this.errorsToDisplay().length > 0) {
-      classes.push('p-invalid');
-    }
-
+    // Note: p-invalid is handled by [invalid] input binding, not manual class
     return classes.join(' ');
   });
 
@@ -112,18 +115,10 @@ export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

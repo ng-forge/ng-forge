@@ -1,34 +1,43 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonCheckbox, IonNote } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicCheckboxComponent, IonicCheckboxProps } from './ionic-checkbox.type';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
-  selector: 'df-ionic-checkbox',
-  imports: [IonCheckbox, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  selector: 'df-ion-checkbox',
+  imports: [IonCheckbox, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let checkboxId = key() + '-checkbox';
 
     <ion-checkbox
-      [field]="f"
+      [id]="checkboxId"
+      [formField]="f"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"
       [justify]="props()?.justify"
       [color]="props()?.color ?? 'primary'"
       [indeterminate]="props()?.indeterminate ?? false"
       [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="isAriaInvalid()"
-      [attr.aria-required]="isRequired() || null"
+      [attr.aria-invalid]="ariaInvalid()"
+      [attr.aria-required]="ariaRequired()"
+      [attr.aria-describedby]="ariaDescribedBy()"
     >
       {{ label() | dynamicText | async }}
     </ion-checkbox>
 
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+      <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    } @empty {
+      @if (props()?.hint; as hint) {
+        <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
+      }
     }
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
       :host {
@@ -49,6 +58,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicCheckboxFieldComponent implements IonicCheckboxComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<boolean>>();
   readonly key = input.required<string>();
 
@@ -58,6 +69,7 @@ export default class IonicCheckboxFieldComponent implements IonicCheckboxCompone
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<IonicCheckboxProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
@@ -66,21 +78,39 @@ export default class IonicCheckboxFieldComponent implements IonicCheckboxCompone
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
+  constructor() {
+    // Shadow DOM - apply meta to ion-checkbox element
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'ion-checkbox',
+    });
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Accessibility
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Base ID for error elements */
-  readonly errorId = computed(() => `${this.key()}-error`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** Unique ID for the helper text element */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
 
   /** Whether the field is currently in an invalid state (invalid AND touched) */
-  readonly isAriaInvalid = computed(() => {
+  protected readonly ariaInvalid = computed(() => {
     const fieldState = this.field()();
     return fieldState.invalid() && fieldState.touched();
   });
 
   /** Whether the field has a required validator */
-  readonly isRequired = computed(() => {
-    return this.field()().required?.() === true;
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
   });
+
+  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

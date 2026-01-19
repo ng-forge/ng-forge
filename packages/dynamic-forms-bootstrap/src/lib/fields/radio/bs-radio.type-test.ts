@@ -12,14 +12,14 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { BsRadioProps, BsRadioField } from './bs-radio.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // BsRadioProps - Whitelist Test
 // ============================================================================
 
 describe('BsRadioProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'inline' | 'reverse' | 'buttonGroup' | 'buttonSize' | 'helpText';
+  type ExpectedKeys = 'inline' | 'reverse' | 'buttonGroup' | 'buttonSize' | 'hint';
   type ActualKeys = keyof BsRadioProps;
 
   it('should have exactly the expected keys', () => {
@@ -47,8 +47,8 @@ describe('BsRadioProps - Exhaustive Whitelist', () => {
       expectTypeOf<BsRadioProps['buttonSize']>().toEqualTypeOf<'sm' | 'lg' | undefined>();
     });
 
-    it('helpText', () => {
-      expectTypeOf<BsRadioProps['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<BsRadioProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });
@@ -70,6 +70,7 @@ describe('BsRadioField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // From FieldWithValidation
     | 'required'
     | 'email'

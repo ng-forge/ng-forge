@@ -1,5 +1,4 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
-import { testUrl } from '../shared/test-utils';
 import { ionBlur } from '../shared/test-utils';
 
 setupTestLogging();
@@ -12,7 +11,7 @@ test.describe('Cross-Field Validation Tests', () => {
 
   test.describe('Password Confirmation Validation', () => {
     test('should validate password matching', async ({ page, helpers }) => {
-      await page.goto(testUrl('/cross-field-validation/password-validation'));
+      await page.goto('/#/testing/cross-field-validation/password-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('password-validation');
@@ -96,7 +95,7 @@ test.describe('Cross-Field Validation Tests', () => {
 
   test.describe('Conditional Required Fields', () => {
     test('should handle conditional field requirements', async ({ page, helpers }) => {
-      await page.goto(testUrl('/cross-field-validation/conditional-fields'));
+      await page.goto('/#/testing/cross-field-validation/conditional-fields');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('conditional-validation');
@@ -184,7 +183,7 @@ test.describe('Cross-Field Validation Tests', () => {
 
   test.describe('Dependent Select Fields', () => {
     test('should handle dependent field selections', async ({ page, helpers }) => {
-      await page.goto(testUrl('/cross-field-validation/dependent-fields'));
+      await page.goto('/#/testing/cross-field-validation/dependent-fields');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('dependent-fields');
@@ -298,7 +297,7 @@ test.describe('Cross-Field Validation Tests', () => {
 
   test.describe('Field Enable/Disable', () => {
     test('should handle field enabling/disabling based on selections', async ({ page, helpers }) => {
-      await page.goto(testUrl('/cross-field-validation/enable-disable'));
+      await page.goto('/#/testing/cross-field-validation/enable-disable');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('enable-disable');

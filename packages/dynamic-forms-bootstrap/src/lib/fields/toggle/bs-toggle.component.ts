@@ -1,18 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { FormField, FieldTree } from '@angular/forms/signals';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsToggleComponent, BsToggleProps } from './bs-toggle.type';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-bs-toggle',
-  imports: [Field, DynamicTextPipe, AsyncPipe],
+  imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let f = field(); @let inputId = key() + '-input';
 
     <div
       class="form-check form-switch"
@@ -24,28 +23,26 @@ import { AsyncPipe } from '@angular/common';
     >
       <input
         type="checkbox"
-        [field]="f"
-        [id]="key()"
+        [formField]="f"
+        [id]="inputId"
         class="form-check-input"
         [class.is-invalid]="f().invalid() && f().touched()"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
-        [attr.hidden]="f().hidden() || null"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
       />
-      <label [for]="key()" class="form-check-label">
+      <label [for]="inputId" class="form-check-label">
         {{ label() | dynamicText | async }}
       </label>
     </div>
 
-    @if (props()?.helpText; as helpText) {
-      <div class="form-text" [id]="helpTextId()" [attr.hidden]="f().hidden() || null">
-        {{ helpText | dynamicText | async }}
-      </div>
-    }
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
       <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
+    } @empty {
+      @if (props()?.hint; as hint) {
+        <div class="form-text" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
+      }
     }
   `,
   styles: [
@@ -81,6 +78,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BsToggleFieldComponent implements BsToggleComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<boolean>>();
   readonly key = input.required<string>();
 
@@ -91,17 +90,22 @@ export default class BsToggleFieldComponent implements BsToggleComponent {
   readonly props = input<BsToggleProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+  readonly meta = input<FieldMeta>();
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input[type="checkbox"]' });
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Accessibility
   // ─────────────────────────────────────────────────────────────────────────────
 
-  protected readonly helpTextId = computed(() => `${this.key()}-help`);
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
   protected readonly ariaInvalid = computed(() => {
@@ -113,15 +117,10 @@ export default class BsToggleFieldComponent implements BsToggleComponent {
     return this.field()().required?.() === true ? true : null;
   });
 
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-    if (this.props()?.helpText) {
-      ids.push(this.helpTextId());
-    }
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

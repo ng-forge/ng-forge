@@ -72,6 +72,11 @@ export default [
     data: { scenario: getScenarioById('login') },
   },
   {
+    path: 'hero-demo',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('hero-demo') },
+  },
+  {
     path: 'paginated-form',
     loadComponent: () => import('./shared/example-scenario.component'),
     data: { scenario: getScenarioById('paginated-form') },
@@ -90,6 +95,16 @@ export default [
     path: 'row',
     loadComponent: () => import('./shared/example-scenario.component'),
     data: { scenario: getScenarioById('row') },
+  },
+  {
+    path: 'validation-showcase',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('validation-showcase') },
+  },
+  {
+    path: 'default-props',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('default-props') },
   },
   // Special components with custom logic
   {

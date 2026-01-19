@@ -6,7 +6,7 @@ export interface IonicInputProps extends InputProps {
   shape?: 'round';
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked' | 'floating';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
-  helperText?: DynamicText;
+  hint?: DynamicText;
   errorText?: DynamicText;
   counter?: boolean;
   maxlength?: number;

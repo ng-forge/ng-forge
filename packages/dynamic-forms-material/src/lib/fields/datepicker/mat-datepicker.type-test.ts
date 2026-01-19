@@ -6,7 +6,7 @@ import type { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { MatDatepickerProps, MatDatepickerField } from './mat-datepicker.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // MatDatepickerProps - Whitelist Test
@@ -76,6 +76,7 @@ describe('MatDatepickerField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // From FieldWithValidation
     | 'required'
     | 'email'

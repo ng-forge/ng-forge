@@ -3,7 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig } from '@ng-forge/dynamic-forms';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 import type {
   IonicButtonProps,
@@ -81,6 +81,7 @@ describe('IonicSubmitButtonField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // Explicitly defined
     | 'logic';
   type ActualKeys = keyof IonicSubmitButtonField;
@@ -155,6 +156,7 @@ describe('IonicNextButtonField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // Explicitly defined
     | 'logic';
   type ActualKeys = keyof IonicNextButtonField;
@@ -219,7 +221,7 @@ describe('IonicNextButtonField - Exhaustive Whitelist', () => {
 describe('IonicPreviousButtonField - Exhaustive Whitelist', () => {
   type ExpectedKeys =
     // From FieldDef (minus event)
-    'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col';
+    'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'meta';
   type ActualKeys = keyof IonicPreviousButtonField;
 
   it('should have exactly the expected keys', () => {
@@ -288,6 +290,7 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // Explicitly defined
     | 'arrayKey';
   type ActualKeys = keyof AddArrayItemButtonField;
@@ -362,6 +365,7 @@ describe('RemoveArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // Explicitly defined
     | 'arrayKey';
   type ActualKeys = keyof RemoveArrayItemButtonField;

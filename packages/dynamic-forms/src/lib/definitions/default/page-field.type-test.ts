@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { PageField, PageLogicConfig } from './page-field';
 import type { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import type { PageAllowedChildren } from '../../models/types/nesting-constraints';
-import type { RequiredKeys } from '../../../../testing/src/type-test-utils';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // PageLogicConfig - Whitelist Test
@@ -39,8 +39,9 @@ describe('PageLogicConfig - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('PageField - Exhaustive Whitelist', () => {
-  // PageField extends FieldDef<never> and adds: fields, label?: never, logic?
-  // From FieldDef: key, type, label, props, className, disabled, readonly, hidden, tabIndex, col
+  // PageField extends FieldDef<never> and adds: fields, label?: never, logic?, meta?: never
+  // From FieldDef: key, type, label, props, className, disabled, readonly, hidden, tabIndex, col, meta
+  // Note: 'meta' is overridden to 'never' because containers don't have native form elements
   type ExpectedKeys =
     | 'key'
     | 'type'
@@ -52,6 +53,7 @@ describe('PageField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     | 'fields'
     | 'logic';
 
@@ -83,6 +85,10 @@ describe('PageField - Exhaustive Whitelist', () => {
 
     it('props is never', () => {
       expectTypeOf<PageField['props']>().toEqualTypeOf<never | undefined>();
+    });
+
+    it('meta is never (pages have no native form element)', () => {
+      expectTypeOf<PageField['meta']>().toEqualTypeOf<never | undefined>();
     });
 
     it('className', () => {

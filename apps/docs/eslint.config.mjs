@@ -8,14 +8,7 @@ export default [
   {
     files: ['**/*.ts'],
     rules: {
-      '@angular-eslint/directive-selector': [
-        'error',
-        {
-          type: 'attribute',
-          prefix: 'app',
-          style: 'camelCase',
-        },
-      ],
+      '@angular-eslint/directive-selector': 'off',
       '@angular-eslint/component-selector': 'off',
     },
   },

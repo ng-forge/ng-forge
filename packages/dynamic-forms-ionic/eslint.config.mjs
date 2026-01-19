@@ -31,19 +31,11 @@ export default [
   {
     files: ['**/*.ts'],
     rules: {
-      '@angular-eslint/directive-selector': [
-        'error',
-        {
-          type: 'attribute',
-          prefix: 'dfIonic',
-          style: 'camelCase',
-        },
-      ],
       '@angular-eslint/component-selector': [
         'error',
         {
           type: 'element',
-          prefix: 'df-ionic',
+          prefix: 'df-ion',
           style: 'kebab-case',
         },
       ],

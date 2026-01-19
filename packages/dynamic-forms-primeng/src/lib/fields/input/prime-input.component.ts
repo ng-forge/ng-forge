@@ -1,20 +1,19 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeInputComponent, PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
 import { InputText } from 'primeng/inputtext';
 import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-input',
-  imports: [InputText, DynamicTextPipe, AsyncPipe, Field],
+  imports: [InputText, DynamicTextPipe, AsyncPipe, FormField],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="df-prime-field">
       @if (label()) {
@@ -24,20 +23,21 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
         #inputRef
         pInputText
         [id]="inputId()"
-        [field]="f"
+        [formField]="f"
         [type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
         [class]="inputClasses()"
       />
-      @if (props()?.hint; as hint) {
-        <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
-      }
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
+      } @empty {
+        @if (props()?.hint; as hint) {
+          <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
+        }
       }
     </div>
   `,
@@ -57,6 +57,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
   ],
 })
 export default class PrimeInputFieldComponent implements PrimeInputComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
   private primeNGConfig = inject(PRIMENG_CONFIG, { optional: true });
 
   readonly field = input.required<FieldTree<string>>();
@@ -101,8 +102,13 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeInputProps>();
+  readonly meta = input<InputMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+  }
 
   readonly effectiveSize = computed(() => this.props()?.size ?? this.primeNGConfig?.size);
   readonly effectiveVariant = computed(() => this.props()?.variant ?? this.primeNGConfig?.variant);
@@ -131,11 +137,7 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
       classes.push('p-filled');
     }
 
-    // Add p-invalid class when there are errors to display
-    if (this.errorsToDisplay().length > 0) {
-      classes.push('p-invalid');
-    }
-
+    // Note: p-invalid is handled by [invalid] input binding, not manual class
     return classes.join(' ');
   });
 
@@ -163,18 +165,10 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

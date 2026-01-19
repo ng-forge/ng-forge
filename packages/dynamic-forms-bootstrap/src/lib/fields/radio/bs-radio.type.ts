@@ -1,4 +1,4 @@
-import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueFieldComponent, ValueType } from '@ng-forge/dynamic-forms';
 import { RadioField } from '@ng-forge/dynamic-forms/integration';
 
 export interface BsRadioProps {
@@ -6,9 +6,9 @@ export interface BsRadioProps {
   reverse?: boolean;
   buttonGroup?: boolean;
   buttonSize?: 'sm' | 'lg';
-  helpText?: DynamicText;
+  hint?: DynamicText;
 }
 
 export type BsRadioField<T> = RadioField<T, BsRadioProps>;
 
-export type BsRadioComponent<T> = ValueFieldComponent<BsRadioField<T>>;
+export type BsRadioComponent = ValueFieldComponent<BsRadioField<ValueType>>;

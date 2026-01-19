@@ -1,29 +1,29 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeCheckboxComponent, PrimeCheckboxProps } from './prime-checkbox.type';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-checkbox',
-  imports: [Checkbox, DynamicTextPipe, AsyncPipe, Field],
+  imports: [Checkbox, DynamicTextPipe, AsyncPipe, FormField],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @let checkboxId = key() + '-checkbox'; @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let f = field(); @let checkboxId = key() + '-checkbox';
 
     <div class="flex items-center">
       <p-checkbox
-        [field]="f"
+        [formField]="f"
         [inputId]="checkboxId"
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
         [styleClass]="checkboxClasses()"
         [attr.tabindex]="tabIndex()"
       />
@@ -32,11 +32,12 @@ import { AsyncPipe } from '@angular/common';
       }
     </div>
 
-    @if (props()?.hint; as hint) {
-      <small class="p-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
-    }
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
       <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
+    } @empty {
+      @if (props()?.hint; as hint) {
+        <small class="p-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
+      }
     }
   `,
   styles: [
@@ -59,6 +60,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PrimeCheckboxFieldComponent implements PrimeCheckboxComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<boolean>>();
   readonly key = input.required<string>();
 
@@ -68,6 +71,7 @@ export default class PrimeCheckboxFieldComponent implements PrimeCheckboxCompone
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeCheckboxProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
@@ -75,6 +79,13 @@ export default class PrimeCheckboxFieldComponent implements PrimeCheckboxCompone
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  constructor() {
+    // Apply meta attributes to the internal checkbox input
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'input[type="checkbox"]',
+    });
+  }
 
   readonly checkboxClasses = computed(() => {
     const classes: string[] = [];
@@ -84,11 +95,7 @@ export default class PrimeCheckboxFieldComponent implements PrimeCheckboxCompone
       classes.push(styleClass);
     }
 
-    // Add p-invalid class when there are errors to display
-    if (this.errorsToDisplay().length > 0) {
-      classes.push('p-invalid');
-    }
-
+    // Note: p-invalid is handled by [invalid] input binding, not manual class
     return classes.join(' ');
   });
 
@@ -114,18 +121,10 @@ export default class PrimeCheckboxFieldComponent implements PrimeCheckboxCompone
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

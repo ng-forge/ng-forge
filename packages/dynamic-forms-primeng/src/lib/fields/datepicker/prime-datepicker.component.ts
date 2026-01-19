@@ -1,33 +1,29 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { FormField, FieldTree } from '@angular/forms/signals';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeDatepickerComponent, PrimeDatepickerProps } from './prime-datepicker.type';
 import { AsyncPipe } from '@angular/common';
-import { DatePicker } from 'primeng/datepicker';
+import { PrimeDatepickerControlComponent } from './prime-datepicker-control.component';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-datepicker',
-  imports: [DatePicker, Field, DynamicTextPipe, AsyncPipe],
+  imports: [PrimeDatepickerControlComponent, FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="df-prime-field">
       @if (label()) {
         <label [for]="key()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
 
-      <p-datepicker
+      <df-prime-datepicker-control
+        [formField]="f"
         [inputId]="key()"
-        [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [tabIndex]="tabIndex()"
         [dateFormat]="props()?.dateFormat || 'mm/dd/yy'"
         [inline]="props()?.inline ?? false"
         [showIcon]="props()?.showIcon ?? true"
@@ -35,14 +31,22 @@ import { DatePicker } from 'primeng/datepicker';
         [selectionMode]="props()?.selectionMode || 'single'"
         [touchUI]="props()?.touchUI ?? false"
         [view]="props()?.view || 'date'"
+        [minDate]="minDate()"
+        [maxDate]="maxDate()"
+        [defaultDate]="startAt()"
         [styleClass]="datepickerClasses()"
+        [meta]="meta()"
+        [ariaInvalid]="ariaInvalid()"
+        [ariaRequired]="ariaRequired()"
+        [ariaDescribedBy]="ariaDescribedBy()"
       />
 
-      @if (props()?.hint; as hint) {
-        <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
-      }
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
+      } @empty {
+        @if (props()?.hint; as hint) {
+          <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
+        }
       }
     </div>
   `,
@@ -62,7 +66,9 @@ import { DatePicker } from 'primeng/datepicker';
   ],
 })
 export default class PrimeDatepickerFieldComponent implements PrimeDatepickerComponent {
-  readonly field = input.required<FieldTree<Date | null>>();
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
+  readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
@@ -75,8 +81,13 @@ export default class PrimeDatepickerFieldComponent implements PrimeDatepickerCom
   readonly maxDate = input<Date | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<PrimeDatepickerProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+  }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
@@ -91,11 +102,7 @@ export default class PrimeDatepickerFieldComponent implements PrimeDatepickerCom
       classes.push(styleClass);
     }
 
-    // Add p-invalid class when there are errors to display
-    if (this.errorsToDisplay().length > 0) {
-      classes.push('p-invalid');
-    }
-
+    // Note: p-invalid is handled by [invalid] input binding, not manual class
     return classes.join(' ');
   });
 
@@ -109,30 +116,22 @@ export default class PrimeDatepickerFieldComponent implements PrimeDatepickerCom
   /** Base ID for error elements, used for aria-describedby */
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
-  /** aria-invalid: true when field is invalid AND touched, false otherwise */
+  /** aria-invalid: true when field is invalid AND touched */
   protected readonly ariaInvalid = computed(() => {
     const fieldState = this.field()();
     return fieldState.invalid() && fieldState.touched();
   });
 
-  /** aria-required: true if field is required, null otherwise (to remove attribute) */
+  /** aria-required: true if field is required, null otherwise */
   protected readonly ariaRequired = computed(() => {
     return this.field()().required?.() === true ? true : null;
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

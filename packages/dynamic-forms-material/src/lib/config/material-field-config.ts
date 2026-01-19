@@ -19,6 +19,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     name: MatField.Input,
     loadComponent: () => import('../fields/input/mat-input.component'),
     mapper: valueFieldMapper,
+    propsToMeta: ['type'],
   },
   {
     name: MatField.Select,
@@ -70,6 +71,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     name: MatField.Textarea,
     loadComponent: () => import('../fields/textarea/mat-textarea.component'),
     mapper: valueFieldMapper,
+    propsToMeta: ['rows', 'cols'],
   },
   {
     name: MatField.Radio,

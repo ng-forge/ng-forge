@@ -10,7 +10,7 @@ test.describe('Material Components Tests', () => {
 
   test.describe('Datepicker Component', () => {
     test('should open calendar and select date', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/datepicker-basic');
+      await page.goto('/#/test/material-components/datepicker-basic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('datepicker-basic');
@@ -40,7 +40,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should respect min/max date constraints', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/datepicker-constraints');
+      await page.goto('/#/test/material-components/datepicker-constraints');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('datepicker-constraints');
@@ -61,7 +61,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should handle required field validation', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/datepicker-validation');
+      await page.goto('/#/test/material-components/datepicker-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('datepicker-validation');
@@ -76,7 +76,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should clear date value', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/datepicker-clear');
+      await page.goto('/#/test/material-components/datepicker-clear');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('datepicker-clear');
@@ -96,7 +96,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/datepicker-disabled');
+      await page.goto('/#/test/material-components/datepicker-disabled');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('datepicker-disabled');
@@ -112,7 +112,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should work with initial value', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/datepicker-initial-value');
+      await page.goto('/#/test/material-components/datepicker-initial-value');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('datepicker-initial-value');
@@ -128,7 +128,7 @@ test.describe('Material Components Tests', () => {
 
   test.describe('Slider Component', () => {
     test('should update value on interaction', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/slider-basic');
+      await page.goto('/#/test/material-components/slider-basic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('slider-basic');
@@ -153,7 +153,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should respect min and max bounds', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/slider-bounds');
+      await page.goto('/#/test/material-components/slider-bounds');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('slider-bounds');
@@ -171,7 +171,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should work with step increments', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/slider-steps');
+      await page.goto('/#/test/material-components/slider-steps');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('slider-steps');
@@ -184,7 +184,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/slider-disabled');
+      await page.goto('/#/test/material-components/slider-disabled');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('slider-disabled');
@@ -195,7 +195,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should display current value', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/slider-value-display');
+      await page.goto('/#/test/material-components/slider-value-display');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('slider-value-display');
@@ -210,7 +210,7 @@ test.describe('Material Components Tests', () => {
 
   test.describe('Toggle Component', () => {
     test('should change state on click', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/toggle-basic');
+      await page.goto('/#/test/material-components/toggle-basic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-basic');
@@ -230,7 +230,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should work with keyboard (Space/Enter)', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/toggle-keyboard');
+      await page.goto('/#/test/material-components/toggle-keyboard');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-keyboard');
@@ -254,7 +254,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/toggle-disabled');
+      await page.goto('/#/test/material-components/toggle-disabled');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-disabled');
@@ -270,7 +270,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should handle required toggle validation', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/toggle-validation');
+      await page.goto('/#/test/material-components/toggle-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-validation');
@@ -291,7 +291,7 @@ test.describe('Material Components Tests', () => {
 
   test.describe('Multi-Checkbox Component', () => {
     test('should select multiple options', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-basic');
+      await page.goto('/#/test/material-components/multi-checkbox-basic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-checkbox-basic');
@@ -312,7 +312,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should collect values as array on submit', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-array');
+      await page.goto('/#/test/material-components/multi-checkbox-array');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-checkbox-array');
@@ -338,7 +338,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should deselect options', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-deselect');
+      await page.goto('/#/test/material-components/multi-checkbox-deselect');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-checkbox-deselect');
@@ -360,7 +360,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should handle disabled options', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-disabled-options');
+      await page.goto('/#/test/material-components/multi-checkbox-disabled-options');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-checkbox-disabled-options');
@@ -379,7 +379,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should handle required multi-checkbox validation', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-validation');
+      await page.goto('/#/test/material-components/multi-checkbox-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-checkbox-validation');

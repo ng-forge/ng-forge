@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ng-forge/ng-forge/main/logo-light.svg" alt="ng-forge logo" width="400"/>
+  <img src="./logo.svg" alt="ng-forge Dynamic Forms" width="400"/>
 </p>
 
 # @ng-forge/dynamic-forms
@@ -16,10 +16,13 @@ Core library for building type-safe, dynamic Angular forms with signal forms int
 
 ## Compatibility
 
-| @ng-forge/dynamic-forms | Angular       | Notes                              |
-| ----------------------- | ------------- | ---------------------------------- |
-| 0.1.1+                  | >=21.0.2      | Signal forms API signature changed |
-| 0.1.0                   | 21.0.0-21.0.1 | Initial release                    |
+| @ng-forge/dynamic-forms | Angular       |
+| ----------------------- | ------------- |
+| 0.4.x                   | >=21.1.0      |
+| 0.3.x                   | 21.0.7-21.0.x |
+| 0.2.x                   | 21.0.6        |
+| 0.1.1+                  | 21.0.2-21.0.5 |
+| 0.1.0                   | 21.0.0-21.0.1 |
 
 ## Installation
 
