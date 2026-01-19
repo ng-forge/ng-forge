@@ -3,7 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { ConditionalExpression } from '../expressions/conditional-expression';
-import type { RequiredKeys, OptionalKeys } from '@ng-forge/testing';
+import type { RequiredKeys, OptionalKeys } from '@ng-forge/utils';
 import type {
   BaseValidatorConfig,
   BuiltInValidatorConfig,

@@ -7,7 +7,7 @@ import type { LogicConfig } from '../../models/logic/logic-config';
 import type { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
 import type { ValidationMessages } from '../../models/validation-types';
 import type { FieldWithValidation } from './field-with-validation';
-import type { RequiredKeys } from '@ng-forge/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // FieldWithValidation - Whitelist Test

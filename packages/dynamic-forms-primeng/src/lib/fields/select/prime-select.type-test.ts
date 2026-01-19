@@ -12,7 +12,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { PrimeSelectProps, PrimeSelectField } from './prime-select.type';
-import type { RequiredKeys } from '@ng-forge/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // PrimeSelectProps - Whitelist Test

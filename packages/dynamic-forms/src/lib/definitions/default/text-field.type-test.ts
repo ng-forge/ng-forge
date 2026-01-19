@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { TextField, TextProps, TextElementType } from './text-field';
 import type { DynamicText } from '../../models/types/dynamic-text';
 import type { LogicConfig } from '../../models/logic';
-import type { RequiredKeys } from '@ng-forge/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // TextElementType - Whitelist Test

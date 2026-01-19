@@ -12,7 +12,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { IonicMultiCheckboxProps, IonicMultiCheckboxField } from './ionic-multi-checkbox.type';
-import type { RequiredKeys } from '@ng-forge/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // IonicMultiCheckboxProps - Whitelist Test

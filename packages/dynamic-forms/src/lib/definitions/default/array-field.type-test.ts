@@ -4,7 +4,7 @@
 import { expectTypeOf } from 'vitest';
 import type { ArrayField, ArrayComponent } from './array-field';
 import type { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
-import type { RequiredKeys } from '@ng-forge/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // ArrayField - Whitelist Test
