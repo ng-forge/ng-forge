@@ -17,7 +17,7 @@
         "tsConfig": "apps/examples/primeng/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "stylePreprocessorOptions": {
-          "includePaths": ["libs/styling/src"]
+          "includePaths": ["internal/styling/src"]
         },
         "assets": [
           {

@@ -1,7 +1,7 @@
 {
   "name": "examples-shared-testing",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/examples-shared-testing/src",
+  "sourceRoot": "internal/examples-shared-testing/src",
   "projectType": "library",
   "tags": ["scope:examples", "type:testing"],
   "// targets": "to see all targets run: nx show project examples-shared-testing --web",
