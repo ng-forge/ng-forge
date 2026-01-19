@@ -1,6 +1,6 @@
 import { RowFieldComponent } from './row-field.component';
 import { RowField } from '../../definitions/default/row-field';
-import { createSimpleTestField, setupSimpleTest } from '@ng-forge/testing-internal';
+import { createSimpleTestField, setupSimpleTest } from '@ng-forge/testing';
 import { FieldDef } from '../../definitions/base/field-def';
 
 describe('RowFieldComponent', () => {

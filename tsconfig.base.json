@@ -29,7 +29,7 @@
       "@ng-forge/examples-shared-testing": ["libs/examples-shared-testing/src/index.ts"],
       "@ng-forge/examples-shared-testing/playwright-config": ["libs/examples-shared-testing/src/lib/playwright-config.ts"],
       "@ng-forge/styling": ["libs/styling/src/index.ts"],
-      "@ng-forge/testing-internal": ["libs/testing-internal/src/index.ts"]
+      "@ng-forge/testing": ["libs/testing/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

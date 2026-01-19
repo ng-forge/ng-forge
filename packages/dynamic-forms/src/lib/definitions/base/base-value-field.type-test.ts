@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText } from '../../models/types/dynamic-text';
 import type { BaseValueField, ValueType, ValueFieldComponent } from './base-value-field';
 import type { FieldDef } from './field-def';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // ValueType - Type Tests

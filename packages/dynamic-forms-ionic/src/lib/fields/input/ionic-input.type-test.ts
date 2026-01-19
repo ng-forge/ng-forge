@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { IonicInputProps, IonicInputField } from './ionic-input.type';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // IonicInputProps - Whitelist Test

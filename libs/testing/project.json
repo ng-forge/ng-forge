@@ -1,7 +1,7 @@
 {
-  "name": "testing-internal",
+  "name": "testing",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/testing-internal/src",
+  "sourceRoot": "libs/testing/src",
   "projectType": "library",
   "tags": ["internal"],
   "targets": {

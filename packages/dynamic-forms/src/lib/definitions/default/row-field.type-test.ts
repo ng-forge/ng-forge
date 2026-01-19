@@ -4,7 +4,7 @@
 import { expectTypeOf } from 'vitest';
 import type { RowField, RowComponent } from './row-field';
 import type { RowAllowedChildren } from '../../models/types/nesting-constraints';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // RowField - Whitelist Test

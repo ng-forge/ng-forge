@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { IonicToggleProps, IonicToggleField } from './ionic-toggle.type';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // IonicToggleProps - Whitelist Test

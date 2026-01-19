@@ -2,7 +2,7 @@ import { vi } from 'vitest';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { evaluateCondition } from './condition-evaluator';
-import { createMockLogger, MockLogger } from '@ng-forge/testing-internal';
+import { createMockLogger, MockLogger } from '@ng-forge/testing';
 
 describe('condition-evaluator', () => {
   let mockContext: EvaluationContext;

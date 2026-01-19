@@ -6,7 +6,7 @@ import type { ValidatorConfig } from '../validation/validator-config';
 import type { LogicConfig } from '../logic/logic-config';
 import type { ConditionalExpression } from '../expressions/conditional-expression';
 import type { SchemaApplicationConfig, SchemaDefinition } from './schema-definition';
-import type { RequiredKeys, OptionalKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys, OptionalKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // SchemaApplicationConfig - Whitelist Test

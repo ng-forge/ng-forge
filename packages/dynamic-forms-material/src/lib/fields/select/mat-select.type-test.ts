@@ -14,7 +14,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { MatSelectProps, MatSelectField } from './mat-select.type';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // MatSelectProps - Whitelist Test

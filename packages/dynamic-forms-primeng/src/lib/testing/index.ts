@@ -4,7 +4,7 @@ export {
   DEFAULT_TEST_TRANSLATIONS,
   SPANISH_TEST_TRANSLATIONS,
   createTestTranslationService,
-} from '@ng-forge/testing-internal';
+} from '@ng-forge/testing';
 export { waitForDFInit } from './wait-for-df';
 export {
   PrimeNGFormTestUtils,

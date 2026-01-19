@@ -14,7 +14,7 @@ export default [
         'error',
         {
           enforceBuildableLibDependency: true,
-          allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$', '^@examples/.*', '^@ng-forge/testing-internal$'],
+          allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$', '^@examples/.*', '^@ng-forge/testing$'],
           depConstraints: [
             {
               sourceTag: '*',

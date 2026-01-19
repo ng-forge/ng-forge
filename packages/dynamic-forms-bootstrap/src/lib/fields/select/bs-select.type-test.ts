@@ -13,7 +13,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { BsSelectProps, BsSelectField } from './bs-select.type';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // BsSelectProps - Whitelist Test

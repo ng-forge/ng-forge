@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { ConditionalExpression } from '../expressions/conditional-expression';
 import type { LogicConfig, FormStateCondition } from './logic-config';
 import { isFormStateCondition } from './logic-config';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // FormStateCondition - Type Tests

@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { BsTextareaProps, BsTextareaField } from './bs-textarea.type';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // BsTextareaProps - Whitelist Test

@@ -3,7 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { LogicConfig } from '@ng-forge/dynamic-forms';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 import type {
   BsButtonProps,

@@ -12,7 +12,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { BsMultiCheckboxProps, BsMultiCheckboxField } from './bs-multi-checkbox.type';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // BsMultiCheckboxProps - Whitelist Test

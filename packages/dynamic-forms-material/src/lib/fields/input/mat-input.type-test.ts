@@ -10,7 +10,7 @@ import type { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { MatInputProps, MatInputField } from './mat-input.type';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // MatInputProps - Whitelist Test

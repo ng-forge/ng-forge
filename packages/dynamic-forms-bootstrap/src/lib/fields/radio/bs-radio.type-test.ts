@@ -12,7 +12,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { BsRadioProps, BsRadioField } from './bs-radio.type';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // BsRadioProps - Whitelist Test

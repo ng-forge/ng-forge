@@ -13,7 +13,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { MatRadioProps, MatRadioField } from './mat-radio.type';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // MatRadioProps - Whitelist Test

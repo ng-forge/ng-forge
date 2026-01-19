@@ -1,6 +1,6 @@
 import { GroupFieldComponent } from './group-field.component';
 import { GroupField } from '../../definitions/default/group-field';
-import { createSimpleTestField, TestFieldComponent } from '@ng-forge/testing-internal';
+import { createSimpleTestField, TestFieldComponent } from '@ng-forge/testing';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';

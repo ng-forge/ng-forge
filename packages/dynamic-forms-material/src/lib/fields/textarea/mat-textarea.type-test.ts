@@ -6,7 +6,7 @@ import type { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { MatTextareaProps, MatTextareaField } from './mat-textarea.type';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // MatTextareaProps - Whitelist Test

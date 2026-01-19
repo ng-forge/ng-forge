@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { PageField, PageLogicConfig } from './page-field';
 import type { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import type { PageAllowedChildren } from '../../models/types/nesting-constraints';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // PageLogicConfig - Whitelist Test

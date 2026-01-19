@@ -13,7 +13,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { IonicSelectProps, IonicSelectField } from './ionic-select.type';
-import type { RequiredKeys } from '@ng-forge/testing-internal';
+import type { RequiredKeys } from '@ng-forge/testing';
 
 // ============================================================================
 // IonicSelectProps - Whitelist Test
