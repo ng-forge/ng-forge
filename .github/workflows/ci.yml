@@ -97,7 +97,7 @@ jobs:
           echo "✅ All packages validated successfully"
 
       - name: Cache build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             dist/packages/dynamic-forms
@@ -133,7 +133,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Restore build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             dist/packages/dynamic-forms
@@ -175,7 +175,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Restore build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             dist/packages/dynamic-forms
@@ -226,7 +226,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Restore build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             dist/packages/dynamic-forms
@@ -291,7 +291,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Restore build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             dist/packages/dynamic-forms
