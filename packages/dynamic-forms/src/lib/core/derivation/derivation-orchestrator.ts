@@ -18,6 +18,7 @@ import {
   timer,
 } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
+import { FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { getChangedKeys } from '../../utils/object-utils';
@@ -68,6 +69,7 @@ export class DerivationOrchestrator {
   private readonly logger = inject(DynamicFormLogger);
   private readonly warningTracker = inject(DERIVATION_WARNING_TRACKER);
   private readonly functionRegistry = inject(FunctionRegistryService);
+  private readonly formOptions = inject(FORM_OPTIONS);
 
   /**
    * Computed signal containing the collected and validated derivations.
@@ -215,6 +217,7 @@ export class DerivationOrchestrator {
       logger: this.logger,
       warningTracker: this.warningTracker,
       derivationLogger: untracked(() => this.config.derivationLogger()),
+      maxIterations: untracked(() => this.formOptions()?.maxDerivationIterations),
     };
 
     const result = applyDerivationsForTrigger(collection, 'onChange', applicatorContext);
@@ -256,6 +259,7 @@ export class DerivationOrchestrator {
       logger: this.logger,
       warningTracker: this.warningTracker,
       derivationLogger: untracked(() => this.config.derivationLogger()),
+      maxIterations: untracked(() => this.formOptions()?.maxDerivationIterations),
     };
 
     const result = applyDerivationsForTrigger(filteredCollection, 'debounced', applicatorContext, changedFields);

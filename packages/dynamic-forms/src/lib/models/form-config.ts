@@ -537,6 +537,20 @@ export interface FormOptions {
   disabled?: boolean;
 
   /**
+   * Maximum number of iterations for derivation chain processing.
+   *
+   * Derivations can trigger other derivations (e.g., A → B → C).
+   * This limit prevents infinite loops in case of circular dependencies
+   * that weren't caught at build time.
+   *
+   * Increase this value if you have legitimate deep derivation chains
+   * (more than 10 levels deep).
+   *
+   * @default 10
+   */
+  maxDerivationIterations?: number;
+
+  /**
    * Default disabled behavior for submit buttons.
    *
    * Controls when submit buttons are automatically disabled.

@@ -56,6 +56,12 @@ export interface DerivationApplicatorContext {
    * Created via `createDerivationLogger()` factory.
    */
   derivationLogger: DerivationLogger;
+
+  /**
+   * Maximum number of iterations for derivation chain processing.
+   * Falls back to MAX_DERIVATION_ITERATIONS constant if not provided.
+   */
+  maxIterations?: number;
 }
 
 /**
@@ -114,6 +120,7 @@ export function applyDerivations(
 ): DerivationProcessingResult {
   const chainContext = createDerivationChainContext();
   const { derivationLogger } = context;
+  const maxIterations = context.maxIterations ?? MAX_DERIVATION_ITERATIONS;
   let appliedCount = 0;
   let skippedCount = 0;
   let errorCount = 0;
@@ -127,7 +134,7 @@ export function applyDerivations(
   // Process derivations iteratively until no more changes
   let hasChanges = true;
 
-  while (hasChanges && chainContext.iteration < MAX_DERIVATION_ITERATIONS) {
+  while (hasChanges && chainContext.iteration < maxIterations) {
     chainContext.iteration++;
     hasChanges = false;
 
@@ -154,7 +161,7 @@ export function applyDerivations(
     skippedCount,
     errorCount,
     iterations: chainContext.iteration,
-    maxIterationsReached: chainContext.iteration >= MAX_DERIVATION_ITERATIONS,
+    maxIterationsReached: chainContext.iteration >= maxIterations,
   };
 
   if (processingResult.maxIterationsReached) {
