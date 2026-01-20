@@ -34,9 +34,15 @@ Use JavaScript expressions with access to `formValue`:
 
 ```typescript
 {
-  type: 'derivation',
-  targetField: 'fullName',
-  expression: 'formValue.firstName + " " + formValue.lastName',
+  key: 'fullName',
+  type: 'input',
+  label: 'Full Name',
+  readonly: true,
+  logic: [{
+    type: 'derivation',
+    targetField: 'fullName',
+    expression: 'formValue.firstName + " " + formValue.lastName',
+  }],
 }
 ```
 
@@ -50,15 +56,21 @@ Set a constant value when a condition is met:
 
 ```typescript
 {
-  type: 'derivation',
-  targetField: 'phonePrefix',
-  value: '+1',
-  condition: {
-    type: 'fieldValue',
-    fieldPath: 'country',
-    operator: 'equals',
-    value: 'USA',
-  },
+  key: 'phonePrefix',
+  type: 'input',
+  label: 'Phone Prefix',
+  readonly: true,
+  logic: [{
+    type: 'derivation',
+    targetField: 'phonePrefix',
+    value: '+1',
+    condition: {
+      type: 'fieldValue',
+      fieldPath: 'country',
+      operator: 'equals',
+      value: 'USA',
+    },
+  }],
 }
 ```
 
@@ -122,27 +134,34 @@ Only apply derivations when conditions are met:
 
 ```typescript
 {
-  type: 'derivation',
-  targetField: 'currency',
-  value: 'USD',
-  condition: {
-    type: 'fieldValue',
-    fieldPath: 'country',
-    operator: 'equals',
-    value: 'USA',
-  },
-}
-
-{
-  type: 'derivation',
-  targetField: 'currency',
-  value: 'EUR',
-  condition: {
-    type: 'fieldValue',
-    fieldPath: 'country',
-    operator: 'equals',
-    value: 'Germany',
-  },
+  key: 'currency',
+  type: 'input',
+  label: 'Currency',
+  readonly: true,
+  logic: [
+    {
+      type: 'derivation',
+      targetField: 'currency',
+      value: 'USD',
+      condition: {
+        type: 'fieldValue',
+        fieldPath: 'country',
+        operator: 'equals',
+        value: 'USA',
+      },
+    },
+    {
+      type: 'derivation',
+      targetField: 'currency',
+      value: 'EUR',
+      condition: {
+        type: 'fieldValue',
+        fieldPath: 'country',
+        operator: 'equals',
+        value: 'Germany',
+      },
+    },
+  ],
 }
 ```
 
@@ -156,10 +175,16 @@ For expressions, dependencies are automatically extracted:
 
 ```typescript
 {
-  type: 'derivation',
-  targetField: 'total',
-  expression: 'formValue.quantity * formValue.unitPrice',
-  // Automatically depends on: quantity, unitPrice
+  key: 'total',
+  type: 'input',
+  label: 'Total',
+  readonly: true,
+  logic: [{
+    type: 'derivation',
+    targetField: 'total',
+    expression: 'formValue.quantity * formValue.unitPrice',
+    // Automatically depends on: quantity, unitPrice
+  }],
 }
 ```
 
@@ -169,10 +194,16 @@ For custom functions, specify dependencies explicitly:
 
 ```typescript
 {
-  type: 'derivation',
-  targetField: 'discount',
-  functionName: 'calculateDiscount',
-  dependsOn: ['total', 'memberLevel'],
+  key: 'discount',
+  type: 'input',
+  label: 'Discount',
+  readonly: true,
+  logic: [{
+    type: 'derivation',
+    targetField: 'discount',
+    functionName: 'calculateDiscount',
+    dependsOn: ['total', 'memberLevel'],
+  }],
 }
 ```
 

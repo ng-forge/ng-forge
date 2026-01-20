@@ -53,11 +53,17 @@ Inside array items, `formValue` refers to the current array item. Use `rootFormV
 
 ```typescript
 {
-  type: 'derivation',
-  targetField: '$.lineTotal',
-  // formValue = current array item { quantity, unitPrice }
-  // rootFormValue = entire form { lineItems, discount, ... }
-  expression: 'formValue.quantity * formValue.unitPrice * (1 - rootFormValue.discount / 100)',
+  key: 'lineTotal',
+  type: 'input',
+  label: 'Total',
+  readonly: true,
+  logic: [{
+    type: 'derivation',
+    targetField: '$.lineTotal',
+    // formValue = current array item { quantity, unitPrice }
+    // rootFormValue = entire form { lineItems, discount, ... }
+    expression: 'formValue.quantity * formValue.unitPrice * (1 - rootFormValue.discount / 100)',
+  }],
 }
 ```
 
@@ -92,10 +98,16 @@ Add names to derivations for easier identification in logs:
 
 ```typescript
 {
-  type: 'derivation',
-  debugName: 'Calculate line total',
-  targetField: '$.lineTotal',
-  expression: 'formValue.quantity * formValue.unitPrice',
+  key: 'lineTotal',
+  type: 'input',
+  label: 'Total',
+  readonly: true,
+  logic: [{
+    type: 'derivation',
+    debugName: 'Calculate line total',
+    targetField: '$.lineTotal',
+    expression: 'formValue.quantity * formValue.unitPrice',
+  }],
 }
 ```
 
