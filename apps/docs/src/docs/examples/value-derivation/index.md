@@ -29,60 +29,45 @@ The name fields demonstrate string derivation:
 
 ## Key Patterns
 
-### Defining Derivations
+### Using the `derivation` Shorthand
 
-Derivations are defined in the `logic` array of the source field:
+The simplest way to create a derived field is with the `derivation` property directly on the target field:
 
 ```typescript
 {
-  key: 'quantity',
+  key: 'subtotal',
   type: 'input',
-  value: 1,
-  logic: [{
-    type: 'derivation',
-    targetField: 'subtotal',
-    expression: 'formValue.quantity * formValue.unitPrice',
-  }],
+  disabled: true,
+  derivation: 'formValue.quantity * formValue.unitPrice',
 }
 ```
 
-### Multiple Sources, Multiple Targets
+The expression is evaluated whenever its dependencies change. Dependencies are automatically detected from the expression.
 
-When a source field affects multiple derived values (directly or through a chain), include ALL derivations on that source field. The derivation system processes them in dependency order within a single cycle:
+### Chained Derivations
+
+Derivations can reference other derived values. The system automatically processes them in the correct order:
 
 ```typescript
-// On quantity field - includes ALL downstream derivations
-logic: [
-  { type: 'derivation', targetField: 'subtotal', expression: 'formValue.quantity * formValue.unitPrice' },
-  { type: 'derivation', targetField: 'tax', expression: 'formValue.subtotal * formValue.taxRate / 100' },
-  { type: 'derivation', targetField: 'total', expression: 'formValue.subtotal + formValue.tax' },
-];
+// subtotal depends on quantity and unitPrice
+{ key: 'subtotal', derivation: 'formValue.quantity * formValue.unitPrice' }
 
-// On unitPrice field - same derivations since it also affects subtotal
-logic: [
-  { type: 'derivation', targetField: 'subtotal', expression: 'formValue.quantity * formValue.unitPrice' },
-  { type: 'derivation', targetField: 'tax', expression: 'formValue.subtotal * formValue.taxRate / 100' },
-  { type: 'derivation', targetField: 'total', expression: 'formValue.subtotal + formValue.tax' },
-];
+// tax depends on subtotal (another derived field)
+{ key: 'tax', derivation: 'formValue.subtotal * formValue.taxRate / 100' }
 
-// On taxRate field - only affects tax and total
-logic: [
-  { type: 'derivation', targetField: 'tax', expression: 'formValue.subtotal * formValue.taxRate / 100' },
-  { type: 'derivation', targetField: 'total', expression: 'formValue.subtotal + formValue.tax' },
-];
+// total depends on both subtotal and tax
+{ key: 'total', derivation: 'formValue.subtotal + formValue.tax' }
 ```
 
 ### Derivation Flow
 
 ```
-quantity ───┬── subtotal ─┬── tax ─┬── total
-            │             │        │
-unitPrice ──┘             │        │
-                          │        │
-taxRate ──────────────────┴────────┘
+quantity ───┐
+            ├── subtotal ──┬── tax ──┬── total
+unitPrice ──┘              │         │
+                           │         │
+taxRate ───────────────────┴─────────┘
 ```
-
-Each source field defines derivations for all fields downstream in its dependency chain.
 
 ## Related
 

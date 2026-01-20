@@ -21,23 +21,6 @@ export const valueDerivationScenario: ExampleScenario = {
         min: 1,
         props: { type: 'number' },
         col: 4,
-        logic: [
-          {
-            type: 'derivation',
-            targetField: 'subtotal',
-            expression: 'formValue.quantity * formValue.unitPrice',
-          },
-          {
-            type: 'derivation',
-            targetField: 'tax',
-            expression: 'formValue.subtotal * formValue.taxRate / 100',
-          },
-          {
-            type: 'derivation',
-            targetField: 'total',
-            expression: 'formValue.subtotal + formValue.tax',
-          },
-        ],
       },
       {
         key: 'unitPrice',
@@ -46,32 +29,15 @@ export const valueDerivationScenario: ExampleScenario = {
         value: 25,
         props: { type: 'number' },
         col: 4,
-        logic: [
-          {
-            type: 'derivation',
-            targetField: 'subtotal',
-            expression: 'formValue.quantity * formValue.unitPrice',
-          },
-          {
-            type: 'derivation',
-            targetField: 'tax',
-            expression: 'formValue.subtotal * formValue.taxRate / 100',
-          },
-          {
-            type: 'derivation',
-            targetField: 'total',
-            expression: 'formValue.subtotal + formValue.tax',
-          },
-        ],
       },
       {
         key: 'subtotal',
         type: 'input',
         label: 'Subtotal ($)',
-        value: 25,
         props: { type: 'number' },
-        readonly: true,
+        disabled: true,
         col: 4,
+        derivation: 'formValue.quantity * formValue.unitPrice',
       },
       {
         key: 'taxRate',
@@ -80,36 +46,24 @@ export const valueDerivationScenario: ExampleScenario = {
         value: 10,
         props: { type: 'number' },
         col: 4,
-        logic: [
-          {
-            type: 'derivation',
-            targetField: 'tax',
-            expression: 'formValue.subtotal * formValue.taxRate / 100',
-          },
-          {
-            type: 'derivation',
-            targetField: 'total',
-            expression: 'formValue.subtotal + formValue.tax',
-          },
-        ],
       },
       {
         key: 'tax',
         type: 'input',
         label: 'Tax ($)',
-        value: 2.5,
         props: { type: 'number' },
-        readonly: true,
+        disabled: true,
         col: 4,
+        derivation: 'formValue.subtotal * formValue.taxRate / 100',
       },
       {
         key: 'total',
         type: 'input',
         label: 'Total ($)',
-        value: 27.5,
         props: { type: 'number' },
-        readonly: true,
+        disabled: true,
         col: 4,
+        derivation: 'formValue.subtotal + formValue.tax',
       },
       {
         key: 'nameTitle',
@@ -123,13 +77,6 @@ export const valueDerivationScenario: ExampleScenario = {
         label: 'First Name',
         value: 'John',
         col: 4,
-        logic: [
-          {
-            type: 'derivation',
-            targetField: 'fullName',
-            expression: '(formValue.firstName || "") + " " + (formValue.lastName || "")',
-          },
-        ],
       },
       {
         key: 'lastName',
@@ -137,21 +84,14 @@ export const valueDerivationScenario: ExampleScenario = {
         label: 'Last Name',
         value: 'Doe',
         col: 4,
-        logic: [
-          {
-            type: 'derivation',
-            targetField: 'fullName',
-            expression: '(formValue.firstName || "") + " " + (formValue.lastName || "")',
-          },
-        ],
       },
       {
         key: 'fullName',
         type: 'input',
         label: 'Full Name',
-        value: 'John Doe',
-        readonly: true,
+        disabled: true,
         col: 4,
+        derivation: '(formValue.firstName || "") + " " + (formValue.lastName || "")',
       },
     ],
   } as const satisfies FormConfig,
