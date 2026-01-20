@@ -106,6 +106,11 @@ export default [
     loadComponent: () => import('./shared/example-scenario.component'),
     data: { scenario: getScenarioById('default-props') },
   },
+  {
+    path: 'value-derivation',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('value-derivation') },
+  },
   // Special components with custom logic
   {
     path: 'conditional-logic-showcase',
