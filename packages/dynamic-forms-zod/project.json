@@ -1,0 +1,47 @@
+{
+  "name": "dynamic-forms-zod",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/dynamic-forms-zod/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "manifestRootsToUpdate": ["{projectRoot}", "dist/{projectRoot}"],
+      "currentVersionResolver": "git-tag",
+      "fallbackCurrentVersionResolver": "disk"
+    }
+  },
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/dynamic-forms-zod",
+        "main": "packages/dynamic-forms-zod/src/index.ts",
+        "tsConfig": "packages/dynamic-forms-zod/tsconfig.lib.json",
+        "assets": [],
+        "additionalEntryPoints": [
+          "packages/dynamic-forms-zod/material/src/index.ts",
+          "packages/dynamic-forms-zod/bootstrap/src/index.ts",
+          "packages/dynamic-forms-zod/primeng/src/index.ts",
+          "packages/dynamic-forms-zod/ionic/src/index.ts",
+          "packages/dynamic-forms-zod/mcp/src/index.ts"
+        ]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "packages/dynamic-forms-zod/vitest.config.mts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}
