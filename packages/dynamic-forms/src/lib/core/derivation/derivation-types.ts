@@ -109,72 +109,18 @@ export interface DerivationEntry {
 /**
  * Collection of all derivation entries from a form's field definitions.
  *
+ * This interface is intentionally minimal - it contains only the core data.
+ * Lookup maps are provided via {@link DerivationLookup} which computes
+ * them lazily on demand.
+ *
  * @public
  */
 export interface DerivationCollection {
   /**
-   * All derivation entries collected from field definitions.
+   * All derivation entries collected from field definitions,
+   * sorted in topological order for efficient processing.
    */
   entries: DerivationEntry[];
-
-  /**
-   * Map of target field key to entries that modify it.
-   *
-   * Used for quick lookup when processing derivations.
-   */
-  byTarget: Map<string, DerivationEntry[]>;
-
-  /**
-   * Map of source field key to entries defined on it.
-   *
-   * Used for finding derivations when a field's value changes.
-   */
-  bySource: Map<string, DerivationEntry[]>;
-
-  /**
-   * Map of dependency field key to entries that depend on it.
-   *
-   * Used for efficient O(1) lookup when filtering by changed fields.
-   * A derivation entry appears in this map for each field in its dependsOn array.
-   */
-  byDependency: Map<string, DerivationEntry[]>;
-
-  /**
-   * Map of array path to entries that derive array item values.
-   *
-   * Used for O(1) lookup when an array field changes.
-   * Key is the array field path (e.g., "items" or "orders.lineItems").
-   * Entries have targets like "items.$.quantity" or "orders.lineItems.$.total".
-   */
-  byArrayPath: Map<string, DerivationEntry[]>;
-
-  /**
-   * Entries that have wildcard (*) dependency.
-   *
-   * These entries depend on all form values and must always be considered.
-   * Stored separately to avoid scanning all entries for wildcards.
-   */
-  wildcardEntries: DerivationEntry[];
-
-  /**
-   * Pre-computed collection containing only onChange entries.
-   *
-   * Cached at collection time for efficient access without runtime filtering.
-   * Created by `precomputeCachedCollections`.
-   *
-   * @internal
-   */
-  onChangeCollection?: DerivationCollection;
-
-  /**
-   * Pre-computed collections for debounced entries, keyed by debounce duration.
-   *
-   * Cached at collection time for efficient access without runtime filtering.
-   * Created by `precomputeCachedCollections`.
-   *
-   * @internal
-   */
-  debouncedCollectionsByMs?: Map<number, DerivationCollection>;
 }
 
 /**
@@ -241,14 +187,7 @@ export interface DerivationChainContext {
  * @internal
  */
 export function createEmptyDerivationCollection(): DerivationCollection {
-  return {
-    entries: [],
-    byTarget: new Map(),
-    bySource: new Map(),
-    byDependency: new Map(),
-    byArrayPath: new Map(),
-    wildcardEntries: [],
-  };
+  return { entries: [] };
 }
 
 /**

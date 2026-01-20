@@ -118,9 +118,8 @@ export function applyDerivations(
   let skippedCount = 0;
   let errorCount = 0;
 
-  // Filter entries based on changed fields using O(k) lookup via bySource map
-  // where k = number of changed fields (much faster than O(n*m) filter)
-  const entriesToProcess = changedFields ? getEntriesForChangedFields(collection, changedFields) : collection.entries;
+  // Filter entries based on changed fields
+  const entriesToProcess = changedFields ? getEntriesForChangedFields(collection.entries, changedFields) : collection.entries;
 
   // Log cycle start in verbose mode
   derivationLogger.cycleStart('onChange', entriesToProcess.length);
@@ -171,38 +170,24 @@ export function applyDerivations(
 /**
  * Gets entries that should be processed based on changed fields.
  *
- * Uses O(k) lookup via indexed maps instead of O(n*m) filter,
- * where k = number of changed fields, n = total entries, m = avg deps per entry.
+ * Filters entries by checking if any of their dependencies are in the changed fields set.
+ * Also includes all wildcard (*) entries since they depend on any form change.
+ *
+ * Note: For optimal O(k) performance where k = changed fields count, use
+ * DerivationLookup.getEntriesForChangedFields() which uses pre-built indexes.
  *
  * @internal
  */
-function getEntriesForChangedFields(collection: DerivationCollection, changedFields: Set<string>): DerivationEntry[] {
-  const entrySet = new Set<DerivationEntry>();
-
-  // Add entries triggered by each changed field via byDependency map
-  for (const fieldKey of changedFields) {
-    const entries = collection.byDependency.get(fieldKey);
-    if (entries) {
-      for (const entry of entries) {
-        entrySet.add(entry);
-      }
+function getEntriesForChangedFields(entries: DerivationEntry[], changedFields: Set<string>): DerivationEntry[] {
+  return entries.filter((entry) => {
+    // Wildcard entries are always included
+    if (entry.dependsOn.includes('*')) {
+      return true;
     }
 
-    // Check if this changed field is an array path - O(1) lookup
-    const arrayEntries = collection.byArrayPath.get(fieldKey);
-    if (arrayEntries) {
-      for (const entry of arrayEntries) {
-        entrySet.add(entry);
-      }
-    }
-  }
-
-  // Add all wildcard entries - O(w) where w = number of wildcard entries
-  for (const entry of collection.wildcardEntries) {
-    entrySet.add(entry);
-  }
-
-  return Array.from(entrySet);
+    // Check if any dependency is in changed fields
+    return entry.dependsOn.some((dep) => changedFields.has(dep));
+  });
 }
 
 /**
@@ -667,8 +652,7 @@ function warnMissingField(fieldKey: string, logger?: Logger, warningTracker?: De
 /**
  * Processes derivations for a specific trigger type.
  *
- * Use this to filter derivations by trigger (onChange vs debounced).
- * Uses pre-computed cached collections when available for better performance.
+ * Filters entries by trigger type and applies them.
  *
  * @param collection - The collected derivation entries
  * @param trigger - The trigger type to filter by
@@ -684,62 +668,18 @@ export function applyDerivationsForTrigger(
   context: DerivationApplicatorContext,
   changedFields?: Set<string>,
 ): DerivationProcessingResult {
-  // Use pre-computed cached collection if available (avoids runtime filtering/map rebuilding)
-  if (trigger === 'onChange' && collection.onChangeCollection) {
-    return applyDerivations(collection.onChangeCollection, context, changedFields);
-  }
+  // Filter entries by trigger type
+  const filteredEntries = collection.entries.filter((entry) => {
+    if (trigger === 'onChange') {
+      return !entry.trigger || entry.trigger === 'onChange';
+    }
+    return entry.trigger === trigger;
+  });
 
-  // Fallback to runtime filtering for edge cases or when cache is not available
+  // Create a minimal collection with filtered entries
   const filteredCollection: DerivationCollection = {
-    entries: collection.entries.filter((entry) => {
-      if (trigger === 'onChange') {
-        return !entry.trigger || entry.trigger === 'onChange';
-      }
-      return entry.trigger === trigger;
-    }),
-    byTarget: new Map(),
-    bySource: new Map(),
-    byDependency: new Map(),
-    byArrayPath: new Map(),
-    wildcardEntries: [],
+    entries: filteredEntries,
   };
-
-  // Rebuild lookup maps for filtered entries
-  for (const entry of filteredCollection.entries) {
-    const targetEntries = filteredCollection.byTarget.get(entry.targetFieldKey) ?? [];
-    targetEntries.push(entry);
-    filteredCollection.byTarget.set(entry.targetFieldKey, targetEntries);
-
-    const sourceEntries = filteredCollection.bySource.get(entry.sourceFieldKey) ?? [];
-    sourceEntries.push(entry);
-    filteredCollection.bySource.set(entry.sourceFieldKey, sourceEntries);
-
-    // Build byDependency map and track wildcards
-    let hasWildcard = false;
-    for (const dep of entry.dependsOn) {
-      if (dep === '*') {
-        hasWildcard = true;
-      } else {
-        const depEntries = filteredCollection.byDependency.get(dep) ?? [];
-        depEntries.push(entry);
-        filteredCollection.byDependency.set(dep, depEntries);
-      }
-    }
-
-    if (hasWildcard) {
-      filteredCollection.wildcardEntries.push(entry);
-    }
-
-    // Build byArrayPath map
-    if (isArrayPlaceholderPath(entry.targetFieldKey)) {
-      const arrayPath = parseArrayPath(entry.targetFieldKey).arrayPath;
-      if (arrayPath) {
-        const arrayEntries = filteredCollection.byArrayPath.get(arrayPath) ?? [];
-        arrayEntries.push(entry);
-        filteredCollection.byArrayPath.set(arrayPath, arrayEntries);
-      }
-    }
-  }
 
   return applyDerivations(filteredCollection, context, changedFields);
 }

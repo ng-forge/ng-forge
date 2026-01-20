@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { signal, WritableSignal } from '@angular/core';
 import { applyDerivations, applyDerivationsForTrigger, DerivationApplicatorContext } from './derivation-applicator';
-import { DerivationCollection, DerivationEntry, createEmptyDerivationCollection } from './derivation-types';
+import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { DerivationLogger } from './derivation-logger.service';
 
@@ -86,45 +86,7 @@ describe('derivation-applicator', () => {
    * Helper to create a collection from entries.
    */
   function createCollection(entries: DerivationEntry[]): DerivationCollection {
-    const collection = createEmptyDerivationCollection();
-    collection.entries = entries;
-
-    // Build lookup maps
-    for (const entry of entries) {
-      const targetEntries = collection.byTarget.get(entry.targetFieldKey) ?? [];
-      targetEntries.push(entry);
-      collection.byTarget.set(entry.targetFieldKey, targetEntries);
-
-      const sourceEntries = collection.bySource.get(entry.sourceFieldKey) ?? [];
-      sourceEntries.push(entry);
-      collection.bySource.set(entry.sourceFieldKey, sourceEntries);
-
-      // Build byDependency map and track wildcards
-      let hasWildcard = false;
-      for (const dep of entry.dependsOn) {
-        if (dep === '*') {
-          hasWildcard = true;
-        } else {
-          const depEntries = collection.byDependency.get(dep) ?? [];
-          depEntries.push(entry);
-          collection.byDependency.set(dep, depEntries);
-        }
-      }
-
-      if (hasWildcard) {
-        collection.wildcardEntries.push(entry);
-      }
-
-      // Handle array paths
-      if (entry.targetFieldKey.includes('.$.')) {
-        const arrayPath = entry.targetFieldKey.split('.$.')[0];
-        const arrayEntries = collection.byArrayPath.get(arrayPath) ?? [];
-        arrayEntries.push(entry);
-        collection.byArrayPath.set(arrayPath, arrayEntries);
-      }
-    }
-
-    return collection;
+    return { entries };
   }
 
   describe('applyDerivations', () => {

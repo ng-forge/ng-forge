@@ -91,6 +91,29 @@ ng-forge is a type-safe, UI-agnostic dynamic forms library for Angular 21+ that 
 - Troubleshooting releases
 - Best practices
 
+### 7. [Roadmap](./07-roadmap.md)
+
+**Topics Covered:**
+
+- Future development plans
+- Planned features and improvements
+- Version milestones
+
+### 8. [Derivation System](./08-derivation-system.md)
+
+**Topics Covered:**
+
+- Derivation system architecture overview
+- Key components (collector, validator, sorter, cache, orchestrator, applicator)
+- Data flow from collection to runtime processing
+- DerivationEntry and DerivationCollection structures
+- Dependency extraction (automatic and explicit)
+- Array field derivations with `$` placeholder
+- Loop prevention mechanisms (cycle detection, chain tracking, equality checks, max iterations)
+- Performance optimizations (topological sorting, caching, indexed lookups)
+- Debugging with verbose logging
+- Common issues and troubleshooting
+
 ## Quick Reference
 
 ### Common Tasks
@@ -109,6 +132,10 @@ ng-forge is a type-safe, UI-agnostic dynamic forms library for Angular 21+ that 
 | Testing validation                     | [Testing Guide](./05-testing-guide.md)                         | Testing Validation         |
 | Releasing a new version                | [Release Process](./06-release-process.md)                     | Release Workflow           |
 | Creating a hotfix release              | [Release Process](./06-release-process.md)                     | Hotfix Workflow            |
+| Understanding derivation flow          | [Derivation System](./08-derivation-system.md)                 | Data Flow                  |
+| Debugging derivations                  | [Derivation System](./08-derivation-system.md)                 | Debugging                  |
+| Array field derivations                | [Derivation System](./08-derivation-system.md)                 | Array Field Derivations    |
+| Loop prevention mechanisms             | [Derivation System](./08-derivation-system.md)                 | Loop Prevention            |
 
 ### Key Concepts
 

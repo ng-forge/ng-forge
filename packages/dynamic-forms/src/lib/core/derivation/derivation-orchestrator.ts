@@ -2,6 +2,7 @@ import { computed, DestroyRef, inject, InjectionToken, Injector, isDevMode, Sign
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FieldTree } from '@angular/forms/signals';
 import {
+  auditTime,
   combineLatestWith,
   debounceTime,
   exhaustMap,
@@ -10,22 +11,21 @@ import {
   merge,
   of,
   pairwise,
+  queueScheduler,
   scheduled,
   startWith,
   switchMap,
   timer,
 } from 'rxjs';
-import { queueScheduler } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { getChangedKeys } from '../../utils/object-utils';
 import { FunctionRegistryService } from '../registry';
 import { applyDerivationsForTrigger } from './derivation-applicator';
-import { getDebouncedCollection, getDebouncePeriods } from './derivation-cache';
 import { collectDerivations } from './derivation-collector';
-import { DerivationCollection } from './derivation-types';
 import { validateNoCycles } from './cycle-detector';
+import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
 import { DERIVATION_WARNING_TRACKER } from './derivation-warning-tracker';
 
@@ -92,7 +92,7 @@ export class DerivationOrchestrator {
       }
 
       validateNoCycles(collection, this.logger);
-      this.warnAboutWildcardDependencies(collection);
+      this.warnAboutWildcardDependencies(collection.entries, fields.length);
 
       return collection;
     });
@@ -110,10 +110,25 @@ export class DerivationOrchestrator {
       .pipe(
         filter((collection): collection is DerivationCollection => collection !== null),
         combineLatestWith(formValue$, form$),
+
+        // auditTime(0): Batch synchronous emissions from Angular's change detection.
+        // When a single user action triggers multiple signal updates, this ensures
+        // we only process derivations once after all updates complete (microtask timing).
+        auditTime(0),
+
+        // exhaustMap: Prevents re-entry while processing derivations.
+        // If form value changes DURING derivation processing (from our own setValue calls),
+        // we ignore those emissions and complete the current cycle first.
+        // switchMap would cancel mid-processing, causing incomplete derivation chains.
         exhaustMap(([collection, , formAccessor]) => {
           this.applyOnChangeDerivations(collection, formAccessor);
+
+          // scheduled with queueScheduler: Ensures the observable completes
+          // in the next microtask, allowing exhaustMap to accept new emissions.
+          // Without this, exhaustMap would block indefinitely.
           return scheduled([null], queueScheduler);
         }),
+
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe();
@@ -122,7 +137,12 @@ export class DerivationOrchestrator {
   private setupDebouncedStream(): void {
     toObservable(this.config.formValue, { injector: this.injector })
       .pipe(
+        // debounceTime: Wait for value to stabilize before detecting changes.
+        // Uses DEFAULT_DEBOUNCE_MS as the minimum debounce period.
         debounceTime(DEFAULT_DEBOUNCE_MS),
+
+        // startWith + pairwise: Track previous and current values to detect changes.
+        // startWith(null) ensures pairwise has an initial value to pair with.
         startWith(null as Record<string, unknown> | null),
         pairwise(),
         filter((pair): pair is [Record<string, unknown> | null, Record<string, unknown>] => pair[1] !== null),
@@ -131,21 +151,29 @@ export class DerivationOrchestrator {
           changedFields: getChangedKeys(previous, current),
         })),
         filter(({ changedFields }) => changedFields.size > 0),
+
+        // switchMap: For debounced derivations, it's OK to cancel pending work
+        // if new changes come in - we want the latest debounced values.
+        // (Unlike onChange which uses exhaustMap to prevent cancellation)
         switchMap(({ changedFields }) => {
           const collection = untracked(() => this.derivationCollection());
           const formAccessor = untracked(() => this.config.form());
 
           if (!collection || !formAccessor) return of(null);
 
-          const debouncePeriods = getDebouncePeriods(collection);
+          // Get unique debounce periods from entries with trigger 'debounced'
+          const debouncePeriods = this.getDebouncePeriods(collection.entries);
           if (debouncePeriods.length === 0) return of(null);
 
+          // merge: Process multiple debounce periods concurrently.
+          // Each period stream handles its own timing independently.
           const periodStreams = debouncePeriods.map((debounceMs) =>
             this.createPeriodStream(debounceMs, collection, formAccessor, changedFields),
           );
 
           return merge(...periodStreams);
         }),
+
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe();
@@ -206,10 +234,19 @@ export class DerivationOrchestrator {
     formAccessor: FieldTree<unknown>,
     changedFields?: Set<string>,
   ): void {
-    const cachedCollection = getDebouncedCollection(collection, debounceMs);
-    if (!cachedCollection || cachedCollection.entries.length === 0) {
+    // Filter entries to just those with the specific debounce period
+    const debouncedEntries = collection.entries.filter(
+      (entry) => entry.trigger === 'debounced' && (entry.debounceMs ?? DEFAULT_DEBOUNCE_MS) === debounceMs,
+    );
+
+    if (debouncedEntries.length === 0) {
       return;
     }
+
+    // Create a minimal collection with filtered entries
+    const filteredCollection: DerivationCollection = {
+      entries: debouncedEntries,
+    };
 
     const applicatorContext = {
       formValue: this.config.formValue,
@@ -221,7 +258,7 @@ export class DerivationOrchestrator {
       derivationLogger: untracked(() => this.config.derivationLogger()),
     };
 
-    const result = applyDerivationsForTrigger(cachedCollection, 'debounced', applicatorContext, changedFields);
+    const result = applyDerivationsForTrigger(filteredCollection, 'debounced', applicatorContext, changedFields);
 
     if (result.maxIterationsReached) {
       this.logger.warn(
@@ -231,12 +268,27 @@ export class DerivationOrchestrator {
     }
   }
 
-  private warnAboutWildcardDependencies(collection: DerivationCollection): void {
+  /**
+   * Gets all unique debounce periods from entries with trigger 'debounced'.
+   */
+  private getDebouncePeriods(entries: DerivationEntry[]): number[] {
+    const periods = new Set<number>();
+    for (const entry of entries) {
+      if (entry.trigger === 'debounced') {
+        periods.add(entry.debounceMs ?? DEFAULT_DEBOUNCE_MS);
+      }
+    }
+    return Array.from(periods);
+  }
+
+  private warnAboutWildcardDependencies(entries: DerivationEntry[], fieldCount: number): void {
     if (!isDevMode()) return;
 
-    const wildcardEntries = collection.wildcardEntries;
+    // Find entries with wildcard dependency
+    const wildcardEntries = entries.filter((entry) => entry.dependsOn.includes('*'));
     if (wildcardEntries.length === 0) return;
 
+    // Find implicit wildcards (custom functions without explicit dependsOn)
     const implicitWildcards = wildcardEntries.filter(
       (entry) => entry.functionName && (!entry.originalConfig?.dependsOn || entry.originalConfig.dependsOn.length === 0),
     );
@@ -246,7 +298,7 @@ export class DerivationOrchestrator {
 
       this.logger.warn(
         '[Derivation] Derivations using custom functions without explicit dependsOn detected. ' +
-          'These run on EVERY form change, which may impact performance in large forms. ' +
+          `These run on EVERY form change, which may impact performance (form has ${fieldCount} fields). ` +
           'Consider specifying explicit dependsOn arrays for better performance.',
         derivationDescs,
       );

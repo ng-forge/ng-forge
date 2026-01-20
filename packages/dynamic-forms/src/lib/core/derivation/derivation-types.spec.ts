@@ -9,14 +9,10 @@ import {
 
 describe('derivation-types', () => {
   describe('createEmptyDerivationCollection', () => {
-    it('should create an empty collection with empty arrays and maps', () => {
+    it('should create an empty collection with empty entries array', () => {
       const collection = createEmptyDerivationCollection();
 
       expect(collection.entries).toEqual([]);
-      expect(collection.byTarget).toBeInstanceOf(Map);
-      expect(collection.byTarget.size).toBe(0);
-      expect(collection.bySource).toBeInstanceOf(Map);
-      expect(collection.bySource.size).toBe(0);
     });
 
     it('should create independent instances each time', () => {

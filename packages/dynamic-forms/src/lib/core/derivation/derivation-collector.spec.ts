@@ -248,44 +248,6 @@ describe('derivation-collector', () => {
       });
     });
 
-    describe('lookup maps', () => {
-      it('should build byTarget lookup map', () => {
-        const fields: FieldDef<unknown>[] = [
-          {
-            key: 'source1',
-            type: 'text',
-            logic: [{ type: 'derivation', targetField: 'target1', value: 'a' }],
-          } as TextFieldDef,
-          {
-            key: 'source2',
-            type: 'text',
-            logic: [{ type: 'derivation', targetField: 'target1', value: 'b' }],
-          } as TextFieldDef,
-        ];
-
-        const collection = collectDerivations(fields);
-
-        expect(collection.byTarget.get('target1')?.length).toBe(2);
-      });
-
-      it('should build bySource lookup map', () => {
-        const fields: FieldDef<unknown>[] = [
-          {
-            key: 'source1',
-            type: 'text',
-            logic: [
-              { type: 'derivation', targetField: 'target1', value: 'a' },
-              { type: 'derivation', targetField: 'target2', value: 'b' },
-            ],
-          } as TextFieldDef,
-        ];
-
-        const collection = collectDerivations(fields);
-
-        expect(collection.bySource.get('source1')?.length).toBe(2);
-      });
-    });
-
     describe('edge cases', () => {
       it('should handle empty fields array', () => {
         const collection = collectDerivations([]);

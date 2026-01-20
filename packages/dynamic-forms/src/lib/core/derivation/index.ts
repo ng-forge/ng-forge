@@ -9,17 +9,20 @@ export type {
 
 export { createEmptyDerivationCollection, createDerivationChainContext, createDerivationKey, parseDerivationKey } from './derivation-types';
 
+// Tokens
+export { DERIVATION_ENTRIES } from './derivation-tokens';
+
+// Lookup
+export { DerivationLookup } from './derivation-lookup';
+
 // Collector
 export { collectDerivations } from './derivation-collector';
-
-// Cache
-export { precomputeCachedCollections, getOnChangeCollection, getDebouncedCollection, getDebouncePeriods } from './derivation-cache';
 
 // Cycle detection
 export { detectCycles, validateNoCycles } from './cycle-detector';
 
 // Sorter
-export { topologicalSort, createSortedCollection } from './derivation-sorter';
+export { topologicalSort } from './derivation-sorter';
 
 // Applicator
 export type { DerivationApplicatorContext } from './derivation-applicator';

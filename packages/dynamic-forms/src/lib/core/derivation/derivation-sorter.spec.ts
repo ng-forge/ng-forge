@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { topologicalSort, createSortedCollection } from './derivation-sorter';
-import { DerivationCollection, DerivationEntry, createEmptyDerivationCollection } from './derivation-types';
+import { topologicalSort } from './derivation-sorter';
+import { DerivationEntry } from './derivation-types';
 
 describe('derivation-sorter', () => {
   /**
@@ -17,69 +17,22 @@ describe('derivation-sorter', () => {
     };
   }
 
-  /**
-   * Helper to create a collection from entries.
-   */
-  function createCollection(entries: DerivationEntry[]): DerivationCollection {
-    const collection = createEmptyDerivationCollection();
-    collection.entries = entries;
-
-    // Build lookup maps
-    for (const entry of entries) {
-      const targetEntries = collection.byTarget.get(entry.targetFieldKey) ?? [];
-      targetEntries.push(entry);
-      collection.byTarget.set(entry.targetFieldKey, targetEntries);
-
-      const sourceEntries = collection.bySource.get(entry.sourceFieldKey) ?? [];
-      sourceEntries.push(entry);
-      collection.bySource.set(entry.sourceFieldKey, sourceEntries);
-
-      let hasWildcard = false;
-      for (const dep of entry.dependsOn) {
-        if (dep === '*') {
-          hasWildcard = true;
-        } else {
-          const depEntries = collection.byDependency.get(dep) ?? [];
-          depEntries.push(entry);
-          collection.byDependency.set(dep, depEntries);
-        }
-      }
-
-      if (hasWildcard) {
-        collection.wildcardEntries.push(entry);
-      }
-
-      // Handle array paths
-      if (entry.targetFieldKey.includes('.$.')) {
-        const arrayPath = entry.targetFieldKey.split('.$.')[0];
-        const arrayEntries = collection.byArrayPath.get(arrayPath) ?? [];
-        arrayEntries.push(entry);
-        collection.byArrayPath.set(arrayPath, arrayEntries);
-      }
-    }
-
-    return collection;
-  }
-
   describe('topologicalSort', () => {
-    it('should return empty array for empty collection', () => {
-      const collection = createCollection([]);
-      const result = topologicalSort(collection);
+    it('should return empty array for empty entries', () => {
+      const result = topologicalSort([]);
       expect(result).toEqual([]);
     });
 
     it('should return single entry unchanged', () => {
       const entry = createEntry('a', 'b');
-      const collection = createCollection([entry]);
-      const result = topologicalSort(collection);
+      const result = topologicalSort([entry]);
       expect(result).toEqual([entry]);
     });
 
     it('should sort independent derivations (no change needed)', () => {
       const entry1 = createEntry('a', 'b');
       const entry2 = createEntry('c', 'd');
-      const collection = createCollection([entry1, entry2]);
-      const result = topologicalSort(collection);
+      const result = topologicalSort([entry1, entry2]);
 
       // Both are independent, order should be preserved
       expect(result).toContain(entry1);
@@ -90,9 +43,8 @@ describe('derivation-sorter', () => {
       // Chain: a -> b -> c
       const entry1 = createEntry('a', 'b', ['a']); // a produces b
       const entry2 = createEntry('b', 'c', ['b']); // b produces c (depends on b)
-      const collection = createCollection([entry2, entry1]); // Wrong order in input
 
-      const result = topologicalSort(collection);
+      const result = topologicalSort([entry2, entry1]); // Wrong order in input
 
       // entry1 (a->b) should come before entry2 (b->c)
       expect(result.indexOf(entry1)).toBeLessThan(result.indexOf(entry2));
@@ -106,8 +58,7 @@ describe('derivation-sorter', () => {
       const entry4 = createEntry('c', 'd', ['c']); // c produces d (also)
 
       // Mix up the order
-      const collection = createCollection([entry4, entry3, entry2, entry1]);
-      const result = topologicalSort(collection);
+      const result = topologicalSort([entry4, entry3, entry2, entry1]);
 
       // entry1 and entry2 should come before entry3 and entry4
       expect(result.indexOf(entry1)).toBeLessThan(result.indexOf(entry3));
@@ -122,8 +73,7 @@ describe('derivation-sorter', () => {
       const entry2 = createEntry('price', 'subtotal', ['price']); // Also targets subtotal
       const entry3 = createEntry('subtotal', 'total', ['subtotal']); // Depends on subtotal
 
-      const collection = createCollection([entry3, entry1, entry2]);
-      const result = topologicalSort(collection);
+      const result = topologicalSort([entry3, entry1, entry2]);
 
       // entry3 should come after entry1 and entry2
       expect(result.indexOf(entry1)).toBeLessThan(result.indexOf(entry3));
@@ -135,8 +85,7 @@ describe('derivation-sorter', () => {
       const entry2 = createEntry('*', 'c', ['*']); // Wildcard - depends on everything
       const entry3 = createEntry('d', 'e', ['d']);
 
-      const collection = createCollection([entry2, entry1, entry3]);
-      const result = topologicalSort(collection);
+      const result = topologicalSort([entry2, entry1, entry3]);
 
       // entry2 (wildcard) should come after entry1 and entry3
       expect(result.indexOf(entry1)).toBeLessThan(result.indexOf(entry2));
@@ -148,36 +97,12 @@ describe('derivation-sorter', () => {
       const entry1 = createEntry('a', 'b', ['a']);
       const entry2 = createEntry('b', 'a', ['b']);
 
-      const collection = createCollection([entry1, entry2]);
-      const result = topologicalSort(collection);
+      const result = topologicalSort([entry1, entry2]);
 
       // Both should be in result (order may vary due to cycle)
       expect(result).toContain(entry1);
       expect(result).toContain(entry2);
       expect(result.length).toBe(2);
-    });
-  });
-
-  describe('createSortedCollection', () => {
-    it('should return new collection with sorted entries', () => {
-      const entry1 = createEntry('a', 'b', ['a']);
-      const entry2 = createEntry('b', 'c', ['b']);
-      const collection = createCollection([entry2, entry1]);
-
-      const sorted = createSortedCollection(collection);
-
-      // Should be a new collection object
-      expect(sorted).not.toBe(collection);
-
-      // Entries should be sorted
-      expect(sorted.entries.indexOf(entry1)).toBeLessThan(sorted.entries.indexOf(entry2));
-
-      // All lookup maps should be preserved
-      expect(sorted.byTarget).toBe(collection.byTarget);
-      expect(sorted.bySource).toBe(collection.bySource);
-      expect(sorted.byDependency).toBe(collection.byDependency);
-      expect(sorted.byArrayPath).toBe(collection.byArrayPath);
-      expect(sorted.wildcardEntries).toBe(collection.wildcardEntries);
     });
   });
 });

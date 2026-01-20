@@ -3,11 +3,9 @@ import { FieldWithValidation } from '../../definitions/base/field-with-validatio
 import { DerivationLogicConfig, isDerivationLogicConfig } from '../../models/logic/logic-config';
 import { hasChildFields } from '../../models/types/type-guards';
 import { normalizeFieldsArray } from '../../utils/object-utils';
-import { extractArrayPath, isArrayPlaceholderPath } from '../../utils/path-utils/path-utils';
 import { extractExpressionDependencies, extractStringDependencies } from '../cross-field/cross-field-detector';
-import { precomputeCachedCollections } from './derivation-cache';
 import { topologicalSort } from './derivation-sorter';
-import { DerivationCollection, DerivationEntry, createEmptyDerivationCollection } from './derivation-types';
+import { DerivationCollection, DerivationEntry } from './derivation-types';
 
 /**
  * Context for collecting derivations, tracking the current array path for relative references.
@@ -32,22 +30,21 @@ interface CollectionContext {
  * - Full `logic` array entries with `type: 'derivation'`
  *
  * The collected entries include dependency information for cycle detection
- * and reactive evaluation.
+ * and reactive evaluation. Entries are sorted topologically so derivations
+ * are processed in dependency order.
+ *
+ * Lookup maps (byTarget, byDependency, etc.) are NOT built here - they are
+ * computed lazily via {@link DerivationLookup} to avoid hidden mutation
+ * and reduce the size of the returned collection.
  *
  * @param fields - Array of field definitions to traverse
- * @returns Collection of all derivation entries with lookup maps
+ * @returns Collection containing sorted derivation entries
  *
  * @example
  * ```typescript
  * const fields = [
- *   {
- *     key: 'quantity',
- *     type: 'number',
- *   },
- *   {
- *     key: 'unitPrice',
- *     type: 'number',
- *   },
+ *   { key: 'quantity', type: 'number' },
+ *   { key: 'unitPrice', type: 'number' },
  *   {
  *     key: 'total',
  *     type: 'number',
@@ -62,22 +59,17 @@ interface CollectionContext {
  * @public
  */
 export function collectDerivations(fields: FieldDef<unknown>[]): DerivationCollection {
-  const collection = createEmptyDerivationCollection();
+  const entries: DerivationEntry[] = [];
   const context: CollectionContext = {};
 
-  traverseFields(fields, collection, context);
-  buildLookupMaps(collection);
+  traverseFields(fields, entries, context);
 
-  // Sort entries in topological order for efficient processing
+  // Sort entries in topological order for efficient processing.
   // This ensures derivations are processed in dependency order,
-  // reducing the number of iterations needed in the applicator
-  collection.entries = topologicalSort(collection);
+  // reducing the number of iterations needed in the applicator.
+  const sortedEntries = topologicalSort(entries);
 
-  // Pre-compute cached sub-collections for onChange and debounced entries
-  // This avoids expensive filtering operations at runtime
-  precomputeCachedCollections(collection);
-
-  return collection;
+  return { entries: sortedEntries };
 }
 
 /**
@@ -85,9 +77,9 @@ export function collectDerivations(fields: FieldDef<unknown>[]): DerivationColle
  *
  * @internal
  */
-function traverseFields(fields: FieldDef<unknown>[], collection: DerivationCollection, context: CollectionContext): void {
+function traverseFields(fields: FieldDef<unknown>[], entries: DerivationEntry[], context: CollectionContext): void {
   for (const field of fields) {
-    collectFromField(field, collection, context);
+    collectFromField(field, entries, context);
 
     // Recursively process container fields (page, row, group, array)
     if (hasChildFields(field)) {
@@ -98,7 +90,7 @@ function traverseFields(fields: FieldDef<unknown>[], collection: DerivationColle
         childContext.arrayPath = field.key;
       }
 
-      traverseFields(normalizeFieldsArray(field.fields) as FieldDef<unknown>[], collection, childContext);
+      traverseFields(normalizeFieldsArray(field.fields) as FieldDef<unknown>[], entries, childContext);
     }
   }
 }
@@ -108,7 +100,7 @@ function traverseFields(fields: FieldDef<unknown>[], collection: DerivationColle
  *
  * @internal
  */
-function collectFromField(field: FieldDef<unknown>, collection: DerivationCollection, context: CollectionContext): void {
+function collectFromField(field: FieldDef<unknown>, entries: DerivationEntry[], context: CollectionContext): void {
   const fieldKey = field.key;
   if (!fieldKey) return;
 
@@ -117,7 +109,7 @@ function collectFromField(field: FieldDef<unknown>, collection: DerivationCollec
   // Collect shorthand derivation property
   if (validationField.derivation) {
     const entry = createShorthandEntry(fieldKey, validationField.derivation);
-    collection.entries.push(entry);
+    entries.push(entry);
   }
 
   // Collect logic array derivations
@@ -125,7 +117,7 @@ function collectFromField(field: FieldDef<unknown>, collection: DerivationCollec
     for (const logicConfig of validationField.logic) {
       if (isDerivationLogicConfig(logicConfig)) {
         const entry = createLogicEntry(fieldKey, logicConfig, context);
-        collection.entries.push(entry);
+        entries.push(entry);
       }
     }
   }
@@ -277,51 +269,4 @@ function extractDependencies(config: DerivationLogicConfig): string[] {
   }
 
   return Array.from(deps);
-}
-
-/**
- * Builds lookup maps for quick access to derivation entries.
- *
- * @internal
- */
-function buildLookupMaps(collection: DerivationCollection): void {
-  for (const entry of collection.entries) {
-    // Build byTarget map
-    const targetEntries = collection.byTarget.get(entry.targetFieldKey) ?? [];
-    targetEntries.push(entry);
-    collection.byTarget.set(entry.targetFieldKey, targetEntries);
-
-    // Build bySource map
-    const sourceEntries = collection.bySource.get(entry.sourceFieldKey) ?? [];
-    sourceEntries.push(entry);
-    collection.bySource.set(entry.sourceFieldKey, sourceEntries);
-
-    // Build byDependency map - key by each dependency field
-    // Also track wildcard entries separately
-    let hasWildcard = false;
-    for (const dep of entry.dependsOn) {
-      if (dep === '*') {
-        hasWildcard = true;
-      } else {
-        const depEntries = collection.byDependency.get(dep) ?? [];
-        depEntries.push(entry);
-        collection.byDependency.set(dep, depEntries);
-      }
-    }
-
-    // Add to wildcardEntries if has * dependency
-    if (hasWildcard) {
-      collection.wildcardEntries.push(entry);
-    }
-
-    // Build byArrayPath map for array derivations
-    if (isArrayPlaceholderPath(entry.targetFieldKey)) {
-      const arrayPath = extractArrayPath(entry.targetFieldKey);
-      if (arrayPath) {
-        const arrayEntries = collection.byArrayPath.get(arrayPath) ?? [];
-        arrayEntries.push(entry);
-        collection.byArrayPath.set(arrayPath, arrayEntries);
-      }
-    }
-  }
 }

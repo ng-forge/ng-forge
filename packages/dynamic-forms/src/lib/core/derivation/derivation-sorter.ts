@@ -1,4 +1,4 @@
-import { DerivationCollection, DerivationEntry } from './derivation-types';
+import { DerivationEntry } from './derivation-types';
 
 /**
  * Sorts derivation entries in topological order based on their dependencies.
@@ -10,7 +10,7 @@ import { DerivationCollection, DerivationEntry } from './derivation-types';
  * Uses Kahn's algorithm for topological sorting, which also provides
  * natural handling of entries with no dependencies (they come first).
  *
- * @param collection - The derivation collection to sort
+ * @param entries - The derivation entries to sort
  * @returns A new array of entries in topological order
  *
  * @example
@@ -21,16 +21,14 @@ import { DerivationCollection, DerivationEntry } from './derivation-types';
  * // 3. lineTotal -> grandTotal (depends on lineTotal)
  * //
  * // Topological sort ensures lineTotal is computed before grandTotal
- * const sorted = topologicalSort(collection);
+ * const sorted = topologicalSort(entries);
  * // Result: [1, 2, 3] - derivations that produce lineTotal come before
  * // those that consume it
  * ```
  *
  * @public
  */
-export function topologicalSort(collection: DerivationCollection): DerivationEntry[] {
-  const entries = collection.entries;
-
+export function topologicalSort(entries: DerivationEntry[]): DerivationEntry[] {
   if (entries.length <= 1) {
     return [...entries];
   }
@@ -148,28 +146,4 @@ export function topologicalSort(collection: DerivationCollection): DerivationEnt
   }
 
   return sorted;
-}
-
-/**
- * Creates a sorted derivation collection.
- *
- * Returns a new collection with entries in topological order.
- * All lookup maps are preserved from the original collection.
- *
- * @param collection - The original derivation collection
- * @returns A new collection with sorted entries
- *
- * @public
- */
-export function createSortedCollection(collection: DerivationCollection): DerivationCollection {
-  const sortedEntries = topologicalSort(collection);
-
-  return {
-    entries: sortedEntries,
-    byTarget: collection.byTarget,
-    bySource: collection.bySource,
-    byDependency: collection.byDependency,
-    byArrayPath: collection.byArrayPath,
-    wildcardEntries: collection.wildcardEntries,
-  };
 }
