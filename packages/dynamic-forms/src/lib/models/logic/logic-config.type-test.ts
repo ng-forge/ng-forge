@@ -3,7 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { ConditionalExpression } from '../expressions/conditional-expression';
-import type { LogicConfig, FormStateCondition } from './logic-config';
+import type { LogicConfig, FormStateCondition, StateLogicConfig, DerivationLogicConfig, DerivationTrigger } from './logic-config';
 import { isFormStateCondition } from './logic-config';
 import type { RequiredKeys } from '@ng-forge/utils';
 
@@ -33,47 +33,129 @@ describe('FormStateCondition - Type Tests', () => {
 });
 
 // ============================================================================
-// LogicConfig - Whitelist Test
+// StateLogicConfig - Whitelist Test
 // ============================================================================
 
-describe('LogicConfig - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'type' | 'condition';
-  type ActualKeys = keyof LogicConfig;
+describe('StateLogicConfig - Exhaustive Whitelist', () => {
+  type ExpectedKeys = 'type' | 'condition' | 'trigger' | 'debounceMs';
+  type ActualKeys = keyof StateLogicConfig;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
   });
 
   describe('required keys', () => {
-    it('should have type and condition as required', () => {
-      expectTypeOf<RequiredKeys<LogicConfig>>().toEqualTypeOf<'type' | 'condition'>();
+    // Note: trigger is required in DebouncedStateLogicConfig variant,
+    // which makes it appear in RequiredKeys for the union type
+    it('should have type, condition, and trigger as required', () => {
+      expectTypeOf<RequiredKeys<StateLogicConfig>>().toEqualTypeOf<'type' | 'condition' | 'trigger'>();
     });
   });
 });
 
 // ============================================================================
-// LogicConfig - Property Types
+// StateLogicConfig - Property Types
 // ============================================================================
 
-describe('LogicConfig - Property Types', () => {
+describe('StateLogicConfig - Property Types', () => {
   it('type should be literal union', () => {
-    expectTypeOf<LogicConfig['type']>().toEqualTypeOf<'hidden' | 'readonly' | 'disabled' | 'required'>();
+    expectTypeOf<StateLogicConfig['type']>().toEqualTypeOf<'hidden' | 'readonly' | 'disabled' | 'required'>();
   });
 
   it('condition should accept ConditionalExpression', () => {
-    expectTypeOf<ConditionalExpression>().toMatchTypeOf<LogicConfig['condition']>();
+    expectTypeOf<ConditionalExpression>().toMatchTypeOf<StateLogicConfig['condition']>();
   });
 
   it('condition should accept boolean', () => {
-    expectTypeOf<boolean>().toMatchTypeOf<LogicConfig['condition']>();
+    expectTypeOf<boolean>().toMatchTypeOf<StateLogicConfig['condition']>();
   });
 
   it('condition should accept FormStateCondition', () => {
-    expectTypeOf<FormStateCondition>().toMatchTypeOf<LogicConfig['condition']>();
+    expectTypeOf<FormStateCondition>().toMatchTypeOf<StateLogicConfig['condition']>();
   });
 
   it('condition should be union of all condition types', () => {
-    expectTypeOf<LogicConfig['condition']>().toEqualTypeOf<ConditionalExpression | boolean | FormStateCondition>();
+    expectTypeOf<StateLogicConfig['condition']>().toEqualTypeOf<ConditionalExpression | boolean | FormStateCondition>();
+  });
+});
+
+// ============================================================================
+// DerivationLogicConfig - Whitelist Test
+// ============================================================================
+
+describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
+  type ExpectedKeys =
+    | 'type'
+    | 'targetField'
+    | 'condition'
+    | 'value'
+    | 'expression'
+    | 'functionName'
+    | 'trigger'
+    | 'debounceMs'
+    | 'debugName'
+    | 'dependsOn';
+  type ActualKeys = keyof DerivationLogicConfig;
+
+  it('should have exactly the expected keys', () => {
+    expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
+  });
+
+  describe('required keys', () => {
+    // Note: trigger is required in DebouncedDerivationLogicConfig variant,
+    // which makes it appear in RequiredKeys for the union type
+    it('should have type, targetField, and trigger as required', () => {
+      expectTypeOf<RequiredKeys<DerivationLogicConfig>>().toEqualTypeOf<'type' | 'targetField' | 'trigger'>();
+    });
+  });
+});
+
+// ============================================================================
+// DerivationLogicConfig - Property Types
+// ============================================================================
+
+describe('DerivationLogicConfig - Property Types', () => {
+  it('type should be literal derivation', () => {
+    expectTypeOf<DerivationLogicConfig['type']>().toEqualTypeOf<'derivation'>();
+  });
+
+  it('targetField should be string', () => {
+    expectTypeOf<DerivationLogicConfig['targetField']>().toEqualTypeOf<string>();
+  });
+
+  it('condition should be optional', () => {
+    expectTypeOf<DerivationLogicConfig['condition']>().toEqualTypeOf<ConditionalExpression | boolean | undefined>();
+  });
+
+  it('value should be unknown', () => {
+    expectTypeOf<DerivationLogicConfig['value']>().toEqualTypeOf<unknown>();
+  });
+
+  it('expression should be string or undefined', () => {
+    expectTypeOf<DerivationLogicConfig['expression']>().toEqualTypeOf<string | undefined>();
+  });
+
+  it('functionName should be string or undefined', () => {
+    expectTypeOf<DerivationLogicConfig['functionName']>().toEqualTypeOf<string | undefined>();
+  });
+
+  it('trigger should be DerivationTrigger or undefined', () => {
+    expectTypeOf<DerivationLogicConfig['trigger']>().toEqualTypeOf<DerivationTrigger | undefined>();
+  });
+});
+
+// ============================================================================
+// LogicConfig - Union Type
+// ============================================================================
+
+describe('LogicConfig - Union Type', () => {
+  it('should be union of StateLogicConfig and DerivationLogicConfig', () => {
+    expectTypeOf<StateLogicConfig>().toMatchTypeOf<LogicConfig>();
+    expectTypeOf<DerivationLogicConfig>().toMatchTypeOf<LogicConfig>();
+  });
+
+  it('type should include all logic types', () => {
+    expectTypeOf<LogicConfig['type']>().toEqualTypeOf<'hidden' | 'readonly' | 'disabled' | 'required' | 'derivation'>();
   });
 });
 

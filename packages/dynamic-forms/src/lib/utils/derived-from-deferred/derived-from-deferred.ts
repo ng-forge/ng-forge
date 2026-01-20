@@ -3,6 +3,22 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, defer, Observable, OperatorFunction } from 'rxjs';
 
 /**
+ * Type guard to check if a value is an array of Signals.
+ * @internal
+ */
+function isSignalArray(value: unknown): value is readonly Signal<unknown>[] {
+  return Array.isArray(value) && value.every((item) => isSignal(item));
+}
+
+/**
+ * Type guard to check if a value is a record (object) of Signals.
+ * @internal
+ */
+function isSignalRecord(value: unknown): value is Record<string, Signal<unknown>> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && Object.values(value).every((item) => isSignal(item));
+}
+
+/**
  * Options for derivedFromDeferred.
  */
 export interface DerivedFromDeferredOptions<R> {
@@ -28,20 +44,6 @@ type SignalValues<T extends readonly Signal<unknown>[]> = {
 type SignalObjectValues<T extends Record<string, Signal<unknown>>> = {
   [K in keyof T]: SignalValue<T[K]>;
 };
-
-/**
- * Type guard to check if a value is an array of Signals.
- */
-function isSignalArray(value: unknown): value is readonly Signal<unknown>[] {
-  return Array.isArray(value) && value.every((item) => isSignal(item));
-}
-
-/**
- * Type guard to check if a value is an object of Signals (record).
- */
-function isSignalRecord(value: unknown): value is Record<string, Signal<unknown>> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value) && Object.values(value).every((item) => isSignal(item));
-}
 
 /**
  * Like derivedFrom from ngxtension, but uses defer() to avoid input availability issues.

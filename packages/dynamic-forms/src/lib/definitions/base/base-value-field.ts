@@ -51,6 +51,7 @@ type ExcludedKeys =
   | 'pattern'
   | 'validators'
   | 'logic'
+  | 'derivation'
   | 'schemas';
 // Note: 'meta' is NOT excluded - components must handle meta attributes
 

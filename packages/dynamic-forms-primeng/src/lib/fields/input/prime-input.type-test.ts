@@ -79,6 +79,7 @@ describe('PrimeInputField (String) - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseValueField
     | 'value'
@@ -221,6 +222,7 @@ describe('PrimeInputField (Number) - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     | 'value'
     | 'placeholder';

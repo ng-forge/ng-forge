@@ -1,5 +1,11 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { FormStateCondition, isFormStateCondition, LogicConfig } from '../../models/logic/logic-config';
+import {
+  FormStateCondition,
+  isFormStateCondition,
+  isStateLogicConfig,
+  LogicConfig,
+  StateLogicConfig,
+} from '../../models/logic/logic-config';
 import { CustomValidatorConfig, ValidatorConfig } from '../../models/validation/validator-config';
 import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
 import { CustomFunctionScope } from '../expressions/custom-function-types';
@@ -12,10 +18,19 @@ const FORM_VALUE_ACCESS_PATTERN = /\bformValue\s*(?:\.|\[)/;
 
 /**
  * Regular expressions to extract field paths from formValue expressions.
+ *
+ * Enhanced to capture full nested paths including dot notation chains:
+ * - formValue.fieldName → captures 'fieldName'
+ * - formValue.parent.child.grandchild → captures 'parent.child.grandchild'
+ * - formValue['field-name'] → captures 'field-name'
+ * - formValue["field.with.dots"] → captures 'field.with.dots'
+ *
+ * Note: Computed property access (formValue[variableName]) is NOT supported
+ * and must use explicit dependsOn configuration.
  */
-const FORM_VALUE_DOT_PATTERN = /\bformValue\.(\w+)/g;
-const FORM_VALUE_BRACKET_SINGLE_PATTERN = /\bformValue\s*\[\s*'(\w+)'\s*\]/g;
-const FORM_VALUE_BRACKET_DOUBLE_PATTERN = /\bformValue\s*\[\s*"(\w+)"\s*\]/g;
+const FORM_VALUE_DOT_PATTERN = /\bformValue\.([\w.]+)/g;
+const FORM_VALUE_BRACKET_SINGLE_PATTERN = /\bformValue\s*\[\s*'([\w.-]+)'\s*\]/g;
+const FORM_VALUE_BRACKET_DOUBLE_PATTERN = /\bformValue\s*\[\s*"([\w.-]+)"\s*\]/g;
 
 /**
  * Context for cross-field detection, providing access to function scope information.
@@ -157,24 +172,47 @@ export function extractStringDependencies(expression: string): string[] {
   return Array.from(deps);
 }
 
-/** Internal helper that populates a Set with dependencies from an expression string. */
+/**
+ * Internal helper that populates a Set with dependencies from an expression string.
+ *
+ * Extracts both root fields and full nested paths for precise dependency tracking:
+ * - 'formValue.parent.child' → adds 'parent' (root) and 'parent.child' (full path)
+ * - 'formValue.simple' → adds 'simple'
+ */
 function extractFromExpressionString(expression: string, deps: Set<string>): void {
-  // Extract from dot notation: formValue.fieldName
+  // Extract from dot notation: formValue.fieldName or formValue.parent.child.grandchild
   const dotMatches = expression.matchAll(FORM_VALUE_DOT_PATTERN);
   for (const match of dotMatches) {
-    deps.add(match[1]);
+    const fullPath = match[1];
+    // Always add the root field (first segment) as the primary dependency
+    const rootField = fullPath.split('.')[0];
+    deps.add(rootField);
+    // Also add the full path for more precise dependency tracking if nested
+    if (fullPath.includes('.')) {
+      deps.add(fullPath);
+    }
   }
 
   // Extract from bracket notation with single quotes: formValue['fieldName']
   const bracketSingleMatches = expression.matchAll(FORM_VALUE_BRACKET_SINGLE_PATTERN);
   for (const match of bracketSingleMatches) {
-    deps.add(match[1]);
+    const fullPath = match[1];
+    const rootField = fullPath.split('.')[0];
+    deps.add(rootField);
+    if (fullPath.includes('.')) {
+      deps.add(fullPath);
+    }
   }
 
   // Extract from bracket notation with double quotes: formValue["fieldName"]
   const bracketDoubleMatches = expression.matchAll(FORM_VALUE_BRACKET_DOUBLE_PATTERN);
   for (const match of bracketDoubleMatches) {
-    deps.add(match[1]);
+    const fullPath = match[1];
+    const rootField = fullPath.split('.')[0];
+    deps.add(rootField);
+    if (fullPath.includes('.')) {
+      deps.add(fullPath);
+    }
   }
 }
 
@@ -236,13 +274,34 @@ export function hasCrossFieldWhenCondition(config: ValidatorConfig, context?: Cr
 // ============================================================================
 
 /**
+ * Detects if a StateLogicConfig has a cross-field condition.
+ *
+ * Note: This function only handles state logic (hidden, readonly, disabled, required).
+ * Derivation logic is handled separately by the derivation system.
+ *
+ * @param config The state logic configuration to check
+ * @param context Optional context providing function scope lookup
+ * @returns true if the logic condition references other fields
+ */
+export function isCrossFieldStateLogic(config: StateLogicConfig, context?: CrossFieldDetectionContext): boolean {
+  return isCrossFieldExpression(config.condition, context);
+}
+
+/**
  * Detects if a LogicConfig has a cross-field condition.
  *
  * @param config The logic configuration to check
  * @param context Optional context providing function scope lookup
  * @returns true if the logic condition references other fields
+ *
+ * @deprecated Use `isCrossFieldStateLogic` for state logic configs.
+ *             Derivation logic is handled by the derivation system.
  */
 export function isCrossFieldLogic(config: LogicConfig, context?: CrossFieldDetectionContext): boolean {
+  // Only check state logic configs
+  if (!isStateLogicConfig(config)) {
+    return false;
+  }
   return isCrossFieldExpression(config.condition, context);
 }
 

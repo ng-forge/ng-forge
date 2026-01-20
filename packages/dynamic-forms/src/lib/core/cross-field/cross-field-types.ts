@@ -1,5 +1,5 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { LogicConfig } from '../../models/logic/logic-config';
+import { StateLogicConfig } from '../../models/logic/logic-config';
 import { ValidatorConfig } from '../../models/validation/validator-config';
 import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
 
@@ -55,7 +55,9 @@ export type LogicType = 'hidden' | 'disabled' | 'readonly' | 'required';
 
 /**
  * Cross-field logic entry.
- * Represents a logic condition that references other fields and needs form-level evaluation.
+ * Represents a state logic condition that references other fields and needs form-level evaluation.
+ *
+ * Note: Derivation logic is handled separately by the derivation system.
  */
 export interface CrossFieldLogicEntry extends BaseCrossFieldEntry {
   category: 'logic';
@@ -66,8 +68,8 @@ export interface CrossFieldLogicEntry extends BaseCrossFieldEntry {
   /** The original condition expression */
   condition: ConditionalExpression;
 
-  /** The full LogicConfig for reference */
-  config: LogicConfig;
+  /** The full StateLogicConfig for reference */
+  config: StateLogicConfig;
 }
 
 /**

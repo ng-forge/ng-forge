@@ -71,6 +71,7 @@ describe('BsToggleField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseCheckedField
     | 'value'

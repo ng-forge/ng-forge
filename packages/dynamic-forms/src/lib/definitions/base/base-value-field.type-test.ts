@@ -73,6 +73,7 @@ describe('BaseValueField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseValueField
     | 'value'
@@ -283,7 +284,6 @@ describe('ValueFieldComponent - Type Extraction', () => {
   }
   type TestValue = string;
   type TestField = BaseValueField<TestProps, TestValue>;
-  type TestComponent = ValueFieldComponent<TestField>;
 
   it('should transform field to component inputs', () => {
     // Verify that the type includes the necessary properties for components

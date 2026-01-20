@@ -28,6 +28,8 @@ describe('FieldWithValidation - Exhaustive Whitelist', () => {
     | 'validationMessages'
     // Logic rules
     | 'logic'
+    // Derivation shorthand
+    | 'derivation'
     // Schema applications
     | 'schemas';
 
@@ -97,6 +99,10 @@ describe('FieldWithValidation - Advanced Validation', () => {
 describe('FieldWithValidation - Logic Rules', () => {
   it('logic', () => {
     expectTypeOf<FieldWithValidation['logic']>().toEqualTypeOf<LogicConfig[] | undefined>();
+  });
+
+  it('derivation', () => {
+    expectTypeOf<FieldWithValidation['derivation']>().toEqualTypeOf<string | undefined>();
   });
 });
 
@@ -267,9 +273,18 @@ describe('FieldWithValidation - Complete Field Examples', () => {
       validators: [],
       validationMessages: {},
       logic: [],
+      derivation: 'formValue.quantity * formValue.price',
       schemas: [],
     };
 
     expectTypeOf(field).toMatchTypeOf<FieldWithValidation>();
+  });
+
+  it('should accept field with derivation expression', () => {
+    const field = {
+      derivation: 'formValue.firstName + " " + formValue.lastName',
+    } as const satisfies FieldWithValidation;
+
+    expectTypeOf(field.derivation).toEqualTypeOf<'formValue.firstName + " " + formValue.lastName'>();
   });
 });

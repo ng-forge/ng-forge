@@ -72,6 +72,7 @@ export class UserFormComponent {
 - **UI Agnostic** - Bring your own UI or use official integrations
 - **Validation** - Shorthand validators (`required`, `email`, `minLength`) and custom validators
 - **Conditional Logic** - Dynamic visibility and validation based on form state
+- **Value Derivation** - Automatic value computation with expression, function, or static values
 - **Container Fields** - Groups, rows, and pages for complex layouts
 - **i18n Ready** - Observable/Signal support for labels and messages
 - **Event System** - Custom events for buttons and form actions
@@ -95,6 +96,7 @@ Or [create your own](https://ng-forge.com/dynamic-forms/deep-dive/custom-integra
 - [Field Types](https://ng-forge.com/dynamic-forms/core/field-types)
 - [Validation](https://ng-forge.com/dynamic-forms/core/validation)
 - [Conditional Logic](https://ng-forge.com/dynamic-forms/core/conditional-logic)
+- [Value Derivation](https://ng-forge.com/dynamic-forms/core/derivation)
 - [Type Safety](https://ng-forge.com/dynamic-forms/core/type-safety)
 - [Events](https://ng-forge.com/dynamic-forms/core/events)
 - [i18n](https://ng-forge.com/dynamic-forms/core/i18n)

@@ -18,6 +18,7 @@ export { rowScenario } from './row.scenario';
 export { arrayScenario, AddTagsEvent, AddContactEvent } from './array.scenario';
 export { validationShowcaseScenario } from './validation-showcase.scenario';
 export { defaultPropsScenario } from './default-props.scenario';
+export { valueDerivationScenario } from './value-derivation.scenario';
 
 import { inputScenario } from './input.scenario';
 import { checkboxScenario } from './checkbox.scenario';
@@ -39,6 +40,7 @@ import { rowScenario } from './row.scenario';
 import { arrayScenario } from './array.scenario';
 import { validationShowcaseScenario } from './validation-showcase.scenario';
 import { defaultPropsScenario } from './default-props.scenario';
+import { valueDerivationScenario } from './value-derivation.scenario';
 import { ExampleScenario } from '../shared/types';
 
 export const ALL_SCENARIOS: ExampleScenario[] = [
@@ -62,6 +64,7 @@ export const ALL_SCENARIOS: ExampleScenario[] = [
   arrayScenario,
   validationShowcaseScenario,
   defaultPropsScenario,
+  valueDerivationScenario,
 ];
 
 export function getScenarioById(id: string): ExampleScenario | undefined {

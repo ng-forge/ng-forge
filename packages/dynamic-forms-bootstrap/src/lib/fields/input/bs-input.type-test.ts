@@ -87,6 +87,7 @@ describe('BsInputField (String) - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseValueField
     | 'value'
@@ -229,6 +230,7 @@ describe('BsInputField (Number) - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     | 'value'
     | 'placeholder';

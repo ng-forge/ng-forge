@@ -202,6 +202,14 @@ export interface FormConfig<
  *       currency: 'USD'
  *     }).format(context.value)
  *   },
+ *   derivations: {
+ *     getCurrencyForCountry: (context) => {
+ *       const countryToCurrency: Record<string, string> = {
+ *         'USA': 'USD', 'Germany': 'EUR', 'UK': 'GBP'
+ *       };
+ *       return countryToCurrency[context.formValue.country as string] ?? 'USD';
+ *     }
+ *   },
  *   simpleValidators: {
  *     noSpaces: (value) => {
  *       return typeof value === 'string' && value.includes(' ')
@@ -244,6 +252,74 @@ export interface CustomFnConfig {
    * ```
    */
   customFunctions?: Record<string, CustomFunction>;
+
+  /**
+   * Custom derivation functions for value derivation logic.
+   *
+   * These functions compute derived values and are called when a
+   * `DerivationLogicConfig` references them by `functionName`.
+   *
+   * Derivation functions:
+   * - Receive an `EvaluationContext` with access to `formValue`
+   * - Return the value to set on the target field
+   * - Are called reactively when dependencies change
+   *
+   * Use derivation functions for complex mappings or logic that
+   * can't be easily expressed as a JavaScript expression.
+   *
+   * @example
+   * ```typescript
+   * derivations: {
+   *   // Country to currency mapping
+   *   getCurrencyForCountry: (context) => {
+   *     const countryToCurrency: Record<string, string> = {
+   *       'USA': 'USD',
+   *       'Germany': 'EUR',
+   *       'France': 'EUR',
+   *       'UK': 'GBP',
+   *       'Japan': 'JPY'
+   *     };
+   *     return countryToCurrency[context.formValue.country as string] ?? 'USD';
+   *   },
+   *
+   *   // Complex tax calculation
+   *   calculateTax: (context) => {
+   *     const subtotal = context.formValue.subtotal as number ?? 0;
+   *     const state = context.formValue.state as string;
+   *     const taxRates: Record<string, number> = {
+   *       'CA': 0.0725, 'NY': 0.08, 'TX': 0.0625
+   *     };
+   *     return subtotal * (taxRates[state] ?? 0);
+   *   },
+   *
+   *   // Format phone number
+   *   formatPhoneNumber: (context) => {
+   *     const phone = context.fieldValue as string ?? '';
+   *     const digits = phone.replace(/\D/g, '');
+   *     if (digits.length === 10) {
+   *       return `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+   *     }
+   *     return phone;
+   *   }
+   * }
+   * ```
+   *
+   * Field configuration using a derivation function:
+   * ```typescript
+   * {
+   *   key: 'country',
+   *   type: 'select',
+   *   logic: [
+   *     {
+   *       type: 'derivation',
+   *       targetField: 'currency',
+   *       functionName: 'getCurrencyForCountry'
+   *     }
+   *   ]
+   * }
+   * ```
+   */
+  derivations?: Record<string, CustomFunction>;
 
   /**
    * Custom validators using Angular's public FieldContext API
@@ -459,6 +535,20 @@ export interface FormOptions {
    * @value false
    */
   disabled?: boolean;
+
+  /**
+   * Maximum number of iterations for derivation chain processing.
+   *
+   * Derivations can trigger other derivations (e.g., A → B → C).
+   * This limit prevents infinite loops in case of circular dependencies
+   * that weren't caught at build time.
+   *
+   * Increase this value if you have legitimate deep derivation chains
+   * (more than 10 levels deep).
+   *
+   * @default 10
+   */
+  maxDerivationIterations?: number;
 
   /**
    * Default disabled behavior for submit buttons.
