@@ -17,7 +17,7 @@ import {
   untracked,
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
-import { form } from '@angular/forms/signals';
+import { form, FieldTree } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { EMPTY, forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
 import { derivedFromDeferred } from './utils/derived-from-deferred/derived-from-deferred';
@@ -411,7 +411,7 @@ export class DynamicForm<
   readonly derivationOrchestratorConfig: DerivationOrchestratorConfig = {
     schemaFields: computed(() => this.formSetup().schemaFields as FieldDef<unknown>[] | undefined),
     formValue: this.formValue as Signal<Record<string, unknown>>,
-    form: computed(() => this.form() as unknown as import('@angular/forms/signals').FieldTree<unknown>),
+    form: computed(() => this.form() as unknown as FieldTree<unknown>),
     derivationLogger: this.derivationLogger,
   };
 
