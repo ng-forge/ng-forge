@@ -1,4 +1,4 @@
-import { isSignal, Signal, untracked, WritableSignal } from '@angular/core';
+import { isWritableSignal, Signal, untracked } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
@@ -81,6 +81,9 @@ interface DerivationResult {
 
   /** Error message if application failed */
   error?: string;
+
+  /** Warning message (e.g., missing target field) - not a failure, but noteworthy */
+  warning?: string;
 }
 
 /**
@@ -124,6 +127,7 @@ export function applyDerivations(
   let appliedCount = 0;
   let skippedCount = 0;
   let errorCount = 0;
+  let warnCount = 0;
 
   // Filter entries based on changed fields
   const entriesToProcess = changedFields ? getEntriesForChangedFields(collection.entries, changedFields) : collection.entries;
@@ -149,6 +153,9 @@ export function applyDerivations(
         hasChanges = true;
       } else if (result.error) {
         errorCount++;
+      } else if (result.warning) {
+        warnCount++;
+        skippedCount++;
       } else {
         skippedCount++;
       }
@@ -160,6 +167,7 @@ export function applyDerivations(
     appliedCount,
     skippedCount,
     errorCount,
+    warnCount,
     iterations: chainContext.iteration,
     maxIterationsReached: chainContext.iteration >= maxIterations,
   };
@@ -298,17 +306,35 @@ function tryApplyDerivation(
 
   // Apply the value
   try {
-    applyValueToForm(entry.targetFieldKey, newValue, context.rootForm, context.logger, context.warningTracker);
-    chainContext.appliedDerivations.add(derivationKey);
-    derivationLogger.evaluation({
-      debugName: entry.debugName,
-      sourceFieldKey: entry.sourceFieldKey,
-      targetFieldKey: entry.targetFieldKey,
-      result: 'applied',
-      previousValue: currentValue,
-      newValue,
-    });
-    return { applied: true, targetFieldKey: entry.targetFieldKey, newValue };
+    const wasApplied = applyValueToForm(entry.targetFieldKey, newValue, context.rootForm, context.logger, context.warningTracker);
+
+    if (wasApplied) {
+      chainContext.appliedDerivations.add(derivationKey);
+      derivationLogger.evaluation({
+        debugName: entry.debugName,
+        sourceFieldKey: entry.sourceFieldKey,
+        targetFieldKey: entry.targetFieldKey,
+        result: 'applied',
+        previousValue: currentValue,
+        newValue,
+      });
+      return { applied: true, targetFieldKey: entry.targetFieldKey, newValue };
+    } else {
+      // Field not found - this is a warning, not an error
+      // The warning was already logged by warnMissingField
+      derivationLogger.evaluation({
+        debugName: entry.debugName,
+        sourceFieldKey: entry.sourceFieldKey,
+        targetFieldKey: entry.targetFieldKey,
+        result: 'skipped',
+        skipReason: 'target-not-found',
+      });
+      return {
+        applied: false,
+        targetFieldKey: entry.targetFieldKey,
+        warning: `Target field '${entry.targetFieldKey}' not found`,
+      };
+    }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     context.logger.error(formatDerivationError(entry, 'apply', errorMessage));
@@ -523,11 +549,10 @@ function applyValueToForm(
   rootForm: FieldTree<unknown>,
   logger?: Logger,
   warningTracker?: DerivationWarningTracker,
-): void {
+): boolean {
   // Handle simple top-level fields
   if (!targetPath.includes('.')) {
-    setFieldValue(rootForm, targetPath, value, logger, warningTracker);
-    return;
+    return setFieldValue(rootForm, targetPath, value, logger, warningTracker);
   }
 
   // Handle nested paths (e.g., 'address.city' or 'items.$.quantity')
@@ -541,21 +566,21 @@ function applyValueToForm(
     if (part === '$') {
       // This case should be resolved at collection time
       // If we still have '$', we need to skip for now
-      return;
+      return false;
     }
 
     // Navigate to the next level using bracket notation
     const next = (current as Record<string, unknown>)[part];
     if (next === undefined || next === null) {
       warnMissingField(targetPath, logger, warningTracker);
-      return; // Path doesn't exist
+      return false; // Path doesn't exist
     }
     current = next;
   }
 
   // Set the final value
   const finalPart = parts[parts.length - 1];
-  setFieldValue(current, finalPart, value, logger, warningTracker);
+  return setFieldValue(current, finalPart, value, logger, warningTracker);
 }
 
 /**
@@ -584,12 +609,14 @@ function formatDerivationError(entry: DerivationEntry, phase: 'compute' | 'apply
  * Sets a field value using the Angular Signal Forms pattern.
  *
  * Accesses the child field via bracket notation, drills down to find
- * the WritableSignal, and uses isSignal for type-safe signal detection.
+ * the WritableSignal, and uses isWritableSignal for type-safe signal detection.
  *
  * Angular Signal Forms structure:
  * - form[key] is a callable function (field accessor)
  * - form[key]() returns the field instance with { value: WritableSignal<T> }
  * - form[key]().value.set(newValue) sets the value
+ *
+ * @returns true if the value was successfully set, false if field not found
  *
  * @internal
  */
@@ -599,19 +626,19 @@ function setFieldValue(
   value: unknown,
   logger?: Logger,
   warningTracker?: DerivationWarningTracker,
-): void {
+): boolean {
   // Access child field via bracket notation (same pattern as group-field/array-field)
   const fieldAccessor = (parent as Record<string, unknown>)[fieldKey];
 
   if (fieldAccessor === undefined || fieldAccessor === null) {
     warnMissingField(fieldKey, logger, warningTracker);
-    return;
+    return false;
   }
 
   // Angular Signal Forms: field accessor is a callable function
   if (typeof fieldAccessor !== 'function') {
     warnMissingField(fieldKey, logger, warningTracker);
-    return;
+    return false;
   }
 
   // Call the accessor to get the field instance
@@ -619,16 +646,18 @@ function setFieldValue(
 
   if (!fieldInstance || typeof fieldInstance !== 'object' || !('value' in fieldInstance)) {
     warnMissingField(fieldKey, logger, warningTracker);
-    return;
+    return false;
   }
 
   // Get the value signal and verify it's a WritableSignal
   const valueSignal = fieldInstance.value;
 
-  if (isSignal(valueSignal) && typeof (valueSignal as WritableSignal<unknown>).set === 'function') {
-    (valueSignal as WritableSignal<unknown>).set(value);
+  if (isWritableSignal(valueSignal)) {
+    valueSignal.set(value);
+    return true;
   } else {
     warnMissingField(fieldKey, logger, warningTracker);
+    return false;
   }
 }
 

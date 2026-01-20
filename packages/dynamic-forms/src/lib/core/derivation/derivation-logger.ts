@@ -21,7 +21,7 @@ export interface DerivationLogEntry {
   /** Result of the derivation evaluation */
   result: 'applied' | 'skipped' | 'error';
   /** Reason for skipping (if result is 'skipped') */
-  skipReason?: 'condition-false' | 'value-unchanged' | 'already-applied';
+  skipReason?: 'condition-false' | 'value-unchanged' | 'already-applied' | 'target-not-found';
   /** The new value that was set (if result is 'applied') */
   newValue?: unknown;
   /** The previous value before the derivation (if result is 'applied') */

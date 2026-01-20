@@ -95,8 +95,11 @@ export class DerivationLookup {
   /**
    * Gets entries that should be processed based on changed fields.
    *
-   * Uses O(k) lookup via indexed maps instead of O(n*m) filter,
-   * where k = number of changed fields, n = total entries, m = avg deps per entry.
+   * Handles nested path matching: if 'address' changed, entries depending on
+   * 'address.city' will also be included (parent change implies child changed).
+   *
+   * Uses O(k) lookup via indexed maps for exact matches, plus O(d) scan for
+   * nested dependencies, where k = changed fields, d = unique dependencies.
    */
   getEntriesForChangedFields(changedFields: Set<string>): DerivationEntry[] {
     const entrySet = new Set<DerivationEntry>();
@@ -115,6 +118,18 @@ export class DerivationLookup {
       if (arrayEntries) {
         for (const entry of arrayEntries) {
           entrySet.add(entry);
+        }
+      }
+
+      // Handle nested dependencies: if 'address' changed, include entries
+      // that depend on 'address.city', 'address.street', etc.
+      // This is O(d) where d = number of unique dependency keys in the map.
+      const fieldKeyPrefix = fieldKey + '.';
+      for (const [depKey, depEntries] of this.byDependency) {
+        if (depKey.startsWith(fieldKeyPrefix)) {
+          for (const entry of depEntries) {
+            entrySet.add(entry);
+          }
         }
       }
     }

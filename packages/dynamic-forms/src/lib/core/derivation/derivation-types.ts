@@ -248,8 +248,16 @@ export interface DerivationProcessingResult {
   /** Number of derivations skipped (condition not met or value unchanged) */
   skippedCount: number;
 
-  /** Number of derivations that failed */
+  /** Number of derivations that failed with errors */
   errorCount: number;
+
+  /**
+   * Number of derivations that encountered warnings (e.g., missing target field).
+   *
+   * These are not counted as errors because they may be intentional (conditional fields)
+   * but indicate potential configuration issues if unexpected.
+   */
+  warnCount: number;
 
   /** Total iterations performed */
   iterations: number;
