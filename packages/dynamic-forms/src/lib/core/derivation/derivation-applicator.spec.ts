@@ -3,6 +3,7 @@ import { signal, WritableSignal } from '@angular/core';
 import { applyDerivations, applyDerivationsForTrigger, DerivationApplicatorContext } from './derivation-applicator';
 import { DerivationCollection, DerivationEntry, createEmptyDerivationCollection } from './derivation-types';
 import { Logger } from '../../providers/features/logger/logger.interface';
+import { DerivationLogger } from './derivation-logger.service';
 
 describe('derivation-applicator', () => {
   /**
@@ -14,6 +15,19 @@ describe('derivation-applicator', () => {
       warn: vi.fn(),
       error: vi.fn(),
       debug: vi.fn(),
+    };
+  }
+
+  /**
+   * Mock derivation logger for testing (no-op implementation).
+   */
+  function createMockDerivationLogger(): DerivationLogger {
+    return {
+      cycleStart: vi.fn(),
+      iteration: vi.fn(),
+      evaluation: vi.fn(),
+      summary: vi.fn(),
+      maxIterationsReached: vi.fn(),
     };
   }
 
@@ -133,6 +147,7 @@ describe('derivation-applicator', () => {
           formValue: formValueSignal,
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
+          derivationLogger: createMockDerivationLogger(),
         };
 
         const result = applyDerivations(collection, context);
@@ -151,6 +166,7 @@ describe('derivation-applicator', () => {
           formValue: formValueSignal,
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
+          derivationLogger: createMockDerivationLogger(),
         };
 
         const result = applyDerivations(collection, context);
@@ -170,6 +186,7 @@ describe('derivation-applicator', () => {
           formValue: formValueSignal,
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
+          derivationLogger: createMockDerivationLogger(),
         };
 
         const result = applyDerivations(collection, context);
@@ -196,6 +213,7 @@ describe('derivation-applicator', () => {
           formValue: formValueSignal,
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
+          derivationLogger: createMockDerivationLogger(),
         };
 
         const result = applyDerivations(collection, context);
@@ -225,6 +243,7 @@ describe('derivation-applicator', () => {
             getCurrency: getCurrencyFn,
           },
           logger,
+          derivationLogger: createMockDerivationLogger(),
         };
 
         const result = applyDerivations(collection, context);
@@ -248,6 +267,7 @@ describe('derivation-applicator', () => {
           formValue: formValueSignal,
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
+          derivationLogger: createMockDerivationLogger(),
         };
 
         const result = applyDerivations(collection, context);
@@ -276,6 +296,7 @@ describe('derivation-applicator', () => {
           formValue: formValueSignal,
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
+          derivationLogger: createMockDerivationLogger(),
         };
 
         // Only field1 changed
@@ -304,6 +325,7 @@ describe('derivation-applicator', () => {
           formValue: formValueSignal,
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
+          derivationLogger: createMockDerivationLogger(),
         };
 
         applyDerivations(collection, context);
@@ -322,6 +344,7 @@ describe('derivation-applicator', () => {
           formValue: formValueSignal,
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
+          derivationLogger: createMockDerivationLogger(),
         };
 
         // Even though unrelatedField changed, wildcard dependency means it processes
@@ -347,6 +370,7 @@ describe('derivation-applicator', () => {
           formValue: formValueSignal,
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
+          derivationLogger: createMockDerivationLogger(),
         };
 
         applyDerivations(collection, context);
@@ -385,6 +409,7 @@ describe('derivation-applicator', () => {
           formValue: formValueSignal,
           rootForm: mockForm as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
+          derivationLogger: createMockDerivationLogger(),
         };
 
         const result = applyDerivations(collection, context);
@@ -424,6 +449,7 @@ describe('derivation-applicator', () => {
           formValue: formValueSignal,
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
+          derivationLogger: createMockDerivationLogger(),
         };
 
         const result = applyDerivations(collection, context);
@@ -457,6 +483,7 @@ describe('derivation-applicator', () => {
         formValue: formValueSignal,
         rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
         logger,
+        derivationLogger: createMockDerivationLogger(),
       };
 
       applyDerivationsForTrigger(collection, 'onChange', context);
@@ -478,6 +505,7 @@ describe('derivation-applicator', () => {
         formValue: formValueSignal,
         rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
         logger,
+        derivationLogger: createMockDerivationLogger(),
       };
 
       applyDerivationsForTrigger(collection, 'onBlur', context);
@@ -496,6 +524,7 @@ describe('derivation-applicator', () => {
         formValue: formValueSignal,
         rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
         logger,
+        derivationLogger: createMockDerivationLogger(),
       };
 
       const result = applyDerivationsForTrigger(collection, 'onChange', context);

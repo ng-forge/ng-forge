@@ -96,6 +96,14 @@ export interface DerivationEntry {
    * The original logic config if this entry was created from a full logic config.
    */
   originalConfig?: DerivationLogicConfig;
+
+  /**
+   * Optional debug name for easier identification in logs.
+   *
+   * Copied from the originalConfig if provided. When set, this name
+   * appears in verbose derivation logs instead of the source→target path.
+   */
+  debugName?: string;
 }
 
 /**
@@ -287,4 +295,26 @@ export function parseDerivationKey(key: string): { sourceKey: string; targetKey:
     sourceKey: key.substring(0, delimiterIndex),
     targetKey: key.substring(delimiterIndex + DERIVATION_KEY_DELIMITER.length),
   };
+}
+
+/**
+ * Result of processing all pending derivations.
+ *
+ * @public
+ */
+export interface DerivationProcessingResult {
+  /** Number of derivations successfully applied */
+  appliedCount: number;
+
+  /** Number of derivations skipped (condition not met or value unchanged) */
+  skippedCount: number;
+
+  /** Number of derivations that failed */
+  errorCount: number;
+
+  /** Total iterations performed */
+  iterations: number;
+
+  /** Whether max iterations was reached (potential loop) */
+  maxIterationsReached: boolean;
 }

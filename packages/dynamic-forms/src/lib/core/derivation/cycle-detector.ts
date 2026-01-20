@@ -84,6 +84,31 @@ export function detectCycles(collection: DerivationCollection): CycleDetectionRe
  * These patterns are allowed because they stabilize via equality checks.
  * Example: USD/EUR conversion where both fields derive from each other.
  *
+ * ## Floating-Point Precision Note
+ *
+ * Bidirectional derivations stabilize via equality checks using exact IEEE 754
+ * comparison with no tolerance. This means:
+ *
+ * - **Integer math**: Safe (e.g., `A = B * 2`, `B = A / 2` where A is even)
+ * - **Floating-point math**: May oscillate due to rounding errors
+ *
+ * For currency conversions or other floating-point operations, consider:
+ * 1. Rounding values in your expression (e.g., `Math.round(value * 100) / 100`)
+ * 2. Using integer cents instead of decimal dollars
+ * 3. Using one-way derivation instead of bidirectional
+ *
+ * @example
+ * ```typescript
+ * // Safe - uses rounding to avoid oscillation
+ * logic: [
+ *   {
+ *     type: 'derivation',
+ *     targetField: 'eur',
+ *     expression: 'Math.round(formValue.usd * 0.92 * 100) / 100'
+ *   }
+ * ]
+ * ```
+ *
  * @internal
  */
 function detectBidirectionalPairs(collection: DerivationCollection): Set<string> {

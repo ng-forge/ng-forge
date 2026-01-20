@@ -186,6 +186,7 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
     debounceMs,
     isShorthand: false,
     originalConfig: config,
+    debugName: config.debugName,
   };
 }
 

@@ -15,9 +15,14 @@ import {
   DerivationChainContext,
   DerivationCollection,
   DerivationEntry,
+  DerivationProcessingResult,
 } from './derivation-types';
 import { DerivationWarningTracker } from './derivation-warning-tracker';
 import { MAX_DERIVATION_ITERATIONS } from './derivation-constants';
+import { DerivationLogger } from './derivation-logger.service';
+
+// Re-export for backwards compatibility
+export type { DerivationProcessingResult } from './derivation-types';
 
 /**
  * Context required for applying derivations.
@@ -45,6 +50,12 @@ export interface DerivationApplicatorContext {
    * If not provided, warnings will be logged every time.
    */
   warningTracker?: DerivationWarningTracker;
+
+  /**
+   * Derivation logger for debug output.
+   * Created via `createDerivationLogger()` factory.
+   */
+  derivationLogger: DerivationLogger;
 }
 
 /**
@@ -64,28 +75,6 @@ interface DerivationResult {
 
   /** Error message if application failed */
   error?: string;
-}
-
-/**
- * Result of processing all pending derivations.
- *
- * @public
- */
-export interface DerivationProcessingResult {
-  /** Number of derivations successfully applied */
-  appliedCount: number;
-
-  /** Number of derivations skipped (condition not met or value unchanged) */
-  skippedCount: number;
-
-  /** Number of derivations that failed */
-  errorCount: number;
-
-  /** Total iterations performed */
-  iterations: number;
-
-  /** Whether max iterations was reached (potential loop) */
-  maxIterationsReached: boolean;
 }
 
 /**
@@ -124,6 +113,7 @@ export function applyDerivations(
   changedFields?: Set<string>,
 ): DerivationProcessingResult {
   const chainContext = createDerivationChainContext();
+  const { derivationLogger } = context;
   let appliedCount = 0;
   let skippedCount = 0;
   let errorCount = 0;
@@ -132,12 +122,18 @@ export function applyDerivations(
   // where k = number of changed fields (much faster than O(n*m) filter)
   const entriesToProcess = changedFields ? getEntriesForChangedFields(collection, changedFields) : collection.entries;
 
+  // Log cycle start in verbose mode
+  derivationLogger.cycleStart('onChange', entriesToProcess.length);
+
   // Process derivations iteratively until no more changes
   let hasChanges = true;
 
   while (hasChanges && chainContext.iteration < MAX_DERIVATION_ITERATIONS) {
     chainContext.iteration++;
     hasChanges = false;
+
+    // Log iteration in verbose mode
+    derivationLogger.iteration(chainContext.iteration);
 
     for (const entry of entriesToProcess) {
       const result = tryApplyDerivation(entry, context, chainContext);
@@ -153,23 +149,23 @@ export function applyDerivations(
     }
   }
 
-  const maxIterationsReached = chainContext.iteration >= MAX_DERIVATION_ITERATIONS;
-
-  if (maxIterationsReached) {
-    context.logger.error(
-      `[Derivation] Processing reached max iterations (${MAX_DERIVATION_ITERATIONS}). ` +
-        `This may indicate a loop in derivation logic that wasn't caught at build time. ` +
-        `Consider restructuring derivations to reduce chain depth or using explicit 'dependsOn'.`,
-    );
-  }
-
-  return {
+  // Build result
+  const processingResult: DerivationProcessingResult = {
     appliedCount,
     skippedCount,
     errorCount,
     iterations: chainContext.iteration,
-    maxIterationsReached,
+    maxIterationsReached: chainContext.iteration >= MAX_DERIVATION_ITERATIONS,
   };
+
+  if (processingResult.maxIterationsReached) {
+    derivationLogger.maxIterationsReached(processingResult, 'onChange');
+  }
+
+  // Log summary
+  derivationLogger.summary(processingResult, 'onChange');
+
+  return processingResult;
 }
 
 /**
@@ -233,6 +229,8 @@ function tryApplyDerivation(
   context: DerivationApplicatorContext,
   chainContext: DerivationChainContext,
 ): DerivationResult {
+  const { derivationLogger } = context;
+
   // Check if this is an array field derivation (has '$' placeholder)
   if (isArrayPlaceholderPath(entry.targetFieldKey)) {
     return tryApplyArrayDerivation(entry, context, chainContext);
@@ -242,6 +240,13 @@ function tryApplyDerivation(
 
   // Check if already applied in this cycle
   if (chainContext.appliedDerivations.has(derivationKey)) {
+    derivationLogger.evaluation({
+      debugName: entry.debugName,
+      sourceFieldKey: entry.sourceFieldKey,
+      targetFieldKey: entry.targetFieldKey,
+      result: 'skipped',
+      skipReason: 'already-applied',
+    });
     return { applied: false, targetFieldKey: entry.targetFieldKey };
   }
 
@@ -251,6 +256,13 @@ function tryApplyDerivation(
 
   // Evaluate condition
   if (!evaluateDerivationCondition(entry.condition, evalContext)) {
+    derivationLogger.evaluation({
+      debugName: entry.debugName,
+      sourceFieldKey: entry.sourceFieldKey,
+      targetFieldKey: entry.targetFieldKey,
+      result: 'skipped',
+      skipReason: 'condition-false',
+    });
     return { applied: false, targetFieldKey: entry.targetFieldKey };
   }
 
@@ -261,6 +273,13 @@ function tryApplyDerivation(
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     context.logger.error(formatDerivationError(entry, 'compute', errorMessage));
+    derivationLogger.evaluation({
+      debugName: entry.debugName,
+      sourceFieldKey: entry.sourceFieldKey,
+      targetFieldKey: entry.targetFieldKey,
+      result: 'error',
+      error: errorMessage,
+    });
     return {
       applied: false,
       targetFieldKey: entry.targetFieldKey,
@@ -268,9 +287,20 @@ function tryApplyDerivation(
     };
   }
 
-  // Check if value actually changed
+  // Check if value actually changed using exact equality.
+  // Note: This uses isEqual which performs deep comparison with exact IEEE 754
+  // equality for numbers. Bidirectional derivations with floating-point math
+  // may oscillate due to rounding errors. Use explicit rounding in expressions
+  // or integer arithmetic to avoid this issue.
   const currentValue = getNestedValue(formValue, entry.targetFieldKey);
   if (isEqual(currentValue, newValue)) {
+    derivationLogger.evaluation({
+      debugName: entry.debugName,
+      sourceFieldKey: entry.sourceFieldKey,
+      targetFieldKey: entry.targetFieldKey,
+      result: 'skipped',
+      skipReason: 'value-unchanged',
+    });
     return { applied: false, targetFieldKey: entry.targetFieldKey };
   }
 
@@ -278,10 +308,25 @@ function tryApplyDerivation(
   try {
     applyValueToForm(entry.targetFieldKey, newValue, context.rootForm, context.logger, context.warningTracker);
     chainContext.appliedDerivations.add(derivationKey);
+    derivationLogger.evaluation({
+      debugName: entry.debugName,
+      sourceFieldKey: entry.sourceFieldKey,
+      targetFieldKey: entry.targetFieldKey,
+      result: 'applied',
+      previousValue: currentValue,
+      newValue,
+    });
     return { applied: true, targetFieldKey: entry.targetFieldKey, newValue };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     context.logger.error(formatDerivationError(entry, 'apply', errorMessage));
+    derivationLogger.evaluation({
+      debugName: entry.debugName,
+      sourceFieldKey: entry.sourceFieldKey,
+      targetFieldKey: entry.targetFieldKey,
+      result: 'error',
+      error: errorMessage,
+    });
     return {
       applied: false,
       targetFieldKey: entry.targetFieldKey,

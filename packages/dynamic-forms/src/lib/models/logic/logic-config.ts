@@ -197,6 +197,24 @@ interface BaseDerivationLogicConfig {
   type: 'derivation';
 
   /**
+   * Optional name for this derivation for debugging purposes.
+   *
+   * When provided, this name appears in derivation debug logs,
+   * making it easier to identify specific derivations in complex forms.
+   *
+   * @example
+   * ```typescript
+   * {
+   *   type: 'derivation',
+   *   debugName: 'Calculate line total',
+   *   targetField: '$.lineTotal',
+   *   expression: 'formValue.quantity * formValue.unitPrice'
+   * }
+   * ```
+   */
+  debugName?: string;
+
+  /**
    * The field whose value will be modified.
    *
    * Can be:

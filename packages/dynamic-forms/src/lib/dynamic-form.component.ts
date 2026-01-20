@@ -55,6 +55,8 @@ import {
   getDebouncePeriods,
   DERIVATION_WARNING_TRACKER,
   createDerivationWarningTracker,
+  createDerivationLogger,
+  DerivationLogger,
 } from './core/derivation';
 import { createDebouncedEffect, DEFAULT_DEBOUNCE_MS } from './utils/debounce/debounce';
 import { PageOrchestratorComponent } from './core/page-orchestrator';
@@ -269,6 +271,19 @@ export class DynamicForm<
     const configOptions = config.options || {};
     const inputOptions = this.formOptions();
     return { ...configOptions, ...inputOptions };
+  });
+
+  /**
+   * Computed derivation logger based on form options.
+   *
+   * Uses factory pattern to return no-op logger when logging is disabled,
+   * avoiding any logging overhead in production.
+   */
+  private readonly derivationLogger = computed<DerivationLogger>(() => {
+    const options = this.effectiveFormOptions();
+    const level = options.debug?.derivations;
+    const config = level ? { level } : undefined;
+    return createDerivationLogger(config, this.logger);
   });
 
   readonly fieldSignalContext = computed<FieldSignalContext<TModel>>(() => ({
@@ -641,6 +656,7 @@ export class DynamicForm<
           customFunctions: this.functionRegistry.getCustomFunctions(),
           logger: this.logger,
           warningTracker: this.derivationWarningTracker,
+          derivationLogger: untracked(() => this.derivationLogger()),
         };
 
         // Apply derivations with onChange trigger
@@ -784,6 +800,7 @@ export class DynamicForm<
       customFunctions: this.functionRegistry.getCustomFunctions(),
       logger: this.logger,
       warningTracker: this.derivationWarningTracker,
+      derivationLogger: untracked(() => this.derivationLogger()),
     };
 
     // Apply debounced derivations using the cached collection

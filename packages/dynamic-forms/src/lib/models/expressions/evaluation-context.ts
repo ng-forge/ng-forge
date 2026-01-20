@@ -4,7 +4,13 @@ export interface EvaluationContext<TValue = unknown> {
   /** Current field value */
   fieldValue: TValue;
 
-  /** Complete form value (or array item value for array derivations) */
+  /**
+   * Form value for the current evaluation scope.
+   *
+   * For regular (non-array) derivations, this contains the complete form value.
+   * For array item derivations, this is scoped to the current array item.
+   * Use `rootFormValue` to access the complete form when inside an array context.
+   */
   formValue: Record<string, unknown>;
 
   /** Field path for relative references */
@@ -18,7 +24,26 @@ export interface EvaluationContext<TValue = unknown> {
 
   /**
    * Root form value when inside an array context.
+   *
    * This provides access to values outside the current array item.
+   * When a derivation targets an array item field (e.g., `items.$.lineTotal`),
+   * `formValue` is scoped to the current array item, while `rootFormValue`
+   * provides access to the entire form value including fields outside the array.
+   *
+   * @example
+   * ```typescript
+   * // In an array item derivation (e.g., lineItems.$.lineTotal):
+   * {
+   *   type: 'derivation',
+   *   targetField: '$.lineTotal',
+   *   // formValue = current array item { quantity: 2, unitPrice: 50 }
+   *   // rootFormValue = entire form { globalDiscount: 0.1, lineItems: [...] }
+   *   expression: 'formValue.quantity * formValue.unitPrice * (1 - rootFormValue.globalDiscount)'
+   * }
+   * ```
+   *
+   * For non-array derivations, `rootFormValue` is not set and `formValue`
+   * contains the entire form value.
    */
   rootFormValue?: Record<string, unknown>;
 

@@ -7,7 +7,7 @@ import { DerivationProcessingResult } from './derivation-applicator';
  *
  * - 'none': No debug logging
  * - 'summary': Log cycle completion with counts (default in dev mode)
- * - 'verbose': Log individual derivation evaluation (future enhancement)
+ * - 'verbose': Log individual derivation evaluations with details
  *
  * @public
  */
@@ -21,6 +21,32 @@ export type DerivationLogLevel = 'none' | 'summary' | 'verbose';
 export interface DerivationLogConfig {
   /** Log level for derivation debugging. Defaults to 'summary' in dev mode, 'none' in prod. */
   level: DerivationLogLevel;
+}
+
+/**
+ * Information about a single derivation evaluation for logging.
+ *
+ * @public
+ */
+export interface DerivationLogEntry {
+  /** Debug name if provided in the derivation config */
+  debugName?: string;
+  /** Source field key where the derivation is defined */
+  sourceFieldKey: string;
+  /** Target field key that will be modified */
+  targetFieldKey: string;
+  /** Result of the derivation evaluation */
+  result: 'applied' | 'skipped' | 'error';
+  /** Reason for skipping (if result is 'skipped') */
+  skipReason?: 'condition-false' | 'value-unchanged' | 'already-applied';
+  /** The new value that was set (if result is 'applied') */
+  newValue?: unknown;
+  /** The previous value before the derivation (if result is 'applied') */
+  previousValue?: unknown;
+  /** Error message (if result is 'error') */
+  error?: string;
+  /** Duration in milliseconds (optional, for performance tracking) */
+  durationMs?: number;
 }
 
 /**
@@ -102,10 +128,113 @@ export function createDefaultDerivationLogConfig(): DerivationLogConfig {
  * @param minLevel - Minimum level required for logging
  * @returns True if logging should occur
  *
- * @internal
+ * @public
  */
-function shouldLog(config: DerivationLogConfig, minLevel: 'summary' | 'verbose'): boolean {
+export function shouldLog(config: DerivationLogConfig, minLevel: 'summary' | 'verbose'): boolean {
   if (config.level === 'none') return false;
   if (minLevel === 'summary') return config.level === 'summary' || config.level === 'verbose';
   return config.level === 'verbose';
+}
+
+/**
+ * Logs a verbose entry for a single derivation evaluation.
+ *
+ * Only logs when config level is 'verbose'.
+ *
+ * @param entry - The derivation log entry with evaluation details
+ * @param logger - Logger instance
+ * @param config - Debug logging configuration
+ *
+ * @internal
+ */
+export function logDerivationEvaluation(entry: DerivationLogEntry, logger: Logger, config: DerivationLogConfig): void {
+  if (!shouldLog(config, 'verbose')) return;
+
+  const name = entry.debugName ? `"${entry.debugName}"` : `${entry.sourceFieldKey} -> ${entry.targetFieldKey}`;
+
+  switch (entry.result) {
+    case 'applied':
+      logger.debug(`${LOG_PREFIX} -> Applied: ${name}`, {
+        source: entry.sourceFieldKey,
+        target: entry.targetFieldKey,
+        previousValue: entry.previousValue,
+        newValue: entry.newValue,
+        ...(entry.durationMs !== undefined && { durationMs: entry.durationMs }),
+      });
+      break;
+
+    case 'skipped':
+      logger.debug(`${LOG_PREFIX} -> Skipped: ${name} (${formatSkipReason(entry.skipReason)})`, {
+        source: entry.sourceFieldKey,
+        target: entry.targetFieldKey,
+        reason: entry.skipReason,
+      });
+      break;
+
+    case 'error':
+      logger.debug(`${LOG_PREFIX} -> Error: ${name}`, {
+        source: entry.sourceFieldKey,
+        target: entry.targetFieldKey,
+        error: entry.error,
+      });
+      break;
+  }
+}
+
+/**
+ * Formats the skip reason for human-readable output.
+ *
+ * @internal
+ */
+function formatSkipReason(reason?: string): string {
+  switch (reason) {
+    case 'condition-false':
+      return 'condition not met';
+    case 'value-unchanged':
+      return 'value unchanged';
+    case 'already-applied':
+      return 'already applied this cycle';
+    default:
+      return 'unknown';
+  }
+}
+
+/**
+ * Logs the start of a derivation processing cycle.
+ *
+ * Only logs when config level is 'verbose'.
+ *
+ * @param trigger - The trigger type ('onChange' or 'debounced')
+ * @param entryCount - Number of derivations to process in this cycle
+ * @param logger - Logger instance
+ * @param config - Debug logging configuration
+ *
+ * @internal
+ */
+export function logDerivationCycleStart(
+  trigger: 'onChange' | 'debounced',
+  entryCount: number,
+  logger: Logger,
+  config: DerivationLogConfig,
+): void {
+  if (!shouldLog(config, 'verbose')) return;
+
+  logger.debug(`${LOG_PREFIX} Starting cycle (${trigger}) with ${entryCount} derivation(s)`);
+}
+
+/**
+ * Logs the start of a derivation iteration within a cycle.
+ *
+ * Only logs when config level is 'verbose'.
+ *
+ * @param iteration - Current iteration number (1-based)
+ * @param logger - Logger instance
+ * @param config - Debug logging configuration
+ *
+ * @internal
+ */
+export function logDerivationIteration(iteration: number, logger: Logger, config: DerivationLogConfig): void {
+  if (!shouldLog(config, 'verbose')) return;
+
+  logger.debug(`${LOG_PREFIX} Iteration ${iteration}`);
 }

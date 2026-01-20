@@ -1,5 +1,11 @@
 // Types
-export type { DerivationEntry, DerivationCollection, CycleDetectionResult, DerivationChainContext } from './derivation-types';
+export type {
+  DerivationEntry,
+  DerivationCollection,
+  CycleDetectionResult,
+  DerivationChainContext,
+  DerivationProcessingResult,
+} from './derivation-types';
 
 export { createEmptyDerivationCollection, createDerivationChainContext, createDerivationKey, parseDerivationKey } from './derivation-types';
 
@@ -16,7 +22,7 @@ export { detectCycles, validateNoCycles } from './cycle-detector';
 export { topologicalSort, createSortedCollection } from './derivation-sorter';
 
 // Applicator
-export type { DerivationApplicatorContext, DerivationProcessingResult } from './derivation-applicator';
+export type { DerivationApplicatorContext } from './derivation-applicator';
 export { applyDerivations, applyDerivationsForTrigger, getDebouncedDerivationEntries } from './derivation-applicator';
 
 // Warning Tracker
@@ -30,5 +36,9 @@ export { MAX_DERIVATION_ITERATIONS, ARRAY_PLACEHOLDER, MAX_AST_CACHE_SIZE, DERIV
 export { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 
 // Logger
-export type { DerivationLogLevel, DerivationLogConfig } from './derivation-logger';
-export { logDerivationSummary, logMaxIterationsReached, createDefaultDerivationLogConfig } from './derivation-logger';
+export type { DerivationLogLevel, DerivationLogConfig, DerivationLogEntry } from './derivation-logger';
+export { createDefaultDerivationLogConfig } from './derivation-logger';
+
+// Derivation Logger Service
+export type { DerivationLogger } from './derivation-logger.service';
+export { DERIVATION_LOGGER, createDerivationLogger } from './derivation-logger.service';
