@@ -45,7 +45,6 @@ describe('RowFieldComponent', () => {
 
     const { component } = setupSimpleTest(RowFieldComponent, {
       field,
-      value: { field1: 'value1', field2: 'value2' },
     });
 
     // The component should render directly as the host element (no nested form)
