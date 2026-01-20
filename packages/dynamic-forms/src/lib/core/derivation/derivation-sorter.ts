@@ -46,34 +46,62 @@ export function topologicalSort(collection: DerivationCollection): DerivationEnt
     inDegree.set(entry, 0);
   }
 
-  // Build edges: if entry A writes to field X, and entry B depends on X,
-  // then A must come before B (edge A -> B)
-  for (const entryA of entries) {
-    const targetField = entryA.targetFieldKey;
+  // Pre-build index: target field -> entries that produce it
+  // This enables O(1) lookup instead of O(n) scanning
+  const producersByTarget = new Map<string, DerivationEntry[]>();
+  for (const entry of entries) {
+    // Index by exact target field
+    const producers = producersByTarget.get(entry.targetFieldKey) ?? [];
+    producers.push(entry);
+    producersByTarget.set(entry.targetFieldKey, producers);
 
-    for (const entryB of entries) {
-      if (entryA === entryB) continue;
+    // Also index array field relative paths for array derivations
+    // If entry targets 'items.$.lineTotal', index under 'lineTotal' too
+    if (entry.targetFieldKey.includes('.$.')) {
+      const relativePath = entry.targetFieldKey.split('.$.')[1];
+      if (relativePath) {
+        const relativeProducers = producersByTarget.get(relativePath) ?? [];
+        relativeProducers.push(entry);
+        producersByTarget.set(relativePath, relativeProducers);
+      }
+    }
+  }
 
-      // Check if B depends on the field that A produces
-      const bDependsOnATarget = entryB.dependsOn.some((dep) => {
-        // Exact match
-        if (dep === targetField) return true;
+  // Collect entries with wildcard dependencies (need special handling)
+  const wildcardDependents: DerivationEntry[] = [];
+  for (const entry of entries) {
+    if (entry.dependsOn.includes('*')) {
+      wildcardDependents.push(entry);
+    }
+  }
 
-        // Wildcard dependency - depends on everything
-        if (dep === '*') return true;
+  // Build edges using pre-computed index
+  // For each entry B, find all entries A whose target is in B's dependencies
+  for (const entryB of entries) {
+    for (const dep of entryB.dependsOn) {
+      // Skip wildcards here - handled separately below
+      if (dep === '*') continue;
 
-        // Handle array field patterns
-        // If A targets 'items.$.lineTotal' and B depends on 'lineTotal'
-        if (targetField.includes('.$.')) {
-          const relativePath = targetField.split('.$.')[1];
-          if (dep === relativePath) return true;
+      // O(1) lookup: find all producers of this dependency
+      const producers = producersByTarget.get(dep);
+      if (producers) {
+        for (const entryA of producers) {
+          const entryAEdges = graph.get(entryA);
+          if (entryA !== entryB && entryAEdges && !entryAEdges.has(entryB)) {
+            entryAEdges.add(entryB);
+            inDegree.set(entryB, (inDegree.get(entryB) ?? 0) + 1);
+          }
         }
+      }
+    }
+  }
 
-        return false;
-      });
-
-      if (bDependsOnATarget) {
-        graph.get(entryA)!.add(entryB);
+  // Handle wildcard dependencies: they depend on ALL producers
+  for (const entryB of wildcardDependents) {
+    for (const entryA of entries) {
+      const entryAEdges = graph.get(entryA);
+      if (entryA !== entryB && entryAEdges && !entryAEdges.has(entryB)) {
+        entryAEdges.add(entryB);
         inDegree.set(entryB, (inDegree.get(entryB) ?? 0) + 1);
       }
     }
@@ -91,11 +119,13 @@ export function topologicalSort(collection: DerivationCollection): DerivationEnt
   }
 
   while (queue.length > 0) {
-    const current = queue.shift()!;
+    const current = queue.shift();
+    if (!current) break; // TypeScript guard (shouldn't happen due to while condition)
     sorted.push(current);
 
     // Reduce in-degree for all neighbors
-    for (const neighbor of graph.get(current)!) {
+    const neighbors = graph.get(current) ?? new Set<DerivationEntry>();
+    for (const neighbor of neighbors) {
       const newDegree = (inDegree.get(neighbor) ?? 0) - 1;
       inDegree.set(neighbor, newDegree);
 

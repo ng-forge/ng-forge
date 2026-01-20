@@ -2,6 +2,7 @@ import { isSignal, Signal, untracked, WritableSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
+import { isEqual } from '../../utils/object-utils';
 import { parseArrayPath, resolveArrayPath, isArrayPlaceholderPath } from '../../utils/path-utils/path-utils';
 import { CustomFunction } from '../expressions/custom-function-types';
 import { evaluateCondition } from '../expressions/condition-evaluator';
@@ -15,26 +16,8 @@ import {
   DerivationCollection,
   DerivationEntry,
 } from './derivation-types';
-
-/**
- * Maximum number of derivation iterations before stopping to prevent infinite loops.
- *
- * The value of 10 is chosen based on:
- * - Most derivation chains are 2-3 levels deep (A→B→C)
- * - Complex forms with conditional cascades rarely exceed 5-6 levels
- * - 10 provides headroom for bidirectional sync patterns (A↔B) which may need
- *   2 iterations per pair to stabilize
- * - Higher values delay detection of actual infinite loops
- * - Lower values risk false positives on legitimate deep chains
- *
- * If you hit this limit legitimately, consider:
- * 1. Restructuring derivations to reduce chain depth
- * 2. Using explicit `dependsOn` to control evaluation order
- * 3. Breaking complex derivations into computed signals outside the form
- *
- * @internal
- */
-const MAX_DERIVATION_ITERATIONS = 10;
+import { DerivationWarningTracker } from './derivation-warning-tracker';
+import { MAX_DERIVATION_ITERATIONS } from './derivation-constants';
 
 /**
  * Context required for applying derivations.
@@ -56,6 +39,12 @@ export interface DerivationApplicatorContext {
 
   /** Logger for diagnostic output */
   logger: Logger;
+
+  /**
+   * Instance-scoped warning tracker to prevent log spam.
+   * If not provided, warnings will be logged every time.
+   */
+  warningTracker?: DerivationWarningTracker;
 }
 
 /**
@@ -223,6 +212,20 @@ function getEntriesForChangedFields(collection: DerivationCollection, changedFie
 /**
  * Attempts to apply a single derivation.
  *
+ * **Important:** When a derivation's condition evaluates to `false`, the previously
+ * derived value is NOT automatically cleared. If you need to reset a field when a
+ * condition becomes false, use a separate derivation with an inverted condition
+ * that sets the desired fallback value.
+ *
+ * @example
+ * ```typescript
+ * // Two derivations for conditional value with cleanup:
+ * // When country is USA, set phonePrefix to '+1'
+ * { condition: { field: 'country', operator: '==', value: 'USA' }, targetField: 'phonePrefix', value: '+1' }
+ * // When country is NOT USA, clear phonePrefix
+ * { condition: { field: 'country', operator: '!=', value: 'USA' }, targetField: 'phonePrefix', value: '' }
+ * ```
+ *
  * @internal
  */
 function tryApplyDerivation(
@@ -273,7 +276,7 @@ function tryApplyDerivation(
 
   // Apply the value
   try {
-    applyValueToForm(entry.targetFieldKey, newValue, context.rootForm, context.logger);
+    applyValueToForm(entry.targetFieldKey, newValue, context.rootForm, context.logger, context.warningTracker);
     chainContext.appliedDerivations.add(derivationKey);
     return { applied: true, targetFieldKey: entry.targetFieldKey, newValue };
   } catch (error) {
@@ -355,7 +358,7 @@ function tryApplyArrayDerivation(
 
     // Apply the value
     try {
-      applyValueToForm(resolvedTargetPath, newValue, context.rootForm, context.logger);
+      applyValueToForm(resolvedTargetPath, newValue, context.rootForm, context.logger, context.warningTracker);
       chainContext.appliedDerivations.add(derivationKey);
       appliedAny = true;
     } catch (error) {
@@ -477,10 +480,16 @@ function computeDerivedValue(
  *
  * @internal
  */
-function applyValueToForm(targetPath: string, value: unknown, rootForm: FieldTree<unknown>, logger?: Logger): void {
+function applyValueToForm(
+  targetPath: string,
+  value: unknown,
+  rootForm: FieldTree<unknown>,
+  logger?: Logger,
+  warningTracker?: DerivationWarningTracker,
+): void {
   // Handle simple top-level fields
   if (!targetPath.includes('.')) {
-    setFieldValue(rootForm, targetPath, value, logger);
+    setFieldValue(rootForm, targetPath, value, logger, warningTracker);
     return;
   }
 
@@ -501,7 +510,7 @@ function applyValueToForm(targetPath: string, value: unknown, rootForm: FieldTre
     // Navigate to the next level using bracket notation
     const next = (current as Record<string, unknown>)[part];
     if (next === undefined || next === null) {
-      warnMissingField(targetPath, logger);
+      warnMissingField(targetPath, logger, warningTracker);
       return; // Path doesn't exist
     }
     current = next;
@@ -509,11 +518,8 @@ function applyValueToForm(targetPath: string, value: unknown, rootForm: FieldTre
 
   // Set the final value
   const finalPart = parts[parts.length - 1];
-  setFieldValue(current, finalPart, value, logger);
+  setFieldValue(current, finalPart, value, logger, warningTracker);
 }
-
-/** Set of target fields we've already warned about to avoid log spam */
-const warnedMissingFields = new Set<string>();
 
 /**
  * Error message prefix for derivation-related errors.
@@ -550,18 +556,24 @@ function formatDerivationError(entry: DerivationEntry, phase: 'compute' | 'apply
  *
  * @internal
  */
-function setFieldValue(parent: unknown, fieldKey: string, value: unknown, logger?: Logger): void {
+function setFieldValue(
+  parent: unknown,
+  fieldKey: string,
+  value: unknown,
+  logger?: Logger,
+  warningTracker?: DerivationWarningTracker,
+): void {
   // Access child field via bracket notation (same pattern as group-field/array-field)
   const fieldAccessor = (parent as Record<string, unknown>)[fieldKey];
 
   if (fieldAccessor === undefined || fieldAccessor === null) {
-    warnMissingField(fieldKey, logger);
+    warnMissingField(fieldKey, logger, warningTracker);
     return;
   }
 
   // Angular Signal Forms: field accessor is a callable function
   if (typeof fieldAccessor !== 'function') {
-    warnMissingField(fieldKey, logger);
+    warnMissingField(fieldKey, logger, warningTracker);
     return;
   }
 
@@ -569,7 +581,7 @@ function setFieldValue(parent: unknown, fieldKey: string, value: unknown, logger
   const fieldInstance = fieldAccessor();
 
   if (!fieldInstance || typeof fieldInstance !== 'object' || !('value' in fieldInstance)) {
-    warnMissingField(fieldKey, logger);
+    warnMissingField(fieldKey, logger, warningTracker);
     return;
   }
 
@@ -579,60 +591,39 @@ function setFieldValue(parent: unknown, fieldKey: string, value: unknown, logger
   if (isSignal(valueSignal) && typeof (valueSignal as WritableSignal<unknown>).set === 'function') {
     (valueSignal as WritableSignal<unknown>).set(value);
   } else {
-    warnMissingField(fieldKey, logger);
+    warnMissingField(fieldKey, logger, warningTracker);
   }
 }
 
 /**
- * Logs a warning for a missing target field (once per field).
- * @internal
- */
-function warnMissingField(fieldKey: string, logger?: Logger): void {
-  if (!warnedMissingFields.has(fieldKey)) {
-    warnedMissingFields.add(fieldKey);
-    logger?.warn(
-      `${ERROR_PREFIX} Target field '${fieldKey}' not found in form. ` +
-        `Ensure the field is defined in your form configuration. ` +
-        `This warning is shown once per field.`,
-    );
-  }
-}
-
-/**
- * Simple deep equality check for derivation value comparison.
+ * Logs a warning for a missing target field (once per field per form instance).
+ *
+ * Uses the provided warning tracker to avoid log spam. If no tracker is provided,
+ * the warning will be logged every time.
  *
  * @internal
  */
-function isEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
-  if (a == null || b == null) return false;
-  if (typeof a !== typeof b) return false;
-
-  if (typeof a === 'object' && typeof b === 'object') {
-    if (Array.isArray(a) && Array.isArray(b)) {
-      if (a.length !== b.length) return false;
-      return a.every((val, idx) => isEqual(val, b[idx]));
+function warnMissingField(fieldKey: string, logger?: Logger, warningTracker?: DerivationWarningTracker): void {
+  // If tracker is provided, check if we've already warned about this field
+  if (warningTracker) {
+    if (warningTracker.warnedFields.has(fieldKey)) {
+      return;
     }
-
-    if (!Array.isArray(a) && !Array.isArray(b)) {
-      const objA = a as Record<string, unknown>;
-      const objB = b as Record<string, unknown>;
-      const keysA = Object.keys(objA);
-      const keysB = Object.keys(objB);
-      if (keysA.length !== keysB.length) return false;
-      return keysA.every((key) => isEqual(objA[key], objB[key]));
-    }
-
-    return false;
+    warningTracker.warnedFields.add(fieldKey);
   }
 
-  return false;
+  logger?.warn(
+    `${ERROR_PREFIX} Target field '${fieldKey}' not found in form. ` +
+      `Ensure the field is defined in your form configuration. ` +
+      `This warning is shown once per field.`,
+  );
 }
 
 /**
  * Processes derivations for a specific trigger type.
  *
  * Use this to filter derivations by trigger (onChange vs debounced).
+ * Uses pre-computed cached collections when available for better performance.
  *
  * @param collection - The collected derivation entries
  * @param trigger - The trigger type to filter by
@@ -648,8 +639,12 @@ export function applyDerivationsForTrigger(
   context: DerivationApplicatorContext,
   changedFields?: Set<string>,
 ): DerivationProcessingResult {
-  // Create a filtered collection with only matching trigger entries
-  // onChange is the default, so entries without a trigger or with trigger: 'onChange' match
+  // Use pre-computed cached collection if available (avoids runtime filtering/map rebuilding)
+  if (trigger === 'onChange' && collection.onChangeCollection) {
+    return applyDerivations(collection.onChangeCollection, context, changedFields);
+  }
+
+  // Fallback to runtime filtering for edge cases or when cache is not available
   const filteredCollection: DerivationCollection = {
     entries: collection.entries.filter((entry) => {
       if (trigger === 'onChange') {

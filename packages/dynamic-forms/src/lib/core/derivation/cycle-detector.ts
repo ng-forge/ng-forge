@@ -1,4 +1,6 @@
+import { isDevMode } from '@angular/core';
 import { CycleDetectionResult, DerivationCollection } from './derivation-types';
+import { Logger } from '../../providers/features/logger/logger.interface';
 
 /**
  * Node in the derivation dependency graph.
@@ -66,7 +68,14 @@ export function detectCycles(collection: DerivationCollection): CycleDetectionRe
   const bidirectionalPairs = detectBidirectionalPairs(collection);
 
   // Run DFS to detect cycles
-  return detectCyclesWithDFS(graph, bidirectionalPairs);
+  const result = detectCyclesWithDFS(graph, bidirectionalPairs);
+
+  // Include bidirectional pairs in result for warnings
+  if (bidirectionalPairs.size > 0) {
+    result.bidirectionalPairs = Array.from(bidirectionalPairs);
+  }
+
+  return result;
 }
 
 /**
@@ -322,7 +331,11 @@ function formatCycleError(cyclePath: string[]): string {
  * This is the main entry point for cycle validation during form initialization.
  * Should be called after collecting derivations and before setting up effects.
  *
+ * In dev mode, logs a warning when bidirectional derivation pairs are detected.
+ * These patterns are allowed but may oscillate with floating-point values.
+ *
  * @param collection - The collected derivation entries to validate
+ * @param logger - Optional logger for dev-mode warnings
  * @throws Error if a cycle is detected, with details about the cycle
  *
  * @example
@@ -330,7 +343,7 @@ function formatCycleError(cyclePath: string[]): string {
  * const collection = collectDerivations(fields);
  *
  * // This will throw if cycles exist
- * validateNoCycles(collection);
+ * validateNoCycles(collection, logger);
  *
  * // Safe to set up derivation effects now
  * setupDerivationEffects(collection);
@@ -338,10 +351,21 @@ function formatCycleError(cyclePath: string[]): string {
  *
  * @public
  */
-export function validateNoCycles(collection: DerivationCollection): void {
+export function validateNoCycles(collection: DerivationCollection, logger?: Logger): void {
   const result = detectCycles(collection);
 
   if (result.hasCycle) {
     throw new Error(result.errorMessage);
+  }
+
+  // Warn about bidirectional patterns in dev mode
+  if (isDevMode() && result.bidirectionalPairs && result.bidirectionalPairs.length > 0 && logger) {
+    logger.warn(
+      '[Derivation] Bidirectional derivation patterns detected. ' +
+        'These patterns stabilize via equality checks, but may oscillate with floating-point values ' +
+        '(e.g., currency conversions with rounding). ' +
+        'Consider adding tolerance-based comparisons for numeric values.',
+      result.bidirectionalPairs,
+    );
   }
 }

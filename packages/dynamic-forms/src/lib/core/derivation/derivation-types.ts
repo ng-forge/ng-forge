@@ -1,5 +1,6 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { DerivationLogicConfig, LogicTrigger } from '../../models/logic/logic-config';
+import { DERIVATION_KEY_DELIMITER } from './derivation-constants';
 
 /**
  * Entry representing a collected derivation from field definitions.
@@ -146,6 +147,26 @@ export interface DerivationCollection {
    * Stored separately to avoid scanning all entries for wildcards.
    */
   wildcardEntries: DerivationEntry[];
+
+  /**
+   * Pre-computed collection containing only onChange entries.
+   *
+   * Cached at collection time for efficient access without runtime filtering.
+   * Created by `precomputeCachedCollections`.
+   *
+   * @internal
+   */
+  onChangeCollection?: DerivationCollection;
+
+  /**
+   * Pre-computed collections for debounced entries, keyed by debounce duration.
+   *
+   * Cached at collection time for efficient access without runtime filtering.
+   * Created by `precomputeCachedCollections`.
+   *
+   * @internal
+   */
+  debouncedCollectionsByMs?: Map<number, DerivationCollection>;
 }
 
 /**
@@ -165,6 +186,16 @@ export interface CycleDetectionResult {
    * Example: ['country', 'currency', 'country'] for a country -> currency -> country cycle.
    */
   cyclePath?: string[];
+
+  /**
+   * Bidirectional derivation pairs detected (A↔B patterns).
+   *
+   * These are allowed and stabilize via equality checks, but may oscillate
+   * with floating-point precision issues (e.g., currency conversions).
+   *
+   * Format: ['fieldA↔fieldB', 'fieldC↔fieldD']
+   */
+  bidirectionalPairs?: string[];
 
   /**
    * Human-readable error message describing the cycle.
@@ -229,6 +260,9 @@ export function createDerivationChainContext(): DerivationChainContext {
 /**
  * Creates a unique key for a derivation entry.
  *
+ * Uses a null character delimiter to avoid collision with field names
+ * that might contain common delimiters like ':'.
+ *
  * @param sourceKey - The source field key
  * @param targetKey - The target field key
  * @returns Unique key for the derivation
@@ -236,7 +270,7 @@ export function createDerivationChainContext(): DerivationChainContext {
  * @internal
  */
 export function createDerivationKey(sourceKey: string, targetKey: string): string {
-  return `${sourceKey}:${targetKey}`;
+  return `${sourceKey}${DERIVATION_KEY_DELIMITER}${targetKey}`;
 }
 
 /**
@@ -248,9 +282,9 @@ export function createDerivationKey(sourceKey: string, targetKey: string): strin
  * @internal
  */
 export function parseDerivationKey(key: string): { sourceKey: string; targetKey: string } {
-  const colonIndex = key.indexOf(':');
+  const delimiterIndex = key.indexOf(DERIVATION_KEY_DELIMITER);
   return {
-    sourceKey: key.substring(0, colonIndex),
-    targetKey: key.substring(colonIndex + 1),
+    sourceKey: key.substring(0, delimiterIndex),
+    targetKey: key.substring(delimiterIndex + DERIVATION_KEY_DELIMITER.length),
   };
 }

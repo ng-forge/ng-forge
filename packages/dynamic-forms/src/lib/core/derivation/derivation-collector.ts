@@ -5,6 +5,7 @@ import { hasChildFields } from '../../models/types/type-guards';
 import { normalizeFieldsArray } from '../../utils/object-utils';
 import { extractArrayPath, isArrayPlaceholderPath } from '../../utils/path-utils/path-utils';
 import { extractExpressionDependencies, extractStringDependencies } from '../cross-field/cross-field-detector';
+import { precomputeCachedCollections } from './derivation-cache';
 import { topologicalSort } from './derivation-sorter';
 import { DerivationCollection, DerivationEntry, createEmptyDerivationCollection } from './derivation-types';
 
@@ -71,6 +72,10 @@ export function collectDerivations(fields: FieldDef<unknown>[]): DerivationColle
   // This ensures derivations are processed in dependency order,
   // reducing the number of iterations needed in the applicator
   collection.entries = topologicalSort(collection);
+
+  // Pre-compute cached sub-collections for onChange and debounced entries
+  // This avoids expensive filtering operations at runtime
+  precomputeCachedCollections(collection);
 
   return collection;
 }

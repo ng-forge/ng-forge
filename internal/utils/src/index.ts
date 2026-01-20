@@ -4,6 +4,9 @@ export { type RequiredKeys, type OptionalKeys } from './lib/types/type-test-util
 // Async utilities
 export { delay } from './lib/async/delay';
 
+// Object utilities
+export { isEqual } from './lib/object/is-equal';
+
 // i18n testing utilities
 export {
   FakeTranslationService,

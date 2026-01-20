@@ -67,39 +67,54 @@ describe('derivation-types', () => {
     it('should create a key from source and target field keys', () => {
       const key = createDerivationKey('country', 'phonePrefix');
 
-      expect(key).toBe('country:phonePrefix');
+      // Key should contain both parts and be parseable
+      expect(key).toContain('country');
+      expect(key).toContain('phonePrefix');
     });
 
     it('should handle nested field paths', () => {
       const key = createDerivationKey('address.country', 'address.phonePrefix');
 
-      expect(key).toBe('address.country:address.phonePrefix');
+      expect(key).toContain('address.country');
+      expect(key).toContain('address.phonePrefix');
     });
 
     it('should handle array field paths', () => {
       const key = createDerivationKey('items.$.quantity', 'items.$.total');
 
-      expect(key).toBe('items.$.quantity:items.$.total');
+      expect(key).toContain('items.$.quantity');
+      expect(key).toContain('items.$.total');
+    });
+
+    it('should handle field names that contain colons', () => {
+      const key = createDerivationKey('field:with:colons', 'other:field');
+      const parsed = parseDerivationKey(key);
+
+      expect(parsed.sourceKey).toBe('field:with:colons');
+      expect(parsed.targetKey).toBe('other:field');
     });
   });
 
   describe('parseDerivationKey', () => {
     it('should parse a key back to source and target', () => {
-      const { sourceKey, targetKey } = parseDerivationKey('country:phonePrefix');
+      const key = createDerivationKey('country', 'phonePrefix');
+      const { sourceKey, targetKey } = parseDerivationKey(key);
 
       expect(sourceKey).toBe('country');
       expect(targetKey).toBe('phonePrefix');
     });
 
     it('should handle nested field paths', () => {
-      const { sourceKey, targetKey } = parseDerivationKey('address.country:address.phonePrefix');
+      const key = createDerivationKey('address.country', 'address.phonePrefix');
+      const { sourceKey, targetKey } = parseDerivationKey(key);
 
       expect(sourceKey).toBe('address.country');
       expect(targetKey).toBe('address.phonePrefix');
     });
 
     it('should handle array field paths', () => {
-      const { sourceKey, targetKey } = parseDerivationKey('items.$.quantity:items.$.total');
+      const key = createDerivationKey('items.$.quantity', 'items.$.total');
+      const { sourceKey, targetKey } = parseDerivationKey(key);
 
       expect(sourceKey).toBe('items.$.quantity');
       expect(targetKey).toBe('items.$.total');

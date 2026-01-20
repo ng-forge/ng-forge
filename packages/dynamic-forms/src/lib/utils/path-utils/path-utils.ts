@@ -210,3 +210,156 @@ export function getLeafPath(path: string): string {
   const segments = splitPath(path);
   return segments[segments.length - 1] ?? '';
 }
+
+// ============================================================================
+// Multi-Array Path Utilities
+// ============================================================================
+
+/**
+ * Result of parsing a path with multiple array placeholders.
+ *
+ * @public
+ */
+export interface MultiArrayPathInfo {
+  /** Whether this path contains array placeholders */
+  isArrayPath: boolean;
+
+  /** Number of array placeholders in the path */
+  placeholderCount: number;
+
+  /** Path segments (excluding $ placeholders) */
+  segments: string[];
+
+  /** The positions of '$' in the split path (by part index) */
+  placeholderPositions: number[];
+}
+
+/**
+ * Parses a path that may contain multiple array placeholders.
+ *
+ * This supports deeply nested array structures like `orders.$.items.$.quantity`
+ * where multiple levels of arrays need to be traversed.
+ *
+ * @param path - Path with zero or more $ placeholders
+ * @returns Parsed path information
+ *
+ * @example
+ * ```typescript
+ * parseMultiArrayPath('orders.$.items.$.quantity')
+ * // {
+ * //   isArrayPath: true,
+ * //   placeholderCount: 2,
+ * //   segments: ['orders', 'items', 'quantity'],
+ * //   placeholderPositions: [1, 3]
+ * // }
+ *
+ * parseMultiArrayPath('items.$.name')
+ * // {
+ * //   isArrayPath: true,
+ * //   placeholderCount: 1,
+ * //   segments: ['items', 'name'],
+ * //   placeholderPositions: [1]
+ * // }
+ *
+ * parseMultiArrayPath('simpleField')
+ * // {
+ * //   isArrayPath: false,
+ * //   placeholderCount: 0,
+ * //   segments: ['simpleField'],
+ * //   placeholderPositions: []
+ * // }
+ * ```
+ *
+ * @public
+ */
+export function parseMultiArrayPath(path: string): MultiArrayPathInfo {
+  const parts = path.split('.');
+  const segments: string[] = [];
+  const placeholderPositions: number[] = [];
+
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i] === '$') {
+      placeholderPositions.push(i);
+    } else {
+      segments.push(parts[i]);
+    }
+  }
+
+  return {
+    isArrayPath: placeholderPositions.length > 0,
+    placeholderCount: placeholderPositions.length,
+    segments,
+    placeholderPositions,
+  };
+}
+
+/**
+ * Resolves a path with multiple array placeholders using provided indices.
+ *
+ * Each `$` placeholder is replaced with the corresponding index from the
+ * indices array, in order.
+ *
+ * @param path - Path with $ placeholders (e.g., 'orders.$.items.$.quantity')
+ * @param indices - Array of indices to substitute (e.g., [0, 2])
+ * @returns Resolved path (e.g., 'orders.0.items.2.quantity')
+ *
+ * @throws Error if number of indices doesn't match number of placeholders
+ *
+ * @example
+ * ```typescript
+ * resolveMultiArrayPath('orders.$.items.$.quantity', [0, 2])
+ * // 'orders.0.items.2.quantity'
+ *
+ * resolveMultiArrayPath('items.$.name', [5])
+ * // 'items.5.name'
+ * ```
+ *
+ * @public
+ */
+export function resolveMultiArrayPath(path: string, indices: number[]): string {
+  const parts = path.split('.');
+  let indexPointer = 0;
+
+  const resolved = parts.map((part) => {
+    if (part === '$') {
+      if (indexPointer >= indices.length) {
+        throw new Error(
+          `Not enough indices provided for path '${path}'. ` +
+            `Expected ${parts.filter((p) => p === '$').length} indices, got ${indices.length}.`,
+        );
+      }
+      return String(indices[indexPointer++]);
+    }
+    return part;
+  });
+
+  if (indexPointer < indices.length) {
+    throw new Error(`Too many indices provided for path '${path}'. ` + `Expected ${indexPointer} indices, got ${indices.length}.`);
+  }
+
+  return resolved.join('.');
+}
+
+/**
+ * Counts the number of array placeholders in a path.
+ *
+ * @param path - The path to analyze
+ * @returns Number of $ placeholders in the path
+ *
+ * @example
+ * ```typescript
+ * countArrayPlaceholders('orders.$.items.$.quantity')
+ * // 2
+ *
+ * countArrayPlaceholders('items.$.name')
+ * // 1
+ *
+ * countArrayPlaceholders('simpleField')
+ * // 0
+ * ```
+ *
+ * @public
+ */
+export function countArrayPlaceholders(path: string): number {
+  return path.split('.').filter((part) => part === '$').length;
+}
