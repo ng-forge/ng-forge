@@ -530,6 +530,12 @@ export class DynamicForm<
   constructor() {
     this.setupEffects();
     this.setupEventHandlers();
+
+    // Lazily inject the derivation orchestrator to avoid circular dependency.
+    // The orchestrator's constructor sets up RxJS subscriptions that process derivations.
+    afterNextRender(() => {
+      this.injector.get(DERIVATION_ORCHESTRATOR);
+    });
   }
 
   /**
