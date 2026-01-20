@@ -6,7 +6,7 @@ import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../c
 import { CustomFunction } from '../core/expressions/custom-function-types';
 import { ValidationMessages } from './validation-types';
 import { SubmissionConfig } from './submission-config';
-import { DerivationLogLevel } from '../core/derivation/derivation-logger';
+import { DerivationLogLevel } from './logic/logic-config';
 
 /**
  * Configuration interface for defining dynamic form structure and behavior.

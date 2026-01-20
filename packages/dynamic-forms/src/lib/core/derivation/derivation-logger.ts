@@ -1,27 +1,10 @@
-import { isDevMode } from '@angular/core';
 import { Logger } from '../../providers/features/logger/logger.interface';
-import { DerivationProcessingResult } from './derivation-applicator';
+import { DerivationLogConfig, shouldLog } from '../../models/logic/logic-config';
+import { DerivationProcessingResult } from './derivation-types';
 
-/**
- * Log level for derivation debug output.
- *
- * - 'none': No debug logging
- * - 'summary': Log cycle completion with counts (default in dev mode)
- * - 'verbose': Log individual derivation evaluations with details
- *
- * @public
- */
-export type DerivationLogLevel = 'none' | 'summary' | 'verbose';
-
-/**
- * Configuration for derivation debug logging.
- *
- * @public
- */
-export interface DerivationLogConfig {
-  /** Log level for derivation debugging. Defaults to 'summary' in dev mode, 'none' in prod. */
-  level: DerivationLogLevel;
-}
+// Re-export types from models for backwards compatibility
+export type { DerivationLogLevel, DerivationLogConfig } from '../../models/logic/logic-config';
+export { createDefaultDerivationLogConfig, shouldLog } from '../../models/logic/logic-config';
 
 /**
  * Information about a single derivation evaluation for logging.
@@ -103,37 +86,6 @@ export function logMaxIterationsReached(result: DerivationProcessingResult, trig
       `This may indicate a loop in derivation logic. ` +
       `Applied: ${result.appliedCount}, Skipped: ${result.skippedCount}, Errors: ${result.errorCount}`,
   );
-}
-
-/**
- * Creates the default derivation log configuration based on environment.
- *
- * - In development mode: 'summary' (logs cycle completions)
- * - In production mode: 'none' (silent)
- *
- * @returns Default DerivationLogConfig
- *
- * @public
- */
-export function createDefaultDerivationLogConfig(): DerivationLogConfig {
-  return {
-    level: isDevMode() ? 'summary' : 'none',
-  };
-}
-
-/**
- * Checks if logging should occur at the specified level.
- *
- * @param config - Current log configuration
- * @param minLevel - Minimum level required for logging
- * @returns True if logging should occur
- *
- * @public
- */
-export function shouldLog(config: DerivationLogConfig, minLevel: 'summary' | 'verbose'): boolean {
-  if (config.level === 'none') return false;
-  if (minLevel === 'summary') return config.level === 'summary' || config.level === 'verbose';
-  return config.level === 'verbose';
 }
 
 /**

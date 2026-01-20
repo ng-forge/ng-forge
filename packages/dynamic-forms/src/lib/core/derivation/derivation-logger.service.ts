@@ -1,7 +1,8 @@
 import { InjectionToken } from '@angular/core';
 import { Logger } from '../../providers/features/logger/logger.interface';
+import { DerivationLogConfig, createDefaultDerivationLogConfig, shouldLog } from '../../models/logic/logic-config';
 import { DerivationProcessingResult } from './derivation-types';
-import { DerivationLogConfig, DerivationLogEntry, createDefaultDerivationLogConfig, shouldLog } from './derivation-logger';
+import { DerivationLogEntry } from './derivation-logger';
 
 /**
  * Service interface for derivation logging.
