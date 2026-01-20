@@ -21,14 +21,11 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { getChangedKeys } from '../../utils/object-utils';
 import { FunctionRegistryService } from '../registry';
-import {
-  applyDerivationsForTrigger,
-  collectDerivations,
-  DerivationCollection,
-  getDebouncedCollection,
-  getDebouncePeriods,
-  validateNoCycles,
-} from './index';
+import { applyDerivationsForTrigger } from './derivation-applicator';
+import { getDebouncedCollection, getDebouncePeriods } from './derivation-cache';
+import { collectDerivations } from './derivation-collector';
+import { DerivationCollection } from './derivation-types';
+import { validateNoCycles } from './cycle-detector';
 import { DerivationLogger } from './derivation-logger.service';
 import { DERIVATION_WARNING_TRACKER } from './derivation-warning-tracker';
 

@@ -174,7 +174,7 @@ export { EventBus, resolveTokens } from './events';
 export { BUILT_IN_FIELDS } from './providers';
 
 // Object utilities (used by integration mappers)
-export { omit } from './utils/object-utils';
+export { isEqual, omit } from './utils/object-utils';
 
 // Interpolation utility (used by integration error utilities)
 export { interpolateParams } from './utils/interpolate-params';

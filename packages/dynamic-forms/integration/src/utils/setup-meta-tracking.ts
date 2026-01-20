@@ -1,6 +1,5 @@
 import { afterRenderEffect, ElementRef, Signal } from '@angular/core';
-import { applyMetaToElement, FieldMeta } from '@ng-forge/dynamic-forms';
-import { isEqual } from '@ng-forge/utils';
+import { applyMetaToElement, FieldMeta, isEqual } from '@ng-forge/dynamic-forms';
 
 /**
  * Configuration options for setupMetaTracking.
