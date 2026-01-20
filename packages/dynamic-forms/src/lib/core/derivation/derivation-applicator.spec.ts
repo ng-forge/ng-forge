@@ -423,6 +423,151 @@ describe('derivation-applicator', () => {
     });
   });
 
+  describe('array derivations', () => {
+    let logger: Logger;
+
+    beforeEach(() => {
+      logger = createMockLogger();
+    });
+
+    /**
+     * Creates a mock form with array structure for testing array derivations.
+     *
+     * Angular Signal Forms array structure:
+     * - form['items'] is both callable AND has numeric indices
+     * - form['items'][0] → FieldTree for item 0 (which is also callable)
+     * - form['items'][0]['lineTotal'] → FieldTree for lineTotal field
+     * - form['items'][0]['lineTotal']() → { value: WritableSignal<number> }
+     */
+    function createMockArrayForm(initialValue: {
+      items: Array<{ quantity: number; unitPrice: number; lineTotal: number }>;
+      globalDiscount: number;
+    }): {
+      form: Record<string, unknown>;
+      values: typeof initialValue;
+    } {
+      const values = { ...initialValue, items: [...initialValue.items.map((item) => ({ ...item }))] };
+
+      // Create FieldTree-like objects for each array item
+      const itemFieldTrees = values.items.map((item, index) => {
+        const quantitySignal = signal(item.quantity);
+        const unitPriceSignal = signal(item.unitPrice);
+        const lineTotalSignal = signal(item.lineTotal);
+
+        // Sync signals back to values
+        Object.defineProperty(values.items[index], 'lineTotal', {
+          get: () => lineTotalSignal(),
+          set: (v: number) => lineTotalSignal.set(v),
+          enumerable: true,
+          configurable: true,
+        });
+
+        // Each item field is a FieldTree-like object with child fields
+        // Accessing itemFieldTree['lineTotal'] returns a callable FieldTree
+        return {
+          quantity: Object.assign(() => ({ value: quantitySignal }), {}),
+          unitPrice: Object.assign(() => ({ value: unitPriceSignal }), {}),
+          lineTotal: Object.assign(() => ({ value: lineTotalSignal }), {}),
+        };
+      });
+
+      const globalDiscountSignal = signal(values.globalDiscount);
+
+      // Array field must be both callable (for getting value) AND have numeric indices
+      const itemsArrayField = Object.assign(
+        // Callable part - returns array value
+        () => ({ value: signal(values.items) }),
+        // Numeric indices for direct field access
+        itemFieldTrees.reduce(
+          (acc, tree, idx) => {
+            acc[idx] = tree;
+            return acc;
+          },
+          {} as Record<number, (typeof itemFieldTrees)[0]>,
+        ),
+      );
+
+      const form = {
+        items: itemsArrayField,
+        globalDiscount: () => ({ value: globalDiscountSignal }),
+      };
+
+      return { form, values };
+    }
+
+    it('should apply array item derivation using formValue (scoped to item)', () => {
+      const { form, values } = createMockArrayForm({
+        items: [
+          { quantity: 2, unitPrice: 10, lineTotal: 0 },
+          { quantity: 3, unitPrice: 20, lineTotal: 0 },
+        ],
+        globalDiscount: 0,
+      });
+
+      const formValueSignal = signal({
+        items: values.items,
+        globalDiscount: 0,
+      });
+
+      // Derivation targeting array item field with $.
+      const collection = createCollection([
+        createEntry('quantity', 'items.$.lineTotal', {
+          expression: 'formValue.quantity * formValue.unitPrice',
+          dependsOn: ['quantity', 'unitPrice'],
+        }),
+      ]);
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      applyDerivations(collection, context);
+
+      // Each item should have its lineTotal calculated
+      expect(values.items[0].lineTotal).toBe(20); // 2 * 10
+      expect(values.items[1].lineTotal).toBe(60); // 3 * 20
+    });
+
+    it('should provide rootFormValue for cross-scope references in array derivations', () => {
+      const { form, values } = createMockArrayForm({
+        items: [
+          { quantity: 2, unitPrice: 100, lineTotal: 0 },
+          { quantity: 1, unitPrice: 50, lineTotal: 0 },
+        ],
+        globalDiscount: 0.1, // 10% discount
+      });
+
+      const formValueSignal = signal({
+        items: values.items,
+        globalDiscount: 0.1,
+      });
+
+      // Derivation using both formValue (array item scope) and rootFormValue (form scope)
+      const collection = createCollection([
+        createEntry('quantity', 'items.$.lineTotal', {
+          expression: 'formValue.quantity * formValue.unitPrice * (1 - rootFormValue.globalDiscount)',
+          dependsOn: ['quantity', 'unitPrice', 'globalDiscount'],
+        }),
+      ]);
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      applyDerivations(collection, context);
+
+      // Each item should apply the global discount
+      expect(values.items[0].lineTotal).toBe(180); // 2 * 100 * 0.9
+      expect(values.items[1].lineTotal).toBe(45); // 1 * 50 * 0.9
+    });
+  });
+
   describe('applyDerivationsForTrigger', () => {
     let logger: Logger;
     let formValueSignal: WritableSignal<Record<string, unknown>>;

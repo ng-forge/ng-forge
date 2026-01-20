@@ -24,6 +24,9 @@ import { DerivationEntry } from './derivation-types';
 export class DerivationLookup {
   private readonly entriesSignal = inject(DERIVATION_ENTRIES);
 
+  // Track the entries array reference to auto-invalidate on change
+  private _cachedEntriesRef?: DerivationEntry[];
+
   // Cached lookup maps (built lazily on first access)
   private _byTarget?: Map<string, DerivationEntry[]>;
   private _bySource?: Map<string, DerivationEntry[]>;
@@ -35,9 +38,18 @@ export class DerivationLookup {
 
   /**
    * Current derivation entries (from signal).
+   * Auto-invalidates cache if entries reference changed.
    */
   get entries(): DerivationEntry[] {
-    return this.entriesSignal();
+    const currentEntries = this.entriesSignal();
+
+    // Auto-invalidate if entries reference changed (schema was updated)
+    if (this._cachedEntriesRef !== currentEntries) {
+      this.invalidateCache();
+      this._cachedEntriesRef = currentEntries;
+    }
+
+    return currentEntries;
   }
 
   /**

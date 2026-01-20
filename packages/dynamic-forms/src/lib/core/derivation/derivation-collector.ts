@@ -205,7 +205,7 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
  *
  * @internal
  */
-function resolveTargetFieldKey(targetField: string, sourceFieldKey: string, context: CollectionContext): string {
+function resolveTargetFieldKey(targetField: string, _sourceFieldKey: string, context: CollectionContext): string {
   // Check for relative path indicator
   if (targetField.startsWith('$.')) {
     // Extract the relative field name (after '$.')
@@ -216,13 +216,9 @@ function resolveTargetFieldKey(targetField: string, sourceFieldKey: string, cont
       return `${context.arrayPath}.$.${relativePath}`;
     }
 
-    // If not in array context, try to extract array path from source field
-    const arrayMatch = sourceFieldKey.match(/^(.+?)\[/);
-    if (arrayMatch) {
-      return `${arrayMatch[1]}.$.${relativePath}`;
-    }
-
-    // Fallback: keep relative path as-is (will be resolved at runtime)
+    // Not in array context - keep relative path as-is.
+    // This indicates a configuration error (relative path used outside array).
+    // The runtime applicator will handle this gracefully.
     return targetField;
   }
 
