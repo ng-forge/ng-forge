@@ -15,6 +15,10 @@ export { mapFieldToForm } from './form-mapping';
 
 // Schema building - main entry point for dynamic form component (keeping original file location for now)
 export { createSchemaFromFields, fieldsToDefaultValues } from './schema-builder';
+export type { CreateSchemaOptions } from './schema-builder';
+
+// Schema utilities for form-level Standard Schema integration
+export { applyFormLevelSchema, createFormLevelSchema } from './form-schema-merger';
 
 // Re-export types from specific model files
 export type { ValidatorConfig } from '../models/validation/validator-config';

@@ -4,7 +4,7 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
  * Internal marker symbol to identify StandardSchemaMarker instances.
  * Uses ɵ prefix following Angular's convention for internal APIs.
  */
-const STANDARD_SCHEMA_KIND = 'standardSchema' as const;
+export const STANDARD_SCHEMA_KIND = 'standardSchema' as const;
 
 /**
  * Wrapper interface that marks a schema as implementing the Standard Schema spec.
