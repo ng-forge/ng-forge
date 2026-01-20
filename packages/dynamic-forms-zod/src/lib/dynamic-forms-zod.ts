@@ -6,16 +6,18 @@
  *
  * @example
  * ```typescript
- * import { baseFormSchema } from '@ng-forge/dynamic-forms-zod';
- * import { materialFormSchema } from '@ng-forge/dynamic-forms-zod/material';
+ * import { BaseFormConfigSchema } from '@ng-forge/dynamic-forms-zod';
+ * import { MatFormConfigSchema } from '@ng-forge/dynamic-forms-zod/material';
  *
  * // Validate a form configuration
- * const result = materialFormSchema.safeParse(formConfig);
+ * const result = MatFormConfigSchema.safeParse(formConfig);
  * if (!result.success) {
  *   console.error('Invalid form configuration:', result.error);
  * }
  * ```
  */
 
-// Placeholder exports - actual schemas will be implemented in Phase 2
 export const VERSION = '0.4.0';
+
+// Export all base schemas
+export * from './schemas';
