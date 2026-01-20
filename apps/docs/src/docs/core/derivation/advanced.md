@@ -73,24 +73,23 @@ Enable derivation logging to troubleshoot issues:
 
 ### Configuration
 
+Configure derivation logging via `withLoggerConfig`:
+
 ```typescript
-const formConfig = {
-  options: {
-    debug: {
-      derivations: 'verbose', // 'none' | 'summary' | 'verbose'
-    },
-  },
-  fields: [...],
-} satisfies FormConfig;
+// In your providers
+provideDynamicForm(...withMaterialFields(), withLoggerConfig({ derivations: 'verbose' }));
+
+// Or just summary level
+provideDynamicForm(...withMaterialFields(), withLoggerConfig({ derivations: 'summary' }));
 ```
 
 ### Log Levels
 
-| Level     | Output                                        |
-| --------- | --------------------------------------------- |
-| `none`    | No logging                                    |
-| `summary` | Cycle completion with counts (default in dev) |
-| `verbose` | Individual derivation evaluations             |
+| Level     | Output                            |
+| --------- | --------------------------------- |
+| `none`    | No logging (default)              |
+| `summary` | Cycle completion with counts      |
+| `verbose` | Individual derivation evaluations |
 
 ### Using debugName
 

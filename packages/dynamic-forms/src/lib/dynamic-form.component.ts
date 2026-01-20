@@ -60,6 +60,7 @@ import { FormResetEvent } from './events/constants/form-reset.event';
 import { PageChangeEvent } from './events/constants/page-change.event';
 import { PageNavigationStateChangeEvent } from './events/constants/page-navigation-state-change.event';
 import { DynamicFormLogger } from './providers/features/logger/logger.token';
+import { DERIVATION_LOG_CONFIG } from './providers/features/logger/with-logger-config';
 
 function derivationOrchestratorFactoryWrapper(dynamicForm: DynamicForm) {
   return createDerivationOrchestrator(dynamicForm.derivationOrchestratorConfig);
@@ -153,6 +154,7 @@ export class DynamicForm<
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly schemaRegistry = inject(SchemaRegistryService);
   private readonly logger = inject(DynamicFormLogger);
+  private readonly derivationLogConfig = inject(DERIVATION_LOG_CONFIG);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -277,16 +279,13 @@ export class DynamicForm<
   });
 
   /**
-   * Computed derivation logger based on form options.
+   * Computed derivation logger based on injected config.
    *
    * Uses factory pattern to return no-op logger when logging is disabled,
    * avoiding any logging overhead in production.
    */
   private readonly derivationLogger = computed<DerivationLogger>(() => {
-    const options = this.effectiveFormOptions();
-    const level = options.debug?.derivations;
-    const config = level ? { level } : undefined;
-    return createDerivationLogger(config, this.logger);
+    return createDerivationLogger(this.derivationLogConfig, this.logger);
   });
 
   readonly fieldSignalContext = computed<FieldSignalContext<TModel>>(() => ({

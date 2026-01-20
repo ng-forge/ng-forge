@@ -6,7 +6,6 @@ import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../c
 import { CustomFunction } from '../core/expressions/custom-function-types';
 import { ValidationMessages } from './validation-types';
 import { SubmissionConfig } from './submission-config';
-import { DerivationLogLevel } from './logic/logic-config';
 
 /**
  * Configuration interface for defining dynamic form structure and behavior.
@@ -520,8 +519,7 @@ export interface CustomFnConfig {
  * ```typescript
  * options: {
  *   disabled: false,
- *   submitButton: { disableWhenInvalid: true },
- *   debug: { derivations: 'verbose' }
+ *   submitButton: { disableWhenInvalid: true }
  * }
  * ```
  *
@@ -573,49 +571,6 @@ export interface FormOptions {
    * ```
    */
   nextButton?: NextButtonOptions;
-
-  /**
-   * Debug configuration for development and troubleshooting.
-   *
-   * Controls logging and diagnostic output for various form features.
-   *
-   * @example
-   * ```typescript
-   * options: {
-   *   debug: {
-   *     derivations: 'verbose'  // Log each derivation evaluation
-   *   }
-   * }
-   * ```
-   */
-  debug?: DebugOptions;
-}
-
-/**
- * Debug configuration options.
- *
- * Controls logging and diagnostic output for development and troubleshooting.
- *
- * @public
- */
-export interface DebugOptions {
-  /**
-   * Derivation logging level.
-   *
-   * - `'none'`: No debug logging
-   * - `'summary'`: Log cycle completion with counts (default in dev mode)
-   * - `'verbose'`: Log individual derivation evaluations with details
-   *
-   * @default 'summary' in dev mode, 'none' in production
-   *
-   * @example
-   * ```typescript
-   * debug: {
-   *   derivations: 'verbose'
-   * }
-   * ```
-   */
-  derivations?: DerivationLogLevel;
 }
 
 /**

@@ -1,4 +1,3 @@
-import { isDevMode } from '@angular/core';
 import { ConditionalExpression } from '../expressions/conditional-expression';
 
 /**
@@ -460,15 +459,14 @@ export type DerivationLogLevel = 'none' | 'summary' | 'verbose';
  * @public
  */
 export interface DerivationLogConfig {
-  /** Log level for derivation debugging. Defaults to 'summary' in dev mode, 'none' in prod. */
+  /** Log level for derivation debugging. Defaults to 'none'. */
   level: DerivationLogLevel;
 }
 
 /**
- * Creates the default derivation log configuration based on environment.
+ * Creates the default derivation log configuration.
  *
- * - In development mode: 'summary' (logs cycle completions)
- * - In production mode: 'none' (silent)
+ * Defaults to 'none' (silent). Users can enable logging via `withLoggerConfig`.
  *
  * @returns Default DerivationLogConfig
  *
@@ -476,7 +474,7 @@ export interface DerivationLogConfig {
  */
 export function createDefaultDerivationLogConfig(): DerivationLogConfig {
   return {
-    level: isDevMode() ? 'summary' : 'none',
+    level: 'none',
   };
 }
 
