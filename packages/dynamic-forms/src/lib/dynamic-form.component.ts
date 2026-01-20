@@ -8,7 +8,6 @@ import {
   Injector,
   input,
   InputSignal,
-  isDevMode,
   linkedSignal,
   model,
   OnDestroy,
@@ -24,7 +23,7 @@ import { EMPTY, forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
 import { derivedFromDeferred } from './utils/derived-from-deferred/derived-from-deferred';
 import { reconcileFields, ResolvedField, resolveField } from './utils/resolve-field/resolve-field';
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
-import { keyBy, memoize, isEqual, getChangedKeys } from './utils/object-utils';
+import { keyBy, memoize, isEqual } from './utils/object-utils';
 import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from './models/field-signal-context.token';
 import { FieldTypeDefinition } from './models/field-type';
 import { FormConfig, FormOptions } from './models/form-config';
@@ -47,24 +46,24 @@ import { detectFormMode, FormModeDetectionResult } from './models/types/form-mod
 import { collectCrossFieldEntries } from './core/cross-field/cross-field-collector';
 import { FormModeValidator } from './utils/form-validation/form-mode-validator';
 import {
-  collectDerivations,
-  validateNoCycles,
-  applyDerivationsForTrigger,
-  DerivationCollection,
-  getDebouncedCollection,
-  getDebouncePeriods,
   DERIVATION_WARNING_TRACKER,
+  DERIVATION_ORCHESTRATOR,
   createDerivationWarningTracker,
+  createDerivationOrchestrator,
   createDerivationLogger,
   DerivationLogger,
+  DerivationOrchestratorConfig,
 } from './core/derivation';
-import { createDebouncedEffect, DEFAULT_DEBOUNCE_MS } from './utils/debounce/debounce';
 import { PageOrchestratorComponent } from './core/page-orchestrator';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormResetEvent } from './events/constants/form-reset.event';
 import { PageChangeEvent } from './events/constants/page-change.event';
 import { PageNavigationStateChangeEvent } from './events/constants/page-navigation-state-change.event';
 import { DynamicFormLogger } from './providers/features/logger/logger.token';
+
+function derivationOrchestratorFactoryWrapper(dynamicForm: DynamicForm) {
+  return createDerivationOrchestrator(dynamicForm.derivationOrchestratorConfig);
+}
 
 /**
  * Dynamic form component that renders a complete form based on configuration.
@@ -121,6 +120,11 @@ import { DynamicFormLogger } from './providers/features/logger/logger.token';
       deps: [DynamicForm],
     },
     { provide: DERIVATION_WARNING_TRACKER, useFactory: createDerivationWarningTracker },
+    {
+      provide: DERIVATION_ORCHESTRATOR,
+      useFactory: derivationOrchestratorFactoryWrapper,
+      deps: [DynamicForm],
+    },
   ],
   host: {
     class: 'df-dynamic-form df-form',
@@ -149,7 +153,6 @@ export class DynamicForm<
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly schemaRegistry = inject(SchemaRegistryService);
   private readonly logger = inject(DynamicFormLogger);
-  private readonly derivationWarningTracker = inject(DERIVATION_WARNING_TRACKER);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -348,43 +351,7 @@ export class DynamicForm<
     });
   });
 
-  /**
-   * Collected derivations from field definitions.
-   *
-   * Validates that no cycles exist during collection.
-   * Returns null if no derivations are defined.
-   */
-  private readonly derivationCollection = computed<DerivationCollection | null>(() => {
-    const setup = this.formSetup();
-
-    if (!setup.schemaFields || setup.schemaFields.length === 0) {
-      return null;
-    }
-
-    const collection = collectDerivations(setup.schemaFields as FieldDef<unknown>[]);
-
-    // Skip validation if no derivations
-    if (collection.entries.length === 0) {
-      return null;
-    }
-
-    // Validate no cycles exist - this will throw if cycles are detected
-    // Pass logger for dev-mode warnings about bidirectional patterns
-    validateNoCycles(collection, this.logger);
-
-    // Warn about wildcard dependencies in dev mode (performance consideration)
-    this.warnAboutWildcardDependencies(collection);
-
-    return collection;
-  });
-
   private readonly componentId = 'dynamic-form';
-
-  /** Tracks debounce timers by duration for cleanup on component destruction */
-  private readonly debounceTimers = new Map<number, ReturnType<typeof setTimeout>>();
-
-  /** Tracks the last form value processed by debounced derivations for change detection */
-  private lastDebouncedFormValue: Record<string, unknown> | null = null;
 
   private readonly totalComponentsCount = computed(() => {
     const fields = this.formSetup().fields;
@@ -435,6 +402,19 @@ export class DynamicForm<
 
   /** Whether the form is currently submitting. */
   readonly submitting = computed(() => this.form()().submitting());
+
+  /**
+   * Configuration for the derivation orchestrator.
+   * Bundles the form-specific signals needed by the orchestrator.
+   *
+   * @internal Used by DERIVATION_ORCHESTRATOR provider.
+   */
+  readonly derivationOrchestratorConfig: DerivationOrchestratorConfig = {
+    schemaFields: computed(() => this.formSetup().schemaFields as FieldDef<unknown>[] | undefined),
+    formValue: this.formValue as Signal<Record<string, unknown>>,
+    form: computed(() => this.form() as unknown as import('@angular/forms/signals').FieldTree<unknown>),
+    derivationLogger: this.derivationLogger,
+  };
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Initialization
@@ -551,14 +531,6 @@ export class DynamicForm<
   constructor() {
     this.setupEffects();
     this.setupEventHandlers();
-
-    // Clean up debounce timers when component is destroyed
-    this.destroyRef.onDestroy(() => {
-      for (const timer of this.debounceTimers.values()) {
-        clearTimeout(timer);
-      }
-      this.debounceTimers.clear();
-    });
   }
 
   /**
@@ -613,206 +585,6 @@ export class DynamicForm<
         );
       }
     });
-
-    // Process derivations when form values change
-    this.setupDerivationEffect();
-  }
-
-  /**
-   * Sets up the effect that processes derivations when form values change.
-   *
-   * Uses a flag to prevent re-triggering during derivation application.
-   * The flag is reset on a microtask delay to handle Angular's effect scheduling,
-   * which queues re-runs as microtasks when tracked signals change.
-   *
-   * Tracks changed fields for efficient filtering.
-   * Handles both immediate (onChange) and debounced derivations.
-   *
-   * @internal
-   */
-  private setupDerivationEffect(): void {
-    // Flag to prevent re-entry during derivation processing
-    // Reset on microtask to handle Angular's effect scheduling
-    let isProcessingDerivations = false;
-
-    // Set up immediate (onChange) derivations effect
-    explicitEffect([this.formValue, this.derivationCollection, this.form], ([, collection, formAccessor]) => {
-      // Skip if no derivations or already processing
-      if (!collection || isProcessingDerivations) {
-        return;
-      }
-
-      // Prevent re-entry - this flag prevents double-triggering when
-      // derivation application updates formValue signal
-      isProcessingDerivations = true;
-
-      try {
-        // Create the applicator context
-        // Pass formAccessor directly (not called) so child fields can be accessed via bracket notation
-        const applicatorContext = {
-          formValue: this.formValue as Signal<Record<string, unknown>>,
-          rootForm: formAccessor as unknown as import('@angular/forms/signals').FieldTree<unknown>,
-          derivationFunctions: this.functionRegistry.getDerivationFunctions(),
-          customFunctions: this.functionRegistry.getCustomFunctions(),
-          logger: this.logger,
-          warningTracker: this.derivationWarningTracker,
-          derivationLogger: untracked(() => this.derivationLogger()),
-        };
-
-        // Apply derivations with onChange trigger
-        // We don't pass changedFields here - the applicator's internal loop needs
-        // access to ALL derivations to handle cascades (A->B->C). The applicator's
-        // equality check naturally skips derivations whose dependencies haven't changed.
-        // Use untracked to prevent establishing additional dependencies during application
-        untracked(() => {
-          const result = applyDerivationsForTrigger(collection, 'onChange', applicatorContext);
-
-          if (result.maxIterationsReached) {
-            this.logger.warn(
-              `Derivation processing reached max iterations. ` +
-                `This may indicate a loop in derivation logic that wasn't caught at build time. ` +
-                `Applied: ${result.appliedCount}, Skipped: ${result.skippedCount}, Errors: ${result.errorCount}`,
-            );
-          }
-        });
-      } finally {
-        // Reset flag on microtask to handle Angular's effect scheduling.
-        // When derivations update field values, formValue signal changes,
-        // scheduling a new effect run as a microtask. By resetting the flag
-        // on the next microtask, we ensure the scheduled re-run sees the flag
-        // as true and skips processing (preventing double-trigger).
-        queueMicrotask(() => {
-          isProcessingDerivations = false;
-        });
-      }
-    });
-
-    // Set up debounced derivations
-    this.setupDebouncedDerivations();
-  }
-
-  /**
-   * Sets up debounced derivation processing.
-   *
-   * Groups debounced derivations by their debounce duration and processes
-   * each group with its own debounce timing. This allows each derivation
-   * to respect its own `debounceMs` setting.
-   *
-   * Uses a single effect that groups entries at processing time, avoiding
-   * the need to read the derivation collection during component construction.
-   *
-   * @internal
-   */
-  private setupDebouncedDerivations(): void {
-    // Create a single debounced effect with the default (shortest common) debounce
-    // It will handle per-entry debouncing internally
-    createDebouncedEffect(
-      this.formValue as Signal<Record<string, unknown>>,
-      (currentValue) => {
-        const collection = untracked(() => this.derivationCollection());
-        const formAccessor = untracked(() => this.form());
-
-        if (!collection || !formAccessor) return;
-
-        // Get all debounce periods from cached collections
-        const debouncePeriods = getDebouncePeriods(collection);
-        if (debouncePeriods.length === 0) return;
-
-        // Compute which fields changed since last debounced processing
-        // This allows us to skip derivations whose dependencies haven't changed
-        const changedFields = getChangedKeys(this.lastDebouncedFormValue, currentValue as Record<string, unknown>);
-
-        // Update tracking for next comparison
-        this.lastDebouncedFormValue = currentValue ? { ...(currentValue as Record<string, unknown>) } : null;
-
-        // Skip if no fields changed (shouldn't happen due to distinctUntilChanged, but defensive)
-        if (changedFields.size === 0) return;
-
-        // Process entries with the default debounce immediately
-        // (they've already been debounced by createDebouncedEffect)
-        if (debouncePeriods.includes(DEFAULT_DEBOUNCE_MS)) {
-          this.applyDebouncedEntriesForPeriod(DEFAULT_DEBOUNCE_MS, collection, formAccessor, changedFields);
-        }
-
-        // Schedule entries with different debounce durations
-        // These need additional waiting beyond the default debounce
-        for (const debounceMs of debouncePeriods) {
-          if (debounceMs === DEFAULT_DEBOUNCE_MS) continue;
-
-          // Clear existing timer for this duration
-          const existingTimer = this.debounceTimers.get(debounceMs);
-          if (existingTimer) {
-            clearTimeout(existingTimer);
-          }
-
-          // Calculate additional wait time
-          // If debounceMs > DEFAULT, wait the difference
-          // If debounceMs < DEFAULT, process immediately (already waited longer)
-          const additionalWait = Math.max(0, debounceMs - DEFAULT_DEBOUNCE_MS);
-
-          if (additionalWait === 0) {
-            // Already waited long enough, process now
-            this.applyDebouncedEntriesForPeriod(debounceMs, collection, formAccessor, changedFields);
-          } else {
-            // Capture changed fields for the scheduled callback
-            const capturedChangedFields = changedFields;
-            // Schedule for later
-            const timer = setTimeout(() => {
-              this.debounceTimers.delete(debounceMs);
-              // Re-read form state at execution time
-              const currentCollection = untracked(() => this.derivationCollection());
-              const currentFormAccessor = untracked(() => this.form());
-              if (currentCollection && currentFormAccessor) {
-                this.applyDebouncedEntriesForPeriod(debounceMs, currentCollection, currentFormAccessor, capturedChangedFields);
-              }
-            }, additionalWait);
-            this.debounceTimers.set(debounceMs, timer);
-          }
-        }
-      },
-      { ms: DEFAULT_DEBOUNCE_MS, injector: this.injector },
-    );
-  }
-
-  /**
-   * Applies debounced derivation entries for a specific debounce period.
-   * Uses pre-computed cached collections for efficiency.
-   * Filters derivations based on changed fields for performance.
-   * @internal
-   */
-  private applyDebouncedEntriesForPeriod(
-    debounceMs: number,
-    collection: import('./core/derivation').DerivationCollection,
-    formAccessor: ReturnType<typeof this.form>,
-    changedFields?: Set<string>,
-  ): void {
-    // Get the pre-computed cached collection for this debounce period
-    const cachedCollection = getDebouncedCollection(collection, debounceMs);
-    if (!cachedCollection || cachedCollection.entries.length === 0) {
-      return;
-    }
-
-    // Create applicator context
-    const applicatorContext = {
-      formValue: this.formValue as Signal<Record<string, unknown>>,
-      rootForm: formAccessor as unknown as import('@angular/forms/signals').FieldTree<unknown>,
-      derivationFunctions: this.functionRegistry.getDerivationFunctions(),
-      customFunctions: this.functionRegistry.getCustomFunctions(),
-      logger: this.logger,
-      warningTracker: this.derivationWarningTracker,
-      derivationLogger: untracked(() => this.derivationLogger()),
-    };
-
-    // Apply debounced derivations using the cached collection
-    // Pass changedFields to filter derivations whose dependencies haven't changed
-    const result = applyDerivationsForTrigger(cachedCollection, 'debounced', applicatorContext, changedFields);
-
-    if (result.maxIterationsReached) {
-      this.logger.warn(
-        `Debounced derivation processing reached max iterations (${debounceMs}ms). ` +
-          `Applied: ${result.appliedCount}, Skipped: ${result.skippedCount}, Errors: ${result.errorCount}`,
-      );
-    }
   }
 
   private setupEventHandlers(): void {
@@ -903,39 +675,6 @@ export class DynamicForm<
     // Type assertion is necessary: Angular Signal Forms expects exact form value type
     (this.form()().value.set as (value: unknown) => void)(emptyValue);
     this.value.set(emptyValue);
-  }
-
-  /**
-   * Logs a dev-mode warning when derivations use wildcard dependencies.
-   *
-   * Wildcard dependencies (`*`) cause the derivation to run on ANY form change,
-   * which can impact performance in large forms. This warning encourages users
-   * to specify explicit `dependsOn` arrays for better performance.
-   *
-   * @internal
-   */
-  private warnAboutWildcardDependencies(collection: DerivationCollection): void {
-    if (!isDevMode()) return;
-
-    const wildcardEntries = collection.wildcardEntries;
-    if (wildcardEntries.length === 0) return;
-
-    // Filter to entries that have functionName but no explicit dependsOn
-    // These are the ones that defaulted to wildcard
-    const implicitWildcards = wildcardEntries.filter(
-      (entry) => entry.functionName && (!entry.originalConfig?.dependsOn || entry.originalConfig.dependsOn.length === 0),
-    );
-
-    if (implicitWildcards.length > 0) {
-      const derivationDescs = implicitWildcards.map((e) => `${e.sourceFieldKey} -> ${e.targetFieldKey} (${e.functionName})`);
-
-      this.logger.warn(
-        '[Derivation] Derivations using custom functions without explicit dependsOn detected. ' +
-          'These run on EVERY form change, which may impact performance in large forms. ' +
-          'Consider specifying explicit dependsOn arrays for better performance.',
-        derivationDescs,
-      );
-    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

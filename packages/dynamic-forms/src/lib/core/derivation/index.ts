@@ -42,3 +42,12 @@ export { createDefaultDerivationLogConfig } from './derivation-logger';
 // Derivation Logger Service
 export type { DerivationLogger } from './derivation-logger.service';
 export { DERIVATION_LOGGER, createDerivationLogger } from './derivation-logger.service';
+
+// Derivation Orchestrator
+export type { DerivationOrchestratorConfig } from './derivation-orchestrator';
+export {
+  DerivationOrchestrator,
+  createDerivationOrchestrator,
+  DERIVATION_ORCHESTRATOR,
+  injectDerivationOrchestrator,
+} from './derivation-orchestrator';
