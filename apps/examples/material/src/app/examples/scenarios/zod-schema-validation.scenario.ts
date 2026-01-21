@@ -33,7 +33,7 @@ const config = {
       key: 'password',
       type: 'input',
       label: 'Password',
-      required: true,
+      // No `required: true` - Zod handles validation via .min(8) and .regex()
       props: {
         type: 'password',
         hint: 'Min 8 chars, uppercase, lowercase, and number required',
@@ -44,7 +44,7 @@ const config = {
       key: 'confirmPassword',
       type: 'input',
       label: 'Confirm Password',
-      required: true,
+      // No `required: true` - Zod handles validation via .min(1)
       props: {
         type: 'password',
         hint: 'Re-enter your password',
