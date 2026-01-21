@@ -20,13 +20,9 @@ const passwordSchema = z
 /**
  * Form configuration demonstrating Zod schema validation
  * for password confirmation.
- *
- * Note: We cast the schema property separately to avoid type inference
- * conflicts between the Zod schema's output type and FormConfig's generic TValue.
  */
 const config = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  schema: standardSchema(passwordSchema) as any,
+  schema: standardSchema(passwordSchema),
   fields: [
     {
       key: 'password',
