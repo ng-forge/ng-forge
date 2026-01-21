@@ -226,6 +226,46 @@ type UserForm = z.infer<typeof userSchema>;
 // { name: string; age: number; email: string }
 ```
 
+### Optional `formConfig()` Helper
+
+For enhanced type safety between your schema and form fields, use the optional `formConfig()` helper:
+
+```typescript
+import { z } from 'zod';
+import { formConfig } from '@ng-forge/dynamic-forms';
+import { standardSchema } from '@ng-forge/dynamic-forms/schema';
+
+const passwordSchema = z
+  .object({
+    password: z.string().min(8),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords must match',
+    path: ['confirmPassword'],
+  });
+
+const config = formConfig({
+  schema: standardSchema(passwordSchema),
+  fields: [
+    { key: 'password', type: 'input', label: 'Password', required: true, props: { type: 'password' } },
+    { key: 'confirmPassword', type: 'input', label: 'Confirm', required: true, props: { type: 'password' } },
+    { key: 'submit', type: 'submit', label: 'Register' },
+  ] as const,
+});
+```
+
+The helper infers the form value type from fields and constrains the schema accordingly. This is equivalent to:
+
+```typescript
+const config = {
+  schema: standardSchema(passwordSchema),
+  fields: [...],
+} as const satisfies FormConfig;
+```
+
+Use `formConfig()` when you prefer function syntax or want explicit type inference. Both approaches work equally well.
+
 ## Best Practices
 
 **Define schemas separately for reuse:**
