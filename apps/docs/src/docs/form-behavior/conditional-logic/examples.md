@@ -608,5 +608,5 @@ logic: [
 
 - **[Conditional Logic](../)** - Getting started
 - **[Conditional Expressions](../expressions/)** - All operators
-- **[Validation](../../validation/)** - Conditional validation
-- **[Type Safety](../../type-safety/)** - TypeScript integration
+- **[Validation](../../core/validation/)** - Conditional validation
+- **[Type Safety](../../deep-dive/type-safety/)** - TypeScript integration

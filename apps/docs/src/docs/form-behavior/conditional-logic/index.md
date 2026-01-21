@@ -292,5 +292,5 @@ Conditional logic is evaluated:
 
 - **[Conditional Expressions](../expressions/)** - All operators and expression types
 - **[Examples](../examples/)** - Real-world patterns
-- **[Validation](../../validation/)** - Conditional validation
-- **[Type Safety](../../type-safety/)** - TypeScript integration
+- **[Validation](../../core/validation/)** - Conditional validation
+- **[Type Safety](../../deep-dive/type-safety/)** - TypeScript integration

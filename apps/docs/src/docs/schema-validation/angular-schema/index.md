@@ -246,4 +246,4 @@ Consider [Standard Schema (Zod)](../zod) if you:
 
 - **[Schema Validation Overview](../overview)** - When to use form-level validation
 - **[Standard Schema (Zod)](../zod)** - Alternative using Zod/Valibot
-- **[Field Validation](../../validation/)** - Individual field validators
+- **[Field Validation](../../core/validation/)** - Individual field validators

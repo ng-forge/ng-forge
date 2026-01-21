@@ -1436,11 +1436,11 @@ computed(() => {
 
 ## Related Documentation
 
-- [Conditional Logic Basics](../../core/conditional-logic) - Core concepts
-- [Conditional Expressions](../../core/conditional-logic/expressions) - All operators
+- [Conditional Logic Basics](../../form-behavior/conditional-logic) - Core concepts
+- [Conditional Expressions](../../form-behavior/conditional-logic/expressions) - All operators
 - [Validation](../../core/validation/basics) - Validation guide
 - [Multi-Page Forms](../paginated-form) - Page navigation
-- [Type Safety](../../core/type-safety/basics) - TypeScript integration
+- [Type Safety](../../deep-dive/type-safety/basics) - TypeScript integration
 
 ## Try It Yourself
 

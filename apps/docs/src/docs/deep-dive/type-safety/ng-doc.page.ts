@@ -1,11 +1,11 @@
 import { NgDocPage } from '@ng-doc/core';
-import CoreCategory from '../ng-doc.category';
+import DeepDiveCategory from '../ng-doc.category';
 
 const TypeSafetyPage: NgDocPage = {
   title: 'Type Safety',
   mdFile: ['./basics.md', './containers.md', './advanced-types.md'],
-  category: CoreCategory,
-  order: 4,
+  category: DeepDiveCategory,
+  order: 1,
 };
 
 export default TypeSafetyPage;

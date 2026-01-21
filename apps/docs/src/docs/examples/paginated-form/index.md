@@ -486,5 +486,5 @@ Apply different validation rules per step:
 
 - [Page Field Type](../../ui-libs-integrations/material/page) - Page field documentation
 - [Navigation Buttons](../../ui-libs-integrations/material/button#navigation-buttons) - Next, Previous, Submit buttons
-- [Conditional Logic](../../core/conditional-logic) - Show/hide pages dynamically
+- [Conditional Logic](../../form-behavior/conditional-logic) - Show/hide pages dynamically
 - [Validation](../../core/validation) - Per-page and cross-page validation

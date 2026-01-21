@@ -71,5 +71,5 @@ taxRate ───────────────────┴────
 
 ## Related
 
-- **[Value Derivation Basics](../../core/derivation/)** - Core concepts and syntax
-- **[Advanced Derivations](../../core/derivation/advanced/)** - Array derivations, debugging, bidirectional patterns
+- **[Value Derivation Basics](../../form-behavior/derivation/)** - Core concepts and syntax
+- **[Advanced Derivations](../../form-behavior/derivation/advanced/)** - Array derivations, debugging, bidirectional patterns

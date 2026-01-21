@@ -127,7 +127,7 @@ Regular expression validation.
 
 ## Conditional Expressions
 
-Validators support a `when` property for conditional validation. See **[Conditional Logic Expressions](../conditional-logic/expressions/)** for the complete reference on:
+Validators support a `when` property for conditional validation. See **[Conditional Logic Expressions](../../form-behavior/conditional-logic/expressions/)** for the complete reference on:
 
 - All operators (`equals`, `notEquals`, `greater`, `less`, `contains`, `matches`, etc.)
 - Expression types (`fieldValue`, `formValue`, `javascript`, `custom`)
@@ -366,5 +366,5 @@ interface ConditionalExpression {
 
 - **[Validation Basics](../basics/)** - Getting started with validation
 - **[Validation Advanced](../advanced/)** - Conditional validators
-- **[Conditional Logic](../../conditional-logic/)** - Field behavior changes
-- **[Type Safety](../../type-safety/)** - TypeScript integration
+- **[Conditional Logic](../../form-behavior/conditional-logic/)** - Field behavior changes
+- **[Type Safety](../../deep-dive/type-safety/)** - TypeScript integration

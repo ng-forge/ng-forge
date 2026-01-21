@@ -278,4 +278,4 @@ const orderForm = {
 
 - **[Advanced Derivations](./advanced/)** - Array derivations, debugging, bidirectional patterns
 - **[Conditional Logic](../conditional-logic/)** - Control field visibility and state
-- **[Validation](../validation/)** - Field validation rules
+- **[Validation](../../core/validation/)** - Field validation rules
