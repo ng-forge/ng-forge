@@ -17,7 +17,7 @@ import {
   untracked,
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
-import { form, FieldTree } from '@angular/forms/signals';
+import { form, FieldTree, Schema } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { EMPTY, forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
 import { derivedFromDeferred } from './utils/derived-from-deferred/derived-from-deferred';
@@ -30,6 +30,7 @@ import { FormConfig, FormOptions } from './models/form-config';
 import { RegisteredFieldTypes } from './models/registry/field-registry';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 import { createSchemaFromFields } from './core/schema-builder';
+import { createFormLevelSchema } from './core/form-schema-merger';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
@@ -332,14 +333,31 @@ export class DynamicForm<
   readonly form = computed<ReturnType<typeof form<TModel>>>(() => {
     return runInInjectionContext(this.injector, () => {
       const setup = this.formSetup();
+      const config = this.config();
       let formInstance: ReturnType<typeof form<TModel>>;
 
       untracked(() => this.rootFormRegistry.registerFormValueSignal(this.entity as Signal<Record<string, unknown>>));
 
-      if (setup.schemaFields && setup.schemaFields.length > 0) {
+      const hasFields = setup.schemaFields && setup.schemaFields.length > 0;
+      const hasFormSchema = config.schema !== undefined;
+
+      if (hasFields) {
         const crossFieldCollection = collectCrossFieldEntries(setup.schemaFields as FieldDef<unknown>[]);
-        const schema = createSchemaFromFields(setup.schemaFields, setup.registry, crossFieldCollection.validators);
-        formInstance = untracked(() => form(this.entity, schema));
+
+        // Create schema with both field-level and form-level validation
+        // Type assertion needed due to complex generic type inference between TModel and InferFormValue
+        const combinedSchema = createSchemaFromFields(setup.schemaFields, setup.registry, {
+          crossFieldValidators: crossFieldCollection.validators,
+          formLevelSchema: config.schema,
+        }) as Schema<TModel>;
+
+        formInstance = untracked(() => form(this.entity, combinedSchema));
+      } else if (hasFormSchema) {
+        // Only form-level schema (no fields with validation)
+        // Non-null assertion safe: hasFormSchema guarantees config.schema is defined
+        // Type assertion needed due to generic type inference
+        const formSchema = createFormLevelSchema(config.schema!) as Schema<TModel>;
+        formInstance = untracked(() => form(this.entity, formSchema));
       } else {
         formInstance = untracked(() => form(this.entity));
       }
