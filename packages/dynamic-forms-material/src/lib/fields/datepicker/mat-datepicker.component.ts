@@ -59,12 +59,11 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       <mat-datepicker-toggle matIconSuffix [for]="picker" />
       <mat-datepicker #picker [startAt]="startAt()" [startView]="props()?.startView || 'month'" [touchUi]="props()?.touchUi ?? false" />
 
-      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-        <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
-      } @empty {
-        @if (props()?.hint; as hint) {
-          <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
-        }
+      @if (props()?.hint; as hint) {
+        <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
+      }
+      @if (errorsToDisplay()[0]; as error) {
+        <mat-error [id]="errorId()">{{ error.message }}</mat-error>
       }
     </mat-form-field>
   `,

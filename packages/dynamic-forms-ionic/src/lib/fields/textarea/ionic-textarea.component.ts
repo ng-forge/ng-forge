@@ -28,14 +28,14 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       [fill]="props()?.fill ?? 'outline'"
       [shape]="props()?.shape"
       [readonly]="f().readonly()"
-      [helperText]="errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
+      [helperText]="(props()?.hint | dynamicText | async) ?? undefined"
       [attr.tabindex]="tabIndex()"
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-required]="ariaRequired()"
       [attr.aria-describedby]="ariaDescribedBy()"
     />
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    @if (errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="errorId()" role="alert">{{ error.message }}</ion-note>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

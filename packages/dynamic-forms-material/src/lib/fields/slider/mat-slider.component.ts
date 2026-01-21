@@ -38,12 +38,11 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       />
     </mat-slider>
 
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
-    } @empty {
-      @if (props()?.hint; as hint) {
-        <div class="mat-hint" [id]="hintId()">{{ hint | dynamicText | async }}</div>
-      }
+    @if (props()?.hint; as hint) {
+      <div class="mat-hint" [id]="hintId()">{{ hint | dynamicText | async }}</div>
+    }
+    @if (errorsToDisplay()[0]; as error) {
+      <mat-error [id]="errorId()">{{ error.message }}</mat-error>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
