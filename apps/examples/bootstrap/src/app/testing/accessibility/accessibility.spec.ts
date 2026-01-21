@@ -539,7 +539,7 @@ test.describe('Accessibility Tests', () => {
       await expect(hint).toHaveText('This field is required for submission');
     });
 
-    test('hint should remain visible when field displays errors', async ({ page, helpers }) => {
+    test('hint should be hidden when field displays errors', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('aria-attributes');
       await expect(scenario).toBeVisible();
 
@@ -554,12 +554,12 @@ test.describe('Accessibility Tests', () => {
       await input.focus();
       await input.blur();
 
-      // Both error and hint should be visible
+      // Error should be visible, hint should be hidden
       await expect(error).toBeVisible();
-      await expect(hint).toBeVisible();
+      await expect(hint).not.toBeVisible();
     });
 
-    test('error should disappear when errors are cleared but hint remains', async ({ page, helpers }) => {
+    test('hint should reappear when errors are cleared', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('aria-attributes');
       await expect(scenario).toBeVisible();
 
@@ -571,17 +571,17 @@ test.describe('Accessibility Tests', () => {
       await input.focus();
       await input.blur();
       await expect(error).toBeVisible();
-      await expect(hint).toBeVisible();
+      await expect(hint).not.toBeVisible();
 
       // Fix the error by entering a value
       await input.fill('valid value');
 
-      // Error should be hidden, hint should still be visible
+      // Error should be hidden, hint should reappear
       await expect(error).not.toBeVisible();
       await expect(hint).toBeVisible();
     });
 
-    test('aria-describedby should include both hint and error when errors appear', async ({ page, helpers }) => {
+    test('aria-describedby should switch from hint to error when errors appear', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('aria-attributes');
       await expect(scenario).toBeVisible();
 
@@ -596,13 +596,13 @@ test.describe('Accessibility Tests', () => {
       await input.focus();
       await input.blur();
 
-      // Now aria-describedby should reference both hint and error
+      // Now aria-describedby should reference error only (not hint)
       ariaDescribedBy = await input.getAttribute('aria-describedby');
       expect(ariaDescribedBy).toContain('requiredField-error');
-      expect(ariaDescribedBy).toContain('requiredField-hint');
+      expect(ariaDescribedBy).not.toContain('requiredField-hint');
     });
 
-    test('aria-describedby should only reference hint when errors are cleared', async ({ page, helpers }) => {
+    test('aria-describedby should switch back to hint when errors are cleared', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('aria-attributes');
       await expect(scenario).toBeVisible();
 
@@ -614,7 +614,7 @@ test.describe('Accessibility Tests', () => {
 
       let ariaDescribedBy = await input.getAttribute('aria-describedby');
       expect(ariaDescribedBy).toContain('requiredField-error');
-      expect(ariaDescribedBy).toContain('requiredField-hint');
+      expect(ariaDescribedBy).not.toContain('requiredField-hint');
 
       // Clear error
       await input.fill('valid value');

@@ -32,11 +32,10 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
         [attr.aria-required]="ariaRequired()"
         [attr.aria-describedby]="ariaDescribedBy()"
       />
-      @if (props()?.hint; as hint) {
-        <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
-      }
       @if (errorsToDisplay()[0]; as error) {
         <mat-error [id]="errorId()">{{ error.message }}</mat-error>
+      } @else if (props()?.hint; as hint) {
+        <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
       }
     </mat-form-field>
   `,

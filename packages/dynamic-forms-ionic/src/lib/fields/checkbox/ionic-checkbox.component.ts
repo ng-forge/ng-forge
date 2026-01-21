@@ -31,8 +31,7 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
 
     @if (errorsToDisplay()[0]; as error) {
       <ion-note color="danger" class="df-ion-error" [id]="errorId()" role="alert">{{ error.message }}</ion-note>
-    }
-    @if (props()?.hint; as hint) {
+    } @else if (props()?.hint; as hint) {
       <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,

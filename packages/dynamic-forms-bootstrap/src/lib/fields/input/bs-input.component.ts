@@ -73,11 +73,10 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
             {{ p?.validFeedback | dynamicText | async }}
           </div>
         }
-        @if (p?.hint) {
-          <div class="form-text" [id]="hintId()">{{ p?.hint | dynamicText | async }}</div>
-        }
         @if (errorsToDisplay()[0]; as error) {
           <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
+        } @else if (p?.hint) {
+          <div class="form-text" [id]="hintId()">{{ p?.hint | dynamicText | async }}</div>
         }
       </div>
     }

@@ -363,10 +363,7 @@ test.describe('Accessibility Tests', () => {
       await expect(hint).toHaveText('This field is required for submission');
     });
 
-    // Note: Ionic's ion-input with helperText property does NOT support showing both
-    // hint and error simultaneously. Ionic internally manages the helper text visibility.
-    // This is a limitation of Ionic's component, so we test Ionic's actual behavior.
-    test('hint should be hidden when field displays errors (Ionic limitation)', async ({ page, helpers }) => {
+    test('hint should be hidden when field displays errors', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('aria-attributes');
       await expect(scenario).toBeVisible();
 
@@ -382,7 +379,7 @@ test.describe('Accessibility Tests', () => {
       await input.blur();
       await page.waitForTimeout(200);
 
-      // Error should be visible, hint hidden (Ionic's internal behavior)
+      // Error should be visible, hint should be hidden
       await expect(error).toBeVisible();
       await expect(hint).not.toBeVisible();
     });
@@ -411,7 +408,7 @@ test.describe('Accessibility Tests', () => {
       await expect(hint).toBeVisible();
     });
 
-    test('aria-describedby should include both hint and error when errors appear', async ({ page, helpers }) => {
+    test('aria-describedby should switch from hint to error when errors appear', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('aria-attributes');
       await expect(scenario).toBeVisible();
 
@@ -427,13 +424,13 @@ test.describe('Accessibility Tests', () => {
       await input.blur();
       await page.waitForTimeout(200);
 
-      // Now aria-describedby should reference both hint and error
+      // Now aria-describedby should reference error only (not hint)
       ariaDescribedBy = await input.getAttribute('aria-describedby');
       expect(ariaDescribedBy).toContain('requiredField-error');
-      expect(ariaDescribedBy).toContain('requiredField-hint');
+      expect(ariaDescribedBy).not.toContain('requiredField-hint');
     });
 
-    test('aria-describedby should only reference hint when errors are cleared', async ({ page, helpers }) => {
+    test('aria-describedby should switch back to hint when errors are cleared', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('aria-attributes');
       await expect(scenario).toBeVisible();
 
@@ -446,7 +443,7 @@ test.describe('Accessibility Tests', () => {
 
       let ariaDescribedBy = await input.getAttribute('aria-describedby');
       expect(ariaDescribedBy).toContain('requiredField-error');
-      expect(ariaDescribedBy).toContain('requiredField-hint');
+      expect(ariaDescribedBy).not.toContain('requiredField-hint');
 
       // Clear error
       await input.fill('valid value');

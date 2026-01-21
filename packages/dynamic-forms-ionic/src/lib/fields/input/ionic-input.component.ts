@@ -29,7 +29,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [fill]="effectiveFill()"
       [shape]="effectiveShape()"
       [readonly]="f().readonly()"
-      [helperText]="(props()?.hint | dynamicText | async) ?? undefined"
+      [helperText]="errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="tabIndex()"
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-required]="ariaRequired()"

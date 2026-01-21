@@ -25,11 +25,10 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       [attr.aria-describedby]="ariaDescribedBy()"
     />
 
-    @if (props()?.hint; as hint) {
-      <small class="p-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
-    }
     @if (errorsToDisplay()[0]; as error) {
       <small class="p-error" [id]="errorId()" role="alert">{{ error.message }}</small>
+    } @else if (props()?.hint; as hint) {
+      <small class="p-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
     }
   `,
   styles: [

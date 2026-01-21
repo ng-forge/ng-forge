@@ -34,11 +34,10 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
         [style.resize]="props()?.resize || 'vertical'"
       ></textarea>
 
-      @if (props()?.hint; as hint) {
-        <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
-      }
       @if (errorsToDisplay()[0]; as error) {
         <mat-error [id]="errorId()">{{ error.message }}</mat-error>
+      } @else if (props()?.hint; as hint) {
+        <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
       }
     </mat-form-field>
   `,
