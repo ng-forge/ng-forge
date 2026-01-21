@@ -8,6 +8,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+env:
+  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng dynamic-forms-zod'
+
 jobs:
   # This job determines if the workflow should run
   should-run:
@@ -125,7 +128,7 @@ jobs:
       - name: Verify package integrity
         run: |
           echo "Verifying package integrity..."
-          for PKG in dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng; do
+          for PKG in ${{ env.LIBRARY_PACKAGES }}; do
             if [ -d "dist/packages/$PKG" ]; then
               echo "Checking dist/packages/$PKG..."
               if [ ! -f "dist/packages/$PKG/package.json" ]; then
@@ -152,6 +155,7 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
+            dist/packages/dynamic-forms-zod
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
   quality:
@@ -192,6 +196,7 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
+            dist/packages/dynamic-forms-zod
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Lint affected projects
@@ -246,6 +251,7 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
+            dist/packages/dynamic-forms-zod
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Test affected projects
@@ -292,6 +298,7 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
+            dist/packages/dynamic-forms-zod
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Build docs if affected

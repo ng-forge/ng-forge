@@ -11,7 +11,11 @@ export const STANDARD_SCHEMA_KIND = 'standardSchema' as const;
  * This allows the dynamic forms system to identify and use standard-compliant schemas
  * for validation without coupling to any specific schema library.
  *
- * @typeParam T - The inferred type that the schema validates to
+ * The `out` variance modifier makes this type covariant in T, meaning a
+ * StandardSchemaMarker<SpecificType> is assignable to StandardSchemaMarker<BroaderType>.
+ * This enables Zod/Valibot schemas to be used with FormConfig's inferred TValue.
+ *
+ * @typeParam T - The inferred type that the schema validates to (covariant)
  *
  * @example
  * ```typescript
@@ -27,7 +31,7 @@ export const STANDARD_SCHEMA_KIND = 'standardSchema' as const;
  * const formSchema = standardSchema(userSchema);
  * ```
  */
-export interface StandardSchemaMarker<T = unknown> {
+export interface StandardSchemaMarker<out T = unknown> {
   /**
    * Internal marker identifying this as a standard schema wrapper.
    * @internal
@@ -43,6 +47,9 @@ export interface StandardSchemaMarker<T = unknown> {
 /**
  * Type alias for form schemas that can be used with dynamic forms.
  * Currently only supports Standard Schema compliant schemas.
+ *
+ * The covariance from StandardSchemaMarker flows through, allowing
+ * schemas with specific types to be assigned to broader form value types.
  *
  * @typeParam T - The inferred type that the schema validates to
  */
@@ -119,3 +126,9 @@ export function isStandardSchemaMarker(value: unknown): value is StandardSchemaM
     'schema' in value
   );
 }
+
+/**
+ * Extracts the output type from a Standard Schema.
+ * Works with Zod, Valibot, ArkType, and other Standard Schema compliant libraries.
+ */
+export type InferSchemaOutput<T> = T extends StandardSchemaV1<infer Output> ? Output : never;

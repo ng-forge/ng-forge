@@ -20,6 +20,7 @@ import { schemaSystemSuite } from '../schema-system/schema-system.suite';
 import { submissionBehaviorSuite } from '../submission-behavior/submission-behavior.suite';
 import { userJourneyFlowsSuite } from '../user-journey-flows/user-journey-flows.suite';
 import { userWorkflowsSuite } from '../user-workflows/user-workflows.suite';
+import { zodSchemaValidationSuite } from '../zod-schema-validation/zod-schema-validation.suite';
 
 /**
  * Registry of all test suites in the application.
@@ -48,4 +49,5 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   submissionBehaviorSuite,
   userJourneyFlowsSuite,
   userWorkflowsSuite,
+  zodSchemaValidationSuite,
 ];

@@ -40,6 +40,7 @@ export interface FormConfig<
   TFields extends NarrowFields | RegisteredFieldTypes[] = RegisteredFieldTypes[],
   TValue = InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>,
   TProps extends object = Record<string, unknown>,
+  TSchemaValue = unknown,
 > {
   /**
    * Array of field definitions that define the form structure.
@@ -82,10 +83,10 @@ export interface FormConfig<
    * const formConfig = {
    *   fields: [...],
    *   schema: standardSchema(PasswordSchema),
-   * };
+   * } as const satisfies FormConfig;
    * ```
    */
-  schema?: FormSchema<TValue>;
+  schema?: FormSchema<TSchemaValue>;
 
   /**
    * Global form configuration options.
