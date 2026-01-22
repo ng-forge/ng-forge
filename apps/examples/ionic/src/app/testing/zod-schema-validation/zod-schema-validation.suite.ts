@@ -10,7 +10,7 @@ export const zodSchemaValidationSuite: TestSuite = {
   id: 'zod-schema-validation',
   title: 'Zod Schema Validation Tests',
   description: 'Tests form-level validation using Zod with Standard Schema',
-  path: '/test/zod-schema-validation',
+  path: '/testing/zod-schema-validation',
   scenarios: [passwordConfirmationScenario],
 };
 
