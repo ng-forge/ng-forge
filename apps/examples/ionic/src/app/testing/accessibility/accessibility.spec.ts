@@ -414,7 +414,7 @@ test.describe('Accessibility Tests', () => {
 
       const input = scenario.locator('#requiredField input');
 
-      // Initially aria-describedby references hint
+      // Initially aria-describedby references hint only
       let ariaDescribedBy = await input.getAttribute('aria-describedby');
       expect(ariaDescribedBy).toContain('requiredField-hint');
       expect(ariaDescribedBy).not.toContain('requiredField-error');
@@ -424,7 +424,7 @@ test.describe('Accessibility Tests', () => {
       await input.blur();
       await page.waitForTimeout(200);
 
-      // Now aria-describedby should reference error
+      // Now aria-describedby should reference error only (not hint)
       ariaDescribedBy = await input.getAttribute('aria-describedby');
       expect(ariaDescribedBy).toContain('requiredField-error');
       expect(ariaDescribedBy).not.toContain('requiredField-hint');
@@ -443,12 +443,13 @@ test.describe('Accessibility Tests', () => {
 
       let ariaDescribedBy = await input.getAttribute('aria-describedby');
       expect(ariaDescribedBy).toContain('requiredField-error');
+      expect(ariaDescribedBy).not.toContain('requiredField-hint');
 
       // Clear error
       await input.fill('valid value');
       await page.waitForTimeout(200);
 
-      // aria-describedby should reference hint again
+      // aria-describedby should reference hint only
       ariaDescribedBy = await input.getAttribute('aria-describedby');
       expect(ariaDescribedBy).toContain('requiredField-hint');
       expect(ariaDescribedBy).not.toContain('requiredField-error');

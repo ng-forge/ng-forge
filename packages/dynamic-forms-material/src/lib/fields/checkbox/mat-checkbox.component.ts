@@ -31,12 +31,10 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       {{ label() | dynamicText | async }}
     </mat-checkbox>
 
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <mat-error [id]="errorId() + '-' + i" [attr.hidden]="f().hidden() || null">{{ error.message }}</mat-error>
-    } @empty {
-      @if (props()?.hint; as hint) {
-        <div class="mat-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
-      }
+    @if (errorsToDisplay()[0]; as error) {
+      <mat-error [id]="errorId()" [attr.hidden]="f().hidden() || null">{{ error.message }}</mat-error>
+    } @else if (props()?.hint; as hint) {
+      <div class="mat-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',

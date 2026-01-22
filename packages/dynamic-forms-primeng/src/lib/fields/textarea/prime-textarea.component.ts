@@ -33,12 +33,10 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
         [styleClass]="textareaClasses()"
       />
 
-      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-        <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
-      } @empty {
-        @if (props()?.hint; as hint) {
-          <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
-        }
+      @if (errorsToDisplay()[0]; as error) {
+        <small class="p-error" [id]="errorId()" role="alert">{{ error.message }}</small>
+      } @else if (props()?.hint; as hint) {
+        <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
       }
     </div>
   `,

@@ -40,12 +40,10 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
         </ion-select-option>
       }
     </ion-select>
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
-    } @empty {
-      @if (props()?.hint; as hint) {
-        <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
-      }
+    @if (errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="errorId()" role="alert">{{ error.message }}</ion-note>
+    } @else if (props()?.hint; as hint) {
+      <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

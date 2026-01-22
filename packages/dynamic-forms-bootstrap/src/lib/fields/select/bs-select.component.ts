@@ -40,12 +40,10 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
         }
       </select>
 
-      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-        <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
-      } @empty {
-        @if (props()?.hint; as hint) {
-          <div class="form-text" [id]="hintId()">{{ hint | dynamicText | async }}</div>
-        }
+      @if (errorsToDisplay()[0]; as error) {
+        <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
+      } @else if (props()?.hint; as hint) {
+        <div class="form-text" [id]="hintId()">{{ hint | dynamicText | async }}</div>
       }
     </div>
   `,
