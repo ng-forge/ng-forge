@@ -40,7 +40,6 @@
     "rxjs": ">=7.0.0"
   },
   "dependencies": {
-    "@standard-schema/spec": "^1.0.0",
     "ngxtension": ">=4.0.0"
   }
 }
