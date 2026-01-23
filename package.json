@@ -98,7 +98,6 @@
     "tslib": "^2.3.0",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.52.0",
-    "verdaccio": "^6.0.5",
     "vite": "^7.3.1",
     "vite-tsconfig-paths": "^6.0.3",
     "vitest": "4.0.17",
@@ -125,7 +124,6 @@
     "@ng-doc/core": "^21.0.0",
     "@ng-doc/ui-kit": "^21.0.0",
     "@primeuix/themes": "^2.0.2",
-    "@standard-schema/spec": "^1.1.0",
     "@vercel/analytics": "^1.6.1",
     "bootstrap": "^5.3.8",
     "date-fns": "^4.1.0",
@@ -133,9 +131,7 @@
     "ngxtension": "^7.0.2",
     "primeicons": "^7.0.0",
     "primeng": "^21.0.2",
-    "rxjs": "~7.8.0",
-    "zod": "^3.25.76",
-    "zod-to-json-schema": "^3.25.1"
+    "rxjs": "~7.8.0"
   },
   "packageManager": "pnpm@10.28.0",
   "engines": {

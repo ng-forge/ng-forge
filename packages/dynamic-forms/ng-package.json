@@ -5,5 +5,5 @@
     "entryFile": "src/index.ts"
   },
   "assets": [".npmignore"],
-  "allowedNonPeerDependencies": ["ngxtension", "@standard-schema/spec"]
+  "allowedNonPeerDependencies": ["ngxtension"]
 }

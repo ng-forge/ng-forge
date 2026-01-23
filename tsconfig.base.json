@@ -22,7 +22,6 @@
       "@ng-doc/generated": ["dist/ng-doc/docs"],
       "@ng-forge/dynamic-forms": ["packages/dynamic-forms/src/index.ts"],
       "@ng-forge/dynamic-forms/integration": ["packages/dynamic-forms/integration/src/public_api.ts"],
-      "@ng-forge/dynamic-forms/schema": ["packages/dynamic-forms/schema/src/public_api.ts"],
       "@ng-forge/dynamic-forms-bootstrap": ["packages/dynamic-forms-bootstrap/src/index.ts"],
       "@ng-forge/dynamic-forms-ionic": ["packages/dynamic-forms-ionic/src/index.ts"],
       "@ng-forge/dynamic-forms-material": ["packages/dynamic-forms-material/src/index.ts"],
@@ -31,13 +30,7 @@
       "@ng-forge/examples-shared-testing/playwright-config": ["internal/examples-shared-testing/src/lib/playwright-config.ts"],
       "@ng-forge/styling": ["internal/styling/src/index.ts"],
       "@ng-forge/dynamic-forms/testing": ["packages/dynamic-forms/testing/src/public_api.ts"],
-      "@ng-forge/utils": ["internal/utils/src/index.ts"],
-      "@ng-forge/dynamic-forms-zod": ["internal/dynamic-forms-zod/src/index.ts"],
-      "@ng-forge/dynamic-forms-zod/material": ["internal/dynamic-forms-zod/material/src/index.ts"],
-      "@ng-forge/dynamic-forms-zod/bootstrap": ["internal/dynamic-forms-zod/bootstrap/src/index.ts"],
-      "@ng-forge/dynamic-forms-zod/primeng": ["internal/dynamic-forms-zod/primeng/src/index.ts"],
-      "@ng-forge/dynamic-forms-zod/ionic": ["internal/dynamic-forms-zod/ionic/src/index.ts"],
-      "@ng-forge/dynamic-forms-zod/mcp": ["internal/dynamic-forms-zod/mcp/src/index.ts"]
+      "@ng-forge/utils": ["internal/utils/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
