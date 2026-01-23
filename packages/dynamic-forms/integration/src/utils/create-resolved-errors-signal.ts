@@ -119,9 +119,12 @@ function resolveErrorMessage(
     return of(null);
   }
 
-  // If using error.message directly (string), wrap in of() instead of dynamicTextToObservable
-  // error.message is always a string, not DynamicText
-  const messageObservable = messageToUse === error.message ? of(messageToUse) : dynamicTextToObservable(messageToUse, injector);
+  // If using error.message directly (from schema validators), wrap in of() instead of dynamicTextToObservable
+  // error.message is always a plain string, not DynamicText
+  const isSchemaMessage = fieldMessage === undefined && defaultMessage === undefined;
+  const messageObservable = isSchemaMessage
+    ? of(messageToUse as string) // error.message is always string
+    : dynamicTextToObservable(messageToUse, injector);
 
   // Apply parameter interpolation to support {{param}} syntax
   return messageObservable.pipe(
