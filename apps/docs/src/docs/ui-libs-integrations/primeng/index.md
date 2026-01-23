@@ -814,5 +814,5 @@ PrimeNG components are designed with accessibility in mind and follow WAI-ARIA s
 
 - Check out [Examples & Patterns](../../../examples/) for real-world use cases
 - Learn about [Validation](../../../core/validation/) for form validation
-- See [Type Safety](../../../core/type-safety/) for TypeScript integration
-- Explore [Conditional Logic](../../../core/conditional-logic/) for dynamic field behavior
+- See [Type Safety](../../../deep-dive/type-safety/) for TypeScript integration
+- Explore [Conditional Logic](../../../form-behavior/conditional-logic/) for dynamic field behavior

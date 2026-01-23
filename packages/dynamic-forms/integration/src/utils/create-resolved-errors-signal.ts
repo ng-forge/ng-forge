@@ -86,7 +86,12 @@ export function createResolvedErrorsSignal<T>(
 
 /**
  * Resolves a single error message from DynamicText sources with fallback logic
- * Priority: field-level message → default message → no message (logs warning)
+ * Priority: field-level message → default message → error.message → no message (logs warning)
+ *
+ * The error.message fallback enables schema validation libraries (Zod, Valibot, etc.)
+ * to provide their own messages without requiring explicit validationMessages configuration.
+ * Users who want translations can still override by configuring validationMessages.
+ *
  * @internal
  */
 function resolveErrorMessage(
@@ -102,8 +107,8 @@ function resolveErrorMessage(
   // Fall back to default message if no field-level message exists
   const defaultMessage = defaultMessages[error.kind];
 
-  // Determine which message to use: field-level → default
-  const messageToUse = fieldMessage ?? defaultMessage;
+  // Determine which message to use: field-level → default → error.message (from schema validators)
+  const messageToUse = fieldMessage ?? defaultMessage ?? error.message;
 
   // If no message found, log warning and return null (will be filtered out)
   if (!messageToUse) {
@@ -114,8 +119,12 @@ function resolveErrorMessage(
     return of(null);
   }
 
-  // Convert DynamicText to Observable
-  const messageObservable = dynamicTextToObservable(messageToUse, injector);
+  // If using error.message directly (from schema validators), wrap in of() instead of dynamicTextToObservable
+  // error.message is always a plain string, not DynamicText
+  const isSchemaMessage = fieldMessage === undefined && defaultMessage === undefined;
+  const messageObservable = isSchemaMessage
+    ? of(messageToUse as string) // error.message is always string
+    : dynamicTextToObservable(messageToUse, injector);
 
   // Apply parameter interpolation to support {{param}} syntax
   return messageObservable.pipe(

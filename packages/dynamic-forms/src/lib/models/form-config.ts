@@ -1,4 +1,3 @@
-import { Schema } from '@angular/forms/signals';
 import { InferFormValue } from './types/form-value-inference';
 import { NarrowFields, RegisteredFieldTypes } from './registry/field-registry';
 import { SchemaDefinition } from './schemas/schema-definition';
@@ -6,6 +5,7 @@ import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../c
 import { CustomFunction } from '../core/expressions/custom-function-types';
 import { ValidationMessages } from './validation-types';
 import { SubmissionConfig } from './submission-config';
+import type { FormSchema } from '@ng-forge/dynamic-forms/schema';
 
 /**
  * Configuration interface for defining dynamic form structure and behavior.
@@ -40,6 +40,7 @@ export interface FormConfig<
   TFields extends NarrowFields | RegisteredFieldTypes[] = RegisteredFieldTypes[],
   TValue = InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>,
   TProps extends object = Record<string, unknown>,
+  TSchemaValue = unknown,
 > {
   /**
    * Array of field definitions that define the form structure.
@@ -60,19 +61,32 @@ export interface FormConfig<
   fields: TFields;
 
   /**
-   * Optional form-level validation schema.
+   * Optional form-level validation schema using Standard Schema spec.
    *
    * Provides additional validation beyond field-level validation.
+   * Supports Zod, Valibot, ArkType, and other Standard Schema compliant libraries.
    * Useful for cross-field validation rules.
    *
    * @example
    * ```typescript
-   * schema: {
-   *   passwordConfirm: validators.equals('password')
-   * }
+   * import { z } from 'zod';
+   * import { standardSchema } from '@ng-forge/dynamic-forms/schema';
+   *
+   * const PasswordSchema = z.object({
+   *   password: z.string().min(8),
+   *   confirmPassword: z.string(),
+   * }).refine(
+   *   (data) => data.password === data.confirmPassword,
+   *   { message: 'Passwords must match', path: ['confirmPassword'] }
+   * );
+   *
+   * const formConfig = {
+   *   fields: [...],
+   *   schema: standardSchema(PasswordSchema),
+   * } as const satisfies FormConfig;
    * ```
    */
-  schema?: Schema<TValue>;
+  schema?: FormSchema<TSchemaValue>;
 
   /**
    * Global form configuration options.

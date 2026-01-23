@@ -3,6 +3,7 @@ import { TestSuite } from './types';
 // Import all test suites
 import { accessibilitySuite } from '../accessibility/accessibility.suite';
 import { advancedValidationSuite } from '../advanced-validation/advanced-validation.suite';
+import { angularSchemaValidationSuite } from '../angular-schema-validation/angular-schema-validation.suite';
 import { arrayFieldsSuite } from '../array-fields/array-fields.suite';
 import { asyncValidationSuite } from '../async-validation/async-validation.suite';
 import { bootstrapComponentsSuite } from '../bootstrap-components/bootstrap-components.suite';
@@ -20,6 +21,7 @@ import { schemaSystemSuite } from '../schema-system/schema-system.suite';
 import { submissionBehaviorSuite } from '../submission-behavior/submission-behavior.suite';
 import { userJourneyFlowsSuite } from '../user-journey-flows/user-journey-flows.suite';
 import { userWorkflowsSuite } from '../user-workflows/user-workflows.suite';
+import { zodSchemaValidationSuite } from '../zod-schema-validation/zod-schema-validation.suite';
 
 /**
  * Registry of all test suites in the application.
@@ -31,6 +33,7 @@ import { userWorkflowsSuite } from '../user-workflows/user-workflows.suite';
 export const TEST_SUITE_REGISTRY: TestSuite[] = [
   accessibilitySuite,
   advancedValidationSuite,
+  angularSchemaValidationSuite,
   arrayFieldsSuite,
   asyncValidationSuite,
   bootstrapComponentsSuite,
@@ -48,4 +51,5 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   submissionBehaviorSuite,
   userJourneyFlowsSuite,
   userWorkflowsSuite,
+  zodSchemaValidationSuite,
 ];

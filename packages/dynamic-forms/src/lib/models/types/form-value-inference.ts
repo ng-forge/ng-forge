@@ -60,12 +60,20 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
       : // Display-only: text - exclude
         T extends { type: 'text' }
         ? never
-        : // Value fields: infer type and optionality
-          T extends { key: infer K; value: infer V }
-          ? K extends string
-            ? { [P in K]: MaybeOptional<T, InferValueType<T, V>> }
-            : never
-          : never;
+        : // Button fields: submit/button - exclude (they don't hold values)
+          T extends { type: 'submit' | 'button' }
+          ? never
+          : // Value fields with explicit value: infer type and optionality
+            T extends { key: infer K; value: infer V }
+            ? K extends string
+              ? { [P in K]: MaybeOptional<T, InferValueType<T, V>> }
+              : never
+            : // Value fields without explicit value: include as string (default input type)
+              T extends { key: infer K }
+              ? K extends string
+                ? { [P in K]: MaybeOptional<T, string> }
+                : never
+              : never;
 
 /**
  * Internal helper with depth tracking

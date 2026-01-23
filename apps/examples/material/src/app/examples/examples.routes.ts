@@ -120,4 +120,9 @@ export default [
     path: 'expression-validators-demo',
     loadComponent: () => import('./expression-validators-demo.component'),
   },
+  {
+    path: 'zod-schema-validation',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('zod-schema-validation') },
+  },
 ] satisfies Route[];

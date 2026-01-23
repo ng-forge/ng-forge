@@ -255,4 +255,4 @@ Arrays can use these field types as templates:
 - Group fields → creates object arrays
 - Row fields → for horizontal layouts within each array item
 
-See [Type Safety & Inference](../core/type-safety) for details on how arrays affect type inference.
+See [Type Safety & Inference](../../deep-dive/type-safety) for details on how arrays affect type inference.

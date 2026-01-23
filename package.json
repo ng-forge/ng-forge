@@ -62,6 +62,7 @@
     "@nx/workspace": "22.3.3",
     "@playwright/test": "1.57.0",
     "@schematics/angular": "~21.1.0",
+    "@standard-schema/spec": "^1.1.0",
     "@swc-node/register": "~1.11.1",
     "@swc/core": "~1.15.8",
     "@swc/helpers": "~0.5.18",
@@ -131,7 +132,9 @@
     "ngxtension": "^7.0.2",
     "primeicons": "^7.0.0",
     "primeng": "^21.0.2",
-    "rxjs": "~7.8.0"
+    "rxjs": "~7.8.0",
+    "zod": "^3.25.76",
+    "zod-to-json-schema": "^3.25.1"
   },
   "packageManager": "pnpm@10.28.0",
   "engines": {

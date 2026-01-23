@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext } from '@angular/core';
-import { createSchemaFromFields, fieldsToDefaultValues } from './schema-builder';
+import { createSchemaFromFields, fieldsToDefaultValues, CreateSchemaOptions } from './schema-builder';
 import { FieldTypeDefinition } from '../models/field-type';
 import { FieldDef } from '../definitions';
 import { FunctionRegistryService } from './registry/function-registry.service';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 // Use vi.hoisted() to declare mocks before vi.mock() hoisting
 const { mockMapFieldToForm } = vi.hoisted(() => ({
@@ -427,6 +428,165 @@ describe('schema-builder', () => {
         ];
         const schema = createSchema<ComplexModel>(fields, registry);
         expect(schema).toBeDefined();
+      });
+    });
+
+    // 1.1.8 Form-Level Schema Integration
+    describe('Form-Level Schema (formLevelSchema option)', () => {
+      // Helper to create a mock Standard Schema
+      function createMockStandardSchema<T>(): StandardSchemaV1<T> {
+        return {
+          '~standard': {
+            version: 1,
+            vendor: 'test',
+            validate: vi.fn(),
+          },
+        } as unknown as StandardSchemaV1<T>;
+      }
+
+      // Helper to create a StandardSchemaMarker
+      function createStandardSchemaMarker<T>(schema: StandardSchemaV1<T>) {
+        return {
+          ɵkind: 'standardSchema' as const,
+          schema,
+        };
+      }
+
+      it('should create schema with formLevelSchema Standard Schema marker', () => {
+        interface PasswordForm {
+          password: string;
+          confirmPassword: string;
+        }
+
+        const mockStandardSchema = createMockStandardSchema<PasswordForm>();
+        const formLevelSchema = createStandardSchemaMarker(mockStandardSchema);
+
+        const fields: FieldDef<any>[] = [
+          { type: 'input', key: 'password' },
+          { type: 'input', key: 'confirmPassword' },
+        ];
+
+        const options: CreateSchemaOptions<PasswordForm> = {
+          formLevelSchema,
+        };
+
+        const schema = runInInjectionContext(injector, () => createSchemaFromFields<PasswordForm>(fields, registry, options));
+
+        expect(schema).toBeDefined();
+      });
+
+      it('should create schema without formLevelSchema', () => {
+        const fields: FieldDef<any>[] = [{ type: 'input', key: 'name' }];
+
+        const schema = runInInjectionContext(injector, () => createSchemaFromFields(fields, registry));
+
+        expect(schema).toBeDefined();
+      });
+
+      it('should create schema with formLevelSchema as Angular callback', () => {
+        interface LoginForm {
+          email: string;
+          password: string;
+        }
+
+        const angularCallback = vi.fn();
+        const fields: FieldDef<any>[] = [
+          { type: 'input', key: 'email' },
+          { type: 'input', key: 'password' },
+        ];
+
+        const options: CreateSchemaOptions<LoginForm> = {
+          formLevelSchema: angularCallback,
+        };
+
+        const schema = runInInjectionContext(injector, () => createSchemaFromFields<LoginForm>(fields, registry, options));
+
+        expect(schema).toBeDefined();
+      });
+
+      it('should create schema with both field-level and form-level validation', () => {
+        interface UserForm {
+          name: string;
+          email: string;
+        }
+
+        const mockStandardSchema = createMockStandardSchema<UserForm>();
+        const formLevelSchema = createStandardSchemaMarker(mockStandardSchema);
+
+        const fields: FieldDef<any>[] = [
+          { type: 'input', key: 'name' },
+          { type: 'input', key: 'email' },
+        ];
+
+        const options: CreateSchemaOptions<UserForm> = {
+          formLevelSchema,
+        };
+
+        // Should not throw when combining field-level and form-level validation
+        const schema = runInInjectionContext(injector, () => createSchemaFromFields<UserForm>(fields, registry, options));
+        expect(schema).toBeDefined();
+      });
+
+      it('should create schema with empty fields array when formLevelSchema is provided', () => {
+        interface EmptyForm {
+          dynamicField?: string;
+        }
+
+        const mockStandardSchema = createMockStandardSchema<EmptyForm>();
+        const formLevelSchema = createStandardSchemaMarker(mockStandardSchema);
+
+        const options: CreateSchemaOptions<EmptyForm> = {
+          formLevelSchema,
+        };
+
+        // Should create schema even with empty fields array
+        const schema = runInInjectionContext(injector, () => createSchemaFromFields<EmptyForm>([], registry, options));
+        expect(schema).toBeDefined();
+      });
+
+      it('should accept options object with both crossFieldValidators and formLevelSchema without throwing', () => {
+        interface FormWithBothValidations {
+          field1: string;
+          field2: string;
+        }
+
+        const mockStandardSchema = createMockStandardSchema<FormWithBothValidations>();
+        const formLevelSchema = createStandardSchemaMarker(mockStandardSchema);
+        const crossFieldValidators = [
+          {
+            sourceFieldKey: 'field1',
+            config: { type: 'custom' as const, expression: 'fieldValue === "test"' },
+          },
+        ];
+
+        const fields: FieldDef<any>[] = [
+          { type: 'input', key: 'field1' },
+          { type: 'input', key: 'field2' },
+        ];
+
+        const options: CreateSchemaOptions<FormWithBothValidations> = {
+          crossFieldValidators,
+          formLevelSchema,
+        };
+
+        // Should not throw when both options are provided
+        expect(() =>
+          runInInjectionContext(injector, () => createSchemaFromFields<FormWithBothValidations>(fields, registry, options)),
+        ).not.toThrow();
+      });
+
+      it('should maintain backwards compatibility with array-based crossFieldValidators', () => {
+        const crossFieldValidators = [
+          {
+            sourceFieldKey: 'field1',
+            config: { type: 'custom' as const, expression: 'fieldValue === "test"' },
+          },
+        ];
+
+        const fields: FieldDef<any>[] = [{ type: 'input', key: 'field1' }];
+
+        // Old API: passing array directly as third argument - should not throw
+        expect(() => runInInjectionContext(injector, () => createSchemaFromFields(fields, registry, crossFieldValidators))).not.toThrow();
       });
     });
   });

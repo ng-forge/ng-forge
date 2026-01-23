@@ -521,7 +521,7 @@ const config = {
 };
 ```
 
-The validator is only active when the `when` condition evaluates to `true`, allowing dynamic validation based on form state. See [Conditional Logic](../../conditional-logic/) for all expression types and operators.
+The validator is only active when the `when` condition evaluates to `true`, allowing dynamic validation based on form state. See [Conditional Logic](../../form-behavior/conditional-logic/) for all expression types and operators.
 
 ## Common Validation Patterns
 
@@ -734,4 +734,4 @@ const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
 
 - [Validation Basics](../basics/) - Core validation concepts
 - [Validation Reference](../reference/) - Standard validation rules
-- [Type Safety](../../type-safety/basics/) - TypeScript integration
+- [Type Safety](../../deep-dive/type-safety/basics/) - TypeScript integration

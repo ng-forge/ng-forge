@@ -8,6 +8,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng'
+
 jobs:
   checks:
     name: Checks
@@ -77,12 +80,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build all libraries
-        run: pnpm nx run-many -t build -p dynamic-forms,dynamic-forms-material,dynamic-forms-bootstrap,dynamic-forms-ionic,dynamic-forms-primeng
+        run: pnpm nx run-many -t build -p ${{ env.LIBRARY_PACKAGES }}
 
       - name: Verify package integrity
         run: |
           echo "Verifying package integrity..."
-          for PKG in dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng; do
+          for PKG in ${{ env.LIBRARY_PACKAGES }}; do
             echo "Checking dist/packages/$PKG..."
             if [ ! -f "dist/packages/$PKG/package.json" ]; then
               echo "❌ Missing package.json in dist/packages/$PKG"
@@ -147,7 +150,7 @@ jobs:
         run: pnpm nx run-many -t lint --parallel=3
 
       - name: Type check all libraries
-        run: pnpm nx run-many -t build -p dynamic-forms,dynamic-forms-material,dynamic-forms-bootstrap,dynamic-forms-ionic,dynamic-forms-primeng --verbose
+        run: pnpm nx run-many -t build -p ${{ env.LIBRARY_PACKAGES }} --verbose
 
   test:
     name: Unit Tests
