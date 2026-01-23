@@ -126,4 +126,105 @@ test.describe('Zod Schema Validation E2E Tests', () => {
       await expect(submitButton).not.toHaveAttribute('aria-disabled', 'true');
     });
   });
+
+  test.describe('Comprehensive Validation (Nested Objects & Arrays)', () => {
+    test('should have submit disabled with empty form', async ({ page, helpers }) => {
+      await page.goto('/#/testing/zod-schema-validation/comprehensive-validation');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('comprehensive-validation-test');
+      await expect(scenario).toBeVisible();
+
+      const submitButton = helpers.getSubmitButton(scenario);
+      // Ionic uses aria-disabled instead of disabled attribute
+      await expect(submitButton).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    test('should display error on nested field path (user.email)', async ({ page, helpers }) => {
+      await page.goto('/#/testing/zod-schema-validation/comprehensive-validation');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('comprehensive-validation-test');
+
+      // Get nested email input (inside user group)
+      const emailInput = scenario.locator('#user #email input');
+      await helpers.fillInput(emailInput, 'invalid-email');
+      await ionBlur(emailInput);
+
+      // Verify error is displayed on email field (Ionic uses ion-note for errors)
+      const errorElement = scenario.locator('#user #email ion-note.error-message').first();
+      await expect(errorElement).toContainText('Invalid email');
+    });
+
+    test('should display error on nested field (user.firstName)', async ({ page, helpers }) => {
+      await page.goto('/#/testing/zod-schema-validation/comprehensive-validation');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('comprehensive-validation-test');
+
+      // Get firstName input inside user group
+      const firstNameInput = scenario.locator('#user #firstName input');
+      await helpers.fillInput(firstNameInput, 'A');
+      await ionBlur(firstNameInput);
+
+      // Verify error is displayed
+      const errorElement = scenario.locator('#user #firstName ion-note.error-message').first();
+      await expect(errorElement).toContainText('at least 2 characters');
+    });
+
+    test('should display error on array item field (addresses[0].zip)', async ({ page, helpers }) => {
+      await page.goto('/#/testing/zod-schema-validation/comprehensive-validation');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('comprehensive-validation-test');
+
+      // Get ZIP input in first address (addresses array has initial empty item)
+      const zipInput = scenario.locator('#addresses #zip input').first();
+      await helpers.fillInput(zipInput, '123');
+      await ionBlur(zipInput);
+
+      // Verify error is displayed
+      const errorElement = scenario.locator('#addresses #zip ion-note.error-message').first();
+      await expect(errorElement).toContainText('5 digits');
+    });
+
+    test('should validate all fields pass and enable submit', async ({ page, helpers }) => {
+      await page.goto('/#/testing/zod-schema-validation/comprehensive-validation');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('comprehensive-validation-test');
+      const submitButton = helpers.getSubmitButton(scenario);
+
+      // Fill user info
+      const emailInput = scenario.locator('#user #email input');
+      await helpers.fillInput(emailInput, 'test@example.com');
+      await ionBlur(emailInput);
+
+      const firstNameInput = scenario.locator('#user #firstName input');
+      await helpers.fillInput(firstNameInput, 'John');
+      await ionBlur(firstNameInput);
+
+      const lastNameInput = scenario.locator('#user #lastName input');
+      await helpers.fillInput(lastNameInput, 'Springfield');
+      await ionBlur(lastNameInput);
+
+      // Fill address with city matching last name (for cross-field validation)
+      const streetInput = scenario.locator('#addresses #street input').first();
+      await helpers.fillInput(streetInput, '123 Main Street');
+      await ionBlur(streetInput);
+
+      const cityInput = scenario.locator('#addresses #city input').first();
+      await helpers.fillInput(cityInput, 'Springfield');
+      await ionBlur(cityInput);
+
+      const zipInput = scenario.locator('#addresses #zip input').first();
+      await helpers.fillInput(zipInput, '12345');
+      await ionBlur(zipInput);
+
+      await page.waitForTimeout(300);
+
+      // All validations should pass - submit should be enabled
+      await expect(submitButton).not.toHaveAttribute('aria-disabled', 'true');
+    });
+  });
 });
