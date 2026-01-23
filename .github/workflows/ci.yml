@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng dynamic-forms-zod'
+  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng'
 
 jobs:
   checks:
@@ -108,7 +108,6 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-forms-zod
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
   quality:
@@ -145,7 +144,6 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-forms-zod
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Lint all projects
@@ -188,7 +186,6 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-forms-zod
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Run tests
@@ -240,7 +237,6 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-forms-zod
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Build documentation
@@ -306,7 +302,6 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-forms-zod
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Run E2E tests in Docker

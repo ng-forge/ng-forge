@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng dynamic-forms-zod'
+  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng'
 
 jobs:
   # This job determines if the workflow should run
@@ -155,7 +155,6 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-forms-zod
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
   quality:
@@ -196,7 +195,6 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-forms-zod
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Lint affected projects
@@ -251,7 +249,6 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-forms-zod
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Test affected projects
@@ -298,7 +295,6 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-forms-zod
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Build docs if affected

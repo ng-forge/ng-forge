@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "postinstall": "bash scripts/postinstall.sh",
-    "build:libs": "nx run-many -t build -p dynamic-forms,dynamic-forms-material,dynamic-forms-bootstrap,dynamic-forms-primeng,dynamic-forms-ionic,dynamic-forms-zod",
+    "build:libs": "nx run-many -t build -p dynamic-forms,dynamic-forms-material,dynamic-forms-bootstrap,dynamic-forms-primeng,dynamic-forms-ionic",
     "build:docs": "nx build docs",
     "build:examples": "nx run-many -t build -p material-examples,bootstrap-examples,primeng-examples,ionic-examples --configuration=production",
     "build:all:prod": "pnpm run build:libs && pnpm run build:docs && pnpm run build:examples",
