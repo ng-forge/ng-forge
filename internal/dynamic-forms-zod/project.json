@@ -1,0 +1,35 @@
+{
+  "name": "dynamic-forms-zod",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "internal/dynamic-forms-zod/src",
+  "projectType": "library",
+  "tags": ["scope:internal"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/internal/dynamic-forms-zod",
+        "main": "internal/dynamic-forms-zod/src/index.ts",
+        "tsConfig": "internal/dynamic-forms-zod/tsconfig.lib.json",
+        "assets": [],
+        "additionalEntryPoints": [
+          "internal/dynamic-forms-zod/material/src/index.ts",
+          "internal/dynamic-forms-zod/bootstrap/src/index.ts",
+          "internal/dynamic-forms-zod/primeng/src/index.ts",
+          "internal/dynamic-forms-zod/ionic/src/index.ts",
+          "internal/dynamic-forms-zod/mcp/src/index.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "internal/dynamic-forms-zod/vitest.config.mts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}
