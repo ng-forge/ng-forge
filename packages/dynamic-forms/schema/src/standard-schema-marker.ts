@@ -1,0 +1,121 @@
+import type { StandardSchemaV1 } from '@standard-schema/spec';
+
+/**
+ * Internal marker symbol to identify StandardSchemaMarker instances.
+ * Uses ɵ prefix following Angular's convention for internal APIs.
+ */
+const STANDARD_SCHEMA_KIND = 'standardSchema' as const;
+
+/**
+ * Wrapper interface that marks a schema as implementing the Standard Schema spec.
+ * This allows the dynamic forms system to identify and use standard-compliant schemas
+ * for validation without coupling to any specific schema library.
+ *
+ * @typeParam T - The inferred type that the schema validates to
+ *
+ * @example
+ * ```typescript
+ * import { z } from 'zod';
+ * import { standardSchema } from '@ng-forge/dynamic-forms/schema';
+ *
+ * const userSchema = z.object({
+ *   name: z.string(),
+ *   email: z.string().email(),
+ * });
+ *
+ * // Wrap the Zod schema with standardSchema marker
+ * const formSchema = standardSchema(userSchema);
+ * ```
+ */
+export interface StandardSchemaMarker<T = unknown> {
+  /**
+   * Internal marker identifying this as a standard schema wrapper.
+   * @internal
+   */
+  readonly ɵkind: typeof STANDARD_SCHEMA_KIND;
+
+  /**
+   * The underlying schema that implements the Standard Schema spec.
+   */
+  readonly schema: StandardSchemaV1<T>;
+}
+
+/**
+ * Type alias for form schemas that can be used with dynamic forms.
+ * Currently only supports Standard Schema compliant schemas.
+ *
+ * @typeParam T - The inferred type that the schema validates to
+ */
+export type FormSchema<T = unknown> = StandardSchemaMarker<T>;
+
+/**
+ * Wraps a Standard Schema compliant schema for use with dynamic forms.
+ *
+ * This function creates a marker wrapper around schemas that implement the
+ * Standard Schema spec (Zod, Valibot, ArkType, etc.), allowing the dynamic
+ * forms system to identify and use them for validation.
+ *
+ * @typeParam T - The inferred type that the schema validates to
+ * @param schema - A schema implementing the Standard Schema V1 spec
+ * @returns A wrapped schema marker that can be passed to dynamic form configuration
+ *
+ * @example
+ * ```typescript
+ * import { z } from 'zod';
+ * import { standardSchema } from '@ng-forge/dynamic-forms/schema';
+ *
+ * const loginSchema = z.object({
+ *   email: z.string().email('Invalid email format'),
+ *   password: z.string().min(8, 'Password must be at least 8 characters'),
+ * });
+ *
+ * // Wrap for use with dynamic forms
+ * const formSchema = standardSchema(loginSchema);
+ *
+ * // Use in form configuration
+ * const formConfig = {
+ *   schema: formSchema,
+ *   fields: [
+ *     input({ key: 'email', label: 'Email' }),
+ *     input({ key: 'password', label: 'Password', props: { type: 'password' } }),
+ *   ],
+ * };
+ * ```
+ */
+export function standardSchema<T>(schema: StandardSchemaV1<T>): StandardSchemaMarker<T> {
+  return {
+    ɵkind: STANDARD_SCHEMA_KIND,
+    schema,
+  };
+}
+
+/**
+ * Type guard to check if a value is a StandardSchemaMarker.
+ *
+ * This is useful when processing form configuration to determine if a schema
+ * has been provided and should be used for validation.
+ *
+ * @param value - The value to check
+ * @returns True if the value is a StandardSchemaMarker, false otherwise
+ *
+ * @example
+ * ```typescript
+ * import { isStandardSchemaMarker } from '@ng-forge/dynamic-forms/schema';
+ *
+ * function processFormConfig(config: FormConfig) {
+ *   if (config.schema && isStandardSchemaMarker(config.schema)) {
+ *     // Use the schema for validation
+ *     const result = config.schema.schema['~standard'].validate(formValue);
+ *   }
+ * }
+ * ```
+ */
+export function isStandardSchemaMarker(value: unknown): value is StandardSchemaMarker {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'ɵkind' in value &&
+    (value as StandardSchemaMarker).ɵkind === STANDARD_SCHEMA_KIND &&
+    'schema' in value
+  );
+}
