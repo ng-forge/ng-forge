@@ -19,6 +19,7 @@ import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { ArrayFieldTree } from '../../core/field-tree-utils';
+import { isEqual } from '../../utils/object-utils';
 
 /**
  * Container component for rendering dynamic arrays of fields.
@@ -107,7 +108,10 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   private readonly resolvedItemsSignal = signal<ResolvedArrayItem[]>([]);
   private readonly updateVersion = signal(0);
-  private readonly itemOrderSignal = linkedSignal(() => this.resolvedItemsSignal().map((item) => item.id));
+  private readonly itemOrderSignal = linkedSignal(() => this.resolvedItemsSignal().map((item) => item.id), {
+    debugName: 'ArrayFieldComponent.itemOrderSignal',
+    equal: isEqual,
+  });
 
   readonly resolvedItems = linkedSignal(() => this.resolvedItemsSignal());
 

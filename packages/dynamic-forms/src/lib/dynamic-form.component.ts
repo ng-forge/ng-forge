@@ -308,26 +308,37 @@ export class DynamicForm<
 
   readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues);
 
-  private readonly entity = linkedSignal(() => {
-    const inputValue = this.value();
-    const defaults = this.defaultValues();
-    const setup = this.formSetup();
+  /**
+   * Entity computed from parent value, group key, and defaults.
+   * Uses deep equality check to prevent unnecessary updates when
+   * object spread creates new references with identical values.
+   */
+  private readonly entity = linkedSignal(
+    () => {
+      const inputValue = this.value();
+      const defaults = this.defaultValues();
+      const setup = this.formSetup();
 
-    const combined = { ...defaults, ...inputValue };
+      const combined = { ...defaults, ...inputValue };
 
-    if (setup.schemaFields && setup.schemaFields.length > 0) {
-      const validKeys = new Set(setup.schemaFields.map((field) => field.key).filter((key: string | undefined) => key !== undefined));
-      const filtered: Record<string, unknown> = {};
-      for (const key of Object.keys(combined)) {
-        if (validKeys.has(key)) {
-          filtered[key] = (combined as Record<string, unknown>)[key];
+      if (setup.schemaFields?.length) {
+        const validKeys = new Set(setup.schemaFields.map((field) => field.key).filter((key: string | undefined) => key !== undefined));
+        const filtered: Record<string, unknown> = {};
+        for (const key of Object.keys(combined)) {
+          if (validKeys.has(key)) {
+            filtered[key] = (combined as Record<string, unknown>)[key];
+          }
         }
+        return filtered as TModel;
       }
-      return filtered as TModel;
-    }
 
-    return combined as TModel;
-  });
+      return combined as TModel;
+    },
+    {
+      debugName: 'GroupFieldComponent.entity',
+      equal: isEqual,
+    },
+  );
 
   readonly form = computed<ReturnType<typeof form<TModel>>>(() => {
     return runInInjectionContext(this.injector, () => {
@@ -336,7 +347,7 @@ export class DynamicForm<
 
       untracked(() => this.rootFormRegistry.registerFormValueSignal(this.entity as Signal<Record<string, unknown>>));
 
-      if (setup.schemaFields && setup.schemaFields.length > 0) {
+      if (setup.schemaFields?.length) {
         const crossFieldCollection = collectCrossFieldEntries(setup.schemaFields as FieldDef<unknown>[]);
         const schema = createSchemaFromFields(setup.schemaFields, setup.registry, crossFieldCollection.validators);
         formInstance = untracked(() => form(this.entity, schema));

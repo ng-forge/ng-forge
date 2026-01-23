@@ -10,6 +10,8 @@ import { mapFieldToInputs } from '../field-mapper/field-mapper';
 import { flattenFields } from '../flattener/field-flattener';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { getArrayValue } from './array-field.types';
+import { isEqual } from '../object-utils';
+import { EMPTY_OBJECT } from '../frozen-values';
 
 /**
  * Options for creating an array item injector.
@@ -146,11 +148,16 @@ function createObjectItemForm<TModel extends Record<string, unknown>>(
 ): ReturnType<typeof form<unknown>> {
   const { template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayKey } = options;
 
-  const itemEntity = linkedSignal(() => {
-    const parentValue = parentFieldSignalContext.value();
-    const arrayValue = getArrayValue(parentValue as Partial<TModel>, arrayKey);
-    return arrayValue[indexSignal()] ?? {};
-  });
+  const itemEntity = linkedSignal(
+    () => {
+      const parentValue = parentFieldSignalContext.value();
+      const arrayValue = getArrayValue(parentValue as Partial<TModel>, arrayKey);
+      return arrayValue[indexSignal()] ?? EMPTY_OBJECT;
+    },
+    {
+      equal: isEqual,
+    },
+  );
 
   const nestedFields = 'fields' in template && Array.isArray(template.fields) ? template.fields : [];
 
