@@ -18,25 +18,37 @@ Schema validation excels at:
 
 Dynamic Forms supports two approaches to form-level validation:
 
-| Approach                            | Best For                          | Import                           |
-| ----------------------------------- | --------------------------------- | -------------------------------- |
-| [Angular Schema](../angular-schema) | Angular-only projects             | `@angular/forms/signals`         |
-| [Standard Schema](../zod)           | Reusing existing schemas, OpenAPI | `@ng-forge/dynamic-forms/schema` |
+| Approach                            | Best For                               | Wrapper Required         |
+| ----------------------------------- | -------------------------------------- | ------------------------ |
+| [Angular Schema](../angular-schema) | Angular-only projects, full API access | No (raw callback)        |
+| [Standard Schema](../zod)           | Reusing Zod/Valibot schemas, OpenAPI   | Yes (`standardSchema()`) |
 
 ### Angular Schema
 
-Uses Angular's native `Schema<T>` from signal forms. Best when:
+Uses Angular's native schema APIs from signal forms. Best when:
 
 - Your project is Angular-only
 - You want zero additional dependencies
 - Validation logic is specific to this form
 
 ```typescript
-import { schema, required, validate } from '@angular/forms/signals';
+import { validateTree } from '@angular/forms/signals';
 
-const passwordSchema = schema<PasswordForm>(({ value }) =>
-  validate(value.password === value.confirmPassword, { confirmPassword: { passwordMismatch: true } }),
-);
+const config = {
+  // Raw callback - no wrapper needed!
+  schema: (path) => {
+    validateTree(path, (ctx) => {
+      const { password, confirmPassword } = ctx.value();
+      if (password !== confirmPassword) {
+        return [{ kind: 'passwordMismatch', fieldTree: ctx.fieldTreeOf(path).confirmPassword }];
+      }
+      return null;
+    });
+  },
+  fields: [
+    /* ... */
+  ],
+};
 ```
 
 ### Standard Schema (Zod, Valibot, ArkType)
@@ -68,13 +80,14 @@ const config = {
 
 ## Comparison
 
-| Feature        | Angular Schema           | Standard Schema                   |
-| -------------- | ------------------------ | --------------------------------- |
-| Dependencies   | None (Angular core)      | Schema library (Zod, etc.)        |
-| Type inference | Manual                   | Automatic from schema             |
-| Cross-platform | No                       | Yes (same schema in Node.js)      |
-| OpenAPI compat | No                       | Yes (via zod-openapi, etc.)       |
-| Learning curve | Familiar to Angular devs | Requires schema library knowledge |
+| Feature          | Angular Schema           | Standard Schema                   |
+| ---------------- | ------------------------ | --------------------------------- |
+| Dependencies     | None (Angular core)      | Schema library (Zod, etc.)        |
+| Type inference   | Manual                   | Automatic from schema             |
+| Cross-platform   | No                       | Yes (same schema in Node.js)      |
+| OpenAPI compat   | No                       | Yes (via zod-openapi, etc.)       |
+| Learning curve   | Familiar to Angular devs | Requires schema library knowledge |
+| Wrapper required | No (raw callback)        | Yes (`standardSchema()`)          |
 
 ## How It Works
 

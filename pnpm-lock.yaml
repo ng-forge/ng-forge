@@ -177,6 +177,9 @@ importers:
       '@schematics/angular':
         specifier: ~21.1.0
         version: 21.1.0(chokidar@5.0.0)
+      '@standard-schema/spec':
+        specifier: ^1.1.0
+        version: 1.1.0
       '@swc-node/register':
         specifier: ~1.11.1
         version: 1.11.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(@swc/types@0.1.25)(typescript@5.9.3)

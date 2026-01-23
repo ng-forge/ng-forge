@@ -19,6 +19,12 @@ export default [
     loadChildren: () => import('./advanced-validation/advanced-validation.routes'),
   },
 
+  // Angular Schema Validation Tests - Form-level validation using native Angular schema callbacks
+  {
+    path: 'angular-schema-validation',
+    loadChildren: () => import('./angular-schema-validation/angular-schema-validation.routes'),
+  },
+
   // Array Fields Tests - Refactored into folder structure
   {
     path: 'array-fields',

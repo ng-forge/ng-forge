@@ -3,6 +3,7 @@ import { TestSuite } from './types';
 // Import all test suites
 import { accessibilitySuite } from '../accessibility/accessibility.suite';
 import { advancedValidationSuite } from '../advanced-validation/advanced-validation.suite';
+import { angularSchemaValidationSuite } from '../angular-schema-validation/angular-schema-validation.suite';
 import { arrayFieldsSuite } from '../array-fields/array-fields.suite';
 import { asyncValidationSuite } from '../async-validation/async-validation.suite';
 import { bootstrapComponentsSuite } from '../bootstrap-components/bootstrap-components.suite';
@@ -32,6 +33,7 @@ import { zodSchemaValidationSuite } from '../zod-schema-validation/zod-schema-va
 export const TEST_SUITE_REGISTRY: TestSuite[] = [
   accessibilitySuite,
   advancedValidationSuite,
+  angularSchemaValidationSuite,
   arrayFieldsSuite,
   asyncValidationSuite,
   bootstrapComponentsSuite,

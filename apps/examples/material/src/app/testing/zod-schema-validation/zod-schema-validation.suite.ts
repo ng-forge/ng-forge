@@ -1,4 +1,5 @@
 import { TestSuite } from '../shared/types';
+import { comprehensiveValidationScenario } from './scenarios/comprehensive-validation.scenario';
 import { passwordConfirmationScenario } from './scenarios/password-confirmation.scenario';
 
 /**
@@ -11,7 +12,7 @@ export const zodSchemaValidationSuite: TestSuite = {
   title: 'Zod Schema Validation Tests',
   description: 'Tests form-level validation using Zod with Standard Schema',
   path: '/test/zod-schema-validation',
-  scenarios: [passwordConfirmationScenario],
+  scenarios: [comprehensiveValidationScenario, passwordConfirmationScenario],
 };
 
 /**

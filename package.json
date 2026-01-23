@@ -62,6 +62,7 @@
     "@nx/workspace": "22.3.3",
     "@playwright/test": "1.57.0",
     "@schematics/angular": "~21.1.0",
+    "@standard-schema/spec": "^1.1.0",
     "@swc-node/register": "~1.11.1",
     "@swc/core": "~1.15.8",
     "@swc/helpers": "~0.5.18",

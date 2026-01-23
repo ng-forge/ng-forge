@@ -5,9 +5,49 @@ keyword: AngularSchemaPage
 
 Angular's signal forms include a native `Schema<T>` API for form-level validation. This approach requires no additional dependencies and integrates seamlessly with Dynamic Forms.
 
-## Basic Usage
+## Raw Callback Pattern (Recommended)
 
-Import the schema utilities from Angular's signal forms:
+For maximum simplicity, pass Angular's schema callback directly without any wrapper:
+
+```typescript
+import { FormConfig } from '@ng-forge/dynamic-forms';
+import { validateTree } from '@angular/forms/signals';
+
+const config = {
+  // Raw callback - no wrapper needed!
+  schema: (path) => {
+    validateTree(path, (ctx) => {
+      const { password, confirmPassword } = ctx.value();
+      if (password !== confirmPassword) {
+        return [{ kind: 'passwordMismatch', fieldTree: ctx.fieldTreeOf(path).confirmPassword }];
+      }
+      return null;
+    });
+  },
+  fields: [
+    { key: 'password', type: 'input', label: 'Password', required: true, props: { type: 'password' } },
+    {
+      key: 'confirmPassword',
+      type: 'input',
+      label: 'Confirm Password',
+      required: true,
+      validationMessages: { passwordMismatch: 'Passwords must match' },
+      props: { type: 'password' },
+    },
+    { key: 'submit', type: 'submit', label: 'Register' },
+  ],
+} as const satisfies FormConfig;
+```
+
+This pattern gives you full access to Angular's validation APIs including `validateTree`, `validate`, and `required`.
+
+## Combining Field and Schema Validation
+
+Field-level validators (like `required`, `minLength`) run **first**, then the schema callback runs for cross-field validation. Both work together seamlessly.
+
+## Using schema() Wrapper
+
+Alternatively, you can use Angular's `schema()` function to wrap your callback:
 
 ```typescript
 import { schema, required, validate } from '@angular/forms/signals';

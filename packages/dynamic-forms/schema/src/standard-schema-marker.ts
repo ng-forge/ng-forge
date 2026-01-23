@@ -1,3 +1,4 @@
+import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 /**
@@ -5,6 +6,42 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
  * Uses ɵ prefix following Angular's convention for internal APIs.
  */
 export const STANDARD_SCHEMA_KIND = 'standardSchema' as const;
+
+/**
+ * Angular schema callback function type.
+ * This is the raw callback that Angular's schema() function accepts.
+ *
+ * Use this when you want to write Angular schema validation directly
+ * without any wrapper. This is ideal for Angular-only projects that
+ * want full access to Angular's form validation APIs.
+ *
+ * @typeParam T - The form value type
+ *
+ * @example
+ * ```typescript
+ * import { FormConfig } from '@ng-forge/dynamic-forms';
+ * import { validateTree } from '@angular/forms/signals';
+ *
+ * const config = {
+ *   // Raw callback - no wrapper needed!
+ *   schema: (path) => {
+ *     validateTree(path, (ctx) => {
+ *       const { password, confirmPassword } = ctx.value();
+ *       if (password !== confirmPassword) {
+ *         return [{ kind: 'passwordMismatch', fieldTree: ctx.fieldTreeOf(path).confirmPassword }];
+ *       }
+ *       return null;
+ *     });
+ *   },
+ *   fields: [
+ *     { key: 'password', type: 'input', label: 'Password', required: true },
+ *     { key: 'confirmPassword', type: 'input', label: 'Confirm', required: true,
+ *       validationMessages: { passwordMismatch: 'Passwords must match' } },
+ *   ],
+ * } as const satisfies FormConfig;
+ * ```
+ */
+export type AngularSchemaCallback<T = unknown> = (path: SchemaPath<T> & SchemaPathTree<T>) => void;
 
 /**
  * Wrapper interface that marks a schema as implementing the Standard Schema spec.
@@ -46,14 +83,38 @@ export interface StandardSchemaMarker<out T = unknown> {
 
 /**
  * Type alias for form schemas that can be used with dynamic forms.
- * Currently only supports Standard Schema compliant schemas.
+ * Supports both Standard Schema compliant schemas (Zod, Valibot, ArkType)
+ * and raw Angular schema callbacks.
  *
  * The covariance from StandardSchemaMarker flows through, allowing
  * schemas with specific types to be assigned to broader form value types.
  *
  * @typeParam T - The inferred type that the schema validates to
+ *
+ * @example Standard Schema (Zod)
+ * ```typescript
+ * import { z } from 'zod';
+ * import { standardSchema } from '@ng-forge/dynamic-forms/schema';
+ *
+ * const config = {
+ *   schema: standardSchema(z.object({ ... })),
+ *   fields: [...],
+ * };
+ * ```
+ *
+ * @example Angular Schema Callback
+ * ```typescript
+ * import { validateTree } from '@angular/forms/signals';
+ *
+ * const config = {
+ *   schema: (path) => {
+ *     validateTree(path, (ctx) => { ... });
+ *   },
+ *   fields: [...],
+ * };
+ * ```
  */
-export type FormSchema<T = unknown> = StandardSchemaMarker<T>;
+export type FormSchema<T = unknown> = StandardSchemaMarker<T> | AngularSchemaCallback<T>;
 
 /**
  * Wraps a Standard Schema compliant schema for use with dynamic forms.

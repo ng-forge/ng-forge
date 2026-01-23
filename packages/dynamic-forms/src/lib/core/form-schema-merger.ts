@@ -2,14 +2,15 @@ import { schema, Schema, validateStandardSchema } from '@angular/forms/signals';
 import { isStandardSchemaMarker, type FormSchema } from '@ng-forge/dynamic-forms/schema';
 
 /**
- * Applies a form-level Standard Schema validation to a schema path.
+ * Applies a form-level schema validation to a schema path.
+ * Supports both Standard Schema (Zod, Valibot, ArkType) and raw Angular schema callbacks.
  *
  * This is a helper function used internally by `createSchemaFromFields`
  * to apply form-level validation after field-level validation.
  *
  * @typeParam TModel - The form value type
  * @param path - The schema path to validate
- * @param formLevelSchema - Form-level Standard Schema marker
+ * @param formLevelSchema - Form-level schema (Standard Schema marker or Angular callback)
  *
  * @internal
  */
@@ -20,6 +21,10 @@ export function applyFormLevelSchema<TModel>(path: unknown, formLevelSchema: For
     // The path is the root schema path which is always valid for form-level validation
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     validateStandardSchema(path as any, formLevelSchema.schema);
+  } else if (typeof formLevelSchema === 'function') {
+    // Angular schema callback - execute directly with the path
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    formLevelSchema(path as any);
   }
 }
 

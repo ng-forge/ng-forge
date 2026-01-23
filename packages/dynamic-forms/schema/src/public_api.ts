@@ -11,4 +11,4 @@
  */
 
 export { standardSchema, isStandardSchemaMarker } from './standard-schema-marker';
-export type { StandardSchemaMarker, FormSchema, InferSchemaOutput } from './standard-schema-marker';
+export type { StandardSchemaMarker, FormSchema, InferSchemaOutput, AngularSchemaCallback } from './standard-schema-marker';

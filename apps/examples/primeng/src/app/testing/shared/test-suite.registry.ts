@@ -3,6 +3,7 @@ import { TestSuite } from './types';
 // Import all test suites
 import { accessibilitySuite } from '../accessibility/accessibility.suite';
 import { advancedValidationSuite } from '../advanced-validation/advanced-validation.suite';
+import { angularSchemaValidationSuite } from '../angular-schema-validation/angular-schema-validation.suite';
 // NOTE: arrayFieldsSuite not available in PrimeNG (requires addArrayItem/removeArrayItem field types)
 import { asyncValidationSuite } from '../async-validation/async-validation.suite';
 // NOTE: bootstrapComponentsSuite replaced with PrimeNG-specific tests
@@ -32,6 +33,7 @@ import { zodSchemaValidationSuite } from '../zod-schema-validation/zod-schema-va
 export const TEST_SUITE_REGISTRY: TestSuite[] = [
   accessibilitySuite,
   advancedValidationSuite,
+  angularSchemaValidationSuite,
   // NOTE: arrayFieldsSuite not available in PrimeNG (requires addArrayItem/removeArrayItem field types)
   asyncValidationSuite,
   // NOTE: bootstrapComponentsSuite not available - needs PrimeNG-specific component tests

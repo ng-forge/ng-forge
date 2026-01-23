@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createFormLevelSchema } from './form-schema-merger';
 import { standardSchema, isStandardSchemaMarker } from '@ng-forge/dynamic-forms/schema';
+import type { AngularSchemaCallback } from '@ng-forge/dynamic-forms/schema';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 // Helper to create a mock Standard Schema
@@ -67,6 +68,44 @@ describe('form-schema-merger', () => {
       expect(isStandardSchemaMarker({})).toBe(false);
       expect(isStandardSchemaMarker(null)).toBe(false);
       expect(isStandardSchemaMarker(undefined)).toBe(false);
+    });
+  });
+
+  describe('Angular schema callbacks', () => {
+    it('should create a schema from Angular schema callback function', () => {
+      const callback: AngularSchemaCallback<{ password: string }> = vi.fn();
+
+      const result = createFormLevelSchema(callback);
+
+      expect(result).toBeDefined();
+    });
+
+    it('should not treat StandardSchemaMarker as a function', () => {
+      const mockSchema = createMockStandardSchema<{ test: string }>();
+      const marker = standardSchema(mockSchema);
+
+      expect(typeof marker === 'function').toBe(false);
+      expect(isStandardSchemaMarker(marker)).toBe(true);
+    });
+
+    it('should correctly identify callback as a function', () => {
+      const callback: AngularSchemaCallback<{ value: number }> = vi.fn();
+
+      expect(typeof callback === 'function').toBe(true);
+      expect(isStandardSchemaMarker(callback)).toBe(false);
+    });
+
+    it('should handle complex form value types with Angular callback', () => {
+      interface PasswordForm {
+        password: string;
+        confirmPassword: string;
+      }
+
+      const callback: AngularSchemaCallback<PasswordForm> = vi.fn();
+
+      const result = createFormLevelSchema(callback);
+
+      expect(result).toBeDefined();
     });
   });
 
