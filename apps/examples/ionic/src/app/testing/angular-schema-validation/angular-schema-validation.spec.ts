@@ -19,7 +19,8 @@ test.describe('Angular Schema Validation E2E Tests', () => {
       const submitButton = helpers.getSubmitButton(scenario);
 
       // Submit should be disabled initially (required validation)
-      await expect(submitButton).toBeDisabled();
+      // Use attribute check for ion-button (toBeDisabled doesn't work with Ionic web components)
+      await expect(submitButton).toHaveAttribute('disabled', '');
     });
 
     test('should have submit disabled with mismatched passwords', async ({ page, helpers }) => {
@@ -39,7 +40,7 @@ test.describe('Angular Schema Validation E2E Tests', () => {
       await page.waitForTimeout(300);
 
       // Submit should be disabled (Angular validateTree validation fails)
-      await expect(submitButton).toBeDisabled();
+      await expect(submitButton).toHaveAttribute('disabled', '');
     });
 
     test('should display error message for password mismatch', async ({ page, helpers }) => {
@@ -83,7 +84,7 @@ test.describe('Angular Schema Validation E2E Tests', () => {
       await page.waitForTimeout(300);
 
       // Submit should be enabled (all validations pass)
-      await expect(submitButton).toBeEnabled();
+      await expect(submitButton).not.toHaveAttribute('disabled');
     });
 
     test('should clear error when passwords match', async ({ page, helpers }) => {
@@ -125,21 +126,21 @@ test.describe('Angular Schema Validation E2E Tests', () => {
       await helpers.fillInput(passwordInput, 'ValidPassword123');
       await helpers.fillInput(confirmInput, 'ValidPassword123');
       await page.waitForTimeout(300);
-      await expect(submitButton).toBeEnabled();
+      await expect(submitButton).not.toHaveAttribute('disabled');
 
       // Change password to create mismatch
       await helpers.clearAndFill(passwordInput, 'DifferentPassword456');
       await page.waitForTimeout(300);
 
       // Submit should be disabled again
-      await expect(submitButton).toBeDisabled();
+      await expect(submitButton).toHaveAttribute('disabled', '');
 
       // Fix the mismatch
       await helpers.clearAndFill(confirmInput, 'DifferentPassword456');
       await page.waitForTimeout(300);
 
       // Submit should be enabled again
-      await expect(submitButton).toBeEnabled();
+      await expect(submitButton).not.toHaveAttribute('disabled');
     });
   });
 });
