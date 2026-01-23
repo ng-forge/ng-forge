@@ -133,7 +133,7 @@ export function createSchemaFromFields<TModel = unknown>(
 
     // Apply form-level Standard Schema validation
     if (formLevelSchema) {
-      applyFormLevelSchema(path as SchemaPath<TModel>, formLevelSchema);
+      applyFormLevelSchema(path as SchemaPathTree<TModel>, formLevelSchema);
     }
   });
 }

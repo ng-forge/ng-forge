@@ -1,4 +1,6 @@
-import { schema, Schema, validateStandardSchema } from '@angular/forms/signals';
+import { schema, Schema, SchemaPathTree, validateStandardSchema } from '@angular/forms/signals';
+// Import from secondary entry point - this is correct for ng-packagr's entry point architecture
+// (different from importing internal barrel files which should be avoided)
 import { isStandardSchemaMarker, type FormSchema } from '@ng-forge/dynamic-forms/schema';
 
 /**
@@ -9,22 +11,28 @@ import { isStandardSchemaMarker, type FormSchema } from '@ng-forge/dynamic-forms
  * to apply form-level validation after field-level validation.
  *
  * @typeParam TModel - The form value type
- * @param path - The schema path to validate
+ * @param path - The schema path to validate (from Angular's schema callback)
  * @param formLevelSchema - Form-level schema (Standard Schema marker or Angular callback)
+ *
+ * @remarks
+ * Type assertions are required due to Angular's complex generic constraints:
+ * - `validateStandardSchema` uses `IgnoreUnknownProperties<TSchema>` to accommodate Zod's strict types
+ * - `SchemaPathTree` includes `SchemaPath` via conditional types that TypeScript can't narrow
+ * These assertions are safe because the path originates from Angular's schema() function.
  *
  * @internal
  */
-export function applyFormLevelSchema<TModel>(path: unknown, formLevelSchema: FormSchema<TModel>): void {
+export function applyFormLevelSchema<TModel>(path: SchemaPathTree<TModel>, formLevelSchema: FormSchema<TModel>): void {
   if (isStandardSchemaMarker(formLevelSchema)) {
     // Standard Schema (Zod, Valibot, ArkType, etc.)
-    // Type assertion required due to Angular's complex type constraints on validateStandardSchema
-    // The path is the root schema path which is always valid for form-level validation
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    validateStandardSchema(path as any, formLevelSchema.schema);
+    // Cast via Parameters: validateStandardSchema's IgnoreUnknownProperties<TSchema> creates type incompatibility
+    // that TypeScript cannot resolve. The cast is safe as path comes from Angular's schema() callback.
+    (validateStandardSchema as (...args: unknown[]) => void)(path, formLevelSchema.schema);
   } else if (typeof formLevelSchema === 'function') {
     // Angular schema callback - execute directly with the path
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    formLevelSchema(path as any);
+    // Cast via Function: AngularSchemaCallback expects intersection type SchemaPath & SchemaPathTree.
+    // SchemaPathTree structurally includes SchemaPath, so this is safe at runtime.
+    (formLevelSchema as (path: unknown) => void)(path);
   }
 }
 
