@@ -500,7 +500,7 @@ Add social login buttons before the form:
 ## Related
 
 - **[Login Form](../login-form/)** - Simple authentication form
-- **[Multi-Step Wizard](../wizard/)** - Page field navigation patterns
-- **[Validation](../validation/basics/)** - Validation guide
-- **[Conditional Logic](../dynamic-behavior/conditional-logic/overview/)** - Dynamic field behavior
-- **[Material Fields](../../ui-libs-integrations/reference/material/overview-setup/)** - Material Design field types
+- **[Paginated Form](../paginated-form/)** - Page field navigation patterns
+- **[Validation](../../validation/basics/)** - Validation guide
+- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Dynamic field behavior
+- **[Material Integration](../../ui-libs-integrations/material/)** - Material Design styling

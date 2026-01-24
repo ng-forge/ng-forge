@@ -177,10 +177,8 @@ Dropdown allows users to categorize their inquiry:
 
 - **[User Registration](../user-registration/)** - Multi-step form with conditional fields
 - **[Login Form](../login-form/)** - Simple authentication
-- **[Survey Form](../survey-form/)** - Complex questionnaires
 
 ## Related Documentation
 
-- **[Field Types](../schema-fields/field-types/)** - Available field types
-- **[Validation](../validation/basics/)** - Form validation guide
+- **[Validation](../../validation/basics/)** - Form validation guide
 - **[Material Integration](../../ui-libs-integrations/material/)** - Material Design styling

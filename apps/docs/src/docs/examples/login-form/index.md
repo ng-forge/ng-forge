@@ -183,10 +183,8 @@ For social login buttons, you can use text fields with links or handle this outs
 
 - **[User Registration](../user-registration/)** - Account creation
 - **[Contact Form](../contact-form/)** - Basic form with validation
-- **[Password Reset](../password-reset/)** - Forgot password flow
 
 ## Related Documentation
 
-- **[Validation](../validation/basics/)** - Form validation guide
-- **[Field Types](../schema-fields/field-types/)** - Input, checkbox, button
+- **[Validation](../../validation/basics/)** - Form validation guide
 - **[Material Integration](../../ui-libs-integrations/material/)** - Material Design styling

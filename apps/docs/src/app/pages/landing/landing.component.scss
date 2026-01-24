@@ -1337,6 +1337,16 @@ section {
 // ============================================
 // VALIDATION SECTION
 // ============================================
+.validation {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 2rem;
+
+  @media (max-width: 768px) {
+    padding: 2rem 1.25rem;
+  }
+}
+
 .validation-header,
 .field-types-header,
 .quickstart-header,
@@ -1385,7 +1395,6 @@ section {
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   background: $bg-surface;
-  border-bottom: 1px solid $steel-dark;
   font-size: 0.85rem;
   color: $steel-mid;
   font-weight: 500;

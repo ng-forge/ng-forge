@@ -45,6 +45,13 @@ $steel-dark: #2a2824;
 
 // Light theme - ember colors with light backgrounds
 :root {
+  // Shiki syntax highlighting CSS variables (used by ng-doc dual-theme Shiki)
+  // These must be defined for code to be visible in both light and dark modes
+  --shiki-light: #1a1a1a;
+  --shiki-dark: #{$steel};
+  --shiki-light-bg: transparent;
+  --shiki-dark-bg: transparent;
+
   // Ember primary colors
   --ng-doc-primary: #{$ember-core};
   --ng-doc-primary-rgb: 255, 77, 0;
