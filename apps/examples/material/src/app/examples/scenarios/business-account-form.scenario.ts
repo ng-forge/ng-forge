@@ -95,7 +95,7 @@ export const businessAccountFormScenario: ExampleScenario = {
       {
         key: 'numberOfEmployees',
         type: 'input',
-        value: null,
+        value: undefined,
         label: 'Number of Employees',
         props: { type: 'number', appearance: 'outline' },
         logic: [

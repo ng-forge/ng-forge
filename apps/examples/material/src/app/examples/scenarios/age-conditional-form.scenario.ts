@@ -27,7 +27,7 @@ export const ageConditionalFormScenario: ExampleScenario = {
       {
         key: 'age',
         type: 'input',
-        value: null,
+        value: undefined,
         label: 'Age',
         required: true,
         min: 0,

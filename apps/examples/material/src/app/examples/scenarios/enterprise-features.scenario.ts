@@ -23,7 +23,7 @@ export const enterpriseFeaturesScenario: ExampleScenario = {
       {
         key: 'teamSize',
         type: 'input',
-        value: null,
+        value: undefined,
         label: 'Team Size',
         min: 1,
         props: {
