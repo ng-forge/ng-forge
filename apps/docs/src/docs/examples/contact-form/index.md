@@ -1,3 +1,5 @@
+[← Back to Quick Start](/examples)
+
 Simple contact form demonstrating basic form fields, validation, and user input.
 
 ## Live Demo
@@ -179,6 +181,6 @@ Dropdown allows users to categorize their inquiry:
 
 ## Related Documentation
 
-- **[Field Types](../../core/field-types/)** - Available field types
-- **[Validation](../../core/validation/)** - Form validation guide
+- **[Field Types](../schema-fields/field-types/)** - Available field types
+- **[Validation](../validation/basics/)** - Form validation guide
 - **[Material Integration](../../ui-libs-integrations/material/)** - Material Design styling

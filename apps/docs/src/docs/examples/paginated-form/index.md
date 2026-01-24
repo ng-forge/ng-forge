@@ -1,3 +1,5 @@
+[← Back to Quick Start](/examples)
+
 A comprehensive multi-step registration form demonstrating the `page` field type for creating wizards and stepped workflows.
 
 ## Live Demo
@@ -486,5 +488,5 @@ Apply different validation rules per step:
 
 - [Page Field Type](../../ui-libs-integrations/material/page) - Page field documentation
 - [Navigation Buttons](../../ui-libs-integrations/material/button#navigation-buttons) - Next, Previous, Submit buttons
-- [Conditional Logic](../../form-behavior/conditional-logic) - Show/hide pages dynamically
-- [Validation](../../core/validation) - Per-page and cross-page validation
+- [Conditional Logic](../dynamic-behavior/conditional-logic/overview) - Show/hide pages dynamically
+- [Validation](../validation/basics) - Per-page and cross-page validation

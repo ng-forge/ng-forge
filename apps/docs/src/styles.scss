@@ -1003,3 +1003,81 @@ html:has(app-landing) {
     background: #{$bg-void} !important;
   }
 }
+
+// ============================================
+// HIDE PAGE HEADERS GLOBALLY
+// ============================================
+// Breadcrumbs are sufficient - hide the duplicate h1 header on all pages
+.ng-doc-page-header {
+  display: none;
+}
+
+// ============================================
+// EXAMPLE PAGES - BACK LINK STYLING
+// ============================================
+// Style the "← Back to Quick Start" links on example pages with animated underline
+// Matches landing page inline-link style
+.ng-doc-page__content > p:first-of-type > a[href='/examples'] {
+  color: $ember-glow;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+  font-weight: 500;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 60%;
+    height: 3px;
+    background: $ember-glow;
+    border-radius: 1px 40% 40% 1px;
+    opacity: 0.5;
+    transition:
+      width 0.3s ease,
+      opacity 0.3s ease,
+      background 0.3s ease;
+  }
+
+  &:hover {
+    color: $ember-hot;
+
+    &::after {
+      width: 100%;
+      opacity: 0.8;
+      background: $ember-hot;
+    }
+  }
+}
+
+// ============================================
+// PAGE DESCRIPTION HORIZONTAL RULE
+// ============================================
+// Add a subtle separator line under page descriptions across all docs
+// This targets paragraphs that come before the first heading (the description)
+.ng-doc-page__content {
+  // Find the description paragraph and add a separator after it
+  // The description is typically the first paragraph (or second if there's a back link)
+
+  // For pages without a back link - first paragraph before first heading
+  > p:first-child:has(+ h2),
+  > p:first-child:has(+ h3) {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--ng-doc-base-3);
+  }
+
+  // For example pages with back link - second paragraph before heading
+  > p:first-of-type + p:has(+ *:is(h2, h3, .ng-doc-demo)) {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--ng-doc-base-3);
+  }
+
+  // For pages where description is followed by Live Demo
+  > p:first-child + h2:first-of-type,
+  > p + p + h2:first-of-type {
+    margin-top: 0;
+  }
+}

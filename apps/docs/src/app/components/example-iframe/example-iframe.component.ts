@@ -4,9 +4,11 @@ import { ENVIRONMENT } from '../../config/environment';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, fromEvent, map } from 'rxjs';
+import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 
 @Component({
   selector: 'example-iframe',
+  imports: [CodeHighlightDirective],
   template: `
     <div class="example-iframe-container" [style.height.px]="iframeHeight()">
       @if (loading()) {
@@ -29,7 +31,9 @@ import { filter, fromEvent, map } from 'rxjs';
     @if (code()) {
       <details>
         <summary>Click to view config! 🔧</summary>
-        <pre><code>{{ code() }}</code></pre>
+        <div class="code-container">
+          <pre [codeHighlight]="code()!" lang="typescript"></pre>
+        </div>
       </details>
     }
   `,
@@ -131,20 +135,50 @@ import { filter, fromEvent, map } from 'rxjs';
         background: var(--ng-doc-base-2, #eeeeee);
       }
 
-      details pre {
-        margin: 0;
-        padding: 1rem;
-        background: #282c34;
+      .code-container {
         border-radius: 0 0 4px 4px;
         overflow-x: auto;
       }
 
-      details code {
-        color: #abb2bf;
+      .code-container pre {
+        margin: 0;
+        padding: 1rem;
         font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
         font-size: 0.875rem;
         line-height: 1.6;
-        white-space: pre;
+        overflow-x: auto;
+      }
+
+      /* Shiki dual-theme support - light mode default */
+      .code-container pre :deep(.shiki) {
+        background-color: var(--shiki-light-bg, #fafafa) !important;
+      }
+
+      .code-container pre :deep(.shiki),
+      .code-container pre :deep(.shiki span) {
+        color: var(--shiki-light, inherit) !important;
+      }
+
+      /* Dark mode via ng-doc theme */
+      :host-context(html[data-theme='dark']) .code-container pre :deep(.shiki) {
+        background-color: var(--shiki-dark-bg, #1e1e1e) !important;
+      }
+
+      :host-context(html[data-theme='dark']) .code-container pre :deep(.shiki),
+      :host-context(html[data-theme='dark']) .code-container pre :deep(.shiki span) {
+        color: var(--shiki-dark, inherit) !important;
+      }
+
+      /* Auto mode follows system preference */
+      @media (prefers-color-scheme: dark) {
+        :host-context(html[data-theme='auto']) .code-container pre :deep(.shiki) {
+          background-color: var(--shiki-dark-bg, #1e1e1e) !important;
+        }
+
+        :host-context(html[data-theme='auto']) .code-container pre :deep(.shiki),
+        :host-context(html[data-theme='auto']) .code-container pre :deep(.shiki span) {
+          color: var(--shiki-dark, inherit) !important;
+        }
       }
     `,
   ],

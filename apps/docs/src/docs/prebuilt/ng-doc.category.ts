@@ -1,9 +1,9 @@
 import { NgDocCategory } from '@ng-doc/core';
 
-const PrebuiltCategory: NgDocCategory = {
-  title: 'Prebuilt Components',
-  order: 5,
+const LayoutComponentsCategory: NgDocCategory = {
+  title: 'Layout Components',
+  order: 7,
   expandable: true,
 };
 
-export default PrebuiltCategory;
+export default LayoutComponentsCategory;

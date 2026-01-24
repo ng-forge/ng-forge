@@ -1,3 +1,5 @@
+[← Back to Quick Start](/examples)
+
 Complete example of a user registration form with validation, conditional logic, and proper type safety.
 
 ## Live Demo
@@ -499,6 +501,6 @@ Add social login buttons before the form:
 
 - **[Login Form](../login-form/)** - Simple authentication form
 - **[Multi-Step Wizard](../wizard/)** - Page field navigation patterns
-- **[Validation](../../core/validation/basics/)** - Validation guide
-- **[Conditional Logic](../../form-behavior/conditional-logic/)** - Dynamic field behavior
+- **[Validation](../validation/basics/)** - Validation guide
+- **[Conditional Logic](../dynamic-behavior/conditional-logic/overview/)** - Dynamic field behavior
 - **[Material Fields](../../ui-libs-integrations/reference/material/overview-setup/)** - Material Design field types

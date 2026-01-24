@@ -321,5 +321,5 @@ Consider [Angular Schema](../angular-schema) if you:
 
 - **[Schema Validation Overview](../overview)** - When to use form-level validation
 - **[Angular Schema](../angular-schema)** - Native Angular approach
-- **[Field Validation](../../core/validation/)** - Individual field validators
+- **[Field Validation](../../validation/basics/)** - Individual field validators
 - **[Standard Schema Spec](https://standardschema.dev)** - The specification

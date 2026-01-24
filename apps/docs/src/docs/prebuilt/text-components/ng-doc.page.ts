@@ -1,10 +1,10 @@
 import { NgDocPage } from '@ng-doc/core';
-import PrebuiltCategory from '../ng-doc.category';
+import LayoutComponentsCategory from '../ng-doc.category';
 
 const TextComponentsPage: NgDocPage = {
   title: 'Text Components',
   mdFile: './index.md',
-  category: PrebuiltCategory,
+  category: LayoutComponentsCategory,
   order: 4,
 };
 

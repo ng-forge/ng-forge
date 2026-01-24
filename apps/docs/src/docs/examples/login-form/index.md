@@ -1,3 +1,5 @@
+[← Back to Quick Start](/examples)
+
 Simple login form demonstrating authentication UI with email and password fields.
 
 ## Live Demo
@@ -185,6 +187,6 @@ For social login buttons, you can use text fields with links or handle this outs
 
 ## Related Documentation
 
-- **[Validation](../../core/validation/)** - Form validation guide
-- **[Field Types](../../core/field-types/)** - Input, checkbox, button
+- **[Validation](../validation/basics/)** - Form validation guide
+- **[Field Types](../schema-fields/field-types/)** - Input, checkbox, button
 - **[Material Integration](../../ui-libs-integrations/material/)** - Material Design styling

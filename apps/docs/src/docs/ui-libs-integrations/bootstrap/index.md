@@ -130,7 +130,7 @@ export class ContactFormComponent {
 
 ## Configuration Options
 
-Configure default props at the library, form, or field level. See [Configuration](../../deep-dive/configuration) for the full cascade behavior and examples.
+Configure default props at the library, form, or field level.
 
 Use `BsFormConfig` for type-safe form configurations with Bootstrap-specific props.
 
@@ -785,6 +785,6 @@ Bootstrap's native HTML elements provide excellent baseline accessibility that's
 ## Next Steps
 
 - Check out [Examples & Patterns](../../../examples/) for real-world use cases
-- Learn about [Validation](../../../core/validation/) for form validation
-- See [Type Safety](../../../deep-dive/type-safety/) for TypeScript integration
-- Explore [Conditional Logic](../../../form-behavior/conditional-logic/) for dynamic field behavior
+- Learn about [Validation](../../validation/basics/) for form validation
+- See [Type Safety](../../advanced/type-safety/basics/) for TypeScript integration
+- Explore [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/) for dynamic field behavior

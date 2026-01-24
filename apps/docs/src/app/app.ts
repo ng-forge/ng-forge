@@ -8,6 +8,7 @@ import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgDocButtonIconComponent, NgDocIconComponent, NgDocTooltipDirective } from '@ng-doc/ui-kit';
 
 import { Logo } from './components/logo';
+import { SidebarAccordionDirective } from './directives/sidebar-accordion.directive';
 
 const THEME_STORAGE_KEY = 'ng-forge-docs-theme';
 type ThemeType = 'auto' | 'light' | 'dark';
@@ -36,6 +37,7 @@ function storageValueToTheme(value: string | null): string | undefined {
     NgDocButtonIconComponent,
     NgDocTooltipDirective,
     Logo,
+    SidebarAccordionDirective,
   ],
   selector: 'app-root',
   templateUrl: './app.html',

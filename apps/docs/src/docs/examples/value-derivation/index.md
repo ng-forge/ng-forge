@@ -3,6 +3,8 @@ title: Value Derivation
 keyword: ValueDerivationExamplePage
 ---
 
+[← Back to Quick Start](/examples)
+
 This example demonstrates automatic value derivation using expressions. Watch how changing input values automatically updates calculated fields.
 
 ## Live Demo
@@ -71,5 +73,4 @@ taxRate ───────────────────┴────
 
 ## Related
 
-- **[Value Derivation Basics](../../form-behavior/derivation/)** - Core concepts and syntax
-- **[Advanced Derivations](../../form-behavior/derivation/advanced/)** - Array derivations, debugging, bidirectional patterns
+- **[Value Derivation](../../dynamic-behavior/value-derivation/basics/)** - Core concepts, syntax, array derivations, debugging, and bidirectional patterns
