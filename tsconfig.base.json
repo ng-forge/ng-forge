@@ -28,6 +28,7 @@
       "@ng-forge/dynamic-forms-material": ["packages/dynamic-forms-material/src/index.ts"],
       "@ng-forge/dynamic-forms-primeng": ["packages/dynamic-forms-primeng/src/index.ts"],
       "@ng-forge/examples-shared-testing": ["internal/examples-shared-testing/src/index.ts"],
+      "@ng-forge/examples-shared-ui": ["internal/examples-shared-ui/src/index.ts"],
       "@ng-forge/examples-shared-testing/playwright-config": ["internal/examples-shared-testing/src/lib/playwright-config.ts"],
       "@ng-forge/styling": ["internal/styling/src/index.ts"],
       "@ng-forge/dynamic-forms/testing": ["packages/dynamic-forms/testing/src/public_api.ts"],

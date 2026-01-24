@@ -1017,7 +1017,8 @@ html:has(app-landing) {
 // ============================================
 // Style the "← Back to Quick Start" links on example pages with animated underline
 // Matches landing page inline-link style
-.ng-doc-page__content > p:first-of-type > a[href='/examples'] {
+// DOM structure: DIV.ng-doc-page-wrapper > P.ngde > NG-DOC-PAGE-LINK > A[href="/examples"]
+.ng-doc-page-wrapper > p:first-of-type ng-doc-page-link a[href='/examples'] {
   color: $ember-glow;
   text-decoration: none;
   position: relative;
@@ -1098,12 +1099,22 @@ html:has(app-landing) {
 // PAGE DESCRIPTION HORIZONTAL RULE
 // ============================================
 // Add a subtle separator line under page descriptions across all docs
-// This targets paragraphs that come before the first heading (the description)
-.ng-doc-page__content {
-  // Find the description paragraph and add a separator after it
-  // The description is typically the first paragraph (or second if there's a back link)
+// Uses a combination of selectors to cover different page structures:
+// - Pages with intro paragraph followed by heading
+// - Pages with intro paragraph followed by blockquote/note then heading
+// - Example pages with back link, then description, then content
+// Note: ng-doc uses .ng-doc-page-wrapper for the page content container
+.ng-doc-page-wrapper {
+  // Style for explicit <hr> elements in markdown (---)
+  > hr {
+    border: none;
+    border-top: 1px solid var(--ng-doc-base-3);
+    margin: 1.5rem 0;
+  }
 
-  // For pages without a back link - first paragraph before first heading
+  // For pages without explicit <hr>:
+  // Target the first paragraph that comes before a heading
+  // This handles most doc pages with intro descriptions
   > p:first-child:has(+ h2),
   > p:first-child:has(+ h3) {
     padding-bottom: 1.5rem;
@@ -1111,16 +1122,26 @@ html:has(app-landing) {
     border-bottom: 1px solid var(--ng-doc-base-3);
   }
 
-  // For example pages with back link - second paragraph before heading
-  > p:first-of-type + p:has(+ *:is(h2, h3, .ng-doc-demo)) {
+  // For pages with Note/blockquote after description then heading
+  > p:first-child:has(+ p + h2),
+  > p:first-child:has(+ p + h3) {
     padding-bottom: 1.5rem;
     margin-bottom: 1.5rem;
     border-bottom: 1px solid var(--ng-doc-base-3);
   }
 
-  // For pages where description is followed by Live Demo
-  > p:first-child + h2:first-of-type,
-  > p + p + h2:first-of-type {
+  // For example pages with back link paragraph first
+  // Structure: p (back link with ng-doc-page-link) > p (description) > h2
+  > p:first-of-type:has(ng-doc-page-link a[href='/examples']) + p {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--ng-doc-base-3);
+  }
+
+  // Ensure consistent spacing after the separator
+  > p + h2:first-of-type,
+  > p + p + h2:first-of-type,
+  > hr + h2 {
     margin-top: 0;
   }
 }
