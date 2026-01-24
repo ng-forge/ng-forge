@@ -16,6 +16,7 @@ jobs:
   should-run:
     name: Check if should run
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       should-skip: ${{ steps.check.outputs.should-skip }}
     steps:
@@ -34,6 +35,7 @@ jobs:
     needs: should-run
     if: needs.should-run.outputs.should-skip != 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -98,6 +100,7 @@ jobs:
     needs: should-run
     if: needs.should-run.outputs.should-skip != 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -162,6 +165,7 @@ jobs:
     needs: [should-run, build]
     if: needs.should-run.outputs.should-skip != 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -216,6 +220,7 @@ jobs:
     needs: [should-run, build]
     if: needs.should-run.outputs.should-skip != 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -262,6 +267,7 @@ jobs:
     needs: [should-run, build]
     if: needs.should-run.outputs.should-skip != 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -326,6 +332,7 @@ jobs:
     needs: [should-run, quality, test, build-apps]
     if: needs.should-run.outputs.should-skip != 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -372,6 +379,15 @@ jobs:
             echo "affected=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Cache Playwright browsers
+        if: steps.check-affected.outputs.affected == 'true'
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
       - name: Run E2E tests in Docker
         if: steps.check-affected.outputs.affected == 'true'
         run: ./scripts/playwright-docker.sh ${{ matrix.app }}
@@ -384,3 +400,16 @@ jobs:
           path: apps/examples/${{ matrix.short }}/test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  ci-success:
+    name: PR Check Complete
+    if: always()
+    needs: [should-run, checks, build, quality, test, build-apps, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify all jobs succeeded
+        uses: re-actors/alls-green@release/v1
+        with:
+          allowed-skips: checks, build, quality, test, build-apps, e2e
+          jobs: ${{ toJSON(needs) }}
