@@ -76,22 +76,10 @@ jobs:
       - name: Fetch base branch for affected detection
         run: git fetch origin main:main
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Restore node_modules
-        uses: actions/cache/restore@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-          fail-on-cache-miss: true
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Validate PR title
         run: |
@@ -143,22 +131,10 @@ jobs:
       - name: Fetch base branch for affected detection
         run: git fetch origin main:main
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Restore node_modules
-        uses: actions/cache/restore@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-          fail-on-cache-miss: true
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Build affected libraries
         run: pnpm nx affected -t build --base=origin/main
@@ -210,22 +186,10 @@ jobs:
       - name: Fetch base branch for affected detection
         run: git fetch origin main:main
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Restore node_modules
-        uses: actions/cache/restore@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-          fail-on-cache-miss: true
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Restore build artifacts
         uses: actions/cache@v5
@@ -256,22 +220,10 @@ jobs:
       - name: Fetch base branch for affected detection
         run: git fetch origin main:main
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Restore node_modules
-        uses: actions/cache/restore@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-          fail-on-cache-miss: true
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Restore build artifacts
         uses: actions/cache@v5
@@ -295,6 +247,9 @@ jobs:
     needs: [setup, build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      e2e-matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has-e2e: ${{ steps.set-matrix.outputs.has-e2e }}
 
     steps:
       - name: Checkout
@@ -305,22 +260,10 @@ jobs:
       - name: Fetch base branch for affected detection
         run: git fetch origin main:main
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Restore node_modules
-        uses: actions/cache/restore@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-          fail-on-cache-miss: true
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Restore build artifacts
         uses: actions/cache@v5
@@ -357,69 +300,64 @@ jobs:
             echo "No example apps affected, skipping build"
           fi
 
+      - name: Determine E2E matrix
+        id: set-matrix
+        run: |
+          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || echo "")
+          echo "Affected E2E projects: $AFFECTED"
+
+          # Build JSON matrix
+          MATRIX='{"include":['
+          FIRST=true
+
+          for APP in bootstrap-examples material-examples primeng-examples ionic-examples; do
+            if echo "$AFFECTED" | grep -q "$APP"; then
+              SHORT=$(echo "$APP" | sed 's/-examples//')
+              if [ "$FIRST" = true ]; then
+                FIRST=false
+              else
+                MATRIX+=','
+              fi
+              MATRIX+="{\"app\":\"$APP\",\"short\":\"$SHORT\"}"
+              echo "  - $APP (affected)"
+            else
+              echo "  - $APP (not affected, skipping)"
+            fi
+          done
+
+          MATRIX+=']}'
+
+          if [ "$MATRIX" = '{"include":[]}' ]; then
+            echo "No E2E apps affected"
+            echo "has-e2e=false" >> $GITHUB_OUTPUT
+            echo "matrix={\"include\":[]}" >> $GITHUB_OUTPUT
+          else
+            echo "E2E matrix: $MATRIX"
+            echo "has-e2e=true" >> $GITHUB_OUTPUT
+            echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          fi
+
   e2e:
     name: E2E Tests (${{ matrix.app }})
-    needs: [setup, quality, test, build-apps]
+    needs: [quality, test, build-apps]
+    if: needs.build-apps.outputs.has-e2e == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - app: bootstrap-examples
-            short: bootstrap
-          - app: material-examples
-            short: material
-          - app: primeng-examples
-            short: primeng
-          - app: ionic-examples
-            short: ionic
+      matrix: ${{ fromJson(needs.build-apps.outputs.e2e-matrix) }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
-      - name: Fetch base branch for affected detection
-        run: git fetch origin main:main
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Restore node_modules
-        uses: actions/cache/restore@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-          fail-on-cache-miss: true
-
-      - name: Check if app is affected
-        id: check-affected
-        run: |
-          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e) || true
-          if echo "$AFFECTED" | grep -q "${{ matrix.app }}"; then
-            echo "affected=true" >> $GITHUB_OUTPUT
-          else
-            echo "affected=false" >> $GITHUB_OUTPUT
-          fi
-
-      # Note: Docker rebuilds everything inside container, no need for host caches
-
+      # Docker handles everything - no need for pnpm/node setup on host
       - name: Run E2E tests in Docker
-        if: steps.check-affected.outputs.affected == 'true'
         run: ./scripts/playwright-docker.sh ${{ matrix.app }}
 
       - name: Upload test artifacts on failure
         uses: actions/upload-artifact@v6
-        if: failure() && steps.check-affected.outputs.affected == 'true'
+        if: failure()
         with:
           name: playwright-results-${{ matrix.app }}
           path: apps/examples/${{ matrix.short }}/test-results/
@@ -436,5 +374,6 @@ jobs:
       - name: Verify all jobs succeeded
         uses: re-actors/alls-green@release/v1
         with:
+          # e2e may be skipped if no E2E apps are affected
           allowed-skips: setup, checks, build, quality, test, build-apps, e2e
           jobs: ${{ toJSON(needs) }}

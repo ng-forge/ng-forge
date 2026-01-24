@@ -51,22 +51,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Restore node_modules
-        uses: actions/cache/restore@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-          fail-on-cache-miss: true
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Check formatting
         run: |
@@ -97,22 +85,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Restore node_modules
-        uses: actions/cache/restore@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-          fail-on-cache-miss: true
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Build all libraries
         run: pnpm nx run-many -t build -p ${{ env.LIBRARY_PACKAGES }}
@@ -155,22 +131,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Restore node_modules
-        uses: actions/cache/restore@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-          fail-on-cache-miss: true
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Restore build artifacts
         uses: actions/cache/restore@v5
@@ -197,22 +161,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Restore node_modules
-        uses: actions/cache/restore@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-          fail-on-cache-miss: true
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Restore build artifacts
         uses: actions/cache/restore@v5
@@ -251,22 +203,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Restore node_modules
-        uses: actions/cache/restore@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-          fail-on-cache-miss: true
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Restore build artifacts
         uses: actions/cache/restore@v5
