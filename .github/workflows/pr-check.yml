@@ -204,17 +204,6 @@ jobs:
       - name: Lint affected projects
         run: pnpm nx affected -t lint --base=origin/main
 
-      - name: Type check affected libraries
-        run: |
-          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --type=lib)
-          if [ -n "$AFFECTED" ]; then
-            echo "Type checking affected libraries:"
-            echo "$AFFECTED"
-            pnpm nx affected -t build --base=origin/main --exclude='*-examples,docs' --verbose
-          else
-            echo "No libraries affected, skipping type check"
-          fi
-
   test:
     name: Unit Tests
     needs: [should-run, build]
@@ -379,14 +368,7 @@ jobs:
             echo "affected=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Cache Playwright browsers
-        if: steps.check-affected.outputs.affected == 'true'
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package.json') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
+      # Note: Docker rebuilds everything inside container, no need for host caches
 
       - name: Run E2E tests in Docker
         if: steps.check-affected.outputs.affected == 'true'

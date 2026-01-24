@@ -152,9 +152,6 @@ jobs:
       - name: Lint all projects
         run: pnpm nx run-many -t lint --parallel=3
 
-      - name: Type check all libraries
-        run: pnpm nx run-many -t build -p ${{ env.LIBRARY_PACKAGES }} --verbose
-
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -282,44 +279,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Restore build artifacts
-        uses: actions/cache@v5
-        with:
-          path: |
-            dist/packages/dynamic-forms
-            dist/packages/dynamic-forms-material
-            dist/packages/dynamic-forms-bootstrap
-            dist/packages/dynamic-forms-ionic
-            dist/packages/dynamic-forms-primeng
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package.json') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
+      # Docker handles everything - no need for pnpm/node setup on host
+      # The script only needs node (pre-installed) to read package.json
       - name: Run E2E tests in Docker
-        run: pnpm e2e:${{ matrix.short }}
+        run: ./scripts/playwright-docker.sh ${{ matrix.app }}
 
       - name: Upload test artifacts on failure
         uses: actions/upload-artifact@v6
