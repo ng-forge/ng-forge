@@ -147,38 +147,7 @@ import { CodeHighlightDirective } from '../../directives/code-highlight.directiv
         font-size: 0.875rem;
         line-height: 1.6;
         overflow-x: auto;
-      }
-
-      /* Shiki dual-theme support - light mode default */
-      .code-container pre :deep(.shiki) {
-        background-color: var(--shiki-light-bg, #fafafa) !important;
-      }
-
-      .code-container pre :deep(.shiki),
-      .code-container pre :deep(.shiki span) {
-        color: var(--shiki-light, inherit) !important;
-      }
-
-      /* Dark mode via ng-doc theme */
-      :host-context(html[data-theme='dark']) .code-container pre :deep(.shiki) {
-        background-color: var(--shiki-dark-bg, #1e1e1e) !important;
-      }
-
-      :host-context(html[data-theme='dark']) .code-container pre :deep(.shiki),
-      :host-context(html[data-theme='dark']) .code-container pre :deep(.shiki span) {
-        color: var(--shiki-dark, inherit) !important;
-      }
-
-      /* Auto mode follows system preference */
-      @media (prefers-color-scheme: dark) {
-        :host-context(html[data-theme='auto']) .code-container pre :deep(.shiki) {
-          background-color: var(--shiki-dark-bg, #1e1e1e) !important;
-        }
-
-        :host-context(html[data-theme='auto']) .code-container pre :deep(.shiki),
-        :host-context(html[data-theme='auto']) .code-container pre :deep(.shiki span) {
-          color: var(--shiki-dark, inherit) !important;
-        }
+        background: transparent;
       }
     `,
   ],

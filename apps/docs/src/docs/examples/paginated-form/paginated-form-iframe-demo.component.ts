@@ -11,29 +11,35 @@ export class PaginatedFormIframeDemoComponent {
   code = `{
   fields: [
     // Page 1: Personal Info
-    { key: 'page1', type: 'page',
+    {
+      key: 'page1',
+      type: 'page',
       fields: [
-        { key: 'firstName', type: 'input', label: 'First Name', value: '', required: true },
-        { key: 'lastName', type: 'input', label: 'Last Name', value: '', required: true },
-        { key: 'email', type: 'input', label: 'Email', value: '', required: true, email: true },
-        { type: 'next', key: 'next1', label: 'Continue' }
-      ]
+        { key: 'firstName', type: 'input', label: 'First Name', required: true },
+        { key: 'lastName', type: 'input', label: 'Last Name', required: true },
+        { key: 'email', type: 'input', label: 'Email', required: true, email: true },
+        { type: 'next', key: 'next1', label: 'Continue' },
+      ],
     },
     // Page 2: Address
-    { key: 'page2', type: 'page',
+    {
+      key: 'page2',
+      type: 'page',
       fields: [
-        { key: 'street', type: 'input', label: 'Street', value: '', required: true },
-        { key: 'city', type: 'input', label: 'City', value: '', required: true },
+        { key: 'street', type: 'input', label: 'Street', required: true },
+        { key: 'city', type: 'input', label: 'City', required: true },
         { type: 'previous', key: 'prev2', label: 'Back' },
-        { type: 'next', key: 'next2', label: 'Continue' }
-      ]
+        { type: 'next', key: 'next2', label: 'Continue' },
+      ],
     },
     // Page 3: Review & Submit
-    { key: 'page3', type: 'page',
+    {
+      key: 'page3',
+      type: 'page',
       fields: [
         { type: 'previous', key: 'prev3', label: 'Back' },
-        { type: 'submit', key: 'submit', label: 'Submit' }
-      ]
+        { type: 'submit', key: 'submit', label: 'Submit' },
+      ],
     },
   ],
 }`;

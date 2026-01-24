@@ -1052,6 +1052,49 @@ html:has(app-landing) {
 }
 
 // ============================================
+// SHIKI CODE HIGHLIGHTING (GLOBAL)
+// ============================================
+// Shiki dual-theme support for code highlighting
+// When using defaultColor: false, Shiki outputs CSS variables
+// that need to be controlled at the document level
+
+// Light mode (default) - use --shiki-light colors
+.shiki,
+.shiki span {
+  color: var(--shiki-light) !important;
+  background-color: var(--shiki-light-bg) !important;
+}
+
+// Dark mode (explicit) - use --shiki-dark colors
+html[data-theme='dark'] {
+  .shiki,
+  .shiki span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+  }
+}
+
+// Dark mode (auto with dark system preference)
+@media (prefers-color-scheme: dark) {
+  html[data-theme='auto'] {
+    .shiki,
+    .shiki span {
+      color: var(--shiki-dark) !important;
+      background-color: var(--shiki-dark-bg) !important;
+    }
+  }
+}
+
+// Landing page always uses dark mode
+html:has(app-landing) {
+  .shiki,
+  .shiki span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+  }
+}
+
+// ============================================
 // PAGE DESCRIPTION HORIZONTAL RULE
 // ============================================
 // Add a subtle separator line under page descriptions across all docs
