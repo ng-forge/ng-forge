@@ -75,6 +75,9 @@ export class ExampleScenarioComponent {
   private readonly minimalParam = injectQueryParams('minimal');
   minimal = computed(() => this.minimalParam() === 'true');
 
+  /** Theme from query params (used for landing page embeds) */
+  private readonly themeParam = injectQueryParams('theme');
+
   /** Whether embedded in an iframe (auto-detected) */
   readonly isInIframe = this.checkIfInIframe();
 
@@ -95,9 +98,19 @@ export class ExampleScenarioComponent {
   /** Active tab */
   activeTab = signal<'demo' | 'code'>('demo');
 
-  /** Current resolved theme for host binding - derived from theme source */
-  private readonly themeSource = signal<string | null | undefined>('auto');
-  currentTheme = computed(() => this.resolveTheme(this.themeSource()));
+  /** Theme override from postMessage (only used when not explicitly set via query param) */
+  private readonly themeOverride = signal<string | null>(null);
+  currentTheme = computed(() => {
+    const queryParam = this.themeParam();
+    // 'landing' theme is explicit and should never be overridden by postMessage
+    // This ensures landing page embeds stay dark regardless of user's docs theme
+    if (queryParam === 'landing') {
+      return 'dark' as const;
+    }
+    // For other cases, allow postMessage to override query param
+    const override = this.themeOverride();
+    return this.resolveTheme(override ?? queryParam ?? 'auto');
+  });
 
   /** Copy feedback state */
   copied = signal(false);
@@ -127,8 +140,38 @@ export class ExampleScenarioComponent {
     return resolved;
   });
 
-  /** JSON representation of the config for display */
-  configJson = computed(() => JSON.stringify(this.scenario().config, null, 2));
+  /** Config as JS-style object notation (no quotes around property keys) */
+  configJson = computed(() => this.toJsObjectNotation(this.scenario().config, 0));
+
+  /** Convert object to JavaScript-style notation without quoted property keys */
+  private toJsObjectNotation(value: unknown, indent: number): string {
+    const spaces = '  '.repeat(indent);
+    const nextSpaces = '  '.repeat(indent + 1);
+
+    if (value === null) return 'null';
+    if (value === undefined) return 'undefined';
+    if (typeof value === 'string') return `'${value.replace(/'/g, "\\'")}'`;
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+    if (value instanceof RegExp) return value.toString();
+
+    if (Array.isArray(value)) {
+      if (value.length === 0) return '[]';
+      const items = value.map((item) => `${nextSpaces}${this.toJsObjectNotation(item, indent + 1)}`);
+      return `[\n${items.join(',\n')}\n${spaces}]`;
+    }
+
+    if (typeof value === 'object') {
+      const entries = Object.entries(value as Record<string, unknown>);
+      if (entries.length === 0) return '{}';
+      const props = entries.map(([key, val]) => {
+        const formattedValue = this.toJsObjectNotation(val, indent + 1);
+        return `${nextSpaces}${key}: ${formattedValue}`;
+      });
+      return `{\n${props.join(',\n')}\n${spaces}}`;
+    }
+
+    return String(value);
+  }
 
   /** Syntax-highlighted config HTML using Shiki */
   highlightedConfig = toSignal(this.createHighlightedConfig$(), {
@@ -168,32 +211,21 @@ export class ExampleScenarioComponent {
     });
   }
 
-  /** Setup theme listener - listen to parent postMessage or use query param fallback */
+  /** Setup theme listener - listen to parent postMessage for theme overrides */
   private setupThemeListener(): void {
+    // In iframe mode, listen for theme changes from parent (overrides query param)
     if (this.isInIframe && this.isBrowser) {
-      // Apply system preference immediately as default
-      this.themeSource.set('auto');
-
-      // Listen for theme changes from parent
       fromEvent<MessageEvent>(window, 'message')
         .pipe(
           filter((event) => event.data?.type === 'theme-change'),
           map((event) => event.data.theme),
           takeUntilDestroyed(),
         )
-        .subscribe((theme) => this.themeSource.set(theme));
+        .subscribe((theme) => this.themeOverride.set(theme));
 
       // Request theme from parent (with retry for timing)
       window.parent.postMessage({ type: 'request-theme' }, '*');
       setTimeout(() => window.parent.postMessage({ type: 'request-theme' }, '*'), 100);
-    } else if (this.isBrowser) {
-      // Not in iframe - use query param or system preference
-      this.route.queryParams
-        .pipe(
-          map((params) => params['theme'] ?? 'auto'),
-          takeUntilDestroyed(),
-        )
-        .subscribe((theme) => this.themeSource.set(theme));
     }
 
     // Apply theme to document (for global styles that need it)
@@ -214,7 +246,8 @@ export class ExampleScenarioComponent {
 
     if (theme === 'auto' || theme === undefined) {
       return prefersDark ? 'dark' : 'light';
-    } else if (theme === 'dark') {
+    } else if (theme === 'dark' || theme === 'landing') {
+      // 'landing' theme forces dark mode for landing page embeds
       return 'dark';
     }
     return 'light';
