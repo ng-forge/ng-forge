@@ -10,6 +10,7 @@ concurrency:
 
 env:
   LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng'
+  NODE_MODULES_CACHE_KEY: modules-${{ github.run_id }}
 
 jobs:
   # This job determines if the workflow should run
@@ -30,10 +31,39 @@ jobs:
             echo "should-skip=false" >> $GITHUB_OUTPUT
           fi
 
-  checks:
-    name: Checks
+  setup:
+    name: Setup
     needs: should-run
     if: needs.should-run.outputs.should-skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache node_modules
+        uses: actions/cache/save@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+  checks:
+    name: Checks
+    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -55,10 +85,13 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore node_modules
+        uses: actions/cache/restore@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+          fail-on-cache-miss: true
 
       - name: Validate PR title
         run: |
@@ -97,8 +130,7 @@ jobs:
 
   build:
     name: Build & Verify
-    needs: should-run
-    if: needs.should-run.outputs.should-skip != 'true'
+    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -120,10 +152,13 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore node_modules
+        uses: actions/cache/restore@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+          fail-on-cache-miss: true
 
       - name: Build affected libraries
         run: pnpm nx affected -t build --base=origin/main
@@ -161,9 +196,8 @@ jobs:
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
   quality:
-    name: Lint & Type Check
-    needs: [should-run, build]
-    if: needs.should-run.outputs.should-skip != 'true'
+    name: Lint
+    needs: [setup, build]
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -185,10 +219,13 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore node_modules
+        uses: actions/cache/restore@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+          fail-on-cache-miss: true
 
       - name: Restore build artifacts
         uses: actions/cache@v5
@@ -206,8 +243,7 @@ jobs:
 
   test:
     name: Unit Tests
-    needs: [should-run, build]
-    if: needs.should-run.outputs.should-skip != 'true'
+    needs: [setup, build]
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -229,10 +265,13 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore node_modules
+        uses: actions/cache/restore@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+          fail-on-cache-miss: true
 
       - name: Restore build artifacts
         uses: actions/cache@v5
@@ -253,8 +292,7 @@ jobs:
 
   build-apps:
     name: Build Apps
-    needs: [should-run, build]
-    if: needs.should-run.outputs.should-skip != 'true'
+    needs: [setup, build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -276,10 +314,13 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore node_modules
+        uses: actions/cache/restore@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+          fail-on-cache-miss: true
 
       - name: Restore build artifacts
         uses: actions/cache@v5
@@ -318,8 +359,7 @@ jobs:
 
   e2e:
     name: E2E Tests (${{ matrix.app }})
-    needs: [should-run, quality, test, build-apps]
-    if: needs.should-run.outputs.should-skip != 'true'
+    needs: [setup, quality, test, build-apps]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -353,10 +393,13 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore node_modules
+        uses: actions/cache/restore@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+          fail-on-cache-miss: true
 
       - name: Check if app is affected
         id: check-affected
@@ -386,12 +429,12 @@ jobs:
   ci-success:
     name: PR Check Complete
     if: always()
-    needs: [should-run, checks, build, quality, test, build-apps, e2e]
+    needs: [should-run, setup, checks, build, quality, test, build-apps, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Verify all jobs succeeded
         uses: re-actors/alls-green@release/v1
         with:
-          allowed-skips: checks, build, quality, test, build-apps, e2e
+          allowed-skips: setup, checks, build, quality, test, build-apps, e2e
           jobs: ${{ toJSON(needs) }}

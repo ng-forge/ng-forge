@@ -10,18 +10,16 @@ concurrency:
 
 env:
   LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng'
+  NODE_MODULES_CACHE_KEY: modules-${{ github.run_id }}
 
 jobs:
-  checks:
-    name: Checks
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -36,6 +34,39 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Cache node_modules
+        uses: actions/cache/save@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: setup
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Restore node_modules
+        uses: actions/cache/restore@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+          fail-on-cache-miss: true
 
       - name: Check formatting
         run: |
@@ -60,12 +91,11 @@ jobs:
     name: Build & Verify
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    needs: setup
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -76,10 +106,13 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore node_modules
+        uses: actions/cache/restore@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+          fail-on-cache-miss: true
 
       - name: Build all libraries
         run: pnpm nx run-many -t build -p ${{ env.LIBRARY_PACKAGES }}
@@ -102,7 +135,7 @@ jobs:
           echo "✅ All packages validated successfully"
 
       - name: Cache build artifacts
-        uses: actions/cache@v5
+        uses: actions/cache/save@v5
         with:
           path: |
             dist/packages/dynamic-forms
@@ -110,19 +143,17 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
+          key: build-${{ github.sha }}
 
   quality:
-    name: Lint & Type Check
+    name: Lint
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: build
+    needs: [setup, build]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -133,13 +164,16 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore node_modules
+        uses: actions/cache/restore@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+          fail-on-cache-miss: true
 
       - name: Restore build artifacts
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
           path: |
             dist/packages/dynamic-forms
@@ -147,7 +181,8 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
+          key: build-${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Lint all projects
         run: pnpm nx run-many -t lint --parallel=3
@@ -156,13 +191,11 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: build
+    needs: [setup, build]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -173,13 +206,16 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore node_modules
+        uses: actions/cache/restore@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+          fail-on-cache-miss: true
 
       - name: Restore build artifacts
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
           path: |
             dist/packages/dynamic-forms
@@ -187,7 +223,8 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
+          key: build-${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Run tests
         run: pnpm nx run-many -t test --parallel=3 --configuration=ci --coverage
@@ -208,13 +245,11 @@ jobs:
     name: Build Apps
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: build
+    needs: [setup, build]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -225,13 +260,16 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore node_modules
+        uses: actions/cache/restore@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+          fail-on-cache-miss: true
 
       - name: Restore build artifacts
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
           path: |
             dist/packages/dynamic-forms
@@ -239,7 +277,8 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
+          key: build-${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Build documentation
         run: |
