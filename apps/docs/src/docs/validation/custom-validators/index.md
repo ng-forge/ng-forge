@@ -14,7 +14,7 @@ ng-forge supports three types of custom validators using Angular's Signal Forms 
 
 Try the interactive example below to see both expression-based and function-based validators in action:
 
-{{ NgDocActions.demo("ExpressionValidatorsIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/expression-validators" class="example-frame" title="Expression Validators Demo"></iframe>
 
 ## Message Resolution (STRICT)
 

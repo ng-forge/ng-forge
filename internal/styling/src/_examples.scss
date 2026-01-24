@@ -29,8 +29,8 @@
     padding: 0;
     // Use auto height for iframe embedding - content determines height
     height: auto;
-    // Hide overflow to prevent scrollbars in iframe - parent controls scrolling
-    overflow: hidden;
+    // Allow content to scroll if needed within the iframe
+    overflow: auto;
   }
 }
 

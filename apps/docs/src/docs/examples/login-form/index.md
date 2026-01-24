@@ -4,7 +4,7 @@ Simple login form demonstrating authentication UI with email and password fields
 
 ## Live Demo
 
-{{ NgDocActions.demo("LoginFormDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/login" class="example-frame" title="Login Form Demo"></iframe>
 
 ## Overview
 

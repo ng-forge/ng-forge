@@ -690,13 +690,59 @@ html[data-theme='dark'] ng-doc-search {
 // PrimeNG and Ionic examples are loaded via iframes
 // Their styles are isolated in their respective example apps
 
-// Hide ng-doc's built-in code viewer for iframe wrapper components
+// Hide ng-doc's built-in code viewer for demo components
 // The wrapper code is not useful - users see the actual FormConfig
-// via the custom "View Config" section in ExampleIframeComponent
+// via the embedded example app's Config tab
 ng-doc-demo-displayer {
   ::ng-deep ng-doc-code,
   ::ng-deep .ng-doc-code-viewer {
     display: none !important;
+  }
+}
+
+// ============================================
+// EMBEDDED EXAMPLE IFRAMES
+// ============================================
+// Global class for example iframes in markdown - card-like appearance
+.example-frame {
+  display: block;
+  width: 100%;
+  // Remove height constraint - let content dictate (requires JS for true auto-height)
+  min-height: 100px;
+  // Light mode: subtle gray border
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  // Light mode: white background
+  background: #ffffff;
+  overflow: hidden;
+  position: relative;
+
+  // Subtle ember gradient top border
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, $ember-core, transparent);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+// Dark mode iframe styling (explicit)
+html[data-theme='dark'] .example-frame {
+  border-color: $steel-dark;
+  background: $bg-deep;
+}
+
+// Dark mode iframe styling (auto with dark system preference)
+@media (prefers-color-scheme: dark) {
+  html[data-theme='auto'] .example-frame {
+    border-color: $steel-dark;
+    background: $bg-deep;
   }
 }
 
@@ -1063,7 +1109,8 @@ html:has(app-landing) {
 .shiki,
 .shiki span {
   color: var(--shiki-light) !important;
-  background-color: var(--shiki-light-bg) !important;
+  // Use transparent background - parent container provides background
+  background-color: transparent !important;
 }
 
 // Dark mode (explicit) - use --shiki-dark colors
@@ -1071,7 +1118,7 @@ html[data-theme='dark'] {
   .shiki,
   .shiki span {
     color: var(--shiki-dark) !important;
-    background-color: var(--shiki-dark-bg) !important;
+    background-color: transparent !important;
   }
 }
 
@@ -1081,7 +1128,7 @@ html[data-theme='dark'] {
     .shiki,
     .shiki span {
       color: var(--shiki-dark) !important;
-      background-color: var(--shiki-dark-bg) !important;
+      background-color: transparent !important;
     }
   }
 }

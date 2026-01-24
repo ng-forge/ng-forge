@@ -97,7 +97,7 @@
 
           <div class="hero-demo-body">
             <div id="demo-panel" role="tabpanel" class="demo-content" [class.hidden]="heroTab() !== 'demo'">
-              <example-iframe library="material" example="hero-demo?minimal=true&theme=landing" />
+              <iframe [src]="heroDemoUrl()" title="Hero Demo" frameborder="0"></iframe>
             </div>
             <div
               id="config-panel"
@@ -220,7 +220,7 @@
             <span>Live Demo</span>
           </div>
           <div class="demo-panel-body">
-            <example-iframe library="material" example="validation-showcase?minimal=true&theme=landing" />
+            <iframe [src]="validationDemoUrl()" title="Validation Demo" frameborder="0"></iframe>
           </div>
         </div>
 

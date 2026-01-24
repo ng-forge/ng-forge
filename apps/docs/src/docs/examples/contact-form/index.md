@@ -4,7 +4,7 @@ Simple contact form demonstrating basic form fields, validation, and user input.
 
 ## Live Demo
 
-{{ NgDocActions.demo("ContactFormDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/contact" class="example-frame" title="Contact Form Demo"></iframe>
 
 ## Overview
 

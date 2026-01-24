@@ -4,7 +4,7 @@ Checkout form demonstrating the common "same as billing" pattern for shipping ad
 
 ## Live Demo
 
-{{ NgDocActions.demo("ShippingBillingAddressDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/shipping-billing-address" class="example-frame" title="Shipping Billing Address Demo"></iframe>
 
 ## Overview
 

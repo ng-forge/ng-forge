@@ -4,7 +4,7 @@ Account registration form that shows different fields based on whether the user 
 
 ## Live Demo
 
-{{ NgDocActions.demo("BusinessAccountFormDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/business-account-form" class="example-frame" title="Business Account Form Demo"></iframe>
 
 ## Overview
 

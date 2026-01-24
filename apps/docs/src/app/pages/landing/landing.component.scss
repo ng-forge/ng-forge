@@ -741,26 +741,11 @@ nav {
 }
 
 .demo-content {
-  // Override iframe component styles for dark theme
-  ::ng-deep {
-    .example-iframe-container {
-      border: none;
-      border-radius: 0;
-      box-shadow: none;
-    }
-
-    .example-loading {
-      background: $bg-deep;
-
-      p {
-        color: $steel-mid;
-      }
-    }
-
-    .spinner {
-      border-color: $steel-dark;
-      border-top-color: $ember-hot;
-    }
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
   }
 }
 
@@ -1413,31 +1398,15 @@ section {
 .demo-panel-body {
   padding: 0;
   flex: 1;
-  min-height: 350px;
+  min-height: 420px;
   max-width: 100%;
   overflow: hidden;
 
-  // Override iframe component styles for dark theme
-  ::ng-deep {
-    .example-iframe-container {
-      border: none;
-      border-radius: 0;
-      box-shadow: none;
-      max-width: 100%;
-    }
-
-    .example-loading {
-      background: $bg-deep;
-
-      p {
-        color: $steel-mid;
-      }
-    }
-
-    .spinner {
-      border-color: $steel-dark;
-      border-top-color: $ember-hot;
-    }
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
   }
 }
 

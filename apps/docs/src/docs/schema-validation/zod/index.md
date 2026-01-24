@@ -69,7 +69,7 @@ const config = {
 
 Try the password confirmation form with Zod validation:
 
-{{ NgDocActions.demo("ZodIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/zod-schema-validation" class="example-frame" title="Zod Validation Demo"></iframe>
 
 ## Why Standard Schema?
 

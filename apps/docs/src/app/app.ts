@@ -110,6 +110,27 @@ export class App implements OnInit {
           .subscribe((event) => {
             (event.source as Window)?.postMessage({ type: 'theme-change', theme: this.theme() }, '*');
           });
+
+        // Listen for iframe height updates and resize accordingly
+        // Uses route path for deterministic matching between iframe src and child route
+        fromEvent<MessageEvent>(window, 'message')
+          .pipe(
+            filter(
+              (event) =>
+                event.data?.type === 'iframe-height' && typeof event.data.height === 'number' && typeof event.data.route === 'string',
+            ),
+            takeUntilDestroyed(this.destroyRef),
+          )
+          .subscribe((event) => {
+            const { height, route } = event.data;
+            const iframes = document.querySelectorAll<HTMLIFrameElement>('iframe');
+            iframes.forEach((iframe) => {
+              // Match iframe by checking if its src contains the route path
+              if (iframe.src.includes(`#${route}`) || iframe.src.includes(`#${route}?`)) {
+                iframe.style.height = `${height}px`;
+              }
+            });
+          });
       });
 
       // Save theme changes to localStorage (skip initial emission)

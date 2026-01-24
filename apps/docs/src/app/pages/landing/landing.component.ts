@@ -1,14 +1,15 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { NgDocSearchComponent } from '@ng-doc/app';
 import { catchError, delay, filter, iif, map, merge, of, switchMap, tap } from 'rxjs';
 
-import { ExampleIframeComponent } from '../../components/example-iframe/example-iframe.component';
 import { Logo } from '../../components/logo';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
+import { ENVIRONMENT } from '../../config/environment';
 
 import {
   CODE_SNIPPETS,
@@ -42,7 +43,7 @@ const CONFETTI_ANIMATION_DURATION_MS = 800;
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, ExampleIframeComponent, CodeHighlightDirective, NgDocSearchComponent, Logo],
+  imports: [RouterLink, CodeHighlightDirective, NgDocSearchComponent, Logo],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,6 +52,22 @@ export class LandingComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly http = inject(HttpClient);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly env = inject(ENVIRONMENT);
+  private readonly sanitizer = inject(DomSanitizer);
+
+  // ============================================
+  // IFRAME URLs (for embedded examples)
+  // ============================================
+
+  readonly heroDemoUrl = computed(() =>
+    this.sanitizer.bypassSecurityTrustResourceUrl(`${this.env.exampleBaseUrls.material}/#/examples/hero-demo?minimal=true&theme=landing`),
+  );
+
+  readonly validationDemoUrl = computed(() =>
+    this.sanitizer.bypassSecurityTrustResourceUrl(
+      `${this.env.exampleBaseUrls.material}/#/examples/validation-showcase?minimal=true&theme=landing`,
+    ),
+  );
 
   // ============================================
   // EXPOSED CONSTANTS

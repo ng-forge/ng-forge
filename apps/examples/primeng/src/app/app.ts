@@ -9,7 +9,6 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   imports: [RouterModule],
   selector: 'example-root',
   templateUrl: './app.html',
-  styleUrl: './app.scss',
 })
 export class App {
   protected title = 'PrimeNG Examples';

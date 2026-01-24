@@ -2,7 +2,7 @@ Arrays create dynamic collections of field values. The fields array defines a **
 
 ## Interactive Demo
 
-{{ NgDocActions.demo("ArrayFieldDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/array-field" class="example-frame" title="Array Field Demo"></iframe>
 
 ## Flat Arrays (Primitive Values)
 

@@ -4,7 +4,7 @@ A comprehensive multi-step registration form demonstrating the `page` field type
 
 ## Live Demo
 
-{{ NgDocActions.demo("PaginatedFormDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/paginated-form" class="example-frame" title="Paginated Form Demo"></iframe>
 
 ## Overview
 

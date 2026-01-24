@@ -4,7 +4,7 @@ Contact form demonstrating dynamic field visibility based on preferred contact m
 
 ## Live Demo
 
-{{ NgDocActions.demo("ContactDynamicFieldsDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/contact-dynamic-fields" class="example-frame" title="Contact Dynamic Fields Demo"></iframe>
 
 ## Overview
 

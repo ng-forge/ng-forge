@@ -2,7 +2,7 @@ Groups nest form fields under a single key in the form value. This creates logic
 
 ## Interactive Demo
 
-{{ NgDocActions.demo("GroupFieldDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/group-field" class="example-frame" title="Group Field Demo"></iframe>
 
 ## Basic Group
 

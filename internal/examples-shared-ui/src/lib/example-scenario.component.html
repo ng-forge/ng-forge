@@ -1,0 +1,53 @@
+@if (minimal()) {
+  <!-- Minimal mode: only show the form (used by landing page) -->
+  <div class="minimal-content">
+    <form [dynamic-form]="scenario().config" [(value)]="formValue"></form>
+  </div>
+} @else {
+  <!-- Full mode: show header, tabs, and form (optionally hide form data output in iframes) -->
+  <div class="example-header">
+    <div class="header-left">
+      <div class="header-dots">
+        <span class="header-dot"></span>
+        <span class="header-dot"></span>
+        <span class="header-dot"></span>
+      </div>
+      @if (scenario().title) {
+        <span class="example-title">{{ scenario().title }}</span>
+      }
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" type="button" [title]="copied() ? 'Copied!' : 'Copy config'" (click)="copyConfig()">
+        <span [class]="copied() ? 'icon icon--check' : 'icon icon--copy'"></span>
+      </button>
+      <button class="icon-btn" type="button" title="Open in new tab" (click)="openFullscreen()">
+        <span class="icon icon--external"></span>
+      </button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn" type="button" [class.active]="activeTab() === 'demo'" (click)="activeTab.set('demo')">
+      <span class="icon icon--play"></span>
+      Live Demo
+    </button>
+    <button class="tab-btn" type="button" [class.active]="activeTab() === 'code'" (click)="activeTab.set('code')">
+      <span class="icon icon--code"></span>
+      Config
+    </button>
+  </div>
+  <div class="tab-content">
+    @if (activeTab() === 'demo') {
+      <div #formContainer class="form-container">
+        <form [dynamic-form]="scenario().config" [(value)]="formValue"></form>
+      </div>
+      @if (!hideFormOutput()) {
+        <div class="example-result">
+          <h4>Form Data</h4>
+          <pre>{{ formValue() | json }}</pre>
+        </div>
+      }
+    } @else {
+      <div class="code-block" [innerHTML]="highlightedConfig()"></div>
+    }
+  </div>
+}

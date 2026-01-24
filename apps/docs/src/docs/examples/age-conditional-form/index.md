@@ -4,7 +4,7 @@ Registration form demonstrating numeric comparison operators for age-based condi
 
 ## Live Demo
 
-{{ NgDocActions.demo("AgeConditionalFormDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/age-conditional-form" class="example-frame" title="Age Conditional Form Demo"></iframe>
 
 ## Overview
 

@@ -4,7 +4,7 @@ Complete example of a user registration form with validation, conditional logic,
 
 ## Live Demo
 
-{{ NgDocActions.demo("UserRegistrationDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/user-registration" class="example-frame" title="User Registration Demo"></iframe>
 
 ## Overview
 

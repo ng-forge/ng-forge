@@ -157,7 +157,7 @@ import '@ng-forge/dynamic-forms-bootstrap';
 
 Here's a full registration form showcasing multiple Bootstrap field types:
 
-{{ NgDocActions.demo("CompleteFormIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4204/#/examples/complete-form" class="example-frame" title="Complete Form Demo"></iframe>
 
 This example demonstrates:
 
@@ -186,7 +186,7 @@ Text input field with HTML5 type support and optional floating labels.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("InputIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4204/#/examples/input" class="example-frame" title="Input Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -249,7 +249,7 @@ Multi-line text input field with Bootstrap form styling.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("TextareaIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4204/#/examples/textarea" class="example-frame" title="Textarea Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -289,7 +289,7 @@ Dropdown selection field with native HTML select element. Supports both single a
 
 **Live Demo:**
 
-{{ NgDocActions.demo("SelectIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4204/#/examples/select" class="example-frame" title="Select Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -326,7 +326,7 @@ Radio button group for selecting a single option with optional button group styl
 
 **Live Demo:**
 
-{{ NgDocActions.demo("RadioIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4204/#/examples/radio" class="example-frame" title="Radio Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -361,7 +361,7 @@ Boolean checkbox control for single true/false selections.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("CheckboxIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4204/#/examples/checkbox" class="example-frame" title="Checkbox Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -389,7 +389,7 @@ Multiple checkbox selection field for choosing multiple options.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4204/#/examples/multi-checkbox" class="example-frame" title="Multi-Checkbox Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -430,7 +430,7 @@ Slide toggle switch for boolean on/off selections (renders as Bootstrap switch).
 
 **Live Demo:**
 
-{{ NgDocActions.demo("ToggleIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4204/#/examples/toggle" class="example-frame" title="Toggle Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -456,7 +456,7 @@ Native HTML5 range input for selecting values from a numeric range.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("SliderIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4204/#/examples/slider" class="example-frame" title="Slider Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -488,7 +488,7 @@ Native HTML5 date input with Bootstrap styling.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("DatepickerIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4204/#/examples/datepicker" class="example-frame" title="Datepicker Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -540,7 +540,7 @@ Form submission button that's automatically disabled when the form is invalid.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("ButtonIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4204/#/examples/button" class="example-frame" title="Button Field Demo"></iframe>
 
 **Basic Usage:**
 

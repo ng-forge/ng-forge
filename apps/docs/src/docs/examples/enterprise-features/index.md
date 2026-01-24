@@ -4,7 +4,7 @@ Complex configuration form demonstrating AND/OR logic for enterprise feature gat
 
 ## Live Demo
 
-{{ NgDocActions.demo("EnterpriseFeaturesDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/enterprise-features" class="example-frame" title="Enterprise Features Demo"></iframe>
 
 ## Overview
 
