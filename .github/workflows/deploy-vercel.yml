@@ -23,6 +23,7 @@ jobs:
   check-ci:
     name: Check CI Status
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       ci-success: ${{ steps.check.outputs.success }}
     steps:
@@ -61,7 +62,11 @@ jobs:
   deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: check-ci
+    if: |
+      (inputs.environment == 'preview') ||
+      (inputs.environment == 'production' && github.ref == 'refs/heads/main')
     environment:
       name: ${{ inputs.environment }}
       url: ${{ steps.deploy.outputs.url }}
@@ -105,6 +110,12 @@ jobs:
           fi
           echo "url=$URL" >> $GITHUB_OUTPUT
           echo "Deployed to: $URL"
+
+      - name: Smoke test deployment
+        run: |
+          echo "Verifying deployment is accessible..."
+          curl --fail --retry 5 --retry-delay 10 "${{ steps.deploy.outputs.url }}/dynamic-forms/" > /dev/null
+          echo "Deployment verified successfully"
 
       - name: Output Deployment URL
         run: |

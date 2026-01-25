@@ -1,0 +1,43 @@
+name: 'Setup Node and Restore Cache'
+description: 'Install pnpm, setup Node.js, and restore node_modules cache'
+
+inputs:
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '22'
+  pnpm-version:
+    description: 'pnpm version to use'
+    required: false
+    default: '10.28.0'
+  cache-key:
+    description: 'Cache key for node_modules'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ inputs.pnpm-version }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Restore node_modules
+      uses: actions/cache/restore@v5
+      with:
+        path: node_modules
+        key: ${{ inputs.cache-key }}
+        fail-on-cache-miss: true
+
+    - name: Verify cache restored
+      shell: bash
+      run: |
+        if [ ! -d "node_modules" ] || [ ! -f "node_modules/.pnpm/lock.yaml" ]; then
+          echo "::error::node_modules cache appears corrupted or incomplete"
+          exit 1
+        fi

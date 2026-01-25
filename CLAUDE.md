@@ -109,6 +109,30 @@
 - **Never run `--update-snapshots` locally** outside Docker, as this will create platform-specific screenshots that fail in CI.
 - The Docker script is at `scripts/playwright-docker.sh` and uses `docker-compose.playwright.yml`.
 
+## Docker Cache Management
+
+E2E tests use Docker volumes to cache Playwright browsers and Nx artifacts for faster subsequent runs.
+
+**When to clean caches:**
+
+- After upgrading Playwright version
+- When seeing "Unrecognized Cache Artifacts" warnings
+- When tests behave unexpectedly
+- When Docker volumes become corrupted
+
+**How to clean:**
+
+```bash
+pnpm e2e:clean
+```
+
+**Running tests with fresh cache:**
+
+```bash
+# Clean and run in one command
+./scripts/playwright-docker.sh material-examples --clean
+```
+
 ## Commit Messages
 
 **You MUST use Angular-style conventional commits for PR titles.** PRs are squash-merged, so only the PR title matters for the changelog. PR titles are validated by commitlint in CI.
