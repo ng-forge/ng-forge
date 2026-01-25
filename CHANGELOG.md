@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.5.0](https://github.com/ng-forge/ng-forge/compare/v0.4.0...v0.5.0) (2026-01-25)
+
+### 🚀 Features
+
+- **docs:** add vercel speed insights integration ([#189](https://github.com/ng-forge/ng-forge/pull/189))
+- **dynamic-forms:** add value derivation logic system ([#123](https://github.com/ng-forge/ng-forge/pull/123))
+- **dynamic-forms:** add zod integration ([#179](https://github.com/ng-forge/ng-forge/pull/179), [#180](https://github.com/ng-forge/ng-forge/issues/180), [#181](https://github.com/ng-forge/ng-forge/issues/181), [#182](https://github.com/ng-forge/ng-forge/issues/182))
+
+### 🐛 Bug Fixes
+
+- cache playwright browsers for unit tests in CI ([#192](https://github.com/ng-forge/ng-forge/pull/192), [#190](https://github.com/ng-forge/ng-forge/issues/190))
+- **dynamic-forms:** show only first validation error instead of all errors ([#183](https://github.com/ng-forge/ng-forge/pull/183), [#179](https://github.com/ng-forge/ng-forge/issues/179))
+
+### ♻️ Code Refactoring
+
+- **dynamic-forms:** extract testing utilities and reduce package size ([#176](https://github.com/ng-forge/ng-forge/pull/176))
+
+### 📚 Documentation
+
+- add social media preview and optimize seo keywords ([#178](https://github.com/ng-forge/ng-forge/pull/178))
+- sync compatibility matrix across all READMEs
+
 ## [0.4.0](https://github.com/ng-forge/ng-forge/compare/v0.3.1...v0.4.0) (2026-01-18)
 
 ### 🚀 Features
