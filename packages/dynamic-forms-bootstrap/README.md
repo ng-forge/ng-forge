@@ -18,6 +18,7 @@ Bootstrap 5 field components for [@ng-forge/dynamic-forms](https://www.npmjs.com
 
 | @ng-forge/dynamic-forms-bootstrap | @ng-forge/dynamic-forms | Angular       |
 | --------------------------------- | ----------------------- | ------------- |
+| 0.5.x                             | 0.5.x                   | >=21.1.0      |
 | 0.4.x                             | 0.4.x                   | >=21.1.0      |
 | 0.3.x                             | 0.3.x                   | 21.0.7-21.0.x |
 | 0.2.x                             | 0.2.x                   | 21.0.6        |
