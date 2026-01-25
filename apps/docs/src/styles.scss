@@ -1109,14 +1109,14 @@ html:has(app-landing) {
 // SHIKI CODE HIGHLIGHTING (GLOBAL)
 // ============================================
 // Shiki dual-theme support for code highlighting
-// When using defaultColor: false, Shiki outputs CSS variables
-// that need to be controlled at the document level
+// Shiki outputs inline colors for the default (light) theme, and CSS variables
+// for the dark theme (--shiki-dark). In light mode, let inline colors work.
+// In dark mode, override with the --shiki-dark CSS variables.
 
-// Light mode (default) - use --shiki-light colors
+// Light mode (default) - let inline colors from Shiki work
+// Only set transparent background to ensure parent container bg shows
 .shiki,
 .shiki span {
-  color: var(--shiki-light) !important;
-  // Use transparent background - parent container provides background
   background-color: transparent !important;
 }
 
