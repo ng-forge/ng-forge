@@ -11,6 +11,7 @@ concurrency:
 env:
   LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng'
   NODE_MODULES_CACHE_KEY: modules-${{ github.run_id }}
+  PLAYWRIGHT_CACHE_KEY: playwright-${{ github.run_id }}
 
 jobs:
   setup:
@@ -40,6 +41,12 @@ jobs:
         with:
           path: node_modules
           key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+      - name: Cache Playwright browsers
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
 
   checks:
     name: Checks
@@ -165,6 +172,13 @@ jobs:
         uses: ./.github/actions/setup-node-restore
         with:
           cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+      - name: Restore Playwright browsers
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
+          fail-on-cache-miss: true
 
       - name: Restore build artifacts
         uses: actions/cache/restore@v5
