@@ -712,8 +712,10 @@ nav {
 }
 
 .hero-demo-body {
-  min-height: 300px;
+  min-height: 500px;
   position: relative;
+  display: flex;
+  flex-direction: column;
 
   > .hidden {
     visibility: hidden;
@@ -732,6 +734,8 @@ nav {
 
   pre {
     margin: 0;
+    // Override Shiki's inline background style
+    background: transparent !important;
   }
 
   @media (max-width: 768px) {
@@ -741,9 +745,14 @@ nav {
 }
 
 .demo-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
   iframe {
     width: 100%;
-    height: 100%;
+    flex: 1;
+    min-height: 500px;
     border: none;
     display: block;
   }
@@ -764,7 +773,7 @@ nav {
   }
 
   .hero-demo-body {
-    min-height: 280px;
+    min-height: 480px;
   }
 }
 
@@ -894,6 +903,8 @@ nav {
 
   pre {
     margin: 0;
+    // Override Shiki's inline background style
+    background: transparent !important;
   }
 
   @media (max-width: 768px) {
@@ -1326,6 +1337,8 @@ section {
 
   pre {
     margin: 0;
+    // Override Shiki's inline background style
+    background: transparent !important;
   }
 
   @media (max-width: 768px) {
@@ -1411,9 +1424,13 @@ section {
   max-width: 100%;
   overflow: hidden;
 
-  iframe {
+  // ::ng-deep to pierce view encapsulation and override inline styles set by JS
+  // stylelint-disable-next-line selector-pseudo-element-no-unknown
+  ::ng-deep iframe {
     width: 100%;
-    height: 100%;
+    // Override JS-set inline height to fill container
+    // Landing page iframes should fill available space, not auto-size
+    height: 100% !important;
     border: none;
     display: block;
   }

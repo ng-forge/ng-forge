@@ -221,7 +221,11 @@ export class ExampleScenarioComponent {
           map((event) => event.data.theme),
           takeUntilDestroyed(),
         )
-        .subscribe((theme) => this.themeOverride.set(theme));
+        .subscribe((theme) => {
+          // ng-doc uses null for light theme - convert to 'light' explicitly
+          // so the iframe doesn't fall back to 'auto' (system preference)
+          this.themeOverride.set(theme === null ? 'light' : theme);
+        });
 
       // Request theme from parent (with retry for timing)
       window.parent.postMessage({ type: 'request-theme' }, '*');
@@ -256,6 +260,10 @@ export class ExampleScenarioComponent {
   /** Send height to parent for iframe auto-sizing */
   private setupIframeHeightReporter(): void {
     if (!this.isInIframe || !this.isBrowser) return;
+
+    // Don't auto-size landing page embeds - they should fill their containers
+    // Landing page embeds are identified by theme=landing query param
+    if (this.themeParam() === 'landing') return;
 
     this.createHeightObserver$()
       .pipe(
@@ -310,7 +318,7 @@ export class ExampleScenarioComponent {
         return from(
           import('shiki').then(({ codeToHtml }) =>
             codeToHtml(code, {
-              lang: 'json',
+              lang: 'javascript',
               theme: shikiTheme,
             }),
           ),
@@ -328,7 +336,9 @@ export class ExampleScenarioComponent {
   }
 
   openFullscreen(): void {
-    const url = `${window.location.origin}${window.location.pathname}?minimal=true`;
+    // Handle hash routing - the route is in the hash, not pathname
+    const hash = window.location.hash.split('?')[0]; // Remove existing query params from hash
+    const url = `${window.location.origin}${window.location.pathname}${hash}?minimal=true`;
     window.open(url, '_blank');
   }
 }
