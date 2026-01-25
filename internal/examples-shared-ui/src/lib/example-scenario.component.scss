@@ -201,9 +201,8 @@
 .tabs {
   display: flex;
   gap: $space-1;
-  padding: 0 $space-4;
+  padding: $space-2 $space-4 0;
   background: var(--bg-surface);
-  border-bottom: 1px solid var(--border);
   width: 100%;
   box-sizing: border-box;
 }
@@ -212,17 +211,16 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: $space-2 $space-4;
+  padding: $space-3 $space-4;
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: $radius-md $radius-md 0 0;
+  border: none;
+  border-bottom: 2px solid transparent;
   color: var(--text-muted);
   font-family: $font-mono;
   font-size: $text-xs;
   font-weight: 500;
   cursor: pointer;
   transition: all $transition-base;
-  margin-bottom: -1px;
 
   &:hover {
     color: var(--text-secondary);
@@ -231,9 +229,7 @@
 
   &.active {
     color: $ember-glow;
-    background: var(--bg-deep);
-    border-color: var(--border);
-    border-bottom-color: var(--bg-deep);
+    border-bottom-color: $ember-glow;
   }
 }
 
@@ -241,7 +237,7 @@
 // CONTENT
 // ============================================
 .tab-content {
-  padding: $space-6 $space-4;
+  padding: $space-8 $space-6;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -399,10 +395,10 @@
   }
 
   .tabs {
-    padding: 0 $space-3;
+    padding: $space-1 $space-3 0;
   }
 
   .tab-content {
-    padding: $space-4 $space-3;
+    padding: $space-6 $space-4;
   }
 }

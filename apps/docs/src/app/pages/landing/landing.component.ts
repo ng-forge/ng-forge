@@ -1,15 +1,14 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { NgDocSearchComponent } from '@ng-doc/app';
-import { catchError, delay, filter, fromEvent, iif, map, merge, of, switchMap, tap } from 'rxjs';
+import { catchError, delay, filter, iif, map, merge, of, switchMap, tap } from 'rxjs';
+import { DynamicForm } from '@ng-forge/dynamic-forms';
 
 import { Logo } from '../../components/logo';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
-import { ENVIRONMENT } from '../../config/environment';
 
 import {
   CODE_SNIPPETS,
@@ -35,6 +34,8 @@ import {
   scrollToHash,
 } from './landing.utils';
 
+import { heroFormConfig, validationFormConfig } from './landing.forms';
+
 const EMPTY_FIREFLY_STATE = { positions: [] as FireflyPosition[], sparks: [] as Spark[] };
 
 // Animation timing constants
@@ -43,7 +44,7 @@ const CONFETTI_ANIMATION_DURATION_MS = 800;
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, CodeHighlightDirective, NgDocSearchComponent, Logo],
+  imports: [RouterLink, CodeHighlightDirective, NgDocSearchComponent, Logo, DynamicForm],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,22 +53,13 @@ export class LandingComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly http = inject(HttpClient);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-  private readonly env = inject(ENVIRONMENT);
-  private readonly sanitizer = inject(DomSanitizer);
 
   // ============================================
-  // IFRAME URLs (for embedded examples)
+  // FORM CONFIGS (for landing page demos)
   // ============================================
 
-  readonly heroDemoUrl = computed(() =>
-    this.sanitizer.bypassSecurityTrustResourceUrl(`${this.env.exampleBaseUrls.material}/#/examples/hero-demo?minimal=true&theme=landing`),
-  );
-
-  readonly validationDemoUrl = computed(() =>
-    this.sanitizer.bypassSecurityTrustResourceUrl(
-      `${this.env.exampleBaseUrls.material}/#/examples/validation-showcase?minimal=true&theme=landing`,
-    ),
-  );
+  readonly heroFormConfig = heroFormConfig;
+  readonly validationFormConfig = validationFormConfig;
 
   // ============================================
   // EXPOSED CONSTANTS
@@ -175,33 +167,9 @@ export class LandingComponent {
   private initializeBrowserFeatures(): void {
     // Merge all browser-only subscriptions into one
     // Note: scrollSnapEffect$ disabled for now - uncomment to re-enable
-    merge(/* this.scrollSnapEffect$(), */ this.intersectionObserverEffect$(), this.validationHeightSyncEffect$())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+    merge(/* this.scrollSnapEffect$(), */ this.intersectionObserverEffect$()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
 
     scrollToHash(SECTION_IDS);
-  }
-
-  /** Sync validation code panel height with the demo panel (including header) */
-  private validationHeightSyncEffect$() {
-    return fromEvent<MessageEvent>(window, 'message').pipe(
-      filter(
-        (event) =>
-          event.data?.type === 'iframe-height' &&
-          typeof event.data.height === 'number' &&
-          event.data.route === '/examples/validation-showcase',
-      ),
-      // Small delay to allow iframe height to be applied first
-      delay(50),
-      tap(() => {
-        const demoPanel = document.querySelector('.validation-demo-panel') as HTMLElement | null;
-        const codePanel = document.querySelector('.validation-code-panel') as HTMLElement | null;
-        if (demoPanel && codePanel) {
-          // Sync code panel to match demo panel's full height (includes header)
-          codePanel.style.maxHeight = `${demoPanel.offsetHeight}px`;
-        }
-      }),
-    );
   }
 
   private scrollSnapEffect$() {

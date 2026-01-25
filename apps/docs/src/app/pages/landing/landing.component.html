@@ -96,8 +96,8 @@
           </div>
 
           <div class="hero-demo-body">
-            <div id="demo-panel" role="tabpanel" class="demo-content" [class.hidden]="heroTab() !== 'demo'">
-              <iframe [src]="heroDemoUrl()" title="Hero Demo" frameborder="0"></iframe>
+            <div id="demo-panel" role="tabpanel" class="demo-content landing-form" [class.hidden]="heroTab() !== 'demo'">
+              <form [dynamic-form]="heroFormConfig"></form>
             </div>
             <div
               id="config-panel"
@@ -219,8 +219,8 @@
             <span class="panel-icon icon icon--play"></span>
             <span>Live Demo</span>
           </div>
-          <div class="demo-panel-body">
-            <iframe [src]="validationDemoUrl()" title="Validation Demo" frameborder="0"></iframe>
+          <div class="demo-panel-body validation-form">
+            <form [dynamic-form]="validationFormConfig"></form>
           </div>
         </div>
 

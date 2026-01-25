@@ -4,12 +4,22 @@
 @use 'icons';
 
 // ============================================
+// MATERIAL THEME (ember-themed for landing page forms)
+// ============================================
+@use '@angular/material' as mat;
+@use 'material' as ember-mat;
+@use 'tokens' as *;
+
+// Initialize Material core
+@include mat.core();
+
+// ============================================
 // CSS LAYER ORDER
 // ============================================
 // Define layer order - later layers have higher priority
 // ng-doc styles are in lowest priority layer so they don't
 // affect landing page or other non-docs pages
-@layer ng-doc, material, app;
+@layer ng-doc, app;
 
 // ============================================
 // NG-DOC STYLES (scoped to ng-doc layer)
@@ -18,9 +28,28 @@
 @import '@ng-doc/app/styles/themes/dark.css' layer(ng-doc);
 
 // ============================================
-// MATERIAL THEME (for docs UI only)
+// MATERIAL THEME APPLICATION
 // ============================================
-@import '@angular/material/prebuilt-themes/indigo-pink.css' layer(material);
+// Only apply Material theme on landing page (where we have direct forms)
+// Other pages use iframes which have their own isolated styling
+
+html:has(app-landing) {
+  @include ember-mat.material-theme-light();
+  @include ember-mat.material-theme-landing();
+
+  // Input color overrides (matching Material example app)
+  .mat-mdc-form-field {
+    --mat-form-field-outlined-input-text-color: #dee2e6;
+    --mat-form-field-filled-input-text-color: #dee2e6;
+    --mdc-outlined-text-field-container-color: #000000;
+    --mdc-filled-text-field-container-color: #000000;
+  }
+
+  .mdc-text-field--outlined,
+  .mdc-text-field--filled {
+    background-color: #000000 !important;
+  }
+}
 
 // ============================================
 // NG-DOC EMBER THEME OVERRIDES
@@ -697,9 +726,9 @@ html[data-theme='dark'] ng-doc-search {
 // PrimeNG and Ionic examples are loaded via iframes
 // Their styles are isolated in their respective example apps
 
-// Hide ng-doc's built-in code viewer for demo components
+// Hide ng-doc's built-in code viewer for iframe wrapper components
 // The wrapper code is not useful - users see the actual FormConfig
-// via the embedded example app's Config tab
+// via the custom "View Config" section in ExampleIframeComponent
 ng-doc-demo-displayer {
   ::ng-deep ng-doc-code,
   ::ng-deep .ng-doc-code-viewer {
@@ -708,18 +737,66 @@ ng-doc-demo-displayer {
 }
 
 // ============================================
+// HIDE PAGE HEADERS GLOBALLY
+// ============================================
+// Breadcrumbs are sufficient - hide the duplicate h1 header on all pages
+.ng-doc-page-header {
+  display: none;
+}
+
+// ============================================
+// BACK TO QUICK START LINKS
+// ============================================
+// Style "← Back to Quick Start" links with same animated underline as landing page
+.ng-doc-page-wrapper > p:first-of-type a[href='/examples'] {
+  color: $ember-glow;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+  font-weight: 500;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 60%;
+    height: 3px;
+    background: $ember-glow;
+    border-radius: 1px 40% 40% 1px;
+    opacity: 0.5;
+    transition:
+      width 0.3s ease,
+      opacity 0.3s ease,
+      background 0.3s ease;
+  }
+
+  &:hover {
+    color: $ember-hot;
+
+    &::after {
+      width: 100%;
+      opacity: 0.8;
+      background: $ember-hot;
+    }
+  }
+}
+
+// ============================================
 // EMBEDDED EXAMPLE IFRAMES
 // ============================================
+// Heading before iframe needs margin
+h2:has(+ .example-frame) {
+  margin-bottom: 1rem;
+}
+
 // Global class for example iframes in markdown - card-like appearance
 .example-frame {
   display: block;
   width: 100%;
-  // Remove height constraint - let content dictate (requires JS for true auto-height)
   min-height: 100px;
-  // Light mode: subtle gray border
   border: 1px solid #e0e0e0;
   border-radius: 12px;
-  // Light mode: white background
   background: #ffffff;
   overflow: hidden;
   position: relative;
@@ -1058,54 +1135,6 @@ html:has(app-landing) {
 }
 
 // ============================================
-// HIDE PAGE HEADERS GLOBALLY
-// ============================================
-// Breadcrumbs are sufficient - hide the duplicate h1 header on all pages
-.ng-doc-page-header {
-  display: none;
-}
-
-// ============================================
-// EXAMPLE PAGES - BACK LINK STYLING
-// ============================================
-// Style the "← Back to Quick Start" links on example pages with animated underline
-// Matches landing page inline-link style
-// DOM structure: DIV.ng-doc-page-wrapper > P.ngde > NG-DOC-PAGE-LINK > A[href="/examples"]
-.ng-doc-page-wrapper > p:first-of-type ng-doc-page-link a[href='/examples'] {
-  color: $ember-glow;
-  text-decoration: none;
-  position: relative;
-  transition: color 0.3s ease;
-  font-weight: 500;
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 0;
-    width: 60%;
-    height: 3px;
-    background: $ember-glow;
-    border-radius: 1px 40% 40% 1px;
-    opacity: 0.5;
-    transition:
-      width 0.3s ease,
-      opacity 0.3s ease,
-      background 0.3s ease;
-  }
-
-  &:hover {
-    color: $ember-hot;
-
-    &::after {
-      width: 100%;
-      opacity: 0.8;
-      background: $ember-hot;
-    }
-  }
-}
-
-// ============================================
 // SHIKI CODE HIGHLIGHTING (GLOBAL)
 // ============================================
 // Shiki dual-theme support for code highlighting
@@ -1186,7 +1215,7 @@ html:has(app-landing) {
 
   // For example pages with back link paragraph first
   // Structure: p (back link with ng-doc-page-link) > p (description) > h2
-  > p:first-of-type:has(ng-doc-page-link a[href='/examples']) + p {
+  > p:first-of-type:has(a[href='/examples']) + p {
     padding-bottom: 1.5rem;
     margin-bottom: 1.5rem;
     border-bottom: 1px solid var(--ng-doc-base-3);

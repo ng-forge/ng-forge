@@ -712,6 +712,7 @@ nav {
 }
 
 .hero-demo-body {
+  min-height: 300px;
   position: relative;
 
   > .hidden {
@@ -731,8 +732,6 @@ nav {
 
   pre {
     margin: 0;
-    // Override Shiki's inline background style
-    background: transparent !important;
   }
 
   @media (max-width: 768px) {
@@ -742,12 +741,29 @@ nav {
 }
 
 .demo-content {
-  iframe {
+  padding: $space-6;
+}
+
+// Landing page form containers - match example app .example-container
+.landing-form,
+.validation-form {
+  // Form fields fill container width
+  // stylelint-disable-next-line selector-pseudo-element-no-unknown
+  ::ng-deep .mat-mdc-form-field {
     width: 100%;
-    min-height: 100px; // Fallback until height syncing kicks in
-    border: none;
-    display: block;
   }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+    width: 100%;
+  }
+}
+
+.landing-form {
+  max-width: 552px;
+  margin: 0 auto;
 }
 
 @media (max-width: 768px) {
@@ -762,6 +778,10 @@ nav {
   .header-tab {
     padding: 0.35rem 0.7rem;
     font-size: 0.7rem;
+  }
+
+  .hero-demo-body {
+    min-height: 280px;
   }
 }
 
@@ -891,8 +911,6 @@ nav {
 
   pre {
     margin: 0;
-    // Override Shiki's inline background style
-    background: transparent !important;
   }
 
   @media (max-width: 768px) {
@@ -1325,8 +1343,6 @@ section {
 
   pre {
     margin: 0;
-    // Override Shiki's inline background style
-    background: transparent !important;
   }
 
   @media (max-width: 768px) {
@@ -1338,16 +1354,6 @@ section {
 // ============================================
 // VALIDATION SECTION
 // ============================================
-.validation {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 2rem 2rem;
-
-  @media (max-width: 768px) {
-    padding: 2rem 1.25rem;
-  }
-}
-
 .validation-header,
 .field-types-header,
 .quickstart-header,
@@ -1359,7 +1365,7 @@ section {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  align-items: start; // Each panel sizes to its content; JS syncs code panel height to form
+  align-items: stretch;
   max-width: 100%;
   overflow: hidden;
 
@@ -1396,6 +1402,7 @@ section {
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   background: $bg-surface;
+  border-bottom: 1px solid $steel-dark;
   font-size: 0.85rem;
   color: $steel-mid;
   font-weight: 500;
@@ -1406,14 +1413,14 @@ section {
 }
 
 .demo-panel-body {
-  padding: 0;
+  padding: $space-4;
+  flex: 1;
   max-width: 100%;
+  display: flex;
+  align-items: center;
 
-  iframe {
+  form {
     width: 100%;
-    min-height: 100px; // Fallback until height syncing kicks in
-    border: none;
-    display: block;
   }
 }
 
@@ -1421,7 +1428,6 @@ section {
   display: flex;
   flex-direction: column;
   min-width: 0; // Allow shrinking below content size in grid
-  overflow: hidden; // Clip content when max-height is set via JS
 
   .code-block {
     max-width: 100%;
@@ -1429,13 +1435,16 @@ section {
     display: flex;
     flex-direction: column;
     min-width: 0;
-    min-height: 0; // Allow shrinking in flex context
   }
 
   .code-body {
     flex: 1;
     overflow-y: auto;
-    min-height: 0; // Allow shrinking - height controlled by parent max-height
+    max-height: 400px;
+
+    @media (max-width: 900px) {
+      max-height: 300px;
+    }
   }
 }
 
