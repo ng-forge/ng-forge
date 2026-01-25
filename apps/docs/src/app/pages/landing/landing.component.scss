@@ -744,6 +744,7 @@ nav {
 .demo-content {
   iframe {
     width: 100%;
+    min-height: 100px; // Fallback until height syncing kicks in
     border: none;
     display: block;
   }
@@ -1410,6 +1411,7 @@ section {
 
   iframe {
     width: 100%;
+    min-height: 100px; // Fallback until height syncing kicks in
     border: none;
     display: block;
   }
