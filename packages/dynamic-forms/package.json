@@ -1,6 +1,6 @@
 {
   "name": "@ng-forge/dynamic-forms",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Type-safe, signal-powered dynamic forms for Angular. Build complex forms from configuration with full TypeScript inference.",
   "type": "module",
   "license": "MIT",
