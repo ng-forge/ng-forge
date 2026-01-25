@@ -261,10 +261,6 @@ export class ExampleScenarioComponent {
   private setupIframeHeightReporter(): void {
     if (!this.isInIframe || !this.isBrowser) return;
 
-    // Don't auto-size landing page embeds - they should fill their containers
-    // Landing page embeds are identified by theme=landing query param
-    if (this.themeParam() === 'landing') return;
-
     this.createHeightObserver$()
       .pipe(
         filter(() => this.activeTab() === 'demo'),
