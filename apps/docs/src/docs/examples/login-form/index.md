@@ -1,8 +1,10 @@
+[← Back to Quick Start](/examples)
+
 Simple login form demonstrating authentication UI with email and password fields.
 
 ## Live Demo
 
-{{ NgDocActions.demo("LoginFormDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/login" class="example-frame" title="Login Form Demo"></iframe>
 
 ## Overview
 
@@ -181,10 +183,8 @@ For social login buttons, you can use text fields with links or handle this outs
 
 - **[User Registration](../user-registration/)** - Account creation
 - **[Contact Form](../contact-form/)** - Basic form with validation
-- **[Password Reset](../password-reset/)** - Forgot password flow
 
 ## Related Documentation
 
-- **[Validation](../../core/validation/)** - Form validation guide
-- **[Field Types](../../core/field-types/)** - Input, checkbox, button
+- **[Validation](../../validation/basics/)** - Form validation guide
 - **[Material Integration](../../ui-libs-integrations/material/)** - Material Design styling

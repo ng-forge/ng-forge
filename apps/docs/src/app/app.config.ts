@@ -16,6 +16,8 @@ import { appRoutes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { ENVIRONMENT, environment } from './config/environment';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -43,9 +45,11 @@ export const appConfig: ApplicationConfig = {
     provideSearchEngine(NgDocDefaultSearchEngine),
     providePageSkeleton(NG_DOC_DEFAULT_PAGE_SKELETON),
     provideMainPageProcessor(NG_DOC_DEFAULT_PAGE_PROCESSORS),
-    // Environment configuration for iframe example URLs
+    // Environment configuration for example URLs
     // Values are injected at build time via --define
     { provide: ENVIRONMENT, useValue: environment },
     provideClientHydration(withEventReplay()),
+    // Dynamic forms for landing page demos
+    provideDynamicForm(...withMaterialFields()),
   ],
 };

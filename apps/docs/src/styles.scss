@@ -4,12 +4,22 @@
 @use 'icons';
 
 // ============================================
+// MATERIAL THEME (ember-themed for landing page forms)
+// ============================================
+@use '@angular/material' as mat;
+@use 'material' as ember-mat;
+@use 'tokens' as *;
+
+// Initialize Material core
+@include mat.core();
+
+// ============================================
 // CSS LAYER ORDER
 // ============================================
 // Define layer order - later layers have higher priority
 // ng-doc styles are in lowest priority layer so they don't
 // affect landing page or other non-docs pages
-@layer ng-doc, material, app;
+@layer ng-doc, app;
 
 // ============================================
 // NG-DOC STYLES (scoped to ng-doc layer)
@@ -18,9 +28,28 @@
 @import '@ng-doc/app/styles/themes/dark.css' layer(ng-doc);
 
 // ============================================
-// MATERIAL THEME (for docs UI only)
+// MATERIAL THEME APPLICATION
 // ============================================
-@import '@angular/material/prebuilt-themes/indigo-pink.css' layer(material);
+// Only apply Material theme on landing page (where we have direct forms)
+// Other pages use iframes which have their own isolated styling
+
+html:has(app-landing) {
+  @include ember-mat.material-theme-light();
+  @include ember-mat.material-theme-landing();
+
+  // Input color overrides (matching Material example app)
+  .mat-mdc-form-field {
+    --mat-form-field-outlined-input-text-color: #dee2e6;
+    --mat-form-field-filled-input-text-color: #dee2e6;
+    --mdc-outlined-text-field-container-color: #000000;
+    --mdc-filled-text-field-container-color: #000000;
+  }
+
+  .mdc-text-field--outlined,
+  .mdc-text-field--filled {
+    background-color: #000000 !important;
+  }
+}
 
 // ============================================
 // NG-DOC EMBER THEME OVERRIDES
@@ -45,6 +74,13 @@ $steel-dark: #2a2824;
 
 // Light theme - ember colors with light backgrounds
 :root {
+  // Shiki syntax highlighting CSS variables (used by ng-doc dual-theme Shiki)
+  // These must be defined for code to be visible in both light and dark modes
+  --shiki-light: #1a1a1a;
+  --shiki-dark: #{$steel};
+  --shiki-light-bg: transparent;
+  --shiki-dark-bg: transparent;
+
   // Ember primary colors
   --ng-doc-primary: #{$ember-core};
   --ng-doc-primary-rgb: 255, 77, 0;
@@ -701,6 +737,100 @@ ng-doc-demo-displayer {
 }
 
 // ============================================
+// HIDE PAGE HEADERS GLOBALLY
+// ============================================
+// Breadcrumbs are sufficient - hide the duplicate h1 header on all pages
+.ng-doc-page-header {
+  display: none;
+}
+
+// ============================================
+// BACK TO QUICK START LINKS
+// ============================================
+// Style "← Back to Quick Start" links with same animated underline as landing page
+.ng-doc-page-wrapper > p:first-of-type a[href='/examples'] {
+  color: $ember-glow;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+  font-weight: 500;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 60%;
+    height: 3px;
+    background: $ember-glow;
+    border-radius: 1px 40% 40% 1px;
+    opacity: 0.5;
+    transition:
+      width 0.3s ease,
+      opacity 0.3s ease,
+      background 0.3s ease;
+  }
+
+  &:hover {
+    color: $ember-hot;
+
+    &::after {
+      width: 100%;
+      opacity: 0.8;
+      background: $ember-hot;
+    }
+  }
+}
+
+// ============================================
+// EMBEDDED EXAMPLE IFRAMES
+// ============================================
+// Heading before iframe needs margin
+h2:has(+ .example-frame) {
+  margin-bottom: 1rem;
+}
+
+// Global class for example iframes in markdown - card-like appearance
+.example-frame {
+  display: block;
+  width: 100%;
+  min-height: 100px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: #ffffff;
+  overflow: hidden;
+  position: relative;
+
+  // Subtle ember gradient top border
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, $ember-core, transparent);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+// Dark mode iframe styling (explicit)
+html[data-theme='dark'] .example-frame {
+  border-color: $steel-dark;
+  background: $bg-deep;
+}
+
+// Dark mode iframe styling (auto with dark system preference)
+@media (prefers-color-scheme: dark) {
+  html[data-theme='auto'] .example-frame {
+    border-color: $steel-dark;
+    background: $bg-deep;
+  }
+}
+
+// ============================================
 // GLOBAL SCROLLBAR STYLING
 // ============================================
 // Custom ember-themed scrollbar applied globally
@@ -1001,5 +1131,100 @@ html:has(app-landing) {
 
   body {
     background: #{$bg-void} !important;
+  }
+}
+
+// ============================================
+// SHIKI CODE HIGHLIGHTING (GLOBAL)
+// ============================================
+// Shiki dual-theme support for code highlighting
+// Shiki outputs inline colors for the default (light) theme, and CSS variables
+// for the dark theme (--shiki-dark). In light mode, let inline colors work.
+// In dark mode, override with the --shiki-dark CSS variables.
+
+// Light mode (default) - let inline colors from Shiki work
+// Only set transparent background to ensure parent container bg shows
+.shiki,
+.shiki span {
+  background-color: transparent !important;
+}
+
+// Dark mode (explicit) - use --shiki-dark colors
+html[data-theme='dark'] {
+  .shiki,
+  .shiki span {
+    color: var(--shiki-dark) !important;
+    background-color: transparent !important;
+  }
+}
+
+// Dark mode (auto with dark system preference)
+@media (prefers-color-scheme: dark) {
+  html[data-theme='auto'] {
+    .shiki,
+    .shiki span {
+      color: var(--shiki-dark) !important;
+      background-color: transparent !important;
+    }
+  }
+}
+
+// Landing page always uses dark mode
+html:has(app-landing) {
+  .shiki,
+  .shiki span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+  }
+}
+
+// ============================================
+// PAGE DESCRIPTION HORIZONTAL RULE
+// ============================================
+// Add a subtle separator line under page descriptions across all docs
+// Uses a combination of selectors to cover different page structures:
+// - Pages with intro paragraph followed by heading
+// - Pages with intro paragraph followed by blockquote/note then heading
+// - Example pages with back link, then description, then content
+// Note: ng-doc uses .ng-doc-page-wrapper for the page content container
+.ng-doc-page-wrapper {
+  // Style for explicit <hr> elements in markdown (---)
+  > hr {
+    border: none;
+    border-top: 1px solid var(--ng-doc-base-3);
+    margin: 1.5rem 0;
+  }
+
+  // For pages without explicit <hr>:
+  // Target the first paragraph that comes before a heading
+  // This handles most doc pages with intro descriptions
+  > p:first-child:has(+ h2),
+  > p:first-child:has(+ h3) {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--ng-doc-base-3);
+  }
+
+  // For pages with Note/blockquote after description then heading
+  > p:first-child:has(+ p + h2),
+  > p:first-child:has(+ p + h3) {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--ng-doc-base-3);
+  }
+
+  // For example pages with back link paragraph first
+  // Structure: p (back link with ng-doc-page-link) > p (description) > h2
+  > p:first-of-type:has(a[href='/examples']) + p {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--ng-doc-base-3);
+  }
+
+  // Ensure consistent spacing after the separator
+  > p + h2:first-of-type,
+  > p + p + h2:first-of-type,
+  > hr + h2 {
+    margin-top: 0;
   }
 }

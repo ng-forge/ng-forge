@@ -1,8 +1,10 @@
+[← Back to Quick Start](/examples)
+
 Simple contact form demonstrating basic form fields, validation, and user input.
 
 ## Live Demo
 
-{{ NgDocActions.demo("ContactFormDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/contact" class="example-frame" title="Contact Form Demo"></iframe>
 
 ## Overview
 
@@ -175,10 +177,8 @@ Dropdown allows users to categorize their inquiry:
 
 - **[User Registration](../user-registration/)** - Multi-step form with conditional fields
 - **[Login Form](../login-form/)** - Simple authentication
-- **[Survey Form](../survey-form/)** - Complex questionnaires
 
 ## Related Documentation
 
-- **[Field Types](../../core/field-types/)** - Available field types
-- **[Validation](../../core/validation/)** - Form validation guide
+- **[Validation](../../validation/basics/)** - Form validation guide
 - **[Material Integration](../../ui-libs-integrations/material/)** - Material Design styling

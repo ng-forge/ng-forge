@@ -100,4 +100,4 @@ const config = {
 
 - **[Angular Schema](../angular-schema)** - Native Angular approach
 - **[Standard Schema (Zod)](../zod)** - Use Zod, Valibot, or ArkType
-- **[Field Validation](../../core/validation/)** - Individual field validators
+- **[Field Validation](../../validation/basics/)** - Individual field validators

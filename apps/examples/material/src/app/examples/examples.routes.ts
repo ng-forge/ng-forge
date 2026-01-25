@@ -77,6 +77,11 @@ export default [
     data: { scenario: getScenarioById('hero-demo') },
   },
   {
+    path: 'contact',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('contact') },
+  },
+  {
     path: 'paginated-form',
     loadComponent: () => import('./shared/example-scenario.component'),
     data: { scenario: getScenarioById('paginated-form') },
@@ -124,5 +129,30 @@ export default [
     path: 'zod-schema-validation',
     loadComponent: () => import('./shared/example-scenario.component'),
     data: { scenario: getScenarioById('zod-schema-validation') },
+  },
+  {
+    path: 'contact-dynamic-fields',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('contact-dynamic-fields') },
+  },
+  {
+    path: 'business-account-form',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('business-account-form') },
+  },
+  {
+    path: 'shipping-billing-address',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('shipping-billing-address') },
+  },
+  {
+    path: 'age-conditional-form',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('age-conditional-form') },
+  },
+  {
+    path: 'enterprise-features',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('enterprise-features') },
   },
 ] satisfies Route[];

@@ -96,8 +96,8 @@
           </div>
 
           <div class="hero-demo-body">
-            <div id="demo-panel" role="tabpanel" class="demo-content" [class.hidden]="heroTab() !== 'demo'">
-              <example-iframe library="material" example="hero-demo?minimal=true&theme=landing" />
+            <div id="demo-panel" role="tabpanel" class="demo-content landing-form" [class.hidden]="heroTab() !== 'demo'">
+              <form [dynamic-form]="heroFormConfig"></form>
             </div>
             <div
               id="config-panel"
@@ -219,8 +219,8 @@
             <span class="panel-icon icon icon--play"></span>
             <span>Live Demo</span>
           </div>
-          <div class="demo-panel-body">
-            <example-iframe library="material" example="validation-showcase?minimal=true&theme=landing" />
+          <div class="demo-panel-body validation-form">
+            <form [dynamic-form]="validationFormConfig"></form>
           </div>
         </div>
 
@@ -238,7 +238,7 @@
       </div>
 
       <p class="validation-cta fade-up" [class.visible]="isVisible('validation-cta')">
-        <a routerLink="/core/validation" class="inline-link" title="Read the validation documentation"
+        <a routerLink="/validation/basics" class="inline-link" title="Read the validation documentation"
           >Learn more about validation &rarr;</a
         >
       </p>
@@ -401,7 +401,7 @@
 
     <p class="integrations-footnote fade-up" [class.visible]="isVisible('integrations-footnote')">
       Or
-      <a routerLink="/deep-dive/custom-integrations" class="inline-link" title="Learn how to create custom UI library adapters"
+      <a routerLink="/advanced/custom-integrations" class="inline-link" title="Learn how to create custom UI library adapters"
         >build your own adapter</a
       >
     </p>

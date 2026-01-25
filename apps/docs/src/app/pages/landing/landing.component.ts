@@ -5,8 +5,8 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { NgDocSearchComponent } from '@ng-doc/app';
 import { catchError, delay, filter, iif, map, merge, of, switchMap, tap } from 'rxjs';
+import { DynamicForm } from '@ng-forge/dynamic-forms';
 
-import { ExampleIframeComponent } from '../../components/example-iframe/example-iframe.component';
 import { Logo } from '../../components/logo';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 
@@ -34,6 +34,8 @@ import {
   scrollToHash,
 } from './landing.utils';
 
+import { heroFormConfig, validationFormConfig } from './landing.forms';
+
 const EMPTY_FIREFLY_STATE = { positions: [] as FireflyPosition[], sparks: [] as Spark[] };
 
 // Animation timing constants
@@ -42,7 +44,7 @@ const CONFETTI_ANIMATION_DURATION_MS = 800;
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, ExampleIframeComponent, CodeHighlightDirective, NgDocSearchComponent, Logo],
+  imports: [RouterLink, CodeHighlightDirective, NgDocSearchComponent, Logo, DynamicForm],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,6 +53,13 @@ export class LandingComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly http = inject(HttpClient);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+
+  // ============================================
+  // FORM CONFIGS (for landing page demos)
+  // ============================================
+
+  readonly heroFormConfig = heroFormConfig;
+  readonly validationFormConfig = validationFormConfig;
 
   // ============================================
   // EXPOSED CONSTANTS

@@ -54,11 +54,15 @@ esac
 echo "Running Playwright tests for $APP in Docker..."
 [[ -n "$EXTRA_ARGS" ]] && echo "Extra args: $EXTRA_ARGS"
 
+# Extract short name for project isolation (e.g., "material" from "material-examples")
+PROJECT_NAME="playwright-${APP%-examples}"
+
 # Build the command - Playwright's webServer config handles dev server automatically
 CMD="pnpm install --frozen-lockfile && pnpm exec nx run $APP:e2e $EXTRA_ARGS"
 
 # Build the image (uses cache if unchanged) and run tests
-docker compose -f docker-compose.playwright.yml build
-PLAYWRIGHT_CMD="$CMD" docker compose -f docker-compose.playwright.yml up \
+# Use unique project name to allow parallel runs of different apps
+docker compose -p "$PROJECT_NAME" -f docker-compose.playwright.yml build
+PLAYWRIGHT_CMD="$CMD" docker compose -p "$PROJECT_NAME" -f docker-compose.playwright.yml up \
   --abort-on-container-exit \
   --exit-code-from playwright

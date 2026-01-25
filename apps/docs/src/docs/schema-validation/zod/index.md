@@ -1,35 +1,50 @@
 ---
-title: Standard Schema (Zod)
+title: Zod Validation
 keyword: ZodSchemaPage
 ---
 
-Dynamic Forms supports the [Standard Schema](https://standardschema.dev) specification, enabling validation with Zod, Valibot, ArkType, and other compatible libraries. This approach lets you reuse existing schemas and share validation logic between frontend and backend.
+Use [Zod](https://zod.dev) schemas to validate your dynamic forms. This lets you reuse existing schemas, share validation logic between frontend and backend, and leverage Zod's powerful cross-field validation like `.refine()`.
 
 ## Installation
 
-Standard Schema support is built into the core library. Install your preferred schema library:
-
 ```bash
-# Using Zod
 npm install zod
-
-# Or Valibot
-npm install valibot
-
-# Or ArkType
-npm install arktype
 ```
 
 ## Basic Usage
 
-Import the `standardSchema` wrapper from the schema entry point:
-
 ```typescript
 import { z } from 'zod';
 import { standardSchema } from '@ng-forge/dynamic-forms/schema';
+
+const userSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+const config = {
+  schema: standardSchema(userSchema),
+  fields: [
+    { key: 'email', type: 'input', label: 'Email', props: { type: 'email' } },
+    { key: 'password', type: 'input', label: 'Password', props: { type: 'password' } },
+    { key: 'submit', type: 'submit', label: 'Register' },
+  ],
+} as const satisfies FormConfig;
 ```
 
-Define your schema and wrap it:
+The `standardSchema()` wrapper tells Dynamic Forms to use Zod for validation. Errors are automatically mapped to the corresponding form fields.
+
+## Live Demo
+
+Try the password confirmation form with Zod validation:
+
+<iframe src="http://localhost:4201/#/examples/zod-schema-validation" class="example-frame" title="Zod Validation Demo"></iframe>
+
+## Cross-Field Validation
+
+The main reason to use Zod is cross-field validation - rules that depend on multiple fields.
+
+### Password Confirmation with `.refine()`
 
 ```typescript
 const passwordSchema = z
@@ -37,77 +52,13 @@ const passwordSchema = z
     password: z.string().min(8, 'Password must be at least 8 characters'),
     confirmPassword: z.string(),
   })
-  .refine((data) => data.password === data.confirmPassword, { message: 'Passwords must match', path: ['confirmPassword'] });
-
-const config = {
-  schema: standardSchema(passwordSchema),
-  fields: [
-    {
-      key: 'password',
-      type: 'input',
-      label: 'Password',
-      required: true,
-      props: { type: 'password' },
-    },
-    {
-      key: 'confirmPassword',
-      type: 'input',
-      label: 'Confirm Password',
-      required: true,
-      props: { type: 'password' },
-    },
-    {
-      key: 'submit',
-      type: 'submit',
-      label: 'Register',
-    },
-  ],
-} as const satisfies FormConfig;
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords must match',
+    path: ['confirmPassword'], // Error appears on this field
+  });
 ```
 
-## Live Demo
-
-Try the password confirmation form with Zod validation:
-
-{{ NgDocActions.demo("ZodIframeDemoComponent", { container: false }) }}
-
-## Why Standard Schema?
-
-The [Standard Schema spec](https://standardschema.dev) provides a unified interface for schema libraries. Benefits include:
-
-- **Library agnostic** - Switch between Zod, Valibot, or ArkType
-- **Type inference** - TypeScript types derived from schemas
-- **Ecosystem integration** - Works with tRPC, Hono, and more
-- **Backend sharing** - Same schema validates on server
-
-### Supported Libraries
-
-| Library | Version | Standard Schema Support         |
-| ------- | ------- | ------------------------------- |
-| Zod     | 3.23+   | Built-in (`~standard` property) |
-| Valibot | 0.31+   | Built-in                        |
-| ArkType | 2.0+    | Built-in                        |
-
-## The `standardSchema()` Wrapper
-
-The wrapper creates a marker that Dynamic Forms recognizes:
-
-```typescript
-import { standardSchema } from '@ng-forge/dynamic-forms/schema';
-
-// Zod schema
-const zodSchema = z.object({ name: z.string() });
-const wrapped = standardSchema(zodSchema);
-
-// Valibot schema
-import * as v from 'valibot';
-const valibotSchema = v.object({ name: v.string() });
-const wrappedValibot = standardSchema(valibotSchema);
-```
-
-## Zod Validation Patterns
-
-### Cross-Field Validation with `.refine()`
+### Date Range Validation
 
 ```typescript
 const dateRangeSchema = z
@@ -121,7 +72,7 @@ const dateRangeSchema = z
   });
 ```
 
-### Multiple Refinements with `.superRefine()`
+### Multiple Cross-Field Rules with `.superRefine()`
 
 ```typescript
 const registrationSchema = z
@@ -149,7 +100,7 @@ const registrationSchema = z
   });
 ```
 
-### Conditional Validation with `.transform()`
+### Conditional Required Fields
 
 ```typescript
 const contactSchema = z
@@ -171,155 +122,100 @@ const contactSchema = z
   );
 ```
 
-## Using with OpenAPI
+## Reusing Schemas
 
-Reuse schemas generated from OpenAPI specs:
+### From OpenAPI or Backend
 
 ```typescript
-// From your OpenAPI-generated schemas
+// Reuse schemas generated from OpenAPI specs
 import { UserCreateSchema } from './generated/schemas';
-import { standardSchema } from '@ng-forge/dynamic-forms/schema';
 
 const config = {
   schema: standardSchema(UserCreateSchema),
   fields: [
-    { key: 'username', type: 'input', label: 'Username', required: true },
-    { key: 'email', type: 'input', label: 'Email', required: true },
-    { key: 'password', type: 'input', label: 'Password', required: true, props: { type: 'password' } },
+    { key: 'username', type: 'input', label: 'Username' },
+    { key: 'email', type: 'input', label: 'Email' },
+    { key: 'password', type: 'input', label: 'Password', props: { type: 'password' } },
   ],
 } as const satisfies FormConfig;
 ```
 
-## Error Mapping
-
-Zod errors are automatically mapped to form fields using the `path` property:
+### Shared Validation Logic
 
 ```typescript
-// Zod error structure
+// schemas/user.schema.ts - shared with backend
+export const userSchema = z.object({
+  email: z.string().email('Invalid email'),
+  password: z.string().min(8, 'Password too short'),
+});
+
+// frontend form
+import { userSchema } from '@shared/schemas';
+
+const config = {
+  schema: standardSchema(userSchema),
+  fields: [
+    { key: 'email', type: 'input', label: 'Email' },
+    { key: 'password', type: 'input', label: 'Password', props: { type: 'password' } },
+  ],
+} as const satisfies FormConfig;
+```
+
+## How Errors Work
+
+Zod errors automatically map to form fields via the `path` property:
+
+```typescript
+// When validation fails, Zod produces:
 {
-  issues: [
-    {
-      path: ['confirmPassword'],
-      message: 'Passwords must match',
-    },
-  ];
+  issues: [{ path: ['confirmPassword'], message: 'Passwords must match' }];
 }
 
-// Becomes Angular form error
+// Dynamic Forms maps this to Angular's form errors:
 form.controls.confirmPassword.errors;
 // → { 'Passwords must match': true }
 ```
 
-## Type Safety
+## Combining with Field Validators
 
-The schema provides type inference for your form:
-
-```typescript
-const userSchema = z.object({
-  name: z.string(),
-  age: z.number().min(0),
-  email: z.string().email(),
-});
-
-// TypeScript infers the form type
-type UserForm = z.infer<typeof userSchema>;
-// { name: string; age: number; email: string }
-```
-
-### Optional `formConfig()` Helper
-
-For enhanced type safety between your schema and form fields, use the optional `formConfig()` helper:
-
-```typescript
-import { z } from 'zod';
-import { formConfig } from '@ng-forge/dynamic-forms';
-import { standardSchema } from '@ng-forge/dynamic-forms/schema';
-
-const passwordSchema = z
-  .object({
-    password: z.string().min(8),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords must match',
-    path: ['confirmPassword'],
-  });
-
-const config = formConfig({
-  schema: standardSchema(passwordSchema),
-  fields: [
-    { key: 'password', type: 'input', label: 'Password', required: true, props: { type: 'password' } },
-    { key: 'confirmPassword', type: 'input', label: 'Confirm', required: true, props: { type: 'password' } },
-    { key: 'submit', type: 'submit', label: 'Register' },
-  ] as const,
-});
-```
-
-The helper infers the form value type from fields and constrains the schema accordingly. This is equivalent to:
+Use Zod for cross-field rules, field-level validators for single-field rules:
 
 ```typescript
 const config = {
-  schema: standardSchema(passwordSchema),
-  fields: [...],
-} as const satisfies FormConfig;
-```
-
-Use `formConfig()` when you prefer function syntax or want explicit type inference. Both approaches work equally well.
-
-## Best Practices
-
-**Define schemas separately for reuse:**
-
-```typescript
-// schemas/user.schema.ts
-export const userSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
-
-// In your form
-import { userSchema } from './schemas/user.schema';
-const config = {
-  schema: standardSchema(userSchema),
-  fields: [
-    /* ... */
-  ],
-};
-```
-
-**Use schema validation for cross-field, field validators for single-field:**
-
-```typescript
-const config = {
-  // Schema handles cross-field validation
+  // Zod handles cross-field validation
   schema: standardSchema(
-    z
-      .object({
-        password: z.string(),
-        confirm: z.string(),
-      })
-      .refine(/* ... */),
+    z.object({ password: z.string(), confirm: z.string() }).refine((data) => data.password === data.confirm, {
+      message: 'Passwords must match',
+      path: ['confirm'],
+    }),
   ),
 
   // Field validators handle single-field rules
   fields: [
-    { key: 'password', minLength: 8, required: true },
-    { key: 'confirm', required: true },
+    { key: 'password', type: 'input', label: 'Password', required: true, minLength: 8 },
+    { key: 'confirm', type: 'input', label: 'Confirm Password', required: true },
   ],
-};
+} as const satisfies FormConfig;
 ```
 
-## When to Use Angular Schema Instead
+## Other Schema Libraries
 
-Consider [Angular Schema](../angular-schema) if you:
+The same approach works with Valibot and ArkType:
 
-- Don't want additional dependencies
-- Have validation logic specific to one form
-- Prefer Angular's native APIs
+```typescript
+// Valibot
+import * as v from 'valibot';
+const schema = v.object({ email: v.pipe(v.string(), v.email()) });
+const config = { schema: standardSchema(schema), fields: [...] };
+
+// ArkType
+import { type } from 'arktype';
+const schema = type({ email: 'email' });
+const config = { schema: standardSchema(schema), fields: [...] };
+```
 
 ## Related
 
 - **[Schema Validation Overview](../overview)** - When to use form-level validation
-- **[Angular Schema](../angular-schema)** - Native Angular approach
-- **[Field Validation](../../core/validation/)** - Individual field validators
-- **[Standard Schema Spec](https://standardschema.dev)** - The specification
+- **[Angular Schema](../angular-schema)** - Native Angular approach without dependencies
+- **[Field Validation](../../validation/basics/)** - Individual field validators

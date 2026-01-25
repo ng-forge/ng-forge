@@ -129,7 +129,7 @@ export class ContactFormComponent {
 
 ## Configuration Options
 
-Configure default props at the library, form, or field level. See [Configuration](../../deep-dive/configuration) for the full cascade behavior and examples.
+Configure default props at the library, form, or field level.
 
 Use `MatFormConfig` for type-safe form configurations with Material-specific props.
 
@@ -159,7 +159,7 @@ import '@ng-forge/dynamic-forms-material';
 
 Here's a full registration form showcasing multiple Material Design field types:
 
-{{ NgDocActions.demo("CompleteFormIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/complete-form" class="example-frame" title="Complete Form Demo"></iframe>
 
 This example demonstrates:
 
@@ -188,7 +188,7 @@ Text input field with HTML5 type support.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("InputIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/input" class="example-frame" title="Input Demo"></iframe>
 
 **Basic Usage:**
 
@@ -247,7 +247,7 @@ Multi-line text input field with Material Design styling.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("TextareaIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/textarea" class="example-frame" title="Textarea Demo"></iframe>
 
 **Basic Usage:**
 
@@ -285,7 +285,7 @@ Dropdown selection field. Supports both single and multi-select modes.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("SelectIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/select" class="example-frame" title="Select Demo"></iframe>
 
 **Basic Usage:**
 
@@ -319,7 +319,7 @@ Radio button group for selecting a single option.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("RadioIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/radio" class="example-frame" title="Radio Demo"></iframe>
 
 **Basic Usage:**
 
@@ -351,7 +351,7 @@ Boolean checkbox control for single true/false selections.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("CheckboxIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/checkbox" class="example-frame" title="Checkbox Demo"></iframe>
 
 **Basic Usage:**
 
@@ -378,7 +378,7 @@ Multiple checkbox selection field for choosing multiple options.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/multi-checkbox" class="example-frame" title="Multi-Checkbox Demo"></iframe>
 
 **Basic Usage:**
 
@@ -410,7 +410,7 @@ Slide toggle switch for boolean on/off selections.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("ToggleIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/toggle" class="example-frame" title="Toggle Demo"></iframe>
 
 **Basic Usage:**
 
@@ -436,7 +436,7 @@ Numeric slider control for selecting values from a range.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("SliderIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/slider" class="example-frame" title="Slider Demo"></iframe>
 
 **Basic Usage:**
 
@@ -467,7 +467,7 @@ Date selection field with Material Design calendar popup.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("DatepickerIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/datepicker" class="example-frame" title="Datepicker Demo"></iframe>
 
 **Basic Usage:**
 
@@ -504,7 +504,7 @@ Form submission button that's automatically disabled when the form is invalid.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("ButtonIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/button" class="example-frame" title="Button Demo"></iframe>
 
 **Basic Usage:**
 
@@ -615,6 +615,6 @@ All Material Design components include:
 ## Next Steps
 
 - Check out [Examples & Patterns](../../../examples/) for real-world use cases
-- Learn about [Validation](../../../core/validation/) for form validation
-- See [Type Safety](../../../deep-dive/type-safety/) for TypeScript integration
-- Explore [Conditional Logic](../../../form-behavior/conditional-logic/) for dynamic field behavior
+- Learn about [Validation](../../validation/basics/) for form validation
+- See [Type Safety](../../advanced/type-safety/basics/) for TypeScript integration
+- Explore [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/) for dynamic field behavior

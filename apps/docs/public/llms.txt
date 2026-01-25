@@ -12,6 +12,7 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - Multiple UI library integrations (Material, PrimeNG, Ionic, Bootstrap)
 - Built-in validation with expression-based validators
 - Conditional logic for showing/hiding fields
+- Value derivation for computed fields
 - Type-safe form configurations
 - Reactive forms under the hood
 
@@ -26,29 +27,52 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - /ui-libs-integrations/ionic: Ionic integration
 - /ui-libs-integrations/bootstrap: Bootstrap integration
 
-### Core Concepts
-- /core/field-types: Available field types (input, select, checkbox, etc.)
-- /core/validation: Validation configuration and custom validators
-- /core/conditional-logic: Show/hide fields based on conditions
-- /core/events: Form and field event handling
-- /core/i18n: Internationalization support
-- /core/type-safety: TypeScript type safety features
+### Schema & Fields
+- /schema-fields/field-types: Available field types (input, select, checkbox, etc.)
 
-### Advanced Topics
-- /deep-dive/expression-parser: Expression syntax for validators and conditions
-- /deep-dive/custom-integrations: Creating custom UI library integrations
+### Validation
+- /validation/basics: Validation configuration basics
+- /validation/advanced: Conditional validators
+- /validation/custom-validators: Custom and expression validators
+- /validation/reference: Complete validation reference
 
-### Examples
-- /examples/login-form: Simple login form example
-- /examples/contact-form: Contact form with validation
-- /examples/user-registration: Multi-field registration form
-- /examples/paginated-form: Multi-page wizard form
+### Dynamic Behavior
+- /dynamic-behavior/conditional-logic: Show/hide fields based on conditions
+- /dynamic-behavior/value-derivation: Computed field values
+- /dynamic-behavior/i18n: Internationalization support
+- /dynamic-behavior/submission: Form submission handling
 
-### Prebuilt Components
+### Schema Validation
+- /schema-validation/overview: Form-level validation overview
+- /schema-validation/angular-schema: Angular native schema validation
+- /schema-validation/zod: Standard Schema (Zod, Valibot, ArkType) validation
+
+### Layout Components
 - /prebuilt/form-pages: Page container components
 - /prebuilt/form-groups: Field grouping components
 - /prebuilt/form-rows: Row layout components
 - /prebuilt/form-arrays: Dynamic array fields
+- /prebuilt/text-components: Text and label components
+- /prebuilt/hidden-fields: Hidden field components
+
+### Examples
+- /examples: Browse all examples
+- /examples/login-form: Simple login form example
+- /examples/contact-form: Contact form with validation
+- /examples/user-registration: Multi-field registration form
+- /examples/paginated-form: Multi-page wizard form
+- /examples/value-derivation: Computed field values example
+- /examples/contact-dynamic-fields: Dynamic contact fields
+- /examples/business-account-form: Business account form
+- /examples/shipping-billing-address: Shipping same-as-billing example
+- /examples/age-conditional-form: Age-based conditional form
+- /examples/enterprise-features: Complex multi-condition form
+
+### Advanced Topics
+- /advanced/type-safety: TypeScript type safety features
+- /advanced/events: Form and field event handling
+- /advanced/expression-parser: Expression syntax for validators and conditions
+- /advanced/custom-integrations: Creating custom UI library integrations
 
 ### API Reference
 - /api-reference: Complete API documentation for all packages

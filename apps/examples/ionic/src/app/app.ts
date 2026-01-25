@@ -10,7 +10,6 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   imports: [RouterModule, IonApp, IonRouterOutlet],
   selector: 'example-root',
   templateUrl: './app.html',
-  styleUrl: './app.scss',
 })
 export class App {
   protected title = 'Ionic Examples';
