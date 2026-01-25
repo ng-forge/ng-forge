@@ -5,7 +5,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { NgDocSearchComponent } from '@ng-doc/app';
-import { catchError, delay, filter, iif, map, merge, of, switchMap, tap } from 'rxjs';
+import { catchError, delay, filter, fromEvent, iif, map, merge, of, switchMap, tap } from 'rxjs';
 
 import { Logo } from '../../components/logo';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
@@ -175,9 +175,33 @@ export class LandingComponent {
   private initializeBrowserFeatures(): void {
     // Merge all browser-only subscriptions into one
     // Note: scrollSnapEffect$ disabled for now - uncomment to re-enable
-    merge(/* this.scrollSnapEffect$(), */ this.intersectionObserverEffect$()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+    merge(/* this.scrollSnapEffect$(), */ this.intersectionObserverEffect$(), this.validationHeightSyncEffect$())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
 
     scrollToHash(SECTION_IDS);
+  }
+
+  /** Sync validation code panel height with the demo panel (including header) */
+  private validationHeightSyncEffect$() {
+    return fromEvent<MessageEvent>(window, 'message').pipe(
+      filter(
+        (event) =>
+          event.data?.type === 'iframe-height' &&
+          typeof event.data.height === 'number' &&
+          event.data.route === '/examples/validation-showcase',
+      ),
+      // Small delay to allow iframe height to be applied first
+      delay(50),
+      tap(() => {
+        const demoPanel = document.querySelector('.validation-demo-panel') as HTMLElement | null;
+        const codePanel = document.querySelector('.validation-code-panel') as HTMLElement | null;
+        if (demoPanel && codePanel) {
+          // Sync code panel to match demo panel's full height (includes header)
+          codePanel.style.maxHeight = `${demoPanel.offsetHeight}px`;
+        }
+      }),
+    );
   }
 
   private scrollSnapEffect$() {

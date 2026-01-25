@@ -1359,7 +1359,7 @@ section {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  align-items: stretch;
+  align-items: start; // Each panel sizes to its content; JS syncs code panel height to form
   max-width: 100%;
   overflow: hidden;
 
@@ -1421,6 +1421,7 @@ section {
   display: flex;
   flex-direction: column;
   min-width: 0; // Allow shrinking below content size in grid
+  overflow: hidden; // Clip content when max-height is set via JS
 
   .code-block {
     max-width: 100%;
@@ -1428,16 +1429,13 @@ section {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    min-height: 0; // Allow shrinking in flex context
   }
 
   .code-body {
     flex: 1;
     overflow-y: auto;
-    max-height: 400px;
-
-    @media (max-width: 900px) {
-      max-height: 300px;
-    }
+    min-height: 0; // Allow shrinking - height controlled by parent max-height
   }
 }
 
