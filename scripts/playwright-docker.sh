@@ -8,8 +8,11 @@
 #   ./scripts/playwright-docker.sh ionic-examples                    # Run tests
 #   ./scripts/playwright-docker.sh ionic-examples --update-snapshots # Update baselines
 #   ./scripts/playwright-docker.sh material-examples --grep "input"  # Run specific tests
+#   ./scripts/playwright-docker.sh ionic-examples --clean            # Clean cache first
 #
 # Apps: ionic-examples, material-examples, bootstrap-examples, primeng-examples
+# Options:
+#   --clean  Clean Docker volumes before running tests
 
 set -e
 
@@ -19,7 +22,24 @@ export PLAYWRIGHT_VERSION
 
 APP=${1:-ionic-examples}
 shift || true
-EXTRA_ARGS="$@"
+
+# Handle --clean flag
+CLEAN=false
+EXTRA_ARGS=""
+for arg in "$@"; do
+  if [[ "$arg" == "--clean" ]]; then
+    CLEAN=true
+  else
+    EXTRA_ARGS="$EXTRA_ARGS $arg"
+  fi
+done
+EXTRA_ARGS=$(echo "$EXTRA_ARGS" | xargs)  # Trim whitespace
+
+if [[ "$CLEAN" == "true" ]]; then
+  echo "Cleaning Docker volumes first..."
+  ./scripts/clean-e2e-cache.sh
+  echo ""
+fi
 
 # Validate app name
 case $APP in
