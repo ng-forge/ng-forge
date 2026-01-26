@@ -461,6 +461,113 @@ Understanding how your config maps to the form value object:
 | hideWhen not working | \`hideWhen: {...}\` | Use \`logic: [{ type: 'hidden', condition: {...} }]\` |
 | derivation not working | \`derivation: { expression }\` | Use \`logic: [{ type: 'derivation', targetField, expression }]\` |
 
+## Nested Paths (Accessing Nested Field Values)
+
+When referencing fields inside groups/containers in expressions and conditions:
+
+\`\`\`typescript
+// Flat field (direct access)
+'formValue.email'
+
+// Inside a group (dot notation)
+'formValue.address.city'
+'formValue.address.zip'
+
+// Inside nested groups
+'formValue.billing.address.street'
+
+// Inside an array (index access)
+'formValue.contacts[0].email'
+'formValue.items[2].quantity'
+
+// With optional chaining (SAFE - handles undefined)
+'formValue.address?.city'                    // returns undefined if address is null
+'formValue.contacts?.[0]?.email'             // safe array access
+'formValue.billing?.address?.street ?? ""'   // with default value
+
+// In fieldValue conditions - use the FIELD PATH, not formValue
+{
+  type: 'fieldValue',
+  fieldPath: 'address.city',        // NOT 'formValue.address.city'
+  operator: 'equals',
+  value: 'NYC'
+}
+
+// In JavaScript conditions - use formValue prefix
+{
+  type: 'javascript',
+  expression: 'formValue.address?.city === "NYC"'
+}
+\`\`\`
+
+**Tip:** For derivations referencing nested values, always use optional chaining to prevent errors when parent is undefined.
+
+## Shorthand vs Full Syntax (When to Use Each)
+
+### Validation
+\`\`\`typescript
+// SHORTHAND (recommended for simple cases)
+{ key: 'email', type: 'input', required: true, email: true, minLength: 5 }
+
+// FULL SYNTAX (for custom messages or complex rules)
+{
+  key: 'email',
+  type: 'input',
+  validators: [
+    { type: 'required' },
+    { type: 'email' },
+    { type: 'minLength', value: 5 },
+    { type: 'custom', expression: '!fieldValue.includes("spam")', kind: 'noSpam' }
+  ]
+}
+\`\`\`
+
+### When to use Full Syntax:
+- Custom validators (expression/function-based)
+- Async validators (API calls to check uniqueness)
+- Cross-field validation (password confirmation)
+
+### Logic Blocks (always explicit - NO shorthand exists)
+\`\`\`typescript
+// This is the ONLY way - there's no hideWhen/showWhen shorthand
+logic: [{
+  type: 'hidden',  // or 'disabled', 'readonly', 'required', 'derivation'
+  condition: { type: 'fieldValue', fieldPath: 'x', operator: 'equals', value: 'y' }
+}]
+\`\`\`
+
+## Error Message Examples (What You'll See)
+
+### Error: "options" at wrong level
+\`\`\`
+Validation error at 'fields.0': options should be at FIELD level, not inside props
+\`\`\`
+**Fix:** Move \`options\` from \`props: { options: [...] }\` to field level
+
+### Error: "label" on container
+\`\`\`
+Validation error at 'fields.0': Field "address" (type: group): "group" fields do NOT have a label property
+\`\`\`
+**Fix:** Remove \`label\` from group/row/array/page fields
+
+### Error: "logic" on container
+\`\`\`
+Validation error at 'fields.0': "row" containers do NOT support logic blocks - apply logic to individual child fields instead
+\`\`\`
+**Fix:** Move logic to each child field, not the container
+
+### Error: Invalid field type
+\`\`\`
+Validation error at 'fields.0': Unknown field type "inputField". Valid types: input, select, checkbox, radio, multi-checkbox, textarea, datepicker, toggle, slider, hidden, text, row, group, array, page, button, submit, next, previous
+\`\`\`
+**Fix:** Use exact type name (e.g., \`input\` not \`inputField\`)
+
+### Error: Invalid property in props
+\`\`\`
+Validation error at 'fields.0.props': Unrecognized key(s) in object: 'min', 'max'
+\`\`\`
+**Fix:** For slider, use \`minValue\`/\`maxValue\` at field level
+
 ## Material-Specific Props (Detailed)
 
 ### Common Material Props
