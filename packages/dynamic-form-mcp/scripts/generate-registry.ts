@@ -331,14 +331,15 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   {
     type: 'row',
     category: 'container',
-    description: 'Horizontal layout container for grouping fields in columns',
+    description:
+      'Horizontal layout container for grouping fields in columns. Rows do NOT have a label property and cannot contain hidden fields.',
     valueType: undefined,
     baseInterface: 'FieldDef',
     props: {
       fields: {
         name: 'fields',
-        type: 'FieldDef[]',
-        description: 'Child fields to render horizontally',
+        type: 'RowAllowedChildren[]',
+        description: 'Child fields to render horizontally. Allowed: groups, arrays, leaf fields (NOT pages, rows, or hidden)',
         required: true,
       },
     },
@@ -346,6 +347,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     example: `{
   key: 'nameRow',
   type: 'row',
+  // NOTE: Rows do NOT have a label property
   fields: [
     { key: 'firstName', type: 'input', label: 'First Name', col: 6 },
     { key: 'lastName', type: 'input', label: 'Last Name', col: 6 }
@@ -355,14 +357,15 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   {
     type: 'group',
     category: 'container',
-    description: 'Nested form group container creating a sub-object in form values',
+    description:
+      'Nested form group container creating a sub-object in form values. Groups are logical containers only and do NOT have a label property.',
     valueType: 'object',
     baseInterface: 'FieldDef',
     props: {
       fields: {
         name: 'fields',
-        type: 'FieldDef[]',
-        description: 'Child fields in the group',
+        type: 'GroupAllowedChildren[]',
+        description: 'Child fields in the group. Allowed: rows, leaf fields (NOT pages or other groups)',
         required: true,
       },
     },
@@ -370,7 +373,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     example: `{
   key: 'address',
   type: 'group',
-  label: 'Address',
+  // NOTE: Groups do NOT have a label property
   fields: [
     { key: 'street', type: 'input', label: 'Street' },
     { key: 'city', type: 'input', label: 'City' },
@@ -381,69 +384,68 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   {
     type: 'array',
     category: 'container',
-    description: 'Repeatable field group for dynamic lists/arrays',
+    description:
+      'Repeatable field group for dynamic lists/arrays. Arrays do NOT have label, minItems, or maxItems properties. Use "fields" (not "template") to define the item template.',
     valueType: 'T[]',
     baseInterface: 'FieldDef',
     props: {
-      template: {
-        name: 'template',
-        type: 'FieldDef[]',
-        description: 'Template fields for each array item',
+      fields: {
+        name: 'fields',
+        type: 'ArrayAllowedChildren[]',
+        description: 'Template field(s) for each array item. Allowed: rows, groups, leaf fields (NOT pages or other arrays)',
         required: true,
       },
-      minItems: {
-        name: 'minItems',
-        type: 'number',
-        description: 'Minimum number of items',
-        required: false,
-      },
-      maxItems: {
-        name: 'maxItems',
-        type: 'number',
-        description: 'Maximum number of items',
-        required: false,
-      },
     },
-    validationSupported: true,
-    example: `{
-  key: 'phones',
+    validationSupported: false,
+    example: `// Flat array (primitive values)
+{
+  key: 'tags',
   type: 'array',
-  label: 'Phone Numbers',
-  template: [
-    { key: 'type', type: 'select', label: 'Type', props: { options: [...] } },
-    { key: 'number', type: 'input', label: 'Number' }
-  ],
-  props: { minItems: 1, maxItems: 5 }
-}`,
+  // NOTE: Arrays do NOT have label, minItems, or maxItems
+  fields: [
+    { key: 'tag', type: 'input', label: 'Tag' }
+  ]
+}
+// Result: { tags: ['value1', 'value2'] }
+
+// Object array (nested groups)
+{
+  key: 'contacts',
+  type: 'array',
+  fields: [{
+    type: 'group',
+    fields: [
+      { key: 'name', type: 'input', label: 'Name' },
+      { key: 'email', type: 'input', label: 'Email' }
+    ]
+  }]
+}
+// Result: { contacts: [{name: '', email: ''}, ...] }`,
   },
   {
     type: 'page',
     category: 'container',
-    description: 'Multi-step form page container for wizard-style forms',
+    description:
+      'Multi-step form page container for wizard-style forms. Pages do NOT have label or title properties. ALL top-level fields must be pages if using multi-page mode.',
     valueType: undefined,
     baseInterface: 'FieldDef',
     props: {
       fields: {
         name: 'fields',
-        type: 'FieldDef[]',
-        description: 'Fields in this page',
+        type: 'PageAllowedChildren[]',
+        description: 'Fields in this page. Allowed: rows, groups, arrays, leaf fields (NOT other pages)',
         required: true,
-      },
-      title: {
-        name: 'title',
-        type: 'DynamicText',
-        description: 'Page title',
-        required: false,
       },
     },
     validationSupported: false,
     example: `{
   key: 'step1',
   type: 'page',
-  label: 'Personal Info',
+  // NOTE: Pages do NOT have label or title properties
   fields: [
     { key: 'firstName', type: 'input', label: 'First Name' },
-    { key: 'lastName', type: 'input', label: 'Last Name' }
+    { key: 'lastName', type: 'input', label: 'Last Name' },
+    { key: 'next', type: 'next', label: 'Next' }
   ]
 }`,
   },

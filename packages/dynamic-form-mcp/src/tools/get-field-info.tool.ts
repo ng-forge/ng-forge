@@ -11,8 +11,15 @@ import { getFieldType, getFieldTypes, getUIAdapter, type FieldTypeInfo, type UIA
 
 const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 
+// Container fields that do NOT have label property
+const CONTAINER_TYPES = ['row', 'group', 'array', 'page'];
+
+// Properties that are at top level, not in props
+const TOP_LEVEL_PROPS = ['fields', 'template'];
+
 function formatFieldInfo(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldType): string {
   const lines: string[] = [];
+  const isContainer = CONTAINER_TYPES.includes(field.type);
 
   lines.push(`## ${field.type} field`);
   lines.push('');
@@ -24,6 +31,13 @@ function formatFieldInfo(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldType)
   }
 
   lines.push(`**Validation Supported:** ${field.validationSupported ? 'Yes' : 'No'}`);
+
+  // Special note for container fields
+  if (isContainer) {
+    lines.push('');
+    lines.push(`**⚠️ Note:** ${field.type} fields do NOT have a \`label\` property.`);
+  }
+
   lines.push('');
 
   // Base properties
@@ -32,14 +46,17 @@ function formatFieldInfo(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldType)
   lines.push('- `key`: string - Unique identifier for the field');
   lines.push(`- \`type\`: "${field.type}" - Field type discriminator`);
 
-  if (field.category === 'value') {
+  // Only value fields have label
+  if (field.category === 'value' && !isContainer) {
     lines.push('- `label`: string | { value: string, translate?: boolean } - Field label');
   }
 
   // Field-specific props
   const requiredProps = Object.values(field.props).filter((p) => p.required);
   for (const prop of requiredProps) {
-    lines.push(`- \`props.${prop.name}\`: ${prop.type} - ${prop.description}`);
+    // Some props are at top level (fields), others in props
+    const prefix = TOP_LEVEL_PROPS.includes(prop.name) ? '' : 'props.';
+    lines.push(`- \`${prefix}${prop.name}\`: ${prop.type} - ${prop.description}`);
   }
 
   lines.push('');
@@ -49,11 +66,12 @@ function formatFieldInfo(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldType)
   const optionalProps = Object.values(field.props).filter((p) => !p.required);
   for (const prop of optionalProps) {
     const defaultVal = prop.default !== undefined ? ` (default: ${JSON.stringify(prop.default)})` : '';
-    lines.push(`- \`props.${prop.name}\`: ${prop.type} - ${prop.description}${defaultVal}`);
+    const prefix = TOP_LEVEL_PROPS.includes(prop.name) ? '' : 'props.';
+    lines.push(`- \`${prefix}${prop.name}\`: ${prop.type} - ${prop.description}${defaultVal}`);
   }
 
   // Common optional properties for value fields
-  if (field.category === 'value') {
+  if (field.category === 'value' && !isContainer) {
     lines.push('- `value`: initial value for the field');
     lines.push('- `disabled`: boolean - Disable the field');
     lines.push('- `readonly`: boolean - Make field read-only');

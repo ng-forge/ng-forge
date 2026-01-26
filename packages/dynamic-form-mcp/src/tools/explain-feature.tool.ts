@@ -321,7 +321,7 @@ const config: FormConfig = {
     {
       key: 'page1',
       type: 'page',
-      label: 'Personal Info',  // Shows in stepper/tabs
+      // NOTE: Pages do NOT have label or title properties
       fields: [
         { key: 'firstName', type: 'input', label: 'First Name' },
         { key: 'lastName', type: 'input', label: 'Last Name' },
@@ -331,7 +331,6 @@ const config: FormConfig = {
     {
       key: 'page2',
       type: 'page',
-      label: 'Contact',
       fields: [
         { key: 'email', type: 'input', label: 'Email' },
         { key: 'prev2', type: 'previous', label: 'Back' },
@@ -341,7 +340,6 @@ const config: FormConfig = {
     {
       key: 'page3',
       type: 'page',
-      label: 'Review',
       fields: [
         { key: 'prev3', type: 'previous', label: 'Back' },
         { key: 'submit', type: 'submit', label: 'Submit' },
@@ -354,10 +352,19 @@ const config: FormConfig = {
 ## Key Points
 
 - ALL top-level fields must be \`type: 'page'\` (can't mix pages with non-pages)
+- **Pages do NOT have \`label\` or \`title\` properties**
 - Use \`next\` button to advance pages
 - Use \`previous\` button to go back
 - Each page validates before advancing
 - Form values are preserved across pages
+
+## Container Field Rules
+
+Container fields (page, group, array, row) do NOT have \`label\`:
+- \`page\`: No label, no title
+- \`group\`: No label (logical container only)
+- \`array\`: No label, no minItems/maxItems, uses \`fields\` not \`template\`
+- \`row\`: No label (horizontal layout only)
 `,
   },
 };
