@@ -70,10 +70,15 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     ]),
   );
 
-  // Container base without fields
+  // Container base without fields - explicitly forbids label and meta
   const ContainerBaseSchema = BaseFieldDefSchema.omit({
     label: true,
     meta: true,
+  }).extend({
+    // Explicitly forbid label on container fields
+    // This makes Zod reject any value for these properties
+    label: z.never().optional(),
+    meta: z.never().optional(),
   });
 
   // Page can contain: rows, groups, arrays, leaves (no pages)
@@ -82,6 +87,8 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     type: z.literal('page'),
     fields: z.array(AnyFieldSchema),
     logic: z.array(PageLogicSchema).optional(),
+    // Also forbid title (common mistake)
+    title: z.never().optional(),
   });
 
   // Row can contain: groups, arrays, leaves (no pages, rows)
@@ -97,9 +104,13 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
   });
 
   // Array can contain: rows, groups, leaves (no pages, arrays)
+  // Also forbid template (common mistake - should use 'fields')
   const ArrayFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('array'),
     fields: z.array(AnyFieldSchema),
+    template: z.never().optional(),
+    minItems: z.never().optional(),
+    maxItems: z.never().optional(),
   });
 
   // All fields union
