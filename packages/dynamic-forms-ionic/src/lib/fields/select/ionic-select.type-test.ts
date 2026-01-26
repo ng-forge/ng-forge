@@ -9,10 +9,11 @@ import type {
   SchemaApplicationConfig,
   ValidatorConfig,
   ValidationMessages,
+  ValueType,
 } from '@ng-forge/dynamic-forms';
 
 import type { IonicSelectProps, IonicSelectField } from './ionic-select.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // IonicSelectProps - Whitelist Test
@@ -30,77 +31,64 @@ describe('IonicSelectProps - Exhaustive Whitelist', () => {
     | 'shape'
     | 'labelPlacement'
     | 'color'
-    | 'compareWith';
-  type ActualKeys = keyof IonicSelectProps<string>;
+    | 'compareWith'
+    | 'hint';
+  type ActualKeys = keyof IonicSelectProps;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
   });
 
   it('should have all keys optional', () => {
-    expectTypeOf<RequiredKeys<IonicSelectProps<string>>>().toEqualTypeOf<never>();
+    expectTypeOf<RequiredKeys<IonicSelectProps>>().toEqualTypeOf<never>();
   });
 
   describe('property types', () => {
     it('multiple', () => {
-      expectTypeOf<IonicSelectProps<string>['multiple']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<IonicSelectProps['multiple']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('interface', () => {
-      expectTypeOf<IonicSelectProps<string>['interface']>().toEqualTypeOf<'action-sheet' | 'popover' | 'alert' | undefined>();
+      expectTypeOf<IonicSelectProps['interface']>().toEqualTypeOf<'action-sheet' | 'popover' | 'alert' | undefined>();
     });
 
     it('interfaceOptions', () => {
-      expectTypeOf<IonicSelectProps<string>['interfaceOptions']>().toEqualTypeOf<unknown | undefined>();
+      expectTypeOf<IonicSelectProps['interfaceOptions']>().toEqualTypeOf<unknown | undefined>();
     });
 
     it('cancelText', () => {
-      expectTypeOf<IonicSelectProps<string>['cancelText']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<IonicSelectProps['cancelText']>().toEqualTypeOf<string | undefined>();
     });
 
     it('okText', () => {
-      expectTypeOf<IonicSelectProps<string>['okText']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<IonicSelectProps['okText']>().toEqualTypeOf<string | undefined>();
     });
 
     it('placeholder', () => {
-      expectTypeOf<IonicSelectProps<string>['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
+      expectTypeOf<IonicSelectProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('fill', () => {
-      expectTypeOf<IonicSelectProps<string>['fill']>().toEqualTypeOf<'solid' | 'outline' | undefined>();
+      expectTypeOf<IonicSelectProps['fill']>().toEqualTypeOf<'solid' | 'outline' | undefined>();
     });
 
     it('shape', () => {
-      expectTypeOf<IonicSelectProps<string>['shape']>().toEqualTypeOf<'round' | undefined>();
+      expectTypeOf<IonicSelectProps['shape']>().toEqualTypeOf<'round' | undefined>();
     });
 
     it('labelPlacement', () => {
-      expectTypeOf<IonicSelectProps<string>['labelPlacement']>().toEqualTypeOf<
-        'start' | 'end' | 'fixed' | 'stacked' | 'floating' | undefined
-      >();
+      expectTypeOf<IonicSelectProps['labelPlacement']>().toEqualTypeOf<'start' | 'end' | 'fixed' | 'stacked' | 'floating' | undefined>();
     });
 
     it('color', () => {
-      expectTypeOf<IonicSelectProps<string>['color']>().toEqualTypeOf<
+      expectTypeOf<IonicSelectProps['color']>().toEqualTypeOf<
         'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | undefined
       >();
     });
 
     it('compareWith', () => {
-      type CompareWithType = IonicSelectProps<string>['compareWith'];
-      expectTypeOf<CompareWithType>().toEqualTypeOf<((o1: string, o2: string) => boolean) | undefined>();
-    });
-  });
-
-  describe('generic type parameter', () => {
-    it('compareWith uses type parameter T', () => {
-      interface CustomType {
-        id: number;
-        name: string;
-      }
-
-      type CompareWithType = IonicSelectProps<CustomType>['compareWith'];
-      expectTypeOf<CompareWithType>().toEqualTypeOf<((o1: CustomType, o2: CustomType) => boolean) | undefined>();
+      type CompareWithType = IonicSelectProps['compareWith'];
+      expectTypeOf<CompareWithType>().toEqualTypeOf<((o1: ValueType, o2: ValueType) => boolean) | undefined>();
     });
   });
 });
@@ -134,6 +122,7 @@ describe('IonicSelectField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseValueField
     | 'value'
@@ -323,7 +312,8 @@ describe('IonicSelectField - Usage Tests', () => {
         { label: 'Jane', value: { id: 2, name: 'Jane' } },
       ],
       props: {
-        compareWith: (o1: User, o2: User) => o1.id === o2.id,
+        // compareWith uses ValueType since Props are no longer generic
+        compareWith: (o1: ValueType, o2: ValueType) => (o1 as User).id === (o2 as User).id,
       },
       value: { id: 1, name: 'John' },
     } as const satisfies IonicSelectField<User>;

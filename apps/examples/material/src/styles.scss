@@ -1,146 +1,170 @@
-/* You can add global styles to this file, and also import other style files */
+// ============================================
+// MATERIAL EXAMPLE APP STYLES
+// ============================================
+// Uses ng-forge styling library with ember-themed Material
 
 @use '@angular/material' as mat;
+@use 'material' as ember-mat;
+@use 'examples' as examples;
+@use 'tokens' as *;
 
+// Initialize Material core
 @include mat.core();
 
-$my-primary: mat.m2-define-palette(mat.$m2-indigo-palette, 500);
-$my-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
+// ============================================
+// THEME APPLICATION
+// ============================================
 
-$my-light-theme: mat.m2-define-light-theme(
-  (
-    color: (
-      primary: $my-primary,
-      accent: $my-accent,
-    ),
-    typography: mat.m2-define-typography-config(),
-    density: 0,
-  )
-);
-
-$my-dark-theme: mat.m2-define-dark-theme(
-  (
-    color: (
-      primary: $my-primary,
-      accent: $my-accent,
-    ),
-  )
-);
-
-@include mat.all-component-themes($my-light-theme);
+// Apply ember-themed Material (light default)
+@include ember-mat.material-theme-light();
 
 // Auto mode - use system preference when no data-theme is set
 @media (prefers-color-scheme: dark) {
   html:not([data-theme]),
   :root:not([data-theme]) {
-    @include mat.all-component-colors($my-dark-theme);
+    @include ember-mat.material-theme-dark();
   }
 }
 
+// Explicit light theme (same as default, for when data-theme='light' is set)
+[data-theme='light'] {
+  @include ember-mat.material-theme-light();
+}
+
 // Explicit dark theme
-[data-theme='dark'],
-html[data-theme='dark'],
-:root[data-theme='dark'] {
-  @include mat.all-component-colors($my-dark-theme);
+[data-theme='dark'] {
+  @include ember-mat.material-theme-dark();
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+// Landing page theme (dark variant with landing background)
+[data-theme='landing'] {
+  @include ember-mat.material-theme-landing();
 }
 
-// Ensure root element is block-level for proper height measurement
-example-root {
-  display: block;
-}
+// ============================================
+// EXAMPLE APP STYLES
+// ============================================
 
-html,
+@include examples.example-base();
+@include examples.example-theme-variables();
+@include examples.example-body-themes();
+@include examples.example-components();
+
+// Material-specific body font
 body {
-  // Use auto height for iframe embedding - content determines height
-  height: auto;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-  // Hide overflow to prevent scrollbars in iframe - parent controls scrolling
-  overflow: hidden;
-  // ng-doc light mode colors
-  background-color: #f6f6f6;
-  color: rgb(78, 78, 78);
-}
-
-// Auto mode - use system preference when no data-theme is set
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme]),
-  html:not([data-theme]) body {
-    // ng-doc dark mode colors
-    background-color: rgb(41, 41, 41);
-    color: #a9a9a9;
-  }
-}
-
-// Explicit dark theme
-html[data-theme='dark'],
-html[data-theme='dark'] body {
-  // ng-doc dark mode colors
-  background-color: rgb(41, 41, 41);
-  color: #a9a9a9;
+  font-family: $font-primary;
 }
 
 // ============================================
-// Shared Example App Styles
+// MATERIAL INPUT TEXT COLOR OVERRIDE
 // ============================================
+// Material theme handles backgrounds - we only override text colors for contrast
 
-:root {
-  // ng-doc light mode colors
-  --example-result-bg: #ebebeb;
-  --example-result-border: #ddd;
-  --example-result-text: rgb(78, 78, 78);
+// Light mode - white input backgrounds
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-container-color: #ffffff;
+  --mdc-filled-text-field-container-color: #ffffff;
 }
 
-// Auto mode - use system preference when no data-theme is set
+// Direct override for outlined text field background
+.mdc-text-field--outlined {
+  background-color: #ffffff !important;
+}
+
+.mdc-text-field--filled {
+  background-color: #ffffff !important;
+}
+
+// Auto mode - light text and black backgrounds when system prefers dark
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme]),
-  :root:not([data-theme]) {
-    // ng-doc dark mode colors
-    --example-result-bg: rgb(48, 48, 48);
-    --example-result-border: rgb(71, 71, 71);
-    --example-result-text: #a9a9a9;
+  html:not([data-theme]) .mat-mdc-form-field {
+    --mat-form-field-outlined-input-text-color: #dee2e6;
+    --mat-form-field-filled-input-text-color: #dee2e6;
+    --mdc-outlined-text-field-container-color: #000000;
+    --mdc-filled-text-field-container-color: #000000;
+  }
+
+  html:not([data-theme]) .mdc-text-field--outlined,
+  html:not([data-theme]) .mdc-text-field--filled {
+    background-color: #000000 !important;
   }
 }
 
-// Explicit dark theme
-html[data-theme='dark'],
-:root[data-theme='dark'] {
-  // ng-doc dark mode colors
-  --example-result-bg: rgb(48, 48, 48);
-  --example-result-border: rgb(71, 71, 71);
-  --example-result-text: #a9a9a9;
+// Dark mode - light text and black backgrounds
+[data-theme='dark'] .mat-mdc-form-field,
+[data-theme='landing'] .mat-mdc-form-field {
+  --mat-form-field-outlined-input-text-color: #dee2e6;
+  --mat-form-field-filled-input-text-color: #dee2e6;
+  --mdc-outlined-text-field-container-color: #000000;
+  --mdc-filled-text-field-container-color: #000000;
 }
 
-// Example demo component shared styles
-.example-container {
-  display: block;
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 24px;
+[data-theme='dark'] .mdc-text-field--outlined,
+[data-theme='dark'] .mdc-text-field--filled,
+[data-theme='landing'] .mdc-text-field--outlined,
+[data-theme='landing'] .mdc-text-field--filled {
+  background-color: #000000 !important;
 }
 
-.example-result {
-  margin-top: 24px;
-  padding: 16px;
-  background: var(--example-result-bg);
-  border: 1px solid var(--example-result-border);
-  border-radius: 0.375rem;
+// ============================================
+// MATERIAL DATEPICKER OVERRIDE
+// ============================================
+// Set datepicker backgrounds to white (light) and black (dark) for contrast
 
-  h4 {
-    margin-top: 0;
-    margin-bottom: 12px;
-    color: var(--example-result-text);
+// Light mode - white datepicker background
+.mat-datepicker-content {
+  --mat-datepicker-calendar-container-background-color: #ffffff !important;
+  --mat-datepicker-calendar-date-selected-state-background-color: #{$ember-core} !important;
+  --mat-datepicker-calendar-date-today-selected-state-outline-color: #{$ember-core} !important;
+}
+
+// Datepicker toggle button - remove circle/background, use ember color for icon
+.mat-datepicker-toggle {
+  --mat-datepicker-toggle-icon-color: #{$ember-core};
+
+  .mat-mdc-icon-button {
+    --mdc-icon-button-state-layer-size: 40px;
+    --mdc-icon-button-icon-size: 24px;
+
+    // Remove the circle background
+    &::before {
+      display: none !important;
+    }
+
+    // Style the ripple to use ember color
+    .mat-mdc-button-persistent-ripple::before {
+      background-color: #{$ember-core} !important;
+      opacity: 0 !important;
+    }
+
+    &:hover .mat-mdc-button-persistent-ripple::before {
+      opacity: 0.04 !important;
+    }
+  }
+}
+
+// Auto mode - black datepicker when system prefers dark
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .mat-datepicker-content {
+    --mat-datepicker-calendar-container-background-color: #000000 !important;
+    --mat-datepicker-calendar-date-selected-state-background-color: #{$ember-glow} !important;
+    --mat-datepicker-calendar-date-today-selected-state-outline-color: #{$ember-glow} !important;
   }
 
-  pre {
-    margin: 0;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    color: var(--example-result-text);
+  html:not([data-theme]) .mat-datepicker-toggle {
+    --mat-datepicker-toggle-icon-color: #{$ember-glow};
   }
+}
+
+// Dark mode - black datepicker background
+[data-theme='dark'] .mat-datepicker-content,
+[data-theme='landing'] .mat-datepicker-content {
+  --mat-datepicker-calendar-container-background-color: #000000 !important;
+  --mat-datepicker-calendar-date-selected-state-background-color: #{$ember-glow} !important;
+  --mat-datepicker-calendar-date-today-selected-state-outline-color: #{$ember-glow} !important;
+}
+
+[data-theme='dark'] .mat-datepicker-toggle,
+[data-theme='landing'] .mat-datepicker-toggle {
+  --mat-datepicker-toggle-icon-color: #{$ember-glow};
 }

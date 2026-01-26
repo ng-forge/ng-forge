@@ -4,7 +4,7 @@ import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
 export interface BsInputProps extends InputProps {
   size?: 'sm' | 'lg';
   floatingLabel?: boolean;
-  helpText?: DynamicText;
+  hint?: DynamicText;
   validFeedback?: DynamicText;
   invalidFeedback?: DynamicText;
   plaintext?: boolean;

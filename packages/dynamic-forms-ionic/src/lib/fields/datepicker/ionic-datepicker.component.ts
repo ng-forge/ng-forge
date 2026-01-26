@@ -17,9 +17,10 @@ import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErr
 import { IonicDatepickerComponent, IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
-  selector: 'df-ionic-datepicker',
+  selector: 'df-ion-datepicker',
   imports: [
     IonInput,
     IonModal,
@@ -35,11 +36,12 @@ import { format } from 'date-fns';
     AsyncPipe,
   ],
   template: `
-    @let f = field(); @let dateValue = f().value();
-    @let ariaInvalid = isAriaInvalid();
-    @let ariaRequired = isRequired() || null;
+    @let f = field();
+    @let dateValue = f().value();
+    @let inputId = key() + '-input';
 
     <ion-input
+      [id]="inputId"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="'stacked'"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -48,12 +50,15 @@ import { format } from 'date-fns';
       [readonly]="true"
       [fill]="'outline'"
       [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="ariaInvalid"
-      [attr.aria-required]="ariaRequired"
+      [attr.aria-invalid]="ariaInvalid()"
+      [attr.aria-required]="ariaRequired()"
+      [attr.aria-describedby]="ariaDescribedBy()"
       (click)="!f().disabled() && openModal()"
     />
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" class="df-ionic-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    @if (errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="errorId()" role="alert">{{ error.message }}</ion-note>
+    } @else if (props()?.hint; as hint) {
+      <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
 
     <ion-modal [isOpen]="isModalOpen()" (didDismiss)="closeModal()">
@@ -103,8 +108,6 @@ import { format } from 'date-fns';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[class.df-invalid]': 'showErrors()',
-    '[class.df-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
 })
@@ -147,18 +150,29 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Base ID for error elements */
-  readonly errorId = computed(() => `${this.key()}-error`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** Unique ID for the helper text element */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
 
   /** Whether the field is currently in an invalid state (invalid AND touched) */
-  readonly isAriaInvalid = computed(() => {
+  protected readonly ariaInvalid = computed(() => {
     const fieldState = this.field()();
     return fieldState.invalid() && fieldState.touched();
   });
 
   /** Whether the field has a required validator */
-  readonly isRequired = computed(() => {
-    return this.field()().required?.() === true;
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
   });
+
+  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 
   openModal() {
     this.isModalOpen.set(true);

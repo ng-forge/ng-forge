@@ -5,83 +5,78 @@ import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErr
 import { BsInputComponent, BsInputProps } from './bs-input.type';
 import { AsyncPipe } from '@angular/common';
 import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-bs-input',
   imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @let p = props(); @let effectiveSize = this.effectiveSize();
-    @let effectiveFloatingLabel = this.effectiveFloatingLabel();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
-    @if (effectiveFloatingLabel) {
+    @let f = field(); @let p = props(); @let inputId = key() + '-input';
+    @if (effectiveFloatingLabel()) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
         <input
           #inputRef
           [formField]="f"
-          [id]="key()"
+          [id]="inputId"
           [type]="p?.type ?? 'text'"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [attr.aria-describedby]="ariaDescribedBy"
+          [attr.aria-invalid]="ariaInvalid()"
+          [attr.aria-required]="ariaRequired()"
+          [attr.aria-describedby]="ariaDescribedBy()"
           class="form-control"
-          [class.form-control-sm]="effectiveSize === 'sm'"
-          [class.form-control-lg]="effectiveSize === 'lg'"
+          [class.form-control-sm]="effectiveSize() === 'sm'"
+          [class.form-control-lg]="effectiveSize() === 'lg'"
           [class.form-control-plaintext]="p?.plaintext"
           [class.is-invalid]="f().invalid() && f().touched()"
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
         />
         @if (label()) {
-          <label [for]="key()">{{ label() | dynamicText | async }}</label>
+          <label [for]="inputId">{{ label() | dynamicText | async }}</label>
         }
         @if (p?.validFeedback && f().valid() && f().touched()) {
           <div class="valid-feedback d-block">
             {{ p?.validFeedback | dynamicText | async }}
           </div>
         }
-        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-          <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
+        @if (errorsToDisplay()[0]; as error) {
+          <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
         }
       </div>
     } @else {
       <!-- Standard variant -->
       <div class="mb-3">
         @if (label()) {
-          <label [for]="key()" class="form-label">{{ label() | dynamicText | async }}</label>
+          <label [for]="inputId" class="form-label">{{ label() | dynamicText | async }}</label>
         }
         <input
           #inputRef
           [formField]="f"
-          [id]="key()"
+          [id]="inputId"
           [type]="p?.type ?? 'text'"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [attr.aria-describedby]="ariaDescribedBy"
+          [attr.aria-invalid]="ariaInvalid()"
+          [attr.aria-required]="ariaRequired()"
+          [attr.aria-describedby]="ariaDescribedBy()"
           class="form-control"
-          [class.form-control-sm]="effectiveSize === 'sm'"
-          [class.form-control-lg]="effectiveSize === 'lg'"
+          [class.form-control-sm]="effectiveSize() === 'sm'"
+          [class.form-control-lg]="effectiveSize() === 'lg'"
           [class.form-control-plaintext]="p?.plaintext"
           [class.is-invalid]="f().invalid() && f().touched()"
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
         />
-        @if (p?.helpText) {
-          <div class="form-text" [id]="helpTextId()">
-            {{ p?.helpText | dynamicText | async }}
-          </div>
-        }
         @if (p?.validFeedback && f().valid() && f().touched()) {
           <div class="valid-feedback d-block">
             {{ p?.validFeedback | dynamicText | async }}
           </div>
         }
-        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-          <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
+        @if (errorsToDisplay()[0]; as error) {
+          <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
+        } @else if (p?.hint) {
+          <div class="form-text" [id]="hintId()">{{ p?.hint | dynamicText | async }}</div>
         }
       </div>
     }
@@ -167,8 +162,8 @@ export default class BsInputFieldComponent implements BsInputComponent {
   // Accessibility
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Unique ID for the help text element, used for aria-describedby */
-  protected readonly helpTextId = computed(() => `${this.key()}-help`);
+  /** Unique ID for the hint element, used for aria-describedby */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
 
   /** Base ID for error elements, used for aria-describedby */
   protected readonly errorId = computed(() => `${this.key()}-error`);
@@ -184,19 +179,11 @@ export default class BsInputFieldComponent implements BsInputComponent {
     return this.field()().required?.() === true ? true : null;
   });
 
-  /** aria-describedby: links to help text and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.helpText) {
-      ids.push(this.helpTextId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  /** aria-describedby: links to hint and error messages for screen readers */
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

@@ -1,21 +1,23 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicInputComponent, IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 @Component({
-  selector: 'df-ionic-input',
+  selector: 'df-ion-input',
   imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
-    @let ariaInvalid = isAriaInvalid();
-    @let ariaRequired = isRequired() || null;
+    @let inputId = key() + '-input';
 
     <ion-input
+      [id]="inputId"
       [type]="props()?.type ?? 'text'"
       [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
@@ -27,13 +29,14 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [fill]="effectiveFill()"
       [shape]="effectiveShape()"
       [readonly]="f().readonly()"
-      [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
+      [helperText]="errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="ariaInvalid"
-      [attr.aria-required]="ariaRequired"
+      [attr.aria-invalid]="ariaInvalid()"
+      [attr.aria-required]="ariaRequired()"
+      [attr.aria-describedby]="ariaDescribedBy()"
     />
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" class="df-ionic-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    @if (errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="errorId()" role="alert">{{ error.message }}</ion-note>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,8 +44,6 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[class.df-invalid]': 'showErrors()',
-    '[class.df-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styleUrl: '../../styles/_form-field.scss',
@@ -85,6 +86,26 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'ion-input',
     });
+
+    // Workaround: Ionic's ion-input does NOT automatically propagate aria-describedby changes
+    // to the native input element inside its shadow DOM. This effect imperatively syncs the attribute
+    // after a microtask to ensure Ionic has processed the attribute change.
+    explicitEffect([this.ariaDescribedBy], ([describedBy]) => {
+      queueMicrotask(() => {
+        const ionInput = this.elementRef.nativeElement.querySelector('ion-input') as HTMLIonInputElement | null;
+        if (ionInput?.getInputElement) {
+          ionInput.getInputElement().then((inputEl) => {
+            if (inputEl) {
+              if (describedBy) {
+                inputEl.setAttribute('aria-describedby', describedBy);
+              } else {
+                inputEl.removeAttribute('aria-describedby');
+              }
+            }
+          });
+        }
+      });
+    });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -92,16 +113,27 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Base ID for error elements */
-  readonly errorId = computed(() => `${this.key()}-error`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** Unique ID for the helper text element */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
 
   /** Whether the field is currently in an invalid state (invalid AND touched) */
-  readonly isAriaInvalid = computed(() => {
+  protected readonly ariaInvalid = computed(() => {
     const fieldState = this.field()();
     return fieldState.invalid() && fieldState.touched();
   });
 
   /** Whether the field has a required validator */
-  readonly isRequired = computed(() => {
-    return this.field()().required?.() === true;
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
   });
+
+  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

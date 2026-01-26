@@ -7,14 +7,14 @@ import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErr
 import { MatInputComponent, MatInputProps } from './mat-input.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-input',
   imports: [MatFormField, MatLabel, MatInput, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let inputId = key() + '-input';
 
     <mat-form-field [appearance]="effectiveAppearance()" [subscriptSizing]="effectiveSubscriptSizing()">
       @if (label()) {
@@ -23,33 +23,25 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       <input
         #inputRef
         matInput
+        [id]="inputId"
         [formField]="f"
         [type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
       />
-      @if (props()?.hint; as hint) {
+      @if (errorsToDisplay()[0]; as error) {
+        <mat-error [id]="errorId()">{{ error.message }}</mat-error>
+      } @else if (props()?.hint; as hint) {
         <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
-      }
-      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-        <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
       }
     </mat-form-field>
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
-      :host {
-        display: block;
-        width: 100%;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-
       mat-form-field {
         width: 100%;
       }
@@ -154,18 +146,10 @@ export default class MatInputFieldComponent implements MatInputComponent {
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

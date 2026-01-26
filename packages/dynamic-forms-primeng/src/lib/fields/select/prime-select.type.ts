@@ -1,4 +1,4 @@
-import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueFieldComponent, ValueType } from '@ng-forge/dynamic-forms';
 import { SelectField, SelectProps } from '@ng-forge/dynamic-forms/integration';
 
 /**
@@ -33,4 +33,4 @@ export interface PrimeSelectProps extends SelectProps {
 
 export type PrimeSelectField<T> = SelectField<T, PrimeSelectProps>;
 
-export type PrimeSelectComponent<T> = ValueFieldComponent<PrimeSelectField<T>>;
+export type PrimeSelectComponent = ValueFieldComponent<PrimeSelectField<ValueType>>;

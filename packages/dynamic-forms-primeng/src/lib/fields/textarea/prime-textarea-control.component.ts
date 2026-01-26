@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
 import { setupMetaTracking, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { TextareaModule } from 'primeng/textarea';
-import { FormsModule } from '@angular/forms';
 
 /**
  * A wrapper component for PrimeNG's textarea that implements FormValueControl.
@@ -14,13 +14,15 @@ import { FormsModule } from '@angular/forms';
   template: `
     <textarea
       pInputTextarea
-      [(ngModel)]="value"
+      [ngModel]="value()"
+      (ngModelChange)="value.set($event)"
       [placeholder]="placeholder()"
       [attr.maxlength]="maxlength()"
       [attr.tabindex]="tabIndex()"
       [autoResize]="autoResize()"
       [disabled]="disabled()"
       [readonly]="readonly()"
+      [invalid]="ariaInvalid()"
       [class]="styleClass()"
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-required]="ariaRequired()"

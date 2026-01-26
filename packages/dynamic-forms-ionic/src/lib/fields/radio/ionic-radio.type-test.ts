@@ -9,57 +9,46 @@ import type {
   SchemaApplicationConfig,
   ValidatorConfig,
   ValidationMessages,
+  ValueType,
 } from '@ng-forge/dynamic-forms';
 
 import type { IonicRadioProps, IonicRadioField } from './ionic-radio.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // IonicRadioProps - Whitelist Test
 // ============================================================================
 
 describe('IonicRadioProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'compareWith';
-  type ActualKeys = keyof IonicRadioProps<string>;
+  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'compareWith' | 'hint';
+  type ActualKeys = keyof IonicRadioProps;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
   });
 
   it('should have all keys optional', () => {
-    expectTypeOf<RequiredKeys<IonicRadioProps<string>>>().toEqualTypeOf<never>();
+    expectTypeOf<RequiredKeys<IonicRadioProps>>().toEqualTypeOf<never>();
   });
 
   describe('property types', () => {
     it('labelPlacement', () => {
-      expectTypeOf<IonicRadioProps<string>['labelPlacement']>().toEqualTypeOf<'start' | 'end' | 'fixed' | 'stacked' | undefined>();
+      expectTypeOf<IonicRadioProps['labelPlacement']>().toEqualTypeOf<'start' | 'end' | 'fixed' | 'stacked' | undefined>();
     });
 
     it('justify', () => {
-      expectTypeOf<IonicRadioProps<string>['justify']>().toEqualTypeOf<'start' | 'end' | 'space-between' | undefined>();
+      expectTypeOf<IonicRadioProps['justify']>().toEqualTypeOf<'start' | 'end' | 'space-between' | undefined>();
     });
 
     it('color', () => {
-      expectTypeOf<IonicRadioProps<string>['color']>().toEqualTypeOf<
+      expectTypeOf<IonicRadioProps['color']>().toEqualTypeOf<
         'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | undefined
       >();
     });
 
     it('compareWith', () => {
-      type CompareWithType = IonicRadioProps<string>['compareWith'];
-      expectTypeOf<CompareWithType>().toEqualTypeOf<((o1: string, o2: string) => boolean) | undefined>();
-    });
-  });
-
-  describe('generic type parameter', () => {
-    it('compareWith uses type parameter T', () => {
-      interface CustomType {
-        id: number;
-        name: string;
-      }
-
-      type CompareWithType = IonicRadioProps<CustomType>['compareWith'];
-      expectTypeOf<CompareWithType>().toEqualTypeOf<((o1: CustomType, o2: CustomType) => boolean) | undefined>();
+      type CompareWithType = IonicRadioProps['compareWith'];
+      expectTypeOf<CompareWithType>().toEqualTypeOf<((o1: ValueType, o2: ValueType) => boolean) | undefined>();
     });
   });
 });
@@ -93,6 +82,7 @@ describe('IonicRadioField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseValueField
     | 'value'
@@ -278,7 +268,8 @@ describe('IonicRadioField - Usage Tests', () => {
         { label: 'Inactive', value: { id: 2, label: 'Inactive' } },
       ],
       props: {
-        compareWith: (o1: Status, o2: Status) => o1.id === o2.id,
+        // compareWith uses ValueType since Props are no longer generic
+        compareWith: (o1: ValueType, o2: ValueType) => (o1 as Status).id === (o2 as Status).id,
       },
       value: { id: 1, label: 'Active' },
     } as const satisfies IonicRadioField<Status>;

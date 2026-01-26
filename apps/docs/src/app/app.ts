@@ -1,11 +1,14 @@
-import { Component, inject, OnInit, PLATFORM_ID, afterNextRender, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, PLATFORM_ID, afterNextRender, DestroyRef, computed } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocThemeToggleComponent } from '@ng-doc/app';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
 import { fromEvent, map, startWith, of, skip, filter } from 'rxjs';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgDocButtonIconComponent, NgDocIconComponent, NgDocTooltipDirective } from '@ng-doc/ui-kit';
+
+import { Logo } from './components/logo';
+import { SidebarAccordionDirective } from './directives/sidebar-accordion.directive';
 
 const THEME_STORAGE_KEY = 'ng-forge-docs-theme';
 type ThemeType = 'auto' | 'light' | 'dark';
@@ -33,6 +36,8 @@ function storageValueToTheme(value: string | null): string | undefined {
     NgDocIconComponent,
     NgDocButtonIconComponent,
     NgDocTooltipDirective,
+    Logo,
+    SidebarAccordionDirective,
   ],
   selector: 'app-root',
   templateUrl: './app.html',
@@ -45,7 +50,23 @@ export class App implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
   readonly themeService = inject(NgDocThemeService);
+
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects),
+      startWith(this.router.url),
+    ),
+    { requireSync: true },
+  );
+
+  readonly isLandingPage = computed(() => {
+    const url = this.currentUrl();
+    // Handle hash-based URLs like /#features, /#validation, etc.
+    return url === '/' || url === '' || url.startsWith('/#');
+  });
 
   theme = toSignal(
     this.isBrowser ? this.themeService.themeChanges().pipe(startWith(this.themeService.currentTheme)) : of('auto' as const),
@@ -88,6 +109,27 @@ export class App implements OnInit {
           )
           .subscribe((event) => {
             (event.source as Window)?.postMessage({ type: 'theme-change', theme: this.theme() }, '*');
+          });
+
+        // Listen for iframe height updates and resize accordingly
+        // Uses route path for deterministic matching between iframe src and child route
+        fromEvent<MessageEvent>(window, 'message')
+          .pipe(
+            filter(
+              (event) =>
+                event.data?.type === 'iframe-height' && typeof event.data.height === 'number' && typeof event.data.route === 'string',
+            ),
+            takeUntilDestroyed(this.destroyRef),
+          )
+          .subscribe((event) => {
+            const { height, route } = event.data;
+            const iframes = document.querySelectorAll<HTMLIFrameElement>('iframe');
+            iframes.forEach((iframe) => {
+              // Match iframe by checking if its src contains the route path
+              if (iframe.src.includes(`#${route}`) || iframe.src.includes(`#${route}?`)) {
+                iframe.style.height = `${height}px`;
+              }
+            });
           });
       });
 

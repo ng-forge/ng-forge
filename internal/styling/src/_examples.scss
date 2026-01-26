@@ -1,0 +1,175 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+
+// ============================================
+// SHARED EXAMPLE APP STYLES
+// ============================================
+// Common styles used across all example apps
+// (Material, Bootstrap, Ionic, PrimeNG)
+
+// ============================================
+// BASE STYLES MIXIN
+// ============================================
+@mixin example-base {
+  // Apply box-sizing globally but preserve framework component margins/padding
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  // Ensure root element is block-level for proper height measurement
+  example-root {
+    display: block;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    // Use auto height for iframe embedding - content determines height
+    height: auto;
+    // Allow content to scroll if needed within the iframe
+    overflow: auto;
+  }
+}
+
+// ============================================
+// THEME VARIABLES MIXIN
+// ============================================
+// Sets up CSS custom properties for example result components
+// Uses actual docs background colors for consistency
+@mixin example-theme-variables {
+  :root {
+    // Light mode - white background for contrast
+    --example-result-bg: #ffffff;
+    --example-result-border: #e0e0e0;
+    --example-result-text: #1a1a1a;
+  }
+
+  // Auto mode - use system preference when no data-theme is set
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]),
+    :root:not([data-theme]) {
+      --example-result-bg: #000000;
+      --example-result-border: #{$steel-dark};
+      --example-result-text: #{$steel};
+    }
+  }
+
+  // Explicit light theme (same as default)
+  html[data-theme='light'],
+  :root[data-theme='light'] {
+    --example-result-bg: #ffffff;
+    --example-result-border: #e0e0e0;
+    --example-result-text: #1a1a1a;
+  }
+
+  // Explicit dark theme - black background for contrast
+  html[data-theme='dark'],
+  :root[data-theme='dark'] {
+    --example-result-bg: #000000;
+    --example-result-border: #{$steel-dark};
+    --example-result-text: #{$steel};
+  }
+
+  // Landing page theme - black background
+  html[data-theme='landing'],
+  :root[data-theme='landing'] {
+    --example-result-bg: #000000;
+    --example-result-border: #{$steel-dark};
+    --example-result-text: #{$steel};
+  }
+}
+
+// ============================================
+// COMPONENT STYLES MIXIN
+// ============================================
+@mixin example-components {
+  // Example demo container
+  .example-container {
+    display: block;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: $space-6;
+  }
+
+  // Example result display
+  .example-result {
+    margin-top: $space-6;
+    padding: $space-4;
+    background: var(--example-result-bg);
+    border: 1px solid var(--example-result-border);
+    border-radius: $radius-md;
+
+    h4 {
+      margin-top: 0;
+      margin-bottom: $space-3;
+      color: var(--example-result-text);
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: var(--example-result-text);
+    }
+  }
+}
+
+// ============================================
+// BODY THEME STYLES
+// ============================================
+// Standard body theming for example apps
+@mixin example-body-light {
+  background-color: rgb(250, 250, 250);
+  color: rgb(78, 78, 78);
+}
+
+@mixin example-body-dark {
+  background-color: rgb(19, 18, 16);
+  color: #a9a9a9;
+}
+
+@mixin example-body-landing {
+  // Matches landing page colors
+  background-color: $bg-deep;
+  color: $steel;
+}
+
+// ============================================
+// COMPLETE EXAMPLE THEME MIXIN
+// ============================================
+// Applies full theme setup for body element
+@mixin example-body-themes {
+  html,
+  body {
+    @include example-body-light;
+  }
+
+  // Auto mode - use system preference when no data-theme is set
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]),
+    html:not([data-theme]) body {
+      @include example-body-dark;
+    }
+  }
+
+  // Explicit light theme (same as default)
+  html[data-theme='light'],
+  html[data-theme='light'] body {
+    @include example-body-light;
+  }
+
+  // Explicit dark theme
+  html[data-theme='dark'],
+  html[data-theme='dark'] body {
+    @include example-body-dark;
+  }
+
+  // Landing page theme
+  html[data-theme='landing'],
+  html[data-theme='landing'] body {
+    @include example-body-landing;
+  }
+}

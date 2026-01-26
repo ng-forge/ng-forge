@@ -5,6 +5,7 @@ import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, Textar
 import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeTextareaControlComponent } from './prime-textarea-control.component';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-textarea',
@@ -12,7 +13,6 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="df-prime-field">
       @if (label()) {
@@ -29,15 +29,14 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
         [maxlength]="props()?.maxlength"
         [tabIndex]="tabIndex()"
         [autoResize]="props()?.autoResize ?? false"
-        [ariaDescribedBy]="ariaDescribedBy"
+        [ariaDescribedBy]="ariaDescribedBy()"
         [styleClass]="textareaClasses()"
       />
 
-      @if (props()?.hint; as hint) {
+      @if (errorsToDisplay()[0]; as error) {
+        <small class="p-error" [id]="errorId()" role="alert">{{ error.message }}</small>
+      } @else if (props()?.hint; as hint) {
         <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
-      }
-      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-        <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
       }
     </div>
   `,
@@ -46,7 +45,6 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[class.df-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styles: [
@@ -110,18 +108,10 @@ export default class PrimeTextareaFieldComponent implements PrimeTextareaCompone
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

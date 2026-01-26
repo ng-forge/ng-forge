@@ -1,5 +1,6 @@
 import { ComponentFixture } from '@angular/core/testing';
-import { FormConfig, FieldDef } from '@ng-forge/dynamic-forms';
+import { FormConfig } from '../../src/lib/models/form-config';
+import { FieldDef } from '../../src/lib/definitions/base/field-def';
 
 /**
  * Simple form configuration interface for testing

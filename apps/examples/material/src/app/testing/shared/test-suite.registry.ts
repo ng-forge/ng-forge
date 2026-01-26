@@ -2,12 +2,14 @@ import { TestSuite } from './types';
 
 // Import all test suites
 import { advancedValidationSuite } from '../advanced-validation/advanced-validation.suite';
+import { angularSchemaValidationSuite } from '../angular-schema-validation/angular-schema-validation.suite';
 import { arrayFieldsSuite } from '../array-fields/array-fields.suite';
 import { asyncValidationSuite } from '../async-validation/async-validation.suite';
 import { comprehensiveFieldTestsSuite } from '../comprehensive-field-tests/comprehensive-field-tests.suite';
 import { crossFieldValidationSuite } from '../cross-field-validation/cross-field-validation.suite';
 import { crossPageValidationSuite } from '../cross-page-validation/cross-page-validation.suite';
 import { demoScenariosSuite } from '../demo-scenarios/demo-scenarios.suite';
+import { derivationLogicSuite } from '../derivation-logic/derivation-logic.suite';
 import { errorHandlingSuite } from '../error-handling/error-handling.suite';
 import { essentialTestsSuite } from '../essential-tests/essential-tests.suite';
 import { expressionBasedLogicSuite } from '../expression-based-logic/expression-based-logic.suite';
@@ -17,6 +19,7 @@ import { multiPageNavigationSuite } from '../multi-page-navigation/multi-page-na
 import { schemaSystemSuite } from '../schema-system/schema-system.suite';
 import { userJourneyFlowsSuite } from '../user-journey-flows/user-journey-flows.suite';
 import { userWorkflowsSuite } from '../user-workflows/user-workflows.suite';
+import { zodSchemaValidationSuite } from '../zod-schema-validation/zod-schema-validation.suite';
 
 /**
  * Registry of all test suites in the application.
@@ -27,12 +30,14 @@ import { userWorkflowsSuite } from '../user-workflows/user-workflows.suite';
  */
 export const TEST_SUITE_REGISTRY: TestSuite[] = [
   advancedValidationSuite,
+  angularSchemaValidationSuite,
   arrayFieldsSuite,
   asyncValidationSuite,
   comprehensiveFieldTestsSuite,
   crossFieldValidationSuite,
   crossPageValidationSuite,
   demoScenariosSuite,
+  derivationLogicSuite,
   errorHandlingSuite,
   essentialTestsSuite,
   expressionBasedLogicSuite,
@@ -42,4 +47,5 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   schemaSystemSuite,
   userJourneyFlowsSuite,
   userWorkflowsSuite,
+  zodSchemaValidationSuite,
 ];

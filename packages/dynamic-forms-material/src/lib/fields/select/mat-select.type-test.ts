@@ -10,10 +10,11 @@ import type {
   SchemaApplicationConfig,
   ValidatorConfig,
   ValidationMessages,
+  ValueType,
 } from '@ng-forge/dynamic-forms';
 
 import type { MatSelectProps, MatSelectField } from './mat-select.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // MatSelectProps - Whitelist Test
@@ -21,44 +22,44 @@ import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 
 describe('MatSelectProps - Exhaustive Whitelist', () => {
   type ExpectedKeys = 'appearance' | 'multiple' | 'panelMaxHeight' | 'subscriptSizing' | 'compareWith' | 'hint' | 'placeholder';
-  type ActualKeys = keyof MatSelectProps<unknown>;
+  type ActualKeys = keyof MatSelectProps;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
   });
 
   it('should have all keys optional', () => {
-    expectTypeOf<RequiredKeys<MatSelectProps<unknown>>>().toEqualTypeOf<never>();
+    expectTypeOf<RequiredKeys<MatSelectProps>>().toEqualTypeOf<never>();
   });
 
   describe('property types', () => {
     it('appearance', () => {
-      expectTypeOf<MatSelectProps<unknown>['appearance']>().toEqualTypeOf<MatFormFieldAppearance | undefined>();
+      expectTypeOf<MatSelectProps['appearance']>().toEqualTypeOf<MatFormFieldAppearance | undefined>();
     });
 
     it('multiple', () => {
-      expectTypeOf<MatSelectProps<unknown>['multiple']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<MatSelectProps['multiple']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('panelMaxHeight', () => {
-      expectTypeOf<MatSelectProps<unknown>['panelMaxHeight']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<MatSelectProps['panelMaxHeight']>().toEqualTypeOf<string | undefined>();
     });
 
     it('subscriptSizing', () => {
-      expectTypeOf<MatSelectProps<unknown>['subscriptSizing']>().toEqualTypeOf<SubscriptSizing | undefined>();
+      expectTypeOf<MatSelectProps['subscriptSizing']>().toEqualTypeOf<SubscriptSizing | undefined>();
     });
 
-    it('compareWith (generic)', () => {
-      type Expected = ((o1: string, o2: string) => boolean) | undefined;
-      expectTypeOf<MatSelectProps<string>['compareWith']>().toEqualTypeOf<Expected>();
+    it('compareWith', () => {
+      type Expected = ((o1: ValueType, o2: ValueType) => boolean) | undefined;
+      expectTypeOf<MatSelectProps['compareWith']>().toEqualTypeOf<Expected>();
     });
 
     it('hint', () => {
-      expectTypeOf<MatSelectProps<unknown>['hint']>().toEqualTypeOf<DynamicText | undefined>();
+      expectTypeOf<MatSelectProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('placeholder', () => {
-      expectTypeOf<MatSelectProps<unknown>['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
+      expectTypeOf<MatSelectProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });
@@ -92,6 +93,7 @@ describe('MatSelectField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseValueField
     | 'value'

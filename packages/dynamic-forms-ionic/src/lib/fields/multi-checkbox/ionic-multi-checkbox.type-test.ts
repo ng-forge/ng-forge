@@ -12,46 +12,37 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { IonicMultiCheckboxProps, IonicMultiCheckboxField } from './ionic-multi-checkbox.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // IonicMultiCheckboxProps - Whitelist Test
 // ============================================================================
 
 describe('IonicMultiCheckboxProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color';
-  type ActualKeys = keyof IonicMultiCheckboxProps<string>;
+  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'hint';
+  type ActualKeys = keyof IonicMultiCheckboxProps;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
   });
 
   it('should have all keys optional', () => {
-    expectTypeOf<RequiredKeys<IonicMultiCheckboxProps<string>>>().toEqualTypeOf<never>();
+    expectTypeOf<RequiredKeys<IonicMultiCheckboxProps>>().toEqualTypeOf<never>();
   });
 
   describe('property types', () => {
     it('labelPlacement', () => {
-      expectTypeOf<IonicMultiCheckboxProps<string>['labelPlacement']>().toEqualTypeOf<'start' | 'end' | 'fixed' | 'stacked' | undefined>();
+      expectTypeOf<IonicMultiCheckboxProps['labelPlacement']>().toEqualTypeOf<'start' | 'end' | 'fixed' | 'stacked' | undefined>();
     });
 
     it('justify', () => {
-      expectTypeOf<IonicMultiCheckboxProps<string>['justify']>().toEqualTypeOf<'start' | 'end' | 'space-between' | undefined>();
+      expectTypeOf<IonicMultiCheckboxProps['justify']>().toEqualTypeOf<'start' | 'end' | 'space-between' | undefined>();
     });
 
     it('color', () => {
-      expectTypeOf<IonicMultiCheckboxProps<string>['color']>().toEqualTypeOf<
+      expectTypeOf<IonicMultiCheckboxProps['color']>().toEqualTypeOf<
         'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | undefined
       >();
-    });
-  });
-
-  describe('generic type parameter', () => {
-    it('does not affect props structure', () => {
-      type NumberProps = keyof IonicMultiCheckboxProps<number>;
-      type StringProps = keyof IonicMultiCheckboxProps<string>;
-
-      expectTypeOf<NumberProps>().toEqualTypeOf<StringProps>();
     });
   });
 });
@@ -85,6 +76,7 @@ describe('IonicMultiCheckboxField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseValueField
     | 'value'

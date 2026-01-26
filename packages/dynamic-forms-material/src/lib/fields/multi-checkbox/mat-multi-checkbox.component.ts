@@ -2,40 +2,36 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  isEqual,
-  setupMetaTracking,
-  shouldShowErrors,
-  ValueInArrayPipe,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, isEqual, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { MatMultiCheckboxComponent, MatMultiCheckboxProps } from './mat-multi-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-multi-checkbox',
-  imports: [MatCheckbox, ValueInArrayPipe, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatCheckbox, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let checkboxGroupId = key() + '-checkbox-group';
+    @let checked = checkedValuesMap();
 
     @if (label(); as label) {
       <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
     <div
+      [id]="checkboxGroupId"
       class="checkbox-group"
       role="group"
-      [attr.aria-invalid]="ariaInvalid"
-      [attr.aria-required]="ariaRequired"
-      [attr.aria-describedby]="ariaDescribedBy"
+      [attr.aria-invalid]="ariaInvalid()"
+      [attr.aria-required]="ariaRequired()"
+      [attr.aria-describedby]="ariaDescribedBy()"
     >
       @for (option of options(); track option.value) {
         <mat-checkbox
-          [checked]="option | inArray: valueViewModel()"
+          [checked]="checked['' + option.value]"
           [disabled]="f().disabled() || option.disabled"
           [color]="props()?.color || 'primary'"
           [labelPosition]="props()?.labelPosition || 'after'"
@@ -46,37 +42,25 @@ import { AsyncPipe } from '@angular/common';
       }
     </div>
 
-    @if (props()?.hint; as hint) {
+    @if (errorsToDisplay()[0]; as error) {
+      <mat-error [id]="errorId()">{{ error.message }}</mat-error>
+    } @else if (props()?.hint; as hint) {
       <div class="mat-hint" [id]="hintId()">{{ hint | dynamicText | async }}</div>
     }
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
-    }
   `,
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-    `,
-  ],
+  styleUrl: '../../styles/_form-field.scss',
   host: {
     '[class]': 'className() || ""',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
-  providers: [ValueInArrayPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class MatMultiCheckboxFieldComponent<T extends ValueType> implements MatMultiCheckboxComponent<T> {
+export default class MatMultiCheckboxFieldComponent implements MatMultiCheckboxComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<T[]>>();
+  readonly field = input.required<FieldTree<ValueType[]>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
@@ -85,17 +69,26 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<FieldOption<T>[]>([]);
+  readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<MatMultiCheckboxProps>();
   readonly meta = input<FieldMeta>();
 
-  valueViewModel = linkedSignal<FieldOption<T>[]>(
+  valueViewModel = linkedSignal<FieldOption<ValueType>[]>(
     () => {
       const currentValues = this.field()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
     },
     { equal: isEqual },
   );
+
+  /** Computed map of checked option values for O(1) lookup in template */
+  readonly checkedValuesMap = computed(() => {
+    const map: Record<string, boolean> = {};
+    for (const opt of this.valueViewModel()) {
+      map[String(opt.value)] = true;
+    }
+    return map;
+  });
 
   constructor() {
     // Apply meta attributes to all checkbox inputs, re-apply when options change
@@ -123,7 +116,7 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
     });
   }
 
-  onCheckboxChange(option: FieldOption<T>, checked: boolean): void {
+  onCheckboxChange(option: FieldOption<ValueType>, checked: boolean): void {
     this.valueViewModel.update((currentOptions) => {
       if (checked) {
         return currentOptions.some((opt) => opt.value === option.value) ? currentOptions : [...currentOptions, option];
@@ -163,18 +156,10 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

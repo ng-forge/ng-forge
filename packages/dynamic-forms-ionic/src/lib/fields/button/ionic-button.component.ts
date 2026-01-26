@@ -15,14 +15,26 @@ import { IonicButtonComponent, IonicButtonProps } from './ionic-button.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'df-ionic-button',
+  selector: 'df-ion-button',
   imports: [IonButton, DynamicTextPipe, AsyncPipe],
   host: {
     '[id]': '`${key()}`',
+    '[class]': 'className()',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
   template: `
+    @let buttonId = key() + '-button';
+
     <ion-button
+      [id]="buttonId"
       [type]="buttonType()"
       [expand]="props()?.expand"
       [fill]="props()?.fill || 'solid'"
@@ -30,7 +42,6 @@ import { AsyncPipe } from '@angular/common';
       [size]="props()?.size"
       [color]="props()?.color || 'primary'"
       [strong]="props()?.strong"
-      [class]="className() || ''"
       [disabled]="disabled()"
       [attr.data-testid]="buttonTestId()"
       (click)="onClick()"

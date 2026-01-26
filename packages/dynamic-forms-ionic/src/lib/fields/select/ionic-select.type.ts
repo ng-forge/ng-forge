@@ -1,7 +1,7 @@
-import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueFieldComponent, ValueType } from '@ng-forge/dynamic-forms';
 import { SelectField, SelectProps } from '@ng-forge/dynamic-forms/integration';
 
-export interface IonicSelectProps<T> extends SelectProps {
+export interface IonicSelectProps extends SelectProps {
   multiple?: boolean;
   interface?: 'action-sheet' | 'popover' | 'alert';
   interfaceOptions?: unknown;
@@ -12,9 +12,10 @@ export interface IonicSelectProps<T> extends SelectProps {
   shape?: 'round';
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked' | 'floating';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
-  compareWith?: (o1: T, o2: T) => boolean;
+  compareWith?: (o1: ValueType, o2: ValueType) => boolean;
+  hint?: DynamicText;
 }
 
-export type IonicSelectField<T> = SelectField<T, IonicSelectProps<T>>;
+export type IonicSelectField<T> = SelectField<T, IonicSelectProps>;
 
-export type IonicSelectComponent<T> = ValueFieldComponent<IonicSelectField<T>>;
+export type IonicSelectComponent = ValueFieldComponent<IonicSelectField<ValueType>>;

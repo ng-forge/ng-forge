@@ -1,0 +1,26 @@
+services:
+  playwright:
+    build:
+      context: .
+      dockerfile: Dockerfile.playwright
+      args:
+        PLAYWRIGHT_VERSION: ${PLAYWRIGHT_VERSION:-1.57.0}
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+      # Use Docker-managed volumes for caches to avoid host/container cache conflicts
+      - playwright-cache:/root/.cache/ms-playwright
+      - nx-cache:/app/.nx/cache
+    environment:
+      - CI=true
+      - E2E_BROWSERS=${E2E_BROWSERS:-chromium}
+      # Use Docker-specific Nx cache to avoid "Unrecognized Cache Artifacts" warnings
+      - NX_CACHE_DIRECTORY=/app/.nx/cache
+      - NX_DAEMON=false
+    network_mode: host
+    command: ['bash', '-c', "${PLAYWRIGHT_CMD:-echo 'No command specified'}"]
+
+volumes:
+  playwright-cache:
+  nx-cache:

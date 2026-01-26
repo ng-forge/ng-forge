@@ -10,7 +10,7 @@ test.describe('Schema System E2E Tests', () => {
 
   test.describe('Apply Schema', () => {
     test('should apply reusable requiredEmail schema to field', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/schema-system/apply-schema');
+      await page.goto('/#/test/schema-system/apply-schema');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('apply-schema-test');
@@ -39,7 +39,7 @@ test.describe('Schema System E2E Tests', () => {
 
   test.describe('Apply When Schema', () => {
     test('should conditionally apply schema when checkbox is checked', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/schema-system/apply-when-schema');
+      await page.goto('/#/test/schema-system/apply-when-schema');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('apply-when-schema-test');
@@ -78,7 +78,7 @@ test.describe('Schema System E2E Tests', () => {
     });
 
     test('should re-apply schema when checkbox is checked again', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/schema-system/apply-when-schema');
+      await page.goto('/#/test/schema-system/apply-when-schema');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('apply-when-schema-test');

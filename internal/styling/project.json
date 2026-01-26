@@ -1,0 +1,7 @@
+{
+  "name": "styling",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "internal/styling/src",
+  "projectType": "library",
+  "tags": ["scope:styling", "type:lib"]
+}

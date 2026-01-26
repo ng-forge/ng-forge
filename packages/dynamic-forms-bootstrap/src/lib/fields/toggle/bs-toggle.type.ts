@@ -5,7 +5,7 @@ export interface BsToggleProps {
   size?: 'sm' | 'lg';
   reverse?: boolean;
   inline?: boolean;
-  helpText?: DynamicText;
+  hint?: DynamicText;
 }
 
 export type BsToggleField = ToggleField<BsToggleProps>;

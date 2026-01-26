@@ -5,7 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText } from '../../models/types/dynamic-text';
 import type { BaseValueField, ValueType, ValueFieldComponent } from './base-value-field';
 import type { FieldDef } from './field-def';
-import type { RequiredKeys } from '../../../../testing/src/type-test-utils';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // ValueType - Type Tests
@@ -73,6 +73,7 @@ describe('BaseValueField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseValueField
     | 'value'
@@ -283,7 +284,6 @@ describe('ValueFieldComponent - Type Extraction', () => {
   }
   type TestValue = string;
   type TestField = BaseValueField<TestProps, TestValue>;
-  type TestComponent = ValueFieldComponent<TestField>;
 
   it('should transform field to component inputs', () => {
     // Verify that the type includes the necessary properties for components

@@ -19,7 +19,7 @@ const config = {
       label: 'Input Field',
       required: true,
       props: {
-        helpText: 'Enter some text',
+        hint: 'Enter some text',
       },
     },
     // Textarea field
@@ -29,7 +29,7 @@ const config = {
       label: 'Textarea Field',
       required: true,
       props: {
-        helpText: 'Enter a longer description',
+        hint: 'Enter a longer description',
         rows: 3,
       },
     },
@@ -45,7 +45,7 @@ const config = {
         { label: 'Option 3', value: 'option3' },
       ],
       props: {
-        helpText: 'Choose an option',
+        hint: 'Choose an option',
       },
     },
     // Checkbox field
@@ -55,7 +55,7 @@ const config = {
       label: 'Checkbox Field',
       required: true,
       props: {
-        helpText: 'Check this box',
+        hint: 'Check this box',
       },
     },
     // Toggle field
@@ -65,7 +65,7 @@ const config = {
       label: 'Toggle Field',
       required: true,
       props: {
-        helpText: 'Toggle this switch',
+        hint: 'Toggle this switch',
       },
     },
     // Radio field - options at field level
@@ -80,7 +80,7 @@ const config = {
         { label: 'Radio 3', value: 'radio3' },
       ],
       props: {
-        helpText: 'Select one option',
+        hint: 'Select one option',
       },
     },
     // Multi-checkbox field - options at field level
@@ -95,7 +95,7 @@ const config = {
         { label: 'Check 3', value: 'check3' },
       ],
       props: {
-        helpText: 'Select multiple options',
+        hint: 'Select multiple options',
       },
     },
     // Slider field - minValue/maxValue at field level
@@ -106,7 +106,7 @@ const config = {
       minValue: 0,
       maxValue: 100,
       props: {
-        helpText: 'Adjust the value',
+        hint: 'Adjust the value',
       },
     },
     // Datepicker field
@@ -116,7 +116,7 @@ const config = {
       label: 'Datepicker Field',
       required: true,
       props: {
-        helpText: 'Select a date',
+        hint: 'Select a date',
       },
     },
     // Submit button

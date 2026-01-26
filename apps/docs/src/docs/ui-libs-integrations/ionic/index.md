@@ -123,11 +123,42 @@ export class ContactFormComponent {
 }
 ```
 
+## Configuration Options
+
+Configure default props at the library, form, or field level.
+
+Use `IonicFormConfig` for type-safe form configurations with Ionic-specific props.
+
+### Available Options
+
+| Option           | Type                                                                                                            | Default     | Description              |
+| ---------------- | --------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------ |
+| `fill`           | `'solid' \| 'outline'`                                                                                          | `'solid'`   | Input fill style         |
+| `shape`          | `'round'`                                                                                                       | -           | Rounded shape for inputs |
+| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked' \| 'floating'`                                                        | `'start'`   | Label position           |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger' \| 'light' \| 'medium' \| 'dark'` | `'primary'` | Ionic color theme        |
+| `size`           | `'small' \| 'default' \| 'large'`                                                                               | `'default'` | Button size              |
+| `expand`         | `'full' \| 'block'`                                                                                             | -           | Button expand behavior   |
+| `buttonFill`     | `'clear' \| 'outline' \| 'solid' \| 'default'`                                                                  | `'solid'`   | Button fill style        |
+| `strong`         | `boolean`                                                                                                       | `false`     | Bold button text         |
+
+---
+
+## Type Augmentation
+
+Importing this package automatically extends `@ng-forge/dynamic-forms` with Ionic-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:
+
+```typescript
+import '@ng-forge/dynamic-forms-ionic';
+```
+
+---
+
 ## Complete Form Example
 
 Here's a full registration form showcasing multiple Ionic field types optimized for mobile:
 
-{{ NgDocActions.demo("CompleteFormIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4203/#/examples/complete-form" class="example-frame" title="Complete Form Demo"></iframe>
 
 This example demonstrates:
 
@@ -156,7 +187,7 @@ Text input field with mobile keyboard optimization and platform-adaptive styling
 
 **Live Demo:**
 
-{{ NgDocActions.demo("InputIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4203/#/examples/input" class="example-frame" title="Input Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -220,7 +251,7 @@ Multi-line text input field with auto-grow support for mobile devices.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("TextareaIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4203/#/examples/textarea" class="example-frame" title="Textarea Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -265,7 +296,7 @@ Dropdown selection field with native action sheets on mobile devices.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("SelectIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4203/#/examples/select" class="example-frame" title="Select Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -306,7 +337,7 @@ Radio button group for selecting a single option with mobile-friendly spacing.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("RadioIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4203/#/examples/radio" class="example-frame" title="Radio Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -339,7 +370,7 @@ Boolean checkbox control optimized for touch interaction.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("CheckboxIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4203/#/examples/checkbox" class="example-frame" title="Checkbox Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -367,7 +398,7 @@ Multiple checkbox selection field for choosing multiple options.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4203/#/examples/multi-checkbox" class="example-frame" title="Multi-Checkbox Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -407,7 +438,7 @@ Slide toggle switch for boolean on/off selections with smooth animations.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("ToggleIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4203/#/examples/toggle" class="example-frame" title="Toggle Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -435,7 +466,7 @@ Range slider control with pin display and snap-to-tick support.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("SliderIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4203/#/examples/slider" class="example-frame" title="Slider Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -481,7 +512,7 @@ Date and time selection with native mobile pickers for iOS and Android.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("DatepickerIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4203/#/examples/datepicker" class="example-frame" title="Datepicker Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -533,7 +564,7 @@ Form submission button that's automatically disabled when the form is invalid.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("ButtonIframeDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4203/#/examples/button" class="example-frame" title="Button Field Demo"></iframe>
 
 **Basic Usage:**
 
@@ -774,6 +805,6 @@ All Ionic components include comprehensive accessibility features:
 ## Next Steps
 
 - Check out [Examples & Patterns](../../../examples/) for real-world use cases
-- Learn about [Validation](../../../core/validation/) for form validation
-- See [Type Safety](../../../core/type-safety/) for TypeScript integration
-- Explore [Conditional Logic](../../../core/conditional-logic/) for dynamic field behavior
+- Learn about [Validation](../../validation/basics/) for form validation
+- See [Type Safety](../../advanced/type-safety/basics/) for TypeScript integration
+- Explore [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/) for dynamic field behavior

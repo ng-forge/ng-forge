@@ -5,14 +5,14 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { BsToggleProps, BsToggleField } from './bs-toggle.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // BsToggleProps - Whitelist Test
 // ============================================================================
 
 describe('BsToggleProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'size' | 'reverse' | 'inline' | 'helpText';
+  type ExpectedKeys = 'size' | 'reverse' | 'inline' | 'hint';
   type ActualKeys = keyof BsToggleProps;
 
   it('should have exactly the expected keys', () => {
@@ -36,8 +36,8 @@ describe('BsToggleProps - Exhaustive Whitelist', () => {
       expectTypeOf<BsToggleProps['inline']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('helpText', () => {
-      expectTypeOf<BsToggleProps['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<BsToggleProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });
@@ -71,6 +71,7 @@ describe('BsToggleField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseCheckedField
     | 'value'
@@ -174,7 +175,7 @@ describe('BsToggleField - Usage', () => {
       props: {
         size: 'lg',
         reverse: false,
-        helpText: 'Toggle to enable/disable',
+        hint: 'Toggle to enable/disable',
       },
     } as const satisfies BsToggleField;
 

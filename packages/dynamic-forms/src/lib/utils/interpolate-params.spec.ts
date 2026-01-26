@@ -163,4 +163,50 @@ describe('interpolateParams', () => {
 
     expect(result).toBe('Expected valid, got invalid');
   });
+
+  // Angular Signal Forms compatibility tests
+  describe('Angular Signal Forms format', () => {
+    it('should handle minLength property (Signal Forms format) with requiredLength placeholder', () => {
+      const message = 'Must be at least {{requiredLength}} characters';
+      // Angular Signal Forms uses 'minLength' property, not 'requiredLength'
+      const error = { kind: 'minLength', minLength: 5 } as ValidationError;
+      const result = interpolateParams(message, error);
+
+      expect(result).toBe('Must be at least 5 characters');
+    });
+
+    it('should handle maxLength property (Signal Forms format) with requiredLength placeholder', () => {
+      const message = 'Must be at most {{requiredLength}} characters';
+      // Angular Signal Forms uses 'maxLength' property, not 'requiredLength'
+      const error = { kind: 'maxLength', maxLength: 10 } as ValidationError;
+      const result = interpolateParams(message, error);
+
+      expect(result).toBe('Must be at most 10 characters');
+    });
+
+    it('should handle minLength placeholder directly', () => {
+      const message = 'Minimum length: {{minLength}}';
+      const error = { kind: 'minLength', minLength: 5 } as ValidationError;
+      const result = interpolateParams(message, error);
+
+      expect(result).toBe('Minimum length: 5');
+    });
+
+    it('should handle maxLength placeholder directly', () => {
+      const message = 'Maximum length: {{maxLength}}';
+      const error = { kind: 'maxLength', maxLength: 100 } as ValidationError;
+      const result = interpolateParams(message, error);
+
+      expect(result).toBe('Maximum length: 100');
+    });
+
+    it('should prefer requiredLength over minLength when both present', () => {
+      const message = 'Must be at least {{requiredLength}} characters';
+      // Classic format takes precedence
+      const error = { kind: 'minlength', requiredLength: 8, minLength: 5 } as ValidationError;
+      const result = interpolateParams(message, error);
+
+      expect(result).toBe('Must be at least 8 characters');
+    });
+  });
 });

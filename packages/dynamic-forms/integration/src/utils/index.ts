@@ -3,8 +3,8 @@ export { createResolvedErrorsSignal } from './create-resolved-errors-signal';
 export type { ResolvedError } from './create-resolved-errors-signal';
 export { shouldShowErrors } from './should-show-errors';
 
-// Value comparison utilities
-export { isEqual } from './is-equal';
+// Value comparison utilities - re-exported from main library
+export { isEqual } from '@ng-forge/dynamic-forms';
 
 // Meta tracking utilities
 export { setupMetaTracking } from './setup-meta-tracking';

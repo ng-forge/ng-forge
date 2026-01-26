@@ -1,8 +1,10 @@
+[← Back to Quick Start](/examples)
+
 A comprehensive multi-step registration form demonstrating the `page` field type for creating wizards and stepped workflows.
 
 ## Live Demo
 
-{{ NgDocActions.demo("PaginatedFormDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/paginated-form" class="example-frame" title="Paginated Form Demo"></iframe>
 
 ## Overview
 
@@ -290,14 +292,14 @@ Each page validates independently. Users cannot proceed to the next page until a
 
 ## Performance & Lazy Loading
 
-ng-forge uses Angular's `@defer` blocks with **smart prefetching** to achieve true lazy loading while maintaining flicker-free navigation.
+Dynamic Forms uses Angular's `@defer` blocks with **smart prefetching** to achieve true lazy loading while maintaining flicker-free navigation.
 
 ### How It Works
 
 - **Current page loads immediately** - The active page renders instantly
 - **Adjacent pages (±1) prefetch** - Next/previous pages load in background for instant navigation
 - **Distant pages defer until idle** - Pages 2+ steps away load when browser is idle
-- **Automatic optimization** - No configuration needed - ng-forge handles this automatically
+- **Automatic optimization** - No configuration needed - Dynamic Forms handles this automatically
 
 ### Benefits
 
@@ -484,7 +486,6 @@ Apply different validation rules per step:
 
 ## Related Documentation
 
-- [Page Field Type](../../ui-libs-integrations/material/page) - Page field documentation
-- [Navigation Buttons](../../ui-libs-integrations/material/button#navigation-buttons) - Next, Previous, Submit buttons
-- [Conditional Logic](../../core/conditional-logic) - Show/hide pages dynamically
-- [Validation](../../core/validation) - Per-page and cross-page validation
+- [Conditional Logic](../../dynamic-behavior/conditional-logic/overview) - Show/hide pages dynamically
+- [Validation](../../validation/basics) - Per-page and cross-page validation
+- [Material Integration](../../ui-libs-integrations/material/) - Material Design styling

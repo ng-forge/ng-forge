@@ -12,7 +12,7 @@ import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
  * The Field directive binds to the `checked` model for checkbox controls.
  */
 @Component({
-  selector: 'df-ionic-toggle-control',
+  selector: 'df-ion-toggle-control',
   imports: [IonToggle],
   template: `
     <ion-toggle
@@ -28,14 +28,14 @@ import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-required]="ariaRequired()"
       [attr.aria-readonly]="ariaReadonly()"
+      [attr.aria-describedby]="ariaDescribedBy()"
     >
       <ng-content />
     </ion-toggle>
   `,
   styleUrl: '../../styles/_form-field.scss',
   host: {
-    '[class.df-invalid]': 'invalid() && touched()',
-    '[class.df-touched]': 'touched()',
+    style: 'display: block',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -74,6 +74,7 @@ export class IonicToggleControlComponent implements FormCheckboxControl {
   readonly enableOnOffLabels = input<boolean>(false);
   readonly tabIndex = input<number | undefined>(undefined);
   readonly meta = input<FieldMeta>();
+  readonly ariaDescribedBy = input<string | null>(null);
 
   constructor() {
     // Shadow DOM - apply meta to ion-toggle element

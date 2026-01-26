@@ -60,6 +60,7 @@ import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../v
 export class FunctionRegistryService {
   private readonly customFunctions = new Map<string, CustomFunction>();
   private readonly customFunctionScopes = new Map<string, CustomFunctionScope>();
+  private readonly derivationFunctions = new Map<string, CustomFunction>();
   private readonly validators = new Map<string, CustomValidator>();
   private readonly asyncValidators = new Map<string, AsyncCustomValidator>();
   private readonly httpValidators = new Map<string, HttpCustomValidator>();
@@ -122,6 +123,62 @@ export class FunctionRegistryService {
   clearCustomFunctions(): void {
     this.customFunctions.clear();
     this.customFunctionScopes.clear();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Derivation Functions
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Register a derivation function for value derivation logic.
+   *
+   * Derivation functions compute derived values and are called when a
+   * `DerivationLogicConfig` references them by `functionName`.
+   *
+   * @param name - Unique identifier for the function
+   * @param fn - Function that receives EvaluationContext and returns the derived value
+   *
+   * @example
+   * ```typescript
+   * registry.registerDerivationFunction('getCurrencyForCountry', (ctx) => {
+   *   const countryToCurrency = { 'USA': 'USD', 'Germany': 'EUR', 'UK': 'GBP' };
+   *   return countryToCurrency[ctx.formValue.country] ?? 'USD';
+   * });
+   * ```
+   */
+  registerDerivationFunction(name: string, fn: CustomFunction): void {
+    this.derivationFunctions.set(name, fn);
+  }
+
+  /**
+   * Get a derivation function by name
+   */
+  getDerivationFunction(name: string): CustomFunction | undefined {
+    return this.derivationFunctions.get(name);
+  }
+
+  /**
+   * Get all derivation functions as an object
+   */
+  getDerivationFunctions(): Record<string, CustomFunction> {
+    return Object.fromEntries(this.derivationFunctions);
+  }
+
+  /**
+   * Set derivation functions from a config object.
+   * Only updates functions if their references have changed.
+   *
+   * @param derivations - Object mapping function names to derivation functions
+   */
+  setDerivationFunctions(derivations: Record<string, CustomFunction> | undefined): void {
+    this.setRegistryIfChanged(this.derivationFunctions, derivations);
+  }
+
+  /**
+   * Clear all derivation functions
+   */
+  clearDerivationFunctions(): void {
+    this.derivationFunctions.clear();
   }
 
   /**
@@ -355,6 +412,7 @@ export class FunctionRegistryService {
    */
   clearAll(): void {
     this.clearCustomFunctions();
+    this.clearDerivationFunctions();
     this.clearValidators();
     this.clearAsyncValidators();
     this.clearHttpValidators();

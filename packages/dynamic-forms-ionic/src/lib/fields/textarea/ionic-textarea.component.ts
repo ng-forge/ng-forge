@@ -1,20 +1,22 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonNote, IonTextarea } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { IonicTextareaComponent, IonicTextareaProps } from './ionic-textarea.type';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
-  selector: 'df-ionic-textarea',
+  selector: 'df-ion-textarea',
   imports: [IonTextarea, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
-    @let ariaInvalid = isAriaInvalid();
-    @let ariaRequired = isRequired() || null;
+    @let textareaId = key() + '-textarea';
 
     <ion-textarea
+      [id]="textareaId"
       [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
@@ -26,13 +28,14 @@ import { AsyncPipe } from '@angular/common';
       [fill]="props()?.fill ?? 'outline'"
       [shape]="props()?.shape"
       [readonly]="f().readonly()"
-      [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
+      [helperText]="errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="ariaInvalid"
-      [attr.aria-required]="ariaRequired"
+      [attr.aria-invalid]="ariaInvalid()"
+      [attr.aria-required]="ariaRequired()"
+      [attr.aria-describedby]="ariaDescribedBy()"
     />
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" class="df-ionic-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    @if (errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="errorId()" role="alert">{{ error.message }}</ion-note>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,8 +43,6 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[class.df-invalid]': 'showErrors()',
-    '[class.df-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styleUrl: '../../styles/_form-field.scss',
@@ -78,6 +79,26 @@ export default class IonicTextareaFieldComponent implements IonicTextareaCompone
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'ion-textarea',
     });
+
+    // Workaround: Ionic's ion-textarea does NOT automatically propagate aria-describedby changes
+    // to the native textarea element inside its shadow DOM. This effect imperatively syncs the attribute
+    // after a microtask to ensure Ionic has processed the attribute change.
+    explicitEffect([this.ariaDescribedBy], ([describedBy]) => {
+      queueMicrotask(() => {
+        const ionTextarea = this.elementRef.nativeElement.querySelector('ion-textarea') as HTMLIonTextareaElement | null;
+        if (ionTextarea?.getInputElement) {
+          ionTextarea.getInputElement().then((textareaEl) => {
+            if (textareaEl) {
+              if (describedBy) {
+                textareaEl.setAttribute('aria-describedby', describedBy);
+              } else {
+                textareaEl.removeAttribute('aria-describedby');
+              }
+            }
+          });
+        }
+      });
+    });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -85,16 +106,27 @@ export default class IonicTextareaFieldComponent implements IonicTextareaCompone
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Base ID for error elements */
-  readonly errorId = computed(() => `${this.key()}-error`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** Unique ID for the helper text element */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
 
   /** Whether the field is currently in an invalid state (invalid AND touched) */
-  readonly isAriaInvalid = computed(() => {
+  protected readonly ariaInvalid = computed(() => {
     const fieldState = this.field()();
     return fieldState.invalid() && fieldState.touched();
   });
 
   /** Whether the field has a required validator */
-  readonly isRequired = computed(() => {
-    return this.field()().required?.() === true;
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
   });
+
+  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

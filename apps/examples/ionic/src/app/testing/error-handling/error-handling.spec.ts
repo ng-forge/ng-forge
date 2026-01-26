@@ -1,5 +1,4 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
-import { BASE_URL, testUrl } from '../shared/test-utils';
 import { ionBlur } from '../shared/test-utils';
 
 setupTestLogging();
@@ -15,7 +14,7 @@ test.describe('Error Handling and Edge Cases', () => {
   test.describe('Invalid Configuration Handling', () => {
     test('should handle invalid field configurations gracefully', async ({ page, helpers }) => {
       // Navigate to invalid config test
-      await page.goto(testUrl('/error-handling/invalid-config'));
+      await page.goto('/#/testing/error-handling/invalid-config');
       await page.waitForLoadState('domcontentloaded');
 
       // Locate the specific test scenario with extended timeout for slower browsers
@@ -77,7 +76,7 @@ test.describe('Error Handling and Edge Cases', () => {
   test.describe('Basic Form Functionality', () => {
     test('should handle form submission without errors', async ({ page, helpers }) => {
       // Navigate to basic test
-      await page.goto(testUrl('/error-handling/basic-test'));
+      await page.goto('/#/testing/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -165,7 +164,7 @@ test.describe('Error Handling and Edge Cases', () => {
 
     test('should handle rapid form interactions without errors', async ({ page, helpers }) => {
       // Navigate to basic test
-      await page.goto(testUrl('/error-handling/basic-test'));
+      await page.goto('/#/testing/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -213,7 +212,7 @@ test.describe('Error Handling and Edge Cases', () => {
 
     test('should handle accessibility interactions', async ({ page, helpers }) => {
       // Navigate to basic test
-      await page.goto(testUrl('/error-handling/basic-test'));
+      await page.goto('/#/testing/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -258,7 +257,7 @@ test.describe('Error Handling and Edge Cases', () => {
   test.describe('Form State Management', () => {
     test('should maintain form state during browser navigation', async ({ page, helpers }) => {
       // Navigate to basic test
-      await page.goto(testUrl('/error-handling/basic-test'));
+      await page.goto('/#/testing/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -287,9 +286,9 @@ test.describe('Error Handling and Edge Cases', () => {
       await expect(firstNameInput).toHaveValue('Persistent', { timeout: 5000 });
 
       // Navigate away and back
-      await page.goto(BASE_URL);
+      await page.goto('/');
       await page.waitForLoadState('networkidle');
-      await page.goto(testUrl('/error-handling/basic-test'));
+      await page.goto('/#/testing/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Form should be fresh (not persisted in this case)
@@ -309,7 +308,7 @@ test.describe('Error Handling and Edge Cases', () => {
       // Perform repeated navigation to test memory cleanup
       for (let i = 0; i < 3; i++) {
         // Navigate to basic test
-        await page.goto(testUrl('/error-handling/basic-test'));
+        await page.goto('/#/testing/error-handling/basic-test');
         await page.waitForLoadState('networkidle');
 
         // Locate the scenario
@@ -339,7 +338,7 @@ test.describe('Error Handling and Edge Cases', () => {
       }
 
       // Final load to ensure everything still works
-      await page.goto(testUrl('/error-handling/basic-test'));
+      await page.goto('/#/testing/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       const finalScenario = helpers.getScenario('basic-test');

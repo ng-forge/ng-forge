@@ -19,6 +19,12 @@ export default [
     loadChildren: () => import('./advanced-validation/advanced-validation.routes'),
   },
 
+  // Angular Schema Validation Tests - Raw Angular schema callback validation
+  {
+    path: 'angular-schema-validation',
+    loadChildren: () => import('./angular-schema-validation/angular-schema-validation.routes'),
+  },
+
   // Array Fields Tests - Refactored into folder structure
   {
     path: 'array-fields',
@@ -53,6 +59,12 @@ export default [
   {
     path: 'demo-scenarios',
     loadChildren: () => import('./demo-scenarios/demo-scenarios.routes'),
+  },
+
+  // Derivation Logic Tests - Value derivation based on field values, expressions, and custom functions
+  {
+    path: 'derivation-logic',
+    loadChildren: () => import('./derivation-logic/derivation-logic.routes'),
   },
 
   // Error Handling Tests - Refactored into folder structure
@@ -125,5 +137,11 @@ export default [
   {
     path: 'user-workflows',
     loadChildren: () => import('./user-workflows/user-workflows.routes'),
+  },
+
+  // Zod Schema Validation Tests - Form-level validation using Zod with Standard Schema
+  {
+    path: 'zod-schema-validation',
+    loadChildren: () => import('./zod-schema-validation/zod-schema-validation.routes'),
   },
 ] satisfies Route[];

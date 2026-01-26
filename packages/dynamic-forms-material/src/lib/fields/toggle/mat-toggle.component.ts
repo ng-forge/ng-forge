@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
@@ -8,46 +8,37 @@ import { MatToggleComponent, MatToggleProps } from './mat-toggle.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-toggle',
   imports: [MatSlideToggle, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let toggleId = key() + '-toggle';
 
     <mat-slide-toggle
+      [id]="toggleId"
       [formField]="f"
       [color]="props()?.color || 'primary'"
       [labelPosition]="props()?.labelPosition || 'after'"
       [hideIcon]="props()?.hideIcon || false"
       [disableRipple]="effectiveDisableRipple()"
       [required]="!!f().required()"
-      [aria-describedby]="ariaDescribedBy"
+      [attr.aria-describedby]="ariaDescribedBy()"
       [attr.tabindex]="tabIndex()"
       class="toggle-container"
     >
       {{ label() | dynamicText | async }}
     </mat-slide-toggle>
 
-    @if (props()?.hint; as hint) {
+    @if (errorsToDisplay()[0]; as error) {
+      <mat-error [id]="errorId()">{{ error.message }}</mat-error>
+    } @else if (props()?.hint; as hint) {
       <div class="mat-hint" [id]="hintId()">{{ hint | dynamicText | async }}</div>
     }
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
-    }
   `,
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-    `,
-  ],
+  styleUrl: '../../styles/_form-field.scss',
   host: {
     '[class]': 'className()',
     '[id]': '`${key()}`',
@@ -111,18 +102,46 @@ export default class MatToggleFieldComponent implements MatToggleComponent {
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
+  /**
+   * Workaround: Angular Material's MatSlideToggle does NOT propagate aria-required to its internal
+   * button element. This effect imperatively sets/removes aria-required on the internal button.
+   *
+   * Uses afterRenderEffect to ensure DOM is ready before querying internal elements.
+   */
+  private readonly syncAriaRequiredToDom = afterRenderEffect(() => {
+    const isRequired = this.ariaRequired();
+    const buttonEl = this.elementRef.nativeElement.querySelector('button[role="switch"]');
+    if (buttonEl) {
+      if (isRequired) {
+        buttonEl.setAttribute('aria-required', 'true');
+      } else {
+        buttonEl.removeAttribute('aria-required');
+      }
     }
+  });
 
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.join(' ');
+  /**
+   * Workaround: Angular Material's MatSlideToggle does NOT propagate aria-describedby to its internal
+   * button element. This effect imperatively sets/removes aria-describedby on the internal button.
+   *
+   * Uses afterRenderEffect to ensure DOM is ready before querying internal elements.
+   */
+  private readonly syncAriaDescribedByToDom = afterRenderEffect(() => {
+    const describedBy = this.ariaDescribedBy();
+    const buttonEl = this.elementRef.nativeElement.querySelector('button[role="switch"]');
+    if (buttonEl) {
+      if (describedBy) {
+        buttonEl.setAttribute('aria-describedby', describedBy);
+      } else {
+        buttonEl.removeAttribute('aria-describedby');
+      }
+    }
   });
 }

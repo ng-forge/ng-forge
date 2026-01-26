@@ -7,7 +7,7 @@ import type { ThemePalette } from '@angular/material/core';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { MatToggleProps, MatToggleField } from './mat-toggle.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // MatToggleProps - Whitelist Test
@@ -81,6 +81,7 @@ describe('MatToggleField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseCheckedField
     | 'value'

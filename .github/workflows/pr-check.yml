@@ -8,11 +8,17 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+env:
+  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng'
+  NODE_MODULES_CACHE_KEY: modules-${{ github.run_id }}
+  PLAYWRIGHT_CACHE_KEY: playwright-${{ github.run_id }}
+
 jobs:
   # This job determines if the workflow should run
   should-run:
     name: Check if should run
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       should-skip: ${{ steps.check.outputs.should-skip }}
     steps:
@@ -26,31 +32,61 @@ jobs:
             echo "should-skip=false" >> $GITHUB_OUTPUT
           fi
 
-  checks:
-    name: Checks
+  setup:
+    name: Setup
     needs: should-run
     if: needs.should-run.outputs.should-skip != 'true'
     runs-on: ubuntu-latest
-
+    timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v6
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 8.15.1
+          version: 10.28.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Cache node_modules
+        uses: actions/cache/save@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+      - name: Cache Playwright browsers
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
+
+  checks:
+    name: Checks
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Fetch base branch for affected detection
+        run: git fetch origin main:main
+
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
+        with:
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Validate PR title
         run: |
@@ -89,29 +125,23 @@ jobs:
 
   build:
     name: Build & Verify
-    needs: should-run
-    if: needs.should-run.outputs.should-skip != 'true'
+    needs: setup
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.1
+      - name: Fetch base branch for affected detection
+        run: git fetch origin main:main
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Build affected libraries
         run: pnpm nx affected -t build --base=origin/main
@@ -119,7 +149,7 @@ jobs:
       - name: Verify package integrity
         run: |
           echo "Verifying package integrity..."
-          for PKG in dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng; do
+          for PKG in ${{ env.LIBRARY_PACKAGES }}; do
             if [ -d "dist/packages/$PKG" ]; then
               echo "Checking dist/packages/$PKG..."
               if [ ! -f "dist/packages/$PKG/package.json" ]; then
@@ -138,7 +168,7 @@ jobs:
           echo "✅ Package integrity check complete"
 
       - name: Cache build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             dist/packages/dynamic-forms
@@ -149,33 +179,27 @@ jobs:
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
   quality:
-    name: Lint & Type Check
-    needs: [should-run, build]
-    if: needs.should-run.outputs.should-skip != 'true'
+    name: Lint
+    needs: [setup, build]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.1
+      - name: Fetch base branch for affected detection
+        run: git fetch origin main:main
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Restore build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             dist/packages/dynamic-forms
@@ -188,45 +212,35 @@ jobs:
       - name: Lint affected projects
         run: pnpm nx affected -t lint --base=origin/main
 
-      - name: Type check affected libraries
-        run: |
-          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --type=lib)
-          if [ -n "$AFFECTED" ]; then
-            echo "Type checking affected libraries:"
-            echo "$AFFECTED"
-            pnpm nx affected -t build --base=origin/main --exclude='*-examples,docs' --verbose
-          else
-            echo "No libraries affected, skipping type check"
-          fi
-
   test:
     name: Unit Tests
-    needs: [should-run, build]
-    if: needs.should-run.outputs.should-skip != 'true'
+    needs: [setup, build]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.1
+      - name: Fetch base branch for affected detection
+        run: git fetch origin main:main
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore Playwright browsers
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
+          fail-on-cache-miss: true
 
       - name: Restore build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             dist/packages/dynamic-forms
@@ -244,32 +258,29 @@ jobs:
 
   build-apps:
     name: Build Apps
-    needs: [should-run, build]
-    if: needs.should-run.outputs.should-skip != 'true'
+    needs: [setup, build]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      e2e-matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has-e2e: ${{ steps.set-matrix.outputs.has-e2e }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.1
+      - name: Fetch base branch for affected detection
+        run: git fetch origin main:main
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
         with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Restore build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             dist/packages/dynamic-forms
@@ -303,90 +314,80 @@ jobs:
             echo "No example apps affected, skipping build"
           fi
 
+      - name: Determine E2E matrix
+        id: set-matrix
+        run: |
+          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || echo "")
+          echo "Affected E2E projects: $AFFECTED"
+
+          # Build JSON matrix
+          MATRIX='{"include":['
+          FIRST=true
+
+          for APP in bootstrap-examples material-examples primeng-examples ionic-examples; do
+            if echo "$AFFECTED" | grep -q "$APP"; then
+              SHORT=$(echo "$APP" | sed 's/-examples//')
+              if [ "$FIRST" = true ]; then
+                FIRST=false
+              else
+                MATRIX+=','
+              fi
+              MATRIX+="{\"app\":\"$APP\",\"short\":\"$SHORT\"}"
+              echo "  - $APP (affected)"
+            else
+              echo "  - $APP (not affected, skipping)"
+            fi
+          done
+
+          MATRIX+=']}'
+
+          if [ "$MATRIX" = '{"include":[]}' ]; then
+            echo "No E2E apps affected"
+            echo "has-e2e=false" >> $GITHUB_OUTPUT
+            echo "matrix={\"include\":[]}" >> $GITHUB_OUTPUT
+          else
+            echo "E2E matrix: $MATRIX"
+            echo "has-e2e=true" >> $GITHUB_OUTPUT
+            echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          fi
+
   e2e:
     name: E2E Tests (${{ matrix.app }})
-    needs: [should-run, quality, test, build-apps]
-    if: needs.should-run.outputs.should-skip != 'true'
+    needs: [quality, test, build-apps]
+    if: needs.build-apps.outputs.has-e2e == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
-      matrix:
-        app: [bootstrap-examples, material-examples, primeng-examples, ionic-examples]
+      matrix: ${{ fromJson(needs.build-apps.outputs.e2e-matrix) }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.1
+      # Docker handles everything - no need for pnpm/node setup on host
+      - name: Run E2E tests in Docker
+        run: ./scripts/playwright-docker.sh ${{ matrix.app }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Restore build artifacts
-        uses: actions/cache@v4
-        with:
-          path: |
-            dist/packages/dynamic-forms
-            dist/packages/dynamic-forms-material
-            dist/packages/dynamic-forms-bootstrap
-            dist/packages/dynamic-forms-ionic
-            dist/packages/dynamic-forms-primeng
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-
-      - name: Check if app is affected
-        id: check-affected
-        run: |
-          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || true)
-          if echo "$AFFECTED" | grep -q "${{ matrix.app }}"; then
-            echo "affected=true" >> $GITHUB_OUTPUT
-          else
-            echo "affected=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Get Playwright version
-        if: steps.check-affected.outputs.affected == 'true'
-        id: playwright-version
-        run: echo "version=$(pnpm exec playwright --version | head -1)" >> $GITHUB_OUTPUT
-
-      - name: Cache Playwright browsers
-        if: steps.check-affected.outputs.affected == 'true'
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-chromium
-
-      - name: Install Playwright browser
-        if: steps.check-affected.outputs.affected == 'true'
-        run: pnpm exec playwright install chromium --with-deps
-
-      - name: Run E2E tests
-        if: steps.check-affected.outputs.affected == 'true'
-        env:
-          E2E_BROWSERS: chromium
-        run: |
-          echo "Running e2e tests for ${{ matrix.app }}..."
-          pnpm nx run ${{ matrix.app }}:e2e
-
-      - name: Skip E2E tests (not affected)
-        if: steps.check-affected.outputs.affected == 'false'
-        run: echo "E2E tests for ${{ matrix.app }} not affected, skipping"
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
+      - name: Upload test artifacts on failure
+        uses: actions/upload-artifact@v6
         if: failure()
         with:
-          name: playwright-report-pr-${{ matrix.app }}
-          path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/
+          name: playwright-results-${{ matrix.app }}
+          path: apps/examples/${{ matrix.short }}/test-results/
+          if-no-files-found: ignore
           retention-days: 7
+
+  ci-success:
+    name: PR Check Complete
+    if: always()
+    needs: [should-run, setup, checks, build, quality, test, build-apps, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify all jobs succeeded
+        uses: re-actors/alls-green@release/v1
+        with:
+          # e2e may be skipped if no E2E apps are affected
+          allowed-skips: setup, checks, build, quality, test, build-apps, e2e
+          jobs: ${{ toJSON(needs) }}

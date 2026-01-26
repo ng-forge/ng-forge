@@ -6,14 +6,14 @@ import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErr
 import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-slider',
   imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe, FormField],
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let inputId = key() + '-input';
 
     @if (label(); as label) {
       <div class="slider-label">{{ label | dynamicText | async }}</div>
@@ -30,31 +30,23 @@ import { AsyncPipe } from '@angular/common';
     >
       <input
         matSliderThumb
+        [id]="inputId"
         [formField]="f"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-describedby]="ariaDescribedBy()"
       />
     </mat-slider>
 
-    @if (props()?.hint; as hint) {
+    @if (errorsToDisplay()[0]; as error) {
+      <mat-error [id]="errorId()">{{ error.message }}</mat-error>
+    } @else if (props()?.hint; as hint) {
       <div class="mat-hint" [id]="hintId()">{{ hint | dynamicText | async }}</div>
     }
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
-    }
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
-      :host {
-        display: block;
-        width: 100%;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-
       .slider-container {
         width: 100%;
       }
@@ -111,18 +103,10 @@ export default class MatSliderFieldComponent implements MatSliderComponent {
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

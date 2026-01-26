@@ -2,7 +2,7 @@ Organize fields into horizontal rows for compact layouts. Rows display fields si
 
 ## Interactive Demo
 
-{{ NgDocActions.demo("RowFieldDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/row-field" class="example-frame" title="Row Field Demo"></iframe>
 
 ## Basic Row
 

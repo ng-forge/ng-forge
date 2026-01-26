@@ -1,0 +1,509 @@
+<!-- Skip link for accessibility -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- Scroll progress indicator -->
+<div class="scroll-progress" [style.transform]="'scaleX(' + scrollProgress() / 100 + ')'" aria-hidden="true"></div>
+
+<!-- Noise texture overlay -->
+<div class="noise-overlay" aria-hidden="true"></div>
+
+<!-- Background glow -->
+<div class="bg-glow" aria-hidden="true"></div>
+
+<!-- Fireflies -->
+<div class="fireflies" aria-hidden="true">
+  @for (firefly of fireflyPositions(); track $index) {
+    <div class="firefly interactive" [style.left.px]="firefly.x" [style.top.px]="firefly.y"></div>
+  }
+  @for (spark of sparks(); track $index) {
+    <div class="spark" [style.left.px]="spark.x" [style.top.px]="spark.y" [style.opacity]="spark.opacity"></div>
+  }
+</div>
+
+<!-- Navigation -->
+<nav [class.scrolled]="navScrolled()" aria-label="Main navigation">
+  <a routerLink="/" class="logo">
+    <app-logo size="lg" />
+  </a>
+  <div class="nav-links">
+    <ng-doc-search />
+    <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="github-link" title="GitHub">
+      <span class="icon icon--github"></span>
+    </a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<main id="main-content">
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Angular 21+ Signal Forms
+      </div>
+      <h1>
+        <span class="line1">Forms are boring.</span>
+        <span class="line2">Your code shouldn't be.</span>
+      </h1>
+      <p class="hero-tagline">Write the config. We handle the rest. Type-safe. Signal-native. Zero boilerplate.</p>
+      <div class="hero-ctas">
+        <a routerLink="/installation" class="btn btn-primary">
+          <span class="icon icon--sparkles"></span>
+          Get Started
+        </a>
+        <a
+          href="https://github.com/ng-forge/ng-forge"
+          target="_blank"
+          rel="noopener"
+          class="btn btn-secondary"
+          title="View ng-forge repository on GitHub"
+        >
+          <span class="icon icon--github"></span>
+          View on GitHub
+        </a>
+      </div>
+
+      <div class="hero-demo">
+        <div class="hero-demo-container">
+          <div class="hero-demo-header">
+            <div class="header-dots">
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+            </div>
+            <div class="header-tabs" role="tablist" aria-label="Demo view options">
+              <button
+                class="header-tab"
+                role="tab"
+                [attr.aria-selected]="heroTab() === 'demo'"
+                aria-controls="demo-panel"
+                [class.active]="heroTab() === 'demo'"
+                (click)="setHeroTab('demo')"
+              >
+                <span class="icon icon--play" aria-hidden="true"></span> Live Demo
+              </button>
+              <button
+                class="header-tab"
+                role="tab"
+                [attr.aria-selected]="heroTab() === 'config'"
+                aria-controls="config-panel"
+                [class.active]="heroTab() === 'config'"
+                (click)="setHeroTab('config')"
+              >
+                <span class="icon icon--code" aria-hidden="true"></span> Config
+              </button>
+            </div>
+          </div>
+
+          <div class="hero-demo-body">
+            <div id="demo-panel" role="tabpanel" class="demo-content landing-form" [class.hidden]="heroTab() !== 'demo'">
+              <form [dynamic-form]="heroFormConfig"></form>
+            </div>
+            <div
+              id="config-panel"
+              role="tabpanel"
+              class="code-content"
+              [class.hidden]="heroTab() !== 'config'"
+              [codeHighlight]="codeSnippets.heroConfig"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="stats">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-icon icon icon--download"></span>
+        <div class="stat-content">
+          <span class="stat-value">{{ npmDownloads() }}</span>
+          <span class="stat-label">Monthly Downloads</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon icon icon--star"></span>
+        <div class="stat-content">
+          <span class="stat-value">{{ githubStars() }}</span>
+          <span class="stat-label">GitHub Stars</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon icon icon--layers"></span>
+        <div class="stat-content">
+          <span class="stat-value">{{ uiLibraryCount }}</span>
+          <span class="stat-label">UI Integrations</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Features -->
+  <section id="features" class="features">
+    <div class="features-header fade-up" [class.visible]="isVisible('features-header')">
+      <div class="section-label">Why ng-forge</div>
+      <h2 class="section-title">Built different.</h2>
+      <p class="section-desc">Not another forms wrapper. Native signal forms integration, real type safety, actual developer experience.</p>
+    </div>
+
+    <div class="features-container">
+      @for (feature of features; track feature.title) {
+        <div
+          class="feature-card fade-up"
+          [class.visible]="isVisible('feature-' + $index)"
+          (mousemove)="onCardMouseMove($event)"
+          (mouseleave)="onCardMouseLeave($event)"
+        >
+          <div class="feature-header">
+            <span class="feature-icon icon icon--{{ feature.icon }}" aria-hidden="true"></span>
+            <h3>{{ feature.title }}</h3>
+          </div>
+          <p>
+            @if (feature.highlightCode) {
+              <code>{{ feature.highlightCode }}</code>
+            }
+            {{ feature.description }}
+          </p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Showcase -->
+  <section id="showcase" class="showcase">
+    <div class="showcase-header fade-up" [class.visible]="isVisible('showcase-header')">
+      <div class="section-label">Power features</div>
+      <h2 class="section-title">Simple API. Complex forms.</h2>
+      <p class="section-desc">Conditional logic, multi-step wizards, i18n. All declarative.</p>
+    </div>
+
+    <div class="showcase-grid">
+      <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-0')">
+        <h3>
+          <span class="showcase-icon icon icon--git-branch"></span>
+          Conditional Everything
+        </h3>
+        <p>Fields that appear, disappear, or become required based on other values. No imperative code.</p>
+        <div class="showcase-code" [codeHighlight]="codeSnippets.conditionalLogic"></div>
+      </div>
+      <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-1')">
+        <h3>
+          <span class="showcase-icon icon icon--workflow"></span>
+          Multi-Step Wizards
+        </h3>
+        <p>Page-level validation, navigation controls, progress tracking. Built-in.</p>
+        <div class="showcase-code" [codeHighlight]="codeSnippets.multiStepWizard"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Validation -->
+  <section id="validation" class="validation">
+    <div class="section-container">
+      <div class="validation-header fade-up" [class.visible]="isVisible('validation-header')">
+        <div class="section-label">Validation</div>
+        <h2 class="section-title">Try to break it.</h2>
+        <p class="section-desc">Real-time validation. No Validators import. Just properties.</p>
+      </div>
+
+      <div class="validation-showcase fade-up" [class.visible]="isVisible('validation-demo')">
+        <div class="validation-demo-panel">
+          <div class="demo-panel-header">
+            <span class="panel-icon icon icon--play"></span>
+            <span>Live Demo</span>
+          </div>
+          <div class="demo-panel-body validation-form">
+            <form [dynamic-form]="validationFormConfig"></form>
+          </div>
+        </div>
+
+        <div class="validation-code-panel">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-title">validation-config.ts</span>
+            </div>
+            <div class="code-body" [codeHighlight]="codeSnippets.validationShowcase"></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="validation-cta fade-up" [class.visible]="isVisible('validation-cta')">
+        <a routerLink="/validation/basics" class="inline-link" title="Read the validation documentation"
+          >Learn more about validation &rarr;</a
+        >
+      </p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Field Types -->
+  <section id="field-types" class="field-types">
+    <div class="section-container">
+      <div class="field-types-header fade-up" [class.visible]="isVisible('field-types-header')">
+        <div class="section-label">Field types</div>
+        <h2 class="section-title">Everything you need, built in.</h2>
+        <p class="section-desc">Common field types ready to use. Need more? Create your own.</p>
+      </div>
+
+      <div class="field-types-grid fade-up" [class.visible]="isVisible('field-types-grid')">
+        @for (fieldType of fieldTypes; track fieldType.code) {
+          <div class="field-type">
+            <code>{{ fieldType.code }}</code>
+            <span>{{ fieldType.label }}</span>
+            <div class="field-type-tooltip">
+              <pre>{{ fieldType.snippet }}</pre>
+            </div>
+          </div>
+        }
+      </div>
+
+      <p class="field-types-cta fade-up" [class.visible]="isVisible('field-types-cta')">
+        <a routerLink="/examples/login-form" class="inline-link" title="View the login form example">See live examples &rarr;</a>
+      </p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- JSON Config -->
+  <section id="json-config" class="json-config">
+    <div class="section-container">
+      <div class="json-header fade-up" [class.visible]="isVisible('json-header')">
+        <div class="section-label">Backend-driven</div>
+        <h2 class="section-title">Forms don't have to live in code.</h2>
+        <p class="section-desc">Store configs in your database. Fetch via API. Update forms without redeploying.</p>
+      </div>
+
+      <div class="json-flow fade-up" [class.visible]="isVisible('json-demo')">
+        <!-- Flow diagram -->
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-icon database">
+              <span class="icon icon--database"></span>
+            </div>
+            <span class="flow-label">Database</span>
+          </div>
+
+          <div class="flow-connector">
+            <div class="flow-line"></div>
+            <div class="flow-packet"></div>
+          </div>
+
+          <div class="flow-step">
+            <div class="flow-icon api">
+              <span class="icon icon--api"></span>
+            </div>
+            <span class="flow-label">API Request</span>
+          </div>
+
+          <div class="flow-connector">
+            <div class="flow-line"></div>
+            <div class="flow-packet"></div>
+          </div>
+
+          <div class="flow-step">
+            <div class="flow-icon json">
+              <span class="icon icon--json"></span>
+            </div>
+            <span class="flow-label">JSON</span>
+          </div>
+
+          <div class="flow-connector">
+            <div class="flow-line"></div>
+            <div class="flow-packet"></div>
+          </div>
+
+          <div class="flow-step">
+            <div class="flow-icon form">
+              <span class="icon icon--form"></span>
+            </div>
+            <span class="flow-label">Live Form</span>
+          </div>
+        </div>
+
+        <!-- Code example -->
+        <div class="json-code-example">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-title">form.component.ts</span>
+            </div>
+            <div class="code-body" [codeHighlight]="codeSnippets.jsonFetch"></div>
+          </div>
+        </div>
+
+        <!-- Use cases -->
+        <div class="json-use-cases">
+          <div class="use-case">
+            <span class="use-case-icon icon icon--palette"></span>
+            <div class="use-case-text">
+              <strong>Form Builders</strong>
+              <span>Visual editors that output JSON</span>
+            </div>
+          </div>
+          <div class="use-case">
+            <span class="use-case-icon icon icon--users"></span>
+            <div class="use-case-text">
+              <strong>Multi-tenant</strong>
+              <span>Custom forms per customer</span>
+            </div>
+          </div>
+          <div class="use-case">
+            <span class="use-case-icon icon icon--bar-chart"></span>
+            <div class="use-case-text">
+              <strong>Dynamic Surveys</strong>
+              <span>Change questions on the fly</span>
+            </div>
+          </div>
+          <div class="use-case">
+            <span class="use-case-icon icon icon--flame"></span>
+            <div class="use-case-text">
+              <strong>Hot Swappable</strong>
+              <span>Forms update when config changes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Integrations -->
+  <section id="integrations" class="integrations">
+    <div class="integrations-header fade-up" [class.visible]="isVisible('integrations-header')">
+      <div class="section-label">Integrations</div>
+      <h2 class="section-title">Your UI library. Our forms.</h2>
+      <p class="section-desc">First-class adapters for everything you're already using.</p>
+    </div>
+
+    <div class="integrations-row fade-up" [class.visible]="isVisible('integrations-row')">
+      @for (integration of integrations; track integration.name) {
+        <a [routerLink]="integration.route" class="integration-logo" [title]="integration.title">
+          <img [src]="integration.icon" [alt]="integration.name" loading="lazy" />
+          <span>{{ integration.name }}</span>
+        </a>
+      }
+    </div>
+
+    <p class="integrations-footnote fade-up" [class.visible]="isVisible('integrations-footnote')">
+      Or
+      <a routerLink="/advanced/custom-integrations" class="inline-link" title="Learn how to create custom UI library adapters"
+        >build your own adapter</a
+      >
+    </p>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <h2 class="cta-title">Stop writing forms.<br /><span>Start forging them.</span></h2>
+
+    <div class="install-box">
+      <div class="install-selectors">
+        <div class="install-tabs" role="tablist" aria-label="Package manager">
+          @for (pkg of packageManagers; track pkg.id) {
+            <button
+              class="install-tab"
+              role="tab"
+              [attr.aria-selected]="currentPackageManager() === pkg.id"
+              [class.active]="currentPackageManager() === pkg.id"
+              (click)="setPackageManager(pkg.id)"
+            >
+              {{ pkg.label }}
+            </button>
+          }
+        </div>
+        <div class="install-tabs ui-tabs" role="tablist" aria-label="UI library">
+          @for (ui of uiLibraries; track ui.id) {
+            <button
+              class="install-tab"
+              role="tab"
+              [attr.aria-selected]="currentUiLibrary() === ui.id"
+              [class.active]="currentUiLibrary() === ui.id"
+              (click)="setUiLibrary(ui.id)"
+            >
+              {{ ui.label }}
+            </button>
+          }
+        </div>
+      </div>
+      <div class="install-cmd">
+        <code>{{ installCommand() }}</code>
+        <button class="copy-btn" (click)="copyInstallCommand()" [attr.aria-label]="copied() ? 'Copied!' : 'Copy to clipboard'">
+          @if (copied()) {
+            <span class="icon icon--check" style="color: #28ca42"></span>
+          } @else {
+            <span class="icon icon--copy"></span>
+          }
+          <!-- Confetti particles -->
+          @for (particle of copyConfetti(); track particle.id) {
+            <span
+              class="copy-confetti"
+              [style.--confetti-x]="particle.x + 'px'"
+              [style.--confetti-y]="particle.y + 'px'"
+              [style.--confetti-angle]="particle.angle + 'deg'"
+            ></span>
+          }
+        </button>
+      </div>
+    </div>
+
+    <div class="cta-buttons">
+      <a routerLink="/installation" class="btn btn-primary">
+        <span class="icon icon--book"></span>
+        Read the Docs
+      </a>
+      <a
+        href="https://github.com/ng-forge/ng-forge"
+        target="_blank"
+        rel="noopener"
+        class="btn btn-secondary"
+        title="View ng-forge repository on GitHub"
+      >
+        <span class="icon icon--github"></span>
+        GitHub
+      </a>
+    </div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-links">
+    <a
+      href="https://github.com/ng-forge/ng-forge/issues"
+      target="_blank"
+      rel="noopener"
+      title="Report bugs or request features on GitHub Issues"
+      >Issues</a
+    >
+    <a
+      href="https://github.com/ng-forge/ng-forge/discussions"
+      target="_blank"
+      rel="noopener"
+      title="Join the community discussion on GitHub Discussions"
+      >Discussions</a
+    >
+    <a
+      href="https://github.com/ng-forge/ng-forge/blob/main/CONTRIBUTING.md"
+      target="_blank"
+      rel="noopener"
+      title="Learn how to contribute to ng-forge"
+      >Contributing</a
+    >
+  </div>
+  <p class="footer-copy">MIT License &copy; ng-forge</p>
+</footer>

@@ -90,15 +90,46 @@ This command automatically:
 - Updates CHANGELOG.md with entries since the previous release
 - Commits the changelog
 
+### 6. Review and clean up changelog
+
+After generating, review `CHANGELOG.md` and ensure:
+
+1. **Header is present** - The file should start with:
+
+   ```markdown
+   # Changelog
+
+   All notable changes to this project will be documented in this file.
+
+   This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/).
+   ```
+
+2. **No AI attribution** - Remove any "Thank You" sections that mention Claude, AI assistants, or automated tools. Per `CLAUDE.md`, AI attribution is not allowed.
+
+3. **Version links** - Each version header should link to the GitHub compare view:
+
+   ```markdown
+   ## [0.4.0](https://github.com/ng-forge/ng-forge/compare/v0.3.1...v0.4.0) (YYYY-MM-DD)
+   ```
+
+4. **Clean formatting** - Remove excessive breaking change details, keeping only concise summaries.
+
+If changes are needed, amend the changelog commit:
+
+```bash
+git add CHANGELOG.md
+git commit --amend --no-edit
+```
+
 **Note:** Tags and GitHub releases are created automatically by the Release GitHub Action after the PR is merged and manually triggered.
 
-### 6. Push the branch
+### 7. Push the branch
 
 ```bash
 git push -u origin release-{VERSION}
 ```
 
-### 7. Create the PR
+### 8. Create the PR
 
 ```bash
 gh pr create --title "chore(release): bump version to {VERSION}" --body "## Summary

@@ -1,0 +1,113 @@
+@use 'sass:map';
+@use 'tokens' as *;
+@use 'themes' as *;
+
+// ============================================
+// BOOTSTRAP EMBER THEME VARIABLES
+// ============================================
+// These variables MUST be set before importing Bootstrap
+// to override Bootstrap's default color system.
+//
+// Usage in app styles.scss:
+// @use 'styling/bootstrap' as ember-bs;
+// @use 'bootstrap/scss/bootstrap' with (
+//   $primary: ember-bs.$bs-primary,
+//   $secondary: ember-bs.$bs-secondary,
+//   ...
+// );
+
+// ============================================
+// BOOTSTRAP COLOR OVERRIDES
+// ============================================
+
+// Primary colors from ember palette
+$bs-primary: $ember-core; // #ff4d00
+$bs-secondary: $ember-glow; // #ff8c42
+
+// Semantic colors from tokens
+$bs-success: $success; // #28ca42
+$bs-info: #3498db; // Info blue (not in our palette)
+$bs-warning: $warning; // #ffbd2e
+$bs-danger: $error; // #ff5f57
+
+// Light theme body colors
+$bs-body-bg-light: map.get($theme-light, bg-void);
+$bs-body-color-light: map.get($theme-light, text-primary);
+
+// Dark theme body colors
+$bs-body-bg-dark: map.get($theme-dark, bg-void);
+$bs-body-color-dark: map.get($theme-dark, text-primary);
+
+// Link colors
+$bs-link-color: $ember-core;
+$bs-link-hover-color: $ember-hot;
+
+// Focus states
+$bs-focus-border-color: $ember-core;
+$bs-focus-box-shadow: 0 0 0 0.25rem rgba($ember-core, 0.25);
+
+// ============================================
+// THEME APPLICATION MIXINS
+// ============================================
+
+/// Applies light theme CSS custom properties
+@mixin bootstrap-theme-light {
+  @include apply-theme($theme-light);
+
+  // Bootstrap-specific overrides
+  --bs-primary: #{$ember-core};
+  --bs-primary-rgb: 255, 77, 0;
+  --bs-secondary: #{$ember-glow};
+  --bs-secondary-rgb: 255, 140, 66;
+  --bs-success: #{$success};
+  --bs-success-rgb: 40, 202, 66;
+  --bs-warning: #{$warning};
+  --bs-warning-rgb: 255, 189, 46;
+  --bs-danger: #{$error};
+  --bs-danger-rgb: 255, 95, 87;
+  --bs-link-color: #{$ember-core};
+  --bs-link-hover-color: #{$ember-hot};
+}
+
+/// Applies dark theme CSS custom properties
+@mixin bootstrap-theme-dark {
+  @include apply-theme($theme-dark);
+
+  // Bootstrap-specific overrides for dark mode
+  --bs-primary: #{$ember-glow};
+  --bs-primary-rgb: 255, 140, 66;
+  --bs-secondary: #{$ember-core};
+  --bs-secondary-rgb: 255, 77, 0;
+  --bs-success: #{$success};
+  --bs-success-rgb: 40, 202, 66;
+  --bs-warning: #{$warning};
+  --bs-warning-rgb: 255, 189, 46;
+  --bs-danger: #{$error};
+  --bs-danger-rgb: 255, 95, 87;
+  --bs-link-color: #{$ember-glow};
+  --bs-link-hover-color: #{$ember-core};
+  --bs-body-bg: var(--bg-void);
+  --bs-body-color: var(--text-primary);
+}
+
+/// Applies landing page theme (dark variant)
+@mixin bootstrap-theme-landing {
+  @include bootstrap-theme-dark;
+  --bg-void: #{$bg-deep};
+  --bs-body-bg: #{$bg-deep};
+}
+
+// ============================================
+// BOOTSTRAP VARIABLE MAP
+// ============================================
+// Export as a map for use with Bootstrap's with() syntax
+$bootstrap-overrides: (
+  'primary': $bs-primary,
+  'secondary': $bs-secondary,
+  'success': $bs-success,
+  'info': $bs-info,
+  'warning': $bs-warning,
+  'danger': $bs-danger,
+  'link-color': $bs-link-color,
+  'link-hover-color': $bs-link-hover-color,
+);

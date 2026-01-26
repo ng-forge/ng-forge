@@ -51,4 +51,6 @@ export type {
   IonicToggleComponent,
   IonicConfig,
   IonicFieldType,
+  IonicFormProps,
+  IonicFormConfig,
 } from './lib';

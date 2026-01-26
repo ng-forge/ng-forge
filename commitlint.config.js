@@ -47,7 +47,8 @@ export default {
       ],
     ],
     'scope-empty': [0], // Allow empty scope
-    'subject-case': [2, 'always', 'lower-case'],
+    // Disable strict lowercase to allow proper nouns (function names, class names, etc.)
+    'subject-case': [0],
     'subject-empty': [2, 'never'],
     'subject-full-stop': [2, 'never', '.'],
     'header-max-length': [2, 'always', 100],

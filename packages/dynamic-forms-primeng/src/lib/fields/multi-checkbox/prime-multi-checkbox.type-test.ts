@@ -12,7 +12,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { PrimeMultiCheckboxProps, PrimeMultiCheckboxField } from './prime-multi-checkbox.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // PrimeMultiCheckboxProps - Whitelist Test
@@ -70,6 +70,7 @@ describe('PrimeMultiCheckboxField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseValueField
     | 'value'

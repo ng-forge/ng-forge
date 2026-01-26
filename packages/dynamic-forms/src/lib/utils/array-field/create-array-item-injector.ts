@@ -192,7 +192,6 @@ function createItemInjector<TModel extends Record<string, unknown>>(options: Cre
     value: parentFieldSignalContext.value,
     defaultValues: () => ({}),
     form: formRef as FieldTree<Record<string, unknown>>,
-    defaultValidationMessages: parentFieldSignalContext.defaultValidationMessages,
   };
 
   const injector = Injector.create({

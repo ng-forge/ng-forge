@@ -5,7 +5,7 @@ export interface BsTextareaProps extends TextareaProps {
   rows?: number;
   size?: 'sm' | 'lg';
   floatingLabel?: boolean;
-  helpText?: DynamicText;
+  hint?: DynamicText;
   validFeedback?: DynamicText;
   invalidFeedback?: DynamicText;
 }

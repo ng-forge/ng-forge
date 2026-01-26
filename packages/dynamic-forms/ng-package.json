@@ -3,5 +3,7 @@
   "dest": "../../dist/packages/dynamic-forms",
   "lib": {
     "entryFile": "src/index.ts"
-  }
+  },
+  "assets": [".npmignore"],
+  "allowedNonPeerDependencies": ["ngxtension"]
 }

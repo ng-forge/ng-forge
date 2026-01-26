@@ -1,5 +1,4 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
-import { testUrl } from '../shared/test-utils';
 import { ionBlur } from '../shared/test-utils';
 
 setupTestLogging();
@@ -13,7 +12,7 @@ test.describe('Cross-Page Validation Tests', () => {
   test.describe('Email Verification Flow', () => {
     test('should complete email verification across multiple pages', async ({ page, helpers }) => {
       // Navigate to email verification scenario
-      await page.goto(testUrl('/cross-page-validation/email-verification'));
+      await page.goto('/#/testing/cross-page-validation/email-verification');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
@@ -122,7 +121,7 @@ test.describe('Cross-Page Validation Tests', () => {
     });
 
     test('should validate email confirmation matches primary email', async ({ page, helpers }) => {
-      await page.goto(testUrl('/cross-page-validation/email-verification'));
+      await page.goto('/#/testing/cross-page-validation/email-verification');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('cross-page-email-verification');
@@ -180,7 +179,7 @@ test.describe('Cross-Page Validation Tests', () => {
 
   test.describe('Conditional Pages Flow', () => {
     test('should navigate through individual account flow', async ({ page, helpers }) => {
-      await page.goto(testUrl('/cross-page-validation/conditional-pages'));
+      await page.goto('/#/testing/cross-page-validation/conditional-pages');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('conditional-pages');
@@ -274,7 +273,7 @@ test.describe('Cross-Page Validation Tests', () => {
     });
 
     test('should navigate through business account flow', async ({ page, helpers }) => {
-      await page.goto(testUrl('/cross-page-validation/conditional-pages'));
+      await page.goto('/#/testing/cross-page-validation/conditional-pages');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('conditional-pages');
@@ -361,7 +360,7 @@ test.describe('Cross-Page Validation Tests', () => {
 
   test.describe('Business Flow', () => {
     test('should validate Tax ID format', async ({ page, helpers }) => {
-      await page.goto(testUrl('/cross-page-validation/business-flow'));
+      await page.goto('/#/testing/cross-page-validation/business-flow');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('business-flow');
@@ -447,7 +446,7 @@ test.describe('Cross-Page Validation Tests', () => {
 
   test.describe('Cascade Dependencies Flow', () => {
     test('should maintain consistent data across pages', async ({ page, helpers }) => {
-      await page.goto(testUrl('/cross-page-validation/cascade-dependencies'));
+      await page.goto('/#/testing/cross-page-validation/cascade-dependencies');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('cascade-dependencies');
@@ -540,7 +539,7 @@ test.describe('Cross-Page Validation Tests', () => {
 
   test.describe('Progressive Validation Flow', () => {
     test('should enforce validation at each page level', async ({ page, helpers }) => {
-      await page.goto(testUrl('/cross-page-validation/progressive-validation'));
+      await page.goto('/#/testing/cross-page-validation/progressive-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('progressive-validation');
@@ -661,7 +660,7 @@ test.describe('Cross-Page Validation Tests', () => {
     });
 
     test('should validate username confirmation matches original', async ({ page, helpers }) => {
-      await page.goto(testUrl('/cross-page-validation/progressive-validation'));
+      await page.goto('/#/testing/cross-page-validation/progressive-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('progressive-validation');

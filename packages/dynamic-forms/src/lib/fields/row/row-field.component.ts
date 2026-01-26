@@ -28,7 +28,7 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
   `,
   styleUrl: './row-field.component.scss',
   host: {
-    class: 'df-field df-row',
+    '[class]': 'hostClasses()',
     '[class.disabled]': 'disabled()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
@@ -52,10 +52,17 @@ export default class RowFieldComponent {
 
   field = input.required<RowField>();
   key = input.required<string>();
+  className = input<string>();
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals
   // ─────────────────────────────────────────────────────────────────────────────
+
+  readonly hostClasses = computed(() => {
+    const base = 'df-field df-row';
+    const custom = this.className();
+    return custom ? `${base} ${custom}` : base;
+  });
 
   readonly disabled = computed(() => {
     try {

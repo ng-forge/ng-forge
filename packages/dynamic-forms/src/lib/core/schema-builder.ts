@@ -15,11 +15,49 @@ import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import type { Logger } from '../providers/features/logger/logger.interface';
 import { EvaluationContext } from '../models/expressions/evaluation-context';
 import { normalizeFieldsArray } from '../utils/object-utils';
+import { applyFormLevelSchema } from './form-schema-merger';
+import type { FormSchema } from '@ng-forge/dynamic-forms/schema';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getFieldTreeByKey<TModel>(ctx: FieldContext<TModel>, key: string): FieldTree<unknown> | undefined {
   return (ctx.fieldTree as Record<string, FieldTree<unknown>>)[key];
+}
+
+/**
+ * Options for creating a schema from field definitions.
+ */
+export interface CreateSchemaOptions<TModel = unknown> {
+  /**
+   * Optional array of collected cross-field validators.
+   */
+  crossFieldValidators?: CrossFieldValidatorEntry[];
+
+  /**
+   * Optional form-level Standard Schema for additional validation.
+   *
+   * Supports Zod, Valibot, ArkType, and other Standard Schema compliant libraries.
+   * Useful for cross-field validation rules.
+   *
+   * @example
+   * ```typescript
+   * import { z } from 'zod';
+   * import { standardSchema } from '@ng-forge/dynamic-forms/schema';
+   *
+   * const PasswordSchema = z.object({
+   *   password: z.string().min(8),
+   *   confirmPassword: z.string(),
+   * }).refine(
+   *   (data) => data.password === data.confirmPassword,
+   *   { message: 'Passwords must match', path: ['confirmPassword'] }
+   * );
+   *
+   * const schema = createSchemaFromFields(fields, registry, {
+   *   formLevelSchema: standardSchema(PasswordSchema),
+   * });
+   * ```
+   */
+  formLevelSchema?: FormSchema<TModel>;
 }
 
 /**
@@ -34,17 +72,24 @@ function getFieldTreeByKey<TModel>(ctx: FieldContext<TModel>, key: string): Fiel
  *
  * @param fields Field definitions to create schema from
  * @param registry Field type registry
- * @param crossFieldValidators Optional array of collected cross-field validators
+ * @param optionsOrValidators Optional configuration object or array of cross-field validators (for backwards compatibility)
  */
 export function createSchemaFromFields<TModel = unknown>(
   fields: FieldDef<unknown>[],
   registry: Map<string, FieldTypeDefinition>,
-  crossFieldValidators?: CrossFieldValidatorEntry[],
+  optionsOrValidators?: CrossFieldValidatorEntry[] | CreateSchemaOptions<TModel>,
 ): Schema<TModel> {
   // Inject services for cross-field validation
   // These will be available because createSchemaFromFields is called within runInInjectionContext
   const functionRegistry = inject(FunctionRegistryService);
   const logger = inject(DynamicFormLogger);
+
+  // Normalize options - support both old array signature and new options object
+  const options: CreateSchemaOptions<TModel> = Array.isArray(optionsOrValidators)
+    ? { crossFieldValidators: optionsOrValidators }
+    : (optionsOrValidators ?? {});
+
+  const { crossFieldValidators, formLevelSchema } = options;
 
   return schema<TModel>((path) => {
     for (const fieldDef of fields) {
@@ -84,6 +129,11 @@ export function createSchemaFromFields<TModel = unknown>(
     // Apply cross-field validators using validateTree
     if (crossFieldValidators && crossFieldValidators.length > 0) {
       applyCrossFieldTreeValidator(path as SchemaPathTree<TModel>, crossFieldValidators, functionRegistry, logger);
+    }
+
+    // Apply form-level Standard Schema validation
+    if (formLevelSchema) {
+      applyFormLevelSchema(path as SchemaPathTree<TModel>, formLevelSchema);
     }
   });
 }

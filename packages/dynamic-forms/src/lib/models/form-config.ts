@@ -1,4 +1,3 @@
-import { Schema } from '@angular/forms/signals';
 import { InferFormValue } from './types/form-value-inference';
 import { NarrowFields, RegisteredFieldTypes } from './registry/field-registry';
 import { SchemaDefinition } from './schemas/schema-definition';
@@ -6,6 +5,7 @@ import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../c
 import { CustomFunction } from '../core/expressions/custom-function-types';
 import { ValidationMessages } from './validation-types';
 import { SubmissionConfig } from './submission-config';
+import type { FormSchema } from '@ng-forge/dynamic-forms/schema';
 
 /**
  * Configuration interface for defining dynamic form structure and behavior.
@@ -32,12 +32,15 @@ import { SubmissionConfig } from './submission-config';
  *
  * @typeParam TFields - Array of registered field types available for this form
  * @typeParam TValue - The strongly-typed interface for form values
+ * @typeParam TProps - The type for form-level default props (library-specific)
  *
  * @public
  */
 export interface FormConfig<
   TFields extends NarrowFields | RegisteredFieldTypes[] = RegisteredFieldTypes[],
   TValue = InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>,
+  TProps extends object = Record<string, unknown>,
+  TSchemaValue = unknown,
 > {
   /**
    * Array of field definitions that define the form structure.
@@ -58,19 +61,32 @@ export interface FormConfig<
   fields: TFields;
 
   /**
-   * Optional form-level validation schema.
+   * Optional form-level validation schema using Standard Schema spec.
    *
    * Provides additional validation beyond field-level validation.
+   * Supports Zod, Valibot, ArkType, and other Standard Schema compliant libraries.
    * Useful for cross-field validation rules.
    *
    * @example
    * ```typescript
-   * schema: {
-   *   passwordConfirm: validators.equals('password')
-   * }
+   * import { z } from 'zod';
+   * import { standardSchema } from '@ng-forge/dynamic-forms/schema';
+   *
+   * const PasswordSchema = z.object({
+   *   password: z.string().min(8),
+   *   confirmPassword: z.string(),
+   * }).refine(
+   *   (data) => data.password === data.confirmPassword,
+   *   { message: 'Passwords must match', path: ['confirmPassword'] }
+   * );
+   *
+   * const formConfig = {
+   *   fields: [...],
+   *   schema: standardSchema(PasswordSchema),
+   * } as const satisfies FormConfig;
    * ```
    */
-  schema?: Schema<TValue>;
+  schema?: FormSchema<TSchemaValue>;
 
   /**
    * Global form configuration options.
@@ -155,6 +171,33 @@ export interface FormConfig<
    * ```
    */
   submission?: SubmissionConfig<TValue>;
+
+  /**
+   * Default props applied to all fields in the form.
+   *
+   * These props serve as defaults that can be overridden at the field level.
+   * Useful for setting consistent styling across the entire form (e.g., appearance,
+   * size, or other UI library-specific props).
+   *
+   * The cascade order is: Library config → Form defaultProps → Field props
+   * Each level can override the previous one.
+   *
+   * @example
+   * ```typescript
+   * // Material example
+   * const config: MatFormConfig = {
+   *   defaultProps: {
+   *     appearance: 'outline',
+   *     subscriptSizing: 'dynamic',
+   *   },
+   *   fields: [
+   *     { type: 'input', key: 'name', label: 'Name' },  // Uses defaultProps
+   *     { type: 'input', key: 'email', props: { appearance: 'fill' } },  // Override
+   *   ],
+   * };
+   * ```
+   */
+  defaultProps?: TProps;
 }
 
 /**
@@ -172,6 +215,14 @@ export interface FormConfig<
  *       style: 'currency',
  *       currency: 'USD'
  *     }).format(context.value)
+ *   },
+ *   derivations: {
+ *     getCurrencyForCountry: (context) => {
+ *       const countryToCurrency: Record<string, string> = {
+ *         'USA': 'USD', 'Germany': 'EUR', 'UK': 'GBP'
+ *       };
+ *       return countryToCurrency[context.formValue.country as string] ?? 'USD';
+ *     }
  *   },
  *   simpleValidators: {
  *     noSpaces: (value) => {
@@ -215,6 +266,74 @@ export interface CustomFnConfig {
    * ```
    */
   customFunctions?: Record<string, CustomFunction>;
+
+  /**
+   * Custom derivation functions for value derivation logic.
+   *
+   * These functions compute derived values and are called when a
+   * `DerivationLogicConfig` references them by `functionName`.
+   *
+   * Derivation functions:
+   * - Receive an `EvaluationContext` with access to `formValue`
+   * - Return the value to set on the target field
+   * - Are called reactively when dependencies change
+   *
+   * Use derivation functions for complex mappings or logic that
+   * can't be easily expressed as a JavaScript expression.
+   *
+   * @example
+   * ```typescript
+   * derivations: {
+   *   // Country to currency mapping
+   *   getCurrencyForCountry: (context) => {
+   *     const countryToCurrency: Record<string, string> = {
+   *       'USA': 'USD',
+   *       'Germany': 'EUR',
+   *       'France': 'EUR',
+   *       'UK': 'GBP',
+   *       'Japan': 'JPY'
+   *     };
+   *     return countryToCurrency[context.formValue.country as string] ?? 'USD';
+   *   },
+   *
+   *   // Complex tax calculation
+   *   calculateTax: (context) => {
+   *     const subtotal = context.formValue.subtotal as number ?? 0;
+   *     const state = context.formValue.state as string;
+   *     const taxRates: Record<string, number> = {
+   *       'CA': 0.0725, 'NY': 0.08, 'TX': 0.0625
+   *     };
+   *     return subtotal * (taxRates[state] ?? 0);
+   *   },
+   *
+   *   // Format phone number
+   *   formatPhoneNumber: (context) => {
+   *     const phone = context.fieldValue as string ?? '';
+   *     const digits = phone.replace(/\D/g, '');
+   *     if (digits.length === 10) {
+   *       return `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+   *     }
+   *     return phone;
+   *   }
+   * }
+   * ```
+   *
+   * Field configuration using a derivation function:
+   * ```typescript
+   * {
+   *   key: 'country',
+   *   type: 'select',
+   *   logic: [
+   *     {
+   *       type: 'derivation',
+   *       targetField: 'currency',
+   *       functionName: 'getCurrencyForCountry'
+   *     }
+   *   ]
+   * }
+   * ```
+   */
+  derivations?: Record<string, CustomFunction>;
 
   /**
    * Custom validators using Angular's public FieldContext API
@@ -430,6 +549,20 @@ export interface FormOptions {
    * @value false
    */
   disabled?: boolean;
+
+  /**
+   * Maximum number of iterations for derivation chain processing.
+   *
+   * Derivations can trigger other derivations (e.g., A → B → C).
+   * This limit prevents infinite loops in case of circular dependencies
+   * that weren't caught at build time.
+   *
+   * Increase this value if you have legitimate deep derivation chains
+   * (more than 10 levels deep).
+   *
+   * @default 10
+   */
+  maxDerivationIterations?: number;
 
   /**
    * Default disabled behavior for submit buttons.

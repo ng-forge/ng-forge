@@ -1,0 +1,404 @@
+// ============================================
+// EXAMPLE SCENARIO COMPONENT STYLES
+// ============================================
+// Uses Forge design tokens from internal/styling
+@use 'tokens' as *;
+@use 'themes' as *;
+
+// ============================================
+// HOST ELEMENTmake
+// ============================================
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  font-family: $font-primary;
+  overflow: auto;
+  position: relative;
+  box-sizing: border-box;
+
+  // Light mode defaults (CSS custom properties)
+  --bg-deep: #{map-get($theme-light, bg-deep)};
+  --bg-surface: #{map-get($theme-light, bg-surface)};
+  --bg-elevated: #{map-get($theme-light, bg-elevated)};
+  --text-primary: #{map-get($theme-light, text-primary)};
+  --text-secondary: #{map-get($theme-light, text-secondary)};
+  --text-muted: #{map-get($theme-light, text-muted)};
+  --border: #{map-get($theme-light, border)};
+  --border-hover: #{map-get($theme-light, border-hover)};
+
+  background: var(--bg-deep);
+  color: var(--text-primary);
+}
+
+// Dark mode overrides
+:host([data-theme='dark']) {
+  --bg-deep: #{map-get($theme-dark, bg-deep)};
+  --bg-surface: #{map-get($theme-dark, bg-surface)};
+  --bg-elevated: #{map-get($theme-dark, bg-elevated)};
+  --text-primary: #{map-get($theme-dark, text-primary)};
+  --text-secondary: #{map-get($theme-dark, text-secondary)};
+  --text-muted: #{map-get($theme-dark, text-muted)};
+  --border: #{map-get($theme-dark, border)};
+  --border-hover: #{map-get($theme-dark, border-hover)};
+}
+
+// Gradient top border (Forge signature)
+:host::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, $ember-core, $ember-glow, $ember-core, transparent);
+  opacity: 0.7;
+  z-index: 1;
+}
+
+// ============================================
+// ICONS (CSS Mask-based with data URIs)
+// ============================================
+// Icons use CSS masks so they inherit color from currentColor
+
+@mixin icon-mask($svg) {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  -webkit-mask-image: url('data:image/svg+xml,#{$svg}');
+  mask-image: url('data:image/svg+xml,#{$svg}');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  flex-shrink: 0;
+}
+
+.icon {
+  &--copy {
+    @include icon-mask(
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1'/%3E%3C/svg%3E"
+    );
+  }
+
+  &--check {
+    @include icon-mask(
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E"
+    );
+  }
+
+  &--external {
+    @include icon-mask(
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6'/%3E%3Cpolyline points='15 3 21 3 21 9'/%3E%3Cline x1='10' y1='14' x2='21' y2='3'/%3E%3C/svg%3E"
+    );
+  }
+
+  &--play {
+    @include icon-mask(
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpolygon points='5 3 19 12 5 21 5 3'/%3E%3C/svg%3E"
+    );
+    width: 12px;
+    height: 12px;
+  }
+
+  &--code {
+    @include icon-mask(
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='16 18 22 12 16 6'/%3E%3Cpolyline points='8 6 2 12 8 18'/%3E%3C/svg%3E"
+    );
+    width: 12px;
+    height: 12px;
+  }
+}
+
+// ============================================
+// HEADER
+// ============================================
+.example-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $space-3 0;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  gap: $space-4;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding-left: $space-4;
+}
+
+.header-dots {
+  display: flex;
+  gap: $space-2;
+}
+
+.header-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+
+  &:nth-child(1) {
+    background: $error;
+  }
+  &:nth-child(2) {
+    background: $warning;
+  }
+  &:nth-child(3) {
+    background: $success;
+  }
+}
+
+.example-title {
+  font-family: $font-mono;
+  font-size: $text-xs;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.header-actions {
+  display: flex;
+  gap: $space-1;
+  padding-right: $space-4;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: $radius-md;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all $transition-base;
+
+  &:hover {
+    background: var(--bg-elevated);
+    color: $ember-glow;
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// ============================================
+// TABS
+// ============================================
+.tabs {
+  display: flex;
+  gap: $space-1;
+  padding: $space-2 $space-4 0;
+  background: var(--bg-surface);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: $space-3 $space-4;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-family: $font-mono;
+  font-size: $text-xs;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all $transition-base;
+
+  &:hover {
+    color: var(--text-secondary);
+    background: var(--bg-elevated);
+  }
+
+  &.active {
+    color: $ember-glow;
+    border-bottom-color: $ember-glow;
+  }
+}
+
+// ============================================
+// CONTENT
+// ============================================
+.tab-content {
+  padding: $space-8 $space-6;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-deep);
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+  padding: $space-4 0;
+}
+
+// ============================================
+// CODE BLOCK (with Shiki syntax highlighting)
+// ============================================
+.code-block {
+  background: var(--bg-surface);
+  border-radius: $radius-md;
+  padding: $space-4;
+  overflow-y: auto;
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
+  font-family: $font-mono;
+  font-size: $text-sm;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+
+  // Shiki generates a <pre class="shiki" style="background-color:...">
+  // Override the inline background with !important
+  // Use ::ng-deep to pierce Angular's view encapsulation for innerHTML content
+  // stylelint-disable-next-line selector-pseudo-element-no-unknown
+  ::ng-deep {
+    pre,
+    pre.shiki,
+    .shiki {
+      background: transparent !important;
+      background-color: transparent !important;
+      margin: 0;
+      padding: 0;
+      font-family: inherit;
+      font-size: inherit;
+      line-height: inherit;
+      white-space: inherit;
+      word-break: inherit;
+    }
+
+    // Shiki generates a <code> element with inline styles
+    code {
+      background: transparent !important;
+      padding: 0;
+      font-family: inherit;
+      font-size: inherit;
+      line-height: inherit;
+    }
+  }
+
+  // Ember-themed scrollbar (consistent with docs app)
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--bg-elevated);
+    border-radius: $radius-sm;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, $ember-hot, $ember-core);
+    border-radius: $radius-sm;
+    border: 2px solid var(--bg-elevated);
+
+    &:hover {
+      background: linear-gradient(180deg, $ember-glow, $ember-hot);
+    }
+  }
+
+  // Firefox scrollbar
+  scrollbar-width: thin;
+  scrollbar-color: $ember-core var(--bg-elevated);
+}
+
+// ============================================
+// EXAMPLE RESULT
+// ============================================
+.example-result {
+  margin-top: $space-4;
+  padding: $space-4;
+  background: var(--bg-surface);
+  border-radius: $radius-md;
+  border: 1px solid var(--border);
+
+  h4 {
+    margin: 0 0 $space-2 0;
+    font-family: $font-mono;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+  }
+
+  pre {
+    margin: 0;
+    font-family: $font-mono;
+    font-size: $text-xs;
+    line-height: 1.5;
+    color: var(--text-primary);
+  }
+}
+
+// ============================================
+// MINIMAL MODE (for landing page embeds)
+// ============================================
+.minimal-content {
+  padding: $space-4;
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
+}
+
+// ============================================
+// IFRAME MODE (full-width layout for docs embeds)
+// ============================================
+:host.in-iframe {
+  min-height: auto;
+  // Override global .example-container max-width for full-width iframe
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+
+  // Remove the ember top border in iframe mode
+  &::before {
+    display: none;
+  }
+
+  .example-header {
+    padding: $space-2 0;
+  }
+
+  .header-left {
+    padding-left: $space-3;
+  }
+
+  .header-actions {
+    padding-right: $space-3;
+  }
+
+  .tabs {
+    padding: $space-1 $space-3 0;
+  }
+
+  .tab-content {
+    padding: $space-6 $space-4;
+  }
+}

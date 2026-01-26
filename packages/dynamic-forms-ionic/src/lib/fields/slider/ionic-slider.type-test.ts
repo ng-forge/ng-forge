@@ -5,14 +5,25 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { IonicSliderProps, IonicSliderField } from './ionic-slider.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // IonicSliderProps - Whitelist Test
 // ============================================================================
 
 describe('IonicSliderProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'min' | 'max' | 'step' | 'dualKnobs' | 'pin' | 'pinFormatter' | 'ticks' | 'snaps' | 'color' | 'labelPlacement';
+  type ExpectedKeys =
+    | 'min'
+    | 'max'
+    | 'step'
+    | 'dualKnobs'
+    | 'pin'
+    | 'pinFormatter'
+    | 'ticks'
+    | 'snaps'
+    | 'color'
+    | 'labelPlacement'
+    | 'hint';
   type ActualKeys = keyof IonicSliderProps;
 
   it('should have exactly the expected keys', () => {
@@ -98,6 +109,7 @@ describe('IonicSliderField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseValueField
     | 'value'

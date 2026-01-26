@@ -9,7 +9,7 @@ export interface IonicTextareaProps extends TextareaProps {
   fill?: 'solid' | 'outline';
   shape?: 'round';
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked' | 'floating';
-  helperText?: DynamicText;
+  hint?: DynamicText;
   errorText?: DynamicText;
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
 }

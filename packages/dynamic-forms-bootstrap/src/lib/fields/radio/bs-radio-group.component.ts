@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, input, model } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
 import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 
@@ -22,9 +22,9 @@ export interface BsRadioGroupProps {
    */
   buttonSize?: 'sm' | 'lg';
   /**
-   * Help text to display below the radio group
+   * Hint text to display below the radio group
    */
-  helpText?: DynamicText;
+  hint?: DynamicText;
 }
 
 @Component({
@@ -32,7 +32,6 @@ export interface BsRadioGroupProps {
   imports: [DynamicTextPipe, AsyncPipe],
   template: `
     @let props = properties();
-    @let ariaDescribedBy = this.ariaDescribedBy();
     @if (props?.buttonGroup) {
       <div class="btn-group" role="group" [attr.aria-label]="label() | dynamicText | async">
         @for (option of options(); track option.value; let i = $index) {
@@ -43,7 +42,7 @@ export interface BsRadioGroupProps {
             [checked]="value() === option.value"
             (change)="onRadioChange(option.value)"
             [disabled]="disabled() || option.disabled || false"
-            [attr.aria-describedby]="ariaDescribedBy"
+            [attr.aria-describedby]="ariaDescribedBy()"
             class="btn-check"
             [id]="name() + '_' + i"
             autocomplete="off"
@@ -68,7 +67,7 @@ export interface BsRadioGroupProps {
             [checked]="value() === option.value"
             (change)="onRadioChange(option.value)"
             [disabled]="disabled() || option.disabled || false"
-            [attr.aria-describedby]="ariaDescribedBy"
+            [attr.aria-describedby]="ariaDescribedBy()"
             class="form-check-input"
             [id]="name() + '_' + i"
           />
@@ -88,11 +87,11 @@ export interface BsRadioGroupProps {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BsRadioGroupComponent<T = unknown> implements FormValueControl<T | undefined> {
+export class BsRadioGroupComponent implements FormValueControl<ValueType | undefined> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   // Value model - FormField directive binds form value to this
-  readonly value = model<T | undefined>(undefined);
+  readonly value = model<ValueType | undefined>(undefined);
 
   // Optional FormValueControl properties - Field directive will bind these
   readonly disabled = input<boolean>(false);
@@ -101,7 +100,7 @@ export class BsRadioGroupComponent<T = unknown> implements FormValueControl<T | 
 
   // Component-specific inputs
   readonly label = input<DynamicText>();
-  readonly options = input.required<FieldOption<T>[]>();
+  readonly options = input.required<FieldOption<ValueType>[]>();
   readonly properties = input<BsRadioGroupProps>();
   readonly meta = input<FieldMeta>();
 
@@ -115,7 +114,7 @@ export class BsRadioGroupComponent<T = unknown> implements FormValueControl<T | 
   /**
    * Handle radio button change event
    */
-  protected onRadioChange(newValue: T): void {
+  protected onRadioChange(newValue: ValueType): void {
     if (!this.disabled() && !this.readonly()) {
       this.value.set(newValue);
     }

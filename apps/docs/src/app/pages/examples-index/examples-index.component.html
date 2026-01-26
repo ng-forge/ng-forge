@@ -1,0 +1,31 @@
+<div class="examples-container">
+  <header class="examples-header">
+    <h1>Quick Start</h1>
+    <p class="subtitle">Jump into real-world form examples and patterns</p>
+  </header>
+
+  <div class="filter-bar">
+    <button type="button" class="filter-tag" [class.active]="selectedTags().size === 0" (click)="clearFilters()">All</button>
+    @for (tag of allTags; track tag) {
+      <button type="button" class="filter-tag" [class.active]="isTagActive(tag)" (click)="toggleTag(tag)">{{ tag }}</button>
+    }
+  </div>
+
+  <div class="examples-grid">
+    @for (example of filteredExamples(); track example.id) {
+      <a [routerLink]="example.path" class="example-card">
+        <h2>{{ example.title }}</h2>
+        <p>{{ example.description }}</p>
+        <div class="tags">
+          @for (tag of example.tags; track tag) {
+            <span class="tag">{{ tag }}</span>
+          }
+        </div>
+      </a>
+    } @empty {
+      <div class="no-results">
+        <p>No examples match the selected filters</p>
+      </div>
+    }
+  </div>
+</div>

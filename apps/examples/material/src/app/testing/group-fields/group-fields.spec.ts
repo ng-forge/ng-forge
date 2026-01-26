@@ -11,9 +11,12 @@ test.describe('Group Fields E2E Tests', () => {
   test.describe('Value Propagation', () => {
     test('should propagate values from nested group fields to parent form', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('group-value-propagation');
-      await page.goto('http://localhost:4201/#/test/group-fields/group-value-propagation');
+      await page.goto('/#/test/group-fields/group-value-propagation');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Screenshot: Empty group layout
+      await helpers.expectScreenshotMatch(scenario, 'material-group-value-propagation-empty');
 
       // Fill the top-level name field
       const nameInput = scenario.locator('#name input');
@@ -39,11 +42,14 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(streetInput).toHaveValue('123 Main St', { timeout: 5000 });
       await expect(cityInput).toHaveValue('Springfield', { timeout: 5000 });
       await expect(zipInput).toHaveValue('12345', { timeout: 5000 });
+
+      // Screenshot: Filled group layout
+      await helpers.expectScreenshotMatch(scenario, 'material-group-value-propagation-filled');
     });
 
     test('should update parent form value when editing group fields', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('group-value-propagation');
-      await page.goto('http://localhost:4201/#/test/group-fields/group-value-propagation');
+      await page.goto('/#/test/group-fields/group-value-propagation');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -63,7 +69,7 @@ test.describe('Group Fields E2E Tests', () => {
   test.describe('Initial Values', () => {
     test('should display initial values in group fields', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('group-initial-values');
-      await page.goto('http://localhost:4201/#/test/group-fields/group-initial-values');
+      await page.goto('/#/test/group-fields/group-initial-values');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -78,7 +84,7 @@ test.describe('Group Fields E2E Tests', () => {
 
     test('should allow editing initial values in group fields', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('group-initial-values');
-      await page.goto('http://localhost:4201/#/test/group-fields/group-initial-values');
+      await page.goto('/#/test/group-fields/group-initial-values');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -100,7 +106,7 @@ test.describe('Group Fields E2E Tests', () => {
   test.describe('Multiple Groups', () => {
     test('should propagate values through multiple sibling groups', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('group-nested');
-      await page.goto('http://localhost:4201/#/test/group-fields/group-nested');
+      await page.goto('/#/test/group-fields/group-nested');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -123,11 +129,14 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(personalInputs.nth(1)).toHaveValue('Doe', { timeout: 5000 });
       await expect(workInputs.nth(0)).toHaveValue('Acme Corp', { timeout: 5000 });
       await expect(workInputs.nth(1)).toHaveValue('Developer', { timeout: 5000 });
+
+      // Screenshot: Multiple groups filled
+      await helpers.expectScreenshotMatch(scenario, 'material-group-nested-filled');
     });
 
     test('should maintain one group values when editing another group', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('group-nested');
-      await page.goto('http://localhost:4201/#/test/group-fields/group-nested');
+      await page.goto('/#/test/group-fields/group-nested');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 

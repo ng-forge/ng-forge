@@ -1,5 +1,3 @@
-> Prerequisites: [What is Dynamic Forms?](../what-is-dynamic-forms)
-
 Get ng-forge dynamic forms up and running in your Angular project.
 
 ## Requirements
@@ -213,34 +211,30 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-See [Custom Integration Guide](../deep-dive/custom-integrations) for building custom field components.
+See [Custom Integration Guide](../advanced/custom-integrations) for building custom field components.
 
 ## Next Steps
 
 Now that you have ng-forge dynamic forms installed, explore the core features:
 
-### Configure Behavior
-
-- **[Configuration](../configuration)** - Configure logging, debugging, and other provider-level options
-
 ### Learn Core Concepts
 
-- **[Field Types](../core/field-types)** - Understand all available field types (input, select, checkbox, group, etc.)
-- **[Validation](../core/validation)** - Add validation rules with shorthand syntax or conditional validators
-- **[Conditional Logic](../core/conditional-logic)** - Show/hide fields based on other field values
-- **[Type Safety](../core/type-safety)** - TypeScript type inference for forms
+- **[Field Types](../schema-fields/field-types)** - Understand all available field types (input, select, checkbox, group, etc.)
+- **[Validation](../validation/basics)** - Add validation rules with shorthand syntax or conditional validators
+- **[Conditional Logic](../dynamic-behavior/conditional-logic/overview)** - Show/hide fields based on other field values
+- **[Type Safety](../advanced/type-safety/basics)** - TypeScript type inference for forms
 
 ### Build Advanced Forms
 
-- **[Multi-Step Forms](../prebuilt/form-pages)** - Create wizard-style forms with page navigation
-- **[Repeatable Sections](../prebuilt/form-arrays)** - Dynamic form arrays for adding/removing fields
-- **[Conditional Validation](../core/validation/advanced#conditional-validators)** - Validators that activate based on conditions
+- **[Multi-Step Forms](../layout-components/form-pages)** - Create wizard-style forms with page navigation
+- **[Repeatable Sections](../layout-components/form-arrays)** - Dynamic form arrays for adding/removing fields
+- **[Conditional Validation](../validation/advanced#conditional-validators)** - Validators that activate based on conditions
 
 ### Customize and Extend
 
-- **[i18n Setup](../core/i18n)** - Add multi-language support to your forms
-- **[Events](../core/events)** - Handle custom form events
-- **[Custom Fields](../deep-dive/custom-integrations)** - Create your own field types
+- **[i18n Setup](../dynamic-behavior/i18n)** - Add multi-language support to your forms
+- **[Events](../advanced/events)** - Handle custom form events
+- **[Custom Fields](../advanced/custom-integrations)** - Create your own field types
 
 ## Get Help
 

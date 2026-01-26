@@ -15,10 +15,6 @@
  * - Field mappers (valueFieldMapper, checkboxFieldMapper, etc.)
  * - Error utilities (createResolvedErrorsSignal, shouldShowErrors)
  *
- * ## Testing API
- * Import from '@ng-forge/dynamic-forms/testing' for:
- * - Test utilities and harnesses
- * - Form config builders for testing
  */
 
 // ============================================================
@@ -136,6 +132,9 @@ export {
 
 export type { FormEvent, FormEventConstructor, TokenContext, ArrayItemContext } from './events';
 
+// Helpers
+export { formConfig } from './helpers';
+
 // Errors
 export { DynamicFormError } from './errors/dynamic-form-error';
 
@@ -154,7 +153,7 @@ export type { FieldTypeDefinition, ValueHandlingMode } from './models';
 export { FIELD_REGISTRY } from './models';
 
 // Signal Context - injection tokens for field components
-export { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from './models';
+export { ARRAY_CONTEXT, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from './models';
 
 // Dynamic Text utilities
 export { dynamicTextToObservable } from './utils';
@@ -178,10 +177,13 @@ export { EventBus, resolveTokens } from './events';
 export { BUILT_IN_FIELDS } from './providers';
 
 // Object utilities (used by integration mappers)
-export { omit } from './utils/object-utils';
+export { isEqual, omit } from './utils/object-utils';
 
 // Interpolation utility (used by integration error utilities)
 export { interpolateParams } from './utils/interpolate-params';
 
 // Meta utilities (used by UI library wrapped-meta directives)
 export { applyMetaToElement } from './utils/apply-meta';
+
+// Registry services (used by UI library button mappers)
+export { RootFormRegistryService } from './core/registry/root-form-registry.service';

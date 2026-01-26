@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
@@ -7,15 +7,14 @@ import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, Textar
 import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
-import { explicitEffect } from 'ngxtension/explicit-effect';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-textarea',
   imports: [MatFormField, MatLabel, MatInput, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let textareaId = key() + '-textarea';
 
     <mat-form-field [appearance]="effectiveAppearance()" [subscriptSizing]="effectiveSubscriptSizing()">
       @if (label()) {
@@ -25,34 +24,26 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
       <textarea
         #textareaRef
         matInput
+        [id]="textareaId"
         [formField]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
         [style.resize]="props()?.resize || 'vertical'"
       ></textarea>
 
-      @if (props()?.hint; as hint) {
+      @if (errorsToDisplay()[0]; as error) {
+        <mat-error [id]="errorId()">{{ error.message }}</mat-error>
+      } @else if (props()?.hint; as hint) {
         <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
-      }
-      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-        <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
       }
     </mat-form-field>
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
-      :host {
-        display: block;
-        width: 100%;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-
       mat-form-field {
         width: 100%;
       }
@@ -108,16 +99,22 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
    * Note: We cannot use [readonly] or [attr.readonly] bindings because Angular throws
    * NG8022: "Binding to '[readonly]' is not allowed on nodes using the '[field]' directive"
    *
+   * Uses afterRenderEffect to ensure DOM is ready before manipulating attributes.
+   *
    * @see https://github.com/angular/angular/issues/65897
    */
-  private readonly syncReadonlyToDom = explicitEffect([this.textareaRef, this.isReadonly], ([textareaRef, isReadonly]) => {
-    if (textareaRef?.nativeElement) {
-      if (isReadonly) {
-        textareaRef.nativeElement.setAttribute('readonly', '');
-      } else {
-        textareaRef.nativeElement.removeAttribute('readonly');
+  private readonly syncReadonlyToDom = afterRenderEffect({
+    write: () => {
+      const textareaRef = this.textareaRef();
+      const isReadonly = this.isReadonly();
+      if (textareaRef?.nativeElement) {
+        if (isReadonly) {
+          textareaRef.nativeElement.setAttribute('readonly', '');
+        } else {
+          textareaRef.nativeElement.removeAttribute('readonly');
+        }
       }
-    }
+    },
   });
 
   readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
@@ -150,18 +147,10 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

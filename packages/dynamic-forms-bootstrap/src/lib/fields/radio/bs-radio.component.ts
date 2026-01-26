@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsRadioComponent, BsRadioProps } from './bs-radio.type';
 import { AsyncPipe } from '@angular/common';
 import { BsRadioGroupComponent } from './bs-radio-group.component';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-bs-radio',
@@ -12,7 +13,6 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="mb-3">
       @if (label(); as label) {
@@ -20,18 +20,17 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
       }
 
       <df-bs-radio-group
-        [formField]="$any(f)"
+        [formField]="f"
         [label]="label()"
         [options]="options()"
         [properties]="props()"
-        [ariaDescribedBy]="ariaDescribedBy"
+        [ariaDescribedBy]="ariaDescribedBy()"
       />
 
-      @if (props()?.helpText; as helpText) {
-        <div class="form-text" [id]="helpTextId()">{{ helpText | dynamicText | async }}</div>
-      }
-      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-        <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
+      @if (errorsToDisplay()[0]; as error) {
+        <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
+      } @else if (props()?.hint; as hint) {
+        <div class="form-text" [id]="hintId()">{{ hint | dynamicText | async }}</div>
       }
     </div>
   `,
@@ -54,10 +53,10 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
     '[attr.hidden]': 'field()().hidden() || null',
   },
 })
-export default class BsRadioFieldComponent<T extends string> implements BsRadioComponent<T> {
+export default class BsRadioFieldComponent implements BsRadioComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<T>>();
+  readonly field = input.required<FieldTree<ValueType>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
@@ -66,7 +65,7 @@ export default class BsRadioFieldComponent<T extends string> implements BsRadioC
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<FieldOption<T>[]>([]);
+  readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<BsRadioProps>();
   readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
@@ -88,7 +87,7 @@ export default class BsRadioFieldComponent<T extends string> implements BsRadioC
   // Accessibility
   // ─────────────────────────────────────────────────────────────────────────────
 
-  protected readonly helpTextId = computed(() => `${this.key()}-help`);
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
   protected readonly ariaInvalid = computed(() => {
@@ -100,15 +99,10 @@ export default class BsRadioFieldComponent<T extends string> implements BsRadioC
     return this.field()().required?.() === true ? true : null;
   });
 
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-    if (this.props()?.helpText) {
-      ids.push(this.helpTextId());
-    }
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

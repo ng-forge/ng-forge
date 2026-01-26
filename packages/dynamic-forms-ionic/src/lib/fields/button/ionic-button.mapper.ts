@@ -1,5 +1,5 @@
-import { computed, Signal } from '@angular/core';
-import { buildBaseInputs, FieldDef } from '@ng-forge/dynamic-forms';
+import { computed, inject, Signal } from '@angular/core';
+import { buildBaseInputs, DEFAULT_PROPS, FieldDef } from '@ng-forge/dynamic-forms';
 
 /**
  * Generic button mapper for custom events or basic buttons.
@@ -10,10 +10,11 @@ import { buildBaseInputs, FieldDef } from '@ng-forge/dynamic-forms';
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Signal<Record<string, unknown>> {
-  // Build base inputs (static, from field definition)
-  const baseInputs = buildBaseInputs(fieldDef);
+  const defaultProps = inject(DEFAULT_PROPS);
 
   return computed(() => {
+    const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+
     const inputs: Record<string, unknown> = {
       ...baseInputs,
     };

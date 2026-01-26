@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo-light.svg" alt="ng-forge logo" width="400"/>
+  <img src="logo.svg" alt="ng-forge Dynamic Forms" width="400"/>
 </p>
 
 <p align="center">
@@ -71,6 +71,20 @@ export class LoginComponent {
 
 🌍 **i18n Ready** – Observable/Signal support for labels and messages
 
+## ⚠️ Compatibility
+
+> **Experimental API Notice:** This library uses Angular's experimental Signal Forms API.
+> Angular may introduce breaking changes in patch releases.
+
+| @ng-forge/dynamic-forms | Angular       |
+| ----------------------- | ------------- |
+| 0.5.x                   | >=21.1.0      |
+| 0.4.x                   | >=21.1.0      |
+| 0.3.x                   | 21.0.7-21.0.x |
+| 0.2.x                   | 21.0.6        |
+| 0.1.1+                  | 21.0.2-21.0.5 |
+| 0.1.0                   | 21.0.0-21.0.1 |
+
 ## 📦 Packages
 
 | Package                                                                 | Description     |
@@ -100,6 +114,8 @@ pnpm run build:libs
 pnpm run test
 pnpm run serve:docs
 ```
+
+See [Developer Guides](./guides/) for architecture docs, testing strategy, and creating UI adapters.
 
 ## 📄 License
 

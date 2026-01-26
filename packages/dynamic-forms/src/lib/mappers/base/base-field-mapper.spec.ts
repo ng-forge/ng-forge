@@ -204,6 +204,223 @@ describe('baseFieldMapper', () => {
     });
   });
 
+  describe('defaultProps merging', () => {
+    it('should use defaultProps when field has no props', () => {
+      // Arrange
+      const fieldDef: FieldDef<unknown> = {
+        key: 'testField',
+        type: 'input',
+        label: 'Test Label',
+      };
+      const defaultProps = { appearance: 'outline', size: 'small' };
+
+      // Act
+      const inputs = buildBaseInputs(fieldDef, defaultProps);
+
+      // Assert
+      expect(inputs).toHaveProperty('props', { appearance: 'outline', size: 'small' });
+    });
+
+    it('should merge defaultProps with field props (field takes precedence)', () => {
+      // Arrange
+      const fieldDef: FieldDef<unknown> = {
+        key: 'testField',
+        type: 'input',
+        label: 'Test Label',
+        props: { appearance: 'fill', hint: 'Field hint' },
+      };
+      const defaultProps = { appearance: 'outline', size: 'small' };
+
+      // Act
+      const inputs = buildBaseInputs(fieldDef, defaultProps);
+
+      // Assert - field props override defaultProps
+      expect(inputs['props']).toEqual({
+        appearance: 'fill', // overridden by field
+        size: 'small', // from defaultProps
+        hint: 'Field hint', // only in field
+      });
+    });
+
+    it('should handle undefined defaultProps gracefully', () => {
+      // Arrange
+      const fieldDef: FieldDef<unknown> = {
+        key: 'testField',
+        type: 'input',
+        props: { hint: 'Test hint' },
+      };
+
+      // Act
+      const inputs = buildBaseInputs(fieldDef, undefined);
+
+      // Assert
+      expect(inputs['props']).toEqual({ hint: 'Test hint' });
+    });
+
+    it('should handle empty defaultProps object', () => {
+      // Arrange
+      const fieldDef: FieldDef<unknown> = {
+        key: 'testField',
+        type: 'input',
+        props: { hint: 'Test hint' },
+      };
+
+      // Act
+      const inputs = buildBaseInputs(fieldDef, {});
+
+      // Assert
+      expect(inputs['props']).toEqual({ hint: 'Test hint' });
+    });
+
+    it('should not set props when both defaultProps and field props are undefined', () => {
+      // Arrange
+      const fieldDef: FieldDef<unknown> = {
+        key: 'testField',
+        type: 'input',
+      };
+
+      // Act
+      const inputs = buildBaseInputs(fieldDef, undefined);
+
+      // Assert
+      expect(inputs).not.toHaveProperty('props');
+    });
+
+    it('should set props from defaultProps even when field props is undefined', () => {
+      // Arrange
+      const fieldDef: FieldDef<unknown> = {
+        key: 'testField',
+        type: 'input',
+      };
+      const defaultProps = { appearance: 'outline' };
+
+      // Act
+      const inputs = buildBaseInputs(fieldDef);
+      const inputsWithDefaults = buildBaseInputs(fieldDef, defaultProps);
+
+      // Assert
+      expect(inputs).not.toHaveProperty('props');
+      expect(inputsWithDefaults).toHaveProperty('props', { appearance: 'outline' });
+    });
+
+    it('should handle deeply nested props correctly', () => {
+      // Arrange - note: shallow merge, nested objects replace entirely
+      const fieldDef: FieldDef<unknown> = {
+        key: 'testField',
+        type: 'input',
+        props: { nested: { fieldValue: true } },
+      };
+      const defaultProps = { nested: { defaultValue: true }, other: 'value' };
+
+      // Act
+      const inputs = buildBaseInputs(fieldDef, defaultProps);
+
+      // Assert - shallow merge: field's nested replaces default's nested entirely
+      expect(inputs['props']).toEqual({
+        nested: { fieldValue: true }, // field value wins entirely (shallow merge)
+        other: 'value', // from defaultProps
+      });
+    });
+
+    it('should handle Material-like props scenario', () => {
+      // Arrange
+      const fieldDef: FieldDef<unknown> = {
+        key: 'email',
+        type: 'mat-input',
+        label: 'Email',
+        props: { appearance: 'fill' }, // Override just appearance
+      };
+      const defaultProps = {
+        appearance: 'outline',
+        subscriptSizing: 'dynamic',
+        disableRipple: false,
+      };
+
+      // Act
+      const inputs = buildBaseInputs(fieldDef, defaultProps);
+
+      // Assert
+      expect(inputs['props']).toEqual({
+        appearance: 'fill', // overridden
+        subscriptSizing: 'dynamic', // from defaults
+        disableRipple: false, // from defaults
+      });
+    });
+
+    it('should handle Bootstrap-like props scenario', () => {
+      // Arrange
+      const fieldDef: FieldDef<unknown> = {
+        key: 'username',
+        type: 'bs-input',
+        label: 'Username',
+        // No field props - should use all defaults
+      };
+      const defaultProps = {
+        size: 'sm',
+        floatingLabel: true,
+        variant: 'primary',
+      };
+
+      // Act
+      const inputs = buildBaseInputs(fieldDef, defaultProps);
+
+      // Assert
+      expect(inputs['props']).toEqual({
+        size: 'sm',
+        floatingLabel: true,
+        variant: 'primary',
+      });
+    });
+
+    it('should handle Ionic-like props scenario', () => {
+      // Arrange
+      const fieldDef: FieldDef<unknown> = {
+        key: 'phone',
+        type: 'ionic-input',
+        label: 'Phone',
+        props: { color: 'secondary' }, // Override color
+      };
+      const defaultProps = {
+        fill: 'outline',
+        labelPlacement: 'floating',
+        color: 'primary',
+      };
+
+      // Act
+      const inputs = buildBaseInputs(fieldDef, defaultProps);
+
+      // Assert
+      expect(inputs['props']).toEqual({
+        fill: 'outline',
+        labelPlacement: 'floating',
+        color: 'secondary', // overridden
+      });
+    });
+
+    it('should handle PrimeNG-like props scenario', () => {
+      // Arrange
+      const fieldDef: FieldDef<unknown> = {
+        key: 'description',
+        type: 'prime-textarea',
+        label: 'Description',
+        props: { variant: 'filled' },
+      };
+      const defaultProps = {
+        size: 'small',
+        variant: 'outlined',
+      };
+
+      // Act
+      const inputs = buildBaseInputs(fieldDef, defaultProps);
+
+      // Assert
+      expect(inputs['props']).toEqual({
+        size: 'small', // from defaults
+        variant: 'filled', // overridden
+      });
+    });
+  });
+
   describe('integration scenarios', () => {
     it('should create correct inputs for complex field definition', () => {
       // Arrange

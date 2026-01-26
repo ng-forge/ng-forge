@@ -10,7 +10,7 @@ test.describe('Expression-Based Logic Tests', () => {
 
   test.describe('Hidden Logic', () => {
     test('should hide/show fields based on fieldValue condition', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/hidden-logic');
+      await page.goto('/#/test/expression-based-logic/hidden-logic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('hidden-logic-test');
@@ -26,17 +26,23 @@ test.describe('Expression-Based Logic Tests', () => {
       const paymentField = scenario.getByTestId('paymentMethod');
       await expect(paymentField).toBeHidden({ timeout: 10000 });
 
+      // Screenshot: Free subscription - payment hidden
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-hidden-logic-free');
+
       // Select premium - payment should be visible
       await subscriptionSelect.selectOption({ label: 'Premium' });
       await subscriptionSelect.blur();
 
       await expect(paymentField).toBeVisible({ timeout: 10000 });
+
+      // Screenshot: Premium subscription - payment visible
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-hidden-logic-premium');
     });
   });
 
   test.describe('Disabled Logic', () => {
     test('should disable fields using JavaScript expressions', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/disabled-logic');
+      await page.goto('/#/test/expression-based-logic/disabled-logic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('disabled-logic-test');
@@ -46,17 +52,23 @@ test.describe('Expression-Based Logic Tests', () => {
       const vehicleInput = scenario.locator('#vehicleType input');
       await expect(vehicleInput).toBeDisabled();
 
+      // Screenshot: Vehicle type disabled
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-disabled-logic-disabled');
+
       // Check the checkbox - vehicle type should be enabled
       await scenario.locator('#hasVehicle input[type="checkbox"]').check();
 
       // Use auto-waiting assertion to wait for Angular to update disabled state
       await expect(vehicleInput).toBeEnabled();
+
+      // Screenshot: Vehicle type enabled
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-disabled-logic-enabled');
     });
   });
 
   test.describe('AND Logic', () => {
     test('should hide fields using AND conditional logic', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/and-logic');
+      await page.goto('/#/test/expression-based-logic/and-logic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('and-logic-test');
@@ -67,6 +79,9 @@ test.describe('Expression-Based Logic Tests', () => {
       // Initially both unchecked - regular price should be visible
       await expect(regularPriceField).toBeVisible();
 
+      // Screenshot: Initial state - regular price visible
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-and-logic-initial');
+
       // Check only hasDiscount - regular price should still be visible (only one condition true)
       await scenario.locator('#hasDiscount input[type="checkbox"]').check();
       await expect(regularPriceField).toBeVisible();
@@ -74,6 +89,9 @@ test.describe('Expression-Based Logic Tests', () => {
       // Check isPremiumMember too - now both conditions true, regular price should be hidden
       await scenario.locator('#isPremiumMember input[type="checkbox"]').check();
       await expect(regularPriceField).toBeHidden();
+
+      // Screenshot: Both conditions true - regular price hidden
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-and-logic-both-true');
 
       // Uncheck hasDiscount - regular price should be visible again (only one condition true)
       await scenario.locator('#hasDiscount input[type="checkbox"]').uncheck();
@@ -83,7 +101,7 @@ test.describe('Expression-Based Logic Tests', () => {
 
   test.describe('Readonly Logic', () => {
     test('should make static readonly field always readonly', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/readonly-logic');
+      await page.goto('/#/test/expression-based-logic/readonly-logic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('readonly-logic-test');
@@ -95,7 +113,7 @@ test.describe('Expression-Based Logic Tests', () => {
     });
 
     test('should make fields readonly using conditional logic', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/readonly-logic');
+      await page.goto('/#/test/expression-based-logic/readonly-logic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('readonly-logic-test');
@@ -127,7 +145,7 @@ test.describe('Expression-Based Logic Tests', () => {
 
   test.describe('OR Logic', () => {
     test('should apply OR conditional logic for multiple conditions', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/or-logic');
+      await page.goto('/#/test/expression-based-logic/or-logic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('or-logic-test');
@@ -160,7 +178,7 @@ test.describe('Expression-Based Logic Tests', () => {
 
   test.describe('Nested AND within OR', () => {
     test('should handle nested AND within OR conditions', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/nested-and-within-or');
+      await page.goto('/#/test/expression-based-logic/nested-and-within-or');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('nested-and-within-or-test');
@@ -195,7 +213,7 @@ test.describe('Expression-Based Logic Tests', () => {
 
   test.describe('Nested OR within AND', () => {
     test('should handle nested OR within AND conditions', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/nested-or-within-and');
+      await page.goto('/#/test/expression-based-logic/nested-or-within-and');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('nested-or-within-and-test');
@@ -232,7 +250,7 @@ test.describe('Expression-Based Logic Tests', () => {
 
   test.describe('Comparison Operators', () => {
     test('should show underage warning when age < 18', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/comparison-operators');
+      await page.goto('/#/test/expression-based-logic/comparison-operators');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('comparison-operators-test');
@@ -254,7 +272,7 @@ test.describe('Expression-Based Logic Tests', () => {
     });
 
     test('should show senior discount when age > 65', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/comparison-operators');
+      await page.goto('/#/test/expression-based-logic/comparison-operators');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('comparison-operators-test');
@@ -276,7 +294,7 @@ test.describe('Expression-Based Logic Tests', () => {
     });
 
     test('should show bulk order note when quantity > 10', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/comparison-operators');
+      await page.goto('/#/test/expression-based-logic/comparison-operators');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('comparison-operators-test');
@@ -298,7 +316,7 @@ test.describe('Expression-Based Logic Tests', () => {
     });
 
     test('should show reactivate option when status != active', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/comparison-operators');
+      await page.goto('/#/test/expression-based-logic/comparison-operators');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('comparison-operators-test');
@@ -324,7 +342,7 @@ test.describe('Expression-Based Logic Tests', () => {
     });
 
     test('should show pass/fail messages based on score threshold', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/comparison-operators');
+      await page.goto('/#/test/expression-based-logic/comparison-operators');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('comparison-operators-test');
@@ -352,7 +370,7 @@ test.describe('Expression-Based Logic Tests', () => {
 
   test.describe('String Operators', () => {
     test('should show corporate note when email contains "company"', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/string-operators');
+      await page.goto('/#/test/expression-based-logic/string-operators');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('string-operators-test');
@@ -374,7 +392,7 @@ test.describe('Expression-Based Logic Tests', () => {
     });
 
     test('should show secure/insecure notes based on URL prefix', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/string-operators');
+      await page.goto('/#/test/expression-based-logic/string-operators');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('string-operators-test');
@@ -400,7 +418,7 @@ test.describe('Expression-Based Logic Tests', () => {
     });
 
     test('should show PDF viewer when filename ends with .pdf', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/string-operators');
+      await page.goto('/#/test/expression-based-logic/string-operators');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('string-operators-test');
@@ -436,7 +454,7 @@ test.describe('Expression-Based Logic Tests', () => {
     });
 
     test('should show international shipping note when country != US', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/expression-based-logic/string-operators');
+      await page.goto('/#/test/expression-based-logic/string-operators');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('string-operators-test');

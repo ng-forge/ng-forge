@@ -17,19 +17,20 @@ import {
   untracked,
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
-import { form } from '@angular/forms/signals';
+import { form, FieldTree, Schema } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { EMPTY, forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
 import { derivedFromDeferred } from './utils/derived-from-deferred/derived-from-deferred';
 import { reconcileFields, ResolvedField, resolveField } from './utils/resolve-field/resolve-field';
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
 import { keyBy, memoize, isEqual } from './utils/object-utils';
-import { FIELD_SIGNAL_CONTEXT } from './models/field-signal-context.token';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from './models/field-signal-context.token';
 import { FieldTypeDefinition } from './models/field-type';
 import { FormConfig, FormOptions } from './models/form-config';
 import { RegisteredFieldTypes } from './models/registry/field-registry';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 import { createSchemaFromFields } from './core/schema-builder';
+import { createFormLevelSchema } from './core/form-schema-merger';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
@@ -45,12 +46,26 @@ import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryS
 import { detectFormMode, FormModeDetectionResult } from './models/types/form-mode';
 import { collectCrossFieldEntries } from './core/cross-field/cross-field-collector';
 import { FormModeValidator } from './utils/form-validation/form-mode-validator';
+import {
+  DERIVATION_WARNING_TRACKER,
+  DERIVATION_ORCHESTRATOR,
+  createDerivationWarningTracker,
+  createDerivationOrchestrator,
+  createDerivationLogger,
+  DerivationLogger,
+  DerivationOrchestratorConfig,
+} from './core/derivation';
 import { PageOrchestratorComponent } from './core/page-orchestrator';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormResetEvent } from './events/constants/form-reset.event';
 import { PageChangeEvent } from './events/constants/page-change.event';
 import { PageNavigationStateChangeEvent } from './events/constants/page-navigation-state-change.event';
 import { DynamicFormLogger } from './providers/features/logger/logger.token';
+import { DERIVATION_LOG_CONFIG } from './providers/features/logger/with-logger-config';
+
+function derivationOrchestratorFactoryWrapper(dynamicForm: DynamicForm) {
+  return createDerivationOrchestrator(dynamicForm.derivationOrchestratorConfig);
+}
 
 /**
  * Dynamic form component that renders a complete form based on configuration.
@@ -84,7 +99,35 @@ import { DynamicFormLogger } from './providers/features/logger/logger.token';
     }
   `,
   styleUrl: './dynamic-form.component.scss',
-  providers: [EventBus, SchemaRegistryService, FunctionRegistryService, RootFormRegistryService, FieldContextRegistryService],
+  providers: [
+    EventBus,
+    SchemaRegistryService,
+    FunctionRegistryService,
+    RootFormRegistryService,
+    FieldContextRegistryService,
+    // Form-level config tokens provided via useFactory to enable reactive updates
+    {
+      provide: DEFAULT_PROPS,
+      useFactory: (form: DynamicForm) => computed(() => form.config().defaultProps),
+      deps: [DynamicForm],
+    },
+    {
+      provide: DEFAULT_VALIDATION_MESSAGES,
+      useFactory: (form: DynamicForm) => computed(() => form.config().defaultValidationMessages),
+      deps: [DynamicForm],
+    },
+    {
+      provide: FORM_OPTIONS,
+      useFactory: (form: DynamicForm) => form.effectiveFormOptions,
+      deps: [DynamicForm],
+    },
+    { provide: DERIVATION_WARNING_TRACKER, useFactory: createDerivationWarningTracker },
+    {
+      provide: DERIVATION_ORCHESTRATOR,
+      useFactory: derivationOrchestratorFactoryWrapper,
+      deps: [DynamicForm],
+    },
+  ],
   host: {
     class: 'df-dynamic-form df-form',
     novalidate: '', // Disable browser validation - Angular Signal Forms handles validation
@@ -112,6 +155,7 @@ export class DynamicForm<
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly schemaRegistry = inject(SchemaRegistryService);
   private readonly logger = inject(DynamicFormLogger);
+  private readonly derivationLogConfig = inject(DERIVATION_LOG_CONFIG);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -235,24 +279,31 @@ export class DynamicForm<
     return { ...configOptions, ...inputOptions };
   });
 
+  /**
+   * Computed derivation logger based on injected config.
+   *
+   * Uses factory pattern to return no-op logger when logging is disabled,
+   * avoiding any logging overhead in production.
+   */
+  private readonly derivationLogger = computed<DerivationLogger>(() => {
+    return createDerivationLogger(this.derivationLogConfig, this.logger);
+  });
+
   readonly fieldSignalContext = computed<FieldSignalContext<TModel>>(() => ({
     injector: this.injector,
     value: this.value,
     defaultValues: this.defaultValues,
     form: this.form(),
-    defaultValidationMessages: this.config().defaultValidationMessages,
-    formOptions: this.effectiveFormOptions(),
   }));
 
+  /**
+   * Injector for field components with FIELD_SIGNAL_CONTEXT.
+   * Other form-level tokens (DEFAULT_PROPS, etc.) are provided at component level.
+   */
   private readonly fieldInjector = computed(() =>
     Injector.create({
       parent: this.injector,
-      providers: [
-        {
-          provide: FIELD_SIGNAL_CONTEXT,
-          useValue: this.fieldSignalContext(),
-        },
-      ],
+      providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: this.fieldSignalContext() }],
     }),
   );
 
@@ -282,14 +333,31 @@ export class DynamicForm<
   readonly form = computed<ReturnType<typeof form<TModel>>>(() => {
     return runInInjectionContext(this.injector, () => {
       const setup = this.formSetup();
+      const config = this.config();
       let formInstance: ReturnType<typeof form<TModel>>;
 
       untracked(() => this.rootFormRegistry.registerFormValueSignal(this.entity as Signal<Record<string, unknown>>));
 
-      if (setup.schemaFields && setup.schemaFields.length > 0) {
+      const hasFields = setup.schemaFields && setup.schemaFields.length > 0;
+      const hasFormSchema = config.schema !== undefined;
+
+      if (hasFields) {
         const crossFieldCollection = collectCrossFieldEntries(setup.schemaFields as FieldDef<unknown>[]);
-        const schema = createSchemaFromFields(setup.schemaFields, setup.registry, crossFieldCollection.validators);
-        formInstance = untracked(() => form(this.entity, schema));
+
+        // Create schema with both field-level and form-level validation
+        // Type assertion needed due to complex generic type inference between TModel and InferFormValue
+        const combinedSchema = createSchemaFromFields(setup.schemaFields, setup.registry, {
+          crossFieldValidators: crossFieldCollection.validators,
+          formLevelSchema: config.schema,
+        }) as Schema<TModel>;
+
+        formInstance = untracked(() => form(this.entity, combinedSchema));
+      } else if (hasFormSchema) {
+        // Only form-level schema (no fields with validation)
+        // Non-null assertion safe: hasFormSchema guarantees config.schema is defined
+        // Type assertion needed due to generic type inference
+        const formSchema = createFormLevelSchema(config.schema!) as Schema<TModel>;
+        formInstance = untracked(() => form(this.entity, formSchema));
       } else {
         formInstance = untracked(() => form(this.entity));
       }
@@ -351,6 +419,19 @@ export class DynamicForm<
 
   /** Whether the form is currently submitting. */
   readonly submitting = computed(() => this.form()().submitting());
+
+  /**
+   * Configuration for the derivation orchestrator.
+   * Bundles the form-specific signals needed by the orchestrator.
+   *
+   * @internal Used by DERIVATION_ORCHESTRATOR provider.
+   */
+  readonly derivationOrchestratorConfig: DerivationOrchestratorConfig = {
+    schemaFields: computed(() => this.formSetup().schemaFields as FieldDef<unknown>[] | undefined),
+    formValue: this.formValue as Signal<Record<string, unknown>>,
+    form: computed(() => this.form() as unknown as FieldTree<unknown>),
+    derivationLogger: this.derivationLogger,
+  };
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Initialization
@@ -467,6 +548,12 @@ export class DynamicForm<
   constructor() {
     this.setupEffects();
     this.setupEventHandlers();
+
+    // Lazily inject the derivation orchestrator to avoid circular dependency.
+    // The orchestrator's constructor sets up RxJS subscriptions that process derivations.
+    afterNextRender(() => {
+      this.injector.get(DERIVATION_ORCHESTRATOR);
+    });
   }
 
   /**
@@ -558,6 +645,11 @@ export class DynamicForm<
       Object.entries(customFnConfig.customFunctions).forEach(([name, fn]) => {
         this.functionRegistry.registerCustomFunction(name, fn);
       });
+    }
+
+    // Register derivation functions (stored separately for use by derivation applicator)
+    if (customFnConfig.derivations) {
+      this.functionRegistry.setDerivationFunctions(customFnConfig.derivations);
     }
 
     this.functionRegistry.setValidators(customFnConfig.validators);

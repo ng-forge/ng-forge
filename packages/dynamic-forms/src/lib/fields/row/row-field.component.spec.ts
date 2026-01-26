@@ -1,6 +1,6 @@
 import { RowFieldComponent } from './row-field.component';
 import { RowField } from '../../definitions/default/row-field';
-import { createSimpleTestField, setupSimpleTest } from '@ng-forge/dynamic-forms/testing';
+import { createSimpleTestField, setupSimpleTest } from '../../../../testing/src/simple-test-utils';
 import { FieldDef } from '../../definitions/base/field-def';
 
 describe('RowFieldComponent', () => {
@@ -45,7 +45,6 @@ describe('RowFieldComponent', () => {
 
     const { component } = setupSimpleTest(RowFieldComponent, {
       field,
-      value: { field1: 'value1', field2: 'value2' },
     });
 
     // The component should render directly as the host element (no nested form)

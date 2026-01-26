@@ -19,6 +19,9 @@ permissions:
   id-token: write
   actions: read
 
+env:
+  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng'
+
 jobs:
   # This job runs on push and skips immediately - just to show the workflow in PR
   await-dispatch:
@@ -38,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check CI workflow status
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { owner, repo } = context.repo;
@@ -91,7 +94,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -99,12 +102,12 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 8.15.1
+          version: 10.28.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
 
@@ -120,12 +123,12 @@ jobs:
           echo "📦 Releasing version: $VERSION"
 
       - name: Build libraries
-        run: pnpm nx run-many -t build -p dynamic-forms,dynamic-forms-material,dynamic-forms-primeng,dynamic-forms-ionic,dynamic-forms-bootstrap
+        run: pnpm nx run-many -t build -p ${{ env.LIBRARY_PACKAGES }}
 
       - name: Verify build outputs
         run: |
           echo "Verifying build outputs..."
-          for pkg in dynamic-forms dynamic-forms-material dynamic-forms-primeng dynamic-forms-ionic dynamic-forms-bootstrap; do
+          for pkg in ${{ env.LIBRARY_PACKAGES }}; do
             if [ ! -d "dist/packages/$pkg" ]; then
               echo "❌ Build output missing for $pkg"
               exit 1
@@ -166,7 +169,7 @@ jobs:
           git push origin "v${{ env.VERSION }}"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION }}
           name: Release v${{ env.VERSION }}
@@ -193,7 +196,7 @@ jobs:
           echo "## Release v${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Published packages:" >> $GITHUB_STEP_SUMMARY
-          for pkg in dynamic-forms dynamic-forms-material dynamic-forms-primeng dynamic-forms-ionic dynamic-forms-bootstrap; do
+          for pkg in ${{ env.LIBRARY_PACKAGES }}; do
             echo "- \`@ng-forge/$pkg@${{ env.VERSION }}\`" >> $GITHUB_STEP_SUMMARY
           done
           echo "" >> $GITHUB_STEP_SUMMARY

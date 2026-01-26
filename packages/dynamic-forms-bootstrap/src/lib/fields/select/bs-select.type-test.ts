@@ -9,10 +9,11 @@ import type {
   SchemaApplicationConfig,
   ValidatorConfig,
   ValidationMessages,
+  ValueType,
 } from '@ng-forge/dynamic-forms';
 
 import type { BsSelectProps, BsSelectField } from './bs-select.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // BsSelectProps - Whitelist Test
@@ -24,56 +25,57 @@ describe('BsSelectProps - Exhaustive Whitelist', () => {
     | 'size'
     | 'htmlSize'
     | 'floatingLabel'
-    | 'helpText'
+    | 'hint'
     | 'validFeedback'
     | 'invalidFeedback'
     | 'compareWith'
     | 'placeholder';
-  type ActualKeys = keyof BsSelectProps<string>;
+  type ActualKeys = keyof BsSelectProps;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
   });
 
   it('should have all keys optional', () => {
-    expectTypeOf<RequiredKeys<BsSelectProps<string>>>().toEqualTypeOf<never>();
+    expectTypeOf<RequiredKeys<BsSelectProps>>().toEqualTypeOf<never>();
   });
 
   describe('property types', () => {
     it('multiple', () => {
-      expectTypeOf<BsSelectProps<string>['multiple']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<BsSelectProps['multiple']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('size', () => {
-      expectTypeOf<BsSelectProps<string>['size']>().toEqualTypeOf<'sm' | 'lg' | undefined>();
+      expectTypeOf<BsSelectProps['size']>().toEqualTypeOf<'sm' | 'lg' | undefined>();
     });
 
     it('htmlSize', () => {
-      expectTypeOf<BsSelectProps<string>['htmlSize']>().toEqualTypeOf<number | undefined>();
+      expectTypeOf<BsSelectProps['htmlSize']>().toEqualTypeOf<number | undefined>();
     });
 
     it('floatingLabel', () => {
-      expectTypeOf<BsSelectProps<string>['floatingLabel']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<BsSelectProps['floatingLabel']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('helpText', () => {
-      expectTypeOf<BsSelectProps<string>['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<BsSelectProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('validFeedback', () => {
-      expectTypeOf<BsSelectProps<string>['validFeedback']>().toEqualTypeOf<DynamicText | undefined>();
+      expectTypeOf<BsSelectProps['validFeedback']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('invalidFeedback', () => {
-      expectTypeOf<BsSelectProps<string>['invalidFeedback']>().toEqualTypeOf<DynamicText | undefined>();
+      expectTypeOf<BsSelectProps['invalidFeedback']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('compareWith', () => {
-      expectTypeOf<BsSelectProps<string>['compareWith']>().toEqualTypeOf<((o1: string, o2: string) => boolean) | undefined>();
+      // Bootstrap select uses string for compareWith since native HTML select only supports strings
+      expectTypeOf<BsSelectProps['compareWith']>().toEqualTypeOf<((o1: string, o2: string) => boolean) | undefined>();
     });
 
     it('placeholder', () => {
-      expectTypeOf<BsSelectProps<string>['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
+      expectTypeOf<BsSelectProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });
@@ -107,6 +109,7 @@ describe('BsSelectField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseValueField
     | 'value'
@@ -221,7 +224,7 @@ describe('BsSelectField - Usage', () => {
       props: {
         size: 'lg',
         floatingLabel: true,
-        helpText: 'Select your country',
+        hint: 'Select your country',
       },
     } as const satisfies BsSelectField<string>;
 

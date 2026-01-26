@@ -5,14 +5,14 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { IonicCheckboxProps, IonicCheckboxField } from './ionic-checkbox.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // IonicCheckboxProps - Whitelist Test
 // ============================================================================
 
 describe('IonicCheckboxProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'indeterminate';
+  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'indeterminate' | 'hint';
   type ActualKeys = keyof IonicCheckboxProps;
 
   it('should have exactly the expected keys', () => {
@@ -73,6 +73,7 @@ describe('IonicCheckboxField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseCheckedField
     | 'value'

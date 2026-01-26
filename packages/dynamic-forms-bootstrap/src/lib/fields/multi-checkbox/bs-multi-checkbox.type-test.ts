@@ -12,39 +12,39 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { BsMultiCheckboxProps, BsMultiCheckboxField } from './bs-multi-checkbox.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // BsMultiCheckboxProps - Whitelist Test
 // ============================================================================
 
 describe('BsMultiCheckboxProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'switch' | 'inline' | 'reverse' | 'helpText';
-  type ActualKeys = keyof BsMultiCheckboxProps<string>;
+  type ExpectedKeys = 'switch' | 'inline' | 'reverse' | 'hint';
+  type ActualKeys = keyof BsMultiCheckboxProps;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
   });
 
   it('should have all keys optional', () => {
-    expectTypeOf<RequiredKeys<BsMultiCheckboxProps<string>>>().toEqualTypeOf<never>();
+    expectTypeOf<RequiredKeys<BsMultiCheckboxProps>>().toEqualTypeOf<never>();
   });
 
   describe('property types', () => {
     it('switch', () => {
-      expectTypeOf<BsMultiCheckboxProps<string>['switch']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<BsMultiCheckboxProps['switch']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('inline', () => {
-      expectTypeOf<BsMultiCheckboxProps<string>['inline']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<BsMultiCheckboxProps['inline']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('reverse', () => {
-      expectTypeOf<BsMultiCheckboxProps<string>['reverse']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<BsMultiCheckboxProps['reverse']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('helpText', () => {
-      expectTypeOf<BsMultiCheckboxProps<string>['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<BsMultiCheckboxProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });
@@ -78,6 +78,7 @@ describe('BsMultiCheckboxField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseValueField
     | 'value'
@@ -193,7 +194,7 @@ describe('BsMultiCheckboxField - Usage', () => {
       props: {
         switch: false,
         inline: true,
-        helpText: 'Select your interests',
+        hint: 'Select your interests',
       },
     } as const satisfies BsMultiCheckboxField<string>;
 

@@ -3,19 +3,19 @@ import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatHint } from '@angular/material/input';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatSelectComponent, MatSelectProps } from './mat-select.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-select',
   imports: [MatFormField, MatLabel, MatSelect, MatOption, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let selectId = key() + '-select';
 
     <mat-form-field [appearance]="effectiveAppearance()" [subscriptSizing]="effectiveSubscriptSizing()">
       @if (label(); as label) {
@@ -23,13 +23,14 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       }
 
       <mat-select
+        [id]="selectId"
         [formField]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [multiple]="props()?.multiple || false"
         [compareWith]="props()?.compareWith || defaultCompare"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
       >
         @for (option of options(); track option.value) {
           <mat-option [value]="option.value" [disabled]="option.disabled || false">
@@ -38,25 +39,16 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         }
       </mat-select>
 
-      @if (props()?.hint; as hint) {
+      @if (errorsToDisplay()[0]; as error) {
+        <mat-error [id]="errorId()">{{ error.message }}</mat-error>
+      } @else if (props()?.hint; as hint) {
         <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
-      }
-      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-        <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
       }
     </mat-form-field>
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
-      :host {
-        display: block;
-        width: 100%;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-
       mat-form-field {
         width: 100%;
       }
@@ -70,11 +62,11 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
     '[attr.hidden]': 'field()().hidden() || null',
   },
 })
-export default class MatSelectFieldComponent<T> implements MatSelectComponent<T> {
+export default class MatSelectFieldComponent implements MatSelectComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<T>>();
+  readonly field = input.required<FieldTree<ValueType>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
@@ -83,8 +75,8 @@ export default class MatSelectFieldComponent<T> implements MatSelectComponent<T>
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<FieldOption<T>[]>([]);
-  readonly props = input<MatSelectProps<T>>();
+  readonly options = input<FieldOption<ValueType>[]>([]);
+  readonly props = input<MatSelectProps>();
   readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
@@ -129,18 +121,10 @@ export default class MatSelectFieldComponent<T> implements MatSelectComponent<T>
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

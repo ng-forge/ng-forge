@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ng-forge/ng-forge/main/logo-light.svg" alt="ng-forge logo" width="400"/>
+  <img src="./logo.svg" alt="ng-forge Dynamic Forms" width="400"/>
 </p>
 
 # @ng-forge/dynamic-forms-bootstrap
@@ -18,7 +18,11 @@ Bootstrap 5 field components for [@ng-forge/dynamic-forms](https://www.npmjs.com
 
 | @ng-forge/dynamic-forms-bootstrap | @ng-forge/dynamic-forms | Angular       |
 | --------------------------------- | ----------------------- | ------------- |
-| 0.1.1+                            | 0.1.1+                  | >=21.0.2      |
+| 0.5.x                             | 0.5.x                   | >=21.1.0      |
+| 0.4.x                             | 0.4.x                   | >=21.1.0      |
+| 0.3.x                             | 0.3.x                   | 21.0.7-21.0.x |
+| 0.2.x                             | 0.2.x                   | 21.0.6        |
+| 0.1.1+                            | 0.1.1+                  | 21.0.2-21.0.5 |
 | 0.1.0                             | 0.1.0                   | 21.0.0-21.0.1 |
 
 ## Installation

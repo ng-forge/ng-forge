@@ -1,9 +1,10 @@
-import { EnvironmentInjector, runInInjectionContext } from '@angular/core';
+import { EnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { textFieldMapper } from './text-field-mapper';
 import { TextField } from '../../definitions/default/text-field';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
+import { DEFAULT_PROPS, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { vi } from 'vitest';
 
 describe('textFieldMapper', () => {
@@ -28,10 +29,22 @@ describe('textFieldMapper', () => {
       getCustomFunctions: mockGetCustomFunctions,
     };
 
+    const mockFieldSignalContext = {
+      injector: undefined,
+      value: signal({}),
+      defaultValues: () => ({}),
+      form: {},
+      defaultValidationMessages: undefined,
+      formOptions: undefined,
+      defaultProps: undefined,
+    };
+
     await TestBed.configureTestingModule({
       providers: [
         { provide: FieldContextRegistryService, useValue: mockFieldContextRegistry },
         { provide: FunctionRegistryService, useValue: mockFunctionRegistry },
+        { provide: FIELD_SIGNAL_CONTEXT, useValue: mockFieldSignalContext },
+        { provide: DEFAULT_PROPS, useValue: signal(undefined) },
       ],
     }).compileComponents();
 

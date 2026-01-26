@@ -5,14 +5,14 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { BsCheckboxProps, BsCheckboxField } from './bs-checkbox.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // BsCheckboxProps - Whitelist Test
 // ============================================================================
 
 describe('BsCheckboxProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'switch' | 'inline' | 'reverse' | 'indeterminate' | 'helpText';
+  type ExpectedKeys = 'switch' | 'inline' | 'reverse' | 'indeterminate' | 'hint';
   type ActualKeys = keyof BsCheckboxProps;
 
   it('should have exactly the expected keys', () => {
@@ -40,8 +40,8 @@ describe('BsCheckboxProps - Exhaustive Whitelist', () => {
       expectTypeOf<BsCheckboxProps['indeterminate']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('helpText', () => {
-      expectTypeOf<BsCheckboxProps['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<BsCheckboxProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });
@@ -75,6 +75,7 @@ describe('BsCheckboxField - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseCheckedField
     | 'value'
@@ -178,7 +179,7 @@ describe('BsCheckboxField - Usage', () => {
       props: {
         switch: true,
         inline: true,
-        helpText: 'Please read the terms carefully',
+        hint: 'Please read the terms carefully',
       },
     } as const satisfies BsCheckboxField;
 

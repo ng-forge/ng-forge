@@ -1,6 +1,6 @@
 {
   "name": "@ng-forge/dynamic-forms",
-  "version": "0.2.0",
+  "version": "0.5.0",
   "description": "Type-safe, signal-powered dynamic forms for Angular. Build complex forms from configuration with full TypeScript inference.",
   "type": "module",
   "license": "MIT",
@@ -31,13 +31,16 @@
   ],
   "sideEffects": false,
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "peerDependencies": {
-    "@angular/common": ">=21.0.7",
-    "@angular/core": ">=21.0.7",
-    "@angular/forms": ">=21.0.7",
-    "ngxtension": ">=4.0.0",
+    "@angular/common": "~21.1.0",
+    "@angular/core": "~21.1.0",
+    "@angular/forms": "~21.1.0",
+    "@standard-schema/spec": "^1.0.0",
     "rxjs": ">=7.0.0"
+  },
+  "dependencies": {
+    "ngxtension": ">=4.0.0"
   }
 }

@@ -51,4 +51,6 @@ export type {
   BsToggleComponent,
   BootstrapConfig,
   BsFieldType,
+  BsFormProps,
+  BsFormConfig,
 } from './lib';

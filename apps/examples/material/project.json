@@ -16,6 +16,9 @@
         "browser": "apps/examples/material/src/main.ts",
         "tsConfig": "apps/examples/material/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
+        "stylePreprocessorOptions": {
+          "includePaths": ["internal/styling/src"]
+        },
         "assets": [
           {
             "glob": "**/*",

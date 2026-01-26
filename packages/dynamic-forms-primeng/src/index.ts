@@ -14,6 +14,7 @@ export {
   PrimeField,
   withPrimeNGFields,
 } from './lib';
+
 export type {
   PrimeButtonProps,
   PrimeButtonField,
@@ -51,4 +52,6 @@ export type {
   PrimeToggleComponent,
   PrimeNGConfig,
   PrimeFieldType,
+  PrimeFormProps,
+  PrimeFormConfig,
 } from './lib';

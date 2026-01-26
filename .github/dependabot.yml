@@ -1,0 +1,90 @@
+version: 2
+updates:
+  # npm dependencies
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Europe/Bucharest'
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: 'chore(deps)'
+    labels:
+      - 'dependencies'
+      - 'automated'
+    groups:
+      # Group Nx updates together
+      nx:
+        patterns:
+          - '@nx/*'
+          - 'nx'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Group testing dependencies
+      testing:
+        patterns:
+          - '@vitest/*'
+          - 'vitest'
+          - '@playwright/*'
+          - 'playwright'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Group linting/formatting tools
+      linting:
+        patterns:
+          - 'eslint*'
+          - '@eslint/*'
+          - '@typescript-eslint/*'
+          - 'typescript-eslint'
+          - 'prettier'
+          - 'angular-eslint'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Group minor and patch updates for other dependencies
+      minor-patch:
+        update-types:
+          - 'minor'
+          - 'patch'
+        exclude-patterns:
+          - '@angular/*'
+          - '@angular-devkit/*'
+          - '@nx/*'
+          - 'nx'
+          - '@vitest/*'
+          - 'vitest'
+          - '@playwright/*'
+          - 'playwright'
+          - 'eslint*'
+          - '@eslint/*'
+          - '@typescript-eslint/*'
+          - 'typescript-eslint'
+          - 'prettier'
+          - 'angular-eslint'
+    ignore:
+      # Ignore major version updates - review these manually
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+      # Angular updates are handled manually due to breaking changes between patches
+      - dependency-name: '@angular/*'
+      - dependency-name: '@angular-devkit/*'
+      - dependency-name: '@schematics/angular'
+
+  # GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Europe/Bucharest'
+    commit-message:
+      prefix: 'ci(deps)'
+    labels:
+      - 'dependencies'
+      - 'ci'
+      - 'automated'

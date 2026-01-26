@@ -6,14 +6,17 @@ import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from 
 import { IonicToggleComponent, IonicToggleProps } from './ionic-toggle.type';
 import { IonicToggleControlComponent } from './ionic-toggle-control.component';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
-  selector: 'df-ionic-toggle',
+  selector: 'df-ion-toggle',
   imports: [IonicToggleControlComponent, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let toggleId = key() + '-toggle';
 
-    <df-ionic-toggle-control
+    <df-ion-toggle-control
+      [id]="toggleId"
       [formField]="f"
       [meta]="meta()"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"
@@ -21,12 +24,15 @@ import { AsyncPipe } from '@angular/common';
       [color]="props()?.color ?? 'primary'"
       [enableOnOffLabels]="props()?.enableOnOffLabels ?? false"
       [tabIndex]="tabIndex()"
+      [ariaDescribedBy]="ariaDescribedBy()"
     >
       {{ label() | dynamicText | async }}
-    </df-ionic-toggle-control>
+    </df-ion-toggle-control>
 
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    @if (errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="errorId()" role="alert">{{ error.message }}</ion-note>
+    } @else if (props()?.hint; as hint) {
+      <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -43,8 +49,6 @@ import { AsyncPipe } from '@angular/common';
   ],
   host: {
     '[class]': 'className()',
-    '[class.df-invalid]': 'showErrors()',
-    '[class.df-touched]': 'field()().touched()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'field()().hidden() || null',
@@ -81,5 +85,16 @@ export default class IonicToggleFieldComponent implements IonicToggleComponent {
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Base ID for error elements */
-  readonly errorId = computed(() => `${this.key()}-error`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** Unique ID for the helper text element */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
+
+  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

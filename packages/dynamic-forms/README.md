@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ng-forge/ng-forge/main/logo-light.svg" alt="ng-forge logo" width="400"/>
+  <img src="./logo.svg" alt="ng-forge Dynamic Forms" width="400"/>
 </p>
 
 # @ng-forge/dynamic-forms
@@ -16,10 +16,14 @@ Core library for building type-safe, dynamic Angular forms with signal forms int
 
 ## Compatibility
 
-| @ng-forge/dynamic-forms | Angular       | Notes                              |
-| ----------------------- | ------------- | ---------------------------------- |
-| 0.1.1+                  | >=21.0.2      | Signal forms API signature changed |
-| 0.1.0                   | 21.0.0-21.0.1 | Initial release                    |
+| @ng-forge/dynamic-forms | Angular       |
+| ----------------------- | ------------- |
+| 0.5.x                   | >=21.1.0      |
+| 0.4.x                   | >=21.1.0      |
+| 0.3.x                   | 21.0.7-21.0.x |
+| 0.2.x                   | 21.0.6        |
+| 0.1.1+                  | 21.0.2-21.0.5 |
+| 0.1.0                   | 21.0.0-21.0.1 |
 
 ## Installation
 
@@ -69,6 +73,7 @@ export class UserFormComponent {
 - **UI Agnostic** - Bring your own UI or use official integrations
 - **Validation** - Shorthand validators (`required`, `email`, `minLength`) and custom validators
 - **Conditional Logic** - Dynamic visibility and validation based on form state
+- **Value Derivation** - Automatic value computation with expression, function, or static values
 - **Container Fields** - Groups, rows, and pages for complex layouts
 - **i18n Ready** - Observable/Signal support for labels and messages
 - **Event System** - Custom events for buttons and form actions
@@ -92,6 +97,7 @@ Or [create your own](https://ng-forge.com/dynamic-forms/deep-dive/custom-integra
 - [Field Types](https://ng-forge.com/dynamic-forms/core/field-types)
 - [Validation](https://ng-forge.com/dynamic-forms/core/validation)
 - [Conditional Logic](https://ng-forge.com/dynamic-forms/core/conditional-logic)
+- [Value Derivation](https://ng-forge.com/dynamic-forms/core/derivation)
 - [Type Safety](https://ng-forge.com/dynamic-forms/core/type-safety)
 - [Events](https://ng-forge.com/dynamic-forms/core/events)
 - [i18n](https://ng-forge.com/dynamic-forms/core/i18n)

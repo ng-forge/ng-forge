@@ -2,7 +2,7 @@ Groups nest form fields under a single key in the form value. This creates logic
 
 ## Interactive Demo
 
-{{ NgDocActions.demo("GroupFieldDemoComponent", { container: false }) }}
+<iframe src="http://localhost:4201/#/examples/group-field" class="example-frame" title="Group Field Demo"></iframe>
 
 ## Basic Group
 
@@ -129,4 +129,4 @@ Groups can contain:
 - Leaf fields (input, select, checkbox, etc.)
 - Row fields (for horizontal layouts within the group)
 
-See [Type Safety & Inference](../core/type-safety) for details on how groups affect type inference.
+See [Type Safety & Inference](../advanced/type-safety/basics) for details on how groups affect type inference.

@@ -11,7 +11,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Multi-Page Registration Wizard', () => {
     test('should complete full 3-page registration workflow', async ({ page, helpers }) => {
       // Navigate to the multi-page registration component
-      await page.goto('http://localhost:4204/#/test/multi-page-navigation/multi-page-registration');
+      await page.goto('/#/test/multi-page-navigation/multi-page-registration');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
@@ -21,6 +21,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       // PAGE 1: Account Setup
       // Verify we're on page 1 by checking for username field
       await expect(scenario.locator('#username input')).toBeVisible();
+
+      // Screenshot: Page 1 empty state
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-multi-page-registration-page1-empty');
 
       // Fill page 1 fields (blur triggers validation)
       await scenario.locator('#username input').fill('testuser123');
@@ -32,12 +35,18 @@ test.describe('Multi-Page Navigation Tests', () => {
       await scenario.locator('#confirmPassword input').fill('securepassword123');
       await scenario.locator('#confirmPassword input').blur();
 
+      // Screenshot: Page 1 filled state
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-multi-page-registration-page1-filled');
+
       // Navigate to page 2 using specific button
       await scenario.locator('#nextToPersonalPage button').click();
 
       // PAGE 2: Personal Information
       // Verify we're on page 2 by checking for firstName field
       await expect(scenario.locator('#firstName input')).toBeVisible();
+
+      // Screenshot: Page 2 empty state
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-multi-page-registration-page2-empty');
 
       // Fill page 2 fields (blur triggers validation)
       await scenario.locator('#firstName input').fill('John');
@@ -55,12 +64,18 @@ test.describe('Multi-Page Navigation Tests', () => {
       await scenario.locator('#phoneNumber input').fill('+1-555-123-4567');
       await scenario.locator('#phoneNumber input').blur();
 
+      // Screenshot: Page 2 filled state
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-multi-page-registration-page2-filled');
+
       // Navigate to page 3 using specific button
       await scenario.locator('#nextToPreferencesPage button').click();
 
       // PAGE 3: Preferences
       // Verify we're on page 3 by checking for newsletter checkbox (Bootstrap uses .form-check)
       await expect(scenario.locator('#newsletter .form-check input')).toBeVisible();
+
+      // Screenshot: Page 3 empty state
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-multi-page-registration-page3-empty');
 
       // Fill page 3 fields
       await scenario.locator('#newsletter .form-check input').click();
@@ -75,6 +90,9 @@ test.describe('Multi-Page Navigation Tests', () => {
 
       // Agree to terms (required)
       await scenario.locator('#terms .form-check input').click();
+
+      // Screenshot: Page 3 filled state
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-multi-page-registration-page3-filled');
 
       // Set up event listener BEFORE clicking submit
       const submittedDataPromise = page.evaluate(
@@ -115,7 +133,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Validation-Based Navigation', () => {
     test('should prevent navigation with invalid required fields', async ({ page, helpers }) => {
       // Navigate to the validation navigation component
-      await page.goto('http://localhost:4204/#/test/multi-page-navigation/validation-navigation');
+      await page.goto('/#/test/multi-page-navigation/validation-navigation');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
@@ -178,7 +196,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Backward Navigation and Data Persistence', () => {
     test('should navigate backward and preserve data', async ({ page, helpers }) => {
       // Navigate to the backward navigation component
-      await page.goto('http://localhost:4204/#/test/multi-page-navigation/backward-navigation');
+      await page.goto('/#/test/multi-page-navigation/backward-navigation');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
@@ -190,6 +208,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       await scenario.locator('#field1 input').fill('Data from step 1');
       await scenario.locator('#field1 input').blur();
 
+      // Screenshot: Page 1 filled
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-backward-nav-page1');
+
       await scenario.locator('#nextToPage2 button').click();
 
       // PAGE 2: Fill and navigate forward (blur triggers validation)
@@ -197,12 +218,18 @@ test.describe('Multi-Page Navigation Tests', () => {
       await scenario.locator('#field2 input').fill('Data from step 2');
       await scenario.locator('#field2 input').blur();
 
+      // Screenshot: Page 2 filled
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-backward-nav-page2');
+
       await scenario.locator('#nextToPage3 button').click();
 
       // PAGE 3: Fill field (blur triggers validation)
       await expect(scenario.locator('#field3 input')).toBeVisible();
       await scenario.locator('#field3 input').fill('Data from step 3');
       await scenario.locator('#field3 input').blur();
+
+      // Screenshot: Page 3 filled
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-backward-nav-page3');
 
       // Test backward navigation
       const backButtonFromPage3 = scenario.locator('#previousToPage2 button');
@@ -213,6 +240,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       await expect(scenario.locator('#field2 input')).toBeVisible();
       await expect(scenario.locator('#field2 input')).toHaveValue('Data from step 2');
 
+      // Screenshot: Back to page 2 with data preserved
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-backward-nav-back-to-page2');
+
       // Go back one more time (different button - now on page 2)
       const backButtonFromPage2 = scenario.locator('#previousToPage1 button');
       await backButtonFromPage2.click();
@@ -220,6 +250,9 @@ test.describe('Multi-Page Navigation Tests', () => {
       // Verify we're back on page 1 and data is preserved
       await expect(scenario.locator('#field1 input')).toBeVisible();
       await expect(scenario.locator('#field1 input')).toHaveValue('Data from step 1');
+
+      // Screenshot: Back to page 1 with data preserved
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-backward-nav-back-to-page1');
 
       // Navigate forward again to verify data persists
       await scenario.locator('#nextToPage2 button').click();
@@ -259,7 +292,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Direct Page Navigation', () => {
     test('should allow direct navigation to specific pages', async ({ page, helpers }) => {
       // Navigate to the direct navigation component
-      await page.goto('http://localhost:4204/#/test/multi-page-navigation/direct-navigation');
+      await page.goto('/#/test/multi-page-navigation/direct-navigation');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
@@ -336,7 +369,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Page Transitions and Loading States', () => {
     test('should handle smooth page transitions with large data', async ({ page, helpers }) => {
       // Navigate to the page transitions component
-      await page.goto('http://localhost:4204/#/test/multi-page-navigation/page-transitions');
+      await page.goto('/#/test/multi-page-navigation/page-transitions');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario

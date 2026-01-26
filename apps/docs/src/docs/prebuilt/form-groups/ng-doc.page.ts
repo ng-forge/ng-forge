@@ -1,15 +1,11 @@
 import { NgDocPage } from '@ng-doc/core';
-import PrebuiltCategory from '../ng-doc.category';
-import { GroupFieldIframeDemoComponent } from '../../examples/group-field/group-field-iframe-demo.component';
+import LayoutComponentsCategory from '../ng-doc.category';
 
 const FormGroupsPage: NgDocPage = {
   title: 'Form Groups',
   mdFile: './index.md',
-  category: PrebuiltCategory,
+  category: LayoutComponentsCategory,
   order: 2,
-  demos: {
-    GroupFieldDemoComponent: GroupFieldIframeDemoComponent,
-  },
 };
 
 export default FormGroupsPage;

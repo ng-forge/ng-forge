@@ -39,7 +39,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('http-get-validator-test');
-      await page.goto('http://localhost:4204/#/test/async-validation/http-get-validator');
+      await page.goto('/#/test/async-validation/http-get-validator');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -95,7 +95,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('http-post-validator-test');
-      await page.goto('http://localhost:4204/#/test/async-validation/http-post-validator');
+      await page.goto('/#/test/async-validation/http-post-validator');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -128,7 +128,7 @@ test.describe('Async Validation Tests', () => {
   test.describe('Resource-Based Async Validator', () => {
     test('should validate product code using resource-based async validator', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('async-resource-validator-test');
-      await page.goto('http://localhost:4204/#/test/async-validation/async-resource-validator');
+      await page.goto('/#/test/async-validation/async-resource-validator');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -174,7 +174,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('http-error-handling-test');
-      await page.goto('http://localhost:4204/#/test/async-validation/http-error-handling');
+      await page.goto('/#/test/async-validation/http-error-handling');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -207,7 +207,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('multiple-validators-test');
-      await page.goto('http://localhost:4204/#/test/async-validation/multiple-validators');
+      await page.goto('/#/test/async-validation/multiple-validators');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
