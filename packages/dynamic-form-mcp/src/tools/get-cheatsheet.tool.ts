@@ -15,6 +15,29 @@ const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
  */
 const CHEATSHEET = `# ng-forge Dynamic Forms Cheatsheet
 
+## ⚠️ ALWAYS VALIDATE BEFORE DEPLOYING
+
+**Call \`ngforge_validate_form_config\` with your config before using it!**
+
+\`\`\`typescript
+// Validate your config - catches errors BEFORE runtime
+ngforge_validate_form_config({
+  uiIntegration: 'material',
+  config: yourFormConfig
+})
+\`\`\`
+
+This catches:
+- Wrong property placement (options in props vs field level)
+- Invalid props for field types
+- Labels on containers
+- Logic on wrong container types
+- Unknown field types
+
+**Don't skip this step** - a 900-line config with one mistake fails silently at runtime.
+
+---
+
 ## Quick Start (Component Usage)
 
 \`\`\`typescript
@@ -592,6 +615,53 @@ Validation error at 'fields.0.props': Unrecognized key(s) in object: 'min', 'max
 
 ### Input \`type\` Values
 \`'text'\` (default), \`'email'\`, \`'password'\`, \`'number'\`, \`'tel'\`, \`'url'\`
+
+## Minimal Snippets (Copy-Paste Ready)
+
+### Text Input with Validation
+\`\`\`typescript
+{ key: 'email', type: 'input', label: 'Email', required: true, email: true, props: { type: 'email' } }
+\`\`\`
+
+### Select with Options
+\`\`\`typescript
+{ key: 'country', type: 'select', label: 'Country', required: true, options: [{ label: 'USA', value: 'us' }, { label: 'Canada', value: 'ca' }] }
+\`\`\`
+
+### Slider with Range
+\`\`\`typescript
+{ key: 'rating', type: 'slider', label: 'Rating', minValue: 1, maxValue: 10, step: 1, value: 5 }
+\`\`\`
+
+### Conditional Field (Show When)
+\`\`\`typescript
+{ key: 'details', type: 'input', label: 'Details', logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'showDetails', operator: 'notEquals', value: true } }] }
+\`\`\`
+
+### Derived Field (Computed)
+\`\`\`typescript
+{ key: 'total', type: 'input', label: 'Total', readonly: true, logic: [{ type: 'derivation', targetField: 'total', expression: 'formValue.qty * formValue.price' }] }
+\`\`\`
+
+### Nested Group
+\`\`\`typescript
+{ key: 'address', type: 'group', fields: [{ key: 'street', type: 'input', label: 'Street' }, { key: 'city', type: 'input', label: 'City' }] }
+\`\`\`
+
+### Array of Items
+\`\`\`typescript
+{ key: 'contacts', type: 'array', fields: [{ key: 'item', type: 'group', fields: [{ key: 'name', type: 'input', label: 'Name' }, { key: 'phone', type: 'input', label: 'Phone' }] }] }
+\`\`\`
+
+### Multi-Page Form
+\`\`\`typescript
+{ fields: [{ key: 'p1', type: 'page', fields: [{ key: 'name', type: 'input', label: 'Name' }, { key: 'next', type: 'next', label: 'Next' }] }, { key: 'p2', type: 'page', fields: [{ key: 'email', type: 'input', label: 'Email' }, { key: 'back', type: 'previous', label: 'Back' }, { key: 'submit', type: 'submit', label: 'Submit' }] }] }
+\`\`\`
+
+### Disabled Submit When Invalid
+\`\`\`typescript
+{ key: 'submit', type: 'submit', label: 'Submit', logic: [{ type: 'disabled', condition: 'formInvalid' }] }
+\`\`\`
 `;
 
 export function registerGetCheatsheetTool(server: McpServer): void {
