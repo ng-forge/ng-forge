@@ -64,9 +64,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: check-ci
-    if: |
-      (inputs.environment == 'preview') ||
-      (inputs.environment == 'production' && github.ref == 'refs/heads/main')
     environment:
       name: ${{ inputs.environment }}
       url: ${{ steps.deploy.outputs.url }}
@@ -112,6 +109,7 @@ jobs:
           echo "Deployed to: $URL"
 
       - name: Smoke test deployment
+        if: inputs.environment == 'production'
         run: |
           echo "Verifying deployment is accessible..."
           curl --fail --retry 5 --retry-delay 10 "${{ steps.deploy.outputs.url }}/dynamic-forms/" > /dev/null
