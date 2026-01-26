@@ -1,0 +1,184 @@
+/**
+ * Get Field Info Tool
+ *
+ * Returns human-readable information about field types including
+ * properties, validators, and UI-specific options.
+ */
+
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { z } from 'zod';
+import { getFieldType, getFieldTypes, getUIAdapter, type FieldTypeInfo, type UIAdapterFieldType } from '../registry/index.js';
+
+const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
+
+function formatFieldInfo(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldType): string {
+  const lines: string[] = [];
+
+  lines.push(`## ${field.type} field`);
+  lines.push('');
+  lines.push(`**Category:** ${field.category}`);
+  lines.push(`**Description:** ${field.description}`);
+
+  if (field.valueType) {
+    lines.push(`**Value Type:** ${field.valueType}`);
+  }
+
+  lines.push(`**Validation Supported:** ${field.validationSupported ? 'Yes' : 'No'}`);
+  lines.push('');
+
+  // Base properties
+  lines.push('### Required Properties');
+  lines.push('');
+  lines.push('- `key`: string - Unique identifier for the field');
+  lines.push(`- \`type\`: "${field.type}" - Field type discriminator`);
+
+  if (field.category === 'value') {
+    lines.push('- `label`: string | { value: string, translate?: boolean } - Field label');
+  }
+
+  // Field-specific props
+  const requiredProps = Object.values(field.props).filter((p) => p.required);
+  for (const prop of requiredProps) {
+    lines.push(`- \`props.${prop.name}\`: ${prop.type} - ${prop.description}`);
+  }
+
+  lines.push('');
+  lines.push('### Optional Properties');
+  lines.push('');
+
+  const optionalProps = Object.values(field.props).filter((p) => !p.required);
+  for (const prop of optionalProps) {
+    const defaultVal = prop.default !== undefined ? ` (default: ${JSON.stringify(prop.default)})` : '';
+    lines.push(`- \`props.${prop.name}\`: ${prop.type} - ${prop.description}${defaultVal}`);
+  }
+
+  // Common optional properties for value fields
+  if (field.category === 'value') {
+    lines.push('- `value`: initial value for the field');
+    lines.push('- `disabled`: boolean - Disable the field');
+    lines.push('- `readonly`: boolean - Make field read-only');
+    lines.push('- `col`: number (1-12) - Column width in grid layout');
+    lines.push('- `className`: string - CSS class to apply');
+    lines.push('- `hideWhen`: { expression: string } | { field: string, operator: string, value: any }');
+    lines.push('- `showWhen`: { expression: string } | { field: string, operator: string, value: any }');
+    lines.push('- `logic`: LogicBlock[] - Dynamic behavior (derivation, etc.)');
+  }
+
+  // UI-specific properties
+  if (uiFieldType && Object.keys(uiFieldType.additionalProps).length > 0) {
+    lines.push('');
+    lines.push('### UI-Specific Properties');
+    lines.push('');
+
+    for (const prop of Object.values(uiFieldType.additionalProps)) {
+      const defaultVal = prop.default !== undefined ? ` (default: ${JSON.stringify(prop.default)})` : '';
+      lines.push(`- \`${prop.name}\`: ${prop.type} - ${prop.description}${defaultVal}`);
+    }
+  }
+
+  // Validators (for value fields)
+  if (field.validationSupported) {
+    lines.push('');
+    lines.push('### Validation (shorthand)');
+    lines.push('');
+    lines.push('- `required`: boolean - Field must have a value');
+    lines.push('- `email`: boolean - Must be valid email format');
+    lines.push('- `min`: number - Minimum numeric value');
+    lines.push('- `max`: number - Maximum numeric value');
+    lines.push('- `minLength`: number - Minimum string length');
+    lines.push('- `maxLength`: number - Maximum string length');
+    lines.push('- `pattern`: string - Regex pattern to match');
+  }
+
+  // Example
+  lines.push('');
+  lines.push('### Example');
+  lines.push('');
+  lines.push('```typescript');
+  lines.push(field.example);
+  lines.push('```');
+
+  return lines.join('\n');
+}
+
+export function registerGetFieldInfoTool(server: McpServer): void {
+  server.tool(
+    'ngforge_get_field_info',
+    'Returns human-readable documentation for a field type including all properties, validators, and examples. Use this to understand what properties are available for a specific field type. If no fieldType is specified, lists all available field types.',
+    {
+      fieldType: z
+        .string()
+        .optional()
+        .describe(
+          'Field type to get info for (input, select, checkbox, radio, textarea, datepicker, toggle, slider, hidden, text, row, group, array, page, button, submit). If omitted, lists all types.',
+        ),
+      uiIntegration: z
+        .enum(UI_INTEGRATIONS)
+        .optional()
+        .describe('UI library for UI-specific properties (material, bootstrap, primeng, ionic)'),
+    },
+    async ({ fieldType, uiIntegration }) => {
+      // If no fieldType, list all available types
+      if (!fieldType) {
+        const types = getFieldTypes();
+        const byCategory = {
+          value: types.filter((t) => t.category === 'value'),
+          container: types.filter((t) => t.category === 'container'),
+          button: types.filter((t) => t.category === 'button'),
+          display: types.filter((t) => t.category === 'display'),
+        };
+
+        const lines: string[] = [
+          '# Available Field Types',
+          '',
+          '## Value Fields (hold form data)',
+          ...byCategory.value.map((t) => `- **${t.type}**: ${t.description}`),
+          '',
+          '## Container Fields (layout/grouping)',
+          ...byCategory.container.map((t) => `- **${t.type}**: ${t.description}`),
+          '',
+          '## Button Fields',
+          ...byCategory.button.map((t) => `- **${t.type}**: ${t.description}`),
+          '',
+          '## Display Fields',
+          ...byCategory.display.map((t) => `- **${t.type}**: ${t.description}`),
+          '',
+          'Use `ngforge_get_field_info` with a specific fieldType for detailed properties and examples.',
+        ];
+
+        return {
+          content: [{ type: 'text' as const, text: lines.join('\n') }],
+        };
+      }
+
+      // Get specific field type info
+      const field = getFieldType(fieldType);
+
+      if (!field) {
+        const allTypes = getFieldTypes().map((t) => t.type);
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Unknown field type: "${fieldType}". Available types: ${allTypes.join(', ')}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      // Get UI-specific properties if integration specified
+      let uiFieldType: UIAdapterFieldType | undefined;
+      if (uiIntegration) {
+        const adapter = getUIAdapter(uiIntegration);
+        uiFieldType = adapter?.fieldTypes.find((ft) => ft.type === fieldType);
+      }
+
+      const info = formatFieldInfo(field, uiFieldType);
+
+      return {
+        content: [{ type: 'text' as const, text: info }],
+      };
+    },
+  );
+}
