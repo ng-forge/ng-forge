@@ -1,25 +1,17 @@
 /**
  * Schemas Resource
  *
- * Exposes JSON schemas as MCP resources for LLM context.
- * Provides per-field-type schemas to avoid context size issues.
+ * Provides a lightweight index pointing to tools for schema access.
+ * Actual schemas are accessed via tools to control context size.
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { getFieldTypeJsonSchema, getSupportedFieldTypes, type UiIntegration, type FieldType } from '@ng-forge/dynamic-forms-zod/mcp';
+import { getSupportedFieldTypes } from '@ng-forge/dynamic-forms-zod/mcp';
 
-const UI_INTEGRATIONS: UiIntegration[] = ['material', 'bootstrap', 'primeng', 'ionic'];
-
-function isValidUiIntegration(value: string): value is UiIntegration {
-  return UI_INTEGRATIONS.includes(value as UiIntegration);
-}
-
-function isValidFieldType(value: string): value is FieldType {
-  return getSupportedFieldTypes().includes(value as FieldType);
-}
+const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 
 export function registerSchemasResource(server: McpServer): void {
-  // List all available schemas
+  // Single lightweight resource pointing to tools
   server.resource('ng-forge Schemas', 'ng-forge://schemas', async () => {
     const fieldTypes = getSupportedFieldTypes();
 
@@ -27,106 +19,37 @@ export function registerSchemasResource(server: McpServer): void {
       contents: [
         {
           uri: 'ng-forge://schemas',
-          mimeType: 'application/json',
-          text: JSON.stringify(
-            {
-              description: 'JSON Schemas for ng-forge dynamic forms',
-              note: 'Use per-field-type schemas to avoid large context sizes (~25KB each vs ~258KB for full schema)',
-              integrations: UI_INTEGRATIONS,
-              fieldTypes,
-              usage: {
-                perFieldType: 'ng-forge://schemas/{integration}/{fieldType}',
-                example: 'ng-forge://schemas/material/input',
-              },
-            },
-            null,
-            2,
-          ),
-        },
-      ],
-    };
-  });
+          mimeType: 'text/markdown',
+          text: `# ng-forge Dynamic Forms Schema Reference
 
-  // List field types for a UI integration
-  server.resource('Field Types', 'ng-forge://schemas/{uiIntegration}', async (uri: URL) => {
-    const match = uri.href.match(/ng-forge:\/\/schemas\/([^/]+)$/);
-    const uiIntegration = match?.[1];
+## UI Integrations
+${UI_INTEGRATIONS.map((ui) => `- ${ui}`).join('\n')}
 
-    if (!uiIntegration || !isValidUiIntegration(uiIntegration)) {
-      return {
-        contents: [
-          {
-            uri: uri.href,
-            mimeType: 'text/plain',
-            text: `Invalid UI integration: ${uiIntegration}. Valid options: ${UI_INTEGRATIONS.join(', ')}`,
-          },
-        ],
-      };
-    }
+## Field Types
+${fieldTypes.map((ft) => `- ${ft}`).join('\n')}
 
-    const fieldTypes = getSupportedFieldTypes();
+## Tools (Use These Instead of Resources)
 
-    return {
-      contents: [
-        {
-          uri: uri.href,
-          mimeType: 'application/json',
-          text: JSON.stringify(
-            {
-              uiIntegration,
-              fieldTypes,
-              schemas: fieldTypes.map((ft) => ({
-                fieldType: ft,
-                uri: `ng-forge://schemas/${uiIntegration}/${ft}`,
-              })),
-            },
-            null,
-            2,
-          ),
-        },
-      ],
-    };
-  });
+**For human-readable field info:**
+\`ngforge_get_field_info(fieldType?, uiIntegration?)\`
+- Returns properties, validators, and examples (~600 tokens)
 
-  // Individual field type schema
-  server.resource('Field Schema', 'ng-forge://schemas/{uiIntegration}/{fieldType}', async (uri: URL) => {
-    const match = uri.href.match(/ng-forge:\/\/schemas\/([^/]+)\/([^/]+)$/);
-    const uiIntegration = match?.[1];
-    const fieldType = match?.[2];
+**For JSON Schema (when needed):**
+\`ngforge_get_field_schema(uiIntegration, fieldType?)\`
+- Returns machine-precise schema (~6,400 tokens per field type)
 
-    if (!uiIntegration || !isValidUiIntegration(uiIntegration)) {
-      return {
-        contents: [
-          {
-            uri: uri.href,
-            mimeType: 'text/plain',
-            text: `Invalid UI integration: ${uiIntegration}. Valid options: ${UI_INTEGRATIONS.join(', ')}`,
-          },
-        ],
-      };
-    }
+**For examples:**
+\`ngforge_get_example(pattern?)\`
+- Patterns: derivation, conditional, multi-page, validation, dynamic-options, nested-groups
 
-    if (!fieldType || !isValidFieldType(fieldType)) {
-      const validTypes = getSupportedFieldTypes();
-      return {
-        contents: [
-          {
-            uri: uri.href,
-            mimeType: 'text/plain',
-            text: `Invalid field type: ${fieldType}. Valid options: ${validTypes.join(', ')}`,
-          },
-        ],
-      };
-    }
+**For feature explanations:**
+\`ngforge_explain_feature(feature?)\`
+- Features: derivation, hideWhen, showWhen, validation, logic, pages
 
-    const schema = getFieldTypeJsonSchema(uiIntegration, fieldType);
-
-    return {
-      contents: [
-        {
-          uri: uri.href,
-          mimeType: 'application/schema+json',
-          text: JSON.stringify(schema, null, 2),
+**For validation:**
+\`ngforge_validate_form_config(uiIntegration, config)\`
+- Validates config against actual TypeScript types
+`,
         },
       ],
     };
