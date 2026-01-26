@@ -21,6 +21,7 @@
 - **You MUST investigate real Angular APIs and use those.** Before implementing custom solutions, research whether Angular provides a built-in API. Use official Angular documentation and source code as reference.
 - **Offload as much logic to Angular as possible.** We only wrap Angular APIs - we don't reinvent them. Our role is to provide configuration-driven wrappers that delegate to Angular's underlying functionality.
 - When wrapping Angular APIs (validators, logic functions, form controls), keep the wrapper thin and delegate to Angular's implementation.
+- **Do NOT set `standalone: true`** in component/directive decorators - it's the default in Angular v20+.
 
 ## Effects and Reactivity
 
@@ -37,6 +38,33 @@
     const value = this.someSignal();
     // side effect logic
   });
+  ```
+
+- **Use `derivedFrom` from ngxtension for async signal derivations.** This handles RxJS pipelines declaratively while returning a signal.
+
+  ```typescript
+  // ✅ Correct - declarative async derivation
+  readonly result = derivedFrom(
+    [this.config],
+    pipe(
+      switchMap(([config]) => this.httpValidator(config)),
+      map(response => response.data)
+    )
+  );
+
+  // ❌ Avoid - manual subscription
+  constructor() {
+    toObservable(this.config)
+      .pipe(switchMap(config => this.httpValidator(config)))
+      .subscribe(result => this.result.set(result));
+  }
+  ```
+
+- **Use `outputFromObservable()` for event stream outputs.** This is acceptable for converting signal changes to output events.
+
+  ```typescript
+  // ✅ Acceptable for outputs
+  readonly validityChange = outputFromObservable(toObservable(this.valid));
   ```
 
 - Use modern Angular signal APIs: `input()`, `output()`, `model()`, `computed()`, `linkedSignal()`, `viewChild()`, `viewChildren()`, `contentChild()`, `contentChildren()`.
@@ -71,10 +99,75 @@
 ## Code Patterns
 
 - **Write code declaratively whenever possible.** Prefer declarative patterns over imperative ones - use `computed()` for derived state, reactive streams for data flow, and configuration-driven approaches over procedural logic.
-- Use memoization for expensive computations that may be called multiple times with the same inputs.
 - Handle errors gracefully with proper error recovery patterns.
 - Use custom injection tokens with factory functions that throw descriptive errors when context is missing.
 - Prefer `untracked()` when reading signals inside reactive contexts where you don't want to establish a dependency.
+
+## Memoization
+
+- **Use `memoize()` utility for expensive computations** that may be called multiple times with the same inputs.
+- Located in `packages/dynamic-forms/src/lib/utils/memoize.ts`.
+- Use for: field resolution, schema generation, type inference, and other repeated computations.
+
+  ```typescript
+  import { memoize } from '../utils/memoize';
+
+  const resolveField = memoize((fieldConfig: FieldConfig) => {
+    // expensive resolution logic
+  });
+  ```
+
+## Error Handling
+
+- **Use `DynamicFormError` for library errors** with the consistent `[Dynamic Forms]` prefix.
+
+  ```typescript
+  import { DynamicFormError } from '../errors/dynamic-form-error';
+
+  throw new DynamicFormError('Field "name" is required but was not provided');
+  // Output: [Dynamic Forms] Field "name" is required but was not provided
+  ```
+
+- Throw descriptive errors from injection tokens when context is missing.
+- Log warnings for recoverable issues; throw for unrecoverable ones.
+- Use the `DynamicFormLogger` injection token for customizable logging.
+
+## File Structure
+
+### Field Components
+
+Each UI library field follows this structure:
+
+```
+packages/dynamic-forms-{library}/src/lib/fields/{field-name}/
+├── {prefix}-{field-name}.component.ts       # Component implementation
+├── {prefix}-{field-name}.component.spec.ts  # Unit tests
+└── index.ts                                 # Barrel export
+```
+
+**Naming by library:**
+
+| Library   | Prefix  | Example Component     | Example File               |
+| --------- | ------- | --------------------- | -------------------------- |
+| Material  | `Mat`   | `MatInputComponent`   | `mat-input.component.ts`   |
+| Bootstrap | `Bs`    | `BsInputComponent`    | `bs-input.component.ts`    |
+| PrimeNG   | `Prime` | `PrimeInputComponent` | `prime-input.component.ts` |
+| Ionic     | `Ionic` | `IonicInputComponent` | `ionic-input.component.ts` |
+
+### Test Files
+
+| Type           | Pattern                    | Example                           |
+| -------------- | -------------------------- | --------------------------------- |
+| Component test | `{name}.component.spec.ts` | `mat-input.component.spec.ts`     |
+| Service test   | `{name}.service.spec.ts`   | `schema-registry.service.spec.ts` |
+| Utility test   | `{name}.spec.ts`           | `memoize.spec.ts`                 |
+| Type test      | `{name}.type-test.ts`      | `mat-input.type-test.ts`          |
+
+### Type Definition Files
+
+| Type            | Pattern          | Example             |
+| --------------- | ---------------- | ------------------- |
+| Type definition | `{name}.type.ts` | `mat-input.type.ts` |
 
 ## Quality Assurance
 
