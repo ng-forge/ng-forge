@@ -3,11 +3,13 @@
  *
  * Returns human-readable information about field types including
  * properties, validators, and UI-specific options.
+ * Optionally includes JSON Schema for machine-readable validation.
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { getFieldType, getFieldTypes, getUIAdapter, type FieldTypeInfo, type UIAdapterFieldType } from '../registry/index.js';
+import { getFieldTypeJsonSchema, type UiIntegration, type FieldType } from '@ng-forge/dynamic-forms-zod/mcp';
 
 const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 
@@ -15,7 +17,7 @@ const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 const CONTAINER_TYPES = ['row', 'group', 'array', 'page'];
 
 // Properties that are at top level, not in props
-const TOP_LEVEL_PROPS = ['fields', 'template'];
+const TOP_LEVEL_PROPS = ['fields', 'options', 'minValue', 'maxValue', 'step'];
 
 function formatFieldInfo(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldType): string {
   const lines: string[] = [];
@@ -75,11 +77,45 @@ function formatFieldInfo(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldType)
     lines.push('- `value`: initial value for the field');
     lines.push('- `disabled`: boolean - Disable the field');
     lines.push('- `readonly`: boolean - Make field read-only');
+    lines.push('- `hidden`: boolean - Hide the field');
     lines.push('- `col`: number (1-12) - Column width in grid layout');
     lines.push('- `className`: string - CSS class to apply');
-    lines.push('- `hideWhen`: { expression: string } | { field: string, operator: string, value: any }');
-    lines.push('- `showWhen`: { expression: string } | { field: string, operator: string, value: any }');
-    lines.push('- `logic`: LogicBlock[] - Dynamic behavior (derivation, etc.)');
+    lines.push('- `logic`: LogicConfig[] - Conditional behavior and derivation');
+    lines.push('');
+    lines.push('### Logic Blocks (conditional behavior)');
+    lines.push('');
+    lines.push('Use `logic` array for dynamic behavior. NO hideWhen/showWhen shorthand exists!');
+    lines.push('');
+    lines.push('```typescript');
+    lines.push('logic: [');
+    lines.push("  // Conditional visibility - use type: 'hidden'");
+    lines.push('  {');
+    lines.push("    type: 'hidden',");
+    lines.push('    condition: {');
+    lines.push("      type: 'fieldValue',");
+    lines.push("      fieldPath: 'otherField',");
+    lines.push("      operator: 'equals',");
+    lines.push("      value: 'someValue'");
+    lines.push('    }');
+    lines.push('  },');
+    lines.push("  // Or use JavaScript expression with type: 'javascript'");
+    lines.push('  {');
+    lines.push("    type: 'hidden',");
+    lines.push("    condition: { type: 'javascript', expression: 'formValue.age < 18' }");
+    lines.push('  },');
+    lines.push('  // Dynamic required');
+    lines.push('  {');
+    lines.push("    type: 'required',");
+    lines.push("    condition: { type: 'fieldValue', fieldPath: 'type', operator: 'equals', value: 'business' }");
+    lines.push('  },');
+    lines.push('  // Value derivation');
+    lines.push('  {');
+    lines.push("    type: 'derivation',");
+    lines.push("    targetField: 'fullName',");
+    lines.push('    expression: \'formValue.firstName + " " + formValue.lastName\'');
+    lines.push('  }');
+    lines.push(']');
+    lines.push('```');
   }
 
   // UI-specific properties
@@ -119,23 +155,41 @@ function formatFieldInfo(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldType)
   return lines.join('\n');
 }
 
+// Field types that support JSON Schema generation
+const SCHEMA_SUPPORTED_FIELD_TYPES = [
+  'input',
+  'textarea',
+  'select',
+  'checkbox',
+  'radio',
+  'multi-checkbox',
+  'toggle',
+  'slider',
+  'datepicker',
+  'button',
+  'submit',
+  'next',
+  'previous',
+] as const;
+
 export function registerGetFieldInfoTool(server: McpServer): void {
   server.tool(
     'ngforge_get_field_info',
-    'Returns human-readable documentation for a field type including all properties, validators, and examples. Use this to understand what properties are available for a specific field type. If no fieldType is specified, lists all available field types.',
+    'Returns human-readable documentation for a field type including all properties, validators, and examples. Optionally includes JSON Schema for machine-readable validation. If no fieldType is specified, lists all available field types.',
     {
       fieldType: z
         .string()
         .optional()
         .describe(
-          'Field type to get info for (input, select, checkbox, radio, textarea, datepicker, toggle, slider, hidden, text, row, group, array, page, button, submit). If omitted, lists all types.',
+          'Field type to get info for (input, select, checkbox, radio, multi-checkbox, textarea, datepicker, toggle, slider, hidden, text, row, group, array, page, button, submit, next, previous). If omitted, lists all types.',
         ),
       uiIntegration: z
         .enum(UI_INTEGRATIONS)
         .optional()
         .describe('UI library for UI-specific properties (material, bootstrap, primeng, ionic)'),
+      includeSchema: z.boolean().optional().describe('Include JSON Schema for the field type (for tooling/validation). Default: false'),
     },
-    async ({ fieldType, uiIntegration }) => {
+    async ({ fieldType, uiIntegration, includeSchema }) => {
       // If no fieldType, list all available types
       if (!fieldType) {
         const types = getFieldTypes();
@@ -192,7 +246,19 @@ export function registerGetFieldInfoTool(server: McpServer): void {
         uiFieldType = adapter?.fieldTypes.find((ft) => ft.type === fieldType);
       }
 
-      const info = formatFieldInfo(field, uiFieldType);
+      let info = formatFieldInfo(field, uiFieldType);
+
+      // Optionally include JSON Schema
+      if (
+        includeSchema &&
+        uiIntegration &&
+        SCHEMA_SUPPORTED_FIELD_TYPES.includes(fieldType as (typeof SCHEMA_SUPPORTED_FIELD_TYPES)[number])
+      ) {
+        const schema = getFieldTypeJsonSchema(uiIntegration as UiIntegration, fieldType as FieldType);
+        info += `\n\n### JSON Schema\n\n\`\`\`json\n${JSON.stringify(schema, null, 2)}\n\`\`\``;
+      } else if (includeSchema && !uiIntegration) {
+        info += '\n\n*Note: Specify uiIntegration to include JSON Schema*';
+      }
 
       return {
         content: [{ type: 'text' as const, text: info }],

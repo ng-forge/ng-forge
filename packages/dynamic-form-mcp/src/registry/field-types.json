@@ -57,7 +57,7 @@
       "options": {
         "name": "options",
         "type": "FieldOption[]",
-        "description": "Array of selectable options with label and value",
+        "description": "Array of selectable options with label and value. IMPORTANT: options goes at FIELD level, NOT inside props",
         "required": true
       },
       "multiple": {
@@ -75,7 +75,7 @@
       }
     },
     "validationSupported": true,
-    "example": "{\n  key: 'country',\n  type: 'select',\n  label: 'Country',\n  required: true,\n  props: {\n    options: [\n      { label: 'United States', value: 'us' },\n      { label: 'Canada', value: 'ca' }\n    ]\n  }\n}"
+    "example": "{\n  key: 'country',\n  type: 'select',\n  label: 'Country',\n  required: true,\n  options: [\n    { label: 'United States', value: 'us' },\n    { label: 'Canada', value: 'ca' }\n  ]\n}"
   },
   {
     "type": "checkbox",
@@ -88,6 +88,23 @@
     "example": "{\n  key: 'acceptTerms',\n  type: 'checkbox',\n  label: 'I accept the terms and conditions',\n  required: true\n}"
   },
   {
+    "type": "multi-checkbox",
+    "category": "value",
+    "description": "Multiple checkbox group for selecting multiple values from options",
+    "valueType": "T[]",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "options": {
+        "name": "options",
+        "type": "FieldOption[]",
+        "description": "Array of selectable options. IMPORTANT: options goes at FIELD level, NOT inside props",
+        "required": true
+      }
+    },
+    "validationSupported": true,
+    "example": "{\n  key: 'interests',\n  type: 'multi-checkbox',\n  label: 'Select your interests',\n  options: [\n    { label: 'Sports', value: 'sports' },\n    { label: 'Music', value: 'music' },\n    { label: 'Art', value: 'art' },\n    { label: 'Technology', value: 'tech' }\n  ]\n}"
+  },
+  {
     "type": "radio",
     "category": "value",
     "description": "Radio button group for single selection from options",
@@ -97,12 +114,12 @@
       "options": {
         "name": "options",
         "type": "FieldOption[]",
-        "description": "Array of selectable options",
+        "description": "Array of selectable options. IMPORTANT: options goes at FIELD level, NOT inside props",
         "required": true
       }
     },
     "validationSupported": true,
-    "example": "{\n  key: 'gender',\n  type: 'radio',\n  label: 'Gender',\n  props: {\n    options: [\n      { label: 'Male', value: 'male' },\n      { label: 'Female', value: 'female' },\n      { label: 'Other', value: 'other' }\n    ]\n  }\n}"
+    "example": "{\n  key: 'gender',\n  type: 'radio',\n  label: 'Gender',\n  options: [\n    { label: 'Male', value: 'male' },\n    { label: 'Female', value: 'female' },\n    { label: 'Other', value: 'other' }\n  ]\n}"
   },
   {
     "type": "datepicker",
@@ -144,30 +161,30 @@
     "valueType": "number",
     "baseInterface": "BaseValueField",
     "props": {
-      "min": {
-        "name": "min",
+      "minValue": {
+        "name": "minValue",
         "type": "number",
-        "description": "Minimum value",
+        "description": "Minimum value. IMPORTANT: This is at FIELD level, NOT inside props",
         "required": false,
         "default": 0
       },
-      "max": {
-        "name": "max",
+      "maxValue": {
+        "name": "maxValue",
         "type": "number",
-        "description": "Maximum value",
+        "description": "Maximum value. IMPORTANT: This is at FIELD level, NOT inside props",
         "required": false,
         "default": 100
       },
       "step": {
         "name": "step",
         "type": "number",
-        "description": "Step increment",
+        "description": "Step increment. IMPORTANT: This is at FIELD level, NOT inside props",
         "required": false,
         "default": 1
       }
     },
     "validationSupported": true,
-    "example": "{\n  key: 'volume',\n  type: 'slider',\n  label: 'Volume',\n  value: 50,\n  props: { min: 0, max: 100, step: 5 }\n}"
+    "example": "{\n  key: 'volume',\n  type: 'slider',\n  label: 'Volume',\n  value: 50,\n  minValue: 0,\n  maxValue: 100,\n  step: 5\n}"
   },
   {
     "type": "hidden",
@@ -182,25 +199,19 @@
   {
     "type": "text",
     "category": "display",
-    "description": "Static text display element (headings, paragraphs, labels)",
+    "description": "Static text display element (headings, paragraphs, spans). The text content comes from the label property.",
     "baseInterface": "FieldDef",
     "props": {
-      "content": {
-        "name": "content",
-        "type": "DynamicText",
-        "description": "Text content to display",
-        "required": true
-      },
-      "element": {
-        "name": "element",
-        "type": "'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'label'",
+      "elementType": {
+        "name": "elementType",
+        "type": "'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span'",
         "description": "HTML element type for rendering",
         "required": false,
         "default": "p"
       }
     },
     "validationSupported": false,
-    "example": "{\n  key: 'sectionTitle',\n  type: 'text',\n  props: { content: 'Personal Information', element: 'h2' }\n}"
+    "example": "{\n  key: 'sectionTitle',\n  type: 'text',\n  label: 'Personal Information',\n  props: { elementType: 'h2' }\n}"
   },
   {
     "type": "row",
@@ -255,18 +266,36 @@
   {
     "type": "page",
     "category": "container",
-    "description": "Multi-step form page container for wizard-style forms. Pages do NOT have label or title properties. ALL top-level fields must be pages if using multi-page mode.",
+    "description": "Multi-step form page container for wizard-style forms. Pages do NOT have label or title properties. ALL top-level fields must be pages if using multi-page mode. IMPORTANT: Navigation buttons (next, previous) must be added as fields WITHIN each page that needs them.",
     "baseInterface": "FieldDef",
     "props": {
       "fields": {
         "name": "fields",
         "type": "PageAllowedChildren[]",
-        "description": "Fields in this page. Allowed: rows, groups, arrays, leaf fields (NOT other pages)",
+        "description": "Fields in this page. Allowed: rows, groups, arrays, leaf fields (NOT other pages). Include next/previous buttons as needed.",
         "required": true
       }
     },
     "validationSupported": false,
-    "example": "{\n  key: 'step1',\n  type: 'page',\n  // NOTE: Pages do NOT have label or title properties\n  fields: [\n    { key: 'firstName', type: 'input', label: 'First Name' },\n    { key: 'lastName', type: 'input', label: 'Last Name' },\n    { key: 'next', type: 'next', label: 'Next' }\n  ]\n}"
+    "example": "{\n  key: 'step1',\n  type: 'page',\n  // NOTE: Pages do NOT have label or title properties\n  // Navigation buttons are fields WITHIN the page\n  fields: [\n    { key: 'firstName', type: 'input', label: 'First Name' },\n    { key: 'lastName', type: 'input', label: 'Last Name' },\n    { key: 'next', type: 'next', label: 'Next' }\n  ]\n}"
+  },
+  {
+    "type": "next",
+    "category": "button",
+    "description": "Navigation button to go to next page in multi-step forms. Must be placed INSIDE a page's fields array.",
+    "baseInterface": "FieldDef",
+    "props": {},
+    "validationSupported": false,
+    "example": "{\n  key: 'next',\n  type: 'next',\n  label: 'Next'\n}"
+  },
+  {
+    "type": "previous",
+    "category": "button",
+    "description": "Navigation button to go to previous page in multi-step forms. Must be placed INSIDE a page's fields array.",
+    "baseInterface": "FieldDef",
+    "props": {},
+    "validationSupported": false,
+    "example": "{\n  key: 'back',\n  type: 'previous',\n  label: 'Back'\n}"
   },
   {
     "type": "button",

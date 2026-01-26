@@ -28,27 +28,29 @@ ${UI_INTEGRATIONS.map((ui) => `- ${ui}`).join('\n')}
 ## Field Types
 ${fieldTypes.map((ft) => `- ${ft}`).join('\n')}
 
-## Tools (Use These Instead of Resources)
+## Tools (4 total - consolidated)
 
-**For human-readable field info:**
-\`ngforge_get_field_info(fieldType?, uiIntegration?)\`
-- Returns properties, validators, and examples (~600 tokens)
+**1. START HERE - One-shot reference:**
+\`ngforge_get_cheatsheet(uiIntegration?)\`
+- Property placement rules, condition syntax, copy-paste patterns, common errors
+- Component API (template binding, event names)
+- **Use this first** - it has 90% of what you need in one call
 
-**For JSON Schema (when needed):**
-\`ngforge_get_field_schema(uiIntegration, fieldType?)\`
-- Returns machine-precise schema (~6,400 tokens per field type)
-
-**For examples:**
-\`ngforge_get_example(pattern?)\`
-- Patterns: derivation, conditional, multi-page, validation, dynamic-options, nested-groups
-
-**For feature explanations:**
-\`ngforge_explain_feature(feature?)\`
-- Features: derivation, hideWhen, showWhen, validation, logic, pages
-
-**For validation:**
+**2. Validation:**
 \`ngforge_validate_form_config(uiIntegration, config)\`
 - Validates config against actual TypeScript types
+- Catches errors before runtime
+
+**3. Field info + schema:**
+\`ngforge_get_field_info(fieldType?, uiIntegration?, includeSchema?)\`
+- Properties, validators, and examples for a specific field type
+- Set includeSchema=true for JSON Schema (machine-readable)
+
+**4. Examples + deep explanations:**
+\`ngforge_get_example(pattern?, depth?)\`
+- Patterns: complete, derivation, conditional, multi-page, validation
+- depth="example" (default) = working code
+- depth="deep" = conceptual explanation + code + edge cases
 `,
         },
       ],

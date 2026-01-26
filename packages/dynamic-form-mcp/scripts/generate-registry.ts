@@ -131,7 +131,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       options: {
         name: 'options',
         type: 'FieldOption[]',
-        description: 'Array of selectable options with label and value',
+        description: 'Array of selectable options with label and value. IMPORTANT: options goes at FIELD level, NOT inside props',
         required: true,
       },
       multiple: {
@@ -154,12 +154,10 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   type: 'select',
   label: 'Country',
   required: true,
-  props: {
-    options: [
-      { label: 'United States', value: 'us' },
-      { label: 'Canada', value: 'ca' }
-    ]
-  }
+  options: [
+    { label: 'United States', value: 'us' },
+    { label: 'Canada', value: 'ca' }
+  ]
 }`,
   },
   {
@@ -178,6 +176,33 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
 }`,
   },
   {
+    type: 'multi-checkbox',
+    category: 'value',
+    description: 'Multiple checkbox group for selecting multiple values from options',
+    valueType: 'T[]',
+    baseInterface: 'BaseValueField',
+    props: {
+      options: {
+        name: 'options',
+        type: 'FieldOption[]',
+        description: 'Array of selectable options. IMPORTANT: options goes at FIELD level, NOT inside props',
+        required: true,
+      },
+    },
+    validationSupported: true,
+    example: `{
+  key: 'interests',
+  type: 'multi-checkbox',
+  label: 'Select your interests',
+  options: [
+    { label: 'Sports', value: 'sports' },
+    { label: 'Music', value: 'music' },
+    { label: 'Art', value: 'art' },
+    { label: 'Technology', value: 'tech' }
+  ]
+}`,
+  },
+  {
     type: 'radio',
     category: 'value',
     description: 'Radio button group for single selection from options',
@@ -187,7 +212,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       options: {
         name: 'options',
         type: 'FieldOption[]',
-        description: 'Array of selectable options',
+        description: 'Array of selectable options. IMPORTANT: options goes at FIELD level, NOT inside props',
         required: true,
       },
     },
@@ -196,13 +221,11 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   key: 'gender',
   type: 'radio',
   label: 'Gender',
-  props: {
-    options: [
-      { label: 'Male', value: 'male' },
-      { label: 'Female', value: 'female' },
-      { label: 'Other', value: 'other' }
-    ]
-  }
+  options: [
+    { label: 'Male', value: 'male' },
+    { label: 'Female', value: 'female' },
+    { label: 'Other', value: 'other' }
+  ]
 }`,
   },
   {
@@ -255,24 +278,24 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     valueType: 'number',
     baseInterface: 'BaseValueField',
     props: {
-      min: {
-        name: 'min',
+      minValue: {
+        name: 'minValue',
         type: 'number',
-        description: 'Minimum value',
+        description: 'Minimum value. IMPORTANT: This is at FIELD level, NOT inside props',
         required: false,
         default: 0,
       },
-      max: {
-        name: 'max',
+      maxValue: {
+        name: 'maxValue',
         type: 'number',
-        description: 'Maximum value',
+        description: 'Maximum value. IMPORTANT: This is at FIELD level, NOT inside props',
         required: false,
         default: 100,
       },
       step: {
         name: 'step',
         type: 'number',
-        description: 'Step increment',
+        description: 'Step increment. IMPORTANT: This is at FIELD level, NOT inside props',
         required: false,
         default: 1,
       },
@@ -283,7 +306,9 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   type: 'slider',
   label: 'Volume',
   value: 50,
-  props: { min: 0, max: 100, step: 5 }
+  minValue: 0,
+  maxValue: 100,
+  step: 5
 }`,
   },
   {
@@ -303,19 +328,13 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   {
     type: 'text',
     category: 'display',
-    description: 'Static text display element (headings, paragraphs, labels)',
+    description: 'Static text display element (headings, paragraphs, spans). The text content comes from the label property.',
     valueType: undefined,
     baseInterface: 'FieldDef',
     props: {
-      content: {
-        name: 'content',
-        type: 'DynamicText',
-        description: 'Text content to display',
-        required: true,
-      },
-      element: {
-        name: 'element',
-        type: "'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'label'",
+      elementType: {
+        name: 'elementType',
+        type: "'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span'",
         description: 'HTML element type for rendering',
         required: false,
         default: 'p',
@@ -325,7 +344,8 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     example: `{
   key: 'sectionTitle',
   type: 'text',
-  props: { content: 'Personal Information', element: 'h2' }
+  label: 'Personal Information',
+  props: { elementType: 'h2' }
 }`,
   },
   {
@@ -426,14 +446,15 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     type: 'page',
     category: 'container',
     description:
-      'Multi-step form page container for wizard-style forms. Pages do NOT have label or title properties. ALL top-level fields must be pages if using multi-page mode.',
+      'Multi-step form page container for wizard-style forms. Pages do NOT have label or title properties. ALL top-level fields must be pages if using multi-page mode. IMPORTANT: Navigation buttons (next, previous) must be added as fields WITHIN each page that needs them.',
     valueType: undefined,
     baseInterface: 'FieldDef',
     props: {
       fields: {
         name: 'fields',
         type: 'PageAllowedChildren[]',
-        description: 'Fields in this page. Allowed: rows, groups, arrays, leaf fields (NOT other pages)',
+        description:
+          'Fields in this page. Allowed: rows, groups, arrays, leaf fields (NOT other pages). Include next/previous buttons as needed.',
         required: true,
       },
     },
@@ -442,11 +463,40 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   key: 'step1',
   type: 'page',
   // NOTE: Pages do NOT have label or title properties
+  // Navigation buttons are fields WITHIN the page
   fields: [
     { key: 'firstName', type: 'input', label: 'First Name' },
     { key: 'lastName', type: 'input', label: 'Last Name' },
     { key: 'next', type: 'next', label: 'Next' }
   ]
+}`,
+  },
+  {
+    type: 'next',
+    category: 'button',
+    description: "Navigation button to go to next page in multi-step forms. Must be placed INSIDE a page's fields array.",
+    valueType: undefined,
+    baseInterface: 'FieldDef',
+    props: {},
+    validationSupported: false,
+    example: `{
+  key: 'next',
+  type: 'next',
+  label: 'Next'
+}`,
+  },
+  {
+    type: 'previous',
+    category: 'button',
+    description: "Navigation button to go to previous page in multi-step forms. Must be placed INSIDE a page's fields array.",
+    valueType: undefined,
+    baseInterface: 'FieldDef',
+    props: {},
+    validationSupported: false,
+    example: `{
+  key: 'back',
+  type: 'previous',
+  label: 'Back'
 }`,
   },
   {

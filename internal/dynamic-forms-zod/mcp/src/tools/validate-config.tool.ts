@@ -69,15 +69,145 @@ export interface FormattedValidationError {
 }
 
 /**
+ * Known field types for helpful error messages.
+ */
+const KNOWN_FIELD_TYPES = [
+  'input',
+  'textarea',
+  'select',
+  'checkbox',
+  'multi-checkbox',
+  'radio',
+  'datepicker',
+  'toggle',
+  'slider',
+  'hidden',
+  'text',
+  'row',
+  'group',
+  'array',
+  'page',
+  'button',
+  'submit',
+  'next',
+  'previous',
+];
+
+/**
+ * Properties that commonly cause errors and their correct placement.
+ */
+const PROPERTY_GUIDANCE: Record<string, string> = {
+  options: 'options should be at FIELD level, not inside props',
+  minValue: 'minValue should be at FIELD level, not inside props',
+  maxValue: 'maxValue should be at FIELD level, not inside props',
+  step: 'step should be at FIELD level, not inside props (for slider)',
+  fields: 'fields should be at FIELD level, contains child fields for containers',
+  template: 'Use "fields" instead of "template" for array items',
+  label: 'Container types (row, group, array, page) do NOT have a label property',
+  title: 'Page fields do NOT have a title property',
+  minItems: 'Array fields do NOT have minItems/maxItems properties',
+  maxItems: 'Array fields do NOT have minItems/maxItems properties',
+  expressions: 'Use "derivation" or "logic" instead of "expressions"',
+  logic:
+    'Only PAGE and LEAF fields support logic blocks. Row, group, and array containers do NOT support logic - apply logic to their child fields instead',
+};
+
+/**
  * Format a Zod error into user-friendly validation errors.
  */
-function formatZodError(error: ZodError): FormattedValidationError[] {
-  return error.errors.map((err) => ({
-    path: err.path.join('.') || 'root',
-    message: err.message,
-    expected: 'expected' in err ? String(err.expected) : undefined,
-    received: 'received' in err ? String(err.received) : undefined,
-  }));
+function formatZodError(error: ZodError, config?: unknown): FormattedValidationError[] {
+  const errors = error.errors.map((err) => {
+    const path = err.path.join('.') || 'root';
+    let message = err.message;
+    let expected: string | undefined;
+    let received: string | undefined;
+
+    // Extract expected/received if available
+    if ('expected' in err) expected = String(err.expected);
+    if ('received' in err) received = String(err.received);
+
+    // Enhance "Invalid input" with more context
+    if (message === 'Invalid input' || message === 'Invalid union') {
+      // Try to figure out what field this is
+      const fieldMatch = path.match(/fields\.(\d+)/);
+      if (fieldMatch && config && typeof config === 'object' && 'fields' in config) {
+        const fields = (config as { fields: unknown[] }).fields;
+        const index = parseInt(fieldMatch[1], 10);
+        const field = fields[index] as Record<string, unknown> | undefined;
+
+        if (field) {
+          const fieldType = field['type'] as string;
+          const fieldKey = field['key'] as string;
+
+          if (fieldType && !KNOWN_FIELD_TYPES.includes(fieldType)) {
+            message = `Unknown field type "${fieldType}". Valid types: ${KNOWN_FIELD_TYPES.join(', ')}`;
+          } else if (fieldType) {
+            // Check for common mistakes
+            const mistakes: string[] = [];
+
+            // Check for label on containers
+            if (['row', 'group', 'array', 'page'].includes(fieldType) && 'label' in field) {
+              mistakes.push(`"${fieldType}" fields do NOT have a label property`);
+            }
+
+            // Check for options in wrong place
+            if (['select', 'radio', 'multi-checkbox'].includes(fieldType)) {
+              const props = field['props'] as Record<string, unknown> | undefined;
+              if (props && 'options' in props && !('options' in field)) {
+                mistakes.push('options should be at field level, not inside props');
+              }
+              if (!('options' in field) && !(props && 'options' in props)) {
+                mistakes.push('options is required for this field type');
+              }
+            }
+
+            // Check for slider props in wrong place
+            if (fieldType === 'slider') {
+              const props = field['props'] as Record<string, unknown> | undefined;
+              if (props && ('min' in props || 'max' in props || 'step' in props)) {
+                mistakes.push('Use minValue/maxValue/step at field level, not min/max/step in props');
+              }
+            }
+
+            // Check for template instead of fields
+            if (['array', 'group', 'row', 'page'].includes(fieldType) && 'template' in field) {
+              mistakes.push('Use "fields" instead of "template"');
+            }
+
+            // Check for logic on containers that don't support it
+            if (['row', 'group', 'array'].includes(fieldType) && 'logic' in field) {
+              mistakes.push(`"${fieldType}" containers do NOT support logic blocks - apply logic to individual child fields instead`);
+            }
+
+            if (mistakes.length > 0) {
+              message = `Field "${fieldKey || index}" (type: ${fieldType}): ${mistakes.join('; ')}`;
+            } else {
+              message = `Field "${fieldKey || index}" (type: ${fieldType}) has invalid properties. Check that all properties are valid for this field type.`;
+            }
+          } else {
+            message = `Field at index ${index} is missing required "type" property`;
+          }
+        }
+      }
+    }
+
+    // Check if the path matches a known problematic property
+    const lastPathPart = err.path[err.path.length - 1];
+    if (typeof lastPathPart === 'string' && PROPERTY_GUIDANCE[lastPathPart]) {
+      message = `${message}. Hint: ${PROPERTY_GUIDANCE[lastPathPart]}`;
+    }
+
+    return { path, message, expected, received };
+  });
+
+  // Deduplicate errors with same path
+  const seen = new Set<string>();
+  return errors.filter((err) => {
+    const key = `${err.path}:${err.message}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 /**
@@ -148,7 +278,7 @@ export function validateFormConfig(uiIntegration: UiIntegration, config: unknown
     };
   }
 
-  const errors = formatZodError(result.error);
+  const errors = formatZodError(result.error, config);
 
   return {
     valid: false,

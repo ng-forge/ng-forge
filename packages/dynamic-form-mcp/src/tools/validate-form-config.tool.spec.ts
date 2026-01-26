@@ -278,6 +278,85 @@ describe('Validate Form Config Tool', () => {
       expect(content.valid).toBe(false);
       expect(content.errors.length).toBeGreaterThan(0);
     });
+
+    it('reports error for logic on group container', async () => {
+      const result = await registeredTool.handler({
+        uiIntegration: 'material',
+        config: {
+          fields: [
+            {
+              key: 'address',
+              type: 'group',
+              fields: [{ key: 'street', type: 'input', label: 'Street' }],
+              logic: [{ type: 'hidden', condition: true }],
+            },
+          ],
+        },
+      });
+      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+
+      expect(content.valid).toBe(false);
+      expect(content.errors.length).toBeGreaterThan(0);
+    });
+
+    it('reports error for logic on row container', async () => {
+      const result = await registeredTool.handler({
+        uiIntegration: 'material',
+        config: {
+          fields: [
+            {
+              key: 'nameRow',
+              type: 'row',
+              fields: [{ key: 'name', type: 'input', label: 'Name' }],
+              logic: [{ type: 'hidden', condition: true }],
+            },
+          ],
+        },
+      });
+      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+
+      expect(content.valid).toBe(false);
+      expect(content.errors.length).toBeGreaterThan(0);
+    });
+
+    it('reports error for logic on array container', async () => {
+      const result = await registeredTool.handler({
+        uiIntegration: 'material',
+        config: {
+          fields: [
+            {
+              key: 'items',
+              type: 'array',
+              fields: [{ key: 'item', type: 'input', label: 'Item' }],
+              logic: [{ type: 'hidden', condition: true }],
+            },
+          ],
+        },
+      });
+      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+
+      expect(content.valid).toBe(false);
+      expect(content.errors.length).toBeGreaterThan(0);
+    });
+
+    it('allows logic on page container (hidden only)', async () => {
+      const result = await registeredTool.handler({
+        uiIntegration: 'material',
+        config: {
+          fields: [
+            {
+              key: 'page1',
+              type: 'page',
+              fields: [{ key: 'name', type: 'input', label: 'Name' }],
+              logic: [{ type: 'hidden', condition: true }],
+            },
+          ],
+        },
+      });
+      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+
+      expect(content.valid).toBe(true);
+    });
   });
 
   describe('error response format', () => {

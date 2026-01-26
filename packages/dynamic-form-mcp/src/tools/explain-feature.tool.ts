@@ -74,85 +74,141 @@ logic: [{
 \`\`\`
 `,
   },
-  hideWhen: {
-    inline: `# Conditional Visibility (hideWhen/showWhen)
+  conditional: {
+    inline: `# Conditional Visibility (logic blocks)
 
-Control field visibility based on other field values.
+Control field visibility, required state, disabled state, and readonly state based on conditions.
 
-## hideWhen - Hide field when condition is true
+**IMPORTANT:** There is NO hideWhen/showWhen shorthand. Use \`logic\` blocks with \`condition\` objects.
 
-\`\`\`typescript
-{
-  key: 'companyName',
-  type: 'input',
-  label: 'Company Name',
-  hideWhen: {
-    field: 'accountType',
-    operator: 'eq',
-    value: 'personal',
-  },
-}
-\`\`\`
-
-## showWhen - Show field only when condition is true
+## Basic Syntax - Hide a field conditionally
 
 \`\`\`typescript
 {
   key: 'companyName',
   type: 'input',
   label: 'Company Name',
-  showWhen: {
-    field: 'accountType',
-    operator: 'eq',
-    value: 'business',
-  },
-}
-\`\`\`
-
-## Operators
-
-- \`eq\` - equals
-- \`neq\` - not equals
-- \`gt\` - greater than
-- \`gte\` - greater than or equal
-- \`lt\` - less than
-- \`lte\` - less than or equal
-- \`contains\` - string/array contains
-- \`in\` - value is in array
-
-## Expression Syntax (advanced)
-
-For complex conditions, use expression syntax:
-
-\`\`\`typescript
-{
-  key: 'seniorDiscount',
-  type: 'checkbox',
-  label: 'Apply senior discount',
-  hideWhen: {
-    expression: 'formValue.age < 65',
-  },
-}
-\`\`\`
-
-## Multiple Conditions
-
-Use \`logic\` array for multiple conditions:
-
-\`\`\`typescript
-{
-  key: 'specialField',
-  type: 'input',
-  label: 'Special Field',
   logic: [{
     type: 'hidden',
-    expression: 'formValue.type !== "special" || formValue.level < 5',
-  }],
+    condition: {
+      type: 'fieldValue',
+      fieldPath: 'accountType',
+      operator: 'notEquals',
+      value: 'business'
+    }
+  }]
 }
 \`\`\`
+
+## Logic Types
+
+- \`hidden\` - Hide the field when condition is true
+- \`disabled\` - Disable the field when condition is true
+- \`readonly\` - Make field read-only when condition is true
+- \`required\` - Make field required when condition is true
+
+## Condition Types
+
+### 1. fieldValue - Compare a field's value
+
+\`\`\`typescript
+condition: {
+  type: 'fieldValue',
+  fieldPath: 'accountType',  // Path to the field to check
+  operator: 'equals',        // Comparison operator
+  value: 'business'          // Value to compare against
+}
+\`\`\`
+
+**Operators:** \`equals\`, \`notEquals\`, \`greater\`, \`less\`, \`greaterOrEqual\`, \`lessOrEqual\`, \`contains\`, \`startsWith\`, \`endsWith\`, \`matches\`
+
+### 2. javascript - Custom JavaScript expression
+
+\`\`\`typescript
+condition: {
+  type: 'javascript',
+  expression: 'formValue.age >= 65 && formValue.hasDiscount'
+}
+\`\`\`
+
+The expression has access to \`formValue\` object containing all form values.
+
+### 3. Boolean - Static condition
+
+\`\`\`typescript
+condition: true   // Always applies
+condition: false  // Never applies
+\`\`\`
+
+### 4. Logical combinations (and/or)
+
+\`\`\`typescript
+condition: {
+  type: 'and',
+  conditions: [
+    { type: 'fieldValue', fieldPath: 'type', operator: 'equals', value: 'business' },
+    { type: 'fieldValue', fieldPath: 'size', operator: 'greater', value: 10 }
+  ]
+}
+\`\`\`
+
+## Multiple Logic Rules
+
+Combine multiple rules in the logic array:
+
+\`\`\`typescript
+{
+  key: 'companyName',
+  type: 'input',
+  label: 'Company Name',
+  logic: [
+    // Hide when NOT business
+    {
+      type: 'hidden',
+      condition: {
+        type: 'fieldValue',
+        fieldPath: 'accountType',
+        operator: 'notEquals',
+        value: 'business'
+      }
+    },
+    // Make required when IS business
+    {
+      type: 'required',
+      condition: {
+        type: 'fieldValue',
+        fieldPath: 'accountType',
+        operator: 'equals',
+        value: 'business'
+      }
+    }
+  ]
+}
+\`\`\`
+
+## Form State Conditions (for buttons)
+
+For buttons, you can use special form state conditions:
+
+\`\`\`typescript
+{
+  key: 'submit',
+  type: 'submit',
+  label: 'Submit',
+  logic: [
+    { type: 'disabled', condition: 'formInvalid' },
+    { type: 'disabled', condition: 'formSubmitting' }
+  ]
+}
+\`\`\`
+
+**Form state conditions:** \`formInvalid\`, \`formSubmitting\`, \`pageInvalid\`
 `,
   },
-  showWhen: { inline: 'See hideWhen - showWhen is the inverse (show when condition is true).' },
+  // Aliases for common search terms
+  hideWhen: { inline: 'See "conditional" feature. Note: hideWhen/showWhen shorthand does NOT exist. Use logic blocks instead.' },
+  showWhen: { inline: 'See "conditional" feature. Note: hideWhen/showWhen shorthand does NOT exist. Use logic blocks instead.' },
+  visibility: { inline: 'See "conditional" feature for controlling field visibility with logic blocks.' },
   validation: {
     inline: `# Validation
 
@@ -379,7 +435,7 @@ export function registerExplainFeatureTool(server: McpServer): void {
       feature: z
         .enum(FEATURES as unknown as [string, ...string[]])
         .optional()
-        .describe('Feature to explain: derivation, hideWhen, showWhen, validation, logic, pages. If omitted, lists available features.'),
+        .describe('Feature to explain: derivation, conditional, validation, logic, pages. If omitted, lists available features.'),
     },
     async ({ feature }) => {
       // If no feature specified, list available features
@@ -393,14 +449,15 @@ export function registerExplainFeatureTool(server: McpServer): void {
           '## derivation',
           'How to compute field values based on other fields (calculated fields, auto-fill)',
           '',
-          '## hideWhen / showWhen',
-          'How to conditionally show/hide fields based on form values',
+          '## conditional',
+          'How to conditionally show/hide, enable/disable, or require fields using logic blocks',
+          '**Note:** There is NO hideWhen/showWhen shorthand - use logic blocks with condition objects',
           '',
           '## validation',
           'How to add validation rules to fields (built-in and custom validators)',
           '',
           '## logic',
-          'How to use logic blocks for dynamic behaviors (derivation, hidden, disabled)',
+          'How to use logic blocks for dynamic behaviors (derivation, hidden, disabled, required)',
           '',
           '## pages',
           'How to create multi-page wizard forms',
