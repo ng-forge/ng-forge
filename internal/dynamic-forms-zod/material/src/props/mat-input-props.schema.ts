@@ -5,7 +5,7 @@ import { MatFormFieldAppearanceSchema, SubscriptSizingSchema } from './mat-commo
 /**
  * Input type options for Material input field.
  */
-export const MatInputTypeSchema = z.enum(['text', 'email', 'password', 'number', 'tel', 'url']);
+export const MatInputTypeSchema = z.enum(['text', 'email', 'password', 'number', 'tel', 'url', 'search']);
 
 export type MatInputType = z.infer<typeof MatInputTypeSchema>;
 

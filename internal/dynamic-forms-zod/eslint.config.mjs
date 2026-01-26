@@ -13,7 +13,7 @@ export default [
             '{projectRoot}/vite.config.{js,ts,mjs,mts}',
             '{projectRoot}/vitest.config.{js,ts,mjs,mts}',
           ],
-          ignoredDependencies: ['zod', 'zod-to-json-schema'],
+          ignoredDependencies: ['zod', 'zod-to-json-schema', 'vitest'],
         },
       ],
     },
