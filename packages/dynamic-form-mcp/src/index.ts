@@ -23,7 +23,10 @@ export {
   getUIAdapterFieldType,
 } from './registry/index.js';
 
-// Re-export core validation module for direct use (e.g., Amplify AI tools)
-export type { FieldConfig, FormConfig, ValidationIssue, ValidationResult } from './core/index.js';
+// Re-export validation from Zod package for direct use (e.g., Amplify AI tools)
+export type { ValidationResult, FormattedValidationError, UiIntegration } from '@ng-forge/dynamic-forms-zod/mcp';
 
-export { validateFormConfig, validateFormConfigIssues } from './core/index.js';
+export { validateFormConfig, isValidFormConfig } from '@ng-forge/dynamic-forms-zod/mcp';
+
+// Re-export JSON schema utilities
+export { getFormConfigJsonSchema, getLeafFieldJsonSchema } from '@ng-forge/dynamic-forms-zod/mcp';

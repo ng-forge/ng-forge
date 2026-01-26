@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/dynamic-form-mcp/src",
   "projectType": "library",
+  "implicitDependencies": ["dynamic-forms-zod"],
   "release": {
     "version": {
       "manifestRootsToUpdate": ["{projectRoot}", "dist/{projectRoot}"],

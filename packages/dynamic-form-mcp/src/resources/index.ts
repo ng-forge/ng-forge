@@ -11,6 +11,7 @@ import { registerUIAdaptersResource } from './ui-adapters.resource.js';
 import { registerDocumentationResource } from './documentation.resource.js';
 import { registerInstructionsResource } from './instructions.resource.js';
 import { registerExamplesResource } from './examples.resource.js';
+import { registerSchemasResource } from './schemas.resource.js';
 
 /**
  * Register all MCP resources
@@ -22,4 +23,5 @@ export function registerResources(server: McpServer): void {
   registerValidatorsResource(server);
   registerUIAdaptersResource(server);
   registerDocumentationResource(server);
+  registerSchemasResource(server);
 }

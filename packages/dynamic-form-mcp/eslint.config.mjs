@@ -9,7 +9,14 @@ export default [
         'error',
         {
           ignoredFiles: ['{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}'],
-          ignoredDependencies: ['vite', '@nx/vite', 'vitest', 'tsx', 'ts-morph'],
+          ignoredDependencies: [
+            'vite',
+            '@nx/vite',
+            'vitest',
+            'tsx',
+            'ts-morph',
+            '@ng-forge/dynamic-forms-zod', // Internal package, bundled by esbuild
+          ],
         },
       ],
     },

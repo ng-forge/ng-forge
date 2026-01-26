@@ -306,7 +306,67 @@ Available adapters:
 6. **Group without fields** - Group fields need child fields
 7. **min > max** - Ensure min values are less than max values
 
+## CRITICAL: UI Library Differences
+
+Different UI libraries support different properties. Always validate against the correct library using \`ngforge_validate_form_config\` with the appropriate \`uiIntegration\` parameter.
+
+### Property Differences by Library
+
+| Property | Material | Bootstrap | PrimeNG | Ionic |
+|----------|----------|-----------|---------|-------|
+| \`appearance\` | ✓ (fill, outline) | ✗ | ✗ | ✓ (fill, outline) |
+| \`subscriptSizing\` | ✓ | ✗ | ✗ | ✗ |
+| \`floatLabel\` | ✓ | ✗ | ✓ | ✗ |
+| \`hint\` | ✓ | ✓ (as \`helpText\`) | ✓ | ✓ |
+
+### Container Fields
+
+Container fields (\`page\`, \`group\`, \`row\`) do NOT support these properties:
+- \`label\` - Use \`text\` field type for headings instead
+- \`required\`, \`email\`, \`min\`, \`max\`, etc. - Validation is for leaf fields only
+
+### Common Mistakes to Avoid
+
+1. **Using \`expressions\` on fields** - This property is NOT supported on standard fields. Use \`derivation\` for computed values or \`logic\` for conditional behavior.
+
+2. **Adding \`label\` to container fields** - Pages, groups, and rows don't have labels:
+   \`\`\`typescript
+   // ❌ WRONG
+   { key: 'address', type: 'group', label: 'Address', fields: [...] }
+
+   // ✅ CORRECT - Use a text field for the heading
+   { key: 'addressTitle', type: 'text', label: 'Address', props: { elementType: 'h3' } }
+   { key: 'address', type: 'group', fields: [...] }
+   \`\`\`
+
+3. **Adding \`id\` to FormConfig** - The root FormConfig does not accept an \`id\` property.
+
+4. **Putting slider min/max in props** - For slider fields, \`min\`, \`max\`, and \`step\` are field-level properties:
+   \`\`\`typescript
+   // ❌ WRONG
+   { key: 'volume', type: 'slider', label: 'Volume', props: { min: 0, max: 100 } }
+
+   // ✅ CORRECT
+   { key: 'volume', type: 'slider', label: 'Volume', min: 0, max: 100 }
+   \`\`\`
+
+5. **Using unsupported field types** - Each UI library supports specific field types. Use \`ngforge_get_field_schema\` to see available types.
+
 ## Validation Before Use
 
-Always validate your FormConfig using the \`validate_form_config\` tool before using it. This catches structural errors and provides warnings for potential issues.
+Always validate your FormConfig using the \`ngforge_validate_form_config\` tool before using it. This tool uses the actual TypeScript/Zod schemas, so if validation passes, the config will work correctly at runtime.
+
+\`\`\`typescript
+// Always specify the UI integration you're using
+ngforge_validate_form_config({
+  uiIntegration: 'material',  // or 'bootstrap', 'primeng', 'ionic'
+  config: { fields: [...] }
+})
+\`\`\`
+
+To understand what properties are supported for each field type, use \`ngforge_get_field_schema\`:
+
+\`\`\`typescript
+ngforge_get_field_schema({ uiIntegration: 'material' })
+\`\`\`
 `;
