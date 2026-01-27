@@ -152,10 +152,16 @@ export function getDocs(): DocTopic[] {
   if (!docsCache) {
     try {
       // Docs are optional and loaded dynamically
-
       docsCache = require('./docs.json') as DocTopic[];
-    } catch {
+    } catch (error) {
       // docs.json may not exist if docs weren't generated
+      // Log unexpected errors (not file-not-found) in development
+      if (process.env.NODE_ENV !== 'production') {
+        const isModuleNotFound = error instanceof Error && 'code' in error && error.code === 'MODULE_NOT_FOUND';
+        if (!isModuleNotFound) {
+          console.warn('[ng-forge-mcp] Failed to load docs.json:', error instanceof Error ? error.message : error);
+        }
+      }
       docsCache = [];
     }
   }
