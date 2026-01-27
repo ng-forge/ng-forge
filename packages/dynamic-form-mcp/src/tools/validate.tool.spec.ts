@@ -1,14 +1,14 @@
 /**
- * Validate Form Config Tool Tests
+ * Validate Tool Tests
  *
- * Tests for the Zod-based form config validation tool.
+ * Tests for the unified Zod-based form config validation tool.
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { registerValidateFormConfigTool } from './validate-form-config.tool.js';
+import { registerValidateTool } from './validate.tool.js';
 
-describe('Validate Form Config Tool', () => {
+describe('Validate Tool', () => {
   let server: McpServer;
   let registeredTool: { name: string; handler: (args: Record<string, unknown>) => Promise<unknown> };
 
@@ -19,7 +19,7 @@ describe('Validate Form Config Tool', () => {
       }),
     } as unknown as McpServer;
 
-    registerValidateFormConfigTool(server);
+    registerValidateTool(server);
   });
 
   afterEach(() => {
@@ -27,7 +27,7 @@ describe('Validate Form Config Tool', () => {
   });
 
   it('registers tool with correct name', () => {
-    expect(registeredTool.name).toBe('ngforge_validate_form_config');
+    expect(registeredTool.name).toBe('ngforge_validate');
   });
 
   describe('valid configs', () => {
@@ -41,7 +41,14 @@ describe('Validate Form Config Tool', () => {
           ],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(true);
     });
@@ -62,7 +69,14 @@ describe('Validate Form Config Tool', () => {
           ],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(true);
     });
@@ -74,7 +88,14 @@ describe('Validate Form Config Tool', () => {
           fields: [{ key: 'name', type: 'input', label: 'Name' }],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(true);
     });
@@ -86,7 +107,14 @@ describe('Validate Form Config Tool', () => {
           fields: [{ key: 'name', type: 'input', label: 'Name' }],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(true);
     });
@@ -98,7 +126,14 @@ describe('Validate Form Config Tool', () => {
           fields: [{ key: 'name', type: 'input', label: 'Name' }],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(true);
     });
@@ -110,7 +145,14 @@ describe('Validate Form Config Tool', () => {
         uiIntegration: 'material',
         config: {},
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(false);
       expect(content.errors.length).toBeGreaterThan(0);
@@ -125,7 +167,14 @@ describe('Validate Form Config Tool', () => {
           fields: [{ type: 'input', label: 'Name' }],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(false);
       expect(content.errors.length).toBeGreaterThan(0);
@@ -138,7 +187,14 @@ describe('Validate Form Config Tool', () => {
           fields: [{ key: 'name', label: 'Name' }],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(false);
       expect(content.errors.length).toBeGreaterThan(0);
@@ -153,7 +209,14 @@ describe('Validate Form Config Tool', () => {
           fields: [{ key: 'name', type: 'unknown-type', label: 'Name' }],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(false);
       expect(content.errors.length).toBeGreaterThan(0);
@@ -168,7 +231,14 @@ describe('Validate Form Config Tool', () => {
           fields: [{ key: 'country', type: 'select', label: 'Country' }],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(false);
       expect(content.errors.length).toBeGreaterThan(0);
@@ -191,7 +261,14 @@ describe('Validate Form Config Tool', () => {
           ],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(true);
     });
@@ -205,7 +282,14 @@ describe('Validate Form Config Tool', () => {
           fields: [{ key: 'address', type: 'group' }],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(false);
       expect(content.errors.length).toBeGreaterThan(0);
@@ -227,7 +311,14 @@ describe('Validate Form Config Tool', () => {
           ],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(true);
     });
@@ -247,7 +338,14 @@ describe('Validate Form Config Tool', () => {
           ],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       // Row fields may require additional properties or have specific constraints
       // If invalid, check the error for proper feedback
@@ -273,7 +371,14 @@ describe('Validate Form Config Tool', () => {
           ],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(false);
       expect(content.errors.length).toBeGreaterThan(0);
@@ -293,7 +398,14 @@ describe('Validate Form Config Tool', () => {
           ],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(false);
       expect(content.errors.length).toBeGreaterThan(0);
@@ -313,7 +425,14 @@ describe('Validate Form Config Tool', () => {
           ],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(false);
       expect(content.errors.length).toBeGreaterThan(0);
@@ -333,7 +452,14 @@ describe('Validate Form Config Tool', () => {
           ],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(false);
       expect(content.errors.length).toBeGreaterThan(0);
@@ -353,7 +479,14 @@ describe('Validate Form Config Tool', () => {
           ],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(true);
     });
@@ -367,7 +500,14 @@ describe('Validate Form Config Tool', () => {
           fields: [{ type: 'input', label: 'Name' }], // missing key
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(false);
       expect(Array.isArray(content.errors)).toBe(true);
@@ -375,31 +515,46 @@ describe('Validate Form Config Tool', () => {
       expect(content.errors[0]).toHaveProperty('message');
     });
 
-    it('returns errorSummary for invalid configs', async () => {
+    it('returns errorCount for invalid configs', async () => {
       const result = await registeredTool.handler({
         uiIntegration: 'material',
         config: {
           fields: [{ type: 'input', label: 'Name' }], // missing key
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(false);
-      expect(content.errorSummary).toBeDefined();
-      expect(typeof content.errorSummary).toBe('string');
+      expect(content.errorCount).toBeDefined();
+      expect(typeof content.errorCount).toBe('number');
+      expect(content.errorCount).toBeGreaterThan(0);
     });
 
-    it('returns data for valid configs', async () => {
+    it('returns uiIntegration for valid configs', async () => {
       const result = await registeredTool.handler({
         uiIntegration: 'material',
         config: {
           fields: [{ key: 'name', type: 'input', label: 'Name' }],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(true);
-      expect(content.data).toBeDefined();
+      expect(content.uiIntegration).toBe('material');
     });
   });
 
@@ -411,7 +566,14 @@ describe('Validate Form Config Tool', () => {
           fields: [{ key: 'name', type: 'input', label: 'Name' }],
         },
       });
-      const content = JSON.parse((result as { content: [{ text: string }] }).content[0].text);
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
 
       expect(content.valid).toBe(false);
       expect(content.errors[0].message).toContain('Unknown UI integration');

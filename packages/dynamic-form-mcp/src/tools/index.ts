@@ -3,66 +3,48 @@
  *
  * Registers all available tools with the MCP server.
  *
- * 8 tools organized by workflow:
+ * 4 tools with zero overlap, each serving a single clear purpose:
+ *
+ * | Tool              | Purpose        | One-liner               |
+ * |-------------------|----------------|-------------------------|
+ * | ngforge_lookup    | Documentation  | "Tell me about X"       |
+ * | ngforge_examples  | Working code   | "Show me how to do X"   |
+ * | ngforge_validate  | Verification   | "Is my config correct?" |
+ * | ngforge_scaffold  | Generation     | "Generate a skeleton"   |
  *
  * RECOMMENDED WORKFLOW:
- * 1. ngforge_quick_lookup topic="workflow" - See tool usage guide
- * 2. ngforge_quick_lookup topic="golden-path" - Get form structure templates
- * 3. ngforge_quick_lookup topic="<field-type>" - Get syntax for specific fields
- * 4. ngforge_validate_file - Validate your config (catches all errors)
+ * 1. ngforge_lookup topic="workflow" - See tool usage guide
+ * 2. ngforge_lookup topic="golden-path" - Get form structure templates
+ * 3. ngforge_lookup topic="<field-type>" - Get syntax for specific fields
+ * 4. ngforge_validate - Validate your config (catches all errors)
  *
- * LEARN:
- * - ngforge_quick_lookup - RECOMMENDED: Focused lookup for specific topics
- * - ngforge_get_cheatsheet - Full reference (large response)
- * - ngforge_get_field_info - Deep dive into field types + placement rules
- * - ngforge_get_example - Working examples (use "complete" or "mega")
- * - ngforge_get_api_reference - Compact API reference (LLM-optimized)
+ * For working code examples:
+ * - ngforge_examples pattern="complete" - Full multi-page form
+ * - ngforge_examples pattern="minimal-conditional" - Minimal conditional example
  *
- * VALIDATE:
- * - ngforge_validate_file - Validate .ts files (RECOMMENDED)
- * - ngforge_validate_form_config - Validate JSON config
- * - ngforge_validate_field - Validate individual fields incrementally
+ * For generating skeletons:
+ * - ngforge_scaffold pages=2 arrays=["contacts"] groups=["address"]
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { registerValidateFormConfigTool } from './validate-form-config.tool.js';
-import { registerValidateFileTool } from './validate-file.tool.js';
-import { registerValidateFieldTool } from './validate-field.tool.js';
-import { registerGetFieldInfoTool } from './get-field-info.tool.js';
-import { registerGetExampleTool } from './get-example.tool.js';
-import { registerGetCheatsheetTool } from './get-cheatsheet.tool.js';
-import { registerQuickLookupTool } from './quick-lookup.tool.js';
-import { registerGetApiReferenceTool } from './get-api-reference.tool.js';
+import { registerLookupTool } from './lookup.tool.js';
+import { registerExamplesTool } from './examples.tool.js';
+import { registerValidateTool } from './validate.tool.js';
+import { registerScaffoldTool } from './scaffold.tool.js';
 
 /**
- * Register all MCP tools (8 total)
+ * Register all MCP tools (4 total)
  */
 export function registerTools(server: McpServer): void {
-  // === LEARN ===
+  // 1. Lookup - unified documentation ("Tell me about X")
+  registerLookupTool(server);
 
-  // 1. Cheatsheet - the recommended starting point (comprehensive reference)
-  registerGetCheatsheetTool(server);
+  // 2. Examples - working code patterns ("Show me how to do X")
+  registerExamplesTool(server);
 
-  // 2. Quick Lookup - focused topic lookup (avoids wall of text)
-  registerQuickLookupTool(server);
+  // 3. Validate - unified validation ("Is my config correct?")
+  registerValidateTool(server);
 
-  // 3. Field info - deep dive into specific field types (includes optional JSON schema)
-  registerGetFieldInfoTool(server);
-
-  // 4. Examples - working code with optional deep explanations
-  registerGetExampleTool(server);
-
-  // 5. API Reference - compact reference optimized for LLM parsing
-  registerGetApiReferenceTool(server);
-
-  // === VALIDATE ===
-
-  // 6. Validate config - JSON config validation
-  registerValidateFormConfigTool(server);
-
-  // 7. Validate file - read and validate actual .ts files
-  registerValidateFileTool(server);
-
-  // 8. Validate field - incremental single-field validation
-  registerValidateFieldTool(server);
+  // 4. Scaffold - skeleton generator ("Generate a skeleton for X")
+  registerScaffoldTool(server);
 }
