@@ -16,20 +16,24 @@ const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
  * Extract FormConfig objects from TypeScript/JavaScript source code.
  * Handles common patterns like:
  * - const config: FormConfig = { fields: [...] }
- * - export const config = { fields: [...] }
+ * - const config: FormConfig<T> = { fields: [...] }
+ * - export const config = { fields: [...] } satisfies FormConfig
+ * - export const config = { fields: [...] } as FormConfig
  * - { fields: [...] } (standalone object)
  */
 function extractFormConfigs(source: string): Array<{ name: string; config: unknown; startLine: number }> {
   const configs: Array<{ name: string; config: unknown; startLine: number }> = [];
+  const foundNames = new Set<string>();
 
-  // Pattern 1: Named exports/constants with FormConfig type
-  // const varName: FormConfig = { ... }
-  // export const varName: FormConfig = { ... }
-  const namedConfigRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*:\s*FormConfig\s*=\s*/g;
+  // Pattern 1: Type annotation - const varName: FormConfig = { ... }
+  // Also handles: FormConfig<T>, FormConfig | undefined, etc.
+  const typeAnnotationRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*:\s*FormConfig(?:<[^>]*>|\s*\|[^=]*)?\s*=\s*/gm;
 
   let match;
-  while ((match = namedConfigRegex.exec(source)) !== null) {
+  while ((match = typeAnnotationRegex.exec(source)) !== null) {
     const varName = match[1];
+    if (foundNames.has(varName)) continue;
+
     const startIndex = match.index + match[0].length;
     const startLine = source.substring(0, match.index).split('\n').length;
 
@@ -37,16 +41,97 @@ function extractFormConfigs(source: string): Array<{ name: string; config: unkno
       const config = extractObjectAtPosition(source, startIndex);
       if (config && typeof config === 'object' && 'fields' in config) {
         configs.push({ name: varName, config, startLine });
+        foundNames.add(varName);
       }
     } catch {
       // Skip malformed configs
     }
   }
 
-  // Pattern 2: Objects with fields array (without explicit type)
-  // Look for { fields: [ patterns
+  // Pattern 2: satisfies FormConfig - const varName = { ... } satisfies FormConfig
+  const satisfiesRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(\{[\s\S]*?\})\s*satisfies\s+FormConfig/gm;
+
+  while ((match = satisfiesRegex.exec(source)) !== null) {
+    const varName = match[1];
+    if (foundNames.has(varName)) continue;
+
+    const startLine = source.substring(0, match.index).split('\n').length;
+
+    // Find the object start position
+    const objectStartMatch = source.substring(match.index).match(/=\s*\{/);
+    if (!objectStartMatch) continue;
+
+    const startIndex = match.index + (objectStartMatch.index ?? 0) + objectStartMatch[0].length - 1;
+
+    try {
+      const config = extractObjectAtPosition(source, startIndex);
+      if (config && typeof config === 'object' && 'fields' in config) {
+        configs.push({ name: varName, config, startLine });
+        foundNames.add(varName);
+      }
+    } catch {
+      // Skip malformed configs
+    }
+  }
+
+  // Pattern 3: as FormConfig - const varName = { ... } as FormConfig
+  const asRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(\{[\s\S]*?\})\s*as\s+FormConfig/gm;
+
+  while ((match = asRegex.exec(source)) !== null) {
+    const varName = match[1];
+    if (foundNames.has(varName)) continue;
+
+    const startLine = source.substring(0, match.index).split('\n').length;
+
+    // Find the object start position
+    const objectStartMatch = source.substring(match.index).match(/=\s*\{/);
+    if (!objectStartMatch) continue;
+
+    const startIndex = match.index + (objectStartMatch.index ?? 0) + objectStartMatch[0].length - 1;
+
+    try {
+      const config = extractObjectAtPosition(source, startIndex);
+      if (config && typeof config === 'object' && 'fields' in config) {
+        configs.push({ name: varName, config, startLine });
+        foundNames.add(varName);
+      }
+    } catch {
+      // Skip malformed configs
+    }
+  }
+
+  // Pattern 4: Variable with FormConfig in comment or inferred type
+  // Look for variables assigned objects with fields arrays
+  const variableWithFieldsRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*\{/gm;
+
+  while ((match = variableWithFieldsRegex.exec(source)) !== null) {
+    const varName = match[1];
+    if (foundNames.has(varName)) continue;
+
+    const startIndex = match.index + match[0].length - 1;
+    const startLine = source.substring(0, match.index).split('\n').length;
+
+    try {
+      const config = extractObjectAtPosition(source, startIndex);
+      if (config && typeof config === 'object' && 'fields' in config && Array.isArray((config as Record<string, unknown>).fields)) {
+        // Check if "fields" contains objects that look like form fields
+        const fields = (config as { fields: unknown[] }).fields;
+        if (fields.length > 0 && typeof fields[0] === 'object' && fields[0] !== null) {
+          const firstField = fields[0] as Record<string, unknown>;
+          if ('key' in firstField || 'type' in firstField) {
+            configs.push({ name: varName, config, startLine });
+            foundNames.add(varName);
+          }
+        }
+      }
+    } catch {
+      // Skip malformed configs
+    }
+  }
+
+  // Pattern 5: Fallback - any object literal with fields: [ as top-level
   if (configs.length === 0) {
-    const fieldsRegex = /\{\s*fields\s*:\s*\[/g;
+    const fieldsRegex = /\{\s*fields\s*:\s*\[/gm;
     while ((match = fieldsRegex.exec(source)) !== null) {
       const startIndex = match.index;
       const startLine = source.substring(0, match.index).split('\n').length;
@@ -54,7 +139,11 @@ function extractFormConfigs(source: string): Array<{ name: string; config: unkno
       try {
         const config = extractObjectAtPosition(source, startIndex);
         if (config && typeof config === 'object' && 'fields' in config) {
-          configs.push({ name: `config_line_${startLine}`, config, startLine });
+          const name = `config_line_${startLine}`;
+          if (!foundNames.has(name)) {
+            configs.push({ name, config, startLine });
+            foundNames.add(name);
+          }
         }
       } catch {
         // Skip malformed configs

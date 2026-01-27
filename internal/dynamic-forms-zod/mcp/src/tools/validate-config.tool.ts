@@ -113,6 +113,37 @@ const PROPERTY_GUIDANCE: Record<string, string> = {
 };
 
 /**
+ * "Did you mean?" suggestions for common typos and wrong property names.
+ */
+const DID_YOU_MEAN: Record<string, string> = {
+  hideWhen: 'Did you mean `logic: [{ type: "hidden", condition: {...} }]`? There is no hideWhen shorthand.',
+  showWhen: 'Did you mean `logic: [{ type: "hidden", condition: {...} }]` with inverted condition? There is no showWhen shorthand.',
+  disableWhen: 'Did you mean `logic: [{ type: "disabled", condition: {...} }]`? There is no disableWhen shorthand.',
+  requiredWhen: 'Did you mean `logic: [{ type: "required", condition: {...} }]`? There is no requiredWhen shorthand.',
+  derivation: 'Did you mean `logic: [{ type: "derivation", targetField: "...", expression: "..." }]`? Derivation goes in the logic array.',
+  derive: 'Did you mean `logic: [{ type: "derivation", targetField: "...", expression: "..." }]`?',
+  computed: 'Did you mean `logic: [{ type: "derivation", targetField: "...", expression: "..." }]`?',
+  calculate: 'Did you mean `logic: [{ type: "derivation", targetField: "...", expression: "..." }]`?',
+  condition: 'Did you mean to put this inside `logic: [{ type: "...", condition: {...} }]`?',
+  visible: 'Did you mean `logic: [{ type: "hidden", condition: {...} }]`? Use hidden with inverted condition for visibility.',
+  visibility: 'Did you mean `logic: [{ type: "hidden", condition: {...} }]`?',
+  show: 'Did you mean `logic: [{ type: "hidden", condition: {...} }]` with inverted condition?',
+  hide: 'Did you mean `logic: [{ type: "hidden", condition: {...} }]`?',
+  min: 'Did you mean `minValue` at field level (for slider) or `min` shorthand validator (for numbers)?',
+  max: 'Did you mean `maxValue` at field level (for slider) or `max` shorthand validator (for numbers)?',
+  items: 'Did you mean `options` for select/radio/multi-checkbox, or `fields` for array containers?',
+  template: 'Did you mean `fields`? Arrays use `fields` to define the template for each item.',
+  element: 'Did you mean `props: { elementType: "..." }`? For text fields, use elementType inside props.',
+  content: 'Did you mean `label`? For text fields, the content goes in the label property.',
+  title: 'Did you mean to use a `text` field with `label: "..." and props: { elementType: "h1" }`? Pages don\'t have titles.',
+  name: 'Did you mean `key`? Field identifiers use the `key` property.',
+  inputType: 'Did you mean `props: { type: "..." }`? Input type goes inside props.',
+  fieldType: 'Did you mean `type`? The field type property is just `type`.',
+  validators: 'Validators can be shorthand (`required: true`, `email: true`) or use the `validators: [...]` array.',
+  validation: 'Did you mean to use validator shorthand (`required`, `email`, `min`, etc.) or `validators: [...]` array?',
+};
+
+/**
  * Format a Zod error into user-friendly validation errors.
  */
 function formatZodError(error: ZodError, config?: unknown): FormattedValidationError[] {
@@ -179,6 +210,13 @@ function formatZodError(error: ZodError, config?: unknown): FormattedValidationE
               mistakes.push(`"${fieldType}" containers do NOT support logic blocks - apply logic to individual child fields instead`);
             }
 
+            // Check for "did you mean" properties
+            for (const [wrongProp, suggestion] of Object.entries(DID_YOU_MEAN)) {
+              if (wrongProp in field) {
+                mistakes.push(suggestion);
+              }
+            }
+
             if (mistakes.length > 0) {
               message = `Field "${fieldKey || index}" (type: ${fieldType}): ${mistakes.join('; ')}`;
             } else {
@@ -193,6 +231,11 @@ function formatZodError(error: ZodError, config?: unknown): FormattedValidationE
 
     // Check if the path matches a known problematic property
     const lastPathPart = err.path[err.path.length - 1];
+
+    // Check for "did you mean" at the path level
+    if (typeof lastPathPart === 'string' && DID_YOU_MEAN[lastPathPart]) {
+      message = `${message}. ${DID_YOU_MEAN[lastPathPart]}`;
+    }
     if (typeof lastPathPart === 'string' && PROPERTY_GUIDANCE[lastPathPart]) {
       message = `${message}. Hint: ${PROPERTY_GUIDANCE[lastPathPart]}`;
     }
