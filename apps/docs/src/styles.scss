@@ -1179,33 +1179,33 @@ html:has(app-landing) {
 }
 
 // ============================================
-// AI INTEGRATION SIDEBAR STAR ICON
+// AI INTEGRATION SIDEBAR ICON
 // ============================================
-// Add animated sparkle star icon to AI Integration menu item
-// Uses ember colors for forge-themed glow effect
+// Animated AI sparkle icon for the AI Integration menu item
+// Features color-shifting glow and pulsing animation
 
-// Sparkle animation keyframes
-@keyframes sparkle {
+@keyframes ai-pulse {
   0%,
   100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-    filter: drop-shadow(0 0 2px $ember-glow);
-  }
-  25% {
-    opacity: 0.8;
-    transform: scale(1.1) rotate(5deg);
-    filter: drop-shadow(0 0 4px $ember-hot);
+    transform: scale(1);
+    filter: drop-shadow(0 0 3px #a855f7) drop-shadow(0 0 6px #6366f1);
   }
   50% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-    filter: drop-shadow(0 0 6px $ember-core);
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 6px #c084fc) drop-shadow(0 0 12px #818cf8);
   }
-  75% {
-    opacity: 0.9;
-    transform: scale(1.05) rotate(-3deg);
-    filter: drop-shadow(0 0 3px $ember-glow);
+}
+
+@keyframes ai-color-shift {
+  0%,
+  100% {
+    color: #a855f7; // Purple
+  }
+  33% {
+    color: #6366f1; // Indigo
+  }
+  66% {
+    color: #ec4899; // Pink
   }
 }
 
@@ -1213,26 +1213,27 @@ html:has(app-landing) {
 ng-doc-sidebar a[href*='ai-integration'],
 .ng-doc-side-bar-wrapper a[href*='ai-integration'] {
   position: relative;
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
 
-  // Star icon before the text
-  &::before {
+  // AI sparkle icon after the text (positioned slightly above like superscript)
+  &::after {
     content: '✦';
-    display: inline-flex;
-    font-size: 14px;
-    color: $ember-glow;
-    animation: sparkle 3s ease-in-out infinite;
-    flex-shrink: 0;
-    line-height: 1;
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 10px;
+    animation:
+      ai-pulse 2s ease-in-out infinite,
+      ai-color-shift 4s ease-in-out infinite;
+    vertical-align: super;
+    position: relative;
+    top: -1px;
   }
 
-  // Hover effect - brighter star
-  &:hover::before {
-    color: $molten;
-    animation-duration: 1.5s;
-    filter: drop-shadow(0 0 6px $ember-hot);
+  // Hover effect - faster, brighter
+  &:hover::after {
+    animation:
+      ai-pulse 0.8s ease-in-out infinite,
+      ai-color-shift 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px #c084fc) drop-shadow(0 0 16px #818cf8);
   }
 }
 
