@@ -1214,18 +1214,19 @@ ng-doc-sidebar a[href*='ai-integration'],
 .ng-doc-side-bar-wrapper a[href*='ai-integration'] {
   position: relative;
 
-  // AI sparkle icon after the text (positioned slightly above like superscript)
+  // AI sparkle icons - overlapping stars with glow effect
   &::after {
-    content: '✦';
+    content: '✦✦✦';
     display: inline-block;
-    margin-left: 4px;
-    font-size: 10px;
+    margin-left: 3px;
+    font-size: 11px;
+    letter-spacing: -5px; // overlap the stars
     animation:
       ai-pulse 2s ease-in-out infinite,
       ai-color-shift 4s ease-in-out infinite;
     vertical-align: super;
     position: relative;
-    top: -1px;
+    top: -2px;
   }
 
   // Hover effect - faster, brighter
