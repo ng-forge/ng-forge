@@ -1,9 +1,9 @@
 import { NgDocPage } from '@ng-doc/core';
 
 const AiIntegrationPage: NgDocPage = {
-  title: 'AI Integration',
+  title: 'AI Integration (MCP)',
   mdFile: './index.md',
-  order: 8,
+  order: 10,
 };
 
 export default AiIntegrationPage;
