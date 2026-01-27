@@ -26,6 +26,7 @@ All packages are released together with the same version:
 - `@ng-forge/dynamic-forms-ionic`
 - `@ng-forge/dynamic-forms-material`
 - `@ng-forge/dynamic-forms-primeng`
+- `@ng-forge/dynamic-form-mcp` (MCP server)
 
 ## Commit Message Format
 
@@ -143,6 +144,7 @@ gh pr create --title "chore(release): bump version to {VERSION}" --body "## Summ
 - @ng-forge/dynamic-forms-ionic: {OLD_VERSION} -> {VERSION}
 - @ng-forge/dynamic-forms-material: {OLD_VERSION} -> {VERSION}
 - @ng-forge/dynamic-forms-primeng: {OLD_VERSION} -> {VERSION}
+- @ng-forge/dynamic-form-mcp: {OLD_VERSION} -> {VERSION}
 
 ## Changelog
 [Include changelog entries from CHANGELOG.md for this version]
