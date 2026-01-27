@@ -1,0 +1,56 @@
+{
+  "name": "dynamic-form-mcp",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/dynamic-form-mcp/src",
+  "projectType": "library",
+  "implicitDependencies": ["dynamic-forms-zod"],
+  "release": {
+    "version": {
+      "manifestRootsToUpdate": ["{projectRoot}", "dist/{projectRoot}"],
+      "currentVersionResolver": "git-tag",
+      "fallbackCurrentVersionResolver": "disk"
+    }
+  },
+  "tags": ["scope:mcp", "type:server"],
+  "targets": {
+    "generate-registry": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsx packages/dynamic-form-mcp/scripts/generate-registry.ts"
+      }
+    },
+    "build": {
+      "dependsOn": ["^build", "generate-registry"],
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/dynamic-form-mcp",
+        "main": "packages/dynamic-form-mcp/src/index.ts",
+        "tsConfig": "packages/dynamic-form-mcp/tsconfig.lib.json",
+        "format": ["esm"],
+        "platform": "node",
+        "bundle": true,
+        "additionalEntryPoints": ["packages/dynamic-form-mcp/bin/ng-forge-mcp.ts"],
+        "assets": [
+          "packages/dynamic-form-mcp/README.md",
+          "packages/dynamic-form-mcp/package.json",
+          "packages/dynamic-form-mcp/src/registry/*.json"
+        ]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "packages/dynamic-form-mcp/vite.config.ts"
+      }
+    }
+  }
+}

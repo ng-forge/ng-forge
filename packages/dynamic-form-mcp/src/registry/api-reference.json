@@ -1,0 +1,510 @@
+{
+  "version": "1.0.0",
+  "description": "ng-forge Dynamic Forms API Reference - Compact format optimized for LLM consumption",
+  "logicMatrix": {
+    "description": "Logic support per field type. Y=supported, N=not supported",
+    "columns": ["hidden", "disabled", "required", "readonly", "derivation"],
+    "fields": {
+      "page": ["Y", "N", "N", "N", "N"],
+      "group": ["N", "N", "N", "N", "N"],
+      "row": ["N", "N", "N", "N", "N"],
+      "array": ["N", "N", "N", "N", "N"],
+      "input": ["Y", "Y", "Y", "Y", "Y"],
+      "select": ["Y", "Y", "Y", "Y", "Y"],
+      "checkbox": ["Y", "Y", "Y", "Y", "Y"],
+      "radio": ["Y", "Y", "Y", "Y", "Y"],
+      "multi-checkbox": ["Y", "Y", "Y", "Y", "Y"],
+      "textarea": ["Y", "Y", "Y", "Y", "Y"],
+      "datepicker": ["Y", "Y", "Y", "Y", "Y"],
+      "toggle": ["Y", "Y", "Y", "Y", "Y"],
+      "slider": ["Y", "Y", "Y", "Y", "Y"],
+      "hidden": ["N", "N", "N", "N", "N"],
+      "text": ["Y", "N", "N", "N", "N"],
+      "button": ["Y", "Y", "N", "N", "N"],
+      "submit": ["Y", "Y", "N", "N", "N"],
+      "next": ["Y", "Y", "N", "N", "N"],
+      "previous": ["Y", "Y", "N", "N", "N"]
+    }
+  },
+  "containerRules": {
+    "page": {
+      "hasLabel": false,
+      "supportsLogic": true,
+      "logicTypes": ["hidden"],
+      "allowedChildren": [
+        "row",
+        "group",
+        "array",
+        "input",
+        "select",
+        "checkbox",
+        "radio",
+        "multi-checkbox",
+        "textarea",
+        "datepicker",
+        "toggle",
+        "slider",
+        "hidden",
+        "text",
+        "button",
+        "submit",
+        "next",
+        "previous"
+      ],
+      "notAllowedChildren": ["page"],
+      "notes": "Nav buttons (next/previous) go INSIDE page. ALL top-level fields must be pages if using multi-page mode."
+    },
+    "group": {
+      "hasLabel": false,
+      "supportsLogic": false,
+      "allowedChildren": [
+        "row",
+        "input",
+        "select",
+        "checkbox",
+        "radio",
+        "multi-checkbox",
+        "textarea",
+        "datepicker",
+        "toggle",
+        "slider",
+        "hidden",
+        "text",
+        "button",
+        "submit"
+      ],
+      "notAllowedChildren": ["page", "group"],
+      "notes": "Creates nested object in form value. Use 'fields', NOT 'children' or 'template'."
+    },
+    "row": {
+      "hasLabel": false,
+      "supportsLogic": false,
+      "allowedChildren": [
+        "group",
+        "array",
+        "input",
+        "select",
+        "checkbox",
+        "radio",
+        "multi-checkbox",
+        "textarea",
+        "datepicker",
+        "toggle",
+        "slider",
+        "text",
+        "button",
+        "submit"
+      ],
+      "notAllowedChildren": ["page", "row", "hidden"],
+      "notes": "Layout only. Use 'col' (1-12) on children. Hidden fields NOT allowed inside rows."
+    },
+    "array": {
+      "hasLabel": false,
+      "supportsLogic": false,
+      "allowedChildren": [
+        "row",
+        "group",
+        "input",
+        "select",
+        "checkbox",
+        "radio",
+        "multi-checkbox",
+        "textarea",
+        "datepicker",
+        "toggle",
+        "slider",
+        "text"
+      ],
+      "notAllowedChildren": ["page", "array", "hidden"],
+      "notes": "Use 'fields' (NOT 'template'). No minItems/maxItems properties."
+    }
+  },
+  "fieldReference": {
+    "input": {
+      "category": "value",
+      "valueType": "string | number",
+      "fieldLevelProps": [
+        "key",
+        "type",
+        "label",
+        "value",
+        "required",
+        "email",
+        "min",
+        "max",
+        "minLength",
+        "maxLength",
+        "pattern",
+        "disabled",
+        "readonly",
+        "hidden",
+        "col",
+        "logic",
+        "validators",
+        "validationMessages"
+      ],
+      "propsObject": ["type", "placeholder", "appearance", "hint"],
+      "copyPaste": "{ type: 'input', key: 'name', label: 'Name', value: '' }",
+      "copyPasteEmail": "{ type: 'input', key: 'email', label: 'Email', required: true, email: true, props: { type: 'email' } }",
+      "copyPasteNumber": "{ type: 'input', key: 'age', label: 'Age', value: '', meta: { inputmode: 'numeric' } }"
+    },
+    "select": {
+      "category": "value",
+      "valueType": "T | T[]",
+      "fieldLevelProps": [
+        "key",
+        "type",
+        "label",
+        "value",
+        "options",
+        "required",
+        "disabled",
+        "readonly",
+        "hidden",
+        "col",
+        "logic",
+        "validators",
+        "validationMessages"
+      ],
+      "propsObject": ["multiple", "placeholder", "appearance"],
+      "copyPaste": "{ type: 'select', key: 'country', label: 'Country', options: [{ value: 'us', label: 'USA' }], value: 'us' }",
+      "pitfall": "options goes at FIELD level, NOT inside props"
+    },
+    "radio": {
+      "category": "value",
+      "valueType": "T",
+      "fieldLevelProps": [
+        "key",
+        "type",
+        "label",
+        "value",
+        "options",
+        "required",
+        "disabled",
+        "readonly",
+        "hidden",
+        "col",
+        "logic",
+        "validators",
+        "validationMessages"
+      ],
+      "propsObject": [],
+      "copyPaste": "{ type: 'radio', key: 'gender', label: 'Gender', options: [{ value: 'm', label: 'Male' }, { value: 'f', label: 'Female' }] }",
+      "pitfall": "options goes at FIELD level, NOT inside props"
+    },
+    "checkbox": {
+      "category": "value",
+      "valueType": "boolean",
+      "fieldLevelProps": [
+        "key",
+        "type",
+        "label",
+        "value",
+        "required",
+        "disabled",
+        "readonly",
+        "hidden",
+        "col",
+        "logic",
+        "validators",
+        "validationMessages"
+      ],
+      "propsObject": ["color"],
+      "copyPaste": "{ type: 'checkbox', key: 'accept', label: 'Accept terms', value: false }"
+    },
+    "multi-checkbox": {
+      "category": "value",
+      "valueType": "T[]",
+      "fieldLevelProps": [
+        "key",
+        "type",
+        "label",
+        "value",
+        "options",
+        "required",
+        "disabled",
+        "readonly",
+        "hidden",
+        "col",
+        "logic",
+        "validators",
+        "validationMessages"
+      ],
+      "propsObject": [],
+      "copyPaste": "{ type: 'multi-checkbox', key: 'tags', label: 'Tags', options: [{ value: 'a', label: 'A' }], value: [] }",
+      "pitfall": "value is an array, options at FIELD level"
+    },
+    "textarea": {
+      "category": "value",
+      "valueType": "string",
+      "fieldLevelProps": [
+        "key",
+        "type",
+        "label",
+        "value",
+        "required",
+        "minLength",
+        "maxLength",
+        "disabled",
+        "readonly",
+        "hidden",
+        "col",
+        "logic",
+        "validators",
+        "validationMessages"
+      ],
+      "propsObject": ["rows", "placeholder", "appearance"],
+      "copyPaste": "{ type: 'textarea', key: 'bio', label: 'Bio', props: { rows: 4 } }"
+    },
+    "datepicker": {
+      "category": "value",
+      "valueType": "Date | string",
+      "fieldLevelProps": [
+        "key",
+        "type",
+        "label",
+        "value",
+        "required",
+        "disabled",
+        "readonly",
+        "hidden",
+        "col",
+        "logic",
+        "validators",
+        "validationMessages"
+      ],
+      "propsObject": ["minDate", "maxDate", "startView", "appearance"],
+      "copyPaste": "{ type: 'datepicker', key: 'dob', label: 'Date of Birth', value: undefined }"
+    },
+    "toggle": {
+      "category": "value",
+      "valueType": "boolean",
+      "fieldLevelProps": [
+        "key",
+        "type",
+        "label",
+        "value",
+        "required",
+        "disabled",
+        "readonly",
+        "hidden",
+        "col",
+        "logic",
+        "validators",
+        "validationMessages"
+      ],
+      "propsObject": ["color"],
+      "copyPaste": "{ type: 'toggle', key: 'notify', label: 'Enable notifications', value: false }"
+    },
+    "slider": {
+      "category": "value",
+      "valueType": "number",
+      "fieldLevelProps": [
+        "key",
+        "type",
+        "label",
+        "value",
+        "minValue",
+        "maxValue",
+        "step",
+        "required",
+        "disabled",
+        "readonly",
+        "hidden",
+        "col",
+        "logic",
+        "validators",
+        "validationMessages"
+      ],
+      "propsObject": ["thumbLabel", "tickInterval", "color"],
+      "copyPaste": "{ type: 'slider', key: 'rating', label: 'Rating', minValue: 1, maxValue: 10, step: 1, value: 5 }",
+      "pitfall": "Use minValue/maxValue/step at FIELD level, NOT min/max in props"
+    },
+    "hidden": {
+      "category": "value",
+      "valueType": "T",
+      "fieldLevelProps": ["key", "type", "value"],
+      "propsObject": [],
+      "copyPaste": "{ type: 'hidden', key: 'userId', value: '123' }",
+      "doesNotSupport": ["logic", "validators", "required", "label"]
+    },
+    "text": {
+      "category": "display",
+      "valueType": null,
+      "fieldLevelProps": ["key", "type", "label", "hidden", "col", "logic"],
+      "propsObject": ["elementType"],
+      "copyPaste": "{ type: 'text', key: 'title', label: 'Section Title', props: { elementType: 'h2' } }",
+      "notes": "Content goes in 'label', NOT in props.content"
+    },
+    "group": {
+      "category": "container",
+      "valueType": "object",
+      "fieldLevelProps": ["key", "type", "fields"],
+      "propsObject": [],
+      "copyPaste": "{ type: 'group', key: 'address', fields: [{ type: 'input', key: 'city', label: 'City' }] }",
+      "doesNotSupport": ["label", "logic"]
+    },
+    "row": {
+      "category": "container",
+      "valueType": null,
+      "fieldLevelProps": ["key", "type", "fields"],
+      "propsObject": [],
+      "copyPaste": "{ type: 'row', key: 'nameRow', fields: [{ type: 'input', key: 'first', label: 'First', col: 6 }, { type: 'input', key: 'last', label: 'Last', col: 6 }] }",
+      "doesNotSupport": ["label", "logic"]
+    },
+    "array": {
+      "category": "container",
+      "valueType": "T[]",
+      "fieldLevelProps": ["key", "type", "fields"],
+      "propsObject": [],
+      "copyPaste": "{ type: 'array', key: 'contacts', fields: [{ type: 'group', key: 'item', fields: [{ type: 'input', key: 'name', label: 'Name' }] }] }",
+      "doesNotSupport": ["label", "logic", "minItems", "maxItems", "template"]
+    },
+    "page": {
+      "category": "container",
+      "valueType": null,
+      "fieldLevelProps": ["key", "type", "fields", "logic"],
+      "propsObject": [],
+      "copyPaste": "{ type: 'page', key: 'step1', fields: [{ type: 'input', key: 'name', label: 'Name' }, { type: 'next', key: 'next', label: 'Next' }] }",
+      "doesNotSupport": ["label", "title"],
+      "notes": "Only supports hidden logic. Nav buttons go INSIDE each page."
+    },
+    "button": {
+      "category": "button",
+      "valueType": null,
+      "fieldLevelProps": ["key", "type", "label", "event", "hidden", "disabled", "col", "logic"],
+      "propsObject": [],
+      "copyPaste": "{ type: 'button', key: 'custom', label: 'Custom', event: MyCustomEvent }",
+      "pitfall": "Generic button REQUIRES 'event' property. Use submit/next/previous instead for common actions."
+    },
+    "submit": {
+      "category": "button",
+      "valueType": null,
+      "fieldLevelProps": ["key", "type", "label", "hidden", "disabled", "col", "logic"],
+      "propsObject": [],
+      "copyPaste": "{ type: 'submit', key: 'submit', label: 'Submit' }"
+    },
+    "next": {
+      "category": "button",
+      "valueType": null,
+      "fieldLevelProps": ["key", "type", "label", "hidden", "disabled", "col", "logic"],
+      "propsObject": [],
+      "copyPaste": "{ type: 'next', key: 'next', label: 'Next' }",
+      "notes": "Must be placed INSIDE a page's fields array"
+    },
+    "previous": {
+      "category": "button",
+      "valueType": null,
+      "fieldLevelProps": ["key", "type", "label", "hidden", "disabled", "col", "logic"],
+      "propsObject": [],
+      "copyPaste": "{ type: 'previous', key: 'back', label: 'Back' }",
+      "notes": "Must be placed INSIDE a page's fields array"
+    }
+  },
+  "validators": {
+    "shorthand": {
+      "description": "Use directly on field (no validators array needed)",
+      "list": ["required", "email", "min", "max", "minLength", "maxLength", "pattern"]
+    },
+    "fullSyntax": {
+      "description": "Use in validators array for custom logic",
+      "types": {
+        "required": "{ type: 'required' }",
+        "email": "{ type: 'email' }",
+        "min": "{ type: 'min', value: 0 }",
+        "max": "{ type: 'max', value: 100 }",
+        "minLength": "{ type: 'minLength', value: 3 }",
+        "maxLength": "{ type: 'maxLength', value: 50 }",
+        "pattern": "{ type: 'pattern', value: '^[A-Z]+$' }",
+        "custom": "{ type: 'custom', expression: 'fieldValue !== formValue.other', kind: 'errorKind' }",
+        "customAsync": "{ type: 'customAsync', functionName: 'checkAvailability' }",
+        "customHttp": "{ type: 'customHttp', functionName: 'validateOnServer' }"
+      }
+    },
+    "errorMessages": {
+      "description": "Custom messages go in validationMessages at FIELD level, NOT in validator config",
+      "example": "validationMessages: { required: 'This is required', customKind: 'Custom error' }"
+    }
+  },
+  "logic": {
+    "types": ["hidden", "disabled", "required", "readonly", "derivation"],
+    "conditions": {
+      "fieldValue": "{ type: 'fieldValue', fieldPath: 'field.path', operator: 'equals', value: 'x' }",
+      "javascript": "{ type: 'javascript', expression: 'formValue.age >= 18' }",
+      "and": "{ type: 'and', conditions: [...] }",
+      "or": "{ type: 'or', conditions: [...] }",
+      "true": "{ type: 'true' }",
+      "false": "{ type: 'false' }"
+    },
+    "operators": [
+      "equals",
+      "notEquals",
+      "greater",
+      "greaterOrEquals",
+      "less",
+      "lessOrEquals",
+      "contains",
+      "notContains",
+      "startsWith",
+      "endsWith",
+      "empty",
+      "notEmpty"
+    ],
+    "buttonConditions": ["formInvalid", "formSubmitting", "pageInvalid"],
+    "derivationExample": "{ type: 'derivation', targetField: 'fullName', expression: 'formValue.first + \" \" + formValue.last' }",
+    "expressionVariables": {
+      "formValue": "Complete form value object",
+      "fieldValue": "Current field's value"
+    }
+  },
+  "typeInference": {
+    "recommended": "const config = { fields: [...] } as const satisfies FormConfig;",
+    "pitfall1": "const config: FormConfig = {...} // Loses type inference - InferFormValue returns Record<string, unknown>",
+    "pitfall2": "const config = {...} satisfies FormConfig // Without 'as const', arrays are mutable, inference breaks",
+    "correct": "const config = { fields: [...] } as const satisfies FormConfig;\ntype Value = InferFormValue<typeof config>; // Exact shape!"
+  },
+  "arrayButtons": {
+    "description": "Button types for adding/removing array items (provided by UI adapter packages)",
+    "addArrayItem": {
+      "copyPaste": "{ type: 'addArrayItem', key: 'addItem', label: 'Add', arrayKey: 'myArray' }",
+      "fieldLevelProps": ["key", "type", "label", "arrayKey", "hidden", "disabled", "col", "logic"],
+      "pitfall": "arrayKey goes at FIELD level, NOT in props"
+    },
+    "removeArrayItem": {
+      "copyPaste": "{ type: 'removeArrayItem', key: 'removeItem', label: 'Remove' }",
+      "fieldLevelProps": ["key", "type", "label", "hidden", "disabled", "col", "logic"],
+      "notes": "Place inside array template. arrayKey is inferred from parent array."
+    }
+  },
+  "contextApi": {
+    "description": "CRITICAL: Different APIs for validators vs expressions!",
+    "expressions": {
+      "usedIn": ["logic[].expression", "derivation.expression", "javascript conditions"],
+      "variables": {
+        "formValue": "formValue.fieldName or formValue.path.to.field",
+        "fieldValue": "Current field's value"
+      },
+      "example": "expression: 'formValue.password === fieldValue'"
+    },
+    "validators": {
+      "usedIn": ["customFnConfig.validators (registered functions)"],
+      "api": "Angular FieldContext",
+      "methods": {
+        "ctx.value()": "Current field value",
+        "ctx.valueOf('path' as never)": "Value at path (requires cast)",
+        "ctx.state": "Field state (errors, touched, dirty)",
+        "ctx.stateOf('path' as never)": "State at path"
+      },
+      "example": "const password = ctx.valueOf('password' as never);",
+      "pitfall": "Do NOT use formValue in validators - use ctx.valueOf()"
+    }
+  },
+  "commonPitfalls": [
+    "Container fields (group, row, array) do NOT support logic - apply to children instead",
+    "options/minValue/maxValue/arrayKey go at FIELD level, NOT in props",
+    "Validators use ctx.value() and ctx.valueOf(), NOT formValue",
+    "Type annotation (: FormConfig) loses inference - use 'as const satisfies'",
+    "Generic button type requires 'event' property - use submit/next/previous instead",
+    "Array fields use 'fields' property, NOT 'template'"
+  ]
+}

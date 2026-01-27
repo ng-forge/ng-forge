@@ -1,0 +1,158 @@
+[
+  {
+    "type": "required",
+    "category": "built-in",
+    "description": "Validates that a field has a non-empty value",
+    "parameters": {},
+    "example": "{ type: 'required' }\n// or shorthand: required: true"
+  },
+  {
+    "type": "email",
+    "category": "built-in",
+    "description": "Validates email format",
+    "parameters": {},
+    "example": "{ type: 'email' }\n// or shorthand: email: true"
+  },
+  {
+    "type": "min",
+    "category": "built-in",
+    "description": "Validates minimum numeric value",
+    "parameters": {
+      "value": {
+        "name": "value",
+        "type": "number",
+        "description": "Minimum allowed value",
+        "required": true
+      }
+    },
+    "example": "{ type: 'min', value: 0 }\n// or shorthand: min: 0"
+  },
+  {
+    "type": "max",
+    "category": "built-in",
+    "description": "Validates maximum numeric value",
+    "parameters": {
+      "value": {
+        "name": "value",
+        "type": "number",
+        "description": "Maximum allowed value",
+        "required": true
+      }
+    },
+    "example": "{ type: 'max', value: 100 }\n// or shorthand: max: 100"
+  },
+  {
+    "type": "minLength",
+    "category": "built-in",
+    "description": "Validates minimum string length",
+    "parameters": {
+      "value": {
+        "name": "value",
+        "type": "number",
+        "description": "Minimum string length",
+        "required": true
+      }
+    },
+    "example": "{ type: 'minLength', value: 3 }\n// or shorthand: minLength: 3"
+  },
+  {
+    "type": "maxLength",
+    "category": "built-in",
+    "description": "Validates maximum string length",
+    "parameters": {
+      "value": {
+        "name": "value",
+        "type": "number",
+        "description": "Maximum string length",
+        "required": true
+      }
+    },
+    "example": "{ type: 'maxLength', value: 100 }\n// or shorthand: maxLength: 100"
+  },
+  {
+    "type": "pattern",
+    "category": "built-in",
+    "description": "Validates against a regular expression pattern",
+    "parameters": {
+      "value": {
+        "name": "value",
+        "type": "string | RegExp",
+        "description": "Regular expression pattern",
+        "required": true
+      }
+    },
+    "example": "{ type: 'pattern', value: '^[A-Z][a-z]+$' }\n// or shorthand: pattern: '^[A-Z][a-z]+$'"
+  },
+  {
+    "type": "custom",
+    "category": "custom",
+    "description": "Custom synchronous validator using registered function or expression. IMPORTANT: The validator returns { kind: 'errorKind' } on failure. The actual error MESSAGE is defined in 'validationMessages' at the FIELD level, NOT in the validator config.",
+    "parameters": {
+      "functionName": {
+        "name": "functionName",
+        "type": "string",
+        "description": "Name of registered validator function",
+        "required": false
+      },
+      "expression": {
+        "name": "expression",
+        "type": "string",
+        "description": "JavaScript expression to evaluate",
+        "required": false
+      },
+      "kind": {
+        "name": "kind",
+        "type": "string",
+        "description": "Error kind returned when validation fails. This kind maps to a message in field-level validationMessages.",
+        "required": false
+      },
+      "params": {
+        "name": "params",
+        "type": "Record<string, unknown>",
+        "description": "Parameters to pass to validator function",
+        "required": false
+      }
+    },
+    "example": "// Expression-based custom validator with error message\n// The validator:\n{\n  type: 'custom',\n  expression: 'fieldValue === formValue.password',\n  kind: 'passwordMismatch'  // Just the error KIND, not the message\n}\n\n// COMPLETE FIELD with validationMessages at FIELD level:\n{\n  key: 'confirmPassword',\n  type: 'input',\n  label: 'Confirm Password',\n  props: { type: 'password' },\n  validators: [\n    { type: 'custom', expression: 'fieldValue === formValue.password', kind: 'passwordMismatch' }\n  ],\n  validationMessages: {\n    passwordMismatch: 'Passwords do not match'  // Message goes HERE at field level\n  }\n}"
+  },
+  {
+    "type": "customAsync",
+    "category": "async",
+    "description": "Async validator using registered async function",
+    "parameters": {
+      "functionName": {
+        "name": "functionName",
+        "type": "string",
+        "description": "Name of registered async validator function",
+        "required": true
+      },
+      "params": {
+        "name": "params",
+        "type": "Record<string, unknown>",
+        "description": "Parameters to pass to validator function",
+        "required": false
+      }
+    },
+    "example": "{\n  type: 'customAsync',\n  functionName: 'checkUsernameAvailability'\n}"
+  },
+  {
+    "type": "customHttp",
+    "category": "http",
+    "description": "HTTP-based validator with automatic request cancellation",
+    "parameters": {
+      "functionName": {
+        "name": "functionName",
+        "type": "string",
+        "description": "Name of registered HTTP validator configuration",
+        "required": true
+      },
+      "params": {
+        "name": "params",
+        "type": "Record<string, unknown>",
+        "description": "Parameters to pass to HTTP validator",
+        "required": false
+      }
+    },
+    "example": "{\n  type: 'customHttp',\n  functionName: 'validateEmailExists'\n}"
+  }
+]

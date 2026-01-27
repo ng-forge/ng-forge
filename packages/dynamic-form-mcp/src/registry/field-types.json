@@ -1,0 +1,466 @@
+[
+  {
+    "type": "input",
+    "category": "value",
+    "description": "Text-based input field with HTML5 type support (text, email, password, number, tel, url)",
+    "valueType": "string | number",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "type": {
+        "name": "type",
+        "type": "'text' | 'email' | 'password' | 'number' | 'tel' | 'url'",
+        "description": "HTML input type",
+        "required": false,
+        "default": "text"
+      },
+      "placeholder": {
+        "name": "placeholder",
+        "type": "DynamicText",
+        "description": "Placeholder text displayed when field is empty",
+        "required": false
+      }
+    },
+    "validationSupported": true,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "{\n  key: 'email',\n  type: 'input',\n  label: 'Email Address',\n  required: true,\n  email: true,\n  props: { type: 'email', placeholder: 'user@example.com' }\n}",
+    "minimalExample": "{ key: 'name', type: 'input', label: 'Name' }"
+  },
+  {
+    "type": "textarea",
+    "category": "value",
+    "description": "Multi-line text input field for longer content",
+    "valueType": "string",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "rows": {
+        "name": "rows",
+        "type": "number",
+        "description": "Number of visible text lines",
+        "required": false,
+        "default": 3
+      },
+      "placeholder": {
+        "name": "placeholder",
+        "type": "DynamicText",
+        "description": "Placeholder text displayed when field is empty",
+        "required": false
+      }
+    },
+    "validationSupported": true,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "{\n  key: 'description',\n  type: 'textarea',\n  label: 'Description',\n  props: { rows: 5, placeholder: 'Enter description...' }\n}",
+    "minimalExample": "{ key: 'bio', type: 'textarea', label: 'Bio' }"
+  },
+  {
+    "type": "select",
+    "category": "value",
+    "description": "Dropdown selection field with single or multiple selection",
+    "valueType": "T | T[]",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "options": {
+        "name": "options",
+        "type": "FieldOption[]",
+        "description": "Array of selectable options with label and value. IMPORTANT: options goes at FIELD level, NOT inside props",
+        "required": true
+      },
+      "multiple": {
+        "name": "multiple",
+        "type": "boolean",
+        "description": "Allow multiple selections",
+        "required": false,
+        "default": false
+      },
+      "placeholder": {
+        "name": "placeholder",
+        "type": "DynamicText",
+        "description": "Placeholder text for empty selection",
+        "required": false
+      }
+    },
+    "validationSupported": true,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "{\n  key: 'country',\n  type: 'select',\n  label: 'Country',\n  required: true,\n  options: [\n    { label: 'United States', value: 'us' },\n    { label: 'Canada', value: 'ca' }\n  ]\n}",
+    "minimalExample": "{ key: 'status', type: 'select', label: 'Status', options: [{ label: 'Active', value: 'active' }] }"
+  },
+  {
+    "type": "checkbox",
+    "category": "value",
+    "description": "Boolean toggle checkbox field",
+    "valueType": "boolean",
+    "baseInterface": "BaseCheckedField",
+    "props": {},
+    "validationSupported": true,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "{\n  key: 'acceptTerms',\n  type: 'checkbox',\n  label: 'I accept the terms and conditions',\n  required: true\n}",
+    "minimalExample": "{ key: 'agree', type: 'checkbox', label: 'I agree' }"
+  },
+  {
+    "type": "multi-checkbox",
+    "category": "value",
+    "description": "Multiple checkbox group for selecting multiple values from options",
+    "valueType": "T[]",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "options": {
+        "name": "options",
+        "type": "FieldOption[]",
+        "description": "Array of selectable options. IMPORTANT: options goes at FIELD level, NOT inside props",
+        "required": true
+      }
+    },
+    "validationSupported": true,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "{\n  key: 'interests',\n  type: 'multi-checkbox',\n  label: 'Select your interests',\n  options: [\n    { label: 'Sports', value: 'sports' },\n    { label: 'Music', value: 'music' },\n    { label: 'Art', value: 'art' },\n    { label: 'Technology', value: 'tech' }\n  ]\n}",
+    "minimalExample": "{ key: 'tags', type: 'multi-checkbox', label: 'Tags', options: [{ label: 'A', value: 'a' }] }"
+  },
+  {
+    "type": "radio",
+    "category": "value",
+    "description": "Radio button group for single selection from options",
+    "valueType": "T",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "options": {
+        "name": "options",
+        "type": "FieldOption[]",
+        "description": "Array of selectable options. IMPORTANT: options goes at FIELD level, NOT inside props",
+        "required": true
+      }
+    },
+    "validationSupported": true,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "{\n  key: 'gender',\n  type: 'radio',\n  label: 'Gender',\n  options: [\n    { label: 'Male', value: 'male' },\n    { label: 'Female', value: 'female' },\n    { label: 'Other', value: 'other' }\n  ]\n}",
+    "minimalExample": "{ key: 'choice', type: 'radio', label: 'Choice', options: [{ label: 'Yes', value: 'yes' }, { label: 'No', value: 'no' }] }"
+  },
+  {
+    "type": "datepicker",
+    "category": "value",
+    "description": "Date selection field with calendar picker",
+    "valueType": "Date | string",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "minDate": {
+        "name": "minDate",
+        "type": "Date | string",
+        "description": "Minimum selectable date",
+        "required": false
+      },
+      "maxDate": {
+        "name": "maxDate",
+        "type": "Date | string",
+        "description": "Maximum selectable date",
+        "required": false
+      }
+    },
+    "validationSupported": true,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "{\n  key: 'birthDate',\n  type: 'datepicker',\n  label: 'Date of Birth',\n  required: true,\n  props: { maxDate: new Date() }\n}",
+    "minimalExample": "{ key: 'date', type: 'datepicker', label: 'Date' }"
+  },
+  {
+    "type": "toggle",
+    "category": "value",
+    "description": "Switch/toggle control for boolean values",
+    "valueType": "boolean",
+    "baseInterface": "BaseCheckedField",
+    "props": {},
+    "validationSupported": true,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "{\n  key: 'notifications',\n  type: 'toggle',\n  label: 'Enable notifications'\n}",
+    "minimalExample": "{ key: 'enabled', type: 'toggle', label: 'Enable' }"
+  },
+  {
+    "type": "slider",
+    "category": "value",
+    "description": "Numeric range slider for value selection",
+    "valueType": "number",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "minValue": {
+        "name": "minValue",
+        "type": "number",
+        "description": "Minimum value. IMPORTANT: This is at FIELD level, NOT inside props",
+        "required": false,
+        "default": 0
+      },
+      "maxValue": {
+        "name": "maxValue",
+        "type": "number",
+        "description": "Maximum value. IMPORTANT: This is at FIELD level, NOT inside props",
+        "required": false,
+        "default": 100
+      },
+      "step": {
+        "name": "step",
+        "type": "number",
+        "description": "Step increment. IMPORTANT: This is at FIELD level, NOT inside props",
+        "required": false,
+        "default": 1
+      }
+    },
+    "validationSupported": true,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "{\n  key: 'volume',\n  type: 'slider',\n  label: 'Volume',\n  value: 50,\n  minValue: 0,\n  maxValue: 100,\n  step: 5\n}",
+    "minimalExample": "{ key: 'rating', type: 'slider', label: 'Rating' }"
+  },
+  {
+    "type": "hidden",
+    "category": "value",
+    "description": "Hidden field that participates in form values without rendering. REQUIRED: The \"value\" property MUST be provided (string, number, boolean, or array). FORBIDDEN: label, logic, validators, required, props, disabled, readonly, hidden, col, tabIndex, meta - hidden fields are purely for passing values through the form. IMPORTANT: In multi-page forms, hidden fields must go INSIDE a page, not at the root level.",
+    "valueType": "string | number | boolean | (string | number | boolean)[]",
+    "baseInterface": "FieldDef",
+    "props": {},
+    "validationSupported": false,
+    "source": "core",
+    "allowedIn": ["top-level (single-page forms only)", "page.fields", "group.fields", "array.fields"],
+    "notAllowedIn": ["row", "top-level when using pages"],
+    "example": "// Hidden field - value is REQUIRED!\n{\n  key: 'userId',\n  type: 'hidden',\n  value: 'abc123'  // REQUIRED: string, number, boolean, or array\n}\n\n// Valid value types:\n{ key: 'count', type: 'hidden', value: 42 }           // number\n{ key: 'active', type: 'hidden', value: true }        // boolean\n{ key: 'tags', type: 'hidden', value: [1, 2, 3] }     // array\n\n// ❌ FORBIDDEN (will cause validation error):\n// - label, logic, validators, required, props\n// - disabled, readonly, hidden, col, tabIndex, meta\n// - Validation shorthand: email, min, max, minLength, maxLength, pattern",
+    "minimalExample": "{ key: 'id', type: 'hidden', value: 'abc123' }"
+  },
+  {
+    "type": "text",
+    "category": "display",
+    "description": "Static text display element (headings, paragraphs, spans). The text content comes from the label property.",
+    "baseInterface": "FieldDef",
+    "props": {
+      "elementType": {
+        "name": "elementType",
+        "type": "'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span'",
+        "description": "HTML element type for rendering",
+        "required": false,
+        "default": "p"
+      }
+    },
+    "validationSupported": false,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "{\n  key: 'sectionTitle',\n  type: 'text',\n  label: 'Personal Information',\n  props: { elementType: 'h2' }\n}",
+    "minimalExample": "{ key: 'header', type: 'text', label: 'Section Title' }"
+  },
+  {
+    "type": "row",
+    "category": "container",
+    "description": "Horizontal layout container for grouping fields in columns. Rows do NOT have a label property and do NOT support logic blocks.",
+    "baseInterface": "FieldDef",
+    "props": {
+      "fields": {
+        "name": "fields",
+        "type": "RowAllowedChildren[]",
+        "description": "Child fields to render horizontally. Allowed: groups, arrays, VALUE fields (input, select, etc). NOT ALLOWED: pages, rows, hidden fields",
+        "required": true
+      }
+    },
+    "validationSupported": false,
+    "source": "core",
+    "allowedIn": ["top-level", "page", "group", "array"],
+    "notAllowedIn": ["row"],
+    "canContain": [
+      "group",
+      "array",
+      "input",
+      "textarea",
+      "select",
+      "checkbox",
+      "multi-checkbox",
+      "radio",
+      "datepicker",
+      "toggle",
+      "slider",
+      "text",
+      "button",
+      "submit",
+      "next",
+      "previous"
+    ],
+    "cannotContain": ["page", "row", "hidden"],
+    "example": "{\n  key: 'nameRow',\n  type: 'row',\n  // NOTE: Rows do NOT have label or logic properties\n  fields: [\n    { key: 'firstName', type: 'input', label: 'First Name', col: 6 },\n    { key: 'lastName', type: 'input', label: 'Last Name', col: 6 }\n  ]\n}\n// NOT ALLOWED in rows:\n// - type: 'hidden' (hidden fields cannot be inside rows)\n// - type: 'page' (pages are top-level only)\n// - type: 'row' (no nested rows)",
+    "minimalExample": "{ key: 'row1', type: 'row', fields: [...] }"
+  },
+  {
+    "type": "group",
+    "category": "container",
+    "description": "Nested form group container creating a sub-object in form values. Groups are logical containers only and do NOT have a label property.",
+    "valueType": "object",
+    "baseInterface": "FieldDef",
+    "props": {
+      "fields": {
+        "name": "fields",
+        "type": "GroupAllowedChildren[]",
+        "description": "Child fields in the group. Allowed: rows, leaf fields (NOT pages or other groups)",
+        "required": true
+      }
+    },
+    "validationSupported": true,
+    "source": "core",
+    "allowedIn": ["top-level", "page", "row", "array"],
+    "notAllowedIn": ["group"],
+    "canContain": [
+      "row",
+      "input",
+      "textarea",
+      "select",
+      "checkbox",
+      "multi-checkbox",
+      "radio",
+      "datepicker",
+      "toggle",
+      "slider",
+      "hidden",
+      "text",
+      "button",
+      "submit",
+      "next",
+      "previous"
+    ],
+    "cannotContain": ["page", "group"],
+    "example": "{\n  key: 'address',\n  type: 'group',\n  // NOTE: Groups do NOT have a label property\n  fields: [\n    { key: 'street', type: 'input', label: 'Street' },\n    { key: 'city', type: 'input', label: 'City' },\n    { key: 'zip', type: 'input', label: 'ZIP Code' }\n  ]\n}",
+    "minimalExample": "{ key: 'address', type: 'group', fields: [...] }"
+  },
+  {
+    "type": "array",
+    "category": "container",
+    "description": "Repeatable field group for dynamic lists/arrays. Arrays do NOT have label, minItems, or maxItems properties. Use \"fields\" (not \"template\") to define the item template.",
+    "valueType": "T[]",
+    "baseInterface": "FieldDef",
+    "props": {
+      "fields": {
+        "name": "fields",
+        "type": "ArrayAllowedChildren[]",
+        "description": "Template field(s) for each array item. Allowed: rows, groups, leaf fields (NOT pages or other arrays)",
+        "required": true
+      }
+    },
+    "validationSupported": false,
+    "source": "core",
+    "allowedIn": ["top-level", "page", "row", "group"],
+    "notAllowedIn": ["array"],
+    "canContain": [
+      "row",
+      "group",
+      "input",
+      "textarea",
+      "select",
+      "checkbox",
+      "multi-checkbox",
+      "radio",
+      "datepicker",
+      "toggle",
+      "slider",
+      "hidden",
+      "text",
+      "button",
+      "submit",
+      "next",
+      "previous"
+    ],
+    "cannotContain": ["page", "array"],
+    "example": "// Flat array (primitive values)\n{\n  key: 'tags',\n  type: 'array',\n  // NOTE: Arrays do NOT have label, minItems, or maxItems\n  fields: [\n    { key: 'tag', type: 'input', label: 'Tag' }\n  ]\n}\n// Result: { tags: ['value1', 'value2'] }\n\n// Object array (nested groups)\n{\n  key: 'contacts',\n  type: 'array',\n  fields: [{\n    type: 'group',\n    fields: [\n      { key: 'name', type: 'input', label: 'Name' },\n      { key: 'email', type: 'input', label: 'Email' }\n    ]\n  }]\n}\n// Result: { contacts: [{name: '', email: ''}, ...] }",
+    "minimalExample": "{ key: 'items', type: 'array', fields: [...] }"
+  },
+  {
+    "type": "page",
+    "category": "container",
+    "description": "Multi-step form page container for wizard-style forms. Pages do NOT have label or title properties. ALL top-level fields must be pages if using multi-page mode. IMPORTANT: Navigation buttons (next, previous) must be added as fields WITHIN each page that needs them.",
+    "baseInterface": "FieldDef",
+    "props": {
+      "fields": {
+        "name": "fields",
+        "type": "PageAllowedChildren[]",
+        "description": "Fields in this page. Allowed: rows, groups, arrays, leaf fields (NOT other pages). Include next/previous buttons as needed.",
+        "required": true
+      }
+    },
+    "validationSupported": false,
+    "source": "core",
+    "allowedIn": ["top-level"],
+    "notAllowedIn": ["page", "row", "group", "array"],
+    "canContain": [
+      "row",
+      "group",
+      "array",
+      "input",
+      "textarea",
+      "select",
+      "checkbox",
+      "multi-checkbox",
+      "radio",
+      "datepicker",
+      "toggle",
+      "slider",
+      "hidden",
+      "text",
+      "button",
+      "submit",
+      "next",
+      "previous"
+    ],
+    "cannotContain": ["page"],
+    "example": "{\n  key: 'step1',\n  type: 'page',\n  // NOTE: Pages do NOT have label or title properties\n  // Navigation buttons are fields WITHIN the page\n  fields: [\n    { key: 'firstName', type: 'input', label: 'First Name' },\n    { key: 'lastName', type: 'input', label: 'Last Name' },\n    { key: 'next', type: 'next', label: 'Next' }\n  ]\n}",
+    "minimalExample": "{ key: 'step1', type: 'page', fields: [...] }"
+  },
+  {
+    "type": "next",
+    "category": "button",
+    "description": "Navigation button to go to next page in multi-step forms. Must be placed INSIDE a page's fields array.",
+    "baseInterface": "FieldDef",
+    "props": {},
+    "validationSupported": false,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "{\n  key: 'next',\n  type: 'next',\n  label: 'Next'\n}",
+    "minimalExample": "{ key: 'next', type: 'next', label: 'Next' }"
+  },
+  {
+    "type": "previous",
+    "category": "button",
+    "description": "Navigation button to go to previous page in multi-step forms. Must be placed INSIDE a page's fields array.",
+    "baseInterface": "FieldDef",
+    "props": {},
+    "validationSupported": false,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "{\n  key: 'back',\n  type: 'previous',\n  label: 'Back'\n}",
+    "minimalExample": "{ key: 'back', type: 'previous', label: 'Back' }"
+  },
+  {
+    "type": "button",
+    "category": "button",
+    "description": "Generic button for custom actions. IMPORTANT: The generic 'button' type REQUIRES the 'event' property with a FormEventConstructor. For simple use cases, prefer 'submit', 'next', or 'previous' which don't require event configuration.",
+    "baseInterface": "FieldDef",
+    "props": {
+      "event": {
+        "name": "event",
+        "type": "FormEventConstructor<TEvent>",
+        "description": "REQUIRED. Event constructor that will be emitted when button is clicked. Must be registered with provideFormEvents().",
+        "required": true
+      }
+    },
+    "validationSupported": false,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "// RECOMMENDED: Use pre-defined button types for common actions\n{ key: 'submit', type: 'submit', label: 'Submit Form' }\n{ key: 'next', type: 'next', label: 'Next' }\n{ key: 'back', type: 'previous', label: 'Back' }\n\n// ADVANCED: Generic button with custom event (requires setup)\n// 1. Create event class: class MyCustomEvent extends FormEvent {}\n// 2. Register with: provideFormEvents([MyCustomEvent])\n// 3. Use in config:\n{\n  key: 'customAction',\n  type: 'button',\n  label: 'Custom Action',\n  event: MyCustomEvent  // Must be the class reference\n}",
+    "minimalExample": "{ key: 'action', type: 'button', label: 'Action', event: MyEvent }"
+  },
+  {
+    "type": "submit",
+    "category": "button",
+    "description": "Form submit button",
+    "baseInterface": "FieldDef",
+    "props": {},
+    "validationSupported": false,
+    "source": "adapter",
+    "allowedIn": ["top-level", "page", "row", "group", "array"],
+    "example": "{\n  key: 'submit',\n  type: 'submit',\n  label: 'Submit Form'\n}",
+    "minimalExample": "{ key: 'submit', type: 'submit', label: 'Submit' }"
+  }
+]

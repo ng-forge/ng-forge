@@ -1179,6 +1179,57 @@ html:has(app-landing) {
 }
 
 // ============================================
+// AI INTEGRATION SIDEBAR ICON
+// ============================================
+// Three-star sparkle icon with staggered pulse animation
+
+@keyframes ai-sparkle-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Target the AI Integration sidebar link
+ng-doc-sidebar a[href*='ai-integration'],
+.ng-doc-side-bar-wrapper a[href*='ai-integration'] {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  // Three-star sparkle SVG
+  &::after {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    background-color: #{$ember-glow};
+    mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z' fill='currentColor'/%3E%3Cpath d='M19 2L19.5 4L21.5 4.5L19.5 5L19 7L18.5 5L16.5 4.5L18.5 4L19 2Z' fill='currentColor' opacity='0.7'/%3E%3Cpath d='M5 16L5.5 18L7.5 18.5L5.5 19L5 21L4.5 19L2.5 18.5L4.5 18L5 16Z' fill='currentColor' opacity='0.5'/%3E%3C/svg%3E");
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z' fill='currentColor'/%3E%3Cpath d='M19 2L19.5 4L21.5 4.5L19.5 5L19 7L18.5 5L16.5 4.5L18.5 4L19 2Z' fill='currentColor' opacity='0.7'/%3E%3Cpath d='M5 16L5.5 18L7.5 18.5L5.5 19L5 21L4.5 19L2.5 18.5L4.5 18L5 16Z' fill='currentColor' opacity='0.5'/%3E%3C/svg%3E");
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    animation: ai-sparkle-pulse 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 2px #{$ember-glow});
+  }
+
+  &:hover::after {
+    background-color: #{$molten};
+    animation: ai-sparkle-pulse 1s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px #{$ember-glow});
+  }
+}
+
+// ============================================
 // PAGE DESCRIPTION HORIZONTAL RULE
 // ============================================
 // Add a subtle separator line under page descriptions across all docs

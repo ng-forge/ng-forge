@@ -281,6 +281,50 @@ describe('MatFormConfigSchema', () => {
       const result = MatFormConfigSchema.safeParse(config);
       expect(result.success).toBe(false);
     });
+
+    it('should reject array field with label property', () => {
+      const config = {
+        fields: [
+          {
+            key: 'items',
+            type: 'array',
+            label: 'My Items', // Arrays should NOT have label
+            fields: [{ key: 'item', type: 'input', label: 'Item' }],
+          },
+        ],
+      };
+      const result = MatFormConfigSchema.safeParse(config);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject group field with label property', () => {
+      const config = {
+        fields: [
+          {
+            key: 'address',
+            type: 'group',
+            label: 'Address', // Groups should NOT have label
+            fields: [{ key: 'street', type: 'input', label: 'Street' }],
+          },
+        ],
+      };
+      const result = MatFormConfigSchema.safeParse(config);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject array field with template instead of fields', () => {
+      const config = {
+        fields: [
+          {
+            key: 'items',
+            type: 'array',
+            template: [{ key: 'item', type: 'input', label: 'Item' }], // Should be 'fields' not 'template'
+          },
+        ],
+      };
+      const result = MatFormConfigSchema.safeParse(config);
+      expect(result.success).toBe(false);
+    });
   });
 });
 
