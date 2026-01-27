@@ -48,57 +48,42 @@ function extractFormConfigs(source: string): Array<{ name: string; config: unkno
     }
   }
 
-  // Pattern 2: satisfies FormConfig - const varName = { ... } satisfies FormConfig
-  const satisfiesRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(\{[\s\S]*?\})\s*satisfies\s+FormConfig/gm;
+  // Pattern 2 & 3: satisfies FormConfig / as FormConfig
+  // Look for variable declarations that end with "satisfies FormConfig" or "as FormConfig"
+  // We can't use lazy regex for nested braces, so find declarations and check what follows
+  const varDeclRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*\{/gm;
 
-  while ((match = satisfiesRegex.exec(source)) !== null) {
+  while ((match = varDeclRegex.exec(source)) !== null) {
     const varName = match[1];
     if (foundNames.has(varName)) continue;
 
+    const startIndex = match.index + match[0].length - 1;
     const startLine = source.substring(0, match.index).split('\n').length;
 
-    // Find the object start position
-    const objectStartMatch = source.substring(match.index).match(/=\s*\{/);
-    if (!objectStartMatch) continue;
-
-    const startIndex = match.index + (objectStartMatch.index ?? 0) + objectStartMatch[0].length - 1;
-
     try {
-      const config = extractObjectAtPosition(source, startIndex);
-      if (config && typeof config === 'object' && 'fields' in config) {
-        configs.push({ name: varName, config, startLine });
-        foundNames.add(varName);
+      // Find matching closing brace
+      const endIndex = findMatchingBrace(source, startIndex);
+      if (endIndex === -1) continue;
+
+      // Check what comes after the object: "satisfies FormConfig" or "as FormConfig"
+      const afterObject = source.substring(endIndex + 1, endIndex + 50).trim();
+      const isSatisfies = /^satisfies\s+FormConfig/.test(afterObject);
+      const isAs = /^as\s+FormConfig/.test(afterObject);
+
+      if (isSatisfies || isAs) {
+        const config = extractObjectAtPosition(source, startIndex);
+        if (config && typeof config === 'object' && 'fields' in config) {
+          configs.push({ name: varName, config, startLine });
+          foundNames.add(varName);
+        }
       }
     } catch {
       // Skip malformed configs
     }
   }
 
-  // Pattern 3: as FormConfig - const varName = { ... } as FormConfig
-  const asRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(\{[\s\S]*?\})\s*as\s+FormConfig/gm;
-
-  while ((match = asRegex.exec(source)) !== null) {
-    const varName = match[1];
-    if (foundNames.has(varName)) continue;
-
-    const startLine = source.substring(0, match.index).split('\n').length;
-
-    // Find the object start position
-    const objectStartMatch = source.substring(match.index).match(/=\s*\{/);
-    if (!objectStartMatch) continue;
-
-    const startIndex = match.index + (objectStartMatch.index ?? 0) + objectStartMatch[0].length - 1;
-
-    try {
-      const config = extractObjectAtPosition(source, startIndex);
-      if (config && typeof config === 'object' && 'fields' in config) {
-        configs.push({ name: varName, config, startLine });
-        foundNames.add(varName);
-      }
-    } catch {
-      // Skip malformed configs
-    }
-  }
+  // Reset regex lastIndex for Pattern 4
+  varDeclRegex.lastIndex = 0;
 
   // Pattern 4: Variable with FormConfig in comment or inferred type
   // Look for variables assigned objects with fields arrays
@@ -152,6 +137,44 @@ function extractFormConfigs(source: string): Array<{ name: string; config: unkno
   }
 
   return configs;
+}
+
+/**
+ * Find the index of the matching closing brace.
+ * Returns -1 if not found.
+ */
+function findMatchingBrace(source: string, startIndex: number): number {
+  let depth = 0;
+  let inString = false;
+  let stringChar = '';
+
+  for (let i = startIndex; i < source.length; i++) {
+    const char = source[i];
+    const prevChar = i > 0 ? source[i - 1] : '';
+
+    // Handle string boundaries
+    if ((char === '"' || char === "'" || char === '`') && prevChar !== '\\') {
+      if (!inString) {
+        inString = true;
+        stringChar = char;
+      } else if (char === stringChar) {
+        inString = false;
+      }
+    }
+
+    // Track brace depth (only outside strings)
+    if (!inString) {
+      if (char === '{') depth++;
+      if (char === '}') {
+        depth--;
+        if (depth === 0) {
+          return i;
+        }
+      }
+    }
+  }
+
+  return -1;
 }
 
 /**

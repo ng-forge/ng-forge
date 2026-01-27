@@ -314,7 +314,8 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   {
     type: 'hidden',
     category: 'value',
-    description: 'Hidden field that participates in form values without rendering',
+    description:
+      'Hidden field that participates in form values without rendering. WARNING: Hidden fields do NOT support logic blocks, validators, or labels - they are purely for passing values through the form.',
     valueType: 'T',
     baseInterface: 'FieldDef',
     props: {},
@@ -323,7 +324,12 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   key: 'userId',
   type: 'hidden',
   value: 'abc123'
-}`,
+}
+// NOT SUPPORTED on hidden fields:
+// - logic: [...] (no conditional visibility/disabled)
+// - validators: [...] (no validation)
+// - required: true (no validation)
+// - label: '...' (not rendered)`,
   },
   {
     type: 'text',
@@ -502,30 +508,34 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   {
     type: 'button',
     category: 'button',
-    description: 'Generic button for custom actions',
+    description:
+      "Generic button for custom actions. IMPORTANT: The generic 'button' type REQUIRES the 'event' property with a FormEventConstructor. For simple use cases, prefer 'submit', 'next', or 'previous' which don't require event configuration.",
     valueType: undefined,
     baseInterface: 'FieldDef',
     props: {
-      buttonType: {
-        name: 'buttonType',
-        type: "'button' | 'submit' | 'reset'",
-        description: 'HTML button type',
-        required: false,
-        default: 'button',
-      },
-      onClick: {
-        name: 'onClick',
-        type: 'string',
-        description: 'Click event handler function name',
-        required: false,
+      event: {
+        name: 'event',
+        type: 'FormEventConstructor<TEvent>',
+        description:
+          'REQUIRED. Event constructor that will be emitted when button is clicked. Must be registered with provideFormEvents().',
+        required: true,
       },
     },
     validationSupported: false,
-    example: `{
+    example: `// RECOMMENDED: Use pre-defined button types for common actions
+{ key: 'submit', type: 'submit', label: 'Submit Form' }
+{ key: 'next', type: 'next', label: 'Next' }
+{ key: 'back', type: 'previous', label: 'Back' }
+
+// ADVANCED: Generic button with custom event (requires setup)
+// 1. Create event class: class MyCustomEvent extends FormEvent {}
+// 2. Register with: provideFormEvents([MyCustomEvent])
+// 3. Use in config:
+{
   key: 'customAction',
   type: 'button',
   label: 'Custom Action',
-  props: { buttonType: 'button', onClick: 'handleCustomAction' }
+  event: MyCustomEvent  // Must be the class reference
 }`,
   },
   {
@@ -640,7 +650,8 @@ const VALIDATORS: ValidatorInfo[] = [
   {
     type: 'custom',
     category: 'custom',
-    description: 'Custom synchronous validator using registered function or expression',
+    description:
+      "Custom synchronous validator using registered function or expression. IMPORTANT: The validator returns { kind: 'errorKind' } on failure. The actual error MESSAGE is defined in 'validationMessages' at the FIELD level, NOT in the validator config.",
     parameters: {
       functionName: {
         name: 'functionName',
@@ -657,7 +668,7 @@ const VALIDATORS: ValidatorInfo[] = [
       kind: {
         name: 'kind',
         type: 'string',
-        description: 'Error kind for expression-based validators',
+        description: 'Error kind returned when validation fails. This kind maps to a message in field-level validationMessages.',
         required: false,
       },
       params: {
@@ -667,14 +678,26 @@ const VALIDATORS: ValidatorInfo[] = [
         required: false,
       },
     },
-    example: `// Function-based
-{ type: 'custom', functionName: 'validateUsername' }
-
-// Expression-based
+    example: `// Expression-based custom validator with error message
+// The validator:
 {
   type: 'custom',
   expression: 'fieldValue === formValue.password',
-  kind: 'passwordMismatch'
+  kind: 'passwordMismatch'  // Just the error KIND, not the message
+}
+
+// COMPLETE FIELD with validationMessages at FIELD level:
+{
+  key: 'confirmPassword',
+  type: 'input',
+  label: 'Confirm Password',
+  props: { type: 'password' },
+  validators: [
+    { type: 'custom', expression: 'fieldValue === formValue.password', kind: 'passwordMismatch' }
+  ],
+  validationMessages: {
+    passwordMismatch: 'Passwords do not match'  // Message goes HERE at field level
+  }
 }`,
   },
   {

@@ -183,7 +183,15 @@ const TOPICS: Record<string, string> = {
 }
 \`\`\`
 
-Included in form value but not rendered.`,
+Included in form value but not rendered.
+
+**⚠️ NOT SUPPORTED on hidden fields:**
+- \`logic: [...]\` - No conditional visibility/disabled
+- \`validators: [...]\` - No validation
+- \`required: true\` - No validation shorthand
+- \`label: '...'\` - Not rendered anyway
+
+Hidden fields are purely for passing values through the form.`,
 
   // Containers
   group: `# Group Container (Nested Object)
@@ -378,10 +386,29 @@ expression: \`(() => {
 **Async validators:**
 \`\`\`typescript
 validators: [{ type: 'customAsync', functionName: 'checkEmailAvailable' }]
-\`\`\``,
+\`\`\`
+
+**Custom error messages (validationMessages at FIELD level):**
+\`\`\`typescript
+{
+  key: 'confirmPassword',
+  type: 'input',
+  label: 'Confirm Password',
+  validators: [
+    { type: 'custom', expression: 'fieldValue === formValue.password', kind: 'mismatch' }
+  ],
+  validationMessages: {
+    mismatch: 'Passwords do not match',  // Maps to validator's 'kind'
+    required: 'This field is required'   // Override built-in messages
+  }
+}
+\`\`\`
+
+**⚠️ Common mistake:** Putting message in validator config - it goes in \`validationMessages\` at field level!`,
 
   buttons: `# Buttons
 
+**RECOMMENDED: Pre-defined button types (no setup required):**
 \`\`\`typescript
 // Submit button
 { key: 'submit', type: 'submit', label: 'Submit' }
@@ -389,10 +416,24 @@ validators: [{ type: 'customAsync', functionName: 'checkEmailAvailable' }]
 // Navigation (multi-page)
 { key: 'next', type: 'next', label: 'Next' }
 { key: 'back', type: 'previous', label: 'Back' }
-
-// Generic button (handle via buttonClick event)
-{ key: 'reset', type: 'button', label: 'Reset' }
 \`\`\`
+
+**ADVANCED: Generic button (requires event setup):**
+\`\`\`typescript
+// ⚠️ Generic 'button' type REQUIRES the 'event' property!
+// 1. Create event class: class ResetEvent extends FormEvent {}
+// 2. Register: provideFormEvents([ResetEvent])
+// 3. Use in config:
+{
+  key: 'reset',
+  type: 'button',
+  label: 'Reset',
+  event: ResetEvent  // REQUIRED - class reference
+}
+\`\`\`
+
+**⚠️ Common mistake:** Using \`type: 'button'\` without \`event\` property - this will fail!
+For simple actions, prefer \`type: 'submit'\` and handle in form submission instead.
 
 **Disable when form invalid:**
 \`\`\`typescript
@@ -528,6 +569,11 @@ const TOPIC_ALIASES: Record<string, string> = {
   validators: 'validation',
   required: 'validation',
   pattern: 'validation',
+  validationmessages: 'validation',
+  'validation-messages': 'validation',
+  'error-messages': 'validation',
+  errormessages: 'validation',
+  messages: 'validation',
   output: 'form-value',
   shape: 'form-value',
   structure: 'form-value',

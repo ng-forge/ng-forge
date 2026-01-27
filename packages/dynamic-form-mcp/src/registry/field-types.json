@@ -189,12 +189,12 @@
   {
     "type": "hidden",
     "category": "value",
-    "description": "Hidden field that participates in form values without rendering",
+    "description": "Hidden field that participates in form values without rendering. WARNING: Hidden fields do NOT support logic blocks, validators, or labels - they are purely for passing values through the form.",
     "valueType": "T",
     "baseInterface": "FieldDef",
     "props": {},
     "validationSupported": false,
-    "example": "{\n  key: 'userId',\n  type: 'hidden',\n  value: 'abc123'\n}"
+    "example": "{\n  key: 'userId',\n  type: 'hidden',\n  value: 'abc123'\n}\n// NOT SUPPORTED on hidden fields:\n// - logic: [...] (no conditional visibility/disabled)\n// - validators: [...] (no validation)\n// - required: true (no validation)\n// - label: '...' (not rendered)"
   },
   {
     "type": "text",
@@ -300,25 +300,18 @@
   {
     "type": "button",
     "category": "button",
-    "description": "Generic button for custom actions",
+    "description": "Generic button for custom actions. IMPORTANT: The generic 'button' type REQUIRES the 'event' property with a FormEventConstructor. For simple use cases, prefer 'submit', 'next', or 'previous' which don't require event configuration.",
     "baseInterface": "FieldDef",
     "props": {
-      "buttonType": {
-        "name": "buttonType",
-        "type": "'button' | 'submit' | 'reset'",
-        "description": "HTML button type",
-        "required": false,
-        "default": "button"
-      },
-      "onClick": {
-        "name": "onClick",
-        "type": "string",
-        "description": "Click event handler function name",
-        "required": false
+      "event": {
+        "name": "event",
+        "type": "FormEventConstructor<TEvent>",
+        "description": "REQUIRED. Event constructor that will be emitted when button is clicked. Must be registered with provideFormEvents().",
+        "required": true
       }
     },
     "validationSupported": false,
-    "example": "{\n  key: 'customAction',\n  type: 'button',\n  label: 'Custom Action',\n  props: { buttonType: 'button', onClick: 'handleCustomAction' }\n}"
+    "example": "// RECOMMENDED: Use pre-defined button types for common actions\n{ key: 'submit', type: 'submit', label: 'Submit Form' }\n{ key: 'next', type: 'next', label: 'Next' }\n{ key: 'back', type: 'previous', label: 'Back' }\n\n// ADVANCED: Generic button with custom event (requires setup)\n// 1. Create event class: class MyCustomEvent extends FormEvent {}\n// 2. Register with: provideFormEvents([MyCustomEvent])\n// 3. Use in config:\n{\n  key: 'customAction',\n  type: 'button',\n  label: 'Custom Action',\n  event: MyCustomEvent  // Must be the class reference\n}"
   },
   {
     "type": "submit",
