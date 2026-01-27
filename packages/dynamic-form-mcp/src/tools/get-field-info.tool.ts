@@ -22,10 +22,14 @@ const TOP_LEVEL_PROPS = ['fields', 'options', 'minValue', 'maxValue', 'step'];
 function formatFieldInfo(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldType): string {
   const lines: string[] = [];
   const isContainer = CONTAINER_TYPES.includes(field.type);
+  const isHidden = field.type === 'hidden';
 
   lines.push(`## ${field.type} field`);
   lines.push('');
   lines.push(`**Category:** ${field.category}`);
+  lines.push(
+    `**Source:** ${field.source === 'core' ? 'Core library (no adapter required)' : 'Adapter required (material, bootstrap, primeng, or ionic)'}`,
+  );
   lines.push(`**Description:** ${field.description}`);
 
   if (field.valueType) {
@@ -34,46 +38,112 @@ function formatFieldInfo(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldType)
 
   lines.push(`**Validation Supported:** ${field.validationSupported ? 'Yes' : 'No'}`);
 
+  // Placement rules section
+  lines.push('');
+  lines.push('### Placement Rules');
+  lines.push('');
+  if (field.allowedIn && field.allowedIn.length > 0) {
+    lines.push(`**✅ Allowed in:** ${field.allowedIn.join(', ')}`);
+  }
+  if (field.notAllowedIn && field.notAllowedIn.length > 0) {
+    lines.push(`**❌ NOT allowed in:** ${field.notAllowedIn.join(', ')}`);
+  }
+  if (field.canContain && field.canContain.length > 0) {
+    lines.push(`**Can contain:** ${field.canContain.join(', ')}`);
+  }
+  if (field.cannotContain && field.cannotContain.length > 0) {
+    lines.push(`**Cannot contain:** ${field.cannotContain.join(', ')}`);
+  }
+  if (!field.allowedIn && !field.notAllowedIn) {
+    lines.push('**Allowed in:** top-level, page, row, group, array (no restrictions)');
+  }
+
+  // Minimal example section
+  if (field.minimalExample) {
+    lines.push('');
+    lines.push('### Minimal Valid Example');
+    lines.push('');
+    lines.push('The absolute minimum required to make this field work:');
+    lines.push('');
+    lines.push('```typescript');
+    lines.push(field.minimalExample);
+    lines.push('```');
+  }
+
   // Special note for container fields
   if (isContainer) {
     lines.push('');
     lines.push(`**⚠️ Note:** ${field.type} fields do NOT have a \`label\` property.`);
   }
 
-  lines.push('');
-
-  // Base properties
-  lines.push('### Required Properties');
-  lines.push('');
-  lines.push('- `key`: string - Unique identifier for the field');
-  lines.push(`- \`type\`: "${field.type}" - Field type discriminator`);
-
-  // Only value fields have label
-  if (field.category === 'value' && !isContainer) {
-    lines.push('- `label`: string | { value: string, translate?: boolean } - Field label');
-  }
-
-  // Field-specific props
-  const requiredProps = Object.values(field.props).filter((p) => p.required);
-  for (const prop of requiredProps) {
-    // Some props are at top level (fields), others in props
-    const prefix = TOP_LEVEL_PROPS.includes(prop.name) ? '' : 'props.';
-    lines.push(`- \`${prefix}${prop.name}\`: ${prop.type} - ${prop.description}`);
+  // Special note for hidden fields
+  if (isHidden) {
+    lines.push('');
+    lines.push('**⚠️ IMPORTANT:** Hidden fields are special - they ONLY support: `key`, `type`, `value`, `className`');
+    lines.push('They do NOT render and cannot be validated - they exist purely to pass values through the form.');
   }
 
   lines.push('');
-  lines.push('### Optional Properties');
-  lines.push('');
 
-  const optionalProps = Object.values(field.props).filter((p) => !p.required);
-  for (const prop of optionalProps) {
-    const defaultVal = prop.default !== undefined ? ` (default: ${JSON.stringify(prop.default)})` : '';
-    const prefix = TOP_LEVEL_PROPS.includes(prop.name) ? '' : 'props.';
-    lines.push(`- \`${prefix}${prop.name}\`: ${prop.type} - ${prop.description}${defaultVal}`);
+  // For hidden fields, use special formatting
+  if (isHidden) {
+    lines.push('### Required Properties');
+    lines.push('');
+    lines.push('- `key`: string - Unique identifier for the field');
+    lines.push(`- \`type\`: "hidden" - Field type discriminator`);
+    lines.push('- `value`: string | number | boolean | (string | number | boolean)[] - **REQUIRED!** The value to include in form data');
+    lines.push('');
+    lines.push('### Optional Properties');
+    lines.push('');
+    lines.push('- `className`: string - CSS class names');
+    lines.push('');
+    lines.push('### Forbidden Properties (will cause validation error)');
+    lines.push('');
+    lines.push('Hidden fields do NOT support any of these properties:');
+    lines.push('- `label` - Hidden fields do not render');
+    lines.push('- `logic` - No conditional visibility/disabled');
+    lines.push('- `validators` - No validation');
+    lines.push('- `required` - No validation shorthand');
+    lines.push('- `props` - No UI configuration');
+    lines.push('- `disabled`, `readonly`, `hidden`, `col`, `tabIndex`, `meta`');
+    lines.push('- Validation shorthand: `email`, `min`, `max`, `minLength`, `maxLength`, `pattern`');
+  } else {
+    // Base properties
+    lines.push('### Required Properties');
+    lines.push('');
+    lines.push('- `key`: string - Unique identifier for the field');
+    lines.push(`- \`type\`: "${field.type}" - Field type discriminator`);
+
+    // Only value fields have label
+    if (field.category === 'value' && !isContainer) {
+      lines.push('- `label`: string | { value: string, translate?: boolean } - Field label');
+    }
   }
 
-  // Common optional properties for value fields
-  if (field.category === 'value' && !isContainer) {
+  // Skip field-specific props section for hidden fields (already handled above)
+  if (!isHidden) {
+    // Field-specific props
+    const requiredProps = Object.values(field.props).filter((p) => p.required);
+    for (const prop of requiredProps) {
+      // Some props are at top level (fields), others in props
+      const prefix = TOP_LEVEL_PROPS.includes(prop.name) ? '' : 'props.';
+      lines.push(`- \`${prefix}${prop.name}\`: ${prop.type} - ${prop.description}`);
+    }
+
+    lines.push('');
+    lines.push('### Optional Properties');
+    lines.push('');
+
+    const optionalProps = Object.values(field.props).filter((p) => !p.required);
+    for (const prop of optionalProps) {
+      const defaultVal = prop.default !== undefined ? ` (default: ${JSON.stringify(prop.default)})` : '';
+      const prefix = TOP_LEVEL_PROPS.includes(prop.name) ? '' : 'props.';
+      lines.push(`- \`${prefix}${prop.name}\`: ${prop.type} - ${prop.description}${defaultVal}`);
+    }
+  }
+
+  // Common optional properties for value fields (but not hidden fields)
+  if (field.category === 'value' && !isContainer && !isHidden) {
     lines.push('- `value`: initial value for the field');
     lines.push('- `disabled`: boolean - Disable the field');
     lines.push('- `readonly`: boolean - Make field read-only');
@@ -175,7 +245,17 @@ const SCHEMA_SUPPORTED_FIELD_TYPES = [
 export function registerGetFieldInfoTool(server: McpServer): void {
   server.tool(
     'ngforge_get_field_info',
-    'Returns human-readable documentation for a field type including all properties, validators, and examples. Optionally includes JSON Schema for machine-readable validation. If no fieldType is specified, lists all available field types.',
+    `Get COMPLETE documentation for a specific field type. Use when quick_lookup isn't enough.
+
+Returns:
+- All properties (required and optional)
+- Placement rules (where field can/cannot go)
+- Minimal valid example (copy-paste ready)
+- Validation options
+- UI-specific properties (if uiIntegration specified)
+- Logic block examples
+
+Tip: For quick syntax reference, use ngforge_quick_lookup instead. Use this tool for deep dives.`,
     {
       fieldType: z
         .string()

@@ -133,7 +133,7 @@ export {
 export type { FormEvent, FormEventConstructor, TokenContext, ArrayItemContext } from './events';
 
 // Helpers
-export { formConfig } from './helpers';
+export { createField, field, formConfig } from './helpers';
 
 // Errors
 export { DynamicFormError } from './errors/dynamic-form-error';

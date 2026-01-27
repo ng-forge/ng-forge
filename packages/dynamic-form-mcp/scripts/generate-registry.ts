@@ -30,6 +30,18 @@ interface FieldTypeInfo {
   props: Record<string, PropertyInfo>;
   validationSupported: boolean;
   example: string;
+  /** Field types that this container can contain (for containers only) */
+  canContain?: string[];
+  /** Field types that this container CANNOT contain (for containers only) */
+  cannotContain?: string[];
+  /** Where this field type is allowed to be placed */
+  allowedIn?: string[];
+  /** Where this field type is NOT allowed to be placed */
+  notAllowedIn?: string[];
+  /** Whether this field type is part of core library or requires an adapter */
+  source: 'core' | 'adapter';
+  /** Minimal valid example (just required properties) */
+  minimalExample?: string;
 }
 
 interface PropertyInfo {
@@ -83,6 +95,8 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       },
     },
     validationSupported: true,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'email',
   type: 'input',
@@ -91,6 +105,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   email: true,
   props: { type: 'email', placeholder: 'user@example.com' }
 }`,
+    minimalExample: `{ key: 'name', type: 'input', label: 'Name' }`,
   },
   {
     type: 'textarea',
@@ -114,12 +129,15 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       },
     },
     validationSupported: true,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'description',
   type: 'textarea',
   label: 'Description',
   props: { rows: 5, placeholder: 'Enter description...' }
 }`,
+    minimalExample: `{ key: 'bio', type: 'textarea', label: 'Bio' }`,
   },
   {
     type: 'select',
@@ -149,6 +167,8 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       },
     },
     validationSupported: true,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'country',
   type: 'select',
@@ -159,6 +179,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     { label: 'Canada', value: 'ca' }
   ]
 }`,
+    minimalExample: `{ key: 'status', type: 'select', label: 'Status', options: [{ label: 'Active', value: 'active' }] }`,
   },
   {
     type: 'checkbox',
@@ -168,12 +189,15 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     baseInterface: 'BaseCheckedField',
     props: {},
     validationSupported: true,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'acceptTerms',
   type: 'checkbox',
   label: 'I accept the terms and conditions',
   required: true
 }`,
+    minimalExample: `{ key: 'agree', type: 'checkbox', label: 'I agree' }`,
   },
   {
     type: 'multi-checkbox',
@@ -190,6 +214,8 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       },
     },
     validationSupported: true,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'interests',
   type: 'multi-checkbox',
@@ -201,6 +227,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     { label: 'Technology', value: 'tech' }
   ]
 }`,
+    minimalExample: `{ key: 'tags', type: 'multi-checkbox', label: 'Tags', options: [{ label: 'A', value: 'a' }] }`,
   },
   {
     type: 'radio',
@@ -217,6 +244,8 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       },
     },
     validationSupported: true,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'gender',
   type: 'radio',
@@ -227,6 +256,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     { label: 'Other', value: 'other' }
   ]
 }`,
+    minimalExample: `{ key: 'choice', type: 'radio', label: 'Choice', options: [{ label: 'Yes', value: 'yes' }, { label: 'No', value: 'no' }] }`,
   },
   {
     type: 'datepicker',
@@ -249,6 +279,8 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       },
     },
     validationSupported: true,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'birthDate',
   type: 'datepicker',
@@ -256,6 +288,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   required: true,
   props: { maxDate: new Date() }
 }`,
+    minimalExample: `{ key: 'date', type: 'datepicker', label: 'Date' }`,
   },
   {
     type: 'toggle',
@@ -265,11 +298,14 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     baseInterface: 'BaseCheckedField',
     props: {},
     validationSupported: true,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'notifications',
   type: 'toggle',
   label: 'Enable notifications'
 }`,
+    minimalExample: `{ key: 'enabled', type: 'toggle', label: 'Enable' }`,
   },
   {
     type: 'slider',
@@ -301,6 +337,8 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       },
     },
     validationSupported: true,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'volume',
   type: 'slider',
@@ -310,26 +348,37 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   maxValue: 100,
   step: 5
 }`,
+    minimalExample: `{ key: 'rating', type: 'slider', label: 'Rating' }`,
   },
   {
     type: 'hidden',
     category: 'value',
     description:
-      'Hidden field that participates in form values without rendering. WARNING: Hidden fields do NOT support logic blocks, validators, or labels - they are purely for passing values through the form.',
-    valueType: 'T',
+      'Hidden field that participates in form values without rendering. REQUIRED: The "value" property MUST be provided (string, number, boolean, or array). FORBIDDEN: label, logic, validators, required, props, disabled, readonly, hidden, col, tabIndex, meta - hidden fields are purely for passing values through the form. IMPORTANT: In multi-page forms, hidden fields must go INSIDE a page, not at the root level.',
+    valueType: 'string | number | boolean | (string | number | boolean)[]',
     baseInterface: 'FieldDef',
     props: {},
     validationSupported: false,
-    example: `{
+    source: 'core',
+    allowedIn: ['top-level (single-page forms only)', 'page.fields', 'group.fields', 'array.fields'],
+    notAllowedIn: ['row', 'top-level when using pages'],
+    example: `// Hidden field - value is REQUIRED!
+{
   key: 'userId',
   type: 'hidden',
-  value: 'abc123'
+  value: 'abc123'  // REQUIRED: string, number, boolean, or array
 }
-// NOT SUPPORTED on hidden fields:
-// - logic: [...] (no conditional visibility/disabled)
-// - validators: [...] (no validation)
-// - required: true (no validation)
-// - label: '...' (not rendered)`,
+
+// Valid value types:
+{ key: 'count', type: 'hidden', value: 42 }           // number
+{ key: 'active', type: 'hidden', value: true }        // boolean
+{ key: 'tags', type: 'hidden', value: [1, 2, 3] }     // array
+
+// ❌ FORBIDDEN (will cause validation error):
+// - label, logic, validators, required, props
+// - disabled, readonly, hidden, col, tabIndex, meta
+// - Validation shorthand: email, min, max, minLength, maxLength, pattern`,
+    minimalExample: `{ key: 'id', type: 'hidden', value: 'abc123' }`,
   },
   {
     type: 'text',
@@ -347,38 +396,69 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       },
     },
     validationSupported: false,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'sectionTitle',
   type: 'text',
   label: 'Personal Information',
   props: { elementType: 'h2' }
 }`,
+    minimalExample: `{ key: 'header', type: 'text', label: 'Section Title' }`,
   },
   {
     type: 'row',
     category: 'container',
     description:
-      'Horizontal layout container for grouping fields in columns. Rows do NOT have a label property and cannot contain hidden fields.',
+      'Horizontal layout container for grouping fields in columns. Rows do NOT have a label property and do NOT support logic blocks.',
     valueType: undefined,
     baseInterface: 'FieldDef',
     props: {
       fields: {
         name: 'fields',
         type: 'RowAllowedChildren[]',
-        description: 'Child fields to render horizontally. Allowed: groups, arrays, leaf fields (NOT pages, rows, or hidden)',
+        description:
+          'Child fields to render horizontally. Allowed: groups, arrays, VALUE fields (input, select, etc). NOT ALLOWED: pages, rows, hidden fields',
         required: true,
       },
     },
     validationSupported: false,
+    source: 'core',
+    allowedIn: ['top-level', 'page', 'group', 'array'],
+    notAllowedIn: ['row'],
+    canContain: [
+      'group',
+      'array',
+      'input',
+      'textarea',
+      'select',
+      'checkbox',
+      'multi-checkbox',
+      'radio',
+      'datepicker',
+      'toggle',
+      'slider',
+      'text',
+      'button',
+      'submit',
+      'next',
+      'previous',
+    ],
+    cannotContain: ['page', 'row', 'hidden'],
     example: `{
   key: 'nameRow',
   type: 'row',
-  // NOTE: Rows do NOT have a label property
+  // NOTE: Rows do NOT have label or logic properties
   fields: [
     { key: 'firstName', type: 'input', label: 'First Name', col: 6 },
     { key: 'lastName', type: 'input', label: 'Last Name', col: 6 }
   ]
-}`,
+}
+// NOT ALLOWED in rows:
+// - type: 'hidden' (hidden fields cannot be inside rows)
+// - type: 'page' (pages are top-level only)
+// - type: 'row' (no nested rows)`,
+    minimalExample: `{ key: 'row1', type: 'row', fields: [...] }`,
   },
   {
     type: 'group',
@@ -396,6 +476,28 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       },
     },
     validationSupported: true,
+    source: 'core',
+    allowedIn: ['top-level', 'page', 'row', 'array'],
+    notAllowedIn: ['group'],
+    canContain: [
+      'row',
+      'input',
+      'textarea',
+      'select',
+      'checkbox',
+      'multi-checkbox',
+      'radio',
+      'datepicker',
+      'toggle',
+      'slider',
+      'hidden',
+      'text',
+      'button',
+      'submit',
+      'next',
+      'previous',
+    ],
+    cannotContain: ['page', 'group'],
     example: `{
   key: 'address',
   type: 'group',
@@ -406,6 +508,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     { key: 'zip', type: 'input', label: 'ZIP Code' }
   ]
 }`,
+    minimalExample: `{ key: 'address', type: 'group', fields: [...] }`,
   },
   {
     type: 'array',
@@ -423,6 +526,29 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       },
     },
     validationSupported: false,
+    source: 'core',
+    allowedIn: ['top-level', 'page', 'row', 'group'],
+    notAllowedIn: ['array'],
+    canContain: [
+      'row',
+      'group',
+      'input',
+      'textarea',
+      'select',
+      'checkbox',
+      'multi-checkbox',
+      'radio',
+      'datepicker',
+      'toggle',
+      'slider',
+      'hidden',
+      'text',
+      'button',
+      'submit',
+      'next',
+      'previous',
+    ],
+    cannotContain: ['page', 'array'],
     example: `// Flat array (primitive values)
 {
   key: 'tags',
@@ -447,6 +573,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   }]
 }
 // Result: { contacts: [{name: '', email: ''}, ...] }`,
+    minimalExample: `{ key: 'items', type: 'array', fields: [...] }`,
   },
   {
     type: 'page',
@@ -465,6 +592,30 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       },
     },
     validationSupported: false,
+    source: 'core',
+    allowedIn: ['top-level'],
+    notAllowedIn: ['page', 'row', 'group', 'array'],
+    canContain: [
+      'row',
+      'group',
+      'array',
+      'input',
+      'textarea',
+      'select',
+      'checkbox',
+      'multi-checkbox',
+      'radio',
+      'datepicker',
+      'toggle',
+      'slider',
+      'hidden',
+      'text',
+      'button',
+      'submit',
+      'next',
+      'previous',
+    ],
+    cannotContain: ['page'],
     example: `{
   key: 'step1',
   type: 'page',
@@ -476,6 +627,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     { key: 'next', type: 'next', label: 'Next' }
   ]
 }`,
+    minimalExample: `{ key: 'step1', type: 'page', fields: [...] }`,
   },
   {
     type: 'next',
@@ -485,11 +637,14 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     baseInterface: 'FieldDef',
     props: {},
     validationSupported: false,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'next',
   type: 'next',
   label: 'Next'
 }`,
+    minimalExample: `{ key: 'next', type: 'next', label: 'Next' }`,
   },
   {
     type: 'previous',
@@ -499,11 +654,14 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     baseInterface: 'FieldDef',
     props: {},
     validationSupported: false,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'back',
   type: 'previous',
   label: 'Back'
 }`,
+    minimalExample: `{ key: 'back', type: 'previous', label: 'Back' }`,
   },
   {
     type: 'button',
@@ -522,6 +680,8 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       },
     },
     validationSupported: false,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `// RECOMMENDED: Use pre-defined button types for common actions
 { key: 'submit', type: 'submit', label: 'Submit Form' }
 { key: 'next', type: 'next', label: 'Next' }
@@ -537,6 +697,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   label: 'Custom Action',
   event: MyCustomEvent  // Must be the class reference
 }`,
+    minimalExample: `{ key: 'action', type: 'button', label: 'Action', event: MyEvent }`,
   },
   {
     type: 'submit',
@@ -546,11 +707,14 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     baseInterface: 'FieldDef',
     props: {},
     validationSupported: false,
+    source: 'adapter',
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'submit',
   type: 'submit',
   label: 'Submit Form'
 }`,
+    minimalExample: `{ key: 'submit', type: 'submit', label: 'Submit' }`,
   },
 ];
 

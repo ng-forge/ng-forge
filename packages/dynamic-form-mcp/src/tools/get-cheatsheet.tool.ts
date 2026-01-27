@@ -667,7 +667,18 @@ Validation error at 'fields.0.props': Unrecognized key(s) in object: 'min', 'max
 export function registerGetCheatsheetTool(server: McpServer): void {
   server.tool(
     'ngforge_get_cheatsheet',
-    'Returns a complete, condensed reference for building forms. Use this FIRST - it has property placement rules, condition syntax, copy-paste patterns, and common error fixes. Designed to minimize tool calls.',
+    `FULL REFERENCE: Complete condensed reference for building forms.
+
+Contains:
+- Property placement rules (#1 mistake source)
+- Container rules (what can go where)
+- All condition types with examples
+- All logic types with examples
+- Copy-paste patterns
+- Common errors and fixes
+
+NOTE: This is a large response. For focused lookups, use ngforge_quick_lookup instead.
+For working code examples, use ngforge_get_example.`,
     {
       uiIntegration: z
         .enum(UI_INTEGRATIONS)

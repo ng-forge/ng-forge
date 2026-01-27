@@ -3,18 +3,25 @@
  *
  * Registers all available tools with the MCP server.
  *
- * 7 tools organized by workflow:
+ * 8 tools organized by workflow:
+ *
+ * RECOMMENDED WORKFLOW:
+ * 1. ngforge_quick_lookup topic="workflow" - See tool usage guide
+ * 2. ngforge_quick_lookup topic="golden-path" - Get form structure templates
+ * 3. ngforge_quick_lookup topic="<field-type>" - Get syntax for specific fields
+ * 4. ngforge_validate_file - Validate your config (catches all errors)
  *
  * LEARN:
- * 1. ngforge_get_cheatsheet - Full reference (start here for overview)
- * 2. ngforge_quick_lookup - Focused lookup for specific topics
- * 3. ngforge_get_field_info - Deep dive into field types + optional JSON schema
- * 4. ngforge_get_example - Working examples + deep explanations
+ * - ngforge_quick_lookup - RECOMMENDED: Focused lookup for specific topics
+ * - ngforge_get_cheatsheet - Full reference (large response)
+ * - ngforge_get_field_info - Deep dive into field types + placement rules
+ * - ngforge_get_example - Working examples (use "complete" or "mega")
+ * - ngforge_get_api_reference - Compact API reference (LLM-optimized)
  *
  * VALIDATE:
- * 5. ngforge_validate_form_config - Validate JSON config
- * 6. ngforge_validate_file - Validate actual .ts files directly
- * 7. ngforge_validate_field - Validate individual fields incrementally
+ * - ngforge_validate_file - Validate .ts files (RECOMMENDED)
+ * - ngforge_validate_form_config - Validate JSON config
+ * - ngforge_validate_field - Validate individual fields incrementally
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -25,9 +32,10 @@ import { registerGetFieldInfoTool } from './get-field-info.tool.js';
 import { registerGetExampleTool } from './get-example.tool.js';
 import { registerGetCheatsheetTool } from './get-cheatsheet.tool.js';
 import { registerQuickLookupTool } from './quick-lookup.tool.js';
+import { registerGetApiReferenceTool } from './get-api-reference.tool.js';
 
 /**
- * Register all MCP tools (7 total)
+ * Register all MCP tools (8 total)
  */
 export function registerTools(server: McpServer): void {
   // === LEARN ===
@@ -44,14 +52,17 @@ export function registerTools(server: McpServer): void {
   // 4. Examples - working code with optional deep explanations
   registerGetExampleTool(server);
 
+  // 5. API Reference - compact reference optimized for LLM parsing
+  registerGetApiReferenceTool(server);
+
   // === VALIDATE ===
 
-  // 5. Validate config - JSON config validation
+  // 6. Validate config - JSON config validation
   registerValidateFormConfigTool(server);
 
-  // 6. Validate file - read and validate actual .ts files
+  // 7. Validate file - read and validate actual .ts files
   registerValidateFileTool(server);
 
-  // 7. Validate field - incremental single-field validation
+  // 8. Validate field - incremental single-field validation
   registerValidateFieldTool(server);
 }

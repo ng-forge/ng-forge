@@ -2,330 +2,157 @@
  * Validate File Tool
  *
  * Reads a TypeScript/JavaScript file and extracts FormConfig objects
- * for validation. Handles common export patterns.
+ * for validation using ts-morph AST parsing for robust handling of
+ * complex patterns including:
+ * - new Date() constructors
+ * - Function references and arrow functions
+ * - Regex literals
+ * - External variable references
+ * - Method calls like Math.floor()
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { readFile } from 'fs/promises';
 import { validateFormConfig, type UiIntegration, type ValidationResult } from '@ng-forge/dynamic-forms-zod/mcp';
+import {
+  createSourceFile,
+  findFormConfigCandidates,
+  extractToJson,
+  type FormConfigCandidate,
+  type ExtractionResult,
+} from '../utils/ast-extractor.js';
 
 const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 
 /**
- * Extract FormConfig objects from TypeScript/JavaScript source code.
- * Handles common patterns like:
- * - const config: FormConfig = { fields: [...] }
- * - const config: FormConfig<T> = { fields: [...] }
- * - export const config = { fields: [...] } satisfies FormConfig
- * - export const config = { fields: [...] } as FormConfig
- * - { fields: [...] } (standalone object)
+ * Result of extracting and validating a single FormConfig.
  */
-function extractFormConfigs(source: string): Array<{ name: string; config: unknown; startLine: number }> {
-  const configs: Array<{ name: string; config: unknown; startLine: number }> = [];
-  const foundNames = new Set<string>();
-
-  // Pattern 1: Type annotation - const varName: FormConfig = { ... }
-  // Also handles: FormConfig<T>, FormConfig | undefined, etc.
-  const typeAnnotationRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*:\s*FormConfig(?:<[^>]*>|\s*\|[^=]*)?\s*=\s*/gm;
-
-  let match;
-  while ((match = typeAnnotationRegex.exec(source)) !== null) {
-    const varName = match[1];
-    if (foundNames.has(varName)) continue;
-
-    const startIndex = match.index + match[0].length;
-    const startLine = source.substring(0, match.index).split('\n').length;
-
-    try {
-      const config = extractObjectAtPosition(source, startIndex);
-      if (config && typeof config === 'object' && 'fields' in config) {
-        configs.push({ name: varName, config, startLine });
-        foundNames.add(varName);
-      }
-    } catch {
-      // Skip malformed configs
-    }
-  }
-
-  // Pattern 2 & 3: satisfies FormConfig / as FormConfig
-  // Look for variable declarations that end with "satisfies FormConfig" or "as FormConfig"
-  // We can't use lazy regex for nested braces, so find declarations and check what follows
-  const varDeclRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*\{/gm;
-
-  while ((match = varDeclRegex.exec(source)) !== null) {
-    const varName = match[1];
-    if (foundNames.has(varName)) continue;
-
-    const startIndex = match.index + match[0].length - 1;
-    const startLine = source.substring(0, match.index).split('\n').length;
-
-    try {
-      // Find matching closing brace
-      const endIndex = findMatchingBrace(source, startIndex);
-      if (endIndex === -1) continue;
-
-      // Check what comes after the object: "satisfies FormConfig" or "as FormConfig"
-      const afterObject = source.substring(endIndex + 1, endIndex + 50).trim();
-      const isSatisfies = /^satisfies\s+FormConfig/.test(afterObject);
-      const isAs = /^as\s+FormConfig/.test(afterObject);
-
-      if (isSatisfies || isAs) {
-        const config = extractObjectAtPosition(source, startIndex);
-        if (config && typeof config === 'object' && 'fields' in config) {
-          configs.push({ name: varName, config, startLine });
-          foundNames.add(varName);
-        }
-      }
-    } catch {
-      // Skip malformed configs
-    }
-  }
-
-  // Reset regex lastIndex for Pattern 4
-  varDeclRegex.lastIndex = 0;
-
-  // Pattern 4: Variable with FormConfig in comment or inferred type
-  // Look for variables assigned objects with fields arrays
-  const variableWithFieldsRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*\{/gm;
-
-  while ((match = variableWithFieldsRegex.exec(source)) !== null) {
-    const varName = match[1];
-    if (foundNames.has(varName)) continue;
-
-    const startIndex = match.index + match[0].length - 1;
-    const startLine = source.substring(0, match.index).split('\n').length;
-
-    try {
-      const config = extractObjectAtPosition(source, startIndex);
-      if (config && typeof config === 'object' && 'fields' in config && Array.isArray((config as Record<string, unknown>).fields)) {
-        // Check if "fields" contains objects that look like form fields
-        const fields = (config as { fields: unknown[] }).fields;
-        if (fields.length > 0 && typeof fields[0] === 'object' && fields[0] !== null) {
-          const firstField = fields[0] as Record<string, unknown>;
-          if ('key' in firstField || 'type' in firstField) {
-            configs.push({ name: varName, config, startLine });
-            foundNames.add(varName);
-          }
-        }
-      }
-    } catch {
-      // Skip malformed configs
-    }
-  }
-
-  // Pattern 5: Fallback - any object literal with fields: [ as top-level
-  if (configs.length === 0) {
-    const fieldsRegex = /\{\s*fields\s*:\s*\[/gm;
-    while ((match = fieldsRegex.exec(source)) !== null) {
-      const startIndex = match.index;
-      const startLine = source.substring(0, match.index).split('\n').length;
-
-      try {
-        const config = extractObjectAtPosition(source, startIndex);
-        if (config && typeof config === 'object' && 'fields' in config) {
-          const name = `config_line_${startLine}`;
-          if (!foundNames.has(name)) {
-            configs.push({ name, config, startLine });
-            foundNames.add(name);
-          }
-        }
-      } catch {
-        // Skip malformed configs
-      }
-    }
-  }
-
-  return configs;
+interface ConfigValidationResult {
+  name: string;
+  line: number;
+  matchReason: FormConfigCandidate['matchReason'];
+  extraction: ExtractionResult;
+  validation: ValidationResult;
 }
 
 /**
- * Find the index of the matching closing brace.
- * Returns -1 if not found.
+ * Format a validation report with detailed information about discovery,
+ * extraction, and validation phases.
  */
-function findMatchingBrace(source: string, startIndex: number): number {
-  let depth = 0;
-  let inString = false;
-  let stringChar = '';
-
-  for (let i = startIndex; i < source.length; i++) {
-    const char = source[i];
-    const prevChar = i > 0 ? source[i - 1] : '';
-
-    // Handle string boundaries
-    if ((char === '"' || char === "'" || char === '`') && prevChar !== '\\') {
-      if (!inString) {
-        inString = true;
-        stringChar = char;
-      } else if (char === stringChar) {
-        inString = false;
-      }
-    }
-
-    // Track brace depth (only outside strings)
-    if (!inString) {
-      if (char === '{') depth++;
-      if (char === '}') {
-        depth--;
-        if (depth === 0) {
-          return i;
-        }
-      }
-    }
-  }
-
-  return -1;
-}
-
-/**
- * Extract a JavaScript object starting at a given position.
- * Handles nested braces and common TypeScript syntax.
- */
-function extractObjectAtPosition(source: string, startIndex: number): unknown {
-  // Find the opening brace
-  let braceStart = startIndex;
-  while (braceStart < source.length && source[braceStart] !== '{') {
-    braceStart++;
-  }
-
-  if (braceStart >= source.length) {
-    throw new Error('No object found');
-  }
-
-  // Find matching closing brace
-  let depth = 0;
-  let inString = false;
-  let stringChar = '';
-  let i = braceStart;
-
-  while (i < source.length) {
-    const char = source[i];
-    const prevChar = i > 0 ? source[i - 1] : '';
-
-    // Handle string boundaries
-    if ((char === '"' || char === "'" || char === '`') && prevChar !== '\\') {
-      if (!inString) {
-        inString = true;
-        stringChar = char;
-      } else if (char === stringChar) {
-        inString = false;
-      }
-    }
-
-    // Track brace depth (only outside strings)
-    if (!inString) {
-      if (char === '{') depth++;
-      if (char === '}') depth--;
-
-      if (depth === 0) {
-        break;
-      }
-    }
-
-    i++;
-  }
-
-  if (depth !== 0) {
-    throw new Error('Unbalanced braces');
-  }
-
-  // Extract the object literal
-  let objectStr = source.substring(braceStart, i + 1);
-
-  // Clean up TypeScript-specific syntax for JSON parsing
-  objectStr = cleanForParsing(objectStr);
-
-  // Try to parse as JSON-like object
-  try {
-    // Use Function constructor to evaluate as JavaScript (safer than eval)
-    const fn = new Function(`return (${objectStr})`);
-    return fn();
-  } catch {
-    throw new Error('Failed to parse object');
-  }
-}
-
-/**
- * Clean TypeScript/JavaScript object literal for parsing.
- */
-function cleanForParsing(source: string): string {
-  let result = source;
-
-  // Remove TypeScript type annotations from property values
-  // e.g., value: 'test' as const -> value: 'test'
-  result = result.replace(/:\s*('[^']*'|"[^"]*")\s+as\s+const/g, ': $1');
-
-  // Remove trailing commas before closing braces/brackets
-  result = result.replace(/,(\s*[}\]])/g, '$1');
-
-  // Handle template literals with simple expressions (convert to regular strings)
-  // This is a simplification - complex template literals won't work
-  result = result.replace(/`([^`]*)`/g, (_, content) => {
-    // If it contains ${}, it's a template literal with expressions - keep as is
-    if (content.includes('${')) {
-      return `"${content.replace(/"/g, '\\"')}"`;
-    }
-    return `"${content.replace(/"/g, '\\"')}"`;
-  });
-
-  return result;
-}
-
-/**
- * Format validation results for file-based validation.
- */
-function formatFileValidationResult(
+function formatReport(
   filePath: string,
-  configs: Array<{ name: string; config: unknown; startLine: number }>,
-  results: Array<{ name: string; startLine: number; result: ValidationResult }>,
   uiIntegration: string,
+  candidates: FormConfigCandidate[],
+  results: ConfigValidationResult[],
 ): string {
   const lines: string[] = [];
 
-  lines.push(`# File Validation Report`);
+  lines.push('# File Validation Report');
   lines.push('');
   lines.push(`**File:** ${filePath}`);
   lines.push(`**UI Integration:** ${uiIntegration}`);
-  lines.push(`**Configs Found:** ${configs.length}`);
   lines.push('');
 
-  if (configs.length === 0) {
-    lines.push('## No FormConfig Objects Found');
+  // Discovery Phase
+  lines.push('## Discovery Phase');
+  lines.push('');
+
+  if (candidates.length === 0) {
+    lines.push('**Found 0 FormConfig candidate(s)**');
     lines.push('');
     lines.push('Could not find any FormConfig objects in the file.');
     lines.push('');
-    lines.push('**Expected patterns:**');
-    lines.push('- `const myConfig: FormConfig = { fields: [...] }`');
-    lines.push('- `export const config: FormConfig = { fields: [...] }`');
-    lines.push('- `{ fields: [...] }` (standalone object)');
+    lines.push('### Detection Strategies Used');
+    lines.push('');
+    lines.push('1. **Satisfies clause** (recommended): `const x = {...} as const satisfies FormConfig`');
+    lines.push('2. **Type annotation**: `const x: FormConfig = {...}`');
+    lines.push('3. **As cast**: `const x = {...} as FormConfig`');
+    lines.push('4. **Structural match**: Any object with `fields` array containing objects with `key` or `type`');
+    lines.push('');
+    lines.push('### Troubleshooting');
+    lines.push('');
+    lines.push('- Ensure the file path is absolute and the file exists');
+    lines.push('- Check that FormConfig objects have a `fields` array at the root');
+    lines.push('- Fields array elements must have `key` or `type` properties');
+    lines.push('- For custom type aliases (e.g., `MyFormConfig`), structural detection will still find them');
     return lines.join('\n');
   }
 
-  const allValid = results.every((r) => r.result.valid);
-  const totalErrors = results.reduce((sum, r) => sum + (r.result.errors?.length || 0), 0);
+  lines.push(`Found **${candidates.length}** FormConfig candidate(s):`);
+  lines.push('');
+  lines.push('| Name | Line | Detection Method |');
+  lines.push('|------|------|------------------|');
+  for (const candidate of candidates) {
+    const reasonLabel = {
+      'type-annotation': 'Type annotation',
+      satisfies: 'as const satisfies',
+      'as-cast': 'As cast',
+      structural: 'Structural match',
+    }[candidate.matchReason];
+    lines.push(`| ${candidate.name} | ${candidate.startLine} | ${reasonLabel} |`);
+  }
+  lines.push('');
+
+  // Extraction Warnings
+  const hasWarnings = results.some((r) => r.extraction.warnings.length > 0);
+
+  if (hasWarnings) {
+    lines.push('## Extraction Warnings');
+    lines.push('');
+    lines.push('The following runtime values were replaced with placeholders:');
+    lines.push('');
+
+    for (const result of results) {
+      if (result.extraction.warnings.length === 0) {
+        continue;
+      }
+
+      lines.push(`### ${result.name}`);
+      lines.push('');
+
+      for (const warning of result.extraction.warnings) {
+        lines.push(`- **${warning.path}**: ${warning.issue}`);
+        lines.push(`  - Original: \`${warning.originalText}\``);
+        lines.push(`  - Placeholder: \`${JSON.stringify(warning.placeholder)}\``);
+      }
+      lines.push('');
+    }
+  }
+
+  // Validation Results
+  lines.push('## Validation Results');
+  lines.push('');
+
+  const allValid = results.every((r) => r.validation.valid);
+  const totalErrors = results.reduce((sum, r) => sum + (r.validation.errors?.length || 0), 0);
 
   if (allValid) {
-    lines.push(`## ✅ ALL CONFIGS VALID`);
+    lines.push('### All Configs Valid');
     lines.push('');
-    for (const { name, startLine } of configs) {
-      lines.push(`- **${name}** (line ${startLine}): Valid`);
+    for (const result of results) {
+      lines.push(`- **${result.name}** (line ${result.line}): Valid`);
+      if (result.extraction.warnings.length > 0) {
+        lines.push(`  - Note: ${result.extraction.warnings.length} runtime value(s) replaced with placeholders`);
+      }
     }
   } else {
-    lines.push(`## ❌ VALIDATION ERRORS FOUND`);
-    lines.push('');
-    lines.push(`Total errors: ${totalErrors}`);
+    lines.push(`**Total Errors:** ${totalErrors}`);
     lines.push('');
 
-    for (const { name, startLine, result } of results) {
-      if (result.valid) {
-        lines.push(`### ${name} (line ${startLine}): ✅ Valid`);
-      } else {
-        lines.push(`### ${name} (line ${startLine}): ❌ Invalid`);
-        lines.push('');
-        if (result.errors) {
-          for (const error of result.errors) {
-            lines.push(`- **${error.path}:** ${error.message}`);
-          }
+    for (const result of results) {
+      const statusIcon = result.validation.valid ? 'Valid' : 'Invalid';
+      lines.push(`### ${result.name} (line ${result.line}): ${statusIcon}`);
+      lines.push('');
+
+      if (result.validation.valid) {
+        lines.push('All validatable properties passed schema validation.');
+        if (result.extraction.warnings.length > 0) {
+          lines.push(`Note: ${result.extraction.warnings.length} runtime value(s) could not be validated.`);
+        }
+      } else if (result.validation.errors) {
+        for (const error of result.validation.errors) {
+          lines.push(`- **${error.path}:** ${error.message}`);
         }
       }
       lines.push('');
@@ -335,49 +162,78 @@ function formatFileValidationResult(
   return lines.join('\n');
 }
 
+/**
+ * Format structured JSON output for programmatic consumption.
+ */
+function formatStructuredOutput(filePath: string, uiIntegration: string, results: ConfigValidationResult[]): object {
+  return {
+    filePath,
+    uiIntegration,
+    configsFound: results.length,
+    allValid: results.every((r) => r.validation.valid),
+    results: results.map((r) => ({
+      name: r.name,
+      startLine: r.line,
+      matchReason: r.matchReason,
+      valid: r.validation.valid,
+      errors: r.validation.errors,
+      extractionWarnings: r.extraction.warnings.length > 0 ? r.extraction.warnings : undefined,
+    })),
+  };
+}
+
 export function registerValidateFileTool(server: McpServer): void {
   server.tool(
     'ngforge_validate_file',
-    'Reads a TypeScript/JavaScript file and validates all FormConfig objects found in it. Extracts configs from common patterns like `const config: FormConfig = {...}`. Use this to validate your actual source files instead of manually converting to JSON.',
+    `VALIDATION TOOL: Validate FormConfig in a TypeScript file. Use AFTER writing your config.
+
+Returns SPECIFIC error messages with:
+- Exact property that's wrong
+- What the correct structure should look like
+- Copy-paste fix suggestions
+
+Handles complex syntax: new Date(), functions, regex, external variables.
+
+Example errors you'll see:
+- "Hidden field missing REQUIRED value property"
+- "options MUST be at FIELD level, NOT inside props"
+- "row containers do NOT support logic blocks"`,
     {
       filePath: z.string().describe('Absolute path to the TypeScript/JavaScript file containing FormConfig'),
       uiIntegration: z.enum(UI_INTEGRATIONS).describe('UI library to validate against (material, bootstrap, primeng, ionic)'),
     },
     async ({ filePath, uiIntegration }) => {
       try {
-        // Read the file
+        // 1. Read the file
         const source = await readFile(filePath, 'utf-8');
 
-        // Extract FormConfig objects
-        const configs = extractFormConfigs(source);
+        // 2. Parse with ts-morph
+        const sourceFile = createSourceFile(source, filePath);
 
-        // Validate each config
-        const results = configs.map(({ name, config, startLine }) => ({
-          name,
-          startLine,
-          result: validateFormConfig(uiIntegration as UiIntegration, config),
-        }));
+        // 3. Find candidates using structural detection
+        const candidates = findFormConfigCandidates(sourceFile);
 
-        // Format the output
-        const output = formatFileValidationResult(filePath, configs, results, uiIntegration);
+        // 4. Extract and validate each candidate
+        const results: ConfigValidationResult[] = candidates.map((candidate) => {
+          const extraction = extractToJson(candidate.objectLiteral);
+          const validation = validateFormConfig(uiIntegration as UiIntegration, extraction.value);
 
-        // Also return structured data
-        const structured = {
-          filePath,
-          uiIntegration,
-          configsFound: configs.length,
-          allValid: results.every((r) => r.result.valid),
-          results: results.map((r) => ({
-            name: r.name,
-            startLine: r.startLine,
-            valid: r.result.valid,
-            errors: r.result.errors,
-          })),
-        };
+          return {
+            name: candidate.name,
+            line: candidate.startLine,
+            matchReason: candidate.matchReason,
+            extraction,
+            validation,
+          };
+        });
+
+        // 5. Format the report
+        const report = formatReport(filePath, uiIntegration, candidates, results);
+        const structured = formatStructuredOutput(filePath, uiIntegration, results);
 
         return {
           content: [
-            { type: 'text' as const, text: output },
+            { type: 'text' as const, text: report },
             { type: 'text' as const, text: '\n\n```json\n' + JSON.stringify(structured, null, 2) + '\n```' },
           ],
         };

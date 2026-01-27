@@ -113,7 +113,15 @@ function enhanceValidationResult(result: ValidationResult, uiIntegration: string
 export function registerValidateFormConfigTool(server: McpServer): void {
   server.tool(
     'ngforge_validate_form_config',
-    'Validates a FormConfig against the actual TypeScript types for a specific UI library. Returns detailed error messages with FIX SUGGESTIONS when validation fails. ALWAYS call this before deploying your form config!',
+    `VALIDATION TOOL: Validate a JSON FormConfig object directly.
+
+Use this when you have the config as a JSON object (not in a file).
+For file validation, use ngforge_validate_file instead.
+
+Returns:
+- SPECIFIC error messages with exact paths
+- FIX SUGGESTIONS for common mistakes
+- Validates against actual TypeScript types`,
     {
       uiIntegration: z.enum(UI_INTEGRATIONS).describe('UI library to validate against (material, bootstrap, primeng, ionic)'),
       config: z.object({}).passthrough().describe('The FormConfig object to validate'),

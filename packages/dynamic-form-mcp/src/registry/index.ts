@@ -28,6 +28,18 @@ export interface FieldTypeInfo {
   props: Record<string, PropertyInfo>;
   validationSupported: boolean;
   example: string;
+  /** Field types that this container can contain (for containers only) */
+  canContain?: string[];
+  /** Field types that this container CANNOT contain (for containers only) */
+  cannotContain?: string[];
+  /** Where this field type is allowed to be placed */
+  allowedIn?: string[];
+  /** Where this field type is NOT allowed to be placed */
+  notAllowedIn?: string[];
+  /** Whether this field type is part of core library or requires an adapter */
+  source: 'core' | 'adapter';
+  /** Minimal valid example (just required properties) */
+  minimalExample?: string;
 }
 
 export interface ValidatorInfo {

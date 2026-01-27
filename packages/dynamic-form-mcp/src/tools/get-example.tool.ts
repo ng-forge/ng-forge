@@ -1419,13 +1419,11 @@ const megaFormConfig: FormConfig = {
           ]
         },
 
-        // GENERIC BUTTON (custom action)
-        {
-          key: 'resetButton',
-          type: 'button',
-          label: 'Reset Form'
-          // Handle via (buttonClick) event in component
-        }
+        // NOTE: Generic 'button' type requires an 'event' property with a FormEventConstructor.
+        // For simple reset functionality, handle it in component code instead:
+        //   this.formService.reset();
+        // Or use (formReset) event on the form component.
+        // The submit button above handles form submission - no separate reset button needed in this example.
       ]
     }
   ]
@@ -1512,7 +1510,6 @@ interface MegaFormValue {
 | submit | Page 6 |
 | next | Page 1, 2, 3, 4 |
 | previous | Page 2, 3, 4, 5, 6 |
-| button | Page 6 |
 | required validation | Page 1, 2, 4 |
 | email validation | Page 1 |
 | min/max validation | Page 1 |
@@ -1539,7 +1536,16 @@ function formatDocTopic(doc: DocTopic): string {
 export function registerGetExampleTool(server: McpServer): void {
   server.tool(
     'ngforge_get_example',
-    'Returns example form configurations for common patterns like derivation, conditional visibility, multi-page forms, validation, etc. Use depth="deep" for conceptual explanations + code + edge cases.',
+    `EXAMPLES: Get working, copy-paste-ready form configurations.
+
+Recommended patterns:
+- "complete": Multi-page form with all major features (START HERE)
+- "mega": Kitchen sink with EVERY feature demonstrated
+
+Other patterns: derivation, conditional, multi-page, validation, dynamic-options, nested-groups
+
+Use depth="deep" for conceptual explanations + code + edge cases.
+Tip: For quick syntax, use ngforge_quick_lookup instead.`,
     {
       pattern: z
         .enum(PATTERNS as unknown as [string, ...string[]])

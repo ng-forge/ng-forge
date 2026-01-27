@@ -144,6 +144,7 @@
     "primeicons": "^7.0.0",
     "primeng": "^21.0.4",
     "rxjs": "~7.8.0",
+    "ts-morph": "^27.0.2",
     "zod": "^3.25.76",
     "zod-to-json-schema": "^3.25.1"
   },
