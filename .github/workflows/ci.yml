@@ -111,8 +111,8 @@ jobs:
             fi
             # MCP package has Node.js structure (not Angular)
             if [ "$PKG" = "dynamic-form-mcp" ]; then
-              if [ ! -f "dist/packages/$PKG/index.js" ]; then
-                echo "❌ Missing index.js in dist/packages/$PKG"
+              if [ ! -f "dist/packages/$PKG/src/index.js" ]; then
+                echo "❌ Missing src/index.js in dist/packages/$PKG"
                 exit 1
               fi
               echo "✅ $PKG package structure looks valid (MCP server)"
