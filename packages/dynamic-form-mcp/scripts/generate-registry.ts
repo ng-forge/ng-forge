@@ -1271,24 +1271,24 @@ async function generateRegistry(): Promise<void> {
 
   // Write field types
   const fieldTypesPath = path.join(OUTPUT_DIR, 'field-types.json');
-  fs.writeFileSync(fieldTypesPath, JSON.stringify(CORE_FIELD_TYPES, null, 2));
+  fs.writeFileSync(fieldTypesPath, JSON.stringify(CORE_FIELD_TYPES, null, 2) + '\n');
   console.log(`Generated ${fieldTypesPath}`);
 
   // Write validators
   const validatorsPath = path.join(OUTPUT_DIR, 'validators.json');
-  fs.writeFileSync(validatorsPath, JSON.stringify(VALIDATORS, null, 2));
+  fs.writeFileSync(validatorsPath, JSON.stringify(VALIDATORS, null, 2) + '\n');
   console.log(`Generated ${validatorsPath}`);
 
   // Write UI adapters
   const uiAdaptersPath = path.join(OUTPUT_DIR, 'ui-adapters.json');
-  fs.writeFileSync(uiAdaptersPath, JSON.stringify(UI_ADAPTERS, null, 2));
+  fs.writeFileSync(uiAdaptersPath, JSON.stringify(UI_ADAPTERS, null, 2) + '\n');
   console.log(`Generated ${uiAdaptersPath}`);
 
   // Generate and write docs
   const docs = generateDocs();
   if (docs.length > 0) {
     const docsPath = path.join(OUTPUT_DIR, 'docs.json');
-    fs.writeFileSync(docsPath, JSON.stringify(docs, null, 2));
+    fs.writeFileSync(docsPath, JSON.stringify(docs, null, 2) + '\n');
     console.log(`Generated ${docsPath} (${docs.length} topics)`);
   }
 
