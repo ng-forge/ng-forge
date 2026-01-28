@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng'
+  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng dynamic-form-mcp'
   NODE_MODULES_CACHE_KEY: modules-${{ github.run_id }}
   PLAYWRIGHT_CACHE_KEY: playwright-${{ github.run_id }}
 
@@ -156,7 +156,14 @@ jobs:
                 echo "❌ Missing package.json in dist/packages/$PKG"
                 exit 1
               fi
-              if [ ! -f "dist/packages/$PKG/index.d.ts" ] && [ ! -f "dist/packages/$PKG/fesm2022/index.d.ts" ]; then
+              # MCP package has Node.js structure (not Angular)
+              if [ "$PKG" = "dynamic-form-mcp" ]; then
+                if [ ! -f "dist/packages/$PKG/index.js" ]; then
+                  echo "❌ Missing index.js in dist/packages/$PKG"
+                  exit 1
+                fi
+                echo "✅ $PKG package structure looks valid (MCP server)"
+              elif [ ! -f "dist/packages/$PKG/index.d.ts" ] && [ ! -f "dist/packages/$PKG/fesm2022/index.d.ts" ]; then
                 echo "⚠️  Warning: No index.d.ts found in dist/packages/$PKG"
               else
                 echo "✅ $PKG package structure looks valid"
@@ -176,6 +183,7 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
+            dist/packages/dynamic-form-mcp
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
   quality:
@@ -207,6 +215,7 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
+            dist/packages/dynamic-form-mcp
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Lint affected projects
@@ -248,6 +257,7 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
+            dist/packages/dynamic-form-mcp
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Test affected projects
@@ -288,6 +298,7 @@ jobs:
             dist/packages/dynamic-forms-bootstrap
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
+            dist/packages/dynamic-form-mcp
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Build docs if affected
@@ -351,6 +362,42 @@ jobs:
             echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           fi
 
+  mcp-registry:
+    name: MCP Registry Check
+    needs: [setup, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
+        with:
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+      - name: Check MCP registry is up to date
+        run: |
+          # Run generate-registry to regenerate files
+          pnpm nx run dynamic-form-mcp:generate-registry
+
+          # Check for uncommitted changes in registry files
+          if git diff --quiet packages/dynamic-form-mcp/src/registry/*.json; then
+            echo "✅ MCP registry files are up to date"
+          else
+            echo "❌ MCP registry files are out of date!"
+            echo ""
+            echo "Changed files:"
+            git diff --name-only packages/dynamic-form-mcp/src/registry/*.json
+            echo ""
+            echo "Run 'pnpm nx run dynamic-form-mcp:generate-registry' and commit the changes."
+            echo ""
+            echo "Diff:"
+            git diff packages/dynamic-form-mcp/src/registry/*.json
+            exit 1
+          fi
+
   e2e:
     name: E2E Tests (${{ matrix.app }})
     needs: [quality, test, build-apps]
@@ -381,7 +428,7 @@ jobs:
   ci-success:
     name: PR Check Complete
     if: always()
-    needs: [should-run, setup, checks, build, quality, test, build-apps, e2e]
+    needs: [should-run, setup, checks, build, quality, test, mcp-registry, build-apps, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -389,5 +436,5 @@ jobs:
         uses: re-actors/alls-green@release/v1
         with:
           # e2e may be skipped if no E2E apps are affected
-          allowed-skips: setup, checks, build, quality, test, build-apps, e2e
+          allowed-skips: setup, checks, build, quality, test, mcp-registry, build-apps, e2e
           jobs: ${{ toJSON(needs) }}
