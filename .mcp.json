@@ -20,6 +20,11 @@
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "ng-forge": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["dist/packages/dynamic-form-mcp/bin/ng-forge-mcp.js"]
     }
   }
 }

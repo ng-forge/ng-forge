@@ -16,6 +16,54 @@
 
 - **Spawn subagents if you believe the task is better to be divided**
 
+## MCP Server Synchronization
+
+The `@ng-forge/dynamic-form-mcp` package provides an MCP server for AI-assisted form schema generation. **When making changes to the dynamic-forms library that affect behavior, configuration, or APIs, you MUST also update the MCP server accordingly.**
+
+### When to Update the MCP
+
+Update `packages/dynamic-form-mcp/` when:
+
+- **Adding new field types** - Add metadata to the registry and update examples
+- **Adding/modifying validators** - Update the validators registry and documentation
+- **Changing field configuration options** - Update the field types registry
+- **Adding new UI adapter features** - Update the UI adapters registry
+- **Changing the form configuration schema** - Update tools and resources
+- **Modifying API surface or behavior** - Update instructions and examples
+
+### MCP Package Structure
+
+```
+packages/dynamic-form-mcp/
+├── src/
+│   ├── registry/           # Generated metadata (field types, validators, UI adapters)
+│   ├── resources/          # MCP resources (documentation, examples, schemas)
+│   ├── tools/              # MCP tools (lookup, examples, validate, scaffold)
+│   └── server.ts           # MCP server setup
+├── scripts/
+│   └── generate-registry.ts  # Regenerates metadata from source
+└── bin/
+    └── ng-forge-mcp.ts     # CLI entry point
+```
+
+### Regenerating the Registry
+
+After making changes to dynamic-forms packages, regenerate the MCP registry:
+
+```bash
+nx run dynamic-form-mcp:generate-registry
+```
+
+This extracts metadata from the source packages and updates the JSON registry files.
+
+### Local Development
+
+The MCP is configured in `.mcp.json` to run from `dist/`. After `pnpm install`, the MCP is automatically built. To manually rebuild:
+
+```bash
+nx build dynamic-form-mcp
+```
+
 ## Angular API Usage
 
 - **You MUST investigate real Angular APIs and use those.** Before implementing custom solutions, research whether Angular provides a built-in API. Use official Angular documentation and source code as reference.
@@ -260,7 +308,7 @@ pnpm e2e:clean
 
 ### Allowed Scopes
 
-`core`, `forms`, `dynamic-forms`, `material`, `bootstrap`, `primeng`, `ionic`, `docs`, `examples`, `release`, `deps`, `config`, or empty
+`core`, `forms`, `dynamic-forms`, `material`, `bootstrap`, `primeng`, `ionic`, `mcp`, `docs`, `examples`, `release`, `deps`, `config`, or empty
 
 ### Rules
 
