@@ -19,6 +19,13 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/**
+ * Write JSON data to a file with proper formatting and trailing newline.
+ */
+function writeJson(filePath: string, data: unknown): void {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n');
+}
+
 const OUTPUT_DIR = path.resolve(__dirname, '../src/registry');
 
 interface FieldTypeInfo {
@@ -1271,24 +1278,24 @@ async function generateRegistry(): Promise<void> {
 
   // Write field types
   const fieldTypesPath = path.join(OUTPUT_DIR, 'field-types.json');
-  fs.writeFileSync(fieldTypesPath, JSON.stringify(CORE_FIELD_TYPES, null, 2));
+  writeJson(fieldTypesPath, CORE_FIELD_TYPES);
   console.log(`Generated ${fieldTypesPath}`);
 
   // Write validators
   const validatorsPath = path.join(OUTPUT_DIR, 'validators.json');
-  fs.writeFileSync(validatorsPath, JSON.stringify(VALIDATORS, null, 2));
+  writeJson(validatorsPath, VALIDATORS);
   console.log(`Generated ${validatorsPath}`);
 
   // Write UI adapters
   const uiAdaptersPath = path.join(OUTPUT_DIR, 'ui-adapters.json');
-  fs.writeFileSync(uiAdaptersPath, JSON.stringify(UI_ADAPTERS, null, 2));
+  writeJson(uiAdaptersPath, UI_ADAPTERS);
   console.log(`Generated ${uiAdaptersPath}`);
 
   // Generate and write docs
   const docs = generateDocs();
   if (docs.length > 0) {
     const docsPath = path.join(OUTPUT_DIR, 'docs.json');
-    fs.writeFileSync(docsPath, JSON.stringify(docs, null, 2));
+    writeJson(docsPath, docs);
     console.log(`Generated ${docsPath} (${docs.length} topics)`);
   }
 

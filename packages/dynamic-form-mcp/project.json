@@ -16,7 +16,7 @@
     "generate-registry": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx tsx packages/dynamic-form-mcp/scripts/generate-registry.ts"
+        "command": "npx tsx packages/dynamic-form-mcp/scripts/generate-registry.ts && pnpm exec prettier --write packages/dynamic-form-mcp/src/registry/*.json"
       }
     },
     "build": {
