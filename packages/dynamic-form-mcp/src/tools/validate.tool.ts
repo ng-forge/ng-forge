@@ -44,8 +44,11 @@ const FIX_SUGGESTIONS: Record<string, string> = {
   element: 'Use `props: { elementType }` not `element` for text field HTML element.',
   hideWhen: "Use `logic: [{ type: 'hidden', condition: {...} }]` - no `hideWhen` shorthand exists.",
   showWhen: "Use `logic: [{ type: 'hidden', condition: {...} }]` with inverted condition - no `showWhen` shorthand exists.",
-  expressions: "Use `logic: [{ type: 'derivation', targetField, expression }]` - no `expressions` property exists.",
-  derivation: "Use `logic: [{ type: 'derivation', targetField: 'fieldKey', expression: '...' }]`",
+  expressions: "Use `logic: [{ type: 'derivation', expression }]` or shorthand `derivation: '...'` - no `expressions` property exists.",
+  derivation:
+    "Use shorthand `derivation: '...'` or `logic: [{ type: 'derivation', expression: '...' }]`. Derivations are defined on the target field itself.",
+  targetField:
+    "The `targetField` property has been removed. Define derivations directly on the target field using `derivation: '...'` or `logic: [{ type: 'derivation', expression: '...' }]`.",
   value: 'Hidden fields REQUIRE a `value` property. Add: `value: "your-value-here"`',
   validators: 'Hidden fields do NOT support validators. Remove the `validators` property.',
   required: 'Hidden fields do NOT support `required`. Remove it.',

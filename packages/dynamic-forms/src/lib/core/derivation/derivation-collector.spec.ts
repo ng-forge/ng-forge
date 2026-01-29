@@ -29,8 +29,7 @@ describe('derivation-collector', () => {
         const collection = collectDerivations(fields);
 
         expect(collection.entries.length).toBe(1);
-        expect(collection.entries[0].sourceFieldKey).toBe('total');
-        expect(collection.entries[0].targetFieldKey).toBe('total');
+        expect(collection.entries[0].fieldKey).toBe('total');
         expect(collection.entries[0].expression).toBe('formValue.quantity * formValue.unitPrice');
         expect(collection.entries[0].isShorthand).toBe(true);
         expect(collection.entries[0].trigger).toBe('onChange');
@@ -54,15 +53,14 @@ describe('derivation-collector', () => {
     });
 
     describe('logic array derivations', () => {
-      it('should collect derivation from logic array', () => {
+      it('should collect derivation from logic array (self-targeting)', () => {
         const fields: FieldDef<unknown>[] = [
           {
-            key: 'country',
+            key: 'phonePrefix',
             type: 'text',
             logic: [
               {
                 type: 'derivation',
-                targetField: 'phonePrefix',
                 expression: 'formValue.country === "USA" ? "+1" : "+44"',
               },
             ],
@@ -72,21 +70,19 @@ describe('derivation-collector', () => {
         const collection = collectDerivations(fields);
 
         expect(collection.entries.length).toBe(1);
-        expect(collection.entries[0].sourceFieldKey).toBe('country');
-        expect(collection.entries[0].targetFieldKey).toBe('phonePrefix');
+        expect(collection.entries[0].fieldKey).toBe('phonePrefix');
         expect(collection.entries[0].isShorthand).toBe(false);
       });
 
       it('should collect derivation with static value', () => {
         const fields: FieldDef<unknown>[] = [
           {
-            key: 'premium',
-            type: 'checkbox',
+            key: 'discount',
+            type: 'number',
             logic: [
               {
                 type: 'derivation',
-                targetField: 'discount',
-                condition: { type: 'fieldValue', operator: 'equals', value: true },
+                condition: { type: 'fieldValue', fieldPath: 'premium', operator: 'equals', value: true },
                 value: 20,
               },
             ],
@@ -102,12 +98,11 @@ describe('derivation-collector', () => {
       it('should collect derivation with function name', () => {
         const fields: FieldDef<unknown>[] = [
           {
-            key: 'country',
+            key: 'currency',
             type: 'text',
             logic: [
               {
                 type: 'derivation',
-                targetField: 'currency',
                 functionName: 'getCurrencyForCountry',
               },
             ],
@@ -120,17 +115,17 @@ describe('derivation-collector', () => {
         expect(collection.entries[0].dependsOn).toContain('*'); // Functions assume full form access
       });
 
-      it('should collect derivation with onBlur trigger', () => {
+      it('should collect derivation with debounced trigger', () => {
         const fields: FieldDef<unknown>[] = [
           {
-            key: 'zipCode',
+            key: 'city',
             type: 'text',
             logic: [
               {
                 type: 'derivation',
-                targetField: 'city',
                 expression: 'lookupCityFromZip(formValue.zipCode)',
-                trigger: 'onBlur',
+                trigger: 'debounced',
+                debounceMs: 500,
               },
             ],
           } as TextFieldDef,
@@ -138,20 +133,20 @@ describe('derivation-collector', () => {
 
         const collection = collectDerivations(fields);
 
-        expect(collection.entries[0].trigger).toBe('onBlur');
+        expect(collection.entries[0].trigger).toBe('debounced');
+        expect(collection.entries[0].debounceMs).toBe(500);
       });
 
       it('should ignore non-derivation logic entries', () => {
         const fields: FieldDef<unknown>[] = [
           {
-            key: 'email',
+            key: 'displayEmail',
             type: 'text',
             logic: [
               { type: 'hidden', condition: false },
               { type: 'readonly', condition: true },
               {
                 type: 'derivation',
-                targetField: 'displayEmail',
                 expression: 'formValue.email.toLowerCase()',
               },
               { type: 'disabled', condition: false },
@@ -162,7 +157,7 @@ describe('derivation-collector', () => {
         const collection = collectDerivations(fields);
 
         expect(collection.entries.length).toBe(1);
-        expect(collection.entries[0].targetFieldKey).toBe('displayEmail');
+        expect(collection.entries[0].fieldKey).toBe('displayEmail');
       });
     });
 
@@ -189,10 +184,10 @@ describe('derivation-collector', () => {
         const collection = collectDerivations(fields);
 
         expect(collection.entries.length).toBe(1);
-        expect(collection.entries[0].sourceFieldKey).toBe('fullAddress');
+        expect(collection.entries[0].fieldKey).toBe('fullAddress');
       });
 
-      it('should collect derivations from array fields', () => {
+      it('should collect derivations from array fields with array path', () => {
         const fields: FieldDef<unknown>[] = [
           {
             key: 'items',
@@ -218,22 +213,22 @@ describe('derivation-collector', () => {
         const collection = collectDerivations(fields);
 
         expect(collection.entries.length).toBe(1);
-        expect(collection.entries[0].sourceFieldKey).toBe('lineTotal');
+        // Array derivations get their path prefixed with the array path
+        expect(collection.entries[0].fieldKey).toBe('items.$.lineTotal');
       });
 
-      it('should collect derivations with relative paths in array', () => {
+      it('should collect derivations with logic in array fields', () => {
         const fields: FieldDef<unknown>[] = [
           {
             key: 'items',
             type: 'array',
             fields: [
               {
-                key: 'quantity',
+                key: 'lineTotal',
                 type: 'number',
                 logic: [
                   {
                     type: 'derivation',
-                    targetField: '$.lineTotal',
                     expression: 'formValue.quantity * formValue.price',
                   },
                 ],
@@ -244,7 +239,7 @@ describe('derivation-collector', () => {
 
         const collection = collectDerivations(fields);
 
-        expect(collection.entries[0].targetFieldKey).toBe('items.$.lineTotal');
+        expect(collection.entries[0].fieldKey).toBe('items.$.lineTotal');
       });
     });
 
@@ -275,22 +270,30 @@ describe('derivation-collector', () => {
         const collection = collectDerivations(fields);
 
         expect(collection.entries.length).toBe(1);
-        expect(collection.entries[0].sourceFieldKey).toBe('valid');
+        expect(collection.entries[0].fieldKey).toBe('valid');
       });
 
-      it('should handle mixed shorthand and logic derivations', () => {
+      it('should handle mixed shorthand and logic derivations on same field', () => {
         const fields: FieldDef<unknown>[] = [
           {
             key: 'field1',
             type: 'text',
             derivation: 'formValue.other',
-            logic: [{ type: 'derivation', targetField: 'field2', value: 'static' }],
+            logic: [
+              {
+                type: 'derivation',
+                value: 'static',
+                condition: { type: 'fieldValue', fieldPath: 'flag', operator: 'equals', value: true },
+              },
+            ],
           } as TextFieldDef,
         ];
 
         const collection = collectDerivations(fields);
 
         expect(collection.entries.length).toBe(2);
+        // Both target the same field (field1) but with different conditions
+        expect(collection.entries.every((e) => e.fieldKey === 'field1')).toBe(true);
       });
     });
   });

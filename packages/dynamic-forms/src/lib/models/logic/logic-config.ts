@@ -188,6 +188,10 @@ export type DerivationTrigger = LogicTrigger;
 /**
  * Base configuration for value derivation logic.
  *
+ * All derivations target the field they are defined on (self-targeting).
+ * This simplifies configuration by removing the need for `targetField` -
+ * derivation logic is placed on the field that should receive the computed value.
+ *
  * @internal
  */
 interface BaseDerivationLogicConfig {
@@ -205,30 +209,17 @@ interface BaseDerivationLogicConfig {
    * @example
    * ```typescript
    * {
-   *   type: 'derivation',
-   *   debugName: 'Calculate line total',
-   *   targetField: '$.lineTotal',
-   *   expression: 'formValue.quantity * formValue.unitPrice'
+   *   key: 'lineTotal',
+   *   type: 'input',
+   *   logic: [{
+   *     type: 'derivation',
+   *     debugName: 'Calculate line total',
+   *     expression: 'formValue.quantity * formValue.unitPrice'
+   *   }]
    * }
    * ```
    */
   debugName?: string;
-
-  /**
-   * The field whose value will be modified.
-   *
-   * Can be:
-   * - Absolute path: 'fieldName' or 'nested.field.path'
-   * - Relative path for arrays: '$.siblingField' (same index as source)
-   *
-   * @example
-   * ```typescript
-   * targetField: 'phonePrefix'           // Absolute path
-   * targetField: 'address.country'       // Nested path
-   * targetField: '$.lineTotal'           // Relative path (array sibling)
-   * ```
-   */
-  targetField: string;
 
   /**
    * Condition that determines when this derivation applies.
@@ -258,7 +249,7 @@ interface BaseDerivationLogicConfig {
   condition?: ConditionalExpression | boolean;
 
   /**
-   * Static value to set on the target field.
+   * Static value to set on this field.
    *
    * Use when the derived value is a constant.
    * Mutually exclusive with `expression` and `functionName`.
@@ -277,6 +268,7 @@ interface BaseDerivationLogicConfig {
    * JavaScript expression to evaluate for the derived value.
    *
    * Has access to `formValue` object containing all form values.
+   * For array fields, `formValue` is scoped to the current array item.
    * Uses the same secure AST-based parser as other expressions.
    * Mutually exclusive with `value` and `functionName`.
    *
@@ -320,18 +312,22 @@ interface BaseDerivationLogicConfig {
    * ```typescript
    * // Only re-evaluate when country changes
    * {
-   *   type: 'derivation',
-   *   targetField: 'currency',
-   *   functionName: 'getCurrencyForCountry',
-   *   dependsOn: ['country']
+   *   key: 'currency',
+   *   logic: [{
+   *     type: 'derivation',
+   *     functionName: 'getCurrencyForCountry',
+   *     dependsOn: ['country']
+   *   }]
    * }
    *
    * // Override automatic detection for complex expressions
    * {
-   *   type: 'derivation',
-   *   targetField: 'total',
-   *   expression: 'calculateTotal(formValue)',
-   *   dependsOn: ['quantity', 'unitPrice', 'discount']
+   *   key: 'total',
+   *   logic: [{
+   *     type: 'derivation',
+   *     expression: 'calculateTotal(formValue)',
+   *     dependsOn: ['quantity', 'unitPrice', 'discount']
+   *   }]
    * }
    * ```
    */
@@ -378,53 +374,57 @@ interface DebouncedDerivationLogicConfig extends BaseDerivationLogicConfig {
  * Configuration for value derivation logic.
  *
  * Enables programmatic value derivation based on conditions.
- * When the condition is met, the target field's value is set
- * using a static value, expression, or custom function.
+ * Derivations are self-targeting: the logic is placed on the field
+ * that should receive the computed value.
  *
  * @example
  * ```typescript
  * // Set phone prefix based on country selection
  * {
- *   type: 'derivation',
- *   targetField: 'phonePrefix',
- *   value: '+1',
- *   condition: {
- *     type: 'fieldValue',
- *     fieldPath: 'country',
- *     operator: 'equals',
- *     value: 'USA'
- *   }
+ *   key: 'phonePrefix',
+ *   logic: [{
+ *     type: 'derivation',
+ *     value: '+1',
+ *     condition: {
+ *       type: 'fieldValue',
+ *       fieldPath: 'country',
+ *       operator: 'equals',
+ *       value: 'USA'
+ *     }
+ *   }]
  * }
  *
  * // Compute total from quantity and price
  * {
- *   type: 'derivation',
- *   targetField: 'total',
- *   expression: 'formValue.quantity * formValue.unitPrice'
+ *   key: 'total',
+ *   derivation: 'formValue.quantity * formValue.unitPrice'
  * }
  *
  * // Use custom function for complex logic
  * {
- *   type: 'derivation',
- *   targetField: 'currency',
- *   functionName: 'getCurrencyForCountry'
+ *   key: 'currency',
+ *   logic: [{
+ *     type: 'derivation',
+ *     functionName: 'getCurrencyForCountry'
+ *   }]
  * }
  *
  * // Self-transform with debounced trigger
  * // (applies after user stops typing)
  * {
- *   type: 'derivation',
- *   targetField: 'email',
- *   expression: 'formValue.email.toLowerCase()',
- *   trigger: 'debounced',
- *   debounceMs: 500
+ *   key: 'email',
+ *   logic: [{
+ *     type: 'derivation',
+ *     expression: 'formValue.email.toLowerCase()',
+ *     trigger: 'debounced',
+ *     debounceMs: 500
+ *   }]
  * }
  *
- * // Relative path for array items
+ * // Array item derivation (formValue is scoped to current item)
  * {
- *   type: 'derivation',
- *   targetField: '$.lineTotal',  // Same array index as source field
- *   expression: 'formValue.quantity * formValue.unitPrice'
+ *   key: 'lineTotal',  // Inside array field
+ *   derivation: 'formValue.quantity * formValue.unitPrice'
  * }
  * ```
  *

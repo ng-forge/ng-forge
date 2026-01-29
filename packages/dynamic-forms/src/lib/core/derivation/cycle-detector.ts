@@ -79,10 +79,14 @@ export function detectCycles(collection: DerivationCollection): CycleDetectionRe
 }
 
 /**
- * Detects bidirectional derivation pairs (A→B and B→A).
+ * Detects bidirectional derivation pairs (A↔B patterns).
  *
  * These patterns are allowed because they stabilize via equality checks.
  * Example: USD/EUR conversion where both fields derive from each other.
+ *
+ * A bidirectional pair exists when:
+ * - Field A derives its value from field B (A depends on B)
+ * - Field B derives its value from field A (B depends on A)
  *
  * ## Floating-Point Precision Note
  *
@@ -99,39 +103,37 @@ export function detectCycles(collection: DerivationCollection): CycleDetectionRe
  *
  * @example
  * ```typescript
- * // Safe - uses rounding to avoid oscillation
- * logic: [
- *   {
- *     type: 'derivation',
- *     targetField: 'eur',
- *     expression: 'Math.round(formValue.usd * 0.92 * 100) / 100'
- *   }
- * ]
+ * // Bidirectional currency conversion
+ * { key: 'amountUSD', derivation: 'formValue.amountEUR * 1.1' }
+ * { key: 'amountEUR', derivation: 'formValue.amountUSD / 1.1' }
  * ```
  *
  * @internal
  */
 function detectBidirectionalPairs(collection: DerivationCollection): Set<string> {
   const pairs = new Set<string>();
-  const edgeSet = new Set<string>();
 
-  // Build set of all source→target edges
+  // Build a map of fieldKey -> dependencies (other fields this derivation reads from)
+  const dependencyMap = new Map<string, Set<string>>();
   for (const entry of collection.entries) {
-    if (entry.sourceFieldKey !== entry.targetFieldKey) {
-      edgeSet.add(`${entry.sourceFieldKey}→${entry.targetFieldKey}`);
+    const deps = dependencyMap.get(entry.fieldKey) ?? new Set<string>();
+    for (const dep of entry.dependsOn) {
+      if (dep !== '*' && dep !== entry.fieldKey) {
+        deps.add(dep);
+      }
     }
+    dependencyMap.set(entry.fieldKey, deps);
   }
 
-  // Find bidirectional pairs (A→B exists AND B→A exists)
-  for (const entry of collection.entries) {
-    const reverseEdge = `${entry.targetFieldKey}→${entry.sourceFieldKey}`;
-    if (edgeSet.has(reverseEdge)) {
-      // Normalize pair key (alphabetically sorted)
-      const pairKey =
-        entry.sourceFieldKey < entry.targetFieldKey
-          ? `${entry.sourceFieldKey}↔${entry.targetFieldKey}`
-          : `${entry.targetFieldKey}↔${entry.sourceFieldKey}`;
-      pairs.add(pairKey);
+  // Find bidirectional pairs: A depends on B AND B depends on A
+  for (const [fieldA, depsA] of dependencyMap) {
+    for (const fieldB of depsA) {
+      const depsB = dependencyMap.get(fieldB);
+      if (depsB?.has(fieldA)) {
+        // Normalize pair key (alphabetically sorted)
+        const pairKey = fieldA < fieldB ? `${fieldA}↔${fieldB}` : `${fieldB}↔${fieldA}`;
+        pairs.add(pairKey);
+      }
     }
   }
 
@@ -165,8 +167,9 @@ function isBidirectionalCycle(cyclePath: string[], bidirectionalPairs: Set<strin
  * Creates nodes for each field involved in derivations and
  * edges representing the derivation dependencies.
  *
- * Edge direction: sourceField -> targetField
- * (source triggers derivation that modifies target)
+ * Edge direction is based on dependencies:
+ * - If field A's derivation depends on field B, then B -> A (changing B triggers A)
+ * - A cycle exists if: A -> B -> C -> A (circular dependency chain)
  *
  * @internal
  */
@@ -188,35 +191,20 @@ function buildDependencyGraph(collection: DerivationCollection): Map<string, Gra
   };
 
   for (const entry of collection.entries) {
-    const sourceNode = ensureNode(entry.sourceFieldKey);
-    const targetNode = ensureNode(entry.targetFieldKey);
+    const fieldNode = ensureNode(entry.fieldKey);
 
-    // For cycle detection, we care about the data flow:
-    // When sourceField changes -> targetField gets updated
-    // So the edge is: sourceField -> targetField
-    //
-    // A cycle exists if: A -> B -> A
-    // (A triggers B, B triggers A)
-
-    // For self-referential derivations (where source === target), don't add source->target edge.
-    // This includes:
-    // 1. Shorthand derivations (field.derivation = 'expression')
-    // 2. Self-transform derivations (logic: [{ targetField: 'self', ... }])
-    // These are legitimate patterns for computed fields and value transformations,
-    // not actual cycles. The real dependencies come from the expression (tracked in dependsOn).
-    const isSelfReferential = entry.sourceFieldKey === entry.targetFieldKey;
-    if (!isSelfReferential) {
-      // The target depends on the source for its value
-      targetNode.dependsOn.add(entry.sourceFieldKey);
-      sourceNode.dependedOnBy.add(entry.targetFieldKey);
-    }
-
-    // Also track dependencies from the derivation expression/condition
+    // Track dependencies from the derivation expression/condition.
+    // For cycle detection, edges go from dependency -> field:
+    // If field A depends on field B, then when B changes, A gets updated.
+    // A cycle exists when there's a circular chain of such dependencies.
     for (const dep of entry.dependsOn) {
-      if (dep !== '*' && dep !== entry.targetFieldKey) {
+      // Skip wildcard dependencies and self-references
+      if (dep !== '*' && dep !== entry.fieldKey) {
         const depNode = ensureNode(dep);
-        targetNode.dependsOn.add(dep);
-        depNode.dependedOnBy.add(entry.targetFieldKey);
+        // The field depends on 'dep'
+        fieldNode.dependsOn.add(dep);
+        // 'dep' is depended on by the field
+        depNode.dependedOnBy.add(entry.fieldKey);
       }
     }
   }

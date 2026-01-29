@@ -15,10 +15,17 @@ const config = {
         { label: 'Japan', value: 'JP' },
       ],
       col: 6,
+    },
+    {
+      key: 'phonePrefix',
+      type: 'input',
+      label: 'Phone Prefix',
+      value: '',
+      readonly: true,
+      col: 6,
       logic: [
         {
           type: 'derivation',
-          targetField: 'phonePrefix',
           value: '+1',
           condition: {
             type: 'fieldValue',
@@ -29,7 +36,6 @@ const config = {
         },
         {
           type: 'derivation',
-          targetField: 'phonePrefix',
           value: '+44',
           condition: {
             type: 'fieldValue',
@@ -40,7 +46,6 @@ const config = {
         },
         {
           type: 'derivation',
-          targetField: 'phonePrefix',
           value: '+49',
           condition: {
             type: 'fieldValue',
@@ -51,52 +56,7 @@ const config = {
         },
         {
           type: 'derivation',
-          targetField: 'phonePrefix',
           value: '+81',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'country',
-            operator: 'equals',
-            value: 'JP',
-          },
-        },
-        {
-          type: 'derivation',
-          targetField: 'currency',
-          value: 'USD',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'country',
-            operator: 'equals',
-            value: 'US',
-          },
-        },
-        {
-          type: 'derivation',
-          targetField: 'currency',
-          value: 'GBP',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'country',
-            operator: 'equals',
-            value: 'UK',
-          },
-        },
-        {
-          type: 'derivation',
-          targetField: 'currency',
-          value: 'EUR',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'country',
-            operator: 'equals',
-            value: 'DE',
-          },
-        },
-        {
-          type: 'derivation',
-          targetField: 'currency',
-          value: 'JPY',
           condition: {
             type: 'fieldValue',
             fieldPath: 'country',
@@ -107,20 +67,54 @@ const config = {
       ],
     },
     {
-      key: 'phonePrefix',
-      type: 'input',
-      label: 'Phone Prefix',
-      value: '',
-      readonly: true,
-      col: 6,
-    },
-    {
       key: 'currency',
       type: 'input',
       label: 'Currency',
       value: '',
       readonly: true,
       col: 6,
+      logic: [
+        {
+          type: 'derivation',
+          value: 'USD',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'country',
+            operator: 'equals',
+            value: 'US',
+          },
+        },
+        {
+          type: 'derivation',
+          value: 'GBP',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'country',
+            operator: 'equals',
+            value: 'UK',
+          },
+        },
+        {
+          type: 'derivation',
+          value: 'EUR',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'country',
+            operator: 'equals',
+            value: 'DE',
+          },
+        },
+        {
+          type: 'derivation',
+          value: 'JPY',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'country',
+            operator: 'equals',
+            value: 'JP',
+          },
+        },
+      ],
     },
     {
       key: 'submit',

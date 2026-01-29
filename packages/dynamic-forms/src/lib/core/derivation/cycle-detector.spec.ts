@@ -5,11 +5,18 @@ import { DerivationCollection, DerivationEntry, createEmptyDerivationCollection 
 describe('cycle-detector', () => {
   /**
    * Helper to create a derivation entry for testing.
+   * In the new self-targeting model:
+   * - fieldKey: the field that owns the derivation (target of the derivation)
+   * - dependsOn: fields that this derivation depends on
+   *
+   * Legacy parameters (for test compatibility):
+   * - fieldKey: what was previously called "target" (the field receiving the value)
+   * - dependency: what was previously "source" becomes the main dependency
    */
-  function createEntry(source: string, target: string, dependsOn: string[] = []): DerivationEntry {
+  function createEntry(fieldKey: string, dependency?: string, extraDependsOn: string[] = []): DerivationEntry {
+    const dependsOn = dependency ? [dependency, ...extraDependsOn] : extraDependsOn;
     return {
-      sourceFieldKey: source,
-      targetFieldKey: target,
+      fieldKey,
       dependsOn,
       condition: true,
       trigger: 'onChange',
@@ -38,15 +45,17 @@ describe('cycle-detector', () => {
       });
 
       it('should return no cycle for single derivation', () => {
-        const collection = createCollection([createEntry('country', 'phonePrefix')]);
+        // phonePrefix depends on country (country -> phonePrefix)
+        const collection = createCollection([createEntry('phonePrefix', 'country')]);
         const result = detectCycles(collection);
 
         expect(result.hasCycle).toBe(false);
       });
 
       it('should return no cycle for linear chain', () => {
-        // A -> B -> C (no cycle)
-        const collection = createCollection([createEntry('a', 'b'), createEntry('b', 'c'), createEntry('c', 'd')]);
+        // A -> B -> C -> D (no cycle)
+        // In self-targeting: B depends on A, C depends on B, D depends on C
+        const collection = createCollection([createEntry('b', 'a'), createEntry('c', 'b'), createEntry('d', 'c')]);
         const result = detectCycles(collection);
 
         expect(result.hasCycle).toBe(false);
@@ -54,16 +63,17 @@ describe('cycle-detector', () => {
 
       it('should return no cycle for diamond pattern', () => {
         // A -> B, A -> C, B -> D, C -> D (no cycle)
-        const collection = createCollection([createEntry('a', 'b'), createEntry('a', 'c'), createEntry('b', 'd'), createEntry('c', 'd')]);
+        // In self-targeting: B depends on A, C depends on A, D depends on B and C
+        const collection = createCollection([createEntry('b', 'a'), createEntry('c', 'a'), createEntry('d', 'b', ['c'])]);
         const result = detectCycles(collection);
 
         expect(result.hasCycle).toBe(false);
       });
 
       it('should return no cycle for multiple independent chains', () => {
-        // Chain 1: A -> B
-        // Chain 2: C -> D
-        const collection = createCollection([createEntry('a', 'b'), createEntry('c', 'd')]);
+        // Chain 1: A -> B (B depends on A)
+        // Chain 2: C -> D (D depends on C)
+        const collection = createCollection([createEntry('b', 'a'), createEntry('d', 'c')]);
         const result = detectCycles(collection);
 
         expect(result.hasCycle).toBe(false);
@@ -76,6 +86,7 @@ describe('cycle-detector', () => {
         // These are not cycles because:
         // 1. The value equality check prevents re-triggering when value doesn't change
         // 2. Self-transforms are typically idempotent
+        // In self-targeting: A depends on itself (self-transform)
         const collection = createCollection([createEntry('a', 'a')]);
         const result = detectCycles(collection);
 
@@ -83,8 +94,9 @@ describe('cycle-detector', () => {
       });
 
       it('should allow bidirectional two-node patterns (stabilizing cycles)', () => {
-        // A -> B -> A is a bidirectional sync pattern
+        // A <-> B is a bidirectional sync pattern
         // These stabilize via equality checks at runtime (e.g., USD/EUR conversion)
+        // In self-targeting: A depends on B, B depends on A
         const collection = createCollection([createEntry('a', 'b'), createEntry('b', 'a')]);
         const result = detectCycles(collection);
 
@@ -93,8 +105,10 @@ describe('cycle-detector', () => {
       });
 
       it('should detect three-node cycle', () => {
-        // A -> B -> C -> A
-        const collection = createCollection([createEntry('a', 'b'), createEntry('b', 'c'), createEntry('c', 'a')]);
+        // A -> B -> C -> A (cycle!)
+        // In self-targeting: B depends on A, C depends on B, A depends on C
+        // This creates: A -> B -> C -> A
+        const collection = createCollection([createEntry('b', 'a'), createEntry('c', 'b'), createEntry('a', 'c')]);
         const result = detectCycles(collection);
 
         expect(result.hasCycle).toBe(true);
@@ -102,9 +116,10 @@ describe('cycle-detector', () => {
       });
 
       it('should detect cycle with additional non-cyclic nodes', () => {
-        // Linear: X -> Y
-        // Cycle: A -> B -> C -> A
-        const collection = createCollection([createEntry('x', 'y'), createEntry('a', 'b'), createEntry('b', 'c'), createEntry('c', 'a')]);
+        // Linear: X -> Y (no cycle)
+        // Cycle: A -> B -> C -> A (cycle!)
+        // In self-targeting: Y depends on X (linear), B depends on A, C depends on B, A depends on C (cycle)
+        const collection = createCollection([createEntry('y', 'x'), createEntry('b', 'a'), createEntry('c', 'b'), createEntry('a', 'c')]);
         const result = detectCycles(collection);
 
         expect(result.hasCycle).toBe(true);
@@ -112,10 +127,11 @@ describe('cycle-detector', () => {
 
       it('should include error message with cycle path for non-bidirectional cycles', () => {
         // 3-node cycle is not a bidirectional pattern, so should be detected
+        // In self-targeting: field2 depends on field1, field3 depends on field2, field1 depends on field3
         const collection = createCollection([
-          createEntry('field1', 'field2'),
-          createEntry('field2', 'field3'),
-          createEntry('field3', 'field1'),
+          createEntry('field2', 'field1'),
+          createEntry('field3', 'field2'),
+          createEntry('field1', 'field3'),
         ]);
         const result = detectCycles(collection);
 

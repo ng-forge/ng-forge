@@ -44,23 +44,23 @@ export function topologicalSort(entries: DerivationEntry[]): DerivationEntry[] {
     inDegree.set(entry, 0);
   }
 
-  // Pre-build index: target field -> entries that produce it
+  // Pre-build index: field key -> entries that produce/target it
   // This enables O(1) lookup instead of O(n) scanning
-  const producersByTarget = new Map<string, DerivationEntry[]>();
+  const derivationsByField = new Map<string, DerivationEntry[]>();
   for (const entry of entries) {
-    // Index by exact target field
-    const producers = producersByTarget.get(entry.targetFieldKey) ?? [];
-    producers.push(entry);
-    producersByTarget.set(entry.targetFieldKey, producers);
+    // Index by exact field key
+    const fieldEntries = derivationsByField.get(entry.fieldKey) ?? [];
+    fieldEntries.push(entry);
+    derivationsByField.set(entry.fieldKey, fieldEntries);
 
     // Also index array field relative paths for array derivations
     // If entry targets 'items.$.lineTotal', index under 'lineTotal' too
-    if (entry.targetFieldKey.includes('.$.')) {
-      const relativePath = entry.targetFieldKey.split('.$.')[1];
+    if (entry.fieldKey.includes('.$.')) {
+      const relativePath = entry.fieldKey.split('.$.')[1];
       if (relativePath) {
-        const relativeProducers = producersByTarget.get(relativePath) ?? [];
-        relativeProducers.push(entry);
-        producersByTarget.set(relativePath, relativeProducers);
+        const relativeEntries = derivationsByField.get(relativePath) ?? [];
+        relativeEntries.push(entry);
+        derivationsByField.set(relativePath, relativeEntries);
       }
     }
   }
@@ -74,14 +74,15 @@ export function topologicalSort(entries: DerivationEntry[]): DerivationEntry[] {
   }
 
   // Build edges using pre-computed index
-  // For each entry B, find all entries A whose target is in B's dependencies
+  // For each entry B, find all entries A whose field is in B's dependencies
+  // If B depends on field X, and A produces X, then A must run before B
   for (const entryB of entries) {
     for (const dep of entryB.dependsOn) {
       // Skip wildcards here - handled separately below
       if (dep === '*') continue;
 
-      // O(1) lookup: find all producers of this dependency
-      const producers = producersByTarget.get(dep);
+      // O(1) lookup: find all derivations that produce this dependency
+      const producers = derivationsByField.get(dep);
       if (producers) {
         for (const entryA of producers) {
           const entryAEdges = graph.get(entryA);

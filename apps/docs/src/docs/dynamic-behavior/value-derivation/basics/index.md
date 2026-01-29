@@ -2,18 +2,30 @@ Automatically compute and set field values based on other form values. Derivatio
 
 ## Quick Start
 
-Set a field's value based on another field:
+Derivations are defined ON the field that receives the computed value (self-targeting).
+
+### Shorthand Syntax (Preferred)
 
 ```typescript
 {
   key: 'total',
   type: 'input',
-  value: 0,
+  label: 'Total',
+  readonly: true,
+  derivation: 'formValue.quantity * formValue.unitPrice',
+}
+```
+
+### Logic Block Syntax
+
+```typescript
+{
+  key: 'total',
+  type: 'input',
   label: 'Total',
   readonly: true,
   logic: [{
     type: 'derivation',
-    targetField: 'total',
     expression: 'formValue.quantity * formValue.unitPrice',
   }],
 }
@@ -33,11 +45,7 @@ Use JavaScript expressions with access to `formValue`:
   type: 'input',
   label: 'Full Name',
   readonly: true,
-  logic: [{
-    type: 'derivation',
-    targetField: 'fullName',
-    expression: 'formValue.firstName + " " + formValue.lastName',
-  }],
+  derivation: '(formValue.firstName || "") + " " + (formValue.lastName || "")',
 }
 ```
 
@@ -57,7 +65,6 @@ Set a constant value when a condition is met:
   readonly: true,
   logic: [{
     type: 'derivation',
-    targetField: 'phonePrefix',
     value: '+1',
     condition: {
       type: 'fieldValue',
@@ -84,10 +91,11 @@ fields: [
   {
     key: 'tax',
     type: 'input',
+    readonly: true,
     logic: [{
       type: 'derivation',
-      targetField: 'tax',
       functionName: 'calculateTax',
+      dependsOn: ['subtotal', 'state'],
     }],
   },
 ],
@@ -113,7 +121,6 @@ Use `trigger: 'debounced'` for self-transforming fields to avoid interrupting th
   label: 'Email',
   logic: [{
     type: 'derivation',
-    targetField: 'email',
     expression: 'formValue.email.toLowerCase()',
     trigger: 'debounced',
     debounceMs: 500, // optional, defaults to 500
@@ -136,7 +143,6 @@ Only apply derivations when conditions are met:
   logic: [
     {
       type: 'derivation',
-      targetField: 'currency',
       value: 'USD',
       condition: {
         type: 'fieldValue',
@@ -147,7 +153,6 @@ Only apply derivations when conditions are met:
     },
     {
       type: 'derivation',
-      targetField: 'currency',
       value: 'EUR',
       condition: {
         type: 'fieldValue',
@@ -160,7 +165,7 @@ Only apply derivations when conditions are met:
 }
 ```
 
-Multiple derivations targeting the same field are evaluated in order.
+Multiple derivations on the same field are evaluated in order.
 
 ## Dependencies
 
@@ -174,12 +179,8 @@ For expressions, dependencies are automatically extracted:
   type: 'input',
   label: 'Total',
   readonly: true,
-  logic: [{
-    type: 'derivation',
-    targetField: 'total',
-    expression: 'formValue.quantity * formValue.unitPrice',
-    // Automatically depends on: quantity, unitPrice
-  }],
+  derivation: 'formValue.quantity * formValue.unitPrice',
+  // Automatically depends on: quantity, unitPrice
 }
 ```
 
@@ -195,7 +196,6 @@ For custom functions, specify dependencies explicitly:
   readonly: true,
   logic: [{
     type: 'derivation',
-    targetField: 'discount',
     functionName: 'calculateDiscount',
     dependsOn: ['total', 'memberLevel'],
   }],
@@ -229,13 +229,7 @@ const orderForm = {
       value: 0,
       label: 'Subtotal',
       readonly: true,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'subtotal',
-          expression: 'formValue.quantity * formValue.unitPrice',
-        },
-      ],
+      derivation: 'formValue.quantity * formValue.unitPrice',
     },
     {
       key: 'tax',
@@ -243,13 +237,7 @@ const orderForm = {
       value: 0,
       label: 'Tax (10%)',
       readonly: true,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'tax',
-          expression: 'formValue.subtotal * 0.1',
-        },
-      ],
+      derivation: 'formValue.subtotal * 0.1',
     },
     {
       key: 'total',
@@ -257,13 +245,7 @@ const orderForm = {
       value: 0,
       label: 'Total',
       readonly: true,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'total',
-          expression: 'formValue.subtotal + formValue.tax',
-        },
-      ],
+      derivation: 'formValue.subtotal + formValue.tax',
     },
   ],
 } as const satisfies FormConfig;
@@ -271,7 +253,7 @@ const orderForm = {
 
 ## Array Field Derivations
 
-Derivations support relative paths with `$` for array item siblings:
+Inside arrays, `formValue` is scoped to the current array item:
 
 ```typescript
 {
@@ -290,25 +272,14 @@ Derivations support relative paths with `$` for array item siblings:
           label: 'Total',
           value: 0,
           readonly: true,
-          logic: [{
-            type: 'derivation',
-            targetField: '$.lineTotal', // Relative to current array item
-            expression: 'formValue.quantity * formValue.unitPrice',
-          }],
+          // formValue is scoped to the current array item
+          derivation: 'formValue.quantity * formValue.unitPrice',
         },
       ],
     },
   ],
 }
 ```
-
-### Path Syntax
-
-| Path                | Description                          |
-| ------------------- | ------------------------------------ |
-| `$.fieldName`       | Sibling field in the same array item |
-| `lineItems.0.total` | Absolute path to specific array item |
-| `grandTotal`        | Top-level field outside the array    |
 
 ### Accessing Root Form Value
 
@@ -320,13 +291,9 @@ Inside array items, `formValue` refers to the current array item. Use `rootFormV
   type: 'input',
   label: 'Total',
   readonly: true,
-  logic: [{
-    type: 'derivation',
-    targetField: '$.lineTotal',
-    // formValue = current array item { quantity, unitPrice }
-    // rootFormValue = entire form { lineItems, discount, ... }
-    expression: 'formValue.quantity * formValue.unitPrice * (1 - rootFormValue.discount / 100)',
-  }],
+  // formValue = current array item { quantity, unitPrice }
+  // rootFormValue = entire form { lineItems, discount, ... }
+  derivation: 'formValue.quantity * formValue.unitPrice * (1 - rootFormValue.discount / 100)',
 }
 ```
 
@@ -367,7 +334,6 @@ Add names to derivations for easier identification in logs:
   logic: [{
     type: 'derivation',
     debugName: 'Calculate line total',
-    targetField: '$.lineTotal',
     expression: 'formValue.quantity * formValue.unitPrice',
   }],
 }
@@ -378,8 +344,8 @@ Add names to derivations for easier identification in logs:
 ```
 Derivation - Starting cycle (onChange) with 5 derivation(s)
 Derivation - Iteration 1
-Derivation - Applied "Calculate line total" { source: 'quantity', target: '$.lineTotal', newValue: 150 }
-Derivation - Skipped: country -> phonePrefix (condition not met)
+Derivation - Applied "Calculate line total" { field: 'lineTotal', newValue: 150 }
+Derivation - Skipped: phonePrefix (condition not met)
 Derivation - Cycle complete (onChange) { applied: 1, skipped: 4, errors: 0, iterations: 1 }
 ```
 
@@ -390,26 +356,18 @@ Create two-way bindings between fields:
 ```typescript
 // Celsius to Fahrenheit
 {
-  key: 'celsius',
+  key: 'fahrenheit',
   type: 'input',
-  value: 0,
-  logic: [{
-    type: 'derivation',
-    targetField: 'fahrenheit',
-    expression: 'formValue.celsius * 9 / 5 + 32',
-  }],
+  value: 32,
+  derivation: 'formValue.celsius * 9 / 5 + 32',
 }
 
 // Fahrenheit to Celsius
 {
-  key: 'fahrenheit',
+  key: 'celsius',
   type: 'input',
-  value: 32,
-  logic: [{
-    type: 'derivation',
-    targetField: 'celsius',
-    expression: '(formValue.fahrenheit - 32) * 5 / 9',
-  }],
+  value: 0,
+  derivation: '(formValue.fahrenheit - 32) * 5 / 9',
 }
 ```
 
@@ -429,7 +387,7 @@ Bidirectional derivations stabilize when the computed value equals the current v
 1. **Rounding in expressions:**
 
    ```typescript
-   expression: 'Math.round(formValue.usd * exchangeRate * 100) / 100';
+   derivation: 'Math.round(formValue.usd * exchangeRate * 100) / 100';
    ```
 
 2. **Using integers:** Store cents instead of dollars
@@ -469,9 +427,6 @@ interface DerivationLogicConfig {
 
   /** Optional name for debugging */
   debugName?: string;
-
-  /** Target field to modify */
-  targetField: string;
 
   /** When to evaluate: 'onChange' (default) or 'debounced' */
   trigger?: 'onChange' | 'debounced';

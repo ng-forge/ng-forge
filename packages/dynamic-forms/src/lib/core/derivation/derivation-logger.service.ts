@@ -72,13 +72,12 @@ class ActiveDerivationLogger implements DerivationLogger {
   evaluation(entry: DerivationLogEntry): void {
     if (!shouldLog(this.config, 'verbose')) return;
 
-    const name = entry.debugName ? `"${entry.debugName}"` : `${entry.sourceFieldKey} -> ${entry.targetFieldKey}`;
+    const name = entry.debugName ? `"${entry.debugName}"` : entry.fieldKey;
 
     switch (entry.result) {
       case 'applied':
         this.logger.debug(`Derivation - Applied ${name}`, {
-          source: entry.sourceFieldKey,
-          target: entry.targetFieldKey,
+          field: entry.fieldKey,
           previousValue: entry.previousValue,
           newValue: entry.newValue,
           ...(entry.durationMs !== undefined && { durationMs: entry.durationMs }),
@@ -87,16 +86,14 @@ class ActiveDerivationLogger implements DerivationLogger {
 
       case 'skipped':
         this.logger.debug(`Derivation - Skipped ${name} (${this.formatSkipReason(entry.skipReason)})`, {
-          source: entry.sourceFieldKey,
-          target: entry.targetFieldKey,
+          field: entry.fieldKey,
           reason: entry.skipReason,
         });
         break;
 
       case 'error':
         this.logger.debug(`Derivation - Error ${name}`, {
-          source: entry.sourceFieldKey,
-          target: entry.targetFieldKey,
+          field: entry.fieldKey,
           error: entry.error,
         });
         break;

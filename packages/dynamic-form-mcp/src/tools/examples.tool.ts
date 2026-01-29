@@ -1003,28 +1003,32 @@ These will cause validation errors:
   // ========== STANDARD PATTERNS ==========
   derivation: {
     description: 'Computed field values from other fields',
-    minimal: `{
+    minimal: `// Shorthand (preferred)
+{
   key: 'fullName',
   type: 'input',
   label: 'Full Name',
   readonly: true,
-  logic: [{
-    type: 'derivation',
-    targetField: 'fullName',
-    expression: '(formValue.firstName || "") + " " + (formValue.lastName || "")'
-  }]
+  derivation: '(formValue.firstName || "") + " " + (formValue.lastName || "")'
 }`,
 
-    brief: `// Computed field
+    brief: `// Shorthand derivation (preferred for simple expressions)
 {
   key: 'total',
   type: 'input',
   label: 'Total',
-  readonly: true,  // Usually readonly
+  readonly: true,
+  derivation: 'formValue.quantity * formValue.price'
+}
+
+// Logic block (for conditions, debounce, custom functions)
+{
+  key: 'discount',
+  type: 'input',
+  readonly: true,
   logic: [{
     type: 'derivation',
-    targetField: 'total',  // Points to THIS field
-    expression: 'formValue.quantity * formValue.price'
+    expression: 'formValue.isPremium ? 0.2 : 0'
   }]
 }
 
@@ -1032,17 +1036,31 @@ These will cause validation errors:
 
     full: `# Value Derivation (Computed Fields)
 
+Derivations are always defined ON the field that receives the computed value.
+
+## Shorthand Syntax (Preferred)
+
 \`\`\`typescript
-// Derivation goes on the TARGET field (the one being computed)
 {
   key: 'fullName',
   type: 'input',
   label: 'Full Name',
   readonly: true,
+  derivation: '(formValue.firstName || "") + " " + (formValue.lastName || "")'
+}
+\`\`\`
+
+## Logic Block Syntax (For conditions, debounce, etc.)
+
+\`\`\`typescript
+{
+  key: 'total',
+  type: 'input',
+  label: 'Total',
+  readonly: true,
   logic: [{
     type: 'derivation',
-    targetField: 'fullName',   // Points to this field's own key
-    expression: '(formValue.firstName || "") + " " + (formValue.lastName || "")'
+    expression: 'formValue.quantity * formValue.unitPrice'
   }]
 }
 \`\`\`
@@ -1146,21 +1164,34 @@ Derivations automatically compute field values based on other form values.
 
 ## How It Works
 
-1. **Derivation goes on the TARGET field** (the field that receives the computed value)
-2. **targetField points to itself** (the field's own key)
-3. **Expression uses \`formValue.\` prefix** to access other field values
+1. **Derivation is defined ON the field** that receives the computed value (self-targeting)
+2. **Expression uses \`formValue.\` prefix** to access other field values
+3. **Shorthand syntax** is preferred for simple expressions
+
+## Shorthand Syntax (Preferred)
 
 \`\`\`typescript
 {
-  key: 'total',           // This field will be computed
+  key: 'total',
   type: 'input',
   label: 'Total',
-  readonly: true,         // Usually make derived fields readonly
+  readonly: true,
+  derivation: 'formValue.quantity * formValue.price'
+}
+\`\`\`
+
+## Logic Block Syntax (For advanced features)
+
+\`\`\`typescript
+{
+  key: 'total',
+  type: 'input',
+  label: 'Total',
+  readonly: true,
   logic: [{
     type: 'derivation',
-    targetField: 'total', // Points to itself (this field's key)
-    expression: 'formValue.quantity * formValue.price',
-  }],
+    expression: 'formValue.quantity * formValue.price'
+  }]
 }
 \`\`\`
 
@@ -1175,35 +1206,35 @@ Derivations automatically compute field values based on other form values.
 
 ### Simple Math
 \`\`\`typescript
-expression: 'formValue.quantity * formValue.unitPrice'
+derivation: 'formValue.quantity * formValue.unitPrice'
 \`\`\`
 
 ### String Concatenation
 \`\`\`typescript
-expression: '(formValue.firstName || "") + " " + (formValue.lastName || "")'
+derivation: '(formValue.firstName || "") + " " + (formValue.lastName || "")'
 \`\`\`
 
 ### Conditional Value
 \`\`\`typescript
-expression: 'formValue.isPremium ? 0.2 : 0'
+derivation: 'formValue.isPremium ? 0.2 : 0'
 \`\`\`
 
 ### Array Operations
 \`\`\`typescript
-expression: '(formValue.items || []).reduce((sum, i) => sum + i.price, 0)'
-expression: '(formValue.contacts?.length || 0) + " contacts"'
+derivation: '(formValue.items || []).reduce((sum, i) => sum + i.price, 0)'
+derivation: '(formValue.contacts?.length || 0) + " contacts"'
 \`\`\`
 
 ### Nested Access (Optional Chaining!)
 \`\`\`typescript
-expression: 'formValue.address?.city'
-expression: 'formValue.contacts?.[0]?.email'
-expression: 'formValue.billing?.address?.street ?? "No address"'
+derivation: 'formValue.address?.city'
+derivation: 'formValue.contacts?.[0]?.email'
+derivation: 'formValue.billing?.address?.street ?? "No address"'
 \`\`\`
 
 ### Complex Logic (IIFE)
 \`\`\`typescript
-expression: \`(() => {
+derivation: \`(() => {
   const years = formValue.yearsExperience || 0;
   if (years < 2) return 'Junior';
   if (years < 5) return 'Mid-Level';
@@ -1212,24 +1243,41 @@ expression: \`(() => {
 })()\`
 \`\`\`
 
+## Advanced Features (Logic Block)
+
+### Conditional Derivation
+\`\`\`typescript
+logic: [{
+  type: 'derivation',
+  value: 10,
+  condition: { type: 'fieldValue', fieldPath: 'memberType', operator: 'equals', value: 'premium' }
+}]
+\`\`\`
+
+### Debounced Self-Transform
+\`\`\`typescript
+logic: [{
+  type: 'derivation',
+  expression: 'formValue.email.toLowerCase()',
+  trigger: 'debounced'
+}]
+\`\`\`
+
+### Custom Function
+\`\`\`typescript
+logic: [{
+  type: 'derivation',
+  functionName: 'calculateAge',
+  dependsOn: ['dateOfBirth']
+}]
+\`\`\`
+
 ## Common Mistakes
-
-❌ Missing targetField:
-\`\`\`typescript
-logic: [{ type: 'derivation', expression: '...' }]  // Missing targetField!
-\`\`\`
-
-❌ Wrong field in targetField:
-\`\`\`typescript
-// Derivation on 'total' field
-{ key: 'total', logic: [{ type: 'derivation', targetField: 'price', expression: '...' }] }
-// Should be targetField: 'total' (itself)
-\`\`\`
 
 ❌ Not handling undefined:
 \`\`\`typescript
-expression: 'formValue.firstName + formValue.lastName'  // Can produce "undefinedundefined"
-expression: '(formValue.firstName || "") + " " + (formValue.lastName || "")'  // ✅
+derivation: 'formValue.firstName + formValue.lastName'  // Can produce "undefinedundefined"
+derivation: '(formValue.firstName || "") + " " + (formValue.lastName || "")'  // ✅
 \`\`\``;
 
 PATTERNS['multi-page'].minimal = PATTERNS['minimal-multipage'].minimal;
@@ -1252,7 +1300,7 @@ const COMPLETE_EXAMPLE = `# Complete Multi-Page Form Example
 
 This is a **complete, copy-pasteable** form configuration that demonstrates:
 - Multi-page navigation
-- Value derivation (computed fields)
+- Value derivation (computed fields - self-targeting)
 - Conditional visibility (using logic blocks - NO hideWhen/showWhen shorthand)
 - Validation (required, email, minLength)
 - Groups for nested data
@@ -1282,11 +1330,8 @@ const formConfig = {
           type: 'input',
           label: 'Full Name',
           readonly: true,
-          logic: [{
-            type: 'derivation',
-            targetField: 'fullName',
-            expression: '(formValue.firstName || "") + " " + (formValue.lastName || "")'
-          }]
+          // Shorthand derivation - no targetField needed, derivation is on the target field itself
+          derivation: '(formValue.firstName || "") + " " + (formValue.lastName || "")'
         },
         { key: 'email', type: 'input', label: 'Email', required: true, email: true, props: { type: 'email' } },
         { key: 'next1', type: 'next', label: 'Continue' }
@@ -1495,11 +1540,8 @@ const megaFormConfig = {
           type: 'input',
           label: 'Derived (A + B)',
           readonly: true,
-          logic: [{
-            type: 'derivation',
-            targetField: 'derived',
-            expression: 'parseInt(formValue.sourceA || 0) + parseInt(formValue.sourceB || 0)'
-          }]
+          // Self-targeting derivation - no targetField needed
+          derivation: 'parseInt(formValue.sourceA || 0) + parseInt(formValue.sourceB || 0)'
         },
 
         // CONDITIONAL VISIBILITY

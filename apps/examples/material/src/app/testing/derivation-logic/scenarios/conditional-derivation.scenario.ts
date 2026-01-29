@@ -14,10 +14,18 @@ const config = {
         { label: 'VIP', value: 'vip' },
       ],
       col: 6,
+    },
+    {
+      key: 'discountPercent',
+      type: 'input',
+      label: 'Discount (%)',
+      value: 0,
+      props: { type: 'number' },
+      readonly: true,
+      col: 3,
       logic: [
         {
           type: 'derivation',
-          targetField: 'discountPercent',
           value: 0,
           condition: {
             type: 'fieldValue',
@@ -28,7 +36,6 @@ const config = {
         },
         {
           type: 'derivation',
-          targetField: 'discountPercent',
           value: 15,
           condition: {
             type: 'fieldValue',
@@ -39,7 +46,6 @@ const config = {
         },
         {
           type: 'derivation',
-          targetField: 'discountPercent',
           value: 30,
           condition: {
             type: 'fieldValue',
@@ -48,9 +54,18 @@ const config = {
             value: 'vip',
           },
         },
+      ],
+    },
+    {
+      key: 'freeShipping',
+      type: 'toggle',
+      label: 'Free Shipping',
+      value: false,
+      disabled: true,
+      col: 3,
+      logic: [
         {
           type: 'derivation',
-          targetField: 'freeShipping',
           value: false,
           condition: {
             type: 'fieldValue',
@@ -61,7 +76,6 @@ const config = {
         },
         {
           type: 'derivation',
-          targetField: 'freeShipping',
           value: true,
           condition: {
             type: 'or',
@@ -84,33 +98,23 @@ const config = {
       ],
     },
     {
-      key: 'discountPercent',
-      type: 'input',
-      label: 'Discount (%)',
-      value: 0,
-      props: { type: 'number' },
-      readonly: true,
-      col: 3,
-    },
-    {
-      key: 'freeShipping',
-      type: 'toggle',
-      label: 'Free Shipping',
-      value: false,
-      disabled: true,
-      col: 3,
-    },
-    {
       key: 'age',
       type: 'input',
       label: 'Age',
       value: 25,
       props: { type: 'number' },
       col: 4,
+    },
+    {
+      key: 'ageCategory',
+      type: 'input',
+      label: 'Age Category',
+      value: 'Adult',
+      readonly: true,
+      col: 4,
       logic: [
         {
           type: 'derivation',
-          targetField: 'ageCategory',
           value: 'Minor',
           condition: {
             type: 'fieldValue',
@@ -121,7 +125,6 @@ const config = {
         },
         {
           type: 'derivation',
-          targetField: 'ageCategory',
           value: 'Adult',
           condition: {
             type: 'and',
@@ -143,7 +146,6 @@ const config = {
         },
         {
           type: 'derivation',
-          targetField: 'ageCategory',
           value: 'Senior',
           condition: {
             type: 'fieldValue',
@@ -153,14 +155,6 @@ const config = {
           },
         },
       ],
-    },
-    {
-      key: 'ageCategory',
-      type: 'input',
-      label: 'Age Category',
-      value: 'Adult',
-      readonly: true,
-      col: 4,
     },
     {
       key: 'submit',

@@ -298,7 +298,7 @@ export class DerivationOrchestrator {
     );
 
     if (implicitWildcards.length > 0) {
-      const derivationDescs = implicitWildcards.map((e) => `${e.sourceFieldKey} -> ${e.targetFieldKey} (${e.functionName})`);
+      const derivationDescs = implicitWildcards.map((e) => `${e.fieldKey} (${e.functionName})`);
 
       this.logger.warn(
         '[Derivation] Derivations using custom functions without explicit dependsOn detected. ' +

@@ -10,23 +10,6 @@ const config = {
       value: 1,
       props: { type: 'number' },
       col: 4,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'subtotal',
-          expression: 'formValue.quantity * formValue.unitPrice',
-        },
-        {
-          type: 'derivation',
-          targetField: 'tax',
-          expression: 'formValue.subtotal * formValue.taxRate / 100',
-        },
-        {
-          type: 'derivation',
-          targetField: 'total',
-          expression: 'formValue.subtotal + formValue.tax',
-        },
-      ],
     },
     {
       key: 'unitPrice',
@@ -35,23 +18,6 @@ const config = {
       value: 10,
       props: { type: 'number' },
       col: 4,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'subtotal',
-          expression: 'formValue.quantity * formValue.unitPrice',
-        },
-        {
-          type: 'derivation',
-          targetField: 'tax',
-          expression: 'formValue.subtotal * formValue.taxRate / 100',
-        },
-        {
-          type: 'derivation',
-          targetField: 'total',
-          expression: 'formValue.subtotal + formValue.tax',
-        },
-      ],
     },
     {
       key: 'taxRate',
@@ -60,18 +26,6 @@ const config = {
       value: 10,
       props: { type: 'number' },
       col: 4,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'tax',
-          expression: 'formValue.subtotal * formValue.taxRate / 100',
-        },
-        {
-          type: 'derivation',
-          targetField: 'total',
-          expression: 'formValue.subtotal + formValue.tax',
-        },
-      ],
     },
     {
       key: 'subtotal',
@@ -81,6 +35,7 @@ const config = {
       props: { type: 'number' },
       readonly: true,
       col: 4,
+      derivation: 'formValue.quantity * formValue.unitPrice',
     },
     {
       key: 'tax',
@@ -90,6 +45,7 @@ const config = {
       props: { type: 'number' },
       readonly: true,
       col: 4,
+      derivation: 'formValue.subtotal * formValue.taxRate / 100',
     },
     {
       key: 'total',
@@ -99,6 +55,7 @@ const config = {
       props: { type: 'number' },
       readonly: true,
       col: 4,
+      derivation: 'formValue.subtotal + formValue.tax',
     },
     {
       key: 'firstName',
@@ -106,13 +63,6 @@ const config = {
       label: 'First Name',
       value: '',
       col: 4,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'fullName',
-          expression: 'formValue.firstName + " " + formValue.lastName',
-        },
-      ],
     },
     {
       key: 'lastName',
@@ -120,13 +70,6 @@ const config = {
       label: 'Last Name',
       value: '',
       col: 4,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'fullName',
-          expression: 'formValue.firstName + " " + formValue.lastName',
-        },
-      ],
     },
     {
       key: 'fullName',
@@ -135,6 +78,7 @@ const config = {
       value: ' ',
       readonly: true,
       col: 4,
+      derivation: 'formValue.firstName + " " + formValue.lastName',
     },
     {
       key: 'submit',

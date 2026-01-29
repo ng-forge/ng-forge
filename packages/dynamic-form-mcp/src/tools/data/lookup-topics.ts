@@ -527,11 +527,19 @@ logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'accountTy
 
   derivation: {
     brief: `\`\`\`typescript
-logic: [{ type: 'derivation', targetField: 'fullName', expression: 'formValue.firstName + " " + formValue.lastName' }]
+// Shorthand (preferred)
+{ key: 'fullName', type: 'input', readonly: true, derivation: 'formValue.firstName + " " + formValue.lastName' }
+
+// Logic block (for conditions, debounce, etc.)
+logic: [{ type: 'derivation', expression: 'formValue.firstName + " " + formValue.lastName' }]
 \`\`\`
-Put derivation on the TARGET field, \`targetField\` points to itself.`,
+Derivation is always defined ON the field that receives the computed value (self-targeting).`,
 
     full: `# Value Derivation (Computed Fields)
+
+Derivations are always defined ON the field that receives the computed value (self-targeting).
+
+## Shorthand (preferred for simple expressions)
 
 \`\`\`typescript
 {
@@ -539,10 +547,51 @@ Put derivation on the TARGET field, \`targetField\` points to itself.`,
   type: 'input',
   label: 'Full Name',
   readonly: true,
+  derivation: '(formValue.firstName || "") + " " + (formValue.lastName || "")'
+}
+\`\`\`
+
+## Logic Block (for conditions, debounce, custom functions)
+
+\`\`\`typescript
+{
+  key: 'total',
+  type: 'input',
+  label: 'Total',
+  readonly: true,
   logic: [{
     type: 'derivation',
-    targetField: 'fullName',     // Points to THIS field's key
-    expression: 'formValue.firstName + " " + formValue.lastName'
+    expression: 'formValue.quantity * formValue.unitPrice'
+  }]
+}
+\`\`\`
+
+## Conditional Derivation
+
+\`\`\`typescript
+{
+  key: 'discount',
+  type: 'input',
+  readonly: true,
+  logic: [{
+    type: 'derivation',
+    value: 10,
+    condition: { type: 'fieldValue', fieldPath: 'memberType', operator: 'equals', value: 'premium' }
+  }]
+}
+\`\`\`
+
+## Custom Function Derivation
+
+\`\`\`typescript
+{
+  key: 'age',
+  type: 'input',
+  readonly: true,
+  logic: [{
+    type: 'derivation',
+    functionName: 'calculateAge',
+    dependsOn: ['dateOfBirth']
   }]
 }
 \`\`\`
@@ -553,14 +602,14 @@ Put derivation on the TARGET field, \`targetField\` points to itself.`,
 
 **Nested access:**
 \`\`\`typescript
-expression: 'formValue.address?.city'                    // Optional chaining
-expression: 'formValue.items?.[0]?.name'                // Array access
-expression: 'formValue.discount ?? 0'                   // Nullish coalescing
+derivation: 'formValue.address?.city'                    // Optional chaining
+derivation: 'formValue.items?.[0]?.name'                // Array access
+derivation: 'formValue.discount ?? 0'                   // Nullish coalescing
 \`\`\`
 
 **Complex logic (IIFE):**
 \`\`\`typescript
-expression: \`(() => {
+derivation: \`(() => {
   const qty = formValue.quantity || 0;
   const price = formValue.unitPrice || 0;
   return qty * price;

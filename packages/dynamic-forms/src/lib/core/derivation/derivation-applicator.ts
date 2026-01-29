@@ -73,8 +73,8 @@ interface DerivationResult {
   /** Whether the derivation was applied */
   applied: boolean;
 
-  /** The target field key */
-  targetFieldKey: string;
+  /** The field key */
+  fieldKey: string;
 
   /** The computed value */
   newValue?: unknown;
@@ -217,9 +217,9 @@ function getEntriesForChangedFields(entries: DerivationEntry[], changedFields: S
  * ```typescript
  * // Two derivations for conditional value with cleanup:
  * // When country is USA, set phonePrefix to '+1'
- * { condition: { field: 'country', operator: '==', value: 'USA' }, targetField: 'phonePrefix', value: '+1' }
+ * { key: 'phonePrefix', logic: [{ type: 'derivation', condition: { field: 'country', operator: '==', value: 'USA' }, value: '+1' }] }
  * // When country is NOT USA, clear phonePrefix
- * { condition: { field: 'country', operator: '!=', value: 'USA' }, targetField: 'phonePrefix', value: '' }
+ * { key: 'phonePrefix', logic: [{ type: 'derivation', condition: { field: 'country', operator: '!=', value: 'USA' }, value: '' }] }
  * ```
  *
  * @internal
@@ -232,22 +232,21 @@ function tryApplyDerivation(
   const { derivationLogger } = context;
 
   // Check if this is an array field derivation (has '$' placeholder)
-  if (isArrayPlaceholderPath(entry.targetFieldKey)) {
+  if (isArrayPlaceholderPath(entry.fieldKey)) {
     return tryApplyArrayDerivation(entry, context, chainContext);
   }
 
-  const derivationKey = createDerivationKey(entry.sourceFieldKey, entry.targetFieldKey);
+  const derivationKey = createDerivationKey(entry.fieldKey);
 
   // Check if already applied in this cycle
   if (chainContext.appliedDerivations.has(derivationKey)) {
     derivationLogger.evaluation({
       debugName: entry.debugName,
-      sourceFieldKey: entry.sourceFieldKey,
-      targetFieldKey: entry.targetFieldKey,
+      fieldKey: entry.fieldKey,
       result: 'skipped',
       skipReason: 'already-applied',
     });
-    return { applied: false, targetFieldKey: entry.targetFieldKey };
+    return { applied: false, fieldKey: entry.fieldKey };
   }
 
   // Create evaluation context
@@ -258,12 +257,11 @@ function tryApplyDerivation(
   if (!evaluateDerivationCondition(entry.condition, evalContext)) {
     derivationLogger.evaluation({
       debugName: entry.debugName,
-      sourceFieldKey: entry.sourceFieldKey,
-      targetFieldKey: entry.targetFieldKey,
+      fieldKey: entry.fieldKey,
       result: 'skipped',
       skipReason: 'condition-false',
     });
-    return { applied: false, targetFieldKey: entry.targetFieldKey };
+    return { applied: false, fieldKey: entry.fieldKey };
   }
 
   // Compute derived value
@@ -275,14 +273,13 @@ function tryApplyDerivation(
     context.logger.error(formatDerivationError(entry, 'compute', errorMessage));
     derivationLogger.evaluation({
       debugName: entry.debugName,
-      sourceFieldKey: entry.sourceFieldKey,
-      targetFieldKey: entry.targetFieldKey,
+      fieldKey: entry.fieldKey,
       result: 'error',
       error: errorMessage,
     });
     return {
       applied: false,
-      targetFieldKey: entry.targetFieldKey,
+      fieldKey: entry.fieldKey,
       error: errorMessage,
     };
   }
@@ -292,47 +289,44 @@ function tryApplyDerivation(
   // equality for numbers. Bidirectional derivations with floating-point math
   // may oscillate due to rounding errors. Use explicit rounding in expressions
   // or integer arithmetic to avoid this issue.
-  const currentValue = getNestedValue(formValue, entry.targetFieldKey);
+  const currentValue = getNestedValue(formValue, entry.fieldKey);
   if (isEqual(currentValue, newValue)) {
     derivationLogger.evaluation({
       debugName: entry.debugName,
-      sourceFieldKey: entry.sourceFieldKey,
-      targetFieldKey: entry.targetFieldKey,
+      fieldKey: entry.fieldKey,
       result: 'skipped',
       skipReason: 'value-unchanged',
     });
-    return { applied: false, targetFieldKey: entry.targetFieldKey };
+    return { applied: false, fieldKey: entry.fieldKey };
   }
 
   // Apply the value
   try {
-    const wasApplied = applyValueToForm(entry.targetFieldKey, newValue, context.rootForm, context.logger, context.warningTracker);
+    const wasApplied = applyValueToForm(entry.fieldKey, newValue, context.rootForm, context.logger, context.warningTracker);
 
     if (wasApplied) {
       chainContext.appliedDerivations.add(derivationKey);
       derivationLogger.evaluation({
         debugName: entry.debugName,
-        sourceFieldKey: entry.sourceFieldKey,
-        targetFieldKey: entry.targetFieldKey,
+        fieldKey: entry.fieldKey,
         result: 'applied',
         previousValue: currentValue,
         newValue,
       });
-      return { applied: true, targetFieldKey: entry.targetFieldKey, newValue };
+      return { applied: true, fieldKey: entry.fieldKey, newValue };
     } else {
       // Field not found - this is a warning, not an error
       // The warning was already logged by warnMissingField
       derivationLogger.evaluation({
         debugName: entry.debugName,
-        sourceFieldKey: entry.sourceFieldKey,
-        targetFieldKey: entry.targetFieldKey,
+        fieldKey: entry.fieldKey,
         result: 'skipped',
         skipReason: 'target-not-found',
       });
       return {
         applied: false,
-        targetFieldKey: entry.targetFieldKey,
-        warning: `Target field '${entry.targetFieldKey}' not found`,
+        fieldKey: entry.fieldKey,
+        warning: `Field '${entry.fieldKey}' not found`,
       };
     }
   } catch (error) {
@@ -340,14 +334,13 @@ function tryApplyDerivation(
     context.logger.error(formatDerivationError(entry, 'apply', errorMessage));
     derivationLogger.evaluation({
       debugName: entry.debugName,
-      sourceFieldKey: entry.sourceFieldKey,
-      targetFieldKey: entry.targetFieldKey,
+      fieldKey: entry.fieldKey,
       result: 'error',
       error: errorMessage,
     });
     return {
       applied: false,
-      targetFieldKey: entry.targetFieldKey,
+      fieldKey: entry.fieldKey,
       error: errorMessage,
     };
   }
@@ -368,10 +361,10 @@ function tryApplyArrayDerivation(
 ): DerivationResult {
   const formValue = untracked(() => context.formValue());
 
-  // Parse the target path using path utilities
-  const pathInfo = parseArrayPath(entry.targetFieldKey);
+  // Parse the field path using path utilities
+  const pathInfo = parseArrayPath(entry.fieldKey);
   if (!pathInfo.isArrayPath) {
-    return { applied: false, targetFieldKey: entry.targetFieldKey, error: 'Invalid array derivation path' };
+    return { applied: false, fieldKey: entry.fieldKey, error: 'Invalid array derivation path' };
   }
 
   const { arrayPath } = pathInfo;
@@ -379,15 +372,15 @@ function tryApplyArrayDerivation(
   // Get the array from form values
   const arrayValue = getNestedValue(formValue, arrayPath);
   if (!Array.isArray(arrayValue)) {
-    return { applied: false, targetFieldKey: entry.targetFieldKey };
+    return { applied: false, fieldKey: entry.fieldKey };
   }
 
   let appliedAny = false;
 
   // Process each array item
   for (let i = 0; i < arrayValue.length; i++) {
-    const resolvedTargetPath = resolveArrayPath(entry.targetFieldKey, i);
-    const derivationKey = createDerivationKey(entry.sourceFieldKey, resolvedTargetPath);
+    const resolvedPath = resolveArrayPath(entry.fieldKey, i);
+    const derivationKey = createDerivationKey(resolvedPath);
 
     // Skip if already applied in this cycle
     if (chainContext.appliedDerivations.has(derivationKey)) {
@@ -414,14 +407,14 @@ function tryApplyArrayDerivation(
     }
 
     // Check if value actually changed
-    const currentValue = getNestedValue(formValue, resolvedTargetPath);
+    const currentValue = getNestedValue(formValue, resolvedPath);
     if (isEqual(currentValue, newValue)) {
       continue;
     }
 
     // Apply the value
     try {
-      applyValueToForm(resolvedTargetPath, newValue, context.rootForm, context.logger, context.warningTracker);
+      applyValueToForm(resolvedPath, newValue, context.rootForm, context.logger, context.warningTracker);
       chainContext.appliedDerivations.add(derivationKey);
       appliedAny = true;
     } catch (error) {
@@ -430,7 +423,7 @@ function tryApplyArrayDerivation(
     }
   }
 
-  return { applied: appliedAny, targetFieldKey: entry.targetFieldKey };
+  return { applied: appliedAny, fieldKey: entry.fieldKey };
 }
 
 /**
@@ -443,12 +436,12 @@ function createEvaluationContext(
   formValue: Record<string, unknown>,
   context: DerivationApplicatorContext,
 ): EvaluationContext {
-  const fieldValue = getNestedValue(formValue, entry.sourceFieldKey);
+  const fieldValue = getNestedValue(formValue, entry.fieldKey);
 
   return {
     fieldValue,
     formValue,
-    fieldPath: entry.sourceFieldKey,
+    fieldPath: entry.fieldKey,
     customFunctions: context.customFunctions,
     logger: context.logger,
   };
@@ -529,7 +522,7 @@ function computeDerivedValue(
   }
 
   // No value source specified
-  throw new Error(`Derivation for ${entry.targetFieldKey} has no value source. ` + `Specify 'value', 'expression', or 'functionName'.`);
+  throw new Error(`Derivation for ${entry.fieldKey} has no value source. ` + `Specify 'value', 'expression', or 'functionName'.`);
 }
 
 /**
@@ -602,7 +595,7 @@ function formatDerivationError(entry: DerivationEntry, phase: 'compute' | 'apply
         ? 'static value'
         : 'unknown source';
 
-  return `${ERROR_PREFIX} Failed to ${phase} derivation (${entry.sourceFieldKey} → ${entry.targetFieldKey}, ${source}): ${message}`;
+  return `${ERROR_PREFIX} Failed to ${phase} derivation (field: ${entry.fieldKey}, ${source}): ${message}`;
 }
 
 /**

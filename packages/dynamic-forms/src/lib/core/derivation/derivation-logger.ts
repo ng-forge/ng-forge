@@ -14,10 +14,8 @@ export { createDefaultDerivationLogConfig, shouldLog } from '../../models/logic/
 export interface DerivationLogEntry {
   /** Debug name if provided in the derivation config */
   debugName?: string;
-  /** Source field key where the derivation is defined */
-  sourceFieldKey: string;
-  /** Target field key that will be modified */
-  targetFieldKey: string;
+  /** Field key where the derivation is defined and targets */
+  fieldKey: string;
   /** Result of the derivation evaluation */
   result: 'applied' | 'skipped' | 'error';
   /** Reason for skipping (if result is 'skipped') */
@@ -102,13 +100,12 @@ export function logMaxIterationsReached(result: DerivationProcessingResult, trig
 export function logDerivationEvaluation(entry: DerivationLogEntry, logger: Logger, config: DerivationLogConfig): void {
   if (!shouldLog(config, 'verbose')) return;
 
-  const name = entry.debugName ? `"${entry.debugName}"` : `${entry.sourceFieldKey} -> ${entry.targetFieldKey}`;
+  const name = entry.debugName ? `"${entry.debugName}"` : entry.fieldKey;
 
   switch (entry.result) {
     case 'applied':
       logger.debug(`${LOG_PREFIX} -> Applied: ${name}`, {
-        source: entry.sourceFieldKey,
-        target: entry.targetFieldKey,
+        field: entry.fieldKey,
         previousValue: entry.previousValue,
         newValue: entry.newValue,
         ...(entry.durationMs !== undefined && { durationMs: entry.durationMs }),
@@ -117,16 +114,14 @@ export function logDerivationEvaluation(entry: DerivationLogEntry, logger: Logge
 
     case 'skipped':
       logger.debug(`${LOG_PREFIX} -> Skipped: ${name} (${formatSkipReason(entry.skipReason)})`, {
-        source: entry.sourceFieldKey,
-        target: entry.targetFieldKey,
+        field: entry.fieldKey,
         reason: entry.skipReason,
       });
       break;
 
     case 'error':
       logger.debug(`${LOG_PREFIX} -> Error: ${name}`, {
-        source: entry.sourceFieldKey,
-        target: entry.targetFieldKey,
+        field: entry.fieldKey,
         error: entry.error,
       });
       break;
