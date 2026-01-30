@@ -61,6 +61,12 @@ export default [
     loadChildren: () => import('./demo-scenarios/demo-scenarios.routes'),
   },
 
+  // Derivation Logic Tests - Value derivation based on field values, expressions, and custom functions
+  {
+    path: 'derivation-logic',
+    loadChildren: () => import('./derivation-logic/derivation-logic.routes'),
+  },
+
   // Error Handling Tests - Refactored into folder structure
   {
     path: 'error-handling',
@@ -79,6 +85,12 @@ export default [
     loadChildren: () => import('./expression-based-logic/expression-based-logic.routes'),
   },
 
+  // Field Meta Tests - Tests for meta attribute passthrough
+  {
+    path: 'field-meta',
+    loadChildren: () => import('./field-meta/field-meta.routes'),
+  },
+
   // Form Reset/Clear Tests - Refactored into folder structure
   {
     path: 'form-reset-clear',
@@ -92,7 +104,10 @@ export default [
   },
 
   // PrimeNG Components Tests - PrimeNG-specific component tests
-  // TODO: Create primeng-components test folder with PrimeNG-specific tests
+  {
+    path: 'primeng-components',
+    loadChildren: () => import('./primeng-components/primeng-components.routes'),
+  },
 
   // Multi-Page Navigation Tests - Refactored into folder structure
   {
