@@ -32,13 +32,13 @@ export interface EvaluationContext<TValue = unknown> {
    *
    * @example
    * ```typescript
-   * // In an array item derivation (e.g., lineItems.$.lineTotal):
+   * // In an array item derivation (on the lineTotal field inside lineItems array):
    * {
-   *   type: 'derivation',
-   *   targetField: '$.lineTotal',
+   *   key: 'lineTotal',
+   *   type: 'input',
    *   // formValue = current array item { quantity: 2, unitPrice: 50 }
    *   // rootFormValue = entire form { globalDiscount: 0.1, lineItems: [...] }
-   *   expression: 'formValue.quantity * formValue.unitPrice * (1 - rootFormValue.globalDiscount)'
+   *   derivation: 'formValue.quantity * formValue.unitPrice * (1 - rootFormValue.globalDiscount)'
    * }
    * ```
    *

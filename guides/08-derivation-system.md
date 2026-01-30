@@ -578,7 +578,7 @@ Once a derivation is applied, it won't run again in the same cycle (until next f
 Skips application if the computed value equals the current value:
 
 ```typescript
-const currentValue = getNestedValue(formValue, targetFieldKey);
+const currentValue = getNestedValue(formValue, entry.fieldKey);
 if (isEqual(currentValue, newValue)) {
   return { applied: false, skipReason: 'value-unchanged' };
 }
