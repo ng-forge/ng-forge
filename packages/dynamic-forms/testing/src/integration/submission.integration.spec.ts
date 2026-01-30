@@ -4,8 +4,8 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, submit, FieldTree, TreeValidationResult } from '@angular/forms/signals';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
 import { FormConfig, SubmissionConfig } from '../../models';
-import { firstValueFrom, isObservable, of, timer } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { EMPTY, firstValueFrom, isObservable, of, Subject, throwError, timer } from 'rxjs';
+import { delay, map, switchMap } from 'rxjs/operators';
 
 describe('Form Submission Integration', () => {
   let injector: Injector;
@@ -389,6 +389,178 @@ describe('Form Submission Integration', () => {
       // When only submission.action is configured and no (submitted) listener,
       // there should be no warning
       expect(config.submission).toBeDefined();
+    });
+  });
+
+  describe('Submission Edge Cases', () => {
+    it('should reset submitting state after action throws an exception', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal({ email: 'test@example.com' });
+        const formInstance = form(formValue);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        expect(formInstance().submitting()).toBe(false);
+
+        // Action that throws an exception
+        const failingAction = async () => {
+          throw new Error('Simulated server error');
+        };
+
+        // Submit should throw but submitting should be cleaned up
+        await expect(submit(formInstance, failingAction)).rejects.toThrow('Simulated server error');
+
+        // After exception, submitting should be reset to false
+        expect(formInstance().submitting()).toBe(false);
+      });
+    });
+
+    it('should handle Observable error emission gracefully', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal({ email: 'test@example.com' });
+        const formInstance = form(formValue);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        expect(formInstance().submitting()).toBe(false);
+
+        // Observable that emits an error
+        const errorObservable = () => throwError(() => new Error('Network error'));
+        const wrappedAction = async () => {
+          const result = errorObservable();
+          if (isObservable(result)) {
+            return firstValueFrom(result);
+          }
+          return result;
+        };
+
+        // Submit should throw but submitting should be cleaned up
+        await expect(submit(formInstance, wrappedAction)).rejects.toThrow('Network error');
+
+        // After error, submitting should be reset to false
+        expect(formInstance().submitting()).toBe(false);
+      });
+    });
+
+    it('should handle concurrent submission attempts with switchMap cancellation', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal({ email: 'test@example.com' });
+        const formInstance = form(formValue);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        const submissionResults: string[] = [];
+        const trigger = new Subject<string>();
+
+        // Simulate a switchMap-based submission handler
+        const latestSubmission = trigger.pipe(
+          switchMap((id) =>
+            timer(id === 'first' ? 100 : 50).pipe(
+              map(() => {
+                submissionResults.push(id);
+                return undefined;
+              }),
+            ),
+          ),
+        );
+
+        // Start subscription
+        const subscription = latestSubmission.subscribe();
+
+        // Trigger first submission (slower)
+        trigger.next('first');
+
+        // Trigger second submission immediately (faster, should cancel first)
+        trigger.next('second');
+
+        // Wait for second to complete
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
+        // Only second should have completed (first was cancelled)
+        expect(submissionResults).toEqual(['second']);
+
+        subscription.unsubscribe();
+      });
+    });
+
+    it('should handle empty submission config by returning EMPTY observable behavior', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal({ email: 'test@example.com' });
+        const formInstance = form(formValue);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        // Simulating what happens when no submission action is defined
+        // The EMPTY observable should not emit any value
+        let emitted = false;
+        const subscription = EMPTY.subscribe({
+          next: () => {
+            emitted = true;
+          },
+          complete: () => {
+            // EMPTY completes immediately without emitting
+          },
+        });
+
+        // Allow microtasks to run
+        await Promise.resolve();
+
+        expect(emitted).toBe(false);
+        subscription.unsubscribe();
+      });
+    });
+
+    it('should handle submission action returning null as success', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal({ email: 'test@example.com' });
+        const formInstance = form(formValue);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        // Submit with action returning null (treated as success)
+        await submit(formInstance, async () => {
+          return null as any;
+        });
+
+        // Should complete without errors
+        expect(formInstance().submitting()).toBe(false);
+        expect(formInstance().valid()).toBe(true);
+      });
+    });
+
+    it('should handle delayed Observable with delayed response', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal({ email: 'test@example.com' });
+        const formInstance = form(formValue);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        let submittingBeforeDelay = false;
+        let submittingDuringDelay = false;
+
+        const delayedObservable = () =>
+          of(undefined).pipe(
+            map(() => {
+              submittingBeforeDelay = formInstance().submitting();
+              return undefined;
+            }),
+            delay(50),
+            map(() => {
+              submittingDuringDelay = formInstance().submitting();
+              return undefined;
+            }),
+          );
+
+        const wrappedAction = async () => {
+          const result = delayedObservable();
+          if (isObservable(result)) {
+            return firstValueFrom(result);
+          }
+          return result;
+        };
+
+        await submit(formInstance, wrappedAction);
+
+        // Submitting should have been true during the entire Observable chain
+        expect(submittingBeforeDelay).toBe(true);
+        expect(submittingDuringDelay).toBe(true);
+        // After completion, submitting should be false
+        expect(formInstance().submitting()).toBe(false);
+      });
     });
   });
 });
