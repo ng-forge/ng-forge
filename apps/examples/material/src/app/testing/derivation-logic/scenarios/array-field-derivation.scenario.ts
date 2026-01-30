@@ -30,13 +30,6 @@ const config = {
               label: 'Quantity',
               props: { type: 'number' },
               col: 2,
-              logic: [
-                {
-                  type: 'derivation',
-                  targetField: '$.lineTotal',
-                  expression: 'formValue.quantity * formValue.unitPrice',
-                },
-              ],
             },
             {
               key: 'unitPrice',
@@ -44,13 +37,6 @@ const config = {
               label: 'Unit Price',
               props: { type: 'number' },
               col: 2,
-              logic: [
-                {
-                  type: 'derivation',
-                  targetField: '$.lineTotal',
-                  expression: 'formValue.quantity * formValue.unitPrice',
-                },
-              ],
             },
             {
               key: 'lineTotal',
@@ -58,6 +44,9 @@ const config = {
               label: 'Line Total',
               readonly: true,
               col: 4,
+              // Self-targeting derivation: lineTotal is derived from quantity * unitPrice
+              // formValue is scoped to the current array item
+              derivation: 'formValue.quantity * formValue.unitPrice',
             },
           ],
         },

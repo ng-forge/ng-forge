@@ -10,13 +10,6 @@ const config = {
       value: 100,
       props: { type: 'number' },
       col: 4,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'discountedPrice',
-          functionName: 'calculateDiscountedPrice',
-        },
-      ],
     },
     {
       key: 'discountCode',
@@ -30,13 +23,6 @@ const config = {
         { label: 'HALF (50% off)', value: 'HALF' },
       ],
       col: 4,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'discountedPrice',
-          functionName: 'calculateDiscountedPrice',
-        },
-      ],
     },
     {
       key: 'discountedPrice',
@@ -46,19 +32,19 @@ const config = {
       props: { type: 'number' },
       readonly: true,
       col: 4,
+      logic: [
+        {
+          type: 'derivation',
+          functionName: 'calculateDiscountedPrice',
+          dependsOn: ['price', 'discountCode'],
+        },
+      ],
     },
     {
       key: 'dateOfBirth',
       type: 'datepicker',
       label: 'Date of Birth',
       col: 6,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'age',
-          functionName: 'calculateAge',
-        },
-      ],
     },
     {
       key: 'age',
@@ -67,6 +53,13 @@ const config = {
       value: '',
       readonly: true,
       col: 6,
+      logic: [
+        {
+          type: 'derivation',
+          functionName: 'calculateAge',
+          dependsOn: ['dateOfBirth'],
+        },
+      ],
     },
     {
       key: 'submit',

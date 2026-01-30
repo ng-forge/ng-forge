@@ -20,9 +20,8 @@ describe('derivation-types', () => {
       const collection2 = createEmptyDerivationCollection();
 
       const entry: DerivationEntry = {
-        sourceFieldKey: 'source',
-        targetFieldKey: 'target',
-        dependsOn: [],
+        fieldKey: 'target',
+        dependsOn: ['source'],
         condition: true,
         expression: 'formValue.source',
         trigger: 'onChange',
@@ -60,69 +59,60 @@ describe('derivation-types', () => {
   });
 
   describe('createDerivationKey', () => {
-    it('should create a key from source and target field keys', () => {
-      const key = createDerivationKey('country', 'phonePrefix');
+    it('should create a key from field key', () => {
+      const key = createDerivationKey('phonePrefix');
 
-      // Key should contain both parts and be parseable
-      expect(key).toContain('country');
-      expect(key).toContain('phonePrefix');
+      expect(key).toBe('phonePrefix');
     });
 
     it('should handle nested field paths', () => {
-      const key = createDerivationKey('address.country', 'address.phonePrefix');
+      const key = createDerivationKey('address.phonePrefix');
 
-      expect(key).toContain('address.country');
-      expect(key).toContain('address.phonePrefix');
+      expect(key).toBe('address.phonePrefix');
     });
 
     it('should handle array field paths', () => {
-      const key = createDerivationKey('items.$.quantity', 'items.$.total');
+      const key = createDerivationKey('items.$.total');
 
-      expect(key).toContain('items.$.quantity');
-      expect(key).toContain('items.$.total');
+      expect(key).toBe('items.$.total');
     });
 
     it('should handle field names that contain colons', () => {
-      const key = createDerivationKey('field:with:colons', 'other:field');
+      const key = createDerivationKey('field:with:colons');
       const parsed = parseDerivationKey(key);
 
-      expect(parsed.sourceKey).toBe('field:with:colons');
-      expect(parsed.targetKey).toBe('other:field');
+      expect(parsed.fieldKey).toBe('field:with:colons');
     });
   });
 
   describe('parseDerivationKey', () => {
-    it('should parse a key back to source and target', () => {
-      const key = createDerivationKey('country', 'phonePrefix');
-      const { sourceKey, targetKey } = parseDerivationKey(key);
+    it('should parse a key back to field key', () => {
+      const key = createDerivationKey('phonePrefix');
+      const { fieldKey } = parseDerivationKey(key);
 
-      expect(sourceKey).toBe('country');
-      expect(targetKey).toBe('phonePrefix');
+      expect(fieldKey).toBe('phonePrefix');
     });
 
     it('should handle nested field paths', () => {
-      const key = createDerivationKey('address.country', 'address.phonePrefix');
-      const { sourceKey, targetKey } = parseDerivationKey(key);
+      const key = createDerivationKey('address.phonePrefix');
+      const { fieldKey } = parseDerivationKey(key);
 
-      expect(sourceKey).toBe('address.country');
-      expect(targetKey).toBe('address.phonePrefix');
+      expect(fieldKey).toBe('address.phonePrefix');
     });
 
     it('should handle array field paths', () => {
-      const key = createDerivationKey('items.$.quantity', 'items.$.total');
-      const { sourceKey, targetKey } = parseDerivationKey(key);
+      const key = createDerivationKey('items.$.total');
+      const { fieldKey } = parseDerivationKey(key);
 
-      expect(sourceKey).toBe('items.$.quantity');
-      expect(targetKey).toBe('items.$.total');
+      expect(fieldKey).toBe('items.$.total');
     });
 
     it('should round-trip with createDerivationKey', () => {
-      const original = { source: 'field1', target: 'field2' };
-      const key = createDerivationKey(original.source, original.target);
+      const original = 'myField';
+      const key = createDerivationKey(original);
       const parsed = parseDerivationKey(key);
 
-      expect(parsed.sourceKey).toBe(original.source);
-      expect(parsed.targetKey).toBe(original.target);
+      expect(parsed.fieldKey).toBe(original);
     });
   });
 });

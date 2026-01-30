@@ -128,10 +128,11 @@ Generates expression configuration for conditional logic.
 
 **Parameters:**
 
-- `expressionType` (required): Type of expression (hidden, disabled, value, etc.)
+- `expressionType` (required): Type of expression (hidden, disabled, value, derivation, etc.)
 - `expression` (required): JavaScript expression
-- `targetField`: Field key to apply expression to
 - `relatedFields`: Dependent field keys
+
+**Note:** Derivations are defined on the target field itself using shorthand `derivation: '...'` or logic blocks.
 
 ## Development
 

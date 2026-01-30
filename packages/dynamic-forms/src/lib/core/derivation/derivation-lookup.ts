@@ -28,8 +28,7 @@ export class DerivationLookup {
   private _cachedEntriesRef?: DerivationEntry[];
 
   // Cached lookup maps (built lazily on first access)
-  private _byTarget?: Map<string, DerivationEntry[]>;
-  private _bySource?: Map<string, DerivationEntry[]>;
+  private _byField?: Map<string, DerivationEntry[]>;
   private _byDependency?: Map<string, DerivationEntry[]>;
   private _byArrayPath?: Map<string, DerivationEntry[]>;
   private _wildcardEntries?: DerivationEntry[];
@@ -53,19 +52,12 @@ export class DerivationLookup {
   }
 
   /**
-   * Map of target field key to entries that modify it.
+   * Map of field key to entries that target it.
+   * Since derivations are self-targeting, this maps field keys to their derivations.
    * Used for quick lookup when processing derivations.
    */
-  get byTarget(): Map<string, DerivationEntry[]> {
-    return (this._byTarget ??= this.buildByTargetMap());
-  }
-
-  /**
-   * Map of source field key to entries defined on it.
-   * Used for finding derivations when a field's value changes.
-   */
-  get bySource(): Map<string, DerivationEntry[]> {
-    return (this._bySource ??= this.buildBySourceMap());
+  get byField(): Map<string, DerivationEntry[]> {
+    return (this._byField ??= this.buildByFieldMap());
   }
 
   /**
@@ -173,8 +165,7 @@ export class DerivationLookup {
    * Invalidates cached maps. Call this when entries change.
    */
   invalidateCache(): void {
-    this._byTarget = undefined;
-    this._bySource = undefined;
+    this._byField = undefined;
     this._byDependency = undefined;
     this._byArrayPath = undefined;
     this._wildcardEntries = undefined;
@@ -186,22 +177,12 @@ export class DerivationLookup {
   // Private builders
   // ─────────────────────────────────────────────────────────────────
 
-  private buildByTargetMap(): Map<string, DerivationEntry[]> {
+  private buildByFieldMap(): Map<string, DerivationEntry[]> {
     const map = new Map<string, DerivationEntry[]>();
     for (const entry of this.entries) {
-      const targetEntries = map.get(entry.targetFieldKey) ?? [];
-      targetEntries.push(entry);
-      map.set(entry.targetFieldKey, targetEntries);
-    }
-    return map;
-  }
-
-  private buildBySourceMap(): Map<string, DerivationEntry[]> {
-    const map = new Map<string, DerivationEntry[]>();
-    for (const entry of this.entries) {
-      const sourceEntries = map.get(entry.sourceFieldKey) ?? [];
-      sourceEntries.push(entry);
-      map.set(entry.sourceFieldKey, sourceEntries);
+      const fieldEntries = map.get(entry.fieldKey) ?? [];
+      fieldEntries.push(entry);
+      map.set(entry.fieldKey, fieldEntries);
     }
     return map;
   }
@@ -223,8 +204,8 @@ export class DerivationLookup {
   private buildByArrayPathMap(): Map<string, DerivationEntry[]> {
     const map = new Map<string, DerivationEntry[]>();
     for (const entry of this.entries) {
-      if (isArrayPlaceholderPath(entry.targetFieldKey)) {
-        const arrayPath = extractArrayPath(entry.targetFieldKey);
+      if (isArrayPlaceholderPath(entry.fieldKey)) {
+        const arrayPath = extractArrayPath(entry.fieldKey);
         if (arrayPath) {
           const arrayEntries = map.get(arrayPath) ?? [];
           arrayEntries.push(entry);

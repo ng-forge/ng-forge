@@ -10,13 +10,6 @@ const config = {
       value: 100,
       props: { type: 'number' },
       col: 3,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'priceWithMarkup',
-          expression: 'formValue.basePrice * 1.2',
-        },
-      ],
     },
     {
       key: 'priceWithMarkup',
@@ -26,13 +19,7 @@ const config = {
       props: { type: 'number' },
       readonly: true,
       col: 3,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'priceWithTax',
-          expression: 'formValue.priceWithMarkup * 1.1',
-        },
-      ],
+      derivation: 'formValue.basePrice * 1.2',
     },
     {
       key: 'priceWithTax',
@@ -42,13 +29,7 @@ const config = {
       props: { type: 'number' },
       readonly: true,
       col: 3,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'finalPrice',
-          expression: 'formValue.priceWithTax + formValue.shippingCost',
-        },
-      ],
+      derivation: 'formValue.priceWithMarkup * 1.1',
     },
     {
       key: 'shippingCost',
@@ -57,13 +38,6 @@ const config = {
       value: 10,
       props: { type: 'number' },
       col: 3,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'finalPrice',
-          expression: 'formValue.priceWithTax + formValue.shippingCost',
-        },
-      ],
     },
     {
       key: 'finalPrice',
@@ -73,6 +47,7 @@ const config = {
       props: { type: 'number' },
       readonly: true,
       col: 12,
+      derivation: 'formValue.priceWithTax + formValue.shippingCost',
     },
     {
       key: 'firstName',
@@ -80,13 +55,6 @@ const config = {
       label: 'First Name',
       value: 'John',
       col: 4,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'initials',
-          functionName: 'getInitials',
-        },
-      ],
     },
     {
       key: 'lastName',
@@ -94,13 +62,6 @@ const config = {
       label: 'Last Name',
       value: 'Doe',
       col: 4,
-      logic: [
-        {
-          type: 'derivation',
-          targetField: 'initials',
-          functionName: 'getInitials',
-        },
-      ],
     },
     {
       key: 'initials',
@@ -112,8 +73,8 @@ const config = {
       logic: [
         {
           type: 'derivation',
-          targetField: 'displayName',
-          expression: 'formValue.initials + " - " + formValue.firstName + " " + formValue.lastName',
+          functionName: 'getInitials',
+          dependsOn: ['firstName', 'lastName'],
         },
       ],
     },
@@ -124,6 +85,7 @@ const config = {
       value: 'JD - John Doe',
       readonly: true,
       col: 12,
+      derivation: 'formValue.initials + " - " + formValue.firstName + " " + formValue.lastName',
     },
     {
       key: 'submit',

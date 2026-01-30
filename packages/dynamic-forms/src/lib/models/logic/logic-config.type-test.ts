@@ -84,17 +84,7 @@ describe('StateLogicConfig - Property Types', () => {
 // ============================================================================
 
 describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
-  type ExpectedKeys =
-    | 'type'
-    | 'targetField'
-    | 'condition'
-    | 'value'
-    | 'expression'
-    | 'functionName'
-    | 'trigger'
-    | 'debounceMs'
-    | 'debugName'
-    | 'dependsOn';
+  type ExpectedKeys = 'type' | 'condition' | 'value' | 'expression' | 'functionName' | 'trigger' | 'debounceMs' | 'debugName' | 'dependsOn';
   type ActualKeys = keyof DerivationLogicConfig;
 
   it('should have exactly the expected keys', () => {
@@ -104,8 +94,8 @@ describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
   describe('required keys', () => {
     // Note: trigger is required in DebouncedDerivationLogicConfig variant,
     // which makes it appear in RequiredKeys for the union type
-    it('should have type, targetField, and trigger as required', () => {
-      expectTypeOf<RequiredKeys<DerivationLogicConfig>>().toEqualTypeOf<'type' | 'targetField' | 'trigger'>();
+    it('should have type and trigger as required', () => {
+      expectTypeOf<RequiredKeys<DerivationLogicConfig>>().toEqualTypeOf<'type' | 'trigger'>();
     });
   });
 });
@@ -117,10 +107,6 @@ describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
 describe('DerivationLogicConfig - Property Types', () => {
   it('type should be literal derivation', () => {
     expectTypeOf<DerivationLogicConfig['type']>().toEqualTypeOf<'derivation'>();
-  });
-
-  it('targetField should be string', () => {
-    expectTypeOf<DerivationLogicConfig['targetField']>().toEqualTypeOf<string>();
   });
 
   it('condition should be optional', () => {

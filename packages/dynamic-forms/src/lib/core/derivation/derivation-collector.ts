@@ -108,7 +108,7 @@ function collectFromField(field: FieldDef<unknown>, entries: DerivationEntry[], 
 
   // Collect shorthand derivation property
   if (validationField.derivation) {
-    const entry = createShorthandEntry(fieldKey, validationField.derivation);
+    const entry = createShorthandEntry(fieldKey, validationField.derivation, context);
     entries.push(entry);
   }
 
@@ -127,16 +127,18 @@ function collectFromField(field: FieldDef<unknown>, entries: DerivationEntry[], 
  * Creates a derivation entry from the shorthand `derivation` property.
  *
  * Shorthand derivations:
- * - Always target the same field they're defined on
+ * - Target the same field they're defined on (self-targeting)
  * - Always apply (condition defaults to true)
  * - Always trigger on change
  *
  * @internal
  */
-function createShorthandEntry(fieldKey: string, expression: string): DerivationEntry {
+function createShorthandEntry(fieldKey: string, expression: string, context: CollectionContext): DerivationEntry {
+  // Build the effective field key, including array path if in array context
+  const effectiveFieldKey = context.arrayPath ? `${context.arrayPath}.$.${fieldKey}` : fieldKey;
+
   return {
-    sourceFieldKey: fieldKey,
-    targetFieldKey: fieldKey,
+    fieldKey: effectiveFieldKey,
     dependsOn: extractStringDependencies(expression),
     condition: true,
     expression,
@@ -148,16 +150,21 @@ function createShorthandEntry(fieldKey: string, expression: string): DerivationE
 /**
  * Creates a derivation entry from a full `DerivationLogicConfig`.
  *
+ * All derivations are self-targeting: the derivation is defined on and targets
+ * the same field (fieldKey). For array fields, the context is used to build
+ * the array placeholder path.
+ *
  * Handles:
  * - Condition extraction and dependency analysis
- * - Relative path resolution for array fields
+ * - Array field context for placeholder paths
  * - Multiple value source types (static, expression, function)
  * - Trigger and debounce configuration
  *
  * @internal
  */
 function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, context: CollectionContext): DerivationEntry {
-  const targetFieldKey = resolveTargetFieldKey(config.targetField, fieldKey, context);
+  // Build the effective field key, including array path if in array context
+  const effectiveFieldKey = context.arrayPath ? `${context.arrayPath}.$.${fieldKey}` : fieldKey;
   const dependsOn = extractDependencies(config);
   const condition = config.condition ?? true;
   const trigger = config.trigger ?? 'onChange';
@@ -167,8 +174,7 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
   const debounceMs = trigger === 'debounced' ? (config as { debounceMs?: number }).debounceMs : undefined;
 
   return {
-    sourceFieldKey: fieldKey,
-    targetFieldKey,
+    fieldKey: effectiveFieldKey,
     dependsOn,
     condition,
     value: config.value,
@@ -180,50 +186,6 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
     originalConfig: config,
     debugName: config.debugName,
   };
-}
-
-/**
- * Resolves a target field key, handling relative paths for array fields.
- *
- * Relative paths start with '$.' and reference siblings at the same array index.
- *
- * @param targetField - The target field specification from config
- * @param sourceFieldKey - The source field key
- * @param context - Current collection context with array path info
- * @returns Resolved target field key
- *
- * @example
- * ```typescript
- * // Absolute path - returned as-is
- * resolveTargetFieldKey('phonePrefix', 'country', {})
- * // Returns: 'phonePrefix'
- *
- * // Relative path in array context
- * resolveTargetFieldKey('$.lineTotal', 'items[0].quantity', { arrayPath: 'items' })
- * // Returns: 'items.$.lineTotal'
- * ```
- *
- * @internal
- */
-function resolveTargetFieldKey(targetField: string, _sourceFieldKey: string, context: CollectionContext): string {
-  // Check for relative path indicator
-  if (targetField.startsWith('$.')) {
-    // Extract the relative field name (after '$.')
-    const relativePath = targetField.substring(2);
-
-    if (context.arrayPath) {
-      // Replace '$' with the array path for pattern matching
-      return `${context.arrayPath}.$.${relativePath}`;
-    }
-
-    // Not in array context - keep relative path as-is.
-    // This indicates a configuration error (relative path used outside array).
-    // The runtime applicator will handle this gracefully.
-    return targetField;
-  }
-
-  // Absolute path - return as-is
-  return targetField;
 }
 
 /**

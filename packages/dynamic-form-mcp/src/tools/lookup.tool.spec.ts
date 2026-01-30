@@ -150,7 +150,7 @@ describe('Lookup Tool', () => {
       const content = (result as { content: [{ text: string }] }).content[0].text;
 
       expect(content).toContain('# Value Derivation');
-      expect(content).toContain('targetField');
+      expect(content).toContain('derivation:'); // Shorthand syntax
       expect(content).toContain('expression');
     });
 

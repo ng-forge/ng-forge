@@ -320,14 +320,15 @@ export interface CustomFnConfig {
    *
    * Field configuration using a derivation function:
    * ```typescript
+   * // Derivation is defined on the target field (currency), not the source field (country)
    * {
-   *   key: 'country',
+   *   key: 'currency',
    *   type: 'select',
    *   logic: [
    *     {
    *       type: 'derivation',
-   *       targetField: 'currency',
-   *       functionName: 'getCurrencyForCountry'
+   *       functionName: 'getCurrencyForCountry',
+   *       dependsOn: ['country']
    *     }
    *   ]
    * }

@@ -5,11 +5,11 @@ import { DerivationEntry } from './derivation-types';
 describe('derivation-sorter', () => {
   /**
    * Helper to create a derivation entry for testing.
+   * Now uses single fieldKey (self-targeting pattern).
    */
-  function createEntry(source: string, target: string, dependsOn: string[] = [source]): DerivationEntry {
+  function createEntry(fieldKey: string, dependsOn: string[] = []): DerivationEntry {
     return {
-      sourceFieldKey: source,
-      targetFieldKey: target,
+      fieldKey,
       dependsOn,
       condition: true,
       trigger: 'onChange',
@@ -24,14 +24,14 @@ describe('derivation-sorter', () => {
     });
 
     it('should return single entry unchanged', () => {
-      const entry = createEntry('a', 'b');
+      const entry = createEntry('total', ['quantity', 'price']);
       const result = topologicalSort([entry]);
       expect(result).toEqual([entry]);
     });
 
     it('should sort independent derivations (no change needed)', () => {
-      const entry1 = createEntry('a', 'b');
-      const entry2 = createEntry('c', 'd');
+      const entry1 = createEntry('fieldA', ['x']);
+      const entry2 = createEntry('fieldB', ['y']);
       const result = topologicalSort([entry1, entry2]);
 
       // Both are independent, order should be preserved
@@ -40,50 +40,52 @@ describe('derivation-sorter', () => {
     });
 
     it('should sort chain derivations in correct order', () => {
-      // Chain: a -> b -> c
-      const entry1 = createEntry('a', 'b', ['a']); // a produces b
-      const entry2 = createEntry('b', 'c', ['b']); // b produces c (depends on b)
+      // Chain: a -> subtotal -> total
+      // subtotal depends on a
+      // total depends on subtotal
+      const entrySubtotal = createEntry('subtotal', ['quantity', 'price']);
+      const entryTotal = createEntry('total', ['subtotal', 'taxRate']);
 
-      const result = topologicalSort([entry2, entry1]); // Wrong order in input
+      const result = topologicalSort([entryTotal, entrySubtotal]); // Wrong order in input
 
-      // entry1 (a->b) should come before entry2 (b->c)
-      expect(result.indexOf(entry1)).toBeLessThan(result.indexOf(entry2));
+      // entrySubtotal should come before entryTotal
+      expect(result.indexOf(entrySubtotal)).toBeLessThan(result.indexOf(entryTotal));
     });
 
     it('should sort diamond pattern correctly', () => {
-      // Diamond: a -> b, a -> c, b -> d, c -> d
-      const entry1 = createEntry('a', 'b', ['a']); // a produces b
-      const entry2 = createEntry('a', 'c', ['a']); // a produces c
-      const entry3 = createEntry('b', 'd', ['b']); // b produces d
-      const entry4 = createEntry('c', 'd', ['c']); // c produces d (also)
+      // Diamond pattern:
+      // baseAmount (no deps)
+      // discount depends on baseAmount
+      // tax depends on baseAmount
+      // total depends on discount and tax
+      const entryDiscount = createEntry('discount', ['baseAmount']);
+      const entryTax = createEntry('tax', ['baseAmount']);
+      const entryTotal = createEntry('total', ['discount', 'tax']);
 
       // Mix up the order
-      const result = topologicalSort([entry4, entry3, entry2, entry1]);
+      const result = topologicalSort([entryTotal, entryTax, entryDiscount]);
 
-      // entry1 and entry2 should come before entry3 and entry4
-      expect(result.indexOf(entry1)).toBeLessThan(result.indexOf(entry3));
-      expect(result.indexOf(entry1)).toBeLessThan(result.indexOf(entry4));
-      expect(result.indexOf(entry2)).toBeLessThan(result.indexOf(entry3));
-      expect(result.indexOf(entry2)).toBeLessThan(result.indexOf(entry4));
+      // entryDiscount and entryTax should come before entryTotal
+      expect(result.indexOf(entryDiscount)).toBeLessThan(result.indexOf(entryTotal));
+      expect(result.indexOf(entryTax)).toBeLessThan(result.indexOf(entryTotal));
     });
 
     it('should handle derivation depending on multiple fields', () => {
-      // total depends on quantity and price
-      const entry1 = createEntry('qty', 'subtotal', ['qty']);
-      const entry2 = createEntry('price', 'subtotal', ['price']); // Also targets subtotal
-      const entry3 = createEntry('subtotal', 'total', ['subtotal']); // Depends on subtotal
+      // fullName depends on firstName and lastName
+      const entryFullName = createEntry('fullName', ['firstName', 'lastName']);
+      // displayName depends on fullName
+      const entryDisplayName = createEntry('displayName', ['fullName']);
 
-      const result = topologicalSort([entry3, entry1, entry2]);
+      const result = topologicalSort([entryDisplayName, entryFullName]);
 
-      // entry3 should come after entry1 and entry2
-      expect(result.indexOf(entry1)).toBeLessThan(result.indexOf(entry3));
-      expect(result.indexOf(entry2)).toBeLessThan(result.indexOf(entry3));
+      // entryFullName should come before entryDisplayName
+      expect(result.indexOf(entryFullName)).toBeLessThan(result.indexOf(entryDisplayName));
     });
 
     it('should handle wildcard dependencies (process last)', () => {
-      const entry1 = createEntry('a', 'b', ['a']);
-      const entry2 = createEntry('*', 'c', ['*']); // Wildcard - depends on everything
-      const entry3 = createEntry('d', 'e', ['d']);
+      const entry1 = createEntry('computed1', ['field1']);
+      const entry2 = createEntry('summary', ['*']); // Wildcard - depends on everything
+      const entry3 = createEntry('computed2', ['field2']);
 
       const result = topologicalSort([entry2, entry1, entry3]);
 
@@ -93,15 +95,17 @@ describe('derivation-sorter', () => {
     });
 
     it('should handle bidirectional derivations gracefully', () => {
-      // Bidirectional: a <-> b (these form a cycle but are allowed)
-      const entry1 = createEntry('a', 'b', ['a']);
-      const entry2 = createEntry('b', 'a', ['b']);
+      // Bidirectional: amountUSD <-> amountEUR (these form a cycle but are allowed)
+      // amountUSD depends on amountEUR
+      // amountEUR depends on amountUSD
+      const entryUSD = createEntry('amountUSD', ['amountEUR']);
+      const entryEUR = createEntry('amountEUR', ['amountUSD']);
 
-      const result = topologicalSort([entry1, entry2]);
+      const result = topologicalSort([entryUSD, entryEUR]);
 
       // Both should be in result (order may vary due to cycle)
-      expect(result).toContain(entry1);
-      expect(result).toContain(entry2);
+      expect(result).toContain(entryUSD);
+      expect(result).toContain(entryEUR);
       expect(result.length).toBe(2);
     });
   });

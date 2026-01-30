@@ -105,7 +105,7 @@ describe('Examples Tool', () => {
       const content = (result as { content: [{ text: string }] }).content[0].text;
 
       expect(content).toContain('Derivation');
-      expect(content).toContain('targetField');
+      expect(content).toContain('derivation:'); // Shorthand syntax
       expect(content).toContain('expression');
     });
 

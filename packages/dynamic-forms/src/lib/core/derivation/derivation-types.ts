@@ -1,6 +1,5 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { DerivationLogicConfig, LogicTrigger } from '../../models/logic/logic-config';
-import { DERIVATION_KEY_DELIMITER } from './derivation-constants';
 
 /**
  * Entry representing a collected derivation from field definitions.
@@ -8,25 +7,20 @@ import { DERIVATION_KEY_DELIMITER } from './derivation-constants';
  * Created during form initialization when traversing field definitions
  * to collect all derivation rules (both shorthand and full logic configs).
  *
+ * All derivations are self-targeting: the `fieldKey` is both where the
+ * derivation is defined AND where the computed value will be set.
+ *
  * @public
  */
 export interface DerivationEntry {
   /**
-   * The key of the field where this derivation is defined.
+   * The key of the field where this derivation is defined and targets.
    *
-   * For shorthand derivations, this is the same as `targetFieldKey`.
-   * For full logic derivations, this is the field containing the logic array.
+   * Derivations always target the field they are defined on (self-targeting).
+   * For array fields, this may include a placeholder path like 'items.$.lineTotal'
+   * which is resolved to actual indices at runtime.
    */
-  sourceFieldKey: string;
-
-  /**
-   * The key of the field whose value will be set.
-   *
-   * Can be:
-   * - Absolute path: 'fieldName' or 'nested.field.path'
-   * - Relative path for arrays: '$.siblingField' (same index as source)
-   */
-  targetFieldKey: string;
+  fieldKey: string;
 
   /**
    * Field keys that this derivation depends on.
@@ -47,7 +41,7 @@ export interface DerivationEntry {
   condition: ConditionalExpression | boolean;
 
   /**
-   * Static value to set on the target field.
+   * Static value to set on this field.
    *
    * Mutually exclusive with `expression` and `functionName`.
    */
@@ -88,7 +82,7 @@ export interface DerivationEntry {
   /**
    * Whether this derivation was created from the shorthand `derivation` property.
    *
-   * Shorthand derivations always target the same field they're defined on.
+   * Shorthand derivations use a string expression directly on the field.
    */
   isShorthand: boolean;
 
@@ -101,7 +95,7 @@ export interface DerivationEntry {
    * Optional debug name for easier identification in logs.
    *
    * Copied from the originalConfig if provided. When set, this name
-   * appears in verbose derivation logs instead of the source→target path.
+   * appears in verbose derivation logs instead of the field key.
    */
   debugName?: string;
 }
@@ -169,7 +163,11 @@ export interface DerivationChainContext {
   /**
    * Set of derivation keys that have already been applied.
    *
-   * Key format: "sourceFieldKey:targetFieldKey"
+   * Key format: "fieldKey"
+   *
+   * For array derivations, the caller is responsible for resolving
+   * array placeholders (e.g., 'items.$.lineTotal' -> 'items.0.lineTotal')
+   * before adding to this set.
    */
   appliedDerivations: Set<string>;
 
@@ -207,33 +205,32 @@ export function createDerivationChainContext(): DerivationChainContext {
 /**
  * Creates a unique key for a derivation entry.
  *
- * Uses a null character delimiter to avoid collision with field names
- * that might contain common delimiters like ':'.
+ * Since derivations are self-targeting, the key is simply the field key.
+ * This function exists for semantic clarity and to provide a single point
+ * of change if the key format needs to be extended in the future.
  *
- * @param sourceKey - The source field key
- * @param targetKey - The target field key
+ * Note: For array derivations, callers must resolve placeholders
+ * (e.g., 'items.$.lineTotal' -> 'items.0.lineTotal') before calling this.
+ *
+ * @param fieldKey - The field key (with array index already resolved)
  * @returns Unique key for the derivation
  *
  * @internal
  */
-export function createDerivationKey(sourceKey: string, targetKey: string): string {
-  return `${sourceKey}${DERIVATION_KEY_DELIMITER}${targetKey}`;
+export function createDerivationKey(fieldKey: string): string {
+  return fieldKey;
 }
 
 /**
- * Parses a derivation key back into source and target field keys.
+ * Parses a derivation key back into field key.
  *
  * @param key - The derivation key to parse
- * @returns Object containing source and target field keys
+ * @returns Object containing the field key
  *
  * @internal
  */
-export function parseDerivationKey(key: string): { sourceKey: string; targetKey: string } {
-  const delimiterIndex = key.indexOf(DERIVATION_KEY_DELIMITER);
-  return {
-    sourceKey: key.substring(0, delimiterIndex),
-    targetKey: key.substring(delimiterIndex + DERIVATION_KEY_DELIMITER.length),
-  };
+export function parseDerivationKey(key: string): { fieldKey: string } {
+  return { fieldKey: key };
 }
 
 /**

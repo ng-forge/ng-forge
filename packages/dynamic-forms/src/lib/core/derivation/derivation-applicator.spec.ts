@@ -66,13 +66,12 @@ describe('derivation-applicator', () => {
   }
 
   /**
-   * Helper to create a derivation entry.
+   * Helper to create a derivation entry (self-targeting).
    */
-  function createEntry(source: string, target: string, options: Partial<DerivationEntry> = {}): DerivationEntry {
+  function createEntry(fieldKey: string, options: Partial<DerivationEntry> = {}): DerivationEntry {
     return {
-      sourceFieldKey: source,
-      targetFieldKey: target,
-      dependsOn: options.dependsOn ?? [source],
+      fieldKey,
+      dependsOn: options.dependsOn ?? [],
       condition: options.condition ?? true,
       value: options.value,
       expression: options.expression,
@@ -103,7 +102,7 @@ describe('derivation-applicator', () => {
         const { form, values } = createMockForm({ country: 'USA', phonePrefix: '' });
         formValueSignal.set({ country: 'USA', phonePrefix: '' });
 
-        const collection = createCollection([createEntry('country', 'phonePrefix', { condition: true, value: '+1' })]);
+        const collection = createCollection([createEntry('phonePrefix', { condition: true, value: '+1' })]);
 
         const context: DerivationApplicatorContext = {
           formValue: formValueSignal,
@@ -122,7 +121,7 @@ describe('derivation-applicator', () => {
         const { form, values } = createMockForm({ country: 'USA', phonePrefix: 'original' });
         formValueSignal.set({ country: 'USA', phonePrefix: 'original' });
 
-        const collection = createCollection([createEntry('country', 'phonePrefix', { condition: false, value: '+1' })]);
+        const collection = createCollection([createEntry('phonePrefix', { condition: false, value: '+1' })]);
 
         const context: DerivationApplicatorContext = {
           formValue: formValueSignal,
@@ -142,7 +141,7 @@ describe('derivation-applicator', () => {
         const { form } = createMockForm({ country: 'USA', phonePrefix: '+1' });
         formValueSignal.set({ country: 'USA', phonePrefix: '+1' });
 
-        const collection = createCollection([createEntry('country', 'phonePrefix', { condition: true, value: '+1' })]);
+        const collection = createCollection([createEntry('phonePrefix', { condition: true, value: '+1' })]);
 
         const context: DerivationApplicatorContext = {
           formValue: formValueSignal,
@@ -165,7 +164,7 @@ describe('derivation-applicator', () => {
         formValueSignal.set({ quantity: 2, price: 10, total: 0 });
 
         const collection = createCollection([
-          createEntry('quantity', 'total', {
+          createEntry('total', {
             expression: 'formValue.quantity * formValue.price',
             dependsOn: ['quantity', 'price'],
           }),
@@ -191,7 +190,7 @@ describe('derivation-applicator', () => {
         formValueSignal.set({ country: 'Germany', currency: '' });
 
         const collection = createCollection([
-          createEntry('country', 'currency', {
+          createEntry('currency', {
             functionName: 'getCurrency',
           }),
         ]);
@@ -220,7 +219,7 @@ describe('derivation-applicator', () => {
         formValueSignal.set({ country: 'Germany', currency: '' });
 
         const collection = createCollection([
-          createEntry('country', 'currency', {
+          createEntry('currency', {
             functionName: 'unknownFunction',
           }),
         ]);
@@ -250,8 +249,8 @@ describe('derivation-applicator', () => {
         formValueSignal.set({ field1: 'a', field2: 'b', target1: '', target2: '' });
 
         const collection = createCollection([
-          createEntry('field1', 'target1', { value: 'derived1', dependsOn: ['field1'] }),
-          createEntry('field2', 'target2', { value: 'derived2', dependsOn: ['field2'] }),
+          createEntry('target1', { value: 'derived1', dependsOn: ['field1'] }),
+          createEntry('target2', { value: 'derived2', dependsOn: ['field2'] }),
         ]);
 
         const context: DerivationApplicatorContext = {
@@ -279,8 +278,8 @@ describe('derivation-applicator', () => {
         formValueSignal.set({ field1: 'a', field2: 'b', target1: '', target2: '' });
 
         const collection = createCollection([
-          createEntry('field1', 'target1', { value: 'derived1', dependsOn: ['field1'] }),
-          createEntry('field2', 'target2', { value: 'derived2', dependsOn: ['field2'] }),
+          createEntry('target1', { value: 'derived1', dependsOn: ['field1'] }),
+          createEntry('target2', { value: 'derived2', dependsOn: ['field2'] }),
         ]);
 
         const context: DerivationApplicatorContext = {
@@ -300,7 +299,7 @@ describe('derivation-applicator', () => {
         const { form, values } = createMockForm({ anyField: 'x', target: '' });
         formValueSignal.set({ anyField: 'x', target: '' });
 
-        const collection = createCollection([createEntry('anyField', 'target', { value: 'wildcard', dependsOn: ['*'] })]);
+        const collection = createCollection([createEntry('target', { value: 'wildcard', dependsOn: ['*'] })]);
 
         const context: DerivationApplicatorContext = {
           formValue: formValueSignal,
@@ -322,11 +321,9 @@ describe('derivation-applicator', () => {
         const { form, values } = createMockForm({ source: 'initial', target: '' });
         formValueSignal.set({ source: 'initial', target: '' });
 
-        // Two derivations with same source->target
-        const collection = createCollection([
-          createEntry('source', 'target', { value: 'first' }),
-          createEntry('source', 'target', { value: 'second' }),
-        ]);
+        // Two derivations with same field key (self-targeting)
+        // Only one should run - once applied, it won't apply again in same cycle
+        const collection = createCollection([createEntry('target', { value: 'first' }), createEntry('target', { value: 'second' })]);
 
         const context: DerivationApplicatorContext = {
           formValue: formValueSignal,
@@ -365,7 +362,7 @@ describe('derivation-applicator', () => {
         };
 
         // Create entries that depend on each other but with different values each time
-        const collection = createCollection([createEntry('a', 'b', { expression: 'formValue.a + "b"' })]);
+        const collection = createCollection([createEntry('b', { expression: 'formValue.a + "b"', dependsOn: ['a'] })]);
 
         const context: DerivationApplicatorContext = {
           formValue: formValueSignal,
@@ -400,11 +397,11 @@ describe('derivation-applicator', () => {
 
         const collection = createCollection([
           // Will apply
-          createEntry('field1', 'target1', { value: 'applied' }),
+          createEntry('target1', { value: 'applied' }),
           // Will skip (value unchanged)
-          createEntry('field2', 'target2', { value: 'existing' }),
+          createEntry('target2', { value: 'existing' }),
           // Will error (missing function)
-          createEntry('field2', 'target3', { functionName: 'missing' }),
+          createEntry('target3', { functionName: 'missing' }),
         ]);
 
         const context: DerivationApplicatorContext = {
@@ -509,9 +506,9 @@ describe('derivation-applicator', () => {
         globalDiscount: 0,
       });
 
-      // Derivation targeting array item field with $.
+      // Derivation defined on lineTotal field (self-targeting) within array
       const collection = createCollection([
-        createEntry('quantity', 'items.$.lineTotal', {
+        createEntry('items.$.lineTotal', {
           expression: 'formValue.quantity * formValue.unitPrice',
           dependsOn: ['quantity', 'unitPrice'],
         }),
@@ -547,7 +544,7 @@ describe('derivation-applicator', () => {
 
       // Derivation using both formValue (array item scope) and rootFormValue (form scope)
       const collection = createCollection([
-        createEntry('quantity', 'items.$.lineTotal', {
+        createEntry('items.$.lineTotal', {
           expression: 'formValue.quantity * formValue.unitPrice * (1 - rootFormValue.globalDiscount)',
           dependsOn: ['quantity', 'unitPrice', 'globalDiscount'],
         }),
@@ -582,8 +579,8 @@ describe('derivation-applicator', () => {
       formValueSignal.set({ field1: 'a', target1: '', target2: '' });
 
       const collection = createCollection([
-        createEntry('field1', 'target1', { value: 'onChange', trigger: 'onChange' }),
-        createEntry('field1', 'target2', { value: 'onBlur', trigger: 'onBlur' }),
+        createEntry('target1', { value: 'onChange', trigger: 'onChange' }),
+        createEntry('target2', { value: 'debounced', trigger: 'debounced' }),
       ]);
 
       const context: DerivationApplicatorContext = {
@@ -599,13 +596,13 @@ describe('derivation-applicator', () => {
       expect(values.target2).toBe(''); // Not processed
     });
 
-    it('should only process onBlur derivations when trigger is onBlur', () => {
+    it('should only process debounced derivations when trigger is debounced', () => {
       const { form, values } = createMockForm({ field1: 'a', target1: '', target2: '' });
       formValueSignal.set({ field1: 'a', target1: '', target2: '' });
 
       const collection = createCollection([
-        createEntry('field1', 'target1', { value: 'onChange', trigger: 'onChange' }),
-        createEntry('field1', 'target2', { value: 'onBlur', trigger: 'onBlur' }),
+        createEntry('target1', { value: 'onChange', trigger: 'onChange' }),
+        createEntry('target2', { value: 'debounced', trigger: 'debounced' }),
       ]);
 
       const context: DerivationApplicatorContext = {
@@ -615,17 +612,17 @@ describe('derivation-applicator', () => {
         derivationLogger: createMockDerivationLogger(),
       };
 
-      applyDerivationsForTrigger(collection, 'onBlur', context);
+      applyDerivationsForTrigger(collection, 'debounced', context);
 
       expect(values.target1).toBe(''); // Not processed
-      expect(values.target2).toBe('onBlur');
+      expect(values.target2).toBe('debounced');
     });
 
     it('should handle empty filtered collection', () => {
       const { form } = createMockForm({ field1: 'a', target1: '' });
       formValueSignal.set({ field1: 'a', target1: '' });
 
-      const collection = createCollection([createEntry('field1', 'target1', { value: 'onBlur', trigger: 'onBlur' })]);
+      const collection = createCollection([createEntry('target1', { value: 'debounced', trigger: 'debounced' })]);
 
       const context: DerivationApplicatorContext = {
         formValue: formValueSignal,

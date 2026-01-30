@@ -65,26 +65,26 @@ The collection is intentionally minimal - lookup maps are provided via `Derivati
 
 **Shorthand vs Full Logic:**
 
+Derivations are always **self-targeting**: they compute and set the value of the field they are defined on.
+
 ```typescript
-// Shorthand: derivation property directly on field
+// Shorthand: derivation property directly on field (recommended)
 {
   key: 'total',
   type: 'input',
   derivation: 'formValue.quantity * formValue.unitPrice',
 }
-// → Creates entry where sourceFieldKey === targetFieldKey
 
-// Full logic: in logic[] array
+// Full logic: in logic[] array (for conditions, debounce, functions)
 {
-  key: 'quantity',
+  key: 'total',
   type: 'input',
   logic: [{
     type: 'derivation',
-    targetField: 'total',
     expression: 'formValue.quantity * formValue.unitPrice',
+    condition: { type: 'fieldValue', fieldPath: 'quantity', operator: 'greater', value: 0 },
   }],
 }
-// → Creates entry where sourceFieldKey !== targetFieldKey
 ```
 
 ### 2. Cycle Detector (`cycle-detector.ts`)
@@ -418,11 +418,14 @@ Form Value Updated
 
 ```typescript
 interface DerivationEntry {
-  /** Field where derivation is defined */
-  sourceFieldKey: string;
-
-  /** Field whose value will be set */
-  targetFieldKey: string;
+  /**
+   * The key of the field where this derivation is defined and targets.
+   *
+   * Derivations always target the field they are defined on (self-targeting).
+   * For array fields, this may include a placeholder path like 'items.$.lineTotal'
+   * which is resolved to actual indices at runtime.
+   */
+  fieldKey: string;
 
   /** Field keys this derivation depends on */
   dependsOn: string[]; // ['quantity', 'unitPrice'] or ['*'] for wildcard
@@ -471,19 +474,25 @@ Dependencies are automatically extracted from expressions:
 **Wildcard dependencies (`*`):** Custom functions without explicit `dependsOn` default to wildcard, meaning they run on every form change.
 
 ```typescript
+// On the 'total' field:
+
 // Wildcard - runs on any change (performance warning in dev mode)
 {
-  type: 'derivation',
-  targetField: 'total',
-  functionName: 'calculateTotal',
+  key: 'total',
+  logic: [{
+    type: 'derivation',
+    functionName: 'calculateTotal',
+  }],
 }
 
 // Explicit - only runs when quantity or price changes
 {
-  type: 'derivation',
-  targetField: 'total',
-  functionName: 'calculateTotal',
-  dependsOn: ['quantity', 'price'],
+  key: 'total',
+  logic: [{
+    type: 'derivation',
+    functionName: 'calculateTotal',
+    dependsOn: ['quantity', 'price'],
+  }],
 }
 ```
 
@@ -496,7 +505,7 @@ These run on EVERY form change, which may impact performance (form has 25 fields
 
 ## Array Field Derivations
 
-Array derivations use `$` as a placeholder for the array index:
+Array derivations use `$` as a placeholder for the array index in the internal `fieldKey`:
 
 ```typescript
 // Configuration
@@ -513,7 +522,7 @@ Array derivations use `$` as a placeholder for the array index:
     },
   ],
 }
-// lineTotal becomes targetFieldKey: 'lineItems.$.lineTotal'
+// Internal fieldKey becomes: 'lineItems.$.lineTotal'
 ```
 
 **At runtime:**
@@ -557,7 +566,7 @@ Tracks which derivations have been applied in the current cycle:
 
 ```typescript
 interface DerivationChainContext {
-  appliedDerivations: Set<string>; // "source\0target" keys
+  appliedDerivations: Set<string>; // fieldKey strings
   iteration: number;
 }
 ```
@@ -569,7 +578,7 @@ Once a derivation is applied, it won't run again in the same cycle (until next f
 Skips application if the computed value equals the current value:
 
 ```typescript
-const currentValue = getNestedValue(formValue, targetFieldKey);
+const currentValue = getNestedValue(formValue, entry.fieldKey);
 if (isEqual(currentValue, newValue)) {
   return { applied: false, skipReason: 'value-unchanged' };
 }
@@ -618,7 +627,7 @@ Benefits:
 
 ### 3. Indexed Lookup Maps
 
-O(1) access via `byDependency`, `byTarget`, `bySource` maps instead of O(n) filtering:
+O(1) access via `byDependency`, `byField` maps instead of O(n) filtering:
 
 ```typescript
 // Instead of O(n) filter
@@ -683,8 +692,8 @@ Derivation - Cycle complete (onChange) { applied: 3, skipped: 2, errors: 0, iter
 ```
 Derivation - Starting cycle (onChange) with 5 derivation(s)
 Derivation - Iteration 1
-Derivation - Applied "Calculate total" { source: 'quantity', target: 'total', previousValue: 0, newValue: 150 }
-Derivation - Skipped: country -> phonePrefix (condition not met)
+Derivation - Applied "Calculate total" { field: 'total', previousValue: 0, newValue: 150 }
+Derivation - Skipped: phonePrefix (condition not met)
 Derivation - Iteration 2
 Derivation - Skipped: "Calculate total" (value unchanged)
 Derivation - Cycle complete (onChange) { applied: 1, skipped: 4, errors: 0, iterations: 2 }
@@ -693,11 +702,14 @@ Derivation - Cycle complete (onChange) { applied: 1, skipped: 4, errors: 0, iter
 Use `debugName` on derivation configs for easier identification:
 
 ```typescript
+// On the lineTotal field inside an array
 {
-  type: 'derivation',
-  debugName: 'Calculate line total',
-  targetField: '$.lineTotal',
-  expression: 'formValue.quantity * formValue.unitPrice',
+  key: 'lineTotal',
+  logic: [{
+    type: 'derivation',
+    debugName: 'Calculate line total',
+    expression: 'formValue.quantity * formValue.unitPrice',
+  }],
 }
 ```
 

@@ -451,7 +451,7 @@
       "notEmpty"
     ],
     "buttonConditions": ["formInvalid", "formSubmitting", "pageInvalid"],
-    "derivationExample": "{ type: 'derivation', targetField: 'fullName', expression: 'formValue.first + \" \" + formValue.last' }",
+    "derivationExample": "{ key: 'fullName', derivation: 'formValue.first + \" \" + formValue.last' }",
     "expressionVariables": {
       "formValue": "Complete form value object",
       "fieldValue": "Current field's value"

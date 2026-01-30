@@ -12,7 +12,6 @@ const config = {
       logic: [
         {
           type: 'derivation',
-          targetField: 'email',
           expression: 'formValue.email.toLowerCase()',
           trigger: 'debounced',
         },
@@ -27,7 +26,6 @@ const config = {
       logic: [
         {
           type: 'derivation',
-          targetField: 'username',
           expression: 'formValue.username.trim()',
           trigger: 'debounced',
         },
@@ -43,9 +41,9 @@ const config = {
       logic: [
         {
           type: 'derivation',
-          targetField: 'phone',
           functionName: 'formatPhoneNumber',
           trigger: 'debounced',
+          dependsOn: ['phone'],
         },
       ],
     },
@@ -59,9 +57,9 @@ const config = {
       logic: [
         {
           type: 'derivation',
-          targetField: 'creditCard',
           functionName: 'maskCreditCard',
           trigger: 'debounced',
+          dependsOn: ['creditCard'],
         },
       ],
     },
