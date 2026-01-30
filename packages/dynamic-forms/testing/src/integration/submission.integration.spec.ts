@@ -7,6 +7,19 @@ import { FormConfig, SubmissionConfig } from '../../models';
 import { EMPTY, firstValueFrom, isObservable, of, Subject, throwError, timer } from 'rxjs';
 import { delay, map, switchMap } from 'rxjs/operators';
 
+/**
+ * Type representing the structure of field validation errors returned by errors().
+ * Errors may have kind/message at top level or nested in an 'error' property.
+ */
+interface FieldValidationError {
+  kind?: string;
+  message?: string;
+  error?: {
+    kind?: string;
+    message?: string;
+  };
+}
+
 describe('Form Submission Integration', () => {
   let injector: Injector;
   let rootFormRegistry: RootFormRegistryService;
@@ -136,11 +149,11 @@ describe('Form Submission Integration', () => {
 
         // Server error should be applied
         // The errors() method returns the field's errors directly
-        const errors = formInstance.username().errors();
+        const errors = formInstance.username().errors() as FieldValidationError[];
         // Check that there's at least one error with the expected kind and message
         expect(errors.length).toBeGreaterThan(0);
         const hasServerError = errors.some(
-          (e: any) =>
+          (e: FieldValidationError) =>
             (e.kind === 'server' && e.message === 'Username taken') ||
             (e.error?.kind === 'server' && e.error?.message === 'Username taken'),
         );
@@ -206,6 +219,7 @@ describe('Form Submission Integration', () => {
           return result;
         };
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Testing edge case with invalid return type
         await submit(formInstance, wrappedAction as any);
 
         // Non-TreeValidationResult returns are treated as success
@@ -237,10 +251,10 @@ describe('Form Submission Integration', () => {
 
         await submit(formInstance, wrappedAction);
 
-        const errors = formInstance.username().errors();
+        const errors = formInstance.username().errors() as FieldValidationError[];
         expect(errors.length).toBeGreaterThan(0);
         const hasServerError = errors.some(
-          (e: any) =>
+          (e: FieldValidationError) =>
             (e.kind === 'server' && e.message === 'Username taken') ||
             (e.error?.kind === 'server' && e.error?.message === 'Username taken'),
         );
@@ -513,9 +527,8 @@ describe('Form Submission Integration', () => {
         rootFormRegistry.registerRootForm(formInstance);
 
         // Submit with action returning null (treated as success)
-        await submit(formInstance, async () => {
-          return null as any;
-        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Testing edge case with null return
+        await submit(formInstance, async () => null as any);
 
         // Should complete without errors
         expect(formInstance().submitting()).toBe(false);
