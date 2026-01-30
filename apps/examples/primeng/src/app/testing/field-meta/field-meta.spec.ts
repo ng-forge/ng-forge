@@ -168,4 +168,99 @@ test.describe('Field Meta Attribute Tests', () => {
       expect(submittedData['commentsTextarea']).toBe('Test comments here');
     });
   });
+
+  test.describe('Meta Attribute Persistence Tests', () => {
+    test('should persist meta attributes after form interactions', async ({ page, helpers }) => {
+      // Navigate to native elements test
+      await page.goto('/#/test/field-meta/native-elements');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('meta-native-elements-test');
+      await expect(scenario).toBeVisible();
+
+      // Get email input and verify initial meta attributes
+      // PrimeNG input uses native input element with pInputText directive
+      const emailInput = scenario.locator('#emailInput input');
+      await expect(emailInput).toHaveAttribute('data-testid', 'email-input');
+      await expect(emailInput).toHaveAttribute('autocomplete', 'email');
+
+      // Perform form interactions
+      await emailInput.fill('test@example.com');
+      await page.waitForTimeout(300);
+
+      // Verify meta attributes persist after filling
+      await expect(emailInput).toHaveAttribute('data-testid', 'email-input');
+      await expect(emailInput).toHaveAttribute('autocomplete', 'email');
+
+      // Clear and refill to test persistence through multiple interactions
+      await emailInput.clear();
+      await page.waitForTimeout(300);
+      await emailInput.fill('another@example.com');
+      await page.waitForTimeout(300);
+
+      // Verify meta attributes still persist
+      await expect(emailInput).toHaveAttribute('data-testid', 'email-input');
+      await expect(emailInput).toHaveAttribute('autocomplete', 'email');
+
+      // Test other fields as well
+      const passwordInput = scenario.locator('#passwordInput input');
+      await passwordInput.fill('password123');
+      await page.waitForTimeout(300);
+
+      // Verify password input meta attributes persist
+      await expect(passwordInput).toHaveAttribute('data-testid', 'password-input');
+      await expect(passwordInput).toHaveAttribute('autocomplete', 'current-password');
+    });
+
+    test('should persist meta attributes on wrapped components after interactions', async ({ page, helpers }) => {
+      // Navigate to wrapped components test
+      await page.goto('/#/test/field-meta/wrapped-components');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('meta-wrapped-components-test');
+      await expect(scenario).toBeVisible();
+
+      // Test checkbox - click to toggle
+      // PrimeNG p-checkbox uses input[type="checkbox"] internally
+      const checkboxInput = scenario.locator('#termsCheckbox input[type="checkbox"]');
+      await expect(checkboxInput).toHaveAttribute('data-testid', 'terms-checkbox-input');
+      await scenario.locator('#termsCheckbox p-checkbox').click();
+      await page.waitForTimeout(300);
+
+      // Verify meta persists after click
+      await expect(checkboxInput).toHaveAttribute('data-testid', 'terms-checkbox-input');
+      await expect(checkboxInput).toHaveAttribute('data-analytics', 'terms-acceptance');
+
+      // Click again to toggle back
+      await scenario.locator('#termsCheckbox p-checkbox').click();
+      await page.waitForTimeout(300);
+
+      // Verify meta still persists
+      await expect(checkboxInput).toHaveAttribute('data-testid', 'terms-checkbox-input');
+
+      // Test toggle component
+      // PrimeNG p-toggleSwitch uses input[type="checkbox"] internally
+      const toggleInput = scenario.locator('#notificationsToggle input[type="checkbox"]');
+      await expect(toggleInput).toHaveAttribute('data-testid', 'notifications-toggle-input');
+      await scenario.locator('#notificationsToggle p-toggleswitch').click();
+      await page.waitForTimeout(300);
+
+      // Verify meta persists on toggle
+      await expect(toggleInput).toHaveAttribute('data-testid', 'notifications-toggle-input');
+      await expect(toggleInput).toHaveAttribute('data-analytics', 'notification-setting');
+
+      // Test select component
+      // Meta is applied to the df-prime-select-control wrapper which contains p-select
+      const selectHost = scenario.locator('#countrySelect df-prime-select-control');
+      await expect(selectHost).toHaveAttribute('data-testid', 'country-select-host');
+      await scenario.locator('#countrySelect p-select').click();
+      // PrimeNG uses listbox with option elements
+      await page.getByRole('option', { name: 'United States' }).click();
+      await page.waitForTimeout(300);
+
+      // Verify meta persists after selection
+      await expect(selectHost).toHaveAttribute('data-testid', 'country-select-host');
+      await expect(selectHost).toHaveAttribute('data-analytics', 'country-selection');
+    });
+  });
 });

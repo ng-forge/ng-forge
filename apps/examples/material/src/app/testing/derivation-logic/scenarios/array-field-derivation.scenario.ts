@@ -60,6 +60,13 @@ const config = {
       props: { color: 'primary' },
     },
     {
+      key: 'removeLineItem',
+      type: 'removeArrayItem',
+      arrayKey: 'lineItems',
+      label: 'Remove Last Item',
+      props: { color: 'warn' },
+    },
+    {
       key: 'submit',
       type: 'submit',
       label: 'Submit',

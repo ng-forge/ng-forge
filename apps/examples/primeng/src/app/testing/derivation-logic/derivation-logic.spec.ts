@@ -519,5 +519,142 @@ test.describe('Value Derivation Logic Tests', () => {
       // Verify second item is still correct (quantity=3, unitPrice=30, lineTotal=90)
       await expect(secondLineTotal).toHaveValue('90');
     });
+
+    test('should add array item and verify derivation calculates correctly', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-field-derivation-test');
+      await expect(scenario).toBeVisible();
+
+      const lineTotalInputs = scenario.locator('#lineTotal input');
+      const addButton = scenario.locator('#addLineItem button');
+
+      // Initial: 2 items
+      await expect(lineTotalInputs).toHaveCount(2);
+
+      // Click add button to add a new item
+      await addButton.click();
+      await page.waitForTimeout(500);
+
+      // Should now have 3 items
+      await expect(lineTotalInputs).toHaveCount(3);
+
+      // Fill the new item's quantity and unit price
+      const quantityInputs = scenario.locator('#quantity input');
+      const unitPriceInputs = scenario.locator('#unitPrice input');
+      const newQuantity = quantityInputs.nth(2);
+      const newUnitPrice = unitPriceInputs.nth(2);
+      const newLineTotal = lineTotalInputs.nth(2);
+
+      // Fill new item: quantity=4, unitPrice=25
+      await helpers.clearAndFill(newQuantity, '4');
+      await page.waitForTimeout(300);
+      await helpers.clearAndFill(newUnitPrice, '25');
+      await page.waitForTimeout(500);
+
+      // Verify new item's lineTotal = 4 * 25 = 100
+      await expect(newLineTotal).toHaveValue('100');
+
+      // Verify existing items are unaffected
+      const firstLineTotal = lineTotalInputs.nth(0);
+      const secondLineTotal = lineTotalInputs.nth(1);
+      await expect(firstLineTotal).toHaveValue('100'); // 2 * 50
+      await expect(secondLineTotal).toHaveValue('90'); // 3 * 30
+    });
+
+    test('should remove array item and verify remaining derivations', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-field-derivation-test');
+      await expect(scenario).toBeVisible();
+
+      const lineTotalInputs = scenario.locator('#lineTotal input');
+      const removeButton = scenario.locator('#removeLineItem button');
+
+      // Initial: 2 items
+      await expect(lineTotalInputs).toHaveCount(2);
+
+      // Verify initial values
+      const firstLineTotal = lineTotalInputs.nth(0);
+      const secondLineTotal = lineTotalInputs.nth(1);
+      await expect(firstLineTotal).toHaveValue('100'); // 2 * 50
+      await expect(secondLineTotal).toHaveValue('90'); // 3 * 30
+
+      // Remove last item
+      await removeButton.click();
+      await page.waitForTimeout(500);
+
+      // Should now have 1 item
+      await expect(lineTotalInputs).toHaveCount(1);
+
+      // Verify remaining item still has correct derivation
+      await expect(firstLineTotal).toHaveValue('100'); // 2 * 50
+    });
+
+    test('should clear all items and re-add with correct derivations', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-field-derivation-test');
+      await expect(scenario).toBeVisible();
+
+      const lineTotalInputs = scenario.locator('#lineTotal input');
+      const addButton = scenario.locator('#addLineItem button');
+      const removeButton = scenario.locator('#removeLineItem button');
+
+      // Remove all items
+      await removeButton.click();
+      await page.waitForTimeout(300);
+      await removeButton.click();
+      await page.waitForTimeout(500);
+
+      // Should have 0 items
+      await expect(lineTotalInputs).toHaveCount(0);
+
+      // Add new item
+      await addButton.click();
+      await page.waitForTimeout(500);
+
+      // Should have 1 item
+      await expect(lineTotalInputs).toHaveCount(1);
+
+      // Fill the new item
+      const quantityInputs = scenario.locator('#quantity input');
+      const unitPriceInputs = scenario.locator('#unitPrice input');
+      await helpers.clearAndFill(quantityInputs.nth(0), '10');
+      await page.waitForTimeout(300);
+      await helpers.clearAndFill(unitPriceInputs.nth(0), '15');
+      await page.waitForTimeout(500);
+
+      // Verify derivation works on fresh item: 10 * 15 = 150
+      await expect(lineTotalInputs.nth(0)).toHaveValue('150');
+    });
+
+    test('should maintain independence of array item derivations', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-field-derivation-test');
+      await expect(scenario).toBeVisible();
+
+      const quantityInputs = scenario.locator('#quantity input');
+      const lineTotalInputs = scenario.locator('#lineTotal input');
+
+      // Verify initial state
+      const firstLineTotal = lineTotalInputs.nth(0);
+      const secondLineTotal = lineTotalInputs.nth(1);
+      await expect(firstLineTotal).toHaveValue('100'); // 2 * 50
+      await expect(secondLineTotal).toHaveValue('90'); // 3 * 30
+
+      // Modify second item only
+      await helpers.clearAndFill(quantityInputs.nth(1), '10');
+      await page.waitForTimeout(500);
+
+      // Second item should update: 10 * 30 = 300
+      await expect(secondLineTotal).toHaveValue('300');
+
+      // First item should remain unchanged
+      await expect(firstLineTotal).toHaveValue('100');
+
+      // Now modify first item
+      await helpers.clearAndFill(quantityInputs.nth(0), '7');
+      await page.waitForTimeout(500);
+
+      // First item should update: 7 * 50 = 350
+      await expect(firstLineTotal).toHaveValue('350');
+
+      // Second item should remain at its updated value
+      await expect(secondLineTotal).toHaveValue('300');
+    });
   });
 });
