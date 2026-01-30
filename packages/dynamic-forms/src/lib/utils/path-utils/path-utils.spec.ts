@@ -213,9 +213,21 @@ describe('path-utils', () => {
       expect(() => resolveMultiArrayPath('orders.$.items.$.quantity', [0, 1, 2])).toThrow(/Too many indices provided/);
     });
 
+    it('should throw error when indices provided for single placeholder path exceeds count', () => {
+      expect(() => resolveMultiArrayPath('items.$.name', [0, 1])).toThrow(/Too many indices provided/);
+    });
+
+    it('should throw error when no indices provided for path with placeholders', () => {
+      expect(() => resolveMultiArrayPath('items.$.name', [])).toThrow(/Not enough indices provided/);
+    });
+
     it('should handle path with no placeholders', () => {
       const result = resolveMultiArrayPath('simpleField', []);
       expect(result).toBe('simpleField');
+    });
+
+    it('should throw error when indices provided for path without placeholders', () => {
+      expect(() => resolveMultiArrayPath('simpleField', [0])).toThrow(/Too many indices provided/);
     });
   });
 
