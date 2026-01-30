@@ -143,3 +143,34 @@ export const DEFAULT_VALIDATION_MESSAGES = new InjectionToken<Signal<ValidationM
  * ```
  */
 export const FORM_OPTIONS = new InjectionToken<Signal<FormOptions | undefined>>('FORM_OPTIONS');
+
+/**
+ * Injection token for external data signals.
+ *
+ * External data provides a way to inject application state into form expressions.
+ * Each property in the record is a Signal that gets unwrapped and made available
+ * in the `EvaluationContext` under `externalData`.
+ *
+ * Like DEFAULT_PROPS, this token is provided ONCE at the DynamicForm level
+ * and inherited by all children via Angular's hierarchical injector.
+ *
+ * The token provides a Signal containing the external data record, which itself
+ * contains Signals. This allows the form to react to changes in which external
+ * data is available (outer Signal) and to changes in the external data values
+ * (inner Signals).
+ *
+ * @example
+ * ```typescript
+ * // In FieldContextRegistryService
+ * const externalDataSignal = inject(EXTERNAL_DATA, { optional: true });
+ *
+ * // When creating evaluation context:
+ * const externalDataRecord = externalDataSignal?.();
+ * const resolvedExternalData = externalDataRecord
+ *   ? Object.fromEntries(
+ *       Object.entries(externalDataRecord).map(([k, v]) => [k, v()])
+ *     )
+ *   : {};
+ * ```
+ */
+export const EXTERNAL_DATA = new InjectionToken<Signal<Record<string, Signal<unknown>> | undefined>>('EXTERNAL_DATA');

@@ -436,6 +436,177 @@ describe('condition-evaluator', () => {
       });
     });
 
+    describe('externalData in JavaScript expressions', () => {
+      it('should access externalData properties in JavaScript expressions', () => {
+        const contextWithExternalData: EvaluationContext = {
+          ...mockContext,
+          externalData: {
+            userRole: 'admin',
+            permissions: ['read', 'write', 'delete'],
+          },
+        };
+
+        const expression: ConditionalExpression = {
+          type: 'javascript',
+          expression: "externalData.userRole === 'admin'",
+        };
+
+        const result = evaluateCondition(expression, contextWithExternalData);
+        expect(result).toBe(true);
+      });
+
+      it('should access nested externalData properties', () => {
+        const contextWithExternalData: EvaluationContext = {
+          ...mockContext,
+          externalData: {
+            user: {
+              settings: {
+                theme: 'dark',
+                notifications: true,
+              },
+            },
+          },
+        };
+
+        const expression: ConditionalExpression = {
+          type: 'javascript',
+          expression: "externalData.user.settings.theme === 'dark'",
+        };
+
+        const result = evaluateCondition(expression, contextWithExternalData);
+        expect(result).toBe(true);
+      });
+
+      it('should combine externalData with formValue in conditions', () => {
+        const contextWithExternalData: EvaluationContext = {
+          ...mockContext,
+          externalData: {
+            minimumAge: 21,
+          },
+        };
+
+        const expression: ConditionalExpression = {
+          type: 'javascript',
+          expression: 'formValue.age >= externalData.minimumAge',
+        };
+
+        const result = evaluateCondition(expression, contextWithExternalData);
+        expect(result).toBe(true); // age is 25, minimumAge is 21
+      });
+
+      it('should handle array methods on externalData arrays', () => {
+        const contextWithExternalData: EvaluationContext = {
+          ...mockContext,
+          externalData: {
+            allowedCountries: ['USA', 'Canada', 'UK'],
+          },
+        };
+
+        const contextWithCountry: EvaluationContext = {
+          ...contextWithExternalData,
+          formValue: {
+            ...mockContext.formValue,
+            country: 'USA',
+          },
+        };
+
+        const expression: ConditionalExpression = {
+          type: 'javascript',
+          expression: 'externalData.allowedCountries.includes(formValue.country)',
+        };
+
+        const result = evaluateCondition(expression, contextWithCountry);
+        expect(result).toBe(true);
+      });
+
+      it('should return false when externalData is undefined', () => {
+        const contextWithoutExternalData: EvaluationContext = {
+          ...mockContext,
+          externalData: undefined,
+        };
+
+        // When externalData is undefined, accessing .userRole returns undefined
+        // and undefined === 'admin' is false
+        const expression: ConditionalExpression = {
+          type: 'javascript',
+          expression: "externalData.userRole === 'admin'",
+        };
+
+        // The expression parser returns false when accessing property on undefined
+        const result = evaluateCondition(expression, contextWithoutExternalData);
+        expect(result).toBe(false);
+      });
+
+      it('should return false when externalData property is undefined', () => {
+        const contextWithExternalData: EvaluationContext = {
+          ...mockContext,
+          externalData: {
+            someOtherProperty: 'value',
+          },
+        };
+
+        // When userRole doesn't exist, the comparison returns false
+        const expression: ConditionalExpression = {
+          type: 'javascript',
+          expression: "externalData.userRole === 'admin'",
+        };
+
+        const result = evaluateCondition(expression, contextWithExternalData);
+        expect(result).toBe(false);
+      });
+
+      it('should handle boolean externalData properties', () => {
+        const contextWithExternalData: EvaluationContext = {
+          ...mockContext,
+          externalData: {
+            featureFlags: {
+              advancedMode: true,
+              betaFeatures: false,
+            },
+          },
+        };
+
+        const expressionTrue: ConditionalExpression = {
+          type: 'javascript',
+          expression: 'externalData.featureFlags.advancedMode === true',
+        };
+
+        const expressionFalse: ConditionalExpression = {
+          type: 'javascript',
+          expression: 'externalData.featureFlags.betaFeatures === true',
+        };
+
+        expect(evaluateCondition(expressionTrue, contextWithExternalData)).toBe(true);
+        expect(evaluateCondition(expressionFalse, contextWithExternalData)).toBe(false);
+      });
+
+      it('should work with custom functions that access externalData', () => {
+        const hasPermission = vi.fn((context: EvaluationContext) => {
+          const permissions = context.externalData?.permissions as string[] | undefined;
+          return permissions?.includes('admin') ?? false;
+        });
+
+        const contextWithExternalData: EvaluationContext = {
+          ...mockContext,
+          externalData: {
+            permissions: ['read', 'write', 'admin'],
+          },
+          customFunctions: {
+            hasPermission,
+          },
+        };
+
+        const expression: ConditionalExpression = {
+          type: 'custom',
+          expression: 'hasPermission',
+        };
+
+        const result = evaluateCondition(expression, contextWithExternalData);
+        expect(result).toBe(true);
+        expect(hasPermission).toHaveBeenCalledWith(contextWithExternalData);
+      });
+    });
+
     describe('edge cases and error handling', () => {
       it('should handle null context values gracefully', () => {
         const nullContext: EvaluationContext = {

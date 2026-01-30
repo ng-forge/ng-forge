@@ -85,6 +85,12 @@ export default [
     loadChildren: () => import('./expression-based-logic/expression-based-logic.routes'),
   },
 
+  // External Data Tests - Conditional logic based on external application state
+  {
+    path: 'external-data',
+    loadChildren: () => import('./external-data/external-data.routes'),
+  },
+
   // Field Meta Tests - Tests for meta attribute passthrough
   {
     path: 'field-meta',

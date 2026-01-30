@@ -1,3 +1,4 @@
+import { Signal } from '@angular/core';
 import { InferFormValue } from './types/form-value-inference';
 import { NarrowFields, RegisteredFieldTypes } from './registry/field-registry';
 import { SchemaDefinition } from './schemas/schema-definition';
@@ -198,6 +199,55 @@ export interface FormConfig<
    * ```
    */
   defaultProps?: TProps;
+
+  /**
+   * External data signals available to conditional logic and derivations.
+   *
+   * Provides a way to inject external application state into form expressions.
+   * Each property is a Signal that will be unwrapped and made available in the
+   * `EvaluationContext` under `externalData`.
+   *
+   * The signals are read reactively in logic functions (when/readonly/disabled)
+   * so changes to the external data will trigger re-evaluation of conditions.
+   *
+   * @example
+   * ```typescript
+   * const config: FormConfig = {
+   *   externalData: {
+   *     userRole: computed(() => this.authService.currentRole()),
+   *     permissions: computed(() => this.authService.permissions()),
+   *     featureFlags: computed(() => this.featureFlagService.flags()),
+   *   },
+   *   fields: [
+   *     {
+   *       type: 'input',
+   *       key: 'adminField',
+   *       label: 'Admin Only Field',
+   *       logic: [{
+   *         effect: 'show',
+   *         condition: {
+   *           type: 'javascript',
+   *           expression: "externalData.userRole === 'admin'"
+   *         }
+   *       }]
+   *     },
+   *     {
+   *       type: 'select',
+   *       key: 'advancedOption',
+   *       label: 'Advanced Option',
+   *       logic: [{
+   *         effect: 'show',
+   *         condition: {
+   *           type: 'javascript',
+   *           expression: "externalData.featureFlags.advancedMode === true"
+   *         }
+   *       }]
+   *     }
+   *   ]
+   * };
+   * ```
+   */
+  externalData?: Record<string, Signal<unknown>>;
 }
 
 /**
