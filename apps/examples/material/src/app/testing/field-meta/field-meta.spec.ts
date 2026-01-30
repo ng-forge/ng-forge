@@ -162,4 +162,94 @@ test.describe('Field Meta Attribute Tests', () => {
       expect(submittedData['commentsTextarea']).toBe('Test comments here');
     });
   });
+
+  test.describe('Meta Attribute Persistence Tests', () => {
+    test('should persist meta attributes after form interactions', async ({ page, helpers }) => {
+      // Navigate to native elements test
+      await page.goto('/#/test/field-meta/native-elements');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('meta-native-elements-test');
+      await expect(scenario).toBeVisible();
+
+      // Get email input and verify initial meta attributes
+      const emailInput = scenario.locator('#emailInput input');
+      await expect(emailInput).toHaveAttribute('data-testid', 'email-input');
+      await expect(emailInput).toHaveAttribute('autocomplete', 'email');
+
+      // Perform form interactions
+      await emailInput.fill('test@example.com');
+      await page.waitForTimeout(300);
+
+      // Verify meta attributes persist after filling
+      await expect(emailInput).toHaveAttribute('data-testid', 'email-input');
+      await expect(emailInput).toHaveAttribute('autocomplete', 'email');
+
+      // Clear and refill to test persistence through multiple interactions
+      await emailInput.clear();
+      await page.waitForTimeout(300);
+      await emailInput.fill('another@example.com');
+      await page.waitForTimeout(300);
+
+      // Verify meta attributes still persist
+      await expect(emailInput).toHaveAttribute('data-testid', 'email-input');
+      await expect(emailInput).toHaveAttribute('autocomplete', 'email');
+
+      // Test other fields as well
+      const passwordInput = scenario.locator('#passwordInput input');
+      await passwordInput.fill('password123');
+      await page.waitForTimeout(300);
+
+      // Verify password input meta attributes persist
+      await expect(passwordInput).toHaveAttribute('data-testid', 'password-input');
+      await expect(passwordInput).toHaveAttribute('autocomplete', 'current-password');
+    });
+
+    test('should persist meta attributes on wrapped components after interactions', async ({ page, helpers }) => {
+      // Navigate to wrapped components test
+      await page.goto('/#/test/field-meta/wrapped-components');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('meta-wrapped-components-test');
+      await expect(scenario).toBeVisible();
+
+      // Test checkbox - click to toggle
+      const checkboxInput = scenario.locator('#termsCheckbox mat-checkbox input[type="checkbox"]');
+      await expect(checkboxInput).toHaveAttribute('data-testid', 'terms-checkbox-input');
+      await scenario.locator('#termsCheckbox mat-checkbox').click();
+      await page.waitForTimeout(300);
+
+      // Verify meta persists after click
+      await expect(checkboxInput).toHaveAttribute('data-testid', 'terms-checkbox-input');
+      await expect(checkboxInput).toHaveAttribute('data-analytics', 'terms-acceptance');
+
+      // Click again to toggle back
+      await scenario.locator('#termsCheckbox mat-checkbox').click();
+      await page.waitForTimeout(300);
+
+      // Verify meta still persists
+      await expect(checkboxInput).toHaveAttribute('data-testid', 'terms-checkbox-input');
+
+      // Test toggle component
+      const toggleButton = scenario.locator('#notificationsToggle mat-slide-toggle button[role="switch"]');
+      await expect(toggleButton).toHaveAttribute('data-testid', 'notifications-toggle-input');
+      await scenario.locator('#notificationsToggle mat-slide-toggle').click();
+      await page.waitForTimeout(300);
+
+      // Verify meta persists on toggle
+      await expect(toggleButton).toHaveAttribute('data-testid', 'notifications-toggle-input');
+      await expect(toggleButton).toHaveAttribute('data-analytics', 'notification-setting');
+
+      // Test select component
+      const selectHost = scenario.locator('#countrySelect mat-select');
+      await expect(selectHost).toHaveAttribute('data-testid', 'country-select-host');
+      await selectHost.click();
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(300);
+
+      // Verify meta persists after selection
+      await expect(selectHost).toHaveAttribute('data-testid', 'country-select-host');
+      await expect(selectHost).toHaveAttribute('data-analytics', 'country-selection');
+    });
+  });
 });

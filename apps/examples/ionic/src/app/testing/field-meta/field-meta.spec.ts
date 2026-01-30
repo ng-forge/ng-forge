@@ -1,17 +1,18 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+import { testUrl } from '../shared/test-utils';
 
 setupTestLogging();
 setupConsoleCheck();
 
 test.describe('Field Meta Attribute Tests', () => {
   test.beforeEach(async ({ helpers }) => {
-    await helpers.navigateToScenario('/test/field-meta');
+    await helpers.navigateToScenario('/field-meta');
   });
 
   test.describe('Wrapped Components Meta Test', () => {
     test('should propagate meta attributes to native input elements in wrapped components', async ({ page, helpers }) => {
       // Navigate to the wrapped components test
-      await page.goto('/#/test/field-meta/wrapped-components');
+      await page.goto(testUrl('/field-meta/wrapped-components'));
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -104,7 +105,7 @@ test.describe('Field Meta Attribute Tests', () => {
   test.describe('Native Elements Meta Test', () => {
     test('should apply meta attributes to native input and textarea elements', async ({ page, helpers }) => {
       // Navigate to the native elements test
-      await page.goto('/#/test/field-meta/native-elements');
+      await page.goto(testUrl('/field-meta/native-elements'));
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -178,6 +179,104 @@ test.describe('Field Meta Attribute Tests', () => {
       expect(submittedData['emailInput']).toBe('test@example.com');
       expect(submittedData['passwordInput']).toBe('password123');
       expect(submittedData['commentsTextarea']).toBe('Test comments here');
+    });
+  });
+
+  test.describe('Meta Attribute Persistence Tests', () => {
+    test('should persist meta attributes after form interactions', async ({ page, helpers }) => {
+      // Navigate to native elements test
+      await page.goto(testUrl('/field-meta/native-elements'));
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('meta-native-elements-test');
+      await expect(scenario).toBeVisible();
+
+      // Get email input and verify initial meta attributes
+      // Ionic applies meta to ion-input via setupMetaTracking with selector: 'ion-input'
+      const emailInput = scenario.locator('#emailInput ion-input');
+      await expect(emailInput).toHaveAttribute('data-testid', 'email-input');
+      await expect(emailInput).toHaveAttribute('autocomplete', 'email');
+
+      // Perform form interactions - for ion-input, interact with the native input inside
+      await emailInput.click();
+      await emailInput.locator('input').fill('test@example.com');
+      await page.waitForTimeout(300);
+
+      // Verify meta attributes persist after filling
+      await expect(emailInput).toHaveAttribute('data-testid', 'email-input');
+      await expect(emailInput).toHaveAttribute('autocomplete', 'email');
+
+      // Clear and refill to test persistence through multiple interactions
+      await emailInput.locator('input').clear();
+      await page.waitForTimeout(300);
+      await emailInput.locator('input').fill('another@example.com');
+      await page.waitForTimeout(300);
+
+      // Verify meta attributes still persist
+      await expect(emailInput).toHaveAttribute('data-testid', 'email-input');
+      await expect(emailInput).toHaveAttribute('autocomplete', 'email');
+
+      // Test other fields as well
+      const passwordInput = scenario.locator('#passwordInput ion-input');
+      await passwordInput.click();
+      await passwordInput.locator('input').fill('password123');
+      await page.waitForTimeout(300);
+
+      // Verify password input meta attributes persist
+      await expect(passwordInput).toHaveAttribute('data-testid', 'password-input');
+      await expect(passwordInput).toHaveAttribute('autocomplete', 'current-password');
+    });
+
+    test('should persist meta attributes on wrapped components after interactions', async ({ page, helpers }) => {
+      // Navigate to wrapped components test
+      await page.goto(testUrl('/field-meta/wrapped-components'));
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('meta-wrapped-components-test');
+      await expect(scenario).toBeVisible();
+
+      // Test checkbox - click to toggle
+      // Ionic applies meta to ion-checkbox via setupMetaTracking with selector: 'ion-checkbox'
+      const checkboxElement = scenario.locator('#termsCheckbox ion-checkbox');
+      await expect(checkboxElement).toHaveAttribute('data-testid', 'terms-checkbox-input');
+      await checkboxElement.click();
+      await page.waitForTimeout(300);
+
+      // Verify meta persists after click
+      await expect(checkboxElement).toHaveAttribute('data-testid', 'terms-checkbox-input');
+      await expect(checkboxElement).toHaveAttribute('data-analytics', 'terms-acceptance');
+
+      // Click again to toggle back
+      await checkboxElement.click();
+      await page.waitForTimeout(300);
+
+      // Verify meta still persists
+      await expect(checkboxElement).toHaveAttribute('data-testid', 'terms-checkbox-input');
+
+      // Test toggle component
+      // Ionic applies meta to ion-toggle via setupMetaTracking with selector: 'ion-toggle'
+      const toggleElement = scenario.locator('#notificationsToggle ion-toggle');
+      await expect(toggleElement).toHaveAttribute('data-testid', 'notifications-toggle-input');
+      await toggleElement.click();
+      await page.waitForTimeout(300);
+
+      // Verify meta persists on toggle
+      await expect(toggleElement).toHaveAttribute('data-testid', 'notifications-toggle-input');
+      await expect(toggleElement).toHaveAttribute('data-analytics', 'notification-setting');
+
+      // Test select component
+      // Ionic applies meta to host element by default (no specific selector)
+      const selectHost = scenario.locator('#countrySelect ion-select');
+      await expect(selectHost).toHaveAttribute('data-testid', 'country-select-host');
+      await selectHost.click();
+      // Wait for the alert/popover to appear and select an option
+      await page.locator('ion-alert button').filter({ hasText: 'United States' }).click();
+      await page.locator('ion-alert button').filter({ hasText: 'OK' }).click();
+      await page.waitForTimeout(300);
+
+      // Verify meta persists after selection
+      await expect(selectHost).toHaveAttribute('data-testid', 'country-select-host');
+      await expect(selectHost).toHaveAttribute('data-analytics', 'country-selection');
     });
   });
 });

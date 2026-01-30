@@ -60,6 +60,13 @@ const config = {
       props: { severity: 'primary' },
     },
     {
+      key: 'removeLineItem',
+      type: 'removeArrayItem',
+      arrayKey: 'lineItems',
+      label: 'Remove Last Item',
+      props: { severity: 'danger' },
+    },
+    {
       key: 'submit',
       type: 'submit',
       label: 'Submit',
