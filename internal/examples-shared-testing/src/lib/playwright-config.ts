@@ -102,12 +102,16 @@ export function createPlaywrightConfig(configFileUrl: string, appName: ExampleAp
     /* Configure snapshot path template */
     snapshotPathTemplate: '{snapshotDir}/{testFileDir}/{testFileName}-snapshots/{arg}{ext}',
     /* Run your local dev server before starting the tests */
+    /* In CI/Docker: use serve-static (expects pre-built app) for fast startup */
+    /* Locally: use serve for hot reload during development */
     webServer: {
-      command: `pnpm exec nx run ${appName}:serve --port ${port}`,
+      command: process.env['CI']
+        ? `pnpm exec nx run ${appName}:serve-static --port ${port}`
+        : `pnpm exec nx run ${appName}:serve --port ${port}`,
       url: `http://localhost:${port}`,
       reuseExistingServer: true,
       cwd: workspaceRoot,
-      /* Allow longer startup time in Docker environments */
+      /* Allow longer startup time in Docker/CI environments */
       timeout: 180000,
     },
     projects: getProjects(),
