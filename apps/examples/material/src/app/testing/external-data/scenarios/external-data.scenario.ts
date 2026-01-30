@@ -105,7 +105,7 @@ export class ExternalDataScenarioComponent {
   readonly formValue = signal<Record<string, unknown>>({});
 
   // Form config with externalData - static object since signals handle reactivity internally
-  readonly config: FormConfig = {
+  readonly config = {
     externalData: {
       userRole: this.userRole,
       featureFlags: computed(() => ({
@@ -207,7 +207,7 @@ export class ExternalDataScenarioComponent {
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   setUserRole(role: 'guest' | 'user' | 'admin'): void {
     this.userRole.set(role);
