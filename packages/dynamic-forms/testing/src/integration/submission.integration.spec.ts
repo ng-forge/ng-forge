@@ -575,5 +575,165 @@ describe('Form Submission Integration', () => {
         expect(formInstance().submitting()).toBe(false);
       });
     });
+
+    it('should handle synchronous exception in action', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal({ email: 'test@example.com' });
+        const formInstance = form(formValue);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        // Action that throws synchronously before returning Promise
+        const syncThrowingAction = () => {
+          throw new Error('Sync error before async');
+        };
+
+        // The submit should propagate the error
+        await expect(submit(formInstance, syncThrowingAction)).rejects.toThrow('Sync error before async');
+
+        // Form should not be stuck in submitting state
+        expect(formInstance().submitting()).toBe(false);
+      });
+    });
+
+    it('should handle action that throws after returning Promise', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal({ email: 'test@example.com' });
+        const formInstance = form(formValue);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        // Action that returns a rejected Promise
+        const asyncThrowingAction = async () => {
+          await new Promise((resolve) => setTimeout(resolve, 10));
+          throw new Error('Async error in action');
+        };
+
+        // The submit should propagate the error
+        await expect(submit(formInstance, asyncThrowingAction)).rejects.toThrow('Async error in action');
+
+        // Form should not be stuck in submitting state
+        expect(formInstance().submitting()).toBe(false);
+      });
+    });
+
+    it('should handle Observable that errors', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal({ email: 'test@example.com' });
+        const formInstance = form(formValue);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        // Observable that emits an error
+        const errorObservable = () => throwError(() => new Error('Observable error'));
+
+        const wrappedAction = async () => {
+          const result = errorObservable();
+          if (isObservable(result)) {
+            return firstValueFrom(result);
+          }
+          return result;
+        };
+
+        // The submit should propagate the error
+        await expect(submit(formInstance, wrappedAction)).rejects.toThrow('Observable error');
+
+        // Form should not be stuck in submitting state
+        expect(formInstance().submitting()).toBe(false);
+      });
+    });
+
+    it('should handle multiple rapid submissions (switchMap behavior)', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal({ email: 'test@example.com' });
+        const formInstance = form(formValue);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        let callCount = 0;
+        const completedCalls: number[] = [];
+
+        // Slow action that takes 100ms
+        const slowAction = async () => {
+          const myCallNumber = ++callCount;
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          completedCalls.push(myCallNumber);
+          return undefined;
+        };
+
+        // Fire multiple submissions rapidly
+        const submission1 = submit(formInstance, slowAction);
+        const submission2 = submit(formInstance, slowAction);
+        const submission3 = submit(formInstance, slowAction);
+
+        // Wait for all to complete
+        await Promise.all([submission1, submission2, submission3]);
+
+        // All three should have been called (no built-in debouncing)
+        expect(callCount).toBe(3);
+        expect(completedCalls).toEqual([1, 2, 3]);
+
+        // Form should not be in submitting state
+        expect(formInstance().submitting()).toBe(false);
+      });
+    });
+
+    it('should handle undefined form value during submission', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal({ email: '' });
+        const formInstance = form(formValue);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        let capturedValue: unknown = null;
+
+        // Action that captures the form value
+        const captureAction = async (f: typeof formInstance) => {
+          capturedValue = f().value();
+          return undefined;
+        };
+
+        await submit(formInstance, captureAction);
+
+        // Empty string should be preserved, not converted to undefined
+        expect(capturedValue).toEqual({ email: '' });
+      });
+    });
+  });
+
+  describe('Observable Edge Cases', () => {
+    it('should handle Observable that emits multiple values (only first is used)', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal({ email: 'test@example.com' });
+        const formInstance = form(formValue);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        const emissions: number[] = [];
+        const subject = new Subject<undefined>();
+
+        // Observable that emits multiple times
+        const multiEmitObservable = () =>
+          subject.pipe(
+            map(() => {
+              emissions.push(emissions.length + 1);
+              return undefined;
+            }),
+          );
+
+        const wrappedAction = async () => {
+          const result = multiEmitObservable();
+          if (isObservable(result)) {
+            // Start the subscription
+            const promise = firstValueFrom(result);
+            // Emit multiple values
+            subject.next(undefined);
+            subject.next(undefined);
+            subject.next(undefined);
+            return promise;
+          }
+          return result;
+        };
+
+        await submit(formInstance, wrappedAction);
+
+        // Only first emission should be captured due to firstValueFrom
+        expect(emissions).toEqual([1]);
+      });
+    });
   });
 });
