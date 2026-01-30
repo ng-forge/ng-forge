@@ -4,6 +4,9 @@ import { ConditionalExpressionSchema } from './conditional-expression.schema';
 /**
  * Schema for immediate derivation logic (evaluates on change).
  *
+ * Derivations are self-targeting: they compute and set the value
+ * of the field they are defined on.
+ *
  * Original interface:
  * ```typescript
  * interface OnChangeDerivationLogicConfig extends BaseDerivationLogicConfig {
@@ -17,13 +20,6 @@ export const OnChangeDerivationLogicConfigSchema = z.object({
    * Discriminant for derivation logic.
    */
   type: z.literal('derivation'),
-
-  /**
-   * Field path to set the derived value on.
-   * - Absolute path: 'fieldName' or 'nested.field.path'
-   * - Relative path in arrays: '$.siblingField'
-   */
-  targetField: z.string(),
 
   /**
    * Debug name for logging and troubleshooting.
@@ -68,6 +64,9 @@ export const OnChangeDerivationLogicConfigSchema = z.object({
 /**
  * Schema for debounced derivation logic (evaluates after delay).
  *
+ * Derivations are self-targeting: they compute and set the value
+ * of the field they are defined on.
+ *
  * Original interface:
  * ```typescript
  * interface DebouncedDerivationLogicConfig extends BaseDerivationLogicConfig {
@@ -81,11 +80,6 @@ export const DebouncedDerivationLogicConfigSchema = z.object({
    * Discriminant for derivation logic.
    */
   type: z.literal('derivation'),
-
-  /**
-   * Field path to set the derived value on.
-   */
-  targetField: z.string(),
 
   /**
    * Debug name for logging and troubleshooting.

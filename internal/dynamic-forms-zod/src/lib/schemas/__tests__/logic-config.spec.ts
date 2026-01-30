@@ -50,7 +50,6 @@ describe('LogicConfigSchema', () => {
     it('should validate derivation with static value', () => {
       const config = {
         type: 'derivation',
-        targetField: 'computedField',
         value: 'staticValue',
       };
       const result = LogicConfigSchema.safeParse(config);
@@ -60,7 +59,6 @@ describe('LogicConfigSchema', () => {
     it('should validate derivation with expression', () => {
       const config = {
         type: 'derivation',
-        targetField: 'total',
         expression: 'formValue.price * formValue.quantity',
         dependsOn: ['price', 'quantity'],
       };
@@ -71,7 +69,6 @@ describe('LogicConfigSchema', () => {
     it('should validate derivation with functionName', () => {
       const config = {
         type: 'derivation',
-        targetField: 'fullName',
         functionName: 'computeFullName',
         debugName: 'Full name derivation',
       };
@@ -82,7 +79,6 @@ describe('LogicConfigSchema', () => {
     it('should validate derivation with condition', () => {
       const config = {
         type: 'derivation',
-        targetField: 'discount',
         expression: 'formValue.total * 0.1',
         condition: {
           type: 'fieldValue',
@@ -98,7 +94,6 @@ describe('LogicConfigSchema', () => {
     it('should validate debounced derivation', () => {
       const config = {
         type: 'derivation',
-        targetField: 'searchResults',
         functionName: 'searchAsync',
         trigger: 'debounced',
         debounceMs: 500,
@@ -115,10 +110,11 @@ describe('LogicConfigSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should reject derivation without targetField', () => {
-      const config = { type: 'derivation', value: 'test' };
+    it('should accept derivation without value/expression/functionName (minimal config)', () => {
+      // Derivations are self-targeting, so only 'type' is required
+      const config = { type: 'derivation' };
       const result = LogicConfigSchema.safeParse(config);
-      expect(result.success).toBe(false);
+      expect(result.success).toBe(true);
     });
   });
 });

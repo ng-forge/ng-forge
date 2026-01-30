@@ -120,10 +120,14 @@ const DID_YOU_MEAN: Record<string, string> = {
   showWhen: 'Did you mean `logic: [{ type: "hidden", condition: {...} }]` with inverted condition? There is no showWhen shorthand.',
   disableWhen: 'Did you mean `logic: [{ type: "disabled", condition: {...} }]`? There is no disableWhen shorthand.',
   requiredWhen: 'Did you mean `logic: [{ type: "required", condition: {...} }]`? There is no requiredWhen shorthand.',
-  derivation: 'Did you mean `logic: [{ type: "derivation", targetField: "...", expression: "..." }]`? Derivation goes in the logic array.',
-  derive: 'Did you mean `logic: [{ type: "derivation", targetField: "...", expression: "..." }]`?',
-  computed: 'Did you mean `logic: [{ type: "derivation", targetField: "...", expression: "..." }]`?',
-  calculate: 'Did you mean `logic: [{ type: "derivation", targetField: "...", expression: "..." }]`?',
+  derivation:
+    'Derivations are defined ON the target field using shorthand (`derivation: "expression"`) or logic array (`logic: [{ type: "derivation", expression: "..." }]`).',
+  derive:
+    'Did you mean the `derivation` shorthand? Define it ON the target field: `{ key: "total", derivation: "formValue.a + formValue.b" }`',
+  computed:
+    'Did you mean the `derivation` shorthand? Define it ON the target field: `{ key: "total", derivation: "formValue.a + formValue.b" }`',
+  calculate:
+    'Did you mean the `derivation` shorthand? Define it ON the target field: `{ key: "total", derivation: "formValue.a + formValue.b" }`',
   condition: 'Did you mean to put this inside `logic: [{ type: "...", condition: {...} }]`?',
   visible: 'Did you mean `logic: [{ type: "hidden", condition: {...} }]`? Use hidden with inverted condition for visibility.',
   visibility: 'Did you mean `logic: [{ type: "hidden", condition: {...} }]`?',
