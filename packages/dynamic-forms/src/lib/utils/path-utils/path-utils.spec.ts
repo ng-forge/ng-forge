@@ -244,4 +244,147 @@ describe('path-utils', () => {
       expect(countArrayPlaceholders('orders.$.items.$.quantity')).toBe(2);
     });
   });
+
+  // ============================================================================
+  // Edge Case Tests
+  // ============================================================================
+
+  describe('edge cases', () => {
+    describe('empty and malformed inputs', () => {
+      it('parseArrayPath should handle empty string', () => {
+        const result = parseArrayPath('');
+        expect(result).toEqual({
+          arrayPath: '',
+          relativePath: '',
+          isArrayPath: false,
+        });
+      });
+
+      it('splitPath should handle consecutive dots', () => {
+        // Consecutive dots create empty segments
+        expect(splitPath('items..name')).toEqual(['items', '', 'name']);
+      });
+
+      it('splitPath should handle leading dot', () => {
+        expect(splitPath('.items.name')).toEqual(['', 'items', 'name']);
+      });
+
+      it('splitPath should handle trailing dot', () => {
+        expect(splitPath('items.name.')).toEqual(['items', 'name', '']);
+      });
+
+      it('parseArrayPath should handle just $ as path', () => {
+        const result = parseArrayPath('$');
+        expect(result).toEqual({
+          arrayPath: '',
+          relativePath: '',
+          isArrayPath: false, // No .$. separator
+        });
+      });
+
+      it('parseMultiArrayPath should handle just $ as path', () => {
+        const result = parseMultiArrayPath('$');
+        expect(result).toEqual({
+          isArrayPath: true,
+          placeholderCount: 1,
+          segments: [],
+          placeholderPositions: [0],
+        });
+      });
+
+      it('getParentPath should handle empty path', () => {
+        expect(getParentPath('')).toBe('');
+      });
+
+      it('joinPath should handle segments with dots', () => {
+        // Dots within segments are not escaped - this documents current behavior
+        expect(joinPath(['items.name', 'value'])).toBe('items.name.value');
+      });
+    });
+
+    describe('numeric edge cases', () => {
+      it('resolveArrayPath should handle negative index', () => {
+        // Negative indices are passed through - consumer's responsibility
+        const result = resolveArrayPath('items.$.name', -1);
+        expect(result).toBe('items.-1.name');
+      });
+
+      it('resolveMultiArrayPath should handle negative indices', () => {
+        const result = resolveMultiArrayPath('items.$.name', [-1]);
+        expect(result).toBe('items.-1.name');
+      });
+
+      it('resolveMultiArrayPath should handle non-integer indices', () => {
+        // Non-integers are stringified as-is
+        const result = resolveMultiArrayPath('items.$.name', [1.5]);
+        expect(result).toBe('items.1.5.name');
+      });
+
+      it('resolveArrayPath should handle index 0', () => {
+        expect(resolveArrayPath('items.$.name', 0)).toBe('items.0.name');
+      });
+
+      it('splitPath should preserve numeric string segments', () => {
+        expect(splitPath('items.123.name')).toEqual(['items', '123', 'name']);
+      });
+    });
+
+    describe('deeply nested paths', () => {
+      it('should handle very deep nesting (10 levels)', () => {
+        const deepPath = 'a.b.c.d.e.f.g.h.i.j';
+        expect(splitPath(deepPath)).toHaveLength(10);
+        expect(getLeafPath(deepPath)).toBe('j');
+        expect(getParentPath(deepPath)).toBe('a.b.c.d.e.f.g.h.i');
+      });
+
+      it('should handle deep nesting with multiple placeholders', () => {
+        const path = 'level1.$.level2.$.level3.$.value';
+        const result = parseMultiArrayPath(path);
+        expect(result.placeholderCount).toBe(3);
+        expect(result.segments).toEqual(['level1', 'level2', 'level3', 'value']);
+      });
+
+      it('should resolve deep nesting with multiple indices', () => {
+        const path = 'a.$.b.$.c.$.d';
+        const result = resolveMultiArrayPath(path, [1, 2, 3]);
+        expect(result).toBe('a.1.b.2.c.3.d');
+      });
+    });
+
+    describe('special characters in path segments', () => {
+      it('should handle unicode characters in path segments', () => {
+        expect(splitPath('用户.$.名前')).toEqual(['用户', '$', '名前']);
+      });
+
+      it('should parse unicode array paths', () => {
+        const result = parseArrayPath('用户.$.名前');
+        expect(result).toEqual({
+          arrayPath: '用户',
+          relativePath: '名前',
+          isArrayPath: true,
+        });
+      });
+
+      it('should handle path segments with underscores and numbers', () => {
+        expect(splitPath('field_1.sub_field_2.value_3')).toEqual(['field_1', 'sub_field_2', 'value_3']);
+      });
+
+      it('should handle camelCase and snake_case mixed', () => {
+        expect(splitPath('camelCase.snake_case.PascalCase')).toEqual(['camelCase', 'snake_case', 'PascalCase']);
+      });
+    });
+
+    describe('bracket notation (not supported)', () => {
+      // These tests document that bracket notation is NOT supported
+      it('splitPath should NOT parse bracket notation', () => {
+        // Bracket notation is not parsed - documents current limitation
+        expect(splitPath('items[0].quantity')).toEqual(['items[0]', 'quantity']);
+        // Expected if bracket notation were supported: ['items', '0', 'quantity']
+      });
+
+      it('getLeafPath should return segment with brackets intact', () => {
+        expect(getLeafPath('items[0]')).toBe('items[0]');
+      });
+    });
+  });
 });
