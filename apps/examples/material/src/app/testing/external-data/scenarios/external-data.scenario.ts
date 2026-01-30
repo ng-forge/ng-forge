@@ -51,7 +51,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
           </div>
         </div>
 
-        <form [dynamic-form]="config()" [(value)]="formValue"></form>
+        <form [dynamic-form]="config" [(value)]="formValue"></form>
 
         <details class="debug-output">
           <summary>Debug Output</summary>
@@ -104,8 +104,8 @@ export class ExternalDataScenarioComponent {
   // Form value
   readonly formValue = signal<Record<string, unknown>>({});
 
-  // Form config with externalData
-  readonly config = computed<FormConfig>(() => ({
+  // Form config with externalData - static object since signals handle reactivity internally
+  readonly config: FormConfig = {
     externalData: {
       userRole: this.userRole,
       featureFlags: computed(() => ({
@@ -207,7 +207,7 @@ export class ExternalDataScenarioComponent {
         col: 12,
       },
     ],
-  }));
+  };
 
   setUserRole(role: 'guest' | 'user' | 'admin'): void {
     this.userRole.set(role);
