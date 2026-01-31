@@ -138,49 +138,9 @@ test.describe('PrimeNG Components Tests', () => {
   });
 
   test.describe('Slider Component', () => {
-    test('should update value on interaction', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/slider-basic');
-      await page.waitForLoadState('networkidle');
-
-      const scenario = helpers.getScenario('slider-basic');
-      await expect(scenario).toBeVisible();
-
-      const slider = scenario.locator('#volume p-slider');
-      await expect(slider).toBeVisible();
-
-      // Get slider position and click in the middle
-      const sliderBox = await slider.boundingBox();
-      if (sliderBox) {
-        // Click in the middle of the slider
-        await page.mouse.click(sliderBox.x + sliderBox.width / 2, sliderBox.y + sliderBox.height / 2);
-        await page.waitForTimeout(200);
-      }
-    });
-
-    test('should respect min and max bounds', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/slider-bounds');
-      await page.waitForLoadState('networkidle');
-
-      const scenario = helpers.getScenario('slider-bounds');
-      await expect(scenario).toBeVisible();
-
-      const slider = scenario.locator('#temperature p-slider');
-      await expect(slider).toBeVisible();
-
-      // The slider component should exist with correct attributes
-      // Note: PrimeNG slider uses different internal structure
-    });
-
-    test('should work with step increments', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/slider-steps');
-      await page.waitForLoadState('networkidle');
-
-      const scenario = helpers.getScenario('slider-steps');
-      await expect(scenario).toBeVisible();
-
-      const slider = scenario.locator('#rating p-slider');
-      await expect(slider).toBeVisible();
-    });
+    // Note: Slider interaction tests removed as they didn't properly verify behavior.
+    // PrimeNG slider testing is complex due to internal structure.
+    // The disabled state test below is the only one that actually verifies behavior.
 
     test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
       await page.goto('/#/test/primeng-components/slider-disabled');
@@ -192,17 +152,6 @@ test.describe('PrimeNG Components Tests', () => {
       // PrimeNG slider adds p-disabled class when disabled
       const slider = scenario.locator('#lockedSlider p-slider');
       await expect(slider).toHaveClass(/p-disabled/);
-    });
-
-    test('should display current value', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/slider-value-display');
-      await page.waitForLoadState('networkidle');
-
-      const scenario = helpers.getScenario('slider-value-display');
-      await expect(scenario).toBeVisible();
-
-      const slider = scenario.locator('#brightness p-slider');
-      await expect(slider).toBeVisible();
     });
   });
 
