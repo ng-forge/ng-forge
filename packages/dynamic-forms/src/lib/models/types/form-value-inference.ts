@@ -37,8 +37,11 @@ type InferValueType<T, V> = T extends { type: 'slider' }
     ? number
     : Widen<V>;
 
-/** Make type optional if field is not required */
-type MaybeOptional<T, V> = T extends { required: true } ? V : V | undefined;
+/**
+ * Make type optional if field is not required.
+ * Hidden fields are never optional since they require a value property.
+ */
+type MaybeOptional<T, V> = T extends { type: 'hidden' } ? V : T extends { required: true } ? V : V | undefined;
 
 /**
  * Process a single field and determine its contribution to the form value type
@@ -57,23 +60,30 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
           ? { [P in K]: InferFormValueWithDepth<F, Depth[D]> }
           : { [P in K]: Record<string, unknown> }
         : never
-      : // Display-only: text - exclude
-        T extends { type: 'text' }
-        ? never
-        : // Button fields: submit/button - exclude (they don't hold values)
-          T extends { type: 'submit' | 'button' }
+      : // Container: array - wrap children type in array under key
+        T extends { type: 'array'; key: infer K; fields: infer F }
+        ? K extends string
+          ? F extends RegisteredFieldTypes[]
+            ? { [P in K]: InferFormValueWithDepth<F, Depth[D]>[] }
+            : { [P in K]: unknown[] }
+          : never
+        : // Display-only: text - exclude
+          T extends { type: 'text' }
           ? never
-          : // Value fields with explicit value: infer type and optionality
-            T extends { key: infer K; value: infer V }
-            ? K extends string
-              ? { [P in K]: MaybeOptional<T, InferValueType<T, V>> }
-              : never
-            : // Value fields without explicit value: include as string (default input type)
-              T extends { key: infer K }
+          : // Button fields - exclude (they don't hold values)
+            T extends { type: 'submit' | 'button' | 'next' | 'previous' | 'addArrayItem' | 'removeArrayItem' }
+            ? never
+            : // Value fields with explicit value: infer type and optionality
+              T extends { key: infer K; value: infer V }
               ? K extends string
-                ? { [P in K]: MaybeOptional<T, string> }
+                ? { [P in K]: MaybeOptional<T, InferValueType<T, V>> }
                 : never
-              : never;
+              : // Value fields without explicit value: include as string (default input type)
+                T extends { key: infer K }
+                ? K extends string
+                  ? { [P in K]: MaybeOptional<T, string> }
+                  : never
+                : never;
 
 /**
  * Internal helper with depth tracking

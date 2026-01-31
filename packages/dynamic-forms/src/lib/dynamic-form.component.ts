@@ -19,7 +19,7 @@ import {
 import { NgComponentOutlet } from '@angular/common';
 import { form, FieldTree, Schema } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { EMPTY, forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
+import { EMPTY, filter, forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
 import { derivedFromDeferred } from './utils/derived-from-deferred/derived-from-deferred';
 import { reconcileFields, ResolvedField, resolveField } from './utils/resolve-field/resolve-field';
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
@@ -455,11 +455,23 @@ export class DynamicForm<
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
 
   /**
-   * Emits form values when submitted (via SubmitEvent).
+   * Emits form values when submitted (via SubmitEvent) and form is valid.
+   *
+   * **Important:** This output only emits when the form is valid. If you need to
+   * handle submit events regardless of validity, use the `(events)` output and
+   * filter for `'submit'` events.
+   *
    * Note: Does not emit when `submission.action` is configured - use one or the other.
    */
   readonly submitted = outputFromObservable(
     this.eventBus.on<SubmitEvent>('submit').pipe(
+      filter(() => {
+        if (!this.valid()) {
+          this.logger.debug('Form submitted while invalid, not emitting to (submitted) output');
+          return false;
+        }
+        return true;
+      }),
       switchMap(() => {
         const submissionConfig = this.config().submission;
 
@@ -472,7 +484,8 @@ export class DynamicForm<
           return EMPTY;
         }
 
-        return of(this.value());
+        // Form is valid here, cast to TModel (no longer Partial)
+        return of(this.formValue() as TModel);
       }),
     ),
   );
@@ -621,13 +634,15 @@ export class DynamicForm<
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.onFormClear());
 
-    createSubmissionHandler({
+    createSubmissionHandler<TFields, TModel>({
       eventBus: this.eventBus,
       configSignal: this.config,
-      formSignal: this.form,
+      formSignal: this.form as Signal<FieldTree<TModel>>,
     })
       .pipe(takeUntilDestroyed())
-      .subscribe();
+      .subscribe({
+        error: (err) => this.logger.error('Submission handler error', err),
+      });
   }
 
   private registerValidatorsFromConfig({ customFnConfig, schemas }: FormConfig<TFields>): void {

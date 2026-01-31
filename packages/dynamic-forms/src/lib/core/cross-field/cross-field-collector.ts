@@ -196,7 +196,13 @@ function convertBuiltInToCustomValidator(config: BuiltInValidatorConfig): Custom
       validationExpression = `fieldValue == null || (typeof fieldValue !== 'string' && !Array.isArray(fieldValue)) || fieldValue.length <= (${expression})`;
       break;
     case 'pattern':
-      validationExpression = `fieldValue == null || new RegExp(${expression}).test(fieldValue)`;
+      // Validate regex pattern before injection to prevent runtime errors
+      try {
+        new RegExp(expression);
+      } catch {
+        throw new Error(`Invalid regex pattern in cross-field validator: ${expression}`);
+      }
+      validationExpression = `fieldValue == null || new RegExp(${JSON.stringify(expression)}).test(fieldValue)`;
       break;
     default:
       throw new Error(`Cannot convert ${config.type} validator to custom validator`);

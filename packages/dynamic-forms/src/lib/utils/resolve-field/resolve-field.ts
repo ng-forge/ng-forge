@@ -74,7 +74,7 @@ export function resolveField(fieldDef: FieldDef<unknown>, context: ResolveFieldC
       };
     }),
     catchError((error) => {
-      // Only handle errors if component hasn't been destroyed
+      // Only call onError if component is not destroyed to avoid accessing cleaned-up state
       if (!context.destroyRef.destroyed) {
         context.onError?.(fieldDef, error);
       }

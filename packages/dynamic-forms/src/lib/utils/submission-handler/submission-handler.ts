@@ -1,41 +1,52 @@
 import { Signal } from '@angular/core';
-import { submit } from '@angular/forms/signals';
+import { FieldTree, submit } from '@angular/forms/signals';
 import { EMPTY, firstValueFrom, from, isObservable, Observable, switchMap } from 'rxjs';
 import { EventBus } from '../../events/event.bus';
 import { SubmitEvent } from '../../events/constants/submit.event';
 import { FormConfig } from '../../models/form-config';
 import { RegisteredFieldTypes } from '../../models/registry/field-registry';
+import type { InferFormValue } from '../../models/types/form-value-inference';
 
 /**
  * Options for creating a submission handler.
+ *
+ * @typeParam TFields - Array of registered field types available for this form
+ * @typeParam TModel - The form value model type (inferred from TFields by default)
  */
-export interface SubmissionHandlerOptions<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
+export interface SubmissionHandlerOptions<
+  TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[],
+  TModel extends Record<string, unknown> = InferFormValue<TFields> & Record<string, unknown>,
+> {
   /** Event bus instance for listening to submit events */
   eventBus: EventBus;
   /** Signal containing the form configuration */
   configSignal: Signal<FormConfig<TFields>>;
-  /** Signal containing the form instance. Type is parameterized to support different form value shapes. */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- FieldTree type requires dynamic form model type
-  formSignal: Signal<any>;
+  /** Signal containing the form instance */
+  formSignal: Signal<FieldTree<TModel>>;
 }
 
 /**
  * Wraps a submission action to handle both Promise and Observable returns.
  * Converts Observables to Promises for compatibility with Angular Signal Forms' submit().
  *
+ * The return type uses `void` to match Angular Signal Forms' expected action signature.
+ * The actual result from the action is preserved but typed as void since Angular's
+ * submit() function handles the result internally.
+ *
  * @param action - The submission action function
  * @returns A wrapped function that always returns a Promise
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Form tree type is dynamic, action signatures vary
-function wrapSubmissionAction(action: (formTree: any) => any): (formTree: any) => Promise<any> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (formTree: any): Promise<any> => {
+function wrapSubmissionAction<TModel extends Record<string, unknown>>(
+  action: (formTree: FieldTree<TModel>) => unknown,
+): (formTree: FieldTree<TModel>) => Promise<void> {
+  return async (formTree: FieldTree<TModel>): Promise<void> => {
     const result = action(formTree);
     // If the action returns an Observable, convert it to a Promise
     if (isObservable(result)) {
-      return firstValueFrom(result);
+      await firstValueFrom(result);
+      return;
     }
-    return result;
+    await Promise.resolve(result);
   };
 }
 
@@ -65,9 +76,10 @@ function wrapSubmissionAction(action: (formTree: any) => any): (formTree: any) =
  *   .subscribe();
  * ```
  */
-export function createSubmissionHandler<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]>(
-  options: SubmissionHandlerOptions<TFields>,
-): Observable<unknown> {
+export function createSubmissionHandler<
+  TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[],
+  TModel extends Record<string, unknown> = InferFormValue<TFields> & Record<string, unknown>,
+>(options: SubmissionHandlerOptions<TFields, TModel>): Observable<unknown> {
   const { eventBus, configSignal, formSignal } = options;
 
   return eventBus.on<SubmitEvent>('submit').pipe(
@@ -80,7 +92,9 @@ export function createSubmissionHandler<TFields extends RegisteredFieldTypes[] =
         return EMPTY;
       }
 
-      const wrappedAction = wrapSubmissionAction(submissionConfig.action);
+      // Type assertion needed: submission.action accepts the form tree but its signature
+      // is defined broadly in FormConfig. The actual runtime type is FieldTree<TModel>.
+      const wrappedAction = wrapSubmissionAction<TModel>(submissionConfig.action as (formTree: FieldTree<TModel>) => unknown);
 
       // Use Angular Signal Forms' native submit() function
       // This automatically:

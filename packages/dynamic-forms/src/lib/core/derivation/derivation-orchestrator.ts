@@ -133,7 +133,9 @@ export class DerivationOrchestrator {
 
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe();
+      .subscribe({
+        error: (err) => this.logger.error('Derivation onChange stream error', err),
+      });
   }
 
   private setupDebouncedStream(): void {
@@ -178,7 +180,9 @@ export class DerivationOrchestrator {
 
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe();
+      .subscribe({
+        error: (err) => this.logger.error('Derivation debounced stream error', err),
+      });
   }
 
   private createPeriodStream(

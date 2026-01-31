@@ -19,7 +19,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('PrimeSelectProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'multiple' | 'filter' | 'placeholder' | 'showClear' | 'styleClass' | 'hint';
+  type ExpectedKeys = 'multiple' | 'filter' | 'placeholder' | 'showClear' | 'styleClass' | 'hint' | 'compareWith';
   type ActualKeys = keyof PrimeSelectProps;
 
   it('should have exactly the expected keys', () => {
@@ -53,6 +53,12 @@ describe('PrimeSelectProps - Exhaustive Whitelist', () => {
 
     it('hint', () => {
       expectTypeOf<PrimeSelectProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
+    });
+
+    it('compareWith', () => {
+      type CompareWithType = PrimeSelectProps['compareWith'];
+      // compareWith is a function or undefined
+      expectTypeOf<undefined>().toMatchTypeOf<CompareWithType>();
     });
   });
 });

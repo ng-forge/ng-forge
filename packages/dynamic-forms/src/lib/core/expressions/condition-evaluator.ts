@@ -33,14 +33,20 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
 }
 
 function evaluateFieldValueCondition(expression: ConditionalExpression, context: EvaluationContext): boolean {
-  if (!expression.fieldPath || !expression.operator) return false;
+  if (!expression.fieldPath || !expression.operator) {
+    context.logger.debug('Invalid fieldValue condition config: missing fieldPath or operator', expression);
+    return false;
+  }
 
   const fieldValue = getNestedValue(context.formValue, expression.fieldPath);
   return compareValues(fieldValue, expression.value, expression.operator);
 }
 
 function evaluateFormValueCondition(expression: ConditionalExpression, context: EvaluationContext): boolean {
-  if (!expression.operator) return false;
+  if (!expression.operator) {
+    context.logger.debug('Invalid formValue condition config: missing operator', expression);
+    return false;
+  }
   return compareValues(context.formValue, expression.value, expression.operator);
 }
 

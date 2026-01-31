@@ -29,6 +29,10 @@ export interface PrimeSelectProps extends SelectProps {
    * Hint text displayed below the select.
    */
   hint?: DynamicText;
+  /**
+   * Custom comparison function for determining equality of option values.
+   */
+  compareWith?: (o1: ValueType, o2: ValueType) => boolean;
 }
 
 export type PrimeSelectField<T> = SelectField<T, PrimeSelectProps>;

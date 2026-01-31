@@ -403,7 +403,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       },
     },
     validationSupported: false,
-    source: 'adapter',
+    source: 'core',
     allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
     example: `{
   key: 'sectionTitle',
@@ -722,6 +722,40 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
   label: 'Submit Form'
 }`,
     minimalExample: `{ key: 'submit', type: 'submit', label: 'Submit' }`,
+  },
+  {
+    type: 'addArrayItem',
+    category: 'button',
+    description: 'Button to add a new item to an array field. Must be placed within or near the array container.',
+    valueType: undefined,
+    baseInterface: 'FieldDef',
+    props: {},
+    validationSupported: false,
+    source: 'adapter',
+    allowedIn: ['array', 'row', 'group'],
+    example: `{
+  key: 'addContact',
+  type: 'addArrayItem',
+  label: 'Add Contact'
+}`,
+    minimalExample: `{ key: 'add', type: 'addArrayItem', label: 'Add Item' }`,
+  },
+  {
+    type: 'removeArrayItem',
+    category: 'button',
+    description: 'Button to remove the current item from an array field. Typically placed within each array item template.',
+    valueType: undefined,
+    baseInterface: 'FieldDef',
+    props: {},
+    validationSupported: false,
+    source: 'adapter',
+    allowedIn: ['array', 'row', 'group'],
+    example: `{
+  key: 'removeContact',
+  type: 'removeArrayItem',
+  label: 'Remove'
+}`,
+    minimalExample: `{ key: 'remove', type: 'removeArrayItem', label: 'Remove' }`,
   },
 ];
 
@@ -1070,8 +1104,8 @@ const UI_ADAPTERS: UIAdapterInfo[] = [
         },
       },
       {
-        type: 'calendar',
-        componentName: 'PrimeCalendarComponent',
+        type: 'datepicker',
+        componentName: 'PrimeDatepickerComponent',
         additionalProps: {
           showIcon: {
             name: 'showIcon',

@@ -87,7 +87,7 @@ describe('resolve-field', () => {
       expect(onError).toHaveBeenCalledWith(fieldDef, error);
     });
 
-    it('should not call onError when destroyed during error handling', async () => {
+    it('should not call onError when component is destroyed', async () => {
       const fieldDef: FieldDef<unknown> = { type: 'unknown', key: 'testField' };
       const error = new Error('Component not found');
       const loadTypeComponent = vi.fn().mockImplementation(async () => {
@@ -107,6 +107,7 @@ describe('resolve-field', () => {
       const result = await firstValueFrom(resolveField(fieldDef, context));
 
       expect(result).toBeUndefined();
+      // onError should NOT be called when destroyed to avoid accessing cleaned-up state
       expect(onError).not.toHaveBeenCalled();
     });
 

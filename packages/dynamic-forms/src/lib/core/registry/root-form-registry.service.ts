@@ -121,7 +121,7 @@ export class RootFormRegistryService {
           return rootValue as Record<string, unknown>;
         }
       } catch {
-        // Ignore errors when reading form value
+        // Ignore errors when reading form value - can happen during initialization
       }
     }
 
