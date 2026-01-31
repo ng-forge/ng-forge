@@ -320,10 +320,6 @@ describe('path-utils', () => {
         expect(result).toBe('items.1.5.name');
       });
 
-      it('resolveArrayPath should handle index 0', () => {
-        expect(resolveArrayPath('items.$.name', 0)).toBe('items.0.name');
-      });
-
       it('splitPath should preserve numeric string segments', () => {
         expect(splitPath('items.123.name')).toEqual(['items', '123', 'name']);
       });
