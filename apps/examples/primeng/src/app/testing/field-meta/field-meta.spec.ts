@@ -66,7 +66,7 @@ test.describe('Field Meta Attribute Tests', () => {
 
       // Select a country - click the select to open dropdown
       await scenario.locator('#countrySelect p-select').click();
-      await page.locator('p-select-overlay li:has-text("United States")').click();
+      await page.locator('.p-select-overlay').getByText('United States', { exact: true }).click();
 
       // Set up event listener BEFORE clicking submit
       const submittedDataPromise = page.evaluate(
