@@ -67,8 +67,6 @@ export function createPlaywrightConfig(configFileUrl: string, appName: ExampleAp
     ...nxE2EPreset(fileURLToPath(configFileUrl), { testDir: './src/app/testing' }),
     /* Global timeout for each test - prevents tests from hanging indefinitely */
     timeout: 10000,
-    /* Run tests in parallel - use 2 workers in CI for stability, more locally */
-    workers: process.env['CI'] ? 2 : undefined,
     /* Retry flaky tests once */
     retries: 1,
     /* Expect timeout - how long to wait for expect() assertions */
@@ -104,16 +102,12 @@ export function createPlaywrightConfig(configFileUrl: string, appName: ExampleAp
     /* Configure snapshot path template */
     snapshotPathTemplate: '{snapshotDir}/{testFileDir}/{testFileName}-snapshots/{arg}{ext}',
     /* Run your local dev server before starting the tests */
-    /* In CI/Docker: use serve-static (expects pre-built app) for fast startup */
-    /* Locally: use serve for hot reload during development */
     webServer: {
-      command: process.env['CI']
-        ? `pnpm exec nx run ${appName}:serve-static --port ${port}`
-        : `pnpm exec nx run ${appName}:serve --port ${port}`,
+      command: `pnpm exec nx run ${appName}:serve --port ${port}`,
       url: `http://localhost:${port}`,
       reuseExistingServer: true,
       cwd: workspaceRoot,
-      /* Allow longer startup time in Docker/CI environments */
+      /* Allow longer startup time in Docker environments */
       timeout: 180000,
     },
     projects: getProjects(),
