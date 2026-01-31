@@ -2,30 +2,16 @@
  * Ionic Form Field Styling
  *
  * Customizable styles for Ionic form field components.
- * Override CSS variables to customize:
+ * CSS variables (must be defined by consumer or via defaults):
  *
- * --df-field-gap: gap between label, input, and hint (default: 0.5rem)
- * --df-label-font-weight: label font weight (default: 500)
- * --df-label-color: label text color (default: inherit)
- * --df-hint-color: hint text color (default: --ion-color-medium)
- * --df-hint-font-size: hint text size (default: 0.875rem)
- * --df-error-color: error text color (default: --ion-color-danger)
- * --df-error-font-size: error text size (default: 0.875rem)
+ * --df-field-gap: gap between label, input, and hint
+ * --df-label-font-weight: label font weight
+ * --df-label-color: label text color
+ * --df-hint-color: hint text color
+ * --df-hint-font-size: hint text size
+ * --df-error-color: error text color
+ * --df-error-font-size: error text size
  */
-
-// ============================================
-// CSS Variables (Ionic-themed defaults)
-// ============================================
-
-:host {
-  --df-field-gap: 0.5rem;
-  --df-label-font-weight: 500;
-  --df-label-color: inherit;
-  --df-hint-color: var(--ion-color-medium, #92949c);
-  --df-hint-font-size: 0.875rem;
-  --df-error-color: var(--ion-color-danger, #eb445a);
-  --df-error-font-size: 0.875rem;
-}
 
 // ============================================
 // Field Layout

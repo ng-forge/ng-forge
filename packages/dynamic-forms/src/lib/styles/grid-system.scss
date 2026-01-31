@@ -1,40 +1,28 @@
 /**
  * Dynamic Form Grid System
- * 
+ *
  * A CSS Grid-based layout system with CSS variables for customization.
  * Provides responsive behavior and consistent spacing throughout the form.
+ *
+ * CSS Variables (must be defined by consumer or via defaults):
+ *
+ * Grid Configuration:
+ * --df-grid-columns: number of grid columns (default: 12)
+ * --df-grid-gap: gap between columns
+ * --df-grid-row-gap: gap between rows
+ *
+ * Responsive Gap Adjustments:
+ * --df-grid-gap-sm, --df-grid-gap-md, --df-grid-gap-lg, --df-grid-gap-xl
+ * --df-grid-row-gap-sm, --df-grid-row-gap-md, --df-grid-row-gap-lg, --df-grid-row-gap-xl
+ *
+ * Group Field Styling:
+ * --df-group-gap: gap within groups
+ * --df-group-padding: padding within groups
+ *
+ * Accessibility:
+ * --df-focus-color: focus ring color
+ * --df-disabled-opacity: opacity for disabled elements
  */
-
-/* CSS Variables for Grid System */
-:host,
-.df-form {
-  /* Grid Configuration */
-  --df-grid-columns: 12;
-  --df-grid-gap: 0.5rem;
-  --df-grid-row-gap: 0.5rem;
-
-  /* Responsive Breakpoints */
-  --df-breakpoint-sm: 576px;
-  --df-breakpoint-md: 768px;
-  --df-breakpoint-lg: 992px;
-  --df-breakpoint-xl: 1200px;
-
-  /* Responsive Gap Adjustments */
-  --df-grid-gap-sm: 0.5rem;
-  --df-grid-gap-md: 0.5rem;
-  --df-grid-gap-lg: 0.5rem;
-  --df-grid-gap-xl: 0.5rem;
-
-  /* Responsive Row Gap Adjustments */
-  --df-grid-row-gap-sm: 0.5rem;
-  --df-grid-row-gap-md: 0.5rem;
-  --df-grid-row-gap-lg: 0.5rem;
-  --df-grid-row-gap-xl: 0.5rem;
-
-  /* Group Field Styling Variables */
-  --df-group-gap: var(--df-grid-gap);
-  --df-group-padding: var(--df-grid-gap);
-}
 
 /* Base Form Grid Container */
 .df-form {
@@ -416,7 +404,7 @@
 .df-form.disabled,
 .df-row.disabled,
 .df-field.disabled {
-  opacity: 0.6;
+  opacity: var(--df-disabled-opacity);
   pointer-events: none;
 }
 
@@ -484,7 +472,7 @@
  * not for mouse clicks.
  */
 .df-form :focus-visible {
-  outline: 2px solid var(--df-focus-color, #005fcc);
+  outline: 2px solid var(--df-focus-color);
   outline-offset: 2px;
 }
 
@@ -493,6 +481,6 @@
  * Useful for fieldsets, form groups, etc.
  */
 .df-group:focus-within {
-  outline: 1px dashed var(--df-focus-color, #005fcc);
+  outline: 1px dashed var(--df-focus-color);
   outline-offset: 4px;
 }

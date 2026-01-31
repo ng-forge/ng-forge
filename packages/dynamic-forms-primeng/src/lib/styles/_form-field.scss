@@ -2,30 +2,17 @@
  * PrimeNG Form Field Styling
  *
  * Customizable styles for PrimeNG form field components.
- * Override CSS variables to customize:
+ * CSS variables (must be defined by consumer or via defaults):
  *
- * --df-field-gap: gap between label, input, and hint (default: 0.5rem)
- * --df-label-font-weight: label font weight (default: 500)
- * --df-label-color: label text color (default: inherit)
- * --df-hint-color: hint text color (default: --p-text-muted-color)
- * --df-hint-font-size: hint text size (default: 0.875rem)
- * --df-error-color: error text color (default: --p-red-500)
- * --df-error-font-size: error text size (default: 0.875rem)
+ * --df-field-gap: gap between label, input, and hint
+ * --df-label-font-weight: label font weight
+ * --df-label-color: label text color
+ * --df-hint-color: hint text color
+ * --df-hint-font-size: hint text size
+ * --df-error-color: error text color
+ * --df-error-font-size: error text size
+ * --df-prime-error-margin-top: margin above error message
  */
-
-// ============================================
-// CSS Variables (PrimeNG-themed defaults)
-// ============================================
-
-:host {
-  --df-field-gap: 0.5rem;
-  --df-label-font-weight: 500;
-  --df-label-color: inherit;
-  --df-hint-color: var(--p-text-muted-color, #6c757d);
-  --df-hint-font-size: 0.875rem;
-  --df-error-color: var(--p-red-500, #ef4444);
-  --df-error-font-size: 0.875rem;
-}
 
 // ============================================
 // Field Layout
@@ -52,7 +39,7 @@
   color: var(--df-error-color);
   font-size: var(--df-error-font-size);
   display: block;
-  margin-top: 0.25rem;
+  margin-top: var(--df-prime-error-margin-top);
 }
 
 // ============================================

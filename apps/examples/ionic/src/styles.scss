@@ -6,6 +6,7 @@
 @use 'ionic' as ember-ionic;
 @use 'examples' as examples;
 @use 'tokens' as *;
+@use 'form-defaults' as df;
 
 // Ionic CSS imports
 @import '@ionic/angular/css/core.css';
@@ -44,6 +45,7 @@
 // Light theme (default)
 :root {
   @include ember-ionic.ionic-theme-light();
+  @include df.apply-ionic-form-defaults;
 }
 
 html,
