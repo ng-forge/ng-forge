@@ -67,6 +67,8 @@ export function createPlaywrightConfig(configFileUrl: string, appName: ExampleAp
     ...nxE2EPreset(fileURLToPath(configFileUrl), { testDir: './src/app/testing' }),
     /* Global timeout for each test - prevents tests from hanging indefinitely */
     timeout: 10000,
+    /* Run tests in parallel - use 2 workers in CI for stability, more locally */
+    workers: process.env['CI'] ? 2 : undefined,
     /* Retry flaky tests once */
     retries: 1,
     /* Expect timeout - how long to wait for expect() assertions */
