@@ -52,6 +52,7 @@ Use JavaScript expressions with access to `formValue`:
 **Available variables:**
 
 - `formValue` - Object containing all form field values
+- `externalData` - External application state (when configured in FormConfig)
 
 ### Static Value
 
@@ -450,6 +451,29 @@ interface DerivationLogicConfig {
   condition?: ConditionalExpression | boolean;
 }
 ```
+
+## External Data in Derivations
+
+Use external application state in derivation expressions:
+
+```typescript
+const config = {
+  externalData: {
+    discountRate: computed(() => pricingService.currentDiscount()),
+  },
+  fields: [
+    {
+      key: 'discountedPrice',
+      type: 'input',
+      label: 'Discounted Price',
+      readonly: true,
+      derivation: 'formValue.price * (1 - externalData.discountRate)',
+    },
+  ],
+} as const satisfies FormConfig;
+```
+
+External data values are reactively tracked - when signals change, derivations are re-evaluated.
 
 ## Related
 
