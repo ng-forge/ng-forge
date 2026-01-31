@@ -107,6 +107,8 @@ export function createPlaywrightConfig(configFileUrl: string, appName: ExampleAp
       url: `http://localhost:${port}`,
       reuseExistingServer: true,
       cwd: workspaceRoot,
+      /* Allow longer startup time in Docker environments */
+      timeout: 180000,
     },
     projects: getProjects(),
   });

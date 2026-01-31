@@ -344,6 +344,9 @@ test.describe('Accessibility Tests', () => {
       await page.waitForSelector('[data-testid="error-announcements"] #username input', { state: 'visible', timeout: 10000 });
       const usernameInput = scenario.locator('#username input');
 
+      // Visual regression: compare empty state against baseline
+      await helpers.expectScreenshotMatch(scenario, 'primeng-error-announcements-empty');
+
       // Trigger validation error
       await usernameInput.fill('ab'); // Too short
       await expect(usernameInput).toHaveValue('ab', { timeout: 5000 });
@@ -353,6 +356,9 @@ test.describe('Accessibility Tests', () => {
       const error = scenario.locator('#username .p-error');
       await expect(error).toBeVisible({ timeout: 10000 });
       await expect(error).toHaveAttribute('role', 'alert', { timeout: 10000 });
+
+      // Visual regression: compare error state against baseline
+      await helpers.expectScreenshotMatch(scenario, 'primeng-error-announcements-with-error');
     });
 
     test('multiple errors should each be properly identified', async ({ page, helpers }) => {

@@ -133,7 +133,8 @@ export function extractArrayPath(path: string): string {
 /**
  * Splits a dot-separated path into segments.
  *
- * Handles both dot notation and bracket notation for array indices.
+ * Note: Only dot notation is supported. Bracket notation (e.g., `items[0]`)
+ * is not supported and will not be parsed correctly.
  *
  * @param path - The path to split
  * @returns Array of path segments

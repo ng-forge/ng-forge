@@ -305,6 +305,9 @@ test.describe('Accessibility Tests', () => {
 
       const usernameInput = scenario.locator('#username input');
 
+      // Visual regression: compare empty state against baseline
+      await helpers.expectScreenshotMatch(scenario, 'material-error-announcements-empty');
+
       // Trigger validation error
       await usernameInput.fill('ab'); // Too short
       await usernameInput.blur();
@@ -313,6 +316,9 @@ test.describe('Accessibility Tests', () => {
       // Material errors are announced via mat-error which has proper ARIA
       const error = scenario.locator('#username mat-error');
       await expect(error).toBeVisible();
+
+      // Visual regression: compare error state against baseline
+      await helpers.expectScreenshotMatch(scenario, 'material-error-announcements-with-error');
     });
 
     test('multiple errors should each be properly identified', async ({ page, helpers }) => {

@@ -226,7 +226,9 @@ packages/dynamic-forms-{library}/src/lib/fields/{field-name}/
 ## E2E Testing and Screenshots
 
 - **E2E tests use Playwright** and are located in `apps/examples/*/src/app/testing/`.
-- **Screenshots MUST be updated in Docker** to ensure cross-platform consistency. Font rendering differs between macOS, Linux, and CI environments.
+- **Run tests locally for faster iteration** using `nx e2e <project>` (e.g., `nx e2e primeng-examples`). This is much faster than Docker and should be used during development.
+- **Only use Docker for screenshot updates** - Docker ensures cross-platform consistency for visual regression tests. Font rendering differs between macOS, Linux, and CI environments.
+- **If screenshot tests fail locally, skip them** - Screenshot assertions will fail locally due to platform differences. You can temporarily comment out screenshot tests or use `.skip` when running locally, then verify in CI.
 - **Use the provided scripts** in `package.json`:
 
   ```bash

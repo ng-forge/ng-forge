@@ -880,12 +880,15 @@ describe('DynamicFormComponent', () => {
       expect(component.validityChange).toBeDefined();
       expect(typeof component.validityChange.subscribe).toBe('function');
 
-      let emittedValue: boolean | undefined;
-      component.validityChange.subscribe((valid) => (emittedValue = valid));
+      // Create a promise that resolves when validityChange output emits
+      const validityPromise = new Promise<boolean>((resolve) => {
+        component.validityChange.subscribe((valid) => resolve(valid));
+      });
 
       await waitForDynamicComponents(fixture);
 
       // Should emit false for invalid form (empty required field)
+      const emittedValue = await validityPromise;
       expect(emittedValue).toBe(false);
     });
 
@@ -1524,14 +1527,15 @@ describe('DynamicFormComponent', () => {
 
       const { component, fixture } = createComponent(config);
 
-      let initializationEmitted = false;
-      component.initialized.subscribe(() => {
-        initializationEmitted = true;
+      // Create a promise that resolves when initialized output emits
+      const initPromise = new Promise<void>((resolve) => {
+        component.initialized.subscribe(() => resolve());
       });
 
       await waitForDynamicComponents(fixture);
 
-      expect(initializationEmitted).toBe(true);
+      // Should complete without timeout, proving initialization was emitted
+      await initPromise;
     });
 
     it('should emit initialized after async components load', async () => {
@@ -2048,17 +2052,17 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
 
-      let resetEmitted = false;
-      component.reset.subscribe(() => {
-        resetEmitted = true;
+      // Create a promise that resolves when reset output emits
+      const resetPromise = new Promise<void>((resolve) => {
+        component.reset.subscribe(() => resolve());
       });
 
       // Dispatch FormResetEvent
       (component as any).eventBus.dispatch(FormResetEvent);
-      await delay();
       fixture.detectChanges();
 
-      expect(resetEmitted).toBe(true);
+      // Should complete proving reset was emitted
+      await resetPromise;
     });
 
     it('should emit cleared output when FormClearEvent is dispatched', async () => {
@@ -2076,17 +2080,17 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
 
-      let clearedEmitted = false;
-      component.cleared.subscribe(() => {
-        clearedEmitted = true;
+      // Create a promise that resolves when cleared output emits
+      const clearedPromise = new Promise<void>((resolve) => {
+        component.cleared.subscribe(() => resolve());
       });
 
       // Dispatch FormClearEvent
       (component as any).eventBus.dispatch(FormClearEvent);
-      await delay();
       fixture.detectChanges();
 
-      expect(clearedEmitted).toBe(true);
+      // Should complete proving cleared was emitted
+      await clearedPromise;
     });
 
     it('should handle reset on form with no default values', async () => {
