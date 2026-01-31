@@ -58,8 +58,9 @@ echo "Running Playwright tests for $APP in Docker..."
 PROJECT_NAME="playwright-${APP%-examples}"
 
 # Build the command - pre-build the app first for faster startup, then run e2e tests
+# Use development configuration to avoid baseHref issues (production has baseHref for GitHub Pages)
 # The serve-static target will use the pre-built files
-CMD="pnpm install --frozen-lockfile && pnpm exec nx run $APP:build && pnpm exec nx run $APP:e2e $EXTRA_ARGS"
+CMD="pnpm install --frozen-lockfile && pnpm exec nx run $APP:build:development && pnpm exec nx run $APP:e2e $EXTRA_ARGS"
 
 # Build the image (uses cache if unchanged) and run tests
 # Use unique project name to allow parallel runs of different apps
