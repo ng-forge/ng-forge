@@ -9,7 +9,7 @@ test.describe('Ionic Components Tests', () => {
   });
 
   test.describe('Datetime Component', () => {
-    test('should display ion-datetime and allow date selection', async ({ page, helpers }) => {
+    test('should render ion-datetime component', async ({ page, helpers }) => {
       await page.goto('/#/testing/ionic-components/datetime-component');
       await page.waitForLoadState('networkidle');
 
@@ -24,25 +24,6 @@ test.describe('Ionic Components Tests', () => {
       // Look for ion-datetime component
       const datetime = scenario.locator('#eventDate ion-datetime');
       await expect(datetime).toBeVisible({ timeout: 5000 });
-
-      // The datetime should be rendered and interactive
-      // Note: Ionic datetime is rendered inline by default with presentation='date'
-      // We verify it exists and can be interacted with
-    });
-
-    test('should validate required datetime field', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/datetime-component');
-      await page.waitForLoadState('networkidle');
-
-      const scenario = helpers.getScenario('datetime-component');
-      await expect(scenario).toBeVisible({ timeout: 10000 });
-
-      // Verify the datetime container exists
-      const datetimeContainer = scenario.locator('#eventDate');
-      await expect(datetimeContainer).toBeVisible({ timeout: 5000 });
-
-      // Since the field is required and has no initial value,
-      // any form-level validation would flag this field
     });
   });
 
