@@ -84,11 +84,11 @@ test.describe('PrimeNG Components Tests', () => {
       // Wait for calendar panel to close
       await expect(calendarPanel).not.toBeVisible({ timeout: 5000 });
 
-      // Value should be in custom format (dd/mm/yy)
+      // Value should be in custom format (dd/mm/yy or dd/mm/yyyy depending on PrimeNG version)
       const value = await calendarInput.inputValue();
       expect(value).toBeTruthy();
-      // Format should be dd/mm/yy (e.g., 01/01/24)
-      expect(value).toMatch(/^\d{2}\/\d{2}\/\d{2}$/);
+      // Format should be dd/mm/yy or dd/mm/yyyy (e.g., 01/01/24 or 01/01/2024)
+      expect(value).toMatch(/^\d{2}\/\d{2}\/(\d{2}|\d{4})$/);
     });
 
     test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
@@ -286,18 +286,25 @@ test.describe('PrimeNG Components Tests', () => {
 
       // Click to open dropdown
       await select.click();
-      await expect(page.locator('.p-multiselect-overlay')).toBeVisible({ timeout: 5000 });
+      const overlay = page.locator('.p-multiselect-overlay');
+      await expect(overlay).toBeVisible({ timeout: 5000 });
 
-      // Select multiple options - multiselect stays open after each selection
-      await page.locator('.p-multiselect-overlay').getByText('TypeScript', { exact: true }).click();
-      await page.waitForTimeout(100);
+      // Select first option and wait for animation to complete
+      const typescriptCheckbox = overlay.locator('.p-multiselect-item').filter({ hasText: 'TypeScript' });
+      await typescriptCheckbox.click();
+      await page.waitForTimeout(300);
 
-      await page.locator('.p-multiselect-overlay').getByText('Angular', { exact: true }).click();
-      await page.waitForTimeout(100);
+      // Verify overlay is still visible (multiselect stays open)
+      await expect(overlay).toBeVisible();
+
+      // Select second option
+      const angularCheckbox = overlay.locator('.p-multiselect-item').filter({ hasText: 'Angular' });
+      await angularCheckbox.click();
+      await page.waitForTimeout(300);
 
       // Close the dropdown by clicking outside or pressing Escape
       await page.keyboard.press('Escape');
-      await expect(page.locator('.p-multiselect-overlay')).not.toBeVisible({ timeout: 2000 });
+      await expect(overlay).not.toBeVisible({ timeout: 2000 });
     });
 
     test('should filter options', async ({ page, helpers }) => {

@@ -59,13 +59,32 @@ test.describe('Field Meta Attribute Tests', () => {
       await expect(selectHost).toHaveAttribute('data-analytics', 'country-selection');
 
       // Interact with the form to ensure functionality isn't broken
-      await scenario.locator('#termsCheckbox p-checkbox').click();
-      await scenario.locator('#notificationsToggle p-toggleswitch').click();
-      await scenario.locator('#preferenceRadio p-radiobutton:has-text("Email")').click();
-      await scenario.locator('#interestsMultiCheckbox p-checkbox:has-text("Sports")').click();
+      // Add explicit waits for element visibility before clicking
+      const termsCheckbox = scenario.locator('#termsCheckbox p-checkbox');
+      await expect(termsCheckbox).toBeVisible({ timeout: 5000 });
+      await termsCheckbox.click();
+      await page.waitForTimeout(100);
+
+      const notificationsToggle = scenario.locator('#notificationsToggle p-toggleswitch');
+      await expect(notificationsToggle).toBeVisible({ timeout: 5000 });
+      await notificationsToggle.click();
+      await page.waitForTimeout(100);
+
+      const emailRadio = scenario.locator('#preferenceRadio p-radiobutton').filter({ hasText: 'Email' });
+      await expect(emailRadio).toBeVisible({ timeout: 5000 });
+      await emailRadio.click();
+      await page.waitForTimeout(100);
+
+      const sportsCheckbox = scenario.locator('#interestsMultiCheckbox p-checkbox').filter({ hasText: 'Sports' });
+      await expect(sportsCheckbox).toBeVisible({ timeout: 5000 });
+      await sportsCheckbox.click();
+      await page.waitForTimeout(100);
 
       // Select a country - click the select to open dropdown
-      await scenario.locator('#countrySelect p-select').click();
+      const countrySelect = scenario.locator('#countrySelect p-select');
+      await expect(countrySelect).toBeVisible({ timeout: 5000 });
+      await countrySelect.click();
+      await expect(page.locator('.p-select-overlay')).toBeVisible({ timeout: 5000 });
       await page.locator('.p-select-overlay').getByText('United States', { exact: true }).click();
 
       // Set up event listener BEFORE clicking submit
