@@ -159,8 +159,6 @@ const config = {
 } as const satisfies FormConfig;
 ```
 
-**Note**: Don't store sensitive data (tokens, API keys) in form state or externalData since it's accessible in expressions.
-
 ## Common Form Use Cases
 
 ### Dynamic Visibility
