@@ -469,28 +469,25 @@ describe('Form Submission Integration', () => {
             timer(id === 'first' ? 100 : 50).pipe(
               map(() => {
                 submissionResults.push(id);
-                return undefined;
+                return id;
               }),
             ),
           ),
         );
 
-        // Start subscription
-        const subscription = latestSubmission.subscribe();
+        // Trigger first submission (slower) then immediately second (faster)
+        // switchMap should cancel first and only complete second
+        setTimeout(() => trigger.next('first'), 0);
+        setTimeout(() => trigger.next('second'), 10);
 
-        // Trigger first submission (slower)
-        trigger.next('first');
+        // Wait for the final emission using firstValueFrom with skip to get second result
+        const result = await firstValueFrom(latestSubmission);
 
-        // Trigger second submission immediately (faster, should cancel first)
-        trigger.next('second');
-
-        // Wait for second to complete
-        await new Promise((resolve) => setTimeout(resolve, 150));
-
-        // Only second should have completed (first was cancelled)
+        // Only second should have completed (first was cancelled by switchMap)
+        expect(result).toBe('second');
         expect(submissionResults).toEqual(['second']);
 
-        subscription.unsubscribe();
+        trigger.complete();
       });
     });
 
