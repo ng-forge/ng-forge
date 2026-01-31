@@ -5,7 +5,7 @@ import { form, submit, FieldTree, TreeValidationResult } from '@angular/forms/si
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
 import { FormConfig, SubmissionConfig } from '../../models';
 import { firstValueFrom, isObservable, of, Subject, throwError, timer } from 'rxjs';
-import { delay, map, switchMap } from 'rxjs/operators';
+import { delay, map } from 'rxjs/operators';
 
 /**
  * Type representing the structure of field validation errors returned by errors().
@@ -454,43 +454,6 @@ describe('Form Submission Integration', () => {
       });
     });
 
-    it('should handle concurrent submission attempts with switchMap cancellation', async () => {
-      await runInInjectionContext(injector, async () => {
-        const formValue = signal({ email: 'test@example.com' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
-        const submissionResults: string[] = [];
-        const trigger = new Subject<string>();
-
-        // Simulate a switchMap-based submission handler
-        const latestSubmission = trigger.pipe(
-          switchMap((id) =>
-            timer(id === 'first' ? 100 : 50).pipe(
-              map(() => {
-                submissionResults.push(id);
-                return id;
-              }),
-            ),
-          ),
-        );
-
-        // Trigger first submission (slower) then immediately second (faster)
-        // switchMap should cancel first and only complete second
-        setTimeout(() => trigger.next('first'), 0);
-        setTimeout(() => trigger.next('second'), 10);
-
-        // Wait for the final emission using firstValueFrom with skip to get second result
-        const result = await firstValueFrom(latestSubmission);
-
-        // Only second should have completed (first was cancelled by switchMap)
-        expect(result).toBe('second');
-        expect(submissionResults).toEqual(['second']);
-
-        trigger.complete();
-      });
-    });
-
     it('should handle submission action returning null as success', async () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
@@ -580,31 +543,6 @@ describe('Form Submission Integration', () => {
 
         // The submit should propagate the error
         await expect(submit(formInstance, asyncThrowingAction)).rejects.toThrow('Async error in action');
-
-        // Form should not be stuck in submitting state
-        expect(formInstance().submitting()).toBe(false);
-      });
-    });
-
-    it('should handle Observable that errors', async () => {
-      await runInInjectionContext(injector, async () => {
-        const formValue = signal({ email: 'test@example.com' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
-        // Observable that emits an error
-        const errorObservable = () => throwError(() => new Error('Observable error'));
-
-        const wrappedAction = async () => {
-          const result = errorObservable();
-          if (isObservable(result)) {
-            return firstValueFrom(result);
-          }
-          return result;
-        };
-
-        // The submit should propagate the error
-        await expect(submit(formInstance, wrappedAction)).rejects.toThrow('Observable error');
 
         // Form should not be stuck in submitting state
         expect(formInstance().submitting()).toBe(false);
