@@ -4,7 +4,7 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, submit, FieldTree, TreeValidationResult } from '@angular/forms/signals';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
 import { FormConfig, SubmissionConfig } from '../../models';
-import { EMPTY, firstValueFrom, isObservable, of, Subject, throwError, timer } from 'rxjs';
+import { firstValueFrom, isObservable, of, Subject, throwError, timer } from 'rxjs';
 import { delay, map, switchMap } from 'rxjs/operators';
 
 /**
@@ -490,32 +490,6 @@ describe('Form Submission Integration', () => {
         // Only second should have completed (first was cancelled)
         expect(submissionResults).toEqual(['second']);
 
-        subscription.unsubscribe();
-      });
-    });
-
-    it('should handle empty submission config by returning EMPTY observable behavior', async () => {
-      await runInInjectionContext(injector, async () => {
-        const formValue = signal({ email: 'test@example.com' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
-        // Simulating what happens when no submission action is defined
-        // The EMPTY observable should not emit any value
-        let emitted = false;
-        const subscription = EMPTY.subscribe({
-          next: () => {
-            emitted = true;
-          },
-          complete: () => {
-            // EMPTY completes immediately without emitting
-          },
-        });
-
-        // Allow microtasks to run
-        await Promise.resolve();
-
-        expect(emitted).toBe(false);
         subscription.unsubscribe();
       });
     });
