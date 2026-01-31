@@ -70,14 +70,16 @@ test.describe('Field Meta Attribute Tests', () => {
       await notificationsToggle.click();
       await page.waitForTimeout(100);
 
-      const emailRadio = scenario.locator('#preferenceRadio p-radiobutton').filter({ hasText: 'Email' });
-      await expect(emailRadio).toBeVisible({ timeout: 5000 });
-      await emailRadio.click();
+      // Radio: label is sibling to p-radiobutton, so select the container div
+      const emailRadioOption = scenario.locator('#preferenceRadio .radio-option').filter({ hasText: 'Email' });
+      await expect(emailRadioOption).toBeVisible({ timeout: 5000 });
+      await emailRadioOption.click();
       await page.waitForTimeout(100);
 
-      const sportsCheckbox = scenario.locator('#interestsMultiCheckbox p-checkbox').filter({ hasText: 'Sports' });
-      await expect(sportsCheckbox).toBeVisible({ timeout: 5000 });
-      await sportsCheckbox.click();
+      // Multi-checkbox: similar structure with label as sibling
+      const sportsCheckboxOption = scenario.locator('#interestsMultiCheckbox').getByText('Sports');
+      await expect(sportsCheckboxOption).toBeVisible({ timeout: 5000 });
+      await sportsCheckboxOption.click();
       await page.waitForTimeout(100);
 
       // Select a country - click the select to open dropdown
