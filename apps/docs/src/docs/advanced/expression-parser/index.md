@@ -130,11 +130,38 @@ When expressions are evaluated, they have access to:
 {
   fieldValue: 'current field value',
   formValue: { /* entire form state */ },
-  fieldPath: 'fieldName'
+  fieldPath: 'fieldName',
+  externalData: { /* external application state, if configured */ }
 }
 ```
 
-**Note**: Don't store sensitive data (tokens, API keys) in form state since it's accessible in expressions.
+### External Data
+
+When you configure `externalData` in your FormConfig, it becomes available in expressions:
+
+```typescript
+const config = {
+  externalData: {
+    userRole: computed(() => authService.role()),
+    permissions: computed(() => authService.permissions()),
+  },
+  fields: [
+    {
+      key: 'adminField',
+      type: 'input',
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'javascript',
+            expression: "externalData.userRole !== 'admin'",
+          },
+        },
+      ],
+    },
+  ],
+} as const satisfies FormConfig;
+```
 
 ## Common Form Use Cases
 

@@ -57,6 +57,29 @@ export interface EvaluationContext<TValue = unknown> {
    */
   arrayPath?: string;
 
+  /**
+   * External data signals resolved to their current values.
+   *
+   * This allows forms to reference data from outside the form context
+   * in conditional logic, derivations, and other expressions.
+   *
+   * @example
+   * ```typescript
+   * // In form config:
+   * externalData: {
+   *   userRole: computed(() => this.userService.currentRole()),
+   *   permissions: computed(() => this.authService.permissions()),
+   * }
+   *
+   * // In JavaScript expression:
+   * condition: {
+   *   type: 'javascript',
+   *   expression: "externalData.userRole === 'admin'"
+   * }
+   * ```
+   */
+  externalData?: Record<string, unknown>;
+
   /** Allow additional properties for flexible expression evaluation */
   [key: string]: unknown;
 }

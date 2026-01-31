@@ -42,6 +42,12 @@ export interface DerivationApplicatorContext {
   /** Custom functions for expression evaluation */
   customFunctions?: Record<string, CustomFunction>;
 
+  /**
+   * External data resolved from form config signals.
+   * Made available in evaluation context as `externalData`.
+   */
+  externalData?: Record<string, unknown>;
+
   /** Logger for diagnostic output */
   logger: Logger;
 
@@ -443,6 +449,7 @@ function createEvaluationContext(
     formValue,
     fieldPath: entry.fieldKey,
     customFunctions: context.customFunctions,
+    externalData: context.externalData,
     logger: context.logger,
   };
 }
@@ -471,6 +478,7 @@ function createArrayItemEvaluationContext(
     formValue: arrayItem,
     fieldPath: `${arrayPath}.${itemIndex}`,
     customFunctions: context.customFunctions,
+    externalData: context.externalData,
     logger: context.logger,
     // Provide access to root form value for cross-scope references
     rootFormValue,

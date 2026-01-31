@@ -1,6 +1,7 @@
-import { inject, Injectable, isSignal, untracked } from '@angular/core';
+import { inject, Injectable, isSignal, Signal, untracked } from '@angular/core';
 import { ChildFieldContext, FieldContext } from '@angular/forms/signals';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
+import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
 import { RootFormRegistryService } from './root-form-registry.service';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 
@@ -19,6 +20,7 @@ function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is 
 export class FieldContextRegistryService {
   private rootFormRegistry = inject(RootFormRegistryService);
   private logger = inject(DynamicFormLogger);
+  private externalDataSignal = inject(EXTERNAL_DATA, { optional: true });
 
   /**
    * Creates an evaluation context for a field by combining:
@@ -60,6 +62,7 @@ export class FieldContextRegistryService {
       formValue,
       fieldPath,
       customFunctions: customFunctions || {},
+      externalData: this.resolveExternalData(false),
       logger: this.logger,
     };
   }
@@ -78,6 +81,28 @@ export class FieldContextRegistryService {
 
     // For root fields or when key is not available
     return '';
+  }
+
+  /**
+   * Resolves external data signals to their current values.
+   *
+   * @param reactive - If true, reads signals reactively (creates dependencies).
+   *                   If false, reads signals with untracked() (no dependencies).
+   * @returns Record of resolved external data values, or undefined if no external data.
+   */
+  private resolveExternalData(reactive: boolean): Record<string, unknown> | undefined {
+    const externalDataRecord = reactive ? this.externalDataSignal?.() : untracked(() => this.externalDataSignal?.());
+
+    if (!externalDataRecord) {
+      return undefined;
+    }
+
+    const resolved: Record<string, unknown> = {};
+    for (const [key, signal] of Object.entries(externalDataRecord)) {
+      resolved[key] = reactive ? (signal as Signal<unknown>)() : untracked(() => (signal as Signal<unknown>)());
+    }
+
+    return resolved;
   }
 
   /**
@@ -113,6 +138,7 @@ export class FieldContextRegistryService {
       formValue,
       fieldPath,
       customFunctions: customFunctions || {},
+      externalData: this.resolveExternalData(true),
       logger: this.logger,
     };
   }
@@ -143,6 +169,7 @@ export class FieldContextRegistryService {
       formValue,
       fieldPath,
       customFunctions: customFunctions || {},
+      externalData: this.resolveExternalData(true),
       logger: this.logger,
     };
   }

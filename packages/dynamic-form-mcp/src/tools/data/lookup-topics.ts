@@ -493,7 +493,8 @@ validators: [{ type: 'customAsync', functionName: 'checkEmailAvailable' }]
 logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'accountType', operator: 'notEquals', value: 'business' } }]
 \`\`\`
 ⚠️ **NO hideWhen/showWhen shorthand!** Use logic blocks.
-**Types:** hidden, disabled, readonly, required`,
+**Types:** hidden, disabled, readonly, required
+**External data:** Use \`externalData.userRole\` in javascript conditions (see topic: external-data)`,
 
     full: `# Conditional Visibility
 
@@ -522,7 +523,30 @@ logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'accountTy
 - \`and\`/\`or\`: Combine conditions
 - \`true\`/\`false\`: Static boolean
 
-**Logic types:** \`hidden\`, \`disabled\`, \`readonly\`, \`required\``,
+**Logic types:** \`hidden\`, \`disabled\`, \`readonly\`, \`required\`
+
+## Using External Data in Conditions
+
+Access external application state (user roles, permissions, feature flags) via \`externalData\`:
+
+\`\`\`typescript
+// In FormConfig
+externalData: {
+  userRole: computed(() => this.authService.role()),
+  featureFlags: computed(() => this.featureService.flags()),
+}
+
+// In field logic
+logic: [{
+  type: 'hidden',
+  condition: {
+    type: 'javascript',
+    expression: "externalData.userRole !== 'admin'"
+  }
+}]
+\`\`\`
+
+See topic \`external-data\` for full documentation.`,
   },
 
   derivation: {
@@ -533,7 +557,8 @@ logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'accountTy
 // Logic block (for conditions, debounce, etc.)
 logic: [{ type: 'derivation', expression: 'formValue.firstName + " " + formValue.lastName' }]
 \`\`\`
-Derivation is always defined ON the field that receives the computed value (self-targeting).`,
+Derivation is always defined ON the field that receives the computed value (self-targeting).
+**Variables:** \`formValue\`, \`fieldValue\`, \`externalData\` (see topic: external-data)`,
 
     full: `# Value Derivation (Computed Fields)
 
@@ -599,12 +624,14 @@ Derivations are always defined ON the field that receives the computed value (se
 **Variables in expressions:**
 - \`formValue\`: Complete form value object
 - \`fieldValue\`: This field's current value
+- \`externalData\`: External application state (user roles, feature flags, etc.)
 
 **Nested access:**
 \`\`\`typescript
 derivation: 'formValue.address?.city'                    // Optional chaining
 derivation: 'formValue.items?.[0]?.name'                // Array access
 derivation: 'formValue.discount ?? 0'                   // Nullish coalescing
+derivation: 'formValue.price * (1 - externalData.discountRate)'  // External data
 \`\`\`
 
 **Complex logic (IIFE):**
@@ -660,7 +687,8 @@ Wrong: Wrong property names
 
   'expression-variables': {
     brief: `**formValue** - complete form object: \`formValue.fieldName\`, \`formValue.address?.city\`
-**fieldValue** - current field's value (in custom validators)`,
+**fieldValue** - current field's value (in custom validators)
+**externalData** - external signals: \`externalData.userRole\`, \`externalData.featureFlags.enabled\``,
 
     full: `# Variables in Expressions
 
@@ -670,6 +698,7 @@ Wrong: Wrong property names
 |----------|------|--------------|-------------|
 | \`formValue\` | object | Derivations, conditions, custom validators | Complete form values as nested object |
 | \`fieldValue\` | any | Custom validator expressions only | Current field's value |
+| \`externalData\` | object | Derivations, conditions | External application state (from \`externalData\` in FormConfig) |
 
 ## Accessing Values
 
@@ -691,11 +720,117 @@ expression: 'formValue.contacts?.[0]?.name'
 expression: '(formValue.items?.length || 0) + " items"'
 \`\`\`
 
+### External Data Access
+\`\`\`typescript
+expression: "externalData.userRole === 'admin'"
+expression: 'externalData.featureFlags.advancedMode === true'
+expression: 'externalData.permissions.includes("edit")'
+\`\`\`
+
 ## Safety Tips
 
 1. **Always use optional chaining** (\`?.\`) for nested paths
 2. **Provide defaults** for potentially undefined values: \`formValue.count || 0\`
 3. **Use nullish coalescing** (\`??\`) when 0 or empty string are valid: \`formValue.score ?? 'N/A'\``,
+  },
+
+  'external-data': {
+    brief: `\`\`\`typescript
+externalData: { userRole: computed(() => authService.role()), flags: computed(() => featureFlags()) }
+\`\`\`
+Available as \`externalData.userRole\` in conditions and derivations. Reactively updates when signals change.`,
+
+    full: `# External Data (Application State in Forms)
+
+External data allows forms to access application state (user roles, feature flags, permissions) in conditions and derivations.
+
+## Form Configuration
+
+\`\`\`typescript
+const config = {
+  externalData: {
+    userRole: computed(() => this.authService.currentRole()),
+    permissions: computed(() => this.authService.permissions()),
+    featureFlags: computed(() => ({
+      advancedMode: this.featureService.isAdvanced(),
+      betaFeatures: this.featureService.isBeta(),
+    })),
+  },
+  fields: [
+    // Fields can now use externalData in conditions
+  ]
+} as const satisfies FormConfig;
+\`\`\`
+
+## Using in Conditions (Logic)
+
+\`\`\`typescript
+{
+  key: 'adminNotes',
+  type: 'textarea',
+  label: 'Admin Notes',
+  logic: [{
+    type: 'hidden',
+    condition: {
+      type: 'javascript',
+      expression: "externalData.userRole !== 'admin'"
+    }
+  }]
+}
+\`\`\`
+
+## Using in Derivations
+
+\`\`\`typescript
+{
+  key: 'discountedPrice',
+  type: 'input',
+  readonly: true,
+  derivation: 'formValue.price * (1 - externalData.discountRate)'
+}
+\`\`\`
+
+## Common Patterns
+
+### Role-Based Field Visibility
+\`\`\`typescript
+logic: [{
+  type: 'hidden',
+  condition: {
+    type: 'javascript',
+    expression: "externalData.userRole === 'guest'"  // Hide for guests
+  }
+}]
+\`\`\`
+
+### Feature Flag Conditionals
+\`\`\`typescript
+logic: [{
+  type: 'hidden',
+  condition: {
+    type: 'javascript',
+    expression: 'externalData.featureFlags.betaFeatures !== true'
+  }
+}]
+\`\`\`
+
+### Permission-Based Readonly
+\`\`\`typescript
+logic: [{
+  type: 'readonly',
+  condition: {
+    type: 'javascript',
+    expression: '!externalData.permissions.includes("edit")'
+  }
+}]
+\`\`\`
+
+## Key Points
+
+- **Signals required**: Each property in \`externalData\` must be a Signal (use \`signal()\` or \`computed()\`)
+- **Reactive**: Changes to external signals automatically re-evaluate conditions/derivations
+- **Available in**: JavaScript expressions, custom functions (via context)
+- **Not available in**: \`fieldValue\`/\`formValue\` condition types (use \`javascript\` type)`,
   },
 
   'async-validators': {
@@ -1706,6 +1841,16 @@ export const TOPIC_ALIASES: Record<string, string> = {
   formvalue: 'expression-variables',
   fieldvalue: 'expression-variables',
   variables: 'expression-variables',
+  // External data aliases
+  externaldata: 'external-data',
+  external: 'external-data',
+  'app-state': 'external-data',
+  'application-state': 'external-data',
+  permissions: 'external-data',
+  'feature-flags': 'external-data',
+  featureflags: 'external-data',
+  roles: 'external-data',
+  'user-role': 'external-data',
   // Multi-page aliases
   'multipage-gotchas': 'multi-page-gotchas',
   'page-gotchas': 'multi-page-gotchas',

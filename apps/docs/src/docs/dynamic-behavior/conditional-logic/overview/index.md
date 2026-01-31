@@ -949,6 +949,57 @@ logic: [
 ];
 ```
 
+## External Data in Conditions
+
+Access external application state (user roles, permissions, feature flags) in conditions using `externalData`:
+
+```typescript
+const config = {
+  externalData: {
+    userRole: computed(() => authService.role()),
+    featureFlags: computed(() => ({
+      advancedMode: featureService.isAdvanced(),
+    })),
+  },
+  fields: [
+    {
+      key: 'adminNotes',
+      type: 'textarea',
+      label: 'Admin Notes',
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'javascript',
+            expression: "externalData.userRole !== 'admin'",
+          },
+        },
+      ],
+    },
+    {
+      key: 'advancedSettings',
+      type: 'input',
+      label: 'Advanced Settings',
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'javascript',
+            expression: 'externalData.featureFlags.advancedMode !== true',
+          },
+        },
+      ],
+    },
+  ],
+} as const satisfies FormConfig;
+```
+
+**Key points:**
+
+- Each property in `externalData` must be a Signal (`signal()` or `computed()`)
+- Changes to external signals automatically re-evaluate conditions
+- Access values via `externalData.propertyName` in JavaScript expressions
+
 ## Related
 
 - **[Value Derivation](../value-derivation/basics/)** - Computed field values

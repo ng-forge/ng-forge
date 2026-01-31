@@ -1,4 +1,4 @@
-import { computed, DestroyRef, inject, InjectionToken, Injector, isDevMode, Signal, untracked } from '@angular/core';
+import { computed, DestroyRef, inject, InjectionToken, Injector, isDevMode, isSignal, Signal, untracked } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FieldTree } from '@angular/forms/signals';
 import {
@@ -18,7 +18,7 @@ import {
   timer,
 } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
-import { FORM_OPTIONS } from '../../models/field-signal-context.token';
+import { EXTERNAL_DATA, FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { getChangedKeys } from '../../utils/object-utils';
@@ -70,6 +70,7 @@ export class DerivationOrchestrator {
   private readonly warningTracker = inject(DERIVATION_WARNING_TRACKER);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly formOptions = inject(FORM_OPTIONS);
+  private readonly externalDataSignal = inject(EXTERNAL_DATA, { optional: true });
 
   /**
    * Computed signal containing the collected and validated derivations.
@@ -214,6 +215,7 @@ export class DerivationOrchestrator {
       rootForm: formAccessor,
       derivationFunctions: this.functionRegistry.getDerivationFunctions(),
       customFunctions: this.functionRegistry.getCustomFunctions(),
+      externalData: this.resolveExternalData(),
       logger: this.logger,
       warningTracker: this.warningTracker,
       derivationLogger: untracked(() => this.config.derivationLogger()),
@@ -256,6 +258,7 @@ export class DerivationOrchestrator {
       rootForm: formAccessor,
       derivationFunctions: this.functionRegistry.getDerivationFunctions(),
       customFunctions: this.functionRegistry.getCustomFunctions(),
+      externalData: this.resolveExternalData(),
       logger: this.logger,
       warningTracker: this.warningTracker,
       derivationLogger: untracked(() => this.config.derivationLogger()),
@@ -307,6 +310,33 @@ export class DerivationOrchestrator {
         derivationDescs,
       );
     }
+  }
+
+  /**
+   * Resolves external data signals to their current values without creating dependencies.
+   *
+   * Uses `untracked()` to read signals without establishing reactive dependencies,
+   * which is important for derivations that shouldn't re-trigger on every external data change.
+   *
+   * @returns Record of resolved external data values, or undefined if no external data.
+   */
+  private resolveExternalData(): Record<string, unknown> | undefined {
+    const externalDataRecord = untracked(() => this.externalDataSignal?.());
+
+    if (!externalDataRecord) {
+      return undefined;
+    }
+
+    const resolved: Record<string, unknown> = {};
+    for (const [key, signal] of Object.entries(externalDataRecord)) {
+      if (isSignal(signal)) {
+        resolved[key] = untracked(() => signal());
+      } else {
+        resolved[key] = signal;
+      }
+    }
+
+    return resolved;
   }
 }
 

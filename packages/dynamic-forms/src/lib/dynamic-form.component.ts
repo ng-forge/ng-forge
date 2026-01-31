@@ -24,7 +24,13 @@ import { derivedFromDeferred } from './utils/derived-from-deferred/derived-from-
 import { reconcileFields, ResolvedField, resolveField } from './utils/resolve-field/resolve-field';
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
 import { keyBy, memoize, isEqual } from './utils/object-utils';
-import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from './models/field-signal-context.token';
+import {
+  DEFAULT_PROPS,
+  DEFAULT_VALIDATION_MESSAGES,
+  EXTERNAL_DATA,
+  FIELD_SIGNAL_CONTEXT,
+  FORM_OPTIONS,
+} from './models/field-signal-context.token';
 import { FieldTypeDefinition } from './models/field-type';
 import { FormConfig, FormOptions } from './models/form-config';
 import { RegisteredFieldTypes } from './models/registry/field-registry';
@@ -119,6 +125,11 @@ function derivationOrchestratorFactoryWrapper(dynamicForm: DynamicForm) {
     {
       provide: FORM_OPTIONS,
       useFactory: (form: DynamicForm) => form.effectiveFormOptions,
+      deps: [DynamicForm],
+    },
+    {
+      provide: EXTERNAL_DATA,
+      useFactory: (form: DynamicForm) => computed(() => form.config().externalData),
       deps: [DynamicForm],
     },
     { provide: DERIVATION_WARNING_TRACKER, useFactory: createDerivationWarningTracker },

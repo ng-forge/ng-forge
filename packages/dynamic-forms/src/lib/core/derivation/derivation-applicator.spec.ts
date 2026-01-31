@@ -565,6 +565,172 @@ describe('derivation-applicator', () => {
     });
   });
 
+  describe('external data in derivations', () => {
+    let logger: Logger;
+    let formValueSignal: WritableSignal<Record<string, unknown>>;
+
+    beforeEach(() => {
+      logger = createMockLogger();
+      formValueSignal = signal({ field1: '', adminField: '' });
+    });
+
+    it('should provide externalData in evaluation context for expressions', () => {
+      const { form, values } = createMockForm({ field1: '', isAdmin: false });
+      formValueSignal.set({ field1: '', isAdmin: false });
+
+      // Test a simple comparison expression that the parser supports
+      const collection = createCollection([
+        createEntry('isAdmin', {
+          expression: "externalData.userRole === 'admin'",
+          dependsOn: ['*'],
+        }),
+      ]);
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        externalData: { userRole: 'admin' },
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      applyDerivations(collection, context);
+
+      expect(values.isAdmin).toBe(true);
+    });
+
+    it('should provide externalData to custom derivation functions', () => {
+      const { form, values } = createMockForm({ field1: '', derived: '' });
+      formValueSignal.set({ field1: '', derived: '' });
+
+      const collection = createCollection([
+        createEntry('derived', {
+          functionName: 'deriveFromExternal',
+          dependsOn: ['*'],
+        }),
+      ]);
+
+      const deriveFromExternal = vi.fn().mockImplementation((ctx) => {
+        return ctx.externalData?.permissions?.includes('write') ? 'writable' : 'readonly';
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        derivationFunctions: { deriveFromExternal },
+        externalData: { permissions: ['read', 'write'] },
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      applyDerivations(collection, context);
+
+      expect(deriveFromExternal).toHaveBeenCalled();
+      expect(values.derived).toBe('writable');
+    });
+
+    it('should handle undefined externalData gracefully in custom functions', () => {
+      const { form, values } = createMockForm({ field1: '', target: '' });
+      formValueSignal.set({ field1: '', target: '' });
+
+      // Use a custom function that handles undefined externalData
+      const collection = createCollection([
+        createEntry('target', {
+          functionName: 'getDefaultRole',
+          dependsOn: ['*'],
+        }),
+      ]);
+
+      const getDefaultRole = vi.fn().mockImplementation((ctx) => {
+        return ctx.externalData?.userRole || 'guest';
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        derivationFunctions: { getDefaultRole },
+        // No externalData provided
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      applyDerivations(collection, context);
+
+      expect(values.target).toBe('guest');
+    });
+
+    it('should provide externalData in array item derivations', () => {
+      // Re-use the array form creation helper from the array tests
+      const values = {
+        items: [
+          { quantity: 2, unitPrice: 100, lineTotal: 0 },
+          { quantity: 1, unitPrice: 50, lineTotal: 0 },
+        ],
+        globalDiscount: 0,
+      };
+
+      // Create minimal mock form for array
+      const lineTotalSignal0 = signal(0);
+      const lineTotalSignal1 = signal(0);
+
+      // Sync signals back to values
+      Object.defineProperty(values.items[0], 'lineTotal', {
+        get: () => lineTotalSignal0(),
+        set: (v: number) => lineTotalSignal0.set(v),
+        enumerable: true,
+        configurable: true,
+      });
+      Object.defineProperty(values.items[1], 'lineTotal', {
+        get: () => lineTotalSignal1(),
+        set: (v: number) => lineTotalSignal1.set(v),
+        enumerable: true,
+        configurable: true,
+      });
+
+      const form = {
+        items: Object.assign(() => ({ value: signal(values.items) }), {
+          0: {
+            quantity: () => ({ value: signal(values.items[0].quantity) }),
+            unitPrice: () => ({ value: signal(values.items[0].unitPrice) }),
+            lineTotal: () => ({ value: lineTotalSignal0 }),
+          },
+          1: {
+            quantity: () => ({ value: signal(values.items[1].quantity) }),
+            unitPrice: () => ({ value: signal(values.items[1].unitPrice) }),
+            lineTotal: () => ({ value: lineTotalSignal1 }),
+          },
+        }),
+      };
+
+      const formValueSignal = signal({
+        items: values.items,
+        globalDiscount: 0,
+      });
+
+      // Derivation using externalData for discount rate
+      const collection = createCollection([
+        createEntry('items.$.lineTotal', {
+          expression: 'formValue.quantity * formValue.unitPrice * (1 - externalData.discountRate)',
+          dependsOn: ['quantity', 'unitPrice'],
+        }),
+      ]);
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        externalData: { discountRate: 0.2 }, // 20% discount from external source
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      applyDerivations(collection, context);
+
+      // Each item should apply the external discount rate
+      expect(values.items[0].lineTotal).toBe(160); // 2 * 100 * 0.8
+      expect(values.items[1].lineTotal).toBe(40); // 1 * 50 * 0.8
+    });
+  });
+
   describe('applyDerivationsForTrigger', () => {
     let logger: Logger;
     let formValueSignal: WritableSignal<Record<string, unknown>>;
