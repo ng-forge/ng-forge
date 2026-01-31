@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, submit, FieldTree, TreeValidationResult } from '@angular/forms/signals';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
-import { FormConfig, SubmissionConfig } from '../../models';
 import { firstValueFrom, isObservable, of, Subject, throwError, timer } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 
@@ -31,74 +30,6 @@ describe('Form Submission Integration', () => {
 
     injector = TestBed.inject(Injector);
     rootFormRegistry = TestBed.inject(RootFormRegistryService);
-  });
-
-  describe('SubmissionConfig Interface', () => {
-    it('should define a valid submission config with Promise action', () => {
-      const submissionConfig: SubmissionConfig<{ email: string }> = {
-        action: async () => {
-          // Simulate API call
-          await new Promise((resolve) => setTimeout(resolve, 10));
-          return undefined; // No errors
-        },
-      };
-
-      expect(submissionConfig.action).toBeDefined();
-      expect(typeof submissionConfig.action).toBe('function');
-    });
-
-    it('should define a valid submission config with Observable action', () => {
-      const submissionConfig: SubmissionConfig<{ email: string }> = {
-        action: () => {
-          // Simulate HTTP call returning Observable
-          return timer(10).pipe(map(() => undefined));
-        },
-      };
-
-      expect(submissionConfig.action).toBeDefined();
-      expect(typeof submissionConfig.action).toBe('function');
-    });
-
-    it('should allow Observable submission config to return server errors', () => {
-      const submissionConfig: SubmissionConfig<{ username: string }> = {
-        action: (form) => {
-          // Simulate server validation error via Observable
-          return of([
-            {
-              field: form.username,
-              error: { kind: 'server', message: 'Username already taken' },
-            },
-          ] as TreeValidationResult);
-        },
-      };
-
-      expect(submissionConfig.action).toBeDefined();
-    });
-
-    it('should allow Promise submission config to return server errors', () => {
-      const submissionConfig: SubmissionConfig<{ username: string }> = {
-        action: async (form) => {
-          // Simulate server validation error
-          return [
-            {
-              field: form.username,
-              error: { kind: 'server', message: 'Username already taken' },
-            },
-          ] as TreeValidationResult;
-        },
-      };
-
-      expect(submissionConfig.action).toBeDefined();
-    });
-
-    it('should allow Observable to return any value (treated as success)', () => {
-      // This simulates returning an HTTP response directly without mapping
-      const submissionConfig: SubmissionConfig<{ email: string }> = {
-        action: () => of({ id: 123, status: 'created' }), // Simulating HTTP response body
-      };
-
-      expect(submissionConfig.action).toBeDefined();
-    });
   });
 
   describe('Native submit() Integration', () => {
@@ -290,119 +221,6 @@ describe('Form Submission Integration', () => {
         expect(submittingDuringAction).toBe(true);
         expect(formInstance().submitting()).toBe(false);
       });
-    });
-  });
-
-  describe('FormConfig with Submission', () => {
-    it('should accept Promise-based submission configuration in FormConfig', () => {
-      const config: FormConfig = {
-        fields: [
-          { type: 'input', key: 'email', label: 'Email' },
-          { type: 'submit', key: 'submit', label: 'Submit' },
-        ],
-        submission: {
-          action: async () => {
-            return undefined;
-          },
-        },
-      };
-
-      expect(config.submission).toBeDefined();
-      expect(config.submission?.action).toBeDefined();
-    });
-
-    it('should accept Observable-based submission configuration in FormConfig', () => {
-      const config: FormConfig = {
-        fields: [
-          { type: 'input', key: 'email', label: 'Email' },
-          { type: 'submit', key: 'submit', label: 'Submit' },
-        ],
-        submission: {
-          action: () => of(undefined),
-        },
-      };
-
-      expect(config.submission).toBeDefined();
-      expect(config.submission?.action).toBeDefined();
-    });
-
-    it('should accept Observable that returns HTTP response directly', () => {
-      const config: FormConfig = {
-        fields: [
-          { type: 'input', key: 'email', label: 'Email' },
-          { type: 'submit', key: 'submit', label: 'Submit' },
-        ],
-        submission: {
-          // Simulates: action: (form) => this.http.post('/api/submit', form().value())
-          action: () => of({ id: 123 }),
-        },
-      };
-
-      expect(config.submission).toBeDefined();
-    });
-
-    it('should work without submission configuration (backward compatible)', () => {
-      const config: FormConfig = {
-        fields: [
-          { type: 'input', key: 'email', label: 'Email' },
-          { type: 'submit', key: 'submit', label: 'Submit' },
-        ],
-        // No submission config - users handle it via (submitted) output
-      };
-
-      expect(config.submission).toBeUndefined();
-    });
-  });
-
-  describe('Submission Config and (submitted) Output Interaction', () => {
-    it('should warn when both submission.action and (submitted) output would be used', () => {
-      // This test validates the expected behavior when both are configured
-      // The dynamic-form component should:
-      // 1. Warn via console.warn
-      // 2. Return EMPTY from the submitted output (not emit)
-      // 3. Let submission.action handle the submission
-
-      const config: FormConfig = {
-        fields: [
-          { type: 'input', key: 'email', label: 'Email' },
-          { type: 'submit', key: 'submit', label: 'Submit' },
-        ],
-        submission: {
-          action: () => of(undefined),
-        },
-      };
-
-      // Verify the config structure is valid
-      expect(config.submission).toBeDefined();
-      expect(config.submission?.action).toBeDefined();
-    });
-
-    it('should not warn when only (submitted) output is used (no submission config)', () => {
-      const config: FormConfig = {
-        fields: [
-          { type: 'input', key: 'email', label: 'Email' },
-          { type: 'submit', key: 'submit', label: 'Submit' },
-        ],
-        // No submission config - (submitted) output should work normally
-      };
-
-      expect(config.submission).toBeUndefined();
-    });
-
-    it('should not warn when only submission.action is used (no (submitted) listener)', () => {
-      const config: FormConfig = {
-        fields: [
-          { type: 'input', key: 'email', label: 'Email' },
-          { type: 'submit', key: 'submit', label: 'Submit' },
-        ],
-        submission: {
-          action: () => of(undefined),
-        },
-      };
-
-      // When only submission.action is configured and no (submitted) listener,
-      // there should be no warning
-      expect(config.submission).toBeDefined();
     });
   });
 
