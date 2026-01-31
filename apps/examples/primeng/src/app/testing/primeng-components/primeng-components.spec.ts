@@ -20,20 +20,21 @@ test.describe('PrimeNG Components Tests', () => {
       const calendarInput = scenario.locator('#birthDate input');
       await calendarInput.click();
 
-      // Wait for calendar popup animation
-      await expect(page.locator('.p-datepicker')).toBeVisible({ timeout: 5000 });
+      // Wait for calendar popup panel - PrimeNG uses .p-datepicker-panel for the popup overlay
+      const calendarPanel = page.locator('.p-datepicker-panel');
+      await expect(calendarPanel).toBeVisible({ timeout: 5000 });
 
       // Select a date (e.g., 15th of current month)
-      const dateButton = page.locator('.p-datepicker-calendar td:not(.p-datepicker-other-month) span').filter({ hasText: /^15$/ }).first();
+      const dateButton = calendarPanel.locator('td:not(.p-datepicker-other-month) span').filter({ hasText: /^15$/ }).first();
       if ((await dateButton.count()) > 0) {
         await dateButton.click();
       } else {
         // Fallback: click any available date
-        await page.locator('.p-datepicker-calendar td:not(.p-datepicker-other-month) span').first().click();
+        await calendarPanel.locator('td:not(.p-datepicker-other-month) span').first().click();
       }
 
-      // Wait for calendar to close
-      await expect(page.locator('.p-datepicker')).not.toBeVisible({ timeout: 5000 });
+      // Wait for calendar panel to close
+      await expect(calendarPanel).not.toBeVisible({ timeout: 5000 });
 
       // Value should be set
       expect(await calendarInput.inputValue()).toBeTruthy();
@@ -50,16 +51,16 @@ test.describe('PrimeNG Components Tests', () => {
       const calendarInput = scenario.locator('#appointmentDate input');
       await calendarInput.click();
 
-      // Wait for calendar popup animation
-      await expect(page.locator('.p-datepicker')).toBeVisible({ timeout: 5000 });
+      // Wait for calendar popup panel
+      const calendarPanel = page.locator('.p-datepicker-panel');
+      await expect(calendarPanel).toBeVisible({ timeout: 5000 });
 
       // Calendar should be rendered with the current month
-      const calendar = page.locator('.p-datepicker');
-      await expect(calendar).toBeVisible();
+      await expect(calendarPanel).toBeVisible();
 
       // There should be some disabled dates (outside the min/max range)
       // Previous month days should be disabled or not shown
-      await expect(page.locator('.p-datepicker-calendar')).toBeVisible();
+      await expect(calendarPanel.locator('table')).toBeVisible();
     });
 
     test('should display custom date format', async ({ page, helpers }) => {
@@ -73,14 +74,15 @@ test.describe('PrimeNG Components Tests', () => {
       const calendarInput = scenario.locator('#formattedDate input');
       await calendarInput.click();
 
-      // Wait for calendar popup animation
-      await expect(page.locator('.p-datepicker')).toBeVisible({ timeout: 5000 });
+      // Wait for calendar popup panel
+      const calendarPanel = page.locator('.p-datepicker-panel');
+      await expect(calendarPanel).toBeVisible({ timeout: 5000 });
 
       // Select a date
-      await page.locator('.p-datepicker-calendar td:not(.p-datepicker-other-month) span').first().click();
+      await calendarPanel.locator('td:not(.p-datepicker-other-month) span').first().click();
 
-      // Wait for calendar to close
-      await expect(page.locator('.p-datepicker')).not.toBeVisible({ timeout: 5000 });
+      // Wait for calendar panel to close
+      await expect(calendarPanel).not.toBeVisible({ timeout: 5000 });
 
       // Value should be in custom format (dd/mm/yy)
       const value = await calendarInput.inputValue();
@@ -278,28 +280,24 @@ test.describe('PrimeNG Components Tests', () => {
       const scenario = helpers.getScenario('multi-select-basic');
       await expect(scenario).toBeVisible();
 
-      const select = scenario.locator('#skills p-select');
+      // multi-select uses p-multiSelect component
+      const select = scenario.locator('#skills p-multiSelect');
       await expect(select).toBeVisible();
 
       // Click to open dropdown
       await select.click();
-      await expect(page.locator('.p-select-overlay')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('.p-multiselect-overlay')).toBeVisible({ timeout: 5000 });
 
-      // Select multiple options
-      await page.locator('.p-select-overlay').getByText('TypeScript', { exact: true }).click();
+      // Select multiple options - multiselect stays open after each selection
+      await page.locator('.p-multiselect-overlay').getByText('TypeScript', { exact: true }).click();
       await page.waitForTimeout(100);
 
-      // In multi-select mode, the dropdown stays open after selection
-      // Click to close first if needed, then reopen
-      await select.click();
-      await expect(page.locator('.p-select-overlay')).toBeVisible({ timeout: 5000 });
-
-      await page.locator('.p-select-overlay').getByText('Angular', { exact: true }).click();
+      await page.locator('.p-multiselect-overlay').getByText('Angular', { exact: true }).click();
       await page.waitForTimeout(100);
 
-      // Close the dropdown by clicking outside
+      // Close the dropdown by clicking outside or pressing Escape
       await page.keyboard.press('Escape');
-      await expect(page.locator('.p-select-overlay')).not.toBeVisible({ timeout: 2000 });
+      await expect(page.locator('.p-multiselect-overlay')).not.toBeVisible({ timeout: 2000 });
     });
 
     test('should filter options', async ({ page, helpers }) => {
@@ -309,15 +307,16 @@ test.describe('PrimeNG Components Tests', () => {
       const scenario = helpers.getScenario('multi-select-filter');
       await expect(scenario).toBeVisible();
 
-      const select = scenario.locator('#countries p-select');
+      // multi-select uses p-multiSelect component
+      const select = scenario.locator('#countries p-multiSelect');
       await expect(select).toBeVisible();
 
       // Click to open dropdown
       await select.click();
-      await expect(page.locator('.p-select-overlay')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('.p-multiselect-overlay')).toBeVisible({ timeout: 5000 });
 
       // Filter input should be visible
-      const filterInput = page.locator('.p-select-filter');
+      const filterInput = page.locator('.p-multiselect-filter-container input');
       await expect(filterInput).toBeVisible();
 
       // Type to filter
@@ -325,10 +324,10 @@ test.describe('PrimeNG Components Tests', () => {
       await page.waitForTimeout(200);
 
       // Only matching options should be visible
-      await expect(page.locator('.p-select-overlay').getByText('United States', { exact: true })).toBeVisible();
-      await expect(page.locator('.p-select-overlay').getByText('United Kingdom', { exact: true })).toBeVisible();
+      await expect(page.locator('.p-multiselect-overlay').getByText('United States', { exact: true })).toBeVisible();
+      await expect(page.locator('.p-multiselect-overlay').getByText('United Kingdom', { exact: true })).toBeVisible();
       // Non-matching options should not be visible
-      await expect(page.locator('.p-select-overlay').getByText('Germany', { exact: true })).not.toBeVisible();
+      await expect(page.locator('.p-multiselect-overlay').getByText('Germany', { exact: true })).not.toBeVisible();
     });
 
     test('should work with initial values', async ({ page, helpers }) => {
@@ -338,7 +337,8 @@ test.describe('PrimeNG Components Tests', () => {
       const scenario = helpers.getScenario('multi-select-initial-value');
       await expect(scenario).toBeVisible();
 
-      const select = scenario.locator('#permissions p-select');
+      // multi-select uses p-multiSelect component
+      const select = scenario.locator('#permissions p-multiSelect');
       await expect(select).toBeVisible();
 
       // The select should show the selected values (Read and Write)
@@ -355,8 +355,8 @@ test.describe('PrimeNG Components Tests', () => {
       const scenario = helpers.getScenario('multi-select-disabled');
       await expect(scenario).toBeVisible();
 
-      // PrimeNG select adds p-disabled class when disabled
-      const select = scenario.locator('#lockedSelection p-select');
+      // PrimeNG multi-select adds p-disabled class when disabled
+      const select = scenario.locator('#lockedSelection p-multiSelect');
       await expect(select).toHaveClass(/p-disabled/);
     });
   });
