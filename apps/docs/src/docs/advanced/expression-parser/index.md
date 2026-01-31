@@ -145,17 +145,21 @@ const config = {
     userRole: computed(() => authService.role()),
     permissions: computed(() => authService.permissions()),
   },
-  fields: [{
-    key: 'adminField',
-    type: 'input',
-    logic: [{
-      type: 'hidden',
-      condition: {
-        type: 'javascript',
-        expression: "externalData.userRole !== 'admin'"
-      }
-    }]
-  }]
+  fields: [
+    {
+      key: 'adminField',
+      type: 'input',
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'javascript',
+            expression: "externalData.userRole !== 'admin'",
+          },
+        },
+      ],
+    },
+  ],
 } as const satisfies FormConfig;
 ```
 
