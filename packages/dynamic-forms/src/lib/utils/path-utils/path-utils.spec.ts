@@ -123,6 +123,26 @@ describe('path-utils', () => {
     it('should handle path with numeric segments', () => {
       expect(splitPath('items.0.quantity')).toEqual(['items', '0', 'quantity']);
     });
+
+    it('should handle bracket notation', () => {
+      expect(splitPath('items[0].quantity')).toEqual(['items', '0', 'quantity']);
+    });
+
+    it('should handle consecutive bracket notation', () => {
+      expect(splitPath('a[0][1].b')).toEqual(['a', '0', '1', 'b']);
+    });
+
+    it('should handle mixed dot and bracket notation', () => {
+      expect(splitPath('orders[0].items[1].name')).toEqual(['orders', '0', 'items', '1', 'name']);
+    });
+
+    it('should handle bracket notation at the end', () => {
+      expect(splitPath('items[0]')).toEqual(['items', '0']);
+    });
+
+    it('should handle path with only dots (returns empty array)', () => {
+      expect(splitPath('...')).toEqual([]);
+    });
   });
 
   describe('joinPath', () => {
@@ -260,17 +280,16 @@ describe('path-utils', () => {
         });
       });
 
-      it('splitPath should handle consecutive dots', () => {
-        // Consecutive dots create empty segments
-        expect(splitPath('items..name')).toEqual(['items', '', 'name']);
+      it('splitPath should handle consecutive dots (filters empty segments)', () => {
+        expect(splitPath('items..name')).toEqual(['items', 'name']);
       });
 
-      it('splitPath should handle leading dot', () => {
-        expect(splitPath('.items.name')).toEqual(['', 'items', 'name']);
+      it('splitPath should handle leading dot (filters empty segments)', () => {
+        expect(splitPath('.items.name')).toEqual(['items', 'name']);
       });
 
-      it('splitPath should handle trailing dot', () => {
-        expect(splitPath('items.name.')).toEqual(['items', 'name', '']);
+      it('splitPath should handle trailing dot (filters empty segments)', () => {
+        expect(splitPath('items.name.')).toEqual(['items', 'name']);
       });
 
       it('parseArrayPath should handle just $ as path', () => {
@@ -370,16 +389,21 @@ describe('path-utils', () => {
       });
     });
 
-    describe('bracket notation (not supported)', () => {
-      // These tests document that bracket notation is NOT supported
-      it('splitPath should NOT parse bracket notation', () => {
-        // Bracket notation is not parsed - documents current limitation
-        expect(splitPath('items[0].quantity')).toEqual(['items[0]', 'quantity']);
-        // Expected if bracket notation were supported: ['items', '0', 'quantity']
+    describe('bracket notation', () => {
+      it('splitPath should parse bracket notation correctly', () => {
+        expect(splitPath('items[0].quantity')).toEqual(['items', '0', 'quantity']);
       });
 
-      it('getLeafPath should return segment with brackets intact', () => {
-        expect(getLeafPath('items[0]')).toBe('items[0]');
+      it('getLeafPath should extract numeric index from bracket notation', () => {
+        expect(getLeafPath('items[0]')).toBe('0');
+      });
+
+      it('getParentPath should work with bracket notation', () => {
+        expect(getParentPath('items[0].quantity')).toBe('items.0');
+      });
+
+      it('should handle deeply nested bracket notation', () => {
+        expect(splitPath('a[0].b[1].c[2]')).toEqual(['a', '0', 'b', '1', 'c', '2']);
       });
     });
   });

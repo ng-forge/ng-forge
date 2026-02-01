@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input, linkedSignal, signal } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter, forkJoin, map, Observable, of } from 'rxjs';
+import { catchError, filter, firstValueFrom, forkJoin, map, Observable, of } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ArrayField } from '../../definitions/default/array-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
@@ -162,60 +162,85 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         this.resolvedItemsSignal.set([]);
         break;
       case 'initial':
-        this.resolveAllItems(fieldTrees, updateId);
+        void this.resolveAllItems(fieldTrees, updateId);
         break;
       case 'append':
-        this.appendItems(fieldTrees, operation.startIndex, operation.endIndex, updateId);
+        void this.appendItems(fieldTrees, operation.startIndex, operation.endIndex, updateId);
         break;
       case 'pop':
         this.resolvedItemsSignal.set(resolvedItems.slice(0, operation.newLength));
         break;
       case 'recreate':
         this.resolvedItemsSignal.set([]);
-        this.resolveAllItems(fieldTrees, updateId);
+        void this.resolveAllItems(fieldTrees, updateId);
         break;
       case 'none':
         break;
     }
   }
 
-  private resolveAllItems(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): void {
+  private async resolveAllItems(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): Promise<void> {
     if (fieldTrees.length === 0) {
       this.resolvedItemsSignal.set([]);
       return;
     }
 
-    const itemObservables = fieldTrees.map((fieldTree, i) => this.createResolveItemObservable(fieldTree, i));
+    // Wrap each item observable to catch individual errors
+    const safeItemObservables = fieldTrees.map((fieldTree, i) =>
+      this.createResolveItemObservable(fieldTree, i).pipe(
+        catchError((error) => {
+          this.logger.error(`Failed to resolve array item at index ${i}:`, error);
+          return of(undefined);
+        }),
+      ),
+    );
 
-    forkJoin(itemObservables)
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        map((items) => items.filter((item): item is ResolvedArrayItem => item !== undefined)),
-      )
-      .subscribe((newItems) => {
-        if (updateId === this.updateVersion()) {
-          this.resolvedItemsSignal.set(newItems);
-          emitComponentInitialized(this.eventBus, 'array', this.field().key, this.parentInjector);
-        }
-      });
+    try {
+      const items = await firstValueFrom(
+        forkJoin(safeItemObservables).pipe(map((items) => items.filter((item): item is ResolvedArrayItem => item !== undefined))),
+      );
+
+      if (updateId === this.updateVersion()) {
+        this.resolvedItemsSignal.set(items);
+        emitComponentInitialized(this.eventBus, 'array', this.field().key, this.parentInjector);
+      }
+    } catch (err) {
+      this.logger.error('Failed to resolve array items:', err);
+      this.resolvedItemsSignal.set([]);
+    }
   }
 
-  private appendItems(fieldTrees: readonly (FieldTree<unknown> | null)[], startIndex: number, endIndex: number, updateId: number): void {
+  private async appendItems(
+    fieldTrees: readonly (FieldTree<unknown> | null)[],
+    startIndex: number,
+    endIndex: number,
+    updateId: number,
+  ): Promise<void> {
     const itemsToResolve = fieldTrees.slice(startIndex, endIndex);
     if (itemsToResolve.length === 0) return;
 
-    const itemObservables = itemsToResolve.map((fieldTree, i) => this.createResolveItemObservable(fieldTree, startIndex + i));
+    // Wrap each item observable to catch individual errors
+    const safeItemObservables = itemsToResolve.map((fieldTree, i) => {
+      const index = startIndex + i;
+      return this.createResolveItemObservable(fieldTree, index).pipe(
+        catchError((error) => {
+          this.logger.error(`Failed to resolve array item at index ${index}:`, error);
+          return of(undefined);
+        }),
+      );
+    });
 
-    forkJoin(itemObservables)
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        map((items) => items.filter((item): item is ResolvedArrayItem => item !== undefined)),
-      )
-      .subscribe((newItems) => {
-        if (updateId === this.updateVersion()) {
-          this.resolvedItemsSignal.update((current) => [...current, ...newItems]);
-        }
-      });
+    try {
+      const newItems = await firstValueFrom(
+        forkJoin(safeItemObservables).pipe(map((items) => items.filter((item): item is ResolvedArrayItem => item !== undefined))),
+      );
+
+      if (updateId === this.updateVersion()) {
+        this.resolvedItemsSignal.update((current) => [...current, ...newItems]);
+      }
+    } catch (err) {
+      this.logger.error('Failed to append array items:', err);
+    }
   }
 
   private createResolveItemObservable(fieldTree: FieldTree<unknown> | null, index: number): Observable<ResolvedArrayItem | undefined> {

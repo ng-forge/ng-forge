@@ -47,6 +47,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getDerivationLogicScenario('array-field-derivation-test') },
   },
+  {
+    path: 'bidirectional-float',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('bidirectional-float-test') },
+  },
 ];
 
 export default routes;

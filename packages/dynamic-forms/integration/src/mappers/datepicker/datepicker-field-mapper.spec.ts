@@ -204,6 +204,32 @@ describe('datepickerFieldMapper', () => {
       expect((inputs['minDate'] as Date).toISOString()).toBe('2023-01-15T00:00:00.000Z');
       expect((inputs['maxDate'] as Date).toISOString()).toBe('2023-12-15T23:59:59.999Z');
     });
+
+    it('should return null for invalid date strings', () => {
+      const fieldDef: DatepickerField<unknown> = {
+        key: 'dateField',
+        type: 'datepicker',
+        minDate: 'invalid-date-string',
+      };
+
+      const injector = createTestInjector({ fieldKey: 'dateField' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['minDate']).toBeNull();
+    });
+
+    it('should return null for empty string dates', () => {
+      const fieldDef: DatepickerField<unknown> = {
+        key: 'dateField',
+        type: 'datepicker',
+        minDate: '',
+      };
+
+      const injector = createTestInjector({ fieldKey: 'dateField' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['minDate']).toBeNull();
+    });
   });
 
   describe('base value field properties', () => {

@@ -403,7 +403,7 @@ jobs:
     needs: [quality, test, build-apps]
     if: needs.build-apps.outputs.has-e2e == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-apps.outputs.e2e-matrix) }}
