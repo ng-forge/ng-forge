@@ -35,6 +35,10 @@ export type { Logger } from './providers/features/logger';
 export { ConsoleLogger } from './providers/features/logger/console-logger';
 export { NoopLogger } from './providers/features/logger/noop-logger';
 
+// Event Form Value Feature
+export { withEventFormValue, EMIT_FORM_VALUE_ON_EVENTS } from './providers/features/event-form-value';
+export { hasFormValue } from './events/interfaces/form-event';
+
 // Configuration Types
 export type { CustomFnConfig, FormConfig, FormOptions } from './models';
 export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from './models';

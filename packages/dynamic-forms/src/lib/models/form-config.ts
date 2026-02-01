@@ -650,6 +650,36 @@ export interface FormOptions {
    * ```
    */
   nextButton?: NextButtonOptions;
+
+  /**
+   * Whether to attach the current form value to all events dispatched through the EventBus.
+   *
+   * This per-form setting overrides the global `withEventFormValue()` feature:
+   * - `true` - Enable form value emission for this form (even if globally disabled)
+   * - `false` - Disable form value emission for this form (even if globally enabled)
+   * - `undefined` - Use global setting (default)
+   *
+   * When enabled, events will include a `formValue` property with the current form state.
+   * Use the `hasFormValue()` type guard to safely access this property.
+   *
+   * @example
+   * ```typescript
+   * // Enable for this form only (no global withEventFormValue() needed)
+   * const config: FormConfig = {
+   *   fields: [...],
+   *   options: { emitFormValueOnEvents: true }
+   * };
+   *
+   * // Disable for this form (when globally enabled)
+   * const config: FormConfig = {
+   *   fields: [...],
+   *   options: { emitFormValueOnEvents: false }
+   * };
+   * ```
+   *
+   * @default undefined (uses global setting)
+   */
+  emitFormValueOnEvents?: boolean;
 }
 
 /**

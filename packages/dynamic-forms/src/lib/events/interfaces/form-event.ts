@@ -20,6 +20,38 @@
 export interface FormEvent {
   /** Unique identifier for the event type used for filtering and subscriptions */
   readonly type: string;
+  /**
+   * Optional form value attached to the event when `withEventFormValue()` is enabled
+   * or `options.emitFormValueOnEvents` is set to `true` in the form config.
+   *
+   * Use the `hasFormValue()` type guard to check if this property is present.
+   */
+  readonly formValue?: unknown;
+}
+
+/**
+ * Type guard to check if a form event has a form value attached.
+ *
+ * Use this to safely access the `formValue` property on events when
+ * `withEventFormValue()` is enabled globally or `options.emitFormValueOnEvents`
+ * is set to `true` in the form config.
+ *
+ * @example
+ * ```typescript
+ * eventBus.on<SubmitEvent>('submit').subscribe(event => {
+ *   if (hasFormValue(event)) {
+ *     console.log('Form value:', event.formValue);
+ *   }
+ * });
+ * ```
+ *
+ * @param event - The form event to check
+ * @returns `true` if the event has a form value attached, narrowing the type
+ *
+ * @public
+ */
+export function hasFormValue<T extends FormEvent>(event: T): event is T & { formValue: unknown } {
+  return 'formValue' in event && event.formValue !== undefined;
 }
 
 /**
