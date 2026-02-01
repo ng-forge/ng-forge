@@ -36,7 +36,7 @@ export { ConsoleLogger } from './providers/features/logger/console-logger';
 export { NoopLogger } from './providers/features/logger/noop-logger';
 
 // Event Form Value Feature
-export { withEventFormValue, EMIT_FORM_VALUE_ON_EVENTS } from './providers/features/event-form-value';
+export { withEventFormValue } from './providers/features/event-form-value';
 export { hasFormValue } from './events/interfaces/form-event';
 
 // Configuration Types
