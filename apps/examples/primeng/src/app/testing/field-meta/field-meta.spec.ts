@@ -70,10 +70,10 @@ test.describe('Field Meta Attribute Tests', () => {
       await notificationsToggle.click();
       await page.waitForTimeout(100);
 
-      // Radio: label is sibling to p-radiobutton, so select the container div
+      // Radio: click on the actual p-radiobutton element to trigger selection
       const emailRadioOption = scenario.locator('#preferenceRadio .radio-option').filter({ hasText: 'Email' });
       await expect(emailRadioOption).toBeVisible({ timeout: 5000 });
-      await emailRadioOption.click();
+      await emailRadioOption.locator('p-radiobutton').click();
       await page.waitForTimeout(100);
 
       // Multi-checkbox: similar structure with label as sibling

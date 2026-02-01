@@ -239,14 +239,19 @@ test.describe('PrimeNG Components Tests', () => {
       await expect(overlay).toBeVisible({ timeout: 5000 });
 
       // Select options using getByText which is more reliable across PrimeNG versions
-      await overlay.getByText('TypeScript', { exact: true }).click();
+      // Wait for the option to be stable before clicking
+      const typescriptOption = overlay.getByText('TypeScript', { exact: true });
+      await expect(typescriptOption).toBeVisible();
+      await typescriptOption.click({ force: true });
       await page.waitForTimeout(300);
 
       // Verify overlay is still visible (multiselect stays open)
       await expect(overlay).toBeVisible();
 
-      // Select second option
-      await overlay.getByText('Angular', { exact: true }).click();
+      // Select second option - wait for stability after first selection
+      const angularOption = overlay.getByText('Angular', { exact: true });
+      await expect(angularOption).toBeVisible();
+      await angularOption.click({ force: true });
       await page.waitForTimeout(300);
 
       // Close the dropdown by clicking outside or pressing Escape
