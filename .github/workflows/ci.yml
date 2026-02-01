@@ -323,14 +323,21 @@ jobs:
       # Docker handles everything - no need for pnpm/node setup on host
       # The script only needs node (pre-installed) to read package.json
       - name: Run E2E tests in Docker
+        id: e2e
         run: ./scripts/playwright-docker.sh ${{ matrix.app }}
+
+      - name: Generate job summary
+        if: always() && steps.e2e.outcome != 'skipped'
+        run: node scripts/playwright-job-summary.mjs ${{ matrix.app }} apps/examples/${{ matrix.short }}/test-results
 
       - name: Upload test artifacts on failure
         uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: playwright-results-${{ matrix.app }}
-          path: apps/examples/${{ matrix.short }}/test-results/
+          path: |
+            apps/examples/${{ matrix.short }}/test-results/
+            apps/examples/${{ matrix.short }}/playwright-report/
           if-no-files-found: ignore
           retention-days: 7
 
