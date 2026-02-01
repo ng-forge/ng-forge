@@ -10,12 +10,12 @@
  * Example: node scripts/playwright-job-summary.mjs material-examples apps/examples/material/test-results
  */
 
-import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync, statSync, appendFileSync } from 'node:fs';
 import { join, basename, relative } from 'node:path';
-import { appendFileSync } from 'node:fs';
 
 const MAX_EMBEDDED_IMAGES = 10;
 const MAX_IMAGE_SIZE_KB = 500;
+const MAX_ERROR_LENGTH = 500;
 
 /**
  * @typedef {Object} TestResult
@@ -80,7 +80,7 @@ function findFailedTests(suites, prefix = '') {
           failed.push({
             title: spec.title,
             fullTitle: `${suiteTitle} > ${spec.title}`,
-            error: error.substring(0, 500), // Truncate long errors
+            error: error.substring(0, MAX_ERROR_LENGTH),
             attachments,
           });
         }
@@ -152,9 +152,13 @@ function encodeImageAsDataUri(imagePath) {
 function generateSummary(appName, report, testResultsDir) {
   const lines = [];
   const failedTests = findFailedTests(report.suites || []);
-  const totalTests = report.stats?.expected + report.stats?.unexpected + report.stats?.flaky + report.stats?.skipped || 0;
-  const passedTests = report.stats?.expected || 0;
-  const flakyTests = report.stats?.flaky || 0;
+  const passedTests = report.stats?.expected ?? 0;
+  const failedCount = report.stats?.unexpected ?? 0;
+  const flakyTests = report.stats?.flaky ?? 0;
+  const skippedTests = report.stats?.skipped ?? 0;
+  const totalTests = passedTests + failedCount + flakyTests + skippedTests;
+  const durationMs = report.stats?.duration ?? 0;
+  const durationSec = (durationMs / 1000).toFixed(1);
 
   // Header
   lines.push(`## Playwright E2E Results: ${appName}`);
@@ -164,13 +168,14 @@ function generateSummary(appName, report, testResultsDir) {
   if (failedTests.length === 0) {
     lines.push(`### :white_check_mark: All tests passed`);
     lines.push('');
-    lines.push(`| Metric | Count |`);
+    lines.push(`| Metric | Value |`);
     lines.push(`|--------|-------|`);
     lines.push(`| Total | ${totalTests} |`);
     lines.push(`| Passed | ${passedTests} |`);
     if (flakyTests > 0) {
       lines.push(`| Flaky | ${flakyTests} |`);
     }
+    lines.push(`| Duration | ${durationSec}s |`);
     lines.push('');
     return lines.join('\n');
   }
@@ -178,7 +183,7 @@ function generateSummary(appName, report, testResultsDir) {
   // Failure summary
   lines.push(`### :x: ${failedTests.length} test(s) failed`);
   lines.push('');
-  lines.push(`| Metric | Count |`);
+  lines.push(`| Metric | Value |`);
   lines.push(`|--------|-------|`);
   lines.push(`| Total | ${totalTests} |`);
   lines.push(`| Passed | ${passedTests} |`);
@@ -186,6 +191,7 @@ function generateSummary(appName, report, testResultsDir) {
   if (flakyTests > 0) {
     lines.push(`| Flaky | ${flakyTests} |`);
   }
+  lines.push(`| Duration | ${durationSec}s |`);
   lines.push('');
 
   // Failed tests details
@@ -211,11 +217,13 @@ function generateSummary(appName, report, testResultsDir) {
     lines.push('');
   }
 
-  // Screenshots section
+  // Screenshots section - filter for diff/actual/failure screenshots
+  // Playwright naming: test-failed-1.png, screenshot-diff.png, screenshot-actual.png
   const screenshots = findScreenshots(testResultsDir);
-  const screenshotDiffs = screenshots.filter(
-    (s) => basename(s).includes('-diff') || basename(s).includes('-actual') || basename(s).includes('failure'),
-  );
+  const screenshotDiffs = screenshots.filter((s) => {
+    const name = basename(s);
+    return name.includes('-diff') || name.includes('-actual') || name.includes('-failed') || name.includes('failure');
+  });
 
   if (screenshotDiffs.length > 0) {
     lines.push('### Screenshots');
