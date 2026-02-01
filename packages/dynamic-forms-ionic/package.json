@@ -1,6 +1,6 @@
 {
   "name": "@ng-forge/dynamic-forms-ionic",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Ionic integration for @ng-forge/dynamic-forms. Pre-built Ionic form components for mobile and desktop.",
   "type": "module",
   "license": "MIT",
