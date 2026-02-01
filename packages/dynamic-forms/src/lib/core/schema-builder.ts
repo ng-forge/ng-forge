@@ -20,8 +20,30 @@ import type { FormSchema } from '@ng-forge/dynamic-forms/schema';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Gets a FieldTree by key, supporting nested paths with dot notation.
+ *
+ * @example
+ * getFieldTreeByKey(ctx, 'address.street') // Returns FieldTree for nested 'street' field
+ */
 function getFieldTreeByKey<TModel>(ctx: FieldContext<TModel>, key: string): FieldTree<unknown> | undefined {
-  return (ctx.fieldTree as Record<string, FieldTree<unknown>>)[key];
+  // Simple case - no nesting
+  if (!key.includes('.')) {
+    return (ctx.fieldTree as Record<string, FieldTree<unknown>>)[key];
+  }
+
+  // Nested path - traverse through the structure
+  const parts = key.split('.');
+  let current: unknown = ctx.fieldTree;
+
+  for (const part of parts) {
+    if (!current || typeof current !== 'object') {
+      return undefined;
+    }
+    current = (current as Record<string, unknown>)[part];
+  }
+
+  return current as FieldTree<unknown> | undefined;
 }
 
 /**
@@ -278,6 +300,7 @@ function evaluateCustomCrossFieldValidator<TModel>(
   // Validation failed - create error targeting the source field
   const targetField = getFieldTreeByKey(ctx, sourceFieldKey);
   if (!targetField) {
+    evaluationContext.logger.warn(`Cross-field validator references non-existent field "${sourceFieldKey}"`);
     return null;
   }
 
@@ -291,8 +314,8 @@ function evaluateCustomCrossFieldValidator<TModel>(
     for (const [key, expression] of Object.entries(config.errorParams)) {
       try {
         errorObj[key] = ExpressionParser.evaluate(expression, evaluationContext);
-      } catch {
-        // Ignore evaluation errors for params
+      } catch (error) {
+        evaluationContext.logger.warn(`Failed to evaluate error param expression "${key}": ${expression}`, error);
       }
     }
   }
@@ -338,6 +361,7 @@ function evaluateBuiltInCrossFieldValidator<TModel>(
   // Validation failed - create error targeting the source field
   const targetField = getFieldTreeByKey(ctx, sourceFieldKey);
   if (!targetField) {
+    logger.warn(`Cross-field validator references non-existent field "${sourceFieldKey}"`);
     return null;
   }
 

@@ -124,9 +124,7 @@ describe('Async and HTTP Validator Integration', () => {
         });
       });
 
-      it('should warn when async validator not found', () => {
-        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-
+      it('should throw error when async validator not found', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field: 'value' });
           const config: AsyncValidatorConfig = {
@@ -134,21 +132,15 @@ describe('Async and HTTP Validator Integration', () => {
             functionName: 'nonexistent',
           };
 
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>((path) => {
-              applyValidator(config, path.field);
-            }),
-          );
-          rootFormRegistry.registerRootForm(formInstance);
+          expect(() => {
+            form(
+              formValue,
+              schema<typeof formValue>((path) => {
+                applyValidator(config, path.field);
+              }),
+            );
+          }).toThrow('[Dynamic Forms] Async validator "nonexistent" not found');
         });
-
-        expect(consoleWarnSpy).toHaveBeenCalledWith(
-          '[Dynamic Forms]',
-          expect.stringContaining('Async validator "nonexistent" not found in registry'),
-        );
-
-        consoleWarnSpy.mockRestore();
       });
 
       it('should apply async validator with conditional logic', () => {
@@ -332,9 +324,7 @@ describe('Async and HTTP Validator Integration', () => {
         });
       });
 
-      it('should warn when HTTP validator not found', () => {
-        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-
+      it('should throw error when HTTP validator not found', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field: 'value' });
           const config: HttpValidatorConfig = {
@@ -342,21 +332,15 @@ describe('Async and HTTP Validator Integration', () => {
             functionName: 'nonexistent',
           };
 
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>((path) => {
-              applyValidator(config, path.field);
-            }),
-          );
-          rootFormRegistry.registerRootForm(formInstance);
+          expect(() => {
+            form(
+              formValue,
+              schema<typeof formValue>((path) => {
+                applyValidator(config, path.field);
+              }),
+            );
+          }).toThrow('[Dynamic Forms] HTTP validator "nonexistent" not found');
         });
-
-        expect(consoleWarnSpy).toHaveBeenCalledWith(
-          '[Dynamic Forms]',
-          expect.stringContaining('HTTP validator "nonexistent" not found in registry'),
-        );
-
-        consoleWarnSpy.mockRestore();
       });
 
       it('should apply HTTP validator with conditional logic', () => {

@@ -148,8 +148,8 @@
         }
       },
       {
-        "type": "calendar",
-        "componentName": "PrimeCalendarComponent",
+        "type": "datepicker",
+        "componentName": "PrimeDatepickerComponent",
         "additionalProps": {
           "showIcon": {
             "name": "showIcon",

@@ -253,10 +253,12 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
     const rawValue = getFieldDefaultValue(fieldTemplate, this.rawFieldRegistry());
     const valueHandling = getFieldValueHandling(fieldTemplate.type, this.rawFieldRegistry());
+    const templateType = fieldTemplate.type;
 
-    // For fields with 'include' value handling (bare fields like input, checkbox, etc.),
-    // wrap the value in an object using the field's key since arrays contain objects
-    const value = valueHandling === 'include' && fieldTemplate.key ? { [fieldTemplate.key]: rawValue } : rawValue;
+    // Container fields (group, row) already have their own structure, so use rawValue as-is.
+    // For value fields with 'include' handling, wrap in an object using the field's key.
+    const isContainer = templateType === 'group' || templateType === 'row';
+    const value = isContainer ? rawValue : valueHandling === 'include' && fieldTemplate.key ? { [fieldTemplate.key]: rawValue } : rawValue;
 
     const newArray = [...currentArray];
     newArray.splice(insertIndex, 0, value);

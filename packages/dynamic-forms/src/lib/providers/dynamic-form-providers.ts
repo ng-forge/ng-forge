@@ -7,6 +7,7 @@ import { FieldDef } from '../definitions/base/field-def';
 import { DynamicFormFeature, isDynamicFormFeature } from './features/dynamic-form-feature';
 import { DynamicFormLogger } from './features/logger/logger.token';
 import { ConsoleLogger } from './features/logger/console-logger';
+import type { InferFormValue as RealInferFormValue } from '../models/types/form-value-inference';
 
 // Re-export global types for module augmentation
 export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '../models/registry';
@@ -30,13 +31,9 @@ type ExtractFieldDef<T> = T extends FieldTypeDefinition<infer F> ? F : never;
 type FieldDefUnion<T extends FieldTypeDefinition[]> = ExtractFieldDef<T[number]>;
 
 /**
- * Infer form value type from field definitions
- * Note: Full value type inference requires complex recursive type mapping.
- * Using unknown as placeholder until full inference is implemented.
+ * Infer form value type from field definitions using the real inference type.
  */
-type InferFormValue<TFieldDefs extends FieldDef<unknown>[]> = {
-  [K in TFieldDefs[number]['key']]: unknown;
-};
+type InferFormValue<TFieldDefs extends FieldDef<unknown>[]> = RealInferFormValue<TFieldDefs>;
 
 /**
  * Provider result with type inference

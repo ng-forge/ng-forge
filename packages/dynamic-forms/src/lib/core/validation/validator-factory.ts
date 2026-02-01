@@ -16,6 +16,7 @@ import {
 } from '@angular/forms/signals';
 import { inject } from '@angular/core';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 import {
   AsyncValidatorConfig,
   CustomValidatorConfig,
@@ -176,11 +177,7 @@ function createFunctionValidator(
   const validatorFn = registry.getValidator(functionName);
 
   if (!validatorFn) {
-    logger.warn(
-      `Custom validator "${functionName}" not found in registry. ` +
-        `Ensure it's registered using customFnConfig.validators or check the function name for typos.`,
-    );
-    return () => null;
+    throw new DynamicFormError(`Custom validator "${functionName}" not found. Register it with customFnConfig.validators.`);
   }
 
   return (ctx: FieldContext<unknown>) => validatorFn(ctx, config.params);
@@ -241,16 +238,11 @@ function createExpressionValidator(
  * - onError: Optional handler for resource errors
  */
 function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath<unknown>): void {
-  const logger = inject(DynamicFormLogger);
   const registry = inject(FunctionRegistryService);
   const validatorConfig = registry.getAsyncValidator(config.functionName);
 
   if (!validatorConfig) {
-    logger.warn(
-      `Async validator "${config.functionName}" not found in registry. ` +
-        `Ensure it's registered using customFnConfig.asyncValidators or check the function name for typos.`,
-    );
-    return;
+    throw new DynamicFormError(`Async validator "${config.functionName}" not found. Register it with customFnConfig.asyncValidators.`);
   }
 
   const whenLogic = createConditionalLogic(config.when);
@@ -276,16 +268,11 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
  * - onError: Optional handler for HTTP errors
  */
 function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<unknown>): void {
-  const logger = inject(DynamicFormLogger);
   const registry = inject(FunctionRegistryService);
   const httpValidatorConfig = registry.getHttpValidator(config.functionName);
 
   if (!httpValidatorConfig) {
-    logger.warn(
-      `HTTP validator "${config.functionName}" not found in registry. ` +
-        `Ensure it's registered using customFnConfig.httpValidators or check the function name for typos.`,
-    );
-    return;
+    throw new DynamicFormError(`HTTP validator "${config.functionName}" not found. Register it with customFnConfig.httpValidators.`);
   }
 
   const whenLogic = createConditionalLogic(config.when);

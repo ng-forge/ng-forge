@@ -242,7 +242,7 @@
       }
     },
     "validationSupported": false,
-    "source": "adapter",
+    "source": "core",
     "allowedIn": ["top-level", "page", "row", "group", "array"],
     "example": "{\n  key: 'sectionTitle',\n  type: 'text',\n  label: 'Personal Information',\n  props: { elementType: 'h2' }\n}",
     "minimalExample": "{ key: 'header', type: 'text', label: 'Section Title' }"
@@ -462,5 +462,29 @@
     "allowedIn": ["top-level", "page", "row", "group", "array"],
     "example": "{\n  key: 'submit',\n  type: 'submit',\n  label: 'Submit Form'\n}",
     "minimalExample": "{ key: 'submit', type: 'submit', label: 'Submit' }"
+  },
+  {
+    "type": "addArrayItem",
+    "category": "button",
+    "description": "Button to add a new item to an array field. Must be placed within or near the array container.",
+    "baseInterface": "FieldDef",
+    "props": {},
+    "validationSupported": false,
+    "source": "adapter",
+    "allowedIn": ["array", "row", "group"],
+    "example": "{\n  key: 'addContact',\n  type: 'addArrayItem',\n  label: 'Add Contact'\n}",
+    "minimalExample": "{ key: 'add', type: 'addArrayItem', label: 'Add Item' }"
+  },
+  {
+    "type": "removeArrayItem",
+    "category": "button",
+    "description": "Button to remove the current item from an array field. Typically placed within each array item template.",
+    "baseInterface": "FieldDef",
+    "props": {},
+    "validationSupported": false,
+    "source": "adapter",
+    "allowedIn": ["array", "row", "group"],
+    "example": "{\n  key: 'removeContact',\n  type: 'removeArrayItem',\n  label: 'Remove'\n}",
+    "minimalExample": "{ key: 'remove', type: 'removeArrayItem', label: 'Remove' }"
   }
 ]
