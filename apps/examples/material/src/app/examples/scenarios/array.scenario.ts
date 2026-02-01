@@ -106,9 +106,11 @@ export const arrayScenario: ExampleScenario = {
     tags: [{ value: 'angular' }, { value: 'typescript' }],
     contacts: [
       {
-        name: 'Jane Smith',
-        phone: '5551234567',
-        relationship: 'family',
+        contact: {
+          name: 'Jane Smith',
+          phone: '5551234567',
+          relationship: 'family',
+        },
       },
     ],
   },

@@ -2,7 +2,7 @@ Arrays create dynamic collections of field values. The fields array defines a **
 
 ## Interactive Demo
 
-<iframe src="http://localhost:4201/#/examples/array-field" class="example-frame" title="Array Field Demo"></iframe>
+<iframe src="http://localhost:4201/#/examples/array" class="example-frame" title="Array Field Demo"></iframe>
 
 ## Flat Arrays (Primitive Values)
 
@@ -28,13 +28,14 @@ This creates a flat array in the form value:
 
 ## Object Arrays (Nested Groups)
 
-For arrays of objects, use a group field as the template:
+For arrays of objects with nested structure, use a group field as the template:
 
 ```typescript
 {
   key: 'contacts',
   type: 'array',
   fields: [{
+    key: 'contact',
     type: 'group',
     fields: [
       { key: 'name', type: 'input', label: 'Name', value: '' },
@@ -44,16 +45,15 @@ For arrays of objects, use a group field as the template:
 }
 ```
 
-This creates an array of objects:
+This creates an array of nested objects (note the group key creates the nesting):
 
 ```typescript
 {
-  contacts: [
-    { name: 'John Doe', phone: '5551234567' },
-    { name: 'Jane Smith', phone: '5559876543' },
-  ];
+  contacts: [{ contact: { name: 'John Doe', phone: '5551234567' } }, { contact: { name: 'Jane Smith', phone: '5559876543' } }];
 }
 ```
+
+For flat object arrays without nesting, use a row as the template instead (rows don't add nesting).
 
 ## Array vs Group
 
@@ -179,6 +179,7 @@ export class ContactsFormComponent {
         type: 'array',
         fields: [
           {
+            key: 'contact',
             type: 'group',
             fields: [
               {
@@ -230,7 +231,8 @@ export class ContactsFormComponent {
 The key concept is that the `fields` array contains a **template** (typically one field definition):
 
 - **Flat arrays**: Template is a leaf field → creates `[value1, value2]`
-- **Object arrays**: Template is a group field → creates `[{...}, {...}]`
+- **Object arrays**: Template is a group field with key → creates `[{groupKey: {...}}, ...]`
+- **Flat object arrays**: Template is a row field → creates `[{...}, {...}]` (no nesting)
 
 When you add an array item via the event bus, the template is cloned and a new instance is created with the appropriate default value.
 
@@ -252,7 +254,7 @@ Arrays **cannot** contain:
 Arrays can use these field types as templates:
 
 - Leaf fields (input, select, checkbox, etc.) → creates flat arrays
-- Group fields → creates object arrays
-- Row fields → for horizontal layouts within each array item
+- Group fields with key → creates nested object arrays `[{groupKey: {...}}, ...]`
+- Row fields → creates flat object arrays `[{...}, {...}]` (rows don't add nesting)
 
 See [Type Safety & Inference](../advanced/type-safety/basics) for details on how arrays affect type inference.
