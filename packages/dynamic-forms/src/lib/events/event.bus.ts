@@ -31,6 +31,15 @@ function safeInjectClass<T>(token: Type<T>, defaultValue: T | null): T | null {
 }
 
 /**
+ * Creates a copy of an event with an additional formValue property.
+ * Preserves the event's prototype chain so instanceof checks still work.
+ */
+function attachFormValue<T extends FormEvent>(event: T, formValue: Record<string, unknown>): T & { formValue: unknown } {
+  const prototype = Object.getPrototypeOf(event);
+  return Object.assign(Object.create(prototype), event, { formValue });
+}
+
+/**
  * Event bus service for form-wide event communication.
  *
  * Provides type-safe event dispatching and subscription for form components
@@ -99,8 +108,7 @@ export class EventBus {
     if (this.shouldEmitFormValue()) {
       const formValue = this.rootFormRegistry?.getFormValue();
       if (formValue && Object.keys(formValue).length > 0) {
-        const eventWithValue = Object.assign(Object.create(Object.getPrototypeOf(event)), event, { formValue });
-        this.pipeline$.next(eventWithValue);
+        this.pipeline$.next(attachFormValue(event, formValue));
         return;
       }
     }
