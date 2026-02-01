@@ -372,10 +372,11 @@ Arrays create dynamic, repeatable lists of items.
 {
   key: 'contacts',
   type: 'array',
+  minLength: 1,  // Optional: minimum number of items
+  maxLength: 5,  // Optional: maximum number of items
   // ⚠️ Arrays DO NOT support:
   // - label (no visual label)
   // - logic (apply logic to children instead)
-  // - minItems/maxItems (not implemented)
   // - template (use 'fields' instead)
   fields: [
     // Template for each array item

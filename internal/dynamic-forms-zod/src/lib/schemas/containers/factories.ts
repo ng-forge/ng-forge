@@ -118,8 +118,9 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     // Explicitly forbid logic on arrays
     logic: z.never().optional(),
     template: z.never().optional(),
-    minItems: z.never().optional(),
-    maxItems: z.never().optional(),
+    // Array length validation
+    minLength: z.number().int().min(0).optional(),
+    maxLength: z.number().int().min(0).optional(),
   });
 
   // All fields union
