@@ -404,7 +404,7 @@
 .df-form.disabled,
 .df-row.disabled,
 .df-field.disabled {
-  opacity: var(--df-disabled-opacity);
+  opacity: var(--df-disabled-opacity, 0.6);
   pointer-events: none;
 }
 
@@ -472,7 +472,7 @@
  * not for mouse clicks.
  */
 .df-form :focus-visible {
-  outline: 2px solid var(--df-focus-color);
+  outline: 2px solid var(--df-focus-color, #005fcc);
   outline-offset: 2px;
 }
 
@@ -481,6 +481,6 @@
  * Useful for fieldsets, form groups, etc.
  */
 .df-group:focus-within {
-  outline: 1px dashed var(--df-focus-color);
+  outline: 1px dashed var(--df-focus-color, #005fcc);
   outline-offset: 4px;
 }

@@ -40,21 +40,21 @@
 .df-mat-field {
   display: flex;
   flex-direction: column;
-  gap: var(--df-field-gap);
+  gap: var(--df-field-gap, 0.5rem);
   width: 100%;
 }
 
 .df-mat-label {
-  font-weight: var(--df-label-font-weight);
-  color: var(--df-label-color);
+  font-weight: var(--df-label-font-weight, 500);
+  color: var(--df-label-color, inherit);
 }
 
 .df-mat-hint {
-  color: var(--df-hint-color);
-  font-size: var(--df-hint-font-size);
+  color: var(--df-hint-color, rgba(0, 0, 0, 0.6));
+  font-size: var(--df-hint-font-size, 0.875rem);
 }
 
 .df-mat-error {
-  color: var(--df-error-color);
-  font-size: var(--df-error-font-size);
+  color: var(--df-error-color, #f44336);
+  font-size: var(--df-error-font-size, 0.875rem);
 }

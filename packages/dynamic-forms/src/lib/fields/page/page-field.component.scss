@@ -16,12 +16,12 @@
   display: grid;
   grid-template-columns: 1fr;
   width: 100%;
-  gap: var(--df-grid-row-gap);
-  transition: opacity var(--df-page-transition-duration) var(--df-page-transition-timing);
+  gap: var(--df-grid-row-gap, 0.5rem);
+  transition: opacity var(--df-page-transition-duration, 0.3s) var(--df-page-transition-timing, ease-in-out);
 
   // Allow custom spacing for pages
   &.df-page-spacing-custom {
-    --df-grid-row-gap: var(--df-page-custom-spacing);
+    --df-grid-row-gap: var(--df-page-custom-spacing, 1.5rem);
   }
 
   // Page visibility states
@@ -46,8 +46,8 @@
 @media (prefers-reduced-motion: no-preference) {
   :host {
     transition:
-      opacity var(--df-page-transition-duration) var(--df-page-transition-timing),
-      transform var(--df-page-transition-duration) var(--df-page-transition-timing);
+      opacity var(--df-page-transition-duration, 0.3s) var(--df-page-transition-timing, ease-in-out),
+      transform var(--df-page-transition-duration, 0.3s) var(--df-page-transition-timing, ease-in-out);
   }
 
   :host.df-page-visible {
@@ -55,7 +55,7 @@
   }
 
   :host.df-page-hidden {
-    transform: translateX(var(--df-page-slide-offset));
+    transform: translateX(var(--df-page-slide-offset, -10px));
   }
 }
 

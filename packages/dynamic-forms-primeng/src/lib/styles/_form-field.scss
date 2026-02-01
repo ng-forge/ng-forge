@@ -21,25 +21,25 @@
 .df-prime-field {
   display: flex;
   flex-direction: column;
-  gap: var(--df-field-gap);
+  gap: var(--df-field-gap, 0.5rem);
   width: 100%;
 }
 
 .df-prime-label {
-  font-weight: var(--df-label-font-weight);
-  color: var(--df-label-color);
+  font-weight: var(--df-label-font-weight, 500);
+  color: var(--df-label-color, inherit);
 }
 
 .df-prime-hint {
-  color: var(--df-hint-color);
-  font-size: var(--df-hint-font-size);
+  color: var(--df-hint-color, var(--p-text-muted-color, #6c757d));
+  font-size: var(--df-hint-font-size, 0.875rem);
 }
 
 .p-error {
-  color: var(--df-error-color);
-  font-size: var(--df-error-font-size);
+  color: var(--df-error-color, var(--p-red-500, #ef4444));
+  font-size: var(--df-error-font-size, 0.875rem);
   display: block;
-  margin-top: var(--df-prime-error-margin-top);
+  margin-top: var(--df-prime-error-margin-top, 0.25rem);
 }
 
 // ============================================

@@ -26,26 +26,26 @@
 .df-bs-field {
   display: flex;
   flex-direction: column;
-  gap: var(--df-field-gap);
+  gap: var(--df-field-gap, 0.5rem);
   width: 100%;
-  margin-bottom: var(--df-bs-field-margin-bottom);
+  margin-bottom: var(--df-bs-field-margin-bottom, 1rem);
 }
 
 .df-bs-label {
-  font-weight: var(--df-label-font-weight);
-  color: var(--df-label-color);
+  font-weight: var(--df-label-font-weight, 500);
+  color: var(--df-label-color, inherit);
   margin-bottom: 0; // Override Bootstrap's default label margin
 }
 
 .df-bs-hint {
-  color: var(--df-hint-color);
-  font-size: var(--df-hint-font-size);
-  margin-top: var(--df-bs-hint-margin-top);
+  color: var(--df-hint-color, var(--bs-secondary-color, #6c757d));
+  font-size: var(--df-hint-font-size, 0.875rem);
+  margin-top: var(--df-bs-hint-margin-top, 0.25rem);
 }
 
 // Ensure proper spacing when hint is present
 .df-bs-field:has(.df-bs-hint) {
-  margin-bottom: var(--df-bs-field-with-hint-margin-bottom);
+  margin-bottom: var(--df-bs-field-with-hint-margin-bottom, 0.5rem);
 }
 
 // ============================================
