@@ -1,9 +1,13 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { EventBus } from './event.bus';
-import { FormEvent } from './interfaces/form-event';
+import { FormEvent, hasFormValue } from './interfaces/form-event';
 import { take, toArray, skip } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
+import { EMIT_FORM_VALUE_ON_EVENTS } from '../providers/features/event-form-value/emit-form-value.token';
+import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
+import { FORM_OPTIONS } from '../models/field-signal-context.token';
 
 // Test event classes
 class TestEvent implements FormEvent {
@@ -728,6 +732,208 @@ describe('EventBus', () => {
         const event = await eventPromise;
         expect(event.type).toBe('test-event');
       });
+    });
+  });
+});
+
+// Test Suite for Form Value Emission
+describe('EventBus Form Value Emission', () => {
+  describe('hasFormValue type guard', () => {
+    it('should return true when formValue is defined', () => {
+      const event = { type: 'test', formValue: { name: 'John' } } as FormEvent;
+      expect(hasFormValue(event)).toBe(true);
+    });
+
+    it('should return false when formValue is undefined', () => {
+      const event = { type: 'test' } as FormEvent;
+      expect(hasFormValue(event)).toBe(false);
+    });
+
+    it('should return false when formValue is explicitly undefined', () => {
+      const event = { type: 'test', formValue: undefined } as FormEvent;
+      expect(hasFormValue(event)).toBe(false);
+    });
+
+    it('should narrow the type correctly', () => {
+      const event = { type: 'test', formValue: { name: 'John' } } as FormEvent;
+      if (hasFormValue(event)) {
+        // TypeScript should know formValue exists
+        expect(event.formValue).toEqual({ name: 'John' });
+      }
+    });
+  });
+
+  describe('Global form value emission (withEventFormValue)', () => {
+    let eventBus: EventBus;
+    let rootFormRegistry: RootFormRegistryService;
+
+    beforeEach(() => {
+      rootFormRegistry = new RootFormRegistryService();
+      rootFormRegistry.registerFormValueSignal(signal({ name: 'John', email: 'john@example.com' }));
+
+      TestBed.configureTestingModule({
+        providers: [
+          EventBus,
+          { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true },
+          { provide: RootFormRegistryService, useValue: rootFormRegistry },
+        ],
+      });
+      eventBus = TestBed.inject(EventBus);
+    });
+
+    it('should attach formValue when global emission is enabled', async () => {
+      const eventPromise = firstValueFrom(eventBus.events$.pipe(take(1)));
+      eventBus.dispatch(TestEvent);
+
+      const event = await eventPromise;
+      expect(hasFormValue(event)).toBe(true);
+      expect(event.formValue).toEqual({ name: 'John', email: 'john@example.com' });
+    });
+
+    it('should preserve original event properties', async () => {
+      const eventPromise = firstValueFrom(eventBus.events$.pipe(take(1)));
+      eventBus.dispatch(TestEventWithArgs, 'payload', 42);
+
+      const event = await eventPromise;
+      expect(event.type).toBe('test-event-with-args');
+      expect((event as TestEventWithArgs).payload).toBe('payload');
+      expect((event as TestEventWithArgs).count).toBe(42);
+      expect(hasFormValue(event)).toBe(true);
+    });
+
+    it('should not attach formValue when form value is empty', async () => {
+      // Clear the form value
+      rootFormRegistry.clear();
+
+      const eventPromise = firstValueFrom(eventBus.events$.pipe(take(1)));
+      eventBus.dispatch(TestEvent);
+
+      const event = await eventPromise;
+      expect(hasFormValue(event)).toBe(false);
+    });
+  });
+
+  describe('Per-form override via options.emitFormValueOnEvents', () => {
+    let rootFormRegistry: RootFormRegistryService;
+
+    beforeEach(() => {
+      rootFormRegistry = new RootFormRegistryService();
+      rootFormRegistry.registerFormValueSignal(signal({ name: 'John' }));
+    });
+
+    it('should enable form value emission when per-form option is true (global disabled)', async () => {
+      TestBed.configureTestingModule({
+        providers: [
+          EventBus,
+          { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: false },
+          { provide: RootFormRegistryService, useValue: rootFormRegistry },
+          { provide: FORM_OPTIONS, useValue: signal({ emitFormValueOnEvents: true }) },
+        ],
+      });
+      const eventBus = TestBed.inject(EventBus);
+
+      const eventPromise = firstValueFrom(eventBus.events$.pipe(take(1)));
+      eventBus.dispatch(TestEvent);
+
+      const event = await eventPromise;
+      expect(hasFormValue(event)).toBe(true);
+    });
+
+    it('should disable form value emission when per-form option is false (global enabled)', async () => {
+      TestBed.configureTestingModule({
+        providers: [
+          EventBus,
+          { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true },
+          { provide: RootFormRegistryService, useValue: rootFormRegistry },
+          { provide: FORM_OPTIONS, useValue: signal({ emitFormValueOnEvents: false }) },
+        ],
+      });
+      const eventBus = TestBed.inject(EventBus);
+
+      const eventPromise = firstValueFrom(eventBus.events$.pipe(take(1)));
+      eventBus.dispatch(TestEvent);
+
+      const event = await eventPromise;
+      expect(hasFormValue(event)).toBe(false);
+    });
+
+    it('should use global setting when per-form option is undefined', async () => {
+      TestBed.configureTestingModule({
+        providers: [
+          EventBus,
+          { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true },
+          { provide: RootFormRegistryService, useValue: rootFormRegistry },
+          { provide: FORM_OPTIONS, useValue: signal({}) },
+        ],
+      });
+      const eventBus = TestBed.inject(EventBus);
+
+      const eventPromise = firstValueFrom(eventBus.events$.pipe(take(1)));
+      eventBus.dispatch(TestEvent);
+
+      const event = await eventPromise;
+      expect(hasFormValue(event)).toBe(true);
+    });
+  });
+
+  describe('No form value emission (default)', () => {
+    let eventBus: EventBus;
+
+    beforeEach(() => {
+      TestBed.configureTestingModule({
+        providers: [EventBus],
+      });
+      eventBus = TestBed.inject(EventBus);
+    });
+
+    it('should not attach formValue when global emission is disabled (default)', async () => {
+      const eventPromise = firstValueFrom(eventBus.events$.pipe(take(1)));
+      eventBus.dispatch(TestEvent);
+
+      const event = await eventPromise;
+      expect(hasFormValue(event)).toBe(false);
+    });
+  });
+
+  describe('Edge cases', () => {
+    let rootFormRegistry: RootFormRegistryService;
+
+    beforeEach(() => {
+      rootFormRegistry = new RootFormRegistryService();
+    });
+
+    it('should handle missing RootFormRegistryService gracefully', async () => {
+      TestBed.configureTestingModule({
+        providers: [EventBus, { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true }],
+      });
+      const eventBus = TestBed.inject(EventBus);
+
+      const eventPromise = firstValueFrom(eventBus.events$.pipe(take(1)));
+      eventBus.dispatch(TestEvent);
+
+      const event = await eventPromise;
+      // Should not throw, just not attach formValue
+      expect(hasFormValue(event)).toBe(false);
+    });
+
+    it('should handle missing FORM_OPTIONS gracefully', async () => {
+      rootFormRegistry.registerFormValueSignal(signal({ name: 'John' }));
+
+      TestBed.configureTestingModule({
+        providers: [
+          EventBus,
+          { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true },
+          { provide: RootFormRegistryService, useValue: rootFormRegistry },
+        ],
+      });
+      const eventBus = TestBed.inject(EventBus);
+
+      const eventPromise = firstValueFrom(eventBus.events$.pipe(take(1)));
+      eventBus.dispatch(TestEvent);
+
+      const event = await eventPromise;
+      // Should use global setting
+      expect(hasFormValue(event)).toBe(true);
     });
   });
 });

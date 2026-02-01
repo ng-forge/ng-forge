@@ -325,6 +325,58 @@ eventBus.on<UserUpdatedEvent>('user-updated').subscribe((event) => {
 eventBus.on('some-random-event'); // No type checking on event properties
 ```
 
+## Attaching Form Values to Events
+
+By default, events don't include the form's current value. You can opt-in to automatically attach the form value to all dispatched events using `withEventFormValue()`.
+
+### Global Opt-in
+
+Enable for all forms in your application:
+
+```typescript
+import { provideDynamicForm, withEventFormValue } from '@ng-forge/dynamic-forms';
+
+provideDynamicForm(...withMaterialFields(), withEventFormValue());
+```
+
+### Per-Form Control
+
+Override the global setting for specific forms:
+
+```typescript
+const config: FormConfig = {
+  fields: [...],
+  options: {
+    // Enable for this form (even if globally disabled)
+    emitFormValueOnEvents: true,
+    // Or disable for this form (even if globally enabled)
+    // emitFormValueOnEvents: false,
+  }
+};
+```
+
+### Accessing the Form Value
+
+Use the `hasFormValue()` type guard to safely access the attached value:
+
+```typescript
+import { hasFormValue } from '@ng-forge/dynamic-forms';
+
+eventBus.on<SubmitEvent>('submit').subscribe((event) => {
+  if (hasFormValue(event)) {
+    // TypeScript knows event.formValue exists
+    console.log('Form value at submission:', event.formValue);
+    sendToApi(event.formValue);
+  }
+});
+```
+
+This is useful when you need the complete form state at the time an event occurred, such as:
+
+- Logging form values on submission
+- Auto-saving on page changes
+- Analytics tracking
+
 ## Event Flow
 
 1. Component dispatches event via `eventBus.dispatch()`

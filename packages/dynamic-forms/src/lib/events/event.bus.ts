@@ -1,6 +1,43 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable, InjectionToken, Signal, Type } from '@angular/core';
 import { filter, Observable, Subject } from 'rxjs';
 import { FormEvent, FormEventConstructor } from './interfaces/form-event';
+import { EMIT_FORM_VALUE_ON_EVENTS } from '../providers/features/event-form-value/emit-form-value.token';
+import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
+import { FORM_OPTIONS } from '../models/field-signal-context.token';
+import { FormOptions } from '../models/form-config';
+
+/**
+ * Safely attempts to inject a dependency using an InjectionToken.
+ * Returns the default value if called outside an injection context.
+ */
+function safeInjectToken<T>(token: InjectionToken<T>, defaultValue: T): T {
+  try {
+    return inject(token, { optional: true }) ?? defaultValue;
+  } catch {
+    return defaultValue;
+  }
+}
+
+/**
+ * Safely attempts to inject a service class.
+ * Returns the default value if called outside an injection context.
+ */
+function safeInjectClass<T>(token: Type<T>, defaultValue: T | null): T | null {
+  try {
+    return inject(token, { optional: true }) ?? defaultValue;
+  } catch {
+    return defaultValue;
+  }
+}
+
+/**
+ * Creates a copy of an event with an additional formValue property.
+ * Preserves the event's prototype chain so instanceof checks still work.
+ */
+function attachFormValue<T extends FormEvent>(event: T, formValue: Record<string, unknown>): T & { formValue: unknown } {
+  const prototype = Object.getPrototypeOf(event);
+  return Object.assign(Object.create(prototype), event, { formValue });
+}
 
 /**
  * Event bus service for form-wide event communication.
@@ -36,7 +73,10 @@ import { FormEvent, FormEventConstructor } from './interfaces/form-event';
  */
 @Injectable()
 export class EventBus {
-  private pipeline$ = new Subject<FormEvent>();
+  private readonly pipeline$ = new Subject<FormEvent>();
+  private readonly globalEmitFormValue = safeInjectToken(EMIT_FORM_VALUE_ON_EVENTS, false);
+  private readonly rootFormRegistry = safeInjectClass(RootFormRegistryService, null);
+  private readonly formOptions = safeInjectToken<Signal<FormOptions | undefined> | null>(FORM_OPTIONS, null);
 
   events$ = this.pipeline$.asObservable();
 
@@ -45,6 +85,10 @@ export class EventBus {
    *
    * Creates an instance of the provided event constructor and broadcasts it
    * through the event pipeline to all active subscribers.
+   *
+   * If `withEventFormValue()` is enabled globally or `options.emitFormValueOnEvents`
+   * is set to `true` in the form config, the current form value will be attached
+   * to the event's `formValue` property.
    *
    * @param eventConstructor - Constructor function for the event to dispatch
    *
@@ -59,7 +103,31 @@ export class EventBus {
    */
   // TypeScript limitation: Must use ConstructorParameters which relies on `any` in FormEventConstructor
   dispatch<T extends FormEventConstructor>(eventConstructor: T, ...args: ConstructorParameters<T>): void {
-    this.pipeline$.next(new eventConstructor(...args));
+    const event = new eventConstructor(...args);
+
+    if (this.shouldEmitFormValue()) {
+      const formValue = this.rootFormRegistry?.getFormValue();
+      // Only attach if form value exists and has at least one field.
+      // Empty objects {} are not attached - use hasFormValue() to check.
+      if (formValue && Object.keys(formValue).length > 0) {
+        this.pipeline$.next(attachFormValue(event, formValue));
+        return;
+      }
+    }
+
+    this.pipeline$.next(event);
+  }
+
+  /**
+   * Determines whether form value should be attached to events.
+   *
+   * Precedence rules:
+   * 1. Per-form setting (if defined) takes precedence
+   * 2. Falls back to global setting
+   */
+  private shouldEmitFormValue(): boolean {
+    const formLevelSetting = this.formOptions?.()?.emitFormValueOnEvents;
+    return formLevelSetting ?? this.globalEmitFormValue;
   }
 
   /**
