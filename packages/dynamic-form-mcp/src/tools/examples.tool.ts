@@ -377,6 +377,8 @@ For full control, use the \`fields\`-based API with explicit add/remove buttons:
 {
   key: 'contacts',
   type: 'array',
+  minLength: 1,  // Optional: minimum number of items
+  maxLength: 5,  // Optional: maximum number of items
   fields: [
     [
       { key: 'name', type: 'input', label: 'Name', value: 'Alice' },

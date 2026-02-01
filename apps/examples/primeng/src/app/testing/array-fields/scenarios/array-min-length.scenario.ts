@@ -6,7 +6,7 @@ const config = {
     {
       key: 'items',
       type: 'array',
-      // minLength: 2, // TODO: uncomment when minLength is implemented
+      minLength: 2,
       fields: [
         [
           {

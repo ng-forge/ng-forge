@@ -522,7 +522,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     type: 'array',
     category: 'container',
     description:
-      'Repeatable field group for dynamic lists/arrays. Arrays do NOT have label, minItems, or maxItems properties. Use "fields" (not "template") to define the item template. Supports only \'hidden\' logic type for conditional visibility. Each array item is rendered inside a `<div class="df-array-item">` wrapper with `role="group"`, `aria-label="Item N"` (1-based), `data-array-item-id`, and `data-array-item-index` attributes for styling, accessibility, and testing.',
+      'Repeatable field group for dynamic lists/arrays. Arrays do NOT have a label property. Use "fields" (not "template") to define the item template. Supports only \'hidden\' logic type for conditional visibility. Supports minLength/maxLength for array size validation. Each array item is rendered inside a `<div class="df-array-item">` wrapper with `role="group"`, `aria-label="Item N"` (1-based), `data-array-item-id`, and `data-array-item-index` attributes for styling, accessibility, and testing.',
     valueType: 'T[]',
     baseInterface: 'FieldDef',
     props: {
@@ -532,8 +532,20 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
         description: 'Template field(s) for each array item. Allowed: rows, groups, leaf fields (NOT pages or other arrays)',
         required: true,
       },
+      minLength: {
+        name: 'minLength',
+        type: 'number',
+        description: 'Minimum number of items required in the array. Validation fails if fewer items.',
+        required: false,
+      },
+      maxLength: {
+        name: 'maxLength',
+        type: 'number',
+        description: 'Maximum number of items allowed in the array. Validation fails if more items.',
+        required: false,
+      },
     },
-    validationSupported: false,
+    validationSupported: true,
     source: 'core',
     allowedIn: ['top-level', 'page', 'row', 'group'],
     notAllowedIn: ['array'],
@@ -557,11 +569,12 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
       'previous',
     ],
     cannotContain: ['page', 'array'],
-    example: `// Flat array (primitive values)
+    example: `// Flat array with length validation
 {
   key: 'tags',
   type: 'array',
-  // NOTE: Arrays do NOT have label, minItems, or maxItems
+  minLength: 1,  // At least one tag required
+  maxLength: 5,  // No more than 5 tags
   fields: [
     { key: 'tag', type: 'input', label: 'Tag' }
   ]
@@ -572,6 +585,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
 {
   key: 'contacts',
   type: 'array',
+  minLength: 1,
   fields: [{
     type: 'group',
     fields: [

@@ -680,5 +680,95 @@ describe('form-mapping', () => {
         });
       });
     });
+
+    describe('array field validation', () => {
+      it('should handle array field with minLength without throwing', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ items: [{ item: '' }] });
+          const arrayField: FieldDef = {
+            key: 'items',
+            type: 'array',
+            minLength: 2,
+            fields: [{ key: 'item', type: 'input' }],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(arrayField, path.items as any);
+              }).not.toThrow();
+            }),
+          );
+          rootFormRegistry.registerRootForm(formInstance);
+        });
+      });
+
+      it('should handle array field with maxLength without throwing', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ tags: [{ tag: '' }, { tag: '' }] });
+          const arrayField: FieldDef = {
+            key: 'tags',
+            type: 'array',
+            maxLength: 3,
+            fields: [{ key: 'tag', type: 'input' }],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(arrayField, path.tags as any);
+              }).not.toThrow();
+            }),
+          );
+          rootFormRegistry.registerRootForm(formInstance);
+        });
+      });
+
+      it('should handle array field with both minLength and maxLength without throwing', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ items: [{ item: '' }] });
+          const arrayField: FieldDef = {
+            key: 'items',
+            type: 'array',
+            minLength: 1,
+            maxLength: 5,
+            fields: [{ key: 'item', type: 'input' }],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(arrayField, path.items as any);
+              }).not.toThrow();
+            }),
+          );
+          rootFormRegistry.registerRootForm(formInstance);
+        });
+      });
+
+      it('should handle array field without length constraints without throwing', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ items: [{ item: '' }] });
+          const arrayField: FieldDef = {
+            key: 'items',
+            type: 'array',
+            fields: [{ key: 'item', type: 'input' }],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(arrayField, path.items as any);
+              }).not.toThrow();
+            }),
+          );
+          rootFormRegistry.registerRootForm(formInstance);
+        });
+      });
+    });
   });
 });

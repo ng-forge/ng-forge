@@ -185,16 +185,6 @@ describe('createField', () => {
         } as unknown as Parameters<typeof createField>[1]),
       ).toThrow("Use 'fields' (NOT 'template')");
     });
-
-    it('should throw when array has minItems/maxItems', () => {
-      expect(() =>
-        createField('array', {
-          key: 'contacts',
-          fields: [],
-          minItems: 1,
-        } as unknown as Parameters<typeof createField>[1]),
-      ).toThrow("'minItems' and 'maxItems' properties are NOT supported");
-    });
   });
 
   describe('field alias', () => {

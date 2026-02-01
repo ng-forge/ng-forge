@@ -173,12 +173,6 @@ export function createField<T extends AvailableFieldTypes>(type: T, config: Omit
           `Example: { type: 'array', key: '...', fields: [{ type: 'group', key: 'item', fields: [...] }] }`,
       );
     }
-    if ('minItems' in configWithProps || 'maxItems' in configWithProps) {
-      throw new DynamicFormError(
-        `createField('array'): 'minItems' and 'maxItems' properties are NOT supported. ` +
-          `Use custom validation if you need to enforce array length constraints.`,
-      );
-    }
   }
 
   // Generic button validation
