@@ -4,6 +4,73 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.5.1](https://github.com/ng-forge/ng-forge/compare/v0.5.0...v0.5.1) (2026-02-01)
+
+### 🚀 Features
+
+- ⚠️ **dynamic-forms:** remove targetField from derivation API ([#202](https://github.com/ng-forge/ng-forge/pull/202))
+- **dynamic-forms:** add externalData support for conditional logic ([#204](https://github.com/ng-forge/ng-forge/pull/204))
+- **dynamic-forms:** add comprehensive test coverage for stability benchmarks ([#203](https://github.com/ng-forge/ng-forge/pull/203))
+- **dynamic-forms:** add withEventFormValue() feature for attaching form values to events ([#209](https://github.com/ng-forge/ng-forge/pull/209))
+- ⚠️ **mcp:** add dynamic-form-mcp package ([#126](https://github.com/ng-forge/ng-forge/pull/126))
+
+### 🐛 Bug Fixes
+
+- **config:** allow production deploys from any branch and skip smoke test on preview ([#198](https://github.com/ng-forge/ng-forge/pull/198))
+- **dynamic-forms:** comprehensive API fixes for type inference and silent failures ([#206](https://github.com/ng-forge/ng-forge/pull/206))
+
+### ♻️ Code Refactoring
+
+- **mcp:** consolidate to 4 focused tools with improved documentation ([#210](https://github.com/ng-forge/ng-forge/pull/210))
+
+### 📚 Documentation
+
+- add Quick Start examples hub and improve documentation UX ([#188](https://github.com/ng-forge/ng-forge/pull/188))
+
+### ⏪ Reverts
+
+- **dynamic-forms:** feat(dynamic-forms): add internal zod schema validation package (#187) ([#187](https://github.com/ng-forge/ng-forge/pull/187), [#185](https://github.com/ng-forge/ng-forge/issues/185), [#186](https://github.com/ng-forge/ng-forge/issues/186))
+
+### ⚠️ Breaking Changes
+
+- **dynamic-forms:** remove targetField from derivation API ([#202](https://github.com/ng-forge/ng-forge/pull/202))
+  The targetField property has been removed from DerivationLogicConfig.
+  All derivations now target the field they are defined on (self-targeting).
+
+  Migration:
+  - Move derivation logic from source fields to target fields
+  - Remove targetField property from logic configs
+  - Use shorthand 'derivation' property when possible
+
+  Before:
+
+  ```typescript
+  {
+    key: 'quantity',
+    logic: [{
+      type: 'derivation',
+      targetField: 'total',
+      expression: 'formValue.quantity * formValue.unitPrice'
+    }]
+  }
+  ```
+
+  After:
+
+  ```typescript
+  {
+    key: 'total',
+    derivation: 'formValue.quantity * formValue.unitPrice'
+  }
+  ```
+
+- **mcp:** add dynamic-form-mcp package ([#126](https://github.com/ng-forge/ng-forge/pull/126))
+  New MCP server for AI-assisted form schema generation with 4 focused tools:
+  - `ngforge_lookup`: unified documentation
+  - `ngforge_examples`: working code patterns
+  - `ngforge_validate`: config verification
+  - `ngforge_scaffold`: skeleton generator
+
 ## [0.5.0](https://github.com/ng-forge/ng-forge/compare/v0.4.0...v0.5.0) (2026-01-25)
 
 ### 🚀 Features
