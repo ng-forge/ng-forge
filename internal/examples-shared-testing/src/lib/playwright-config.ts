@@ -1,8 +1,23 @@
-import { defineConfig, devices, PlaywrightTestConfig } from '@playwright/test';
+import { defineConfig, devices, PlaywrightTestConfig, ReporterDescription } from '@playwright/test';
 import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
 import { fileURLToPath } from 'node:url';
 import { APP_PORTS, ExampleApp } from './app-config';
+
+/**
+ * Returns the reporter configuration based on CI environment.
+ * In CI, includes JSON reporter for job summary generation.
+ */
+const getReporters = (): ReporterDescription[] => {
+  const reporters: ReporterDescription[] = [['list'], ['html', { outputFolder: './playwright-report', open: 'never' }]];
+
+  // Add JSON reporter in CI for generating job summaries
+  if (process.env['CI']) {
+    reporters.push(['json', { outputFile: './test-results/results.json' }]);
+  }
+
+  return reporters;
+};
 
 // Re-export for backwards compatibility
 export { APP_PORTS, type ExampleApp } from './app-config';
@@ -65,6 +80,8 @@ export function createPlaywrightConfig(configFileUrl: string, appName: ExampleAp
 
   return defineConfig({
     ...nxE2EPreset(fileURLToPath(configFileUrl), { testDir: './src/app/testing' }),
+    /* Configure reporters - includes JSON in CI for job summary generation */
+    reporter: getReporters(),
     /* Global timeout for each test - prevents tests from hanging indefinitely */
     timeout: 10000,
     /* Retry flaky tests once */
