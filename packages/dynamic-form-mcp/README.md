@@ -1,16 +1,13 @@
 # @ng-forge/dynamic-form-mcp
 
-MCP (Model Context Protocol) server for ng-forge dynamic forms - AI-assisted form schema generation.
+MCP (Model Context Protocol) server for ng-forge dynamic forms - enables AI assistants to generate, validate, and work with dynamic form configurations.
 
 ## Features
-
-This MCP server provides AI assistants with:
 
 - **Documentation Lookup**: Explore field types, concepts, and patterns
 - **Code Examples**: Get working, copy-paste-ready form configurations
 - **Config Validation**: Validate FormConfig objects with detailed error messages
 - **Skeleton Generation**: Generate form scaffolds from parameters
-- **UI Adapter Info**: Get UI library-specific configurations (Material, Bootstrap, PrimeNG, Ionic)
 
 ## Installation
 
@@ -18,22 +15,60 @@ This MCP server provides AI assistants with:
 npm install @ng-forge/dynamic-form-mcp
 ```
 
-## Usage
+## Setup
 
-### Claude Desktop Configuration
+### Cursor
 
-Add to your Claude Desktop configuration (`~/.config/Claude/claude_desktop_config.json`):
+Add to your Cursor MCP settings:
+
+```json
+{
+  "ng-forge": {
+    "command": "npx",
+    "args": ["-y", "@ng-forge/dynamic-form-mcp"]
+  }
+}
+```
+
+### VS Code with Copilot
+
+Create `.vscode/mcp.json` in your project:
+
+```json
+{
+  "servers": {
+    "ng-forge": {
+      "command": "npx",
+      "args": ["-y", "@ng-forge/dynamic-form-mcp"]
+    }
+  }
+}
+```
+
+### Claude Desktop
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
 
 ```json
 {
   "mcpServers": {
     "ng-forge": {
       "command": "npx",
-      "args": ["@ng-forge/dynamic-form-mcp"]
+      "args": ["-y", "@ng-forge/dynamic-form-mcp"]
     }
   }
 }
 ```
+
+### JetBrains IDEs
+
+Go to **Settings > Tools > AI Assistant > Model Context Protocol (MCP)** and add:
+
+| Field     | Value                         |
+| --------- | ----------------------------- |
+| Name      | ng-forge                      |
+| Command   | npx                           |
+| Arguments | -y @ng-forge/dynamic-form-mcp |
 
 ### Local Development
 
@@ -52,145 +87,114 @@ For development within the ng-forge monorepo:
 
 ## Available Tools
 
-The server provides 4 focused tools with zero overlap:
+The server provides 4 focused tools:
 
-| Tool               | Purpose       | One-liner               |
-| ------------------ | ------------- | ----------------------- |
-| `ngforge_lookup`   | Documentation | "Tell me about X"       |
-| `ngforge_examples` | Working code  | "Show me how to do X"   |
-| `ngforge_validate` | Verification  | "Is my config correct?" |
-| `ngforge_scaffold` | Generation    | "Generate a skeleton"   |
+| Tool               | Description                                                 | Read-only |
+| ------------------ | ----------------------------------------------------------- | --------- |
+| `ngforge_lookup`   | Get documentation about field types, concepts, and patterns | ✅        |
+| `ngforge_examples` | Get working code examples for common form patterns          | ✅        |
+| `ngforge_validate` | Validate FormConfig and get detailed error feedback         | ✅        |
+| `ngforge_scaffold` | Generate valid FormConfig skeletons                         | ✅        |
 
-### `ngforge_lookup`
+---
 
-Look up ng-forge Dynamic Forms documentation topics.
+### ngforge_lookup
 
-**Parameters:**
+Get documentation about any ng-forge topic.
 
-- `topic` (required): Topic to look up
-  - Field types: `input`, `select`, `slider`, `radio`, `checkbox`, `textarea`, `datepicker`, `toggle`, `text`, `hidden`
-  - Containers: `group`, `row`, `array`, `page`
-  - Concepts: `validation`, `conditional`, `derivation`, `options-format`, `expression-variables`, `async-validators`
-  - Patterns: `golden-path`, `pitfalls`, `field-placement`, `logic-matrix`, `multi-page-gotchas`, `workflow`
-  - Use `list` to see all available topics
-- `depth`: `brief` | `full` | `schema` (default: `full`)
-  - `brief`: Quick syntax (~20 lines)
-  - `full`: Complete docs with examples
-  - `schema`: Include JSON schema (requires `uiIntegration`)
-- `uiIntegration`: `material` | `bootstrap` | `primeng` | `ionic` (optional)
+| Parameter       | Type                                                      | Default    | Description             |
+| --------------- | --------------------------------------------------------- | ---------- | ----------------------- |
+| `topic`         | string                                                    | (required) | Topic to look up        |
+| `depth`         | `"brief"` \| `"full"` \| `"schema"`                       | `"full"`   | Level of detail         |
+| `uiIntegration` | `"material"` \| `"bootstrap"` \| `"primeng"` \| `"ionic"` | -          | Filter UI-specific info |
 
-**Examples:**
+**Available Topics:**
 
-```
-ngforge_lookup topic="input" depth="brief"
-ngforge_lookup topic="validation" depth="full"
-ngforge_lookup topic="select" depth="schema" uiIntegration="material"
-ngforge_lookup topic="list"
-```
+| Category    | Topics                                                                                                 |
+| ----------- | ------------------------------------------------------------------------------------------------------ |
+| Field Types | `input`, `select`, `radio`, `checkbox`, `textarea`, `datepicker`, `slider`, `toggle`, `hidden`, `text` |
+| Containers  | `group`, `row`, `array`, `page`                                                                        |
+| Concepts    | `validation`, `conditional`, `derivation`, `options-format`, `expression-variables`                    |
+| Patterns    | `golden-path`, `multi-page-gotchas`, `pitfalls`, `workflow`                                            |
 
-### `ngforge_examples`
+---
 
-Get working, copy-paste-ready form configurations.
+### ngforge_examples
 
-**Parameters:**
+Get working code examples for common patterns.
 
-- `pattern`: Pattern to retrieve
-  - **Getting Started**: `complete` (multi-page with all features), `mega` (kitchen sink)
-  - **Minimal patterns** (~20-50 lines): `minimal-multipage`, `minimal-array`, `minimal-conditional`, `minimal-validation`, `minimal-hidden`
-  - **Standard patterns**: `derivation`, `multi-page`, `conditional`, `validation`
-  - Use `list` to see all available patterns
-- `depth`: `minimal` | `brief` | `full` | `explained` (default: `full`)
-  - `minimal`: Code only
-  - `brief`: Code + summary
-  - `full`: Code + comments
-  - `explained`: Code + detailed explanation
+| Parameter | Type                                                  | Default    | Description     |
+| --------- | ----------------------------------------------------- | ---------- | --------------- |
+| `pattern` | string                                                | (required) | Pattern name    |
+| `depth`   | `"minimal"` \| `"brief"` \| `"full"` \| `"explained"` | `"full"`   | Level of detail |
 
-**Examples:**
+**Available Patterns:**
 
-```
-ngforge_examples pattern="complete"
-ngforge_examples pattern="minimal-array" depth="minimal"
-ngforge_examples pattern="list"
-```
+| Pattern               | Description                              |
+| --------------------- | ---------------------------------------- |
+| `minimal-multipage`   | Simplest 2-page wizard form              |
+| `minimal-array`       | Array with add/remove buttons            |
+| `minimal-conditional` | Show/hide field based on condition       |
+| `minimal-validation`  | Password confirmation validation         |
+| `minimal-hidden`      | Hidden fields in multi-page form         |
+| `complete`            | Full form with all major features        |
+| `mega`                | Kitchen sink demonstrating every feature |
 
-### `ngforge_validate`
+---
 
-Validate FormConfig objects with detailed, actionable error messages.
+### ngforge_validate
 
-**Parameters:**
+Validate FormConfig and get detailed error feedback.
 
-- `config` (required): One of:
-  - File path (`.ts`/`.js`): Reads file, extracts FormConfig(s), validates each
-  - JSON string: Parses and validates
-  - JSON object: Validates directly
-- `uiIntegration`: `material` | `bootstrap` | `primeng` | `ionic` (default: `material`)
+| Parameter       | Type                                                      | Default      | Description                    |
+| --------------- | --------------------------------------------------------- | ------------ | ------------------------------ |
+| `config`        | string \| object                                          | (required)   | File path or JSON config       |
+| `uiIntegration` | `"material"` \| `"bootstrap"` \| `"primeng"` \| `"ionic"` | `"material"` | UI library to validate against |
 
-**Features:**
+**Input Detection:**
 
-- Auto-detects input type (file path vs JSON)
-- Extracts multiple FormConfig objects from TypeScript files
-- Returns specific error messages with:
-  - Exact property that's wrong
-  - What the correct structure should look like
-  - Copy-paste fix suggestions
+| Input                    | Treated As         |
+| ------------------------ | ------------------ |
+| Ends with `.ts` or `.js` | File path          |
+| Starts with `{` or `[`   | JSON string        |
+| Object                   | Validated directly |
 
-**Examples:**
+**Example Errors:**
 
-```
-ngforge_validate config="/path/to/form.config.ts"
-ngforge_validate config='{"fields": [...]}' uiIntegration="bootstrap"
-```
+- "Hidden field missing REQUIRED value property"
+- "options MUST be at FIELD level, NOT inside props"
+- "row containers do NOT support logic blocks"
 
-### `ngforge_scaffold`
+---
 
-Generate FormConfig skeletons from parameters.
+### ngforge_scaffold
 
-**Parameters:**
+Generate valid FormConfig skeletons.
 
-- `pages`: Number of pages (0 = single-page, 1-10 = multi-page wizard)
-- `fields`: Basic fields as `"name:type"` pairs (e.g., `["email:input", "country:select"]`)
-- `groups`: Group names for nested objects (e.g., `["address", "billing"]`)
-- `arrays`: Array names for dynamic lists (e.g., `["contacts", "items"]`)
-- `hidden`: Hidden fields as `"name:value"` pairs (e.g., `["userId:abc123"]`)
-- `uiIntegration`: `material` | `bootstrap` | `primeng` | `ionic` (default: `material`)
+| Parameter       | Type     | Default      | Description                           |
+| --------------- | -------- | ------------ | ------------------------------------- |
+| `pages`         | number   | `0`          | Number of pages (0 = single-page)     |
+| `fields`        | string[] | `[]`         | Fields as `"name:type"` pairs         |
+| `groups`        | string[] | `[]`         | Group field names                     |
+| `arrays`        | string[] | `[]`         | Array field names                     |
+| `hidden`        | string[] | `[]`         | Hidden fields as `"name:value"` pairs |
+| `uiIntegration` | enum     | `"material"` | UI library                            |
 
-**Generated code includes:**
+**Supported field types:** `input`, `select`, `radio`, `checkbox`, `textarea`, `datepicker`, `slider`, `toggle`
 
-- Proper page structure with navigation
-- Array containers with add/remove buttons
-- Groups with placeholder fields
-- Hidden fields with values
-- Submit button on last page
-- `as const satisfies FormConfig` wrapper
+---
 
-**Examples:**
+## MCP Resources
 
-```
-ngforge_scaffold pages=0 fields=["name:input","email:input"]
-ngforge_scaffold pages=3 arrays=["contacts"] groups=["address"]
-ngforge_scaffold hidden=["userId:abc123","source:web"]
-```
-
-## Available Resources
-
-| Resource URI                       | Description                           |
-| ---------------------------------- | ------------------------------------- |
-| `ng-forge://field-types`           | List all available field types        |
-| `ng-forge://field-types/{type}`    | Get details for a specific field type |
-| `ng-forge://validators`            | List all available validators         |
-| `ng-forge://validators/{type}`     | Get details for a specific validator  |
-| `ng-forge://ui-adapters`           | List all UI library adapters          |
-| `ng-forge://ui-adapters/{library}` | Get UI library specific configuration |
-| `ng-forge://docs`                  | List documentation topics             |
-| `ng-forge://docs/{topic}`          | Get specific documentation topic      |
-
-## Recommended Workflow
-
-1. **Start with lookup**: `ngforge_lookup topic="workflow"` - See tool usage guide
-2. **Get structure templates**: `ngforge_lookup topic="golden-path"` - Recommended form structures
-3. **Get field syntax**: `ngforge_lookup topic="<field-type>"` - Syntax for specific fields
-4. **Get examples**: `ngforge_examples pattern="complete"` - Full working example
-5. **Validate config**: `ngforge_validate config=...` - Verify your config
+| Resource URI               | Description                                    |
+| -------------------------- | ---------------------------------------------- |
+| `ng-forge://instructions`  | Best practices guide for generating FormConfig |
+| `ng-forge://examples`      | Curated FormConfig examples                    |
+| `ng-forge://examples/{id}` | Specific example by ID                         |
+| `ng-forge://field-types`   | Field type reference                           |
+| `ng-forge://validators`    | Validator reference                            |
+| `ng-forge://ui-adapters`   | UI library configurations                      |
+| `ng-forge://docs`          | Full documentation index                       |
 
 ## Development
 
@@ -207,8 +211,6 @@ nx test dynamic-form-mcp
 ```
 
 ### Generating Registry
-
-The registry is automatically generated before build:
 
 ```bash
 nx run dynamic-form-mcp:generate-registry

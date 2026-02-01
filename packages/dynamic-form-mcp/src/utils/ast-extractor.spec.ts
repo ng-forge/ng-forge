@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createSourceFile, findFormConfigCandidates, extractToJson } from './ast-extractor.js';
+import { createSourceFile, findFormConfigCandidates, extractToJson, DATE_PLACEHOLDER, MAX_SOURCE_TEXT_LENGTH } from './ast-extractor.js';
 
 describe('AST Extractor', () => {
   describe('createSourceFile', () => {
@@ -457,10 +457,10 @@ const config: FormConfig = {
         const varDecl = source.getVariableDeclarations()[0];
         const initializer = varDecl.getInitializer()!;
         const result = extractToJson(initializer);
-        expect(result.value).toBe('2024-01-01T00:00:00.000Z');
+        expect(result.value).toBe(DATE_PLACEHOLDER);
         expect(result.warnings).toHaveLength(1);
         expect(result.warnings[0].issue).toBe('Runtime constructor: Date');
-        expect(result.warnings[0].placeholder).toBe('2024-01-01T00:00:00.000Z');
+        expect(result.warnings[0].placeholder).toBe(DATE_PLACEHOLDER);
       });
 
       it('replaces new Date with argument with placeholder', () => {
@@ -468,7 +468,7 @@ const config: FormConfig = {
         const varDecl = source.getVariableDeclarations()[0];
         const initializer = varDecl.getInitializer()!;
         const result = extractToJson(initializer);
-        expect(result.value).toBe('2024-01-01T00:00:00.000Z');
+        expect(result.value).toBe(DATE_PLACEHOLDER);
         expect(result.warnings).toHaveLength(1);
       });
 
@@ -512,7 +512,7 @@ const config: FormConfig = {
         const initializer = varDecl.getInitializer()!;
         const result = extractToJson(initializer);
         expect(result.value).toBe('__FUNCTION__');
-        expect(result.warnings[0].originalText.length).toBeLessThanOrEqual(53); // 50 + "..."
+        expect(result.warnings[0].originalText.length).toBeLessThanOrEqual(MAX_SOURCE_TEXT_LENGTH + 3); // + "..."
       });
     });
 
@@ -885,7 +885,7 @@ const config: FormConfig = {
         // Second field - has runtime values
         expect(fields[1].key).toBe('birthdate');
         const birthdateProps = fields[1].props as Record<string, unknown>;
-        expect(birthdateProps.maxDate).toBe('2024-01-01T00:00:00.000Z');
+        expect(birthdateProps.maxDate).toBe(DATE_PLACEHOLDER);
         expect(birthdateProps.validate).toBe('__FUNCTION__');
 
         // Third field - static options array
