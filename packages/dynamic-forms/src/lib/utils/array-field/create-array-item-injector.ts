@@ -156,9 +156,11 @@ function createObjectItemForm<TModel extends Record<string, unknown>>(
 
   return runInInjectionContext(parentInjector, () => {
     // Determine which fields to include in the schema
-    // - If template has nested fields (e.g., row with children), use those
-    // - Otherwise use the template itself as a single-field schema
-    const schemaFields = nestedFields.length > 0 ? nestedFields : [template];
+    // - Groups with keys create data nesting, so preserve the group wrapper: [template]
+    // - Rows are layout-only, so use their children directly: nestedFields
+    // - Leaf fields use themselves: [template]
+    const isGroupTemplate = template.type === 'group' && template.key;
+    const schemaFields = isGroupTemplate || nestedFields.length === 0 ? [template] : nestedFields;
     const flattenedFields = flattenFields(schemaFields, registry);
     const schema = createSchemaFromFields(flattenedFields, registry);
     return untracked(() => form(itemEntity, schema));
