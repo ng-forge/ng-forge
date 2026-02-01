@@ -107,6 +107,8 @@ export class EventBus {
 
     if (this.shouldEmitFormValue()) {
       const formValue = this.rootFormRegistry?.getFormValue();
+      // Only attach if form value exists and has at least one field.
+      // Empty objects {} are not attached - use hasFormValue() to check.
       if (formValue && Object.keys(formValue).length > 0) {
         this.pipeline$.next(attachFormValue(event, formValue));
         return;
