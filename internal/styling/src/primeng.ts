@@ -89,6 +89,7 @@ export const EmberPreset = definePreset(Aura, {
           disabledBackground: '{surface.100}',
           borderColor: '{surface.200}',
           focusBorderColor: EMBER.core,
+          invalidBorderColor: SEMANTIC.error,
           color: '{surface.900}',
         },
       },
@@ -105,6 +106,7 @@ export const EmberPreset = definePreset(Aura, {
           disabledBackground: '{surface.100}',
           borderColor: '{surface.300}',
           focusBorderColor: EMBER.glow,
+          invalidBorderColor: SEMANTIC.error,
           color: '{surface.600}',
         },
         overlay: {
