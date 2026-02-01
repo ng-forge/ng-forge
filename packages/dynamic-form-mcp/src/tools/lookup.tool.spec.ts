@@ -7,6 +7,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerLookupTool } from './lookup.tool.js';
+import * as registry from '../registry/index.js';
 
 describe('Lookup Tool', () => {
   let server: McpServer;
@@ -280,6 +281,434 @@ describe('Lookup Tool', () => {
       const content = (result as { content: [{ text: string }] }).content[0].text;
 
       expect(content).toContain('# Input Field');
+    });
+
+    it('returns JSON schema for depth=schema with uiIntegration for TOPICS field types', async () => {
+      const result = await registeredTool.handler({ topic: 'input', depth: 'schema', uiIntegration: 'material' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      // Should contain full content plus JSON schema
+      expect(content).toContain('# Input Field');
+      expect(content).toContain('### JSON Schema');
+      expect(content).toContain('"type"');
+    });
+
+    it('returns JSON schema for depth=schema with uiIntegration for select', async () => {
+      const result = await registeredTool.handler({ topic: 'select', depth: 'schema', uiIntegration: 'bootstrap' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# Select Field');
+      expect(content).toContain('### JSON Schema');
+    });
+
+    it('returns JSON schema for slider with depth=schema', async () => {
+      const result = await registeredTool.handler({ topic: 'slider', depth: 'schema', uiIntegration: 'primeng' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# Slider Field');
+      expect(content).toContain('### JSON Schema');
+    });
+
+    it('does not add JSON schema for non-supported field types', async () => {
+      const result = await registeredTool.handler({ topic: 'validation', depth: 'schema', uiIntegration: 'material' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# Validation');
+      expect(content).not.toContain('### JSON Schema');
+    });
+
+    it('does not add JSON schema for schema depth without uiIntegration', async () => {
+      const result = await registeredTool.handler({ topic: 'input', depth: 'schema' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# Input Field');
+      expect(content).not.toContain('### JSON Schema');
+    });
+  });
+
+  describe('registry fallback for field types not in TOPICS', () => {
+    it('returns field info from registry for multi-checkbox', async () => {
+      const result = await registeredTool.handler({ topic: 'multi-checkbox', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('## multi-checkbox field');
+      expect(content).toContain('**Category:** value');
+      expect(content).toContain('**Validation Supported:**');
+      expect(content).toContain('### Placement Rules');
+      expect(content).toContain('### Full Example');
+    });
+
+    it('formats multi-checkbox with value type', async () => {
+      const result = await registeredTool.handler({ topic: 'multi-checkbox', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('**Value Type:**');
+      expect(content).toContain('T[]');
+    });
+
+    it('formats multi-checkbox with minimal example', async () => {
+      const result = await registeredTool.handler({ topic: 'multi-checkbox', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('### Minimal Valid Example');
+      expect(content).toContain('```typescript');
+    });
+
+    it('formats multi-checkbox with allowed placement rules', async () => {
+      const result = await registeredTool.handler({ topic: 'multi-checkbox', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('**✅ Allowed in:**');
+    });
+
+    it('adds JSON schema for multi-checkbox with depth=schema and uiIntegration', async () => {
+      const result = await registeredTool.handler({ topic: 'multi-checkbox', depth: 'schema', uiIntegration: 'material' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      // multi-checkbox goes through registry fallback, and depth=schema should add JSON schema
+      expect(content).toContain('## multi-checkbox field');
+      expect(content).toContain('### JSON Schema');
+    });
+
+    it('returns buttons topic for submit alias', async () => {
+      // 'submit' is aliased to 'buttons' topic in TOPIC_ALIASES
+      const result = await registeredTool.handler({ topic: 'submit', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# Buttons');
+    });
+
+    it('returns buttons topic for next alias', async () => {
+      // 'next' is aliased to 'buttons' topic in TOPIC_ALIASES
+      const result = await registeredTool.handler({ topic: 'next', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# Buttons');
+    });
+
+    it('returns array-buttons topic for addArrayItem alias', async () => {
+      // 'addarrayitem' is aliased to 'array-buttons' topic
+      const result = await registeredTool.handler({ topic: 'addArrayItem', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# Array Buttons');
+    });
+  });
+
+  describe('formatFieldInfoFull formatting', () => {
+    it('formats field info with placement rules', async () => {
+      // multi-checkbox is the only field type that goes through registry fallback
+      const result = await registeredTool.handler({ topic: 'multi-checkbox', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('### Placement Rules');
+      expect(content).toContain('**✅ Allowed in:**');
+    });
+
+    it('formats field info with minimal example when available', async () => {
+      const result = await registeredTool.handler({ topic: 'multi-checkbox', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('### Minimal Valid Example');
+      expect(content).toContain('```typescript');
+    });
+
+    it('formats field info with value type when available', async () => {
+      const result = await registeredTool.handler({ topic: 'multi-checkbox', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('**Value Type:**');
+    });
+
+    it('formats field info with full example', async () => {
+      const result = await registeredTool.handler({ topic: 'multi-checkbox', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('### Full Example');
+      expect(content).toContain('```typescript');
+      expect(content).toContain('interests');
+    });
+
+    it('does not include UI-specific properties when field has no adapter props', async () => {
+      // multi-checkbox is in registry but doesn't have UI adapter-specific properties
+      const result = await registeredTool.handler({ topic: 'multi-checkbox', depth: 'full', uiIntegration: 'material' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('## multi-checkbox field');
+      expect(content).not.toContain('### UI-Specific Properties');
+    });
+
+    it('adds JSON schema for registry field types with depth=schema and uiIntegration', async () => {
+      const result = await registeredTool.handler({ topic: 'toggle', depth: 'schema', uiIntegration: 'ionic' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      // toggle is in TOPICS, so it uses the TOPICS path which adds schema
+      expect(content).toContain('# Toggle Field');
+      expect(content).toContain('### JSON Schema');
+    });
+
+    it('formats multi-checkbox with description', async () => {
+      const result = await registeredTool.handler({ topic: 'multi-checkbox', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('**Description:**');
+      expect(content).toContain('Multiple checkbox group');
+    });
+
+    it('formats multi-checkbox with validation supported info', async () => {
+      const result = await registeredTool.handler({ topic: 'multi-checkbox', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('**Validation Supported:** Yes');
+    });
+  });
+
+  describe('registry field types with UI adapter info', () => {
+    it('formats datepicker from registry with material UI properties', async () => {
+      // datepicker is in TOPICS, so this will use the TOPICS path
+      // Let's test that schema depth adds JSON schema for datepicker
+      const result = await registeredTool.handler({ topic: 'datepicker', depth: 'schema', uiIntegration: 'material' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# Datepicker Field');
+      expect(content).toContain('### JSON Schema');
+    });
+
+    it('formats toggle from registry with ionic UI properties', async () => {
+      const result = await registeredTool.handler({ topic: 'toggle', depth: 'schema', uiIntegration: 'ionic' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# Toggle Field');
+      expect(content).toContain('### JSON Schema');
+    });
+
+    it('formats checkbox from registry with material UI properties', async () => {
+      const result = await registeredTool.handler({ topic: 'checkbox', depth: 'schema', uiIntegration: 'material' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# Checkbox Field');
+      expect(content).toContain('### JSON Schema');
+    });
+  });
+});
+
+describe('Lookup Tool with mocked registry', () => {
+  let server: McpServer;
+  let registeredTool: { name: string; handler: (args: Record<string, unknown>) => Promise<unknown> };
+
+  beforeEach(() => {
+    server = {
+      tool: vi.fn((name, _description, _schema, handler) => {
+        registeredTool = { name, handler };
+      }),
+    } as unknown as McpServer;
+
+    registerLookupTool(server);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  describe('formatFieldInfoFull edge cases', () => {
+    it('formats container field (row type) with label note', async () => {
+      // Mock getFieldType to return a row type container - isContainer check uses exact type match
+      vi.spyOn(registry, 'getFieldType').mockReturnValue({
+        type: 'row',
+        category: 'container',
+        description: 'Row container',
+        props: {},
+        validationSupported: false,
+        source: 'core',
+        example: '{ key: "row1", type: "row", fields: [] }',
+      });
+
+      const result = await registeredTool.handler({ topic: 'unknown-row-topic', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('## row field');
+      expect(content).toContain('**⚠️ Note:** row fields do NOT have a `label` property.');
+    });
+
+    it('formats hidden field with important note', async () => {
+      // Mock getFieldType to return a hidden field type
+      vi.spyOn(registry, 'getFieldType').mockReturnValue({
+        type: 'hidden',
+        category: 'value',
+        description: 'Hidden field',
+        props: {},
+        validationSupported: false,
+        source: 'core',
+        example: '{ key: "id", type: "hidden", value: "abc" }',
+      });
+
+      const result = await registeredTool.handler({ topic: 'unknown-hidden-topic', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('## hidden field');
+      expect(content).toContain('**⚠️ IMPORTANT:** Hidden fields ONLY support:');
+    });
+
+    it('formats field with notAllowedIn placement rules', async () => {
+      vi.spyOn(registry, 'getFieldType').mockReturnValue({
+        type: 'test-field',
+        category: 'value',
+        description: 'Test field',
+        props: {},
+        validationSupported: true,
+        source: 'core',
+        allowedIn: ['top-level', 'page'],
+        notAllowedIn: ['row', 'array'],
+        example: '{ key: "test", type: "test-field" }',
+      });
+
+      const result = await registeredTool.handler({ topic: 'test-field-xyz', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('**❌ NOT allowed in:** row, array');
+    });
+
+    it('formats container field with canContain rules', async () => {
+      vi.spyOn(registry, 'getFieldType').mockReturnValue({
+        type: 'test-container',
+        category: 'container',
+        description: 'Test container',
+        props: {},
+        validationSupported: false,
+        source: 'core',
+        canContain: ['input', 'select', 'checkbox'],
+        example: '{ key: "container", type: "test-container", fields: [] }',
+      });
+
+      const result = await registeredTool.handler({ topic: 'test-container-abc', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('**Can contain:** input, select, checkbox');
+    });
+
+    it('formats container field with cannotContain rules', async () => {
+      vi.spyOn(registry, 'getFieldType').mockReturnValue({
+        type: 'test-container',
+        category: 'container',
+        description: 'Test container',
+        props: {},
+        validationSupported: false,
+        source: 'core',
+        cannotContain: ['page', 'hidden'],
+        example: '{ key: "container", type: "test-container", fields: [] }',
+      });
+
+      const result = await registeredTool.handler({ topic: 'test-container-def', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('**Cannot contain:** page, hidden');
+    });
+
+    it('formats field with UI-specific properties', async () => {
+      // The UI adapter field type lookup uses resolvedTopic to find the matching field
+      // So the adapter fieldTypes must have a type matching the topic we're looking up
+      const testTopic = 'custom-ui-field';
+
+      vi.spyOn(registry, 'getFieldType').mockReturnValue({
+        type: testTopic,
+        category: 'value',
+        description: 'Custom input field',
+        props: {},
+        validationSupported: true,
+        source: 'adapter',
+        example: '{ key: "email", type: "custom-ui-field" }',
+      });
+
+      vi.spyOn(registry, 'getUIAdapter').mockReturnValue({
+        library: 'material',
+        package: '@ng-forge/dynamic-forms-material',
+        providerFunction: 'withMaterialFields()',
+        fieldTypes: [
+          {
+            type: testTopic, // Must match the topic being looked up
+            componentName: 'CustomInputComponent',
+            additionalProps: {
+              appearance: {
+                name: 'appearance',
+                type: "'fill' | 'outline'",
+                description: 'Material form field appearance',
+                required: false,
+                default: 'outline',
+              },
+              hint: {
+                name: 'hint',
+                type: 'string',
+                description: 'Hint text below the field',
+                required: false,
+              },
+            },
+          },
+        ],
+      });
+
+      const result = await registeredTool.handler({
+        topic: testTopic,
+        depth: 'full',
+        uiIntegration: 'material',
+      });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('### UI-Specific Properties');
+      expect(content).toContain("`appearance`: 'fill' | 'outline' - Material form field appearance");
+      expect(content).toContain('(default: "outline")');
+      expect(content).toContain('`hint`: string - Hint text below the field');
+    });
+
+    it('formats group container field with all placement rule types', async () => {
+      // Use 'group' type to trigger the container note (isContainer check)
+      vi.spyOn(registry, 'getFieldType').mockReturnValue({
+        type: 'group',
+        category: 'container',
+        description: 'Field with all placement rules',
+        props: {},
+        validationSupported: false,
+        source: 'core',
+        allowedIn: ['top-level', 'page', 'row'],
+        notAllowedIn: ['group', 'array'],
+        canContain: ['input', 'select'],
+        cannotContain: ['page', 'group'],
+        minimalExample: '{ key: "test", type: "group", fields: [] }',
+        example: '{ key: "test", type: "group", fields: [{ key: "a", type: "input" }] }',
+      });
+
+      const result = await registeredTool.handler({ topic: 'unknown-group-topic', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('**✅ Allowed in:** top-level, page, row');
+      expect(content).toContain('**❌ NOT allowed in:** group, array');
+      expect(content).toContain('**Can contain:** input, select');
+      expect(content).toContain('**Cannot contain:** page, group');
+      expect(content).toContain('### Minimal Valid Example');
+      expect(content).toContain('**⚠️ Note:** group fields do NOT have a `label` property.');
+    });
+
+    it('does not add JSON schema for unsupported registry field types with depth=schema', async () => {
+      // Test the branch where depth=schema and uiIntegration is provided,
+      // but the field type is NOT in SCHEMA_SUPPORTED_FIELD_TYPES
+      vi.spyOn(registry, 'getFieldType').mockReturnValue({
+        type: 'custom-unsupported',
+        category: 'display',
+        description: 'A field type not in schema supported list',
+        props: {},
+        validationSupported: false,
+        source: 'core',
+        example: '{ key: "test", type: "custom-unsupported" }',
+      });
+
+      const result = await registeredTool.handler({
+        topic: 'custom-unsupported',
+        depth: 'schema',
+        uiIntegration: 'material',
+      });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('## custom-unsupported field');
+      expect(content).not.toContain('### JSON Schema');
     });
   });
 });

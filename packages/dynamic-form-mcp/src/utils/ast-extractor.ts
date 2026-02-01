@@ -10,6 +10,18 @@
  * - Method calls like Math.floor()
  */
 
+/**
+ * Placeholder date used when encountering `new Date()` expressions.
+ * Since dates are runtime values, we substitute a fixed ISO string for validation.
+ */
+export const DATE_PLACEHOLDER = '2024-01-01T00:00:00.000Z';
+
+/**
+ * Maximum length for source text before truncation in warnings.
+ * Keeps warning messages readable while preserving context.
+ */
+export const MAX_SOURCE_TEXT_LENGTH = 50;
+
 import {
   Project,
   SourceFile,
@@ -408,15 +420,13 @@ function extractNode(node: Node, path: string, warnings: ExtractionWarning[], er
     const className = node.getExpression().getText();
 
     if (className === 'Date') {
-      // Use a placeholder date
-      const placeholder = '2024-01-01T00:00:00.000Z';
       warnings.push({
         path,
         issue: `Runtime constructor: ${className}`,
         originalText: text,
-        placeholder,
+        placeholder: DATE_PLACEHOLDER,
       });
-      return placeholder;
+      return DATE_PLACEHOLDER;
     }
 
     warnings.push({
@@ -434,7 +444,7 @@ function extractNode(node: Node, path: string, warnings: ExtractionWarning[], er
     warnings.push({
       path,
       issue: 'Arrow function (cannot be validated statically)',
-      originalText: text.length > 50 ? text.substring(0, 50) + '...' : text,
+      originalText: text.length > MAX_SOURCE_TEXT_LENGTH ? text.substring(0, MAX_SOURCE_TEXT_LENGTH) + '...' : text,
       placeholder: '__FUNCTION__',
     });
     return '__FUNCTION__';
@@ -446,7 +456,7 @@ function extractNode(node: Node, path: string, warnings: ExtractionWarning[], er
     warnings.push({
       path,
       issue: 'Function expression (cannot be validated statically)',
-      originalText: text.length > 50 ? text.substring(0, 50) + '...' : text,
+      originalText: text.length > MAX_SOURCE_TEXT_LENGTH ? text.substring(0, MAX_SOURCE_TEXT_LENGTH) + '...' : text,
       placeholder: '__FUNCTION__',
     });
     return '__FUNCTION__';
@@ -458,7 +468,7 @@ function extractNode(node: Node, path: string, warnings: ExtractionWarning[], er
     warnings.push({
       path,
       issue: 'Function call (cannot be evaluated statically)',
-      originalText: text.length > 50 ? text.substring(0, 50) + '...' : text,
+      originalText: text.length > MAX_SOURCE_TEXT_LENGTH ? text.substring(0, MAX_SOURCE_TEXT_LENGTH) + '...' : text,
       placeholder: `__CALL__:${text}`,
     });
     return `__CALL__:${text}`;
@@ -506,7 +516,7 @@ function extractNode(node: Node, path: string, warnings: ExtractionWarning[], er
     warnings.push({
       path,
       issue: 'Template literal with expressions',
-      originalText: text.length > 50 ? text.substring(0, 50) + '...' : text,
+      originalText: text.length > MAX_SOURCE_TEXT_LENGTH ? text.substring(0, MAX_SOURCE_TEXT_LENGTH) + '...' : text,
       placeholder: '__TEMPLATE__',
     });
     return '__TEMPLATE__';
@@ -568,7 +578,7 @@ function extractNode(node: Node, path: string, warnings: ExtractionWarning[], er
     warnings.push({
       path,
       issue: 'Conditional expression (cannot evaluate statically)',
-      originalText: text.length > 50 ? text.substring(0, 50) + '...' : text,
+      originalText: text.length > MAX_SOURCE_TEXT_LENGTH ? text.substring(0, MAX_SOURCE_TEXT_LENGTH) + '...' : text,
       placeholder: '__CONDITIONAL__',
     });
     return '__CONDITIONAL__';
@@ -579,7 +589,7 @@ function extractNode(node: Node, path: string, warnings: ExtractionWarning[], er
   warnings.push({
     path,
     issue: `Unknown syntax: ${SyntaxKind[node.getKind()]}`,
-    originalText: text.length > 50 ? text.substring(0, 50) + '...' : text,
+    originalText: text.length > MAX_SOURCE_TEXT_LENGTH ? text.substring(0, MAX_SOURCE_TEXT_LENGTH) + '...' : text,
     placeholder: `__UNKNOWN__:${SyntaxKind[node.getKind()]}`,
   });
   return `__UNKNOWN__:${SyntaxKind[node.getKind()]}`;
