@@ -131,9 +131,12 @@ export function extractArrayPath(path: string): string {
 }
 
 /**
- * Splits a dot-separated path into segments.
+ * Splits a path into segments, supporting both dot notation and bracket notation.
  *
- * Handles both dot notation and bracket notation for array indices.
+ * Handles:
+ * - Dot notation: `parent.child.grandchild`
+ * - Bracket notation: `items[0].quantity`
+ * - Mixed notation: `items[0].address.city`
  *
  * @param path - The path to split
  * @returns Array of path segments
@@ -145,13 +148,24 @@ export function extractArrayPath(path: string): string {
  *
  * splitPath('items.0.quantity')
  * // ['items', '0', 'quantity']
+ *
+ * splitPath('items[0].quantity')
+ * // ['items', '0', 'quantity']
+ *
+ * splitPath('a[0][1].b')
+ * // ['a', '0', '1', 'b']
  * ```
  *
  * @public
  */
 export function splitPath(path: string): string[] {
   if (!path) return [];
-  return path.split('.');
+  // Convert bracket notation [n] to .n, then split by dots
+  // Filter out empty segments from leading/trailing/consecutive dots
+  return path
+    .replace(/\[(\d+)\]/g, '.$1')
+    .split('.')
+    .filter(Boolean);
 }
 
 /**

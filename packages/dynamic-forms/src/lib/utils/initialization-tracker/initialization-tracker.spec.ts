@@ -3,6 +3,7 @@ import { EventBus } from '../../events/event.bus';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
 import { createInitializationTracker, createDetailedInitializationTracker } from './initialization-tracker';
 import { firstValueFrom } from 'rxjs';
+import { take, toArray } from 'rxjs/operators';
 
 describe('initialization-tracker', () => {
   describe('createInitializationTracker', () => {
@@ -99,21 +100,13 @@ describe('initialization-tracker', () => {
       const eventBus = new EventBus();
       const tracker$ = createDetailedInitializationTracker(eventBus, 3);
 
-      const emissions: any[] = [];
-      const promise = new Promise<void>((resolve) => {
-        tracker$.subscribe((status) => {
-          emissions.push(status);
-          if (emissions.length === 3) {
-            resolve();
-          }
-        });
-      });
+      const emissionsPromise = firstValueFrom(tracker$.pipe(take(3), toArray()));
 
       eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', 'form1');
       eventBus.dispatch(ComponentInitializedEvent, 'page', 'page1');
       eventBus.dispatch(ComponentInitializedEvent, 'row', 'row1');
 
-      await promise;
+      const emissions = await emissionsPromise;
       expect(emissions).toEqual([
         { currentCount: 1, expectedCount: 3, isComplete: false },
         { currentCount: 2, expectedCount: 3, isComplete: false },
@@ -125,20 +118,12 @@ describe('initialization-tracker', () => {
       const eventBus = new EventBus();
       const tracker$ = createDetailedInitializationTracker(eventBus, 2);
 
-      const emissions: any[] = [];
-      const promise = new Promise<void>((resolve) => {
-        tracker$.subscribe((status) => {
-          emissions.push(status);
-          if (emissions.length === 2) {
-            resolve();
-          }
-        });
-      });
+      const emissionsPromise = firstValueFrom(tracker$.pipe(take(2), toArray()));
 
       eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', 'form1');
       eventBus.dispatch(ComponentInitializedEvent, 'page', 'page1');
 
-      await promise;
+      const emissions = await emissionsPromise;
       expect(emissions[0].isComplete).toBe(false);
       expect(emissions[1].isComplete).toBe(true);
     });
@@ -162,21 +147,13 @@ describe('initialization-tracker', () => {
       const eventBus = new EventBus();
       const tracker$ = createDetailedInitializationTracker(eventBus, 2);
 
-      const emissions: any[] = [];
-      const promise = new Promise<void>((resolve) => {
-        tracker$.subscribe((status) => {
-          emissions.push(status);
-          if (emissions.length === 3) {
-            resolve();
-          }
-        });
-      });
+      const emissionsPromise = firstValueFrom(tracker$.pipe(take(3), toArray()));
 
       eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', 'form1');
       eventBus.dispatch(ComponentInitializedEvent, 'page', 'page1');
       eventBus.dispatch(ComponentInitializedEvent, 'row', 'row1');
 
-      await promise;
+      const emissions = await emissionsPromise;
       expect(emissions[2]).toEqual({
         currentCount: 3,
         expectedCount: 2,
@@ -188,30 +165,25 @@ describe('initialization-tracker', () => {
       const eventBus = new EventBus();
       const tracker$ = createDetailedInitializationTracker(eventBus, 5);
 
-      let emissionCount = 0;
-      const promise = new Promise<void>((resolve) => {
-        tracker$.subscribe((status) => {
-          emissionCount++;
-          expect(status.currentCount).toBe(emissionCount);
-          expect(status.expectedCount).toBe(5);
-
-          if (emissionCount === 4) {
-            expect(status.isComplete).toBe(false);
-          }
-
-          if (emissionCount === 5) {
-            expect(status.isComplete).toBe(true);
-            resolve();
-          }
-        });
-      });
+      const emissionsPromise = firstValueFrom(tracker$.pipe(take(5), toArray()));
 
       // Dispatch 5 events
       for (let i = 1; i <= 5; i++) {
         eventBus.dispatch(ComponentInitializedEvent, 'component', `comp${i}`);
       }
 
-      await promise;
+      const emissions = await emissionsPromise;
+
+      // Verify each emission has correct count and expectedCount
+      emissions.forEach((status, index) => {
+        expect(status.currentCount).toBe(index + 1);
+        expect(status.expectedCount).toBe(5);
+      });
+
+      // Fourth emission should not be complete
+      expect(emissions[3].isComplete).toBe(false);
+      // Fifth emission should be complete
+      expect(emissions[4].isComplete).toBe(true);
     });
 
     it('should handle zero expected count', async () => {
@@ -252,22 +224,13 @@ describe('initialization-tracker', () => {
       const eventBus = new EventBus();
       const tracker$ = createDetailedInitializationTracker(eventBus, 3);
 
-      const statuses: any[] = [];
-      const promise = new Promise<void>((resolve) => {
-        tracker$.subscribe((status) => {
-          statuses.push({ ...status });
-
-          if (status.isComplete) {
-            resolve();
-          }
-        });
-      });
+      const statusesPromise = firstValueFrom(tracker$.pipe(take(3), toArray()));
 
       eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', 'mainForm');
       eventBus.dispatch(ComponentInitializedEvent, 'page', 'personalInfo');
       eventBus.dispatch(ComponentInitializedEvent, 'page', 'contactInfo');
 
-      await promise;
+      const statuses = await statusesPromise;
       expect(statuses.length).toBe(3);
       expect(statuses[2].currentCount).toBe(3);
     });

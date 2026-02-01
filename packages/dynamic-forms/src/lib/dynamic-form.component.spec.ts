@@ -9,7 +9,7 @@ import { checkboxFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/i
 import { BUILT_IN_FIELDS } from './providers/built-in-fields';
 import { BaseCheckedField, BaseValueField } from './definitions';
 import { DebugElement } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 import { FormResetEvent } from './events/constants/form-reset.event';
 import { FormClearEvent } from './events/constants/form-clear.event';
 
@@ -880,12 +880,15 @@ describe('DynamicFormComponent', () => {
       expect(component.validityChange).toBeDefined();
       expect(typeof component.validityChange.subscribe).toBe('function');
 
-      let emittedValue: boolean | undefined;
-      component.validityChange.subscribe((valid) => (emittedValue = valid));
+      // Create a promise that resolves when validityChange output emits
+      const validityPromise = new Promise<boolean>((resolve) => {
+        component.validityChange.subscribe((valid) => resolve(valid));
+      });
 
       await waitForDynamicComponents(fixture);
 
       // Should emit false for invalid form (empty required field)
+      const emittedValue = await validityPromise;
       expect(emittedValue).toBe(false);
     });
 
@@ -1524,14 +1527,18 @@ describe('DynamicFormComponent', () => {
 
       const { component, fixture } = createComponent(config);
 
-      let initializationEmitted = false;
-      component.initialized.subscribe(() => {
-        initializationEmitted = true;
-      });
+      // Create a promise that resolves when initialized output emits (with timeout)
+      const initPromise = Promise.race([
+        new Promise<void>((resolve) => {
+          component.initialized.subscribe(() => resolve());
+        }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout: initialized event not emitted within 5s')), 5000)),
+      ]);
 
       await waitForDynamicComponents(fixture);
 
-      expect(initializationEmitted).toBe(true);
+      // Should complete without timeout, proving initialization was emitted
+      await initPromise;
     });
 
     it('should emit initialized after async components load', async () => {
@@ -1554,7 +1561,7 @@ describe('DynamicFormComponent', () => {
 
       const { component, fixture } = createComponent(config);
 
-      const initializationPromise = firstValueFrom(component.initialized$);
+      const initializationPromise = firstValueFrom(component.initialized$.pipe(timeout(5000)));
 
       await waitForDynamicComponents(fixture);
 
@@ -2048,17 +2055,20 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
 
-      let resetEmitted = false;
-      component.reset.subscribe(() => {
-        resetEmitted = true;
-      });
+      // Create a promise that resolves when reset output emits (with timeout)
+      const resetPromise = Promise.race([
+        new Promise<void>((resolve) => {
+          component.reset.subscribe(() => resolve());
+        }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout: reset event not emitted within 5s')), 5000)),
+      ]);
 
       // Dispatch FormResetEvent
       (component as any).eventBus.dispatch(FormResetEvent);
-      await delay();
       fixture.detectChanges();
 
-      expect(resetEmitted).toBe(true);
+      // Should complete proving reset was emitted
+      await resetPromise;
     });
 
     it('should emit cleared output when FormClearEvent is dispatched', async () => {
@@ -2076,17 +2086,20 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
 
-      let clearedEmitted = false;
-      component.cleared.subscribe(() => {
-        clearedEmitted = true;
-      });
+      // Create a promise that resolves when cleared output emits (with timeout)
+      const clearedPromise = Promise.race([
+        new Promise<void>((resolve) => {
+          component.cleared.subscribe(() => resolve());
+        }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout: cleared event not emitted within 5s')), 5000)),
+      ]);
 
       // Dispatch FormClearEvent
       (component as any).eventBus.dispatch(FormClearEvent);
-      await delay();
       fixture.detectChanges();
 
-      expect(clearedEmitted).toBe(true);
+      // Should complete proving cleared was emitted
+      await clearedPromise;
     });
 
     it('should handle reset on form with no default values', async () => {

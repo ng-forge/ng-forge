@@ -81,7 +81,7 @@ export default class IonicSelectFieldComponent implements IonicSelectComponent {
   readonly defaultValidationMessages = input<ValidationMessages>();
 
   constructor() {
-    setupMetaTracking(this.elementRef, this.meta);
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'ion-select' });
   }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);

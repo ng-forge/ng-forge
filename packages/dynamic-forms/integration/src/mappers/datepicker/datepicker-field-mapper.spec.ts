@@ -38,7 +38,7 @@ describe('datepickerFieldMapper', () => {
   }
 
   describe('datepicker-specific properties', () => {
-    it('should include minDate when defined as string', () => {
+    it('should convert minDate string to Date object', () => {
       const fieldDef: DatepickerField<unknown> = {
         key: 'birthDate',
         type: 'datepicker',
@@ -48,7 +48,8 @@ describe('datepickerFieldMapper', () => {
       const injector = createTestInjector({ fieldKey: 'birthDate' });
       const inputs = testMapper(fieldDef, injector);
 
-      expect(inputs['minDate']).toBe('1900-01-01');
+      expect(inputs['minDate']).toBeInstanceOf(Date);
+      expect((inputs['minDate'] as Date).toISOString()).toContain('1900-01-01');
     });
 
     it('should include minDate when defined as Date object', () => {
@@ -65,7 +66,7 @@ describe('datepickerFieldMapper', () => {
       expect(inputs['minDate']).toEqual(minDate);
     });
 
-    it('should include maxDate when defined as string', () => {
+    it('should convert maxDate string to Date object', () => {
       const fieldDef: DatepickerField<unknown> = {
         key: 'endDate',
         type: 'datepicker',
@@ -75,7 +76,8 @@ describe('datepickerFieldMapper', () => {
       const injector = createTestInjector({ fieldKey: 'endDate' });
       const inputs = testMapper(fieldDef, injector);
 
-      expect(inputs['maxDate']).toBe('2025-12-31');
+      expect(inputs['maxDate']).toBeInstanceOf(Date);
+      expect((inputs['maxDate'] as Date).toISOString()).toContain('2025-12-31');
     });
 
     it('should include maxDate when defined as Date object', () => {
@@ -186,7 +188,7 @@ describe('datepickerFieldMapper', () => {
       expect(inputs['startAt']).toBeNull();
     });
 
-    it('should handle ISO date strings', () => {
+    it('should convert ISO date strings to Date objects', () => {
       const fieldDef: DatepickerField<unknown> = {
         key: 'dateField',
         type: 'datepicker',
@@ -197,8 +199,36 @@ describe('datepickerFieldMapper', () => {
       const injector = createTestInjector({ fieldKey: 'dateField' });
       const inputs = testMapper(fieldDef, injector);
 
-      expect(inputs['minDate']).toBe('2023-01-15T00:00:00.000Z');
-      expect(inputs['maxDate']).toBe('2023-12-15T23:59:59.999Z');
+      expect(inputs['minDate']).toBeInstanceOf(Date);
+      expect(inputs['maxDate']).toBeInstanceOf(Date);
+      expect((inputs['minDate'] as Date).toISOString()).toBe('2023-01-15T00:00:00.000Z');
+      expect((inputs['maxDate'] as Date).toISOString()).toBe('2023-12-15T23:59:59.999Z');
+    });
+
+    it('should return null for invalid date strings', () => {
+      const fieldDef: DatepickerField<unknown> = {
+        key: 'dateField',
+        type: 'datepicker',
+        minDate: 'invalid-date-string',
+      };
+
+      const injector = createTestInjector({ fieldKey: 'dateField' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['minDate']).toBeNull();
+    });
+
+    it('should return null for empty string dates', () => {
+      const fieldDef: DatepickerField<unknown> = {
+        key: 'dateField',
+        type: 'datepicker',
+        minDate: '',
+      };
+
+      const injector = createTestInjector({ fieldKey: 'dateField' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['minDate']).toBeNull();
     });
   });
 
@@ -360,7 +390,7 @@ describe('datepickerFieldMapper', () => {
       expect(inputs).not.toHaveProperty('type');
     });
 
-    it('should correctly map a datepicker with string dates', () => {
+    it('should correctly map a datepicker with string dates (converted to Date objects)', () => {
       const datepickerField: DatepickerField<unknown> = {
         key: 'deliveryDate',
         type: 'datepicker',
@@ -374,8 +404,10 @@ describe('datepickerFieldMapper', () => {
 
       expect(inputs['key']).toBe('deliveryDate');
       expect(inputs['label']).toBe('Delivery Date');
-      expect(inputs['minDate']).toBe('2024-01-01');
-      expect(inputs['maxDate']).toBe('2024-12-31');
+      expect(inputs['minDate']).toBeInstanceOf(Date);
+      expect(inputs['maxDate']).toBeInstanceOf(Date);
+      expect((inputs['minDate'] as Date).toISOString()).toContain('2024-01-01');
+      expect((inputs['maxDate'] as Date).toISOString()).toContain('2024-12-31');
     });
 
     it('should map datepicker with minimal definition', () => {
