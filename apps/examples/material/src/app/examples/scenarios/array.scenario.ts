@@ -1,4 +1,4 @@
-import { AddArrayItemEvent, FormConfig } from '@ng-forge/dynamic-forms';
+import { AppendArrayItemEvent, FormConfig } from '@ng-forge/dynamic-forms';
 import { ExampleScenario } from '../shared/types';
 
 // Array item templates
@@ -29,9 +29,9 @@ const tagTemplate = {
   ],
 } as const;
 
-export class AddTagsEvent extends AddArrayItemEvent {
+export class AddTagsEvent extends AppendArrayItemEvent {
   constructor() {
-    super('tags', tagTemplate);
+    super('tags', [tagTemplate]);
   }
 }
 
@@ -92,9 +92,9 @@ const contactTemplate = {
   ],
 } as const;
 
-export class AddContactEvent extends AddArrayItemEvent {
+export class AddContactEvent extends AppendArrayItemEvent {
   constructor() {
-    super('contacts', contactTemplate);
+    super('contacts', [contactTemplate]);
   }
 }
 

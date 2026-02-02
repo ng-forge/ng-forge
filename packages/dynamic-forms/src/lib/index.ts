@@ -124,15 +124,23 @@ export { isArrayField, isContainerField, isDisplayOnlyField, isGroupField, isLea
 
 // Events
 export {
-  AddArrayItemEvent,
+  AppendArrayItemEvent,
   FormClearEvent,
   FormResetEvent,
+  InsertArrayItemEvent,
   NextPageEvent,
   PageChangeEvent,
+  PopArrayItemEvent,
+  PrependArrayItemEvent,
   PreviousPageEvent,
-  RemoveArrayItemEvent,
+  RemoveAtIndexEvent,
+  ShiftArrayItemEvent,
   SubmitEvent,
 } from './events';
+
+// Array event builder (recommended public API)
+export { arrayEvent } from './events';
+export type { ArrayItemTemplate } from './events';
 
 export type { FormEvent, FormEventConstructor, TokenContext, ArrayItemContext } from './events';
 
