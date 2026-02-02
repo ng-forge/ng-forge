@@ -4,7 +4,9 @@ import { BsField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/bs-button.mapper';
 import {
   addArrayItemButtonFieldMapper,
+  insertArrayItemButtonFieldMapper,
   nextButtonFieldMapper,
+  prependArrayItemButtonFieldMapper,
   previousButtonFieldMapper,
   removeArrayItemButtonFieldMapper,
   submitButtonFieldMapper,
@@ -55,6 +57,18 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
     name: BsField.AddArrayItem,
     loadComponent: () => import('../fields/button/bs-button.component'),
     mapper: addArrayItemButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: BsField.PrependArrayItem,
+    loadComponent: () => import('../fields/button/bs-button.component'),
+    mapper: prependArrayItemButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: BsField.InsertArrayItem,
+    loadComponent: () => import('../fields/button/bs-button.component'),
+    mapper: insertArrayItemButtonFieldMapper,
     valueHandling: 'exclude',
   },
   {

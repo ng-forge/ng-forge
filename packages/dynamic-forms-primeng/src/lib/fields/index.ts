@@ -29,6 +29,8 @@ export type {
   PrimeNextButtonField,
   PrimePreviousButtonField,
   AddArrayItemButtonField,
+  PrependArrayItemButtonField,
+  InsertArrayItemButtonField,
   RemoveArrayItemButtonField,
 } from './button';
 

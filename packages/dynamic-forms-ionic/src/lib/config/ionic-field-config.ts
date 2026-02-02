@@ -4,7 +4,9 @@ import { IonicField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/ionic-button.mapper';
 import {
   addArrayItemButtonFieldMapper,
+  insertArrayItemButtonFieldMapper,
   nextButtonFieldMapper,
+  prependArrayItemButtonFieldMapper,
   previousButtonFieldMapper,
   removeArrayItemButtonFieldMapper,
   submitButtonFieldMapper,
@@ -59,6 +61,18 @@ export const IONIC_FIELD_TYPES: FieldTypeDefinition[] = [
     name: IonicField.AddArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: addArrayItemButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: IonicField.PrependArrayItem,
+    loadComponent: () => import('../fields/button/ionic-button.component'),
+    mapper: prependArrayItemButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: IonicField.InsertArrayItem,
+    loadComponent: () => import('../fields/button/ionic-button.component'),
+    mapper: insertArrayItemButtonFieldMapper,
     valueHandling: 'exclude',
   },
   {

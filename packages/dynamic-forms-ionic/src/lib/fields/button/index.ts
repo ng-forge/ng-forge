@@ -6,6 +6,8 @@ export type {
   IonicNextButtonField,
   IonicPreviousButtonField,
   AddArrayItemButtonField,
+  PrependArrayItemButtonField,
+  InsertArrayItemButtonField,
   RemoveArrayItemButtonField,
 } from './ionic-button.type';
 

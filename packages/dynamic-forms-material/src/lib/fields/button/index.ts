@@ -6,6 +6,8 @@ export type {
   MatNextButtonField,
   MatPreviousButtonField,
   AddArrayItemButtonField,
+  PrependArrayItemButtonField,
+  InsertArrayItemButtonField,
   RemoveArrayItemButtonField,
 } from './mat-button.type';
 

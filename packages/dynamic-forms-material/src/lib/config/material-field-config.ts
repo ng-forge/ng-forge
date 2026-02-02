@@ -4,7 +4,9 @@ import { MatField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/mat-button.mapper';
 import {
   addArrayItemButtonFieldMapper,
+  insertArrayItemButtonFieldMapper,
   nextButtonFieldMapper,
+  prependArrayItemButtonFieldMapper,
   previousButtonFieldMapper,
   removeArrayItemButtonFieldMapper,
   submitButtonFieldMapper,
@@ -59,6 +61,18 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     name: MatField.AddArrayItem,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: addArrayItemButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: MatField.PrependArrayItem,
+    loadComponent: () => import('../fields/button/mat-button.component'),
+    mapper: prependArrayItemButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: MatField.InsertArrayItem,
+    loadComponent: () => import('../fields/button/mat-button.component'),
+    mapper: insertArrayItemButtonFieldMapper,
     valueHandling: 'exclude',
   },
   {

@@ -6,6 +6,8 @@ export type {
   BsNextButtonField,
   BsPreviousButtonField,
   AddArrayItemButtonField,
+  PrependArrayItemButtonField,
+  InsertArrayItemButtonField,
   RemoveArrayItemButtonField,
 } from './bs-button.type';
 

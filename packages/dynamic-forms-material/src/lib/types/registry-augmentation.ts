@@ -7,6 +7,7 @@
 import type { FormEvent } from '@ng-forge/dynamic-forms';
 import type {
   AddArrayItemButtonField,
+  InsertArrayItemButtonField,
   MatButtonField,
   MatCheckboxField,
   MatDatepickerField,
@@ -15,6 +16,7 @@ import type {
   MatNextButtonField,
   MatPreviousButtonField,
   MatRadioField,
+  PrependArrayItemButtonField,
   RemoveArrayItemButtonField,
   MatSelectField,
   MatSliderField,
@@ -33,6 +35,8 @@ declare module '@ng-forge/dynamic-forms' {
     next: MatNextButtonField;
     previous: MatPreviousButtonField;
     addArrayItem: AddArrayItemButtonField;
+    prependArrayItem: PrependArrayItemButtonField;
+    insertArrayItem: InsertArrayItemButtonField;
     removeArrayItem: RemoveArrayItemButtonField;
     textarea: MatTextareaField;
     radio: MatRadioField<unknown>;

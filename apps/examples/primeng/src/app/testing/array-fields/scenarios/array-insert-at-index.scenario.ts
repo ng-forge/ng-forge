@@ -1,4 +1,4 @@
-import { FormConfig, InsertArrayItemEvent } from '@ng-forge/dynamic-forms';
+import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 const config = {
@@ -16,20 +16,22 @@ const config = {
     },
     {
       key: 'insertAtOneButton',
-      type: 'button',
+      type: 'insertArrayItem',
       label: 'Insert at Index 1',
-      event: InsertArrayItemEvent,
-      eventArgs: ['items', 1],
+      arrayKey: 'items',
+      index: 1,
+      template: [{ key: 'value', type: 'input', label: 'Value' }],
       props: {
         severity: 'primary',
       },
     },
     {
       key: 'insertAtZeroButton',
-      type: 'button',
+      type: 'insertArrayItem',
       label: 'Insert at Index 0',
-      event: InsertArrayItemEvent,
-      eventArgs: ['items', 0],
+      arrayKey: 'items',
+      index: 0,
+      template: [{ key: 'value', type: 'input', label: 'Value' }],
     },
   ],
 } as const satisfies FormConfig;
@@ -37,7 +39,7 @@ const config = {
 export const arrayInsertAtIndexScenario: TestScenario = {
   testId: 'array-insert-at-index',
   title: 'Insert at Specific Index',
-  description: 'Insert new items at specific positions using InsertArrayItemEvent',
+  description: 'Insert new items at specific positions using insertArrayItem button',
   config,
   initialValue: {
     items: [{ value: 'First' }, { value: 'Third' }],

@@ -4,7 +4,9 @@ import { PrimeField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/prime-button.mapper';
 import {
   addArrayItemButtonFieldMapper,
+  insertArrayItemButtonFieldMapper,
   nextButtonFieldMapper,
+  prependArrayItemButtonFieldMapper,
   previousButtonFieldMapper,
   removeArrayItemButtonFieldMapper,
   submitButtonFieldMapper,
@@ -59,6 +61,18 @@ export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
     name: PrimeField.AddArrayItem,
     loadComponent: () => import('../fields/button/prime-button.component'),
     mapper: addArrayItemButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: PrimeField.PrependArrayItem,
+    loadComponent: () => import('../fields/button/prime-button.component'),
+    mapper: prependArrayItemButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: PrimeField.InsertArrayItem,
+    loadComponent: () => import('../fields/button/prime-button.component'),
+    mapper: insertArrayItemButtonFieldMapper,
     valueHandling: 'exclude',
   },
   {

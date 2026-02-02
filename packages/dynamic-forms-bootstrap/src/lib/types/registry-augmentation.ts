@@ -20,6 +20,8 @@ import type {
   BsSubmitButtonField,
   BsTextareaField,
   BsToggleField,
+  InsertArrayItemButtonField,
+  PrependArrayItemButtonField,
   RemoveArrayItemButtonField,
 } from '../fields';
 
@@ -33,6 +35,8 @@ declare module '@ng-forge/dynamic-forms' {
     next: BsNextButtonField;
     previous: BsPreviousButtonField;
     addArrayItem: AddArrayItemButtonField;
+    prependArrayItem: PrependArrayItemButtonField;
+    insertArrayItem: InsertArrayItemButtonField;
     removeArrayItem: RemoveArrayItemButtonField;
     textarea: BsTextareaField;
     radio: BsRadioField<unknown>;

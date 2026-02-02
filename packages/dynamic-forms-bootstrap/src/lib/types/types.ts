@@ -11,6 +11,8 @@ export const BsField = {
   Next: 'next',
   Previous: 'previous',
   AddArrayItem: 'addArrayItem',
+  PrependArrayItem: 'prependArrayItem',
+  InsertArrayItem: 'insertArrayItem',
   RemoveArrayItem: 'removeArrayItem',
   Textarea: 'textarea',
   Radio: 'radio',

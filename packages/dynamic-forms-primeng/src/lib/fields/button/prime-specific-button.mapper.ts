@@ -9,15 +9,22 @@ import {
   FieldDef,
   FieldWithValidation,
   FORM_OPTIONS,
+  InsertArrayItemEvent,
   NextPageEvent,
   PopArrayItemEvent,
+  PrependArrayItemEvent,
   PreviousPageEvent,
   RemoveAtIndexEvent,
   resolveNextButtonDisabled,
   resolveSubmitButtonDisabled,
   RootFormRegistryService,
 } from '@ng-forge/dynamic-forms';
-import { AddArrayItemButtonField, RemoveArrayItemButtonField } from './prime-button.type';
+import {
+  AddArrayItemButtonField,
+  InsertArrayItemButtonField,
+  PrependArrayItemButtonField,
+  RemoveArrayItemButtonField,
+} from './prime-button.type';
 
 /**
  * Mapper for submit button - configures native form submission via type="submit"
@@ -153,6 +160,8 @@ export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unkn
  * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array
  * 2. Outside array: Uses `arrayKey` property from field definition
  *
+ * Template is REQUIRED - defines the field structure for new items.
+ *
  * @param fieldDef The add array item button field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
@@ -172,13 +181,17 @@ export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField)
     );
   }
 
-  // Set default eventArgs for AppendArrayItemEvent (arrayKey)
+  // Template defines the field structure for new items
+  const template = fieldDef.template;
+
+  // Set default eventArgs for AppendArrayItemEvent (arrayKey and template)
   // User can override by providing eventArgs in field definition
-  const defaultEventArgs = ['$arrayKey'];
+  const defaultEventArgs = ['$arrayKey', '$template'];
   const eventArgs = 'eventArgs' in fieldDef && fieldDef.eventArgs !== undefined ? fieldDef.eventArgs : defaultEventArgs;
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+
     // Read signal value if index is a signal (supports differential updates)
     const getIndex = () => {
       if (!arrayContext) return -1;
@@ -194,6 +207,150 @@ export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField)
         index: getIndex(),
         arrayKey: targetArrayKey ?? '',
         formValue: arrayContext?.formValue ?? {},
+        template,
+      },
+    };
+
+    // Add disabled binding only if explicitly set by user
+    if (fieldDef.disabled !== undefined) {
+      inputs['disabled'] = fieldDef.disabled;
+    }
+
+    if (fieldDef.hidden !== undefined) {
+      inputs['hidden'] = fieldDef.hidden;
+    }
+
+    return inputs;
+  });
+}
+
+/**
+ * Mapper for prepend array item button - preconfigures PrependArrayItemEvent with array context.
+ *
+ * Supports two modes:
+ * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array
+ * 2. Outside array: Uses `arrayKey` property from field definition
+ *
+ * Template is REQUIRED - defines the field structure for new items.
+ *
+ * @param fieldDef The prepend array item button field definition
+ * @returns Signal containing Record of input names to values for ngComponentOutlet
+ */
+export function prependArrayItemButtonFieldMapper(fieldDef: PrependArrayItemButtonField): Signal<Record<string, unknown>> {
+  const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+  const logger = inject(DynamicFormLogger);
+  const defaultProps = inject(DEFAULT_PROPS);
+
+  // Determine the target array key
+  // Priority: explicit arrayKey from fieldDef > arrayKey from context
+  const targetArrayKey = fieldDef.arrayKey ?? arrayContext?.arrayKey;
+
+  if (!targetArrayKey) {
+    logger.warn(
+      `prependArrayItem button "${fieldDef.key}" has no array context. ` +
+        'Either place it inside an array field, or provide an explicit arrayKey property.',
+    );
+  }
+
+  // Template defines the field structure for new items
+  const template = fieldDef.template;
+
+  // Set default eventArgs for PrependArrayItemEvent (arrayKey and template)
+  const defaultEventArgs = ['$arrayKey', '$template'];
+  const eventArgs = 'eventArgs' in fieldDef && fieldDef.eventArgs !== undefined ? fieldDef.eventArgs : defaultEventArgs;
+
+  return computed(() => {
+    const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+
+    // Read signal value if index is a signal (supports differential updates)
+    const getIndex = () => {
+      if (!arrayContext) return -1;
+      return isSignal(arrayContext.index) ? arrayContext.index() : arrayContext.index;
+    };
+
+    const inputs: Record<string, unknown> = {
+      ...baseInputs,
+      event: PrependArrayItemEvent,
+      eventArgs,
+      eventContext: {
+        key: fieldDef.key,
+        index: getIndex(),
+        arrayKey: targetArrayKey ?? '',
+        formValue: arrayContext?.formValue ?? {},
+        template,
+      },
+    };
+
+    // Add disabled binding only if explicitly set by user
+    if (fieldDef.disabled !== undefined) {
+      inputs['disabled'] = fieldDef.disabled;
+    }
+
+    if (fieldDef.hidden !== undefined) {
+      inputs['hidden'] = fieldDef.hidden;
+    }
+
+    return inputs;
+  });
+}
+
+/**
+ * Mapper for insert array item button - preconfigures InsertArrayItemEvent with array context.
+ *
+ * Supports two modes:
+ * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array
+ * 2. Outside array: Uses `arrayKey` property from field definition
+ *
+ * Template is REQUIRED - defines the field structure for new items.
+ * Index is REQUIRED - specifies where to insert the new item.
+ *
+ * @param fieldDef The insert array item button field definition
+ * @returns Signal containing Record of input names to values for ngComponentOutlet
+ */
+export function insertArrayItemButtonFieldMapper(fieldDef: InsertArrayItemButtonField): Signal<Record<string, unknown>> {
+  const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+  const logger = inject(DynamicFormLogger);
+  const defaultProps = inject(DEFAULT_PROPS);
+
+  // Determine the target array key
+  // Priority: explicit arrayKey from fieldDef > arrayKey from context
+  const targetArrayKey = fieldDef.arrayKey ?? arrayContext?.arrayKey;
+
+  if (!targetArrayKey) {
+    logger.warn(
+      `insertArrayItem button "${fieldDef.key}" has no array context. ` +
+        'Either place it inside an array field, or provide an explicit arrayKey property.',
+    );
+  }
+
+  // Template defines the field structure for new items
+  const template = fieldDef.template;
+  // Index where to insert the new item
+  const insertIndex = fieldDef.index;
+
+  // Set default eventArgs for InsertArrayItemEvent (arrayKey, index, and template)
+  const defaultEventArgs = ['$arrayKey', insertIndex, '$template'];
+  const eventArgs = 'eventArgs' in fieldDef && fieldDef.eventArgs !== undefined ? fieldDef.eventArgs : defaultEventArgs;
+
+  return computed(() => {
+    const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+
+    // Read signal value if index is a signal (supports differential updates)
+    const getIndex = () => {
+      if (!arrayContext) return -1;
+      return isSignal(arrayContext.index) ? arrayContext.index() : arrayContext.index;
+    };
+
+    const inputs: Record<string, unknown> = {
+      ...baseInputs,
+      event: InsertArrayItemEvent,
+      eventArgs,
+      eventContext: {
+        key: fieldDef.key,
+        index: getIndex(),
+        arrayKey: targetArrayKey ?? '',
+        formValue: arrayContext?.formValue ?? {},
+        template,
       },
     };
 
