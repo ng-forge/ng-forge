@@ -25,6 +25,19 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'users',
       label: 'Add User',
+      template: [
+        {
+          key: 'name',
+          type: 'input',
+          label: 'Name',
+        },
+        {
+          key: 'email',
+          type: 'input',
+          label: 'Email',
+          props: { type: 'email' },
+        },
+      ],
       props: { color: 'primary' },
     },
   ],

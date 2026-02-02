@@ -38,6 +38,31 @@ const config = {
       arrayKey: 'tasks',
       label: 'Add Task',
       props: { variant: 'primary' },
+      template: [
+        {
+          key: 'taskRow',
+          type: 'row',
+          fields: [
+            {
+              key: 'title',
+              type: 'input',
+              label: 'Task Title',
+              col: 8,
+            },
+            {
+              key: 'removeThis',
+              type: 'button',
+              label: 'Remove',
+              col: 4,
+              event: RemoveAtIndexEvent,
+              eventArgs: ['tasks', '$index'],
+              props: {
+                variant: 'danger',
+              },
+            },
+          ],
+        },
+      ],
     },
   ],
 } as const satisfies FormConfig;

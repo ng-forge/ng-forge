@@ -13,21 +13,30 @@ export function generateArrayItemIdAndSuffix(): { id: string; suffix: string } {
 }
 
 /**
- * Resolved array item ready for declarative rendering with ngComponentOutlet.
- * Each item has a stable unique ID and a linkedSignal-based index that
- * automatically updates when items are added/removed.
+ * A single field within a resolved array item.
  */
-export interface ResolvedArrayItem {
-  /** Unique identifier for this item (stable across position changes). */
-  id: string;
-  /** 8-char suffix derived from UUID, used for key suffixing to avoid DOM ID collisions. */
-  suffix: string;
+export interface ResolvedArrayItemField {
   /** The loaded component type. */
   component: Type<unknown>;
   /** Injector providing ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT. */
   injector: Injector;
   /** Inputs signal for ngComponentOutlet - evaluated in template for reactivity. */
   inputs: Signal<Record<string, unknown>>;
+}
+
+/**
+ * Resolved array item ready for declarative rendering with ngComponentOutlet.
+ * Each item has a stable unique ID and a linkedSignal-based index that
+ * automatically updates when items are added/removed.
+ * Supports multiple fields per array item (e.g., name + email without a wrapper).
+ */
+export interface ResolvedArrayItem {
+  /** Unique identifier for this item (stable across position changes). */
+  id: string;
+  /** 8-char suffix derived from UUID, used for key suffixing to avoid DOM ID collisions. */
+  suffix: string;
+  /** All fields to render for this array item. */
+  fields: ResolvedArrayItemField[];
 }
 
 /**

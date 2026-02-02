@@ -20,6 +20,14 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'emails',
       label: 'Add Email',
+      template: [
+        {
+          key: 'email',
+          type: 'input',
+          label: 'Email',
+          props: { type: 'email' },
+        },
+      ],
       className: 'array-add-button',
       props: { color: 'primary' },
     },

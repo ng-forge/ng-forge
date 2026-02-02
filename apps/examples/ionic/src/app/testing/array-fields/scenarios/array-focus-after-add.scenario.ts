@@ -29,6 +29,23 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'tasks',
       label: 'Add Task',
+      template: [
+        {
+          key: 'title',
+          type: 'input',
+          label: 'Task Title',
+        },
+        {
+          key: 'priority',
+          type: 'select',
+          label: 'Priority',
+          options: [
+            { value: 'low', label: 'Low' },
+            { value: 'medium', label: 'Medium' },
+            { value: 'high', label: 'High' },
+          ],
+        },
+      ],
       props: { color: 'primary' },
     },
   ],

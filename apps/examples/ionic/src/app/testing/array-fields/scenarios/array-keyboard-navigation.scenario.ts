@@ -29,6 +29,18 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'contacts',
       label: 'Add Contact',
+      template: [
+        {
+          key: 'name',
+          type: 'input',
+          label: 'Name',
+        },
+        {
+          key: 'email',
+          type: 'input',
+          label: 'Email',
+        },
+      ],
       props: { color: 'primary' },
     },
     {

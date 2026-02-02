@@ -32,6 +32,25 @@ const config = {
       arrayKey: 'notes',
       label: 'Add Note',
       className: 'array-add-button',
+      template: [
+        {
+          key: 'noteRow',
+          type: 'row',
+          fields: [
+            {
+              key: 'note',
+              type: 'input',
+              label: 'Note',
+            },
+            {
+              key: 'removeNoteButton',
+              type: 'removeArrayItem',
+              label: 'Remove',
+              className: 'array-remove-button',
+            },
+          ],
+        },
+      ],
     },
   ],
 } as const satisfies FormConfig;

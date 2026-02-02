@@ -58,6 +58,44 @@ const config = {
       arrayKey: 'lineItems',
       label: 'Add Line Item',
       props: { severity: 'primary' },
+      template: [
+        {
+          key: 'itemRow',
+          type: 'row',
+          fields: [
+            {
+              key: 'description',
+              type: 'input',
+              label: 'Description',
+              col: 4,
+            },
+            {
+              key: 'quantity',
+              type: 'input',
+              label: 'Quantity',
+              props: { type: 'number' },
+              col: 2,
+            },
+            {
+              key: 'unitPrice',
+              type: 'input',
+              label: 'Unit Price',
+              props: { type: 'number' },
+              col: 2,
+            },
+            {
+              key: 'lineTotal',
+              type: 'input',
+              label: 'Line Total',
+              readonly: true,
+              col: 4,
+              // Self-targeting derivation: lineTotal is derived from quantity * unitPrice
+              // formValue is scoped to the current array item
+              derivation: 'formValue.quantity * formValue.unitPrice',
+            },
+          ],
+        },
+      ],
     },
     {
       key: 'removeLineItem',

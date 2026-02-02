@@ -39,6 +39,32 @@ const config = {
       arrayKey: 'contacts',
       label: 'Add Contact',
       props: { variant: 'primary' },
+      template: [
+        {
+          key: 'contactRow',
+          type: 'row',
+          fields: [
+            {
+              key: 'contact',
+              type: 'group',
+              fields: [
+                {
+                  key: 'name',
+                  type: 'input',
+                  label: 'Contact Name',
+                  col: 6,
+                },
+                {
+                  key: 'phone',
+                  type: 'input',
+                  label: 'Phone Number',
+                  col: 6,
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
     {
       key: 'removeContact',

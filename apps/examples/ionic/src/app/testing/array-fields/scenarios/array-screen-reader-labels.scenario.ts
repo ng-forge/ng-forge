@@ -38,6 +38,32 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'contacts',
       label: 'Add Contact',
+      template: [
+        {
+          key: 'contactRow',
+          type: 'row',
+          fields: [
+            {
+              key: 'contact',
+              type: 'group',
+              fields: [
+                {
+                  key: 'name',
+                  type: 'input',
+                  label: 'Contact Name',
+                  col: 6,
+                },
+                {
+                  key: 'phone',
+                  type: 'input',
+                  label: 'Phone Number',
+                  col: 6,
+                },
+              ],
+            },
+          ],
+        },
+      ],
       props: { color: 'primary' },
     },
     {

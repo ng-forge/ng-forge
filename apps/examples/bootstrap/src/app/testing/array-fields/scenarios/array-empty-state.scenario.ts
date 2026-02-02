@@ -25,6 +25,18 @@ const config = {
       arrayKey: 'items',
       label: 'Add First Item',
       props: { variant: 'primary' },
+      template: [
+        {
+          key: 'name',
+          type: 'input',
+          label: 'Name',
+        },
+        {
+          key: 'description',
+          type: 'textarea',
+          label: 'Description',
+        },
+      ],
     },
     {
       key: 'removeItem',

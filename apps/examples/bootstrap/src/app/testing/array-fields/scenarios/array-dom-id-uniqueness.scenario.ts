@@ -26,6 +26,19 @@ const config = {
       arrayKey: 'users',
       label: 'Add User',
       props: { variant: 'primary' },
+      template: [
+        {
+          key: 'name',
+          type: 'input',
+          label: 'Name',
+        },
+        {
+          key: 'email',
+          type: 'input',
+          label: 'Email',
+          props: { type: 'email' },
+        },
+      ],
     },
   ],
 } as const satisfies FormConfig;

@@ -5,6 +5,9 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig } from '@ng-forge/dynamic-forms';
 import type { RequiredKeys } from '@ng-forge/utils';
 
+// Import registry augmentation to include Ionic field types in ArrayAllowedChildren
+import '../../types/registry-augmentation';
+
 import type {
   IonicButtonProps,
   IonicButtonField,
@@ -292,7 +295,8 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'col'
     | 'meta'
     // Explicitly defined
-    | 'arrayKey';
+    | 'arrayKey'
+    | 'template';
   type ActualKeys = keyof AddArrayItemButtonField;
 
   it('should have exactly the expected keys', () => {
@@ -310,6 +314,10 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
 
     it('label is required', () => {
       expectTypeOf<AddArrayItemButtonField['label']>().toEqualTypeOf<string>();
+    });
+
+    it('template is required', () => {
+      expectTypeOf<AddArrayItemButtonField['template']>().not.toEqualTypeOf<undefined>();
     });
   });
 
@@ -535,6 +543,7 @@ describe('AddArrayItemButtonField - Usage Tests', () => {
         color: 'success',
       },
       arrayKey: 'items',
+      template: [{ key: 'name', type: 'input' }],
     } as const satisfies AddArrayItemButtonField;
 
     expectTypeOf(field.type).toEqualTypeOf<'addArrayItem'>();
@@ -545,6 +554,7 @@ describe('AddArrayItemButtonField - Usage Tests', () => {
       type: 'addArrayItem',
       key: 'add',
       label: 'Add',
+      template: [{ key: 'item', type: 'input' }],
     } as const satisfies AddArrayItemButtonField;
 
     expectTypeOf(field.type).toEqualTypeOf<'addArrayItem'>();

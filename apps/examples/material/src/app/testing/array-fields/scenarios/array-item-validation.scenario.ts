@@ -44,6 +44,33 @@ const config = {
       arrayKey: 'members',
       label: 'Add Member',
       className: 'array-add-button',
+      template: [
+        {
+          key: 'memberRow',
+          type: 'row',
+          fields: [
+            {
+              key: 'member',
+              type: 'group',
+              fields: [
+                {
+                  key: 'name',
+                  type: 'input',
+                  label: 'Name',
+                  required: true,
+                },
+                {
+                  key: 'email',
+                  type: 'input',
+                  label: 'Email',
+                  required: true,
+                  email: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
   ],
 } as const satisfies FormConfig;

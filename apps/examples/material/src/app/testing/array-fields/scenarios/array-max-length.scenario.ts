@@ -21,6 +21,7 @@ const config = {
       arrayKey: 'tags',
       label: 'Add Tag',
       className: 'array-add-button',
+      template: [{ key: 'tag', type: 'input', label: 'Tag' }],
     },
   ],
 } as const satisfies FormConfig;

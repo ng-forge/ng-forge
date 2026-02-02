@@ -31,6 +31,25 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'notes',
       label: 'Add Note',
+      template: [
+        {
+          key: 'noteRow',
+          type: 'row',
+          fields: [
+            {
+              key: 'note',
+              type: 'input',
+              label: 'Note',
+            },
+            {
+              key: 'removeNoteButton',
+              type: 'removeArrayItem',
+              label: 'Remove',
+              className: 'array-remove-button',
+            },
+          ],
+        },
+      ],
       className: 'array-add-button',
     },
   ],

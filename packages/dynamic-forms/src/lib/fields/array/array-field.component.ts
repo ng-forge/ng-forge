@@ -25,13 +25,16 @@ import { ArrayFieldTree } from '../../core/field-tree-utils';
  * Supports add/remove operations via the arrayEvent() builder API.
  * Uses differential updates to optimize rendering - only recreates items when necessary.
  * Each item gets a scoped injector with ARRAY_CONTEXT for position-aware operations.
+ * Supports multiple sibling fields per array item (e.g., name + email without a wrapper).
  */
 @Component({
   selector: 'array-field',
   imports: [NgComponentOutlet],
   template: `
     @for (item of resolvedItems(); track item.id) {
-      <ng-container *ngComponentOutlet="item.component; injector: item.injector; inputs: item.inputs()" />
+      @for (field of item.fields; track $index) {
+        <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+      }
     }
   `,
   styleUrl: './array-field.component.scss',
@@ -74,9 +77,10 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
-  private readonly fieldTemplate = computed<FieldDef<unknown> | null>(() => {
+  /** All field templates for array items (supports multiple sibling fields). */
+  private readonly fieldTemplates = computed<FieldDef<unknown>[]>(() => {
     const arrayField = this.field();
-    return arrayField.fields && arrayField.fields.length > 0 ? arrayField.fields[0] : null;
+    return (arrayField.fields as FieldDef<unknown>[]) || [];
   });
 
   private readonly arrayFieldTrees = computed<readonly (FieldTree<unknown> | null)[]>(() => {
@@ -137,7 +141,14 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       .pipe(takeUntilDestroyed())
       .subscribe((action) => {
         if (action.action === 'add') {
-          this.addItem(this.resolveTemplate(action.template), action.index);
+          if (!action.template || action.template.length === 0) {
+            this.logger.error(
+              `Cannot add item to array '${this.key()}': template is required. ` +
+                'Provide a template in the event or addArrayItem button configuration.',
+            );
+            return;
+          }
+          void this.handleAddFromEvent(action.template, action.index);
         } else {
           this.removeItem(action.index);
         }
@@ -145,15 +156,82 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   }
 
   /**
-   * Resolves the template to use for a new array item.
-   * If a template array is provided, uses the first element.
-   * Otherwise, falls back to the array's default template.
+   * Handles add operations from events (append, prepend, insert).
+   * Creates resolved items FIRST, then updates form value.
+   * This ensures prepend/insert work correctly - differential update sees "none"
+   * because resolved items count already matches the new array length.
    */
-  private resolveTemplate(eventTemplate?: FieldDef<unknown>[]): FieldDef<unknown> | null {
-    if (eventTemplate && eventTemplate.length > 0) {
-      return eventTemplate[0];
+  private async handleAddFromEvent(templates: FieldDef<unknown>[], index?: number): Promise<void> {
+    if (templates.length === 0) {
+      this.logger.error(
+        `Cannot add item to array '${this.field().key}': no field templates provided. ` +
+          'Ensure the array field has a fields property or the event has a template.',
+      );
+      return;
     }
-    return this.fieldTemplate();
+
+    const arrayKey = this.field().key;
+    const parentForm = this.parentFieldSignalContext.form;
+    const currentValue = parentForm().value() as TModel;
+    const currentArray = getArrayValue(currentValue as Partial<TModel>, arrayKey);
+    const insertIndex = index !== undefined ? Math.min(index, currentArray.length) : currentArray.length;
+
+    // Compute default value by merging all template defaults
+    let value: unknown = {};
+    for (const template of templates) {
+      const rawValue = getFieldDefaultValue(template, this.rawFieldRegistry());
+      const valueHandling = getFieldValueHandling(template.type, this.rawFieldRegistry());
+      const isContainer = template.type === 'group' || template.type === 'row';
+
+      if (isContainer) {
+        value = { ...(value as Record<string, unknown>), ...(rawValue as Record<string, unknown>) };
+      } else if (valueHandling === 'include' && template.key) {
+        value = { ...(value as Record<string, unknown>), [template.key]: rawValue };
+      }
+    }
+
+    // Increment version and create resolved item BEFORE updating value
+    this.updateVersion.update((v) => v + 1);
+    const currentVersion = this.updateVersion();
+
+    // Resolve the new item
+    const resolvedItem = await firstValueFrom(
+      resolveArrayItem({
+        fieldTree: null,
+        index: insertIndex,
+        templates,
+        arrayField: this.field(),
+        itemOrderSignal: this.itemOrderSignal,
+        parentFieldSignalContext: this.parentFieldSignalContext,
+        parentInjector: this.parentInjector,
+        registry: this.rawFieldRegistry(),
+        destroyRef: this.destroyRef,
+        loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+        explicitDefaultValue: value,
+      }).pipe(
+        catchError((error) => {
+          this.logger.error(`Failed to resolve array item at index ${insertIndex}:`, error);
+          return of(undefined);
+        }),
+      ),
+    );
+
+    if (currentVersion !== this.updateVersion() || !resolvedItem) {
+      return;
+    }
+
+    // Insert resolved item at correct position
+    this.resolvedItemsSignal.update((current) => {
+      const newItems = [...current];
+      newItems.splice(insertIndex, 0, resolvedItem);
+      return newItems;
+    });
+
+    // Update form value - differential update sees "none" (lengths match)
+    const newArray = [...currentArray];
+    newArray.splice(insertIndex, 0, value);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    parentForm().value.set({ ...currentValue, [arrayKey]: newArray } as any);
   }
 
   private performDifferentialUpdate(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): void {
@@ -247,13 +325,13 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   }
 
   private createResolveItemObservable(fieldTree: FieldTree<unknown> | null, index: number): Observable<ResolvedArrayItem | undefined> {
-    const template = this.fieldTemplate();
-    if (!template) return of(undefined);
+    const templates = this.fieldTemplates();
+    if (templates.length === 0) return of(undefined);
 
     return resolveArrayItem({
       fieldTree,
       index,
-      template,
+      templates,
       arrayField: this.field(),
       itemOrderSignal: this.itemOrderSignal,
       parentFieldSignalContext: this.parentFieldSignalContext,
@@ -264,39 +342,6 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     });
   }
 
-  private addItem(fieldTemplate: FieldDef<unknown> | null, index?: number): void {
-    if (!fieldTemplate) {
-      this.logger.error(
-        `Cannot add item to array '${this.field().key}': no field template provided. ` +
-          'Ensure the array field has a fields property with at least one field definition.',
-      );
-      return;
-    }
-
-    const arrayKey = this.field().key;
-    const parentForm = this.parentFieldSignalContext.form;
-    const currentValue = parentForm().value() as TModel;
-    const currentArray = getArrayValue(currentValue as Partial<TModel>, arrayKey);
-    const insertIndex = index !== undefined ? Math.min(index, currentArray.length) : currentArray.length;
-
-    const rawValue = getFieldDefaultValue(fieldTemplate, this.rawFieldRegistry());
-    const valueHandling = getFieldValueHandling(fieldTemplate.type, this.rawFieldRegistry());
-    const templateType = fieldTemplate.type;
-
-    // Container fields (group, row) already have their own structure, so use rawValue as-is.
-    // For value fields with 'include' handling, wrap in an object using the field's key.
-    const isContainer = templateType === 'group' || templateType === 'row';
-    const value = isContainer ? rawValue : valueHandling === 'include' && fieldTemplate.key ? { [fieldTemplate.key]: rawValue } : rawValue;
-
-    const newArray = [...currentArray];
-    newArray.splice(insertIndex, 0, value);
-
-    // Update the parent form with the new array value
-    // The `as any` is required due to Angular Signal Forms' complex conditional types
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    parentForm().value.set({ ...currentValue, [arrayKey]: newArray } as any);
-  }
-
   private removeItem(index?: number): void {
     const arrayKey = this.field().key;
     const parentForm = this.parentFieldSignalContext.form;
@@ -305,7 +350,13 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
     if (currentArray.length === 0) return;
 
-    const removeIndex = index !== undefined ? Math.min(index, currentArray.length - 1) : currentArray.length - 1;
+    // When index is provided, validate it's within bounds. Out-of-bounds is a no-op.
+    // When index is undefined, remove the last item (pop behavior).
+    const removeIndex = index !== undefined ? index : currentArray.length - 1;
+
+    // Ignore out-of-bounds indices - they should be a no-op, not remove the last item
+    if (removeIndex < 0 || removeIndex >= currentArray.length) return;
+
     const newArray = [...currentArray];
     newArray.splice(removeIndex, 1);
 

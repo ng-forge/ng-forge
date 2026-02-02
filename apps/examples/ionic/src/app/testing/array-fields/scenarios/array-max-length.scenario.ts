@@ -20,6 +20,13 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'tags',
       label: 'Add Tag',
+      template: [
+        {
+          key: 'tag',
+          type: 'input',
+          label: 'Tag',
+        },
+      ],
       className: 'array-add-button',
     },
   ],

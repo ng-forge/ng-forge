@@ -26,6 +26,19 @@ const config = {
       arrayKey: 'entries',
       label: 'Add Entry',
       props: { severity: 'primary' },
+      template: [
+        {
+          key: 'name',
+          type: 'input',
+          label: 'Entry Name',
+          required: true,
+        },
+        {
+          key: 'value',
+          type: 'input',
+          label: 'Entry Value',
+        },
+      ],
     },
     {
       key: 'removeEntry',

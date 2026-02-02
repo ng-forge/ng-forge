@@ -30,6 +30,23 @@ const config = {
       arrayKey: 'tasks',
       label: 'Add Task',
       props: { severity: 'primary' },
+      template: [
+        {
+          key: 'title',
+          type: 'input',
+          label: 'Task Title',
+        },
+        {
+          key: 'priority',
+          type: 'select',
+          label: 'Priority',
+          options: [
+            { value: 'low', label: 'Low' },
+            { value: 'medium', label: 'Medium' },
+            { value: 'high', label: 'High' },
+          ],
+        },
+      ],
     },
   ],
 } as const satisfies FormConfig;

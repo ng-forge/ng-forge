@@ -16,15 +16,14 @@ export type ArrayItemTemplate = ArrayAllowedChildren[];
  * @example
  * ```typescript
  * // Use the builder API (recommended)
- * eventBus.dispatch(arrayEvent('contacts').append());
- *
- * // Or instantiate directly
- * eventBus.dispatch(new AppendArrayItemEvent('contacts'));
- *
- * // With custom template (overrides array's default template)
  * eventBus.dispatch(arrayEvent('contacts').append([
  *   { key: 'name', type: 'input', label: 'Name' },
  *   { key: 'email', type: 'input', label: 'Email' }
+ * ]));
+ *
+ * // Or instantiate directly
+ * eventBus.dispatch(new AppendArrayItemEvent('contacts', [
+ *   { key: 'name', type: 'input', label: 'Name' }
  * ]));
  * ```
  *
@@ -37,9 +36,9 @@ export class AppendArrayItemEvent<TTemplate extends ArrayItemTemplate = ArrayIte
     /** The key of the array field to append an item to */
     public readonly arrayKey: string,
     /**
-     * Optional template override for the new array item.
-     * If not provided, the array field will use its own default template.
+     * Template for the new array item. REQUIRED.
+     * Defines the field structure for the new item.
      */
-    public readonly template?: TTemplate,
+    public readonly template: TTemplate,
   ) {}
 }

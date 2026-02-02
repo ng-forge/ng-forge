@@ -10,13 +10,12 @@ import { ArrayItemTemplate } from './append-array-item.event';
  * @example
  * ```typescript
  * // Use the builder API (recommended)
- * eventBus.dispatch(arrayEvent('contacts').prepend());
+ * eventBus.dispatch(arrayEvent('contacts').prepend([
+ *   { key: 'name', type: 'input', label: 'Name' }
+ * ]));
  *
  * // Or instantiate directly
- * eventBus.dispatch(new PrependArrayItemEvent('contacts'));
- *
- * // With custom template (overrides array's default template)
- * eventBus.dispatch(arrayEvent('contacts').prepend([
+ * eventBus.dispatch(new PrependArrayItemEvent('contacts', [
  *   { key: 'name', type: 'input', label: 'Name' }
  * ]));
  * ```
@@ -30,9 +29,9 @@ export class PrependArrayItemEvent<TTemplate extends ArrayItemTemplate = ArrayIt
     /** The key of the array field to prepend an item to */
     public readonly arrayKey: string,
     /**
-     * Optional template override for the new array item.
-     * If not provided, the array field will use its own default template.
+     * Template for the new array item. REQUIRED.
+     * Defines the field structure for the new item.
      */
-    public readonly template?: TTemplate,
+    public readonly template: TTemplate,
   ) {}
 }

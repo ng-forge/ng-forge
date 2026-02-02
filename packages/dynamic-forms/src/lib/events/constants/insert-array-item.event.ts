@@ -10,13 +10,12 @@ import { ArrayItemTemplate } from './append-array-item.event';
  * @example
  * ```typescript
  * // Use the builder API (recommended)
- * eventBus.dispatch(arrayEvent('contacts').insertAt(2));
+ * eventBus.dispatch(arrayEvent('contacts').insertAt(2, [
+ *   { key: 'name', type: 'input', label: 'Name' }
+ * ]));
  *
  * // Or instantiate directly
- * eventBus.dispatch(new InsertArrayItemEvent('contacts', 2));
- *
- * // With custom template (overrides array's default template)
- * eventBus.dispatch(arrayEvent('contacts').insertAt(2, [
+ * eventBus.dispatch(new InsertArrayItemEvent('contacts', 2, [
  *   { key: 'name', type: 'input', label: 'Name' }
  * ]));
  * ```
@@ -32,9 +31,9 @@ export class InsertArrayItemEvent<TTemplate extends ArrayItemTemplate = ArrayIte
     /** The index at which to insert the new item */
     public readonly index: number,
     /**
-     * Optional template override for the new array item.
-     * If not provided, the array field will use its own default template.
+     * Template for the new array item. REQUIRED.
+     * Defines the field structure for the new item.
      */
-    public readonly template?: TTemplate,
+    public readonly template: TTemplate,
   ) {}
 }

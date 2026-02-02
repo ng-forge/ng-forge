@@ -43,6 +43,33 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'members',
       label: 'Add Member',
+      template: [
+        {
+          key: 'memberRow',
+          type: 'row',
+          fields: [
+            {
+              key: 'member',
+              type: 'group',
+              fields: [
+                {
+                  key: 'name',
+                  type: 'input',
+                  label: 'Name',
+                  required: true,
+                },
+                {
+                  key: 'email',
+                  type: 'input',
+                  label: 'Email',
+                  required: true,
+                  email: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
       className: 'array-add-button',
     },
   ],

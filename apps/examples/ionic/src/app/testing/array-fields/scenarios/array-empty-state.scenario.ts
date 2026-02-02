@@ -24,6 +24,18 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'items',
       label: 'Add First Item',
+      template: [
+        {
+          key: 'name',
+          type: 'input',
+          label: 'Name',
+        },
+        {
+          key: 'description',
+          type: 'textarea',
+          label: 'Description',
+        },
+      ],
       props: { color: 'primary' },
     },
     {

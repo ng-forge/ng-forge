@@ -1,4 +1,4 @@
-import { Injector, runInInjectionContext, Signal, untracked, linkedSignal } from '@angular/core';
+import { Injector, runInInjectionContext, Signal, untracked, linkedSignal, signal } from '@angular/core';
 import { FieldTree, form } from '@angular/forms/signals';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ArrayField } from '../../definitions/default/array-field';
@@ -11,6 +11,7 @@ import { flattenFields } from '../flattener/field-flattener';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { getArrayValue } from './array-field.types';
 import { addKeySuffixToField, addKeySuffixToValue, stripKeySuffixFromValue } from './key-suffix';
+import { getFieldDefaultValue } from '../default-value/default-value';
 
 /**
  * Options for creating an array item injector.
@@ -32,6 +33,11 @@ export interface CreateArrayItemInjectorOptions<TModel extends Record<string, un
   registry: Map<string, FieldTypeDefinition>;
   /** The array field definition containing this item. */
   arrayField: ArrayField;
+  /**
+   * Optional explicit default value for new items added via events.
+   * When provided, this value is used instead of reading from the parent array.
+   */
+  explicitDefaultValue?: unknown;
 }
 
 /**
@@ -95,27 +101,36 @@ function syncItemToParent<TModel extends Record<string, unknown>>(
  * Handles different item types (flatten, group, regular) by creating appropriate
  * form references and scoped injectors with ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT.
  * Sets up two-way sync to propagate item form changes back to the parent form.
+ *
+ * Always creates a local form with suffixed keys for array items. This ensures:
+ * - Unique DOM IDs across all array items (via UUID-based suffixes)
+ * - Consistent form structure that mappers can rely on
+ * - Proper two-way sync with parent form
+ *
+ * Note: The fieldTree parameter from parent is intentionally not used directly
+ * because it may not have the structure needed by valueFieldMapper (bracket notation access).
+ * Instead, we create our own form with a linkedSignal that derives from parent values.
  */
 export function createArrayItemInjectorAndInputs<TModel extends Record<string, unknown>>(
   options: CreateArrayItemInjectorOptions<TModel>,
 ): ArrayItemInjectorResult {
-  const { fieldTree, template, suffix, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField } = options;
+  const { template, suffix, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField, explicitDefaultValue } = options;
 
-  // Apply suffix to template keys for unique DOM IDs
+  // Apply suffix to template keys for unique DOM IDs across array items
   const suffixedTemplate = addKeySuffixToField(template, suffix);
 
-  // Create item form - uses linkedSignal that derives from parent
-  const formRef =
-    fieldTree ??
-    createObjectItemForm({
-      template: suffixedTemplate,
-      suffix,
-      indexSignal,
-      parentFieldSignalContext,
-      parentInjector,
-      registry,
-      arrayKey: arrayField.key,
-    });
+  // Always create our own form for array items with suffixed schema
+  // This ensures the form structure matches what valueFieldMapper expects (bracket notation access)
+  const formRef = createObjectItemForm({
+    template: suffixedTemplate,
+    suffix,
+    indexSignal,
+    parentFieldSignalContext,
+    parentInjector,
+    registry,
+    arrayKey: arrayField.key,
+    explicitDefaultValue,
+  });
 
   const injector = createItemInjector({
     formRef,
@@ -126,10 +141,7 @@ export function createArrayItemInjectorAndInputs<TModel extends Record<string, u
   });
 
   // Set up two-way sync: item form changes -> parent form array
-  // Only sync for locally created forms (not external FieldTrees)
-  if (!fieldTree) {
-    syncItemToParent(formRef as ReturnType<typeof form<unknown>>, parentFieldSignalContext, arrayField.key, indexSignal, suffix, injector);
-  }
+  syncItemToParent(formRef as ReturnType<typeof form<unknown>>, parentFieldSignalContext, arrayField.key, indexSignal, suffix, injector);
 
   const inputs = runInInjectionContext(injector, () => {
     return mapFieldToInputs(suffixedTemplate, registry);
@@ -147,11 +159,21 @@ interface CreateObjectItemFormOptions<TModel extends Record<string, unknown>> {
   parentInjector: Injector;
   registry: Map<string, FieldTypeDefinition>;
   arrayKey: string;
+  /**
+   * Optional explicit default value for new items added via events.
+   * When provided, this value is used instead of reading from the parent array.
+   */
+  explicitDefaultValue?: unknown;
 }
 
 /**
- * Creates a local form for an object array item using linkedSignal.
- * The linkedSignal derives from the parent array at the current index.
+ * Creates a local form for an object array item.
+ *
+ * The form is initialized with the current parent array item value (with suffixed keys),
+ * but does NOT reactively track parent changes. This prevents infinite loops where:
+ * - Item changes -> sync to parent -> parent changes -> linkedSignal recomputes -> cycle
+ *
+ * Instead, values flow one-way: item form -> parent (via syncItemToParent effect).
  *
  * For array items, we always create a form with a schema to ensure proper field structure.
  * This is needed for valueFieldMapper to find fields via bracket notation.
@@ -159,22 +181,53 @@ interface CreateObjectItemFormOptions<TModel extends Record<string, unknown>> {
  * Value transformation:
  * - Parent stores clean values: { name: 'John', email: 'j@e.com' }
  * - Form schema uses suffixed keys: { name_a1b2c3d4: 'John', email_a1b2c3d4: 'j@e.com' }
- * - We add suffix when reading from parent, strip suffix when syncing back (in syncItemToParent)
  */
 function createObjectItemForm<TModel extends Record<string, unknown>>(
   options: CreateObjectItemFormOptions<TModel>,
 ): ReturnType<typeof form<unknown>> {
-  const { template, suffix, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayKey } = options;
-
-  const itemEntity = linkedSignal(() => {
-    const parentValue = parentFieldSignalContext.value();
-    const arrayValue = getArrayValue(parentValue as Partial<TModel>, arrayKey);
-    const cleanValue = arrayValue[indexSignal()] ?? {};
-    // Add suffix to value keys to match the suffixed schema keys
-    return addKeySuffixToValue(cleanValue, suffix);
-  });
+  const { template, suffix, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayKey, explicitDefaultValue } = options;
 
   const nestedFields = 'fields' in template && Array.isArray(template.fields) ? template.fields : [];
+
+  // Determine which fields will be in the schema
+  const isGroupTemplate = template.type === 'group' && template.key;
+  const schemaFields = isGroupTemplate || nestedFields.length === 0 ? [template] : nestedFields;
+
+  // Get initial value (untracked to avoid reactive dependency)
+  // IMPORTANT: Angular Signal Forms requires the entity to have keys that match the schema.
+  // If the entity is empty, the form won't have child field accessors.
+  const initialValue = untracked(() => {
+    // When explicitDefaultValue is provided (for new items added via events),
+    // use it instead of reading from the parent array. This is necessary because
+    // when prepending/inserting items, the parent array hasn't been updated yet.
+    let cleanValue: unknown;
+    if (explicitDefaultValue !== undefined) {
+      cleanValue = explicitDefaultValue;
+    } else {
+      // Read from parent array for existing items during initial render
+      const parentValue = parentFieldSignalContext.value();
+      const arrayValue = getArrayValue(parentValue as Partial<TModel>, arrayKey);
+      cleanValue = arrayValue[indexSignal()] ?? {};
+    }
+
+    // Add suffix to value keys to match the suffixed schema keys
+    const suffixedValue = addKeySuffixToValue(cleanValue, suffix) as Record<string, unknown>;
+
+    // Ensure the entity has all keys defined in the schema (with default values if missing)
+    // This is required for Angular Signal Forms to create child field accessors
+    const entityWithSchemaKeys = { ...suffixedValue };
+    for (const field of schemaFields) {
+      // The template is already suffixed, so field.key is already 'email_a1b2c3d4'
+      if (field.key && !(field.key in entityWithSchemaKeys)) {
+        entityWithSchemaKeys[field.key] = getFieldDefaultValue(field, registry);
+      }
+    }
+
+    return entityWithSchemaKeys;
+  });
+
+  // Use a regular signal - no reactive dependency on parent
+  const itemEntity = signal(initialValue);
 
   return runInInjectionContext(parentInjector, () => {
     // Determine which fields to include in the schema
@@ -185,7 +238,12 @@ function createObjectItemForm<TModel extends Record<string, unknown>>(
     const schemaFields = isGroupTemplate || nestedFields.length === 0 ? [template] : nestedFields;
     const flattenedFields = flattenFields(schemaFields, registry);
     const schema = createSchemaFromFields(flattenedFields, registry);
-    return untracked(() => form(itemEntity, schema));
+    const formInstance = untracked(() => form(itemEntity, schema));
+    // Initialize the form structure by calling it - this populates child FieldTrees
+    // accessible via bracket notation (formRef['key'])
+    untracked(() => formInstance());
+
+    return formInstance;
   });
 }
 

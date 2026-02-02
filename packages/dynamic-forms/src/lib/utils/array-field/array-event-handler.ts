@@ -34,7 +34,7 @@ const ARRAY_EVENT_TYPES: ArrayEvent['type'][] = [
 /**
  * Normalized action representing an array manipulation.
  */
-export type ArrayAction = { action: 'add'; template?: FieldDef<unknown>[]; index?: number } | { action: 'remove'; index?: number };
+export type ArrayAction = { action: 'add'; template: FieldDef<unknown>[]; index?: number } | { action: 'remove'; index?: number };
 
 /**
  * Converts an array event to a normalized action.

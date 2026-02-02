@@ -20,6 +20,7 @@ const config = {
       arrayKey: 'items',
       label: 'Add Item',
       props: { color: 'primary' },
+      template: [{ key: 'value', type: 'input', label: 'Item' }],
     },
     {
       key: 'removeItem',

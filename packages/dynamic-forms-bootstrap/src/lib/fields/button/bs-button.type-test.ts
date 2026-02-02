@@ -5,6 +5,9 @@ import { expectTypeOf } from 'vitest';
 import type { LogicConfig } from '@ng-forge/dynamic-forms';
 import type { RequiredKeys } from '@ng-forge/utils';
 
+// Import registry augmentation to include Bootstrap field types in ArrayAllowedChildren
+import '../../types/registry-augmentation';
+
 import type {
   BsButtonProps,
   BsSubmitButtonField,
@@ -252,7 +255,8 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'tabIndex'
     | 'col'
     | 'meta'
-    | 'arrayKey';
+    | 'arrayKey'
+    | 'template';
 
   type ActualKeys = keyof AddArrayItemButtonField;
 
@@ -271,6 +275,10 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
 
     it('label is required', () => {
       expectTypeOf<AddArrayItemButtonField['label']>().toEqualTypeOf<string>();
+    });
+
+    it('template is required', () => {
+      expectTypeOf<AddArrayItemButtonField['template']>().not.toEqualTypeOf<undefined>();
     });
   });
 
@@ -403,6 +411,7 @@ describe('Button Fields - Usage', () => {
       key: 'addItem',
       label: 'Add Item',
       arrayKey: 'items',
+      template: [{ key: 'name', type: 'input' }],
       props: {
         variant: 'info',
         size: 'sm',

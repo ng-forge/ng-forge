@@ -257,7 +257,7 @@ test.describe('Array Fields E2E Tests', () => {
 
       // Verify IDs contain UUID suffix pattern (8 hex characters)
       for (const id of ids) {
-        expect(id).toMatch(/_[a-f0-9]{8}$/);
+        expect(id).toMatch(/_[a-f0-9]{8}/);
       }
     });
 
@@ -673,27 +673,22 @@ test.describe('Array Fields E2E Tests', () => {
       const inputs = scenario.locator('#items input');
       await expect(inputs).toHaveCount(2, { timeout: 10000 });
 
-      // Try to insert at out-of-bounds index (100)
-      const insertButton = scenario.locator('button:has-text("Insert at Index 100")');
-      await insertButton.click();
-
-      // Should either add at end or handle gracefully (not crash)
-      // Wait a moment for any state changes
-      await page.waitForTimeout(500);
-
-      // Array should still be functional
-      const currentCount = await inputs.count();
-      expect(currentCount).toBeGreaterThanOrEqual(2);
-
-      // Try to remove at out-of-bounds index
+      // Try to remove at out-of-bounds index (100) - should handle gracefully
       const removeButton = scenario.locator('button:has-text("Remove at Index 100")');
       await removeButton.click();
 
-      // Should handle gracefully (no crash)
+      // Should handle gracefully (no crash, array unchanged)
       await page.waitForTimeout(500);
+      await expect(inputs).toHaveCount(2, { timeout: 5000 });
 
       // Verify original values are preserved
       await expect(inputs.first()).toHaveValue('First', { timeout: 5000 });
+      await expect(inputs.nth(1)).toHaveValue('Second', { timeout: 5000 });
+
+      // Add an item using the addArrayItem button
+      const addButton = scenario.locator('button:has-text("Add Item")');
+      await addButton.click();
+      await expect(inputs).toHaveCount(3, { timeout: 5000 });
     });
   });
 });

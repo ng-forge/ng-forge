@@ -22,6 +22,14 @@ const config = {
       label: 'Add Email',
       className: 'array-add-button',
       props: { variant: 'primary' },
+      template: [
+        {
+          key: 'email',
+          type: 'input',
+          label: 'Email',
+          props: { type: 'email' },
+        },
+      ],
     },
   ],
 } as const satisfies FormConfig;

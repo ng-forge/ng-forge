@@ -19,6 +19,13 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'items',
       label: 'Add Item',
+      template: [
+        {
+          key: 'value',
+          type: 'input',
+          label: 'Item',
+        },
+      ],
       props: { color: 'primary' },
     },
     {

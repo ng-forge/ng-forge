@@ -121,7 +121,7 @@ describe('ArrayFieldComponent', () => {
     expect(component.key()).toBe('testArray');
   });
 
-  it('should store field template from fields array', () => {
+  it('should store field templates from fields array', () => {
     const templateField = createSimpleTestField('item', 'Item');
     const field: ArrayField<unknown> = {
       key: 'testArray',
@@ -131,8 +131,8 @@ describe('ArrayFieldComponent', () => {
 
     const { component } = setupArrayTest(field);
 
-    // The component should store the first field as a template
-    expect(component['fieldTemplate']()).toEqual(templateField);
+    // The component should store all fields as templates (supports multiple sibling fields)
+    expect(component['fieldTemplates']()).toEqual([templateField]);
   });
 
   it('should initialize with zero items for empty array', () => {
@@ -203,7 +203,7 @@ describe('ArrayFieldComponent', () => {
   });
 
   describe('AppendArrayItemEvent', () => {
-    it('should add item when AppendArrayItemEvent is dispatched with custom field template', async () => {
+    it('should add item when AppendArrayItemEvent is dispatched with field template', async () => {
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
@@ -216,9 +216,9 @@ describe('ArrayFieldComponent', () => {
       // Initially empty
       expect(component.resolvedItems()).toHaveLength(0);
 
-      // Dispatch event with custom field template (array of fields)
-      const customField = createSimpleTestField('customItem', 'Custom Item');
-      eventBus.dispatch(AppendArrayItemEvent, 'items', [customField]);
+      // Dispatch event with field template (array of fields) - template is required
+      const template = [createSimpleTestField('item', 'Item')];
+      eventBus.dispatch(AppendArrayItemEvent, 'items', template);
 
       // Wait for async component loading
       const maxAttempts = 50;
@@ -234,7 +234,7 @@ describe('ArrayFieldComponent', () => {
       expect(component.resolvedItems()).toHaveLength(1);
     });
 
-    it('should add item using array template as fallback when AppendArrayItemEvent has no template', async () => {
+    it('should not add item when AppendArrayItemEvent has empty template', async () => {
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
@@ -243,46 +243,19 @@ describe('ArrayFieldComponent', () => {
 
       const { component, fixture } = setupArrayTest(field, { items: [] });
       const eventBus = TestBed.inject(EventBus);
+      const consoleSpy = vi.spyOn(console, 'error');
 
       // Initially empty
       expect(component.resolvedItems()).toHaveLength(0);
 
-      // Dispatch event WITHOUT template parameter - should use array's template
-      eventBus.dispatch(AppendArrayItemEvent, 'items');
-
-      // Wait for async component loading
-      const maxAttempts = 50;
-      let attempts = 0;
-      while (component.resolvedItems().length < 1 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        attempts++;
-      }
-
-      expect(component.resolvedItems()).toHaveLength(1);
-    });
-
-    it('should not add item if array has no template', async () => {
-      const field: ArrayField<unknown> = {
-        key: 'items',
-        type: 'array',
-        fields: [], // No template
-      };
-
-      const { component, fixture } = setupArrayTest(field, { items: [] });
-      const eventBus = TestBed.inject(EventBus);
-      const consoleSpy = vi.spyOn(console, 'error');
-
-      // Dispatch event without template and no array template
-      eventBus.dispatch(AppendArrayItemEvent, 'items');
+      // Dispatch event with empty template array - should fail
+      eventBus.dispatch(AppendArrayItemEvent, 'items', []);
 
       await fixture.whenStable();
       fixture.detectChanges();
 
       expect(component.resolvedItems()).toHaveLength(0);
-      expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('Cannot add item to array'));
+      expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('template is required'));
     });
   });
 
@@ -313,8 +286,9 @@ describe('ArrayFieldComponent', () => {
 
       expect(component.resolvedItems()).toHaveLength(3);
 
-      // Add at index 1 (between first and second)
-      eventBus.dispatch(InsertArrayItemEvent, 'items', 1);
+      // Add at index 1 (between first and second) - template is required
+      const template = [createSimpleTestField('item', 'Item')];
+      eventBus.dispatch(InsertArrayItemEvent, 'items', 1, template);
 
       // Wait for new item
       attempts = 0;

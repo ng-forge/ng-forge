@@ -20,6 +20,14 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'emails',
       label: 'Add Email',
+      template: [
+        {
+          key: 'email',
+          type: 'input',
+          label: 'Email',
+          props: { type: 'email' },
+        },
+      ],
       props: { color: 'primary' },
     },
     {
@@ -45,6 +53,14 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'phones',
       label: 'Add Phone',
+      template: [
+        {
+          key: 'phone',
+          type: 'input',
+          label: 'Phone',
+          props: { type: 'tel' },
+        },
+      ],
       props: { color: 'primary' },
     },
     {

@@ -104,6 +104,32 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'addresses',
       label: 'Add Address',
+      template: [
+        {
+          key: 'addressRow',
+          type: 'row',
+          fields: [
+            {
+              key: 'street',
+              type: 'input',
+              label: 'Street',
+              col: 6,
+            },
+            {
+              key: 'city',
+              type: 'input',
+              label: 'City',
+              col: 3,
+            },
+            {
+              key: 'zip',
+              type: 'input',
+              label: 'ZIP',
+              col: 3,
+            },
+          ],
+        },
+      ],
     },
     {
       key: 'submit',

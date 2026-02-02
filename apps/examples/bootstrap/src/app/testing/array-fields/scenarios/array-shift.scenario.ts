@@ -30,6 +30,13 @@ const config = {
       arrayKey: 'items',
       label: 'Add Item',
       props: { variant: 'primary' },
+      template: [
+        {
+          key: 'value',
+          type: 'input',
+          label: 'Value',
+        },
+      ],
     },
   ],
 } as const satisfies FormConfig;

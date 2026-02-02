@@ -21,6 +21,14 @@ const config = {
       arrayKey: 'emails',
       label: 'Add Email',
       props: { severity: 'primary' },
+      template: [
+        {
+          key: 'email',
+          type: 'input',
+          label: 'Email',
+          props: { type: 'email' },
+        },
+      ],
     },
     {
       key: 'removeEmail',
@@ -46,6 +54,14 @@ const config = {
       arrayKey: 'phones',
       label: 'Add Phone',
       props: { severity: 'primary' },
+      template: [
+        {
+          key: 'phone',
+          type: 'input',
+          label: 'Phone',
+          props: { type: 'tel' },
+        },
+      ],
     },
     {
       key: 'removePhone',

@@ -1,4 +1,4 @@
-import { FormConfig, PrependArrayItemEvent, AppendArrayItemEvent } from '@ng-forge/dynamic-forms';
+import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 const config = {
@@ -16,18 +16,18 @@ const config = {
     },
     {
       key: 'prependButton',
-      type: 'button',
+      type: 'prependArrayItem',
       label: 'Prepend Item',
-      event: PrependArrayItemEvent,
-      eventArgs: ['items'],
+      arrayKey: 'items',
+      template: [{ key: 'value', type: 'input', label: 'Value' }],
       props: { color: 'primary' },
     },
     {
       key: 'appendButton',
-      type: 'button',
+      type: 'addArrayItem',
       label: 'Append Item',
-      event: AppendArrayItemEvent,
-      eventArgs: ['items'],
+      arrayKey: 'items',
+      template: [{ key: 'value', type: 'input', label: 'Value' }],
     },
   ],
 } as const satisfies FormConfig;
@@ -35,7 +35,7 @@ const config = {
 export const arrayPrependScenario: TestScenario = {
   testId: 'array-prepend',
   title: 'Prepend Array Items',
-  description: 'Add new items at the beginning of the array using PrependArrayItemEvent',
+  description: 'Add new items at the beginning of the array using prependArrayItem button',
   config,
   initialValue: {
     items: [{ value: 'First' }, { value: 'Second' }],

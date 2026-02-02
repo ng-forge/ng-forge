@@ -19,6 +19,13 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'tasks',
       label: 'Add Task',
+      template: [
+        {
+          key: 'taskName',
+          type: 'input',
+          label: 'Task',
+        },
+      ],
       className: 'array-add-button',
       props: { color: 'primary' },
     },

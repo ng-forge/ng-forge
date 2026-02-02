@@ -21,6 +21,13 @@ const config = {
       label: 'Add Task',
       className: 'array-add-button',
       props: { severity: 'primary' },
+      template: [
+        {
+          key: 'taskName',
+          type: 'input',
+          label: 'Task',
+        },
+      ],
     },
   ],
 } as const satisfies FormConfig;

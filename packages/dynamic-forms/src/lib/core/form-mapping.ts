@@ -234,37 +234,45 @@ function applyFieldState(fieldDef: FieldDef<unknown>, path: SchemaPath<unknown>)
 /**
  * Maps an array field to the form schema using applyEach.
  *
- * Array items use a template field definition. applyEach creates proper
- * FieldTree structure for each array item.
+ * Array items can contain multiple sibling template field definitions.
+ * applyEach creates proper FieldTree structure for each array item.
+ *
+ * Supports:
+ * - Single field templates (e.g., { key: 'name', type: 'input' })
+ * - Multiple sibling fields (e.g., [{ key: 'name' }, { key: 'email' }])
+ * - Container templates (row, group, page) that wrap children
  */
 function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchemaPath): void {
   if (!isArrayField(arrayField) || !arrayField.fields?.length) {
     return;
   }
 
-  const templateField = arrayField.fields[0];
+  const templateFields = arrayField.fields as FieldDef<unknown>[];
 
   const itemSchema = schema<Record<string, unknown>>((itemPath) => {
     const pathRecord = itemPath as Record<string, AnySchemaPath>;
 
-    if (isRowField(templateField) || isPageField(templateField)) {
-      // Row/page templates flatten their children
-      mapContainerChildren(templateField.fields as FieldDef<unknown>[] | undefined, itemPath);
-    } else if (isGroupField(templateField)) {
-      // Group template - access group's path first
-      const groupKey = templateField.key;
-      if (groupKey) {
-        const groupPath = pathRecord[groupKey];
-        if (groupPath) {
-          mapContainerChildren(templateField.fields, groupPath);
+    // Map ALL template fields (supports multiple sibling fields)
+    for (const templateField of templateFields) {
+      if (isRowField(templateField) || isPageField(templateField)) {
+        // Row/page templates flatten their children
+        mapContainerChildren(templateField.fields as FieldDef<unknown>[] | undefined, itemPath);
+      } else if (isGroupField(templateField)) {
+        // Group template - access group's path first
+        const groupKey = templateField.key;
+        if (groupKey) {
+          const groupPath = pathRecord[groupKey];
+          if (groupPath) {
+            mapContainerChildren(templateField.fields, groupPath);
+          }
+        } else {
+          // No group key - apply children directly (edge case)
+          mapContainerChildren(templateField.fields, itemPath);
         }
       } else {
-        // No group key - apply children directly (edge case)
-        mapContainerChildren(templateField.fields, itemPath);
+        // Simple field template
+        mapFieldToForm(templateField, itemPath);
       }
-    } else {
-      // Simple field template
-      mapFieldToForm(templateField, itemPath);
     }
   });
 

@@ -1,4 +1,4 @@
-import { FormConfig, InsertArrayItemEvent, RemoveAtIndexEvent } from '@ng-forge/dynamic-forms';
+import { FormConfig, RemoveAtIndexEvent } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 const config = {
@@ -16,10 +16,11 @@ const config = {
     },
     {
       key: 'insertAtEnd',
-      type: 'button',
+      type: 'insertArrayItem',
       label: 'Insert at Index 100',
-      event: InsertArrayItemEvent,
-      eventArgs: ['items', 100],
+      arrayKey: 'items',
+      index: 100,
+      template: [{ key: 'value', type: 'input', label: 'Value' }],
     },
     {
       key: 'removeAtEnd',
@@ -35,6 +36,7 @@ const config = {
       arrayKey: 'items',
       label: 'Add Item',
       props: { color: 'primary' },
+      template: [{ key: 'value', type: 'input', label: 'Value' }],
     },
   ],
 } as const satisfies FormConfig;
