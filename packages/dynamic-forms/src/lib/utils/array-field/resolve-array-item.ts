@@ -6,7 +6,7 @@ import { FieldDef } from '../../definitions/base/field-def';
 import { FieldSignalContext } from '../../mappers/types';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { generateArrayItemId, ResolvedArrayItem } from './array-field.types';
+import { generateArrayItemIdAndSuffix, ResolvedArrayItem } from './array-field.types';
 import { createArrayItemInjectorAndInputs } from './create-array-item-injector';
 
 /**
@@ -71,7 +71,7 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
         return undefined;
       }
 
-      const itemId = generateArrayItemId();
+      const { id: itemId, suffix } = generateArrayItemIdAndSuffix();
 
       const indexSignal = linkedSignal(() => {
         const order = itemOrderSignal();
@@ -82,6 +82,7 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
       const { injector, inputs } = createArrayItemInjectorAndInputs({
         fieldTree,
         template,
+        suffix,
         indexSignal,
         parentFieldSignalContext,
         parentInjector,
@@ -96,6 +97,7 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
 
       return {
         id: itemId,
+        suffix,
         component,
         injector,
         inputs,

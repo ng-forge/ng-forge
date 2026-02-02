@@ -10,6 +10,7 @@ import { mapFieldToInputs } from '../field-mapper/field-mapper';
 import { flattenFields } from '../flattener/field-flattener';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { getArrayValue } from './array-field.types';
+import { addKeySuffixToField, addKeySuffixToValue, stripKeySuffixFromValue } from './key-suffix';
 
 /**
  * Options for creating an array item injector.
@@ -19,6 +20,8 @@ export interface CreateArrayItemInjectorOptions<TModel extends Record<string, un
   fieldTree: FieldTree<unknown> | null;
   /** The field template defining the array item structure. */
   template: FieldDef<unknown>;
+  /** 8-char suffix for key uniqueness (derived from item UUID). */
+  suffix: string;
   /** Signal containing the current index (uses linkedSignal for auto-updates). */
   indexSignal: Signal<number>;
   /** Parent context for accessing form state and values. */
@@ -44,12 +47,14 @@ export interface ArrayItemInjectorResult {
 /**
  * Syncs item form value changes back to the parent form's array.
  * This effect watches the item form value and updates the parent array when changes occur.
+ * Strips the key suffix from item values before syncing to maintain clean parent data.
  */
 function syncItemToParent<TModel extends Record<string, unknown>>(
   itemFormInstance: ReturnType<typeof form<unknown>>,
   parentFieldSignalContext: FieldSignalContext<TModel>,
   arrayKey: string,
   indexSignal: Signal<number>,
+  suffix: string,
   injector: Injector,
 ): void {
   // Track if we're currently syncing to prevent loops
@@ -65,11 +70,15 @@ function syncItemToParent<TModel extends Record<string, unknown>>(
       const currentArray = getArrayValue(parentValue as Partial<TModel>, arrayKey);
       const idx = untracked(() => indexSignal());
 
+      // Strip suffix from item value before syncing to parent
+      // Internal form uses suffixed keys (name_a1b2c3d4), parent expects clean keys (name)
+      const cleanItemValue = stripKeySuffixFromValue(itemValue, suffix);
+
       // Only sync if value actually changed
-      if (idx >= 0 && idx < currentArray.length && currentArray[idx] !== itemValue) {
+      if (idx >= 0 && idx < currentArray.length && currentArray[idx] !== cleanItemValue) {
         isSyncing = true;
         const newArray = [...currentArray];
-        newArray[idx] = itemValue;
+        newArray[idx] = cleanItemValue;
         // Update the parent form with the new array value
         // The `as any` is required due to Angular Signal Forms' complex conditional types
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -90,13 +99,17 @@ function syncItemToParent<TModel extends Record<string, unknown>>(
 export function createArrayItemInjectorAndInputs<TModel extends Record<string, unknown>>(
   options: CreateArrayItemInjectorOptions<TModel>,
 ): ArrayItemInjectorResult {
-  const { fieldTree, template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField } = options;
+  const { fieldTree, template, suffix, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField } = options;
+
+  // Apply suffix to template keys for unique DOM IDs
+  const suffixedTemplate = addKeySuffixToField(template, suffix);
 
   // Create item form - uses linkedSignal that derives from parent
   const formRef =
     fieldTree ??
     createObjectItemForm({
-      template,
+      template: suffixedTemplate,
+      suffix,
       indexSignal,
       parentFieldSignalContext,
       parentInjector,
@@ -115,11 +128,11 @@ export function createArrayItemInjectorAndInputs<TModel extends Record<string, u
   // Set up two-way sync: item form changes -> parent form array
   // Only sync for locally created forms (not external FieldTrees)
   if (!fieldTree) {
-    syncItemToParent(formRef as ReturnType<typeof form<unknown>>, parentFieldSignalContext, arrayField.key, indexSignal, injector);
+    syncItemToParent(formRef as ReturnType<typeof form<unknown>>, parentFieldSignalContext, arrayField.key, indexSignal, suffix, injector);
   }
 
   const inputs = runInInjectionContext(injector, () => {
-    return mapFieldToInputs(template, registry);
+    return mapFieldToInputs(suffixedTemplate, registry);
   });
 
   return { injector, inputs };
@@ -127,6 +140,8 @@ export function createArrayItemInjectorAndInputs<TModel extends Record<string, u
 
 interface CreateObjectItemFormOptions<TModel extends Record<string, unknown>> {
   template: FieldDef<unknown>;
+  /** 8-char suffix for key uniqueness - used to transform values to match suffixed schema keys. */
+  suffix: string;
   indexSignal: Signal<number>;
   parentFieldSignalContext: FieldSignalContext<TModel>;
   parentInjector: Injector;
@@ -140,16 +155,23 @@ interface CreateObjectItemFormOptions<TModel extends Record<string, unknown>> {
  *
  * For array items, we always create a form with a schema to ensure proper field structure.
  * This is needed for valueFieldMapper to find fields via bracket notation.
+ *
+ * Value transformation:
+ * - Parent stores clean values: { name: 'John', email: 'j@e.com' }
+ * - Form schema uses suffixed keys: { name_a1b2c3d4: 'John', email_a1b2c3d4: 'j@e.com' }
+ * - We add suffix when reading from parent, strip suffix when syncing back (in syncItemToParent)
  */
 function createObjectItemForm<TModel extends Record<string, unknown>>(
   options: CreateObjectItemFormOptions<TModel>,
 ): ReturnType<typeof form<unknown>> {
-  const { template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayKey } = options;
+  const { template, suffix, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayKey } = options;
 
   const itemEntity = linkedSignal(() => {
     const parentValue = parentFieldSignalContext.value();
     const arrayValue = getArrayValue(parentValue as Partial<TModel>, arrayKey);
-    return arrayValue[indexSignal()] ?? {};
+    const cleanValue = arrayValue[indexSignal()] ?? {};
+    // Add suffix to value keys to match the suffixed schema keys
+    return addKeySuffixToValue(cleanValue, suffix);
   });
 
   const nestedFields = 'fields' in template && Array.isArray(template.fields) ? template.fields : [];
