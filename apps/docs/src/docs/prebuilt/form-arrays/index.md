@@ -63,32 +63,42 @@ For flat object arrays without nesting, use a row as the template instead (rows 
 
 ## Dynamic Add/Remove
 
-Array items can be added or removed dynamically at runtime using the event bus:
+Array items can be added or removed dynamically at runtime using the event bus with the `arrayEvent` builder:
 
 ```typescript
-import { EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-forms';
+import { EventBus, arrayEvent } from '@ng-forge/dynamic-forms';
 
 // Inject the event bus
 eventBus = inject(EventBus);
 
-// Add item to array
+// Add item to end of array (most common)
 addItem() {
-  this.eventBus.dispatch(AddArrayItemEvent, 'tags');
+  this.eventBus.dispatch(arrayEvent('tags').append());
+}
+
+// Add item to beginning of array
+prependItem() {
+  this.eventBus.dispatch(arrayEvent('tags').prepend());
 }
 
 // Add item at specific index
 addItemAt(index: number) {
-  this.eventBus.dispatch(AddArrayItemEvent, 'tags', index);
+  this.eventBus.dispatch(arrayEvent('tags').insertAt(index));
 }
 
 // Remove last item
-removeItem() {
-  this.eventBus.dispatch(RemoveArrayItemEvent, 'tags');
+removeLastItem() {
+  this.eventBus.dispatch(arrayEvent('tags').pop());
+}
+
+// Remove first item
+removeFirstItem() {
+  this.eventBus.dispatch(arrayEvent('tags').shift());
 }
 
 // Remove item at specific index
 removeItemAt(index: number) {
-  this.eventBus.dispatch(RemoveArrayItemEvent, 'tags', index);
+  this.eventBus.dispatch(arrayEvent('tags').removeAt(index));
 }
 ```
 
@@ -107,7 +117,7 @@ Here's a complete working example of a flat array field with dynamic add/remove:
 
 ```typescript
 import { Component, inject } from '@angular/core';
-import { DynamicForm, EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-forms';
+import { DynamicForm, EventBus, arrayEvent } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-tags-form',
@@ -142,11 +152,11 @@ export class TagsFormComponent {
   };
 
   addTag() {
-    this.eventBus.dispatch(AddArrayItemEvent, 'tags');
+    this.eventBus.dispatch(arrayEvent('tags').append());
   }
 
   removeTag(index: number) {
-    this.eventBus.dispatch(RemoveArrayItemEvent, 'tags', index);
+    this.eventBus.dispatch(arrayEvent('tags').removeAt(index));
   }
 }
 ```
@@ -157,7 +167,7 @@ Here's a complete working example of an object array field with validation:
 
 ```typescript
 import { Component, inject } from '@angular/core';
-import { DynamicForm, EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-forms';
+import { DynamicForm, EventBus, arrayEvent } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-contacts-form',
@@ -217,11 +227,11 @@ export class ContactsFormComponent {
   };
 
   addContact() {
-    this.eventBus.dispatch(AddArrayItemEvent, 'contacts');
+    this.eventBus.dispatch(arrayEvent('contacts').append());
   }
 
   removeContact(index: number) {
-    this.eventBus.dispatch(RemoveArrayItemEvent, 'contacts', index);
+    this.eventBus.dispatch(arrayEvent('contacts').removeAt(index));
   }
 }
 ```
@@ -230,9 +240,9 @@ export class ContactsFormComponent {
 
 The key concept is that the `fields` array contains a **template** (typically one field definition):
 
-- **Flat arrays**: Template is a leaf field → creates `[value1, value2]`
-- **Object arrays**: Template is a group field with key → creates `[{groupKey: {...}}, ...]`
-- **Flat object arrays**: Template is a row field → creates `[{...}, {...}]` (no nesting)
+- **Flat arrays**: Template is a leaf field -> creates `[value1, value2]`
+- **Object arrays**: Template is a group field with key -> creates `[{groupKey: {...}}, ...]`
+- **Flat object arrays**: Template is a row field -> creates `[{...}, {...}]` (no nesting)
 
 When you add an array item via the event bus, the template is cloned and a new instance is created with the appropriate default value.
 
@@ -253,8 +263,8 @@ Arrays **cannot** contain:
 
 Arrays can use these field types as templates:
 
-- Leaf fields (input, select, checkbox, etc.) → creates flat arrays
-- Group fields with key → creates nested object arrays `[{groupKey: {...}}, ...]`
-- Row fields → creates flat object arrays `[{...}, {...}]` (rows don't add nesting)
+- Leaf fields (input, select, checkbox, etc.) -> creates flat arrays
+- Group fields with key -> creates nested object arrays `[{groupKey: {...}}, ...]`
+- Row fields -> creates flat object arrays `[{...}, {...}]` (rows don't add nesting)
 
 See [Type Safety & Inference](../advanced/type-safety/basics) for details on how arrays affect type inference.

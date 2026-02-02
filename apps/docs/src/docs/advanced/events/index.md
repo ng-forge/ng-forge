@@ -108,44 +108,86 @@ eventBus.on<FormClearEvent>('form-clear').subscribe(() => {
 });
 ```
 
-### AddArrayItemEvent
+### Array Events
 
-Add an item to an array field.
-
-```typescript
-// Add item using array's template
-eventBus.dispatch(AddArrayItemEvent, 'contacts');
-
-// Add item with custom field template
-const fieldTemplate = { key: 'email', type: 'input', value: '' };
-eventBus.dispatch(AddArrayItemEvent, 'contacts', fieldTemplate);
-
-// Add item at specific index
-eventBus.dispatch(AddArrayItemEvent, 'contacts', fieldTemplate, 2);
-```
-
-**Constructor parameters:**
-
-- `arrayKey: string` - Key of the array field
-- `field?: ArrayAllowedChildren` - Optional field template (uses array's template if omitted)
-- `index?: number` - Optional index to insert at (defaults to end)
-
-### RemoveArrayItemEvent
-
-Remove an item from an array field.
+The `arrayEvent()` builder provides a fluent API for array field manipulation. Import it from the main package:
 
 ```typescript
-// Remove item at index 1
-eventBus.dispatch(RemoveArrayItemEvent, 'contacts', 1);
-
-// Remove last item
-eventBus.dispatch(RemoveArrayItemEvent, 'contacts');
+import { arrayEvent } from '@ng-forge/dynamic-forms';
 ```
 
-**Constructor parameters:**
+#### Adding Items
 
-- `arrayKey: string` - Key of the array field
-- `index?: number` - Index to remove (defaults to last item)
+```typescript
+// Append item at end (most common)
+eventBus.dispatch(arrayEvent('contacts').append());
+
+// Prepend item at beginning
+eventBus.dispatch(arrayEvent('contacts').prepend());
+
+// Insert at specific index
+eventBus.dispatch(arrayEvent('contacts').insertAt(2));
+
+// Override with custom template (array of field configs)
+eventBus.dispatch(
+  arrayEvent('contacts').append([
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' },
+  ]),
+);
+```
+
+#### Removing Items
+
+```typescript
+// Remove last item (stack pop)
+eventBus.dispatch(arrayEvent('contacts').pop());
+
+// Remove first item (queue shift)
+eventBus.dispatch(arrayEvent('contacts').shift());
+
+// Remove item at specific index
+eventBus.dispatch(arrayEvent('contacts').removeAt(2));
+```
+
+#### Internal Event Classes
+
+For advanced use cases (extending events or type-checking), you can import the underlying event classes:
+
+```typescript
+import {
+  AppendArrayItemEvent,
+  PrependArrayItemEvent,
+  InsertArrayItemEvent,
+  PopArrayItemEvent,
+  ShiftArrayItemEvent,
+  RemoveAtIndexEvent,
+} from '@ng-forge/dynamic-forms';
+
+// Example: extend for custom template
+export class AddContactEvent extends AppendArrayItemEvent {
+  constructor() {
+    super('contacts', [
+      { key: 'name', type: 'input', label: 'Name' },
+      { key: 'phone', type: 'input', label: 'Phone' },
+    ]);
+  }
+}
+
+// Usage
+eventBus.dispatch(new AddContactEvent());
+```
+
+**Event types:**
+
+| Event                   | Description                    |
+| ----------------------- | ------------------------------ |
+| `AppendArrayItemEvent`  | Add item at end of array       |
+| `PrependArrayItemEvent` | Add item at beginning of array |
+| `InsertArrayItemEvent`  | Add item at specific index     |
+| `PopArrayItemEvent`     | Remove last item               |
+| `ShiftArrayItemEvent`   | Remove first item              |
+| `RemoveAtIndexEvent`    | Remove item at specific index  |
 
 ## Multiple Event Subscriptions
 

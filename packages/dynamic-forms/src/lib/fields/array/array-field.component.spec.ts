@@ -13,7 +13,7 @@ import { withLoggerConfig } from '../../providers/features/logger/with-logger-co
 import { FIELD_REGISTRY } from '../../models/field-type';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from '../../models/field-signal-context.token';
-import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent } from '../../events';
+import { AppendArrayItemEvent, EventBus, InsertArrayItemEvent, PopArrayItemEvent, RemoveAtIndexEvent } from '../../events';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { vi } from 'vitest';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
@@ -202,8 +202,8 @@ describe('ArrayFieldComponent', () => {
     expect(host.classList.contains('df-array')).toBe(true);
   });
 
-  describe('AddArrayItemEvent', () => {
-    it('should add item when AddArrayItemEvent is dispatched with custom field template', async () => {
+  describe('AppendArrayItemEvent', () => {
+    it('should add item when AppendArrayItemEvent is dispatched with custom field template', async () => {
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
@@ -216,9 +216,9 @@ describe('ArrayFieldComponent', () => {
       // Initially empty
       expect(component.resolvedItems()).toHaveLength(0);
 
-      // Dispatch event with custom field template
+      // Dispatch event with custom field template (array of fields)
       const customField = createSimpleTestField('customItem', 'Custom Item');
-      eventBus.dispatch(AddArrayItemEvent, 'items', customField);
+      eventBus.dispatch(AppendArrayItemEvent, 'items', [customField]);
 
       // Wait for async component loading
       const maxAttempts = 50;
@@ -234,7 +234,7 @@ describe('ArrayFieldComponent', () => {
       expect(component.resolvedItems()).toHaveLength(1);
     });
 
-    it('should add item using array template as fallback when AddArrayItemEvent has no field', async () => {
+    it('should add item using array template as fallback when AppendArrayItemEvent has no template', async () => {
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
@@ -247,8 +247,8 @@ describe('ArrayFieldComponent', () => {
       // Initially empty
       expect(component.resolvedItems()).toHaveLength(0);
 
-      // Dispatch event WITHOUT field parameter - should use array's template
-      eventBus.dispatch(AddArrayItemEvent, 'items');
+      // Dispatch event WITHOUT template parameter - should use array's template
+      eventBus.dispatch(AppendArrayItemEvent, 'items');
 
       // Wait for async component loading
       const maxAttempts = 50;
@@ -264,7 +264,30 @@ describe('ArrayFieldComponent', () => {
       expect(component.resolvedItems()).toHaveLength(1);
     });
 
-    it('should add item at specific index when index is provided', async () => {
+    it('should not add item if array has no template', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [], // No template
+      };
+
+      const { component, fixture } = setupArrayTest(field, { items: [] });
+      const eventBus = TestBed.inject(EventBus);
+      const consoleSpy = vi.spyOn(console, 'error');
+
+      // Dispatch event without template and no array template
+      eventBus.dispatch(AppendArrayItemEvent, 'items');
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component.resolvedItems()).toHaveLength(0);
+      expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('Cannot add item to array'));
+    });
+  });
+
+  describe('InsertArrayItemEvent', () => {
+    it('should add item at specific index when InsertArrayItemEvent is dispatched', async () => {
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
@@ -291,7 +314,7 @@ describe('ArrayFieldComponent', () => {
       expect(component.resolvedItems()).toHaveLength(3);
 
       // Add at index 1 (between first and second)
-      eventBus.dispatch(AddArrayItemEvent, 'items', undefined, 1);
+      eventBus.dispatch(InsertArrayItemEvent, 'items', 1);
 
       // Wait for new item
       attempts = 0;
@@ -305,31 +328,10 @@ describe('ArrayFieldComponent', () => {
 
       expect(component.resolvedItems()).toHaveLength(4);
     });
-
-    it('should not add item if array has no template', async () => {
-      const field: ArrayField<unknown> = {
-        key: 'items',
-        type: 'array',
-        fields: [], // No template
-      };
-
-      const { component, fixture } = setupArrayTest(field, { items: [] });
-      const eventBus = TestBed.inject(EventBus);
-      const consoleSpy = vi.spyOn(console, 'error');
-
-      // Dispatch event without field and no array template
-      eventBus.dispatch(AddArrayItemEvent, 'items');
-
-      await fixture.whenStable();
-      fixture.detectChanges();
-
-      expect(component.resolvedItems()).toHaveLength(0);
-      expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('Cannot add item to array'));
-    });
   });
 
-  describe('RemoveArrayItemEvent', () => {
-    it('should remove last item when RemoveArrayItemEvent is dispatched without index', async () => {
+  describe('PopArrayItemEvent', () => {
+    it('should remove last item when PopArrayItemEvent is dispatched', async () => {
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
@@ -356,49 +358,7 @@ describe('ArrayFieldComponent', () => {
       expect(component.resolvedItems()).toHaveLength(3);
 
       // Remove last item
-      eventBus.dispatch(RemoveArrayItemEvent, 'items');
-
-      // Wait for the component to update
-      attempts = 0;
-      while (component.resolvedItems().length > 2 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await delay(100);
-        attempts++;
-      }
-
-      expect(component.resolvedItems()).toHaveLength(2);
-    });
-
-    it('should remove item at specific index when index is provided', async () => {
-      const field: ArrayField<unknown> = {
-        key: 'items',
-        type: 'array',
-        fields: [createSimpleTestField('item', 'Item')],
-      };
-
-      const { component, fixture } = setupArrayTest(field, {
-        items: ['first', 'second', 'third'],
-      });
-
-      const eventBus = TestBed.inject(EventBus);
-
-      // Wait for initial items
-      const maxAttempts = 50;
-      let attempts = 0;
-      while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await delay(100);
-        attempts++;
-      }
-
-      expect(component.resolvedItems()).toHaveLength(3);
-
-      // Remove item at index 1 (middle item)
-      eventBus.dispatch(RemoveArrayItemEvent, 'items', 1);
+      eventBus.dispatch(PopArrayItemEvent, 'items');
 
       // Wait for the component to update
       attempts = 0;
@@ -426,12 +386,56 @@ describe('ArrayFieldComponent', () => {
       expect(component.resolvedItems()).toHaveLength(0);
 
       // Try to remove from empty array
-      eventBus.dispatch(RemoveArrayItemEvent, 'items');
+      eventBus.dispatch(PopArrayItemEvent, 'items');
 
       await fixture.whenStable();
       fixture.detectChanges();
 
       expect(component.resolvedItems()).toHaveLength(0);
+    });
+  });
+
+  describe('RemoveAtIndexEvent', () => {
+    it('should remove item at specific index when RemoveAtIndexEvent is dispatched', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [createSimpleTestField('item', 'Item')],
+      };
+
+      const { component, fixture } = setupArrayTest(field, {
+        items: ['first', 'second', 'third'],
+      });
+
+      const eventBus = TestBed.inject(EventBus);
+
+      // Wait for initial items
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await delay(100);
+        attempts++;
+      }
+
+      expect(component.resolvedItems()).toHaveLength(3);
+
+      // Remove item at index 1 (middle item)
+      eventBus.dispatch(RemoveAtIndexEvent, 'items', 1);
+
+      // Wait for the component to update
+      attempts = 0;
+      while (component.resolvedItems().length > 2 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await delay(100);
+        attempts++;
+      }
+
+      expect(component.resolvedItems()).toHaveLength(2);
     });
   });
 
@@ -604,7 +608,7 @@ describe('ArrayFieldComponent', () => {
 
       expect(component.resolvedItems()).toHaveLength(1);
 
-      // Add another contact using row template
+      // Add another contact using row template (as array)
       const rowTemplate: RowField<unknown> = {
         key: 'row1',
         type: 'row',
@@ -613,7 +617,7 @@ describe('ArrayFieldComponent', () => {
           { key: 'email', type: 'input', label: 'Email' },
         ],
       };
-      eventBus.dispatch(AddArrayItemEvent, 'contacts', rowTemplate);
+      eventBus.dispatch(AppendArrayItemEvent, 'contacts', [rowTemplate]);
 
       // Wait for new item
       attempts = 0;
@@ -668,7 +672,7 @@ describe('ArrayFieldComponent', () => {
       expect(component.resolvedItems()).toHaveLength(3);
 
       // Remove middle item (index 1)
-      eventBus.dispatch(RemoveArrayItemEvent, 'contacts', 1);
+      eventBus.dispatch(RemoveAtIndexEvent, 'contacts', 1);
 
       // Wait for removal
       attempts = 0;

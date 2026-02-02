@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input, linkedSignal, signal } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, filter, firstValueFrom, forkJoin, map, Observable, of } from 'rxjs';
+import { catchError, firstValueFrom, forkJoin, map, Observable, of } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ArrayField } from '../../definitions/default/array-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
@@ -10,20 +10,19 @@ import { FieldDef } from '../../definitions/base/field-def';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { getFieldValueHandling } from '../../models/field-type';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
-import { AddArrayItemEvent } from '../../events/constants/add-array-item.event';
-import { RemoveArrayItemEvent } from '../../events/constants/remove-array-item.event';
 import { EventBus } from '../../events/event.bus';
 import { FieldSignalContext } from '../../mappers/types';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from '../../utils/array-field/array-field.types';
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
+import { observeArrayActions } from '../../utils/array-field/array-event-handler';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { ArrayFieldTree } from '../../core/field-tree-utils';
 
 /**
  * Container component for rendering dynamic arrays of fields.
  *
- * Supports add/remove operations via AddArrayItemEvent and RemoveArrayItemEvent.
+ * Supports add/remove operations via the arrayEvent() builder API.
  * Uses differential updates to optimize rendering - only recreates items when necessary.
  * Each item gets a scoped injector with ARRAY_CONTEXT for position-aware operations.
  */
@@ -134,23 +133,27 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   }
 
   private setupEventHandlers(): void {
-    // Handle add item events
-    this.eventBus
-      .on<AddArrayItemEvent>('add-array-item')
-      .pipe(
-        takeUntilDestroyed(),
-        filter((event) => event.arrayKey === this.key()),
-      )
-      .subscribe((event) => this.addItem(event.field ?? this.fieldTemplate(), event.index));
+    observeArrayActions(this.eventBus, () => this.key())
+      .pipe(takeUntilDestroyed())
+      .subscribe((action) => {
+        if (action.action === 'add') {
+          this.addItem(this.resolveTemplate(action.template), action.index);
+        } else {
+          this.removeItem(action.index);
+        }
+      });
+  }
 
-    // Handle remove item events
-    this.eventBus
-      .on<RemoveArrayItemEvent>('remove-array-item')
-      .pipe(
-        takeUntilDestroyed(),
-        filter((event) => event.arrayKey === this.key()),
-      )
-      .subscribe((event) => this.removeItem(event.index));
+  /**
+   * Resolves the template to use for a new array item.
+   * If a template array is provided, uses the first element.
+   * Otherwise, falls back to the array's default template.
+   */
+  private resolveTemplate(eventTemplate?: FieldDef<unknown>[]): FieldDef<unknown> | null {
+    if (eventTemplate && eventTemplate.length > 0) {
+      return eventTemplate[0];
+    }
+    return this.fieldTemplate();
   }
 
   private performDifferentialUpdate(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): void {

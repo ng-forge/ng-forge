@@ -1,6 +1,6 @@
 import { computed, inject, isSignal, Signal } from '@angular/core';
 import {
-  AddArrayItemEvent,
+  AppendArrayItemEvent,
   ARRAY_CONTEXT,
   buildBaseInputs,
   DEFAULT_PROPS,
@@ -10,8 +10,9 @@ import {
   FieldWithValidation,
   FORM_OPTIONS,
   NextPageEvent,
+  PopArrayItemEvent,
   PreviousPageEvent,
-  RemoveArrayItemEvent,
+  RemoveAtIndexEvent,
   resolveNextButtonDisabled,
   resolveSubmitButtonDisabled,
   RootFormRegistryService,
@@ -146,7 +147,7 @@ export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unkn
 }
 
 /**
- * Mapper for add array item button - preconfigures AddArrayItemEvent with array context.
+ * Mapper for add array item button - preconfigures AppendArrayItemEvent with array context.
  *
  * Supports two modes:
  * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array
@@ -171,7 +172,7 @@ export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField)
     );
   }
 
-  // Set default eventArgs for AddArrayItemEvent (arrayKey)
+  // Set default eventArgs for AppendArrayItemEvent (arrayKey)
   // User can override by providing eventArgs in field definition
   const defaultEventArgs = ['$arrayKey'];
   const eventArgs = 'eventArgs' in fieldDef && fieldDef.eventArgs !== undefined ? fieldDef.eventArgs : defaultEventArgs;
@@ -187,7 +188,7 @@ export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField)
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
-      event: AddArrayItemEvent,
+      event: AppendArrayItemEvent,
       eventArgs,
       eventContext: {
         key: fieldDef.key,
@@ -211,11 +212,11 @@ export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField)
 }
 
 /**
- * Mapper for remove array item button - preconfigures RemoveArrayItemEvent with array context.
+ * Mapper for remove array item button - preconfigures RemoveAtIndexEvent or PopArrayItemEvent with array context.
  *
  * Supports two modes:
- * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array and removes item at current index
- * 2. Outside array: Uses `arrayKey` property from field definition, removes last item by default
+ * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array and removes item at current index (RemoveAtIndexEvent)
+ * 2. Outside array: Uses `arrayKey` property from field definition, removes last item (PopArrayItemEvent)
  *
  * @param fieldDef The remove array item button field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
@@ -236,11 +237,17 @@ export function removeArrayItemButtonFieldMapper(fieldDef: RemoveArrayItemButton
     );
   }
 
-  // Set default eventArgs for RemoveArrayItemEvent (arrayKey, index if inside array)
-  // When outside array, only pass arrayKey (removes last by default)
+  // Set default eventArgs based on context:
+  // - Inside array: RemoveAtIndexEvent needs arrayKey and index
+  // - Outside array: PopArrayItemEvent only needs arrayKey
   // User can override by providing eventArgs in field definition
   const defaultEventArgs = arrayContext ? ['$arrayKey', '$index'] : ['$arrayKey'];
   const eventArgs = 'eventArgs' in fieldDef && fieldDef.eventArgs !== undefined ? fieldDef.eventArgs : defaultEventArgs;
+
+  // Choose event type based on context:
+  // - Inside array: RemoveAtIndexEvent (remove specific item)
+  // - Outside array: PopArrayItemEvent (remove last item)
+  const eventType = arrayContext ? RemoveAtIndexEvent : PopArrayItemEvent;
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
@@ -253,7 +260,7 @@ export function removeArrayItemButtonFieldMapper(fieldDef: RemoveArrayItemButton
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
-      event: RemoveArrayItemEvent,
+      event: eventType,
       eventArgs,
       eventContext: {
         key: fieldDef.key,
