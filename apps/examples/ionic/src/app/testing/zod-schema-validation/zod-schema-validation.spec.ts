@@ -186,12 +186,12 @@ test.describe('Zod Schema Validation E2E Tests', () => {
       const scenario = helpers.getScenario('comprehensive-validation-test');
 
       // Get ZIP input in first address (addresses array has initial empty item)
-      const zipInput = scenario.locator('#addresses #zip input').first();
+      const zipInput = scenario.locator('#addresses [id^="zip"] input').first();
       await helpers.fillInput(zipInput, '123');
       await ionBlur(zipInput);
 
       // Verify error is displayed (Zod regex validation error)
-      const errorElement = scenario.locator('#addresses #zip ion-note.df-ion-error').first();
+      const errorElement = scenario.locator('#addresses [id^="zip"] ion-note.df-ion-error').first();
       await expect(errorElement).toContainText('5 digits');
     });
 
@@ -216,15 +216,15 @@ test.describe('Zod Schema Validation E2E Tests', () => {
       await ionBlur(lastNameInput);
 
       // Fill address with city matching last name (for cross-field validation)
-      const streetInput = scenario.locator('#addresses #street input').first();
+      const streetInput = scenario.locator('#addresses [id^="street"] input').first();
       await helpers.fillInput(streetInput, '123 Main Street');
       await ionBlur(streetInput);
 
-      const cityInput = scenario.locator('#addresses #city input').first();
+      const cityInput = scenario.locator('#addresses [id^="city"] input').first();
       await helpers.fillInput(cityInput, 'Springfield');
       await ionBlur(cityInput);
 
-      const zipInput = scenario.locator('#addresses #zip input').first();
+      const zipInput = scenario.locator('#addresses [id^="zip"] input').first();
       await helpers.fillInput(zipInput, '12345');
       await ionBlur(zipInput);
 
