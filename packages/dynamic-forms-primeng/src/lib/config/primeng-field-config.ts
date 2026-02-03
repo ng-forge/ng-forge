@@ -1,16 +1,19 @@
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
-import { checkboxFieldMapper, datepickerFieldMapper, optionsFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
+import {
+  addArrayItemButtonMapper,
+  checkboxFieldMapper,
+  datepickerFieldMapper,
+  insertArrayItemButtonMapper,
+  optionsFieldMapper,
+  popArrayItemButtonMapper,
+  prependArrayItemButtonMapper,
+  removeArrayItemButtonMapper,
+  shiftArrayItemButtonMapper,
+  valueFieldMapper,
+} from '@ng-forge/dynamic-forms/integration';
 import { PrimeField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/prime-button.mapper';
-import {
-  addArrayItemButtonFieldMapper,
-  insertArrayItemButtonFieldMapper,
-  nextButtonFieldMapper,
-  prependArrayItemButtonFieldMapper,
-  previousButtonFieldMapper,
-  removeArrayItemButtonFieldMapper,
-  submitButtonFieldMapper,
-} from '../fields/button/prime-specific-button.mapper';
+import { nextButtonFieldMapper, previousButtonFieldMapper, submitButtonFieldMapper } from '../fields/button/prime-specific-button.mapper';
 
 /**
  * PrimeNG field type definitions
@@ -60,25 +63,37 @@ export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: PrimeField.AddArrayItem,
     loadComponent: () => import('../fields/button/prime-button.component'),
-    mapper: addArrayItemButtonFieldMapper,
+    mapper: addArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {
     name: PrimeField.PrependArrayItem,
     loadComponent: () => import('../fields/button/prime-button.component'),
-    mapper: prependArrayItemButtonFieldMapper,
+    mapper: prependArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {
     name: PrimeField.InsertArrayItem,
     loadComponent: () => import('../fields/button/prime-button.component'),
-    mapper: insertArrayItemButtonFieldMapper,
+    mapper: insertArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {
     name: PrimeField.RemoveArrayItem,
     loadComponent: () => import('../fields/button/prime-button.component'),
-    mapper: removeArrayItemButtonFieldMapper,
+    mapper: removeArrayItemButtonMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: PrimeField.PopArrayItem,
+    loadComponent: () => import('../fields/button/prime-button.component'),
+    mapper: popArrayItemButtonMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: PrimeField.ShiftArrayItem,
+    loadComponent: () => import('../fields/button/prime-button.component'),
+    mapper: shiftArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {

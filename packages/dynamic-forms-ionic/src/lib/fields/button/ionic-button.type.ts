@@ -134,3 +134,33 @@ export interface RemoveArrayItemButtonField extends Omit<FieldDef<IonicButtonPro
    */
   arrayKey?: string;
 }
+
+/** Pop array item button field - dispatches PopArrayItemEvent (removes last item) */
+export interface PopArrayItemButtonField extends Omit<FieldDef<IonicButtonProps>, 'event'> {
+  type: 'popArrayItem';
+  key: string;
+  label: string;
+  disabled?: boolean;
+  className?: string;
+  props?: IonicButtonProps;
+  /**
+   * The key of the array field to remove the last item from.
+   * REQUIRED - must specify which array to pop from.
+   */
+  arrayKey: string;
+}
+
+/** Shift array item button field - dispatches ShiftArrayItemEvent (removes first item) */
+export interface ShiftArrayItemButtonField extends Omit<FieldDef<IonicButtonProps>, 'event'> {
+  type: 'shiftArrayItem';
+  key: string;
+  label: string;
+  disabled?: boolean;
+  className?: string;
+  props?: IonicButtonProps;
+  /**
+   * The key of the array field to remove the first item from.
+   * REQUIRED - must specify which array to shift from.
+   */
+  arrayKey: string;
+}

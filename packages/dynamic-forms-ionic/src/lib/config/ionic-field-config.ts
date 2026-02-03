@@ -1,16 +1,19 @@
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
-import { checkboxFieldMapper, datepickerFieldMapper, optionsFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
+import {
+  addArrayItemButtonMapper,
+  checkboxFieldMapper,
+  datepickerFieldMapper,
+  insertArrayItemButtonMapper,
+  optionsFieldMapper,
+  popArrayItemButtonMapper,
+  prependArrayItemButtonMapper,
+  removeArrayItemButtonMapper,
+  shiftArrayItemButtonMapper,
+  valueFieldMapper,
+} from '@ng-forge/dynamic-forms/integration';
 import { IonicField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/ionic-button.mapper';
-import {
-  addArrayItemButtonFieldMapper,
-  insertArrayItemButtonFieldMapper,
-  nextButtonFieldMapper,
-  prependArrayItemButtonFieldMapper,
-  previousButtonFieldMapper,
-  removeArrayItemButtonFieldMapper,
-  submitButtonFieldMapper,
-} from '../fields/button/ionic-specific-button.mapper';
+import { nextButtonFieldMapper, previousButtonFieldMapper, submitButtonFieldMapper } from '../fields/button/ionic-specific-button.mapper';
 
 /**
  * Ionic field type definitions
@@ -60,25 +63,37 @@ export const IONIC_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: IonicField.AddArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
-    mapper: addArrayItemButtonFieldMapper,
+    mapper: addArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {
     name: IonicField.PrependArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
-    mapper: prependArrayItemButtonFieldMapper,
+    mapper: prependArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {
     name: IonicField.InsertArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
-    mapper: insertArrayItemButtonFieldMapper,
+    mapper: insertArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {
     name: IonicField.RemoveArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
-    mapper: removeArrayItemButtonFieldMapper,
+    mapper: removeArrayItemButtonMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: IonicField.PopArrayItem,
+    loadComponent: () => import('../fields/button/ionic-button.component'),
+    mapper: popArrayItemButtonMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: IonicField.ShiftArrayItem,
+    loadComponent: () => import('../fields/button/ionic-button.component'),
+    mapper: shiftArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {

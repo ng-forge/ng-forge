@@ -14,6 +14,8 @@ export const BsField = {
   PrependArrayItem: 'prependArrayItem',
   InsertArrayItem: 'insertArrayItem',
   RemoveArrayItem: 'removeArrayItem',
+  PopArrayItem: 'popArrayItem',
+  ShiftArrayItem: 'shiftArrayItem',
   Textarea: 'textarea',
   Radio: 'radio',
   MultiCheckbox: 'multi-checkbox',

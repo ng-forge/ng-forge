@@ -14,6 +14,8 @@ export const MatField = {
   PrependArrayItem: 'prependArrayItem',
   InsertArrayItem: 'insertArrayItem',
   RemoveArrayItem: 'removeArrayItem',
+  PopArrayItem: 'popArrayItem',
+  ShiftArrayItem: 'shiftArrayItem',
   Textarea: 'textarea',
   Radio: 'radio',
   MultiCheckbox: 'multi-checkbox',

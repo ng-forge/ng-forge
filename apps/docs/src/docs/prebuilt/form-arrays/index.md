@@ -73,8 +73,10 @@ Use button field types directly in your form configuration for declarative array
 | `prependArrayItem` | Outside array    | Inserts a new item at the beginning of the array |
 | `insertArrayItem`  | Outside array    | Inserts a new item at a specific index           |
 | `removeArrayItem`  | Inside each item | Removes the current item from the array          |
+| `popArrayItem`     | Outside array    | Removes the last item from the array             |
+| `shiftArrayItem`   | Outside array    | Removes the first item from the array            |
 
-**Note:** Add/prepend/insert buttons require a `template` property defining the new item structure and should be placed outside the array. Remove buttons go inside each item and don't need a template.
+**Note:** Add/prepend/insert buttons require a `template` property defining the new item structure and should be placed outside the array. Remove buttons go inside each item and don't need a template. Pop/shift buttons should be placed outside the array and require an `arrayKey` property.
 
 ```typescript
 // Define the template for array items

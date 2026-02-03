@@ -1,16 +1,19 @@
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
-import { checkboxFieldMapper, datepickerFieldMapper, optionsFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
+import {
+  addArrayItemButtonMapper,
+  checkboxFieldMapper,
+  datepickerFieldMapper,
+  insertArrayItemButtonMapper,
+  optionsFieldMapper,
+  popArrayItemButtonMapper,
+  prependArrayItemButtonMapper,
+  removeArrayItemButtonMapper,
+  shiftArrayItemButtonMapper,
+  valueFieldMapper,
+} from '@ng-forge/dynamic-forms/integration';
 import { BsField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/bs-button.mapper';
-import {
-  addArrayItemButtonFieldMapper,
-  insertArrayItemButtonFieldMapper,
-  nextButtonFieldMapper,
-  prependArrayItemButtonFieldMapper,
-  previousButtonFieldMapper,
-  removeArrayItemButtonFieldMapper,
-  submitButtonFieldMapper,
-} from '../fields/button/bs-specific-button.mapper';
+import { nextButtonFieldMapper, previousButtonFieldMapper, submitButtonFieldMapper } from '../fields/button/bs-specific-button.mapper';
 
 export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
   {
@@ -56,25 +59,37 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: BsField.AddArrayItem,
     loadComponent: () => import('../fields/button/bs-button.component'),
-    mapper: addArrayItemButtonFieldMapper,
+    mapper: addArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {
     name: BsField.PrependArrayItem,
     loadComponent: () => import('../fields/button/bs-button.component'),
-    mapper: prependArrayItemButtonFieldMapper,
+    mapper: prependArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {
     name: BsField.InsertArrayItem,
     loadComponent: () => import('../fields/button/bs-button.component'),
-    mapper: insertArrayItemButtonFieldMapper,
+    mapper: insertArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {
     name: BsField.RemoveArrayItem,
     loadComponent: () => import('../fields/button/bs-button.component'),
-    mapper: removeArrayItemButtonFieldMapper,
+    mapper: removeArrayItemButtonMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: BsField.PopArrayItem,
+    loadComponent: () => import('../fields/button/bs-button.component'),
+    mapper: popArrayItemButtonMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: BsField.ShiftArrayItem,
+    loadComponent: () => import('../fields/button/bs-button.component'),
+    mapper: shiftArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {

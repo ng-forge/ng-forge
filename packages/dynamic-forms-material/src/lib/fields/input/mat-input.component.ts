@@ -85,23 +85,8 @@ export default class MatInputFieldComponent implements MatInputComponent {
   /**
    * Computed signal that extracts the readonly state from the field.
    * Used by the effect to reactively sync the readonly attribute to the DOM.
-   *
-   * Returns false (editable) if the field tree is not yet available or invalid.
-   * This handles the case where array items are rendered before their FieldTree
-   * is fully initialized from the root form.
    */
-  private readonly isReadonly = computed(() => {
-    const fieldTree = this.field();
-    if (!fieldTree || typeof fieldTree !== 'function') {
-      return false; // Default to editable if field not ready
-    }
-    try {
-      const fieldState = fieldTree();
-      return fieldState?.readonly?.() ?? false;
-    } catch {
-      return false; // Default to editable on error
-    }
-  });
+  private readonly isReadonly = computed(() => this.field()().readonly());
 
   /**
    * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly

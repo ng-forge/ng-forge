@@ -7,4 +7,27 @@ export { optionsFieldMapper } from './select/options-field-mapper';
 export type { FieldWithOptions } from './select/options-field-mapper';
 export { textareaFieldMapper } from './textarea/textarea-field-mapper';
 export { sliderFieldMapper } from './slider/slider-field-mapper';
-export { buttonFieldMapper } from './button/button-field-mapper';
+
+// Button field mappers
+export {
+  buttonFieldMapper,
+  // Array button utilities
+  resolveArrayButtonContext,
+  buildArrayButtonEventContext,
+  resolveArrayButtonEventArgs,
+  // Array button mappers
+  addArrayItemButtonMapper,
+  prependArrayItemButtonMapper,
+  insertArrayItemButtonMapper,
+  removeArrayItemButtonMapper,
+  popArrayItemButtonMapper,
+  shiftArrayItemButtonMapper,
+} from './button';
+export type {
+  ArrayButtonContext,
+  ArrayButtonEventContext,
+  BaseArrayAddButtonField,
+  BaseArrayRemoveButtonField,
+  BaseInsertArrayItemButtonField,
+  EventArg,
+} from './button';
