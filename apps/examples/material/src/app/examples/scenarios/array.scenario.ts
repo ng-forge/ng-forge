@@ -29,62 +29,58 @@ const tagTemplate = {
   ],
 } as const;
 
-const contactTemplate = {
-  key: 'contact',
-  type: 'group',
-  fields: [
-    {
-      key: 'name',
-      type: 'input',
-      label: 'Contact Name',
-      required: true,
-      minLength: 2,
-      props: {
-        placeholder: 'Enter contact name',
-        hint: 'Full name of the emergency contact',
-      },
+const contactFields = [
+  {
+    key: 'name',
+    type: 'input',
+    label: 'Contact Name',
+    required: true,
+    minLength: 2,
+    props: {
+      placeholder: 'Enter contact name',
+      hint: 'Full name of the emergency contact',
     },
-    {
-      key: 'phone',
-      type: 'input',
-      label: 'Phone Number',
-      required: true,
-      pattern: /^\d{10}$/,
-      validationMessages: {
-        pattern: 'Please enter a valid 10-digit phone number',
-      },
-      props: {
-        type: 'tel',
-        placeholder: '5551234567',
-        hint: 'Enter 10-digit phone number without spaces or dashes',
-      },
+  },
+  {
+    key: 'phone',
+    type: 'input',
+    label: 'Phone Number',
+    required: true,
+    pattern: /^\d{10}$/,
+    validationMessages: {
+      pattern: 'Please enter a valid 10-digit phone number',
     },
-    {
-      key: 'relationship',
-      type: 'select',
-      label: 'Relationship',
-      required: true,
-      options: [
-        { label: 'Family', value: 'family' },
-        { label: 'Friend', value: 'friend' },
-        { label: 'Colleague', value: 'colleague' },
-        { label: 'Other', value: 'other' },
-      ],
-      props: {
-        hint: 'Select your relationship to this contact',
-      },
+    props: {
+      type: 'tel',
+      placeholder: '5551234567',
+      hint: 'Enter 10-digit phone number without spaces or dashes',
     },
-    {
-      key: 'removeContact',
-      type: 'removeArrayItem',
-      label: 'Remove Contact',
-      className: 'remove-contact-button',
-      props: {
-        color: 'warn',
-      },
+  },
+  {
+    key: 'relationship',
+    type: 'select',
+    label: 'Relationship',
+    required: true,
+    options: [
+      { label: 'Family', value: 'family' },
+      { label: 'Friend', value: 'friend' },
+      { label: 'Colleague', value: 'colleague' },
+      { label: 'Other', value: 'other' },
+    ],
+    props: {
+      hint: 'Select your relationship to this contact',
     },
-  ],
-} as const;
+  },
+  {
+    key: 'removeContact',
+    type: 'removeArrayItem',
+    label: 'Remove Contact',
+    className: 'remove-contact-button',
+    props: {
+      color: 'warn',
+    },
+  },
+] as const;
 
 export const arrayScenario: ExampleScenario = {
   id: 'array',
@@ -94,11 +90,9 @@ export const arrayScenario: ExampleScenario = {
     tags: [{ value: 'angular' }, { value: 'typescript' }],
     contacts: [
       {
-        contact: {
-          name: 'Jane Smith',
-          phone: '5551234567',
-          relationship: 'family',
-        },
+        name: 'Jane Smith',
+        phone: '5551234567',
+        relationship: 'family',
       },
     ],
   },
@@ -149,7 +143,7 @@ export const arrayScenario: ExampleScenario = {
       {
         key: 'contacts',
         type: 'array',
-        fields: [contactTemplate],
+        fields: contactFields,
       },
       {
         key: 'contactButtons',
@@ -160,7 +154,7 @@ export const arrayScenario: ExampleScenario = {
             type: 'prependArrayItem',
             label: 'Add First',
             arrayKey: 'contacts',
-            template: [contactTemplate],
+            template: contactFields,
             className: 'prepend-contact-button',
             props: {
               color: 'accent',
@@ -171,7 +165,7 @@ export const arrayScenario: ExampleScenario = {
             type: 'addArrayItem',
             label: 'Add Contact',
             arrayKey: 'contacts',
-            template: [contactTemplate],
+            template: contactFields,
             className: 'add-contact-button',
             props: {
               color: 'primary',
