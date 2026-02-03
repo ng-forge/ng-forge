@@ -270,8 +270,14 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
           mapContainerChildren(templateField.fields, itemPath);
         }
       } else {
-        // Simple field template
-        mapFieldToForm(templateField, itemPath);
+        // Simple field template - get the specific field's path
+        const fieldKey = templateField.key;
+        if (fieldKey) {
+          const fieldPath = pathRecord[fieldKey];
+          if (fieldPath) {
+            mapFieldToForm(templateField, fieldPath);
+          }
+        }
       }
     }
   });
