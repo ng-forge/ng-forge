@@ -130,9 +130,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   private setupEffects(): void {
     // Sync field components when array data changes
     explicitEffect([this.arrayFieldTrees], ([fieldTrees]) => {
-      this.updateVersion.update((v) => v + 1);
-      const currentVersion = this.updateVersion();
-      this.performDifferentialUpdate(fieldTrees, currentVersion);
+      this.performDifferentialUpdate(fieldTrees);
     });
   }
 
@@ -234,28 +232,32 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     parentForm().value.set({ ...currentValue, [arrayKey]: newArray } as any);
   }
 
-  private performDifferentialUpdate(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): void {
+  private performDifferentialUpdate(fieldTrees: readonly (FieldTree<unknown> | null)[]): void {
     const resolvedItems = this.resolvedItemsSignal();
     const operation = determineDifferentialOperation(resolvedItems, fieldTrees.length);
+
+    // Only increment version for operations that do actual work.
+    // "none" operations (value-only changes) should not interfere with async add operations.
+    if (operation.type === 'none') {
+      return;
+    }
+
+    this.updateVersion.update((v) => v + 1);
+    const currentVersion = this.updateVersion();
 
     switch (operation.type) {
       case 'clear':
         this.resolvedItemsSignal.set([]);
         break;
       case 'initial':
-        void this.resolveAllItems(fieldTrees, updateId);
+        void this.resolveAllItems(fieldTrees, currentVersion);
         break;
       case 'append':
-        void this.appendItems(fieldTrees, operation.startIndex, operation.endIndex, updateId);
-        break;
-      case 'pop':
-        this.resolvedItemsSignal.set(resolvedItems.slice(0, operation.newLength));
+        void this.appendItems(fieldTrees, operation.startIndex, operation.endIndex, currentVersion);
         break;
       case 'recreate':
         this.resolvedItemsSignal.set([]);
-        void this.resolveAllItems(fieldTrees, updateId);
-        break;
-      case 'none':
+        void this.resolveAllItems(fieldTrees, currentVersion);
         break;
     }
   }

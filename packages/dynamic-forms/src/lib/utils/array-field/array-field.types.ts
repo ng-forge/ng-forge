@@ -67,8 +67,13 @@ export type DifferentialUpdateOperation =
  * - Clear all (empty array)
  * - Initial render (no existing items)
  * - Append only (items added at end)
- * - Pop only (items removed from end)
+ * - Recreate (items removed - we can't know which items, so recreate all)
  * - None (same length - items update via linkedSignal)
+ *
+ * Note: We always use 'recreate' for removals because we can't determine which
+ * specific items were removed. Operations like shift, removeAtIndex remove from
+ * the middle, not just the end. Each array item has its own local form that
+ * doesn't reactively track parent changes, so we must recreate to get correct values.
  */
 export function determineDifferentialOperation(currentItems: ResolvedArrayItem[], newLength: number): DifferentialUpdateOperation {
   const currentLength = currentItems.length;
@@ -91,8 +96,11 @@ export function determineDifferentialOperation(currentItems: ResolvedArrayItem[]
   }
 
   if (newLength < currentLength) {
-    // Items removed - pop from end, remaining items stay
-    return { type: 'pop', newLength };
+    // Items removed - must recreate because we don't know which items were removed.
+    // shift() removes from index 0, removeAtIndex() removes from any position.
+    // Each item's local form is initialized with its value at creation time and
+    // doesn't reactively track parent array changes.
+    return { type: 'recreate' };
   }
 
   // Same length - no structural change, items update via linkedSignal
