@@ -235,7 +235,8 @@ test.describe('Array Fields E2E Tests', () => {
       expect(uniqueIds.size).toBe(ids.length);
 
       for (const id of ids) {
-        expect(id).toMatch(/_\d+/);
+        // Array item field IDs now use UUID suffixes (e.g., "name-abc123" or "email-xyz789")
+        expect(id).toMatch(/-[a-z0-9]+$/i);
       }
     });
 
@@ -499,9 +500,10 @@ test.describe('Array Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      await page.waitForSelector('[data-testid="array-focus-after-add"] #tasks input', { state: 'visible', timeout: 10000 });
+      await page.waitForSelector('[data-testid="array-focus-after-add"] #tasks ion-input input', { state: 'visible', timeout: 10000 });
 
-      const taskInputs = scenario.locator('#tasks input');
+      // Use ion-input input to specifically target input fields (not select inputs)
+      const taskInputs = scenario.locator('#tasks ion-input input');
       await expect(taskInputs).toHaveCount(1, { timeout: 10000 });
 
       const addButton = scenario.locator('ion-button:has-text("Add Task")');
@@ -521,9 +523,10 @@ test.describe('Array Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      await page.waitForSelector('[data-testid="array-focus-after-remove"] #tasks input', { state: 'visible', timeout: 10000 });
+      await page.waitForSelector('[data-testid="array-focus-after-remove"] #tasks ion-input input', { state: 'visible', timeout: 10000 });
 
-      const taskInputs = scenario.locator('#tasks input');
+      // Use ion-input input to specifically target input fields (not select inputs)
+      const taskInputs = scenario.locator('#tasks ion-input input');
       await expect(taskInputs).toHaveCount(3, { timeout: 10000 });
 
       const removeButtons = scenario.locator('ion-button:has-text("Remove")');
