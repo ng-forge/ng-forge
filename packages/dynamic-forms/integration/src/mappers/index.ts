@@ -22,6 +22,10 @@ export {
   removeArrayItemButtonMapper,
   popArrayItemButtonMapper,
   shiftArrayItemButtonMapper,
+  // Navigation button mappers
+  submitButtonFieldMapper,
+  nextButtonFieldMapper,
+  previousButtonFieldMapper,
 } from './button';
 export type {
   ArrayButtonContext,
@@ -29,5 +33,6 @@ export type {
   BaseArrayAddButtonField,
   BaseArrayRemoveButtonField,
   BaseInsertArrayItemButtonField,
+  BaseNavigationButtonField,
   EventArg,
 } from './button';

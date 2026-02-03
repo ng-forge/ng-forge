@@ -9,6 +9,8 @@ export type {
   PrependArrayItemButtonField,
   InsertArrayItemButtonField,
   RemoveArrayItemButtonField,
+  PopArrayItemButtonField,
+  ShiftArrayItemButtonField,
 } from './prime-button.type';
 
 // Public API - component

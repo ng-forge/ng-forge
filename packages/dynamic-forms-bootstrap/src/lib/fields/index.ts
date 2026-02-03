@@ -11,6 +11,8 @@ export type {
   PrependArrayItemButtonField,
   InsertArrayItemButtonField,
   RemoveArrayItemButtonField,
+  PopArrayItemButtonField,
+  ShiftArrayItemButtonField,
 } from './button';
 
 export { BsCheckboxFieldComponent } from './checkbox';

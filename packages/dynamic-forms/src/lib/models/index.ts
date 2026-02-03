@@ -25,7 +25,7 @@ export type {
 } from './validation';
 
 // Logic
-export type { LogicConfig, FormStateCondition } from './logic';
+export type { LogicConfig, StateLogicConfig, FormStateCondition } from './logic';
 export { isFormStateCondition } from './logic';
 
 // Expressions

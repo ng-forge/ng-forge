@@ -16,9 +16,11 @@ import type {
   MatNextButtonField,
   MatPreviousButtonField,
   MatRadioField,
+  PopArrayItemButtonField,
   PrependArrayItemButtonField,
   RemoveArrayItemButtonField,
   MatSelectField,
+  ShiftArrayItemButtonField,
   MatSliderField,
   MatSubmitButtonField,
   MatTextareaField,
@@ -38,6 +40,8 @@ declare module '@ng-forge/dynamic-forms' {
     prependArrayItem: PrependArrayItemButtonField;
     insertArrayItem: InsertArrayItemButtonField;
     removeArrayItem: RemoveArrayItemButtonField;
+    popArrayItem: PopArrayItemButtonField;
+    shiftArrayItem: ShiftArrayItemButtonField;
     textarea: MatTextareaField;
     radio: MatRadioField<unknown>;
     'multi-checkbox': MatMultiCheckboxField<unknown>;

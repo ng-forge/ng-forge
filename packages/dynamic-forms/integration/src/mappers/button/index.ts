@@ -15,3 +15,7 @@ export {
   shiftArrayItemButtonMapper,
 } from './array-button.mapper';
 export type { BaseArrayAddButtonField, BaseArrayRemoveButtonField, BaseInsertArrayItemButtonField } from './array-button.mapper';
+
+// Navigation button mappers
+export { submitButtonFieldMapper, nextButtonFieldMapper, previousButtonFieldMapper } from './navigation-button.mapper';
+export type { BaseNavigationButtonField } from './navigation-button.mapper';

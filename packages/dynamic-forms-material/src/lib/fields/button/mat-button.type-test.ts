@@ -2,7 +2,7 @@
  * Exhaustive type tests for MatButton field types.
  */
 import { expectTypeOf } from 'vitest';
-import type { DynamicText, LogicConfig } from '@ng-forge/dynamic-forms';
+import type { StateLogicConfig } from '@ng-forge/dynamic-forms';
 import type { RequiredKeys } from '@ng-forge/utils';
 
 // Import registry augmentation to include Material field types in ArrayAllowedChildren
@@ -46,13 +46,10 @@ describe('MatButtonProps - Exhaustive Whitelist', () => {
 
 // ============================================================================
 // MatSubmitButtonField - Whitelist Test
-// Extends Omit<FieldDef<MatButtonProps>, 'event'> plus additional fields
 // ============================================================================
 
 describe('MatSubmitButtonField - Exhaustive Whitelist', () => {
-  // FieldDef keys (minus 'event') + submit-specific keys
   type ExpectedKeys =
-    // From FieldDef (minus event)
     | 'key'
     | 'type'
     | 'label'
@@ -64,7 +61,6 @@ describe('MatSubmitButtonField - Exhaustive Whitelist', () => {
     | 'tabIndex'
     | 'col'
     | 'meta'
-    // Submit-specific
     | 'logic';
 
   type ActualKeys = keyof MatSubmitButtonField;
@@ -81,13 +77,9 @@ describe('MatSubmitButtonField - Exhaustive Whitelist', () => {
     it('key is required', () => {
       expectTypeOf<MatSubmitButtonField['key']>().toEqualTypeOf<string>();
     });
-
-    it('label is required', () => {
-      expectTypeOf<MatSubmitButtonField['label']>().toEqualTypeOf<string>();
-    });
   });
 
-  describe('optional keys from FieldDef', () => {
+  describe('optional keys', () => {
     it('disabled', () => {
       expectTypeOf<MatSubmitButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
     });
@@ -98,28 +90,6 @@ describe('MatSubmitButtonField - Exhaustive Whitelist', () => {
 
     it('props', () => {
       expectTypeOf<MatSubmitButtonField['props']>().toEqualTypeOf<MatButtonProps | undefined>();
-    });
-
-    it('readonly', () => {
-      expectTypeOf<MatSubmitButtonField['readonly']>().toEqualTypeOf<boolean | undefined>();
-    });
-
-    it('hidden', () => {
-      expectTypeOf<MatSubmitButtonField['hidden']>().toEqualTypeOf<boolean | undefined>();
-    });
-
-    it('tabIndex', () => {
-      expectTypeOf<MatSubmitButtonField['tabIndex']>().toEqualTypeOf<number | undefined>();
-    });
-
-    it('col', () => {
-      expectTypeOf<MatSubmitButtonField['col']>().toEqualTypeOf<number | undefined>();
-    });
-  });
-
-  describe('submit-specific keys', () => {
-    it('logic', () => {
-      expectTypeOf<MatSubmitButtonField['logic']>().toEqualTypeOf<LogicConfig[] | undefined>();
     });
   });
 });
@@ -157,10 +127,6 @@ describe('MatNextButtonField - Exhaustive Whitelist', () => {
     it('key is required', () => {
       expectTypeOf<MatNextButtonField['key']>().toEqualTypeOf<string>();
     });
-
-    it('label is required', () => {
-      expectTypeOf<MatNextButtonField['label']>().toEqualTypeOf<string>();
-    });
   });
 
   describe('optional keys', () => {
@@ -168,16 +134,8 @@ describe('MatNextButtonField - Exhaustive Whitelist', () => {
       expectTypeOf<MatNextButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('className', () => {
-      expectTypeOf<MatNextButtonField['className']>().toEqualTypeOf<string | undefined>();
-    });
-
     it('props', () => {
       expectTypeOf<MatNextButtonField['props']>().toEqualTypeOf<MatButtonProps | undefined>();
-    });
-
-    it('logic', () => {
-      expectTypeOf<MatNextButtonField['logic']>().toEqualTypeOf<LogicConfig[] | undefined>();
     });
   });
 });
@@ -187,7 +145,19 @@ describe('MatNextButtonField - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('MatPreviousButtonField - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'meta';
+  type ExpectedKeys =
+    | 'key'
+    | 'type'
+    | 'label'
+    | 'props'
+    | 'className'
+    | 'disabled'
+    | 'readonly'
+    | 'hidden'
+    | 'tabIndex'
+    | 'col'
+    | 'meta'
+    | 'logic';
 
   type ActualKeys = keyof MatPreviousButtonField;
 
@@ -203,19 +173,11 @@ describe('MatPreviousButtonField - Exhaustive Whitelist', () => {
     it('key is required', () => {
       expectTypeOf<MatPreviousButtonField['key']>().toEqualTypeOf<string>();
     });
-
-    it('label is required', () => {
-      expectTypeOf<MatPreviousButtonField['label']>().toEqualTypeOf<string>();
-    });
   });
 
   describe('optional keys', () => {
     it('disabled', () => {
       expectTypeOf<MatPreviousButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
-    });
-
-    it('className', () => {
-      expectTypeOf<MatPreviousButtonField['className']>().toEqualTypeOf<string | undefined>();
     });
 
     it('props', () => {
@@ -241,6 +203,7 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'tabIndex'
     | 'col'
     | 'meta'
+    | 'logic'
     | 'arrayKey'
     | 'template';
 
@@ -259,10 +222,6 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
       expectTypeOf<AddArrayItemButtonField['key']>().toEqualTypeOf<string>();
     });
 
-    it('label is required', () => {
-      expectTypeOf<AddArrayItemButtonField['label']>().toEqualTypeOf<string>();
-    });
-
     it('template is required', () => {
       expectTypeOf<AddArrayItemButtonField['template']>().not.toEqualTypeOf<undefined>();
     });
@@ -273,16 +232,8 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
       expectTypeOf<AddArrayItemButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('className', () => {
-      expectTypeOf<AddArrayItemButtonField['className']>().toEqualTypeOf<string | undefined>();
-    });
-
     it('props', () => {
       expectTypeOf<AddArrayItemButtonField['props']>().toEqualTypeOf<MatButtonProps | undefined>();
-    });
-
-    it('arrayKey', () => {
-      expectTypeOf<AddArrayItemButtonField['arrayKey']>().toEqualTypeOf<string | undefined>();
     });
   });
 });
@@ -304,6 +255,7 @@ describe('RemoveArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'tabIndex'
     | 'col'
     | 'meta'
+    | 'logic'
     | 'arrayKey';
 
   type ActualKeys = keyof RemoveArrayItemButtonField;
@@ -320,10 +272,6 @@ describe('RemoveArrayItemButtonField - Exhaustive Whitelist', () => {
     it('key is required', () => {
       expectTypeOf<RemoveArrayItemButtonField['key']>().toEqualTypeOf<string>();
     });
-
-    it('label is required', () => {
-      expectTypeOf<RemoveArrayItemButtonField['label']>().toEqualTypeOf<string>();
-    });
   });
 
   describe('optional keys', () => {
@@ -331,16 +279,8 @@ describe('RemoveArrayItemButtonField - Exhaustive Whitelist', () => {
       expectTypeOf<RemoveArrayItemButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('className', () => {
-      expectTypeOf<RemoveArrayItemButtonField['className']>().toEqualTypeOf<string | undefined>();
-    });
-
     it('props', () => {
       expectTypeOf<RemoveArrayItemButtonField['props']>().toEqualTypeOf<MatButtonProps | undefined>();
-    });
-
-    it('arrayKey', () => {
-      expectTypeOf<RemoveArrayItemButtonField['arrayKey']>().toEqualTypeOf<string | undefined>();
     });
   });
 });

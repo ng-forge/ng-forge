@@ -69,6 +69,10 @@ export {
   removeArrayItemButtonMapper,
   popArrayItemButtonMapper,
   shiftArrayItemButtonMapper,
+  // Navigation button mappers
+  submitButtonFieldMapper,
+  nextButtonFieldMapper,
+  previousButtonFieldMapper,
 } from './mappers';
 
 export type {
@@ -79,6 +83,7 @@ export type {
   BaseArrayAddButtonField,
   BaseArrayRemoveButtonField,
   BaseInsertArrayItemButtonField,
+  BaseNavigationButtonField,
   EventArg,
 } from './mappers';
 

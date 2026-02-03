@@ -21,8 +21,10 @@ import type {
   BsTextareaField,
   BsToggleField,
   InsertArrayItemButtonField,
+  PopArrayItemButtonField,
   PrependArrayItemButtonField,
   RemoveArrayItemButtonField,
+  ShiftArrayItemButtonField,
 } from '../fields';
 
 declare module '@ng-forge/dynamic-forms' {
@@ -38,6 +40,8 @@ declare module '@ng-forge/dynamic-forms' {
     prependArrayItem: PrependArrayItemButtonField;
     insertArrayItem: InsertArrayItemButtonField;
     removeArrayItem: RemoveArrayItemButtonField;
+    popArrayItem: PopArrayItemButtonField;
+    shiftArrayItem: ShiftArrayItemButtonField;
     textarea: BsTextareaField;
     radio: BsRadioField<unknown>;
     'multi-checkbox': BsMultiCheckboxField<unknown>;

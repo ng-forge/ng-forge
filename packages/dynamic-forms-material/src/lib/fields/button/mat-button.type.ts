@@ -1,4 +1,16 @@
-import { ArrayAllowedChildren, FieldComponent, FieldDef, FormEvent, LogicConfig } from '@ng-forge/dynamic-forms';
+import {
+  AppendArrayItemEvent,
+  ArrayAllowedChildren,
+  FieldComponent,
+  FormEvent,
+  InsertArrayItemEvent,
+  NextPageEvent,
+  PopArrayItemEvent,
+  PrependArrayItemEvent,
+  PreviousPageEvent,
+  RemoveAtIndexEvent,
+  ShiftArrayItemEvent,
+} from '@ng-forge/dynamic-forms';
 import { ButtonField } from '@ng-forge/dynamic-forms/integration';
 
 export interface MatButtonProps {
@@ -14,47 +26,23 @@ export type MatButtonComponent<TEvent extends FormEvent> = FieldComponent<MatBut
  */
 
 /** Submit button field - automatically disabled when form is invalid */
-export interface MatSubmitButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
+export type MatSubmitButtonField = Omit<MatButtonField<SubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
   type: 'submit';
-  key: string;
-  label: string;
-  disabled?: boolean;
-  className?: string;
-  props?: MatButtonProps;
-  /** Logic rules for dynamic disabled state (overrides form-level defaults) */
-  logic?: LogicConfig[];
-}
+};
 
 /** Next page button field - with preconfigured NextPageEvent */
-export interface MatNextButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
+export type MatNextButtonField = Omit<MatButtonField<NextPageEvent>, 'event' | 'type' | 'eventArgs'> & {
   type: 'next';
-  key: string;
-  label: string;
-  disabled?: boolean;
-  className?: string;
-  props?: MatButtonProps;
-  /** Logic rules for dynamic disabled state (overrides form-level defaults) */
-  logic?: LogicConfig[];
-}
+};
 
 /** Previous page button field - with preconfigured PreviousPageEvent */
-export interface MatPreviousButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
+export type MatPreviousButtonField = Omit<MatButtonField<PreviousPageEvent>, 'event' | 'type' | 'eventArgs'> & {
   type: 'previous';
-  key: string;
-  label: string;
-  disabled?: boolean;
-  className?: string;
-  props?: MatButtonProps;
-}
+};
 
 /** Add array item button field - dispatches AppendArrayItemEvent */
-export interface AddArrayItemButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
+export type AddArrayItemButtonField = Omit<MatButtonField<AppendArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
   type: 'addArrayItem';
-  key: string;
-  label: string;
-  disabled?: boolean;
-  className?: string;
-  props?: MatButtonProps;
   /**
    * The key of the array field to add items to.
    * Required when the button is placed outside the array.
@@ -66,16 +54,11 @@ export interface AddArrayItemButtonField extends Omit<FieldDef<MatButtonProps>, 
    * Defines the field structure for new items added to the array.
    */
   template: readonly ArrayAllowedChildren[];
-}
+};
 
 /** Prepend array item button field - dispatches PrependArrayItemEvent (adds at beginning) */
-export interface PrependArrayItemButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
+export type PrependArrayItemButtonField = Omit<MatButtonField<PrependArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
   type: 'prependArrayItem';
-  key: string;
-  label: string;
-  disabled?: boolean;
-  className?: string;
-  props?: MatButtonProps;
   /**
    * The key of the array field to prepend items to.
    * Required when the button is placed outside the array.
@@ -87,16 +70,11 @@ export interface PrependArrayItemButtonField extends Omit<FieldDef<MatButtonProp
    * Defines the field structure for new items added to the array.
    */
   template: readonly ArrayAllowedChildren[];
-}
+};
 
 /** Insert array item button field - dispatches InsertArrayItemEvent (adds at specific index) */
-export interface InsertArrayItemButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
+export type InsertArrayItemButtonField = Omit<MatButtonField<InsertArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
   type: 'insertArrayItem';
-  key: string;
-  label: string;
-  disabled?: boolean;
-  className?: string;
-  props?: MatButtonProps;
   /**
    * The key of the array field to insert items into.
    * Required when the button is placed outside the array.
@@ -112,50 +90,35 @@ export interface InsertArrayItemButtonField extends Omit<FieldDef<MatButtonProps
    * Defines the field structure for new items added to the array.
    */
   template: readonly ArrayAllowedChildren[];
-}
+};
 
 /** Remove array item button field - dispatches RemoveAtIndexEvent or PopArrayItemEvent */
-export interface RemoveArrayItemButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
+export type RemoveArrayItemButtonField = Omit<MatButtonField<RemoveAtIndexEvent>, 'event' | 'type' | 'eventArgs'> & {
   type: 'removeArrayItem';
-  key: string;
-  label: string;
-  disabled?: boolean;
-  className?: string;
-  props?: MatButtonProps;
   /**
    * The key of the array field to remove items from.
    * Required when the button is placed outside the array.
    * When inside an array, this is automatically determined from context.
    */
   arrayKey?: string;
-}
+};
 
 /** Pop array item button field - dispatches PopArrayItemEvent (removes last item) */
-export interface PopArrayItemButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
+export type PopArrayItemButtonField = Omit<MatButtonField<PopArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
   type: 'popArrayItem';
-  key: string;
-  label: string;
-  disabled?: boolean;
-  className?: string;
-  props?: MatButtonProps;
   /**
    * The key of the array field to remove the last item from.
    * REQUIRED - must specify which array to pop from.
    */
   arrayKey: string;
-}
+};
 
 /** Shift array item button field - dispatches ShiftArrayItemEvent (removes first item) */
-export interface ShiftArrayItemButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
+export type ShiftArrayItemButtonField = Omit<MatButtonField<ShiftArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
   type: 'shiftArrayItem';
-  key: string;
-  label: string;
-  disabled?: boolean;
-  className?: string;
-  props?: MatButtonProps;
   /**
    * The key of the array field to remove the first item from.
    * REQUIRED - must specify which array to shift from.
    */
   arrayKey: string;
-}
+};
