@@ -405,8 +405,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         const formInstance = form(formValue, formSchema);
         rootFormRegistry.registerRootForm(formInstance);
 
-        // Array itself is registered (no validation on empty array for now)
-        // TODO: Add array-level validation (minLength, maxLength) once implemented
+        // Array itself is registered
         expect(formInstance.tags).toBeDefined();
 
         // Note: Array item validation is handled dynamically by ArrayFieldComponent

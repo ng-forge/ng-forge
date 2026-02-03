@@ -105,8 +105,6 @@ const PROPERTY_GUIDANCE: Record<string, string> = {
   template: 'Use "fields" instead of "template" for array items',
   label: 'Container types (row, group, array, page) do NOT have a label property',
   title: 'Page fields do NOT have a title property',
-  minItems: 'Array fields do NOT have minItems/maxItems properties',
-  maxItems: 'Array fields do NOT have minItems/maxItems properties',
   expressions: 'Use "derivation" or "logic" instead of "expressions"',
   logic:
     'Only PAGE and LEAF fields support logic blocks. Row, group, and array containers do NOT support logic - apply logic to their child fields instead',

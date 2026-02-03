@@ -116,7 +116,7 @@
         "text"
       ],
       "notAllowedChildren": ["page", "array", "hidden"],
-      "notes": "Use 'fields' (NOT 'template'). No minItems/maxItems properties."
+      "notes": "Use 'fields' (NOT 'template'). Supports minLength/maxLength for array size validation."
     }
   },
   "fieldReference": {
@@ -355,10 +355,10 @@
     "array": {
       "category": "container",
       "valueType": "T[]",
-      "fieldLevelProps": ["key", "type", "fields"],
+      "fieldLevelProps": ["key", "type", "fields", "minLength", "maxLength"],
       "propsObject": [],
       "copyPaste": "{ type: 'array', key: 'contacts', fields: [{ type: 'group', key: 'item', fields: [{ type: 'input', key: 'name', label: 'Name' }] }] }",
-      "doesNotSupport": ["label", "logic", "minItems", "maxItems", "template"]
+      "doesNotSupport": ["label", "logic", "template"]
     },
     "page": {
       "category": "container",

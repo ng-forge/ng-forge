@@ -11,7 +11,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('ArrayField - Exhaustive Whitelist', () => {
-  // ArrayField extends FieldDef<never> and adds: fields, label?: never, meta?: never
+  // ArrayField extends FieldDef<never> and adds: fields, label?: never, meta?: never, minLength, maxLength
   // From FieldDef: key, type, label, props, className, disabled, readonly, hidden, tabIndex, col, meta
   // Note: 'meta' is overridden to 'never' because containers don't have native form elements
   type ExpectedKeys =
@@ -26,7 +26,9 @@ describe('ArrayField - Exhaustive Whitelist', () => {
     | 'tabIndex'
     | 'col'
     | 'meta'
-    | 'fields';
+    | 'fields'
+    | 'minLength'
+    | 'maxLength';
 
   type ActualKeys = keyof ArrayField;
 
@@ -84,6 +86,14 @@ describe('ArrayField - Exhaustive Whitelist', () => {
 
     it('col', () => {
       expectTypeOf<ArrayField['col']>().toEqualTypeOf<number | undefined>();
+    });
+
+    it('minLength', () => {
+      expectTypeOf<ArrayField['minLength']>().toEqualTypeOf<number | undefined>();
+    });
+
+    it('maxLength', () => {
+      expectTypeOf<ArrayField['maxLength']>().toEqualTypeOf<number | undefined>();
     });
   });
 
@@ -170,5 +180,40 @@ describe('ArrayField - Usage Tests', () => {
     } as const satisfies ArrayField;
 
     expectTypeOf(field.hidden).toEqualTypeOf<true>();
+  });
+
+  it('should accept array with minLength validation', () => {
+    const field = {
+      key: 'items',
+      type: 'array',
+      fields: [],
+      minLength: 1,
+    } as const satisfies ArrayField;
+
+    expectTypeOf(field.minLength).toEqualTypeOf<1>();
+  });
+
+  it('should accept array with maxLength validation', () => {
+    const field = {
+      key: 'items',
+      type: 'array',
+      fields: [],
+      maxLength: 5,
+    } as const satisfies ArrayField;
+
+    expectTypeOf(field.maxLength).toEqualTypeOf<5>();
+  });
+
+  it('should accept array with both minLength and maxLength', () => {
+    const field = {
+      key: 'items',
+      type: 'array',
+      fields: [],
+      minLength: 1,
+      maxLength: 10,
+    } as const satisfies ArrayField;
+
+    expectTypeOf(field.minLength).toEqualTypeOf<1>();
+    expectTypeOf(field.maxLength).toEqualTypeOf<10>();
   });
 });

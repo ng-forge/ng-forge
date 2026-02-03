@@ -242,6 +242,14 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
     return;
   }
 
+  // Apply array-level length validation
+  if (arrayField.minLength !== undefined) {
+    minLength(fieldPath as SchemaPath<string>, arrayField.minLength);
+  }
+  if (arrayField.maxLength !== undefined) {
+    maxLength(fieldPath as SchemaPath<string>, arrayField.maxLength);
+  }
+
   const templateField = arrayField.fields[0];
 
   const itemSchema = schema<Record<string, unknown>>((itemPath) => {

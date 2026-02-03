@@ -55,6 +55,18 @@ export interface ArrayField<TFields extends readonly ArrayAllowedChildren[] = re
 
   /** Arrays do not support meta - they have no native form element **/
   readonly meta?: never;
+
+  /**
+   * Minimum number of items required in the array.
+   * Validation fails if the array has fewer items than this value.
+   */
+  readonly minLength?: number;
+
+  /**
+   * Maximum number of items allowed in the array.
+   * Validation fails if the array has more items than this value.
+   */
+  readonly maxLength?: number;
 }
 
 /**
