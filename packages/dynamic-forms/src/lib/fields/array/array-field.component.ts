@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ArrayField } from '../../definitions/default/array-field';
+import { isGroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldTree } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions/base/field-def';
@@ -182,7 +183,13 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       const isContainer = template.type === 'group' || template.type === 'row';
 
       if (isContainer) {
-        value = { ...(value as Record<string, unknown>), ...(rawValue as Record<string, unknown>) };
+        if (isGroupField(template)) {
+          // Groups wrap their fields under the group key
+          value = { ...(value as Record<string, unknown>), [template.key]: rawValue };
+        } else {
+          // Rows flatten their fields directly
+          value = { ...(value as Record<string, unknown>), ...(rawValue as Record<string, unknown>) };
+        }
       } else if (valueHandling === 'include' && template.key) {
         value = { ...(value as Record<string, unknown>), [template.key]: rawValue };
       }

@@ -81,7 +81,7 @@ export function addArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButtonFie
   const ctx = resolveArrayButtonContext(fieldDef.key, 'addArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
-    const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+    const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
@@ -116,7 +116,7 @@ export function prependArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButto
   const ctx = resolveArrayButtonContext(fieldDef.key, 'prependArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
-    const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+    const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
@@ -151,7 +151,7 @@ export function insertArrayItemButtonMapper<TProps>(fieldDef: BaseInsertArrayIte
   const ctx = resolveArrayButtonContext(fieldDef.key, 'insertArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
-    const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+    const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
@@ -197,7 +197,7 @@ export function removeArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveBut
   const defaultEventArgs = ctx.isInsideArray ? ['$arrayKey', '$index'] : ['$arrayKey'];
 
   return computed(() => {
-    const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+    const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
@@ -232,7 +232,7 @@ export function popArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButton
   const ctx = resolveArrayButtonContext(fieldDef.key, 'popArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
-    const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+    const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
@@ -267,7 +267,7 @@ export function shiftArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButt
   const ctx = resolveArrayButtonContext(fieldDef.key, 'shiftArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
-    const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+    const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,

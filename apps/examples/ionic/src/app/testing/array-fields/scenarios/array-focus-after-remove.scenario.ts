@@ -1,64 +1,40 @@
-import { FormConfig, RemoveAtIndexEvent } from '@ng-forge/dynamic-forms';
+import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
+
+const removeButtonTemplate = {
+  key: 'taskRow',
+  type: 'row',
+  fields: [
+    {
+      key: 'title',
+      type: 'input',
+      label: 'Task Title',
+      col: 8,
+    },
+    {
+      key: 'removeThis',
+      type: 'removeArrayItem',
+      label: 'Remove',
+      col: 4,
+      props: { color: 'danger' },
+    },
+  ],
+} as const;
 
 const config = {
   fields: [
     {
       key: 'tasks',
       type: 'array',
-      fields: [
-        {
-          key: 'taskRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'title',
-              type: 'input',
-              label: 'Task Title',
-              col: 8,
-            },
-            {
-              key: 'removeThis',
-              type: 'button',
-              label: 'Remove',
-              col: 4,
-              event: RemoveAtIndexEvent,
-              eventArgs: ['tasks', '$index'],
-              props: { color: 'danger' },
-            },
-          ],
-        },
-      ],
+      fields: [removeButtonTemplate],
     },
     {
       key: 'addTask',
       type: 'addArrayItem',
       arrayKey: 'tasks',
       label: 'Add Task',
-      template: [
-        {
-          key: 'taskRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'title',
-              type: 'input',
-              label: 'Task Title',
-              col: 8,
-            },
-            {
-              key: 'removeThis',
-              type: 'button',
-              label: 'Remove',
-              col: 4,
-              event: RemoveAtIndexEvent,
-              eventArgs: ['tasks', '$index'],
-              props: { color: 'danger' },
-            },
-          ],
-        },
-      ],
       props: { color: 'primary' },
+      template: [removeButtonTemplate],
     },
   ],
 } as const satisfies FormConfig;

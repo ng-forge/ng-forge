@@ -1,34 +1,32 @@
-import { FormConfig, RemoveAtIndexEvent } from '@ng-forge/dynamic-forms';
+import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
+
+const removeButtonTemplate = {
+  key: 'taskRow',
+  type: 'row',
+  fields: [
+    {
+      key: 'title',
+      type: 'input',
+      label: 'Task Title',
+      col: 8,
+    },
+    {
+      key: 'removeThis',
+      type: 'removeArrayItem',
+      label: 'Remove',
+      col: 4,
+      props: { color: 'warn' },
+    },
+  ],
+} as const;
 
 const config = {
   fields: [
     {
       key: 'tasks',
       type: 'array',
-      fields: [
-        {
-          key: 'taskRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'title',
-              type: 'input',
-              label: 'Task Title',
-              col: 8,
-            },
-            {
-              key: 'removeThis',
-              type: 'button',
-              label: 'Remove',
-              col: 4,
-              event: RemoveAtIndexEvent,
-              eventArgs: ['tasks', '$index'],
-              props: { color: 'warn' },
-            },
-          ],
-        },
-      ],
+      fields: [removeButtonTemplate],
     },
     {
       key: 'addTask',
@@ -36,29 +34,7 @@ const config = {
       arrayKey: 'tasks',
       label: 'Add Task',
       props: { color: 'primary' },
-      template: [
-        {
-          key: 'taskRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'title',
-              type: 'input',
-              label: 'Task Title',
-              col: 8,
-            },
-            {
-              key: 'removeThis',
-              type: 'button',
-              label: 'Remove',
-              col: 4,
-              event: RemoveAtIndexEvent,
-              eventArgs: ['tasks', '$index'],
-              props: { color: 'warn' },
-            },
-          ],
-        },
-      ],
+      template: [removeButtonTemplate],
     },
   ],
 } as const satisfies FormConfig;

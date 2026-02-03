@@ -1,4 +1,4 @@
-import { FormConfig, ShiftArrayItemEvent } from '@ng-forge/dynamic-forms';
+import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 const config = {
@@ -16,10 +16,9 @@ const config = {
     },
     {
       key: 'shiftButton',
-      type: 'button',
+      type: 'shiftArrayItem',
       label: 'Remove First',
-      event: ShiftArrayItemEvent,
-      eventArgs: ['items'],
+      arrayKey: 'items',
       props: { color: 'danger' },
     },
     {
@@ -27,14 +26,8 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'items',
       label: 'Add Item',
-      template: [
-        {
-          key: 'value',
-          type: 'input',
-          label: 'Value',
-        },
-      ],
       props: { color: 'primary' },
+      template: [{ key: 'value', type: 'input', label: 'Value' }],
     },
   ],
 } as const satisfies FormConfig;
@@ -42,7 +35,7 @@ const config = {
 export const arrayShiftScenario: TestScenario = {
   testId: 'array-shift',
   title: 'Shift Array Items',
-  description: 'Remove the first item from the array using ShiftArrayItemEvent',
+  description: 'Remove the first item from the array using shiftArrayItem button',
   config,
   initialValue: {
     items: [{ value: 'First' }, { value: 'Second' }, { value: 'Third' }],

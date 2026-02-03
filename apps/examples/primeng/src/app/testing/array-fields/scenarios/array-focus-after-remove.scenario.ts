@@ -1,36 +1,32 @@
-import { FormConfig, RemoveAtIndexEvent } from '@ng-forge/dynamic-forms';
+import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
+
+const removeButtonTemplate = {
+  key: 'taskRow',
+  type: 'row',
+  fields: [
+    {
+      key: 'title',
+      type: 'input',
+      label: 'Task Title',
+      col: 8,
+    },
+    {
+      key: 'removeThis',
+      type: 'removeArrayItem',
+      label: 'Remove',
+      col: 4,
+      props: { severity: 'danger' },
+    },
+  ],
+} as const;
 
 const config = {
   fields: [
     {
       key: 'tasks',
       type: 'array',
-      fields: [
-        {
-          key: 'taskRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'title',
-              type: 'input',
-              label: 'Task Title',
-              col: 8,
-            },
-            {
-              key: 'removeThis',
-              type: 'button',
-              label: 'Remove',
-              col: 4,
-              event: RemoveAtIndexEvent,
-              eventArgs: ['tasks', '$index'],
-              props: {
-                severity: 'danger',
-              },
-            },
-          ],
-        },
-      ],
+      fields: [removeButtonTemplate],
     },
     {
       key: 'addTask',
@@ -38,31 +34,7 @@ const config = {
       arrayKey: 'tasks',
       label: 'Add Task',
       props: { severity: 'primary' },
-      template: [
-        {
-          key: 'taskRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'title',
-              type: 'input',
-              label: 'Task Title',
-              col: 8,
-            },
-            {
-              key: 'removeThis',
-              type: 'button',
-              label: 'Remove',
-              col: 4,
-              event: RemoveAtIndexEvent,
-              eventArgs: ['tasks', '$index'],
-              props: {
-                severity: 'danger',
-              },
-            },
-          ],
-        },
-      ],
+      template: [removeButtonTemplate],
     },
   ],
 } as const satisfies FormConfig;
