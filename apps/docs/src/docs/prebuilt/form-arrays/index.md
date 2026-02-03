@@ -63,7 +63,55 @@ For flat object arrays without nesting, use a row as the template instead (rows 
 
 ## Dynamic Add/Remove
 
-Array items can be added or removed dynamically at runtime using the event bus with the `arrayEvent` builder:
+### Declarative Approach (Recommended)
+
+Use button field types directly in your form configuration for declarative array manipulation:
+
+| Button Type        | Placement        | Description                                      |
+| ------------------ | ---------------- | ------------------------------------------------ |
+| `addArrayItem`     | Outside array    | Appends a new item to the end of the array       |
+| `prependArrayItem` | Outside array    | Inserts a new item at the beginning of the array |
+| `insertArrayItem`  | Outside array    | Inserts a new item at a specific index           |
+| `removeArrayItem`  | Inside each item | Removes the current item from the array          |
+
+**Note:** Add/prepend/insert buttons require a `template` property defining the new item structure and should be placed outside the array. Remove buttons go inside each item and don't need a template.
+
+```typescript
+// Define the template for array items
+const contactTemplate = {
+  key: 'contact',
+  type: 'row',
+  fields: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'phone', type: 'input', label: 'Phone' },
+    // Remove button inside each item (no template needed)
+    { key: 'remove', type: 'removeArrayItem', label: 'Remove' },
+  ],
+};
+
+// Form configuration
+{
+  fields: [
+    {
+      key: 'contacts',
+      type: 'array',
+      fields: [contactTemplate],
+    },
+    // Add button outside the array (requires template and arrayKey)
+    {
+      key: 'addContact',
+      type: 'addArrayItem',
+      label: 'Add Contact',
+      arrayKey: 'contacts',
+      template: [contactTemplate],
+    },
+  ];
+}
+```
+
+### Programmatic Approach
+
+For more control, use the event bus with the `arrayEvent` builder:
 
 ```typescript
 import { EventBus, arrayEvent } from '@ng-forge/dynamic-forms';

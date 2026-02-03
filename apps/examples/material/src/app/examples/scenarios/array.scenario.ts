@@ -1,7 +1,7 @@
-import { AppendArrayItemEvent, FormConfig } from '@ng-forge/dynamic-forms';
+import { FormConfig } from '@ng-forge/dynamic-forms';
 import { ExampleScenario } from '../shared/types';
 
-// Array item templates
+// Array item templates - define the structure of each array item
 const tagTemplate = {
   key: 'tag',
   type: 'row',
@@ -28,12 +28,6 @@ const tagTemplate = {
     },
   ],
 } as const;
-
-export class AddTagsEvent extends AppendArrayItemEvent {
-  constructor() {
-    super('tags', [tagTemplate]);
-  }
-}
 
 const contactTemplate = {
   key: 'contact',
@@ -83,7 +77,7 @@ const contactTemplate = {
     {
       key: 'removeContact',
       type: 'removeArrayItem',
-      label: 'Remove',
+      label: 'Remove Contact',
       className: 'remove-contact-button',
       props: {
         color: 'warn',
@@ -92,16 +86,10 @@ const contactTemplate = {
   ],
 } as const;
 
-export class AddContactEvent extends AppendArrayItemEvent {
-  constructor() {
-    super('contacts', [contactTemplate]);
-  }
-}
-
 export const arrayScenario: ExampleScenario = {
   id: 'array',
   title: 'Array Demo',
-  description: 'Demonstrates dynamic array fields with add/remove functionality.',
+  description: 'Demonstrates dynamic array fields with declarative add/remove buttons.',
   initialValue: {
     tags: [{ value: 'angular' }, { value: 'typescript' }],
     contacts: [
@@ -127,7 +115,7 @@ export const arrayScenario: ExampleScenario = {
       {
         key: 'description1',
         type: 'text',
-        label: 'Tags are stored as a flat array of strings: ["tag1", "tag2"]',
+        label: 'Tags use addArrayItem (outside) and removeArrayItem (inside each item) buttons.',
       },
       {
         key: 'tags',
@@ -136,10 +124,11 @@ export const arrayScenario: ExampleScenario = {
       },
       {
         key: 'addTagButton',
-        type: 'button',
+        type: 'addArrayItem',
         label: 'Add Tag',
+        arrayKey: 'tags',
+        template: [tagTemplate],
         className: 'add-tag-button',
-        event: AddTagsEvent,
         props: {
           color: 'primary',
         },
@@ -155,7 +144,7 @@ export const arrayScenario: ExampleScenario = {
       {
         key: 'description2',
         type: 'text',
-        label: 'Contacts are stored as an array of objects: [{name: "", phone: "", relationship: ""}]',
+        label: 'Contacts demonstrate addArrayItem and prependArrayItem buttons outside the array.',
       },
       {
         key: 'contacts',
@@ -163,14 +152,32 @@ export const arrayScenario: ExampleScenario = {
         fields: [contactTemplate],
       },
       {
-        key: 'addContactButton',
-        type: 'button',
-        label: 'Add Contact',
-        className: 'add-contact-button',
-        event: AddContactEvent,
-        props: {
-          color: 'primary',
-        },
+        key: 'contactButtons',
+        type: 'row',
+        fields: [
+          {
+            key: 'prependContactButton',
+            type: 'prependArrayItem',
+            label: 'Add First',
+            arrayKey: 'contacts',
+            template: [contactTemplate],
+            className: 'prepend-contact-button',
+            props: {
+              color: 'accent',
+            },
+          },
+          {
+            key: 'addContactButton',
+            type: 'addArrayItem',
+            label: 'Add Contact',
+            arrayKey: 'contacts',
+            template: [contactTemplate],
+            className: 'add-contact-button',
+            props: {
+              color: 'primary',
+            },
+          },
+        ],
       },
       {
         key: 'submit',
