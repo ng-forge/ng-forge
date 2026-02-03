@@ -22,7 +22,7 @@ export type FieldWithOptions<T = unknown, TProps = unknown> =
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function optionsFieldMapper<T, TProps>(fieldDef: FieldWithOptions<T, TProps>): Signal<Record<string, unknown>> {
-  const ctx = resolveValueFieldContext(fieldDef.key);
+  const ctx = resolveValueFieldContext();
   const defaultProps = inject(DEFAULT_PROPS);
   const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES);
 

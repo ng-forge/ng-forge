@@ -1,15 +1,12 @@
 import { Injector, Signal, type Type } from '@angular/core';
-import { extractSuffixFromUuid } from './key-suffix';
 
 /**
- * Generates a unique identifier and suffix for array items.
+ * Generates a unique identifier for array items.
  * Uses crypto.randomUUID() for collision-free IDs that remain stable across position changes.
- * The suffix is an 8-char hex string extracted from the UUID for key suffixing.
+ * Used for @for tracking to maintain component identity when items are reordered.
  */
-export function generateArrayItemIdAndSuffix(): { id: string; suffix: string } {
-  const id = crypto.randomUUID();
-  const suffix = extractSuffixFromUuid(id);
-  return { id, suffix };
+export function generateArrayItemId(): string {
+  return crypto.randomUUID();
 }
 
 /**
@@ -33,8 +30,6 @@ export interface ResolvedArrayItemField {
 export interface ResolvedArrayItem {
   /** Unique identifier for this item (stable across position changes). */
   id: string;
-  /** 8-char suffix derived from UUID, used for key suffixing to avoid DOM ID collisions. */
-  suffix: string;
   /** All fields to render for this array item. */
   fields: ResolvedArrayItemField[];
 }

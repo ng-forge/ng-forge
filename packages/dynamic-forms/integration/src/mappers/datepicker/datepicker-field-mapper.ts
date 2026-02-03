@@ -34,7 +34,7 @@ function toDate(value: Date | string | null | undefined): Date | null {
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function datepickerFieldMapper<TProps>(fieldDef: DatepickerField<TProps>): Signal<Record<string, unknown>> {
-  const ctx = resolveValueFieldContext(fieldDef.key);
+  const ctx = resolveValueFieldContext();
   const defaultProps = inject(DEFAULT_PROPS);
   const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES);
 

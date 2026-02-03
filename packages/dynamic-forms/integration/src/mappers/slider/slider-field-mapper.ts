@@ -15,7 +15,7 @@ import { resolveValueFieldContext, buildValueFieldInputs } from '../value/value-
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function sliderFieldMapper<TProps>(fieldDef: SliderField<TProps>): Signal<Record<string, unknown>> {
-  const ctx = resolveValueFieldContext(fieldDef.key);
+  const ctx = resolveValueFieldContext();
   const defaultProps = inject(DEFAULT_PROPS);
   const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES);
 

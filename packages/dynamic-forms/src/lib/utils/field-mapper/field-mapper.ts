@@ -1,7 +1,9 @@
-import { computed, Signal } from '@angular/core';
+import { computed, inject, isSignal, Signal } from '@angular/core';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldMeta } from '../../definitions/base/field-meta';
 import { FieldTypeDefinition } from '../../models/field-type';
+import { ARRAY_CONTEXT } from '../../models/field-signal-context.token';
+import { ArrayContext } from '../../mappers/types';
 import { baseFieldMapper } from '../../mappers/base/base-field-mapper';
 
 /**
@@ -47,6 +49,26 @@ function mergeForwardedPropsToMeta(inputs: Record<string, unknown>, propsToMeta:
 }
 
 /**
+ * Applies index suffix to the key property for array items.
+ * This ensures unique DOM IDs while keeping form schema keys clean.
+ *
+ * @param inputs The current inputs record
+ * @param index The array item index
+ * @returns Updated inputs record with suffixed key
+ */
+function applyIndexSuffix(inputs: Record<string, unknown>, index: number): Record<string, unknown> {
+  const key = inputs['key'];
+  if (typeof key !== 'string') {
+    return inputs;
+  }
+
+  return {
+    ...inputs,
+    key: `${key}_${index}`,
+  };
+}
+
+/**
  * Main field mapper function that uses the field registry to get the appropriate mapper
  * based on the field's type property.
  *
@@ -59,6 +81,10 @@ function mergeForwardedPropsToMeta(inputs: Record<string, unknown>, propsToMeta:
  *
  * If the field type definition specifies `propsToMeta`, the specified props
  * will be merged into the meta object (with meta taking precedence).
+ *
+ * When running inside an array item context (ARRAY_CONTEXT is provided), the key
+ * is automatically suffixed with the item index to ensure unique DOM IDs. The form
+ * schema keys remain clean (unsuffixed) so derivations and validations work correctly.
  *
  * @param fieldDef The field definition to map
  * @param fieldRegistry The registry of field type definitions
@@ -76,18 +102,44 @@ export function mapFieldToInputs(
     return undefined;
   }
 
+  // Check if we're inside an array item context - if so, we need to suffix keys
+  // Use try-catch because inject() throws when called outside an injection context
+  let arrayContext: ArrayContext | null = null;
+  try {
+    arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+  } catch {
+    // Not in an injection context or ARRAY_CONTEXT not provided
+  }
+
   // Get the base mapper result
   const mapperResult: Signal<Record<string, unknown>> = fieldType?.mapper ? fieldType.mapper(fieldDef) : baseFieldMapper(fieldDef);
 
-  // If no props forwarding configured, return as-is
   const propsToMeta = fieldType?.propsToMeta;
-  if (!propsToMeta || propsToMeta.length === 0) {
+  const hasPropsForwarding = propsToMeta && propsToMeta.length > 0;
+  // Check that arrayContext exists and has a valid index signal (guards against mock injectors)
+  const indexSignal = arrayContext?.index;
+  const hasArrayContext = indexSignal !== undefined && isSignal(indexSignal);
+
+  // Fast path: no transformations needed
+  if (!hasPropsForwarding && !hasArrayContext) {
     return mapperResult;
   }
 
-  // Wrap in computed to merge forwarded props into meta
+  // Wrap in computed to apply transformations
   return computed(() => {
-    const inputs = mapperResult();
-    return mergeForwardedPropsToMeta(inputs, propsToMeta);
+    let inputs = mapperResult();
+
+    // Apply props forwarding if configured
+    if (hasPropsForwarding) {
+      inputs = mergeForwardedPropsToMeta(inputs, propsToMeta);
+    }
+
+    // Apply index suffix for array items
+    if (hasArrayContext) {
+      const index = indexSignal();
+      inputs = applyIndexSuffix(inputs, index);
+    }
+
+    return inputs;
   });
 }

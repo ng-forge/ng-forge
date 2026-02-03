@@ -17,6 +17,7 @@ import { AppendArrayItemEvent, EventBus, InsertArrayItemEvent, PopArrayItemEvent
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { vi } from 'vitest';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
+import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
 
 describe('ArrayFieldComponent', () => {
   function setupArrayTest(field: ArrayField<unknown>, value?: Record<string, unknown>) {
@@ -35,13 +36,14 @@ describe('ArrayFieldComponent', () => {
         provideDynamicForm(withLoggerConfig()),
         EventBus,
         FunctionRegistryService,
+        RootFormRegistryService,
         {
           provide: FIELD_REGISTRY,
           useValue: registry,
         },
         {
           provide: FIELD_SIGNAL_CONTEXT,
-          useFactory: (injector: Injector) => {
+          useFactory: (injector: Injector, rootFormRegistry: RootFormRegistryService) => {
             return runInInjectionContext(injector, () => {
               const valueSignal = signal(value || {});
               const defaultValues = () => ({}) as Record<string, unknown>;
@@ -57,6 +59,9 @@ describe('ArrayFieldComponent', () => {
               // Access internal structure to force initialization (internal Angular API)
               (testForm as unknown as { structure?: () => void }).structure?.();
 
+              // Register the root form for array item direct binding
+              rootFormRegistry.registerRootForm(testForm);
+
               const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
                 injector,
                 value: valueSignal,
@@ -68,7 +73,7 @@ describe('ArrayFieldComponent', () => {
               return mockFieldSignalContext;
             });
           },
-          deps: [Injector],
+          deps: [Injector, RootFormRegistryService],
         },
       ],
     });
@@ -457,6 +462,7 @@ describe('ArrayFieldComponent', () => {
           provideDynamicForm(),
           EventBus,
           FunctionRegistryService,
+          RootFormRegistryService,
           {
             provide: FIELD_REGISTRY,
             useValue: registry,
@@ -466,7 +472,7 @@ describe('ArrayFieldComponent', () => {
           { provide: FORM_OPTIONS, useValue: signal(undefined) },
           {
             provide: FIELD_SIGNAL_CONTEXT,
-            useFactory: (injector: Injector) => {
+            useFactory: (injector: Injector, rootFormRegistry: RootFormRegistryService) => {
               return runInInjectionContext(injector, () => {
                 const valueSignal = signal(value || {});
                 const defaultValues = () => ({}) as Record<string, unknown>;
@@ -481,6 +487,9 @@ describe('ArrayFieldComponent', () => {
                 // Access internal structure to force initialization (internal Angular API)
                 (testForm as unknown as { structure?: () => void }).structure?.();
 
+                // Register the root form for array item direct binding
+                rootFormRegistry.registerRootForm(testForm);
+
                 const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
                   injector,
                   value: valueSignal,
@@ -492,7 +501,7 @@ describe('ArrayFieldComponent', () => {
                 return mockFieldSignalContext;
               });
             },
-            deps: [Injector],
+            deps: [Injector, RootFormRegistryService],
           },
         ],
       });
