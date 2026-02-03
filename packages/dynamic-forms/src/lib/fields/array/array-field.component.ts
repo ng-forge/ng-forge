@@ -228,6 +228,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     // Update form value - differential update sees "none" (lengths match)
     const newArray = [...currentArray];
     newArray.splice(insertIndex, 0, value);
+    // The `as any` is required because Angular Signal Forms uses complex conditional types
+    // that cannot infer the correct type when setting a dynamically-keyed property
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     parentForm().value.set({ ...currentValue, [arrayKey]: newArray } as any);
   }
