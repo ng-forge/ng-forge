@@ -234,7 +234,7 @@ test.describe('Array Fields E2E Tests', () => {
       expect(uniqueIds.size).toBe(ids.length);
 
       for (const id of ids) {
-        expect(id).toMatch(/_[a-f0-9]{8}/);
+        expect(id).toMatch(/_\d+/);
       }
     });
 

@@ -255,9 +255,9 @@ test.describe('Array Fields E2E Tests', () => {
       const uniqueIds = new Set(ids);
       expect(uniqueIds.size).toBe(ids.length);
 
-      // Verify IDs contain UUID suffix pattern (8 hex characters)
+      // Verify IDs contain index suffix pattern (underscore followed by digits)
       for (const id of ids) {
-        expect(id).toMatch(/_[a-f0-9]{8}/);
+        expect(id).toMatch(/_\d+/);
       }
     });
 

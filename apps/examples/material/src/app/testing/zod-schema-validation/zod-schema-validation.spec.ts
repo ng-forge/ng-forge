@@ -219,17 +219,13 @@ test.describe('Zod Schema Validation E2E Tests', () => {
       await expect(errorElement).toContainText('at least 2 characters');
     });
 
-    // KNOWN LIMITATION: Zod schema validation for array item fields doesn't work with UUID suffix system.
-    // The validation is applied to root form paths but array items use local forms with suffixed keys.
-    // Validation errors don't propagate from root form to local form UI.
-    // TODO: Fix by syncing validation state from root form to local forms.
-    test.skip('should display error on array item field (addresses[0].zip)', async ({ page, helpers }) => {
+    test('should display error on array item field (addresses[0].zip)', async ({ page, helpers }) => {
       await page.goto('/#/test/zod-schema-validation/comprehensive-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('comprehensive-validation-test');
 
-      // Get ZIP input in first address - array item fields have UUID suffixes (e.g., zip_abc12345)
+      // Get ZIP input in first address - array item fields have index suffixes (e.g., zip_0)
       // Use [id^="zip"] to match elements whose ID starts with "zip"
       const zipInput = scenario.locator('#addresses [id^="zip"] input').first();
       await helpers.fillInput(zipInput, '123');
@@ -258,7 +254,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
       await helpers.fillInput(lastNameInput, 'Springfield');
 
       // Fill address with city matching last name (for cross-field validation)
-      // Array item fields have UUID suffixes (e.g., street_abc12345), use [id^="fieldName"] selector
+      // Array item fields have index suffixes (e.g., street_0), use [id^="fieldName"] selector
       const streetInput = scenario.locator('#addresses [id^="street"] input').first();
       await helpers.fillInput(streetInput, '123 Main Street');
 
