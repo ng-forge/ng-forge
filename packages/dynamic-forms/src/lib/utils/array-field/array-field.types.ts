@@ -2,11 +2,16 @@ import { Injector, Signal, type Type } from '@angular/core';
 
 /**
  * Generates a unique identifier for array items.
- * Uses crypto.randomUUID() for collision-free IDs that remain stable across position changes.
+ * Uses crypto.randomUUID() when available (requires secure context/HTTPS),
+ * falls back to a timestamp + random number combination for compatibility.
  * Used for @for tracking to maintain component identity when items are reordered.
  */
 export function generateArrayItemId(): string {
-  return crypto.randomUUID();
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  // Fallback for older browsers or non-secure contexts
+  return `${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 11)}`;
 }
 
 /**

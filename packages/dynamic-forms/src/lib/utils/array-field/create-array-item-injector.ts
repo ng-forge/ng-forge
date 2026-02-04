@@ -125,10 +125,14 @@ interface CreateItemInjectorOptions<TModel extends Record<string, unknown>> {
 function createItemInjector<TModel extends Record<string, unknown>>(options: CreateItemInjectorOptions<TModel>): Injector {
   const { itemFormAccessor, indexSignal, parentFieldSignalContext, parentInjector, arrayField } = options;
 
+  // Use getter for formValue to ensure it's always current, not a stale snapshot.
+  // Components accessing arrayContext.formValue will get the current value.
   const arrayContext: ArrayContext = {
     arrayKey: arrayField.key,
     index: indexSignal,
-    formValue: parentFieldSignalContext.value(),
+    get formValue() {
+      return parentFieldSignalContext.value();
+    },
     field: arrayField,
   };
 
