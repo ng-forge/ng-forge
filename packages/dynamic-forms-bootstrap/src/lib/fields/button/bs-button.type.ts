@@ -55,9 +55,10 @@ export type AddArrayItemButtonField = Omit<BsButtonField<AppendArrayItemEvent>, 
   arrayKey?: string;
   /**
    * Template for the new array item. REQUIRED.
-   * Defines the field structure for new items added to the array.
+   * - Single field (ArrayAllowedChildren): Creates a primitive item (field's value is extracted directly)
+   * - Array of fields (ArrayAllowedChildren[]): Creates an object item (fields merged into object)
    */
-  template: readonly ArrayAllowedChildren[];
+  template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
 };
 
 /** Prepend array item button field - dispatches PrependArrayItemEvent (adds at beginning) */
@@ -71,9 +72,10 @@ export type PrependArrayItemButtonField = Omit<BsButtonField<PrependArrayItemEve
   arrayKey?: string;
   /**
    * Template for the new array item. REQUIRED.
-   * Defines the field structure for new items added to the array.
+   * - Single field (ArrayAllowedChildren): Creates a primitive item (field's value is extracted directly)
+   * - Array of fields (ArrayAllowedChildren[]): Creates an object item (fields merged into object)
    */
-  template: readonly ArrayAllowedChildren[];
+  template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
 };
 
 /** Insert array item button field - dispatches InsertArrayItemEvent (adds at specific index) */
@@ -91,9 +93,10 @@ export type InsertArrayItemButtonField = Omit<BsButtonField<InsertArrayItemEvent
   index: number;
   /**
    * Template for the new array item. REQUIRED.
-   * Defines the field structure for new items added to the array.
+   * - Single field (ArrayAllowedChildren): Creates a primitive item (field's value is extracted directly)
+   * - Array of fields (ArrayAllowedChildren[]): Creates an object item (fields merged into object)
    */
-  template: readonly ArrayAllowedChildren[];
+  template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
 };
 
 /** Remove array item button field - dispatches RemoveAtIndexEvent or PopArrayItemEvent */

@@ -140,7 +140,7 @@ export {
 
 // Array event builder (recommended public API)
 export { arrayEvent } from './events';
-export type { ArrayItemTemplate } from './events';
+export type { ArrayItemTemplate, ArrayItemDefinitionTemplate } from './events';
 
 export type { FormEvent, FormEventConstructor, TokenContext, ArrayItemContext } from './events';
 

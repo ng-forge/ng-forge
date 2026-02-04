@@ -30,8 +30,12 @@ export interface BaseArrayAddButtonField<TProps = unknown> {
   props?: TProps;
   /** Target array key (required when outside array, optional inside) */
   arrayKey?: string;
-  /** Template defining the field structure for new items. REQUIRED. */
-  template: readonly ArrayAllowedChildren[];
+  /**
+   * Template defining the field structure for new items. REQUIRED.
+   * - Single field (ArrayAllowedChildren): Creates a primitive item (field's value is extracted directly)
+   * - Array of fields (ArrayAllowedChildren[]): Creates an object item (fields merged into object)
+   */
+  template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
   /** Optional custom eventArgs */
   eventArgs?: readonly EventArg[];
 }

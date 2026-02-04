@@ -297,6 +297,79 @@ describe('getFieldDefaultValue', () => {
     });
   });
 
+  describe('primitive array items', () => {
+    it('should extract field values directly for primitive array items (single field, not wrapped in array)', () => {
+      const field: FieldDef<any> = {
+        type: 'array',
+        key: 'tags',
+        fields: [
+          { type: 'input', key: 'tag', value: 'angular' },
+          { type: 'input', key: 'tag', value: 'typescript' },
+        ],
+      };
+      const result = getFieldDefaultValue(field, registry);
+
+      // Primitive items: extract field value directly
+      expect(result).toEqual(['angular', 'typescript']);
+    });
+
+    it('should handle primitive array items with default values', () => {
+      const field: FieldDef<any> = {
+        type: 'array',
+        key: 'tags',
+        fields: [
+          { type: 'input', key: 'tag' }, // No value - defaults to ''
+          { type: 'checkbox', key: 'flag' }, // No value - defaults to false
+        ],
+      };
+      const result = getFieldDefaultValue(field, registry);
+
+      expect(result).toEqual(['', false]);
+    });
+
+    it('should handle object array items (array of fields)', () => {
+      const field: FieldDef<any> = {
+        type: 'array',
+        key: 'contacts',
+        fields: [
+          [
+            { type: 'input', key: 'name', value: 'Alice' },
+            { type: 'input', key: 'email', value: 'alice@example.com' },
+          ],
+        ],
+      };
+      const result = getFieldDefaultValue(field, registry);
+
+      // Object items: merge fields into object
+      expect(result).toEqual([{ name: 'Alice', email: 'alice@example.com' }]);
+    });
+
+    it('should handle heterogeneous array items (mixed primitive and object)', () => {
+      const field: FieldDef<any> = {
+        type: 'array',
+        key: 'items',
+        fields: [
+          [{ type: 'input', key: 'label', value: 'Structured' }], // Object item
+          { type: 'input', key: 'value', value: 'Simple' }, // Primitive item
+        ],
+      };
+      const result = getFieldDefaultValue(field, registry);
+
+      expect(result).toEqual([{ label: 'Structured' }, 'Simple']);
+    });
+
+    it('should handle empty array', () => {
+      const field: FieldDef<any> = {
+        type: 'array',
+        key: 'empty',
+        fields: [],
+      };
+      const result = getFieldDefaultValue(field, registry);
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle field without key in group', () => {
       const field: FieldDef<any> = {

@@ -2,7 +2,7 @@
  * Exhaustive type tests for ArrayField type.
  */
 import { expectTypeOf } from 'vitest';
-import type { ArrayField, ArrayComponent, ArrayItemTemplate } from './array-field';
+import type { ArrayField, ArrayComponent, ArrayItemDefinition, ArrayItemTemplate } from './array-field';
 import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
@@ -87,9 +87,20 @@ describe('ArrayField - Exhaustive Whitelist', () => {
   });
 
   describe('fields property', () => {
-    it('fields accepts ArrayItemTemplate array (nested array structure)', () => {
+    it('fields accepts ArrayItemDefinition array (mixed primitive and object items)', () => {
       type FieldsType = ArrayField['fields'];
-      expectTypeOf<FieldsType>().toMatchTypeOf<readonly ArrayItemTemplate[]>();
+      expectTypeOf<FieldsType>().toMatchTypeOf<readonly ArrayItemDefinition[]>();
+    });
+
+    it('ArrayItemTemplate is an array of fields (for object items)', () => {
+      expectTypeOf<ArrayItemTemplate>().toMatchTypeOf<readonly unknown[]>();
+    });
+
+    it('ArrayItemDefinition can be single field or array (for primitive or object items)', () => {
+      // ArrayItemDefinition = ArrayAllowedChildren | ArrayItemTemplate
+      // This allows both primitive (single field) and object (array of fields) items
+      type Definition = ArrayItemDefinition;
+      expectTypeOf<Definition>().not.toBeNever();
     });
   });
 });
@@ -169,5 +180,47 @@ describe('ArrayField - Usage Tests', () => {
     } as const satisfies ArrayField;
 
     expectTypeOf(field.hidden).toEqualTypeOf<true>();
+  });
+
+  it('should accept primitive array items (single field per item)', () => {
+    const field = {
+      key: 'tags',
+      type: 'array',
+      fields: [
+        { key: 'tag', type: 'input', value: 'angular' },
+        { key: 'tag', type: 'input', value: 'typescript' },
+      ],
+    } as const satisfies ArrayField;
+
+    expectTypeOf(field.type).toEqualTypeOf<'array'>();
+    expectTypeOf(field.fields).toMatchTypeOf<readonly unknown[]>();
+  });
+
+  it('should accept object array items (array of fields per item)', () => {
+    const field = {
+      key: 'contacts',
+      type: 'array',
+      fields: [
+        [
+          { key: 'name', type: 'input', value: 'Alice' },
+          { key: 'email', type: 'input', value: 'alice@example.com' },
+        ],
+      ],
+    } as const satisfies ArrayField;
+
+    expectTypeOf(field.type).toEqualTypeOf<'array'>();
+  });
+
+  it('should accept heterogeneous array items (mixed primitive and object)', () => {
+    const field = {
+      key: 'items',
+      type: 'array',
+      fields: [
+        [{ key: 'label', type: 'input', value: 'Structured' }], // Object item
+        { key: 'value', type: 'input', value: 'Simple' }, // Primitive item
+      ],
+    } as const satisfies ArrayField;
+
+    expectTypeOf(field.type).toEqualTypeOf<'array'>();
   });
 });

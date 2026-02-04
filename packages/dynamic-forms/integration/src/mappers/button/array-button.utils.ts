@@ -28,8 +28,11 @@ export interface ArrayButtonEventContext {
   arrayKey: string;
   /** The form value for token resolution */
   formValue: Record<string, unknown>;
-  /** Optional template for add operations */
-  template?: readonly ArrayAllowedChildren[];
+  /**
+   * Optional template for add operations.
+   * Can be a single field (primitive item) or array of fields (object item).
+   */
+  template?: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
 }
 
 /**
@@ -80,13 +83,13 @@ export function resolveArrayButtonContext(fieldKey: string, buttonType: string, 
  *
  * @param fieldKey The button field key
  * @param ctx The resolved array button context
- * @param template Optional template for add operations
+ * @param template Optional template for add operations (single field or array of fields)
  * @returns The event context for the button component
  */
 export function buildArrayButtonEventContext(
   fieldKey: string,
   ctx: ArrayButtonContext,
-  template?: readonly ArrayAllowedChildren[],
+  template?: ArrayAllowedChildren | readonly ArrayAllowedChildren[],
 ): ArrayButtonEventContext {
   const eventContext: ArrayButtonEventContext = {
     key: fieldKey,

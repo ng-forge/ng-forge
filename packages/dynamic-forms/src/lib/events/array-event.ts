@@ -1,4 +1,4 @@
-import { AppendArrayItemEvent, ArrayItemTemplate } from './constants/append-array-item.event';
+import { AppendArrayItemEvent, ArrayItemDefinitionTemplate } from './constants/append-array-item.event';
 import { PrependArrayItemEvent } from './constants/prepend-array-item.event';
 import { InsertArrayItemEvent } from './constants/insert-array-item.event';
 import { PopArrayItemEvent } from './constants/pop-array-item.event';
@@ -13,23 +13,24 @@ import { RemoveAtIndexEvent } from './constants/remove-at-index.event';
  *
  * **BREAKING CHANGE**: Template is now required for add operations.
  *
+ * Supports both primitive and object array items:
+ * - Primitive: Pass a single field definition → extracts field value directly
+ * - Object: Pass an array of field definitions → merges fields into object
+ *
  * @example
  * ```typescript
  * import { arrayEvent } from '@ng-forge/dynamic-forms';
  *
- * // Template is required for add operations
+ * // Object item: append { name, email } object
  * eventBus.dispatch(arrayEvent('contacts').append([
  *   { key: 'name', type: 'input', label: 'Name' },
  *   { key: 'email', type: 'input', label: 'Email' }
  * ]));
  *
- * // Other add operations
- * eventBus.dispatch(arrayEvent('contacts').prepend([
- *   { key: 'name', type: 'input', label: 'Name' }
- * ]));
- * eventBus.dispatch(arrayEvent('contacts').insertAt(2, [
- *   { key: 'name', type: 'input', label: 'Name' }
- * ]));
+ * // Primitive item: append single value
+ * eventBus.dispatch(arrayEvent('tags').append(
+ *   { key: 'tag', type: 'input', label: 'Tag' }
+ * ));
  *
  * // Removing items (no template needed)
  * eventBus.dispatch(arrayEvent('contacts').pop());      // Remove last
@@ -47,32 +48,48 @@ export function arrayEvent(arrayKey: string) {
      * This is the most common operation for adding items.
      *
      * @param template - Template for the new item (REQUIRED)
+     *   - Single field: Creates a primitive item (field's value is extracted directly)
+     *   - Array of fields: Creates an object item (fields merged into object)
      * @returns An AppendArrayItemEvent to dispatch
      *
      * @example
      * ```typescript
+     * // Object item
      * eventBus.dispatch(arrayEvent('contacts').append([
      *   { key: 'name', type: 'input', label: 'Name' }
      * ]));
+     *
+     * // Primitive item
+     * eventBus.dispatch(arrayEvent('tags').append(
+     *   { key: 'tag', type: 'input', label: 'Tag' }
+     * ));
      * ```
      */
-    append: <T extends ArrayItemTemplate>(template: T) => new AppendArrayItemEvent(arrayKey, template),
+    append: <T extends ArrayItemDefinitionTemplate>(template: T) => new AppendArrayItemEvent(arrayKey, template),
 
     /**
      * Prepend a new item at the BEGINNING of the array.
      * Use when new items should appear at the start.
      *
      * @param template - Template for the new item (REQUIRED)
+     *   - Single field: Creates a primitive item (field's value is extracted directly)
+     *   - Array of fields: Creates an object item (fields merged into object)
      * @returns A PrependArrayItemEvent to dispatch
      *
      * @example
      * ```typescript
+     * // Object item
      * eventBus.dispatch(arrayEvent('contacts').prepend([
      *   { key: 'name', type: 'input', label: 'Name' }
      * ]));
+     *
+     * // Primitive item
+     * eventBus.dispatch(arrayEvent('tags').prepend(
+     *   { key: 'tag', type: 'input', label: 'Tag' }
+     * ));
      * ```
      */
-    prepend: <T extends ArrayItemTemplate>(template: T) => new PrependArrayItemEvent(arrayKey, template),
+    prepend: <T extends ArrayItemDefinitionTemplate>(template: T) => new PrependArrayItemEvent(arrayKey, template),
 
     /**
      * Insert a new item at a SPECIFIC INDEX in the array.
@@ -80,16 +97,24 @@ export function arrayEvent(arrayKey: string) {
      *
      * @param index - The position at which to insert the new item
      * @param template - Template for the new item (REQUIRED)
+     *   - Single field: Creates a primitive item (field's value is extracted directly)
+     *   - Array of fields: Creates an object item (fields merged into object)
      * @returns An InsertArrayItemEvent to dispatch
      *
      * @example
      * ```typescript
+     * // Object item at index 2
      * eventBus.dispatch(arrayEvent('contacts').insertAt(2, [
      *   { key: 'name', type: 'input', label: 'Name' }
      * ]));
+     *
+     * // Primitive item at index 2
+     * eventBus.dispatch(arrayEvent('tags').insertAt(2,
+     *   { key: 'tag', type: 'input', label: 'Tag' }
+     * ));
      * ```
      */
-    insertAt: <T extends ArrayItemTemplate>(index: number, template: T) => new InsertArrayItemEvent(arrayKey, index, template),
+    insertAt: <T extends ArrayItemDefinitionTemplate>(index: number, template: T) => new InsertArrayItemEvent(arrayKey, index, template),
 
     /**
      * Remove the LAST item from the array.

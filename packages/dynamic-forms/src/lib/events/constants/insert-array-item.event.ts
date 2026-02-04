@@ -1,5 +1,5 @@
 import { FormEvent } from '../interfaces/form-event';
-import { ArrayItemTemplate } from './append-array-item.event';
+import { ArrayItemDefinitionTemplate } from './append-array-item.event';
 
 /**
  * Event dispatched to insert a new item at a SPECIFIC INDEX in an array field.
@@ -9,20 +9,20 @@ import { ArrayItemTemplate } from './append-array-item.event';
  *
  * @example
  * ```typescript
- * // Use the builder API (recommended)
+ * // Object item: insert { name } object at index 2
  * eventBus.dispatch(arrayEvent('contacts').insertAt(2, [
  *   { key: 'name', type: 'input', label: 'Name' }
  * ]));
  *
- * // Or instantiate directly
- * eventBus.dispatch(new InsertArrayItemEvent('contacts', 2, [
- *   { key: 'name', type: 'input', label: 'Name' }
- * ]));
+ * // Primitive item: insert single value at index 2
+ * eventBus.dispatch(arrayEvent('tags').insertAt(2,
+ *   { key: 'tag', type: 'input', label: 'Tag' }
+ * ));
  * ```
  *
- * @typeParam TTemplate - The type of the template fields (for type safety)
+ * @typeParam TTemplate - The type of the template (single field or array of fields)
  */
-export class InsertArrayItemEvent<TTemplate extends ArrayItemTemplate = ArrayItemTemplate> implements FormEvent {
+export class InsertArrayItemEvent<TTemplate extends ArrayItemDefinitionTemplate = ArrayItemDefinitionTemplate> implements FormEvent {
   readonly type = 'insert-array-item' as const;
 
   constructor(
@@ -32,7 +32,8 @@ export class InsertArrayItemEvent<TTemplate extends ArrayItemTemplate = ArrayIte
     public readonly index: number,
     /**
      * Template for the new array item. REQUIRED.
-     * Defines the field structure for the new item.
+     * - Single field (FieldDef): Creates a primitive item (field's value is extracted directly)
+     * - Array of fields (FieldDef[]): Creates an object item (fields merged into object)
      */
     public readonly template: TTemplate,
   ) {}

@@ -112,21 +112,31 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
   }
 
   if (field.type === 'array') {
-    // With the new fields[][] structure, extract initial values from each item template
-    const arrayField = field as { fields?: readonly (readonly FieldDef<unknown>[])[] };
-    const itemTemplates = arrayField.fields;
+    // Array field supports two item formats:
+    // - Primitive items: single FieldDef (not wrapped in array) → extracts field value directly
+    // - Object items: FieldDef[] (array of fields) → merges fields into object
+    const arrayField = field as { fields?: readonly (FieldDef<unknown> | readonly FieldDef<unknown>[])[] };
+    const itemDefinitions = arrayField.fields;
 
-    if (!itemTemplates || itemTemplates.length === 0) {
+    if (!itemDefinitions || itemDefinitions.length === 0) {
       return [];
     }
 
-    // Each item template is an array of fields that define one array item
-    return itemTemplates.map((itemFields) => {
+    // Process each item definition
+    return itemDefinitions.map((itemDef) => {
+      // Primitive item: single FieldDef (not wrapped in array)
+      // Extract field value directly - key is for internal tracking only
+      if (!Array.isArray(itemDef)) {
+        return getFieldDefaultValue(itemDef as FieldDef<unknown>, registry);
+      }
+
+      // Object item: FieldDef[] - merge fields into object
+      const itemFields = itemDef as readonly FieldDef<unknown>[];
       let itemValue: Record<string, unknown> = {};
 
       for (const templateField of itemFields) {
         const fieldValue = getFieldDefaultValue(templateField, registry);
-        const valueHandling = getFieldValueHandling(templateField.type, registry);
+        const fieldValueHandling = getFieldValueHandling(templateField.type, registry);
 
         if (templateField.type === 'group' && 'key' in templateField && templateField.key) {
           // Groups wrap their value under the group key
@@ -136,7 +146,7 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
           if (fieldValue && typeof fieldValue === 'object') {
             itemValue = { ...itemValue, ...(fieldValue as Record<string, unknown>) };
           }
-        } else if (valueHandling === 'include' && 'key' in templateField && templateField.key) {
+        } else if (fieldValueHandling === 'include' && 'key' in templateField && templateField.key) {
           itemValue[templateField.key] = fieldValue;
         }
       }

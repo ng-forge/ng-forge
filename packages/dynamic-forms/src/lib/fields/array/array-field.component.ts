@@ -3,7 +3,7 @@ import { NgComponentOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { ArrayField, ArrayItemTemplate } from '../../definitions/default/array-field';
+import { ArrayField, ArrayItemDefinition, ArrayItemTemplate } from '../../definitions/default/array-field';
 import { isGroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldTree } from '@angular/forms/signals';
@@ -93,11 +93,18 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   /**
    * Gets the item templates (field definitions) for the array.
-   * Each element is an array of fields that define one array item's structure.
+   * Each element can be either:
+   * - A single FieldDef (primitive item) - normalized to [FieldDef]
+   * - An array of FieldDefs (object item) - used as-is
+   *
+   * Returns normalized templates where all items are arrays for consistent handling.
    */
   private readonly itemTemplates = computed<ArrayItemTemplate[]>(() => {
     const arrayField = this.field();
-    return (arrayField.fields as ArrayItemTemplate[]) || [];
+    const definitions = (arrayField.fields as ArrayItemDefinition[]) || [];
+
+    // Normalize: single FieldDef → [FieldDef], array stays as-is
+    return definitions.map((def) => (Array.isArray(def) ? def : [def]) as ArrayItemTemplate);
   });
 
   private readonly arrayFieldTrees = computed<readonly (FieldTree<unknown> | null)[]>(() => {
@@ -165,7 +172,9 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       .pipe(takeUntilDestroyed())
       .subscribe((action) => {
         if (action.action === 'add') {
-          if (!action.template || action.template.length === 0) {
+          // Template can be single FieldDef (primitive) or FieldDef[] (object)
+          const templates = Array.isArray(action.template) ? action.template : action.template ? [action.template] : [];
+          if (templates.length === 0) {
             this.logger.error(
               `Cannot add item to array '${this.key()}': template is REQUIRED. ` +
                 'Buttons must specify an explicit template property. ' +
@@ -185,8 +194,14 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * Creates resolved items FIRST, then updates form value.
    * This ensures prepend/insert work correctly - differential update sees "none"
    * because resolved items count already matches the new array length.
+   *
+   * Supports both primitive (single FieldDef) and object (FieldDef[]) templates.
    */
-  private async handleAddFromEvent(templates: FieldDef<unknown>[], index?: number): Promise<void> {
+  private async handleAddFromEvent(template: FieldDef<unknown> | FieldDef<unknown>[], index?: number): Promise<void> {
+    // Normalize template to array for consistent handling
+    const templates = Array.isArray(template) ? template : [template];
+    const isPrimitiveItem = !Array.isArray(template);
+
     if (templates.length === 0) {
       this.logger.error(
         `Cannot add item to array '${this.field().key}': no field templates provided. ` +
@@ -201,23 +216,31 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     const currentArray = getArrayValue(currentValue as Partial<TModel>, arrayKey);
     const insertIndex = index !== undefined ? Math.min(index, currentArray.length) : currentArray.length;
 
-    // Compute default value by merging all template defaults
-    let value: unknown = {};
-    for (const template of templates) {
-      const rawValue = getFieldDefaultValue(template, this.rawFieldRegistry());
-      const valueHandling = getFieldValueHandling(template.type, this.rawFieldRegistry());
-      const isContainer = template.type === 'group' || template.type === 'row';
+    // Compute default value
+    let value: unknown;
 
-      if (isContainer) {
-        if (isGroupField(template)) {
-          // Groups wrap their fields under the group key
-          value = { ...(value as Record<string, unknown>), [template.key]: rawValue };
-        } else {
-          // Rows flatten their fields directly
-          value = { ...(value as Record<string, unknown>), ...(rawValue as Record<string, unknown>) };
+    if (isPrimitiveItem) {
+      // Primitive item: single field's value is extracted directly
+      value = getFieldDefaultValue(templates[0], this.rawFieldRegistry());
+    } else {
+      // Object item: merge all template defaults into an object
+      value = {};
+      for (const templateField of templates) {
+        const rawValue = getFieldDefaultValue(templateField, this.rawFieldRegistry());
+        const valueHandling = getFieldValueHandling(templateField.type, this.rawFieldRegistry());
+        const isContainer = templateField.type === 'group' || templateField.type === 'row';
+
+        if (isContainer) {
+          if (isGroupField(templateField)) {
+            // Groups wrap their fields under the group key
+            value = { ...(value as Record<string, unknown>), [templateField.key]: rawValue };
+          } else {
+            // Rows flatten their fields directly
+            value = { ...(value as Record<string, unknown>), ...(rawValue as Record<string, unknown>) };
+          }
+        } else if (valueHandling === 'include' && templateField.key) {
+          value = { ...(value as Record<string, unknown>), [templateField.key]: rawValue };
         }
-      } else if (valueHandling === 'include' && template.key) {
-        value = { ...(value as Record<string, unknown>), [template.key]: rawValue };
       }
     }
 
