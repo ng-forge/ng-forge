@@ -2,8 +2,7 @@
  * Exhaustive type tests for ArrayField type.
  */
 import { expectTypeOf } from 'vitest';
-import type { ArrayField, ArrayComponent } from './array-field';
-import type { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
+import type { ArrayField, ArrayComponent, ArrayItemTemplate } from './array-field';
 import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
@@ -88,9 +87,9 @@ describe('ArrayField - Exhaustive Whitelist', () => {
   });
 
   describe('fields property', () => {
-    it('fields accepts ArrayAllowedChildren array', () => {
+    it('fields accepts ArrayItemTemplate array (nested array structure)', () => {
       type FieldsType = ArrayField['fields'];
-      expectTypeOf<FieldsType>().toMatchTypeOf<readonly ArrayAllowedChildren[]>();
+      expectTypeOf<FieldsType>().toMatchTypeOf<readonly ArrayItemTemplate[]>();
     });
   });
 });
@@ -101,13 +100,13 @@ describe('ArrayField - Exhaustive Whitelist', () => {
 
 describe('ArrayField - Generic Type Parameter', () => {
   it('should accept custom field type array', () => {
-    type CustomFields = readonly ArrayAllowedChildren[];
+    type CustomFields = readonly ArrayItemTemplate[];
     type CustomArrayField = ArrayField<CustomFields>;
-    expectTypeOf<CustomArrayField['fields']>().toMatchTypeOf<readonly ArrayAllowedChildren[]>();
+    expectTypeOf<CustomArrayField['fields']>().toMatchTypeOf<readonly ArrayItemTemplate[]>();
   });
 
   it('should preserve field types in generic', () => {
-    type SpecificArrayField = ArrayField<readonly ArrayAllowedChildren[]>;
+    type SpecificArrayField = ArrayField<readonly ArrayItemTemplate[]>;
     expectTypeOf<SpecificArrayField['type']>().toEqualTypeOf<'array'>();
   });
 });
@@ -117,7 +116,7 @@ describe('ArrayField - Generic Type Parameter', () => {
 // ============================================================================
 
 describe('ArrayComponent - Type Extraction', () => {
-  type TestComponent = ArrayComponent<ArrayAllowedChildren[]>;
+  type TestComponent = ArrayComponent<ArrayItemTemplate[]>;
 
   it('should be a valid type', () => {
     expectTypeOf<TestComponent>().not.toBeNever();
