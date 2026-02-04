@@ -208,3 +208,38 @@ export const ARRAY_TEMPLATE_REGISTRY = new InjectionToken<ArrayTemplateRegistry>
  * Key is the item's unique ID, value is the template (array of field definitions).
  */
 export type ArrayTemplateRegistry = Map<string, import('../definitions/base/field-def').FieldDef<unknown>[]>;
+
+/**
+ * Injection token for array-level item ID generator.
+ *
+ * Provides a function that generates unique IDs for array items. Each array
+ * component instance gets its own generator (via useFactory), ensuring:
+ * - SSR hydration compatibility (server and client generate same IDs for same array)
+ * - No global state pollution between form instances
+ * - Deterministic IDs within each array's lifecycle
+ *
+ * The token is provided by ArrayFieldComponent at its level with a factory
+ * that creates a fresh counter for each array instance.
+ *
+ * @example
+ * ```typescript
+ * // In ArrayFieldComponent
+ * providers: [
+ *   { provide: ARRAY_ITEM_ID_GENERATOR, useFactory: createArrayItemIdGenerator }
+ * ]
+ *
+ * // Usage
+ * const generateId = inject(ARRAY_ITEM_ID_GENERATOR);
+ * const itemId = generateId(); // 'item-0', 'item-1', etc.
+ * ```
+ */
+export const ARRAY_ITEM_ID_GENERATOR = new InjectionToken<() => string>('ARRAY_ITEM_ID_GENERATOR');
+
+/**
+ * Factory function that creates a new array item ID generator.
+ * Each invocation creates an independent counter starting at 0.
+ */
+export function createArrayItemIdGenerator(): () => string {
+  let counter = 0;
+  return () => `item-${counter++}`;
+}

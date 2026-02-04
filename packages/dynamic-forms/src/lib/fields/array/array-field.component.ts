@@ -13,7 +13,12 @@ import { getFieldValueHandling } from '../../models/field-type';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { EventBus } from '../../events/event.bus';
 import { FieldSignalContext } from '../../mappers/types';
-import { ARRAY_TEMPLATE_REGISTRY, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import {
+  ARRAY_ITEM_ID_GENERATOR,
+  ARRAY_TEMPLATE_REGISTRY,
+  createArrayItemIdGenerator,
+  FIELD_SIGNAL_CONTEXT,
+} from '../../models/field-signal-context.token';
 import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from '../../utils/array-field/array-field.types';
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 import { observeArrayActions } from '../../utils/array-field/array-event-handler';
@@ -47,6 +52,8 @@ import { ArrayFieldTree } from '../../core/field-tree-utils';
   providers: [
     // Each array gets its own template registry to track templates used for dynamically added items
     { provide: ARRAY_TEMPLATE_REGISTRY, useFactory: () => new Map<string, FieldDef<unknown>[]>() },
+    // Each array gets its own ID generator for SSR hydration compatibility
+    { provide: ARRAY_ITEM_ID_GENERATOR, useFactory: createArrayItemIdGenerator },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -62,6 +69,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   private readonly eventBus = inject(EventBus);
   private readonly logger = inject(DynamicFormLogger);
   private readonly templateRegistry = inject(ARRAY_TEMPLATE_REGISTRY);
+  private readonly generateItemId = inject(ARRAY_ITEM_ID_GENERATOR);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -229,6 +237,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         registry: this.rawFieldRegistry(),
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+        generateItemId: this.generateItemId,
       }).pipe(
         catchError((error) => {
           this.logger.error(`Failed to resolve array item at index ${insertIndex}:`, error);
@@ -412,6 +421,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         registry: this.rawFieldRegistry(),
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+        generateItemId: this.generateItemId,
       });
     }
 
@@ -428,6 +438,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         registry: this.rawFieldRegistry(),
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+        generateItemId: this.generateItemId,
       });
     }
 

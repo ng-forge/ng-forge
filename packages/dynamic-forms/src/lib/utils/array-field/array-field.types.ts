@@ -1,21 +1,6 @@
 import { Injector, Signal, type Type } from '@angular/core';
 
 /**
- * Counter for generating unique array item IDs.
- * Simple incrementing counter is sufficient since we only need
- * uniqueness within a single form session, not globally.
- */
-let itemIdCounter = 0;
-
-/**
- * Generates a unique identifier for array items.
- * Used for @for tracking to maintain component identity when items are reordered.
- */
-export function generateArrayItemId(): string {
-  return `item-${itemIdCounter++}`;
-}
-
-/**
  * A single field within a resolved array item.
  */
 export interface ResolvedArrayItemField {

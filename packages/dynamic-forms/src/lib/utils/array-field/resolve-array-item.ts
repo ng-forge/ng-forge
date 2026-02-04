@@ -5,7 +5,7 @@ import { FieldDef } from '../../definitions/base/field-def';
 import { FieldSignalContext } from '../../mappers/types';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { generateArrayItemId, ResolvedArrayItem, ResolvedArrayItemField } from './array-field.types';
+import { ResolvedArrayItem, ResolvedArrayItemField } from './array-field.types';
 import { createArrayItemInjectorAndInputs } from './create-array-item-injector';
 
 /**
@@ -33,6 +33,11 @@ export interface ResolveArrayItemOptions<TModel extends Record<string, unknown>>
    * Returns undefined for componentless fields (e.g., hidden fields).
    */
   loadTypeComponent: (type: string) => Promise<Type<unknown> | undefined>;
+  /**
+   * Function to generate unique item IDs. Scoped to the array component instance
+   * to ensure SSR hydration compatibility (server and client generate same IDs).
+   */
+  generateItemId: () => string;
 }
 
 /**
@@ -55,6 +60,7 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
     registry,
     destroyRef,
     loadTypeComponent,
+    generateItemId,
   } = options;
 
   if (templates.length === 0) {
@@ -62,7 +68,7 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
   }
 
   // Generate ONE id for this array item (shared by all fields for tracking)
-  const itemId = generateArrayItemId();
+  const itemId = generateItemId();
 
   // O(1) position lookup via Map instead of O(n) indexOf()
   const indexSignal = linkedSignal(() => {

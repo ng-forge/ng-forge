@@ -6,7 +6,9 @@ export { FIELD_REGISTRY, getFieldValueHandling } from './field-type';
 export type { FieldOption } from './field-option';
 export {
   ARRAY_CONTEXT,
+  ARRAY_ITEM_ID_GENERATOR,
   ARRAY_TEMPLATE_REGISTRY,
+  createArrayItemIdGenerator,
   DEFAULT_PROPS,
   DEFAULT_VALIDATION_MESSAGES,
   FIELD_SIGNAL_CONTEXT,
