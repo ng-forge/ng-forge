@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input, linkedSignal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input, signal } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of } from 'rxjs';
@@ -119,9 +119,18 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   private readonly resolvedItemsSignal = signal<ResolvedArrayItem[]>([]);
   private readonly updateVersion = signal(0);
-  private readonly itemOrderSignal = linkedSignal(() => this.resolvedItemsSignal().map((item) => item.id));
 
-  readonly resolvedItems = linkedSignal(() => this.resolvedItemsSignal());
+  /**
+   * Map of item IDs to their current positions. O(1) lookup vs O(n) indexOf().
+   * Used by child linkedSignals to reactively track their position in the array.
+   */
+  private readonly itemPositionMap = computed(() => {
+    const items = this.resolvedItemsSignal();
+    return new Map(items.map((item, idx) => [item.id, idx]));
+  });
+
+  /** Read-only view of resolved items for template consumption. */
+  readonly resolvedItems = computed(() => this.resolvedItemsSignal());
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Constructor
@@ -214,7 +223,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         index: insertIndex,
         templates,
         arrayField: this.field(),
-        itemOrderSignal: this.itemOrderSignal,
+        itemPositionMap: this.itemPositionMap,
         parentFieldSignalContext: this.parentFieldSignalContext,
         parentInjector: this.parentInjector,
         registry: this.rawFieldRegistry(),
@@ -397,7 +406,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         index,
         templates: overrideTemplate,
         arrayField: this.field(),
-        itemOrderSignal: this.itemOrderSignal,
+        itemPositionMap: this.itemPositionMap,
         parentFieldSignalContext: this.parentFieldSignalContext,
         parentInjector: this.parentInjector,
         registry: this.rawFieldRegistry(),
@@ -413,7 +422,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         index,
         templates: templates as FieldDef<unknown>[],
         arrayField: this.field(),
-        itemOrderSignal: this.itemOrderSignal,
+        itemPositionMap: this.itemPositionMap,
         parentFieldSignalContext: this.parentFieldSignalContext,
         parentInjector: this.parentInjector,
         registry: this.rawFieldRegistry(),
@@ -435,7 +444,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * Handles remove operations from events (pop, shift, removeAt).
    * Updates resolvedItems FIRST, then form value - this ensures differential
    * update sees "none" (lengths match) and avoids unnecessary recreates.
-   * Remaining items' linkedSignal indices auto-update via itemOrderSignal.
+   * Remaining items' linkedSignal indices auto-update via itemPositionMap.
    */
   private removeItem(index?: number): void {
     const arrayKey = this.field().key;
@@ -454,7 +463,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
     // Update resolvedItems FIRST - remove the item at the specified index.
     // This ensures differential update sees "none" (lengths already match).
-    // Remaining items' linkedSignal indices auto-update via itemOrderSignal.
+    // Remaining items' linkedSignal indices auto-update via itemPositionMap.
     const removedItem = this.resolvedItemsSignal()[removeIndex];
     if (removedItem) {
       this.templateRegistry.delete(removedItem.id);

@@ -18,8 +18,8 @@ export interface ResolveArrayItemOptions<TModel extends Record<string, unknown>>
   templates: FieldDef<unknown>[];
   /** The array field definition containing this item. */
   arrayField: ArrayField;
-  /** Signal containing ordered item IDs for reactive index derivation. */
-  itemOrderSignal: Signal<string[]>;
+  /** Map signal for O(1) position lookup. Keys are item IDs, values are indices. */
+  itemPositionMap: Signal<Map<string, number>>;
   /** Parent context for accessing form state and values. */
   parentFieldSignalContext: FieldSignalContext<TModel>;
   /** Parent injector for creating scoped child injector. */
@@ -49,7 +49,7 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
     index,
     templates,
     arrayField,
-    itemOrderSignal,
+    itemPositionMap,
     parentFieldSignalContext,
     parentInjector,
     registry,
@@ -64,10 +64,10 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
   // Generate ONE id for this array item (shared by all fields for tracking)
   const itemId = generateArrayItemId();
 
+  // O(1) position lookup via Map instead of O(n) indexOf()
   const indexSignal = linkedSignal(() => {
-    const order = itemOrderSignal();
-    const idx = order.indexOf(itemId);
-    return idx >= 0 ? idx : index;
+    const positionMap = itemPositionMap();
+    return positionMap.get(itemId) ?? index;
   });
 
   // Resolve all templates in parallel
