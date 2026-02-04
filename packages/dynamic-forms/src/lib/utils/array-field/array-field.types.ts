@@ -1,17 +1,18 @@
 import { Injector, Signal, type Type } from '@angular/core';
 
 /**
+ * Counter for generating unique array item IDs.
+ * Simple incrementing counter is sufficient since we only need
+ * uniqueness within a single form session, not globally.
+ */
+let itemIdCounter = 0;
+
+/**
  * Generates a unique identifier for array items.
- * Uses crypto.randomUUID() when available (requires secure context/HTTPS),
- * falls back to a timestamp + random number combination for compatibility.
  * Used for @for tracking to maintain component identity when items are reordered.
  */
 export function generateArrayItemId(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-  // Fallback for older browsers or non-secure contexts
-  return `${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 11)}`;
+  return `item-${itemIdCounter++}`;
 }
 
 /**
