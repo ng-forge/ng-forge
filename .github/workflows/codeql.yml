@@ -1,0 +1,43 @@
+name: CodeQL Analysis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 7 * * 1' # Weekly Monday 09:00 Europe/Bucharest (07:00 UTC)
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          config: |
+            paths-ignore:
+              # Test files
+              - '**/*.spec.ts'
+              - '**/*.type-test.ts'
+              # Test directories
+              - '**/testing/**'
+              - '**/__tests__/**'
+              # Example apps (demo code, not library source)
+              - 'apps/examples/**'
+              # Internal/experimental packages
+              - 'internal/**'
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:javascript-typescript'
