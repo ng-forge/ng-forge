@@ -131,30 +131,30 @@
   // ============================================
   // Example-specific row layout adjustments for better visual alignment
 
-  df-row {
+  [row-field] {
     // Use baseline alignment for better button/input vertical alignment
-    align-items: baseline;
+    align-items: baseline !important;
 
     // Children share available space equally unless col class specified
     > *:not([class*='df-col-']) {
-      flex: 1 1 0;
+      flex: 1 1 0 !important;
       min-width: 0; // Allow shrinking below content size
     }
 
     // Auto-size column - use natural content width (for buttons side by side)
     > .df-col-auto {
-      flex: 0 0 auto;
-      width: auto;
+      flex: 0 0 auto !important;
+      width: auto !important;
     }
   }
 
   // Responsive behavior - stack on tablet and below (768px)
   // Using 768px because example container is 600px max-width
   @media (max-width: 768px) {
-    df-row:not(.df-row-mobile-keep-cols) {
-      flex-direction: column;
-      flex-wrap: nowrap;
-      align-items: flex-start;
+    [row-field]:not(.df-row-mobile-keep-cols) {
+      flex-direction: column !important;
+      flex-wrap: nowrap !important;
+      align-items: flex-start !important;
 
       > * {
         flex: 0 0 auto !important;
@@ -164,9 +164,9 @@
     }
 
     // Opt-in: keep side-by-side on mobile
-    df-row.df-row-mobile-keep-cols {
-      flex-direction: row;
-      flex-wrap: wrap;
+    [row-field].df-row-mobile-keep-cols {
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
 
       > *:not([class*='df-col-']) {
         flex: 0 0 auto !important;
