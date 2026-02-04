@@ -8,51 +8,27 @@ import {
   Injector,
   input,
   InputSignal,
-  linkedSignal,
   model,
   OnDestroy,
-  runInInjectionContext,
-  signal,
   Signal,
-  untracked,
-  WritableSignal,
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
-import { form, FieldTree, Schema } from '@angular/forms/signals';
+import { FieldTree } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { EMPTY, filter, forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
-import { derivedFromDeferred } from './utils/derived-from-deferred/derived-from-deferred';
-import { reconcileFields, ResolvedField, resolveField } from './utils/resolve-field/resolve-field';
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
-import { keyBy, memoize, isEqual } from './utils/object-utils';
-import {
-  DEFAULT_PROPS,
-  DEFAULT_VALIDATION_MESSAGES,
-  EXTERNAL_DATA,
-  FIELD_SIGNAL_CONTEXT,
-  FORM_OPTIONS,
-} from './models/field-signal-context.token';
-import { FieldTypeDefinition } from './models/field-type';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, EXTERNAL_DATA, FORM_OPTIONS } from './models/field-signal-context.token';
 import { FormConfig, FormOptions } from './models/form-config';
 import { RegisteredFieldTypes } from './models/registry/field-registry';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
-import { createSchemaFromFields } from './core/schema-builder';
-import { createFormLevelSchema } from './core/form-schema-merger';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
 import { setupInitializationTracking } from './utils/initialization-tracker/initialization-tracker';
-import { FormMode, InferFormValue, isContainerField } from './models/types';
+import { InferFormValue, isContainerField } from './models/types';
 import { flattenFields } from './utils/flattener/field-flattener';
 import { FieldDef } from './definitions/base/field-def';
-import { isPageField, PageField } from './definitions/default/page-field';
-import { getFieldDefaultValue } from './utils/default-value/default-value';
-import { FieldSignalContext } from './mappers/types';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService, SchemaRegistryService } from './core/registry';
-import { detectFormMode, FormModeDetectionResult } from './models/types/form-mode';
-import { collectCrossFieldEntries } from './core/cross-field/cross-field-collector';
-import { FormModeValidator } from './utils/form-validation/form-mode-validator';
 import {
   DERIVATION_WARNING_TRACKER,
   DERIVATION_ORCHESTRATOR,
@@ -69,32 +45,10 @@ import { PageChangeEvent } from './events/constants/page-change.event';
 import { PageNavigationStateChangeEvent } from './events/constants/page-navigation-state-change.event';
 import { DynamicFormLogger } from './providers/features/logger/logger.token';
 import { DERIVATION_LOG_CONFIG } from './providers/features/logger/with-logger-config';
+import { FormStateManager } from './state/form-state-manager';
 
 function derivationOrchestratorFactoryWrapper(dynamicForm: DynamicForm) {
   return createDerivationOrchestrator(dynamicForm.derivationOrchestratorConfig);
-}
-
-/**
- * State for managing two-phase config transitions.
- *
- * When config changes and removes fields, old field components still hold cached
- * references to FieldTree nodes. If we create the new form immediately, Angular
- * Signal Forms throws NG01902 "Orphan field" errors when old components try to
- * access their now-orphaned FieldTree nodes.
- *
- * Solution: Two-phase transition
- * - Phase 1 (teardown): Hide old components with @if, allowing Angular to destroy them
- * - Phase 2 (render): After destruction completes, create new form and render new components
- */
-interface ConfigTransitionState<TFields extends RegisteredFieldTypes[]> {
-  /** The config currently being rendered */
-  activeConfig: FormConfig<TFields>;
-  /** The config waiting to be applied after teardown completes */
-  pendingConfig?: FormConfig<TFields>;
-  /** Current phase: 'render' shows components, 'teardown' hides them */
-  renderPhase: 'render' | 'teardown';
-  /** Form values preserved during transition to restore after applying new config */
-  preservedValue?: Record<string, unknown>;
 }
 
 /**
@@ -102,6 +56,12 @@ interface ConfigTransitionState<TFields extends RegisteredFieldTypes[]> {
  *
  * This is the main entry point for the dynamic form system. It handles form state management,
  * validation, field rendering, and event coordination using Angular's signal-based reactive forms.
+ *
+ * **Architecture:**
+ * The component delegates state management to `FormStateManager`, acting as a thin wrapper that:
+ * - Provides inputs to the state manager
+ * - Reads computed signals for template rendering
+ * - Handles DOM events and outputs
  *
  * @typeParam TFields - Array of registered field types available for this form
  * @typeParam TModel - The strongly-typed interface for form values
@@ -120,11 +80,16 @@ interface ConfigTransitionState<TFields extends RegisteredFieldTypes[]> {
   selector: 'form[dynamic-form]',
   imports: [NgComponentOutlet, PageOrchestratorComponent],
   template: `
-    @if (renderPhase() === 'render') {
-      @if (formModeDetection().mode === 'paged') {
-        <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="form()" [fieldSignalContext]="fieldSignalContext()"></div>
+    @if (stateManager.shouldRender()) {
+      @if (stateManager.formModeDetection().mode === 'paged') {
+        <div
+          page-orchestrator
+          [pageFields]="stateManager.pageFieldDefinitions()"
+          [form]="stateManager.form()"
+          [fieldSignalContext]="stateManager.fieldSignalContext()"
+        ></div>
       } @else {
-        @for (field of resolvedFields(); track field.key) {
+        @for (field of stateManager.resolvedFields(); track field.key) {
           <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
         }
       }
@@ -137,27 +102,28 @@ interface ConfigTransitionState<TFields extends RegisteredFieldTypes[]> {
     FunctionRegistryService,
     RootFormRegistryService,
     FieldContextRegistryService,
+    FormStateManager,
     // Form-level config tokens provided via useFactory to enable reactive updates
-    // Uses activeConfig() to respect two-phase config transitions
+    // Uses stateManager.activeConfig() to respect two-phase config transitions
     {
       provide: DEFAULT_PROPS,
-      useFactory: (form: DynamicForm) => computed(() => form.activeConfig().defaultProps),
-      deps: [DynamicForm],
+      useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.defaultProps),
+      deps: [FormStateManager],
     },
     {
       provide: DEFAULT_VALIDATION_MESSAGES,
-      useFactory: (form: DynamicForm) => computed(() => form.activeConfig().defaultValidationMessages),
-      deps: [DynamicForm],
+      useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.defaultValidationMessages),
+      deps: [FormStateManager],
     },
     {
       provide: FORM_OPTIONS,
-      useFactory: (form: DynamicForm) => form.effectiveFormOptions,
-      deps: [DynamicForm],
+      useFactory: (stateManager: FormStateManager) => stateManager.effectiveFormOptions,
+      deps: [FormStateManager],
     },
     {
       provide: EXTERNAL_DATA,
-      useFactory: (form: DynamicForm) => computed(() => form.activeConfig().externalData),
-      deps: [DynamicForm],
+      useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.externalData),
+      deps: [FormStateManager],
     },
     { provide: DERIVATION_WARNING_TRACKER, useFactory: createDerivationWarningTracker },
     {
@@ -169,10 +135,10 @@ interface ConfigTransitionState<TFields extends RegisteredFieldTypes[]> {
   host: {
     class: 'df-dynamic-form df-form',
     novalidate: '', // Disable browser validation - Angular Signal Forms handles validation
-    '[class.disabled]': 'disabled()',
-    '[class.df-form-paged]': 'formModeDetection().mode === "paged"',
-    '[class.df-form-non-paged]': 'formModeDetection().mode === "non-paged"',
-    '[attr.data-form-mode]': 'formModeDetection().mode',
+    '[class.disabled]': 'stateManager.disabled()',
+    '[class.df-form-paged]': 'stateManager.formModeDetection().mode === "paged"',
+    '[class.df-form-non-paged]': 'stateManager.formModeDetection().mode === "non-paged"',
+    '[attr.data-form-mode]': 'stateManager.formModeDetection().mode',
     '(submit)': 'onNativeSubmit($event)',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -189,11 +155,14 @@ export class DynamicForm<
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
-  private readonly rootFormRegistry = inject(RootFormRegistryService);
-  private readonly functionRegistry = inject(FunctionRegistryService);
-  private readonly schemaRegistry = inject(SchemaRegistryService);
   private readonly logger = inject(DynamicFormLogger);
   private readonly derivationLogConfig = inject(DERIVATION_LOG_CONFIG);
+
+  /**
+   * State manager that owns all form state and coordinates the form lifecycle.
+   * The component delegates state management to this service and reads its signals.
+   */
+  protected readonly stateManager = inject(FormStateManager<TFields, TModel>);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -209,54 +178,10 @@ export class DynamicForm<
   value = model<Partial<TModel> | undefined>(undefined);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Config Transition State (Two-Phase Rendering)
+  // Private State
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /**
-   * State machine for managing config transitions.
-   *
-   * When config changes and removes fields, we need a two-phase approach:
-   * 1. Teardown: Hide old components BEFORE creating new form (prevents NG01902 orphan field errors)
-   * 2. Render: Create new form and render new components AFTER old ones are destroyed
-   *
-   * Note: preservedValue is set via effect, not in computation, to avoid signal cycles
-   * (formValue depends on form → formSetup → activeConfig → configTransition)
-   */
-  private readonly configTransition = linkedSignal<FormConfig<TFields>, ConfigTransitionState<TFields>>({
-    source: this.config,
-    computation: (newConfig, previous): ConfigTransitionState<TFields> => {
-      // First load - render immediately without teardown phase
-      if (previous === undefined) {
-        return { activeConfig: newConfig, renderPhase: 'render' };
-      }
-
-      const prevState = previous.value;
-
-      // If already in teardown phase, update pending config (latest wins for rapid changes)
-      if (prevState.renderPhase === 'teardown') {
-        return { ...prevState, pendingConfig: newConfig };
-      }
-
-      // Start teardown phase - preservedValue will be set by effect to avoid cycles
-      return {
-        activeConfig: prevState.activeConfig,
-        pendingConfig: newConfig,
-        renderPhase: 'teardown',
-      };
-    },
-  });
-
-  /** The currently active config used for form rendering */
-  readonly activeConfig = computed(() => this.configTransition().activeConfig);
-
-  /** Current render phase: 'render' = showing form, 'teardown' = hiding old components */
-  readonly renderPhase = computed(() => this.configTransition().renderPhase);
-
-  /**
-   * Value preserved during config transition, set when entering teardown phase.
-   * Stored separately to avoid signal cycles (formValue → form → formSetup → activeConfig → configTransition).
-   */
-  private readonly transitionPreservedValue = signal<Record<string, unknown> | undefined>(undefined);
+  private readonly componentId = 'dynamic-form';
 
   /**
    * Flag to track if the component is destroyed.
@@ -265,112 +190,81 @@ export class DynamicForm<
   private isDestroyed = false;
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Memoized Functions
+  // Computed Signals - Pass-through for backward compatibility
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly memoizedFlattenFields = memoize(
-    (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry),
-    {
-      resolver: (fields, registry) => {
-        const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
-        const registryKeys = Array.from(registry.keys()).sort().join('|');
-        return `${fieldKeys}__${registryKeys}`;
-      },
-      maxSize: 10,
-    },
-  );
+  /** The currently active config used for form rendering */
+  readonly activeConfig = computed(() => this.stateManager.activeConfig());
 
-  private readonly memoizedFlattenFieldsForRendering = memoize(
-    (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry, { preserveRows: true }),
-    {
-      resolver: (fields, registry) => {
-        const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
-        const registryKeys = Array.from(registry.keys()).sort().join('|');
-        return `render_${fieldKeys}__${registryKeys}`;
-      },
-      maxSize: 10,
-    },
-  );
+  /** Current render phase: 'render' = showing form, 'teardown' = hiding old components */
+  readonly renderPhase = computed(() => this.stateManager.renderPhase());
 
-  private readonly memoizedKeyBy = memoize(<T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'), {
-    resolver: (fields) => fields.map((f) => f.key).join('|'),
-    maxSize: 10,
-  });
+  /** Computed form mode detection with validation */
+  readonly formModeDetection = computed(() => this.stateManager.formModeDetection());
 
-  private readonly memoizedDefaultValues = memoize(
-    <T extends FieldDef<unknown>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) => {
-      const result: Record<string, unknown> = {};
-      for (const [key, field] of Object.entries(fieldsById)) {
-        const value = getFieldDefaultValue(field, registry);
-        if (value !== undefined) {
-          result[key] = value;
-        }
-      }
-      return result as TModel;
-    },
-    {
-      resolver: (fieldsById, registry) => {
-        const fieldKeys = Object.keys(fieldsById).sort().join('|');
-        const registryKeys = Array.from(registry.keys()).sort().join('|');
-        return `defaults_${fieldKeys}__${registryKeys}`;
-      },
-      maxSize: 10,
-    },
-  );
+  /** Page field definitions for paged forms */
+  readonly pageFieldDefinitions = computed(() => this.stateManager.pageFieldDefinitions());
+
+  /** Effective form options (merged from config and input) */
+  readonly effectiveFormOptions = computed(() => this.stateManager.effectiveFormOptions());
+
+  /** Field signal context for injection into child components */
+  readonly fieldSignalContext = computed(() => this.stateManager.fieldSignalContext());
+
+  /** Default values computed from field definitions */
+  readonly defaultValues = computed(() => this.stateManager.defaultValues());
+
+  /** The Angular Signal Form instance */
+  readonly form = computed(() => this.stateManager.form());
+
+  /** Current form values (reactive) */
+  readonly formValue = computed(() => this.stateManager.formValue());
+
+  /** Whether the form is currently valid */
+  readonly valid = computed(() => this.stateManager.valid());
+
+  /** Whether the form is currently invalid */
+  readonly invalid = computed(() => this.stateManager.invalid());
+
+  /** Whether any form field has been modified */
+  readonly dirty = computed(() => this.stateManager.dirty());
+
+  /** Whether any form field has been touched (blurred) */
+  readonly touched = computed(() => this.stateManager.touched());
+
+  /** Current validation errors from all fields */
+  readonly errors = computed(() => this.stateManager.errors());
+
+  /** Whether the form is disabled (from options or form state) */
+  readonly disabled = computed(() => this.stateManager.disabled());
+
+  /** Whether the form is currently submitting */
+  readonly submitting = computed(() => this.stateManager.submitting());
+
+  /** Collects errors from async field component loading for error boundary patterns */
+  readonly fieldLoadingErrors = computed(() => this.stateManager.fieldLoadingErrors());
+
+  /** Resolved fields ready for rendering */
+  protected readonly resolvedFields = computed(() => this.stateManager.resolvedFields());
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Computed Signals
+  // Computed Signals - Internal
   // ─────────────────────────────────────────────────────────────────────────────
 
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
-  readonly formModeDetection = computed<FormModeDetectionResult>(() => {
-    const config = this.activeConfig();
-    const fields = config.fields || [];
-    const detection = detectFormMode(fields);
-    const validation = FormModeValidator.validateFormConfiguration(fields);
-
-    if (!validation.isValid) {
-      this.logger.error('Invalid form configuration:', validation.errors);
+  private readonly totalComponentsCount = computed(() => {
+    const setup = this.stateManager.formSetup();
+    const fields = setup?.fields;
+    if (!fields) {
+      return 1;
     }
 
-    if (validation.warnings.length > 0) {
-      this.logger.warn('Form configuration warnings:', validation.warnings);
-    }
-
-    return detection;
-  });
-
-  private readonly formSetup = computed(() => {
-    const config = this.activeConfig();
-    const modeDetection = this.formModeDetection();
     const registry = this.rawFieldRegistry();
+    const flatFields = flattenFields(fields as FieldDef<unknown>[], registry);
+    const componentCount = flatFields.filter(isContainerField).length;
 
-    this.registerValidatorsFromConfig(config);
-
-    if (config.fields && config.fields.length > 0) {
-      return this.createFormSetupFromConfig(config.fields, modeDetection.mode, registry);
-    }
-
-    return this.createEmptyFormSetup(registry);
-  });
-
-  readonly pageFieldDefinitions = computed(() => {
-    const config = this.activeConfig();
-    const mode = this.formModeDetection().mode;
-
-    if (mode === 'paged' && config.fields) {
-      return config.fields.filter(isPageField);
-    }
-
-    return [] as PageField[];
-  });
-
-  readonly effectiveFormOptions = computed(() => {
-    const config = this.activeConfig();
-    const configOptions = config.options || {};
-    const inputOptions = this.formOptions();
-    return { ...configOptions, ...inputOptions };
+    return componentCount + 1;
   });
 
   /**
@@ -383,148 +277,6 @@ export class DynamicForm<
     return createDerivationLogger(this.derivationLogConfig, this.logger);
   });
 
-  readonly fieldSignalContext = computed<FieldSignalContext<TModel>>(() => ({
-    injector: this.injector,
-    value: this.value,
-    defaultValues: this.defaultValues,
-    form: this.form(),
-  }));
-
-  /**
-   * Injector for field components with FIELD_SIGNAL_CONTEXT.
-   * Other form-level tokens (DEFAULT_PROPS, etc.) are provided at component level.
-   */
-  private readonly fieldInjector = computed(() =>
-    Injector.create({
-      parent: this.injector,
-      providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: this.fieldSignalContext() }],
-    }),
-  );
-
-  readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues);
-
-  /**
-   * Entity computed from parent value, group key, and defaults.
-   * Uses deep equality check to prevent unnecessary updates when
-   * object spread creates new references with identical values.
-   */
-  private readonly entity = linkedSignal(
-    () => {
-      const inputValue = this.value();
-      const defaults = this.defaultValues();
-      const setup = this.formSetup();
-
-      const combined = { ...defaults, ...inputValue };
-
-      if (setup.schemaFields?.length) {
-        const validKeys = new Set(setup.schemaFields.map((field) => field.key).filter((key: string | undefined) => key !== undefined));
-        const filtered: Record<string, unknown> = {};
-        for (const key of Object.keys(combined)) {
-          if (validKeys.has(key)) {
-            filtered[key] = (combined as Record<string, unknown>)[key];
-          }
-        }
-        return filtered as TModel;
-      }
-
-      return combined as TModel;
-    },
-    {
-      debugName: 'DynamicFormComponent.entity',
-      equal: isEqual,
-    },
-  );
-
-  readonly form = computed<ReturnType<typeof form<TModel>>>(() => {
-    return runInInjectionContext(this.injector, () => {
-      const setup = this.formSetup();
-      const config = this.config();
-      let formInstance: ReturnType<typeof form<TModel>>;
-
-      untracked(() => this.rootFormRegistry.registerFormValueSignal(this.entity as Signal<Record<string, unknown>>));
-
-      const hasFields = setup.schemaFields && setup.schemaFields.length > 0;
-      const hasFormSchema = config.schema !== undefined;
-
-      if (hasFields) {
-        const crossFieldCollection = collectCrossFieldEntries(setup.schemaFields as FieldDef<unknown>[]);
-
-        // Create schema with both field-level and form-level validation
-        // Type assertion needed due to complex generic type inference between TModel and InferFormValue
-        const combinedSchema = createSchemaFromFields(setup.schemaFields, setup.registry, {
-          crossFieldValidators: crossFieldCollection.validators,
-          formLevelSchema: config.schema,
-        }) as Schema<TModel>;
-
-        formInstance = untracked(() => form(this.entity, combinedSchema));
-      } else if (hasFormSchema) {
-        // Only form-level schema (no fields with validation)
-        // Non-null assertion safe: hasFormSchema guarantees config.schema is defined
-        // Type assertion needed due to generic type inference
-        const formSchema = createFormLevelSchema(config.schema!) as Schema<TModel>;
-        formInstance = untracked(() => form(this.entity, formSchema));
-      } else {
-        formInstance = untracked(() => form(this.entity));
-      }
-
-      untracked(() => this.rootFormRegistry.registerRootForm(formInstance));
-
-      return formInstance;
-    });
-  });
-
-  private readonly componentId = 'dynamic-form';
-
-  private readonly totalComponentsCount = computed(() => {
-    const fields = this.formSetup().fields;
-    if (!fields) {
-      return 1;
-    }
-
-    const registry = this.rawFieldRegistry();
-    const flatFields = flattenFields(fields, registry);
-    const componentCount = flatFields.filter(isContainerField).length;
-
-    return componentCount + 1;
-  });
-
-  private readonly fieldsSource = computed(() => this.formSetup().fields);
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Public State Signals
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Collects errors from async field component loading for error boundary patterns. */
-  readonly fieldLoadingErrors = signal<Array<{ fieldType: string; fieldKey: string; error: Error }>>([]);
-
-  /** Current form values (reactive). */
-  readonly formValue = computed(() => this.form()().value());
-
-  /** Whether the form is currently valid. */
-  readonly valid = computed(() => this.form()().valid());
-
-  /** Whether the form is currently invalid. */
-  readonly invalid = computed(() => this.form()().invalid());
-
-  /** Whether any form field has been modified. */
-  readonly dirty = computed(() => this.form()().dirty());
-
-  /** Whether any form field has been touched (blurred). */
-  readonly touched = computed(() => this.form()().touched());
-
-  /** Current validation errors from all fields. */
-  readonly errors = computed(() => this.form()().errors());
-
-  /** Whether the form is disabled (from options or form state). */
-  readonly disabled = computed(() => {
-    const optionsDisabled = this.effectiveFormOptions().disabled;
-    const formDisabled = this.form()().disabled();
-    return optionsDisabled ?? formDisabled;
-  });
-
-  /** Whether the form is currently submitting. */
-  readonly submitting = computed(() => this.form()().submitting());
-
   /**
    * Configuration for the derivation orchestrator.
    * Bundles the form-specific signals needed by the orchestrator.
@@ -532,7 +284,7 @@ export class DynamicForm<
    * @internal Used by DERIVATION_ORCHESTRATOR provider.
    */
   readonly derivationOrchestratorConfig: DerivationOrchestratorConfig = {
-    schemaFields: computed(() => this.formSetup().schemaFields as FieldDef<unknown>[] | undefined),
+    schemaFields: computed(() => this.stateManager.formSetup()?.schemaFields as FieldDef<unknown>[] | undefined),
     formValue: this.formValue as Signal<Record<string, unknown>>,
     form: computed(() => this.form() as unknown as FieldTree<unknown>),
     derivationLogger: this.derivationLogger,
@@ -568,32 +320,7 @@ export class DynamicForm<
    *
    * Note: Does not emit when `submission.action` is configured - use one or the other.
    */
-  readonly submitted = outputFromObservable(
-    this.eventBus.on<SubmitEvent>('submit').pipe(
-      filter(() => {
-        if (!this.valid()) {
-          this.logger.debug('Form submitted while invalid, not emitting to (submitted) output');
-          return false;
-        }
-        return true;
-      }),
-      switchMap(() => {
-        const submissionConfig = this.config().submission;
-
-        if (submissionConfig?.action) {
-          this.logger.warn(
-            'Both `submission.action` and `(submitted)` output are configured. ' +
-              'When using `submission.action`, the `(submitted)` output will not emit. ' +
-              'Use either `submission.action` OR `(submitted)`, not both.',
-          );
-          return EMPTY;
-        }
-
-        // Form is valid here, cast to TModel (no longer Partial)
-        return of(this.formValue() as TModel);
-      }),
-    ),
-  );
+  readonly submitted = outputFromObservable(this.stateManager.submitted$);
 
   /** Emits when form is reset to default values. */
   readonly reset = outputFromObservable(this.eventBus.on<FormResetEvent>('form-reset'));
@@ -619,51 +346,18 @@ export class DynamicForm<
   );
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Field Resolution
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  protected readonly resolvedFields = derivedFromDeferred(
-    this.fieldsSource,
-    pipe(
-      switchMap((fields) => {
-        if (!fields || fields.length === 0) {
-          return of([] as (ResolvedField | undefined)[]);
-        }
-        const context = {
-          loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
-          registry: this.rawFieldRegistry(),
-          injector: this.fieldInjector(),
-          destroyRef: this.destroyRef,
-          onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
-            const fieldKey = fieldDef.key || '<no key>';
-            this.fieldLoadingErrors.update((errors) => [
-              ...errors,
-              {
-                fieldType: fieldDef.type,
-                fieldKey,
-                error: error instanceof Error ? error : new Error(String(error)),
-              },
-            ]);
-            this.logger.error(
-              `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}). ` +
-                `Ensure the field type is registered in your field registry.`,
-              error,
-            );
-          },
-        };
-        return forkJoin(fields.map((f) => resolveField(f, context)));
-      }),
-      map((fields) => fields.filter((f): f is ResolvedField => f !== undefined)),
-      scan(reconcileFields, [] as ResolvedField[]),
-    ),
-    { initialValue: [] as ResolvedField[], injector: this.injector },
-  );
-
-  // ─────────────────────────────────────────────────────────────────────────────
   // Constructor
   // ─────────────────────────────────────────────────────────────────────────────
 
   constructor() {
+    // Initialize the state manager with component dependencies
+    this.stateManager.initialize({
+      config: this.config,
+      formOptions: this.formOptions,
+      value: this.value,
+      fieldRegistry: this.fieldRegistry,
+    });
+
     this.setupEffects();
     this.setupEventHandlers();
 
@@ -695,19 +389,6 @@ export class DynamicForm<
   // ─────────────────────────────────────────────────────────────────────────────
 
   private setupEffects(): void {
-    // Sync entity changes to the value signal
-    explicitEffect([this.entity], ([currentEntity]) => {
-      const currentValue = this.value();
-      if (!isEqual(currentEntity, currentValue)) {
-        this.value.set(currentEntity);
-      }
-    });
-
-    // Clear loading errors when config changes
-    explicitEffect([this.config], () => {
-      this.fieldLoadingErrors.set([]);
-    });
-
     // Emit initialization event for paged forms
     explicitEffect([this.formModeDetection, this.pageFieldDefinitions], ([{ mode }, pages]) => {
       if (mode === 'paged' && pages.length > 0) {
@@ -720,62 +401,8 @@ export class DynamicForm<
       if (mode === 'non-paged' && fields.length > 0) {
         afterNextRender(
           () => {
-            this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
-          },
-          { injector: this.injector },
-        );
-      }
-    });
-
-    // Config transition effect: captures value when entering teardown, then applies new config
-    explicitEffect([this.configTransition], ([state]) => {
-      if (state.renderPhase === 'teardown' && state.pendingConfig) {
-        // Capture current form value when entering teardown phase
-        // Done here (not in linkedSignal computation) to avoid signal cycle
-        const currentValue = untracked(() => this.formValue());
-        this.transitionPreservedValue.set(currentValue as Record<string, unknown>);
-
-        // afterNextRender ensures old components are destroyed before we proceed
-        afterNextRender(
-          () => {
-            // Guard against execution after component destruction
             if (this.isDestroyed) return;
-
-            const pendingConfig = state.pendingConfig!;
-            const preservedValue = this.transitionPreservedValue();
-
-            // Transition to render phase with new config
-            this.configTransition.set({
-              activeConfig: pendingConfig,
-              renderPhase: 'render',
-            });
-
-            // Restore preserved values for fields that still exist in the new config
-            if (preservedValue) {
-              afterNextRender(
-                () => {
-                  // Guard against execution after component destruction
-                  if (this.isDestroyed) return;
-
-                  const schemaFields = untracked(() => this.formSetup().schemaFields);
-                  if (schemaFields) {
-                    const validKeys = new Set(schemaFields.map((f) => f.key).filter(Boolean));
-                    const filtered: Record<string, unknown> = {};
-                    for (const [key, val] of Object.entries(preservedValue)) {
-                      if (validKeys.has(key)) {
-                        filtered[key] = val;
-                      }
-                    }
-                    if (Object.keys(filtered).length > 0) {
-                      this.value.update((current) => ({ ...current, ...filtered }) as Partial<TModel>);
-                    }
-                  }
-                  // Clear preserved value after restoration
-                  this.transitionPreservedValue.set(undefined);
-                },
-                { injector: this.injector },
-              );
-            }
+            this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
           },
           { injector: this.injector },
         );
@@ -784,95 +411,15 @@ export class DynamicForm<
   }
 
   private setupEventHandlers(): void {
-    this.eventBus
-      .on<FormResetEvent>('form-reset')
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => this.onFormReset());
-
-    this.eventBus
-      .on<FormClearEvent>('form-clear')
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => this.onFormClear());
-
     createSubmissionHandler<TFields, TModel>({
       eventBus: this.eventBus,
       configSignal: this.config,
       formSignal: this.form as Signal<FieldTree<TModel>>,
     })
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         error: (err) => this.logger.error('Submission handler error', err),
       });
-  }
-
-  private registerValidatorsFromConfig({ customFnConfig, schemas }: FormConfig<TFields>): void {
-    if (schemas) {
-      schemas.forEach((schema) => {
-        this.schemaRegistry.registerSchema(schema);
-      });
-    }
-
-    if (!customFnConfig) {
-      return;
-    }
-
-    if (customFnConfig.customFunctions) {
-      Object.entries(customFnConfig.customFunctions).forEach(([name, fn]) => {
-        this.functionRegistry.registerCustomFunction(name, fn);
-      });
-    }
-
-    // Register derivation functions (stored separately for use by derivation applicator)
-    if (customFnConfig.derivations) {
-      this.functionRegistry.setDerivationFunctions(customFnConfig.derivations);
-    }
-
-    this.functionRegistry.setValidators(customFnConfig.validators);
-    this.functionRegistry.setAsyncValidators(customFnConfig.asyncValidators);
-    this.functionRegistry.setHttpValidators(customFnConfig.httpValidators);
-  }
-
-  private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: FormMode, registry: Map<string, FieldTypeDefinition>) {
-    const flattenedFields = this.memoizedFlattenFields(fields, registry);
-    const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(fields, registry);
-    const fieldsById = this.memoizedKeyBy(flattenedFields);
-    const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
-    const fieldsToRender = mode === 'paged' ? [] : flattenedFieldsForRendering;
-
-    return {
-      fields: fieldsToRender,
-      schemaFields: flattenedFields,
-      originalFields: fields,
-      defaultValues,
-      schema: undefined,
-      mode,
-      registry,
-    };
-  }
-
-  private createEmptyFormSetup(registry: Map<string, FieldTypeDefinition>) {
-    return {
-      fields: [],
-      schemaFields: [],
-      defaultValues: {} as TModel,
-      schema: undefined,
-      mode: 'non-paged' as const,
-      registry,
-    };
-  }
-
-  private onFormReset(): void {
-    const defaults = this.defaultValues();
-    // Type assertion is necessary: Angular Signal Forms expects exact form value type
-    (this.form()().value.set as (value: unknown) => void)(defaults);
-    this.value.set(defaults as Partial<TModel>);
-  }
-
-  private onFormClear(): void {
-    const emptyValue = {} as Partial<TModel>;
-    // Type assertion is necessary: Angular Signal Forms expects exact form value type
-    (this.form()().value.set as (value: unknown) => void)(emptyValue);
-    this.value.set(emptyValue);
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -881,6 +428,5 @@ export class DynamicForm<
 
   ngOnDestroy(): void {
     this.isDestroyed = true;
-    this.rootFormRegistry.unregisterForm();
   }
 }
