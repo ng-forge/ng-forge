@@ -14,7 +14,6 @@ import { emitComponentInitialized } from '../../utils/emit-initialization/emit-i
 import { EventBus } from '../../events/event.bus';
 import { FieldSignalContext } from '../../mappers/types';
 import { ARRAY_TEMPLATE_REGISTRY, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
-import type { ArrayTemplateRegistry } from '../../models/field-signal-context.token';
 import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from '../../utils/array-field/array-field.types';
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 import { observeArrayActions } from '../../utils/array-field/array-event-handler';
