@@ -191,44 +191,32 @@
   grid-column-end: 13;
 }
 
-/* Responsive Behavior */
-@media (max-width: 576px) {
+/* Responsive Behavior - Stack on tablet and below (768px) */
+@media (max-width: 768px) {
   .df-form {
     --df-grid-gap: var(--df-grid-gap-sm);
     --df-grid-row-gap: var(--df-grid-row-gap-sm);
   }
 
   .df-row {
-    /* Force single column on mobile for better UX */
-    grid-template-columns: 1fr;
+    /* Force single column on mobile/tablet for better UX */
+    grid-template-columns: 1fr !important;
 
     > * {
       grid-column: 1 / -1 !important;
     }
   }
 
-  /* Mobile-specific overrides */
+  /* Mobile-specific overrides to keep multi-column layout */
   .df-row.df-row-mobile-keep-cols {
-    grid-template-columns: repeat(var(--df-grid-columns), 1fr);
+    grid-template-columns: repeat(var(--df-grid-columns), 1fr) !important;
 
     > * {
       grid-column: revert !important;
     }
   }
-}
 
-@media (min-width: 577px) and (max-width: 768px) {
-  .df-form {
-    --df-grid-gap: var(--df-grid-gap-md);
-    --df-grid-row-gap: var(--df-grid-row-gap-md);
-  }
-
-  .df-row {
-    /* Reduce to 6 columns on tablet */
-    --df-grid-columns: 6;
-  }
-
-  /* Tablet-specific column spans */
+  /* Tablet-specific column spans (for opt-in multi-column on tablet) */
   .df-col-sm-1 {
     grid-column: span 1;
   }

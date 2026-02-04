@@ -13,7 +13,8 @@ import { getFieldValueHandling } from '../../models/field-type';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { EventBus } from '../../events/event.bus';
 import { FieldSignalContext } from '../../mappers/types';
-import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { ARRAY_TEMPLATE_REGISTRY, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import type { ArrayTemplateRegistry } from '../../models/field-signal-context.token';
 import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from '../../utils/array-field/array-field.types';
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 import { observeArrayActions } from '../../utils/array-field/array-event-handler';
@@ -44,6 +45,10 @@ import { ArrayFieldTree } from '../../core/field-tree-utils';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
+  providers: [
+    // Each array gets its own template registry to track templates used for dynamically added items
+    { provide: ARRAY_TEMPLATE_REGISTRY, useFactory: () => new Map<string, FieldDef<unknown>[]>() },
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ArrayFieldComponent<TModel extends Record<string, unknown> = Record<string, unknown>> {
@@ -57,6 +62,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   private readonly parentInjector = inject(Injector);
   private readonly eventBus = inject(EventBus);
   private readonly logger = inject(DynamicFormLogger);
+  private readonly templateRegistry = inject(ARRAY_TEMPLATE_REGISTRY);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -229,6 +235,9 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       return;
     }
 
+    // Store the template used for this item so it can be re-used during recreate operations
+    this.templateRegistry.set(resolvedItem.id, templates);
+
     // Insert resolved item at correct position
     this.resolvedItemsSignal.update((current) => {
       const newItems = [...current];
@@ -260,6 +269,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
     switch (operation.type) {
       case 'clear':
+        // Clean up template registry when all items are removed
+        this.templateRegistry.clear();
         this.resolvedItemsSignal.set([]);
         break;
       case 'initial':
@@ -268,14 +279,31 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       case 'append':
         void this.appendItems(fieldTrees, operation.startIndex, operation.endIndex, currentVersion);
         break;
-      case 'recreate':
+      case 'recreate': {
+        // Before clearing, capture templates by position for items beyond defined templates.
+        // This allows dynamically added items to be recreated with their original templates.
+        const itemTemplates = this.itemTemplates();
+        const positionalTemplates: (FieldDef<unknown>[] | undefined)[] = resolvedItems.map((item, idx) => {
+          // For items within the defined templates range, use the config directly
+          if (idx < itemTemplates.length) {
+            return undefined; // Will use itemTemplates[idx] during resolve
+          }
+          // For dynamically added items, look up their stored template
+          return this.templateRegistry.get(item.id);
+        });
+
         this.resolvedItemsSignal.set([]);
-        void this.resolveAllItems(fieldTrees, currentVersion);
+        void this.resolveAllItems(fieldTrees, currentVersion, positionalTemplates);
         break;
+      }
     }
   }
 
-  private async resolveAllItems(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): Promise<void> {
+  private async resolveAllItems(
+    fieldTrees: readonly (FieldTree<unknown> | null)[],
+    updateId: number,
+    positionalTemplates?: (FieldDef<unknown>[] | undefined)[],
+  ): Promise<void> {
     if (fieldTrees.length === 0) {
       this.resolvedItemsSignal.set([]);
       return;
@@ -283,7 +311,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
     // Wrap each item observable to catch individual errors
     const safeItemObservables = fieldTrees.map((fieldTree, i) =>
-      this.createResolveItemObservable(fieldTree, i).pipe(
+      this.createResolveItemObservable(fieldTree, i, positionalTemplates?.[i]).pipe(
         catchError((error) => {
           this.logger.error(`Failed to resolve array item at index ${i}:`, error);
           return of(undefined);
@@ -297,6 +325,22 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       );
 
       if (updateId === this.updateVersion()) {
+        // Update template registry with new item IDs for dynamically added items
+        if (positionalTemplates) {
+          // Clean up old entries and add new ones
+          const newItemIds = new Set(items.map((item) => item.id));
+          for (const existingId of this.templateRegistry.keys()) {
+            if (!newItemIds.has(existingId)) {
+              this.templateRegistry.delete(existingId);
+            }
+          }
+          items.forEach((item, idx) => {
+            const template = positionalTemplates[idx];
+            if (template) {
+              this.templateRegistry.set(item.id, template);
+            }
+          });
+        }
         this.resolvedItemsSignal.set(items);
         emitComponentInitialized(this.eventBus, 'array', this.field().key, this.parentInjector);
       }
@@ -339,49 +383,61 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     }
   }
 
-  private createResolveItemObservable(fieldTree: FieldTree<unknown> | null, index: number): Observable<ResolvedArrayItem | undefined> {
+  /**
+   * Creates an observable that resolves a single array item.
+   *
+   * Template resolution order:
+   * 1. Use overrideTemplate if provided (from recreate with stored templates)
+   * 2. Use itemTemplates[index] if within defined templates range
+   * 3. Return undefined (item cannot be resolved without a template)
+   */
+  private createResolveItemObservable(
+    fieldTree: FieldTree<unknown> | null,
+    index: number,
+    overrideTemplate?: FieldDef<unknown>[],
+  ): Observable<ResolvedArrayItem | undefined> {
     const itemTemplates = this.itemTemplates();
 
-    // Get the template for this specific item index.
-    // For items beyond the defined templates (dynamically added items), we don't have a template.
-    // Those items are added via buttons which provide their own explicit template.
-    const templates = itemTemplates[index];
-    if (!templates || templates.length === 0) {
-      // This can happen when items are added dynamically via buttons -
-      // the button provides its own template through handleAddFromEvent.
-      // For recreate operations, we should use the first available template as a fallback
-      // since the form value already exists and just needs to be re-rendered.
-      if (itemTemplates.length > 0 && index >= itemTemplates.length) {
-        // Use the last template as a fallback for items beyond defined templates
-        const fallbackTemplates = itemTemplates[itemTemplates.length - 1];
-        return resolveArrayItem({
-          fieldTree,
-          index,
-          templates: fallbackTemplates as FieldDef<unknown>[],
-          arrayField: this.field(),
-          itemOrderSignal: this.itemOrderSignal,
-          parentFieldSignalContext: this.parentFieldSignalContext,
-          parentInjector: this.parentInjector,
-          registry: this.rawFieldRegistry(),
-          destroyRef: this.destroyRef,
-          loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
-        });
-      }
-      return of(undefined);
+    // Priority 1: Use override template (from recreate with stored templates)
+    if (overrideTemplate && overrideTemplate.length > 0) {
+      return resolveArrayItem({
+        fieldTree,
+        index,
+        templates: overrideTemplate,
+        arrayField: this.field(),
+        itemOrderSignal: this.itemOrderSignal,
+        parentFieldSignalContext: this.parentFieldSignalContext,
+        parentInjector: this.parentInjector,
+        registry: this.rawFieldRegistry(),
+        destroyRef: this.destroyRef,
+        loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+      });
     }
 
-    return resolveArrayItem({
-      fieldTree,
-      index,
-      templates: templates as FieldDef<unknown>[],
-      arrayField: this.field(),
-      itemOrderSignal: this.itemOrderSignal,
-      parentFieldSignalContext: this.parentFieldSignalContext,
-      parentInjector: this.parentInjector,
-      registry: this.rawFieldRegistry(),
-      destroyRef: this.destroyRef,
-      loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
-    });
+    // Priority 2: Use defined template at this index
+    const templates = itemTemplates[index];
+    if (templates && templates.length > 0) {
+      return resolveArrayItem({
+        fieldTree,
+        index,
+        templates: templates as FieldDef<unknown>[],
+        arrayField: this.field(),
+        itemOrderSignal: this.itemOrderSignal,
+        parentFieldSignalContext: this.parentFieldSignalContext,
+        parentInjector: this.parentInjector,
+        registry: this.rawFieldRegistry(),
+        destroyRef: this.destroyRef,
+        loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+      });
+    }
+
+    // No template available - this shouldn't happen in normal operation.
+    // Dynamically added items should always have their template stored in the registry.
+    this.logger.warn(
+      `No template found for array item at index ${index}. ` +
+        'This may indicate a bug - dynamically added items should have their templates stored.',
+    );
+    return of(undefined);
   }
 
   private removeItem(index?: number): void {

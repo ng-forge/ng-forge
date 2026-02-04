@@ -115,6 +115,28 @@
       color: var(--example-result-text);
     }
   }
+
+  // ============================================
+  // ARRAY FIELD STYLING
+  // ============================================
+  // Add visual separation between array items for better readability
+
+  .df-array {
+    // Increase gap between array items for visual separation
+    gap: $space-6;
+  }
+
+  // ============================================
+  // FORM BUTTON STYLING
+  // ============================================
+  // Consistent button sizing across all form buttons
+  .df-form {
+    button,
+    [class*='mat-mdc-button'],
+    .mdc-button {
+      min-width: 156px;
+    }
+  }
 }
 
 // ============================================

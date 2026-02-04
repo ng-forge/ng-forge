@@ -253,6 +253,7 @@ export const arrayScenario: ExampleScenario = {
       {
         key: 'contactButtons',
         type: 'row',
+        className: 'df-row-mobile-keep-cols',
         fields: [
           {
             key: 'prependContactButton',
@@ -260,7 +261,7 @@ export const arrayScenario: ExampleScenario = {
             label: 'Add First',
             arrayKey: 'contacts',
             template: contactTemplate,
-            className: 'prepend-contact-button',
+            className: 'prepend-contact-button df-col-auto',
             props: {
               color: 'accent',
             },
@@ -271,7 +272,7 @@ export const arrayScenario: ExampleScenario = {
             label: 'Add Contact',
             arrayKey: 'contacts',
             template: contactTemplate,
-            className: 'add-contact-button',
+            className: 'add-contact-button df-col-auto',
             props: {
               color: 'primary',
             },

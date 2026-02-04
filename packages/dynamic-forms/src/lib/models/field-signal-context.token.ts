@@ -174,3 +174,37 @@ export const FORM_OPTIONS = new InjectionToken<Signal<FormOptions | undefined>>(
  * ```
  */
 export const EXTERNAL_DATA = new InjectionToken<Signal<Record<string, Signal<unknown>> | undefined>>('EXTERNAL_DATA');
+
+/**
+ * Injection token for array-level template registry.
+ *
+ * This registry tracks which template was used to create each array item,
+ * keyed by the item's unique ID. This is essential for "recreate" operations
+ * (e.g., after removing items from the middle) where we need to re-resolve
+ * items using their original templates, not a fallback.
+ *
+ * The token is provided by ArrayFieldComponent at its level and shared
+ * across all items in that array. Each nested array gets its own registry.
+ *
+ * @example
+ * ```typescript
+ * // In ArrayFieldComponent
+ * providers: [
+ *   { provide: ARRAY_TEMPLATE_REGISTRY, useValue: new Map() }
+ * ]
+ *
+ * // When adding items
+ * const registry = inject(ARRAY_TEMPLATE_REGISTRY);
+ * registry.set(itemId, templates);
+ *
+ * // During recreate, look up original template
+ * const originalTemplate = registry.get(existingItemId);
+ * ```
+ */
+export const ARRAY_TEMPLATE_REGISTRY = new InjectionToken<ArrayTemplateRegistry>('ARRAY_TEMPLATE_REGISTRY');
+
+/**
+ * Registry type for storing templates used to create array items.
+ * Key is the item's unique ID, value is the template (array of field definitions).
+ */
+export type ArrayTemplateRegistry = Map<string, import('../definitions/base/field-def').FieldDef<unknown>[]>;
