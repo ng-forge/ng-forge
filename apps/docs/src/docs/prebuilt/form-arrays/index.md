@@ -6,38 +6,32 @@ Arrays create dynamic collections of field values. Each item in the `fields` arr
 
 ## Structure Overview
 
-The `fields` property uses a **nested array structure**: `fields: FieldDef[][]`
+The `fields` property supports two item formats:
 
-- **Outer array**: Each element represents one initial array item
-- **Inner array**: Field definitions for that item (with initial values via `value` property)
+- **Single FieldDef** (not wrapped in array) → **Primitive item** - extracts field value directly
+- **Array of FieldDefs** → **Object item** - merges fields into an object
 
 ```typescript
+// Primitive array: ['angular', 'typescript']
+{
+  key: 'tags',
+  type: 'array',
+  fields: [
+    { key: 'tag', type: 'input', value: 'angular' },      // Single field = primitive
+    { key: 'tag', type: 'input', value: 'typescript' },
+  ]
+}
+
+// Object array: [{ name: 'Alice', email: '...' }]
 {
   key: 'contacts',
   type: 'array',
   fields: [
-    // Item 0
-    [
+    [                                                      // Array of fields = object
       { key: 'name', type: 'input', label: 'Name', value: 'Alice' },
       { key: 'email', type: 'input', label: 'Email', value: 'alice@example.com' }
     ],
-    // Item 1
-    [
-      { key: 'name', type: 'input', label: 'Name', value: 'Bob' },
-      { key: 'email', type: 'input', label: 'Email', value: 'bob@example.com' }
-    ]
   ]
-}
-```
-
-This creates the form value:
-
-```typescript
-{
-  contacts: [
-    { name: 'Alice', email: 'alice@example.com' },
-    { name: 'Bob', email: 'bob@example.com' },
-  ];
 }
 ```
 
@@ -62,7 +56,7 @@ Initial values are defined directly on each field via the `value` property - no 
   key: 'emails',
   type: 'array',
   fields: [
-    // One initial item with pre-filled value
+    // One initial item with pre-filled value (object item)
     [
       { key: 'email', type: 'input', label: 'Email', value: 'primary@example.com' }
     ]
@@ -70,22 +64,22 @@ Initial values are defined directly on each field via the `value` property - no 
 }
 ```
 
-## Flat Arrays (Primitive Values)
+## Primitive Arrays (Simple Value Lists)
 
-For simple arrays of primitive values, use a leaf field in each item:
+For simple arrays of primitive values like `['tag1', 'tag2']`, use a **single FieldDef per item** (not wrapped in an array):
 
 ```typescript
 {
   key: 'tags',
   type: 'array',
   fields: [
-    [{ key: 'tag', type: 'input', label: 'Tag', value: 'featured' }],
-    [{ key: 'tag', type: 'input', label: 'Tag', value: 'popular' }]
+    { key: 'tag', type: 'input', label: 'Tag', value: 'featured' },
+    { key: 'tag', type: 'input', label: 'Tag', value: 'popular' }
   ]
 }
 ```
 
-This creates a flat array in the form value:
+This creates a true primitive array in the form value:
 
 ```typescript
 {
@@ -93,9 +87,11 @@ This creates a flat array in the form value:
 }
 ```
 
+The `key` property on each field is used for internal tracking but doesn't affect the output value.
+
 ## Object Arrays (Multiple Fields per Item)
 
-For arrays of objects with multiple fields, include multiple field definitions per item:
+For arrays of objects with multiple fields, wrap the fields in an **inner array**:
 
 ```typescript
 {
@@ -149,10 +145,33 @@ This creates an array of nested objects (note the group key creates the nesting)
 }
 ```
 
+## Heterogeneous Arrays (Mixed Primitives and Objects)
+
+Arrays can contain both primitive and object items in the same array:
+
+```typescript
+{
+  key: 'items',
+  type: 'array',
+  fields: [
+    [{ key: 'label', type: 'input', value: 'Structured' }],  // Object item (wrapped in array)
+    { key: 'value', type: 'input', value: 'Simple' },        // Primitive item (single field)
+  ]
+}
+```
+
+This creates a heterogeneous array:
+
+```typescript
+{
+  items: [{ label: 'Structured' }, 'Simple'];
+}
+```
+
 ## Array vs Group
 
 - **Groups** create nested objects with keys: `{ address: { street: '', city: '' } }`
-- **Flat Arrays** create lists of values: `{ tags: ['value1', 'value2'] }`
+- **Primitive Arrays** create lists of values: `{ tags: ['value1', 'value2'] }`
 - **Object Arrays** create lists of objects: `{ items: [{name: ''}, {name: ''}] }`
 
 ## Dynamic Add/Remove
@@ -172,8 +191,16 @@ Use button field types directly in your form configuration for declarative array
 
 **Important:** Add/prepend/insert buttons **require** a `template` property defining the new item structure. There is no fallback to the array's `fields[0]` - each button must explicitly define what structure to add.
 
+The `template` can be:
+
+- **Single FieldDef** - creates a primitive item (field value is extracted directly)
+- **Array of FieldDefs** - creates an object item (fields merged into object)
+
 ```typescript
-// Define the template for new array items
+// Template for PRIMITIVE items (single field, not wrapped)
+const tagTemplate = { key: 'tag', type: 'input', label: 'Tag' };
+
+// Template for OBJECT items (array of fields)
 const contactTemplate = [
   { key: 'name', type: 'input', label: 'Name' },
   { key: 'phone', type: 'input', label: 'Phone' },
@@ -185,17 +212,30 @@ const contactTemplate = [
 {
   fields: [
     {
+      key: 'tags',
+      type: 'array',
+      fields: [], // Start empty - primitive array
+    },
+    // Add button for primitive items
+    {
+      key: 'addTag',
+      type: 'addArrayItem',
+      label: 'Add Tag',
+      arrayKey: 'tags',
+      template: tagTemplate, // Single field = primitive item
+    },
+    {
       key: 'contacts',
       type: 'array',
-      fields: [], // Start empty
+      fields: [], // Start empty - object array
     },
-    // Add button outside the array (requires template and arrayKey)
+    // Add button for object items
     {
       key: 'addContact',
       type: 'addArrayItem',
       label: 'Add Contact',
       arrayKey: 'contacts',
-      template: contactTemplate, // REQUIRED - defines what to add
+      template: contactTemplate, // Array of fields = object item
     },
   ];
 }
@@ -211,31 +251,33 @@ import { EventBus, arrayEvent } from '@ng-forge/dynamic-forms';
 // Inject the event bus
 eventBus = inject(EventBus);
 
-// Define the template for new items
+// Template for PRIMITIVE items (single field, not wrapped)
+tagTemplate = { key: 'tag', type: 'input', label: 'Tag', value: '' };
+
+// Template for OBJECT items (array of fields)
 contactTemplate = [
   { key: 'name', type: 'input', label: 'Name', value: '' },
   { key: 'phone', type: 'input', label: 'Phone', value: '' }
 ];
 
-// Add item to end of array
-addItem() {
-  this.eventBus.dispatch(
-    arrayEvent('contacts').append({ template: this.contactTemplate })
-  );
+// Add PRIMITIVE item to end of array
+addTag() {
+  this.eventBus.dispatch(arrayEvent('tags').append(this.tagTemplate));
+}
+
+// Add OBJECT item to end of array
+addContact() {
+  this.eventBus.dispatch(arrayEvent('contacts').append(this.contactTemplate));
 }
 
 // Add item to beginning of array
 prependItem() {
-  this.eventBus.dispatch(
-    arrayEvent('contacts').prepend({ template: this.contactTemplate })
-  );
+  this.eventBus.dispatch(arrayEvent('contacts').prepend(this.contactTemplate));
 }
 
 // Add item at specific index
 addItemAt(index: number) {
-  this.eventBus.dispatch(
-    arrayEvent('contacts').insertAt(index, { template: this.contactTemplate })
-  );
+  this.eventBus.dispatch(arrayEvent('contacts').insertAt(index, this.contactTemplate));
 }
 
 // Remove last item (no template needed)
@@ -263,9 +305,9 @@ Arrays are ideal for:
 - Dynamic collections where items can be added/removed
 - Collection-based data structures where order matters
 
-## Complete Example: Flat Array with Initial Values
+## Complete Example: Primitive Array with Initial Values
 
-Here's a complete working example of a flat array field with initial values and dynamic add/remove:
+Here's a complete working example of a primitive array field (simple value list) with initial values and dynamic add/remove:
 
 ```typescript
 import { Component, inject } from '@angular/core';
@@ -282,34 +324,34 @@ import { DynamicForm, EventBus, arrayEvent } from '@ng-forge/dynamic-forms';
 export class TagsFormComponent {
   private eventBus = inject(EventBus);
 
-  // Template for new tags
-  private tagTemplate = [
-    {
-      key: 'tag',
-      type: 'input',
-      label: 'Tag',
-      value: '',
-      required: true,
-      minLength: 2,
-    },
-  ];
+  // Template for new tags - single field (primitive item)
+  private tagTemplate = {
+    key: 'tag',
+    type: 'input',
+    label: 'Tag',
+    value: '',
+    required: true,
+    minLength: 2,
+  };
 
   formConfig = {
     fields: [
       {
         key: 'tags',
         type: 'array',
-        // Start with two initial tags
+        // Start with two initial tags (primitive items - not wrapped in arrays)
         fields: [
-          [{ key: 'tag', type: 'input', label: 'Tag', value: 'featured', required: true, minLength: 2 }],
-          [{ key: 'tag', type: 'input', label: 'Tag', value: 'popular', required: true, minLength: 2 }],
+          { key: 'tag', type: 'input', label: 'Tag', value: 'featured', required: true, minLength: 2 },
+          { key: 'tag', type: 'input', label: 'Tag', value: 'popular', required: true, minLength: 2 },
         ],
       },
     ],
   };
 
+  // Form value: { tags: ['featured', 'popular'] }
+
   addTag() {
-    this.eventBus.dispatch(arrayEvent('tags').append({ template: this.tagTemplate }));
+    this.eventBus.dispatch(arrayEvent('tags').append(this.tagTemplate));
   }
 
   removeTag(index: number) {
@@ -381,8 +423,10 @@ export class ContactsFormComponent {
     ],
   };
 
+  // Form value: { contacts: [{ name: 'John Doe', phone: '5551234567', relationship: 'family' }] }
+
   addContact() {
-    this.eventBus.dispatch(arrayEvent('contacts').append({ template: this.contactTemplate }));
+    this.eventBus.dispatch(arrayEvent('contacts').append(this.contactTemplate));
   }
 
   removeContact(index: number) {
