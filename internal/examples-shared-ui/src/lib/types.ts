@@ -14,4 +14,6 @@ export interface ExampleScenario {
   config: FormConfig;
   /** Optional initial value for the form */
   initialValue?: Record<string, unknown>;
+  /** Optional CSS class to apply to the form element */
+  formClassName?: string;
 }

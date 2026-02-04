@@ -117,69 +117,22 @@
   }
 
   // ============================================
-  // ARRAY FIELD STYLING
+  // ARRAY EXAMPLE-SPECIFIC STYLES
   // ============================================
-  // Add visual separation between array items for better readability
-
-  .df-array {
-    // Increase gap between array items for visual separation
-    gap: $space-6;
-  }
-
-  // ============================================
-  // ROW FIELD STYLING OVERRIDES
-  // ============================================
-  // Example-specific row layout adjustments for better visual alignment
-
-  [row-field] {
-    // Use baseline alignment for better button/input vertical alignment
-    align-items: baseline !important;
-
-    // Children share available space equally unless col class specified
-    > *:not([class*='df-col-']) {
-      flex: 1 1 0 !important;
-      min-width: 0; // Allow shrinking below content size
+  // Scoped styles for the array documentation example only.
+  // Apply class="array-example-form" to the form to opt-in.
+  .array-example-form {
+    // Add visual separation between array items
+    .df-array {
+      gap: $space-6;
     }
 
-    // Auto-size column - use natural content width (for buttons side by side)
-    > .df-col-auto {
-      flex: 0 0 auto !important;
-      width: auto !important;
-    }
-  }
-
-  // Responsive behavior - stack on tablet and below (768px)
-  // Using 768px because example container is 600px max-width
-  @media (max-width: 768px) {
-    [row-field]:not(.df-row-mobile-keep-cols) {
-      flex-direction: column !important;
-      flex-wrap: nowrap !important;
-      align-items: flex-start !important;
-
-      > * {
-        flex: 0 0 auto !important;
-        width: auto !important;
-        max-width: 100% !important;
-      }
+    // Row baseline alignment for buttons
+    [row-field] {
+      align-items: baseline !important;
     }
 
-    // Opt-in: keep side-by-side on mobile
-    [row-field].df-row-mobile-keep-cols {
-      flex-direction: row !important;
-      flex-wrap: wrap !important;
-
-      > *:not([class*='df-col-']) {
-        flex: 0 0 auto !important;
-        max-width: none !important;
-      }
-    }
-  }
-
-  // ============================================
-  // FORM BUTTON STYLING
-  // ============================================
-  // Consistent button sizing across all form buttons
-  .df-form {
+    // Consistent button sizing
     button,
     [class*='mat-mdc-button'],
     .mdc-button {

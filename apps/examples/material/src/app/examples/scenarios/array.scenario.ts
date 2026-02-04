@@ -86,6 +86,7 @@ export const arrayScenario: ExampleScenario = {
   id: 'array',
   title: 'Array Demo',
   description: 'Demonstrates dynamic array fields with declarative add/remove buttons.',
+  formClassName: 'array-example-form',
   config: {
     fields: [
       {
