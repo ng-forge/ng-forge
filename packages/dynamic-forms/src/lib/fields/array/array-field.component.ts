@@ -211,7 +211,6 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     // Resolve the new item
     const resolvedItem = await firstValueFrom(
       resolveArrayItem({
-        fieldTree: null,
         index: insertIndex,
         templates,
         arrayField: this.field(),
@@ -221,7 +220,6 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         registry: this.rawFieldRegistry(),
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
-        explicitDefaultValue: value,
       }).pipe(
         catchError((error) => {
           this.logger.error(`Failed to resolve array item at index ${insertIndex}:`, error);
@@ -309,8 +307,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     }
 
     // Wrap each item observable to catch individual errors
-    const safeItemObservables = fieldTrees.map((fieldTree, i) =>
-      this.createResolveItemObservable(fieldTree, i, positionalTemplates?.[i]).pipe(
+    const safeItemObservables = fieldTrees.map((_, i) =>
+      this.createResolveItemObservable(i, positionalTemplates?.[i]).pipe(
         catchError((error) => {
           this.logger.error(`Failed to resolve array item at index ${i}:`, error);
           return of(undefined);
@@ -359,9 +357,9 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     if (itemsToResolve.length === 0) return;
 
     // Wrap each item observable to catch individual errors
-    const safeItemObservables = itemsToResolve.map((fieldTree, i) => {
+    const safeItemObservables = itemsToResolve.map((_, i) => {
       const index = startIndex + i;
-      return this.createResolveItemObservable(fieldTree, index).pipe(
+      return this.createResolveItemObservable(index).pipe(
         catchError((error) => {
           this.logger.error(`Failed to resolve array item at index ${index}:`, error);
           return of(undefined);
@@ -390,17 +388,12 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * 2. Use itemTemplates[index] if within defined templates range
    * 3. Return undefined (item cannot be resolved without a template)
    */
-  private createResolveItemObservable(
-    fieldTree: FieldTree<unknown> | null,
-    index: number,
-    overrideTemplate?: FieldDef<unknown>[],
-  ): Observable<ResolvedArrayItem | undefined> {
+  private createResolveItemObservable(index: number, overrideTemplate?: FieldDef<unknown>[]): Observable<ResolvedArrayItem | undefined> {
     const itemTemplates = this.itemTemplates();
 
     // Priority 1: Use override template (from recreate with stored templates)
     if (overrideTemplate && overrideTemplate.length > 0) {
       return resolveArrayItem({
-        fieldTree,
         index,
         templates: overrideTemplate,
         arrayField: this.field(),
@@ -417,7 +410,6 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     const templates = itemTemplates[index];
     if (templates && templates.length > 0) {
       return resolveArrayItem({
-        fieldTree,
         index,
         templates: templates as FieldDef<unknown>[],
         arrayField: this.field(),

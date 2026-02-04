@@ -13,8 +13,6 @@ import { isEqual } from '../object-utils';
  * Options for creating an array item injector.
  */
 export interface CreateArrayItemInjectorOptions<TModel extends Record<string, unknown>> {
-  /** The field tree for this item (unused - kept for API compatibility). */
-  fieldTree: FieldTree<unknown> | null;
   /** The field template defining the array item structure. */
   template: FieldDef<unknown>;
   /** Signal containing the current index (uses linkedSignal for auto-updates). */
@@ -27,11 +25,6 @@ export interface CreateArrayItemInjectorOptions<TModel extends Record<string, un
   registry: Map<string, FieldTypeDefinition>;
   /** The array field definition containing this item. */
   arrayField: ArrayField;
-  /**
-   * Optional explicit default value for new items added via events.
-   * Unused in direct binding approach - kept for API compatibility.
-   */
-  explicitDefaultValue?: unknown;
 }
 
 /**

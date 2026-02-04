@@ -1,5 +1,4 @@
 import { DestroyRef, Injector, linkedSignal, Signal, Type } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
 import { catchError, forkJoin, from, map, Observable, of } from 'rxjs';
 import { ArrayField } from '../../definitions/default/array-field';
 import { FieldDef } from '../../definitions/base/field-def';
@@ -13,8 +12,6 @@ import { createArrayItemInjectorAndInputs } from './create-array-item-injector';
  * Options for resolving an array item.
  */
 export interface ResolveArrayItemOptions<TModel extends Record<string, unknown>> {
-  /** The field tree for this item (null for object items). */
-  fieldTree: FieldTree<unknown> | null;
   /** The initial index of this item in the array. */
   index: number;
   /** The field templates defining the array item structure (supports multiple sibling fields). */
@@ -36,12 +33,6 @@ export interface ResolveArrayItemOptions<TModel extends Record<string, unknown>>
    * Returns undefined for componentless fields (e.g., hidden fields).
    */
   loadTypeComponent: (type: string) => Promise<Type<unknown> | undefined>;
-  /**
-   * Optional explicit default value for new items added via events (append, prepend, insert).
-   * When provided, this value is used instead of reading from the parent array.
-   * This is necessary because when adding items, the parent array hasn't been updated yet.
-   */
-  explicitDefaultValue?: unknown;
 }
 
 /**
@@ -55,7 +46,6 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
   options: ResolveArrayItemOptions<TModel>,
 ): Observable<ResolvedArrayItem | undefined> {
   const {
-    fieldTree,
     index,
     templates,
     arrayField,
@@ -65,7 +55,6 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
     registry,
     destroyRef,
     loadTypeComponent,
-    explicitDefaultValue,
   } = options;
 
   if (templates.length === 0) {
@@ -95,14 +84,12 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
         }
 
         const { injector, inputs } = createArrayItemInjectorAndInputs({
-          fieldTree,
           template,
           indexSignal,
           parentFieldSignalContext,
           parentInjector,
           registry,
           arrayField,
-          explicitDefaultValue,
         });
 
         // Array item templates should always have inputs (componentless fields are handled above)
