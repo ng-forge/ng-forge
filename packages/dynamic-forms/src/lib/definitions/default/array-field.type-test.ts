@@ -183,12 +183,13 @@ describe('ArrayField - Usage Tests', () => {
   });
 
   it('should accept primitive array items (single field per item)', () => {
+    // Using 'hidden' type as it's a value field available in core package
     const field = {
       key: 'tags',
       type: 'array',
       fields: [
-        { key: 'tag', type: 'input', value: 'angular' },
-        { key: 'tag', type: 'input', value: 'typescript' },
+        { key: 'tag', type: 'hidden', value: 'angular' },
+        { key: 'tag', type: 'hidden', value: 'typescript' },
       ],
     } as const satisfies ArrayField;
 
@@ -197,13 +198,14 @@ describe('ArrayField - Usage Tests', () => {
   });
 
   it('should accept object array items (array of fields per item)', () => {
+    // Using 'hidden' type as it's a value field available in core package
     const field = {
       key: 'contacts',
       type: 'array',
       fields: [
         [
-          { key: 'name', type: 'input', value: 'Alice' },
-          { key: 'email', type: 'input', value: 'alice@example.com' },
+          { key: 'name', type: 'hidden', value: 'Alice' },
+          { key: 'email', type: 'hidden', value: 'alice@example.com' },
         ],
       ],
     } as const satisfies ArrayField;
@@ -212,12 +214,13 @@ describe('ArrayField - Usage Tests', () => {
   });
 
   it('should accept heterogeneous array items (mixed primitive and object)', () => {
+    // Using 'hidden' type as it's a value field available in core package
     const field = {
       key: 'items',
       type: 'array',
       fields: [
-        [{ key: 'label', type: 'input', value: 'Structured' }], // Object item
-        { key: 'value', type: 'input', value: 'Simple' }, // Primitive item
+        [{ key: 'label', type: 'hidden', value: 'Structured' }], // Object item
+        { key: 'value', type: 'hidden', value: 'Simple' }, // Primitive item
       ],
     } as const satisfies ArrayField;
 
