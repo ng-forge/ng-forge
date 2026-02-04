@@ -3,18 +3,16 @@
 @use '../../styles/grid-system.scss';
 
 :host {
-  // Row flex container - horizontal layout by default (desktop)
+  // Row flex container - items use natural size unless col is specified
   display: flex;
-  flex-direction: row;
   flex-wrap: wrap;
   gap: var(--df-grid-gap);
-  align-items: baseline; // Align items by text baseline
+  align-items: flex-start;
   width: 100%;
 
-  // Desktop: children share available space equally unless col class specified
+  // Fields without explicit col classes use their natural content size
   ::ng-deep > *:not([class*='df-col-']) {
-    flex: 1 1 0;
-    min-width: 0; // Allow shrinking below content size
+    flex: 0 0 auto;
   }
 
   // Column span utilities for 12-column grid system (1-12)
@@ -26,62 +24,61 @@
     }
   }
 
-  // Auto-size column - use natural content width
-  ::ng-deep > .df-col-auto {
-    flex: 0 0 auto;
-    width: auto;
-  }
-
   // Allow customization of gap for individual rows
   &.df-gap-custom {
     --df-grid-gap: var(--row-custom-gap, 1rem);
   }
 
-  // Justify content options
-  &.df-row-space-between {
-    justify-content: space-between;
+  // Row-specific responsive overrides
+  &.df-row-mobile-stack {
+    @media (max-width: 576px) {
+      flex-direction: column;
 
-    ::ng-deep > * {
-      flex: 0 0 auto !important; // Don't grow, use natural size
-      width: auto !important; // Override any width: 100%
+      ::ng-deep > * {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+      }
     }
   }
 
-  // Opt-in: keep side-by-side on mobile
-  &.df-row-mobile-keep-cols {
-    @media (max-width: 768px) {
-      flex-direction: row !important;
-      flex-wrap: wrap !important;
-
-      // Children without col class grow equally
-      ::ng-deep > *:not([class*='df-col-']) {
-        flex: 1 1 0 !important;
-        width: auto !important;
-        max-width: none !important;
-      }
-
-      // Children with col-auto use natural size
-      ::ng-deep > [class*='df-col-'] {
-        flex: 0 0 auto !important;
-        width: auto !important;
+  &.df-row-tablet-2col {
+    @media (min-width: 577px) and (max-width: 768px) {
+      // Each item takes ~50% in tablet view
+      ::ng-deep > * {
+        flex: 0 0 calc(50% - var(--df-grid-gap) / 2);
+        max-width: calc(50% - var(--df-grid-gap) / 2);
       }
     }
   }
 }
 
-// Responsive behavior for rows - stack on tablet and below (768px)
-@media (max-width: 768px) {
-  :host:not(.df-row-mobile-keep-cols) {
-    // Force single column on mobile/tablet for better UX
-    flex-direction: column !important;
-    flex-wrap: nowrap !important;
-    align-items: flex-start !important; // Align children to start, natural size
+// Responsive behavior for rows
+@media (max-width: 576px) {
+  :host {
+    // Force single column on mobile for better UX
+    flex-direction: column;
 
-    // Children use natural size on mobile
     ::ng-deep > * {
-      flex: 0 0 auto !important;
-      width: auto !important;
+      flex: 0 0 100% !important;
       max-width: 100% !important;
     }
+  }
+
+  // Mobile-specific overrides to keep side-by-side layout
+  :host.df-row-mobile-keep-cols {
+    flex-direction: row;
+
+    // Items without col use natural size, items with col keep their grid sizing
+    ::ng-deep > *:not([class*='df-col-']) {
+      flex: 0 0 auto !important;
+      max-width: none !important;
+    }
+  }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  :host {
+    // On tablet, items with col classes get adjusted sizing
+    // Items without col classes use natural content size
   }
 }

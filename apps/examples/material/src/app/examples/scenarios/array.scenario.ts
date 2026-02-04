@@ -261,7 +261,7 @@ export const arrayScenario: ExampleScenario = {
             label: 'Add First',
             arrayKey: 'contacts',
             template: contactTemplate,
-            className: 'prepend-contact-button df-col-auto',
+            className: 'prepend-contact-button',
             props: {
               color: 'accent',
             },
@@ -272,7 +272,7 @@ export const arrayScenario: ExampleScenario = {
             label: 'Add Contact',
             arrayKey: 'contacts',
             template: contactTemplate,
-            className: 'add-contact-button df-col-auto',
+            className: 'add-contact-button',
             props: {
               color: 'primary',
             },
