@@ -10,6 +10,8 @@ export interface TokenContext {
   arrayKey?: string;
   /** Current form value for complex indexing */
   formValue?: unknown;
+  /** Template for array item creation */
+  template?: unknown;
 }
 
 /**
@@ -19,6 +21,7 @@ export interface TokenContext {
  * - $key: The current field key
  * - $index: The array index (if inside an array field)
  * - $arrayKey: The parent array field key (if inside an array field)
+ * - $template: The template for array item creation
  * - formValue: Reference to the current form value for indexing
  *
  * @param args - Array of arguments that may contain tokens
@@ -32,6 +35,10 @@ export interface TokenContext {
  * @example
  * resolveTokens(['$key', 'static'], { key: 'myField' })
  * // Returns: ['myField', 'static']
+ *
+ * @example
+ * resolveTokens(['$arrayKey', '$template'], { arrayKey: 'contacts', template: [{ key: 'name', type: 'input' }] })
+ * // Returns: ['contacts', [{ key: 'name', type: 'input' }]]
  */
 export function resolveTokens(
   args: readonly (string | number | boolean | null | undefined)[],
@@ -51,6 +58,8 @@ export function resolveTokens(
         return context.index;
       case '$arrayKey':
         return context.arrayKey;
+      case '$template':
+        return context.template;
       case 'formValue':
         return context.formValue;
       default:

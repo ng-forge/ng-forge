@@ -33,8 +33,13 @@ const ARRAY_EVENT_TYPES: ArrayEvent['type'][] = [
 
 /**
  * Normalized action representing an array manipulation.
+ * Template can be:
+ * - Single FieldDef for primitive items (field's value is extracted directly)
+ * - Array of FieldDefs for object items (fields merged into object)
  */
-export type ArrayAction = { action: 'add'; template?: FieldDef<unknown>[]; index?: number } | { action: 'remove'; index?: number };
+export type ArrayAction =
+  | { action: 'add'; template: FieldDef<unknown> | FieldDef<unknown>[]; index?: number }
+  | { action: 'remove'; index?: number };
 
 /**
  * Converts an array event to a normalized action.

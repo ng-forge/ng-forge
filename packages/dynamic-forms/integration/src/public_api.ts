@@ -56,9 +56,36 @@ export {
   checkboxFieldMapper,
   datepickerFieldMapper,
   optionsFieldMapper,
+  // Button mappers
+  buttonFieldMapper,
+  // Array button utilities
+  resolveArrayButtonContext,
+  buildArrayButtonEventContext,
+  resolveArrayButtonEventArgs,
+  // Array button mappers
+  addArrayItemButtonMapper,
+  prependArrayItemButtonMapper,
+  insertArrayItemButtonMapper,
+  removeArrayItemButtonMapper,
+  popArrayItemButtonMapper,
+  shiftArrayItemButtonMapper,
+  // Navigation button mappers
+  submitButtonFieldMapper,
+  nextButtonFieldMapper,
+  previousButtonFieldMapper,
 } from './mappers';
 
-export type { ValueFieldContext, FieldWithOptions } from './mappers';
+export type {
+  ValueFieldContext,
+  FieldWithOptions,
+  ArrayButtonContext,
+  ArrayButtonEventContext,
+  BaseArrayAddButtonField,
+  BaseArrayRemoveButtonField,
+  BaseInsertArrayItemButtonField,
+  BaseNavigationButtonField,
+  EventArg,
+} from './mappers';
 
 // =============================================================================
 // Error Display Utilities

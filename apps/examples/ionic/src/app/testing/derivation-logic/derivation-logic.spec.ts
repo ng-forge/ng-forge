@@ -486,11 +486,12 @@ test.describe('Value Derivation Logic Tests', () => {
       const scenario = helpers.getScenario('array-field-derivation-test');
       await expect(scenario).toBeVisible();
 
-      // Get first line item fields using nth() since array items don't have indexed data-testid
+      // Array item fields have index suffixes (e.g., quantity_0)
+      // Use [id^="fieldName"] to match elements whose ID starts with the field name
       // Ionic uses ion-input inside the field wrapper
-      const quantityInputs = scenario.locator('#quantity ion-input input');
-      const unitPriceInputs = scenario.locator('#unitPrice ion-input input');
-      const lineTotalInputs = scenario.locator('#lineTotal ion-input input');
+      const quantityInputs = scenario.locator('[id^="quantity"] ion-input input');
+      const unitPriceInputs = scenario.locator('[id^="unitPrice"] ion-input input');
+      const lineTotalInputs = scenario.locator('[id^="lineTotal"] ion-input input');
 
       const firstQuantity = quantityInputs.nth(0);
       const firstUnitPrice = unitPriceInputs.nth(0);
@@ -526,7 +527,7 @@ test.describe('Value Derivation Logic Tests', () => {
       await expect(scenario).toBeVisible();
 
       // Ionic uses ion-input inside the field wrapper
-      const lineTotalInputs = scenario.locator('#lineTotal ion-input input');
+      const lineTotalInputs = scenario.locator('[id^="lineTotal"] ion-input input');
       const addButton = scenario.locator('#addLineItem ion-button');
 
       // Initial: 2 items
@@ -540,8 +541,8 @@ test.describe('Value Derivation Logic Tests', () => {
       await expect(lineTotalInputs).toHaveCount(3);
 
       // Fill the new item's quantity and unit price
-      const quantityInputs = scenario.locator('#quantity ion-input input');
-      const unitPriceInputs = scenario.locator('#unitPrice ion-input input');
+      const quantityInputs = scenario.locator('[id^="quantity"] ion-input input');
+      const unitPriceInputs = scenario.locator('[id^="unitPrice"] ion-input input');
       const newQuantity = quantityInputs.nth(2);
       const newUnitPrice = unitPriceInputs.nth(2);
       const newLineTotal = lineTotalInputs.nth(2);
@@ -567,7 +568,7 @@ test.describe('Value Derivation Logic Tests', () => {
       await expect(scenario).toBeVisible();
 
       // Ionic uses ion-input inside the field wrapper
-      const lineTotalInputs = scenario.locator('#lineTotal ion-input input');
+      const lineTotalInputs = scenario.locator('[id^="lineTotal"] ion-input input');
       const removeButton = scenario.locator('#removeLineItem ion-button');
 
       // Initial: 2 items
@@ -595,7 +596,7 @@ test.describe('Value Derivation Logic Tests', () => {
       await expect(scenario).toBeVisible();
 
       // Ionic uses ion-input inside the field wrapper
-      const lineTotalInputs = scenario.locator('#lineTotal ion-input input');
+      const lineTotalInputs = scenario.locator('[id^="lineTotal"] ion-input input');
       const addButton = scenario.locator('#addLineItem ion-button');
       const removeButton = scenario.locator('#removeLineItem ion-button');
 
@@ -616,8 +617,8 @@ test.describe('Value Derivation Logic Tests', () => {
       await expect(lineTotalInputs).toHaveCount(1);
 
       // Fill the new item
-      const quantityInputs = scenario.locator('#quantity ion-input input');
-      const unitPriceInputs = scenario.locator('#unitPrice ion-input input');
+      const quantityInputs = scenario.locator('[id^="quantity"] ion-input input');
+      const unitPriceInputs = scenario.locator('[id^="unitPrice"] ion-input input');
       await helpers.clearAndFill(quantityInputs.nth(0), '10');
       await page.waitForTimeout(300);
       await helpers.clearAndFill(unitPriceInputs.nth(0), '15');
@@ -632,8 +633,8 @@ test.describe('Value Derivation Logic Tests', () => {
       await expect(scenario).toBeVisible();
 
       // Ionic uses ion-input inside the field wrapper
-      const quantityInputs = scenario.locator('#quantity ion-input input');
-      const lineTotalInputs = scenario.locator('#lineTotal ion-input input');
+      const quantityInputs = scenario.locator('[id^="quantity"] ion-input input');
+      const lineTotalInputs = scenario.locator('[id^="lineTotal"] ion-input input');
 
       // Verify initial state
       const firstLineTotal = lineTotalInputs.nth(0);

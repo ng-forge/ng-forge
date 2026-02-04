@@ -88,9 +88,26 @@ function traverseFields(fields: FieldDef<unknown>[], entries: DerivationEntry[],
       // Update array path context if this is an array field
       if (field.type === 'array') {
         childContext.arrayPath = field.key;
-      }
 
-      traverseFields(normalizeFieldsArray(field.fields) as FieldDef<unknown>[], entries, childContext);
+        // Array fields have items that can be either FieldDef (primitive) or FieldDef[] (object).
+        // Normalize all items to arrays and flatten for traversal.
+        const arrayItems = normalizeFieldsArray(field.fields) as (FieldDef<unknown> | FieldDef<unknown>[])[];
+        const normalizedChildren: FieldDef<unknown>[] = [];
+
+        for (const item of arrayItems) {
+          if (Array.isArray(item)) {
+            // Object item: FieldDef[] - add each field
+            normalizedChildren.push(...item);
+          } else {
+            // Primitive item: single FieldDef - add directly
+            normalizedChildren.push(item);
+          }
+        }
+
+        traverseFields(normalizedChildren, entries, childContext);
+      } else {
+        traverseFields(normalizeFieldsArray(field.fields) as FieldDef<unknown>[], entries, childContext);
+      }
     }
   }
 }

@@ -9,7 +9,11 @@ export type {
   IonicNextButtonField,
   IonicPreviousButtonField,
   AddArrayItemButtonField,
+  PrependArrayItemButtonField,
+  InsertArrayItemButtonField,
   RemoveArrayItemButtonField,
+  PopArrayItemButtonField,
+  ShiftArrayItemButtonField,
 } from './button';
 
 // Checkbox

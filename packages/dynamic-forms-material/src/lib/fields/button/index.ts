@@ -6,7 +6,11 @@ export type {
   MatNextButtonField,
   MatPreviousButtonField,
   AddArrayItemButtonField,
+  PrependArrayItemButtonField,
+  InsertArrayItemButtonField,
   RemoveArrayItemButtonField,
+  PopArrayItemButtonField,
+  ShiftArrayItemButtonField,
 } from './mat-button.type';
 
 // Public API - component

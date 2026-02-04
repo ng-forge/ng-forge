@@ -7,24 +7,50 @@ const config = {
       key: 'contacts',
       type: 'array',
       fields: [
-        {
-          key: 'contactRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'name',
-              type: 'input',
-              label: 'Name',
-              col: 6,
-            },
-            {
-              key: 'email',
-              type: 'input',
-              label: 'Email',
-              col: 6,
-            },
-          ],
-        },
+        [
+          {
+            key: 'contactRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'name',
+                type: 'input',
+                label: 'Name',
+                col: 6,
+                value: 'Alice',
+              },
+              {
+                key: 'email',
+                type: 'input',
+                label: 'Email',
+                col: 6,
+                value: 'alice@example.com',
+              },
+            ],
+          },
+        ],
+        [
+          {
+            key: 'contactRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'name',
+                type: 'input',
+                label: 'Name',
+                col: 6,
+                value: 'Bob',
+              },
+              {
+                key: 'email',
+                type: 'input',
+                label: 'Email',
+                col: 6,
+                value: 'bob@example.com',
+              },
+            ],
+          },
+        ],
       ],
     },
   ],
@@ -35,10 +61,4 @@ export const arrayInitialValuesScenario: TestScenario = {
   title: 'Initial Values',
   description: 'Display array fields with predefined values',
   config,
-  initialValue: {
-    contacts: [
-      { name: 'Alice', email: 'alice@example.com' },
-      { name: 'Bob', email: 'bob@example.com' },
-    ],
-  },
 };

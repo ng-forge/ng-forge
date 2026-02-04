@@ -29,7 +29,11 @@ export type {
   MatNextButtonField,
   MatPreviousButtonField,
   AddArrayItemButtonField,
+  PrependArrayItemButtonField,
+  InsertArrayItemButtonField,
   RemoveArrayItemButtonField,
+  PopArrayItemButtonField,
+  ShiftArrayItemButtonField,
 } from './button';
 
 export { MatTextareaFieldComponent } from './textarea';

@@ -8,11 +8,14 @@ const config = {
       type: 'array',
       // minLength: 2, // TODO: uncomment when minLength is implemented
       fields: [
-        {
-          key: 'item',
-          type: 'input',
-          label: 'Item',
-        },
+        [
+          {
+            key: 'item',
+            type: 'input',
+            label: 'Item',
+            value: '',
+          },
+        ],
       ],
     },
     {
@@ -20,6 +23,13 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'items',
       label: 'Add Item',
+      template: [
+        {
+          key: 'item',
+          type: 'input',
+          label: 'Item',
+        },
+      ],
       className: 'array-add-button',
     },
     {
@@ -35,7 +45,4 @@ export const arrayMinLengthScenario: TestScenario = {
   title: 'Minimum Length',
   description: 'Test minimum length constraint on array fields',
   config,
-  initialValue: {
-    items: [{ item: '' }], // Start with one empty item
-  },
 };

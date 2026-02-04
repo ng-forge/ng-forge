@@ -7,11 +7,14 @@ const config = {
       key: 'tasks',
       type: 'array',
       fields: [
-        {
-          key: 'taskName',
-          type: 'input',
-          label: 'Task',
-        },
+        [
+          {
+            key: 'taskName',
+            type: 'input',
+            label: 'Task',
+            value: '',
+          },
+        ],
       ],
     },
     {
@@ -19,6 +22,13 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'tasks',
       label: 'Add Task',
+      template: [
+        {
+          key: 'taskName',
+          type: 'input',
+          label: 'Task',
+        },
+      ],
       className: 'array-add-button',
       props: { color: 'primary' },
     },
@@ -30,7 +40,4 @@ export const arrayValuesScenario: TestScenario = {
   title: 'Maintain Values',
   description: 'Verify that existing values are maintained when adding new items',
   config,
-  initialValue: {
-    tasks: [{ taskName: '' }], // Start with one empty item so array field renders
-  },
 };

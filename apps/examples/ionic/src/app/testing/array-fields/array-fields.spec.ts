@@ -16,33 +16,26 @@ test.describe('Array Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      // Wait for initial selector to be visible
       await page.waitForSelector('[data-testid="array-add"] #emails input', { state: 'visible', timeout: 10000 });
 
-      // Should have one initial empty item (use #emails input for cross-browser compatibility)
       const emailInputs = scenario.locator('#emails input');
       await expect(emailInputs.first()).toBeVisible({ timeout: 10000 });
       await expect(emailInputs).toHaveCount(1, { timeout: 10000 });
 
-      // Screenshot: Initial array with one item
       await helpers.expectScreenshotMatch(scenario, 'ionic-array-add-initial');
 
-      // Should have one add button (inside the first item)
       const addButton = scenario.locator('ion-button:has-text("Add Email")').first();
       await expect(addButton).toBeVisible({ timeout: 10000 });
       await expect(addButton).not.toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
 
-      // Add second item
       await addButton.click();
       await expect(emailInputs).toHaveCount(2, { timeout: 10000 });
 
-      // Add third item
       const addButtons = scenario.locator('ion-button:has-text("Add Email")');
       await expect(addButtons.first()).not.toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
       await addButtons.first().click();
       await expect(emailInputs).toHaveCount(3, { timeout: 10000 });
 
-      // Screenshot: Array with three items
       await helpers.expectScreenshotMatch(scenario, 'ionic-array-add-three-items');
     });
 
@@ -52,14 +45,11 @@ test.describe('Array Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      // Wait for initial selector to be visible
       await page.waitForSelector('[data-testid="array-remove"] #phones input', { state: 'visible', timeout: 10000 });
 
-      // Should have two phone inputs (with initial values)
       const phoneInputs = scenario.locator('#phones input');
       await expect(phoneInputs).toHaveCount(2, { timeout: 10000 });
 
-      // Find and click remove button (removes last item)
       const removeButton = scenario.locator('ion-button:has-text("Remove Last")');
       await expect(removeButton).toBeVisible({ timeout: 10000 });
       await expect(removeButton).not.toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
@@ -74,34 +64,28 @@ test.describe('Array Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      // Wait for initial selector to be visible
       await page.waitForSelector('[data-testid="array-values"] #tasks input', { state: 'visible', timeout: 10000 });
 
-      // Should have one initial item (the component starts with one empty item)
       const taskInputs = scenario.locator('#tasks input');
       await expect(taskInputs.first()).toBeVisible({ timeout: 10000 });
       await expect(taskInputs).toHaveCount(1, { timeout: 10000 });
 
-      // Fill first task (the initial one)
       const firstInput = taskInputs.first();
       await firstInput.fill('First Task');
       await expect(firstInput).toHaveValue('First Task', { timeout: 5000 });
       await ionBlur(firstInput);
 
-      // Find and click add button
       const addButton = scenario.locator('ion-button:has-text("Add Task")').first();
       await expect(addButton).toBeVisible({ timeout: 10000 });
       await expect(addButton).not.toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
       await addButton.click();
       await expect(taskInputs).toHaveCount(2, { timeout: 10000 });
 
-      // Fill second task
       const secondInput = taskInputs.nth(1);
       await secondInput.fill('Second Task');
       await expect(secondInput).toHaveValue('Second Task', { timeout: 5000 });
       await ionBlur(secondInput);
 
-      // Verify both values are maintained
       await expect(taskInputs.first()).toHaveValue('First Task', { timeout: 5000 });
       await expect(taskInputs.nth(1)).toHaveValue('Second Task', { timeout: 5000 });
     });
@@ -112,20 +96,171 @@ test.describe('Array Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      // Wait for initial selector to be visible
       await page.waitForSelector('[data-testid="array-initial-values"] #contacts input', { state: 'visible', timeout: 10000 });
 
-      // Should have 4 inputs total (2 contacts × 2 fields each)
       const allInputs = scenario.locator('#contacts input');
       await expect(allInputs).toHaveCount(4, { timeout: 10000 });
 
-      // Verify initial values - first contact's fields
       await expect(allInputs.nth(0)).toHaveValue('Alice', { timeout: 5000 });
       await expect(allInputs.nth(1)).toHaveValue('alice@example.com', { timeout: 5000 });
-
-      // Verify second contact's fields
       await expect(allInputs.nth(2)).toHaveValue('Bob', { timeout: 5000 });
       await expect(allInputs.nth(3)).toHaveValue('bob@example.com', { timeout: 5000 });
+    });
+  });
+
+  test.describe('Semantic Array Events (PR #218)', () => {
+    test('should prepend items at the beginning of the array', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-prepend');
+      await page.goto('/#/testing/array-fields/array-prepend');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await page.waitForSelector('[data-testid="array-prepend"] #items input', { state: 'visible', timeout: 10000 });
+
+      const inputs = scenario.locator('#items input');
+      await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+      await expect(inputs.nth(0)).toHaveValue('First', { timeout: 5000 });
+      await expect(inputs.nth(1)).toHaveValue('Second', { timeout: 5000 });
+
+      const prependButton = scenario.locator('ion-button:has-text("Prepend Item")');
+      await expect(prependButton).toBeVisible({ timeout: 10000 });
+      await prependButton.click();
+
+      await expect(inputs).toHaveCount(3, { timeout: 10000 });
+
+      await expect(inputs.nth(1)).toHaveValue('First', { timeout: 5000 });
+      await expect(inputs.nth(2)).toHaveValue('Second', { timeout: 5000 });
+      await expect(inputs.nth(0)).toHaveValue('', { timeout: 5000 });
+    });
+
+    test('should shift (remove first) items from array', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-shift');
+      await page.goto('/#/testing/array-fields/array-shift');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await page.waitForSelector('[data-testid="array-shift"] #items input', { state: 'visible', timeout: 10000 });
+
+      const inputs = scenario.locator('#items input');
+      await expect(inputs).toHaveCount(3, { timeout: 10000 });
+
+      await expect(inputs.nth(0)).toHaveValue('First', { timeout: 5000 });
+      await expect(inputs.nth(1)).toHaveValue('Second', { timeout: 5000 });
+      await expect(inputs.nth(2)).toHaveValue('Third', { timeout: 5000 });
+
+      const shiftButton = scenario.locator('ion-button:has-text("Remove First")');
+      await expect(shiftButton).toBeVisible({ timeout: 10000 });
+      await shiftButton.click();
+
+      await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+      await expect(inputs.nth(0)).toHaveValue('Second', { timeout: 5000 });
+      await expect(inputs.nth(1)).toHaveValue('Third', { timeout: 5000 });
+    });
+
+    test('should insert items at specific indices', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-insert-at-index');
+      await page.goto('/#/testing/array-fields/array-insert-at-index');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await page.waitForSelector('[data-testid="array-insert-at-index"] #items input', { state: 'visible', timeout: 10000 });
+
+      const inputs = scenario.locator('#items input');
+      await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+      await expect(inputs.nth(0)).toHaveValue('First', { timeout: 5000 });
+      await expect(inputs.nth(1)).toHaveValue('Third', { timeout: 5000 });
+
+      const insertButton = scenario.locator('ion-button:has-text("Insert at Index 1")');
+      await expect(insertButton).toBeVisible({ timeout: 10000 });
+      await insertButton.click();
+
+      await expect(inputs).toHaveCount(3, { timeout: 10000 });
+
+      await expect(inputs.nth(0)).toHaveValue('First', { timeout: 5000 });
+      await expect(inputs.nth(1)).toHaveValue('', { timeout: 5000 });
+      await expect(inputs.nth(2)).toHaveValue('Third', { timeout: 5000 });
+    });
+
+    test('should remove items at specific indices', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-remove-at-index');
+      await page.goto('/#/testing/array-fields/array-remove-at-index');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await page.waitForSelector('[data-testid="array-remove-at-index"] #items input', { state: 'visible', timeout: 10000 });
+
+      const inputs = scenario.locator('#items input');
+      await expect(inputs).toHaveCount(3, { timeout: 10000 });
+
+      await expect(inputs.nth(0)).toHaveValue('First', { timeout: 5000 });
+      await expect(inputs.nth(1)).toHaveValue('Second', { timeout: 5000 });
+      await expect(inputs.nth(2)).toHaveValue('Third', { timeout: 5000 });
+
+      const removeButton = scenario.locator('ion-button:has-text("Remove at Index 1")');
+      await expect(removeButton).toBeVisible({ timeout: 10000 });
+      await removeButton.click();
+
+      await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+      await expect(inputs.nth(0)).toHaveValue('First', { timeout: 5000 });
+      await expect(inputs.nth(1)).toHaveValue('Third', { timeout: 5000 });
+    });
+  });
+
+  test.describe('DOM ID Uniqueness (PR #219)', () => {
+    test('should generate unique DOM IDs for each array item', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-dom-id-uniqueness');
+      await page.goto('/#/testing/array-fields/array-dom-id-uniqueness');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await page.waitForSelector('[data-testid="array-dom-id-uniqueness"] #users input', { state: 'visible', timeout: 10000 });
+
+      const addButton = scenario.locator('ion-button:has-text("Add User")');
+      await expect(addButton).toBeVisible({ timeout: 10000 });
+      await addButton.click();
+      await addButton.click();
+
+      const inputs = scenario.locator('#users input');
+      await expect(inputs).toHaveCount(6, { timeout: 10000 });
+
+      const ids = await inputs.evaluateAll((els) => els.map((e) => e.id).filter((id) => id));
+
+      expect(ids.length).toBeGreaterThan(0);
+
+      const uniqueIds = new Set(ids);
+      expect(uniqueIds.size).toBe(ids.length);
+
+      for (const id of ids) {
+        // Array item field IDs now use UUID suffixes (e.g., "name-abc123" or "email-xyz789")
+        expect(id).toMatch(/-[a-z0-9]+$/i);
+      }
+    });
+
+    test('should maintain unique IDs after adding and removing items', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-dom-id-uniqueness');
+      await page.goto('/#/testing/array-fields/array-dom-id-uniqueness');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await page.waitForSelector('[data-testid="array-dom-id-uniqueness"] #users input', { state: 'visible', timeout: 10000 });
+
+      const addButton = scenario.locator('ion-button:has-text("Add User")');
+      const inputs = scenario.locator('#users input');
+
+      await addButton.click();
+      await addButton.click();
+      await addButton.click();
+
+      await expect(inputs).toHaveCount(8, { timeout: 10000 });
+
+      const idsBefore = await inputs.evaluateAll((els) => els.map((e) => e.id).filter((id) => id));
+
+      const uniqueIdsBefore = new Set(idsBefore);
+      expect(uniqueIdsBefore.size).toBe(idsBefore.length);
     });
   });
 
@@ -136,17 +271,14 @@ test.describe('Array Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      // Wait for initial selector to be visible
       await page.waitForSelector('[data-testid="array-item-validation"] #members input', { state: 'visible', timeout: 10000 });
 
-      // Fields should already be visible (initial item is rendered)
       const nameInput = scenario.locator('#members input').first();
       const emailInput = scenario.locator('#members input').nth(1);
 
       await expect(nameInput).toBeVisible({ timeout: 10000 });
       await expect(emailInput).toBeVisible({ timeout: 10000 });
 
-      // Fields should be editable and ready for validation
       await expect(nameInput).toBeEditable({ timeout: 5000 });
       await expect(emailInput).toBeEditable({ timeout: 5000 });
     });
@@ -157,7 +289,6 @@ test.describe('Array Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      // Submit button should be present
       await expect(scenario.locator('#submit ion-button')).toBeVisible({ timeout: 10000 });
     });
 
@@ -167,19 +298,15 @@ test.describe('Array Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      // Wait for initial selector to be visible
       await page.waitForSelector('[data-testid="array-max-length"] #tags input', { state: 'visible', timeout: 10000 });
 
-      // Should have two items initially (from initial values)
       const inputs = scenario.locator('#tags input');
       await expect(inputs).toHaveCount(2, { timeout: 10000 });
 
-      // Add button is outside the array (one button)
       const addButton = scenario.locator('ion-button:has-text("Add Tag")');
       await expect(addButton).toBeVisible({ timeout: 10000 });
       await expect(addButton).not.toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
 
-      // Click add button to add a new item
       await addButton.click();
       await expect(inputs).toHaveCount(3, { timeout: 10000 });
     });
@@ -192,11 +319,8 @@ test.describe('Array Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      // Wait for initial selector to be visible
       await page.waitForSelector('[data-testid="array-nested"] #users input', { state: 'visible', timeout: 10000 });
 
-      // Should have multiple fields (initial item is rendered)
-      // Use #users to scope to the array container only
       const firstNameInput = scenario.locator('#users input').first();
       const lastNameInput = scenario.locator('#users input').nth(1);
       const roleSelect = scenario.locator('#users ion-select').first();
@@ -205,7 +329,6 @@ test.describe('Array Fields E2E Tests', () => {
       await expect(lastNameInput).toBeVisible({ timeout: 10000 });
       await expect(roleSelect).toBeVisible({ timeout: 10000 });
 
-      // Fill fields
       await firstNameInput.fill('John');
       await expect(firstNameInput).toHaveValue('John', { timeout: 5000 });
       await ionBlur(firstNameInput);
@@ -214,23 +337,17 @@ test.describe('Array Fields E2E Tests', () => {
       await expect(lastNameInput).toHaveValue('Doe', { timeout: 5000 });
       await ionBlur(lastNameInput);
 
-      // Select role using Ionic ion-select (uses helper for proper OK click)
       await helpers.selectOption(roleSelect, 'Admin');
 
-      // Verify text input values
       await expect(firstNameInput).toHaveValue('John', { timeout: 5000 });
       await expect(lastNameInput).toHaveValue('Doe', { timeout: 5000 });
 
-      // Get initial count of inputs
       const initialCount = await scenario.locator('#users input').count();
 
-      // Add another user
       const addButton = scenario.locator('ion-button:has-text("Add User")').first();
       await expect(addButton).not.toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
       await addButton.click();
 
-      // Wait for inputs to double (adding another user duplicates the structure)
-      // Each user has 2 text inputs plus possible hidden inputs from the nested group structure
       const allInputs = scenario.locator('#users input');
       await expect(allInputs).toHaveCount(initialCount * 2, { timeout: 10000 });
     });
@@ -241,18 +358,14 @@ test.describe('Array Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      // Wait for initial selector to be visible
       await page.waitForSelector('[data-testid="array-multiple-ops"] #notes input', { state: 'visible', timeout: 10000 });
 
-      // Verify initial count (has initial values)
       await expect(scenario.locator('#notes input')).toHaveCount(2, { timeout: 10000 });
 
-      // Add button is outside the array (one button)
       const addButton = scenario.locator('ion-button:has-text("Add Note")');
       await expect(addButton).toBeVisible({ timeout: 10000 });
       await expect(addButton).not.toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
 
-      // Add 3 new notes by clicking the add button
       for (let i = 0; i < 3; i++) {
         const currentCount = 2 + i;
         await expect(addButton).not.toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
@@ -260,10 +373,8 @@ test.describe('Array Fields E2E Tests', () => {
         await expect(scenario.locator('#notes input')).toHaveCount(currentCount + 1, { timeout: 10000 });
       }
 
-      // Should have 5 total
       await expect(scenario.locator('#notes input')).toHaveCount(5, { timeout: 10000 });
 
-      // Remove 2 notes by clicking remove buttons (one per item, remove from end)
       for (let i = 0; i < 2; i++) {
         const currentCount = 5 - i;
         const removeButtons = scenario.locator('ion-button:has-text("Remove")');
@@ -273,13 +384,261 @@ test.describe('Array Fields E2E Tests', () => {
         await expect(scenario.locator('#notes input')).toHaveCount(currentCount - 1, { timeout: 10000 });
       }
 
-      // Should have 3 remaining
       const noteInputs = scenario.locator('#notes input');
       await expect(noteInputs).toHaveCount(3, { timeout: 10000 });
 
-      // Verify original values are maintained
       await expect(noteInputs.first()).toHaveValue('First note', { timeout: 5000 });
       await expect(noteInputs.nth(1)).toHaveValue('Second note', { timeout: 5000 });
+    });
+
+    test('should handle multiple independent arrays', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-multiple-arrays');
+      await page.goto('/#/testing/array-fields/array-multiple-arrays');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await page.waitForSelector('[data-testid="array-multiple-arrays"] #emails input', { state: 'visible', timeout: 10000 });
+
+      const emailInputs = scenario.locator('#emails input');
+      const phoneInputs = scenario.locator('#phones input');
+
+      await expect(emailInputs).toHaveCount(1, { timeout: 10000 });
+      await expect(phoneInputs).toHaveCount(1, { timeout: 10000 });
+
+      const addEmailButton = scenario.locator('ion-button:has-text("Add Email")');
+      await addEmailButton.click();
+      await expect(emailInputs).toHaveCount(2, { timeout: 10000 });
+
+      await expect(phoneInputs).toHaveCount(1, { timeout: 5000 });
+
+      const addPhoneButton = scenario.locator('ion-button:has-text("Add Phone")');
+      await addPhoneButton.click();
+      await addPhoneButton.click();
+      await expect(phoneInputs).toHaveCount(3, { timeout: 10000 });
+
+      await expect(emailInputs).toHaveCount(2, { timeout: 5000 });
+
+      await expect(emailInputs.first()).toHaveValue('alice@example.com', { timeout: 5000 });
+      await expect(phoneInputs.first()).toHaveValue('555-0001', { timeout: 5000 });
+    });
+  });
+
+  test.describe('Accessibility', () => {
+    test('should support keyboard navigation through array fields', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-keyboard-navigation');
+      await page.goto('/#/testing/array-fields/array-keyboard-navigation');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await page.waitForSelector('[data-testid="array-keyboard-navigation"] #beforeField input', { state: 'visible', timeout: 10000 });
+
+      const beforeInput = scenario.locator('#beforeField input');
+      await expect(beforeInput).toBeVisible({ timeout: 10000 });
+      await beforeInput.focus();
+      await expect(beforeInput).toBeFocused();
+
+      await page.keyboard.press('Tab');
+      const contact1Name = scenario.locator('#contacts input').first();
+      await expect(contact1Name).toBeFocused({ timeout: 5000 });
+
+      await page.keyboard.press('Tab');
+      const contact1Email = scenario.locator('#contacts input').nth(1);
+      await expect(contact1Email).toBeFocused({ timeout: 5000 });
+
+      await page.keyboard.press('Tab');
+      const contact2Name = scenario.locator('#contacts input').nth(2);
+      await expect(contact2Name).toBeFocused({ timeout: 5000 });
+
+      await page.keyboard.press('Tab');
+      const contact2Email = scenario.locator('#contacts input').nth(3);
+      await expect(contact2Email).toBeFocused({ timeout: 5000 });
+
+      await page.keyboard.press('Tab');
+      const addButton = scenario.locator('ion-button:has-text("Add Contact")');
+      await expect(addButton).toBeFocused({ timeout: 5000 });
+
+      await page.keyboard.press('Tab');
+      const afterInput = scenario.locator('#afterField input');
+      await expect(afterInput).toBeFocused({ timeout: 5000 });
+
+      await page.keyboard.press('Shift+Tab');
+      await expect(addButton).toBeFocused({ timeout: 5000 });
+    });
+
+    test('should have proper ARIA attributes for screen readers', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-screen-reader-labels');
+      await page.goto('/#/testing/array-fields/array-screen-reader-labels');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await page.waitForSelector('[data-testid="array-screen-reader-labels"] #contacts input', { state: 'visible', timeout: 10000 });
+
+      const inputs = scenario.locator('#contacts input');
+      await expect(inputs).toHaveCount(4, { timeout: 10000 });
+
+      const firstInput = inputs.first();
+      const hasLabel =
+        (await firstInput.getAttribute('aria-labelledby')) !== null ||
+        (await firstInput.getAttribute('aria-label')) !== null ||
+        (await firstInput.getAttribute('id')) !== null;
+      expect(hasLabel).toBe(true);
+
+      const addButton = scenario.locator('ion-button:has-text("Add Contact")');
+      await expect(addButton).toBeVisible({ timeout: 10000 });
+      const addButtonText = await addButton.textContent();
+      expect(addButtonText).toContain('Add Contact');
+
+      const removeButton = scenario.locator('ion-button:has-text("Remove Last Contact")');
+      await expect(removeButton).toBeVisible({ timeout: 10000 });
+    });
+  });
+
+  test.describe('Focus Management', () => {
+    test('should handle focus appropriately when adding items', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-focus-after-add');
+      await page.goto('/#/testing/array-fields/array-focus-after-add');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await page.waitForSelector('[data-testid="array-focus-after-add"] #tasks ion-input input', { state: 'visible', timeout: 10000 });
+
+      // Use ion-input input to specifically target input fields (not select inputs)
+      const taskInputs = scenario.locator('#tasks ion-input input');
+      await expect(taskInputs).toHaveCount(1, { timeout: 10000 });
+
+      const addButton = scenario.locator('ion-button:has-text("Add Task")');
+      await addButton.click();
+
+      await expect(taskInputs).toHaveCount(2, { timeout: 10000 });
+
+      const newTaskInput = taskInputs.nth(1);
+      await expect(newTaskInput).toBeVisible({ timeout: 10000 });
+      await newTaskInput.fill('New Task');
+      await expect(newTaskInput).toHaveValue('New Task', { timeout: 5000 });
+    });
+
+    test('should handle focus appropriately when removing items', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-focus-after-remove');
+      await page.goto('/#/testing/array-fields/array-focus-after-remove');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await page.waitForSelector('[data-testid="array-focus-after-remove"] #tasks ion-input input', { state: 'visible', timeout: 10000 });
+
+      // Use ion-input input to specifically target input fields (not select inputs)
+      const taskInputs = scenario.locator('#tasks ion-input input');
+      await expect(taskInputs).toHaveCount(3, { timeout: 10000 });
+
+      const removeButtons = scenario.locator('ion-button:has-text("Remove")');
+      await expect(removeButtons).toHaveCount(3, { timeout: 10000 });
+      await removeButtons.nth(1).click();
+
+      await expect(taskInputs).toHaveCount(2, { timeout: 10000 });
+
+      await expect(taskInputs.first()).toHaveValue('Task 1', { timeout: 5000 });
+      await expect(taskInputs.nth(1)).toHaveValue('Task 3', { timeout: 5000 });
+    });
+  });
+
+  test.describe('Form State Tracking', () => {
+    test('should track dirty state through array operations', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-dirty-touched-tracking');
+      await page.goto('/#/testing/array-fields/array-dirty-touched-tracking');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await page.waitForSelector('[data-testid="array-dirty-touched-tracking"] #entries input', { state: 'visible', timeout: 10000 });
+
+      const inputs = scenario.locator('#entries input');
+      await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+      const nameInput = inputs.first();
+      await nameInput.clear();
+      await nameInput.fill('Modified Entry');
+      await ionBlur(nameInput);
+
+      const addButton = scenario.locator('ion-button:has-text("Add Entry")');
+      await addButton.click();
+
+      await expect(inputs).toHaveCount(4, { timeout: 10000 });
+
+      await expect(inputs.first()).toHaveValue('Modified Entry', { timeout: 5000 });
+    });
+
+    test('should handle rapid add/remove operations without errors', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-rapid-operations');
+      await page.goto('/#/testing/array-fields/array-rapid-operations');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await page.waitForSelector('[data-testid="array-rapid-operations"] #items input', { state: 'visible', timeout: 10000 });
+
+      const inputs = scenario.locator('#items input');
+      const addButton = scenario.locator('ion-button:has-text("Add Item")');
+      const removeButton = scenario.locator('ion-button:has-text("Remove Item")');
+
+      for (let i = 0; i < 5; i++) {
+        await addButton.click();
+      }
+
+      await expect(inputs).toHaveCount(6, { timeout: 10000 });
+
+      for (let i = 0; i < 3; i++) {
+        await removeButton.click();
+      }
+
+      await expect(inputs).toHaveCount(3, { timeout: 10000 });
+
+      await expect(inputs.first()).toHaveValue('Initial', { timeout: 5000 });
+    });
+  });
+
+  test.describe('Edge Cases', () => {
+    test('should handle starting with an empty array', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-empty-state');
+      await page.goto('/#/testing/array-fields/array-empty-state');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      const inputs = scenario.locator('#items input');
+      await expect(inputs).toHaveCount(0, { timeout: 5000 });
+
+      const addButton = scenario.locator('ion-button:has-text("Add First Item")');
+      await expect(addButton).toBeVisible({ timeout: 10000 });
+      await addButton.click();
+
+      await expect(inputs).toHaveCount(1, { timeout: 10000 });
+
+      const textareas = scenario.locator('#items textarea');
+      await expect(textareas).toHaveCount(1, { timeout: 5000 });
+    });
+
+    test('should handle boundary index operations gracefully', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-boundary-indices');
+      await page.goto('/#/testing/array-fields/array-boundary-indices');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Should have two items initially
+      const inputs = scenario.locator('#items input');
+      await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+      // Try to remove at out-of-bounds index (100) - should handle gracefully
+      const removeButton = scenario.locator('ion-button:has-text("Remove at Index 100")');
+      await removeButton.click();
+
+      // Should handle gracefully (no crash, array unchanged)
+      await page.waitForTimeout(500);
+      await expect(inputs).toHaveCount(2, { timeout: 5000 });
+
+      // Verify original values are preserved
+      await expect(inputs.first()).toHaveValue('First', { timeout: 5000 });
+      await expect(inputs.nth(1)).toHaveValue('Second', { timeout: 5000 });
+
+      // Add an item using the addArrayItem button
+      const addButton = scenario.locator('ion-button:has-text("Add Item")');
+      await addButton.click();
+      await expect(inputs).toHaveCount(3, { timeout: 5000 });
     });
   });
 });

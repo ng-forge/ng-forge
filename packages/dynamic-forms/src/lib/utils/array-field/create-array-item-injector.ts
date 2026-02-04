@@ -1,22 +1,18 @@
-import { Injector, runInInjectionContext, Signal, untracked, linkedSignal } from '@angular/core';
-import { FieldTree, form } from '@angular/forms/signals';
-import { explicitEffect } from 'ngxtension/explicit-effect';
+import { computed, Injector, runInInjectionContext, Signal } from '@angular/core';
+import { FieldTree } from '@angular/forms/signals';
 import { ArrayField } from '../../definitions/default/array-field';
 import { FieldDef } from '../../definitions/base/field-def';
 import { ArrayContext, FieldSignalContext } from '../../mappers/types';
 import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { mapFieldToInputs } from '../field-mapper/field-mapper';
-import { flattenFields } from '../flattener/field-flattener';
-import { createSchemaFromFields } from '../../core/schema-builder';
-import { getArrayValue } from './array-field.types';
+import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
+import { isEqual } from '../object-utils';
 
 /**
  * Options for creating an array item injector.
  */
 export interface CreateArrayItemInjectorOptions<TModel extends Record<string, unknown>> {
-  /** The field tree for this item (null for object items without existing FieldTree). */
-  fieldTree: FieldTree<unknown> | null;
   /** The field template defining the array item structure. */
   template: FieldDef<unknown>;
   /** Signal containing the current index (uses linkedSignal for auto-updates). */
@@ -42,82 +38,59 @@ export interface ArrayItemInjectorResult {
 }
 
 /**
- * Syncs item form value changes back to the parent form's array.
- * This effect watches the item form value and updates the parent array when changes occur.
- */
-function syncItemToParent<TModel extends Record<string, unknown>>(
-  itemFormInstance: ReturnType<typeof form<unknown>>,
-  parentFieldSignalContext: FieldSignalContext<TModel>,
-  arrayKey: string,
-  indexSignal: Signal<number>,
-  injector: Injector,
-): void {
-  // Track if we're currently syncing to prevent loops
-  let isSyncing = false;
-
-  runInInjectionContext(injector, () => {
-    // The form instance is callable - call it to get the form state with .value()
-    explicitEffect([() => itemFormInstance().value()], ([itemValue]) => {
-      if (isSyncing) return;
-
-      const parentForm = parentFieldSignalContext.form;
-      const parentValue = untracked(() => parentForm().value()) as TModel;
-      const currentArray = getArrayValue(parentValue as Partial<TModel>, arrayKey);
-      const idx = untracked(() => indexSignal());
-
-      // Only sync if value actually changed
-      if (idx >= 0 && idx < currentArray.length && currentArray[idx] !== itemValue) {
-        isSyncing = true;
-        const newArray = [...currentArray];
-        newArray[idx] = itemValue;
-        // Update the parent form with the new array value
-        // The `as any` is required due to Angular Signal Forms' complex conditional types
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        parentForm().value.set({ ...parentValue, [arrayKey]: newArray } as any);
-        isSyncing = false;
-      }
-    });
-  });
-}
-
-/**
  * Creates an injector and inputs for an array item.
  *
- * Handles different item types (flatten, group, regular) by creating appropriate
- * form references and scoped injectors with ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT.
- * Sets up two-way sync to propagate item form changes back to the parent form.
+ * Uses direct root form binding - components bind directly to the root form's
+ * FieldTree for array items (rootForm['arrayKey'][index]). This architecture:
+ *
+ * - Eliminates the need for local forms and bidirectional sync
+ * - Allows Zod/StandardSchema validation errors to flow naturally to components
+ * - Reduces complexity by having a single source of truth (the root form)
+ *
+ * The FieldSignalContext.form property uses a getter that evaluates a computed
+ * signal, making form access reactive to index changes (when items reorder,
+ * the component points to the correct array position).
  */
 export function createArrayItemInjectorAndInputs<TModel extends Record<string, unknown>>(
   options: CreateArrayItemInjectorOptions<TModel>,
 ): ArrayItemInjectorResult {
-  const { fieldTree, template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField } = options;
+  const { template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField } = options;
 
-  // Create item form - uses linkedSignal that derives from parent
-  const formRef =
-    fieldTree ??
-    createObjectItemForm({
-      template,
-      indexSignal,
-      parentFieldSignalContext,
-      parentInjector,
-      registry,
-      arrayKey: arrayField.key,
-    });
+  // Get root form registry - it's guaranteed to be available since root form
+  // is registered before resolvedFields computes (dependency chain ensures this)
+  const rootFormRegistry = parentInjector.get(RootFormRegistryService);
+
+  // Create a computed that derives the array item's FieldTree from root form.
+  // Uses isEqual to prevent unnecessary re-computation when index changes but value is same.
+  const itemFormAccessor = computed(
+    () => {
+      const rootForm = rootFormRegistry.getRootForm();
+      if (!rootForm) {
+        return undefined;
+      }
+
+      const index = indexSignal();
+      // Navigate: rootForm['arrayKey'][index]
+      const arrayFieldTree = (rootForm as Record<string, unknown>)[arrayField.key];
+      if (!arrayFieldTree) {
+        return undefined;
+      }
+
+      return (arrayFieldTree as unknown[])[index] as FieldTree<unknown> | undefined;
+    },
+    { equal: isEqual },
+  );
 
   const injector = createItemInjector({
-    formRef,
+    itemFormAccessor,
     indexSignal,
     parentFieldSignalContext,
     parentInjector,
     arrayField,
   });
 
-  // Set up two-way sync: item form changes -> parent form array
-  // Only sync for locally created forms (not external FieldTrees)
-  if (!fieldTree) {
-    syncItemToParent(formRef as ReturnType<typeof form<unknown>>, parentFieldSignalContext, arrayField.key, indexSignal, injector);
-  }
-
+  // mapFieldToInputs automatically reads ARRAY_CONTEXT from the injector
+  // and applies the index suffix to keys for unique DOM IDs
   const inputs = runInInjectionContext(injector, () => {
     return mapFieldToInputs(template, registry);
   });
@@ -125,50 +98,8 @@ export function createArrayItemInjectorAndInputs<TModel extends Record<string, u
   return { injector, inputs };
 }
 
-interface CreateObjectItemFormOptions<TModel extends Record<string, unknown>> {
-  template: FieldDef<unknown>;
-  indexSignal: Signal<number>;
-  parentFieldSignalContext: FieldSignalContext<TModel>;
-  parentInjector: Injector;
-  registry: Map<string, FieldTypeDefinition>;
-  arrayKey: string;
-}
-
-/**
- * Creates a local form for an object array item using linkedSignal.
- * The linkedSignal derives from the parent array at the current index.
- *
- * For array items, we always create a form with a schema to ensure proper field structure.
- * This is needed for valueFieldMapper to find fields via bracket notation.
- */
-function createObjectItemForm<TModel extends Record<string, unknown>>(
-  options: CreateObjectItemFormOptions<TModel>,
-): ReturnType<typeof form<unknown>> {
-  const { template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayKey } = options;
-
-  const itemEntity = linkedSignal(() => {
-    const parentValue = parentFieldSignalContext.value();
-    const arrayValue = getArrayValue(parentValue as Partial<TModel>, arrayKey);
-    return arrayValue[indexSignal()] ?? {};
-  });
-
-  const nestedFields = 'fields' in template && Array.isArray(template.fields) ? template.fields : [];
-
-  return runInInjectionContext(parentInjector, () => {
-    // Determine which fields to include in the schema
-    // - Groups with keys create data nesting, so preserve the group wrapper: [template]
-    // - Rows are layout-only, so use their children directly: nestedFields
-    // - Leaf fields use themselves: [template]
-    const isGroupTemplate = template.type === 'group' && template.key;
-    const schemaFields = isGroupTemplate || nestedFields.length === 0 ? [template] : nestedFields;
-    const flattenedFields = flattenFields(schemaFields, registry);
-    const schema = createSchemaFromFields(flattenedFields, registry);
-    return untracked(() => form(itemEntity, schema));
-  });
-}
-
 interface CreateItemInjectorOptions<TModel extends Record<string, unknown>> {
-  formRef: FieldTree<unknown> | ReturnType<typeof form<unknown>>;
+  itemFormAccessor: Signal<FieldTree<unknown> | undefined>;
   indexSignal: Signal<number>;
   parentFieldSignalContext: FieldSignalContext<TModel>;
   parentInjector: Injector;
@@ -178,22 +109,36 @@ interface CreateItemInjectorOptions<TModel extends Record<string, unknown>> {
 /**
  * Creates a scoped injector for an array item.
  * Provides both FIELD_SIGNAL_CONTEXT (for form access) and ARRAY_CONTEXT (for position awareness).
+ *
+ * The FIELD_SIGNAL_CONTEXT.form uses a getter that evaluates itemFormAccessor() on access.
+ * This makes form access reactive - when mappers access context.form['fieldKey'], the getter runs,
+ * evaluating the computed which tracks indexSignal as a dependency. This ensures components
+ * automatically update when array items reorder.
  */
 function createItemInjector<TModel extends Record<string, unknown>>(options: CreateItemInjectorOptions<TModel>): Injector {
-  const { formRef, indexSignal, parentFieldSignalContext, parentInjector, arrayField } = options;
+  const { itemFormAccessor, indexSignal, parentFieldSignalContext, parentInjector, arrayField } = options;
 
+  // Use getter for formValue to ensure it's always current, not a stale snapshot.
+  // Components accessing arrayContext.formValue will get the current value.
   const arrayContext: ArrayContext = {
     arrayKey: arrayField.key,
     index: indexSignal,
-    formValue: parentFieldSignalContext.value(),
+    get formValue() {
+      return parentFieldSignalContext.value();
+    },
     field: arrayField,
   };
 
+  // Use object with getter to make form access reactive.
+  // When mappers access context.form, the getter evaluates itemFormAccessor().
+  // If this is inside another computed (like mapper's return), dependency tracking works correctly.
   const itemFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
     injector: undefined as unknown as Injector,
     value: parentFieldSignalContext.value,
     defaultValues: () => ({}),
-    form: formRef as FieldTree<Record<string, unknown>>,
+    get form(): FieldTree<Record<string, unknown>> {
+      return itemFormAccessor() as FieldTree<Record<string, unknown>>;
+    },
   };
 
   const injector = Injector.create({

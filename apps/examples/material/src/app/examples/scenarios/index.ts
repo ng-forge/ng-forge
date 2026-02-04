@@ -16,7 +16,7 @@ export { contactScenario } from './contact.scenario';
 export { paginatedFormScenario } from './paginated-form.scenario';
 export { groupScenario } from './group.scenario';
 export { rowScenario } from './row.scenario';
-export { arrayScenario, AddTagsEvent, AddContactEvent } from './array.scenario';
+export { arrayScenario } from './array.scenario';
 export { validationShowcaseScenario } from './validation-showcase.scenario';
 export { defaultPropsScenario } from './default-props.scenario';
 export { valueDerivationScenario } from './value-derivation.scenario';

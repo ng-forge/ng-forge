@@ -506,10 +506,11 @@ test.describe('Value Derivation Logic Tests', () => {
       const scenario = helpers.getScenario('array-field-derivation-test');
       await expect(scenario).toBeVisible();
 
-      // Get first line item fields using nth() since array items don't have indexed data-testid
-      const quantityInputs = scenario.locator('#quantity input');
-      const unitPriceInputs = scenario.locator('#unitPrice input');
-      const lineTotalInputs = scenario.locator('#lineTotal input');
+      // Get first line item fields using nth() since array items have index suffixes (e.g., quantity_0)
+      // Use [id^="fieldName"] to match elements whose ID starts with the field name
+      const quantityInputs = scenario.locator('[id^="quantity"] input');
+      const unitPriceInputs = scenario.locator('[id^="unitPrice"] input');
+      const lineTotalInputs = scenario.locator('[id^="lineTotal"] input');
 
       const firstQuantity = quantityInputs.nth(0);
       const firstUnitPrice = unitPriceInputs.nth(0);
@@ -544,7 +545,7 @@ test.describe('Value Derivation Logic Tests', () => {
       const scenario = helpers.getScenario('array-field-derivation-test');
       await expect(scenario).toBeVisible();
 
-      const lineTotalInputs = scenario.locator('#lineTotal input');
+      const lineTotalInputs = scenario.locator('[id^="lineTotal"] input');
       const addButton = scenario.locator('#addLineItem button');
 
       // Initial: 2 items
@@ -557,9 +558,9 @@ test.describe('Value Derivation Logic Tests', () => {
       // Should now have 3 items
       await expect(lineTotalInputs).toHaveCount(3);
 
-      // Fill the new item's quantity and unit price
-      const quantityInputs = scenario.locator('#quantity input');
-      const unitPriceInputs = scenario.locator('#unitPrice input');
+      // Fill the new item's quantity and unit price (using prefix selector for index-suffixed IDs)
+      const quantityInputs = scenario.locator('[id^="quantity"] input');
+      const unitPriceInputs = scenario.locator('[id^="unitPrice"] input');
       const newQuantity = quantityInputs.nth(2);
       const newUnitPrice = unitPriceInputs.nth(2);
       const newLineTotal = lineTotalInputs.nth(2);
@@ -584,7 +585,7 @@ test.describe('Value Derivation Logic Tests', () => {
       const scenario = helpers.getScenario('array-field-derivation-test');
       await expect(scenario).toBeVisible();
 
-      const lineTotalInputs = scenario.locator('#lineTotal input');
+      const lineTotalInputs = scenario.locator('[id^="lineTotal"] input');
       const removeButton = scenario.locator('#removeLineItem button');
 
       // Initial: 2 items
@@ -611,7 +612,7 @@ test.describe('Value Derivation Logic Tests', () => {
       const scenario = helpers.getScenario('array-field-derivation-test');
       await expect(scenario).toBeVisible();
 
-      const lineTotalInputs = scenario.locator('#lineTotal input');
+      const lineTotalInputs = scenario.locator('[id^="lineTotal"] input');
       const addButton = scenario.locator('#addLineItem button');
       const removeButton = scenario.locator('#removeLineItem button');
 
@@ -631,9 +632,9 @@ test.describe('Value Derivation Logic Tests', () => {
       // Should have 1 item
       await expect(lineTotalInputs).toHaveCount(1);
 
-      // Fill the new item
-      const quantityInputs = scenario.locator('#quantity input');
-      const unitPriceInputs = scenario.locator('#unitPrice input');
+      // Fill the new item (using prefix selector for index-suffixed IDs)
+      const quantityInputs = scenario.locator('[id^="quantity"] input');
+      const unitPriceInputs = scenario.locator('[id^="unitPrice"] input');
       await helpers.clearAndFill(quantityInputs.nth(0), '10');
       await page.waitForTimeout(300);
       await helpers.clearAndFill(unitPriceInputs.nth(0), '15');
@@ -647,8 +648,8 @@ test.describe('Value Derivation Logic Tests', () => {
       const scenario = helpers.getScenario('array-field-derivation-test');
       await expect(scenario).toBeVisible();
 
-      const quantityInputs = scenario.locator('#quantity input');
-      const lineTotalInputs = scenario.locator('#lineTotal input');
+      const quantityInputs = scenario.locator('[id^="quantity"] input');
+      const lineTotalInputs = scenario.locator('[id^="lineTotal"] input');
 
       // Verify initial state
       const firstLineTotal = lineTotalInputs.nth(0);

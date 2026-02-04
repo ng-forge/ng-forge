@@ -164,11 +164,11 @@ test.describe('Zod Schema Validation E2E Tests', () => {
       const scenario = helpers.getScenario('comprehensive-validation-test');
 
       // Get ZIP input in first address (addresses array has initial empty item)
-      const zipInput = scenario.locator('#addresses #zip input').first();
+      const zipInput = scenario.locator('#addresses [id^="zip"] input').first();
       await helpers.fillInput(zipInput, '123');
 
       // Verify error is displayed
-      const errorElement = scenario.locator('#addresses #zip .p-error').first();
+      const errorElement = scenario.locator('#addresses [id^="zip"] .p-error').first();
       await expect(errorElement).toContainText('5 digits');
     });
 
@@ -190,13 +190,13 @@ test.describe('Zod Schema Validation E2E Tests', () => {
       await helpers.fillInput(lastNameInput, 'Springfield');
 
       // Fill address with city matching last name (for cross-field validation)
-      const streetInput = scenario.locator('#addresses #street input').first();
+      const streetInput = scenario.locator('#addresses [id^="street"] input').first();
       await helpers.fillInput(streetInput, '123 Main Street');
 
-      const cityInput = scenario.locator('#addresses #city input').first();
+      const cityInput = scenario.locator('#addresses [id^="city"] input').first();
       await helpers.fillInput(cityInput, 'Springfield');
 
-      const zipInput = scenario.locator('#addresses #zip input').first();
+      const zipInput = scenario.locator('#addresses [id^="zip"] input').first();
       await helpers.fillInput(zipInput, '12345');
 
       await page.waitForTimeout(300);

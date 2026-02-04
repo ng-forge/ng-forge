@@ -52,6 +52,7 @@ const config = {
           label: 'Email',
           required: true,
           col: 12,
+          value: '',
         },
         {
           key: 'firstName',
@@ -59,6 +60,7 @@ const config = {
           label: 'First Name',
           required: true,
           col: 6,
+          value: '',
         },
         {
           key: 'lastName',
@@ -66,6 +68,7 @@ const config = {
           label: 'Last Name',
           required: true,
           col: 6,
+          value: '',
         },
       ],
     },
@@ -73,6 +76,43 @@ const config = {
       key: 'addresses',
       type: 'array',
       fields: [
+        [
+          {
+            key: 'addressRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'street',
+                type: 'input',
+                label: 'Street',
+                col: 6,
+                value: '',
+              },
+              {
+                key: 'city',
+                type: 'input',
+                label: 'City',
+                col: 3,
+                value: '',
+              },
+              {
+                key: 'zip',
+                type: 'input',
+                label: 'ZIP',
+                col: 3,
+                value: '',
+              },
+            ],
+          },
+        ],
+      ],
+    },
+    {
+      key: 'addAddress',
+      type: 'addArrayItem',
+      arrayKey: 'addresses',
+      label: 'Add Address',
+      template: [
         {
           key: 'addressRow',
           type: 'row',
@@ -100,12 +140,6 @@ const config = {
       ],
     },
     {
-      key: 'addAddress',
-      type: 'addArrayItem',
-      arrayKey: 'addresses',
-      label: 'Add Address',
-    },
-    {
       key: 'submit',
       type: 'submit',
       label: 'Submit',
@@ -119,12 +153,4 @@ export const comprehensiveValidationScenario: TestScenario = {
   title: 'Comprehensive Validation',
   description: 'Tests Zod schema validation with nested objects, arrays, and cross-field validation',
   config,
-  initialValue: {
-    user: {
-      email: '',
-      firstName: '',
-      lastName: '',
-    },
-    addresses: [{ street: '', city: '', zip: '' }],
-  },
 };

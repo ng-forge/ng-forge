@@ -6,11 +6,15 @@ export { FIELD_REGISTRY, getFieldValueHandling } from './field-type';
 export type { FieldOption } from './field-option';
 export {
   ARRAY_CONTEXT,
+  ARRAY_ITEM_ID_GENERATOR,
+  ARRAY_TEMPLATE_REGISTRY,
+  createArrayItemIdGenerator,
   DEFAULT_PROPS,
   DEFAULT_VALIDATION_MESSAGES,
   FIELD_SIGNAL_CONTEXT,
   FORM_OPTIONS,
 } from './field-signal-context.token';
+export type { ArrayTemplateRegistry } from './field-signal-context.token';
 export type { ValidationError, ValidationMessages } from './validation-types';
 export type { Prettify } from './prettify';
 
@@ -25,7 +29,7 @@ export type {
 } from './validation';
 
 // Logic
-export type { LogicConfig, FormStateCondition } from './logic';
+export type { LogicConfig, StateLogicConfig, FormStateCondition } from './logic';
 export { isFormStateCondition } from './logic';
 
 // Expressions

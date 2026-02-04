@@ -1,7 +1,7 @@
 @if (minimal()) {
   <!-- Minimal mode: only show the form (used by landing page) -->
   <div class="minimal-content">
-    <form [dynamic-form]="scenario().config" [(value)]="formValue"></form>
+    <form [dynamic-form]="scenario().config" [(value)]="formValue" [class]="scenario().formClassName"></form>
   </div>
 } @else {
   <!-- Full mode: show header, tabs, and form (optionally hide form data output in iframes) -->
@@ -38,7 +38,7 @@
   <div class="tab-content">
     @if (activeTab() === 'demo') {
       <div #formContainer class="form-container">
-        <form [dynamic-form]="scenario().config" [(value)]="formValue"></form>
+        <form [dynamic-form]="scenario().config" [(value)]="formValue" [class]="scenario().formClassName"></form>
       </div>
       @if (!hideFormOutput()) {
         <div class="example-result">

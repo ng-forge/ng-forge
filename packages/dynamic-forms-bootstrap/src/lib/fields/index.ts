@@ -8,7 +8,11 @@ export type {
   BsNextButtonField,
   BsPreviousButtonField,
   AddArrayItemButtonField,
+  PrependArrayItemButtonField,
+  InsertArrayItemButtonField,
   RemoveArrayItemButtonField,
+  PopArrayItemButtonField,
+  ShiftArrayItemButtonField,
 } from './button';
 
 export { BsCheckboxFieldComponent } from './checkbox';

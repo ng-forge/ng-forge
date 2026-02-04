@@ -112,7 +112,47 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
   }
 
   if (field.type === 'array') {
-    return [];
+    // Array field supports two item formats:
+    // - Primitive items: single FieldDef (not wrapped in array) → extracts field value directly
+    // - Object items: FieldDef[] (array of fields) → merges fields into object
+    const arrayField = field as { fields?: readonly (FieldDef<unknown> | readonly FieldDef<unknown>[])[] };
+    const itemDefinitions = arrayField.fields;
+
+    if (!itemDefinitions || itemDefinitions.length === 0) {
+      return [];
+    }
+
+    // Process each item definition
+    return itemDefinitions.map((itemDef) => {
+      // Primitive item: single FieldDef (not wrapped in array)
+      // Extract field value directly - key is for internal tracking only
+      if (!Array.isArray(itemDef)) {
+        return getFieldDefaultValue(itemDef as FieldDef<unknown>, registry);
+      }
+
+      // Object item: FieldDef[] - merge fields into object
+      const itemFields = itemDef as readonly FieldDef<unknown>[];
+      let itemValue: Record<string, unknown> = {};
+
+      for (const templateField of itemFields) {
+        const fieldValue = getFieldDefaultValue(templateField, registry);
+        const fieldValueHandling = getFieldValueHandling(templateField.type, registry);
+
+        if (templateField.type === 'group' && 'key' in templateField && templateField.key) {
+          // Groups wrap their value under the group key
+          itemValue[templateField.key] = fieldValue;
+        } else if (templateField.type === 'row') {
+          // Rows flatten their fields directly
+          if (fieldValue && typeof fieldValue === 'object') {
+            itemValue = { ...itemValue, ...(fieldValue as Record<string, unknown>) };
+          }
+        } else if (fieldValueHandling === 'include' && 'key' in templateField && templateField.key) {
+          itemValue[templateField.key] = fieldValue;
+        }
+      }
+
+      return itemValue;
+    });
   }
 
   // Number inputs need a number type default for Angular signal forms

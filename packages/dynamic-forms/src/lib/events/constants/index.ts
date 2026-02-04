@@ -7,7 +7,7 @@ export { FormClearEvent } from './form-clear.event';
 
 // Array item events - new semantic API
 export { AppendArrayItemEvent } from './append-array-item.event';
-export type { ArrayItemTemplate } from './append-array-item.event';
+export type { ArrayItemTemplate, ArrayItemDefinitionTemplate } from './append-array-item.event';
 export { PrependArrayItemEvent } from './prepend-array-item.event';
 export { InsertArrayItemEvent } from './insert-array-item.event';
 export { PopArrayItemEvent } from './pop-array-item.event';

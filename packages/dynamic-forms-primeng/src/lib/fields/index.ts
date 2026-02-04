@@ -29,7 +29,11 @@ export type {
   PrimeNextButtonField,
   PrimePreviousButtonField,
   AddArrayItemButtonField,
+  PrependArrayItemButtonField,
+  InsertArrayItemButtonField,
   RemoveArrayItemButtonField,
+  PopArrayItemButtonField,
+  ShiftArrayItemButtonField,
 } from './button';
 
 export { PrimeTextareaFieldComponent } from './textarea';

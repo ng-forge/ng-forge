@@ -7,6 +7,7 @@
 import type { FormEvent } from '@ng-forge/dynamic-forms';
 import type {
   AddArrayItemButtonField,
+  InsertArrayItemButtonField,
   IonicButtonField,
   IonicCheckboxField,
   IonicDatepickerField,
@@ -20,7 +21,10 @@ import type {
   IonicSubmitButtonField,
   IonicTextareaField,
   IonicToggleField,
+  PopArrayItemButtonField,
+  PrependArrayItemButtonField,
   RemoveArrayItemButtonField,
+  ShiftArrayItemButtonField,
 } from '../fields';
 
 declare module '@ng-forge/dynamic-forms' {
@@ -39,6 +43,10 @@ declare module '@ng-forge/dynamic-forms' {
     slider: IonicSliderField;
     toggle: IonicToggleField;
     addArrayItem: AddArrayItemButtonField;
+    prependArrayItem: PrependArrayItemButtonField;
+    insertArrayItem: InsertArrayItemButtonField;
     removeArrayItem: RemoveArrayItemButtonField;
+    popArrayItem: PopArrayItemButtonField;
+    shiftArrayItem: ShiftArrayItemButtonField;
   }
 }

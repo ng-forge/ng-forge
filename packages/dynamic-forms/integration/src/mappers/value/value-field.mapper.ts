@@ -7,32 +7,61 @@ import { omit } from '@ng-forge/dynamic-forms';
 import { ValidationMessages } from '@ng-forge/dynamic-forms';
 
 /**
- * Context for value field mapping, containing resolved field tree.
- * Used by specialized mappers to avoid duplicate context resolution.
+ * Context for value field mapping, containing the injected context reference.
+ * Used by specialized mappers to avoid duplicate injection.
+ *
+ * Note: The field tree is resolved lazily via getFieldTree() to support
+ * reactive form access (e.g., for array items where the form structure
+ * may not exist at injection time but becomes available later).
  */
 export interface ValueFieldContext {
-  fieldTree: FieldTree<unknown> | undefined;
+  /**
+   * Gets the field tree for a given key from the form context.
+   * This is reactive for array items - the form getter is evaluated each time,
+   * allowing the computed to re-run when the root form structure updates.
+   */
+  getFieldTree: (fieldKey: string) => FieldTree<unknown> | undefined;
 }
 
 /**
- * Resolves the field tree from the form context.
+ * Creates a value field context from the injected FIELD_SIGNAL_CONTEXT.
  * Must be called within an injection context.
  *
- * Uses type-safe field tree utilities to access child FieldTrees from the parent form.
+ * With direct root form binding for array items, the FIELD_SIGNAL_CONTEXT.form
+ * uses a getter that evaluates reactively. This means:
+ * - For regular fields: direct access to the form's FieldTree
+ * - For array items: the getter resolves rootForm['arrayKey'][index] dynamically
  *
- * @param fieldKey The key of the field to resolve
- * @returns The resolved context with field tree
+ * The returned context provides a getFieldTree function that should be called
+ * inside a computed to establish proper reactive dependencies.
+ *
+ * @returns The value field context with reactive field tree accessor
  */
-export function resolveValueFieldContext(fieldKey: string): ValueFieldContext {
+export function resolveValueFieldContext(): ValueFieldContext {
   const context = inject(FIELD_SIGNAL_CONTEXT);
-  const formRoot = context.form as Record<string, FieldTree<unknown> | undefined>;
-  const fieldTree = formRoot[fieldKey];
-  return { fieldTree };
+
+  return {
+    getFieldTree: (fieldKey: string) => {
+      // Access context.form here (inside a function that will be called from a computed)
+      // This allows the getter to be evaluated reactively
+      const formRoot = context.form as Record<string, FieldTree<unknown> | undefined> | undefined;
+
+      // Handle case where form is undefined (e.g., newly added array items before root form updates)
+      if (!formRoot) {
+        return undefined;
+      }
+
+      return formRoot[fieldKey];
+    },
+  };
 }
 
 /**
  * Builds the base inputs for a value field.
  * This is a helper function used by valueFieldMapper and specialized mappers.
+ *
+ * Note: This function should be called inside a computed signal to ensure
+ * proper reactive dependency tracking for the field tree resolution.
  *
  * @param fieldDef The value field definition
  * @param ctx The resolved value field context
@@ -62,8 +91,11 @@ export function buildValueFieldInputs<TProps, TValue = unknown>(
     inputs['defaultValidationMessages'] = defaultValidationMessages;
   }
 
-  if (ctx.fieldTree !== undefined) {
-    inputs['field'] = ctx.fieldTree;
+  // Resolve field tree reactively - this call is inside a computed,
+  // so it establishes the reactive dependency correctly
+  const fieldTree = ctx.getFieldTree(fieldDef.key);
+  if (fieldTree !== undefined) {
+    inputs['field'] = fieldTree;
   }
 
   return inputs;
@@ -74,6 +106,12 @@ export function buildValueFieldInputs<TProps, TValue = unknown>(
  *
  * Value fields are input fields that contribute to the form's value (text, number, etc.).
  * This mapper injects FIELD_SIGNAL_CONTEXT to access the form structure and retrieve the field proxy.
+ *
+ * For array items, the FIELD_SIGNAL_CONTEXT.form uses a reactive getter that resolves
+ * rootForm['arrayKey'][index] dynamically. This means:
+ * - Zod/StandardSchema validation errors are automatically available
+ * - The field tree updates reactively when the root form structure changes
+ * - Newly added array items will get their field tree once the form value updates
  *
  * For fields with specific properties (select, datepicker, textarea, slider), use the specialized mappers:
  * - selectFieldMapper: for fields with options (select, radio, multi-checkbox)
@@ -87,9 +125,16 @@ export function buildValueFieldInputs<TProps, TValue = unknown>(
 export function valueFieldMapper<TProps = unknown, TValue = unknown>(
   fieldDef: BaseValueField<TProps, TValue>,
 ): Signal<Record<string, unknown>> {
-  const ctx = resolveValueFieldContext(fieldDef.key);
+  // Get the context once at injection time (captures the FIELD_SIGNAL_CONTEXT reference)
+  const ctx = resolveValueFieldContext();
   const defaultProps = inject(DEFAULT_PROPS);
   const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES);
 
-  return computed(() => buildValueFieldInputs(fieldDef, ctx, defaultProps(), defaultValidationMessages()));
+  // The computed calls ctx.getFieldTree(fieldDef.key) inside, which:
+  // 1. Accesses context.form (triggering the getter for array items)
+  // 2. Returns the field tree if available, or undefined if not yet
+  // 3. Re-runs when the form structure updates (reactive dependency)
+  return computed(() => {
+    return buildValueFieldInputs(fieldDef, ctx, defaultProps(), defaultValidationMessages());
+  });
 }

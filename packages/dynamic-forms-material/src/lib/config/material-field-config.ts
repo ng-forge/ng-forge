@@ -1,14 +1,19 @@
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
-import { checkboxFieldMapper, datepickerFieldMapper, optionsFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
+import {
+  addArrayItemButtonMapper,
+  checkboxFieldMapper,
+  datepickerFieldMapper,
+  insertArrayItemButtonMapper,
+  optionsFieldMapper,
+  popArrayItemButtonMapper,
+  prependArrayItemButtonMapper,
+  removeArrayItemButtonMapper,
+  shiftArrayItemButtonMapper,
+  valueFieldMapper,
+} from '@ng-forge/dynamic-forms/integration';
 import { MatField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/mat-button.mapper';
-import {
-  addArrayItemButtonFieldMapper,
-  nextButtonFieldMapper,
-  previousButtonFieldMapper,
-  removeArrayItemButtonFieldMapper,
-  submitButtonFieldMapper,
-} from '../fields/button/mat-specific-button.mapper';
+import { nextButtonFieldMapper, previousButtonFieldMapper, submitButtonFieldMapper } from '../fields/button/mat-specific-button.mapper';
 
 /**
  * Material Design field type definitions
@@ -58,13 +63,37 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: MatField.AddArrayItem,
     loadComponent: () => import('../fields/button/mat-button.component'),
-    mapper: addArrayItemButtonFieldMapper,
+    mapper: addArrayItemButtonMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: MatField.PrependArrayItem,
+    loadComponent: () => import('../fields/button/mat-button.component'),
+    mapper: prependArrayItemButtonMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: MatField.InsertArrayItem,
+    loadComponent: () => import('../fields/button/mat-button.component'),
+    mapper: insertArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {
     name: MatField.RemoveArrayItem,
     loadComponent: () => import('../fields/button/mat-button.component'),
-    mapper: removeArrayItemButtonFieldMapper,
+    mapper: removeArrayItemButtonMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: MatField.PopArrayItem,
+    loadComponent: () => import('../fields/button/mat-button.component'),
+    mapper: popArrayItemButtonMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: MatField.ShiftArrayItem,
+    loadComponent: () => import('../fields/button/mat-button.component'),
+    mapper: shiftArrayItemButtonMapper,
     valueHandling: 'exclude',
   },
   {

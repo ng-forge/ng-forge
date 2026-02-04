@@ -2,8 +2,7 @@
  * Exhaustive type tests for ArrayField type.
  */
 import { expectTypeOf } from 'vitest';
-import type { ArrayField, ArrayComponent } from './array-field';
-import type { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
+import type { ArrayField, ArrayComponent, ArrayItemDefinition, ArrayItemTemplate } from './array-field';
 import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
@@ -88,9 +87,20 @@ describe('ArrayField - Exhaustive Whitelist', () => {
   });
 
   describe('fields property', () => {
-    it('fields accepts ArrayAllowedChildren array', () => {
+    it('fields accepts ArrayItemDefinition array (mixed primitive and object items)', () => {
       type FieldsType = ArrayField['fields'];
-      expectTypeOf<FieldsType>().toMatchTypeOf<readonly ArrayAllowedChildren[]>();
+      expectTypeOf<FieldsType>().toMatchTypeOf<readonly ArrayItemDefinition[]>();
+    });
+
+    it('ArrayItemTemplate is an array of fields (for object items)', () => {
+      expectTypeOf<ArrayItemTemplate>().toMatchTypeOf<readonly unknown[]>();
+    });
+
+    it('ArrayItemDefinition can be single field or array (for primitive or object items)', () => {
+      // ArrayItemDefinition = ArrayAllowedChildren | ArrayItemTemplate
+      // This allows both primitive (single field) and object (array of fields) items
+      type Definition = ArrayItemDefinition;
+      expectTypeOf<Definition>().not.toBeNever();
     });
   });
 });
@@ -101,13 +111,13 @@ describe('ArrayField - Exhaustive Whitelist', () => {
 
 describe('ArrayField - Generic Type Parameter', () => {
   it('should accept custom field type array', () => {
-    type CustomFields = readonly ArrayAllowedChildren[];
+    type CustomFields = readonly ArrayItemTemplate[];
     type CustomArrayField = ArrayField<CustomFields>;
-    expectTypeOf<CustomArrayField['fields']>().toMatchTypeOf<readonly ArrayAllowedChildren[]>();
+    expectTypeOf<CustomArrayField['fields']>().toMatchTypeOf<readonly ArrayItemTemplate[]>();
   });
 
   it('should preserve field types in generic', () => {
-    type SpecificArrayField = ArrayField<readonly ArrayAllowedChildren[]>;
+    type SpecificArrayField = ArrayField<readonly ArrayItemTemplate[]>;
     expectTypeOf<SpecificArrayField['type']>().toEqualTypeOf<'array'>();
   });
 });
@@ -117,7 +127,7 @@ describe('ArrayField - Generic Type Parameter', () => {
 // ============================================================================
 
 describe('ArrayComponent - Type Extraction', () => {
-  type TestComponent = ArrayComponent<ArrayAllowedChildren[]>;
+  type TestComponent = ArrayComponent<ArrayItemTemplate[]>;
 
   it('should be a valid type', () => {
     expectTypeOf<TestComponent>().not.toBeNever();
@@ -170,5 +180,50 @@ describe('ArrayField - Usage Tests', () => {
     } as const satisfies ArrayField;
 
     expectTypeOf(field.hidden).toEqualTypeOf<true>();
+  });
+
+  it('should accept primitive array items (single field per item)', () => {
+    // Using 'hidden' type as it's a value field available in core package
+    const field = {
+      key: 'tags',
+      type: 'array',
+      fields: [
+        { key: 'tag', type: 'hidden', value: 'angular' },
+        { key: 'tag', type: 'hidden', value: 'typescript' },
+      ],
+    } as const satisfies ArrayField;
+
+    expectTypeOf(field.type).toEqualTypeOf<'array'>();
+    expectTypeOf(field.fields).toMatchTypeOf<readonly unknown[]>();
+  });
+
+  it('should accept object array items (array of fields per item)', () => {
+    // Using 'hidden' type as it's a value field available in core package
+    const field = {
+      key: 'contacts',
+      type: 'array',
+      fields: [
+        [
+          { key: 'name', type: 'hidden', value: 'Alice' },
+          { key: 'email', type: 'hidden', value: 'alice@example.com' },
+        ],
+      ],
+    } as const satisfies ArrayField;
+
+    expectTypeOf(field.type).toEqualTypeOf<'array'>();
+  });
+
+  it('should accept heterogeneous array items (mixed primitive and object)', () => {
+    // Using 'hidden' type as it's a value field available in core package
+    const field = {
+      key: 'items',
+      type: 'array',
+      fields: [
+        [{ key: 'label', type: 'hidden', value: 'Structured' }], // Object item
+        { key: 'value', type: 'hidden', value: 'Simple' }, // Primitive item
+      ],
+    } as const satisfies ArrayField;
+
+    expectTypeOf(field.type).toEqualTypeOf<'array'>();
   });
 });

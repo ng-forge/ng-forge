@@ -14,6 +14,101 @@ const config = {
       key: 'lineItems',
       type: 'array',
       fields: [
+        [
+          {
+            key: 'itemRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'description',
+                type: 'input',
+                label: 'Description',
+                col: 4,
+                value: 'Product A',
+              },
+              {
+                key: 'quantity',
+                type: 'input',
+                label: 'Quantity',
+                props: { type: 'number' },
+                col: 2,
+                value: 2,
+              },
+              {
+                key: 'unitPrice',
+                type: 'input',
+                label: 'Unit Price',
+                props: { type: 'number' },
+                col: 2,
+                value: 50,
+              },
+              {
+                key: 'lineTotal',
+                type: 'input',
+                label: 'Line Total',
+                props: { type: 'number' },
+                readonly: true,
+                col: 4,
+                value: 100,
+                // Self-targeting derivation: lineTotal is derived from quantity * unitPrice
+                // formValue is scoped to the current array item
+                derivation: 'formValue.quantity * formValue.unitPrice',
+              },
+            ],
+          },
+        ],
+        [
+          {
+            key: 'itemRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'description',
+                type: 'input',
+                label: 'Description',
+                col: 4,
+                value: 'Product B',
+              },
+              {
+                key: 'quantity',
+                type: 'input',
+                label: 'Quantity',
+                props: { type: 'number' },
+                col: 2,
+                value: 3,
+              },
+              {
+                key: 'unitPrice',
+                type: 'input',
+                label: 'Unit Price',
+                props: { type: 'number' },
+                col: 2,
+                value: 30,
+              },
+              {
+                key: 'lineTotal',
+                type: 'input',
+                label: 'Line Total',
+                props: { type: 'number' },
+                readonly: true,
+                col: 4,
+                value: 90,
+                // Self-targeting derivation: lineTotal is derived from quantity * unitPrice
+                // formValue is scoped to the current array item
+                derivation: 'formValue.quantity * formValue.unitPrice',
+              },
+            ],
+          },
+        ],
+      ],
+    },
+    {
+      key: 'addLineItem',
+      type: 'addArrayItem',
+      arrayKey: 'lineItems',
+      label: 'Add Line Item',
+      props: { severity: 'primary' },
+      template: [
         {
           key: 'itemRow',
           type: 'row',
@@ -53,13 +148,6 @@ const config = {
       ],
     },
     {
-      key: 'addLineItem',
-      type: 'addArrayItem',
-      arrayKey: 'lineItems',
-      label: 'Add Line Item',
-      props: { severity: 'primary' },
-    },
-    {
       key: 'removeLineItem',
       type: 'removeArrayItem',
       arrayKey: 'lineItems',
@@ -80,11 +168,4 @@ export const arrayFieldDerivationScenario: TestScenario = {
   title: 'Array Field Derivation with Relative Paths',
   description: 'Tests derivation within array fields using relative path notation ($.siblingField)',
   config,
-  initialValue: {
-    invoiceNumber: 'INV-001',
-    lineItems: [
-      { description: 'Product A', quantity: 2, unitPrice: 50, lineTotal: 100 },
-      { description: 'Product B', quantity: 3, unitPrice: 30, lineTotal: 90 },
-    ],
-  },
 };

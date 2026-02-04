@@ -13,7 +13,7 @@ export {
   ShiftArrayItemEvent,
   SubmitEvent,
 } from './constants';
-export type { ArrayItemTemplate } from './constants';
+export type { ArrayItemTemplate, ArrayItemDefinitionTemplate } from './constants';
 
 // Array event builder (public API)
 export { arrayEvent } from './array-event';

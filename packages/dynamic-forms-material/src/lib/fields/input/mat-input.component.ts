@@ -105,6 +105,7 @@ export default class MatInputFieldComponent implements MatInputComponent {
     write: () => {
       const inputRef = this.inputRef();
       const isReadonly = this.isReadonly();
+
       if (inputRef?.nativeElement) {
         if (isReadonly) {
           inputRef.nativeElement.setAttribute('readonly', '');

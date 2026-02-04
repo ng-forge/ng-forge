@@ -234,39 +234,119 @@ function applyFieldState(fieldDef: FieldDef<unknown>, path: SchemaPath<unknown>)
 /**
  * Maps an array field to the form schema using applyEach.
  *
- * Array items use a template field definition. applyEach creates proper
- * FieldTree structure for each array item.
+ * Supports two item formats:
+ * - Primitive items: single FieldDef (not wrapped in array) → primitive value schema
+ * - Object items: FieldDef[] (array of fields) → object schema with field keys
+ *
+ * Supports:
+ * - Empty arrays (fields: []) - no initial items, add via buttons
+ * - Primitive arrays - simple value lists like ['tag1', 'tag2']
+ * - Object arrays - structured items like [{ name: 'Alice', email: '...' }]
+ * - Heterogeneous arrays - mixed primitives and objects
+ * - Container templates (row, group, page) that wrap children
  */
 function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchemaPath): void {
-  if (!isArrayField(arrayField) || !arrayField.fields?.length) {
+  if (!isArrayField(arrayField)) {
     return;
   }
 
-  const templateField = arrayField.fields[0];
+  // Fields can be either FieldDef (primitive) or FieldDef[] (object)
+  const itemDefinitions = arrayField.fields as readonly (FieldDef<unknown> | readonly FieldDef<unknown>[])[];
 
+  // Empty array is valid - items will be added via buttons with their own templates
+  // Create a minimal schema that just accepts any value
+  if (!itemDefinitions || itemDefinitions.length === 0) {
+    const emptyItemSchema = schema<unknown>(() => {
+      // No fields to map - items will be added dynamically via buttons
+    });
+    applyEach(fieldPath as SchemaPath<unknown[]>, emptyItemSchema);
+    return;
+  }
+
+  // Analyze item definitions to determine schema type
+  let hasPrimitiveItems = false;
+  const allObjectFields: FieldDef<unknown>[] = [];
+
+  for (const itemDef of itemDefinitions) {
+    if (!Array.isArray(itemDef)) {
+      // Primitive item: single FieldDef
+      hasPrimitiveItems = true;
+    } else {
+      // Object item: collect fields for superset schema
+      collectFieldsFromObjectItem(itemDef as readonly FieldDef<unknown>[], allObjectFields);
+    }
+  }
+
+  // For pure primitive arrays, use a simple schema
+  if (hasPrimitiveItems && allObjectFields.length === 0) {
+    const primitiveItemSchema = schema<unknown>(() => {
+      // Primitive items don't need field mapping - just accept any value
+    });
+    applyEach(fieldPath as SchemaPath<unknown[]>, primitiveItemSchema);
+    return;
+  }
+
+  // For object or mixed arrays, use object schema with optional fields
+  // Mixed arrays use the superset of all object fields (primitive items are just values)
   const itemSchema = schema<Record<string, unknown>>((itemPath) => {
     const pathRecord = itemPath as Record<string, AnySchemaPath>;
 
-    if (isRowField(templateField) || isPageField(templateField)) {
-      // Row/page templates flatten their children
-      mapContainerChildren(templateField.fields as FieldDef<unknown>[] | undefined, itemPath);
-    } else if (isGroupField(templateField)) {
-      // Group template - access group's path first
-      const groupKey = templateField.key;
-      if (groupKey) {
-        const groupPath = pathRecord[groupKey];
-        if (groupPath) {
-          mapContainerChildren(templateField.fields, groupPath);
+    // Map ALL unique template fields from all object items
+    for (const templateField of allObjectFields) {
+      if (isRowField(templateField) || isPageField(templateField)) {
+        // Row/page templates flatten their children
+        mapContainerChildren(templateField.fields as FieldDef<unknown>[] | undefined, itemPath);
+      } else if (isGroupField(templateField)) {
+        // Group template - access group's path first
+        const groupKey = templateField.key;
+        if (groupKey) {
+          const groupPath = pathRecord[groupKey];
+          if (groupPath) {
+            mapContainerChildren(templateField.fields, groupPath);
+          }
+        } else {
+          // No group key - apply children directly (edge case)
+          mapContainerChildren(templateField.fields, itemPath);
         }
       } else {
-        // No group key - apply children directly (edge case)
-        mapContainerChildren(templateField.fields, itemPath);
+        // Simple field template - get the specific field's path
+        const fieldKey = templateField.key;
+        if (fieldKey) {
+          const fieldPathForKey = pathRecord[fieldKey];
+          if (fieldPathForKey) {
+            mapFieldToForm(templateField, fieldPathForKey);
+          }
+        }
       }
-    } else {
-      // Simple field template
-      mapFieldToForm(templateField, itemPath);
     }
   });
 
   applyEach(fieldPath as SchemaPath<Record<string, unknown>[]>, itemSchema);
+}
+
+/**
+ * Collects unique field definitions from an object item template.
+ * Uses field key as the uniqueness identifier.
+ * When the same key appears in multiple templates, uses the first occurrence.
+ */
+function collectFieldsFromObjectItem(itemFields: readonly FieldDef<unknown>[], allFields: FieldDef<unknown>[]): void {
+  const seenKeys = new Set(allFields.map((f) => f.key).filter(Boolean));
+
+  for (const field of itemFields) {
+    // For row/page fields, we need to collect their children's keys
+    if (isRowField(field) || isPageField(field)) {
+      // Use a synthetic key for container fields to dedupe them
+      const containerKey = `__container_${field.type}_${JSON.stringify(field.fields?.map((f) => f.key))}`;
+      if (!seenKeys.has(containerKey)) {
+        seenKeys.add(containerKey);
+        allFields.push(field);
+      }
+    } else {
+      const key = field.key;
+      if (key && !seenKeys.has(key)) {
+        seenKeys.add(key);
+        allFields.push(field);
+      }
+    }
+  }
 }

@@ -6,7 +6,11 @@ export type {
   BsNextButtonField,
   BsPreviousButtonField,
   AddArrayItemButtonField,
+  PrependArrayItemButtonField,
+  InsertArrayItemButtonField,
   RemoveArrayItemButtonField,
+  PopArrayItemButtonField,
+  ShiftArrayItemButtonField,
 } from './bs-button.type';
 
 // Public API - component

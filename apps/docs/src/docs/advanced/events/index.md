@@ -118,23 +118,29 @@ import { arrayEvent } from '@ng-forge/dynamic-forms';
 
 #### Adding Items
 
+**Important:** A template is required for all add operations. The template defines the structure of the new item:
+
+- **Single FieldDef** → creates a **primitive item** (field value extracted directly)
+- **Array of FieldDefs** → creates an **object item** (fields merged into object)
+
 ```typescript
+// Define templates
+const tagTemplate = { key: 'tag', type: 'input', label: 'Tag' }; // Primitive item
+const contactTemplate = [
+  // Object item
+  { key: 'name', type: 'input', label: 'Name' },
+  { key: 'email', type: 'input', label: 'Email' },
+];
+
 // Append item at end (most common)
-eventBus.dispatch(arrayEvent('contacts').append());
+eventBus.dispatch(arrayEvent('tags').append(tagTemplate)); // Primitive: adds a string value
+eventBus.dispatch(arrayEvent('contacts').append(contactTemplate)); // Object: adds { name, email }
 
 // Prepend item at beginning
-eventBus.dispatch(arrayEvent('contacts').prepend());
+eventBus.dispatch(arrayEvent('contacts').prepend(contactTemplate));
 
 // Insert at specific index
-eventBus.dispatch(arrayEvent('contacts').insertAt(2));
-
-// Override with custom template (array of field configs)
-eventBus.dispatch(
-  arrayEvent('contacts').append([
-    { key: 'name', type: 'input', label: 'Name' },
-    { key: 'email', type: 'input', label: 'Email' },
-  ]),
-);
+eventBus.dispatch(arrayEvent('contacts').insertAt(2, contactTemplate));
 ```
 
 #### Removing Items

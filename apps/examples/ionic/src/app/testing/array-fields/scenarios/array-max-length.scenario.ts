@@ -8,11 +8,22 @@ const config = {
       type: 'array',
       // maxLength: 3, // TODO: uncomment when maxLength is implemented
       fields: [
-        {
-          key: 'tag',
-          type: 'input',
-          label: 'Tag',
-        },
+        [
+          {
+            key: 'tag',
+            type: 'input',
+            label: 'Tag',
+            value: 'tag1',
+          },
+        ],
+        [
+          {
+            key: 'tag',
+            type: 'input',
+            label: 'Tag',
+            value: 'tag2',
+          },
+        ],
       ],
     },
     {
@@ -20,6 +31,13 @@ const config = {
       type: 'addArrayItem',
       arrayKey: 'tags',
       label: 'Add Tag',
+      template: [
+        {
+          key: 'tag',
+          type: 'input',
+          label: 'Tag',
+        },
+      ],
       className: 'array-add-button',
     },
   ],
@@ -30,7 +48,4 @@ export const arrayMaxLengthScenario: TestScenario = {
   title: 'Maximum Length',
   description: 'Test maximum length constraint on array fields',
   config,
-  initialValue: {
-    tags: [{ tag: 'tag1' }, { tag: 'tag2' }],
-  },
 };

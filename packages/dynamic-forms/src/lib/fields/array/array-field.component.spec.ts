@@ -17,6 +17,8 @@ import { AppendArrayItemEvent, EventBus, InsertArrayItemEvent, PopArrayItemEvent
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { vi } from 'vitest';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
+import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
+import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 
 describe('ArrayFieldComponent', () => {
   function setupArrayTest(field: ArrayField<unknown>, value?: Record<string, unknown>) {
@@ -35,15 +37,18 @@ describe('ArrayFieldComponent', () => {
         provideDynamicForm(withLoggerConfig()),
         EventBus,
         FunctionRegistryService,
+        RootFormRegistryService,
         {
           provide: FIELD_REGISTRY,
           useValue: registry,
         },
         {
           provide: FIELD_SIGNAL_CONTEXT,
-          useFactory: (injector: Injector) => {
+          useFactory: (injector: Injector, rootFormRegistry: RootFormRegistryService) => {
             return runInInjectionContext(injector, () => {
-              const valueSignal = signal(value || {});
+              // Compute default value from field definition if no explicit value provided
+              const computedValue = value || { [field.key]: getFieldDefaultValue(field, registry) };
+              const valueSignal = signal(computedValue as Record<string, unknown>);
               const defaultValues = () => ({}) as Record<string, unknown>;
 
               // Create schema from the array field to properly setup Signal Forms
@@ -57,6 +62,9 @@ describe('ArrayFieldComponent', () => {
               // Access internal structure to force initialization (internal Angular API)
               (testForm as unknown as { structure?: () => void }).structure?.();
 
+              // Register the root form for array item direct binding
+              rootFormRegistry.registerRootForm(testForm);
+
               const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
                 injector,
                 value: valueSignal,
@@ -68,7 +76,7 @@ describe('ArrayFieldComponent', () => {
               return mockFieldSignalContext;
             });
           },
-          deps: [Injector],
+          deps: [Injector, RootFormRegistryService],
         },
       ],
     });
@@ -88,7 +96,7 @@ describe('ArrayFieldComponent', () => {
     const field: ArrayField<unknown> = {
       key: 'testArray',
       type: 'array',
-      fields: [],
+      fields: [], // Empty array = no initial items
     };
 
     const { component } = setupArrayTest(field);
@@ -101,7 +109,7 @@ describe('ArrayFieldComponent', () => {
     const field: ArrayField<unknown> = {
       key: 'testArray',
       type: 'array',
-      fields: [],
+      fields: [], // Empty array = no initial items
     };
 
     const { component } = setupArrayTest(field);
@@ -113,7 +121,7 @@ describe('ArrayFieldComponent', () => {
     const field: ArrayField<unknown> = {
       key: 'testArray',
       type: 'array',
-      fields: [],
+      fields: [], // Empty array = no initial items
     };
 
     const { component } = setupArrayTest(field);
@@ -121,25 +129,25 @@ describe('ArrayFieldComponent', () => {
     expect(component.key()).toBe('testArray');
   });
 
-  it('should store field template from fields array', () => {
+  it('should store item templates from fields array', () => {
     const templateField = createSimpleTestField('item', 'Item');
     const field: ArrayField<unknown> = {
       key: 'testArray',
       type: 'array',
-      fields: [templateField],
+      fields: [[templateField]], // One initial item with one field
     };
 
     const { component } = setupArrayTest(field);
 
-    // The component should store the first field as a template
-    expect(component['fieldTemplate']()).toEqual(templateField);
+    // The component should store all item templates (each inner array is one item)
+    expect(component['itemTemplates']()).toEqual([[templateField]]);
   });
 
-  it('should initialize with zero items for empty array', () => {
+  it('should initialize with zero items for empty fields array', () => {
     const field: ArrayField<unknown> = {
       key: 'testArray',
       type: 'array',
-      fields: [createSimpleTestField('item', 'Item')],
+      fields: [], // Empty = no initial items
     };
 
     const { component } = setupArrayTest(field, { testArray: [] });
@@ -147,16 +155,19 @@ describe('ArrayFieldComponent', () => {
     expect(component.resolvedItems()).toHaveLength(0);
   });
 
-  it('should create field instances for existing array items', async () => {
+  it('should create field instances for items defined in fields array', async () => {
+    // New structure: fields[][] where each inner array defines one item
     const field: ArrayField<unknown> = {
       key: 'items',
       type: 'array',
-      fields: [createSimpleTestField('item', 'Item')],
+      fields: [
+        [createSimpleTestField('item', 'Item', 'value1')], // Item 0
+        [createSimpleTestField('item', 'Item', 'value2')], // Item 1
+        [createSimpleTestField('item', 'Item', 'value3')], // Item 2
+      ],
     };
 
-    const { component, fixture } = setupArrayTest(field, {
-      items: ['value1', 'value2', 'value3'],
-    });
+    const { component, fixture } = setupArrayTest(field);
 
     // The component loads array items asynchronously via forkJoin in a switchMap
     // Poll until the fields are loaded or timeout
@@ -203,11 +214,11 @@ describe('ArrayFieldComponent', () => {
   });
 
   describe('AppendArrayItemEvent', () => {
-    it('should add item when AppendArrayItemEvent is dispatched with custom field template', async () => {
+    it('should add item when AppendArrayItemEvent is dispatched with field template', async () => {
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
-        fields: [createSimpleTestField('item', 'Default Item')],
+        fields: [], // Empty - items added via buttons
       };
 
       const { component, fixture } = setupArrayTest(field, { items: [] });
@@ -216,9 +227,9 @@ describe('ArrayFieldComponent', () => {
       // Initially empty
       expect(component.resolvedItems()).toHaveLength(0);
 
-      // Dispatch event with custom field template (array of fields)
-      const customField = createSimpleTestField('customItem', 'Custom Item');
-      eventBus.dispatch(AppendArrayItemEvent, 'items', [customField]);
+      // Dispatch event with field template (array of fields) - template is required
+      const template = [createSimpleTestField('item', 'Item')];
+      eventBus.dispatch(AppendArrayItemEvent, 'items', template);
 
       // Wait for async component loading
       const maxAttempts = 50;
@@ -234,69 +245,45 @@ describe('ArrayFieldComponent', () => {
       expect(component.resolvedItems()).toHaveLength(1);
     });
 
-    it('should add item using array template as fallback when AppendArrayItemEvent has no template', async () => {
+    it('should not add item when AppendArrayItemEvent has empty template', async () => {
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
-        fields: [createSimpleTestField('item', 'Default Item')],
-      };
-
-      const { component, fixture } = setupArrayTest(field, { items: [] });
-      const eventBus = TestBed.inject(EventBus);
-
-      // Initially empty
-      expect(component.resolvedItems()).toHaveLength(0);
-
-      // Dispatch event WITHOUT template parameter - should use array's template
-      eventBus.dispatch(AppendArrayItemEvent, 'items');
-
-      // Wait for async component loading
-      const maxAttempts = 50;
-      let attempts = 0;
-      while (component.resolvedItems().length < 1 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        attempts++;
-      }
-
-      expect(component.resolvedItems()).toHaveLength(1);
-    });
-
-    it('should not add item if array has no template', async () => {
-      const field: ArrayField<unknown> = {
-        key: 'items',
-        type: 'array',
-        fields: [], // No template
+        fields: [], // Empty - items added via buttons
       };
 
       const { component, fixture } = setupArrayTest(field, { items: [] });
       const eventBus = TestBed.inject(EventBus);
       const consoleSpy = vi.spyOn(console, 'error');
 
-      // Dispatch event without template and no array template
-      eventBus.dispatch(AppendArrayItemEvent, 'items');
+      // Initially empty
+      expect(component.resolvedItems()).toHaveLength(0);
+
+      // Dispatch event with empty template array - should fail
+      eventBus.dispatch(AppendArrayItemEvent, 'items', []);
 
       await fixture.whenStable();
       fixture.detectChanges();
 
       expect(component.resolvedItems()).toHaveLength(0);
-      expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('Cannot add item to array'));
+      expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('template is REQUIRED'));
     });
   });
 
   describe('InsertArrayItemEvent', () => {
     it('should add item at specific index when InsertArrayItemEvent is dispatched', async () => {
+      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
-        fields: [createSimpleTestField('item', 'Item')],
+        fields: [
+          [createSimpleTestField('item', 'Item', 'first')],
+          [createSimpleTestField('item', 'Item', 'second')],
+          [createSimpleTestField('item', 'Item', 'third')],
+        ],
       };
 
-      const { component, fixture } = setupArrayTest(field, {
-        items: ['first', 'second', 'third'],
-      });
+      const { component, fixture } = setupArrayTest(field);
 
       const eventBus = TestBed.inject(EventBus);
 
@@ -313,8 +300,9 @@ describe('ArrayFieldComponent', () => {
 
       expect(component.resolvedItems()).toHaveLength(3);
 
-      // Add at index 1 (between first and second)
-      eventBus.dispatch(InsertArrayItemEvent, 'items', 1);
+      // Add at index 1 (between first and second) - template is required
+      const template = [createSimpleTestField('item', 'Item')];
+      eventBus.dispatch(InsertArrayItemEvent, 'items', 1, template);
 
       // Wait for new item
       attempts = 0;
@@ -332,15 +320,18 @@ describe('ArrayFieldComponent', () => {
 
   describe('PopArrayItemEvent', () => {
     it('should remove last item when PopArrayItemEvent is dispatched', async () => {
+      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
-        fields: [createSimpleTestField('item', 'Item')],
+        fields: [
+          [createSimpleTestField('item', 'Item', 'first')],
+          [createSimpleTestField('item', 'Item', 'second')],
+          [createSimpleTestField('item', 'Item', 'third')],
+        ],
       };
 
-      const { component, fixture } = setupArrayTest(field, {
-        items: ['first', 'second', 'third'],
-      });
+      const { component, fixture } = setupArrayTest(field);
 
       const eventBus = TestBed.inject(EventBus);
 
@@ -377,7 +368,7 @@ describe('ArrayFieldComponent', () => {
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
-        fields: [createSimpleTestField('item', 'Item')],
+        fields: [], // Empty - no initial items
       };
 
       const { component, fixture } = setupArrayTest(field, { items: [] });
@@ -397,15 +388,18 @@ describe('ArrayFieldComponent', () => {
 
   describe('RemoveAtIndexEvent', () => {
     it('should remove item at specific index when RemoveAtIndexEvent is dispatched', async () => {
+      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
-        fields: [createSimpleTestField('item', 'Item')],
+        fields: [
+          [createSimpleTestField('item', 'Item', 'first')],
+          [createSimpleTestField('item', 'Item', 'second')],
+          [createSimpleTestField('item', 'Item', 'third')],
+        ],
       };
 
-      const { component, fixture } = setupArrayTest(field, {
-        items: ['first', 'second', 'third'],
-      });
+      const { component, fixture } = setupArrayTest(field);
 
       const eventBus = TestBed.inject(EventBus);
 
@@ -483,6 +477,7 @@ describe('ArrayFieldComponent', () => {
           provideDynamicForm(),
           EventBus,
           FunctionRegistryService,
+          RootFormRegistryService,
           {
             provide: FIELD_REGISTRY,
             useValue: registry,
@@ -492,9 +487,11 @@ describe('ArrayFieldComponent', () => {
           { provide: FORM_OPTIONS, useValue: signal(undefined) },
           {
             provide: FIELD_SIGNAL_CONTEXT,
-            useFactory: (injector: Injector) => {
+            useFactory: (injector: Injector, rootFormRegistry: RootFormRegistryService) => {
               return runInInjectionContext(injector, () => {
-                const valueSignal = signal(value || {});
+                // Compute default value from field definition if no explicit value provided
+                const computedValue = value || { [field.key]: getFieldDefaultValue(field, registry) };
+                const valueSignal = signal(computedValue as Record<string, unknown>);
                 const defaultValues = () => ({}) as Record<string, unknown>;
 
                 // Create schema from the array field with proper registry
@@ -507,6 +504,9 @@ describe('ArrayFieldComponent', () => {
                 // Access internal structure to force initialization (internal Angular API)
                 (testForm as unknown as { structure?: () => void }).structure?.();
 
+                // Register the root form for array item direct binding
+                rootFormRegistry.registerRootForm(testForm);
+
                 const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
                   injector,
                   value: valueSignal,
@@ -518,7 +518,7 @@ describe('ArrayFieldComponent', () => {
                 return mockFieldSignalContext;
               });
             },
-            deps: [Injector],
+            deps: [Injector, RootFormRegistryService],
           },
         ],
       });
@@ -536,27 +536,35 @@ describe('ArrayFieldComponent', () => {
 
     it('should create field instances for array items with nested object structure', async () => {
       // This tests the key fix: arrays with objects like contacts: [{name: 'Alice', email: '...'}]
+      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'contacts',
         type: 'array',
         fields: [
-          {
-            key: 'row1',
-            type: 'row',
-            fields: [
-              { key: 'name', type: 'input', label: 'Name' },
-              { key: 'email', type: 'input', label: 'Email' },
-            ],
-          } as RowField<unknown>,
+          [
+            {
+              key: 'row1',
+              type: 'row',
+              fields: [
+                { key: 'name', type: 'input', label: 'Name', value: 'Alice' },
+                { key: 'email', type: 'input', label: 'Email', value: 'alice@example.com' },
+              ],
+            } as RowField<unknown>,
+          ],
+          [
+            {
+              key: 'row1',
+              type: 'row',
+              fields: [
+                { key: 'name', type: 'input', label: 'Name', value: 'Bob' },
+                { key: 'email', type: 'input', label: 'Email', value: 'bob@example.com' },
+              ],
+            } as RowField<unknown>,
+          ],
         ],
       };
 
-      const { component, fixture } = setupNestedObjectArrayTest(field, {
-        contacts: [
-          { name: 'Alice', email: 'alice@example.com' },
-          { name: 'Bob', email: 'bob@example.com' },
-        ],
-      });
+      const { component, fixture } = setupNestedObjectArrayTest(field);
 
       // Wait for async component loading
       const maxAttempts = 50;
@@ -574,24 +582,25 @@ describe('ArrayFieldComponent', () => {
     });
 
     it('should handle adding items to array with nested object structure', async () => {
+      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'contacts',
         type: 'array',
         fields: [
-          {
-            key: 'row1',
-            type: 'row',
-            fields: [
-              { key: 'name', type: 'input', label: 'Name' },
-              { key: 'email', type: 'input', label: 'Email' },
-            ],
-          } as RowField<unknown>,
+          [
+            {
+              key: 'row1',
+              type: 'row',
+              fields: [
+                { key: 'name', type: 'input', label: 'Name', value: 'Alice' },
+                { key: 'email', type: 'input', label: 'Email', value: 'alice@example.com' },
+              ],
+            } as RowField<unknown>,
+          ],
         ],
       };
 
-      const { component, fixture } = setupNestedObjectArrayTest(field, {
-        contacts: [{ name: 'Alice', email: 'alice@example.com' }],
-      });
+      const { component, fixture } = setupNestedObjectArrayTest(field);
 
       const eventBus = TestBed.inject(EventBus);
 
@@ -608,7 +617,7 @@ describe('ArrayFieldComponent', () => {
 
       expect(component.resolvedItems()).toHaveLength(1);
 
-      // Add another contact using row template (as array)
+      // Add another contact using row template (as array) - button templates remain FieldDef[]
       const rowTemplate: RowField<unknown> = {
         key: 'row1',
         type: 'row',
@@ -633,28 +642,45 @@ describe('ArrayFieldComponent', () => {
     });
 
     it('should handle removing items from array with nested object structure', async () => {
+      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'contacts',
         type: 'array',
         fields: [
-          {
-            key: 'row1',
-            type: 'row',
-            fields: [
-              { key: 'name', type: 'input', label: 'Name' },
-              { key: 'email', type: 'input', label: 'Email' },
-            ],
-          } as RowField<unknown>,
+          [
+            {
+              key: 'row1',
+              type: 'row',
+              fields: [
+                { key: 'name', type: 'input', label: 'Name', value: 'Alice' },
+                { key: 'email', type: 'input', label: 'Email', value: 'alice@example.com' },
+              ],
+            } as RowField<unknown>,
+          ],
+          [
+            {
+              key: 'row1',
+              type: 'row',
+              fields: [
+                { key: 'name', type: 'input', label: 'Name', value: 'Bob' },
+                { key: 'email', type: 'input', label: 'Email', value: 'bob@example.com' },
+              ],
+            } as RowField<unknown>,
+          ],
+          [
+            {
+              key: 'row1',
+              type: 'row',
+              fields: [
+                { key: 'name', type: 'input', label: 'Name', value: 'Charlie' },
+                { key: 'email', type: 'input', label: 'Email', value: 'charlie@example.com' },
+              ],
+            } as RowField<unknown>,
+          ],
         ],
       };
 
-      const { component, fixture } = setupNestedObjectArrayTest(field, {
-        contacts: [
-          { name: 'Alice', email: 'alice@example.com' },
-          { name: 'Bob', email: 'bob@example.com' },
-          { name: 'Charlie', email: 'charlie@example.com' },
-        ],
-      });
+      const { component, fixture } = setupNestedObjectArrayTest(field);
 
       const eventBus = TestBed.inject(EventBus);
 
@@ -689,15 +715,17 @@ describe('ArrayFieldComponent', () => {
 
     it('should create fields for array with simple input template', async () => {
       // Test simpler case: arrays with single input field as template (using object items)
+      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'emails',
         type: 'array',
-        fields: [{ key: 'email', type: 'input', label: 'Email' }],
+        fields: [
+          [{ key: 'email', type: 'input', label: 'Email', value: 'alice@example.com' }],
+          [{ key: 'email', type: 'input', label: 'Email', value: 'bob@example.com' }],
+        ],
       };
 
-      const { component, fixture } = setupNestedObjectArrayTest(field, {
-        emails: [{ email: 'alice@example.com' }, { email: 'bob@example.com' }],
-      });
+      const { component, fixture } = setupNestedObjectArrayTest(field);
 
       const maxAttempts = 50;
       let attempts = 0;
@@ -713,19 +741,11 @@ describe('ArrayFieldComponent', () => {
     });
 
     it('should handle empty nested object array gracefully', async () => {
+      // New structure: empty fields[] means no initial items
       const field: ArrayField<unknown> = {
         key: 'contacts',
         type: 'array',
-        fields: [
-          {
-            key: 'row1',
-            type: 'row',
-            fields: [
-              { key: 'name', type: 'input', label: 'Name' },
-              { key: 'email', type: 'input', label: 'Email' },
-            ],
-          } as RowField<unknown>,
-        ],
+        fields: [], // Empty - no initial items
       };
 
       const { component, fixture } = setupNestedObjectArrayTest(field, {

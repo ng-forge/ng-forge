@@ -115,6 +115,30 @@
       color: var(--example-result-text);
     }
   }
+
+  // ============================================
+  // ARRAY EXAMPLE-SPECIFIC STYLES
+  // ============================================
+  // Scoped styles for the array documentation example only.
+  // Apply class="array-example-form" to the form to opt-in.
+  .array-example-form {
+    // Add visual separation between array items
+    .df-array {
+      gap: $space-6;
+    }
+
+    // Row baseline alignment for buttons
+    [row-field] {
+      align-items: baseline !important;
+    }
+
+    // Consistent button sizing
+    button,
+    [class*='mat-mdc-button'],
+    .mdc-button {
+      min-width: 156px;
+    }
+  }
 }
 
 // ============================================
