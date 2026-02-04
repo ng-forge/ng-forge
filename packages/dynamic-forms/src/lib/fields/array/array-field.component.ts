@@ -440,6 +440,12 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     return of(undefined);
   }
 
+  /**
+   * Handles remove operations from events (pop, shift, removeAt).
+   * Updates resolvedItems FIRST, then form value - this ensures differential
+   * update sees "none" (lengths match) and avoids unnecessary recreates.
+   * Remaining items' linkedSignal indices auto-update via itemOrderSignal.
+   */
   private removeItem(index?: number): void {
     const arrayKey = this.field().key;
     const parentForm = this.parentFieldSignalContext.form;
@@ -455,10 +461,23 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     // Ignore out-of-bounds indices - they should be a no-op, not remove the last item
     if (removeIndex < 0 || removeIndex >= currentArray.length) return;
 
+    // Update resolvedItems FIRST - remove the item at the specified index.
+    // This ensures differential update sees "none" (lengths already match).
+    // Remaining items' linkedSignal indices auto-update via itemOrderSignal.
+    const removedItem = this.resolvedItemsSignal()[removeIndex];
+    if (removedItem) {
+      this.templateRegistry.delete(removedItem.id);
+    }
+    this.resolvedItemsSignal.update((current) => {
+      const newItems = [...current];
+      newItems.splice(removeIndex, 1);
+      return newItems;
+    });
+
+    // Update the parent form with the new array value
     const newArray = [...currentArray];
     newArray.splice(removeIndex, 1);
 
-    // Update the parent form with the new array value
     // The `as any` is required due to Angular Signal Forms' complex conditional types
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     parentForm().value.set({ ...currentValue, [arrayKey]: newArray } as any);

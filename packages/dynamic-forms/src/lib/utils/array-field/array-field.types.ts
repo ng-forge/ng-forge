@@ -57,7 +57,6 @@ export type DifferentialUpdateOperation =
   | { type: 'clear' }
   | { type: 'initial'; fieldTreesLength: number }
   | { type: 'append'; startIndex: number; endIndex: number }
-  | { type: 'pop'; newLength: number }
   | { type: 'recreate' }
   | { type: 'none' };
 
