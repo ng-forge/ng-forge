@@ -15,6 +15,7 @@ import {
   signal,
   Signal,
   untracked,
+  WritableSignal,
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { form, FieldTree, Schema } from '@angular/forms/signals';
@@ -74,6 +75,29 @@ function derivationOrchestratorFactoryWrapper(dynamicForm: DynamicForm) {
 }
 
 /**
+ * State for managing two-phase config transitions.
+ *
+ * When config changes and removes fields, old field components still hold cached
+ * references to FieldTree nodes. If we create the new form immediately, Angular
+ * Signal Forms throws NG01902 "Orphan field" errors when old components try to
+ * access their now-orphaned FieldTree nodes.
+ *
+ * Solution: Two-phase transition
+ * - Phase 1 (teardown): Hide old components with @if, allowing Angular to destroy them
+ * - Phase 2 (render): After destruction completes, create new form and render new components
+ */
+interface ConfigTransitionState<TFields extends RegisteredFieldTypes[]> {
+  /** The config currently being rendered */
+  activeConfig: FormConfig<TFields>;
+  /** The config waiting to be applied after teardown completes */
+  pendingConfig?: FormConfig<TFields>;
+  /** Current phase: 'render' shows components, 'teardown' hides them */
+  renderPhase: 'render' | 'teardown';
+  /** Form values preserved during transition to restore after applying new config */
+  preservedValue?: Record<string, unknown>;
+}
+
+/**
  * Dynamic form component that renders a complete form based on configuration.
  *
  * This is the main entry point for the dynamic form system. It handles form state management,
@@ -96,11 +120,13 @@ function derivationOrchestratorFactoryWrapper(dynamicForm: DynamicForm) {
   selector: 'form[dynamic-form]',
   imports: [NgComponentOutlet, PageOrchestratorComponent],
   template: `
-    @if (formModeDetection().mode === 'paged') {
-      <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="form()" [fieldSignalContext]="fieldSignalContext()"></div>
-    } @else {
-      @for (field of resolvedFields(); track field.key) {
-        <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+    @if (renderPhase() === 'render') {
+      @if (formModeDetection().mode === 'paged') {
+        <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="form()" [fieldSignalContext]="fieldSignalContext()"></div>
+      } @else {
+        @for (field of resolvedFields(); track field.key) {
+          <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+        }
       }
     }
   `,
@@ -112,14 +138,15 @@ function derivationOrchestratorFactoryWrapper(dynamicForm: DynamicForm) {
     RootFormRegistryService,
     FieldContextRegistryService,
     // Form-level config tokens provided via useFactory to enable reactive updates
+    // Uses activeConfig() to respect two-phase config transitions
     {
       provide: DEFAULT_PROPS,
-      useFactory: (form: DynamicForm) => computed(() => form.config().defaultProps),
+      useFactory: (form: DynamicForm) => computed(() => form.activeConfig().defaultProps),
       deps: [DynamicForm],
     },
     {
       provide: DEFAULT_VALIDATION_MESSAGES,
-      useFactory: (form: DynamicForm) => computed(() => form.config().defaultValidationMessages),
+      useFactory: (form: DynamicForm) => computed(() => form.activeConfig().defaultValidationMessages),
       deps: [DynamicForm],
     },
     {
@@ -129,7 +156,7 @@ function derivationOrchestratorFactoryWrapper(dynamicForm: DynamicForm) {
     },
     {
       provide: EXTERNAL_DATA,
-      useFactory: (form: DynamicForm) => computed(() => form.config().externalData),
+      useFactory: (form: DynamicForm) => computed(() => form.activeConfig().externalData),
       deps: [DynamicForm],
     },
     { provide: DERIVATION_WARNING_TRACKER, useFactory: createDerivationWarningTracker },
@@ -180,6 +207,62 @@ export class DynamicForm<
 
   /** Form values for two-way data binding. */
   value = model<Partial<TModel> | undefined>(undefined);
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Config Transition State (Two-Phase Rendering)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * State machine for managing config transitions.
+   *
+   * When config changes and removes fields, we need a two-phase approach:
+   * 1. Teardown: Hide old components BEFORE creating new form (prevents NG01902 orphan field errors)
+   * 2. Render: Create new form and render new components AFTER old ones are destroyed
+   *
+   * Note: preservedValue is set via effect, not in computation, to avoid signal cycles
+   * (formValue depends on form → formSetup → activeConfig → configTransition)
+   */
+  private readonly configTransition = linkedSignal<FormConfig<TFields>, ConfigTransitionState<TFields>>({
+    source: this.config,
+    computation: (newConfig, previous): ConfigTransitionState<TFields> => {
+      // First load - render immediately without teardown phase
+      if (previous === undefined) {
+        return { activeConfig: newConfig, renderPhase: 'render' };
+      }
+
+      const prevState = previous.value;
+
+      // If already in teardown phase, update pending config (latest wins for rapid changes)
+      if (prevState.renderPhase === 'teardown') {
+        return { ...prevState, pendingConfig: newConfig };
+      }
+
+      // Start teardown phase - preservedValue will be set by effect to avoid cycles
+      return {
+        activeConfig: prevState.activeConfig,
+        pendingConfig: newConfig,
+        renderPhase: 'teardown',
+      };
+    },
+  });
+
+  /** The currently active config used for form rendering */
+  readonly activeConfig = computed(() => this.configTransition().activeConfig);
+
+  /** Current render phase: 'render' = showing form, 'teardown' = hiding old components */
+  readonly renderPhase = computed(() => this.configTransition().renderPhase);
+
+  /**
+   * Value preserved during config transition, set when entering teardown phase.
+   * Stored separately to avoid signal cycles (formValue → form → formSetup → activeConfig → configTransition).
+   */
+  private readonly transitionPreservedValue = signal<Record<string, unknown> | undefined>(undefined);
+
+  /**
+   * Flag to track if the component is destroyed.
+   * Used to prevent afterNextRender callbacks from executing after destruction.
+   */
+  private isDestroyed = false;
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Memoized Functions
@@ -242,7 +325,7 @@ export class DynamicForm<
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
   readonly formModeDetection = computed<FormModeDetectionResult>(() => {
-    const config = this.config();
+    const config = this.activeConfig();
     const fields = config.fields || [];
     const detection = detectFormMode(fields);
     const validation = FormModeValidator.validateFormConfiguration(fields);
@@ -259,7 +342,7 @@ export class DynamicForm<
   });
 
   private readonly formSetup = computed(() => {
-    const config = this.config();
+    const config = this.activeConfig();
     const modeDetection = this.formModeDetection();
     const registry = this.rawFieldRegistry();
 
@@ -273,7 +356,7 @@ export class DynamicForm<
   });
 
   readonly pageFieldDefinitions = computed(() => {
-    const config = this.config();
+    const config = this.activeConfig();
     const mode = this.formModeDetection().mode;
 
     if (mode === 'paged' && config.fields) {
@@ -284,7 +367,7 @@ export class DynamicForm<
   });
 
   readonly effectiveFormOptions = computed(() => {
-    const config = this.config();
+    const config = this.activeConfig();
     const configOptions = config.options || {};
     const inputOptions = this.formOptions();
     return { ...configOptions, ...inputOptions };
@@ -643,6 +726,61 @@ export class DynamicForm<
         );
       }
     });
+
+    // Config transition effect: captures value when entering teardown, then applies new config
+    explicitEffect([this.configTransition], ([state]) => {
+      if (state.renderPhase === 'teardown' && state.pendingConfig) {
+        // Capture current form value when entering teardown phase
+        // Done here (not in linkedSignal computation) to avoid signal cycle
+        const currentValue = untracked(() => this.formValue());
+        this.transitionPreservedValue.set(currentValue as Record<string, unknown>);
+
+        // afterNextRender ensures old components are destroyed before we proceed
+        afterNextRender(
+          () => {
+            // Guard against execution after component destruction
+            if (this.isDestroyed) return;
+
+            const pendingConfig = state.pendingConfig!;
+            const preservedValue = this.transitionPreservedValue();
+
+            // Transition to render phase with new config
+            this.configTransition.set({
+              activeConfig: pendingConfig,
+              renderPhase: 'render',
+            });
+
+            // Restore preserved values for fields that still exist in the new config
+            if (preservedValue) {
+              afterNextRender(
+                () => {
+                  // Guard against execution after component destruction
+                  if (this.isDestroyed) return;
+
+                  const schemaFields = untracked(() => this.formSetup().schemaFields);
+                  if (schemaFields) {
+                    const validKeys = new Set(schemaFields.map((f) => f.key).filter(Boolean));
+                    const filtered: Record<string, unknown> = {};
+                    for (const [key, val] of Object.entries(preservedValue)) {
+                      if (validKeys.has(key)) {
+                        filtered[key] = val;
+                      }
+                    }
+                    if (Object.keys(filtered).length > 0) {
+                      this.value.update((current) => ({ ...current, ...filtered }) as Partial<TModel>);
+                    }
+                  }
+                  // Clear preserved value after restoration
+                  this.transitionPreservedValue.set(undefined);
+                },
+                { injector: this.injector },
+              );
+            }
+          },
+          { injector: this.injector },
+        );
+      }
+    });
   }
 
   private setupEventHandlers(): void {
@@ -742,6 +880,7 @@ export class DynamicForm<
   // ─────────────────────────────────────────────────────────────────────────────
 
   ngOnDestroy(): void {
+    this.isDestroyed = true;
     this.rootFormRegistry.unregisterForm();
   }
 }

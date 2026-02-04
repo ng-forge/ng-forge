@@ -1645,6 +1645,178 @@ describe('DynamicFormComponent', () => {
     });
   });
 
+  describe('Two-Phase Config Transition', () => {
+    // Note: The "removing fields" scenario is tested in E2E tests (essential-tests.spec.ts)
+    // because unit tests have timing issues with afterNextRender callbacks during TestBed teardown.
+    // The E2E tests verify:
+    // - "removing fields at runtime works without NG01902 error"
+    // - "rapid config changes settle to final config"
+    // These pass on all browsers including Firefox.
+
+    it('should preserve values for fields that remain after adding a field', async () => {
+      // This test verifies value preservation by ADDING a field (simpler case)
+      // rather than removing, to avoid test timing issues
+      const initialConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            value: 'John',
+          },
+          {
+            key: 'lastName',
+            type: 'input',
+            label: 'Last Name',
+            value: 'Doe',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(initialConfig);
+      await waitForDynamicComponents(fixture);
+
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        lastName: 'Doe',
+      });
+
+      // Update value programmatically
+      fixture.componentRef.setInput('value', {
+        firstName: 'Jane',
+        lastName: 'Smith',
+      });
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({
+        firstName: 'Jane',
+        lastName: 'Smith',
+      });
+
+      // Add an email field (existing fields should preserve values)
+      const newConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            value: '', // Default is empty but preserved value should win
+          },
+          {
+            key: 'lastName',
+            type: 'input',
+            label: 'Last Name',
+            value: '',
+          },
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            value: 'new@example.com',
+          },
+        ],
+      };
+
+      fixture.componentRef.setInput('dynamic-form', newConfig);
+      await delay();
+      fixture.detectChanges();
+      await delay();
+      fixture.detectChanges();
+      await delay();
+      fixture.detectChanges();
+      await delay();
+      fixture.detectChanges();
+
+      // Values for existing fields should be preserved
+      const formValue = component.formValue();
+      expect(formValue['firstName']).toBe('Jane');
+      expect(formValue['lastName']).toBe('Smith');
+      // New field gets its default value
+      expect(formValue['email']).toBe('new@example.com');
+    });
+
+    it('should handle rapid config changes (latest wins)', async () => {
+      const config1: TestFormConfig = {
+        fields: [{ key: 'fieldA', type: 'input', label: 'A', value: 'a' }],
+      };
+
+      const { component, fixture } = createComponent(config1);
+      await waitForDynamicComponents(fixture);
+      expect(component.formValue()).toEqual({ fieldA: 'a' });
+
+      // Rapid successive config changes
+      const config2: TestFormConfig = {
+        fields: [{ key: 'fieldB', type: 'input', label: 'B', value: 'b' }],
+      };
+
+      const config3: TestFormConfig = {
+        fields: [{ key: 'fieldC', type: 'input', label: 'C', value: 'c' }],
+      };
+
+      // Fire them rapidly
+      fixture.componentRef.setInput('dynamic-form', config2);
+      fixture.detectChanges();
+      fixture.componentRef.setInput('dynamic-form', config3);
+      fixture.detectChanges();
+
+      // Wait for transitions to complete
+      await delay();
+      fixture.detectChanges();
+      await delay();
+      fixture.detectChanges();
+      await delay();
+      fixture.detectChanges();
+
+      // Should end up with the last config (config3)
+      expect(component.formValue()).toEqual({ fieldC: 'c' });
+    });
+
+    it('should skip teardown on first load', async () => {
+      const config: TestFormConfig = {
+        fields: [{ key: 'firstName', type: 'input', label: 'First Name', value: 'John' }],
+      };
+
+      const { component, fixture } = createComponent(config);
+
+      // On first load, renderPhase should be 'render' immediately
+      expect(component.renderPhase()).toBe('render');
+
+      await waitForDynamicComponents(fixture);
+
+      expect(component.formValue()).toEqual({ firstName: 'John' });
+    });
+
+    it('should transition through phases when config changes', async () => {
+      const config1: TestFormConfig = {
+        fields: [{ key: 'fieldA', type: 'input', label: 'A', value: 'a' }],
+      };
+
+      const { component, fixture } = createComponent(config1);
+      await waitForDynamicComponents(fixture);
+      expect(component.renderPhase()).toBe('render');
+
+      const config2: TestFormConfig = {
+        fields: [{ key: 'fieldB', type: 'input', label: 'B', value: 'b' }],
+      };
+
+      fixture.componentRef.setInput('dynamic-form', config2);
+      fixture.detectChanges();
+
+      // Wait for transition to complete (goes through teardown → render)
+      await delay();
+      fixture.detectChanges();
+      await delay();
+      fixture.detectChanges();
+      await delay();
+      fixture.detectChanges();
+
+      // Should be back to render phase with new config applied
+      expect(component.renderPhase()).toBe('render');
+      expect(component.formValue()).toEqual({ fieldB: 'b' });
+    });
+  });
+
   describe('Row and Group Field Support', () => {
     it('should handle row definitions with multiple child definitions', async () => {
       const config: TestFormConfig = {
