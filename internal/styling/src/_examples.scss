@@ -127,6 +127,55 @@
   }
 
   // ============================================
+  // ROW FIELD STYLING OVERRIDES
+  // ============================================
+  // Example-specific row layout adjustments for better visual alignment
+
+  df-row {
+    // Use baseline alignment for better button/input vertical alignment
+    align-items: baseline;
+
+    // Children share available space equally unless col class specified
+    > *:not([class*='df-col-']) {
+      flex: 1 1 0;
+      min-width: 0; // Allow shrinking below content size
+    }
+
+    // Auto-size column - use natural content width (for buttons side by side)
+    > .df-col-auto {
+      flex: 0 0 auto;
+      width: auto;
+    }
+  }
+
+  // Responsive behavior - stack on tablet and below (768px)
+  // Using 768px because example container is 600px max-width
+  @media (max-width: 768px) {
+    df-row:not(.df-row-mobile-keep-cols) {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: flex-start;
+
+      > * {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        max-width: 100% !important;
+      }
+    }
+
+    // Opt-in: keep side-by-side on mobile
+    df-row.df-row-mobile-keep-cols {
+      flex-direction: row;
+      flex-wrap: wrap;
+
+      > *:not([class*='df-col-']) {
+        flex: 0 0 auto !important;
+        max-width: none !important;
+      }
+    }
+  }
+
+  // ============================================
   // FORM BUTTON STYLING
   // ============================================
   // Consistent button sizing across all form buttons
