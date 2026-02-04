@@ -7,11 +7,30 @@ const config = {
       key: 'items',
       type: 'array',
       fields: [
-        {
-          key: 'value',
-          type: 'input',
-          label: 'Value',
-        },
+        [
+          {
+            key: 'value',
+            type: 'input',
+            label: 'Value',
+            value: 'First',
+          },
+        ],
+        [
+          {
+            key: 'value',
+            type: 'input',
+            label: 'Value',
+            value: 'Second',
+          },
+        ],
+        [
+          {
+            key: 'value',
+            type: 'input',
+            label: 'Value',
+            value: 'Third',
+          },
+        ],
       ],
     },
     {
@@ -51,7 +70,4 @@ export const arrayRemoveAtIndexScenario: TestScenario = {
   title: 'Remove at Specific Index',
   description: 'Remove items at specific positions using RemoveAtIndexEvent',
   config,
-  initialValue: {
-    items: [{ value: 'First' }, { value: 'Second' }, { value: 'Third' }],
-  },
 };

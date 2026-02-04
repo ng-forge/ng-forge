@@ -7,11 +7,22 @@ const config = {
       key: 'items',
       type: 'array',
       fields: [
-        {
-          key: 'value',
-          type: 'input',
-          label: 'Value',
-        },
+        [
+          {
+            key: 'value',
+            type: 'input',
+            label: 'Value',
+            value: 'First',
+          },
+        ],
+        [
+          {
+            key: 'value',
+            type: 'input',
+            label: 'Value',
+            value: 'Third',
+          },
+        ],
       ],
     },
     {
@@ -41,7 +52,4 @@ export const arrayInsertAtIndexScenario: TestScenario = {
   title: 'Insert at Specific Index',
   description: 'Insert new items at specific positions using insertArrayItem button',
   config,
-  initialValue: {
-    items: [{ value: 'First' }, { value: 'Third' }],
-  },
 };

@@ -26,7 +26,74 @@ const config = {
     {
       key: 'tasks',
       type: 'array',
-      fields: [removeButtonTemplate],
+      fields: [
+        [
+          {
+            key: 'taskRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'title',
+                type: 'input',
+                label: 'Task Title',
+                col: 8,
+                value: 'Task 1',
+              },
+              {
+                key: 'removeThis',
+                type: 'removeArrayItem',
+                label: 'Remove',
+                col: 4,
+                props: { color: 'warn' },
+              },
+            ],
+          },
+        ],
+        [
+          {
+            key: 'taskRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'title',
+                type: 'input',
+                label: 'Task Title',
+                col: 8,
+                value: 'Task 2',
+              },
+              {
+                key: 'removeThis',
+                type: 'removeArrayItem',
+                label: 'Remove',
+                col: 4,
+                props: { color: 'warn' },
+              },
+            ],
+          },
+        ],
+        [
+          {
+            key: 'taskRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'title',
+                type: 'input',
+                label: 'Task Title',
+                col: 8,
+                value: 'Task 3',
+              },
+              {
+                key: 'removeThis',
+                type: 'removeArrayItem',
+                label: 'Remove',
+                col: 4,
+                props: { color: 'warn' },
+              },
+            ],
+          },
+        ],
+      ],
     },
     {
       key: 'addTask',
@@ -44,7 +111,4 @@ export const arrayFocusAfterRemoveScenario: TestScenario = {
   title: 'Focus After Remove',
   description: 'Verify focus does not get lost when removing array items',
   config,
-  initialValue: {
-    tasks: [{ title: 'Task 1' }, { title: 'Task 2' }, { title: 'Task 3' }],
-  },
 };

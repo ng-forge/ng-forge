@@ -11,31 +11,35 @@ const config = {
       key: 'members',
       type: 'array',
       fields: [
-        {
-          key: 'memberRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'member',
-              type: 'group',
-              fields: [
-                {
-                  key: 'name',
-                  type: 'input',
-                  label: 'Name',
-                  required: true,
-                },
-                {
-                  key: 'email',
-                  type: 'input',
-                  label: 'Email',
-                  required: true,
-                  email: true,
-                },
-              ],
-            },
-          ],
-        },
+        [
+          {
+            key: 'memberRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'member',
+                type: 'group',
+                fields: [
+                  {
+                    key: 'name',
+                    type: 'input',
+                    label: 'Name',
+                    required: true,
+                    value: '',
+                  },
+                  {
+                    key: 'email',
+                    type: 'input',
+                    label: 'Email',
+                    required: true,
+                    email: true,
+                    value: '',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       ],
     },
     {
@@ -80,7 +84,4 @@ export const arrayItemValidationScenario: TestScenario = {
   title: 'Item Validation',
   description: 'Test validation rules on array item fields',
   config,
-  initialValue: {
-    members: [{ member: { name: '', email: '' } }], // Start with one empty item (group key preserved)
-  },
 };

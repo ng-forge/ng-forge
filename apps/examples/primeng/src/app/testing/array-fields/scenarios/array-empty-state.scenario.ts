@@ -6,18 +6,7 @@ const config = {
     {
       key: 'items',
       type: 'array',
-      fields: [
-        {
-          key: 'name',
-          type: 'input',
-          label: 'Name',
-        },
-        {
-          key: 'description',
-          type: 'textarea',
-          label: 'Description',
-        },
-      ],
+      fields: [],
     },
     {
       key: 'addItem',
@@ -53,7 +42,4 @@ export const arrayEmptyStateScenario: TestScenario = {
   title: 'Empty Array State',
   description: 'Test behavior when array starts empty or becomes empty',
   config,
-  initialValue: {
-    items: [], // Start with empty array
-  },
 };

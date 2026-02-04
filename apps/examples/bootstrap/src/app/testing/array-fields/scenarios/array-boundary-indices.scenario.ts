@@ -7,11 +7,8 @@ const config = {
       key: 'items',
       type: 'array',
       fields: [
-        {
-          key: 'value',
-          type: 'input',
-          label: 'Value',
-        },
+        [{ key: 'value', type: 'input', label: 'Value', value: 'First' }],
+        [{ key: 'value', type: 'input', label: 'Value', value: 'Second' }],
       ],
     },
     {
@@ -54,7 +51,4 @@ export const arrayBoundaryIndicesScenario: TestScenario = {
   title: 'Boundary Index Handling',
   description: 'Test behavior when using out-of-bounds indices for insert/remove operations',
   config,
-  initialValue: {
-    items: [{ value: 'First' }, { value: 'Second' }],
-  },
 };

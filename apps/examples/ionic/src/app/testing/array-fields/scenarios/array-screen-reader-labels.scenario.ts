@@ -7,30 +7,62 @@ const config = {
       key: 'contacts',
       type: 'array',
       fields: [
-        {
-          key: 'contactRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'contact',
-              type: 'group',
-              fields: [
-                {
-                  key: 'name',
-                  type: 'input',
-                  label: 'Contact Name',
-                  col: 6,
-                },
-                {
-                  key: 'phone',
-                  type: 'input',
-                  label: 'Phone Number',
-                  col: 6,
-                },
-              ],
-            },
-          ],
-        },
+        [
+          {
+            key: 'contactRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'contact',
+                type: 'group',
+                fields: [
+                  {
+                    key: 'name',
+                    type: 'input',
+                    label: 'Contact Name',
+                    col: 6,
+                    value: 'Alice',
+                  },
+                  {
+                    key: 'phone',
+                    type: 'input',
+                    label: 'Phone Number',
+                    col: 6,
+                    value: '555-0001',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        [
+          {
+            key: 'contactRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'contact',
+                type: 'group',
+                fields: [
+                  {
+                    key: 'name',
+                    type: 'input',
+                    label: 'Contact Name',
+                    col: 6,
+                    value: 'Bob',
+                  },
+                  {
+                    key: 'phone',
+                    type: 'input',
+                    label: 'Phone Number',
+                    col: 6,
+                    value: '555-0002',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       ],
     },
     {
@@ -81,7 +113,4 @@ export const arrayScreenReaderLabelsScenario: TestScenario = {
   title: 'Screen Reader Labels',
   description: 'Test ARIA attributes and screen reader accessibility for array fields',
   config,
-  initialValue: {
-    contacts: [{ contact: { name: 'Alice', phone: '555-0001' } }, { contact: { name: 'Bob', phone: '555-0002' } }],
-  },
 };

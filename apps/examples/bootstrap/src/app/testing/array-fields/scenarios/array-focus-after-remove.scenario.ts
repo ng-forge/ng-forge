@@ -21,12 +21,34 @@ const removeButtonTemplate = {
   ],
 } as const;
 
+const createTask = (title: string) =>
+  ({
+    key: 'taskRow',
+    type: 'row',
+    fields: [
+      {
+        key: 'title',
+        type: 'input',
+        label: 'Task Title',
+        col: 8,
+        value: title,
+      },
+      {
+        key: 'removeThis',
+        type: 'removeArrayItem',
+        label: 'Remove',
+        col: 4,
+        props: { variant: 'danger' },
+      },
+    ],
+  }) as const;
+
 const config = {
   fields: [
     {
       key: 'tasks',
       type: 'array',
-      fields: [removeButtonTemplate],
+      fields: [[createTask('Task 1')], [createTask('Task 2')], [createTask('Task 3')]],
     },
     {
       key: 'addTask',
@@ -44,7 +66,4 @@ export const arrayFocusAfterRemoveScenario: TestScenario = {
   title: 'Focus After Remove',
   description: 'Verify focus does not get lost when removing array items',
   config,
-  initialValue: {
-    tasks: [{ title: 'Task 1' }, { title: 'Task 2' }, { title: 'Task 3' }],
-  },
 };

@@ -7,21 +7,20 @@ const config = {
       key: 'tasks',
       type: 'array',
       fields: [
-        {
-          key: 'title',
-          type: 'input',
-          label: 'Task Title',
-        },
-        {
-          key: 'priority',
-          type: 'select',
-          label: 'Priority',
-          options: [
-            { value: 'low', label: 'Low' },
-            { value: 'medium', label: 'Medium' },
-            { value: 'high', label: 'High' },
-          ],
-        },
+        [
+          { key: 'title', type: 'input', label: 'Task Title', value: 'Existing Task' },
+          {
+            key: 'priority',
+            type: 'select',
+            label: 'Priority',
+            options: [
+              { value: 'low', label: 'Low' },
+              { value: 'medium', label: 'Medium' },
+              { value: 'high', label: 'High' },
+            ],
+            value: 'medium',
+          },
+        ],
       ],
     },
     {
@@ -56,7 +55,4 @@ export const arrayFocusAfterAddScenario: TestScenario = {
   title: 'Focus After Add',
   description: 'Verify focus management when adding new array items',
   config,
-  initialValue: {
-    tasks: [{ title: 'Existing Task', priority: 'medium' }],
-  },
 };

@@ -73,30 +73,35 @@ const config = {
       key: 'addresses',
       type: 'array',
       fields: [
-        {
-          key: 'addressRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'street',
-              type: 'input',
-              label: 'Street',
-              col: 6,
-            },
-            {
-              key: 'city',
-              type: 'input',
-              label: 'City',
-              col: 3,
-            },
-            {
-              key: 'zip',
-              type: 'input',
-              label: 'ZIP',
-              col: 3,
-            },
-          ],
-        },
+        [
+          {
+            key: 'addressRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'street',
+                type: 'input',
+                label: 'Street',
+                col: 6,
+                value: '',
+              },
+              {
+                key: 'city',
+                type: 'input',
+                label: 'City',
+                col: 3,
+                value: '',
+              },
+              {
+                key: 'zip',
+                type: 'input',
+                label: 'ZIP',
+                col: 3,
+                value: '',
+              },
+            ],
+          },
+        ],
       ],
     },
     {
@@ -151,6 +156,5 @@ export const comprehensiveValidationScenario: TestScenario = {
       firstName: '',
       lastName: '',
     },
-    addresses: [{ street: '', city: '', zip: '' }],
   },
 };

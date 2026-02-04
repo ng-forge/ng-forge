@@ -1,37 +1,40 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
+const createContact = (name: string, phone: string) =>
+  ({
+    key: 'contactRow',
+    type: 'row',
+    fields: [
+      {
+        key: 'contact',
+        type: 'group',
+        fields: [
+          {
+            key: 'name',
+            type: 'input',
+            label: 'Contact Name',
+            col: 6,
+            value: name,
+          },
+          {
+            key: 'phone',
+            type: 'input',
+            label: 'Phone Number',
+            col: 6,
+            value: phone,
+          },
+        ],
+      },
+    ],
+  }) as const;
+
 const config = {
   fields: [
     {
       key: 'contacts',
       type: 'array',
-      fields: [
-        {
-          key: 'contactRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'contact',
-              type: 'group',
-              fields: [
-                {
-                  key: 'name',
-                  type: 'input',
-                  label: 'Contact Name',
-                  col: 6,
-                },
-                {
-                  key: 'phone',
-                  type: 'input',
-                  label: 'Phone Number',
-                  col: 6,
-                },
-              ],
-            },
-          ],
-        },
-      ],
+      fields: [[createContact('Alice', '555-0001')], [createContact('Bob', '555-0002')]],
     },
     {
       key: 'addContact',
@@ -81,7 +84,4 @@ export const arrayScreenReaderLabelsScenario: TestScenario = {
   title: 'Screen Reader Labels',
   description: 'Test ARIA attributes and screen reader accessibility for array fields',
   config,
-  initialValue: {
-    contacts: [{ contact: { name: 'Alice', phone: '555-0001' } }, { contact: { name: 'Bob', phone: '555-0002' } }],
-  },
 };

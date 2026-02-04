@@ -7,11 +7,14 @@ const config = {
       key: 'items',
       type: 'array',
       fields: [
-        {
-          key: 'value',
-          type: 'input',
-          label: 'Item',
-        },
+        [
+          {
+            key: 'value',
+            type: 'input',
+            label: 'Item',
+            value: 'Initial',
+          },
+        ],
       ],
     },
     {
@@ -37,7 +40,4 @@ export const arrayRapidOperationsScenario: TestScenario = {
   title: 'Rapid Operations Stress Test',
   description: 'Test rapid-fire add/remove operations to verify no race conditions occur',
   config,
-  initialValue: {
-    items: [{ value: 'Initial' }],
-  },
 };

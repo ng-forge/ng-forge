@@ -7,12 +7,15 @@ const config = {
       key: 'emails',
       type: 'array',
       fields: [
-        {
-          key: 'email',
-          type: 'input',
-          label: 'Email',
-          props: { type: 'email' },
-        },
+        [
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            props: { type: 'email' },
+            value: '',
+          },
+        ],
       ],
     },
     {
@@ -32,7 +35,4 @@ export const arrayAddScenario: TestScenario = {
   title: 'Add Array Items',
   description: 'Add new email addresses to the array field',
   config,
-  initialValue: {
-    emails: [{ email: '' }], // Start with one empty item so add button is visible
-  },
 };

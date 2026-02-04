@@ -14,42 +14,90 @@ const config = {
       key: 'lineItems',
       type: 'array',
       fields: [
-        {
-          key: 'itemRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'description',
-              type: 'input',
-              label: 'Description',
-              col: 4,
-            },
-            {
-              key: 'quantity',
-              type: 'input',
-              label: 'Quantity',
-              props: { type: 'number' },
-              col: 2,
-            },
-            {
-              key: 'unitPrice',
-              type: 'input',
-              label: 'Unit Price',
-              props: { type: 'number' },
-              col: 2,
-            },
-            {
-              key: 'lineTotal',
-              type: 'input',
-              label: 'Line Total',
-              readonly: true,
-              col: 4,
-              // Self-targeting derivation: lineTotal is derived from quantity * unitPrice
-              // formValue is scoped to the current array item
-              derivation: 'formValue.quantity * formValue.unitPrice',
-            },
-          ],
-        },
+        [
+          {
+            key: 'itemRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'description',
+                type: 'input',
+                label: 'Description',
+                col: 4,
+                value: 'Product A',
+              },
+              {
+                key: 'quantity',
+                type: 'input',
+                label: 'Quantity',
+                props: { type: 'number' },
+                col: 2,
+                value: 2,
+              },
+              {
+                key: 'unitPrice',
+                type: 'input',
+                label: 'Unit Price',
+                props: { type: 'number' },
+                col: 2,
+                value: 50,
+              },
+              {
+                key: 'lineTotal',
+                type: 'input',
+                label: 'Line Total',
+                readonly: true,
+                col: 4,
+                props: { type: 'number' },
+                // Self-targeting derivation: lineTotal is derived from quantity * unitPrice
+                // formValue is scoped to the current array item
+                derivation: 'formValue.quantity * formValue.unitPrice',
+                value: 100,
+              },
+            ],
+          },
+        ],
+        [
+          {
+            key: 'itemRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'description',
+                type: 'input',
+                label: 'Description',
+                col: 4,
+                value: 'Product B',
+              },
+              {
+                key: 'quantity',
+                type: 'input',
+                label: 'Quantity',
+                props: { type: 'number' },
+                col: 2,
+                value: 3,
+              },
+              {
+                key: 'unitPrice',
+                type: 'input',
+                label: 'Unit Price',
+                props: { type: 'number' },
+                col: 2,
+                value: 30,
+              },
+              {
+                key: 'lineTotal',
+                type: 'input',
+                label: 'Line Total',
+                readonly: true,
+                col: 4,
+                props: { type: 'number' },
+                derivation: 'formValue.quantity * formValue.unitPrice',
+                value: 90,
+              },
+            ],
+          },
+        ],
       ],
     },
     {
@@ -88,6 +136,7 @@ const config = {
               label: 'Line Total',
               readonly: true,
               col: 4,
+              props: { type: 'number' },
               derivation: 'formValue.quantity * formValue.unitPrice',
             },
           ],
@@ -122,9 +171,5 @@ export const arrayFieldDerivationScenario: TestScenario = {
   config,
   initialValue: {
     invoiceNumber: 'INV-001',
-    lineItems: [
-      { description: 'Product A', quantity: 2, unitPrice: 50, lineTotal: 100 },
-      { description: 'Product B', quantity: 3, unitPrice: 30, lineTotal: 90 },
-    ],
   },
 };

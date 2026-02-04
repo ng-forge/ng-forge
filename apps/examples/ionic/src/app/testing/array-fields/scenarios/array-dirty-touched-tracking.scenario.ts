@@ -7,17 +7,21 @@ const config = {
       key: 'entries',
       type: 'array',
       fields: [
-        {
-          key: 'name',
-          type: 'input',
-          label: 'Entry Name',
-          required: true,
-        },
-        {
-          key: 'value',
-          type: 'input',
-          label: 'Entry Value',
-        },
+        [
+          {
+            key: 'name',
+            type: 'input',
+            label: 'Entry Name',
+            required: true,
+            value: 'Initial Entry',
+          },
+          {
+            key: 'value',
+            type: 'input',
+            label: 'Entry Value',
+            value: 'Initial Value',
+          },
+        ],
       ],
     },
     {
@@ -55,7 +59,4 @@ export const arrayDirtyTouchedTrackingScenario: TestScenario = {
   title: 'Dirty/Touched State Tracking',
   description: 'Verify form dirty and touched states propagate correctly through array operations',
   config,
-  initialValue: {
-    entries: [{ name: 'Initial Entry', value: 'Initial Value' }],
-  },
 };

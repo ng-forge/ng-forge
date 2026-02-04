@@ -112,7 +112,37 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
   }
 
   if (field.type === 'array') {
-    return [];
+    // With the new fields[][] structure, extract initial values from each item template
+    const arrayField = field as { fields?: readonly (readonly FieldDef<unknown>[])[] };
+    const itemTemplates = arrayField.fields;
+
+    if (!itemTemplates || itemTemplates.length === 0) {
+      return [];
+    }
+
+    // Each item template is an array of fields that define one array item
+    return itemTemplates.map((itemFields) => {
+      let itemValue: Record<string, unknown> = {};
+
+      for (const templateField of itemFields) {
+        const fieldValue = getFieldDefaultValue(templateField, registry);
+        const valueHandling = getFieldValueHandling(templateField.type, registry);
+
+        if (templateField.type === 'group' && 'key' in templateField && templateField.key) {
+          // Groups wrap their value under the group key
+          itemValue[templateField.key] = fieldValue;
+        } else if (templateField.type === 'row') {
+          // Rows flatten their fields directly
+          if (fieldValue && typeof fieldValue === 'object') {
+            itemValue = { ...itemValue, ...(fieldValue as Record<string, unknown>) };
+          }
+        } else if (valueHandling === 'include' && 'key' in templateField && templateField.key) {
+          itemValue[templateField.key] = fieldValue;
+        }
+      }
+
+      return itemValue;
+    });
   }
 
   // Number inputs need a number type default for Angular signal forms

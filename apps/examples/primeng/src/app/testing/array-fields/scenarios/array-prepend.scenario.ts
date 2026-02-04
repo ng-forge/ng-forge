@@ -7,11 +7,22 @@ const config = {
       key: 'items',
       type: 'array',
       fields: [
-        {
-          key: 'value',
-          type: 'input',
-          label: 'Value',
-        },
+        [
+          {
+            key: 'value',
+            type: 'input',
+            label: 'Value',
+            value: 'First',
+          },
+        ],
+        [
+          {
+            key: 'value',
+            type: 'input',
+            label: 'Value',
+            value: 'Second',
+          },
+        ],
       ],
     },
     {
@@ -39,7 +50,4 @@ export const arrayPrependScenario: TestScenario = {
   title: 'Prepend Array Items',
   description: 'Add new items at the beginning of the array using prependArrayItem button',
   config,
-  initialValue: {
-    items: [{ value: 'First' }, { value: 'Second' }],
-  },
 };

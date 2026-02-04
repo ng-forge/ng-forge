@@ -286,10 +286,16 @@ export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleCompone
 /**
  * Creates a simple test field definition
  */
-export function createSimpleTestField(key: string, label: string): FieldDef<unknown> {
-  return {
+export function createSimpleTestField(key: string, label: string, value?: unknown): FieldDef<unknown> {
+  const field: FieldDef<unknown> = {
     key,
     type: 'test',
     label,
   };
+
+  if (value !== undefined) {
+    (field as FieldDef<unknown> & { value: unknown }).value = value;
+  }
+
+  return field;
 }

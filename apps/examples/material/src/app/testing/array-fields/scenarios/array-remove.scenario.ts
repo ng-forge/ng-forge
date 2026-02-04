@@ -7,11 +7,22 @@ const config = {
       key: 'phones',
       type: 'array',
       fields: [
-        {
-          key: 'phone',
-          type: 'input',
-          label: 'Phone',
-        },
+        [
+          {
+            key: 'phone',
+            type: 'input',
+            label: 'Phone',
+            value: '555-0001',
+          },
+        ],
+        [
+          {
+            key: 'phone',
+            type: 'input',
+            label: 'Phone',
+            value: '555-0002',
+          },
+        ],
       ],
     },
     {
@@ -29,7 +40,4 @@ export const arrayRemoveScenario: TestScenario = {
   title: 'Remove Array Items',
   description: 'Remove phone numbers from the array field',
   config,
-  initialValue: {
-    phones: [{ phone: '555-0001' }, { phone: '555-0002' }],
-  },
 };

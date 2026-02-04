@@ -234,26 +234,45 @@ function applyFieldState(fieldDef: FieldDef<unknown>, path: SchemaPath<unknown>)
 /**
  * Maps an array field to the form schema using applyEach.
  *
- * Array items can contain multiple sibling template field definitions.
- * applyEach creates proper FieldTree structure for each array item.
+ * With the new fields[][] structure:
+ * - Each outer array element (fields[i]) defines one array item's field structure
+ * - Items can have different field configurations (heterogeneous arrays)
+ * - We create a superset schema covering all possible fields across all item templates
  *
  * Supports:
- * - Single field templates (e.g., { key: 'name', type: 'input' })
- * - Multiple sibling fields (e.g., [{ key: 'name' }, { key: 'email' }])
+ * - Empty arrays (fields: []) - no initial items, add via buttons
+ * - Homogeneous items (all items have same structure)
+ * - Heterogeneous items (items have different field configurations)
+ * - Multiple sibling fields per item
  * - Container templates (row, group, page) that wrap children
  */
 function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchemaPath): void {
-  if (!isArrayField(arrayField) || !arrayField.fields?.length) {
+  if (!isArrayField(arrayField)) {
     return;
   }
 
-  const templateFields = arrayField.fields as FieldDef<unknown>[];
+  // New structure: fields is FieldDef[][]
+  const itemTemplates = arrayField.fields as readonly (readonly FieldDef<unknown>[])[];
+
+  // Empty array is valid - items will be added via buttons with their own templates
+  // Create a minimal schema that just accepts any object
+  if (!itemTemplates || itemTemplates.length === 0) {
+    const emptyItemSchema = schema<Record<string, unknown>>(() => {
+      // No fields to map - items will be added dynamically via buttons
+    });
+    applyEach(fieldPath as SchemaPath<Record<string, unknown>[]>, emptyItemSchema);
+    return;
+  }
+
+  // Collect all unique field definitions across all item templates
+  // This creates a superset schema that can validate any item structure
+  const allTemplateFields = collectAllTemplateFields(itemTemplates);
 
   const itemSchema = schema<Record<string, unknown>>((itemPath) => {
     const pathRecord = itemPath as Record<string, AnySchemaPath>;
 
-    // Map ALL template fields (supports multiple sibling fields)
-    for (const templateField of templateFields) {
+    // Map ALL unique template fields from all items
+    for (const templateField of allTemplateFields) {
       if (isRowField(templateField) || isPageField(templateField)) {
         // Row/page templates flatten their children
         mapContainerChildren(templateField.fields as FieldDef<unknown>[] | undefined, itemPath);
@@ -273,9 +292,9 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
         // Simple field template - get the specific field's path
         const fieldKey = templateField.key;
         if (fieldKey) {
-          const fieldPath = pathRecord[fieldKey];
-          if (fieldPath) {
-            mapFieldToForm(templateField, fieldPath);
+          const fieldPathForKey = pathRecord[fieldKey];
+          if (fieldPathForKey) {
+            mapFieldToForm(templateField, fieldPathForKey);
           }
         }
       }
@@ -283,4 +302,36 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
   });
 
   applyEach(fieldPath as SchemaPath<Record<string, unknown>[]>, itemSchema);
+}
+
+/**
+ * Collects all unique field definitions across all item templates.
+ * Uses field key as the uniqueness identifier.
+ * When the same key appears in multiple templates, uses the first occurrence.
+ */
+function collectAllTemplateFields(itemTemplates: readonly (readonly FieldDef<unknown>[])[]): FieldDef<unknown>[] {
+  const seenKeys = new Set<string>();
+  const allFields: FieldDef<unknown>[] = [];
+
+  for (const itemFields of itemTemplates) {
+    for (const field of itemFields) {
+      // For row/page fields, we need to collect their children's keys
+      if (isRowField(field) || isPageField(field)) {
+        // Use a synthetic key for container fields to dedupe them
+        const containerKey = `__container_${field.type}_${JSON.stringify(field.fields?.map((f) => f.key))}`;
+        if (!seenKeys.has(containerKey)) {
+          seenKeys.add(containerKey);
+          allFields.push(field);
+        }
+      } else {
+        const key = field.key;
+        if (key && !seenKeys.has(key)) {
+          seenKeys.add(key);
+          allFields.push(field);
+        }
+      }
+    }
+  }
+
+  return allFields;
 }

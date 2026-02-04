@@ -3,7 +3,7 @@ import { NgComponentOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { ArrayField } from '../../definitions/default/array-field';
+import { ArrayField, ArrayItemTemplate } from '../../definitions/default/array-field';
 import { isGroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldTree } from '@angular/forms/signals';
@@ -78,10 +78,13 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
-  /** All field templates for array items (supports multiple sibling fields). */
-  private readonly fieldTemplates = computed<FieldDef<unknown>[]>(() => {
+  /**
+   * Gets the item templates (field definitions) for the array.
+   * Each element is an array of fields that define one array item's structure.
+   */
+  private readonly itemTemplates = computed<ArrayItemTemplate[]>(() => {
     const arrayField = this.field();
-    return (arrayField.fields as FieldDef<unknown>[]) || [];
+    return (arrayField.fields as ArrayItemTemplate[]) || [];
   });
 
   private readonly arrayFieldTrees = computed<readonly (FieldTree<unknown> | null)[]>(() => {
@@ -142,8 +145,9 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         if (action.action === 'add') {
           if (!action.template || action.template.length === 0) {
             this.logger.error(
-              `Cannot add item to array '${this.key()}': template is required. ` +
-                'Provide a template in the event or addArrayItem button configuration.',
+              `Cannot add item to array '${this.key()}': template is REQUIRED. ` +
+                'Buttons must specify an explicit template property. ' +
+                'There is no default template - each add operation must provide its own.',
             );
             return;
           }
@@ -164,7 +168,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     if (templates.length === 0) {
       this.logger.error(
         `Cannot add item to array '${this.field().key}': no field templates provided. ` +
-          'Ensure the array field has a fields property or the event has a template.',
+          'Buttons must specify an explicit template property when adding array items.',
       );
       return;
     }
@@ -336,13 +340,40 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   }
 
   private createResolveItemObservable(fieldTree: FieldTree<unknown> | null, index: number): Observable<ResolvedArrayItem | undefined> {
-    const templates = this.fieldTemplates();
-    if (templates.length === 0) return of(undefined);
+    const itemTemplates = this.itemTemplates();
+
+    // Get the template for this specific item index.
+    // For items beyond the defined templates (dynamically added items), we don't have a template.
+    // Those items are added via buttons which provide their own explicit template.
+    const templates = itemTemplates[index];
+    if (!templates || templates.length === 0) {
+      // This can happen when items are added dynamically via buttons -
+      // the button provides its own template through handleAddFromEvent.
+      // For recreate operations, we should use the first available template as a fallback
+      // since the form value already exists and just needs to be re-rendered.
+      if (itemTemplates.length > 0 && index >= itemTemplates.length) {
+        // Use the last template as a fallback for items beyond defined templates
+        const fallbackTemplates = itemTemplates[itemTemplates.length - 1];
+        return resolveArrayItem({
+          fieldTree,
+          index,
+          templates: fallbackTemplates as FieldDef<unknown>[],
+          arrayField: this.field(),
+          itemOrderSignal: this.itemOrderSignal,
+          parentFieldSignalContext: this.parentFieldSignalContext,
+          parentInjector: this.parentInjector,
+          registry: this.rawFieldRegistry(),
+          destroyRef: this.destroyRef,
+          loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+        });
+      }
+      return of(undefined);
+    }
 
     return resolveArrayItem({
       fieldTree,
       index,
-      templates,
+      templates: templates as FieldDef<unknown>[],
       arrayField: this.field(),
       itemOrderSignal: this.itemOrderSignal,
       parentFieldSignalContext: this.parentFieldSignalContext,

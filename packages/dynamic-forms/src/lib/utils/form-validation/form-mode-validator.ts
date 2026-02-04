@@ -137,8 +137,12 @@ export class FormModeValidator {
         // Check rows within groups
         warnings.push(...this.collectRowHiddenFieldWarnings(field.fields, fieldPath));
       } else if (isArrayField(field)) {
-        // Check rows within array templates
-        warnings.push(...this.collectRowHiddenFieldWarnings(field.fields, fieldPath));
+        // Check rows within array templates (new fields[][] structure)
+        const itemTemplates = field.fields as readonly (readonly FieldDef<unknown>[])[];
+        for (let j = 0; j < itemTemplates.length; j++) {
+          const itemFields = itemTemplates[j];
+          warnings.push(...this.collectRowHiddenFieldWarnings([...itemFields], `${fieldPath}.fields[${j}]`));
+        }
       }
     }
 

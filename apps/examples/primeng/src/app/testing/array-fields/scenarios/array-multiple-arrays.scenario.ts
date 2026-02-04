@@ -7,12 +7,15 @@ const config = {
       key: 'emails',
       type: 'array',
       fields: [
-        {
-          key: 'email',
-          type: 'input',
-          label: 'Email',
-          props: { type: 'email' },
-        },
+        [
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            props: { type: 'email' },
+            value: 'alice@example.com',
+          },
+        ],
       ],
     },
     {
@@ -40,12 +43,15 @@ const config = {
       key: 'phones',
       type: 'array',
       fields: [
-        {
-          key: 'phone',
-          type: 'input',
-          label: 'Phone',
-          props: { type: 'tel' },
-        },
+        [
+          {
+            key: 'phone',
+            type: 'input',
+            label: 'Phone',
+            props: { type: 'tel' },
+            value: '555-0001',
+          },
+        ],
       ],
     },
     {
@@ -77,8 +83,4 @@ export const arrayMultipleArraysScenario: TestScenario = {
   title: 'Multiple Independent Arrays',
   description: 'Verify operations on one array do not affect another array in the same form',
   config,
-  initialValue: {
-    emails: [{ email: 'alice@example.com' }],
-    phones: [{ phone: '555-0001' }],
-  },
 };

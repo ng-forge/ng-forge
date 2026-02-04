@@ -7,11 +7,9 @@ const config = {
       key: 'items',
       type: 'array',
       fields: [
-        {
-          key: 'value',
-          type: 'input',
-          label: 'Value',
-        },
+        [{ key: 'value', type: 'input', label: 'Value', value: 'First' }],
+        [{ key: 'value', type: 'input', label: 'Value', value: 'Second' }],
+        [{ key: 'value', type: 'input', label: 'Value', value: 'Third' }],
       ],
     },
     {
@@ -37,7 +35,4 @@ export const arrayShiftScenario: TestScenario = {
   title: 'Shift Array Items',
   description: 'Remove the first item from the array using shiftArrayItem button',
   config,
-  initialValue: {
-    items: [{ value: 'First' }, { value: 'Second' }, { value: 'Third' }],
-  },
 };

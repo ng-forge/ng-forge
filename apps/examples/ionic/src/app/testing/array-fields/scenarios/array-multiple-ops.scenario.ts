@@ -7,23 +7,46 @@ const config = {
       key: 'notes',
       type: 'array',
       fields: [
-        {
-          key: 'noteRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'note',
-              type: 'input',
-              label: 'Note',
-            },
-            {
-              key: 'removeNoteButton',
-              type: 'removeArrayItem',
-              label: 'Remove',
-              className: 'array-remove-button',
-            },
-          ],
-        },
+        [
+          {
+            key: 'noteRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'note',
+                type: 'input',
+                label: 'Note',
+                value: 'First note',
+              },
+              {
+                key: 'removeNoteButton',
+                type: 'removeArrayItem',
+                label: 'Remove',
+                className: 'array-remove-button',
+              },
+            ],
+          },
+        ],
+        [
+          {
+            key: 'noteRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'note',
+                type: 'input',
+                label: 'Note',
+                value: 'Second note',
+              },
+              {
+                key: 'removeNoteButton',
+                type: 'removeArrayItem',
+                label: 'Remove',
+                className: 'array-remove-button',
+              },
+            ],
+          },
+        ],
       ],
     },
     {
@@ -60,7 +83,4 @@ export const arrayMultipleOpsScenario: TestScenario = {
   title: 'Multiple Operations',
   description: 'Test multiple array operations (add and remove) together',
   config,
-  initialValue: {
-    notes: [{ note: 'First note' }, { note: 'Second note' }],
-  },
 };

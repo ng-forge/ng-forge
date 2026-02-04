@@ -7,17 +7,21 @@ const config = {
       key: 'users',
       type: 'array',
       fields: [
-        {
-          key: 'name',
-          type: 'input',
-          label: 'Name',
-        },
-        {
-          key: 'email',
-          type: 'input',
-          label: 'Email',
-          props: { type: 'email' },
-        },
+        [
+          {
+            key: 'name',
+            type: 'input',
+            label: 'Name',
+            value: '',
+          },
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            props: { type: 'email' },
+            value: '',
+          },
+        ],
       ],
     },
     {
@@ -48,7 +52,4 @@ export const arrayDomIdUniquenessScenario: TestScenario = {
   title: 'Unique DOM IDs',
   description: 'Verify that each array item has unique DOM IDs using UUID-based key suffixes',
   config,
-  initialValue: {
-    users: [{ name: '', email: '' }],
-  },
 };

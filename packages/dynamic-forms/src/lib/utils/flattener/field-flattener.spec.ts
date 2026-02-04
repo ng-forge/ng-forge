@@ -281,15 +281,18 @@ describe('field-flattener', () => {
     });
 
     describe('array field handling', () => {
-      it('should preserve array structure with flattened children', () => {
+      it('should preserve array structure with flattened item templates', () => {
+        // New structure: fields[][] where each inner array defines one item's fields
         const fields: FieldDef<any>[] = [
           {
             type: 'array',
             key: 'items',
-            fields: {
-              name: { type: 'input', key: 'name' },
-              quantity: { type: 'input', key: 'quantity' },
-            },
+            fields: [
+              [
+                { type: 'input', key: 'name' },
+                { type: 'input', key: 'quantity' },
+              ],
+            ],
           },
         ];
 
@@ -298,9 +301,12 @@ describe('field-flattener', () => {
         expect(result).toHaveLength(1);
         expect(result[0].type).toBe('array');
         expect(result[0].key).toBe('items');
+        // Result is now FieldDef[][] with flattened items
         expect(result[0].fields).toEqual([
-          { type: 'input', key: 'name' },
-          { type: 'input', key: 'quantity' },
+          [
+            { type: 'input', key: 'name' },
+            { type: 'input', key: 'quantity' },
+          ],
         ]);
       });
 
@@ -308,9 +314,7 @@ describe('field-flattener', () => {
         const fields: FieldDef<any>[] = [
           {
             type: 'array',
-            fields: {
-              item: { type: 'input', key: 'item' },
-            },
+            fields: [[{ type: 'input', key: 'item' }]],
           } as any,
         ];
 
@@ -382,19 +386,23 @@ describe('field-flattener', () => {
       });
 
       it('should handle array with row template', () => {
+        // New structure: fields[][] where each inner array defines one item's fields
+        // Row containers within items should flatten their children
         const fields: FieldDef<any>[] = [
           {
             type: 'array',
             key: 'addresses',
-            fields: {
-              template: {
-                type: 'row',
-                fields: [
-                  { type: 'input', key: 'street' },
-                  { type: 'input', key: 'city' },
-                ],
-              },
-            },
+            fields: [
+              [
+                {
+                  type: 'row',
+                  fields: [
+                    { type: 'input', key: 'street' },
+                    { type: 'input', key: 'city' },
+                  ],
+                },
+              ],
+            ],
           },
         ];
 
@@ -402,9 +410,12 @@ describe('field-flattener', () => {
 
         expect(result).toHaveLength(1);
         expect(result[0].type).toBe('array');
+        // Result is FieldDef[][] with flattened rows within each item
         expect(result[0].fields).toEqual([
-          { type: 'input', key: 'street' },
-          { type: 'input', key: 'city' },
+          [
+            { type: 'input', key: 'street' },
+            { type: 'input', key: 'city' },
+          ],
         ]);
       });
     });
@@ -528,9 +539,7 @@ describe('field-flattener', () => {
         {
           type: 'array',
           key: 'items',
-          fields: {
-            name: { type: 'input', key: 'name' },
-          },
+          fields: [[{ type: 'input', key: 'name' }]],
         },
       ];
 

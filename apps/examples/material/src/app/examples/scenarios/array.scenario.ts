@@ -1,7 +1,7 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 import { ExampleScenario } from '../shared/types';
 
-// Array item templates - define the structure of each array item
+// Array item templates - define the structure for new items added via buttons
 const tagTemplate = {
   key: 'tag',
   type: 'row',
@@ -29,7 +29,7 @@ const tagTemplate = {
   ],
 } as const;
 
-const contactFields = [
+const contactTemplate = [
   {
     key: 'name',
     type: 'input',
@@ -86,16 +86,6 @@ export const arrayScenario: ExampleScenario = {
   id: 'array',
   title: 'Array Demo',
   description: 'Demonstrates dynamic array fields with declarative add/remove buttons.',
-  initialValue: {
-    tags: [{ value: 'angular' }, { value: 'typescript' }],
-    contacts: [
-      {
-        name: 'Jane Smith',
-        phone: '5551234567',
-        relationship: 'family',
-      },
-    ],
-  },
   config: {
     fields: [
       {
@@ -114,7 +104,66 @@ export const arrayScenario: ExampleScenario = {
       {
         key: 'tags',
         type: 'array',
-        fields: [tagTemplate],
+        fields: [
+          [
+            {
+              key: 'tag',
+              type: 'row',
+              fields: [
+                {
+                  key: 'value',
+                  type: 'input',
+                  label: 'Tag',
+                  required: true,
+                  minLength: 2,
+                  props: {
+                    placeholder: 'Enter a tag',
+                    hint: 'Tags must be at least 2 characters',
+                  },
+                  value: 'angular',
+                },
+                {
+                  key: 'removeTag',
+                  type: 'removeArrayItem',
+                  label: 'Remove',
+                  className: 'remove-tag-button',
+                  props: {
+                    color: 'warn',
+                  },
+                },
+              ],
+            },
+          ],
+          [
+            {
+              key: 'tag',
+              type: 'row',
+              fields: [
+                {
+                  key: 'value',
+                  type: 'input',
+                  label: 'Tag',
+                  required: true,
+                  minLength: 2,
+                  props: {
+                    placeholder: 'Enter a tag',
+                    hint: 'Tags must be at least 2 characters',
+                  },
+                  value: 'typescript',
+                },
+                {
+                  key: 'removeTag',
+                  type: 'removeArrayItem',
+                  label: 'Remove',
+                  className: 'remove-tag-button',
+                  props: {
+                    color: 'warn',
+                  },
+                },
+              ],
+            },
+          ],
+        ],
       },
       {
         key: 'addTagButton',
@@ -143,7 +192,63 @@ export const arrayScenario: ExampleScenario = {
       {
         key: 'contacts',
         type: 'array',
-        fields: contactFields,
+        fields: [
+          [
+            {
+              key: 'name',
+              type: 'input',
+              label: 'Contact Name',
+              required: true,
+              minLength: 2,
+              props: {
+                placeholder: 'Enter contact name',
+                hint: 'Full name of the emergency contact',
+              },
+              value: 'Jane Smith',
+            },
+            {
+              key: 'phone',
+              type: 'input',
+              label: 'Phone Number',
+              required: true,
+              pattern: /^\d{10}$/,
+              validationMessages: {
+                pattern: 'Please enter a valid 10-digit phone number',
+              },
+              props: {
+                type: 'tel',
+                placeholder: '5551234567',
+                hint: 'Enter 10-digit phone number without spaces or dashes',
+              },
+              value: '5551234567',
+            },
+            {
+              key: 'relationship',
+              type: 'select',
+              label: 'Relationship',
+              required: true,
+              options: [
+                { label: 'Family', value: 'family' },
+                { label: 'Friend', value: 'friend' },
+                { label: 'Colleague', value: 'colleague' },
+                { label: 'Other', value: 'other' },
+              ],
+              props: {
+                hint: 'Select your relationship to this contact',
+              },
+              value: 'family',
+            },
+            {
+              key: 'removeContact',
+              type: 'removeArrayItem',
+              label: 'Remove Contact',
+              className: 'remove-contact-button',
+              props: {
+                color: 'warn',
+              },
+            },
+          ],
+        ],
       },
       {
         key: 'contactButtons',
@@ -154,7 +259,7 @@ export const arrayScenario: ExampleScenario = {
             type: 'prependArrayItem',
             label: 'Add First',
             arrayKey: 'contacts',
-            template: contactFields,
+            template: contactTemplate,
             className: 'prepend-contact-button',
             props: {
               color: 'accent',
@@ -165,7 +270,7 @@ export const arrayScenario: ExampleScenario = {
             type: 'addArrayItem',
             label: 'Add Contact',
             arrayKey: 'contacts',
-            template: contactFields,
+            template: contactTemplate,
             className: 'add-contact-button',
             props: {
               color: 'primary',
