@@ -23,6 +23,7 @@ const config = {
             key: 'name',
             type: 'input',
             label: 'Item Name',
+            value: 'First Item',
           },
           {
             key: 'removeButton',
@@ -41,7 +42,6 @@ const config = {
           },
         ],
       ],
-      initialValues: [{ name: 'First Item' }],
     },
     {
       key: 'addItemButton',
