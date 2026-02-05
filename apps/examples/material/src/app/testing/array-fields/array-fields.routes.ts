@@ -131,6 +131,17 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getArrayFieldsScenario('array-boundary-indices') },
   },
+  // Button logic (hidden/disabled)
+  {
+    path: 'array-button-hidden-logic',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('array-button-hidden-logic') },
+  },
+  {
+    path: 'array-button-disabled-logic',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('array-button-disabled-logic') },
+  },
 ];
 
 export default routes;
