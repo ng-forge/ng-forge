@@ -1,6 +1,8 @@
 import { TestSuite } from '../shared/types';
 import { arrayAddScenario } from './scenarios/array-add.scenario';
 import { arrayBoundaryIndicesScenario } from './scenarios/array-boundary-indices.scenario';
+import { arrayButtonDisabledLogicScenario } from './scenarios/array-button-disabled-logic.scenario';
+import { arrayButtonHiddenLogicScenario } from './scenarios/array-button-hidden-logic.scenario';
 import { arrayDirtyTouchedTrackingScenario } from './scenarios/array-dirty-touched-tracking.scenario';
 import { arrayDomIdUniquenessScenario } from './scenarios/array-dom-id-uniqueness.scenario';
 import { arrayEmptyStateScenario } from './scenarios/array-empty-state.scenario';
@@ -74,6 +76,10 @@ export const arrayFieldsSuite: TestSuite = {
     // Edge cases
     arrayEmptyStateScenario,
     arrayBoundaryIndicesScenario,
+
+    // Button logic (hidden/disabled)
+    arrayButtonHiddenLogicScenario,
+    arrayButtonDisabledLogicScenario,
   ],
 };
 

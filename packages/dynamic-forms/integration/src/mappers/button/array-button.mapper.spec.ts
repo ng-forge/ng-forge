@@ -1,5 +1,4 @@
-import { createEnvironmentInjector, EnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { Injector, runInInjectionContext, signal } from '@angular/core';
 import {
   addArrayItemButtonMapper,
   removeArrayItemButtonMapper,
@@ -13,7 +12,6 @@ import { ARRAY_CONTEXT, DEFAULT_PROPS, RootFormRegistryService, NonFieldLogicCon
 import { vi } from 'vitest';
 
 describe('Array Button Mappers with Logic', () => {
-  let parentInjector: EnvironmentInjector;
   let mockRootFormRegistry: {
     getRootForm: ReturnType<typeof vi.fn>;
     getFormValue: ReturnType<typeof vi.fn>;
@@ -34,36 +32,25 @@ describe('Array Button Mappers with Logic', () => {
     mockRootFormRegistry.getFormValue.mockReturnValue(formValue);
   }
 
-  beforeEach(async () => {
+  beforeEach(() => {
     mockRootFormRegistry = {
       getRootForm: vi.fn(),
       getFormValue: vi.fn().mockReturnValue({}),
     };
-
-    await TestBed.configureTestingModule({
-      providers: [
-        { provide: RootFormRegistryService, useValue: mockRootFormRegistry },
-        { provide: DEFAULT_PROPS, useValue: signal(undefined) },
-        { provide: ARRAY_CONTEXT, useValue: undefined },
-      ],
-    }).compileComponents();
-
-    parentInjector = TestBed.inject(EnvironmentInjector);
   });
 
-  function createTestInjector(arrayContext?: { arrayKey: string; index: number }): EnvironmentInjector {
-    return createEnvironmentInjector(
-      [
+  function createTestInjector(arrayContext?: { arrayKey: string; index: number }): Injector {
+    return Injector.create({
+      providers: [
         { provide: RootFormRegistryService, useValue: mockRootFormRegistry },
         { provide: DEFAULT_PROPS, useValue: signal(undefined) },
         { provide: ARRAY_CONTEXT, useValue: arrayContext },
       ],
-      parentInjector,
-    );
+    });
   }
 
   describe('addArrayItemButtonMapper', () => {
-    function testMapper(fieldDef: BaseArrayAddButtonField, injector: EnvironmentInjector): Record<string, unknown> {
+    function testMapper(fieldDef: BaseArrayAddButtonField, injector: Injector): Record<string, unknown> {
       const inputsSignal = runInInjectionContext(injector, () => addArrayItemButtonMapper(fieldDef));
       return inputsSignal();
     }
@@ -281,7 +268,7 @@ describe('Array Button Mappers with Logic', () => {
   });
 
   describe('removeArrayItemButtonMapper', () => {
-    function testMapper(fieldDef: BaseArrayRemoveButtonField, injector: EnvironmentInjector): Record<string, unknown> {
+    function testMapper(fieldDef: BaseArrayRemoveButtonField, injector: Injector): Record<string, unknown> {
       const inputsSignal = runInInjectionContext(injector, () => removeArrayItemButtonMapper(fieldDef));
       return inputsSignal();
     }
@@ -334,7 +321,7 @@ describe('Array Button Mappers with Logic', () => {
   });
 
   describe('prependArrayItemButtonMapper', () => {
-    function testMapper(fieldDef: BaseArrayAddButtonField, injector: EnvironmentInjector): Record<string, unknown> {
+    function testMapper(fieldDef: BaseArrayAddButtonField, injector: Injector): Record<string, unknown> {
       const inputsSignal = runInInjectionContext(injector, () => prependArrayItemButtonMapper(fieldDef));
       return inputsSignal();
     }
@@ -362,7 +349,7 @@ describe('Array Button Mappers with Logic', () => {
   });
 
   describe('popArrayItemButtonMapper', () => {
-    function testMapper(fieldDef: BaseArrayRemoveButtonField, injector: EnvironmentInjector): Record<string, unknown> {
+    function testMapper(fieldDef: BaseArrayRemoveButtonField, injector: Injector): Record<string, unknown> {
       const inputsSignal = runInInjectionContext(injector, () => popArrayItemButtonMapper(fieldDef));
       return inputsSignal();
     }
@@ -389,7 +376,7 @@ describe('Array Button Mappers with Logic', () => {
   });
 
   describe('shiftArrayItemButtonMapper', () => {
-    function testMapper(fieldDef: BaseArrayRemoveButtonField, injector: EnvironmentInjector): Record<string, unknown> {
+    function testMapper(fieldDef: BaseArrayRemoveButtonField, injector: Injector): Record<string, unknown> {
       const inputsSignal = runInInjectionContext(injector, () => shiftArrayItemButtonMapper(fieldDef));
       return inputsSignal();
     }

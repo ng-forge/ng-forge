@@ -3,8 +3,8 @@ import { TextField } from '../../definitions/default/text-field';
 import { buildBaseInputs } from '../base/base-field-mapper';
 import { DEFAULT_PROPS } from '../../models/field-signal-context.token';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
-import { resolveNonFieldHidden } from '../../core/logic/button-logic-resolver';
-import { NonFieldLogicConfig } from '../../core/logic/button-logic-resolver';
+import { resolveNonFieldHidden } from '../../core/logic/non-field-logic-resolver';
+import { NonFieldLogicConfig } from '../../core/logic/non-field-logic-resolver';
 
 /**
  * Maps a text field definition to component inputs.

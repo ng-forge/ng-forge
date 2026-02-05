@@ -1,5 +1,4 @@
-import { TestBed } from '@angular/core/testing';
-import { resolveNonFieldHidden, resolveNonFieldDisabled, NonFieldLogicContext } from './button-logic-resolver';
+import { resolveNonFieldHidden, resolveNonFieldDisabled, NonFieldLogicContext } from './non-field-logic-resolver';
 import { LogicConfig } from '../../models/logic';
 import { vi } from 'vitest';
 
@@ -12,10 +11,6 @@ describe('Non-Field Logic Resolvers', () => {
       submitting: vi.fn().mockReturnValue(false),
     }));
   }
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({}).compileComponents();
-  });
 
   describe('resolveNonFieldHidden', () => {
     describe('explicit hidden value', () => {

@@ -4,5 +4,5 @@ export {
   resolveNextButtonDisabled,
   resolveNonFieldHidden,
   resolveNonFieldDisabled,
-} from './button-logic-resolver';
-export type { ButtonLogicContext, NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } from './button-logic-resolver';
+} from './non-field-logic-resolver';
+export type { ButtonLogicContext, NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } from './non-field-logic-resolver';
