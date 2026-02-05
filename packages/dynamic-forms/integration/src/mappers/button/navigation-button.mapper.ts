@@ -9,6 +9,7 @@ import {
   NextPageEvent,
   PreviousPageEvent,
   resolveNextButtonDisabled,
+  resolveNonFieldHidden,
   resolveSubmitButtonDisabled,
   RootFormRegistryService,
 } from '@ng-forge/dynamic-forms';
@@ -43,6 +44,10 @@ export type BaseNavigationButtonField<TProps = unknown> = ButtonField<TProps, Su
  * 2. Field-level `logic` array (if present, overrides form-level defaults)
  * 3. Form-level `options.submitButton` defaults (disableWhenInvalid, disableWhileSubmitting)
  *
+ * Hidden state is resolved using the non-field-hidden resolver which considers:
+ * 1. Explicit `hidden: true` on the field definition
+ * 2. Field-level `logic` array with `type: 'hidden'` conditions
+ *
  * @param fieldDef The submit button field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
@@ -55,12 +60,13 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+    const rootForm = rootFormRegistry.getRootForm()!;
 
     // Use rootFormRegistry instead of fieldSignalContext.form because when the submit button
     // is inside a group/array, fieldSignalContext.form points to the nested form tree,
     // not the root form. We need root form validity for submit button disabled state (#157).
     const disabledSignal = resolveSubmitButtonDisabled({
-      form: rootFormRegistry.getRootForm()!,
+      form: rootForm,
       formOptions: formOptions(),
       fieldLogic: fieldWithLogic.logic,
       explicitlyDisabled: fieldDef.disabled,
@@ -75,8 +81,15 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
       disabled: disabledSignal(),
     };
 
-    if (fieldDef.hidden !== undefined) {
-      inputs['hidden'] = fieldDef.hidden;
+    // Resolve hidden state using non-field-hidden resolver (supports logic array)
+    if (fieldDef.hidden !== undefined || fieldWithLogic.logic?.some((l) => l.type === 'hidden')) {
+      const hiddenSignal = resolveNonFieldHidden({
+        form: rootForm,
+        fieldLogic: fieldWithLogic.logic,
+        explicitValue: fieldDef.hidden,
+        formValue: rootFormRegistry.getFormValue(),
+      });
+      inputs['hidden'] = hiddenSignal();
     }
 
     return inputs;
@@ -95,11 +108,16 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
  * 2. Field-level `logic` array (if present, overrides form-level defaults)
  * 3. Form-level `options.nextButton` defaults (disableWhenPageInvalid, disableWhileSubmitting)
  *
+ * Hidden state is resolved using the non-field-hidden resolver which considers:
+ * 1. Explicit `hidden: true` on the field definition
+ * 2. Field-level `logic` array with `type: 'hidden'` conditions
+ *
  * @param fieldDef The next button field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonField<TProps>): Signal<Record<string, unknown>> {
   const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
+  const rootFormRegistry = inject(RootFormRegistryService);
   const defaultProps = inject(DEFAULT_PROPS);
   const formOptions = inject(FORM_OPTIONS);
 
@@ -107,6 +125,7 @@ export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFiel
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+    const rootForm = rootFormRegistry.getRootForm();
 
     const disabledSignal = resolveNextButtonDisabled({
       form: fieldSignalContext.form,
@@ -122,8 +141,15 @@ export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFiel
       disabled: disabledSignal(),
     };
 
-    if (fieldDef.hidden !== undefined) {
-      inputs['hidden'] = fieldDef.hidden;
+    // Resolve hidden state using non-field-hidden resolver (supports logic array)
+    if (rootForm && (fieldDef.hidden !== undefined || fieldWithLogic.logic?.some((l) => l.type === 'hidden'))) {
+      const hiddenSignal = resolveNonFieldHidden({
+        form: rootForm,
+        fieldLogic: fieldWithLogic.logic,
+        explicitValue: fieldDef.hidden,
+        formValue: rootFormRegistry.getFormValue(),
+      });
+      inputs['hidden'] = hiddenSignal();
     }
 
     return inputs;
@@ -138,14 +164,22 @@ export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFiel
  * Mapper for previous page button - preconfigures PreviousPageEvent
  * Note: Does not auto-disable based on validation. Users can explicitly disable if needed.
  *
+ * Hidden state is resolved using the non-field-hidden resolver which considers:
+ * 1. Explicit `hidden: true` on the field definition
+ * 2. Field-level `logic` array with `type: 'hidden'` conditions
+ *
  * @param fieldDef The previous button field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function previousButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
+  const rootFormRegistry = inject(RootFormRegistryService);
+
+  const fieldWithLogic = fieldDef as FieldDef<Record<string, unknown>> & Partial<FieldWithValidation>;
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+    const rootForm = rootFormRegistry.getRootForm();
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
@@ -157,8 +191,15 @@ export function previousButtonFieldMapper<TProps>(fieldDef: BaseNavigationButton
       inputs['disabled'] = fieldDef.disabled;
     }
 
-    if (fieldDef.hidden !== undefined) {
-      inputs['hidden'] = fieldDef.hidden;
+    // Resolve hidden state using non-field-hidden resolver (supports logic array)
+    if (rootForm && (fieldDef.hidden !== undefined || fieldWithLogic.logic?.some((l) => l.type === 'hidden'))) {
+      const hiddenSignal = resolveNonFieldHidden({
+        form: rootForm,
+        fieldLogic: fieldWithLogic.logic,
+        explicitValue: fieldDef.hidden,
+        formValue: rootFormRegistry.getFormValue(),
+      });
+      inputs['hidden'] = hiddenSignal();
     }
 
     return inputs;

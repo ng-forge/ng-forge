@@ -50,9 +50,9 @@ export type { SubmissionConfig, SubmissionActionResult, SubmitButtonOptions, Nex
 export type { FormStateCondition } from './models';
 export { isFormStateCondition } from './models';
 
-// Button Logic Resolver
-export { resolveSubmitButtonDisabled, resolveNextButtonDisabled } from './core/logic';
-export type { ButtonLogicContext } from './core/logic';
+// Logic Resolvers
+export { resolveSubmitButtonDisabled, resolveNextButtonDisabled, resolveNonFieldHidden, resolveNonFieldDisabled } from './core/logic';
+export type { ButtonLogicContext, NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } from './core/logic';
 
 // Abstract Base Field Types (for extension by UI libraries)
 export type {
