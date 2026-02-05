@@ -205,11 +205,26 @@ export class FormStateManager<
    * - Teardown: OLD config (form unchanged, fieldsSource=intersection → removed components destroyed)
    * - Applying: NEW config (form updates, fieldsSource=intersection → safe components update)
    * - Restoring: NEW config (form ready, fieldsSource=all new → new components created)
+   *
+   * IMPORTANT: For the initial config, we return deps.config() directly when the state
+   * machine is still in 'uninitialized' state. This allows the form to be created with
+   * the correct schema during the first render, before the explicitEffect dispatches
+   * the 'initialize' action. Without this, logic functions (hidden, readonly, etc.)
+   * wouldn't work because registerFormValueSignal wouldn't be called.
    */
   readonly activeConfig: Signal<FormConfig<TFields> | undefined> = computed(() => {
     const machine = this.machineSignal();
     if (!machine) return undefined;
     const state = machine.state();
+
+    // For initial render: return deps.config directly when machine hasn't been initialized yet.
+    // This avoids needing to dispatch synchronously during component construction (which
+    // causes stack overflow in test suites with @for loops), while still making the config
+    // available so logic functions work correctly.
+    if (state.type === 'uninitialized') {
+      return this.deps?.config();
+    }
+
     if (isReadyState(state)) return state.config;
     if (isTransitioningState(state)) {
       // teardown: old config (form unchanged, removed components being destroyed)
@@ -362,32 +377,35 @@ export class FormStateManager<
       const setup = this.formSetup();
       const config = this.activeConfig();
 
-      if (!config) {
-        return untracked(() => form(this.entity));
-      }
+      // IMPORTANT: Register the form value signal BEFORE field resolution starts.
+      // This ensures logic functions (hidden, readonly, etc.) can access form values
+      // via rootFormRegistry.getFormValue() during schema evaluation.
+      untracked(() => this.rootFormRegistry.registerFormValueSignal(this.entity as Signal<Record<string, unknown>>));
 
       let formInstance: ReturnType<typeof form<TModel>>;
 
-      untracked(() => this.rootFormRegistry.registerFormValueSignal(this.entity as Signal<Record<string, unknown>>));
-
-      const hasFields = setup.schemaFields && setup.schemaFields.length > 0;
-      const hasFormSchema = config.schema !== undefined;
-
-      if (hasFields) {
-        const crossFieldCollection = collectCrossFieldEntries(setup.schemaFields as FieldDef<unknown>[]);
-
-        // Create schema with both field-level and form-level validation
-        const combinedSchema = createSchemaFromFields(setup.schemaFields, setup.registry, {
-          crossFieldValidators: crossFieldCollection.validators,
-          formLevelSchema: config.schema,
-        }) as Schema<TModel>;
-
-        formInstance = untracked(() => form(this.entity, combinedSchema));
-      } else if (hasFormSchema) {
-        const formSchema = createFormLevelSchema(config.schema!) as Schema<TModel>;
-        formInstance = untracked(() => form(this.entity, formSchema));
-      } else {
+      if (!config) {
         formInstance = untracked(() => form(this.entity));
+      } else {
+        const hasFields = setup.schemaFields && setup.schemaFields.length > 0;
+        const hasFormSchema = config.schema !== undefined;
+
+        if (hasFields) {
+          const crossFieldCollection = collectCrossFieldEntries(setup.schemaFields as FieldDef<unknown>[]);
+
+          // Create schema with both field-level and form-level validation
+          const combinedSchema = createSchemaFromFields(setup.schemaFields, setup.registry, {
+            crossFieldValidators: crossFieldCollection.validators,
+            formLevelSchema: config.schema,
+          }) as Schema<TModel>;
+
+          formInstance = untracked(() => form(this.entity, combinedSchema));
+        } else if (hasFormSchema) {
+          const formSchema = createFormLevelSchema(config.schema!) as Schema<TModel>;
+          formInstance = untracked(() => form(this.entity, formSchema));
+        } else {
+          formInstance = untracked(() => form(this.entity));
+        }
       }
 
       untracked(() => this.rootFormRegistry.registerRootForm(formInstance));
@@ -669,7 +687,8 @@ export class FormStateManager<
     // Store the machine in a signal so computed signals re-evaluate
     this.machineSignal.set(machine);
 
-    // Setup effects in injection context
+    // Setup effects in injection context.
+    // The config-watching effect will dispatch the initial config.
     runInInjectionContext(this.injector, () => {
       this.setupEffects();
       this.setupEventHandlers();
@@ -724,7 +743,7 @@ export class FormStateManager<
 
   private setupEffects(): void {
     // Watch for config changes and dispatch to state machine
-    // This handles both initial config and subsequent changes
+    // This handles both initial config and subsequent changes.
     explicitEffect([this.deps.config], ([config]) => {
       const machine = this.machineSignal();
       if (!machine) return;
