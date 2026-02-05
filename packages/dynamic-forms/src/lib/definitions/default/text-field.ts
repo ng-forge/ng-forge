@@ -1,5 +1,5 @@
 import { FieldDef } from '../base/field-def';
-import { LogicConfig } from '../../models/logic';
+import { NonFieldLogicConfig } from '../../core/logic/non-field-logic-resolver';
 
 /**
  * Text element type for rendering different HTML text elements
@@ -20,6 +20,10 @@ export type TextProps = {
 export interface TextField extends FieldDef<TextProps> {
   type: 'text';
 
-  /** Logic rules for conditional visibility (hidden, readonly, disabled) */
-  readonly logic?: LogicConfig[];
+  /**
+   * Logic rules for conditional visibility.
+   * Text fields only support 'hidden' logic type since they are display-only
+   * and don't participate in form validation (no disabled/readonly/required).
+   */
+  readonly logic?: NonFieldLogicConfig[];
 }

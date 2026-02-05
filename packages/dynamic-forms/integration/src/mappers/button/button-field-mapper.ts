@@ -1,13 +1,7 @@
 import { computed, inject, Signal } from '@angular/core';
-import {
-  buildBaseInputs,
-  DEFAULT_PROPS,
-  FormEvent,
-  resolveNonFieldDisabled,
-  resolveNonFieldHidden,
-  RootFormRegistryService,
-} from '@ng-forge/dynamic-forms';
+import { buildBaseInputs, DEFAULT_PROPS, FormEvent, RootFormRegistryService } from '@ng-forge/dynamic-forms';
 import { ButtonField } from '../../definitions';
+import { applyNonFieldLogic } from './non-field-logic.utils';
 
 /**
  * Maps a button field to component inputs.
@@ -34,7 +28,6 @@ export function buttonFieldMapper<TProps, TEvent extends FormEvent>(
 
   return computed(() => {
     const inputs = buildBaseInputs(fieldDef, defaultProps());
-    const rootForm = rootFormRegistry.getRootForm();
 
     // Add button-specific properties
     inputs['event'] = fieldDef.event;
@@ -43,39 +36,10 @@ export function buttonFieldMapper<TProps, TEvent extends FormEvent>(
       inputs['eventArgs'] = fieldDef.eventArgs;
     }
 
-    // Resolve hidden and disabled states (supports logic array)
-    if (rootForm) {
-      const formValue = rootFormRegistry.getFormValue();
-
-      if (fieldDef.hidden !== undefined || fieldDef.logic?.some((l) => l.type === 'hidden')) {
-        const hiddenSignal = resolveNonFieldHidden({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.hidden,
-          formValue,
-        });
-        inputs['hidden'] = hiddenSignal();
-      }
-
-      if (fieldDef.disabled !== undefined || fieldDef.logic?.some((l) => l.type === 'disabled')) {
-        const disabledSignal = resolveNonFieldDisabled({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.disabled,
-          formValue,
-        });
-        inputs['disabled'] = disabledSignal();
-      }
-    } else {
-      // Fallback to static values when rootForm is not available
-      if (fieldDef.disabled !== undefined) {
-        inputs['disabled'] = fieldDef.disabled;
-      }
-      if (fieldDef.hidden !== undefined) {
-        inputs['hidden'] = fieldDef.hidden;
-      }
-    }
-
-    return inputs;
+    // Apply hidden/disabled logic
+    return {
+      ...inputs,
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
+    };
   });
 }

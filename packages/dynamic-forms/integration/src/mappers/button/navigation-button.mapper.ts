@@ -9,11 +9,11 @@ import {
   NextPageEvent,
   PreviousPageEvent,
   resolveNextButtonDisabled,
-  resolveNonFieldHidden,
   resolveSubmitButtonDisabled,
   RootFormRegistryService,
 } from '@ng-forge/dynamic-forms';
 import { ButtonField } from '../../definitions';
+import { resolveHiddenValue } from './non-field-logic.utils';
 
 // =============================================================================
 // Base Interfaces
@@ -61,35 +61,30 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
     const rootForm = rootFormRegistry.getRootForm()!;
+    const formValue = rootFormRegistry.getFormValue();
 
     // Use rootFormRegistry instead of fieldSignalContext.form because when the submit button
     // is inside a group/array, fieldSignalContext.form points to the nested form tree,
     // not the root form. We need root form validity for submit button disabled state (#157).
-    const disabledSignal = resolveSubmitButtonDisabled({
+    const disabled = resolveSubmitButtonDisabled({
       form: rootForm,
       formOptions: formOptions(),
       fieldLogic: fieldWithLogic.logic,
       explicitlyDisabled: fieldDef.disabled,
-    });
+    })();
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
       // No event - native form submit handles it via form's onNativeSubmit
       // Set type="submit" to trigger native form submission
       props: { ...(fieldDef.props as Record<string, unknown>), type: 'submit' },
-      // Evaluate the signal inside the computed - component receives plain boolean
-      disabled: disabledSignal(),
+      disabled,
     };
 
     // Resolve hidden state using non-field-hidden resolver (supports logic array)
-    if (fieldDef.hidden !== undefined || fieldWithLogic.logic?.some((l) => l.type === 'hidden')) {
-      const hiddenSignal = resolveNonFieldHidden({
-        form: rootForm,
-        fieldLogic: fieldWithLogic.logic,
-        explicitValue: fieldDef.hidden,
-        formValue: rootFormRegistry.getFormValue(),
-      });
-      inputs['hidden'] = hiddenSignal();
+    const hidden = resolveHiddenValue(rootForm, formValue, fieldWithLogic);
+    if (hidden !== undefined) {
+      inputs['hidden'] = hidden;
     }
 
     return inputs;
@@ -126,30 +121,25 @@ export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFiel
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
     const rootForm = rootFormRegistry.getRootForm();
+    const formValue = rootFormRegistry.getFormValue();
 
-    const disabledSignal = resolveNextButtonDisabled({
+    const disabled = resolveNextButtonDisabled({
       form: fieldSignalContext.form,
       formOptions: formOptions(),
       fieldLogic: fieldWithLogic.logic,
       currentPageValid: fieldSignalContext.currentPageValid,
-    });
+    })();
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
       event: NextPageEvent,
-      // Evaluate the signal inside the computed - component receives plain boolean
-      disabled: disabledSignal(),
+      disabled,
     };
 
     // Resolve hidden state using non-field-hidden resolver (supports logic array)
-    if (rootForm && (fieldDef.hidden !== undefined || fieldWithLogic.logic?.some((l) => l.type === 'hidden'))) {
-      const hiddenSignal = resolveNonFieldHidden({
-        form: rootForm,
-        fieldLogic: fieldWithLogic.logic,
-        explicitValue: fieldDef.hidden,
-        formValue: rootFormRegistry.getFormValue(),
-      });
-      inputs['hidden'] = hiddenSignal();
+    const hidden = resolveHiddenValue(rootForm, formValue, fieldWithLogic);
+    if (hidden !== undefined) {
+      inputs['hidden'] = hidden;
     }
 
     return inputs;
@@ -180,6 +170,7 @@ export function previousButtonFieldMapper<TProps>(fieldDef: BaseNavigationButton
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
     const rootForm = rootFormRegistry.getRootForm();
+    const formValue = rootFormRegistry.getFormValue();
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
@@ -192,14 +183,9 @@ export function previousButtonFieldMapper<TProps>(fieldDef: BaseNavigationButton
     }
 
     // Resolve hidden state using non-field-hidden resolver (supports logic array)
-    if (rootForm && (fieldDef.hidden !== undefined || fieldWithLogic.logic?.some((l) => l.type === 'hidden'))) {
-      const hiddenSignal = resolveNonFieldHidden({
-        form: rootForm,
-        fieldLogic: fieldWithLogic.logic,
-        explicitValue: fieldDef.hidden,
-        formValue: rootFormRegistry.getFormValue(),
-      });
-      inputs['hidden'] = hiddenSignal();
+    const hidden = resolveHiddenValue(rootForm, formValue, fieldWithLogic);
+    if (hidden !== undefined) {
+      inputs['hidden'] = hidden;
     }
 
     return inputs;

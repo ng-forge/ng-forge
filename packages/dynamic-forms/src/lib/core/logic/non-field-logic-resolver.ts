@@ -185,23 +185,6 @@ function hasFieldLevelDisabledCondition(fieldLogic: LogicConfig[] | undefined, c
 }
 
 /**
- * Checks if the field has explicit logic that should override form-level defaults.
- *
- * When a field has its own disabled logic defined, it indicates the user wants
- * custom control over the disabled state, so form-level defaults should be ignored.
- *
- * @param fieldLogic - Array of logic configurations
- * @returns true if field has its own disabled logic
- */
-function hasCustomDisabledLogic(fieldLogic: LogicConfig[] | undefined): boolean {
-  if (!fieldLogic || fieldLogic.length === 0) {
-    return false;
-  }
-
-  return fieldLogic.some((logic) => logic.type === 'disabled');
-}
-
-/**
  * Checks if the field has custom logic of a specific type.
  *
  * @param fieldLogic - Array of logic configurations
@@ -276,7 +259,7 @@ export function resolveSubmitButtonDisabled(ctx: ButtonLogicContext): Signal<boo
     }
 
     // 2. If field has custom disabled logic, use it exclusively
-    if (hasCustomDisabledLogic(ctx.fieldLogic)) {
+    if (hasCustomLogicOfType(ctx.fieldLogic, 'disabled')) {
       return hasFieldLevelDisabledCondition(ctx.fieldLogic, ctx);
     }
 
@@ -332,7 +315,7 @@ export function resolveNextButtonDisabled(ctx: ButtonLogicContext): Signal<boole
     }
 
     // 2. If field has custom disabled logic, use it exclusively
-    if (hasCustomDisabledLogic(ctx.fieldLogic)) {
+    if (hasCustomLogicOfType(ctx.fieldLogic, 'disabled')) {
       return hasFieldLevelDisabledCondition(ctx.fieldLogic, ctx);
     }
 

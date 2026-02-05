@@ -9,12 +9,11 @@ import {
   PopArrayItemEvent,
   PrependArrayItemEvent,
   RemoveAtIndexEvent,
-  resolveNonFieldDisabled,
-  resolveNonFieldHidden,
   RootFormRegistryService,
   ShiftArrayItemEvent,
 } from '@ng-forge/dynamic-forms';
 import { buildArrayButtonEventContext, EventArg, resolveArrayButtonContext, resolveArrayButtonEventArgs } from './array-button.utils';
+import { applyNonFieldLogic } from './non-field-logic.utils';
 
 // =============================================================================
 // Base Interfaces
@@ -99,49 +98,14 @@ export function addArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButtonFie
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
-    const rootForm = rootFormRegistry.getRootForm();
 
-    const inputs: Record<string, unknown> = {
+    return {
       ...baseInputs,
       event: AppendArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey', '$template']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx, fieldDef.template),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
     };
-
-    // Resolve hidden and disabled states (supports logic array)
-    if (rootForm) {
-      const formValue = rootFormRegistry.getFormValue();
-
-      if (fieldDef.hidden !== undefined || fieldDef.logic?.some((l) => l.type === 'hidden')) {
-        const hiddenSignal = resolveNonFieldHidden({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.hidden,
-          formValue,
-        });
-        inputs['hidden'] = hiddenSignal();
-      }
-
-      if (fieldDef.disabled !== undefined || fieldDef.logic?.some((l) => l.type === 'disabled')) {
-        const disabledSignal = resolveNonFieldDisabled({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.disabled,
-          formValue,
-        });
-        inputs['disabled'] = disabledSignal();
-      }
-    } else {
-      // Fallback to static values when rootForm is not available
-      if (fieldDef.disabled !== undefined) {
-        inputs['disabled'] = fieldDef.disabled;
-      }
-      if (fieldDef.hidden !== undefined) {
-        inputs['hidden'] = fieldDef.hidden;
-      }
-    }
-
-    return inputs;
   });
 }
 
@@ -165,49 +129,14 @@ export function prependArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButto
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
-    const rootForm = rootFormRegistry.getRootForm();
 
-    const inputs: Record<string, unknown> = {
+    return {
       ...baseInputs,
       event: PrependArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey', '$template']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx, fieldDef.template),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
     };
-
-    // Resolve hidden and disabled states (supports logic array)
-    if (rootForm) {
-      const formValue = rootFormRegistry.getFormValue();
-
-      if (fieldDef.hidden !== undefined || fieldDef.logic?.some((l) => l.type === 'hidden')) {
-        const hiddenSignal = resolveNonFieldHidden({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.hidden,
-          formValue,
-        });
-        inputs['hidden'] = hiddenSignal();
-      }
-
-      if (fieldDef.disabled !== undefined || fieldDef.logic?.some((l) => l.type === 'disabled')) {
-        const disabledSignal = resolveNonFieldDisabled({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.disabled,
-          formValue,
-        });
-        inputs['disabled'] = disabledSignal();
-      }
-    } else {
-      // Fallback to static values when rootForm is not available
-      if (fieldDef.disabled !== undefined) {
-        inputs['disabled'] = fieldDef.disabled;
-      }
-      if (fieldDef.hidden !== undefined) {
-        inputs['hidden'] = fieldDef.hidden;
-      }
-    }
-
-    return inputs;
   });
 }
 
@@ -231,49 +160,14 @@ export function insertArrayItemButtonMapper<TProps>(fieldDef: BaseInsertArrayIte
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
-    const rootForm = rootFormRegistry.getRootForm();
 
-    const inputs: Record<string, unknown> = {
+    return {
       ...baseInputs,
       event: InsertArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey', fieldDef.index, '$template']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx, fieldDef.template),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
     };
-
-    // Resolve hidden and disabled states (supports logic array)
-    if (rootForm) {
-      const formValue = rootFormRegistry.getFormValue();
-
-      if (fieldDef.hidden !== undefined || fieldDef.logic?.some((l) => l.type === 'hidden')) {
-        const hiddenSignal = resolveNonFieldHidden({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.hidden,
-          formValue,
-        });
-        inputs['hidden'] = hiddenSignal();
-      }
-
-      if (fieldDef.disabled !== undefined || fieldDef.logic?.some((l) => l.type === 'disabled')) {
-        const disabledSignal = resolveNonFieldDisabled({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.disabled,
-          formValue,
-        });
-        inputs['disabled'] = disabledSignal();
-      }
-    } else {
-      // Fallback to static values when rootForm is not available
-      if (fieldDef.disabled !== undefined) {
-        inputs['disabled'] = fieldDef.disabled;
-      }
-      if (fieldDef.hidden !== undefined) {
-        inputs['hidden'] = fieldDef.hidden;
-      }
-    }
-
-    return inputs;
   });
 }
 
@@ -308,49 +202,14 @@ export function removeArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveBut
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
-    const rootForm = rootFormRegistry.getRootForm();
 
-    const inputs: Record<string, unknown> = {
+    return {
       ...baseInputs,
       event: eventType,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, defaultEventArgs),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
     };
-
-    // Resolve hidden and disabled states (supports logic array)
-    if (rootForm) {
-      const formValue = rootFormRegistry.getFormValue();
-
-      if (fieldDef.hidden !== undefined || fieldDef.logic?.some((l) => l.type === 'hidden')) {
-        const hiddenSignal = resolveNonFieldHidden({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.hidden,
-          formValue,
-        });
-        inputs['hidden'] = hiddenSignal();
-      }
-
-      if (fieldDef.disabled !== undefined || fieldDef.logic?.some((l) => l.type === 'disabled')) {
-        const disabledSignal = resolveNonFieldDisabled({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.disabled,
-          formValue,
-        });
-        inputs['disabled'] = disabledSignal();
-      }
-    } else {
-      // Fallback to static values when rootForm is not available
-      if (fieldDef.disabled !== undefined) {
-        inputs['disabled'] = fieldDef.disabled;
-      }
-      if (fieldDef.hidden !== undefined) {
-        inputs['hidden'] = fieldDef.hidden;
-      }
-    }
-
-    return inputs;
   });
 }
 
@@ -374,49 +233,14 @@ export function popArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButton
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
-    const rootForm = rootFormRegistry.getRootForm();
 
-    const inputs: Record<string, unknown> = {
+    return {
       ...baseInputs,
       event: PopArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
     };
-
-    // Resolve hidden and disabled states (supports logic array)
-    if (rootForm) {
-      const formValue = rootFormRegistry.getFormValue();
-
-      if (fieldDef.hidden !== undefined || fieldDef.logic?.some((l) => l.type === 'hidden')) {
-        const hiddenSignal = resolveNonFieldHidden({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.hidden,
-          formValue,
-        });
-        inputs['hidden'] = hiddenSignal();
-      }
-
-      if (fieldDef.disabled !== undefined || fieldDef.logic?.some((l) => l.type === 'disabled')) {
-        const disabledSignal = resolveNonFieldDisabled({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.disabled,
-          formValue,
-        });
-        inputs['disabled'] = disabledSignal();
-      }
-    } else {
-      // Fallback to static values when rootForm is not available
-      if (fieldDef.disabled !== undefined) {
-        inputs['disabled'] = fieldDef.disabled;
-      }
-      if (fieldDef.hidden !== undefined) {
-        inputs['hidden'] = fieldDef.hidden;
-      }
-    }
-
-    return inputs;
   });
 }
 
@@ -440,48 +264,13 @@ export function shiftArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButt
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
-    const rootForm = rootFormRegistry.getRootForm();
 
-    const inputs: Record<string, unknown> = {
+    return {
       ...baseInputs,
       event: ShiftArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
     };
-
-    // Resolve hidden and disabled states (supports logic array)
-    if (rootForm) {
-      const formValue = rootFormRegistry.getFormValue();
-
-      if (fieldDef.hidden !== undefined || fieldDef.logic?.some((l) => l.type === 'hidden')) {
-        const hiddenSignal = resolveNonFieldHidden({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.hidden,
-          formValue,
-        });
-        inputs['hidden'] = hiddenSignal();
-      }
-
-      if (fieldDef.disabled !== undefined || fieldDef.logic?.some((l) => l.type === 'disabled')) {
-        const disabledSignal = resolveNonFieldDisabled({
-          form: rootForm,
-          fieldLogic: fieldDef.logic,
-          explicitValue: fieldDef.disabled,
-          formValue,
-        });
-        inputs['disabled'] = disabledSignal();
-      }
-    } else {
-      // Fallback to static values when rootForm is not available
-      if (fieldDef.disabled !== undefined) {
-        inputs['disabled'] = fieldDef.disabled;
-      }
-      if (fieldDef.hidden !== undefined) {
-        inputs['hidden'] = fieldDef.hidden;
-      }
-    }
-
-    return inputs;
   });
 }
