@@ -169,7 +169,7 @@ export class DynamicForm<
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Form configuration defining the structure, validation, and behavior. */
-  config: InputSignal<FormConfig<TFields>> = input.required<FormConfig<TFields>>({ alias: 'dynamic-form' });
+  config = input.required<FormConfig<TFields>>({ alias: 'dynamic-form' });
 
   /** Runtime form options that override config options when provided. */
   formOptions = input<FormOptions | undefined>(undefined);
@@ -190,62 +190,62 @@ export class DynamicForm<
   private isDestroyed = false;
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Computed Signals - Pass-through for backward compatibility
+  // Signals - Direct pass-through from state manager
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** The currently active config used for form rendering */
-  readonly activeConfig = computed(() => this.stateManager.activeConfig());
+  readonly activeConfig = this.stateManager.activeConfig;
 
   /** Current render phase: 'render' = showing form, 'teardown' = hiding old components */
-  readonly renderPhase = computed(() => this.stateManager.renderPhase());
+  readonly renderPhase = this.stateManager.renderPhase;
 
   /** Computed form mode detection with validation */
-  readonly formModeDetection = computed(() => this.stateManager.formModeDetection());
+  readonly formModeDetection = this.stateManager.formModeDetection;
 
   /** Page field definitions for paged forms */
-  readonly pageFieldDefinitions = computed(() => this.stateManager.pageFieldDefinitions());
+  readonly pageFieldDefinitions = this.stateManager.pageFieldDefinitions;
 
   /** Effective form options (merged from config and input) */
-  readonly effectiveFormOptions = computed(() => this.stateManager.effectiveFormOptions());
+  readonly effectiveFormOptions = this.stateManager.effectiveFormOptions;
 
   /** Field signal context for injection into child components */
-  readonly fieldSignalContext = computed(() => this.stateManager.fieldSignalContext());
+  readonly fieldSignalContext = this.stateManager.fieldSignalContext;
 
   /** Default values computed from field definitions */
-  readonly defaultValues = computed(() => this.stateManager.defaultValues());
+  readonly defaultValues = this.stateManager.defaultValues;
 
   /** The Angular Signal Form instance */
-  readonly form = computed(() => this.stateManager.form());
+  readonly form = this.stateManager.form;
 
   /** Current form values (reactive) */
-  readonly formValue = computed(() => this.stateManager.formValue());
+  readonly formValue = this.stateManager.formValue;
 
   /** Whether the form is currently valid */
-  readonly valid = computed(() => this.stateManager.valid());
+  readonly valid = this.stateManager.valid;
 
   /** Whether the form is currently invalid */
-  readonly invalid = computed(() => this.stateManager.invalid());
+  readonly invalid = this.stateManager.invalid;
 
   /** Whether any form field has been modified */
-  readonly dirty = computed(() => this.stateManager.dirty());
+  readonly dirty = this.stateManager.dirty;
 
   /** Whether any form field has been touched (blurred) */
-  readonly touched = computed(() => this.stateManager.touched());
+  readonly touched = this.stateManager.touched;
 
   /** Current validation errors from all fields */
-  readonly errors = computed(() => this.stateManager.errors());
+  readonly errors = this.stateManager.errors;
 
   /** Whether the form is disabled (from options or form state) */
-  readonly disabled = computed(() => this.stateManager.disabled());
+  readonly disabled = this.stateManager.disabled;
 
   /** Whether the form is currently submitting */
-  readonly submitting = computed(() => this.stateManager.submitting());
+  readonly submitting = this.stateManager.submitting;
 
   /** Collects errors from async field component loading for error boundary patterns */
-  readonly fieldLoadingErrors = computed(() => this.stateManager.fieldLoadingErrors());
+  readonly fieldLoadingErrors = this.stateManager.fieldLoadingErrors;
 
   /** Resolved fields ready for rendering */
-  protected readonly resolvedFields = computed(() => this.stateManager.resolvedFields());
+  protected readonly resolvedFields = this.stateManager.resolvedFields;
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Internal

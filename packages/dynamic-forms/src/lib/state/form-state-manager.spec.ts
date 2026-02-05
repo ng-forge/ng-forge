@@ -70,6 +70,7 @@ describe('FormStateManager', () => {
       };
 
       stateManager.initialize(deps);
+      TestBed.flushEffects(); // Flush effects to let state machine process initialization
 
       expect(stateManager.activeConfig()).toBeDefined();
     });
@@ -102,6 +103,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
     });
 
     it('should return the current config', () => {
@@ -120,6 +122,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       const detection = stateManager.formModeDetection();
       expect(detection.mode).toBe('non-paged');
@@ -141,6 +144,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       const detection = stateManager.formModeDetection();
       expect(detection.mode).toBe('paged');
@@ -161,6 +165,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       const options = stateManager.effectiveFormOptions();
       expect(options.disabled).toBe(true);
@@ -179,6 +184,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       const options = stateManager.effectiveFormOptions();
       expect(options.disabled).toBe(false);
@@ -194,6 +200,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       expect(stateManager.shouldRender()).toBe(true);
     });
@@ -208,6 +215,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       expect(stateManager.renderPhase()).toBe('render');
     });
@@ -222,6 +230,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
     });
 
     it('should provide valid signal', () => {
@@ -269,6 +278,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       const defaults = stateManager.defaultValues();
       expect(defaults).toBeDefined();
@@ -284,6 +294,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       expect(stateManager.fieldLoadingErrors()).toEqual([]);
     });
@@ -298,6 +309,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       expect(stateManager.pageFieldDefinitions()).toEqual([]);
     });
@@ -317,6 +329,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       const pages = stateManager.pageFieldDefinitions();
       expect(pages).toHaveLength(2);
@@ -338,6 +351,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       stateManager.reset();
 
@@ -357,6 +371,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       stateManager.clear();
 
@@ -376,6 +391,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       stateManager.updateValue({ name: 'Updated' });
 
@@ -392,6 +408,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       const setup = stateManager.formSetup();
       expect(setup).toBeDefined();
@@ -406,6 +423,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       const setup = stateManager.formSetup();
       expect(setup.schemaFields).toBeDefined();
@@ -421,6 +439,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       const context = stateManager.fieldSignalContext();
       expect(context).toBeDefined();
@@ -438,6 +457,7 @@ describe('FormStateManager', () => {
         fieldRegistry: mockFieldRegistry,
       };
       stateManager.initialize(deps);
+      TestBed.flushEffects();
 
       // Should not throw
       expect(() => stateManager.ngOnDestroy()).not.toThrow();

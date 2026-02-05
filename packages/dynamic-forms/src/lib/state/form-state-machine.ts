@@ -1,6 +1,7 @@
-import { DestroyRef, Injector } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { BehaviorSubject, concatMap, Observable, of, Subject } from 'rxjs';
+import { DestroyRef, Injector, signal, Signal, WritableSignal } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { concatMap, Observable, of, Subject } from 'rxjs';
+import { FormConfig } from '../models/form-config';
 import { RegisteredFieldTypes } from '../models/registry/field-registry';
 import {
   createDestroyedState,
@@ -24,7 +25,7 @@ import { SideEffectScheduler } from './side-effect-scheduler';
  *
  * @internal
  */
-export interface FormStateMachineConfig {
+export interface FormStateMachineConfig<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
   /** Injector for Angular service access */
   readonly injector: Injector;
   /** DestroyRef for cleanup */
@@ -32,15 +33,15 @@ export interface FormStateMachineConfig {
   /** Side effect scheduler for controlled timing */
   readonly scheduler: SideEffectScheduler;
   /** Callback to create form setup from config */
-  readonly createFormSetup: () => FormSetup;
+  readonly createFormSetup: (config: FormConfig<TFields>) => FormSetup<TFields>;
   /** Callback to capture current form value */
   readonly captureValue: () => Record<string, unknown>;
   /** Callback to restore form value */
-  readonly restoreValue: (values: Record<string, unknown>) => void;
-  /** Callback when state changes */
-  readonly onStateChange?: (state: FormLifecycleState) => void;
+  readonly restoreValue: (values: Record<string, unknown>, validKeys: Set<string>) => void;
+  /** Callback when form is created (for registration) */
+  readonly onFormCreated?: (formSetup: FormSetup<TFields>) => void;
   /** Callback for logging/debugging state transitions */
-  readonly onTransition?: (transition: StateTransition) => void;
+  readonly onTransition?: (transition: StateTransition<TFields>) => void;
 }
 
 /**
@@ -62,13 +63,13 @@ export interface FormStateMachineConfig {
  *
  * @example
  * ```typescript
- * const machine = new FormStateMachine({
+ * const machine = createFormStateMachine({
  *   injector,
  *   destroyRef,
  *   scheduler,
- *   createFormSetup: () => this.computeFormSetup(this.config()),
- *   captureValue: () => this.formValue(),
- *   restoreValue: (values) => this.value.update(v => ({ ...v, ...values })),
+ *   createFormSetup: (config) => computeFormSetup(config),
+ *   captureValue: () => formValue(),
+ *   restoreValue: (values, validKeys) => restoreFormValues(values, validKeys),
  * });
  *
  * // Subscribe to state changes
@@ -82,24 +83,31 @@ export interface FormStateMachineConfig {
  * @internal
  */
 export class FormStateMachine<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
-  private readonly config: FormStateMachineConfig;
+  private readonly config: FormStateMachineConfig<TFields>;
   private readonly actions$ = new Subject<FormStateAction<TFields>>();
-  private readonly _state$ = new BehaviorSubject<FormLifecycleState<TFields>>(createUninitializedState());
+  private readonly _state: WritableSignal<FormLifecycleState<TFields>>;
   private readonly _transitions$ = new Subject<StateTransition<TFields>>();
 
-  /** Observable of current state */
-  readonly state$: Observable<FormLifecycleState<TFields>> = this._state$.asObservable();
+  /** Signal of current state - use this for deriving computed signals */
+  readonly state: Signal<FormLifecycleState<TFields>>;
+
+  /** Observable of current state - for RxJS interop */
+  readonly state$: Observable<FormLifecycleState<TFields>>;
 
   /** Observable of state transitions (for debugging) */
   readonly transitions$: Observable<StateTransition<TFields>> = this._transitions$.asObservable();
 
-  /** Current state value */
+  /** Current state value (synchronous read) */
   get currentState(): FormLifecycleState<TFields> {
-    return this._state$.value;
+    return this._state();
   }
 
-  constructor(config: FormStateMachineConfig) {
+  constructor(config: FormStateMachineConfig<TFields>) {
     this.config = config;
+    this._state = signal(createUninitializedState());
+    this.state = this._state.asReadonly();
+    this.state$ = toObservable(this._state, { injector: config.injector });
+
     this.setupActionProcessing();
   }
 
@@ -139,12 +147,12 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
    *
    * This is the core of the state machine - it:
    * 1. Computes the next state based on current state + action
-   * 2. Determines required side effects
+   * 2. Updates state immediately
    * 3. Executes side effects with appropriate timing
-   * 4. Updates state after each phase
+   * 4. Dispatches follow-up actions as needed
    */
   private processAction(action: FormStateAction<TFields>): Observable<void> {
-    const currentState = this._state$.value;
+    const currentState = this._state();
     const result = this.computeTransition(currentState, action);
 
     // Record transition for debugging
@@ -157,11 +165,10 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     this._transitions$.next(transition);
     this.config.onTransition?.(transition);
 
-    // Update state
-    this._state$.next(result.state);
-    this.config.onStateChange?.(result.state);
+    // Update state immediately (synchronous)
+    this._state.set(result.state);
 
-    // Execute side effects
+    // Execute side effects (may be async)
     return this.executeSideEffects(result.sideEffects);
   }
 
@@ -204,10 +211,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     }
   }
 
-  private handleInitialize(
-    state: FormLifecycleState<TFields>,
-    config: FormStateAction<TFields>['type'] extends 'initialize' ? FormStateAction<TFields>['config'] : never,
-  ): TransitionResult<TFields> {
+  private handleInitialize(state: FormLifecycleState<TFields>, config: FormConfig<TFields>): TransitionResult<TFields> {
     // Can only initialize from uninitialized state
     if (state.type !== 'uninitialized') {
       return { state, sideEffects: [] };
@@ -219,10 +223,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     };
   }
 
-  private handleConfigChange(
-    state: FormLifecycleState<TFields>,
-    config: FormStateAction<TFields>['type'] extends 'config-change' ? FormStateAction<TFields>['config'] : never,
-  ): TransitionResult<TFields> {
+  private handleConfigChange(state: FormLifecycleState<TFields>, config: FormConfig<TFields>): TransitionResult<TFields> {
     // Handle based on current state
     if (state.type === 'uninitialized') {
       // Treat as initialize
@@ -304,10 +305,10 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
 
     // Transition complete - move to ready with new config
     // We need the formSetup here - compute it from pending config
-    const formSetup = this.config.createFormSetup();
+    const formSetup = this.config.createFormSetup(state.pendingConfig);
 
     return {
-      state: createReadyState(state.pendingConfig, formSetup as FormSetup<TFields>),
+      state: createReadyState(state.pendingConfig, formSetup),
       sideEffects: [{ type: 'clear-preserved-value' }],
     };
   }
@@ -320,7 +321,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
   }
 
   /**
-   * Executes side effects in sequence.
+   * Executes side effects in sequence using the scheduler.
    *
    * Returns an Observable that completes when all effects are done.
    * This is what makes `concatMap` work - each action's effects must
@@ -331,60 +332,81 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       return of(undefined);
     }
 
-    // Execute effects sequentially
-    return effects.reduce((chain$, effect) => chain$.pipe(concatMap(() => this.executeSideEffect(effect))), of(undefined));
+    // Execute effects sequentially using reduce + concatMap
+    return effects.reduce(
+      (chain$, effect) => chain$.pipe(concatMap(() => this.executeSideEffect(effect))),
+      of(undefined) as Observable<void>,
+    );
   }
 
   private executeSideEffect(effect: SideEffect): Observable<void> {
+    const { scheduler } = this.config;
+
     switch (effect.type) {
       case 'capture-value': {
-        return this.config.scheduler.executeBlocking(() => {
+        return scheduler.executeBlocking(() => {
           const value = this.config.captureValue();
-          // Store preserved value in state
-          const state = this._state$.value;
+          // Read current state (not the stale closure) to handle rapid config changes
+          const state = this._state();
           if (isTransitioningState(state)) {
-            this._state$.next(createTransitioningState(state.phase, state.currentConfig, state.pendingConfig, value));
+            this._state.set(createTransitioningState(state.phase, state.currentConfig, state.pendingConfig, value));
           }
         });
       }
 
       case 'wait-frame-boundary': {
-        return this.config.scheduler.executeAtFrameBoundary(() => {
+        return scheduler.executeAtFrameBoundary(() => {
           // Frame boundary reached - dispatch teardown complete
           this.dispatch({ type: 'teardown-complete' });
         });
       }
 
       case 'create-form': {
-        return this.config.scheduler.executeBlocking(() => {
-          const formSetup = this.config.createFormSetup();
-          const state = this._state$.value;
+        return scheduler.executeBlocking(() => {
+          const state = this._state();
+
+          let config: FormConfig<TFields> | undefined;
+          if (state.type === 'initializing') {
+            config = state.config;
+          } else if (isTransitioningState(state) && state.phase === 'applying') {
+            config = state.pendingConfig;
+          }
+
+          if (!config) return;
+
+          const formSetup = this.config.createFormSetup(config);
+          this.config.onFormCreated?.(formSetup);
 
           if (state.type === 'initializing') {
-            this.dispatch({ type: 'setup-complete', formSetup: formSetup as FormSetup<TFields> });
+            this.dispatch({ type: 'setup-complete', formSetup });
           } else if (isTransitioningState(state) && state.phase === 'applying') {
-            this.dispatch({ type: 'apply-complete', formSetup: formSetup as FormSetup<TFields> });
+            this.dispatch({ type: 'apply-complete', formSetup });
           }
         });
       }
 
       case 'restore-values': {
-        return this.config.scheduler.executeAfterRender(() => {
-          this.config.restoreValue(effect.values);
+        return scheduler.executeAfterRender(() => {
+          const state = this._state();
+          if (!isTransitioningState(state) || state.phase !== 'restoring') return;
+
+          // Get valid keys from the new config's form setup
+          const formSetup = this.config.createFormSetup(state.pendingConfig);
+          const validKeys = new Set(formSetup.schemaFields.map((f) => f.key).filter((key): key is string => key !== undefined));
+
+          this.config.restoreValue(effect.values, validKeys);
           this.dispatch({ type: 'restore-complete' });
         });
       }
 
       case 'clear-preserved-value': {
-        return this.config.scheduler.executeBlocking(() => {
-          // No-op - preserved value is automatically cleared on state transition
-        });
+        // No-op - preserved value is automatically cleared on state transition
+        return of(undefined);
       }
 
       case 'cleanup': {
-        return this.config.scheduler.executeBlocking(() => {
-          // Cleanup is handled by DestroyRef
-        });
+        // Cleanup is handled by DestroyRef
+        return of(undefined);
       }
 
       default:
@@ -401,6 +423,8 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
  *
  * @internal
  */
-export function createFormStateMachine<TFields extends RegisteredFieldTypes[]>(config: FormStateMachineConfig): FormStateMachine<TFields> {
+export function createFormStateMachine<TFields extends RegisteredFieldTypes[]>(
+  config: FormStateMachineConfig<TFields>,
+): FormStateMachine<TFields> {
   return new FormStateMachine(config);
 }

@@ -1,5 +1,4 @@
 import {
-  afterNextRender,
   computed,
   DestroyRef,
   inject,
@@ -16,7 +15,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { form, Schema } from '@angular/forms/signals';
-import { EMPTY, filter, forkJoin, map, Observable, of, pipe, scan, switchMap } from 'rxjs';
+import { EMPTY, filter, forkJoin, map, Observable, of, pipe, scan, switchMap, take } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 
 import { FieldDef } from '../definitions/base/field-def';
@@ -44,24 +43,9 @@ import { derivedFromDeferred } from '../utils/derived-from-deferred/derived-from
 import { reconcileFields, ResolvedField, resolveField } from '../utils/resolve-field/resolve-field';
 import { FormModeValidator } from '../utils/form-validation/form-mode-validator';
 
-import { FieldLoadingError, FormSetup } from './state-types';
-import { createSideEffectScheduler, SideEffectScheduler } from './side-effect-scheduler';
-
-/**
- * Internal state for managing two-phase config transitions.
- *
- * @internal
- */
-interface ConfigTransitionState<TFields extends RegisteredFieldTypes[]> {
-  /** The config currently being rendered */
-  activeConfig: FormConfig<TFields>;
-  /** The config waiting to be applied after teardown completes */
-  pendingConfig?: FormConfig<TFields>;
-  /** Current phase: 'render' shows components, 'teardown' hides them */
-  renderPhase: 'render' | 'teardown';
-  /** Form values preserved during transition to restore after applying new config */
-  preservedValue?: Record<string, unknown>;
-}
+import { FieldLoadingError, FormSetup, isReadyState, isTransitioningState } from './state-types';
+import { createSideEffectScheduler } from './side-effect-scheduler';
+import { createFormStateMachine, FormStateMachine } from './form-state-machine';
 
 /**
  * Dependencies for initializing the FormStateManager.
@@ -92,18 +76,15 @@ export interface FormStateManagerDeps<TFields extends RegisteredFieldTypes[] = R
  * - Field resolution and loading
  * - Event coordination
  *
- * The `DynamicFormComponent` becomes a thin wrapper that:
- * 1. Provides inputs and dependencies
- * 2. Initializes this service
- * 3. Reads signals for template rendering
+ * The state machine pattern ensures:
+ * - Deterministic state transitions via concatMap
+ * - No race conditions during rapid config changes
+ * - Clean separation between state logic and side effects
  *
  * @example
  * ```typescript
  * // In component
- * providers: [
- *   FormStateManager,
- *   ...createFormStateProviders(),
- * ]
+ * providers: [FormStateManager, ...]
  *
  * // Component reads from service
  * protected readonly stateManager = inject(FormStateManager);
@@ -136,18 +117,15 @@ export class FormStateManager<
   private readonly schemaRegistry = inject(SchemaRegistryService);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Scheduler
+  // State Machine
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly scheduler: SideEffectScheduler;
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Initialized Dependencies (set during initialize)
-  // ─────────────────────────────────────────────────────────────────────────────
-
+  /**
+   * The state machine, wrapped in a signal so computed signals
+   * re-evaluate when it's created during initialize().
+   */
+  private readonly machineSignal = signal<FormStateMachine<TFields> | null>(null);
   private deps!: FormStateManagerDeps<TFields, TModel>;
-  private isInitialized = false;
-  private isDestroyed = false;
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Memoized Functions
@@ -208,52 +186,66 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   /**
-   * Config transition state - managed via linkedSignal for reactive transitions.
-   * Initialized lazily after `initialize()` is called.
-   */
-  private configTransitionSignal!: WritableSignal<ConfigTransitionState<TFields>>;
-
-  /**
-   * Value preserved during config transition, stored separately to avoid signal cycles.
-   */
-  private readonly transitionPreservedValue = signal<Record<string, unknown> | undefined>(undefined);
-
-  /**
    * Field loading errors accumulated during resolution.
    */
   readonly fieldLoadingErrors = signal<FieldLoadingError[]>([]);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Computed Signals - Configuration
+  // Computed Signals - Derived from State Machine
   // ─────────────────────────────────────────────────────────────────────────────
 
   /**
    * The currently active config used for form rendering.
-   * During transitions, this is the OLD config until teardown completes.
+   *
+   * During config transitions, coordinates with fieldsSource to ensure:
+   * - Components are destroyed BEFORE their form fields are removed
+   * - Components are created AFTER their form fields exist
+   *
+   * Phase timing:
+   * - Teardown: OLD config (form unchanged, fieldsSource=intersection → removed components destroyed)
+   * - Applying: NEW config (form updates, fieldsSource=intersection → safe components update)
+   * - Restoring: NEW config (form ready, fieldsSource=all new → new components created)
    */
-  readonly activeConfig = computed<FormConfig<TFields> | undefined>(() => {
-    if (!this.isInitialized) return undefined;
-    return this.configTransitionSignal().activeConfig;
+  readonly activeConfig: Signal<FormConfig<TFields> | undefined> = computed(() => {
+    const machine = this.machineSignal();
+    if (!machine) return undefined;
+    const state = machine.state();
+    if (isReadyState(state)) return state.config;
+    if (isTransitioningState(state)) {
+      // teardown: old config (form unchanged, removed components being destroyed)
+      // applying: new config (form updates, safe components stay alive)
+      // restoring: new config (new components created)
+      if (state.phase === 'teardown') return state.currentConfig;
+      return state.pendingConfig; // applying or restoring
+    }
+    if (state.type === 'initializing') return state.config;
+    return undefined;
   });
 
   /**
    * Current render phase: 'render' = showing form, 'teardown' = hiding old components.
    */
-  readonly renderPhase = computed<'render' | 'teardown'>(() => {
-    if (!this.isInitialized) return 'render';
-    return this.configTransitionSignal().renderPhase;
+  readonly renderPhase: Signal<'render' | 'teardown'> = computed(() => {
+    const machine = this.machineSignal();
+    if (!machine) return 'render';
+    const state = machine.state();
+    if (isTransitioningState(state) && state.phase === 'teardown') return 'teardown';
+    return 'render';
   });
 
   /**
    * Whether to render the form template.
-   * Returns false during teardown phase to destroy old components before creating new ones.
+   *
+   * With coordinated field transitions, we always render when config is available.
+   * The `fieldsSource` signal controls which specific fields are rendered during
+   * each transition phase, ensuring components are created/destroyed at the right time.
    */
-  readonly shouldRender = computed(() => this.renderPhase() === 'render' && this.activeConfig() !== undefined);
+  readonly shouldRender: Signal<boolean> = computed(() => this.activeConfig() !== undefined);
 
   /**
    * Computed form mode detection with validation.
    */
-  readonly formModeDetection = computed<FormModeDetectionResult>(() => {
+  readonly formModeDetection: Signal<FormModeDetectionResult> = computed(() => {
     const config = this.activeConfig();
     if (!config) {
       return { mode: 'non-paged', isValid: true, errors: [] };
@@ -277,17 +269,17 @@ export class FormStateManager<
   /**
    * Effective form options (merged from config and input).
    */
-  readonly effectiveFormOptions = computed<FormOptions>(() => {
+  readonly effectiveFormOptions: Signal<FormOptions> = computed(() => {
     const config = this.activeConfig();
     const configOptions = config?.options || {};
-    const inputOptions = this.isInitialized ? this.deps.formOptions() : undefined;
+    const inputOptions = this.deps?.formOptions() ?? undefined;
     return { ...configOptions, ...inputOptions };
   });
 
   /**
    * Page field definitions (for paged forms).
    */
-  readonly pageFieldDefinitions = computed<PageField[]>(() => {
+  readonly pageFieldDefinitions: Signal<PageField[]> = computed(() => {
     const config = this.activeConfig();
     const mode = this.formModeDetection().mode;
 
@@ -302,12 +294,12 @@ export class FormStateManager<
   // Computed Signals - Form Setup
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly rawFieldRegistry = computed(() => (this.isInitialized ? this.deps.fieldRegistry.raw : new Map()));
+  private readonly rawFieldRegistry: Signal<Map<string, FieldTypeDefinition>> = computed(() => this.deps?.fieldRegistry.raw ?? new Map());
 
   /**
    * Computed form setup containing all precomputed values for form creation.
    */
-  readonly formSetup = computed<FormSetup<TFields>>(() => {
+  readonly formSetup: Signal<FormSetup<TFields>> = computed(() => {
     const config = this.activeConfig();
     const modeDetection = this.formModeDetection();
     const registry = this.rawFieldRegistry();
@@ -328,7 +320,7 @@ export class FormStateManager<
   /**
    * Default values computed from field definitions.
    */
-  readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues as TModel);
+  readonly defaultValues: WritableSignal<TModel> = linkedSignal(() => this.formSetup().defaultValues as TModel);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Entity & Form
@@ -337,8 +329,8 @@ export class FormStateManager<
   /**
    * Entity (form value merged with defaults).
    */
-  private readonly entity = linkedSignal<TModel>(() => {
-    if (!this.isInitialized) {
+  private readonly entity: WritableSignal<TModel> = linkedSignal<TModel>(() => {
+    if (!this.deps) {
       return {} as TModel;
     }
 
@@ -365,7 +357,7 @@ export class FormStateManager<
   /**
    * The Angular Signal Form instance.
    */
-  readonly form = computed<ReturnType<typeof form<TModel>>>(() => {
+  readonly form: Signal<ReturnType<typeof form<TModel>>> = computed(() => {
     return runInInjectionContext(this.injector, () => {
       const setup = this.formSetup();
       const config = this.activeConfig();
@@ -407,9 +399,9 @@ export class FormStateManager<
   /**
    * Field signal context for injection into child components.
    */
-  readonly fieldSignalContext = computed<FieldSignalContext<TModel>>(() => ({
+  readonly fieldSignalContext: Signal<FieldSignalContext<TModel>> = computed(() => ({
     injector: this.injector,
-    value: this.isInitialized ? this.deps.value : signal(undefined),
+    value: this.deps?.value ?? signal(undefined),
     defaultValues: this.defaultValues,
     form: this.form(),
   }));
@@ -419,43 +411,81 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Current form values (reactive). */
-  readonly formValue = computed(() => this.form()().value());
+  readonly formValue: Signal<Partial<TModel>> = computed(() => this.form()().value());
 
   /** Whether the form is currently valid. */
-  readonly valid = computed(() => this.form()().valid());
+  readonly valid: Signal<boolean> = computed(() => this.form()().valid());
 
   /** Whether the form is currently invalid. */
-  readonly invalid = computed(() => this.form()().invalid());
+  readonly invalid: Signal<boolean> = computed(() => this.form()().invalid());
 
   /** Whether any form field has been modified. */
-  readonly dirty = computed(() => this.form()().dirty());
+  readonly dirty: Signal<boolean> = computed(() => this.form()().dirty());
 
   /** Whether any form field has been touched (blurred). */
-  readonly touched = computed(() => this.form()().touched());
+  readonly touched: Signal<boolean> = computed(() => this.form()().touched());
 
   /** Current validation errors from all fields. */
   readonly errors = computed(() => this.form()().errors());
 
   /** Whether the form is disabled (from options or form state). */
-  readonly disabled = computed(() => {
+  readonly disabled: Signal<boolean> = computed(() => {
     const optionsDisabled = this.effectiveFormOptions().disabled;
     const formDisabled = this.form()().disabled();
     return optionsDisabled ?? formDisabled;
   });
 
   /** Whether the form is currently submitting. */
-  readonly submitting = computed(() => this.form()().submitting());
+  readonly submitting: Signal<boolean> = computed(() => this.form()().submitting());
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Field Resolution
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly fieldsSource = computed(() => this.formSetup().fields);
+  /**
+   * Phase-aware field source that coordinates component lifecycle with form updates.
+   *
+   * This ensures components are never created before their form fields exist,
+   * and are destroyed before their form fields are removed.
+   *
+   * During transitions:
+   * - Teardown: Returns intersection of old/new fields (removed components destroyed first)
+   * - Applying: Returns intersection (safe components update to new form)
+   * - Restoring: Returns all new fields (new components created after form ready)
+   */
+  private readonly fieldsSource: Signal<FieldDef<unknown>[]> = computed(() => {
+    const machine = this.machineSignal();
+    if (!machine) return [];
+
+    const state = machine.state();
+
+    if (isTransitioningState(state)) {
+      const oldFields = state.currentConfig.fields ?? [];
+      const newFields = state.pendingConfig.fields ?? [];
+      const oldKeys = new Set(oldFields.map((f) => f.key));
+      const newKeys = new Set(newFields.map((f) => f.key));
+
+      if (state.phase === 'teardown' || state.phase === 'applying') {
+        // Return intersection: only fields that exist in both configs
+        // During teardown: old form, removed components destroyed
+        // During applying: new form, safe components update
+        return oldFields.filter((f) => newKeys.has(f.key));
+      }
+
+      if (state.phase === 'restoring') {
+        // Return all new fields (new components created after form is ready)
+        return this.formSetup().fields;
+      }
+    }
+
+    // Ready state or initializing: use formSetup fields
+    return this.formSetup().fields;
+  });
 
   /**
    * Injector for field components with FIELD_SIGNAL_CONTEXT.
    */
-  private fieldInjector = computed(() =>
+  private fieldInjector: Signal<Injector> = computed(() =>
     Injector.create({
       parent: this.injector,
       providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: this.fieldSignalContext() }],
@@ -480,19 +510,44 @@ export class FormStateManager<
   /** Stream of clear events. */
   readonly cleared$: Observable<void>;
 
+  /**
+   * Observable that emits when the state machine reaches the 'ready' state.
+   *
+   * Useful for tests to await config transitions completing without arbitrary delays.
+   * Emits once per subscription when the state becomes ready.
+   *
+   * @example
+   * ```typescript
+   * fixture.componentRef.setInput('dynamic-form', newConfig);
+   * await firstValueFrom(stateManager.ready$);
+   * expect(component.formValue()).toEqual({ ... });
+   * ```
+   */
+  get ready$(): Observable<void> {
+    const machine = this.machineSignal();
+    if (!machine) {
+      // No machine yet - return observable that completes immediately
+      // This shouldn't happen in normal usage
+      return of(undefined);
+    }
+    return machine.state$.pipe(
+      filter(isReadyState),
+      take(1),
+      map(() => undefined),
+    );
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Constructor
   // ─────────────────────────────────────────────────────────────────────────────
 
   constructor() {
-    this.scheduler = createSideEffectScheduler(this.injector);
-
     // Initialize resolved fields with deferred derivation
     this.resolvedFields = derivedFromDeferred(
       this.fieldsSource,
       pipe(
         switchMap((fields) => {
-          if (!fields || fields.length === 0 || !this.isInitialized) {
+          if (!fields || fields.length === 0 || !this.deps) {
             return of([] as (ResolvedField | undefined)[]);
           }
           const context = {
@@ -575,40 +630,46 @@ export class FormStateManager<
    * @param deps - Dependencies from the DynamicForm component
    */
   initialize(deps: FormStateManagerDeps<TFields, TModel>): void {
-    if (this.isInitialized) {
+    if (this.machineSignal()) {
       this.logger.warn('FormStateManager already initialized');
       return;
     }
 
     this.deps = deps;
-    this.isInitialized = true;
 
-    // Initialize the config transition signal now that deps are available
-    this.configTransitionSignal = linkedSignal<FormConfig<TFields>, ConfigTransitionState<TFields>>({
-      source: this.deps.config,
-      computation: (newConfig, previous): ConfigTransitionState<TFields> => {
-        // First load - render immediately without teardown phase
-        if (previous === undefined) {
-          return { activeConfig: newConfig, renderPhase: 'render' };
+    // Create the scheduler and state machine
+    const scheduler = createSideEffectScheduler(this.injector);
+    const machine = createFormStateMachine<TFields>({
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      scheduler,
+      createFormSetup: (config) =>
+        this.createFormSetupFromConfig(
+          (config.fields as FieldDef<unknown>[]) ?? [],
+          detectFormMode(config.fields ?? []).mode,
+          this.rawFieldRegistry(),
+        ),
+      captureValue: () => this.formValue() as Record<string, unknown>,
+      restoreValue: (values, validKeys) => {
+        const filtered: Record<string, unknown> = {};
+        for (const [key, val] of Object.entries(values)) {
+          if (validKeys.has(key)) {
+            filtered[key] = val;
+          }
         }
-
-        const prevState = previous.value;
-
-        // If already in teardown phase, update pending config (latest wins for rapid changes)
-        if (prevState.renderPhase === 'teardown') {
-          return { ...prevState, pendingConfig: newConfig };
+        if (Object.keys(filtered).length > 0) {
+          this.deps.value.update((current) => ({ ...current, ...filtered }) as Partial<TModel>);
         }
-
-        // Start teardown phase - preservedValue will be set by effect to avoid cycles
-        return {
-          activeConfig: prevState.activeConfig,
-          pendingConfig: newConfig,
-          renderPhase: 'teardown',
-        };
+      },
+      onTransition: (transition) => {
+        this.logger.debug('State transition:', transition.from.type, '→', transition.to.type, transition.action.type);
       },
     });
 
-    // Setup effects in injection context to support explicitEffect
+    // Store the machine in a signal so computed signals re-evaluate
+    this.machineSignal.set(machine);
+
+    // Setup effects in injection context
     runInInjectionContext(this.injector, () => {
       this.setupEffects();
       this.setupEventHandlers();
@@ -623,7 +684,7 @@ export class FormStateManager<
    * Updates the form value model.
    */
   updateValue(value: Partial<TModel>): void {
-    if (this.isInitialized) {
+    if (this.deps) {
       this.deps.value.set(value);
     }
   }
@@ -634,7 +695,7 @@ export class FormStateManager<
   reset(): void {
     const defaults = this.defaultValues();
     (this.form()().value.set as (value: unknown) => void)(defaults);
-    if (this.isInitialized) {
+    if (this.deps) {
       this.deps.value.set(defaults as Partial<TModel>);
     }
   }
@@ -645,7 +706,7 @@ export class FormStateManager<
   clear(): void {
     const emptyValue = {} as Partial<TModel>;
     (this.form()().value.set as (value: unknown) => void)(emptyValue);
-    if (this.isInitialized) {
+    if (this.deps) {
       this.deps.value.set(emptyValue);
     }
   }
@@ -662,9 +723,25 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   private setupEffects(): void {
+    // Watch for config changes and dispatch to state machine
+    // This handles both initial config and subsequent changes
+    explicitEffect([this.deps.config], ([config]) => {
+      const machine = this.machineSignal();
+      if (!machine) return;
+
+      const state = machine.currentState;
+      if (state.type === 'uninitialized') {
+        // First config - initialize the state machine
+        machine.dispatch({ type: 'initialize', config });
+      } else if (state.type !== 'initializing') {
+        // Subsequent config changes
+        machine.dispatch({ type: 'config-change', config });
+      }
+    });
+
     // Sync entity changes to the value signal
     explicitEffect([this.entity], ([currentEntity]) => {
-      if (!this.isInitialized) return;
+      if (!this.deps) return;
 
       const currentValue = this.deps.value();
       if (!isEqual(currentEntity, currentValue)) {
@@ -673,62 +750,8 @@ export class FormStateManager<
     });
 
     // Clear loading errors when config changes
-    explicitEffect([computed(() => (this.isInitialized ? this.deps.config() : undefined))], () => {
+    explicitEffect([computed(() => this.deps?.config())], () => {
       this.fieldLoadingErrors.set([]);
-    });
-
-    // Config transition effect: captures value when entering teardown, then applies new config
-    explicitEffect([this.configTransitionSignal], ([state]) => {
-      if (state.renderPhase === 'teardown' && state.pendingConfig) {
-        // Capture current form value when entering teardown phase
-        const currentValue = untracked(() => this.formValue());
-        this.transitionPreservedValue.set(currentValue as Record<string, unknown>);
-
-        // afterNextRender ensures old components are destroyed before we proceed
-        afterNextRender(
-          () => {
-            // Guard against execution after component destruction
-            if (this.isDestroyed) return;
-
-            const pendingConfig = state.pendingConfig!;
-            const preservedValue = this.transitionPreservedValue();
-
-            // Transition to render phase with new config
-            this.configTransitionSignal.set({
-              activeConfig: pendingConfig,
-              renderPhase: 'render',
-            });
-
-            // Restore preserved values for fields that still exist in the new config
-            if (preservedValue) {
-              afterNextRender(
-                () => {
-                  // Guard against execution after component destruction
-                  if (this.isDestroyed) return;
-
-                  const schemaFields = untracked(() => this.formSetup().schemaFields);
-                  if (schemaFields) {
-                    const validKeys = new Set(schemaFields.map((f) => f.key).filter(Boolean));
-                    const filtered: Record<string, unknown> = {};
-                    for (const [key, val] of Object.entries(preservedValue)) {
-                      if (validKeys.has(key)) {
-                        filtered[key] = val;
-                      }
-                    }
-                    if (Object.keys(filtered).length > 0 && this.isInitialized) {
-                      this.deps.value.update((current) => ({ ...current, ...filtered }) as Partial<TModel>);
-                    }
-                  }
-                  // Clear preserved value after restoration
-                  this.transitionPreservedValue.set(undefined);
-                },
-                { injector: this.injector },
-              );
-            }
-          },
-          { injector: this.injector },
-        );
-      }
     });
   }
 
@@ -806,7 +829,7 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   ngOnDestroy(): void {
-    this.isDestroyed = true;
+    this.machineSignal()?.dispatch({ type: 'destroy' });
     this.rootFormRegistry.unregisterForm();
   }
 }

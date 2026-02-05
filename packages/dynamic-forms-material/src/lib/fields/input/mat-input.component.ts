@@ -120,6 +120,22 @@ export default class MatInputFieldComponent implements MatInputComponent {
 
   readonly effectiveSubscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');
 
+  /**
+   * Safe accessor for hidden binding that handles ngComponentOutlet timing.
+   *
+   * ngComponentOutlet creates components and runs change detection (including host bindings)
+   * BEFORE applying inputs. Since `field` is a required input, accessing it before it's set
+   * throws NG0950. This computed provides a safe default during that brief window.
+   */
+  protected readonly hiddenBinding = computed(() => {
+    try {
+      return this.field()().hidden() || null;
+    } catch {
+      // Input not set yet - return null (not hidden) during initial component creation
+      return null;
+    }
+  });
+
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
