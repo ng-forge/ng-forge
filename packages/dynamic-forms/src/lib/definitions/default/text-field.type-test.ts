@@ -4,7 +4,7 @@
 import { expectTypeOf } from 'vitest';
 import type { TextField, TextProps, TextElementType } from './text-field';
 import type { DynamicText } from '../../models/types/dynamic-text';
-import type { LogicConfig } from '../../models/logic';
+import type { NonFieldLogicConfig } from '../../core/logic/non-field-logic-resolver';
 import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
@@ -151,7 +151,7 @@ describe('TextField - Exhaustive Whitelist', () => {
     });
 
     it('logic', () => {
-      expectTypeOf<TextField['logic']>().toEqualTypeOf<LogicConfig[] | undefined>();
+      expectTypeOf<TextField['logic']>().toEqualTypeOf<NonFieldLogicConfig[] | undefined>();
     });
   });
 });
