@@ -106,3 +106,10 @@ export { isEqual } from './utils';
 
 export { setupMetaTracking } from './utils';
 export type { MetaTrackingOptions } from './utils';
+
+// =============================================================================
+// Non-Field Logic Resolvers (re-exported from @ng-forge/dynamic-forms)
+// =============================================================================
+
+export { resolveNonFieldHidden, resolveNonFieldDisabled } from '@ng-forge/dynamic-forms';
+export type { NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } from '@ng-forge/dynamic-forms';

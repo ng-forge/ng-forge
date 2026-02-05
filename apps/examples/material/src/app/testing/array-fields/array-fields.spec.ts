@@ -639,6 +639,81 @@ test.describe('Array Fields E2E Tests', () => {
     });
   });
 
+  test.describe('Button Logic (Hidden/Disabled)', () => {
+    test('should hide add button when hidden logic condition is met', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-button-hidden-logic');
+      await page.goto('/#/test/array-fields/array-button-hidden-logic');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Add button should be visible initially
+      const addButton = scenario.locator('button:has-text("Add Item")');
+      await expect(addButton).toBeVisible({ timeout: 5000 });
+
+      // Check the checkbox to trigger hidden logic
+      const checkbox = scenario.locator('mat-checkbox');
+      await checkbox.click();
+
+      // Add button should now be hidden
+      await expect(addButton).toBeHidden({ timeout: 5000 });
+
+      // Uncheck to show the button again
+      await checkbox.click();
+      await expect(addButton).toBeVisible({ timeout: 5000 });
+    });
+
+    test('should disable add button when disabled logic condition is met', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-button-disabled-logic');
+      await page.goto('/#/test/array-fields/array-button-disabled-logic');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Add button should be enabled initially
+      const addButton = scenario.locator('button:has-text("Add Item")');
+      await expect(addButton).toBeVisible({ timeout: 5000 });
+      await expect(addButton).toBeEnabled({ timeout: 5000 });
+
+      // Check the checkbox to trigger disabled logic
+      const checkbox = scenario.locator('mat-checkbox');
+      await checkbox.click();
+
+      // Add button should now be disabled
+      await expect(addButton).toBeDisabled({ timeout: 5000 });
+
+      // Uncheck to enable the button again
+      await checkbox.click();
+      await expect(addButton).toBeEnabled({ timeout: 5000 });
+    });
+
+    test('should disable remove button when items count is 1', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-button-disabled-logic');
+      await page.goto('/#/test/array-fields/array-button-disabled-logic');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // With only one item, remove button should be disabled
+      const removeButton = scenario.locator('button:has-text("Remove")');
+      await expect(removeButton).toBeDisabled({ timeout: 5000 });
+
+      // Add another item
+      const addButton = scenario.locator('button:has-text("Add Item")');
+      await addButton.click();
+
+      // Now remove buttons should be enabled
+      const removeButtons = scenario.locator('button:has-text("Remove")');
+      await expect(removeButtons).toHaveCount(2, { timeout: 5000 });
+      await expect(removeButtons.first()).toBeEnabled({ timeout: 5000 });
+      await expect(removeButtons.nth(1)).toBeEnabled({ timeout: 5000 });
+
+      // Remove one item to go back to 1
+      await removeButtons.first().click();
+
+      // Should have one item and remove button disabled again
+      await expect(removeButtons).toHaveCount(1, { timeout: 5000 });
+      await expect(removeButtons.first()).toBeDisabled({ timeout: 5000 });
+    });
+  });
+
   test.describe('Edge Cases', () => {
     test('should handle starting with an empty array', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-empty-state');

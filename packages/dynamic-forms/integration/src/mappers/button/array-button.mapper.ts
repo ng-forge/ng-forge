@@ -5,12 +5,15 @@ import {
   buildBaseInputs,
   DEFAULT_PROPS,
   InsertArrayItemEvent,
+  NonFieldLogicConfig,
   PopArrayItemEvent,
   PrependArrayItemEvent,
   RemoveAtIndexEvent,
+  RootFormRegistryService,
   ShiftArrayItemEvent,
 } from '@ng-forge/dynamic-forms';
 import { buildArrayButtonEventContext, EventArg, resolveArrayButtonContext, resolveArrayButtonEventArgs } from './array-button.utils';
+import { applyNonFieldLogic } from './non-field-logic.utils';
 
 // =============================================================================
 // Base Interfaces
@@ -38,6 +41,8 @@ export interface BaseArrayAddButtonField<TProps = unknown> {
   template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
   /** Optional custom eventArgs */
   eventArgs?: readonly EventArg[];
+  /** Logic rules for dynamic hidden/disabled state (only hidden and disabled are supported) */
+  logic?: NonFieldLogicConfig[];
 }
 
 /**
@@ -56,6 +61,8 @@ export interface BaseArrayRemoveButtonField<TProps = unknown> {
   arrayKey?: string;
   /** Optional custom eventArgs */
   eventArgs?: readonly EventArg[];
+  /** Logic rules for dynamic hidden/disabled state (only hidden and disabled are supported) */
+  logic?: NonFieldLogicConfig[];
 }
 
 /**
@@ -77,32 +84,28 @@ export interface BaseInsertArrayItemButtonField<TProps = unknown> extends BaseAr
  * Preconfigures AppendArrayItemEvent with array context.
  * Template is REQUIRED to define the field structure for new items.
  *
+ * Hidden and disabled states are resolved using non-field logic resolvers which consider:
+ * 1. Explicit `hidden: true` / `disabled: true` on the field definition
+ * 2. Field-level `logic` array with `type: 'hidden'` or `type: 'disabled'` conditions
+ *
  * @param fieldDef The add array item button field definition
  * @returns Signal containing component inputs
  */
 export function addArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
+  const rootFormRegistry = inject(RootFormRegistryService);
   const ctx = resolveArrayButtonContext(fieldDef.key, 'addArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
 
-    const inputs: Record<string, unknown> = {
+    return {
       ...baseInputs,
       event: AppendArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey', '$template']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx, fieldDef.template),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
     };
-
-    if (fieldDef.disabled !== undefined) {
-      inputs['disabled'] = fieldDef.disabled;
-    }
-
-    if (fieldDef.hidden !== undefined) {
-      inputs['hidden'] = fieldDef.hidden;
-    }
-
-    return inputs;
   });
 }
 
@@ -112,32 +115,28 @@ export function addArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButtonFie
  * Preconfigures PrependArrayItemEvent with array context.
  * Template is REQUIRED to define the field structure for new items.
  *
+ * Hidden and disabled states are resolved using non-field logic resolvers which consider:
+ * 1. Explicit `hidden: true` / `disabled: true` on the field definition
+ * 2. Field-level `logic` array with `type: 'hidden'` or `type: 'disabled'` conditions
+ *
  * @param fieldDef The prepend array item button field definition
  * @returns Signal containing component inputs
  */
 export function prependArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
+  const rootFormRegistry = inject(RootFormRegistryService);
   const ctx = resolveArrayButtonContext(fieldDef.key, 'prependArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
 
-    const inputs: Record<string, unknown> = {
+    return {
       ...baseInputs,
       event: PrependArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey', '$template']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx, fieldDef.template),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
     };
-
-    if (fieldDef.disabled !== undefined) {
-      inputs['disabled'] = fieldDef.disabled;
-    }
-
-    if (fieldDef.hidden !== undefined) {
-      inputs['hidden'] = fieldDef.hidden;
-    }
-
-    return inputs;
   });
 }
 
@@ -147,32 +146,28 @@ export function prependArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButto
  * Preconfigures InsertArrayItemEvent with array context.
  * Template and index are REQUIRED.
  *
+ * Hidden and disabled states are resolved using non-field logic resolvers which consider:
+ * 1. Explicit `hidden: true` / `disabled: true` on the field definition
+ * 2. Field-level `logic` array with `type: 'hidden'` or `type: 'disabled'` conditions
+ *
  * @param fieldDef The insert array item button field definition
  * @returns Signal containing component inputs
  */
 export function insertArrayItemButtonMapper<TProps>(fieldDef: BaseInsertArrayItemButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
+  const rootFormRegistry = inject(RootFormRegistryService);
   const ctx = resolveArrayButtonContext(fieldDef.key, 'insertArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
 
-    const inputs: Record<string, unknown> = {
+    return {
       ...baseInputs,
       event: InsertArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey', fieldDef.index, '$template']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx, fieldDef.template),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
     };
-
-    if (fieldDef.disabled !== undefined) {
-      inputs['disabled'] = fieldDef.disabled;
-    }
-
-    if (fieldDef.hidden !== undefined) {
-      inputs['hidden'] = fieldDef.hidden;
-    }
-
-    return inputs;
   });
 }
 
@@ -187,11 +182,16 @@ export function insertArrayItemButtonMapper<TProps>(fieldDef: BaseInsertArrayIte
  * - Inside array: RemoveAtIndexEvent (removes item at current index)
  * - Outside array: PopArrayItemEvent (removes last item)
  *
+ * Hidden and disabled states are resolved using non-field logic resolvers which consider:
+ * 1. Explicit `hidden: true` / `disabled: true` on the field definition
+ * 2. Field-level `logic` array with `type: 'hidden'` or `type: 'disabled'` conditions
+ *
  * @param fieldDef The remove array item button field definition
  * @returns Signal containing component inputs
  */
 export function removeArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
+  const rootFormRegistry = inject(RootFormRegistryService);
   const ctx = resolveArrayButtonContext(fieldDef.key, 'removeArrayItem', fieldDef.arrayKey);
 
   // Choose event type based on context:
@@ -203,22 +203,13 @@ export function removeArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveBut
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
 
-    const inputs: Record<string, unknown> = {
+    return {
       ...baseInputs,
       event: eventType,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, defaultEventArgs),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
     };
-
-    if (fieldDef.disabled !== undefined) {
-      inputs['disabled'] = fieldDef.disabled;
-    }
-
-    if (fieldDef.hidden !== undefined) {
-      inputs['hidden'] = fieldDef.hidden;
-    }
-
-    return inputs;
   });
 }
 
@@ -228,32 +219,28 @@ export function removeArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveBut
  * Preconfigures PopArrayItemEvent. Should be placed outside the array.
  * arrayKey is REQUIRED when placed outside an array context.
  *
+ * Hidden and disabled states are resolved using non-field logic resolvers which consider:
+ * 1. Explicit `hidden: true` / `disabled: true` on the field definition
+ * 2. Field-level `logic` array with `type: 'hidden'` or `type: 'disabled'` conditions
+ *
  * @param fieldDef The pop array item button field definition
  * @returns Signal containing component inputs
  */
 export function popArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
+  const rootFormRegistry = inject(RootFormRegistryService);
   const ctx = resolveArrayButtonContext(fieldDef.key, 'popArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
 
-    const inputs: Record<string, unknown> = {
+    return {
       ...baseInputs,
       event: PopArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
     };
-
-    if (fieldDef.disabled !== undefined) {
-      inputs['disabled'] = fieldDef.disabled;
-    }
-
-    if (fieldDef.hidden !== undefined) {
-      inputs['hidden'] = fieldDef.hidden;
-    }
-
-    return inputs;
   });
 }
 
@@ -263,31 +250,27 @@ export function popArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButton
  * Preconfigures ShiftArrayItemEvent. Should be placed outside the array.
  * arrayKey is REQUIRED when placed outside an array context.
  *
+ * Hidden and disabled states are resolved using non-field logic resolvers which consider:
+ * 1. Explicit `hidden: true` / `disabled: true` on the field definition
+ * 2. Field-level `logic` array with `type: 'hidden'` or `type: 'disabled'` conditions
+ *
  * @param fieldDef The shift array item button field definition
  * @returns Signal containing component inputs
  */
 export function shiftArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
+  const rootFormRegistry = inject(RootFormRegistryService);
   const ctx = resolveArrayButtonContext(fieldDef.key, 'shiftArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps?.());
 
-    const inputs: Record<string, unknown> = {
+    return {
       ...baseInputs,
       event: ShiftArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
     };
-
-    if (fieldDef.disabled !== undefined) {
-      inputs['disabled'] = fieldDef.disabled;
-    }
-
-    if (fieldDef.hidden !== undefined) {
-      inputs['hidden'] = fieldDef.hidden;
-    }
-
-    return inputs;
   });
 }

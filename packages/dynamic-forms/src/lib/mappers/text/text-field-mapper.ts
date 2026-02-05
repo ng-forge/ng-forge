@@ -1,47 +1,46 @@
 import { computed, inject, Signal } from '@angular/core';
 import { TextField } from '../../definitions/default/text-field';
 import { buildBaseInputs } from '../base/base-field-mapper';
-import { FunctionRegistryService } from '../../core/registry/function-registry.service';
-import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
-import { evaluateCondition } from '../../core/expressions/condition-evaluator';
-import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { DEFAULT_PROPS } from '../../models/field-signal-context.token';
+import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
+import { resolveNonFieldHidden } from '../../core/logic/non-field-logic-resolver';
 
 /**
  * Maps a text field definition to component inputs.
  *
  * Text fields are display-only fields that don't participate in the form schema.
- * This mapper handles the `logic` configuration by creating reactive signals
- * that evaluate conditions using the form value from RootFormRegistryService.
+ * This mapper handles the `logic` configuration by using the non-field-hidden resolver
+ * to evaluate conditions against the form value from RootFormRegistryService.
+ *
+ * Hidden state is resolved using the non-field-hidden resolver which considers:
+ * 1. Explicit `hidden: true` on the field definition
+ * 2. Field-level `logic` array with `type: 'hidden'` conditions
+ *
+ * Note: Text fields don't support disabled logic since they are display-only.
  *
  * @param fieldDef The text field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unknown>> {
-  const fieldContextRegistry = inject(FieldContextRegistryService);
-  const functionRegistry = inject(FunctionRegistryService);
+  const rootFormRegistry = inject(RootFormRegistryService);
   const defaultProps = inject(DEFAULT_PROPS);
-
-  // Create computed signal for hidden state based on logic configuration
-  const hiddenLogic = fieldDef.logic?.filter((l) => l.type === 'hidden') ?? [];
 
   // Return computed signal for reactive updates
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
     const inputs: Record<string, unknown> = { ...baseInputs };
+    const rootForm = rootFormRegistry.getRootForm();
 
-    // Evaluate hidden logic if present
-    if (hiddenLogic.length > 0) {
-      // Use centralized context creation for display-only components
-      const evaluationContext = fieldContextRegistry.createDisplayOnlyContext(fieldDef.key, functionRegistry.getCustomFunctions());
-
-      // Evaluate all hidden logic conditions - if ANY is true, the field is hidden
-      inputs['hidden'] = hiddenLogic.some((logic) => {
-        if (typeof logic.condition === 'boolean') {
-          return logic.condition;
-        }
-        return evaluateCondition(logic.condition as ConditionalExpression, evaluationContext);
-      });
+    // Resolve hidden state using non-field-hidden resolver (supports logic array)
+    // Text fields only support hidden logic (not disabled since they are display-only)
+    if (rootForm && (fieldDef.hidden !== undefined || fieldDef.logic?.some((l) => l.type === 'hidden'))) {
+      const hidden = resolveNonFieldHidden({
+        form: rootForm,
+        fieldLogic: fieldDef.logic,
+        explicitValue: fieldDef.hidden,
+        formValue: rootFormRegistry.getFormValue(),
+      })();
+      inputs['hidden'] = hidden;
     }
 
     return inputs;

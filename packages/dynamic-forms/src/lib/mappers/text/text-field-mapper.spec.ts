@@ -2,31 +2,28 @@ import { EnvironmentInjector, runInInjectionContext, signal } from '@angular/cor
 import { TestBed } from '@angular/core/testing';
 import { textFieldMapper } from './text-field-mapper';
 import { TextField } from '../../definitions/default/text-field';
-import { FunctionRegistryService } from '../../core/registry/function-registry.service';
-import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
+import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
 import { DEFAULT_PROPS, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { vi } from 'vitest';
 
 describe('textFieldMapper', () => {
   let parentInjector: EnvironmentInjector;
-  let mockGetCustomFunctions: ReturnType<typeof vi.fn>;
-  let mockCreateDisplayOnlyContext: ReturnType<typeof vi.fn>;
+  let mockRootFormRegistry: {
+    getRootForm: ReturnType<typeof vi.fn>;
+    getFormValue: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
-    mockGetCustomFunctions = vi.fn().mockReturnValue({});
-    mockCreateDisplayOnlyContext = vi.fn().mockImplementation((fieldPath, customFunctions) => ({
-      fieldValue: undefined,
-      formValue: {},
-      fieldPath,
-      customFunctions: customFunctions || {},
+    // Create a minimal mock form that satisfies the FieldTree interface requirements
+    const mockForm = vi.fn(() => ({
+      value: vi.fn().mockReturnValue({}),
+      valid: vi.fn().mockReturnValue(true),
+      submitting: vi.fn().mockReturnValue(false),
     }));
 
-    const mockFieldContextRegistry = {
-      createDisplayOnlyContext: mockCreateDisplayOnlyContext,
-    };
-
-    const mockFunctionRegistry = {
-      getCustomFunctions: mockGetCustomFunctions,
+    mockRootFormRegistry = {
+      getRootForm: vi.fn().mockReturnValue(mockForm),
+      getFormValue: vi.fn().mockReturnValue({}),
     };
 
     const mockFieldSignalContext = {
@@ -41,8 +38,7 @@ describe('textFieldMapper', () => {
 
     await TestBed.configureTestingModule({
       providers: [
-        { provide: FieldContextRegistryService, useValue: mockFieldContextRegistry },
-        { provide: FunctionRegistryService, useValue: mockFunctionRegistry },
+        { provide: RootFormRegistryService, useValue: mockRootFormRegistry },
         { provide: FIELD_SIGNAL_CONTEXT, useValue: mockFieldSignalContext },
         { provide: DEFAULT_PROPS, useValue: signal(undefined) },
       ],
@@ -257,12 +253,8 @@ describe('textFieldMapper', () => {
     });
 
     it('should correctly map a text field with hidden logic', () => {
-      mockCreateDisplayOnlyContext.mockImplementation((fieldPath, customFunctions) => ({
-        fieldValue: undefined,
-        formValue: { agreedToTerms: true },
-        fieldPath,
-        customFunctions: customFunctions || {},
-      }));
+      // Update mock to return form value with agreedToTerms: true
+      mockRootFormRegistry.getFormValue.mockReturnValue({ agreedToTerms: true });
 
       const textField: TextField = {
         key: 'termsAccepted',
