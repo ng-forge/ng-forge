@@ -61,26 +61,28 @@ export function applyNonFieldLogic(rootFormRegistry: RootFormRegistryService, fi
   const rootForm = rootFormRegistry.getRootForm();
 
   if (rootForm) {
-    const formValue = rootFormRegistry.getFormValue();
-
     // Resolve hidden state if explicitly set or has logic
     if (fieldDef.hidden !== undefined || fieldDef.logic?.some((l) => l.type === 'hidden')) {
-      result.hidden = resolveNonFieldHidden({
+      // Create the signal and READ IT to establish reactive dependencies
+      // The signal's computed will read form.value(), and we read the signal here,
+      // so when form value changes, this mapper's computed will re-run
+      const hiddenSignal = resolveNonFieldHidden({
         form: rootForm,
         fieldLogic: fieldDef.logic,
         explicitValue: fieldDef.hidden,
-        formValue,
-      })();
+      });
+      result.hidden = hiddenSignal();
     }
 
     // Resolve disabled state if explicitly set or has logic
     if (fieldDef.disabled !== undefined || fieldDef.logic?.some((l) => l.type === 'disabled')) {
-      result.disabled = resolveNonFieldDisabled({
+      // Create the signal and READ IT to establish reactive dependencies
+      const disabledSignal = resolveNonFieldDisabled({
         form: rootForm,
         fieldLogic: fieldDef.logic,
         explicitValue: fieldDef.disabled,
-        formValue,
-      })();
+      });
+      result.disabled = disabledSignal();
     }
   } else {
     // Fallback to static values when rootForm is not available
@@ -105,7 +107,7 @@ export function applyNonFieldLogic(rootFormRegistry: RootFormRegistryService, fi
  * NOTE: This function must be called inside a computed() context.
  *
  * @param rootForm The root form FieldTree (can be undefined)
- * @param formValue The current form value for expression evaluation
+ * @param formValue DEPRECATED: No longer used. Pass undefined or omit. Kept for backward compatibility.
  * @param fieldDef The field definition with optional hidden/logic
  * @returns The resolved hidden boolean value, or undefined if no hidden logic
  */
@@ -123,7 +125,7 @@ export function resolveHiddenValue(
       form: rootForm,
       fieldLogic: fieldDef.logic,
       explicitValue: fieldDef.hidden,
-      formValue,
+      // formValue omitted intentionally - resolver will read form.value() reactively
     })();
   }
 

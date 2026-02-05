@@ -37,7 +37,7 @@ const config = {
           type: 'hidden',
           condition: {
             type: 'javascript',
-            expression: 'hideAddButton',
+            expression: 'formValue.hideAddButton',
           },
         },
       ],

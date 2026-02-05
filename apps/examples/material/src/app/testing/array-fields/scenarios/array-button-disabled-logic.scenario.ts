@@ -35,7 +35,7 @@ const config = {
                 type: 'disabled',
                 condition: {
                   type: 'javascript',
-                  expression: 'items?.length <= 1',
+                  expression: 'formValue.items.length <= 1',
                 },
               },
             ],
@@ -60,7 +60,7 @@ const config = {
               type: 'disabled',
               condition: {
                 type: 'javascript',
-                expression: 'items?.length <= 1',
+                expression: 'formValue.items.length <= 1',
               },
             },
           ],
@@ -71,7 +71,7 @@ const config = {
           type: 'disabled',
           condition: {
             type: 'javascript',
-            expression: 'disableAddButton',
+            expression: 'formValue.disableAddButton',
           },
         },
       ],
