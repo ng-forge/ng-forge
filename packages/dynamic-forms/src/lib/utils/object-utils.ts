@@ -3,6 +3,8 @@
  * These are simple implementations for common object manipulation patterns
  */
 
+import { DynamicFormError } from '../errors/dynamic-form-error';
+
 /**
  * Performs a deep equality comparison between two values.
  *
@@ -339,4 +341,26 @@ export function getChangedKeys(
   }
 
   return changedKeys;
+}
+
+/**
+ * Compile-time exhaustiveness check for discriminated unions.
+ *
+ * Place in the `default` branch of a `switch` over a union's discriminant.
+ * TypeScript narrows the value to `never` only when every member is handled;
+ * adding a new member without a matching `case` produces a type error here.
+ *
+ * At runtime, throws if somehow reached (defensive guard).
+ *
+ * @example
+ * ```ts
+ * switch (action.type) {
+ *   case 'a': return handleA(action);
+ *   case 'b': return handleB(action);
+ *   default:  return assertNever(action);
+ * }
+ * ```
+ */
+export function assertNever(value: never): never {
+  throw new DynamicFormError(`Unexpected value: ${JSON.stringify(value)}`);
 }

@@ -43,7 +43,7 @@ import { derivedFromDeferred } from '../utils/derived-from-deferred/derived-from
 import { reconcileFields, ResolvedField, resolveField } from '../utils/resolve-field/resolve-field';
 import { FormModeValidator } from '../utils/form-validation/form-mode-validator';
 
-import { FieldLoadingError, FormSetup, isReadyState, isTransitioningState } from './state-types';
+import { Action, FieldLoadingError, FormSetup, isReadyState, isTransitioningState, LifecycleState, Phase } from './state-types';
 import { createSideEffectScheduler } from './side-effect-scheduler';
 import { createFormStateMachine, FormStateMachine } from './form-state-machine';
 
@@ -198,7 +198,7 @@ export class FormStateManager<
     // This avoids needing to dispatch synchronously during component construction (which
     // causes stack overflow in test suites with @for loops), while still making the config
     // available so logic functions work correctly.
-    if (state.type === 'uninitialized') {
+    if (state.type === LifecycleState.Uninitialized) {
       return this.deps?.config();
     }
 
@@ -208,10 +208,10 @@ export class FormStateManager<
       // applying: old config (form stays unchanged while resolvedFields settles;
       //           the state machine precomputes the new setup independently)
       // restoring: new config (form updates, new components created)
-      if (state.phase === 'teardown' || state.phase === 'applying') return state.currentConfig;
+      if (state.phase === Phase.Teardown || state.phase === Phase.Applying) return state.currentConfig;
       return state.pendingConfig; // restoring only
     }
-    if (state.type === 'initializing') return state.config;
+    if (state.type === LifecycleState.Initializing) return state.config;
     return undefined;
   });
 
@@ -222,7 +222,7 @@ export class FormStateManager<
     const machine = this.machineSignal();
     if (!machine) return 'render';
     const state = machine.state();
-    if (isTransitioningState(state) && state.phase === 'teardown') return 'teardown';
+    if (isTransitioningState(state) && state.phase === Phase.Teardown) return Phase.Teardown;
     return 'render';
   });
 
@@ -313,7 +313,7 @@ export class FormStateManager<
     }
 
     if (isTransitioningState(state)) {
-      if (state.phase === 'restoring' && state.pendingFormSetup) {
+      if (state.phase === Phase.Restoring && state.pendingFormSetup) {
         return state.pendingFormSetup;
       }
       return state.currentFormSetup;
@@ -554,14 +554,14 @@ export class FormStateManager<
         const newFields = state.pendingConfig.fields ?? [];
         const newKeys = new Set(newFields.map((f) => f.key));
 
-        if (state.phase === 'teardown' || state.phase === 'applying') {
+        if (state.phase === Phase.Teardown || state.phase === Phase.Applying) {
           // Return intersection: only fields that exist in both configs
           // During teardown: old form, removed components destroyed
           // During applying: old form still active, safe components stay alive
           return oldFields.filter((f) => newKeys.has(f.key));
         }
 
-        if (state.phase === 'restoring') {
+        if (state.phase === Phase.Restoring) {
           // Return all new fields from the pending FormSetup (new components created after form is ready)
           return state.pendingFormSetup?.fields ?? this.formSetup().fields;
         }
@@ -846,12 +846,12 @@ export class FormStateManager<
       if (!machine) return;
 
       const state = machine.currentState;
-      if (state.type === 'uninitialized') {
+      if (state.type === LifecycleState.Uninitialized) {
         // First config - initialize the state machine
-        machine.dispatch({ type: 'initialize', config });
-      } else if (state.type !== 'initializing') {
+        machine.dispatch({ type: Action.Initialize, config });
+      } else if (state.type !== LifecycleState.Initializing) {
         // Subsequent config changes
-        machine.dispatch({ type: 'config-change', config });
+        machine.dispatch({ type: Action.ConfigChange, config });
       }
     });
 
@@ -945,7 +945,7 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   ngOnDestroy(): void {
-    this.machineSignal()?.dispatch({ type: 'destroy' });
+    this.machineSignal()?.dispatch({ type: Action.Destroy });
     this.rootFormRegistry.unregisterForm();
   }
 }

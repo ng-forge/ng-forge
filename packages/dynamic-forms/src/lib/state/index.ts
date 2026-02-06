@@ -21,6 +21,18 @@ export { SideEffectScheduler, SideEffectOptions, createSideEffectScheduler } fro
 
 // State types
 export {
+  // Discriminant constants
+  LifecycleState,
+  Phase,
+  Action,
+  Effect,
+
+  // Discriminant value types
+  LifecycleStateType,
+  PhaseType,
+  ActionType,
+  EffectType,
+
   // Lifecycle states
   FormLifecycleState,
   FormLifecycleUninitialized,

@@ -4,20 +4,25 @@ import { concatMap, Observable, of, Subject } from 'rxjs';
 import { FormConfig } from '../models/form-config';
 import { RegisteredFieldTypes } from '../models/registry/field-registry';
 import {
+  Action,
   createDestroyedState,
   createInitializingState,
   createReadyState,
   createTransitioningState,
   createUninitializedState,
+  Effect,
   FormLifecycleState,
   FormSetup,
   FormStateAction,
   isReadyState,
   isTransitioningState,
+  LifecycleState,
+  Phase,
   SideEffect,
   StateTransition,
   TransitionResult,
 } from './state-types';
+import { assertNever } from '../utils/object-utils';
 import { SideEffectScheduler } from './side-effect-scheduler';
 
 /**
@@ -76,8 +81,8 @@ export interface FormStateMachineConfig<TFields extends RegisteredFieldTypes[] =
  * machine.state$.subscribe(state => console.log('State:', state.type));
  *
  * // Dispatch actions
- * machine.dispatch({ type: 'initialize', config: formConfig });
- * machine.dispatch({ type: 'config-change', config: newConfig });
+ * machine.dispatch({ type: Action.Initialize, config: formConfig });
+ * machine.dispatch({ type: Action.ConfigChange, config: newConfig });
  * ```
  *
  * @internal
@@ -174,60 +179,59 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
    */
   private computeTransition(state: FormLifecycleState<TFields>, action: FormStateAction<TFields>): TransitionResult<TFields> {
     switch (action.type) {
-      case 'initialize':
+      case Action.Initialize:
         return this.handleInitialize(state, action.config);
 
-      case 'config-change':
+      case Action.ConfigChange:
         return this.handleConfigChange(state, action.config);
 
-      case 'setup-complete':
+      case Action.SetupComplete:
         return this.handleSetupComplete(state, action.formSetup as FormSetup<TFields>);
 
-      case 'teardown-complete':
+      case Action.TeardownComplete:
         return this.handleTeardownComplete(state);
 
-      case 'apply-complete':
+      case Action.ApplyComplete:
         return this.handleApplyComplete(state, action.formSetup as FormSetup<TFields>);
 
-      case 'restore-complete':
+      case Action.RestoreComplete:
         return this.handleRestoreComplete(state);
 
-      case 'destroy':
+      case Action.Destroy:
         return this.handleDestroy();
 
       default:
-        // Unknown action - no state change
-        return { state, sideEffects: [] };
+        return assertNever(action);
     }
   }
 
   private handleInitialize(state: FormLifecycleState<TFields>, config: FormConfig<TFields>): TransitionResult<TFields> {
     // Can only initialize from uninitialized state
-    if (state.type !== 'uninitialized') {
+    if (state.type !== LifecycleState.Uninitialized) {
       return { state, sideEffects: [] };
     }
 
     return {
       state: createInitializingState(config),
-      sideEffects: [{ type: 'create-form' }],
+      sideEffects: [{ type: Effect.CreateForm }],
     };
   }
 
   private handleConfigChange(state: FormLifecycleState<TFields>, config: FormConfig<TFields>): TransitionResult<TFields> {
     // Handle based on current state
-    if (state.type === 'uninitialized') {
+    if (state.type === LifecycleState.Uninitialized) {
       // Treat as initialize
       return {
         state: createInitializingState(config),
-        sideEffects: [{ type: 'create-form' }],
+        sideEffects: [{ type: Effect.CreateForm }],
       };
     }
 
     if (isReadyState(state)) {
       // Start transition from ready state - capture formSetup from ready state
       return {
-        state: createTransitioningState('teardown', state.config, config, state.formSetup),
-        sideEffects: [{ type: 'capture-value' }, { type: 'wait-frame-boundary' }],
+        state: createTransitioningState(Phase.Teardown, state.config, config, state.formSetup),
+        sideEffects: [{ type: Effect.CaptureValue }, { type: Effect.WaitFrameBoundary }],
       };
     }
 
@@ -252,7 +256,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
 
   private handleSetupComplete(state: FormLifecycleState<TFields>, formSetup: FormSetup<TFields>): TransitionResult<TFields> {
     // Setup complete during initialization
-    if (state.type === 'initializing') {
+    if (state.type === LifecycleState.Initializing) {
       return {
         state: createReadyState(state.config, formSetup),
         sideEffects: [],
@@ -263,19 +267,25 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
   }
 
   private handleTeardownComplete(state: FormLifecycleState<TFields>): TransitionResult<TFields> {
-    if (!isTransitioningState(state) || state.phase !== 'teardown') {
+    if (!isTransitioningState(state) || state.phase !== Phase.Teardown) {
       return { state, sideEffects: [] };
     }
 
     // Move to applying phase - carry currentFormSetup through
     return {
-      state: createTransitioningState('applying', state.currentConfig, state.pendingConfig, state.currentFormSetup, state.preservedValue),
-      sideEffects: [{ type: 'create-form' }],
+      state: createTransitioningState(
+        Phase.Applying,
+        state.currentConfig,
+        state.pendingConfig,
+        state.currentFormSetup,
+        state.preservedValue,
+      ),
+      sideEffects: [{ type: Effect.CreateForm }],
     };
   }
 
   private handleApplyComplete(state: FormLifecycleState<TFields>, formSetup: FormSetup<TFields>): TransitionResult<TFields> {
-    if (!isTransitioningState(state) || state.phase !== 'applying') {
+    if (!isTransitioningState(state) || state.phase !== Phase.Applying) {
       return { state, sideEffects: [] };
     }
 
@@ -284,26 +294,26 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       // Move to restoring phase - store new formSetup as pendingFormSetup
       return {
         state: createTransitioningState(
-          'restoring',
+          Phase.Restoring,
           state.currentConfig,
           state.pendingConfig,
           state.currentFormSetup,
           state.preservedValue,
           formSetup,
         ),
-        sideEffects: [{ type: 'restore-values', values: state.preservedValue }],
+        sideEffects: [{ type: Effect.RestoreValues, values: state.preservedValue }],
       };
     }
 
     // No values to restore - go directly to ready
     return {
       state: createReadyState(state.pendingConfig, formSetup),
-      sideEffects: [{ type: 'clear-preserved-value' }],
+      sideEffects: [{ type: Effect.ClearPreservedValue }],
     };
   }
 
   private handleRestoreComplete(state: FormLifecycleState<TFields>): TransitionResult<TFields> {
-    if (!isTransitioningState(state) || state.phase !== 'restoring') {
+    if (!isTransitioningState(state) || state.phase !== Phase.Restoring) {
       return { state, sideEffects: [] };
     }
 
@@ -312,14 +322,14 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
 
     return {
       state: createReadyState(state.pendingConfig, formSetup),
-      sideEffects: [{ type: 'clear-preserved-value' }],
+      sideEffects: [{ type: Effect.ClearPreservedValue }],
     };
   }
 
   private handleDestroy(): TransitionResult<TFields> {
     return {
       state: createDestroyedState(),
-      sideEffects: [{ type: 'cleanup' }],
+      sideEffects: [{ type: Effect.Cleanup }],
     };
   }
 
@@ -346,7 +356,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     const { scheduler } = this.config;
 
     switch (effect.type) {
-      case 'capture-value': {
+      case Effect.CaptureValue: {
         return scheduler.executeBlocking(() => {
           const value = this.config.captureValue();
           // Read current state (not the stale closure) to handle rapid config changes
@@ -366,21 +376,21 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
         });
       }
 
-      case 'wait-frame-boundary': {
+      case Effect.WaitFrameBoundary: {
         return scheduler.executeAtFrameBoundary(() => {
           // Frame boundary reached - dispatch teardown complete
-          this.dispatch({ type: 'teardown-complete' });
+          this.dispatch({ type: Action.TeardownComplete });
         });
       }
 
-      case 'create-form': {
+      case Effect.CreateForm: {
         return scheduler.executeBlocking(() => {
           const state = this._state();
 
           let config: FormConfig<TFields> | undefined;
-          if (state.type === 'initializing') {
+          if (state.type === LifecycleState.Initializing) {
             config = state.config;
-          } else if (isTransitioningState(state) && state.phase === 'applying') {
+          } else if (isTransitioningState(state) && state.phase === Phase.Applying) {
             config = state.pendingConfig;
           }
 
@@ -389,40 +399,40 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
           const formSetup = this.config.createFormSetup(config);
           this.config.onFormCreated?.(formSetup);
 
-          if (state.type === 'initializing') {
-            this.dispatch({ type: 'setup-complete', formSetup });
-          } else if (isTransitioningState(state) && state.phase === 'applying') {
-            this.dispatch({ type: 'apply-complete', formSetup });
+          if (state.type === LifecycleState.Initializing) {
+            this.dispatch({ type: Action.SetupComplete, formSetup });
+          } else if (isTransitioningState(state) && state.phase === Phase.Applying) {
+            this.dispatch({ type: Action.ApplyComplete, formSetup });
           }
         });
       }
 
-      case 'restore-values': {
+      case Effect.RestoreValues: {
         return scheduler.executeAfterRender(() => {
           const state = this._state();
-          if (!isTransitioningState(state) || state.phase !== 'restoring') return;
+          if (!isTransitioningState(state) || state.phase !== Phase.Restoring) return;
 
           // Use pendingFormSetup from state instead of recomputing
           const formSetup = state.pendingFormSetup ?? this.config.createFormSetup(state.pendingConfig);
           const validKeys = new Set(formSetup.schemaFields.map((f) => f.key).filter((key): key is string => key !== undefined));
 
           this.config.restoreValue(effect.values, validKeys);
-          this.dispatch({ type: 'restore-complete' });
+          this.dispatch({ type: Action.RestoreComplete });
         });
       }
 
-      case 'clear-preserved-value': {
+      case Effect.ClearPreservedValue: {
         // No-op - preserved value is automatically cleared on state transition
         return of(undefined);
       }
 
-      case 'cleanup': {
+      case Effect.Cleanup: {
         // Cleanup is handled by DestroyRef
         return of(undefined);
       }
 
       default:
-        return of(undefined);
+        return assertNever(effect);
     }
   }
 }
