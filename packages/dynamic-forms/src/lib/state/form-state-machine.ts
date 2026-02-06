@@ -86,16 +86,12 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
   private readonly config: FormStateMachineConfig<TFields>;
   private readonly actions$ = new Subject<FormStateAction<TFields>>();
   private readonly _state: WritableSignal<FormLifecycleState<TFields>>;
-  private readonly _transitions$ = new Subject<StateTransition<TFields>>();
 
   /** Signal of current state - use this for deriving computed signals */
   readonly state: Signal<FormLifecycleState<TFields>>;
 
   /** Observable of current state - for RxJS interop */
   readonly state$: Observable<FormLifecycleState<TFields>>;
-
-  /** Observable of state transitions (for debugging) */
-  readonly transitions$: Observable<StateTransition<TFields>> = this._transitions$.asObservable();
 
   /** Current state value (synchronous read) */
   get currentState(): FormLifecycleState<TFields> {
@@ -156,14 +152,12 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     const result = this.computeTransition(currentState, action);
 
     // Record transition for debugging
-    const transition: StateTransition<TFields> = {
+    this.config.onTransition?.({
       from: currentState,
       to: result.state,
       action,
       timestamp: Date.now(),
-    };
-    this._transitions$.next(transition);
-    this.config.onTransition?.(transition);
+    });
 
     // Update state immediately (synchronous)
     this._state.set(result.state);
@@ -200,10 +194,6 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
 
       case 'destroy':
         return this.handleDestroy();
-
-      case 'value-update':
-        // Value updates don't change lifecycle state
-        return { state, sideEffects: [] };
 
       default:
         // Unknown action - no state change

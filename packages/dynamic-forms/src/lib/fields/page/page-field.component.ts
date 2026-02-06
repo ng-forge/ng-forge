@@ -3,8 +3,7 @@ import { NgComponentOutlet } from '@angular/common';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
-import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
-import { explicitEffect } from 'ngxtension/explicit-effect';
+import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils';
 import { PageField, validatePageNesting } from '../../definitions/default/page-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { EventBus } from '../../events/event.bus';
@@ -65,11 +64,7 @@ export default class PageFieldComponent {
   // Computed Signals
   // ─────────────────────────────────────────────────────────────────────────────
 
-  readonly hostClasses = computed(() => {
-    const base = 'df-field df-page-field';
-    const custom = this.className();
-    return custom ? `${base} ${custom}` : base;
-  });
+  readonly hostClasses = computed(() => computeContainerHostClasses('page-field', this.className()));
 
   readonly disabled = computed(() => this.field().disabled || false);
 
@@ -141,11 +136,6 @@ export default class PageFieldComponent {
   // ─────────────────────────────────────────────────────────────────────────────
 
   private setupEffects(): void {
-    // Emit initialization event when fields are resolved
-    explicitEffect([this.resolvedFields], ([fields]) => {
-      if (fields.length > 0) {
-        emitComponentInitialized(this.eventBus, 'page', this.field().key, this.injector);
-      }
-    });
+    setupContainerInitEffect(this.resolvedFields, this.eventBus, 'page', () => this.field().key, this.injector);
   }
 }

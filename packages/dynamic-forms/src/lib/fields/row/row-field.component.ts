@@ -1,14 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
-import { forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
-import { reconcileFields, ResolvedField, resolveField } from '../../utils/resolve-field/resolve-field';
-import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
+import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
+import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils';
 import { RowField } from '../../definitions/default/row-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { EventBus } from '../../events/event.bus';
 import { FieldDef } from '../../definitions/base/field-def';
-import { explicitEffect } from 'ngxtension/explicit-effect';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 
 /**
@@ -58,11 +56,7 @@ export default class RowFieldComponent {
   // Computed Signals
   // ─────────────────────────────────────────────────────────────────────────────
 
-  readonly hostClasses = computed(() => {
-    const base = 'df-field df-row';
-    const custom = this.className();
-    return custom ? `${base} ${custom}` : base;
-  });
+  readonly hostClasses = computed(() => computeContainerHostClasses('row', this.className()));
 
   readonly disabled = computed(() => {
     try {
@@ -78,35 +72,25 @@ export default class RowFieldComponent {
   // Field Resolution
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly fieldsSource = computed(() => this.field().fields || []);
+  private readonly fieldsSource = computed(() => (this.field().fields || []) as FieldDef<unknown>[]);
 
   protected readonly resolvedFields = derivedFromDeferred(
     this.fieldsSource,
-    pipe(
-      switchMap((fields) => {
-        if (!fields || fields.length === 0) {
-          return of([] as (ResolvedField | undefined)[]);
-        }
+    createFieldResolutionPipe(() => ({
+      loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+      registry: this.rawFieldRegistry(),
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
+        const fieldKey = fieldDef.key || '<no key>';
         const rowKey = this.field().key || '<no key>';
-        const context = {
-          loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
-          registry: this.rawFieldRegistry(),
-          injector: this.injector,
-          destroyRef: this.destroyRef,
-          onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
-            const fieldKey = fieldDef.key || '<no key>';
-            this.logger.error(
-              `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
-                `within row '${rowKey}'. Ensure the field type is registered in your field registry.`,
-              error,
-            );
-          },
-        };
-        return forkJoin(fields.map((f) => resolveField(f as FieldDef<unknown>, context)));
-      }),
-      map((fields) => fields.filter((f): f is ResolvedField => f !== undefined)),
-      scan(reconcileFields, [] as ResolvedField[]),
-    ),
+        this.logger.error(
+          `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+            `within row '${rowKey}'. Ensure the field type is registered in your field registry.`,
+          error,
+        );
+      },
+    })),
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 
@@ -123,12 +107,7 @@ export default class RowFieldComponent {
   // ─────────────────────────────────────────────────────────────────────────────
 
   private setupEffects(): void {
-    // Emit initialization event when fields are resolved
-    explicitEffect([this.resolvedFields], ([fields]) => {
-      if (fields.length > 0) {
-        emitComponentInitialized(this.eventBus, 'row', this.field().key, this.injector);
-      }
-    });
+    setupContainerInitEffect(this.resolvedFields, this.eventBus, 'row', () => this.field().key, this.injector);
   }
 }
 

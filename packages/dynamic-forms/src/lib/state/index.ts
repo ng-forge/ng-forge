@@ -6,7 +6,6 @@
  * - `FormStateMachine`: RxJS-based state machine for lifecycle management
  * - `SideEffectScheduler`: Controlled timing for side effects
  * - State types and type guards
- * - Token providers for injection
  *
  * @packageDocumentation
  */
@@ -18,13 +17,7 @@ export { FormStateManager, FormStateManagerDeps } from './form-state-manager';
 export { FormStateMachine, FormStateMachineConfig, createFormStateMachine } from './form-state-machine';
 
 // Side effect scheduler
-export {
-  SideEffectScheduler,
-  SideEffectTiming,
-  SideEffectOptions,
-  ScheduledEffect,
-  createSideEffectScheduler,
-} from './side-effect-scheduler';
+export { SideEffectScheduler, SideEffectOptions, createSideEffectScheduler } from './side-effect-scheduler';
 
 // State types
 export {
@@ -45,7 +38,6 @@ export {
   InitializeAction,
   ConfigChangeAction,
   SetupCompleteAction,
-  ValueUpdateAction,
   TeardownCompleteAction,
   ApplyCompleteAction,
   RestoreCompleteAction,
@@ -56,12 +48,10 @@ export {
   TransitionResult,
   SideEffect,
 
-  // Form state
-  FormState,
+  // Field loading errors
   FieldLoadingError,
 
   // Type guards
-  isLifecycleState,
   isReadyState,
   isTransitioningState,
 
@@ -72,6 +62,3 @@ export {
   createTransitioningState,
   createDestroyedState,
 } from './state-types';
-
-// Token providers
-export { createFormStateProviders, createFieldSignalContextProvider, createAllFormProviders } from './token-providers';

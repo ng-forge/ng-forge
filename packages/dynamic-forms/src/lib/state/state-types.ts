@@ -1,8 +1,8 @@
 import { FieldDef } from '../definitions/base/field-def';
 import { FieldTypeDefinition } from '../models/field-type';
-import { FormConfig, FormOptions } from '../models/form-config';
+import { FormConfig } from '../models/form-config';
 import { RegisteredFieldTypes } from '../models/registry/field-registry';
-import { FormMode, FormModeDetectionResult } from '../models/types/form-mode';
+import { FormMode } from '../models/types/form-mode';
 
 /**
  * Form lifecycle states representing the complete state machine for config transitions.
@@ -120,11 +120,10 @@ export interface FormSetup<TFields extends RegisteredFieldTypes[] = RegisteredFi
  *
  * @internal
  */
-export type FormStateAction<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = unknown> =
+export type FormStateAction<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> =
   | InitializeAction<TFields>
   | ConfigChangeAction<TFields>
   | SetupCompleteAction<TFields>
-  | ValueUpdateAction<TModel>
   | TeardownCompleteAction
   | ApplyCompleteAction<TFields>
   | RestoreCompleteAction
@@ -152,14 +151,6 @@ export interface ConfigChangeAction<TFields extends RegisteredFieldTypes[] = Reg
 export interface SetupCompleteAction<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
   readonly type: 'setup-complete';
   readonly formSetup: FormSetup<TFields>;
-}
-
-/**
- * Update form value (from model binding or reset).
- */
-export interface ValueUpdateAction<TModel = unknown> {
-  readonly type: 'value-update';
-  readonly value: Partial<TModel>;
 }
 
 /**
@@ -235,70 +226,6 @@ export interface FieldLoadingError {
   readonly fieldType: string;
   readonly fieldKey: string;
   readonly error: Error;
-}
-
-/**
- * Aggregate form state exposed to component template.
- * Contains all computed signals for form rendering and status.
- *
- * @internal
- */
-export interface FormState<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = unknown> {
-  /** Current lifecycle state */
-  readonly lifecycleState: FormLifecycleState<TFields>;
-
-  /** Active form config (during ready/transitioning states) */
-  readonly activeConfig: FormConfig<TFields> | undefined;
-
-  /** Computed form setup */
-  readonly formSetup: FormSetup<TFields> | undefined;
-
-  /** Current form value */
-  readonly formValue: Partial<TModel>;
-
-  /** Default values computed from field definitions */
-  readonly defaultValues: TModel;
-
-  /** Form validity state */
-  readonly valid: boolean;
-  readonly invalid: boolean;
-
-  /** Form interaction state */
-  readonly dirty: boolean;
-  readonly touched: boolean;
-
-  /** Form error state */
-  readonly errors: Record<string, unknown>;
-
-  /** Form disabled state */
-  readonly disabled: boolean;
-
-  /** Form submitting state */
-  readonly submitting: boolean;
-
-  /** Whether to render the form (false during teardown) */
-  readonly shouldRender: boolean;
-
-  /** Form mode detection result */
-  readonly formModeDetection: FormModeDetectionResult;
-
-  /** Effective form options (merged from config and input) */
-  readonly effectiveFormOptions: FormOptions;
-
-  /** Errors from loading async field components */
-  readonly fieldLoadingErrors: FieldLoadingError[];
-}
-
-/**
- * Type guard for lifecycle state types.
- *
- * @internal
- */
-export function isLifecycleState<T extends FormLifecycleState['type']>(
-  state: FormLifecycleState,
-  type: T,
-): state is Extract<FormLifecycleState, { type: T }> {
-  return state.type === type;
 }
 
 /**

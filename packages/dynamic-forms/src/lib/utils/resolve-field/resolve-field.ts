@@ -97,15 +97,12 @@ export function reconcileFields(prev: ResolvedField[], curr: ResolvedField[]): R
   return curr.map((field) => {
     const existing = prevMap.get(field.key);
 
-    if (existing && existing.component === field.component) {
-      // Same key & type - reuse existing injector, update inputs
-      return {
-        ...field,
-        injector: existing.injector,
-      };
+    if (existing && existing.component === field.component && existing.injector === field.injector) {
+      // Truly unchanged - preserve object identity for signal stability
+      return existing;
     }
 
-    // New field or type changed - use new injector
+    // New field, type changed, or context changed (new injector) - use new field
     return field;
   });
 }

@@ -37,8 +37,8 @@ import { createSchemaFromFields } from '../core/schema-builder';
 import { createFormLevelSchema } from '../core/form-schema-merger';
 import { collectCrossFieldEntries } from '../core/cross-field/cross-field-collector';
 import { flattenFields } from '../utils/flattener/field-flattener';
-import { getFieldDefaultValue } from '../utils/default-value/default-value';
-import { keyBy, memoize, isEqual } from '../utils/object-utils';
+import { memoize, isEqual } from '../utils/object-utils';
+import { createContainerFieldProcessors } from '../utils/container-utils';
 import { derivedFromDeferred } from '../utils/derived-from-deferred/derived-from-deferred';
 import { reconcileFields, ResolvedField, resolveField } from '../utils/resolve-field/resolve-field';
 import { FormModeValidator } from '../utils/form-validation/form-mode-validator';
@@ -131,17 +131,7 @@ export class FormStateManager<
   // Memoized Functions
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly memoizedFlattenFields = memoize(
-    (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry),
-    {
-      resolver: (fields, registry) => {
-        const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
-        const registryKeys = Array.from(registry.keys()).sort().join('|');
-        return `${fieldKeys}__${registryKeys}`;
-      },
-      maxSize: 10,
-    },
-  );
+  private readonly fieldProcessors = createContainerFieldProcessors();
 
   private readonly memoizedFlattenFieldsForRendering = memoize(
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry, { preserveRows: true }),
@@ -150,32 +140,6 @@ export class FormStateManager<
         const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
         const registryKeys = Array.from(registry.keys()).sort().join('|');
         return `render_${fieldKeys}__${registryKeys}`;
-      },
-      maxSize: 10,
-    },
-  );
-
-  private readonly memoizedKeyBy = memoize(<T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'), {
-    resolver: (fields) => fields.map((f) => f.key).join('|'),
-    maxSize: 10,
-  });
-
-  private readonly memoizedDefaultValues = memoize(
-    <T extends FieldDef<unknown>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) => {
-      const result: Record<string, unknown> = {};
-      for (const [key, field] of Object.entries(fieldsById)) {
-        const value = getFieldDefaultValue(field, registry);
-        if (value !== undefined) {
-          result[key] = value;
-        }
-      }
-      return result as TModel;
-    },
-    {
-      resolver: (fieldsById, registry) => {
-        const fieldKeys = Object.keys(fieldsById).sort().join('|');
-        const registryKeys = Array.from(registry.keys()).sort().join('|');
-        return `defaults_${fieldKeys}__${registryKeys}`;
       },
       maxSize: 10,
     },
@@ -817,10 +781,10 @@ export class FormStateManager<
     mode: FormMode,
     registry: Map<string, FieldTypeDefinition>,
   ): FormSetup<TFields> {
-    const flattenedFields = this.memoizedFlattenFields(fields, registry);
+    const flattenedFields = this.fieldProcessors.memoizedFlattenFields(fields, registry);
     const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(fields, registry);
-    const fieldsById = this.memoizedKeyBy(flattenedFields);
-    const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
+    const fieldsById = this.fieldProcessors.memoizedKeyBy(flattenedFields);
+    const defaultValues = this.fieldProcessors.memoizedDefaultValues(fieldsById, registry);
     const fieldsToRender = mode === 'paged' ? [] : flattenedFieldsForRendering;
 
     return {

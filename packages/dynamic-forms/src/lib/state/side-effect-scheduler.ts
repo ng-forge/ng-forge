@@ -2,17 +2,6 @@ import { afterNextRender, DestroyRef, Injector } from '@angular/core';
 import { Observable, Subscriber } from 'rxjs';
 
 /**
- * Side effect timing categories for controlled execution.
- *
- * - **blocking**: Must complete before next action processes
- * - **frame-boundary**: Synchronizes with DOM via requestAnimationFrame
- * - **after-render**: Deferred until after Angular render cycle
- *
- * @internal
- */
-export type SideEffectTiming = 'blocking' | 'frame-boundary' | 'after-render';
-
-/**
  * Options for side effect execution.
  *
  * @internal
@@ -22,18 +11,6 @@ export interface SideEffectOptions {
   readonly injector: Injector;
   /** DestroyRef for cleanup on component destruction */
   readonly destroyRef: DestroyRef;
-}
-
-/**
- * Result of a scheduled side effect.
- *
- * @internal
- */
-export interface ScheduledEffect<T = void> {
-  /** Observable that completes when effect finishes */
-  readonly completed$: Observable<T>;
-  /** Cancel the effect if not yet executed */
-  readonly cancel: () => void;
 }
 
 /**
@@ -198,60 +175,6 @@ export class SideEffectScheduler {
         cancelled = true;
       };
     });
-  }
-
-  /**
-   * Executes effects in sequence with appropriate timing.
-   *
-   * Convenience method for chaining multiple effects with different
-   * timing requirements.
-   *
-   * @param effects - Array of effect definitions with timing
-   * @returns Observable that completes when all effects finish
-   */
-  executeSequence(effects: Array<{ timing: SideEffectTiming; effect: () => void }>): Observable<void> {
-    if (effects.length === 0) {
-      return this.executeBlocking(() => undefined);
-    }
-
-    return new Observable((subscriber: Subscriber<void>) => {
-      let index = 0;
-
-      const executeNext = (): void => {
-        if (this.isDestroyed || index >= effects.length) {
-          subscriber.next();
-          subscriber.complete();
-          return;
-        }
-
-        const { timing, effect } = effects[index];
-        index++;
-
-        const executor = this.getExecutor(timing);
-        executor(() => {
-          effect();
-          executeNext();
-        }).subscribe({
-          error: (err) => subscriber.error(err),
-        });
-      };
-
-      executeNext();
-    });
-  }
-
-  /**
-   * Gets the appropriate executor for a timing category.
-   */
-  private getExecutor(timing: SideEffectTiming): <T>(effect: () => T) => Observable<T> {
-    switch (timing) {
-      case 'blocking':
-        return (effect) => this.executeBlocking(effect);
-      case 'frame-boundary':
-        return (effect) => this.executeAtFrameBoundary(effect);
-      case 'after-render':
-        return (effect) => this.executeAfterRender(effect);
-    }
   }
 }
 

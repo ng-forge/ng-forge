@@ -7,7 +7,6 @@ import {
   inject,
   Injector,
   input,
-  InputSignal,
   model,
   OnDestroy,
   Signal,
@@ -16,7 +15,6 @@ import { NgComponentOutlet } from '@angular/common';
 import { FieldTree } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
-import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, EXTERNAL_DATA, FORM_OPTIONS } from './models/field-signal-context.token';
 import { FormConfig, FormOptions } from './models/form-config';
 import { RegisteredFieldTypes } from './models/registry/field-registry';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
@@ -28,28 +26,15 @@ import { InferFormValue, isContainerField } from './models/types';
 import { flattenFields } from './utils/flattener/field-flattener';
 import { FieldDef } from './definitions/base/field-def';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService, SchemaRegistryService } from './core/registry';
-import {
-  DERIVATION_WARNING_TRACKER,
-  DERIVATION_ORCHESTRATOR,
-  createDerivationWarningTracker,
-  createDerivationOrchestrator,
-  createDerivationLogger,
-  DerivationLogger,
-  DerivationOrchestratorConfig,
-} from './core/derivation';
+import { DERIVATION_ORCHESTRATOR } from './core/derivation';
 import { PageOrchestratorComponent } from './core/page-orchestrator';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormResetEvent } from './events/constants/form-reset.event';
 import { PageChangeEvent } from './events/constants/page-change.event';
 import { PageNavigationStateChangeEvent } from './events/constants/page-navigation-state-change.event';
 import { DynamicFormLogger } from './providers/features/logger/logger.token';
-import { DERIVATION_LOG_CONFIG } from './providers/features/logger/with-logger-config';
 import { FormStateManager } from './state/form-state-manager';
-
-function derivationOrchestratorFactoryWrapper(dynamicForm: DynamicForm) {
-  return createDerivationOrchestrator(dynamicForm.derivationOrchestratorConfig);
-}
+import { provideDynamicFormDI } from './providers/dynamic-form-di';
 
 /**
  * Dynamic form component that renders a complete form based on configuration.
@@ -96,42 +81,7 @@ function derivationOrchestratorFactoryWrapper(dynamicForm: DynamicForm) {
     }
   `,
   styleUrl: './dynamic-form.component.scss',
-  providers: [
-    EventBus,
-    SchemaRegistryService,
-    FunctionRegistryService,
-    RootFormRegistryService,
-    FieldContextRegistryService,
-    FormStateManager,
-    // Form-level config tokens provided via useFactory to enable reactive updates
-    // Uses stateManager.activeConfig() to respect two-phase config transitions
-    {
-      provide: DEFAULT_PROPS,
-      useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.defaultProps),
-      deps: [FormStateManager],
-    },
-    {
-      provide: DEFAULT_VALIDATION_MESSAGES,
-      useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.defaultValidationMessages),
-      deps: [FormStateManager],
-    },
-    {
-      provide: FORM_OPTIONS,
-      useFactory: (stateManager: FormStateManager) => stateManager.effectiveFormOptions,
-      deps: [FormStateManager],
-    },
-    {
-      provide: EXTERNAL_DATA,
-      useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.externalData),
-      deps: [FormStateManager],
-    },
-    { provide: DERIVATION_WARNING_TRACKER, useFactory: createDerivationWarningTracker },
-    {
-      provide: DERIVATION_ORCHESTRATOR,
-      useFactory: derivationOrchestratorFactoryWrapper,
-      deps: [DynamicForm],
-    },
-  ],
+  providers: [provideDynamicFormDI()],
   host: {
     class: 'df-dynamic-form df-form',
     novalidate: '', // Disable browser validation - Angular Signal Forms handles validation
@@ -156,7 +106,6 @@ export class DynamicForm<
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
   private readonly logger = inject(DynamicFormLogger);
-  private readonly derivationLogConfig = inject(DERIVATION_LOG_CONFIG);
 
   /**
    * State manager that owns all form state and coordinates the form lifecycle.
@@ -266,29 +215,6 @@ export class DynamicForm<
 
     return componentCount + 1;
   });
-
-  /**
-   * Computed derivation logger based on injected config.
-   *
-   * Uses factory pattern to return no-op logger when logging is disabled,
-   * avoiding any logging overhead in production.
-   */
-  private readonly derivationLogger = computed<DerivationLogger>(() => {
-    return createDerivationLogger(this.derivationLogConfig, this.logger);
-  });
-
-  /**
-   * Configuration for the derivation orchestrator.
-   * Bundles the form-specific signals needed by the orchestrator.
-   *
-   * @internal Used by DERIVATION_ORCHESTRATOR provider.
-   */
-  readonly derivationOrchestratorConfig: DerivationOrchestratorConfig = {
-    schemaFields: computed(() => this.stateManager.formSetup()?.schemaFields as FieldDef<unknown>[] | undefined),
-    formValue: this.formValue as Signal<Record<string, unknown>>,
-    form: computed(() => this.form() as unknown as FieldTree<unknown>),
-    derivationLogger: this.derivationLogger,
-  };
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Initialization
