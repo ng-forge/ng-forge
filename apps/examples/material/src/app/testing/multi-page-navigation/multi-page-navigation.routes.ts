@@ -32,6 +32,17 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getMultiPageNavigationScenario('page-transitions') },
   },
+  // Conditional Visibility
+  {
+    path: 'page-conditional-visibility',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMultiPageNavigationScenario('page-conditional-visibility') },
+  },
+  {
+    path: 'page-dynamic-navigation',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMultiPageNavigationScenario('page-dynamic-navigation') },
+  },
 ];
 
 export default routes;

@@ -18,7 +18,7 @@ import {
   timer,
 } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
-import { EXTERNAL_DATA, FORM_OPTIONS } from '../../models/field-signal-context.token';
+import { FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { getChangedKeys } from '../../utils/object-utils';
@@ -48,6 +48,9 @@ export interface DerivationOrchestratorConfig {
 
   /** Signal containing the derivation logger */
   derivationLogger: Signal<DerivationLogger>;
+
+  /** Signal containing external data signals for expression evaluation */
+  externalData?: Signal<Record<string, Signal<unknown>> | undefined>;
 }
 
 /**
@@ -70,7 +73,6 @@ export class DerivationOrchestrator {
   private readonly warningTracker = inject(DERIVATION_WARNING_TRACKER);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly formOptions = inject(FORM_OPTIONS);
-  private readonly externalDataSignal = inject(EXTERNAL_DATA, { optional: true });
 
   /**
    * Computed signal containing the collected and validated derivations.
@@ -325,7 +327,7 @@ export class DerivationOrchestrator {
    * @returns Record of resolved external data values, or undefined if no external data.
    */
   private resolveExternalData(): Record<string, unknown> | undefined {
-    const externalDataRecord = untracked(() => this.externalDataSignal?.());
+    const externalDataRecord = untracked(() => this.config.externalData?.());
 
     if (!externalDataRecord) {
       return undefined;

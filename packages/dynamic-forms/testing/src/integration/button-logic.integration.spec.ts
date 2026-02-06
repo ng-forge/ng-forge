@@ -7,7 +7,6 @@ import { resolveSubmitButtonDisabled, resolveNextButtonDisabled, ButtonLogicCont
 import { FormOptions, FormStateCondition, LogicConfig, isFormStateCondition } from '../../models';
 import { createMockLogger } from '../mock-logger';
 import { DynamicFormLogger } from '../../../src/lib/providers/features/logger/logger.token';
-import { DYNAMIC_FORM_REF } from '../../core/registry';
 
 describe('Button Logic Integration', () => {
   let injector: Injector;
@@ -24,11 +23,7 @@ describe('Button Logic Integration', () => {
       providers: [
         FunctionRegistryService,
         FieldContextRegistryService,
-        RootFormRegistryService,
-        {
-          provide: DYNAMIC_FORM_REF,
-          useValue: { entity: mockEntity, form: mockFormSignal },
-        },
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
       ],
     });
 

@@ -3,7 +3,6 @@ import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { RootFormRegistryService } from './root-form-registry.service';
-import { DYNAMIC_FORM_REF } from './dynamic-form-ref.token';
 
 describe('RootFormRegistryService', () => {
   let service: RootFormRegistryService;
@@ -12,13 +11,7 @@ describe('RootFormRegistryService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        RootFormRegistryService,
-        {
-          provide: DYNAMIC_FORM_REF,
-          useValue: { entity: mockEntity, form: mockFormSignal },
-        },
-      ],
+      providers: [{ provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } }],
     });
 
     service = TestBed.inject(RootFormRegistryService);

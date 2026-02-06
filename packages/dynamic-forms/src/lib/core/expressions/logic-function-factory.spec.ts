@@ -3,7 +3,8 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { FieldContext } from '@angular/forms/signals';
 import { vi } from 'vitest';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService, DYNAMIC_FORM_REF } from '../registry';
+import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../registry';
+import { FormStateManager } from '../../state/form-state-manager';
 import { createLogicFunction } from './logic-function-factory';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
@@ -23,12 +24,9 @@ describe('logic-function-factory', () => {
       providers: [
         FunctionRegistryService,
         FieldContextRegistryService,
-        RootFormRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+        { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         { provide: DynamicFormLogger, useValue: mockLogger },
-        {
-          provide: DYNAMIC_FORM_REF,
-          useValue: { entity: mockEntity, form: mockFormSignal },
-        },
       ],
     });
 

@@ -18,7 +18,6 @@ import { createSchemaFromFields } from '../../core/schema-builder';
 import { vi } from 'vitest';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
-import { DYNAMIC_FORM_REF } from '../../core/registry/dynamic-form-ref.token';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 
 describe('ArrayFieldComponent', () => {
@@ -41,8 +40,7 @@ describe('ArrayFieldComponent', () => {
         provideDynamicForm(withLoggerConfig()),
         EventBus,
         FunctionRegistryService,
-        RootFormRegistryService,
-        { provide: DYNAMIC_FORM_REF, useValue: { entity: mockEntity, form: mockFormSignal } },
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
         {
           provide: FIELD_REGISTRY,
           useValue: registry,
@@ -486,8 +484,7 @@ describe('ArrayFieldComponent', () => {
           provideDynamicForm(),
           EventBus,
           FunctionRegistryService,
-          RootFormRegistryService,
-          { provide: DYNAMIC_FORM_REF, useValue: { entity: mockEntity, form: mockFormSignal } },
+          { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
           {
             provide: FIELD_REGISTRY,
             useValue: registry,

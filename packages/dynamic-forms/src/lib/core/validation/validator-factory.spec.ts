@@ -3,7 +3,8 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { form, schema } from '@angular/forms/signals';
 import { ValidatorConfig } from '../../models/validation/validator-config';
-import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService, DYNAMIC_FORM_REF } from '../registry';
+import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
+import { FormStateManager } from '../../state/form-state-manager';
 import { applyValidator, applyValidators } from './validator-factory';
 
 describe('validator-factory', () => {
@@ -14,13 +15,10 @@ describe('validator-factory', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        RootFormRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+        { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         FunctionRegistryService,
         FieldContextRegistryService,
-        {
-          provide: DYNAMIC_FORM_REF,
-          useValue: { entity: mockEntity, form: mockFormSignal },
-        },
       ],
     });
 

@@ -2,7 +2,8 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { type FieldContext, form, schema } from '@angular/forms/signals';
 import { createDynamicValueFunction } from './dynamic-value-factory';
-import { FieldContextRegistryService, RootFormRegistryService, DYNAMIC_FORM_REF } from '../registry';
+import { FieldContextRegistryService, RootFormRegistryService } from '../registry';
+import { FormStateManager } from '../../state/form-state-manager';
 
 describe('dynamic-value-factory (integration)', () => {
   const mockEntity = signal<Record<string, unknown>>({});
@@ -13,12 +14,9 @@ describe('dynamic-value-factory (integration)', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        RootFormRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+        { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         FieldContextRegistryService,
-        {
-          provide: DYNAMIC_FORM_REF,
-          useValue: { entity: mockEntity, form: mockFormSignal },
-        },
       ],
     });
 

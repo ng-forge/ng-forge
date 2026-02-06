@@ -4,13 +4,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { form, schema } from '@angular/forms/signals';
 import { FieldDef } from '../definitions/base/field-def';
 import { FieldWithValidation } from '../definitions/base/field-with-validation';
-import {
-  RootFormRegistryService,
-  FunctionRegistryService,
-  FieldContextRegistryService,
-  SchemaRegistryService,
-  DYNAMIC_FORM_REF,
-} from './registry';
+import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService, SchemaRegistryService } from './registry';
+import { FormStateManager } from '../state/form-state-manager';
 import { mapFieldToForm } from './form-mapping';
 
 describe('form-mapping', () => {
@@ -21,14 +16,11 @@ describe('form-mapping', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        RootFormRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+        { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         FunctionRegistryService,
         FieldContextRegistryService,
         SchemaRegistryService,
-        {
-          provide: DYNAMIC_FORM_REF,
-          useValue: { entity: mockEntity, form: mockFormSignal },
-        },
       ],
     });
 

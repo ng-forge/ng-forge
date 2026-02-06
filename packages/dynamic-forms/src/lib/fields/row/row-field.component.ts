@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injec
 import { NgComponentOutlet } from '@angular/common';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
-import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils';
+import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
 import { RowField } from '../../definitions/default/row-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { EventBus } from '../../events/event.bus';

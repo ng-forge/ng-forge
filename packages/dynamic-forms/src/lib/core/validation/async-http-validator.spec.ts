@@ -3,7 +3,8 @@ import { Injector, runInInjectionContext, signal, ResourceStatus } from '@angula
 import { beforeEach, describe, expect, it, vi, Mock } from 'vitest';
 import { form, schema, FieldContext } from '@angular/forms/signals';
 import { AsyncValidatorConfig, HttpValidatorConfig } from '../../models/validation/validator-config';
-import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService, DYNAMIC_FORM_REF } from '../registry';
+import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
+import { FormStateManager } from '../../state/form-state-manager';
 import { applyValidator } from './validator-factory';
 import { AsyncCustomValidator, HttpCustomValidator } from './validator-types';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
@@ -27,15 +28,12 @@ describe('Async and HTTP Validator Integration', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        RootFormRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+        { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         FunctionRegistryService,
         FieldContextRegistryService,
         // Provide ConsoleLogger to enable logging in tests
         { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
-        {
-          provide: DYNAMIC_FORM_REF,
-          useValue: { entity: mockEntity, form: mockFormSignal },
-        },
       ],
     });
 

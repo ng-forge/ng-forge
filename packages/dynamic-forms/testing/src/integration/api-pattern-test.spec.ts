@@ -4,7 +4,6 @@ import { form, schema } from '@angular/forms/signals';
 import { applyLogic } from '../../core/logic/logic-applicator';
 import { LogicConfig } from '../../models/logic';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
-import { DYNAMIC_FORM_REF } from '../../core/registry';
 
 /**
  * This test file confirms the correct API pattern for accessing
@@ -20,11 +19,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
       providers: [
         FunctionRegistryService,
         FieldContextRegistryService,
-        RootFormRegistryService,
-        {
-          provide: DYNAMIC_FORM_REF,
-          useValue: { entity: mockEntity, form: mockFormSignal },
-        },
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
       ],
     });
 

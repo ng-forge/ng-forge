@@ -1,6 +1,6 @@
 import { DestroyRef, Injector, signal, Signal, WritableSignal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { concatMap, Observable, of, Subject } from 'rxjs';
+import { catchError, concatMap, EMPTY, Observable, of, Subject } from 'rxjs';
 import { FormConfig } from '../models/form-config';
 import { RegisteredFieldTypes } from '../models/registry/field-registry';
 import {
@@ -136,7 +136,14 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
   private setupActionProcessing(): void {
     this.actions$
       .pipe(
-        concatMap((action) => this.processAction(action)),
+        concatMap((action) =>
+          this.processAction(action).pipe(
+            catchError((error) => {
+              console.error(`[FormStateMachine] Action '${action.type}' failed:`, error);
+              return EMPTY;
+            }),
+          ),
+        ),
         takeUntilDestroyed(this.config.destroyRef),
       )
       .subscribe();

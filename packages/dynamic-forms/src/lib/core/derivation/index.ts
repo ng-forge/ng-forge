@@ -9,12 +9,6 @@ export type {
 
 export { createEmptyDerivationCollection, createDerivationChainContext, createDerivationKey, parseDerivationKey } from './derivation-types';
 
-// Tokens
-export { DERIVATION_ENTRIES } from './derivation-tokens';
-
-// Lookup
-export { DerivationLookup } from './derivation-lookup';
-
 // Collector
 export { collectDerivations } from './derivation-collector';
 
@@ -44,7 +38,7 @@ export { createDefaultDerivationLogConfig } from './derivation-logger';
 
 // Derivation Logger Service
 export type { DerivationLogger } from './derivation-logger.service';
-export { DERIVATION_LOGGER, createDerivationLogger } from './derivation-logger.service';
+export { createDerivationLogger } from './derivation-logger.service';
 
 // Derivation Orchestrator
 export type { DerivationOrchestratorConfig } from './derivation-orchestrator';

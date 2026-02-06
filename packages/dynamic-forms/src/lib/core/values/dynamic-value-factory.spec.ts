@@ -3,7 +3,8 @@ import { FieldContext, FieldTree } from '@angular/forms/signals';
 import { signal, Injector, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { createDynamicValueFunction } from './dynamic-value-factory';
-import { RootFormRegistryService, FieldContextRegistryService, DYNAMIC_FORM_REF } from '../registry';
+import { RootFormRegistryService, FieldContextRegistryService } from '../registry';
+import { FormStateManager } from '../../state/form-state-manager';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { ConsoleLogger } from '../../providers/features/logger/console-logger';
 
@@ -15,14 +16,11 @@ describe('dynamic-value-factory', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        RootFormRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+        { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         FieldContextRegistryService,
         // Provide ConsoleLogger to enable logging in tests
         { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
-        {
-          provide: DYNAMIC_FORM_REF,
-          useValue: { entity: mockEntity, form: mockFormSignal },
-        },
       ],
     });
 

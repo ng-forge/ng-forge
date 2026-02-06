@@ -6,7 +6,6 @@ import { mapFieldToForm } from '../../core/form-mapping';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService, SchemaRegistryService } from '../../core/registry';
-import { DYNAMIC_FORM_REF } from '../../core/registry';
 
 describe('Form Mapping Pipeline Integration (End-to-End)', () => {
   let injector: Injector;
@@ -19,12 +18,8 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       providers: [
         FunctionRegistryService,
         FieldContextRegistryService,
-        RootFormRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
         SchemaRegistryService,
-        {
-          provide: DYNAMIC_FORM_REF,
-          useValue: { entity: mockEntity, form: mockFormSignal },
-        },
       ],
     });
 

@@ -5,13 +5,13 @@ import { emitComponentInitialized, InitializationComponentType } from '../emit-i
 import { ResolvedField } from '../resolve-field/resolve-field';
 
 /**
- * Creates a computed host class string for a container component.
+ * Computes the host class string for a container component.
  *
  * All containers follow the pattern: `df-field df-{type}` + optional custom class.
  *
  * @param containerType - The CSS class suffix (e.g., 'group', 'row', 'page-field')
- * @param classNameFn - Function returning the optional custom class name
- * @returns A function that computes the full host class string
+ * @param className - Optional custom class name to append
+ * @returns The computed host class string
  */
 export function computeContainerHostClasses(containerType: string, className: string | undefined): string {
   const base = `df-field df-${containerType}`;

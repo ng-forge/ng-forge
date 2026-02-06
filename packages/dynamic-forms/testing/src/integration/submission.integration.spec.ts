@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, submit, FieldTree, TreeValidationResult } from '@angular/forms/signals';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
-import { DYNAMIC_FORM_REF } from '../../core/registry';
 import { firstValueFrom, isObservable, of, Subject, throwError, timer } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 
@@ -30,11 +29,7 @@ describe('Form Submission Integration', () => {
       providers: [
         FunctionRegistryService,
         FieldContextRegistryService,
-        RootFormRegistryService,
-        {
-          provide: DYNAMIC_FORM_REF,
-          useValue: { entity: mockEntity, form: mockFormSignal },
-        },
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
       ],
     });
 

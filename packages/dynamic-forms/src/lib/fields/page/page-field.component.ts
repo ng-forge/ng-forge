@@ -3,7 +3,7 @@ import { NgComponentOutlet } from '@angular/common';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
-import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils';
+import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
 import { PageField, validatePageNesting } from '../../definitions/default/page-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { EventBus } from '../../events/event.bus';

@@ -1,7 +1,7 @@
-import { inject, Injectable, isSignal, Signal, untracked } from '@angular/core';
+import { computed, inject, Injectable, isSignal, Signal, untracked } from '@angular/core';
 import { ChildFieldContext, FieldContext } from '@angular/forms/signals';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
-import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
+import { FormStateManager } from '../../state/form-state-manager';
 import { RootFormRegistryService } from './root-form-registry.service';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 
@@ -20,7 +20,8 @@ function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is 
 export class FieldContextRegistryService {
   private rootFormRegistry = inject(RootFormRegistryService);
   private logger = inject(DynamicFormLogger);
-  private externalDataSignal = inject(EXTERNAL_DATA, { optional: true });
+  private stateManager = inject(FormStateManager);
+  private externalDataSignal = computed(() => this.stateManager.activeConfig()?.externalData);
 
   /**
    * Creates an evaluation context for a field by combining:
@@ -77,7 +78,7 @@ export class FieldContextRegistryService {
    * @returns Record of resolved external data values, or undefined if no external data.
    */
   private resolveExternalData(reactive: boolean): Record<string, unknown> | undefined {
-    const externalDataRecord = reactive ? this.externalDataSignal?.() : untracked(() => this.externalDataSignal?.());
+    const externalDataRecord = reactive ? this.externalDataSignal() : untracked(() => this.externalDataSignal());
 
     if (!externalDataRecord) {
       return undefined;

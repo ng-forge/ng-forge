@@ -5,13 +5,8 @@ import { form, schema } from '@angular/forms/signals';
 import { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas';
 import { FieldDef } from '../definitions/base/field-def';
 import { FieldTypeDefinition } from '../models/field-type';
-import {
-  SchemaRegistryService,
-  FunctionRegistryService,
-  FieldContextRegistryService,
-  RootFormRegistryService,
-  DYNAMIC_FORM_REF,
-} from './registry';
+import { SchemaRegistryService, FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from './registry';
+import { FormStateManager } from '../state/form-state-manager';
 import { applySchema, createSchemaFunction } from './schema-application';
 import { createSchemaFromFields, fieldsToDefaultValues } from './schema-builder';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
@@ -29,14 +24,11 @@ describe('schema-transformation', () => {
       providers: [
         SchemaRegistryService,
         FunctionRegistryService,
-        RootFormRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+        { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         FieldContextRegistryService,
         // Provide ConsoleLogger to enable logging in tests
         { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
-        {
-          provide: DYNAMIC_FORM_REF,
-          useValue: { entity: mockEntity, form: mockFormSignal },
-        },
       ],
     });
 

@@ -5,9 +5,8 @@ import { FieldContextRegistryService } from '../core/registry/field-context-regi
 import { FunctionRegistryService } from '../core/registry/function-registry.service';
 import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
-import { DYNAMIC_FORM_REF } from '../core/registry/dynamic-form-ref.token';
 import { FormStateManager } from '../state/form-state-manager';
-import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, EXTERNAL_DATA, FORM_OPTIONS } from '../models/field-signal-context.token';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FORM_OPTIONS } from '../models/field-signal-context.token';
 import { DERIVATION_WARNING_TRACKER, createDerivationWarningTracker } from '../core/derivation/derivation-warning-tracker';
 import {
   DERIVATION_ORCHESTRATOR,
@@ -40,14 +39,14 @@ export function provideDynamicFormDI(): Provider[] {
     FunctionRegistryService,
     FormStateManager,
     {
-      provide: DYNAMIC_FORM_REF,
-      useFactory: (stateManager: FormStateManager) => ({
-        entity: stateManager.entity,
-        form: computed(() => stateManager.form()),
-      }),
+      provide: RootFormRegistryService,
+      useFactory: (stateManager: FormStateManager) =>
+        new RootFormRegistryService(
+          stateManager.formValue as Signal<Record<string, unknown>>,
+          computed(() => stateManager.form()),
+        ),
       deps: [FormStateManager],
     },
-    RootFormRegistryService,
     FieldContextRegistryService,
     {
       provide: DEFAULT_PROPS,
@@ -64,11 +63,6 @@ export function provideDynamicFormDI(): Provider[] {
       useFactory: (stateManager: FormStateManager) => stateManager.effectiveFormOptions,
       deps: [FormStateManager],
     },
-    {
-      provide: EXTERNAL_DATA,
-      useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.externalData),
-      deps: [FormStateManager],
-    },
     { provide: DERIVATION_WARNING_TRACKER, useFactory: createDerivationWarningTracker },
     {
       provide: DERIVATION_ORCHESTRATOR,
@@ -80,6 +74,7 @@ export function provideDynamicFormDI(): Provider[] {
           // TypeScript can't prove compatibility due to generic erasure between form<TModel> and FieldTree<unknown>.
           form: computed(() => stateManager.form() as unknown as FieldTree<unknown>),
           derivationLogger: computed(() => createDerivationLogger(logConfig, logger)),
+          externalData: computed(() => stateManager.activeConfig()?.externalData),
         };
         return createDerivationOrchestrator(config);
       },

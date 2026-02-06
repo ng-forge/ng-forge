@@ -7,7 +7,6 @@ import { take, toArray, skip } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 import { EMIT_FORM_VALUE_ON_EVENTS } from '../providers/features/event-form-value/emit-form-value.token';
 import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
-import { DYNAMIC_FORM_REF } from '../core/registry/dynamic-form-ref.token';
 import { FORM_OPTIONS } from '../models/field-signal-context.token';
 
 // Test event classes
@@ -776,9 +775,8 @@ describe('EventBus Form Value Emission', () => {
       TestBed.configureTestingModule({
         providers: [
           EventBus,
-          RootFormRegistryService,
+          { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
           { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true },
-          { provide: DYNAMIC_FORM_REF, useValue: { entity: mockEntity, form: mockFormSignal } },
         ],
       });
       eventBus = TestBed.inject(EventBus);
@@ -829,9 +827,8 @@ describe('EventBus Form Value Emission', () => {
       TestBed.configureTestingModule({
         providers: [
           EventBus,
-          RootFormRegistryService,
+          { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
           { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: false },
-          { provide: DYNAMIC_FORM_REF, useValue: { entity: mockEntity, form: mockFormSignal } },
           { provide: FORM_OPTIONS, useValue: signal({ emitFormValueOnEvents: true }) },
         ],
       });
@@ -848,9 +845,8 @@ describe('EventBus Form Value Emission', () => {
       TestBed.configureTestingModule({
         providers: [
           EventBus,
-          RootFormRegistryService,
+          { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
           { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true },
-          { provide: DYNAMIC_FORM_REF, useValue: { entity: mockEntity, form: mockFormSignal } },
           { provide: FORM_OPTIONS, useValue: signal({ emitFormValueOnEvents: false }) },
         ],
       });
@@ -867,9 +863,8 @@ describe('EventBus Form Value Emission', () => {
       TestBed.configureTestingModule({
         providers: [
           EventBus,
-          RootFormRegistryService,
+          { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
           { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true },
-          { provide: DYNAMIC_FORM_REF, useValue: { entity: mockEntity, form: mockFormSignal } },
           { provide: FORM_OPTIONS, useValue: signal({}) },
         ],
       });
@@ -924,9 +919,8 @@ describe('EventBus Form Value Emission', () => {
       TestBed.configureTestingModule({
         providers: [
           EventBus,
-          RootFormRegistryService,
+          { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
           { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true },
-          { provide: DYNAMIC_FORM_REF, useValue: { entity: mockEntity, form: mockFormSignal } },
         ],
       });
       const eventBus = TestBed.inject(EventBus);

@@ -6,7 +6,6 @@ import type { SchemaPath } from '@angular/forms/signals';
 import { applyValidator, applyValidators } from '../../core/validation/validator-factory';
 import { ValidatorConfig } from '../../models/validation/validator-config';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
-import { DYNAMIC_FORM_REF } from '../../core/registry';
 
 describe('Validator Transformation Pipeline Integration', () => {
   let injector: Injector;
@@ -18,11 +17,7 @@ describe('Validator Transformation Pipeline Integration', () => {
       providers: [
         FunctionRegistryService,
         FieldContextRegistryService,
-        RootFormRegistryService,
-        {
-          provide: DYNAMIC_FORM_REF,
-          useValue: { entity: mockEntity, form: mockFormSignal },
-        },
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
       ],
     });
 

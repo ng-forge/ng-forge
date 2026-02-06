@@ -168,7 +168,9 @@ export class SideEffectScheduler {
         { injector: this.injector },
       );
 
-      // Cleanup on unsubscribe
+      // Cleanup on unsubscribe: sets the local AbortSignal so the callback no-ops.
+      // Note: afterNextRender callbacks cannot be deregistered once scheduled.
+      // The AbortSignal suppresses the effect output, but the callback still fires as a no-op.
       return () => {
         local.abort();
       };
