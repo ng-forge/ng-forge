@@ -7,6 +7,7 @@
 @use 'ember-bs' as ember-bs;
 @use 'examples' as examples;
 @use 'tokens' as *;
+@use 'form-defaults' as df;
 
 // Import Bootstrap with our color overrides
 @use 'bootstrap/scss/bootstrap' with (
@@ -36,6 +37,7 @@
 // Light theme (default)
 :root {
   @include ember-bs.bootstrap-theme-light();
+  @include df.apply-bootstrap-form-defaults;
 }
 
 // Bootstrap-specific body font

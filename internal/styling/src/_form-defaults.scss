@@ -1,0 +1,170 @@
+// ============================================
+// DYNAMIC FORMS CSS VARIABLE DEFAULTS
+// ============================================
+// These defaults are for ng-forge examples/docs only.
+// Library consumers can define their own values for these
+// CSS variables to customize form behavior.
+//
+// The library packages expose CSS variables without defaults,
+// allowing complete customization. These mixins provide
+// sensible defaults for the ng-forge example apps.
+
+@use 'tokens' as *;
+
+// ============================================
+// CORE GRID DEFAULTS
+// ============================================
+// Used by grid-system.scss in @ng-forge/dynamic-forms
+
+@mixin form-grid-defaults {
+  // Grid Configuration
+  --df-grid-columns: 12;
+  --df-grid-gap: 0.5rem;
+  --df-grid-row-gap: 0.5rem;
+
+  // Responsive Breakpoints (informational - media queries are hardcoded)
+  --df-breakpoint-sm: 576px;
+  --df-breakpoint-md: 768px;
+  --df-breakpoint-lg: 992px;
+  --df-breakpoint-xl: 1200px;
+
+  // Responsive Gap Adjustments
+  --df-grid-gap-sm: 0.5rem;
+  --df-grid-gap-md: 0.5rem;
+  --df-grid-gap-lg: 0.5rem;
+  --df-grid-gap-xl: 0.5rem;
+
+  // Responsive Row Gap Adjustments
+  --df-grid-row-gap-sm: 0.5rem;
+  --df-grid-row-gap-md: 0.5rem;
+  --df-grid-row-gap-lg: 0.5rem;
+  --df-grid-row-gap-xl: 0.5rem;
+
+  // Group Field Styling
+  --df-group-gap: var(--df-grid-gap);
+  --df-group-padding: var(--df-grid-gap);
+
+  // Disabled State
+  --df-disabled-opacity: 0.6;
+
+  // Focus Styling (ember-themed for ng-forge)
+  --df-focus-color: #{$ember-core};
+}
+
+// ============================================
+// PAGE FIELD DEFAULTS
+// ============================================
+// Used by page-field.component.scss
+
+@mixin form-page-defaults {
+  --df-page-custom-spacing: 1.5rem;
+  --df-page-transition-duration: 0.3s;
+  --df-page-transition-timing: ease-in-out;
+  --df-page-slide-offset: -10px;
+}
+
+// ============================================
+// MATERIAL FORM FIELD DEFAULTS
+// ============================================
+// Used by @ng-forge/dynamic-forms-material
+
+@mixin form-material-defaults {
+  --df-field-gap: 0.5rem;
+  --df-label-font-weight: 500;
+  --df-label-color: inherit;
+  --df-hint-color: rgba(0, 0, 0, 0.6);
+  --df-hint-font-size: 0.875rem;
+  --df-error-color: #f44336;
+  --df-error-font-size: 0.875rem;
+}
+
+@mixin form-material-defaults-dark {
+  --df-hint-color: rgba(255, 255, 255, 0.7);
+  --df-error-color: #ff6b6b;
+}
+
+// ============================================
+// BOOTSTRAP FORM FIELD DEFAULTS
+// ============================================
+// Used by @ng-forge/dynamic-forms-bootstrap
+
+@mixin form-bootstrap-defaults {
+  --df-field-gap: 0.5rem;
+  --df-label-font-weight: 500;
+  --df-label-color: inherit;
+  --df-hint-color: var(--bs-secondary-color, #6c757d);
+  --df-hint-font-size: 0.875rem;
+  --df-error-color: var(--bs-danger, #dc3545);
+  --df-error-font-size: 0.875rem;
+
+  // Bootstrap-specific spacing
+  --df-bs-field-margin-bottom: 1rem;
+  --df-bs-field-with-hint-margin-bottom: 0.5rem;
+  --df-bs-hint-margin-top: 0.25rem;
+}
+
+// ============================================
+// IONIC FORM FIELD DEFAULTS
+// ============================================
+// Used by @ng-forge/dynamic-forms-ionic
+
+@mixin form-ionic-defaults {
+  --df-field-gap: 0.5rem;
+  --df-label-font-weight: 500;
+  --df-label-color: inherit;
+  --df-hint-color: var(--ion-color-medium, #92949c);
+  --df-hint-font-size: 0.875rem;
+  --df-error-color: var(--ion-color-danger, #eb445a);
+  --df-error-font-size: 0.875rem;
+}
+
+// ============================================
+// PRIMENG FORM FIELD DEFAULTS
+// ============================================
+// Used by @ng-forge/dynamic-forms-primeng
+
+@mixin form-primeng-defaults {
+  --df-field-gap: 0.5rem;
+  --df-label-font-weight: 500;
+  --df-label-color: inherit;
+  --df-hint-color: var(--p-text-muted-color, #6c757d);
+  --df-hint-font-size: 0.875rem;
+  --df-error-color: var(--p-red-500, #ef4444);
+  --df-error-font-size: 0.875rem;
+
+  // PrimeNG-specific spacing
+  --df-prime-error-margin-top: 0.25rem;
+}
+
+// ============================================
+// COMBINED APPLICATION MIXINS
+// ============================================
+// Convenience mixins that apply all relevant defaults
+
+/// Apply all form defaults for Material apps
+@mixin apply-material-form-defaults {
+  @include form-grid-defaults;
+  @include form-page-defaults;
+  @include form-material-defaults;
+}
+
+/// Apply all form defaults for Bootstrap apps
+@mixin apply-bootstrap-form-defaults {
+  @include form-grid-defaults;
+  @include form-page-defaults;
+  @include form-bootstrap-defaults;
+}
+
+/// Apply all form defaults for Ionic apps
+@mixin apply-ionic-form-defaults {
+  @include form-grid-defaults;
+  @include form-page-defaults;
+  @include form-ionic-defaults;
+}
+
+/// Apply all form defaults for PrimeNG apps
+@mixin apply-primeng-form-defaults {
+  @include form-grid-defaults;
+  @include form-page-defaults;
+  @include form-primeng-defaults;
+}

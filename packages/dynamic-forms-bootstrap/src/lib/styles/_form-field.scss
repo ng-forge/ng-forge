@@ -2,33 +2,22 @@
  * Bootstrap Form Field Styling
  *
  * Customizable styles for Bootstrap form field components.
- * Override CSS variables to customize:
+ * CSS variables (must be defined by consumer or via defaults):
  *
- * --df-field-gap: gap between label, input, and hint (default: 0.5rem)
- * --df-label-font-weight: label font weight (default: 500)
- * --df-label-color: label text color (default: inherit)
- * --df-hint-color: hint text color (default: --bs-secondary-color)
- * --df-hint-font-size: hint text size (default: 0.875rem)
- * --df-error-color: error text color (default: --bs-danger)
- * --df-error-font-size: error text size (default: 0.875rem)
+ * --df-field-gap: gap between label, input, and hint
+ * --df-label-font-weight: label font weight
+ * --df-label-color: label text color
+ * --df-hint-color: hint text color
+ * --df-hint-font-size: hint text size
+ * --df-error-color: error text color
+ * --df-error-font-size: error text size
+ * --df-bs-field-margin-bottom: margin below field
+ * --df-bs-field-with-hint-margin-bottom: margin below field with hint
+ * --df-bs-hint-margin-top: margin above hint
  *
  * Note: Bootstrap components primarily use Bootstrap's native classes
  * (is-invalid, is-valid, form-control, etc.) for styling.
  */
-
-// ============================================
-// CSS Variables (Bootstrap-themed defaults)
-// ============================================
-
-:host {
-  --df-field-gap: 0.5rem;
-  --df-label-font-weight: 500;
-  --df-label-color: inherit;
-  --df-hint-color: var(--bs-secondary-color, #6c757d);
-  --df-hint-font-size: 0.875rem;
-  --df-error-color: var(--bs-danger, #dc3545);
-  --df-error-font-size: 0.875rem;
-}
 
 // ============================================
 // Field Layout
@@ -37,26 +26,26 @@
 .df-bs-field {
   display: flex;
   flex-direction: column;
-  gap: var(--df-field-gap);
+  gap: var(--df-field-gap, 0.5rem);
   width: 100%;
-  margin-bottom: 1rem; // Standard Bootstrap form spacing
+  margin-bottom: var(--df-bs-field-margin-bottom, 1rem);
 }
 
 .df-bs-label {
-  font-weight: var(--df-label-font-weight);
-  color: var(--df-label-color);
+  font-weight: var(--df-label-font-weight, 500);
+  color: var(--df-label-color, inherit);
   margin-bottom: 0; // Override Bootstrap's default label margin
 }
 
 .df-bs-hint {
-  color: var(--df-hint-color);
-  font-size: var(--df-hint-font-size);
-  margin-top: 0.25rem;
+  color: var(--df-hint-color, var(--bs-secondary-color, #6c757d));
+  font-size: var(--df-hint-font-size, 0.875rem);
+  margin-top: var(--df-bs-hint-margin-top, 0.25rem);
 }
 
 // Ensure proper spacing when hint is present
 .df-bs-field:has(.df-bs-hint) {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--df-bs-field-with-hint-margin-bottom, 0.5rem);
 }
 
 // ============================================

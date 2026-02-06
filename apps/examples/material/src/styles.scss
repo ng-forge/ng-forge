@@ -7,6 +7,7 @@
 @use 'material' as ember-mat;
 @use 'examples' as examples;
 @use 'tokens' as *;
+@use 'form-defaults' as df;
 
 // Initialize Material core
 @include mat.core();
@@ -39,6 +40,27 @@
 // Landing page theme (dark variant with landing background)
 [data-theme='landing'] {
   @include ember-mat.material-theme-landing();
+}
+
+// ============================================
+// DYNAMIC FORMS DEFAULTS
+// ============================================
+
+:root {
+  @include df.apply-material-form-defaults;
+}
+
+// Dark mode form defaults
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]),
+  :root:not([data-theme]) {
+    @include df.form-material-defaults-dark;
+  }
+}
+
+[data-theme='dark'],
+[data-theme='landing'] {
+  @include df.form-material-defaults-dark;
 }
 
 // ============================================

@@ -6,6 +6,7 @@
 
 @use 'index' as *;
 @use 'examples' as examples;
+@use 'form-defaults' as df;
 @import 'primeicons/primeicons.css';
 
 // ============================================
@@ -24,6 +25,7 @@
 // Light theme (default)
 :root {
   @include apply-theme($theme-light);
+  @include df.apply-primeng-form-defaults;
 }
 
 // Auto mode - use system preference when no data-theme is set
