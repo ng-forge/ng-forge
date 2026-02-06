@@ -172,11 +172,14 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   });
 
   private readonly groupInjector = computed(() => {
+    const nestedFieldTree = this.nestedFieldTree;
     const groupFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
       injector: this.injector,
       value: this.parentFieldSignalContext.value,
       defaultValues: this.defaultValues,
-      form: this.nestedFieldTree(),
+      get form() {
+        return nestedFieldTree();
+      },
     };
 
     return Injector.create({

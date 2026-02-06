@@ -224,17 +224,24 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     }
 
     if (isReadyState(state)) {
-      // Start transition from ready state
+      // Start transition from ready state - capture formSetup from ready state
       return {
-        state: createTransitioningState('teardown', state.config, config),
+        state: createTransitioningState('teardown', state.config, config, state.formSetup),
         sideEffects: [{ type: 'capture-value' }, { type: 'wait-frame-boundary' }],
       };
     }
 
     if (isTransitioningState(state)) {
-      // Already transitioning - update pending config (latest wins)
+      // Already transitioning - update pending config (latest wins), preserve formSetups
       return {
-        state: createTransitioningState(state.phase, state.currentConfig, config, state.preservedValue),
+        state: createTransitioningState(
+          state.phase,
+          state.currentConfig,
+          config,
+          state.currentFormSetup,
+          state.preservedValue,
+          state.pendingFormSetup,
+        ),
         sideEffects: [],
       };
     }
@@ -260,9 +267,9 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       return { state, sideEffects: [] };
     }
 
-    // Move to applying phase
+    // Move to applying phase - carry currentFormSetup through
     return {
-      state: createTransitioningState('applying', state.currentConfig, state.pendingConfig, state.preservedValue),
+      state: createTransitioningState('applying', state.currentConfig, state.pendingConfig, state.currentFormSetup, state.preservedValue),
       sideEffects: [{ type: 'create-form' }],
     };
   }
@@ -274,9 +281,16 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
 
     // Check if we have values to restore
     if (state.preservedValue && Object.keys(state.preservedValue).length > 0) {
-      // Move to restoring phase
+      // Move to restoring phase - store new formSetup as pendingFormSetup
       return {
-        state: createTransitioningState('restoring', state.currentConfig, state.pendingConfig, state.preservedValue),
+        state: createTransitioningState(
+          'restoring',
+          state.currentConfig,
+          state.pendingConfig,
+          state.currentFormSetup,
+          state.preservedValue,
+          formSetup,
+        ),
         sideEffects: [{ type: 'restore-values', values: state.preservedValue }],
       };
     }
@@ -293,9 +307,8 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       return { state, sideEffects: [] };
     }
 
-    // Transition complete - move to ready with new config
-    // We need the formSetup here - compute it from pending config
-    const formSetup = this.config.createFormSetup(state.pendingConfig);
+    // Use pendingFormSetup computed during apply phase instead of recomputing
+    const formSetup = state.pendingFormSetup ?? this.config.createFormSetup(state.pendingConfig);
 
     return {
       state: createReadyState(state.pendingConfig, formSetup),
@@ -339,7 +352,16 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
           // Read current state (not the stale closure) to handle rapid config changes
           const state = this._state();
           if (isTransitioningState(state)) {
-            this._state.set(createTransitioningState(state.phase, state.currentConfig, state.pendingConfig, value));
+            this._state.set(
+              createTransitioningState(
+                state.phase,
+                state.currentConfig,
+                state.pendingConfig,
+                state.currentFormSetup,
+                value,
+                state.pendingFormSetup,
+              ),
+            );
           }
         });
       }
@@ -380,8 +402,8 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
           const state = this._state();
           if (!isTransitioningState(state) || state.phase !== 'restoring') return;
 
-          // Get valid keys from the new config's form setup
-          const formSetup = this.config.createFormSetup(state.pendingConfig);
+          // Use pendingFormSetup from state instead of recomputing
+          const formSetup = state.pendingFormSetup ?? this.config.createFormSetup(state.pendingConfig);
           const validKeys = new Set(formSetup.schemaFields.map((f) => f.key).filter((key): key is string => key !== undefined));
 
           this.config.restoreValue(effect.values, validKeys);

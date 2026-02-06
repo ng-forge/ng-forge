@@ -154,6 +154,19 @@ export class FormStateManager<
    */
   readonly fieldLoadingErrors = signal<FieldLoadingError[]>([]);
 
+  /**
+   * Class-level cached form for the "hold until settled" pattern.
+   *
+   * This MUST live at class level (not inside the `fieldSignalContext` computed)
+   * so it persists when `fieldSignalContext` re-evaluates. If it were a local
+   * variable in the computed, it would reset to `undefined` on re-evaluation,
+   * defeating the hold pattern and exposing the new form to stale components.
+   *
+   * Stored as `unknown` to avoid generic type gymnastics — it's only used
+   * as an opaque cache that gets cast back to the correct type in the getter.
+   */
+  private readonly _formCache: { current: unknown } = { current: undefined };
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Derived from State Machine
   // ─────────────────────────────────────────────────────────────────────────────
@@ -192,10 +205,11 @@ export class FormStateManager<
     if (isReadyState(state)) return state.config;
     if (isTransitioningState(state)) {
       // teardown: old config (form unchanged, removed components being destroyed)
-      // applying: new config (form updates, safe components stay alive)
-      // restoring: new config (new components created)
-      if (state.phase === 'teardown') return state.currentConfig;
-      return state.pendingConfig; // applying or restoring
+      // applying: old config (form stays unchanged while resolvedFields settles;
+      //           the state machine precomputes the new setup independently)
+      // restoring: new config (form updates, new components created)
+      if (state.phase === 'teardown' || state.phase === 'applying') return state.currentConfig;
+      return state.pendingConfig; // restoring only
     }
     if (state.type === 'initializing') return state.config;
     return undefined;
@@ -276,20 +290,48 @@ export class FormStateManager<
   private readonly rawFieldRegistry: Signal<Map<string, FieldTypeDefinition>> = computed(() => this.deps?.fieldRegistry.raw ?? new Map());
 
   /**
-   * Computed form setup containing all precomputed values for form creation.
+   * Computed form setup - reads from the state machine as single source of truth.
+   *
+   * During transitions, this returns the appropriate FormSetup for the current phase:
+   * - uninitialized/initializing: compute from config (bootstrap, before state machine has FormSetup)
+   * - ready: read from state.formSetup
+   * - teardown/applying: read from state.currentFormSetup (old setup, form unchanged)
+   * - restoring: read from state.pendingFormSetup (new setup for new config)
    */
   readonly formSetup: Signal<FormSetup<TFields>> = computed(() => {
-    const config = this.activeConfig();
-    const modeDetection = this.formModeDetection();
+    const machine = this.machineSignal();
     const registry = this.rawFieldRegistry();
 
+    if (!machine) {
+      return this.createEmptyFormSetup(registry);
+    }
+
+    const state = machine.state();
+
+    if (isReadyState(state)) {
+      return state.formSetup;
+    }
+
+    if (isTransitioningState(state)) {
+      if (state.phase === 'restoring' && state.pendingFormSetup) {
+        return state.pendingFormSetup;
+      }
+      return state.currentFormSetup;
+    }
+
+    // uninitialized or initializing: compute from config for bootstrap.
+    // Register validators/schemas eagerly so the form() computed (which runs
+    // during the first render, before the state machine dispatches 'initialize')
+    // can resolve schemas and custom validators.
+    const config = this.activeConfig();
     if (!config) {
       return this.createEmptyFormSetup(registry);
     }
 
-    this.registerValidatorsFromConfig(config);
+    untracked(() => this.registerValidatorsFromConfig(config));
 
     if (config.fields && config.fields.length > 0) {
+      const modeDetection = this.formModeDetection();
       return this.createFormSetupFromConfig(config.fields as FieldDef<unknown>[], modeDetection.mode, registry);
     }
 
@@ -379,14 +421,73 @@ export class FormStateManager<
   });
 
   /**
-   * Field signal context for injection into child components.
+   * Whether the resolved fields pipeline has settled (resolvedFields matches fieldsSource).
+   *
+   * During config transitions, `fieldsSource` updates immediately but `resolvedFields`
+   * settles asynchronously (field resolution uses Promises via `derivedFromDeferred`).
+   * This signal tracks when the pipeline has caught up, ensuring the form getter only
+   * exposes the new form AFTER stale components have been removed by `@for`.
+   *
+   * Initialized in the constructor after `resolvedFields` is set.
    */
-  readonly fieldSignalContext: Signal<FieldSignalContext<TModel>> = computed(() => ({
-    injector: this.injector,
-    value: this.deps?.value ?? signal(undefined),
-    defaultValues: this.defaultValues,
-    form: this.form(),
-  }));
+  private isFieldPipelineSettled!: Signal<boolean>;
+
+  /**
+   * Field signal context for injection into child components.
+   *
+   * Uses a getter for `form` that caches the form until the field resolution
+   * pipeline has settled. This ensures alive components always see a form that
+   * contains their fields, preventing "ctx.field(...) is not a function" crashes.
+   *
+   * The form getter uses a "hold until settled" pattern:
+   * - Pipeline unsettled (resolvedFields != fieldsSource): returns the cached (old)
+   *   form so alive components retain valid FieldTree references
+   * - Pipeline settled: returns the current form and updates the cache
+   *
+   * This is more robust than tracking the state machine phase because the async
+   * gap between `resolvedFields` settling and the state reaching `ready` is what
+   * causes stale components to access missing form fields.
+   *
+   * Mappers access context.form inside their own computed signals, establishing
+   * reactive dependencies on formSignal and isFieldPipelineSettled. This ensures
+   * mappers re-evaluate when:
+   * 1. The form changes (signal dependency)
+   * 2. The pipeline settles (signal dependency) - safe to expose new form
+   */
+  readonly fieldSignalContext: Signal<FieldSignalContext<TModel>> = computed(() => {
+    const formSignal = this.form;
+    // Thunk: isFieldPipelineSettled is set in the constructor after resolvedFields.
+    // This computed evaluates lazily (after construction), so the reference is safe.
+    const isSettled = () => this.isFieldPipelineSettled();
+    // Close over the class-level _formCache so it survives fieldSignalContext re-evaluations.
+    // If this were a local variable, it would reset when defaultValues/value changes
+    // trigger a re-evaluation, breaking the hold pattern during transitions.
+    const formCache = this._formCache;
+
+    return {
+      injector: this.injector,
+      value: this.deps?.value ?? signal(undefined),
+      defaultValues: this.defaultValues,
+      get form() {
+        // Always read formSignal to establish the reactive dependency in the
+        // calling computed (mapper), even if we return a cached value.
+        const currentForm = formSignal();
+        // Read settled state to establish dependency - when the pipeline settles,
+        // the calling computed re-evaluates and gets the updated form.
+        const settled = isSettled();
+
+        if (!settled && formCache.current) {
+          // Pipeline hasn't settled: resolvedFields doesn't match fieldsSource.
+          // Stale components (for removed fields) are still alive in the DOM.
+          // Return cached (old) form so their mappers find valid FieldTree refs.
+          return formCache.current as ReturnType<typeof form<TModel>>;
+        }
+
+        formCache.current = currentForm;
+        return currentForm;
+      },
+    };
+  });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Form State
@@ -434,35 +535,49 @@ export class FormStateManager<
    * - Teardown: Returns intersection of old/new fields (removed components destroyed first)
    * - Applying: Returns intersection (safe components update to new form)
    * - Restoring: Returns all new fields (new components created after form ready)
+   *
+   * Uses a key+type equality function to prevent unnecessary signal emissions during
+   * rapid state transitions (teardown → applying → restoring). Without this, each
+   * state change produces a new array reference even if the content is identical,
+   * causing `switchMap` in the resolvedFields pipeline to cancel in-progress field
+   * resolution and preventing components from being properly destroyed.
    */
-  private readonly fieldsSource: Signal<FieldDef<unknown>[]> = computed(() => {
-    const machine = this.machineSignal();
-    if (!machine) return [];
+  private readonly fieldsSource: Signal<FieldDef<unknown>[]> = computed(
+    () => {
+      const machine = this.machineSignal();
+      if (!machine) return [];
 
-    const state = machine.state();
+      const state = machine.state();
 
-    if (isTransitioningState(state)) {
-      const oldFields = state.currentConfig.fields ?? [];
-      const newFields = state.pendingConfig.fields ?? [];
-      const oldKeys = new Set(oldFields.map((f) => f.key));
-      const newKeys = new Set(newFields.map((f) => f.key));
+      if (isTransitioningState(state)) {
+        const oldFields = state.currentConfig.fields ?? [];
+        const newFields = state.pendingConfig.fields ?? [];
+        const newKeys = new Set(newFields.map((f) => f.key));
 
-      if (state.phase === 'teardown' || state.phase === 'applying') {
-        // Return intersection: only fields that exist in both configs
-        // During teardown: old form, removed components destroyed
-        // During applying: new form, safe components update
-        return oldFields.filter((f) => newKeys.has(f.key));
+        if (state.phase === 'teardown' || state.phase === 'applying') {
+          // Return intersection: only fields that exist in both configs
+          // During teardown: old form, removed components destroyed
+          // During applying: old form still active, safe components stay alive
+          return oldFields.filter((f) => newKeys.has(f.key));
+        }
+
+        if (state.phase === 'restoring') {
+          // Return all new fields from the pending FormSetup (new components created after form is ready)
+          return state.pendingFormSetup?.fields ?? this.formSetup().fields;
+        }
       }
 
-      if (state.phase === 'restoring') {
-        // Return all new fields (new components created after form is ready)
-        return this.formSetup().fields;
-      }
-    }
-
-    // Ready state or initializing: use formSetup fields
-    return this.formSetup().fields;
-  });
+      // Ready state or initializing: use formSetup fields
+      return this.formSetup().fields;
+    },
+    {
+      equal: (a, b) => {
+        if (a === b) return true;
+        if (a.length !== b.length) return false;
+        return a.every((field, i) => field.key === b[i].key && field.type === b[i].type);
+      },
+    },
+  );
 
   /**
    * Injector for field components with FIELD_SIGNAL_CONTEXT.
@@ -476,6 +591,8 @@ export class FormStateManager<
 
   /**
    * Resolved fields ready for rendering.
+   * Components are resolved asynchronously but benefit from the component cache
+   * in the field registry, making resolution near-instant after first render.
    */
   readonly resolvedFields: Signal<ResolvedField[]>;
 
@@ -524,7 +641,8 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   constructor() {
-    // Initialize resolved fields with deferred derivation
+    // Initialize resolved fields with deferred derivation.
+    // The component cache in the field registry makes this near-instant after first render.
     this.resolvedFields = derivedFromDeferred(
       this.fieldsSource,
       pipe(
@@ -561,6 +679,19 @@ export class FormStateManager<
       ),
       { initialValue: [] as ResolvedField[], injector: this.injector },
     ) as Signal<ResolvedField[]>;
+
+    // Track whether the resolved fields pipeline has settled.
+    // This memoized computed ensures mappers only depend on a boolean (not the full
+    // resolvedFields array), preventing unnecessary re-evaluations when resolvedFields
+    // changes but the settled state doesn't.
+    this.isFieldPipelineSettled = computed(() => {
+      const source = this.fieldsSource();
+      const resolved = this.resolvedFields();
+      if (source.length !== resolved.length) return false;
+      if (source.length === 0) return true;
+      const resolvedKeys = new Set(resolved.map((f) => f.key));
+      return source.every((f) => resolvedKeys.has(f.key));
+    });
 
     // Initialize event streams
     this.submitted$ = this.eventBus.on<SubmitEvent>('submit').pipe(
@@ -625,12 +756,14 @@ export class FormStateManager<
       injector: this.injector,
       destroyRef: this.destroyRef,
       scheduler,
-      createFormSetup: (config) =>
-        this.createFormSetupFromConfig(
+      createFormSetup: (config) => {
+        this.registerValidatorsFromConfig(config);
+        return this.createFormSetupFromConfig(
           (config.fields as FieldDef<unknown>[]) ?? [],
           detectFormMode(config.fields ?? []).mode,
           this.rawFieldRegistry(),
-        ),
+        );
+      },
       captureValue: () => this.formValue() as Record<string, unknown>,
       restoreValue: (values, validKeys) => {
         const filtered: Record<string, unknown> = {};

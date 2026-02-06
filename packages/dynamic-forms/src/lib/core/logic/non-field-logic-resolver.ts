@@ -284,6 +284,42 @@ export function resolveSubmitButtonDisabled(ctx: ButtonLogicContext): Signal<boo
 }
 
 /**
+ * Resolves the hidden state for a button based on its logic array.
+ *
+ * Evaluates all hidden logic conditions - if ANY is true, the button is hidden.
+ * Should be called inside a computed signal so it reactively tracks form value changes.
+ *
+ * @param ctx - The button logic context (needs form for expression evaluation)
+ * @returns true if the button should be hidden
+ *
+ * @example
+ * ```typescript
+ * return computed(() => {
+ *   const hidden = resolveButtonHidden({
+ *     form: rootFormRegistry.getRootForm()!,
+ *     fieldLogic: fieldDef.logic,
+ *   });
+ *   inputs['hidden'] = hidden;
+ * });
+ * ```
+ *
+ * @public
+ */
+export function resolveButtonHidden(ctx: Pick<ButtonLogicContext, 'form' | 'fieldLogic' | 'formValue' | 'logger'>): boolean {
+  const fieldLogic = ctx.fieldLogic;
+  if (!fieldLogic || fieldLogic.length === 0) {
+    return false;
+  }
+
+  const hiddenLogic = fieldLogic.filter((logic) => logic.type === 'hidden');
+  if (hiddenLogic.length === 0) {
+    return false;
+  }
+
+  return hiddenLogic.some((logic) => evaluateLogicCondition(logic.condition, ctx as ButtonLogicContext));
+}
+
+/**
  * Resolves the disabled state for a next page button.
  *
  * The disabled state is determined by (in order of precedence):

@@ -66,6 +66,10 @@ export interface FormLifecycleTransitioning<TFields extends RegisteredFieldTypes
   readonly currentConfig: FormConfig<TFields>;
   readonly pendingConfig: FormConfig<TFields>;
   readonly preservedValue?: Record<string, unknown>;
+  /** FormSetup from the ready state that initiated this transition */
+  readonly currentFormSetup: FormSetup<TFields>;
+  /** FormSetup computed for the pending config (set when apply-complete fires) */
+  readonly pendingFormSetup?: FormSetup<TFields>;
 }
 
 /**
@@ -291,9 +295,11 @@ export function createTransitioningState<TFields extends RegisteredFieldTypes[]>
   phase: TransitionPhase,
   currentConfig: FormConfig<TFields>,
   pendingConfig: FormConfig<TFields>,
+  currentFormSetup: FormSetup<TFields>,
   preservedValue?: Record<string, unknown>,
+  pendingFormSetup?: FormSetup<TFields>,
 ): FormLifecycleTransitioning<TFields> {
-  return { type: 'transitioning', phase, currentConfig, pendingConfig, preservedValue };
+  return { type: 'transitioning', phase, currentConfig, pendingConfig, currentFormSetup, preservedValue, pendingFormSetup };
 }
 
 /**

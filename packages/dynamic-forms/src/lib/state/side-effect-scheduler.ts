@@ -18,7 +18,7 @@ export interface SideEffectOptions {
  *
  * Provides three timing categories:
  * 1. **Blocking** - Effect must complete before next action
- * 2. **Frame Boundary** - Waits for requestAnimationFrame (DOM sync)
+ * 2. **Frame Boundary** - Deferred to the next animation frame (`requestAnimationFrame`)
  * 3. **After Render** - Deferred until after Angular's render cycle
  *
  * This replaces scattered `afterNextRender` calls with controlled timing.
@@ -30,11 +30,6 @@ export interface SideEffectOptions {
  * // Synchronous blocking effect
  * scheduler.executeBlocking(() => {
  *   this.state.set({ type: 'teardown' });
- * }).subscribe();
- *
- * // Wait for DOM destruction
- * scheduler.executeAtFrameBoundary(() => {
- *   this.state.set({ type: 'applying' });
  * }).subscribe();
  *
  * // Defer to after render
@@ -91,16 +86,16 @@ export class SideEffectScheduler {
   }
 
   /**
-   * Executes a side effect at the next frame boundary.
+   * Executes a side effect at the next animation frame boundary.
    *
-   * Uses `requestAnimationFrame` to wait for the browser's next paint cycle.
-   * This ensures DOM changes from previous state updates have been applied.
+   * Uses `requestAnimationFrame` to defer the effect to the next browser paint frame (~16ms).
+   * This provides enough time for Angular's change detection and the async field resolution
+   * pipeline (`derivedFromDeferred`) to process pending changes before the state machine continues.
    *
-   * Key use case: Waiting for Angular to destroy old components before
-   * creating new form instances (prevents NG01902 orphan field errors).
+   * Use for teardown timing where both DOM updates and async pipelines need to settle.
    *
-   * @param effect - Function to execute at frame boundary
-   * @returns Observable that completes after frame boundary effect executes
+   * @param effect - Function to execute at the next frame boundary
+   * @returns Observable that completes after the effect executes
    */
   executeAtFrameBoundary<T>(effect: () => T): Observable<T> {
     return new Observable((subscriber: Subscriber<T>) => {

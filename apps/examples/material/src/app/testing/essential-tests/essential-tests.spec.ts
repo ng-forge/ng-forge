@@ -1,16 +1,7 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
 
 setupTestLogging();
-setupConsoleCheck({
-  // Ignore transient errors that occur during rapid config changes
-  // These happen when components are briefly created during teardown phase
-  ignorePatterns: [
-    /NG0950.*Input.*is required but no value is available/,
-    // Firefox logs generic "Error" objects without details for some transient errors
-    // Chrome/WebKit log "Error" while Firefox logs "ERROR Error"
-    /^(ERROR )?Error$/,
-  ],
-});
+setupConsoleCheck();
 
 test.describe('Essential Tests - Quick Validation', () => {
   test('basic form functionality works', async ({ helpers }) => {
