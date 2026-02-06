@@ -61,7 +61,6 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
     const rootForm = rootFormRegistry.rootForm()!;
-    const formValue = rootFormRegistry.formValue();
 
     // Use rootFormRegistry instead of fieldSignalContext.form because when the submit button
     // is inside a group/array, fieldSignalContext.form points to the nested form tree,
@@ -82,7 +81,7 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
     };
 
     // Resolve hidden state using non-field-hidden resolver (supports logic array)
-    const hidden = resolveHiddenValue(rootForm, formValue, fieldWithLogic);
+    const hidden = resolveHiddenValue(rootForm, fieldWithLogic);
     if (hidden !== undefined) {
       inputs['hidden'] = hidden;
     }
@@ -121,7 +120,6 @@ export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFiel
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
     const rootForm = rootFormRegistry.rootForm();
-    const formValue = rootFormRegistry.formValue();
 
     const disabled = resolveNextButtonDisabled({
       form: fieldSignalContext.form,
@@ -137,7 +135,7 @@ export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFiel
     };
 
     // Resolve hidden state using non-field-hidden resolver (supports logic array)
-    const hidden = resolveHiddenValue(rootForm, formValue, fieldWithLogic);
+    const hidden = resolveHiddenValue(rootForm, fieldWithLogic);
     if (hidden !== undefined) {
       inputs['hidden'] = hidden;
     }
@@ -170,7 +168,6 @@ export function previousButtonFieldMapper<TProps>(fieldDef: BaseNavigationButton
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
     const rootForm = rootFormRegistry.rootForm();
-    const formValue = rootFormRegistry.formValue();
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
@@ -183,7 +180,7 @@ export function previousButtonFieldMapper<TProps>(fieldDef: BaseNavigationButton
     }
 
     // Resolve hidden state using non-field-hidden resolver (supports logic array)
-    const hidden = resolveHiddenValue(rootForm, formValue, fieldWithLogic);
+    const hidden = resolveHiddenValue(rootForm, fieldWithLogic);
     if (hidden !== undefined) {
       inputs['hidden'] = hidden;
     }

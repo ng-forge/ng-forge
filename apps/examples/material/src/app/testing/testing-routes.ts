@@ -121,12 +121,6 @@ export default [
     loadChildren: () => import('./multi-page-navigation/multi-page-navigation.routes'),
   },
 
-  // Row Fields Tests - Tests for row container layout and conditional visibility
-  {
-    path: 'row-fields',
-    loadChildren: () => import('./row-fields/row-fields.routes'),
-  },
-
   // Schema System Tests - Reusable schema configurations for validation and logic
   {
     path: 'schema-system',

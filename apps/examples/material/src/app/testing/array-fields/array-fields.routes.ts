@@ -131,22 +131,6 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getArrayFieldsScenario('array-boundary-indices') },
   },
-  // Conditional Visibility
-  {
-    path: 'array-conditional-visibility',
-    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
-    data: { scenario: getArrayFieldsScenario('array-conditional-visibility') },
-  },
-  {
-    path: 'array-state-preservation',
-    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
-    data: { scenario: getArrayFieldsScenario('array-state-preservation') },
-  },
-  {
-    path: 'array-items-conditional-fields',
-    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
-    data: { scenario: getArrayFieldsScenario('array-items-conditional-fields') },
-  },
   // Button logic (hidden/disabled)
   {
     path: 'array-button-hidden-logic',

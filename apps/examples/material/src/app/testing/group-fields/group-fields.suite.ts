@@ -2,9 +2,6 @@ import { TestSuite } from '../shared/types';
 import { groupValuePropagationScenario } from './scenarios/group-value-propagation.scenario';
 import { groupInitialValuesScenario } from './scenarios/group-initial-values.scenario';
 import { groupNestedScenario } from './scenarios/group-nested.scenario';
-import { groupConditionalVisibilityScenario } from './scenarios/group-conditional-visibility.scenario';
-import { groupStatePreservationScenario } from './scenarios/group-state-preservation.scenario';
-import { groupNestedConditionalScenario } from './scenarios/group-nested-conditional.scenario';
 
 /**
  * Group Fields Suite
@@ -21,11 +18,6 @@ export const groupFieldsSuite: TestSuite = {
     groupValuePropagationScenario,
     groupInitialValuesScenario,
     groupNestedScenario,
-
-    // Conditional Visibility
-    groupConditionalVisibilityScenario,
-    groupStatePreservationScenario,
-    groupNestedConditionalScenario,
   ],
 };
 

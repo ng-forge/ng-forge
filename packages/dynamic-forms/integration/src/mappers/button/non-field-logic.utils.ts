@@ -107,13 +107,11 @@ export function applyNonFieldLogic(rootFormRegistry: RootFormRegistryService, fi
  * NOTE: This function must be called inside a computed() context.
  *
  * @param rootForm The root form FieldTree (can be undefined)
- * @param formValue DEPRECATED: No longer used. Pass undefined or omit. Kept for backward compatibility.
  * @param fieldDef The field definition with optional hidden/logic
  * @returns The resolved hidden boolean value, or undefined if no hidden logic
  */
 export function resolveHiddenValue(
   rootForm: FieldTree<unknown, string | number> | undefined,
-  formValue: unknown,
   fieldDef: FieldDefWithLogic,
 ): boolean | undefined {
   if (!rootForm) {

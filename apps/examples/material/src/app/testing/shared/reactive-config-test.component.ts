@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, linkedSignal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 
