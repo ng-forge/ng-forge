@@ -44,6 +44,7 @@ export const Action = {
   Initialize: 'initialize',
   ConfigChange: 'config-change',
   SetupComplete: 'setup-complete',
+  ValueCaptured: 'value-captured',
   TeardownComplete: 'teardown-complete',
   ApplyComplete: 'apply-complete',
   RestoreComplete: 'restore-complete',
@@ -195,6 +196,7 @@ export type FormStateAction<TFields extends RegisteredFieldTypes[] = RegisteredF
   | InitializeAction<TFields>
   | ConfigChangeAction<TFields>
   | SetupCompleteAction<TFields>
+  | ValueCapturedAction
   | TeardownCompleteAction
   | ApplyCompleteAction<TFields>
   | RestoreCompleteAction
@@ -222,6 +224,14 @@ export interface ConfigChangeAction<TFields extends RegisteredFieldTypes[] = Reg
 export interface SetupCompleteAction<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
   readonly type: (typeof Action)['SetupComplete'];
   readonly formSetup: FormSetup<TFields>;
+}
+
+/**
+ * Value captured from the current form during teardown.
+ */
+export interface ValueCapturedAction {
+  readonly type: (typeof Action)['ValueCaptured'];
+  readonly value: Record<string, unknown>;
 }
 
 /**

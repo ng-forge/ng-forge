@@ -198,6 +198,9 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       case Action.SetupComplete:
         return this.handleSetupComplete(state, action.formSetup as FormSetup<TFields>);
 
+      case Action.ValueCaptured:
+        return this.handleValueCaptured(state, action.value);
+
       case Action.TeardownComplete:
         return this.handleTeardownComplete(state);
 
@@ -274,6 +277,24 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     }
 
     return { state, sideEffects: [] };
+  }
+
+  private handleValueCaptured(state: FormLifecycleState<TFields>, value: Record<string, unknown>): TransitionResult<TFields> {
+    if (!isTransitioningState(state)) {
+      return { state, sideEffects: [] };
+    }
+
+    return {
+      state: createTransitioningState(
+        state.phase,
+        state.currentConfig,
+        state.pendingConfig,
+        state.currentFormSetup,
+        value,
+        state.pendingFormSetup,
+      ),
+      sideEffects: [],
+    };
   }
 
   private handleTeardownComplete(state: FormLifecycleState<TFields>): TransitionResult<TFields> {
@@ -369,20 +390,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       case Effect.CaptureValue: {
         return scheduler.executeBlocking(() => {
           const value = this.config.captureValue();
-          // Read current state (not the stale closure) to handle rapid config changes
-          const state = this._state();
-          if (isTransitioningState(state)) {
-            this._state.set(
-              createTransitioningState(
-                state.phase,
-                state.currentConfig,
-                state.pendingConfig,
-                state.currentFormSetup,
-                value,
-                state.pendingFormSetup,
-              ),
-            );
-          }
+          this.dispatch({ type: Action.ValueCaptured, value });
         });
       }
 

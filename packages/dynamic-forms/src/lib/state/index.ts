@@ -50,6 +50,7 @@ export {
   InitializeAction,
   ConfigChangeAction,
   SetupCompleteAction,
+  ValueCapturedAction,
   TeardownCompleteAction,
   ApplyCompleteAction,
   RestoreCompleteAction,

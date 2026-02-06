@@ -363,6 +363,20 @@ export class FormStateManager<
    */
   readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues as TModel);
 
+  /**
+   * Valid field keys derived from formSetup schema fields.
+   *
+   * Memoized separately from `entity` so the Set is only reconstructed when
+   * `formSetup()` changes (config transitions), NOT on every keystroke.
+   * Without this, every `deps.value()` change triggers a redundant
+   * Set construction + map + filter over all schema fields.
+   */
+  private readonly validKeys = computed(() => {
+    const schemaFields = this.formSetup().schemaFields;
+    if (!schemaFields || schemaFields.length === 0) return undefined;
+    return new Set(schemaFields.map((f) => f.key).filter((key): key is string => key !== undefined));
+  });
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Entity & Form
   // ─────────────────────────────────────────────────────────────────────────────
@@ -378,15 +392,14 @@ export class FormStateManager<
 
     const inputValue = deps.value();
     const defaults = this.defaultValues();
-    const formSetupValue = this.formSetup();
+    const keys = this.validKeys();
 
     const combined = { ...defaults, ...inputValue };
 
-    if (formSetupValue.schemaFields && formSetupValue.schemaFields.length > 0) {
-      const validKeys = new Set(formSetupValue.schemaFields.map((field) => field.key).filter((key): key is string => key !== undefined));
+    if (keys) {
       const filtered: Record<string, unknown> = {};
       for (const key of Object.keys(combined)) {
-        if (validKeys.has(key)) {
+        if (keys.has(key)) {
           filtered[key] = (combined as Record<string, unknown>)[key];
         }
       }
@@ -672,44 +685,70 @@ export class FormStateManager<
           const registry = this.rawFieldRegistry();
           const injector = this.fieldInjector();
 
-          // Fast path: all components already cached — resolve synchronously
-          const allCached = fields.every((f) => {
-            const def = deps.fieldRegistry.getType(f.type);
-            return !def?.loadComponent || deps.fieldRegistry.getLoadedComponent(f.type);
-          });
-
-          if (allCached) {
-            const syncContext = {
-              getLoadedComponent: (type: string) => deps.fieldRegistry.getLoadedComponent(type),
-              registry,
-              injector,
-            };
-            return of(fields.map((f) => resolveFieldSync(f, syncContext)));
-          }
-
-          const context = {
-            loadTypeComponent: (type: string) => deps.fieldRegistry.loadTypeComponent(type),
+          const syncContext = {
+            getLoadedComponent: (type: string) => deps.fieldRegistry.getLoadedComponent(type),
             registry,
             injector,
-            destroyRef: this.destroyRef,
-            onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
-              const fieldKey = fieldDef.key || '<no key>';
-              this.fieldLoadingErrors.update((errors) => [
-                ...errors,
-                {
-                  fieldType: fieldDef.type,
-                  fieldKey,
-                  error: error instanceof Error ? error : new Error(String(error)),
-                },
-              ]);
-              this.logger.error(
-                `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}). ` +
-                  `Ensure the field type is registered in your field registry.`,
-                error,
-              );
-            },
           };
-          return forkJoin(fields.map((f) => resolveField(f, context)));
+
+          // Hybrid resolution: resolve cached fields synchronously, only await uncached ones.
+          // This prevents one slow lazy import from blocking all already-cached fields.
+          const results: (ResolvedField | undefined)[] = new Array(fields.length);
+          const asyncIndexes: number[] = [];
+          const asyncObs: Observable<ResolvedField | undefined>[] = [];
+
+          const onError = (fieldDef: FieldDef<unknown>, error: unknown) => {
+            const fieldKey = fieldDef.key || '<no key>';
+            this.fieldLoadingErrors.update((errors) => [
+              ...errors,
+              {
+                fieldType: fieldDef.type,
+                fieldKey,
+                error: error instanceof Error ? error : new Error(String(error)),
+              },
+            ]);
+            this.logger.error(
+              `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}). ` +
+                `Ensure the field type is registered in your field registry.`,
+              error,
+            );
+          };
+
+          for (let i = 0; i < fields.length; i++) {
+            const f = fields[i];
+            const def = deps.fieldRegistry.getType(f.type);
+            const isCached = !def?.loadComponent || deps.fieldRegistry.getLoadedComponent(f.type);
+
+            if (isCached) {
+              results[i] = resolveFieldSync(f, syncContext);
+            } else {
+              asyncIndexes.push(i);
+              asyncObs.push(
+                resolveField(f, {
+                  loadTypeComponent: (type: string) => deps.fieldRegistry.loadTypeComponent(type),
+                  registry,
+                  injector,
+                  destroyRef: this.destroyRef,
+                  onError,
+                }),
+              );
+            }
+          }
+
+          // Fast path: all cached — no async work needed
+          if (asyncObs.length === 0) {
+            return of(results);
+          }
+
+          // Async path: await only uncached fields, merge into pre-filled results
+          return forkJoin(asyncObs).pipe(
+            map((asyncResults) => {
+              for (let j = 0; j < asyncResults.length; j++) {
+                results[asyncIndexes[j]] = asyncResults[j];
+              }
+              return results;
+            }),
+          );
         }),
         map((fields) => fields.filter((f): f is ResolvedField => f !== undefined)),
         scan(reconcileFields, [] as ResolvedField[]),
