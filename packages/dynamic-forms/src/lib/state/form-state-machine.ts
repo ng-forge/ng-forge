@@ -2,6 +2,7 @@ import { DestroyRef, Injector, signal, Signal, WritableSignal } from '@angular/c
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { catchError, concatMap, EMPTY, Observable, of, Subject } from 'rxjs';
 import { FormConfig } from '../models/form-config';
+import { Logger } from '../providers/features/logger/logger.interface';
 import { RegisteredFieldTypes } from '../models/registry/field-registry';
 import {
   Action,
@@ -45,6 +46,8 @@ export interface FormStateMachineConfig<TFields extends RegisteredFieldTypes[] =
   readonly restoreValue: (values: Record<string, unknown>, validKeys: Set<string>) => void;
   /** Callback when form is created (for registration) */
   readonly onFormCreated?: (formSetup: FormSetup<TFields>) => void;
+  /** Logger instance for error reporting */
+  readonly logger: Logger;
   /** Callback for logging/debugging state transitions */
   readonly onTransition?: (transition: StateTransition<TFields>) => void;
 }
@@ -139,7 +142,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
         concatMap((action) =>
           this.processAction(action).pipe(
             catchError((error) => {
-              console.error(`[FormStateMachine] Action '${action.type}' failed:`, error);
+              this.config.logger.error(`Action '${action.type}' failed:`, error);
               return EMPTY;
             }),
           ),
@@ -315,7 +318,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     // No values to restore - go directly to ready
     return {
       state: createReadyState(state.pendingConfig, formSetup),
-      sideEffects: [{ type: Effect.ClearPreservedValue }],
+      sideEffects: [],
     };
   }
 
@@ -329,14 +332,14 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
 
     return {
       state: createReadyState(state.pendingConfig, formSetup),
-      sideEffects: [{ type: Effect.ClearPreservedValue }],
+      sideEffects: [],
     };
   }
 
   private handleDestroy(): TransitionResult<TFields> {
     return {
       state: createDestroyedState(),
-      sideEffects: [{ type: Effect.Cleanup }],
+      sideEffects: [],
     };
   }
 
@@ -426,16 +429,6 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
           this.config.restoreValue(effect.values, validKeys);
           this.dispatch({ type: Action.RestoreComplete });
         });
-      }
-
-      case Effect.ClearPreservedValue: {
-        // No-op - preserved value is automatically cleared on state transition
-        return of(undefined);
-      }
-
-      case Effect.Cleanup: {
-        // Cleanup is handled by DestroyRef
-        return of(undefined);
       }
 
       default:

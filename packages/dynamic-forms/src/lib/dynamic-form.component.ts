@@ -8,7 +8,6 @@ import {
   Injector,
   input,
   model,
-  OnDestroy,
   Signal,
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
@@ -23,8 +22,6 @@ import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
 import { setupInitializationTracking } from './utils/initialization-tracker/initialization-tracker';
 import { InferFormValue, isContainerField } from './models/types';
-import { flattenFields } from './utils/flattener/field-flattener';
-import { FieldDef } from './definitions/base/field-def';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { DERIVATION_ORCHESTRATOR } from './core/derivation';
 import { PageOrchestratorComponent } from './core/page-orchestrator';
@@ -65,16 +62,11 @@ import { provideDynamicFormDI } from './providers/dynamic-form-di';
   selector: 'form[dynamic-form]',
   imports: [NgComponentOutlet, PageOrchestratorComponent],
   template: `
-    @if (stateManager.shouldRender()) {
-      @if (stateManager.formModeDetection().mode === 'paged') {
-        <div
-          page-orchestrator
-          [pageFields]="stateManager.pageFieldDefinitions()"
-          [form]="stateManager.form()"
-          [fieldSignalContext]="stateManager.fieldSignalContext()"
-        ></div>
+    @if (shouldRender()) {
+      @if (formModeDetection().mode === 'paged') {
+        <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="form()" [fieldSignalContext]="fieldSignalContext()"></div>
       } @else {
-        @for (field of stateManager.resolvedFields(); track field.key) {
+        @for (field of resolvedFields(); track field.key) {
           <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
         }
       }
@@ -85,10 +77,10 @@ import { provideDynamicFormDI } from './providers/dynamic-form-di';
   host: {
     class: 'df-dynamic-form df-form',
     novalidate: '', // Disable browser validation - Angular Signal Forms handles validation
-    '[class.disabled]': 'stateManager.disabled()',
-    '[class.df-form-paged]': 'stateManager.formModeDetection().mode === "paged"',
-    '[class.df-form-non-paged]': 'stateManager.formModeDetection().mode === "non-paged"',
-    '[attr.data-form-mode]': 'stateManager.formModeDetection().mode',
+    '[class.disabled]': 'disabled()',
+    '[class.df-form-paged]': 'formModeDetection().mode === "paged"',
+    '[class.df-form-non-paged]': 'formModeDetection().mode === "non-paged"',
+    '[attr.data-form-mode]': 'formModeDetection().mode',
     '(submit)': 'onNativeSubmit($event)',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -96,7 +88,7 @@ import { provideDynamicFormDI } from './providers/dynamic-form-di';
 export class DynamicForm<
   TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[],
   TModel extends Record<string, unknown> = InferFormValue<TFields> & Record<string, unknown>,
-> implements OnDestroy {
+> {
   // ─────────────────────────────────────────────────────────────────────────────
   // Dependencies
   // ─────────────────────────────────────────────────────────────────────────────
@@ -111,7 +103,7 @@ export class DynamicForm<
    * State manager that owns all form state and coordinates the form lifecycle.
    * The component delegates state management to this service and reads its signals.
    */
-  protected stateManager = inject(FormStateManager<TFields, TModel>);
+  private stateManager = inject(FormStateManager<TFields, TModel>);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -131,12 +123,6 @@ export class DynamicForm<
   // ─────────────────────────────────────────────────────────────────────────────
 
   private componentId = 'dynamic-form';
-
-  /**
-   * Flag to track if the component is destroyed.
-   * Used to prevent afterNextRender callbacks from executing after destruction.
-   */
-  private isDestroyed = false;
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Signals - Direct pass-through from state manager
@@ -193,6 +179,9 @@ export class DynamicForm<
   /** Collects errors from async field component loading for error boundary patterns */
   fieldLoadingErrors = this.stateManager.fieldLoadingErrors;
 
+  /** Whether to render the form template */
+  shouldRender = this.stateManager.shouldRender;
+
   /** Resolved fields ready for rendering */
   protected resolvedFields = this.stateManager.resolvedFields;
 
@@ -200,20 +189,9 @@ export class DynamicForm<
   // Computed Signals - Internal
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private rawFieldRegistry = computed(() => this.fieldRegistry.raw);
-
   private totalComponentsCount = computed(() => {
-    const setup = this.stateManager.formSetup();
-    const fields = setup?.fields;
-    if (!fields) {
-      return 1;
-    }
-
-    const registry = this.rawFieldRegistry();
-    const flatFields = flattenFields(fields as FieldDef<unknown>[], registry);
-    const componentCount = flatFields.filter(isContainerField).length;
-
-    return componentCount + 1;
+    const fields = this.stateManager.formSetup()?.fields ?? [];
+    return fields.filter(isContainerField).length + 1;
   });
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -325,7 +303,6 @@ export class DynamicForm<
       if (mode === 'non-paged' && fields.length > 0) {
         afterNextRender(
           () => {
-            if (this.isDestroyed) return;
             this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
           },
           { injector: this.injector },
@@ -344,13 +321,5 @@ export class DynamicForm<
       .subscribe({
         error: (err) => this.logger.error('Submission handler error', err),
       });
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Lifecycle
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  ngOnDestroy(): void {
-    this.isDestroyed = true;
   }
 }

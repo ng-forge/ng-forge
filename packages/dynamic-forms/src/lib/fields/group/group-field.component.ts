@@ -172,9 +172,9 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
     return child;
   });
 
-  private readonly groupInjector = computed(() => {
+  private readonly groupFieldSignalContext: FieldSignalContext<Record<string, unknown>> = (() => {
     const nestedFieldTree = this.nestedFieldTree;
-    const groupFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
+    return {
       injector: this.injector,
       value: this.parentFieldSignalContext.value,
       defaultValues: this.defaultValues,
@@ -182,11 +182,11 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
         return nestedFieldTree();
       },
     };
+  })();
 
-    return Injector.create({
-      parent: this.injector,
-      providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: groupFieldSignalContext }],
-    });
+  private readonly groupInjector = Injector.create({
+    parent: this.injector,
+    providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: this.groupFieldSignalContext }],
   });
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -208,7 +208,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
     createFieldResolutionPipe(() => ({
       loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
       registry: this.rawFieldRegistry(),
-      injector: this.groupInjector(),
+      injector: this.groupInjector,
       destroyRef: this.destroyRef,
       onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
         const fieldKey = fieldDef.key || '<no key>';

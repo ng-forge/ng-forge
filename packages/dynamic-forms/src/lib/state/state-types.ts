@@ -62,8 +62,6 @@ export const Effect = {
   WaitFrameBoundary: 'wait-frame-boundary',
   CreateForm: 'create-form',
   RestoreValues: 'restore-values',
-  ClearPreservedValue: 'clear-preserved-value',
-  Cleanup: 'cleanup',
 } as const;
 
 /** Indexed access type for {@link Effect} values. */
@@ -286,9 +284,7 @@ export type SideEffect =
   | { readonly type: (typeof Effect)['CaptureValue'] }
   | { readonly type: (typeof Effect)['WaitFrameBoundary'] }
   | { readonly type: (typeof Effect)['CreateForm'] }
-  | { readonly type: (typeof Effect)['RestoreValues']; readonly values: Record<string, unknown> }
-  | { readonly type: (typeof Effect)['ClearPreservedValue'] }
-  | { readonly type: (typeof Effect)['Cleanup'] };
+  | { readonly type: (typeof Effect)['RestoreValues']; readonly values: Record<string, unknown> };
 
 /**
  * Error from async field component loading.

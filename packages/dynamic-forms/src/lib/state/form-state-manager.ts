@@ -29,7 +29,7 @@ import { FIELD_SIGNAL_CONTEXT } from '../models/field-signal-context.token';
 import { FieldTypeDefinition } from '../models/field-type';
 import { FormConfig, FormOptions } from '../models/form-config';
 import { RegisteredFieldTypes } from '../models/registry/field-registry';
-import { detectFormMode, FormMode, FormModeDetectionResult } from '../models/types/form-mode';
+import { detectFormMode, FormMode } from '../models/types/form-mode';
 import { InferFormValue } from '../models/types/form-value-inference';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { FunctionRegistryService } from '../core/registry/function-registry.service';
@@ -41,7 +41,7 @@ import { flattenFields } from '../utils/flattener/field-flattener';
 import { memoize, isEqual } from '../utils/object-utils';
 import { createContainerFieldProcessors } from '../utils/container-utils/container-field-processors';
 import { derivedFromDeferred } from '../utils/derived-from-deferred/derived-from-deferred';
-import { reconcileFields, ResolvedField, resolveField } from '../utils/resolve-field/resolve-field';
+import { reconcileFields, ResolvedField, resolveField, resolveFieldSync } from '../utils/resolve-field/resolve-field';
 import { FormModeValidator } from '../utils/form-validation/form-mode-validator';
 
 import { Action, FieldLoadingError, FormSetup, isReadyState, isTransitioningState, LifecycleState, Phase } from './state-types';
@@ -63,6 +63,8 @@ export interface FormStateManagerDeps<TFields extends RegisteredFieldTypes[] = R
   /** Field registry for loading components */
   readonly fieldRegistry: {
     readonly raw: Map<string, FieldTypeDefinition>;
+    getType: (name: string) => FieldTypeDefinition | undefined;
+    getLoadedComponent: (name: string) => Type<unknown> | undefined;
     loadTypeComponent: (type: string) => Promise<Type<unknown> | undefined>;
   };
 }
@@ -505,33 +507,36 @@ export class FormStateManager<
   // Computed Signals - Form State
   // ─────────────────────────────────────────────────────────────────────────────
 
+  /** Intermediate computed that unwraps the double-signal (form()()) once. */
+  private readonly formInstance = computed(() => this.form()());
+
   /** Current form values (reactive). */
-  readonly formValue = computed(() => this.form()().value());
+  readonly formValue = computed(() => this.formInstance().value());
 
   /** Whether the form is currently valid. */
-  readonly valid = computed(() => this.form()().valid());
+  readonly valid = computed(() => this.formInstance().valid());
 
   /** Whether the form is currently invalid. */
-  readonly invalid = computed(() => this.form()().invalid());
+  readonly invalid = computed(() => this.formInstance().invalid());
 
   /** Whether any form field has been modified. */
-  readonly dirty = computed(() => this.form()().dirty());
+  readonly dirty = computed(() => this.formInstance().dirty());
 
   /** Whether any form field has been touched (blurred). */
-  readonly touched = computed(() => this.form()().touched());
+  readonly touched = computed(() => this.formInstance().touched());
 
   /** Current validation errors from all fields. */
-  readonly errors = computed(() => this.form()().errors());
+  readonly errors = computed(() => this.formInstance().errors());
 
   /** Whether the form is disabled (from options or form state). */
   readonly disabled = computed(() => {
     const optionsDisabled = this.effectiveFormOptions().disabled;
-    const formDisabled = this.form()().disabled();
+    const formDisabled = this.formInstance().disabled();
     return optionsDisabled ?? formDisabled;
   });
 
   /** Whether the form is currently submitting. */
-  readonly submitting = computed(() => this.form()().submitting());
+  readonly submitting = computed(() => this.formInstance().submitting());
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Field Resolution
@@ -663,10 +668,29 @@ export class FormStateManager<
           if (!fields || fields.length === 0 || !deps) {
             return of([] as (ResolvedField | undefined)[]);
           }
+
+          const registry = this.rawFieldRegistry();
+          const injector = this.fieldInjector();
+
+          // Fast path: all components already cached — resolve synchronously
+          const allCached = fields.every((f) => {
+            const def = deps.fieldRegistry.getType(f.type);
+            return !def?.loadComponent || deps.fieldRegistry.getLoadedComponent(f.type);
+          });
+
+          if (allCached) {
+            const syncContext = {
+              getLoadedComponent: (type: string) => deps.fieldRegistry.getLoadedComponent(type),
+              registry,
+              injector,
+            };
+            return of(fields.map((f) => resolveFieldSync(f, syncContext)));
+          }
+
           const context = {
             loadTypeComponent: (type: string) => deps.fieldRegistry.loadTypeComponent(type),
-            registry: this.rawFieldRegistry(),
-            injector: this.fieldInjector(),
+            registry,
+            injector,
             destroyRef: this.destroyRef,
             onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
               const fieldKey = fieldDef.key || '<no key>';
@@ -694,16 +718,10 @@ export class FormStateManager<
     ) as Signal<ResolvedField[]>;
 
     // Track whether the resolved fields pipeline has settled.
-    // This memoized computed ensures mappers only depend on a boolean (not the full
-    // resolvedFields array), preventing unnecessary re-evaluations when resolvedFields
-    // changes but the settled state doesn't.
+    // Length comparison is sufficient because scan + reconcileFields guarantees ordering,
+    // and with the sync fast-path, progressive resolution is eliminated for the hot path.
     this.isFieldPipelineSettled = computed(() => {
-      const source = this.fieldsSource();
-      const resolved = this.resolvedFields();
-      if (source.length !== resolved.length) return false;
-      if (source.length === 0) return true;
-      const resolvedKeys = new Set(resolved.map((f) => f.key));
-      return source.every((f) => resolvedKeys.has(f.key));
+      return this.fieldsSource().length === this.resolvedFields().length;
     });
 
     // Initialize event streams
@@ -769,6 +787,7 @@ export class FormStateManager<
       injector: this.injector,
       destroyRef: this.destroyRef,
       scheduler,
+      logger: this.logger,
       createFormSetup: (config) => {
         this.registerValidatorsFromConfig(config);
         // Safe: same cast as formSetup computed — RegisteredFieldTypes extends FieldDef<unknown>.
@@ -850,9 +869,11 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   private setupEffects(deps: FormStateManagerDeps<TFields, TModel>): void {
-    // Watch for config changes and dispatch to state machine
+    // Watch for config changes: dispatch to state machine and clear loading errors.
     // This handles both initial config and subsequent changes.
     explicitEffect([deps.config], ([config]) => {
+      this.fieldLoadingErrors.set([]);
+
       const machine = this.machineSignal();
       if (!machine) return;
 
@@ -882,11 +903,6 @@ export class FormStateManager<
       if (validation.warnings.length > 0) {
         this.logger.warn('Form configuration warnings:', validation.warnings);
       }
-    });
-
-    // Clear loading errors when config changes
-    explicitEffect([deps.config], () => {
-      this.fieldLoadingErrors.set([]);
     });
   }
 

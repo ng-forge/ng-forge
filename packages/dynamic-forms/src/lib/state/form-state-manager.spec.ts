@@ -17,18 +17,21 @@ describe('FormStateManager', () => {
 
   beforeEach(() => {
     // Create mock field registry
+    const rawRegistry = new Map<string, FieldTypeDefinition>([
+      [
+        'input',
+        {
+          type: 'input',
+          defaultValue: '',
+          mapper: vi.fn(),
+          component: vi.fn() as unknown as () => Promise<unknown>,
+        },
+      ],
+    ]);
     mockFieldRegistry = {
-      raw: new Map<string, FieldTypeDefinition>([
-        [
-          'input',
-          {
-            type: 'input',
-            defaultValue: '',
-            mapper: vi.fn(),
-            component: vi.fn() as unknown as () => Promise<unknown>,
-          },
-        ],
-      ]),
+      raw: rawRegistry,
+      getType: (name: string) => rawRegistry.get(name),
+      getLoadedComponent: vi.fn().mockReturnValue(undefined),
       loadTypeComponent: vi.fn().mockResolvedValue(undefined),
     };
 
