@@ -60,8 +60,8 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
-    const rootForm = rootFormRegistry.getRootForm()!;
-    const formValue = rootFormRegistry.getFormValue();
+    const rootForm = rootFormRegistry.rootForm()!;
+    const formValue = rootFormRegistry.formValue();
 
     // Use rootFormRegistry instead of fieldSignalContext.form because when the submit button
     // is inside a group/array, fieldSignalContext.form points to the nested form tree,
@@ -120,8 +120,8 @@ export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFiel
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
-    const rootForm = rootFormRegistry.getRootForm();
-    const formValue = rootFormRegistry.getFormValue();
+    const rootForm = rootFormRegistry.rootForm();
+    const formValue = rootFormRegistry.formValue();
 
     const disabled = resolveNextButtonDisabled({
       form: fieldSignalContext.form,
@@ -169,8 +169,8 @@ export function previousButtonFieldMapper<TProps>(fieldDef: BaseNavigationButton
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
-    const rootForm = rootFormRegistry.getRootForm();
-    const formValue = rootFormRegistry.getFormValue();
+    const rootForm = rootFormRegistry.rootForm();
+    const formValue = rootFormRegistry.formValue();
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,

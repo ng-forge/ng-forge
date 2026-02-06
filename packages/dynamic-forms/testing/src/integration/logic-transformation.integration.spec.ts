@@ -5,18 +5,29 @@ import { form, schema } from '@angular/forms/signals';
 import { applyLogic, applyMultipleLogic } from '../../core/logic/logic-applicator';
 import { LogicConfig } from '../../models/logic';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
+import { DYNAMIC_FORM_REF } from '../../core/registry';
 
 describe('Logic Transformation Pipeline Integration', () => {
   let injector: Injector;
-  let rootFormRegistry: RootFormRegistryService;
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<unknown>(undefined);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService],
+      providers: [
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        RootFormRegistryService,
+        {
+          provide: DYNAMIC_FORM_REF,
+          useValue: { entity: mockEntity, form: mockFormSignal },
+        },
+      ],
     });
 
     injector = TestBed.inject(Injector);
-    rootFormRegistry = TestBed.inject(RootFormRegistryService);
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
   });
 
   describe('Static Logic', () => {
@@ -34,7 +45,7 @@ describe('Logic Transformation Pipeline Integration', () => {
             applyLogic(config, path.email);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Field should be hidden
         expect(formInstance.email().hidden()).toBe(true);
@@ -55,7 +66,7 @@ describe('Logic Transformation Pipeline Integration', () => {
             applyLogic(config, path.username);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Field should be readonly
         expect(formInstance.username().readonly()).toBe(true);
@@ -76,7 +87,7 @@ describe('Logic Transformation Pipeline Integration', () => {
             applyLogic(config, path.email);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Field should be required
         expect(formInstance().valid()).toBe(false);
@@ -92,7 +103,7 @@ describe('Logic Transformation Pipeline Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ contactMethod: 'phone', email: 'test@example.com' });
         // Register the form value signal BEFORE form creation for cross-field logic
-        rootFormRegistry.registerFormValueSignal(formValue as any);
+        mockEntity.set(formValue() as Record<string, unknown>);
 
         const config: LogicConfig = {
           type: 'hidden',
@@ -110,7 +121,7 @@ describe('Logic Transformation Pipeline Integration', () => {
             applyLogic(config, path.email);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Email field should be hidden when contactMethod is not 'email'
         expect(formInstance.email().hidden()).toBe(true);
@@ -126,7 +137,7 @@ describe('Logic Transformation Pipeline Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ showAdvanced: false, advancedOption: '' });
         // Register the form value signal BEFORE form creation for cross-field logic
-        rootFormRegistry.registerFormValueSignal(formValue as any);
+        mockEntity.set(formValue() as Record<string, unknown>);
 
         const config: LogicConfig = {
           type: 'hidden',
@@ -144,7 +155,7 @@ describe('Logic Transformation Pipeline Integration', () => {
             applyLogic(config, path.advancedOption);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Field should be hidden when showAdvanced is false
         expect(formInstance.advancedOption().hidden()).toBe(true);
@@ -160,7 +171,7 @@ describe('Logic Transformation Pipeline Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ userType: 'guest', username: 'guest_user' });
         // Register the form value signal BEFORE form creation for cross-field logic
-        rootFormRegistry.registerFormValueSignal(formValue as any);
+        mockEntity.set(formValue() as Record<string, unknown>);
 
         const config: LogicConfig = {
           type: 'readonly',
@@ -178,7 +189,7 @@ describe('Logic Transformation Pipeline Integration', () => {
             applyLogic(config, path.username);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Username readonly for guests
         expect(formInstance.username().readonly()).toBe(true);
@@ -194,7 +205,7 @@ describe('Logic Transformation Pipeline Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ country: 'USA', state: 'CA' });
         // Register the form value signal BEFORE form creation for cross-field logic
-        rootFormRegistry.registerFormValueSignal(formValue as any);
+        mockEntity.set(formValue() as Record<string, unknown>);
 
         const config: LogicConfig = {
           type: 'hidden',
@@ -212,7 +223,7 @@ describe('Logic Transformation Pipeline Integration', () => {
             applyLogic(config, path.state);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // State visible for USA
         expect(formInstance.state().hidden()).toBe(false);
@@ -233,7 +244,7 @@ describe('Logic Transformation Pipeline Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ role: 'admin', department: 'IT', specialAccess: '' });
         // Register the form value signal BEFORE form creation for cross-field logic
-        rootFormRegistry.registerFormValueSignal(formValue as any);
+        mockEntity.set(formValue() as Record<string, unknown>);
 
         const config: LogicConfig = {
           type: 'hidden',
@@ -262,7 +273,7 @@ describe('Logic Transformation Pipeline Integration', () => {
             applyLogic(config, path.specialAccess);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Special access visible for admin in IT
         expect(formInstance.specialAccess().hidden()).toBe(false);
@@ -281,7 +292,7 @@ describe('Logic Transformation Pipeline Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ isPremium: false, isVIP: false, exclusiveFeature: '' });
         // Register the form value signal BEFORE form creation for cross-field logic
-        rootFormRegistry.registerFormValueSignal(formValue as any);
+        mockEntity.set(formValue() as Record<string, unknown>);
 
         const config: LogicConfig = {
           type: 'hidden',
@@ -310,7 +321,7 @@ describe('Logic Transformation Pipeline Integration', () => {
             applyLogic(config, path.exclusiveFeature);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Feature hidden for regular users
         expect(formInstance.exclusiveFeature().hidden()).toBe(false);
@@ -351,7 +362,7 @@ describe('Logic Transformation Pipeline Integration', () => {
             applyLogic(config, path.weekdayOption);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // This test will vary by day - just verify it doesn't error
         const isHidden = formInstance.weekdayOption().hidden();
@@ -365,7 +376,7 @@ describe('Logic Transformation Pipeline Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ isLocked: true, isArchived: false, data: 'test' });
         // Register the form value signal BEFORE form creation for cross-field logic
-        rootFormRegistry.registerFormValueSignal(formValue as any);
+        mockEntity.set(formValue() as Record<string, unknown>);
 
         const configs: LogicConfig[] = [
           {
@@ -394,7 +405,7 @@ describe('Logic Transformation Pipeline Integration', () => {
             applyMultipleLogic(configs, path.data);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Field is readonly (locked) but not hidden (not archived)
         expect(formInstance.data().readonly()).toBe(true);
@@ -428,7 +439,7 @@ describe('Logic Transformation Pipeline Integration', () => {
             applyLogic(config, path.field);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Field should not be hidden
         expect(formInstance.field().hidden()).toBe(false);
@@ -442,7 +453,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           adminPanel: '',
         });
         // Register the form value signal BEFORE form creation for cross-field logic
-        rootFormRegistry.registerFormValueSignal(formValue as any);
+        mockEntity.set(formValue() as Record<string, unknown>);
 
         const config: LogicConfig = {
           type: 'hidden',
@@ -460,7 +471,7 @@ describe('Logic Transformation Pipeline Integration', () => {
             applyLogic(config, path.adminPanel);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Admin panel visible for admin role
         expect(formInstance.adminPanel().hidden()).toBe(false);

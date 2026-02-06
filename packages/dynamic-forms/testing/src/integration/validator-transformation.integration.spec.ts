@@ -6,18 +6,29 @@ import type { SchemaPath } from '@angular/forms/signals';
 import { applyValidator, applyValidators } from '../../core/validation/validator-factory';
 import { ValidatorConfig } from '../../models/validation/validator-config';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
+import { DYNAMIC_FORM_REF } from '../../core/registry';
 
 describe('Validator Transformation Pipeline Integration', () => {
   let injector: Injector;
-  let rootFormRegistry: RootFormRegistryService;
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<unknown>(undefined);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService],
+      providers: [
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        RootFormRegistryService,
+        {
+          provide: DYNAMIC_FORM_REF,
+          useValue: { entity: mockEntity, form: mockFormSignal },
+        },
+      ],
     });
 
     injector = TestBed.inject(Injector);
-    rootFormRegistry = TestBed.inject(RootFormRegistryService);
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
   });
 
   describe('Static Validators', () => {
@@ -32,7 +43,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidator(config, path.email);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().valid()).toBe(false);
         expect(formInstance().errors()).toBeDefined();
@@ -53,7 +64,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidator(config, path.email as SchemaPath<string>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -73,7 +84,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidator(config, path.age as SchemaPath<number>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -93,7 +104,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidator(config, path.age as SchemaPath<number>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -113,7 +124,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidator(config, path.username as SchemaPath<string>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -133,7 +144,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidator(config, path.username as SchemaPath<string>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -153,7 +164,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidator(config, path.code as SchemaPath<string>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -173,7 +184,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidator(config, path.zipCode as SchemaPath<string>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -198,7 +209,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidator(config, path.score as SchemaPath<number>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Score 5 < min 10 - invalid
         expect(formInstance().valid()).toBe(false);
@@ -223,7 +234,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidator(config, path.quantity as SchemaPath<number>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Quantity 100 > max 50 - invalid
         expect(formInstance().valid()).toBe(false);
@@ -248,7 +259,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidator(config, path.age as SchemaPath<number>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Initially invalid (15 < 18)
         expect(formInstance().valid()).toBe(false);
@@ -280,7 +291,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidators(configs, path.password as SchemaPath<string>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Empty - fails required
         expect(formInstance().valid()).toBe(false);
@@ -310,7 +321,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidators(configs, path.username as SchemaPath<string>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Empty - should have errors
         expect(formInstance().valid()).toBe(false);
@@ -337,7 +348,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidator(config, path.email as SchemaPath<string>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Empty email is valid for email validator (use required separately)
         expect(formInstance().valid()).toBe(true);
@@ -359,7 +370,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidator(config, path.phone as SchemaPath<string>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().valid()).toBe(true);
 
@@ -382,7 +393,7 @@ describe('Validator Transformation Pipeline Integration', () => {
             applyValidators(configs, path.rating as SchemaPath<number>);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Boundary: exactly min
         formValue.set({ rating: 1 });

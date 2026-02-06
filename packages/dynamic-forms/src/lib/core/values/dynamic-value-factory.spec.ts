@@ -3,13 +3,14 @@ import { FieldContext, FieldTree } from '@angular/forms/signals';
 import { signal, Injector, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { createDynamicValueFunction } from './dynamic-value-factory';
-import { RootFormRegistryService, FieldContextRegistryService } from '../registry';
+import { RootFormRegistryService, FieldContextRegistryService, DYNAMIC_FORM_REF } from '../registry';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { ConsoleLogger } from '../../providers/features/logger/console-logger';
 
 describe('dynamic-value-factory', () => {
   let injector: Injector;
-  let rootFormRegistry: RootFormRegistryService;
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<any>(undefined);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -18,11 +19,16 @@ describe('dynamic-value-factory', () => {
         FieldContextRegistryService,
         // Provide ConsoleLogger to enable logging in tests
         { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
+        {
+          provide: DYNAMIC_FORM_REF,
+          useValue: { entity: mockEntity, form: mockFormSignal },
+        },
       ],
     });
 
     injector = TestBed.inject(Injector);
-    rootFormRegistry = TestBed.inject(RootFormRegistryService);
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
   });
 
   describe('createDynamicValueFunction', () => {
@@ -81,12 +87,9 @@ describe('dynamic-value-factory', () => {
       return runInInjectionContext(injector, () => {
         // Set up the root form registry with mock data if needed
         if (setupRoot) {
-          // Create mock form value signal and register BEFORE creating dynamic function
-          const mockFormValue = signal({ username: 'test', email: 'test@example.com' });
-          rootFormRegistry.registerFormValueSignal(mockFormValue);
-
+          mockEntity.set({ username: 'test', email: 'test@example.com' });
           const mockRootField = createMockFieldTree();
-          rootFormRegistry.registerRootForm(mockRootField);
+          mockFormSignal.set(mockRootField);
         }
 
         const dynamicFn = createDynamicValueFunction<TValue, TReturn>(expression);
@@ -111,13 +114,9 @@ describe('dynamic-value-factory', () => {
       const expression = 'formValue.username === "test"';
 
       const result = runInInjectionContext(injector, () => {
-        // Register the form value signal BEFORE creating the dynamic function
-        const mockFormValue = signal({ username: 'test', email: 'test@example.com' });
-        rootFormRegistry.registerFormValueSignal(mockFormValue as any);
-
-        // Also set up the root form registry with mock data
+        mockEntity.set({ username: 'test', email: 'test@example.com' });
         const mockRootField = createMockFieldTree();
-        rootFormRegistry.registerRootForm(mockRootField);
+        mockFormSignal.set(mockRootField);
 
         const dynamicFn = createDynamicValueFunction<string, boolean>(expression);
 

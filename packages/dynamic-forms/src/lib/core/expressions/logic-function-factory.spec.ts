@@ -3,12 +3,15 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { FieldContext } from '@angular/forms/signals';
 import { vi } from 'vitest';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../registry';
+import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService, DYNAMIC_FORM_REF } from '../registry';
 import { createLogicFunction } from './logic-function-factory';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
 
 describe('logic-function-factory', () => {
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<any>(undefined);
+
   let functionRegistry: FunctionRegistryService;
   let injector: Injector;
   let mockLogger: MockLogger;
@@ -22,11 +25,18 @@ describe('logic-function-factory', () => {
         FieldContextRegistryService,
         RootFormRegistryService,
         { provide: DynamicFormLogger, useValue: mockLogger },
+        {
+          provide: DYNAMIC_FORM_REF,
+          useValue: { entity: mockEntity, form: mockFormSignal },
+        },
       ],
     });
 
     functionRegistry = TestBed.inject(FunctionRegistryService);
     injector = TestBed.inject(Injector);
+
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
   });
 
   describe('createLogicFunction', () => {
@@ -56,18 +66,13 @@ describe('logic-function-factory', () => {
       customFormValue?: any,
     ): boolean {
       return runInInjectionContext(injector, () => {
-        // Set up the root form registry with mock data
-        const rootFormRegistry = TestBed.inject(RootFormRegistryService);
-
-        // Create a mock form value signal and register it BEFORE creating the logic function
         const formValueObj = customFormValue || { username: 'test', email: 'test@example.com' };
+
+        // Set the entity value on the mock DynamicForm
+        mockEntity.set(formValueObj);
+
+        // Also set a mock FieldTree
         const mockFormValue = signal(formValueObj);
-
-        // Register the form value signal BEFORE creating logic functions
-        // This is the new pattern that enables cross-field logic to work
-        rootFormRegistry.registerFormValueSignal(mockFormValue as any);
-
-        // Also register a mock FieldTree for backward compatibility
         const mockRootField = Object.assign(
           () => ({
             value: mockFormValue,
@@ -78,7 +83,7 @@ describe('logic-function-factory', () => {
           }),
           { formValue: mockFormValue },
         ) as any;
-        rootFormRegistry.registerRootForm(mockRootField);
+        mockFormSignal.set(mockRootField);
 
         const logicFn = createLogicFunction(expression);
         const fieldContext = createMockFieldContext(fieldValue, undefined, mockValueOf);

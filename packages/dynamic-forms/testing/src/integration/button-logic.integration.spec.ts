@@ -7,21 +7,32 @@ import { resolveSubmitButtonDisabled, resolveNextButtonDisabled, ButtonLogicCont
 import { FormOptions, FormStateCondition, LogicConfig, isFormStateCondition } from '../../models';
 import { createMockLogger } from '../mock-logger';
 import { DynamicFormLogger } from '../../../src/lib/providers/features/logger/logger.token';
+import { DYNAMIC_FORM_REF } from '../../core/registry';
 
 describe('Button Logic Integration', () => {
   let injector: Injector;
-  let rootFormRegistry: RootFormRegistryService;
   let mockLogger: DynamicFormLogger;
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<unknown>(undefined);
 
   beforeEach(() => {
     mockLogger = createMockLogger();
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
 
     TestBed.configureTestingModule({
-      providers: [FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService],
+      providers: [
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        RootFormRegistryService,
+        {
+          provide: DYNAMIC_FORM_REF,
+          useValue: { entity: mockEntity, form: mockFormSignal },
+        },
+      ],
     });
 
     injector = TestBed.inject(Injector);
-    rootFormRegistry = TestBed.inject(RootFormRegistryService);
   });
 
   describe('FormStateCondition Type', () => {
@@ -54,7 +65,7 @@ describe('Button Logic Integration', () => {
             // For this test, we'll check validity based on empty value
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Manually make form invalid by checking valid()
         // Since we haven't added validators, we need a different approach
@@ -82,7 +93,7 @@ describe('Button Logic Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         const ctx: ButtonLogicContext = {
           form: formInstance,
@@ -101,7 +112,7 @@ describe('Button Logic Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         const ctx: ButtonLogicContext = {
           form: formInstance,
@@ -125,7 +136,7 @@ describe('Button Logic Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         const ctx: ButtonLogicContext = {
           form: formInstance,
@@ -150,7 +161,7 @@ describe('Button Logic Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         const ctx: ButtonLogicContext = {
           form: formInstance,
@@ -171,7 +182,7 @@ describe('Button Logic Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ name: '' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         const currentPageValid = signal(false);
 
@@ -202,7 +213,7 @@ describe('Button Logic Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ name: '' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         const currentPageValid = signal(false);
 
@@ -229,7 +240,7 @@ describe('Button Logic Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ name: 'test' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         const currentPageValid = signal(true);
 
@@ -282,7 +293,7 @@ describe('Button Logic Integration', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         const ctx: ButtonLogicContext = {
           form: formInstance,

@@ -101,17 +101,17 @@ export class DynamicForm<
   // Dependencies
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly fieldRegistry = injectFieldRegistry();
-  private readonly injector = inject(Injector);
-  private readonly eventBus = inject(EventBus);
-  private readonly logger = inject(DynamicFormLogger);
+  private destroyRef = inject(DestroyRef);
+  private fieldRegistry = injectFieldRegistry();
+  private injector = inject(Injector);
+  private eventBus = inject(EventBus);
+  private logger = inject(DynamicFormLogger);
 
   /**
    * State manager that owns all form state and coordinates the form lifecycle.
    * The component delegates state management to this service and reads its signals.
    */
-  protected readonly stateManager = inject(FormStateManager<TFields, TModel>);
+  protected stateManager = inject(FormStateManager<TFields, TModel>);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -130,7 +130,7 @@ export class DynamicForm<
   // Private State
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly componentId = 'dynamic-form';
+  private componentId = 'dynamic-form';
 
   /**
    * Flag to track if the component is destroyed.
@@ -143,66 +143,66 @@ export class DynamicForm<
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** The currently active config used for form rendering */
-  readonly activeConfig = this.stateManager.activeConfig;
+  activeConfig = this.stateManager.activeConfig;
 
   /** Current render phase: 'render' = showing form, 'teardown' = hiding old components */
-  readonly renderPhase = this.stateManager.renderPhase;
+  renderPhase = this.stateManager.renderPhase;
 
   /** Computed form mode detection with validation */
-  readonly formModeDetection = this.stateManager.formModeDetection;
+  formModeDetection = this.stateManager.formModeDetection;
 
   /** Page field definitions for paged forms */
-  readonly pageFieldDefinitions = this.stateManager.pageFieldDefinitions;
+  pageFieldDefinitions = this.stateManager.pageFieldDefinitions;
 
   /** Effective form options (merged from config and input) */
-  readonly effectiveFormOptions = this.stateManager.effectiveFormOptions;
+  effectiveFormOptions = this.stateManager.effectiveFormOptions;
 
   /** Field signal context for injection into child components */
-  readonly fieldSignalContext = this.stateManager.fieldSignalContext;
+  fieldSignalContext = this.stateManager.fieldSignalContext;
 
   /** Default values computed from field definitions */
-  readonly defaultValues = this.stateManager.defaultValues;
+  defaultValues = this.stateManager.defaultValues;
 
   /** The Angular Signal Form instance */
-  readonly form = this.stateManager.form;
+  form = this.stateManager.form;
 
   /** Current form values (reactive) */
-  readonly formValue = this.stateManager.formValue;
+  formValue = this.stateManager.formValue;
 
   /** Whether the form is currently valid */
-  readonly valid = this.stateManager.valid;
+  valid = this.stateManager.valid;
 
   /** Whether the form is currently invalid */
-  readonly invalid = this.stateManager.invalid;
+  invalid = this.stateManager.invalid;
 
   /** Whether any form field has been modified */
-  readonly dirty = this.stateManager.dirty;
+  dirty = this.stateManager.dirty;
 
   /** Whether any form field has been touched (blurred) */
-  readonly touched = this.stateManager.touched;
+  touched = this.stateManager.touched;
 
   /** Current validation errors from all fields */
-  readonly errors = this.stateManager.errors;
+  errors = this.stateManager.errors;
 
   /** Whether the form is disabled (from options or form state) */
-  readonly disabled = this.stateManager.disabled;
+  disabled = this.stateManager.disabled;
 
   /** Whether the form is currently submitting */
-  readonly submitting = this.stateManager.submitting;
+  submitting = this.stateManager.submitting;
 
   /** Collects errors from async field component loading for error boundary patterns */
-  readonly fieldLoadingErrors = this.stateManager.fieldLoadingErrors;
+  fieldLoadingErrors = this.stateManager.fieldLoadingErrors;
 
   /** Resolved fields ready for rendering */
-  protected readonly resolvedFields = this.stateManager.resolvedFields;
+  protected resolvedFields = this.stateManager.resolvedFields;
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Internal
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
+  private rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
-  private readonly totalComponentsCount = computed(() => {
+  private totalComponentsCount = computed(() => {
     const setup = this.stateManager.formSetup();
     const fields = setup?.fields;
     if (!fields) {
@@ -220,7 +220,7 @@ export class DynamicForm<
   // Initialization
   // ─────────────────────────────────────────────────────────────────────────────
 
-  readonly initialized$ = setupInitializationTracking({
+  initialized$ = setupInitializationTracking({
     eventBus: this.eventBus,
     totalComponentsCount: this.totalComponentsCount,
     injector: this.injector,
@@ -232,10 +232,10 @@ export class DynamicForm<
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Emits when form validity changes. */
-  readonly validityChange = outputFromObservable(toObservable(this.valid));
+  validityChange = outputFromObservable(toObservable(this.valid));
 
   /** Emits when form dirty state changes. */
-  readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
+  dirtyChange = outputFromObservable(toObservable(this.dirty));
 
   /**
    * Emits form values when submitted (via SubmitEvent) and form is valid.
@@ -246,30 +246,28 @@ export class DynamicForm<
    *
    * Note: Does not emit when `submission.action` is configured - use one or the other.
    */
-  readonly submitted = outputFromObservable(this.stateManager.submitted$);
+  submitted = outputFromObservable(this.stateManager.submitted$);
 
   /** Emits when form is reset to default values. */
-  readonly reset = outputFromObservable(this.eventBus.on<FormResetEvent>('form-reset'));
+  reset = outputFromObservable(this.eventBus.on<FormResetEvent>('form-reset'));
 
   /** Emits when form is cleared to empty state. */
-  readonly cleared = outputFromObservable(this.eventBus.on<FormClearEvent>('form-clear'));
+  cleared = outputFromObservable(this.eventBus.on<FormClearEvent>('form-clear'));
 
   /** Emits all form events for custom event handling. */
-  readonly events = outputFromObservable(this.eventBus.events$);
+  events = outputFromObservable(this.eventBus.events$);
 
   /**
    * Emits when all form components are initialized and ready for interaction.
    * Useful for E2E testing to ensure the form is fully rendered before interaction.
    */
-  readonly initialized = outputFromObservable(this.initialized$);
+  initialized = outputFromObservable(this.initialized$);
 
   /** Emits when the current page changes in paged forms. */
-  readonly onPageChange = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change'));
+  onPageChange = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change'));
 
   /** Emits when page navigation state changes (canGoNext, canGoPrevious, etc.). */
-  readonly onPageNavigationStateChange = outputFromObservable(
-    this.eventBus.on<PageNavigationStateChangeEvent>('page-navigation-state-change'),
-  );
+  onPageNavigationStateChange = outputFromObservable(this.eventBus.on<PageNavigationStateChangeEvent>('page-navigation-state-change'));
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Constructor

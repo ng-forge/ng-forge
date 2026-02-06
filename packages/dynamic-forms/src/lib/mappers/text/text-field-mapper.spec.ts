@@ -8,22 +8,23 @@ import { vi } from 'vitest';
 
 describe('textFieldMapper', () => {
   let parentInjector: EnvironmentInjector;
+  const mockFormValue = signal<Record<string, unknown>>({});
+  const mockForm = vi.fn(() => ({
+    value: vi.fn().mockReturnValue({}),
+    valid: vi.fn().mockReturnValue(true),
+    submitting: vi.fn().mockReturnValue(false),
+  }));
   let mockRootFormRegistry: {
-    getRootForm: ReturnType<typeof vi.fn>;
-    getFormValue: ReturnType<typeof vi.fn>;
+    rootForm: ReturnType<typeof signal>;
+    formValue: ReturnType<typeof signal>;
   };
 
   beforeEach(async () => {
-    // Create a minimal mock form that satisfies the FieldTree interface requirements
-    const mockForm = vi.fn(() => ({
-      value: vi.fn().mockReturnValue({}),
-      valid: vi.fn().mockReturnValue(true),
-      submitting: vi.fn().mockReturnValue(false),
-    }));
+    mockFormValue.set({});
 
     mockRootFormRegistry = {
-      getRootForm: vi.fn().mockReturnValue(mockForm),
-      getFormValue: vi.fn().mockReturnValue({}),
+      rootForm: signal(mockForm),
+      formValue: mockFormValue,
     };
 
     const mockFieldSignalContext = {
@@ -254,7 +255,7 @@ describe('textFieldMapper', () => {
 
     it('should correctly map a text field with hidden logic', () => {
       // Update mock to return form value with agreedToTerms: true
-      mockRootFormRegistry.getFormValue.mockReturnValue({ agreedToTerms: true });
+      mockFormValue.set({ agreedToTerms: true });
 
       const textField: TextField = {
         key: 'termsAccepted',

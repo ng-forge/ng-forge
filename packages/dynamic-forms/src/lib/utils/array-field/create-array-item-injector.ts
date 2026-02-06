@@ -64,7 +64,7 @@ export function createArrayItemInjectorAndInputs<TModel extends Record<string, u
   // Uses isEqual to prevent unnecessary re-computation when index changes but value is same.
   const itemFormAccessor = computed(
     () => {
-      const rootForm = rootFormRegistry.getRootForm();
+      const rootForm = rootFormRegistry.rootForm();
       if (!rootForm) {
         return undefined;
       }

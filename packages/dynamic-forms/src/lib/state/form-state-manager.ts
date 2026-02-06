@@ -30,15 +30,16 @@ import { FieldTypeDefinition } from '../models/field-type';
 import { FormConfig, FormOptions } from '../models/form-config';
 import { RegisteredFieldTypes } from '../models/registry/field-registry';
 import { detectFormMode, FormMode, FormModeDetectionResult } from '../models/types/form-mode';
-import { InferFormValue } from '../models/types';
+import { InferFormValue } from '../models/types/form-value-inference';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
-import { FunctionRegistryService, RootFormRegistryService, SchemaRegistryService } from '../core/registry';
+import { FunctionRegistryService } from '../core/registry/function-registry.service';
+import { SchemaRegistryService } from '../core/registry/schema-registry.service';
 import { createSchemaFromFields } from '../core/schema-builder';
 import { createFormLevelSchema } from '../core/form-schema-merger';
 import { collectCrossFieldEntries } from '../core/cross-field/cross-field-collector';
 import { flattenFields } from '../utils/flattener/field-flattener';
 import { memoize, isEqual } from '../utils/object-utils';
-import { createContainerFieldProcessors } from '../utils/container-utils';
+import { createContainerFieldProcessors } from '../utils/container-utils/container-field-processors';
 import { derivedFromDeferred } from '../utils/derived-from-deferred/derived-from-deferred';
 import { reconcileFields, ResolvedField, resolveField } from '../utils/resolve-field/resolve-field';
 import { FormModeValidator } from '../utils/form-validation/form-mode-validator';
@@ -112,7 +113,6 @@ export class FormStateManager<
   private readonly destroyRef = inject(DestroyRef);
   private readonly logger = inject(DynamicFormLogger);
   private readonly eventBus = inject(EventBus);
-  private readonly rootFormRegistry = inject(RootFormRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly schemaRegistry = inject(SchemaRegistryService);
 
@@ -125,7 +125,13 @@ export class FormStateManager<
    * re-evaluate when it's created during initialize().
    */
   private readonly machineSignal = signal<FormStateMachine<TFields> | null>(null);
-  private deps!: FormStateManagerDeps<TFields, TModel>;
+
+  /**
+   * Component dependencies, stored as a signal so computed signals
+   * that read from it automatically re-evaluate when initialize() is called.
+   * Null before initialize().
+   */
+  private readonly _setup = signal<FormStateManagerDeps<TFields, TModel> | null>(null);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Memoized Functions
@@ -187,9 +193,9 @@ export class FormStateManager<
    * machine is still in 'uninitialized' state. This allows the form to be created with
    * the correct schema during the first render, before the explicitEffect dispatches
    * the 'initialize' action. Without this, logic functions (hidden, readonly, etc.)
-   * wouldn't work because registerFormValueSignal wouldn't be called.
+   * wouldn't work because the form value signal wouldn't be available.
    */
-  readonly activeConfig: Signal<FormConfig<TFields> | undefined> = computed(() => {
+  readonly activeConfig = computed(() => {
     const machine = this.machineSignal();
     if (!machine) return undefined;
     const state = machine.state();
@@ -199,7 +205,7 @@ export class FormStateManager<
     // causes stack overflow in test suites with @for loops), while still making the config
     // available so logic functions work correctly.
     if (state.type === LifecycleState.Uninitialized) {
-      return this.deps?.config();
+      return this._setup()?.config();
     }
 
     if (isReadyState(state)) return state.config;
@@ -218,7 +224,7 @@ export class FormStateManager<
   /**
    * Current render phase: 'render' = showing form, 'teardown' = hiding old components.
    */
-  readonly renderPhase: Signal<'render' | 'teardown'> = computed(() => {
+  readonly renderPhase = computed(() => {
     const machine = this.machineSignal();
     if (!machine) return 'render';
     const state = machine.state();
@@ -233,46 +239,44 @@ export class FormStateManager<
    * The `fieldsSource` signal controls which specific fields are rendered during
    * each transition phase, ensuring components are created/destroyed at the right time.
    */
-  readonly shouldRender: Signal<boolean> = computed(() => this.activeConfig() !== undefined);
+  readonly shouldRender = computed(() => this.activeConfig() !== undefined);
 
   /**
    * Computed form mode detection with validation.
    */
-  readonly formModeDetection: Signal<FormModeDetectionResult> = computed(() => {
+  readonly formModeDetection = computed(() => {
     const config = this.activeConfig();
     if (!config) {
-      return { mode: 'non-paged', isValid: true, errors: [] };
+      return { mode: 'non-paged' as const, isValid: true, errors: [] };
     }
 
-    const fields = config.fields || [];
-    const detection = detectFormMode(fields);
-    const validation = FormModeValidator.validateFormConfiguration(fields);
+    return detectFormMode(config.fields || []);
+  });
 
-    if (!validation.isValid) {
-      this.logger.error('Invalid form configuration:', validation.errors);
-    }
-
-    if (validation.warnings.length > 0) {
-      this.logger.warn('Form configuration warnings:', validation.warnings);
-    }
-
-    return detection;
+  /**
+   * Validation result for the current form configuration.
+   * Kept as a separate computed so logging can be done in an effect, not inside a computed.
+   */
+  private readonly formConfigValidation = computed(() => {
+    const config = this.activeConfig();
+    if (!config) return { isValid: true, errors: [] as string[], warnings: [] as string[] };
+    return FormModeValidator.validateFormConfiguration(config.fields || []);
   });
 
   /**
    * Effective form options (merged from config and input).
    */
-  readonly effectiveFormOptions: Signal<FormOptions> = computed(() => {
+  readonly effectiveFormOptions = computed(() => {
     const config = this.activeConfig();
     const configOptions = config?.options || {};
-    const inputOptions = this.deps?.formOptions() ?? undefined;
+    const inputOptions = this._setup()?.formOptions() ?? undefined;
     return { ...configOptions, ...inputOptions };
   });
 
   /**
    * Page field definitions (for paged forms).
    */
-  readonly pageFieldDefinitions: Signal<PageField[]> = computed(() => {
+  readonly pageFieldDefinitions = computed(() => {
     const config = this.activeConfig();
     const mode = this.formModeDetection().mode;
 
@@ -287,7 +291,7 @@ export class FormStateManager<
   // Computed Signals - Form Setup
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly rawFieldRegistry: Signal<Map<string, FieldTypeDefinition>> = computed(() => this.deps?.fieldRegistry.raw ?? new Map());
+  private readonly rawFieldRegistry = computed(() => this._setup()?.fieldRegistry.raw ?? new Map());
 
   /**
    * Computed form setup - reads from the state machine as single source of truth.
@@ -298,7 +302,7 @@ export class FormStateManager<
    * - teardown/applying: read from state.currentFormSetup (old setup, form unchanged)
    * - restoring: read from state.pendingFormSetup (new setup for new config)
    */
-  readonly formSetup: Signal<FormSetup<TFields>> = computed(() => {
+  readonly formSetup = computed(() => {
     const machine = this.machineSignal();
     const registry = this.rawFieldRegistry();
 
@@ -319,10 +323,23 @@ export class FormStateManager<
       return state.currentFormSetup;
     }
 
-    // uninitialized or initializing: compute from config for bootstrap.
-    // Register validators/schemas eagerly so the form() computed (which runs
-    // during the first render, before the state machine dispatches 'initialize')
-    // can resolve schemas and custom validators.
+    // Bootstrap path (uninitialized or initializing): compute FormSetup from config.
+    //
+    // WHY registerValidatorsFromConfig runs here (inside a computed):
+    // The form() computed evaluates during the first render, BEFORE the explicitEffect
+    // dispatches the 'initialize' action to the state machine. Form schema creation
+    // (createSchemaFromFields) needs validators/schemas already registered in
+    // SchemaRegistryService and FunctionRegistryService, otherwise field-level
+    // validation won't work on the first render.
+    //
+    // This only executes on the bootstrap path (uninitialized/initializing states).
+    // Once the state machine reaches 'ready', formSetup reads from state.formSetup
+    // and this branch is never reached again. Subsequent config changes go through
+    // the state machine's createFormSetup callback, which also calls
+    // registerValidatorsFromConfig.
+    //
+    // The registry methods (setValidators, setAsyncValidators, etc.) are idempotent
+    // set-based operations, so duplicate calls during re-evaluation are safe.
     const config = this.activeConfig();
     if (!config) {
       return this.createEmptyFormSetup(registry);
@@ -332,6 +349,7 @@ export class FormStateManager<
 
     if (config.fields && config.fields.length > 0) {
       const modeDetection = this.formModeDetection();
+      // Safe: RegisteredFieldTypes extends FieldDef<unknown> — the cast narrows the union for the flattener.
       return this.createFormSetupFromConfig(config.fields as FieldDef<unknown>[], modeDetection.mode, registry);
     }
 
@@ -341,7 +359,7 @@ export class FormStateManager<
   /**
    * Default values computed from field definitions.
    */
-  readonly defaultValues: WritableSignal<TModel> = linkedSignal(() => this.formSetup().defaultValues as TModel);
+  readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues as TModel);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Entity & Form
@@ -350,19 +368,20 @@ export class FormStateManager<
   /**
    * Entity (form value merged with defaults).
    */
-  private readonly entity: WritableSignal<TModel> = linkedSignal<TModel>(() => {
-    if (!this.deps) {
+  readonly entity = linkedSignal<TModel>(() => {
+    const deps = this._setup();
+    if (!deps) {
       return {} as TModel;
     }
 
-    const inputValue = this.deps.value();
+    const inputValue = deps.value();
     const defaults = this.defaultValues();
-    const setup = this.formSetup();
+    const formSetupValue = this.formSetup();
 
     const combined = { ...defaults, ...inputValue };
 
-    if (setup.schemaFields && setup.schemaFields.length > 0) {
-      const validKeys = new Set(setup.schemaFields.map((field) => field.key).filter((key): key is string => key !== undefined));
+    if (formSetupValue.schemaFields && formSetupValue.schemaFields.length > 0) {
+      const validKeys = new Set(formSetupValue.schemaFields.map((field) => field.key).filter((key): key is string => key !== undefined));
       const filtered: Record<string, unknown> = {};
       for (const key of Object.keys(combined)) {
         if (validKeys.has(key)) {
@@ -378,15 +397,10 @@ export class FormStateManager<
   /**
    * The Angular Signal Form instance.
    */
-  readonly form: Signal<ReturnType<typeof form<TModel>>> = computed(() => {
+  readonly form = computed(() => {
     return runInInjectionContext(this.injector, () => {
       const setup = this.formSetup();
       const config = this.activeConfig();
-
-      // IMPORTANT: Register the form value signal BEFORE field resolution starts.
-      // This ensures logic functions (hidden, readonly, etc.) can access form values
-      // via rootFormRegistry.getFormValue() during schema evaluation.
-      untracked(() => this.rootFormRegistry.registerFormValueSignal(this.entity as Signal<Record<string, unknown>>));
 
       let formInstance: ReturnType<typeof form<TModel>>;
 
@@ -413,8 +427,6 @@ export class FormStateManager<
           formInstance = untracked(() => form(this.entity));
         }
       }
-
-      untracked(() => this.rootFormRegistry.registerRootForm(formInstance));
 
       return formInstance;
     });
@@ -466,7 +478,7 @@ export class FormStateManager<
 
     return {
       injector: this.injector,
-      value: this.deps?.value ?? signal(undefined),
+      value: this._setup()?.value ?? signal(undefined),
       defaultValues: this.defaultValues,
       get form() {
         // Always read formSignal to establish the reactive dependency in the
@@ -494,32 +506,32 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Current form values (reactive). */
-  readonly formValue: Signal<Partial<TModel>> = computed(() => this.form()().value());
+  readonly formValue = computed(() => this.form()().value());
 
   /** Whether the form is currently valid. */
-  readonly valid: Signal<boolean> = computed(() => this.form()().valid());
+  readonly valid = computed(() => this.form()().valid());
 
   /** Whether the form is currently invalid. */
-  readonly invalid: Signal<boolean> = computed(() => this.form()().invalid());
+  readonly invalid = computed(() => this.form()().invalid());
 
   /** Whether any form field has been modified. */
-  readonly dirty: Signal<boolean> = computed(() => this.form()().dirty());
+  readonly dirty = computed(() => this.form()().dirty());
 
   /** Whether any form field has been touched (blurred). */
-  readonly touched: Signal<boolean> = computed(() => this.form()().touched());
+  readonly touched = computed(() => this.form()().touched());
 
   /** Current validation errors from all fields. */
   readonly errors = computed(() => this.form()().errors());
 
   /** Whether the form is disabled (from options or form state). */
-  readonly disabled: Signal<boolean> = computed(() => {
+  readonly disabled = computed(() => {
     const optionsDisabled = this.effectiveFormOptions().disabled;
     const formDisabled = this.form()().disabled();
     return optionsDisabled ?? formDisabled;
   });
 
   /** Whether the form is currently submitting. */
-  readonly submitting: Signal<boolean> = computed(() => this.form()().submitting());
+  readonly submitting = computed(() => this.form()().submitting());
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Field Resolution
@@ -542,7 +554,7 @@ export class FormStateManager<
    * causing `switchMap` in the resolvedFields pipeline to cancel in-progress field
    * resolution and preventing components from being properly destroyed.
    */
-  private readonly fieldsSource: Signal<FieldDef<unknown>[]> = computed(
+  private readonly fieldsSource = computed(
     () => {
       const machine = this.machineSignal();
       if (!machine) return [];
@@ -582,7 +594,7 @@ export class FormStateManager<
   /**
    * Injector for field components with FIELD_SIGNAL_CONTEXT.
    */
-  private fieldInjector: Signal<Injector> = computed(() =>
+  private fieldInjector = computed(() =>
     Injector.create({
       parent: this.injector,
       providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: this.fieldSignalContext() }],
@@ -647,11 +659,12 @@ export class FormStateManager<
       this.fieldsSource,
       pipe(
         switchMap((fields) => {
-          if (!fields || fields.length === 0 || !this.deps) {
+          const deps = this._setup();
+          if (!fields || fields.length === 0 || !deps) {
             return of([] as (ResolvedField | undefined)[]);
           }
           const context = {
-            loadTypeComponent: (type: string) => this.deps.fieldRegistry.loadTypeComponent(type),
+            loadTypeComponent: (type: string) => deps.fieldRegistry.loadTypeComponent(type),
             registry: this.rawFieldRegistry(),
             injector: this.fieldInjector(),
             destroyRef: this.destroyRef,
@@ -748,7 +761,7 @@ export class FormStateManager<
       return;
     }
 
-    this.deps = deps;
+    this._setup.set(deps);
 
     // Create the scheduler and state machine
     const scheduler = createSideEffectScheduler(this.injector);
@@ -758,6 +771,7 @@ export class FormStateManager<
       scheduler,
       createFormSetup: (config) => {
         this.registerValidatorsFromConfig(config);
+        // Safe: same cast as formSetup computed — RegisteredFieldTypes extends FieldDef<unknown>.
         return this.createFormSetupFromConfig(
           (config.fields as FieldDef<unknown>[]) ?? [],
           detectFormMode(config.fields ?? []).mode,
@@ -773,7 +787,7 @@ export class FormStateManager<
           }
         }
         if (Object.keys(filtered).length > 0) {
-          this.deps.value.update((current) => ({ ...current, ...filtered }) as Partial<TModel>);
+          deps.value.update((current) => ({ ...current, ...filtered }) as Partial<TModel>);
         }
       },
       onTransition: (transition) => {
@@ -787,7 +801,7 @@ export class FormStateManager<
     // Setup effects in injection context.
     // The config-watching effect will dispatch the initial config.
     runInInjectionContext(this.injector, () => {
-      this.setupEffects();
+      this.setupEffects(deps);
       this.setupEventHandlers();
     });
   }
@@ -800,9 +814,7 @@ export class FormStateManager<
    * Updates the form value model.
    */
   updateValue(value: Partial<TModel>): void {
-    if (this.deps) {
-      this.deps.value.set(value);
-    }
+    this._setup()?.value.set(value);
   }
 
   /**
@@ -810,21 +822,20 @@ export class FormStateManager<
    */
   reset(): void {
     const defaults = this.defaultValues();
-    (this.form()().value.set as (value: unknown) => void)(defaults);
-    if (this.deps) {
-      this.deps.value.set(defaults as Partial<TModel>);
-    }
+    // Safe: Angular Signals Form's .value is a WritableSignal at runtime,
+    // but typed as read-only Signal in the public API.
+    (this.form()().value as WritableSignal<TModel>).set(defaults);
+    this._setup()?.value.set(defaults as Partial<TModel>);
   }
 
   /**
    * Clears the form to empty state.
    */
   clear(): void {
-    const emptyValue = {} as Partial<TModel>;
-    (this.form()().value.set as (value: unknown) => void)(emptyValue);
-    if (this.deps) {
-      this.deps.value.set(emptyValue);
-    }
+    const emptyValue = {} as TModel;
+    // Safe: same cast rationale as reset() — see comment above.
+    (this.form()().value as WritableSignal<TModel>).set(emptyValue);
+    this._setup()?.value.set(emptyValue);
   }
 
   /**
@@ -838,10 +849,10 @@ export class FormStateManager<
   // Private Methods - Setup
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private setupEffects(): void {
+  private setupEffects(deps: FormStateManagerDeps<TFields, TModel>): void {
     // Watch for config changes and dispatch to state machine
     // This handles both initial config and subsequent changes.
-    explicitEffect([this.deps.config], ([config]) => {
+    explicitEffect([deps.config], ([config]) => {
       const machine = this.machineSignal();
       if (!machine) return;
 
@@ -857,16 +868,24 @@ export class FormStateManager<
 
     // Sync entity changes to the value signal
     explicitEffect([this.entity], ([currentEntity]) => {
-      if (!this.deps) return;
-
-      const currentValue = this.deps.value();
+      const currentValue = deps.value();
       if (!isEqual(currentEntity, currentValue)) {
-        this.deps.value.set(currentEntity);
+        deps.value.set(currentEntity);
+      }
+    });
+
+    // Log form configuration validation issues
+    explicitEffect([this.formConfigValidation], ([validation]) => {
+      if (!validation.isValid) {
+        this.logger.error('Invalid form configuration:', validation.errors);
+      }
+      if (validation.warnings.length > 0) {
+        this.logger.warn('Form configuration warnings:', validation.warnings);
       }
     });
 
     // Clear loading errors when config changes
-    explicitEffect([computed(() => this.deps?.config())], () => {
+    explicitEffect([deps.config], () => {
       this.fieldLoadingErrors.set([]);
     });
   }
@@ -946,6 +965,5 @@ export class FormStateManager<
 
   ngOnDestroy(): void {
     this.machineSignal()?.dispatch({ type: Action.Destroy });
-    this.rootFormRegistry.unregisterForm();
   }
 }

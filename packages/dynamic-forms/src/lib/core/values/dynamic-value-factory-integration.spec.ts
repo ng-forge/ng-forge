@@ -2,19 +2,29 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { type FieldContext, form, schema } from '@angular/forms/signals';
 import { createDynamicValueFunction } from './dynamic-value-factory';
-import { FieldContextRegistryService, RootFormRegistryService } from '../registry';
+import { FieldContextRegistryService, RootFormRegistryService, DYNAMIC_FORM_REF } from '../registry';
 
 describe('dynamic-value-factory (integration)', () => {
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<any>(undefined);
+
   let injector: Injector;
-  let rootFormRegistry: RootFormRegistryService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [RootFormRegistryService, FieldContextRegistryService],
+      providers: [
+        RootFormRegistryService,
+        FieldContextRegistryService,
+        {
+          provide: DYNAMIC_FORM_REF,
+          useValue: { entity: mockEntity, form: mockFormSignal },
+        },
+      ],
     });
 
     injector = TestBed.inject(Injector);
-    rootFormRegistry = TestBed.inject(RootFormRegistryService);
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
   });
 
   function createFieldContext<T>(fieldValue: T, fieldAccessor: () => unknown): FieldContext<T> {
@@ -34,7 +44,7 @@ describe('dynamic-value-factory (integration)', () => {
         formValue,
         schema<{ testField: string }>(() => void 0),
       );
-      rootFormRegistry.registerRootForm(formInstance);
+      mockFormSignal.set(formInstance);
 
       const dynamicFn = createDynamicValueFunction<string, boolean>('fieldValue === "hello"');
       const fieldContext = createFieldContext('hello', () => formInstance.testField());
@@ -47,13 +57,13 @@ describe('dynamic-value-factory (integration)', () => {
   it('should evaluate expressions with access to form values', () => {
     const result = runInInjectionContext(injector, () => {
       const formValue = signal({ username: 'test', email: 'test@example.com' });
-      rootFormRegistry.registerFormValueSignal(formValue);
+      mockEntity.set({ username: 'test', email: 'test@example.com' });
 
       const formInstance = form(
         formValue,
         schema<{ username: string; email: string }>(() => void 0),
       );
-      rootFormRegistry.registerRootForm(formInstance);
+      mockFormSignal.set(formInstance);
 
       const dynamicFn = createDynamicValueFunction<string, boolean>('formValue.username === "test"');
       const fieldContext = createFieldContext('current-field-value', () => formInstance.username());
@@ -66,13 +76,13 @@ describe('dynamic-value-factory (integration)', () => {
   it('should evaluate expressions with complex logic', () => {
     const result = runInInjectionContext(injector, () => {
       const formValue = signal({ username: 'test', email: 'test@example.com' });
-      rootFormRegistry.registerFormValueSignal(formValue);
+      mockEntity.set({ username: 'test', email: 'test@example.com' });
 
       const formInstance = form(
         formValue,
         schema<{ username: string; email: string }>(() => void 0),
       );
-      rootFormRegistry.registerRootForm(formInstance);
+      mockFormSignal.set(formInstance);
 
       const dynamicFn = createDynamicValueFunction<string, number>('fieldValue.length + formValue.username.length');
       const fieldContext = createFieldContext('hello', () => formInstance.username());
@@ -89,7 +99,7 @@ describe('dynamic-value-factory (integration)', () => {
         formValue,
         schema<{ testField: string }>(() => void 0),
       );
-      rootFormRegistry.registerRootForm(formInstance);
+      mockFormSignal.set(formInstance);
 
       const dynamicFn = createDynamicValueFunction<string, unknown>('nonExistentProperty.method()');
       const fieldContext = createFieldContext('test', () => formInstance.testField());
@@ -106,7 +116,7 @@ describe('dynamic-value-factory (integration)', () => {
         formValue,
         schema<{ testField: string }>(() => void 0),
       );
-      rootFormRegistry.registerRootForm(formInstance);
+      mockFormSignal.set(formInstance);
 
       const testCases = [
         { expression: '"string result"', expected: 'string result' },

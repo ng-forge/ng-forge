@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, submit, FieldTree, TreeValidationResult } from '@angular/forms/signals';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
+import { DYNAMIC_FORM_REF } from '../../core/registry';
 import { firstValueFrom, isObservable, of, Subject, throwError, timer } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 
@@ -21,15 +22,25 @@ interface FieldValidationError {
 
 describe('Form Submission Integration', () => {
   let injector: Injector;
-  let rootFormRegistry: RootFormRegistryService;
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<unknown>(undefined);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService],
+      providers: [
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        RootFormRegistryService,
+        {
+          provide: DYNAMIC_FORM_REF,
+          useValue: { entity: mockEntity, form: mockFormSignal },
+        },
+      ],
     });
 
     injector = TestBed.inject(Injector);
-    rootFormRegistry = TestBed.inject(RootFormRegistryService);
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
   });
 
   describe('Native submit() Integration', () => {
@@ -37,7 +48,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Initially not submitting
         expect(formInstance().submitting()).toBe(false);
@@ -63,7 +74,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ username: 'testuser', email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Initially no errors
         expect(formInstance.username().errors()).toEqual([]);
@@ -96,7 +107,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Submit successfully
         await submit(formInstance, async () => {
@@ -115,7 +126,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Wrap the Observable action like the dynamic-form component does
         const observableAction = () => timer(10).pipe(map(() => undefined));
@@ -138,7 +149,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Simulates returning an HTTP response body directly
         const observableAction = () => of({ id: 123, status: 'created' });
@@ -162,7 +173,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ username: 'testuser' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         const observableAction = (f: typeof formInstance) =>
           of([
@@ -197,7 +208,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         let submittingDuringAction = false;
         const observableAction = (f: typeof formInstance) =>
@@ -229,7 +240,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().submitting()).toBe(false);
 
@@ -250,7 +261,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().submitting()).toBe(false);
 
@@ -276,7 +287,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Submit with action returning null (treated as success)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Testing edge case with null return
@@ -292,7 +303,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         let submittingBeforeDelay = false;
         let submittingDuringDelay = false;
@@ -332,7 +343,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Action that throws synchronously before returning Promise
         const syncThrowingAction = () => {
@@ -351,7 +362,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Action that returns a rejected Promise
         const asyncThrowingAction = async () => {
@@ -371,7 +382,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         let callCount = 0;
         const completedCalls: number[] = [];
@@ -405,7 +416,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: '' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         let capturedValue: unknown = null;
 
@@ -428,7 +439,7 @@ describe('Form Submission Integration', () => {
       await runInInjectionContext(injector, async () => {
         const formValue = signal({ email: 'test@example.com' });
         const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         const emissions: number[] = [];
         const subject = new Subject<undefined>();

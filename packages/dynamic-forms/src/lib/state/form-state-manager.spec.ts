@@ -6,7 +6,7 @@ import { FormConfig, FormOptions } from '../models/form-config';
 import { RegisteredFieldTypes } from '../models/registry/field-registry';
 import { FieldTypeDefinition } from '../models/field-type';
 import { EventBus } from '../events/event.bus';
-import { RootFormRegistryService, SchemaRegistryService, FunctionRegistryService } from '../core/registry';
+import { RootFormRegistryService, SchemaRegistryService, FunctionRegistryService, DYNAMIC_FORM_REF } from '../core/registry';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { NoopLogger } from '../providers/features/logger/noop-logger';
 
@@ -45,6 +45,7 @@ describe('FormStateManager', () => {
         RootFormRegistryService,
         SchemaRegistryService,
         FunctionRegistryService,
+        { provide: DYNAMIC_FORM_REF, useValue: { entity: signal({}), form: signal(undefined) } },
         { provide: DynamicFormLogger, useClass: NoopLogger },
       ],
     });

@@ -4,10 +4,12 @@ import { signal } from '@angular/core';
 import { FieldContextRegistryService } from './field-context-registry.service';
 import { RootFormRegistryService } from './root-form-registry.service';
 import { FieldContext } from '@angular/forms/signals';
+import { DYNAMIC_FORM_REF } from './dynamic-form-ref.token';
 
 describe('FieldContextRegistryService', () => {
   let service: FieldContextRegistryService;
-  let mockRootFormRegistry: RootFormRegistryService;
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<unknown>(undefined);
 
   function createMockFieldContext<T>(value: T): FieldContext<T> {
     return {
@@ -19,11 +21,19 @@ describe('FieldContextRegistryService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [FieldContextRegistryService, RootFormRegistryService],
+      providers: [
+        FieldContextRegistryService,
+        RootFormRegistryService,
+        {
+          provide: DYNAMIC_FORM_REF,
+          useValue: { entity: mockEntity, form: mockFormSignal },
+        },
+      ],
     });
 
     service = TestBed.inject(FieldContextRegistryService);
-    mockRootFormRegistry = TestBed.inject(RootFormRegistryService);
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
   });
 
   describe('createEvaluationContext', () => {
@@ -84,9 +94,7 @@ describe('FieldContextRegistryService', () => {
   describe('createEvaluationContext with root form', () => {
     it('should include root form value', () => {
       const formValue = { name: 'Alice', email: 'alice@example.com' };
-      const formValueSignal = signal(formValue);
-
-      mockRootFormRegistry.registerFormValueSignal(formValueSignal);
+      mockEntity.set(formValue);
 
       const fieldContext = createMockFieldContext('test');
       const result = service.createEvaluationContext(fieldContext);
@@ -95,62 +103,12 @@ describe('FieldContextRegistryService', () => {
     });
 
     it('should handle root form with empty value', () => {
-      const mockRootForm = vi.fn(() => ({
-        value: vi.fn(() => ({})),
-      }));
-
-      mockRootFormRegistry.registerRootForm(mockRootForm as any);
+      mockEntity.set({});
 
       const fieldContext = createMockFieldContext('test');
       const result = service.createEvaluationContext(fieldContext);
 
       expect(result.formValue).toEqual({});
-    });
-
-    it('should handle root form with null value', () => {
-      const mockRootForm = vi.fn(() => ({
-        value: vi.fn(() => null),
-      }));
-
-      mockRootFormRegistry.registerRootForm(mockRootForm as any);
-
-      const fieldContext = createMockFieldContext('test');
-      const result = service.createEvaluationContext(fieldContext);
-
-      expect(result.formValue).toEqual({});
-    });
-
-    it('should handle root form with array value', () => {
-      const mockRootForm = vi.fn(() => ({
-        value: vi.fn(() => [1, 2, 3]),
-      }));
-
-      mockRootFormRegistry.registerRootForm(mockRootForm as any);
-
-      const fieldContext = createMockFieldContext('test');
-      const result = service.createEvaluationContext(fieldContext);
-
-      expect(result.formValue).toEqual({});
-    });
-
-    it('should handle root form that throws error gracefully', () => {
-      // When no form value signal or root form is registered, it returns empty object
-      const fieldContext = createMockFieldContext('test');
-      const result = service.createEvaluationContext(fieldContext);
-
-      expect(result.formValue).toEqual({});
-    });
-
-    it('should use custom form id', () => {
-      const formValue = { custom: 'data' };
-      const formValueSignal = signal(formValue);
-
-      mockRootFormRegistry.registerFormValueSignal(formValueSignal, 'customForm');
-
-      const fieldContext = createMockFieldContext('test');
-      const result = service.createEvaluationContext(fieldContext, undefined, 'customForm');
-
-      expect(result.formValue).toEqual(formValue);
     });
   });
 
@@ -226,9 +184,7 @@ describe('FieldContextRegistryService', () => {
   describe('integration scenarios', () => {
     it('should create complete evaluation context with all features', () => {
       const formValue = { user: { name: 'Alice', email: 'alice@example.com' } };
-      const formValueSignal = signal(formValue);
-
-      mockRootFormRegistry.registerFormValueSignal(formValueSignal);
+      mockEntity.set(formValue);
 
       const fieldContext: any = createMockFieldContext('alice@example.com');
       // Use a real signal for key since isChildFieldContext checks isSignal()
@@ -244,25 +200,6 @@ describe('FieldContextRegistryService', () => {
       expect(result.formValue).toEqual(formValue);
       expect(result.fieldPath).toBe('email');
       expect(result.customFunctions).toEqual(customFunctions);
-    });
-
-    it('should handle multiple forms with different ids', () => {
-      const form1Value = { form1: 'data1' };
-      const form2Value = { form2: 'data2' };
-
-      const formValueSignal1 = signal(form1Value);
-      const formValueSignal2 = signal(form2Value);
-
-      mockRootFormRegistry.registerFormValueSignal(formValueSignal1, 'form1');
-      mockRootFormRegistry.registerFormValueSignal(formValueSignal2, 'form2');
-
-      const fieldContext = createMockFieldContext('test');
-
-      const result1 = service.createEvaluationContext(fieldContext, undefined, 'form1');
-      const result2 = service.createEvaluationContext(fieldContext, undefined, 'form2');
-
-      expect(result1.formValue).toEqual(form1Value);
-      expect(result2.formValue).toEqual(form2Value);
     });
   });
 
@@ -281,7 +218,7 @@ describe('FieldContextRegistryService', () => {
 
     it('should include form value from registry', () => {
       const formValue = { name: 'Alice', email: 'alice@example.com' };
-      mockRootFormRegistry.registerFormValueSignal(signal(formValue));
+      mockEntity.set(formValue);
 
       const result = service.createDisplayOnlyContext('infoText');
 
@@ -304,16 +241,7 @@ describe('FieldContextRegistryService', () => {
       expect(result.customFunctions).toEqual({});
     });
 
-    it('should support custom form ID', () => {
-      const formValue = { status: 'active' };
-      mockRootFormRegistry.registerFormValueSignal(signal(formValue), 'customForm');
-
-      const result = service.createDisplayOnlyContext('infoText', undefined, 'customForm');
-
-      expect(result.formValue).toEqual(formValue);
-    });
-
-    it('should return empty form value when no form is registered', () => {
+    it('should return empty form value when entity is empty', () => {
       const result = service.createDisplayOnlyContext('infoText');
 
       expect(result.formValue).toEqual({});

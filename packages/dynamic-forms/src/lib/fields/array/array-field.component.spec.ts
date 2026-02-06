@@ -18,6 +18,7 @@ import { createSchemaFromFields } from '../../core/schema-builder';
 import { vi } from 'vitest';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
+import { DYNAMIC_FORM_REF } from '../../core/registry/dynamic-form-ref.token';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 
 describe('ArrayFieldComponent', () => {
@@ -30,6 +31,9 @@ describe('ArrayFieldComponent', () => {
 
     const registry = new Map([['test', mockFieldType]]);
 
+    const mockEntity = signal<Record<string, unknown>>({});
+    const mockFormSignal = signal<unknown>(undefined);
+
     TestBed.configureTestingModule({
       imports: [ArrayFieldComponent],
       providers: [
@@ -38,13 +42,14 @@ describe('ArrayFieldComponent', () => {
         EventBus,
         FunctionRegistryService,
         RootFormRegistryService,
+        { provide: DYNAMIC_FORM_REF, useValue: { entity: mockEntity, form: mockFormSignal } },
         {
           provide: FIELD_REGISTRY,
           useValue: registry,
         },
         {
           provide: FIELD_SIGNAL_CONTEXT,
-          useFactory: (injector: Injector, rootFormRegistry: RootFormRegistryService) => {
+          useFactory: (injector: Injector) => {
             return runInInjectionContext(injector, () => {
               // Compute default value from field definition if no explicit value provided
               const computedValue = value || { [field.key]: getFieldDefaultValue(field, registry) };
@@ -62,8 +67,9 @@ describe('ArrayFieldComponent', () => {
               // Access internal structure to force initialization (internal Angular API)
               (testForm as unknown as { structure?: () => void }).structure?.();
 
-              // Register the root form for array item direct binding
-              rootFormRegistry.registerRootForm(testForm);
+              // Register the root form via mock signals
+              mockEntity.set(computedValue as Record<string, unknown>);
+              mockFormSignal.set(testForm);
 
               const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
                 injector,
@@ -76,7 +82,7 @@ describe('ArrayFieldComponent', () => {
               return mockFieldSignalContext;
             });
           },
-          deps: [Injector, RootFormRegistryService],
+          deps: [Injector],
         },
       ],
     });
@@ -471,6 +477,9 @@ describe('ArrayFieldComponent', () => {
         ['test', testFieldType],
       ]);
 
+      const mockEntity = signal<Record<string, unknown>>({});
+      const mockFormSignal = signal<unknown>(undefined);
+
       TestBed.configureTestingModule({
         imports: [ArrayFieldComponent],
         providers: [
@@ -478,6 +487,7 @@ describe('ArrayFieldComponent', () => {
           EventBus,
           FunctionRegistryService,
           RootFormRegistryService,
+          { provide: DYNAMIC_FORM_REF, useValue: { entity: mockEntity, form: mockFormSignal } },
           {
             provide: FIELD_REGISTRY,
             useValue: registry,
@@ -487,7 +497,7 @@ describe('ArrayFieldComponent', () => {
           { provide: FORM_OPTIONS, useValue: signal(undefined) },
           {
             provide: FIELD_SIGNAL_CONTEXT,
-            useFactory: (injector: Injector, rootFormRegistry: RootFormRegistryService) => {
+            useFactory: (injector: Injector) => {
               return runInInjectionContext(injector, () => {
                 // Compute default value from field definition if no explicit value provided
                 const computedValue = value || { [field.key]: getFieldDefaultValue(field, registry) };
@@ -504,8 +514,9 @@ describe('ArrayFieldComponent', () => {
                 // Access internal structure to force initialization (internal Angular API)
                 (testForm as unknown as { structure?: () => void }).structure?.();
 
-                // Register the root form for array item direct binding
-                rootFormRegistry.registerRootForm(testForm);
+                // Register the root form via mock signals
+                mockEntity.set(computedValue as Record<string, unknown>);
+                mockFormSignal.set(testForm);
 
                 const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
                   injector,
@@ -518,7 +529,7 @@ describe('ArrayFieldComponent', () => {
                 return mockFieldSignalContext;
               });
             },
-            deps: [Injector, RootFormRegistryService],
+            deps: [Injector],
           },
         ],
       });

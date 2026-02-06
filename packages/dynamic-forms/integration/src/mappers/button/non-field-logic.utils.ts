@@ -58,7 +58,7 @@ export interface NonFieldLogicResult {
  */
 export function applyNonFieldLogic(rootFormRegistry: RootFormRegistryService, fieldDef: FieldDefWithLogic): NonFieldLogicResult {
   const result: NonFieldLogicResult = {};
-  const rootForm = rootFormRegistry.getRootForm();
+  const rootForm = rootFormRegistry.rootForm();
 
   if (rootForm) {
     // Resolve hidden state if explicitly set or has logic
