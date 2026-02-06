@@ -16,6 +16,7 @@ import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-f
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
 import { CONTAINER_FIELD_PROCESSORS } from '../../utils/container-utils/container-field-processors';
+import { isEqual } from '../../utils/object-utils';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';

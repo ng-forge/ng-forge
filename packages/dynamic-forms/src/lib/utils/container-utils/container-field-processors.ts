@@ -3,7 +3,7 @@ import { FieldDef } from '../../definitions/base/field-def';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { flattenFields } from '../flattener/field-flattener';
 import { getFieldDefaultValue } from '../default-value/default-value';
-import { keyBy, memoize, mapValues, simpleStringHash } from '../object-utils';
+import { keyBy, memoize, mapValues } from '../object-utils';
 
 /**
  * Creates memoized field processing functions shared across container components.
@@ -18,12 +18,11 @@ export function createContainerFieldProcessors() {
     (fields: readonly FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields([...fields], registry),
     {
       resolver: (fields, registry) => {
-        let hash = fields.length;
+        let key = '';
         for (const f of fields) {
-          hash = (hash * 31 + simpleStringHash(f.key ?? '')) | 0;
-          hash = (hash * 31 + simpleStringHash(f.type)) | 0;
+          key += (f.key ?? '') + ':' + (f.type ?? '') + '|';
         }
-        return hash ^ (registry.size * 0x01000193);
+        return key + registry.size;
       },
       maxSize: 10,
     },
@@ -31,11 +30,11 @@ export function createContainerFieldProcessors() {
 
   const memoizedKeyBy = memoize(<T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'), {
     resolver: (fields) => {
-      let hash = fields.length;
+      let key = '';
       for (const f of fields) {
-        hash = (hash * 31 + simpleStringHash(f.key)) | 0;
+        key += f.key + '|';
       }
-      return hash;
+      return key;
     },
     maxSize: 10,
   });
@@ -46,11 +45,7 @@ export function createContainerFieldProcessors() {
     {
       resolver: (fieldsById, registry) => {
         const keys = Object.keys(fieldsById).sort();
-        let hash = keys.length;
-        for (const k of keys) {
-          hash = (hash * 31 + simpleStringHash(k)) | 0;
-        }
-        return hash ^ (registry.size * 0x01000193);
+        return keys.join('|') + '|' + registry.size;
       },
       maxSize: 10,
     },

@@ -1,7 +1,7 @@
-import { computed, inject, Injectable, isSignal, Signal, untracked } from '@angular/core';
+import { inject, Injectable, isSignal, Signal, untracked } from '@angular/core';
 import { ChildFieldContext, FieldContext } from '@angular/forms/signals';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
-import { FormStateManager } from '../../state/form-state-manager';
+import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
 import { RootFormRegistryService } from './root-form-registry.service';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 
@@ -20,8 +20,7 @@ function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is 
 export class FieldContextRegistryService {
   private rootFormRegistry = inject(RootFormRegistryService);
   private logger = inject(DynamicFormLogger);
-  private stateManager = inject(FormStateManager);
-  private externalDataSignal = computed(() => this.stateManager.activeConfig()?.externalData);
+  private externalDataSignal = inject(EXTERNAL_DATA, { optional: true });
 
   /**
    * Creates an evaluation context for a field by combining:
@@ -78,15 +77,18 @@ export class FieldContextRegistryService {
    * @returns Record of resolved external data values, or undefined if no external data.
    */
   private resolveExternalData(reactive: boolean): Record<string, unknown> | undefined {
-    const externalDataRecord = reactive ? this.externalDataSignal() : untracked(() => this.externalDataSignal());
+    const externalDataSignal = this.externalDataSignal;
+    if (!externalDataSignal) return undefined;
+
+    const externalDataRecord = reactive ? externalDataSignal() : untracked(() => externalDataSignal());
 
     if (!externalDataRecord) {
       return undefined;
     }
 
     const resolved: Record<string, unknown> = {};
-    for (const [key, signal] of Object.entries(externalDataRecord)) {
-      resolved[key] = reactive ? (signal as Signal<unknown>)() : untracked(() => (signal as Signal<unknown>)());
+    for (const [key, value] of Object.entries(externalDataRecord)) {
+      resolved[key] = reactive ? (value as Signal<unknown>)() : untracked(() => (value as Signal<unknown>)());
     }
 
     return resolved;

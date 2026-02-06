@@ -1,4 +1,4 @@
-import { DestroyRef, Injector, signal, Signal, WritableSignal } from '@angular/core';
+import { DestroyRef, Injector, signal, Signal, untracked, WritableSignal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { catchError, concatMap, EMPTY, Observable, of, Subject } from 'rxjs';
 import { FormConfig } from '../models/form-config';
@@ -100,6 +100,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
           this.processAction(action).pipe(
             catchError((error) => {
               this.config.logger.error(`Action '${action.type}' failed:`, error);
+              this.recoverFromError();
               return EMPTY;
             }),
           ),
@@ -127,6 +128,20 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
 
     this._state.set(result.state);
     return this.executeSideEffects(result.sideEffects);
+  }
+
+  /**
+   * Recovers from a failed action by reverting to the last stable state.
+   * Initializing → Uninitialized, Transitioning → Ready (using current setup).
+   */
+  private recoverFromError(): void {
+    const state = this._state();
+
+    if (state.type === LifecycleState.Initializing) {
+      this._state.set(createUninitializedState());
+    } else if (isTransitioningState(state)) {
+      this._state.set(createReadyState(state.currentConfig, state.currentFormSetup));
+    }
   }
 
   /** Pure transition: current state + action → next state + side effects. */
@@ -339,7 +354,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
 
       case Effect.CreateForm: {
         return scheduler.executeBlocking(() => {
-          const state = this._state();
+          const state = untracked(() => this._state());
 
           let config: FormConfig<TFields> | undefined;
           if (state.type === LifecycleState.Initializing) {
@@ -363,7 +378,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
 
       case Effect.RestoreValues: {
         return scheduler.executeAfterRender(() => {
-          const state = this._state();
+          const state = untracked(() => this._state());
           if (!isTransitioningState(state) || state.phase !== Phase.Restoring) return;
 
           if (!state.pendingFormSetup) {

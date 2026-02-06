@@ -38,7 +38,7 @@ import { createSchemaFromFields } from '../core/schema-builder';
 import { createFormLevelSchema } from '../core/form-schema-merger';
 import { collectCrossFieldEntries } from '../core/cross-field/cross-field-collector';
 import { flattenFields } from '../utils/flattener/field-flattener';
-import { memoize, isEqual, simpleStringHash } from '../utils/object-utils';
+import { memoize, isEqual } from '../utils/object-utils';
 import { CONTAINER_FIELD_PROCESSORS } from '../utils/container-utils/container-field-processors';
 import { derivedFromDeferred } from '../utils/derived-from-deferred/derived-from-deferred';
 import { reconcileFields, ResolvedField, resolveField, resolveFieldSync } from '../utils/resolve-field/resolve-field';
@@ -118,12 +118,11 @@ export class FormStateManager<
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry, { preserveRows: true }),
     {
       resolver: (fields, registry) => {
-        let hash = fields.length;
+        let key = '';
         for (const f of fields) {
-          hash = (hash * 31 + simpleStringHash(f.key ?? '')) | 0;
-          hash = (hash * 31 + simpleStringHash(f.type)) | 0;
+          key += (f.key ?? '') + ':' + (f.type ?? '') + '|';
         }
-        return hash ^ (registry.size * 0x01000193);
+        return key + registry.size;
       },
       maxSize: 10,
     },
@@ -143,7 +142,7 @@ export class FormStateManager<
    * MUST be class-level — a local variable in the computed would reset on re-evaluation.
    * Mutable ref avoids a reactive cycle (form → isSettled → resolvedFields → form).
    */
-  private readonly _formCache: { current: unknown } = { current: undefined };
+  private readonly _formCache: { current: ReturnType<typeof form<TModel>> | undefined } = { current: undefined };
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Derived from State Machine
@@ -258,14 +257,12 @@ export class FormStateManager<
       return state.currentFormSetup;
     }
 
-    // Bootstrap path: register validators before first form creation.
-    // Only runs in uninitialized/initializing — once ready, reads from state.formSetup.
+    // Bootstrap path: compute form setup before the state machine dispatches 'initialize'.
+    // Validator registration happens in initialize() and createFormSetup callback.
     const config = this.activeConfig();
     if (!config) {
       return this.createEmptyFormSetup(registry);
     }
-
-    untracked(() => this.registerValidatorsFromConfig(config));
 
     if (config.fields && config.fields.length > 0) {
       const modeDetection = this.formModeDetection();
@@ -294,30 +291,36 @@ export class FormStateManager<
   /**
    * Entity (form value merged with defaults).
    */
-  readonly entity = linkedSignal<TModel>(() => {
-    const deps = this._setup();
-    if (!deps) {
-      return {} as TModel;
-    }
-
-    const inputValue = deps.value();
-    const defaults = this.defaultValues();
-    const keys = this.validKeys();
-
-    const combined = { ...defaults, ...inputValue };
-
-    if (keys) {
-      const filtered: Record<string, unknown> = {};
-      for (const key of Object.keys(combined)) {
-        if (keys.has(key)) {
-          filtered[key] = (combined as Record<string, unknown>)[key];
-        }
+  readonly entity = linkedSignal<TModel>(
+    () => {
+      const deps = this._setup();
+      if (!deps) {
+        return {} as TModel;
       }
-      return filtered as TModel;
-    }
 
-    return combined as TModel;
-  });
+      const inputValue = deps.value();
+      const defaults = this.defaultValues();
+      const keys = this.validKeys();
+
+      const combined = { ...defaults, ...inputValue };
+
+      if (keys) {
+        const filtered: Record<string, unknown> = {};
+        for (const key of Object.keys(combined)) {
+          if (keys.has(key)) {
+            filtered[key] = (combined as Record<string, unknown>)[key];
+          }
+        }
+        return filtered as TModel;
+      }
+
+      return combined as TModel;
+    },
+    {
+      debugName: 'FormStateManager.entity',
+      equal: isEqual,
+    },
+  );
 
   /**
    * The Angular Signal Form instance.
@@ -378,7 +381,7 @@ export class FormStateManager<
         const settled = isSettled();
 
         if (!settled && formCache.current) {
-          return formCache.current as ReturnType<typeof form<TModel>>;
+          return formCache.current;
         }
 
         formCache.current = currentForm;

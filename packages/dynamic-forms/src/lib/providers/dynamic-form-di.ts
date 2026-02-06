@@ -6,7 +6,7 @@ import { FunctionRegistryService } from '../core/registry/function-registry.serv
 import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
 import { FormStateManager } from '../state/form-state-manager';
-import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FORM_OPTIONS } from '../models/field-signal-context.token';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, EXTERNAL_DATA, FORM_OPTIONS } from '../models/field-signal-context.token';
 import { DERIVATION_WARNING_TRACKER, createDerivationWarningTracker } from '../core/derivation/derivation-warning-tracker';
 import {
   DERIVATION_ORCHESTRATOR,
@@ -54,20 +54,33 @@ export function provideDynamicFormDI(): Provider[] {
       useFactory: (stateManager: FormStateManager) => stateManager.effectiveFormOptions,
       deps: [FormStateManager],
     },
+    {
+      provide: EXTERNAL_DATA,
+      useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.externalData),
+      deps: [FormStateManager],
+    },
     { provide: DERIVATION_WARNING_TRACKER, useFactory: createDerivationWarningTracker },
     {
       provide: DERIVATION_ORCHESTRATOR,
-      useFactory: (stateManager: FormStateManager, logger: Logger, logConfig: DerivationLogConfig) => {
+      useFactory: (
+        stateManager: FormStateManager,
+        logger: Logger,
+        logConfig: DerivationLogConfig,
+        externalData: Signal<Record<string, Signal<unknown>> | undefined>,
+      ) => {
+        // FormStateManager is injected without type parameters, so its generic defaults
+        // to Record<string, unknown>. The casts widen the type to match DerivationOrchestratorConfig
+        // which uses unknown — safe because the orchestrator only reads values.
         const config: DerivationOrchestratorConfig = {
           schemaFields: computed(() => stateManager.formSetup()?.schemaFields as FieldDef<unknown>[] | undefined),
           formValue: stateManager.formValue as Signal<Record<string, unknown>>,
           form: computed(() => stateManager.form() as unknown as FieldTree<unknown>),
           derivationLogger: computed(() => createDerivationLogger(logConfig, logger)),
-          externalData: computed(() => stateManager.activeConfig()?.externalData),
+          externalData,
         };
         return createDerivationOrchestrator(config);
       },
-      deps: [FormStateManager, DynamicFormLogger, DERIVATION_LOG_CONFIG],
+      deps: [FormStateManager, DynamicFormLogger, DERIVATION_LOG_CONFIG, EXTERNAL_DATA],
     },
   ];
 }

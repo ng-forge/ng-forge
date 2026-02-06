@@ -1,15 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { Signal, signal } from '@angular/core';
 import { FieldContextRegistryService } from './field-context-registry.service';
 import { RootFormRegistryService } from './root-form-registry.service';
-import { FormStateManager } from '../../state/form-state-manager';
+import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
 import { FieldContext } from '@angular/forms/signals';
 
 describe('FieldContextRegistryService', () => {
   let service: FieldContextRegistryService;
   const mockEntity = signal<Record<string, unknown>>({});
   const mockFormSignal = signal<unknown>(undefined);
+  const externalDataSignal = signal<Record<string, Signal<unknown>> | undefined>(undefined);
 
   function createMockFieldContext<T>(value: T): FieldContext<T> {
     return {
@@ -24,13 +25,14 @@ describe('FieldContextRegistryService', () => {
       providers: [
         FieldContextRegistryService,
         { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
-        { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
+        { provide: EXTERNAL_DATA, useValue: externalDataSignal },
       ],
     });
 
     service = TestBed.inject(FieldContextRegistryService);
     mockEntity.set({});
     mockFormSignal.set(undefined);
+    externalDataSignal.set(undefined);
   });
 
   describe('createEvaluationContext', () => {
@@ -242,6 +244,105 @@ describe('FieldContextRegistryService', () => {
       const result = service.createDisplayOnlyContext('infoText');
 
       expect(result.formValue).toEqual({});
+    });
+  });
+
+  describe('createReactiveEvaluationContext', () => {
+    it('should create context with reactive field value', () => {
+      const fieldContext = createMockFieldContext('reactive-value');
+
+      const result = service.createReactiveEvaluationContext(fieldContext);
+
+      expect(result.fieldValue).toBe('reactive-value');
+    });
+
+    it('should include reactive form value', () => {
+      const formValue = { name: 'Bob' };
+      mockEntity.set(formValue);
+
+      const fieldContext = createMockFieldContext('test');
+      const result = service.createReactiveEvaluationContext(fieldContext);
+
+      expect(result.formValue).toEqual(formValue);
+    });
+
+    it('should extract field path from signal key', () => {
+      const fieldContext: any = createMockFieldContext('test');
+      fieldContext.key = signal('username');
+
+      const result = service.createReactiveEvaluationContext(fieldContext);
+
+      expect(result.fieldPath).toBe('username');
+    });
+
+    it('should include custom functions', () => {
+      const customFunctions = { isActive: () => true };
+      const fieldContext = createMockFieldContext('test');
+
+      const result = service.createReactiveEvaluationContext(fieldContext, customFunctions);
+
+      expect(result.customFunctions).toEqual(customFunctions);
+    });
+
+    it('should default custom functions to empty object', () => {
+      const fieldContext = createMockFieldContext('test');
+
+      const result = service.createReactiveEvaluationContext(fieldContext);
+
+      expect(result.customFunctions).toEqual({});
+    });
+  });
+
+  describe('external data resolution', () => {
+    it('should return undefined externalData when token provides undefined', () => {
+      externalDataSignal.set(undefined);
+
+      const fieldContext = createMockFieldContext('test');
+      const result = service.createEvaluationContext(fieldContext);
+
+      expect(result.externalData).toBeUndefined();
+    });
+
+    it('should resolve external data signals in createEvaluationContext', () => {
+      externalDataSignal.set({
+        userId: signal('user-123'),
+        role: signal('admin'),
+      });
+
+      const fieldContext = createMockFieldContext('test');
+      const result = service.createEvaluationContext(fieldContext);
+
+      expect(result.externalData).toEqual({ userId: 'user-123', role: 'admin' });
+    });
+
+    it('should resolve external data signals in createReactiveEvaluationContext', () => {
+      externalDataSignal.set({
+        theme: signal('dark'),
+      });
+
+      const fieldContext = createMockFieldContext('test');
+      const result = service.createReactiveEvaluationContext(fieldContext);
+
+      expect(result.externalData).toEqual({ theme: 'dark' });
+    });
+
+    it('should resolve external data signals in createDisplayOnlyContext', () => {
+      externalDataSignal.set({
+        locale: signal('en-US'),
+      });
+
+      const result = service.createDisplayOnlyContext('infoText');
+
+      expect(result.externalData).toEqual({ locale: 'en-US' });
+    });
+
+    it('should handle empty external data record', () => {
+      externalDataSignal.set({});
+
+      const fieldContext = createMockFieldContext('test');
+      const result = service.createEvaluationContext(fieldContext);
+
+      expect(result.externalData).toEqual({});
     });
   });
 });

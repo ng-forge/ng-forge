@@ -145,6 +145,18 @@ export const DEFAULT_VALIDATION_MESSAGES = new InjectionToken<Signal<ValidationM
 export const FORM_OPTIONS = new InjectionToken<Signal<FormOptions | undefined>>('FORM_OPTIONS');
 
 /**
+ * Injection token for form-level external data.
+ *
+ * Provides a Signal of the external data record from the form config.
+ * Used by `FieldContextRegistryService` to resolve external data for expression evaluation
+ * without coupling to `FormStateManager` directly.
+ *
+ * Like DEFAULT_PROPS, this token is provided ONCE at the DynamicForm level
+ * and inherited by all children via Angular's hierarchical injector.
+ */
+export const EXTERNAL_DATA = new InjectionToken<Signal<Record<string, Signal<unknown>> | undefined>>('EXTERNAL_DATA');
+
+/**
  * Injection token for array-level template registry.
  *
  * This registry tracks which template was used to create each array item,
