@@ -19,11 +19,13 @@ import { Logger } from './features/logger/logger.interface';
 import { DERIVATION_LOG_CONFIG } from './features/logger/with-logger-config';
 import { DerivationLogConfig } from '../models/logic/logic-config';
 import { FieldDef } from '../definitions/base/field-def';
+import { CONTAINER_FIELD_PROCESSORS, createContainerFieldProcessors } from '../utils/container-utils/container-field-processors';
 
 /** @internal */
 export function provideDynamicFormDI(): Provider[] {
   return [
     EventBus,
+    { provide: CONTAINER_FIELD_PROCESSORS, useFactory: createContainerFieldProcessors },
     SchemaRegistryService,
     FunctionRegistryService,
     FormStateManager,

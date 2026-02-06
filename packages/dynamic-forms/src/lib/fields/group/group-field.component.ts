@@ -15,7 +15,7 @@ import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
-import { createContainerFieldProcessors } from '../../utils/container-utils/container-field-processors';
+import { CONTAINER_FIELD_PROCESSORS } from '../../utils/container-utils/container-field-processors';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
@@ -69,7 +69,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   // Memoized Functions
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly fieldProcessors = createContainerFieldProcessors();
+  private readonly fieldProcessors = inject(CONTAINER_FIELD_PROCESSORS);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs

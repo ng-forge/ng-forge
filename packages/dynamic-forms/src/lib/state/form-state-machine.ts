@@ -44,6 +44,8 @@ export interface FormStateMachineConfig<TFields extends RegisteredFieldTypes[] =
   readonly captureValue: () => Record<string, unknown>;
   /** Callback to restore form value */
   readonly restoreValue: (values: Record<string, unknown>, validKeys: Set<string>) => void;
+  /** Predicate returning true when the field pipeline has already settled (all components cached) */
+  readonly isFieldPipelineSettled?: () => boolean;
   /** Callback when form is created (for registration) */
   readonly onFormCreated?: (formSetup: FormSetup<TFields>) => void;
   /** Logger instance for error reporting */
@@ -327,9 +329,12 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       }
 
       case Effect.WaitFrameBoundary: {
-        return scheduler.executeAtFrameBoundary(() => {
-          this.dispatch({ type: Action.TeardownComplete });
-        });
+        return scheduler.executeAtFrameBoundary(
+          () => {
+            this.dispatch({ type: Action.TeardownComplete });
+          },
+          { skipIf: this.config.isFieldPipelineSettled },
+        );
       }
 
       case Effect.CreateForm: {

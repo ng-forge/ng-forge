@@ -38,8 +38,8 @@ import { createSchemaFromFields } from '../core/schema-builder';
 import { createFormLevelSchema } from '../core/form-schema-merger';
 import { collectCrossFieldEntries } from '../core/cross-field/cross-field-collector';
 import { flattenFields } from '../utils/flattener/field-flattener';
-import { memoize, isEqual } from '../utils/object-utils';
-import { createContainerFieldProcessors } from '../utils/container-utils/container-field-processors';
+import { memoize, isEqual, simpleStringHash } from '../utils/object-utils';
+import { CONTAINER_FIELD_PROCESSORS } from '../utils/container-utils/container-field-processors';
 import { derivedFromDeferred } from '../utils/derived-from-deferred/derived-from-deferred';
 import { reconcileFields, ResolvedField, resolveField, resolveFieldSync } from '../utils/resolve-field/resolve-field';
 import { FormModeValidator } from '../utils/form-validation/form-mode-validator';
@@ -112,15 +112,18 @@ export class FormStateManager<
   // Memoized Functions
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly fieldProcessors = createContainerFieldProcessors();
+  private readonly fieldProcessors = inject(CONTAINER_FIELD_PROCESSORS);
 
   private readonly memoizedFlattenFieldsForRendering = memoize(
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry, { preserveRows: true }),
     {
       resolver: (fields, registry) => {
-        const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
-        const registryKeys = Array.from(registry.keys()).sort().join('|');
-        return `render_${fieldKeys}__${registryKeys}`;
+        let hash = fields.length;
+        for (const f of fields) {
+          hash = (hash * 31 + simpleStringHash(f.key ?? '')) | 0;
+          hash = (hash * 31 + simpleStringHash(f.type)) | 0;
+        }
+        return hash ^ (registry.size * 0x01000193);
       },
       maxSize: 10,
     },
@@ -655,6 +658,7 @@ export class FormStateManager<
         );
       },
       captureValue: () => this.formValue() as Record<string, unknown>,
+      isFieldPipelineSettled: () => this.isFieldPipelineSettled(),
       restoreValue: (values, validKeys) => {
         const filtered: Record<string, unknown> = {};
         for (const [key, val] of Object.entries(values)) {

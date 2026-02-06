@@ -57,8 +57,16 @@ export class SideEffectScheduler {
   /**
    * Defers effect to next rAF (~16ms), giving CD and the async field resolution
    * pipeline time to settle before the state machine continues.
+   *
+   * When `options.skipIf` returns `true`, the effect executes synchronously
+   * (like `executeBlocking`), eliminating ~16ms of unnecessary delay when
+   * the field pipeline has already settled (e.g. all components cached).
    */
-  executeAtFrameBoundary<T>(effect: () => T): Observable<T> {
+  executeAtFrameBoundary<T>(effect: () => T, options?: { skipIf?: () => boolean }): Observable<T> {
+    if (options?.skipIf?.()) {
+      return this.executeBlocking(effect);
+    }
+
     return new Observable((subscriber: Subscriber<T>) => {
       if (this.destroyed) {
         subscriber.complete();

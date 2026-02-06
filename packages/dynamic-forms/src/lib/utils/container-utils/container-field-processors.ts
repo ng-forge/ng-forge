@@ -1,8 +1,9 @@
+import { InjectionToken } from '@angular/core';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { flattenFields } from '../flattener/field-flattener';
 import { getFieldDefaultValue } from '../default-value/default-value';
-import { keyBy, memoize, mapValues } from '../object-utils';
+import { keyBy, memoize, mapValues, simpleStringHash } from '../object-utils';
 
 /**
  * Creates memoized field processing functions shared across container components.
@@ -17,16 +18,25 @@ export function createContainerFieldProcessors() {
     (fields: readonly FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields([...fields], registry),
     {
       resolver: (fields, registry) => {
-        const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
-        const registryKeys = Array.from(registry.keys()).sort().join('|');
-        return `${fieldKeys}__${registryKeys}`;
+        let hash = fields.length;
+        for (const f of fields) {
+          hash = (hash * 31 + simpleStringHash(f.key ?? '')) | 0;
+          hash = (hash * 31 + simpleStringHash(f.type)) | 0;
+        }
+        return hash ^ (registry.size * 0x01000193);
       },
       maxSize: 10,
     },
   );
 
   const memoizedKeyBy = memoize(<T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'), {
-    resolver: (fields) => fields.map((f) => f.key).join('|'),
+    resolver: (fields) => {
+      let hash = fields.length;
+      for (const f of fields) {
+        hash = (hash * 31 + simpleStringHash(f.key)) | 0;
+      }
+      return hash;
+    },
     maxSize: 10,
   });
 
@@ -35,9 +45,12 @@ export function createContainerFieldProcessors() {
       mapValues(fieldsById, (field) => getFieldDefaultValue(field, registry)),
     {
       resolver: (fieldsById, registry) => {
-        const fieldKeys = Object.keys(fieldsById).sort().join('|');
-        const registryKeys = Array.from(registry.keys()).sort().join('|');
-        return `defaults_${fieldKeys}__${registryKeys}`;
+        const keys = Object.keys(fieldsById).sort();
+        let hash = keys.length;
+        for (const k of keys) {
+          hash = (hash * 31 + simpleStringHash(k)) | 0;
+        }
+        return hash ^ (registry.size * 0x01000193);
       },
       maxSize: 10,
     },
@@ -45,3 +58,19 @@ export function createContainerFieldProcessors() {
 
   return { memoizedFlattenFields, memoizedKeyBy, memoizedDefaultValues };
 }
+
+/**
+ * Shared container field processors injection token.
+ * Provided at the DynamicForm component level so one form + all its nested groups
+ * share a single memoize cache, while different form instances stay isolated.
+ * The root-level factory acts as a fallback for standalone usage (e.g. tests).
+ *
+ * @internal
+ */
+export const CONTAINER_FIELD_PROCESSORS = new InjectionToken<ReturnType<typeof createContainerFieldProcessors>>(
+  'CONTAINER_FIELD_PROCESSORS',
+  {
+    providedIn: 'root',
+    factory: () => createContainerFieldProcessors(),
+  },
+);
