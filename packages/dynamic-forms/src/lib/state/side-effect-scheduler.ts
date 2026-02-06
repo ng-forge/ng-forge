@@ -42,16 +42,19 @@ export interface SideEffectOptions {
  */
 export class SideEffectScheduler {
   private readonly injector: Injector;
-  private readonly destroyRef: DestroyRef;
-  private isDestroyed = false;
+  private readonly abortController = new AbortController();
+
+  /** Aborted when the owning component is destroyed. */
+  private get destroyed(): boolean {
+    return this.abortController.signal.aborted;
+  }
 
   constructor(options: SideEffectOptions) {
     this.injector = options.injector;
-    this.destroyRef = options.destroyRef;
 
-    // Track destruction to prevent effects from running after cleanup
-    this.destroyRef.onDestroy(() => {
-      this.isDestroyed = true;
+    // Abort all pending effects when the component is destroyed
+    options.destroyRef.onDestroy(() => {
+      this.abortController.abort();
     });
   }
 
@@ -70,7 +73,7 @@ export class SideEffectScheduler {
    */
   executeBlocking<T>(effect: () => T): Observable<T> {
     return new Observable((subscriber: Subscriber<T>) => {
-      if (this.isDestroyed) {
+      if (this.destroyed) {
         subscriber.complete();
         return;
       }
@@ -99,13 +102,13 @@ export class SideEffectScheduler {
    */
   executeAtFrameBoundary<T>(effect: () => T): Observable<T> {
     return new Observable((subscriber: Subscriber<T>) => {
-      if (this.isDestroyed) {
+      if (this.destroyed) {
         subscriber.complete();
         return;
       }
 
       const frameId = requestAnimationFrame(() => {
-        if (this.isDestroyed) {
+        if (this.destroyed) {
           subscriber.complete();
           return;
         }
@@ -140,16 +143,16 @@ export class SideEffectScheduler {
    */
   executeAfterRender<T>(effect: () => T): Observable<T> {
     return new Observable((subscriber: Subscriber<T>) => {
-      if (this.isDestroyed) {
+      if (this.destroyed) {
         subscriber.complete();
         return;
       }
 
-      let cancelled = false;
+      const local = new AbortController();
 
       afterNextRender(
         () => {
-          if (cancelled || this.isDestroyed) {
+          if (local.signal.aborted || this.destroyed) {
             subscriber.complete();
             return;
           }
@@ -167,7 +170,7 @@ export class SideEffectScheduler {
 
       // Cleanup on unsubscribe
       return () => {
-        cancelled = true;
+        local.abort();
       };
     });
   }
