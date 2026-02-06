@@ -70,35 +70,8 @@ export interface FormStateManagerDeps<TFields extends RegisteredFieldTypes[] = R
 }
 
 /**
- * Service that manages all form state and coordinates the form lifecycle.
- *
- * This service is the single source of truth for:
- * - Form lifecycle state (initializing, ready, transitioning, destroyed)
- * - Config transition management (two-phase teardown → apply)
- * - Computed form signals (valid, dirty, errors, etc.)
- * - Field resolution and loading
- * - Event coordination
- *
- * The state machine pattern ensures:
- * - Deterministic state transitions via concatMap
- * - No race conditions during rapid config changes
- * - Clean separation between state logic and side effects
- *
- * @example
- * ```typescript
- * // In component
- * providers: [FormStateManager, ...]
- *
- * // Component reads from service
- * protected readonly stateManager = inject(FormStateManager);
- *
- * // Template uses service signals
- * @if (stateManager.shouldRender()) {
- *   <ng-container *ngFor="let field of stateManager.resolvedFields()">
- *     ...
- *   </ng-container>
- * }
- * ```
+ * Central service that manages all form state and coordinates the form lifecycle.
+ * Single source of truth for lifecycle state, field resolution, form signals, and events.
  *
  * @internal
  */
@@ -163,15 +136,9 @@ export class FormStateManager<
   readonly fieldLoadingErrors = signal<FieldLoadingError[]>([]);
 
   /**
-   * Class-level cached form for the "hold until settled" pattern.
-   *
-   * This MUST live at class level (not inside the `fieldSignalContext` computed)
-   * so it persists when `fieldSignalContext` re-evaluates. If it were a local
-   * variable in the computed, it would reset to `undefined` on re-evaluation,
-   * defeating the hold pattern and exposing the new form to stale components.
-   *
-   * Stored as `unknown` to avoid generic type gymnastics — it's only used
-   * as an opaque cache that gets cast back to the correct type in the getter.
+   * Class-level form cache for the "hold until settled" pattern.
+   * MUST be class-level — a local variable in the computed would reset on re-evaluation.
+   * Mutable ref avoids a reactive cycle (form → isSettled → resolvedFields → form).
    */
   private readonly _formCache: { current: unknown } = { current: undefined };
 
@@ -181,43 +148,23 @@ export class FormStateManager<
 
   /**
    * The currently active config used for form rendering.
-   *
-   * During config transitions, coordinates with fieldsSource to ensure:
-   * - Components are destroyed BEFORE their form fields are removed
-   * - Components are created AFTER their form fields exist
-   *
-   * Phase timing:
-   * - Teardown: OLD config (form unchanged, fieldsSource=intersection → removed components destroyed)
-   * - Applying: NEW config (form updates, fieldsSource=intersection → safe components update)
-   * - Restoring: NEW config (form ready, fieldsSource=all new → new components created)
-   *
-   * IMPORTANT: For the initial config, we return deps.config() directly when the state
-   * machine is still in 'uninitialized' state. This allows the form to be created with
-   * the correct schema during the first render, before the explicitEffect dispatches
-   * the 'initialize' action. Without this, logic functions (hidden, readonly, etc.)
-   * wouldn't work because the form value signal wouldn't be available.
+   * Teardown/Applying → old config, Restoring → new config.
+   * Returns deps.config() in uninitialized state so the form schema is
+   * available before the state machine dispatches 'initialize'.
    */
   readonly activeConfig = computed(() => {
     const machine = this.machineSignal();
     if (!machine) return undefined;
     const state = machine.state();
 
-    // For initial render: return deps.config directly when machine hasn't been initialized yet.
-    // This avoids needing to dispatch synchronously during component construction (which
-    // causes stack overflow in test suites with @for loops), while still making the config
-    // available so logic functions work correctly.
     if (state.type === LifecycleState.Uninitialized) {
       return this._setup()?.config();
     }
 
     if (isReadyState(state)) return state.config;
     if (isTransitioningState(state)) {
-      // teardown: old config (form unchanged, removed components being destroyed)
-      // applying: old config (form stays unchanged while resolvedFields settles;
-      //           the state machine precomputes the new setup independently)
-      // restoring: new config (form updates, new components created)
       if (state.phase === Phase.Teardown || state.phase === Phase.Applying) return state.currentConfig;
-      return state.pendingConfig; // restoring only
+      return state.pendingConfig;
     }
     if (state.type === LifecycleState.Initializing) return state.config;
     return undefined;
@@ -234,13 +181,7 @@ export class FormStateManager<
     return 'render';
   });
 
-  /**
-   * Whether to render the form template.
-   *
-   * With coordinated field transitions, we always render when config is available.
-   * The `fieldsSource` signal controls which specific fields are rendered during
-   * each transition phase, ensuring components are created/destroyed at the right time.
-   */
+  /** Whether to render the form template. */
   readonly shouldRender = computed(() => this.activeConfig() !== undefined);
 
   /**
@@ -255,10 +196,7 @@ export class FormStateManager<
     return detectFormMode(config.fields || []);
   });
 
-  /**
-   * Validation result for the current form configuration.
-   * Kept as a separate computed so logging can be done in an effect, not inside a computed.
-   */
+  /** Validation result for the current form configuration. */
   private readonly formConfigValidation = computed(() => {
     const config = this.activeConfig();
     if (!config) return { isValid: true, errors: [] as string[], warnings: [] as string[] };
@@ -295,15 +233,7 @@ export class FormStateManager<
 
   private readonly rawFieldRegistry = computed(() => this._setup()?.fieldRegistry.raw ?? new Map());
 
-  /**
-   * Computed form setup - reads from the state machine as single source of truth.
-   *
-   * During transitions, this returns the appropriate FormSetup for the current phase:
-   * - uninitialized/initializing: compute from config (bootstrap, before state machine has FormSetup)
-   * - ready: read from state.formSetup
-   * - teardown/applying: read from state.currentFormSetup (old setup, form unchanged)
-   * - restoring: read from state.pendingFormSetup (new setup for new config)
-   */
+  /** Computed form setup — reads from the state machine, computed from config on bootstrap. */
   readonly formSetup = computed(() => {
     const machine = this.machineSignal();
     const registry = this.rawFieldRegistry();
@@ -325,23 +255,8 @@ export class FormStateManager<
       return state.currentFormSetup;
     }
 
-    // Bootstrap path (uninitialized or initializing): compute FormSetup from config.
-    //
-    // WHY registerValidatorsFromConfig runs here (inside a computed):
-    // The form() computed evaluates during the first render, BEFORE the explicitEffect
-    // dispatches the 'initialize' action to the state machine. Form schema creation
-    // (createSchemaFromFields) needs validators/schemas already registered in
-    // SchemaRegistryService and FunctionRegistryService, otherwise field-level
-    // validation won't work on the first render.
-    //
-    // This only executes on the bootstrap path (uninitialized/initializing states).
-    // Once the state machine reaches 'ready', formSetup reads from state.formSetup
-    // and this branch is never reached again. Subsequent config changes go through
-    // the state machine's createFormSetup callback, which also calls
-    // registerValidatorsFromConfig.
-    //
-    // The registry methods (setValidators, setAsyncValidators, etc.) are idempotent
-    // set-based operations, so duplicate calls during re-evaluation are safe.
+    // Bootstrap path: register validators before first form creation.
+    // Only runs in uninitialized/initializing — once ready, reads from state.formSetup.
     const config = this.activeConfig();
     if (!config) {
       return this.createEmptyFormSetup(registry);
@@ -351,7 +266,6 @@ export class FormStateManager<
 
     if (config.fields && config.fields.length > 0) {
       const modeDetection = this.formModeDetection();
-      // Safe: RegisteredFieldTypes extends FieldDef<unknown> — the cast narrows the union for the flattener.
       return this.createFormSetupFromConfig(config.fields as FieldDef<unknown>[], modeDetection.mode, registry);
     }
 
@@ -363,14 +277,7 @@ export class FormStateManager<
    */
   readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues as TModel);
 
-  /**
-   * Valid field keys derived from formSetup schema fields.
-   *
-   * Memoized separately from `entity` so the Set is only reconstructed when
-   * `formSetup()` changes (config transitions), NOT on every keystroke.
-   * Without this, every `deps.value()` change triggers a redundant
-   * Set construction + map + filter over all schema fields.
-   */
+  /** Valid field keys — memoized separately so the Set isn't rebuilt on every keystroke. */
   private readonly validKeys = computed(() => {
     const schemaFields = this.formSetup().schemaFields;
     if (!schemaFields || schemaFields.length === 0) return undefined;
@@ -427,8 +334,6 @@ export class FormStateManager<
 
         if (hasFields) {
           const crossFieldCollection = collectCrossFieldEntries(setup.schemaFields as FieldDef<unknown>[]);
-
-          // Create schema with both field-level and form-level validation
           const combinedSchema = createSchemaFromFields(setup.schemaFields, setup.registry, {
             crossFieldValidators: crossFieldCollection.validators,
             formLevelSchema: config.schema,
@@ -447,48 +352,18 @@ export class FormStateManager<
     });
   });
 
-  /**
-   * Whether the resolved fields pipeline has settled (resolvedFields matches fieldsSource).
-   *
-   * During config transitions, `fieldsSource` updates immediately but `resolvedFields`
-   * settles asynchronously (field resolution uses Promises via `derivedFromDeferred`).
-   * This signal tracks when the pipeline has caught up, ensuring the form getter only
-   * exposes the new form AFTER stale components have been removed by `@for`.
-   *
-   * Initialized in the constructor after `resolvedFields` is set.
-   */
+  /** Whether resolvedFields has caught up with fieldsSource (set in constructor). */
   private isFieldPipelineSettled!: Signal<boolean>;
 
   /**
-   * Field signal context for injection into child components.
-   *
-   * Uses a getter for `form` that caches the form until the field resolution
-   * pipeline has settled. This ensures alive components always see a form that
-   * contains their fields, preventing "ctx.field(...) is not a function" crashes.
-   *
-   * The form getter uses a "hold until settled" pattern:
-   * - Pipeline unsettled (resolvedFields != fieldsSource): returns the cached (old)
-   *   form so alive components retain valid FieldTree references
-   * - Pipeline settled: returns the current form and updates the cache
-   *
-   * This is more robust than tracking the state machine phase because the async
-   * gap between `resolvedFields` settling and the state reaching `ready` is what
-   * causes stale components to access missing form fields.
-   *
-   * Mappers access context.form inside their own computed signals, establishing
-   * reactive dependencies on formSignal and isFieldPipelineSettled. This ensures
-   * mappers re-evaluate when:
-   * 1. The form changes (signal dependency)
-   * 2. The pipeline settles (signal dependency) - safe to expose new form
+   * Field signal context injected into child components.
+   * The `form` getter uses a "hold until settled" pattern: returns the cached
+   * (old) form while resolvedFields != fieldsSource, preventing stale components
+   * from accessing missing FieldTree references.
    */
   readonly fieldSignalContext: Signal<FieldSignalContext<TModel>> = computed(() => {
     const formSignal = this.form;
-    // Thunk: isFieldPipelineSettled is set in the constructor after resolvedFields.
-    // This computed evaluates lazily (after construction), so the reference is safe.
     const isSettled = () => this.isFieldPipelineSettled();
-    // Close over the class-level _formCache so it survives fieldSignalContext re-evaluations.
-    // If this were a local variable, it would reset when defaultValues/value changes
-    // trigger a re-evaluation, breaking the hold pattern during transitions.
     const formCache = this._formCache;
 
     return {
@@ -496,17 +371,10 @@ export class FormStateManager<
       value: this._setup()?.value ?? signal(undefined),
       defaultValues: this.defaultValues,
       get form() {
-        // Always read formSignal to establish the reactive dependency in the
-        // calling computed (mapper), even if we return a cached value.
         const currentForm = formSignal();
-        // Read settled state to establish dependency - when the pipeline settles,
-        // the calling computed re-evaluates and gets the updated form.
         const settled = isSettled();
 
         if (!settled && formCache.current) {
-          // Pipeline hasn't settled: resolvedFields doesn't match fieldsSource.
-          // Stale components (for removed fields) are still alive in the DOM.
-          // Return cached (old) form so their mappers find valid FieldTree refs.
           return formCache.current as ReturnType<typeof form<TModel>>;
         }
 
@@ -557,20 +425,8 @@ export class FormStateManager<
 
   /**
    * Phase-aware field source that coordinates component lifecycle with form updates.
-   *
-   * This ensures components are never created before their form fields exist,
-   * and are destroyed before their form fields are removed.
-   *
-   * During transitions:
-   * - Teardown: Returns intersection of old/new fields (removed components destroyed first)
-   * - Applying: Returns intersection (safe components update to new form)
-   * - Restoring: Returns all new fields (new components created after form ready)
-   *
-   * Uses a key+type equality function to prevent unnecessary signal emissions during
-   * rapid state transitions (teardown → applying → restoring). Without this, each
-   * state change produces a new array reference even if the content is identical,
-   * causing `switchMap` in the resolvedFields pipeline to cancel in-progress field
-   * resolution and preventing components from being properly destroyed.
+   * Teardown/Applying → intersection of old/new fields; Restoring → all new fields.
+   * Uses key+type equality to avoid spurious emissions during rapid transitions.
    */
   private readonly fieldsSource = computed(
     () => {
@@ -585,19 +441,14 @@ export class FormStateManager<
         const newKeys = new Set(newFields.map((f) => f.key));
 
         if (state.phase === Phase.Teardown || state.phase === Phase.Applying) {
-          // Return intersection: only fields that exist in both configs
-          // During teardown: old form, removed components destroyed
-          // During applying: old form still active, safe components stay alive
           return oldFields.filter((f) => newKeys.has(f.key));
         }
 
         if (state.phase === Phase.Restoring) {
-          // Return all new fields from the pending FormSetup (new components created after form is ready)
           return state.pendingFormSetup?.fields ?? this.formSetup().fields;
         }
       }
 
-      // Ready state or initializing: use formSetup fields
       return this.formSetup().fields;
     },
     {
@@ -619,11 +470,7 @@ export class FormStateManager<
     }),
   );
 
-  /**
-   * Resolved fields ready for rendering.
-   * Components are resolved asynchronously but benefit from the component cache
-   * in the field registry, making resolution near-instant after first render.
-   */
+  /** Resolved fields ready for rendering. */
   readonly resolvedFields: Signal<ResolvedField[]>;
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -639,24 +486,10 @@ export class FormStateManager<
   /** Stream of clear events. */
   readonly cleared$: Observable<void>;
 
-  /**
-   * Observable that emits when the state machine reaches the 'ready' state.
-   *
-   * Useful for tests to await config transitions completing without arbitrary delays.
-   * Emits once per subscription when the state becomes ready.
-   *
-   * @example
-   * ```typescript
-   * fixture.componentRef.setInput('dynamic-form', newConfig);
-   * await firstValueFrom(stateManager.ready$);
-   * expect(component.formValue()).toEqual({ ... });
-   * ```
-   */
+  /** Emits once when the state machine reaches 'ready'. Useful for tests. */
   get ready$(): Observable<void> {
     const machine = this.machineSignal();
     if (!machine) {
-      // No machine yet - return observable that completes immediately
-      // This shouldn't happen in normal usage
       return of(undefined);
     }
     return machine.state$.pipe(
@@ -671,8 +504,6 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   constructor() {
-    // Initialize resolved fields with deferred derivation.
-    // The component cache in the field registry makes this near-instant after first render.
     this.resolvedFields = derivedFromDeferred(
       this.fieldsSource,
       pipe(
@@ -691,8 +522,7 @@ export class FormStateManager<
             injector,
           };
 
-          // Hybrid resolution: resolve cached fields synchronously, only await uncached ones.
-          // This prevents one slow lazy import from blocking all already-cached fields.
+          // Hybrid: resolve cached fields sync, only await uncached ones
           const results: (ResolvedField | undefined)[] = new Array(fields.length);
           const asyncIndexes: number[] = [];
           const asyncObs: Observable<ResolvedField | undefined>[] = [];
@@ -735,12 +565,10 @@ export class FormStateManager<
             }
           }
 
-          // Fast path: all cached — no async work needed
           if (asyncObs.length === 0) {
             return of(results);
           }
 
-          // Async path: await only uncached fields, merge into pre-filled results
           return forkJoin(asyncObs).pipe(
             map((asyncResults) => {
               for (let j = 0; j < asyncResults.length; j++) {
@@ -756,14 +584,12 @@ export class FormStateManager<
       { initialValue: [] as ResolvedField[], injector: this.injector },
     ) as Signal<ResolvedField[]>;
 
-    // Track whether the resolved fields pipeline has settled.
-    // Length comparison is sufficient because scan + reconcileFields guarantees ordering,
-    // and with the sync fast-path, progressive resolution is eliminated for the hot path.
+    // Length comparison works because reconcileFields preserves ordering and
+    // fieldsSource changes atomically during transitions (lengths won't match until settled).
     this.isFieldPipelineSettled = computed(() => {
       return this.fieldsSource().length === this.resolvedFields().length;
     });
 
-    // Initialize event streams
     this.submitted$ = this.eventBus.on<SubmitEvent>('submit').pipe(
       filter(() => {
         if (!this.valid()) {
@@ -805,13 +631,7 @@ export class FormStateManager<
   // Initialization
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /**
-   * Initializes the state manager with component dependencies.
-   *
-   * Must be called once from the component constructor after injection is complete.
-   *
-   * @param deps - Dependencies from the DynamicForm component
-   */
+  /** Initializes the state manager. Must be called once from the component constructor. */
   initialize(deps: FormStateManagerDeps<TFields, TModel>): void {
     if (this.machineSignal()) {
       this.logger.warn('FormStateManager already initialized');
@@ -820,7 +640,6 @@ export class FormStateManager<
 
     this._setup.set(deps);
 
-    // Create the scheduler and state machine
     const scheduler = createSideEffectScheduler(this.injector);
     const machine = createFormStateMachine<TFields>({
       injector: this.injector,
@@ -829,7 +648,6 @@ export class FormStateManager<
       logger: this.logger,
       createFormSetup: (config) => {
         this.registerValidatorsFromConfig(config);
-        // Safe: same cast as formSetup computed — RegisteredFieldTypes extends FieldDef<unknown>.
         return this.createFormSetupFromConfig(
           (config.fields as FieldDef<unknown>[]) ?? [],
           detectFormMode(config.fields ?? []).mode,
@@ -853,11 +671,8 @@ export class FormStateManager<
       },
     });
 
-    // Store the machine in a signal so computed signals re-evaluate
     this.machineSignal.set(machine);
 
-    // Setup effects in injection context.
-    // The config-watching effect will dispatch the initial config.
     runInInjectionContext(this.injector, () => {
       this.setupEffects(deps);
       this.setupEventHandlers();
@@ -880,8 +695,6 @@ export class FormStateManager<
    */
   reset(): void {
     const defaults = this.defaultValues();
-    // Safe: Angular Signals Form's .value is a WritableSignal at runtime,
-    // but typed as read-only Signal in the public API.
     (this.form()().value as WritableSignal<TModel>).set(defaults);
     this._setup()?.value.set(defaults as Partial<TModel>);
   }
@@ -891,7 +704,6 @@ export class FormStateManager<
    */
   clear(): void {
     const emptyValue = {} as TModel;
-    // Safe: same cast rationale as reset() — see comment above.
     (this.form()().value as WritableSignal<TModel>).set(emptyValue);
     this._setup()?.value.set(emptyValue);
   }
@@ -908,8 +720,6 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   private setupEffects(deps: FormStateManagerDeps<TFields, TModel>): void {
-    // Watch for config changes: dispatch to state machine and clear loading errors.
-    // This handles both initial config and subsequent changes.
     explicitEffect([deps.config], ([config]) => {
       this.fieldLoadingErrors.set([]);
 
@@ -918,15 +728,12 @@ export class FormStateManager<
 
       const state = machine.currentState;
       if (state.type === LifecycleState.Uninitialized) {
-        // First config - initialize the state machine
         machine.dispatch({ type: Action.Initialize, config });
       } else if (state.type !== LifecycleState.Initializing) {
-        // Subsequent config changes
         machine.dispatch({ type: Action.ConfigChange, config });
       }
     });
 
-    // Sync entity changes to the value signal
     explicitEffect([this.entity], ([currentEntity]) => {
       const currentValue = deps.value();
       if (!isEqual(currentEntity, currentValue)) {
@@ -934,7 +741,6 @@ export class FormStateManager<
       }
     });
 
-    // Log form configuration validation issues
     explicitEffect([this.formConfigValidation], ([validation]) => {
       if (!validation.isValid) {
         this.logger.error('Invalid form configuration:', validation.errors);

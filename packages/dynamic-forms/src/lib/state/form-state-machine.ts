@@ -54,39 +54,9 @@ export interface FormStateMachineConfig<TFields extends RegisteredFieldTypes[] =
 
 /**
  * RxJS-based state machine for form lifecycle management.
+ * Uses `concatMap` for sequential action processing.
  *
- * Uses `concatMap` to ensure sequential action processing, guaranteeing:
- * - Teardown completes before new config is applied
- * - No race conditions during rapid config changes
- * - Deterministic state transitions
- *
- * State transitions follow a strict flow:
- * ```
- * uninitialized → initializing → ready
- *                                  ↓ (config change)
- *                            transitioning (teardown → applying → restoring)
- *                                  ↓
- *                                ready
- * ```
- *
- * @example
- * ```typescript
- * const machine = createFormStateMachine({
- *   injector,
- *   destroyRef,
- *   scheduler,
- *   createFormSetup: (config) => computeFormSetup(config),
- *   captureValue: () => formValue(),
- *   restoreValue: (values, validKeys) => restoreFormValues(values, validKeys),
- * });
- *
- * // Subscribe to state changes
- * machine.state$.subscribe(state => console.log('State:', state.type));
- *
- * // Dispatch actions
- * machine.dispatch({ type: Action.Initialize, config: formConfig });
- * machine.dispatch({ type: Action.ConfigChange, config: newConfig });
- * ```
+ * Flow: uninitialized → initializing → ready ⇄ transitioning (teardown → applying → restoring)
  *
  * @internal
  */
@@ -115,27 +85,12 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     this.setupActionProcessing();
   }
 
-  /**
-   * Dispatches an action to the state machine.
-   *
-   * Actions are processed sequentially via `concatMap`, ensuring
-   * that long-running transitions (like teardown → apply → restore)
-   * complete before the next action is processed.
-   *
-   * @param action - Action to dispatch
-   */
+  /** Dispatches an action. Processed sequentially via `concatMap`. */
   dispatch(action: FormStateAction<TFields>): void {
     this.actions$.next(action);
   }
 
-  /**
-   * Sets up sequential action processing.
-   *
-   * `concatMap` is critical here - it queues actions and processes them
-   * one at a time, waiting for each Observable to complete before
-   * processing the next. This prevents race conditions during config
-   * transitions.
-   */
+  /** Sets up sequential action processing via `concatMap`. */
   private setupActionProcessing(): void {
     this.actions$
       .pipe(
@@ -153,20 +108,14 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
   }
 
   /**
-   * Processes a single action, returning an Observable that completes
-   * when all side effects are finished.
-   *
-   * This is the core of the state machine - it:
-   * 1. Computes the next state based on current state + action
-   * 2. Updates state immediately
-   * 3. Executes side effects with appropriate timing
-   * 4. Dispatches follow-up actions as needed
+   * Processes a single action: computes next state (pure), updates `_state`,
+   * then executes side effects. Effects may dispatch follow-up actions that
+   * are queued via `concatMap` and go through the same transition pipeline.
    */
   private processAction(action: FormStateAction<TFields>): Observable<void> {
     const currentState = this._state();
     const result = this.computeTransition(currentState, action);
 
-    // Record transition for debugging
     this.config.onTransition?.({
       from: currentState,
       to: result.state,
@@ -174,19 +123,11 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       timestamp: Date.now(),
     });
 
-    // Update state immediately (synchronous)
     this._state.set(result.state);
-
-    // Execute side effects (may be async)
     return this.executeSideEffects(result.sideEffects);
   }
 
-  /**
-   * Computes the next state and required side effects for an action.
-   *
-   * This is a pure function - given current state and action, it returns
-   * the new state and side effects without modifying anything.
-   */
+  /** Pure transition: current state + action → next state + side effects. */
   private computeTransition(state: FormLifecycleState<TFields>, action: FormStateAction<TFields>): TransitionResult<TFields> {
     switch (action.type) {
       case Action.Initialize:
@@ -219,7 +160,6 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
   }
 
   private handleInitialize(state: FormLifecycleState<TFields>, config: FormConfig<TFields>): TransitionResult<TFields> {
-    // Can only initialize from uninitialized state
     if (state.type !== LifecycleState.Uninitialized) {
       return { state, sideEffects: [] };
     }
@@ -231,9 +171,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
   }
 
   private handleConfigChange(state: FormLifecycleState<TFields>, config: FormConfig<TFields>): TransitionResult<TFields> {
-    // Handle based on current state
     if (state.type === LifecycleState.Uninitialized) {
-      // Treat as initialize
       return {
         state: createInitializingState(config),
         sideEffects: [{ type: Effect.CreateForm }],
@@ -241,7 +179,6 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     }
 
     if (isReadyState(state)) {
-      // Start transition from ready state - capture formSetup from ready state
       return {
         state: createTransitioningState(Phase.Teardown, state.config, config, state.formSetup),
         sideEffects: [{ type: Effect.CaptureValue }, { type: Effect.WaitFrameBoundary }],
@@ -249,7 +186,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     }
 
     if (isTransitioningState(state)) {
-      // Already transitioning - update pending config (latest wins), preserve formSetups
+      // Already transitioning — update pending config (latest wins)
       return {
         state: createTransitioningState(
           state.phase,
@@ -263,12 +200,10 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       };
     }
 
-    // Other states (destroyed, initializing) - ignore
     return { state, sideEffects: [] };
   }
 
   private handleSetupComplete(state: FormLifecycleState<TFields>, formSetup: FormSetup<TFields>): TransitionResult<TFields> {
-    // Setup complete during initialization
     if (state.type === LifecycleState.Initializing) {
       return {
         state: createReadyState(state.config, formSetup),
@@ -302,7 +237,6 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       return { state, sideEffects: [] };
     }
 
-    // Move to applying phase - carry currentFormSetup through
     return {
       state: createTransitioningState(
         Phase.Applying,
@@ -320,9 +254,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       return { state, sideEffects: [] };
     }
 
-    // Check if we have values to restore
     if (state.preservedValue && Object.keys(state.preservedValue).length > 0) {
-      // Move to restoring phase - store new formSetup as pendingFormSetup
       return {
         state: createTransitioningState(
           Phase.Restoring,
@@ -336,7 +268,6 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       };
     }
 
-    // No values to restore - go directly to ready
     return {
       state: createReadyState(state.pendingConfig, formSetup),
       sideEffects: [],
@@ -348,7 +279,12 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       return { state, sideEffects: [] };
     }
 
-    // Use pendingFormSetup computed during apply phase instead of recomputing
+    if (!state.pendingFormSetup) {
+      this.config.logger.warn(
+        'handleRestoreComplete: pendingFormSetup was not set — falling back to recomputing. ' +
+          'This indicates a bug in the transition flow.',
+      );
+    }
     const formSetup = state.pendingFormSetup ?? this.config.createFormSetup(state.pendingConfig);
 
     return {
@@ -365,18 +301,14 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
   }
 
   /**
-   * Executes side effects in sequence using the scheduler.
-   *
-   * Returns an Observable that completes when all effects are done.
-   * This is what makes `concatMap` work - each action's effects must
-   * complete before the next action processes.
+   * Executes side effects in sequence. Effects may call `this.dispatch()` internally,
+   * queuing follow-up actions into the same `concatMap` pipeline.
    */
   private executeSideEffects(effects: SideEffect[]): Observable<void> {
     if (effects.length === 0) {
       return of(undefined);
     }
 
-    // Execute effects sequentially using reduce + concatMap
     return effects.reduce(
       (chain$, effect) => chain$.pipe(concatMap(() => this.executeSideEffect(effect))),
       of(undefined) as Observable<void>,
@@ -396,7 +328,6 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
 
       case Effect.WaitFrameBoundary: {
         return scheduler.executeAtFrameBoundary(() => {
-          // Frame boundary reached - dispatch teardown complete
           this.dispatch({ type: Action.TeardownComplete });
         });
       }
@@ -430,7 +361,9 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
           const state = this._state();
           if (!isTransitioningState(state) || state.phase !== Phase.Restoring) return;
 
-          // Use pendingFormSetup from state instead of recomputing
+          if (!state.pendingFormSetup) {
+            this.config.logger.warn('RestoreValues effect: pendingFormSetup was not set — falling back to recomputing.');
+          }
           const formSetup = state.pendingFormSetup ?? this.config.createFormSetup(state.pendingConfig);
           const validKeys = new Set(formSetup.schemaFields.map((f) => f.key).filter((key): key is string => key !== undefined));
 
@@ -445,14 +378,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
   }
 }
 
-/**
- * Creates a form state machine.
- *
- * @param config - Configuration for the state machine
- * @returns Configured FormStateMachine instance
- *
- * @internal
- */
+/** @internal */
 export function createFormStateMachine<TFields extends RegisteredFieldTypes[]>(
   config: FormStateMachineConfig<TFields>,
 ): FormStateMachine<TFields> {

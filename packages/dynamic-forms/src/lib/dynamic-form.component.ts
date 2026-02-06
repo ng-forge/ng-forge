@@ -34,28 +34,12 @@ import { FormStateManager } from './state/form-state-manager';
 import { provideDynamicFormDI } from './providers/dynamic-form-di';
 
 /**
- * Dynamic form component that renders a complete form based on configuration.
- *
- * This is the main entry point for the dynamic form system. It handles form state management,
- * validation, field rendering, and event coordination using Angular's signal-based reactive forms.
- *
- * **Architecture:**
- * The component delegates state management to `FormStateManager`, acting as a thin wrapper that:
- * - Provides inputs to the state manager
- * - Reads computed signals for template rendering
- * - Handles DOM events and outputs
- *
- * @typeParam TFields - Array of registered field types available for this form
- * @typeParam TModel - The strongly-typed interface for form values
+ * Dynamic form component — renders a form based on configuration.
+ * Delegates state management to `FormStateManager`.
  *
  * @example
  *```html
- * <form
- *  [dynamic-form]="formConfig"
- *  [(value)]="formData"
- *  (submitted)="handleSubmit($event)"
- *  (validityChange)="handleValidityChange($event)">
- * </form>
+ * <form [dynamic-form]="formConfig" [(value)]="formData" (submitted)="handleSubmit($event)"></form>
  * ```
  */
 @Component({
@@ -99,10 +83,7 @@ export class DynamicForm<
   private eventBus = inject(EventBus);
   private logger = inject(DynamicFormLogger);
 
-  /**
-   * State manager that owns all form state and coordinates the form lifecycle.
-   * The component delegates state management to this service and reads its signals.
-   */
+  /** State manager that owns all form state. */
   private stateManager = inject(FormStateManager<TFields, TModel>);
 
   // ─────────────────────────────────────────────────────────────────────────────

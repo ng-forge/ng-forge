@@ -1,13 +1,7 @@
 /**
- * State management module for dynamic forms.
- *
- * This module provides:
- * - `FormStateManager`: Service that owns all form state
- * - `FormStateMachine`: RxJS-based state machine for lifecycle management
- * - `SideEffectScheduler`: Controlled timing for side effects
- * - State types and type guards
- *
- * @packageDocumentation
+ * State management module barrel — organizational reference only.
+ * Internal code must import directly from specific files, not this barrel.
+ * @internal
  */
 
 // Core service

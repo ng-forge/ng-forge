@@ -33,23 +33,8 @@ export type BaseNavigationButtonField<TProps = unknown> = ButtonField<TProps, Su
 // =============================================================================
 
 /**
- * Mapper for submit button - configures native form submission via type="submit"
- *
- * Unlike other buttons, submit buttons don't dispatch events directly.
- * Instead, they trigger native form submission which the form component
- * intercepts and dispatches to the EventBus.
- *
- * Disabled state is resolved using the button-logic-resolver which considers:
- * 1. Explicit `disabled: true` on the field definition
- * 2. Field-level `logic` array (if present, overrides form-level defaults)
- * 3. Form-level `options.submitButton` defaults (disableWhenInvalid, disableWhileSubmitting)
- *
- * Hidden state is resolved using the non-field-hidden resolver which considers:
- * 1. Explicit `hidden: true` on the field definition
- * 2. Field-level `logic` array with `type: 'hidden'` conditions
- *
- * @param fieldDef The submit button field definition
- * @returns Signal containing Record of input names to values for ngComponentOutlet
+ * Mapper for submit button — configures native form submission via type="submit".
+ * Triggers native form submission rather than dispatching events directly.
  */
 export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonField<TProps>): Signal<Record<string, unknown>> {
   const rootFormRegistry = inject(RootFormRegistryService);
@@ -62,9 +47,7 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
     const rootForm = rootFormRegistry.rootForm()!;
 
-    // Use rootFormRegistry instead of fieldSignalContext.form because when the submit button
-    // is inside a group/array, fieldSignalContext.form points to the nested form tree,
-    // not the root form. We need root form validity for submit button disabled state (#157).
+    // Use rootForm (not fieldSignalContext.form) — submit needs root form validity (#157)
     const disabled = resolveSubmitButtonDisabled({
       form: rootForm,
       formOptions: formOptions(),
@@ -74,13 +57,11 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
-      // No event - native form submit handles it via form's onNativeSubmit
-      // Set type="submit" to trigger native form submission
+      // type="submit" triggers native form submission (no event dispatch needed)
       props: { ...(fieldDef.props as Record<string, unknown>), type: 'submit' },
       disabled,
     };
 
-    // Resolve hidden state using non-field-hidden resolver (supports logic array)
     const hidden = resolveHiddenValue(rootForm, fieldWithLogic);
     if (hidden !== undefined) {
       inputs['hidden'] = hidden;
@@ -94,21 +75,7 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
 // Next Page Button Mapper
 // =============================================================================
 
-/**
- * Mapper for next page button - preconfigures NextPageEvent
- *
- * Disabled state is resolved using the button-logic-resolver which considers:
- * 1. Explicit `disabled: true` on the field definition
- * 2. Field-level `logic` array (if present, overrides form-level defaults)
- * 3. Form-level `options.nextButton` defaults (disableWhenPageInvalid, disableWhileSubmitting)
- *
- * Hidden state is resolved using the non-field-hidden resolver which considers:
- * 1. Explicit `hidden: true` on the field definition
- * 2. Field-level `logic` array with `type: 'hidden'` conditions
- *
- * @param fieldDef The next button field definition
- * @returns Signal containing Record of input names to values for ngComponentOutlet
- */
+/** Mapper for next page button — preconfigures NextPageEvent. */
 export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonField<TProps>): Signal<Record<string, unknown>> {
   const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
   const rootFormRegistry = inject(RootFormRegistryService);
@@ -134,7 +101,6 @@ export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFiel
       disabled,
     };
 
-    // Resolve hidden state using non-field-hidden resolver (supports logic array)
     const hidden = resolveHiddenValue(rootForm, fieldWithLogic);
     if (hidden !== undefined) {
       inputs['hidden'] = hidden;
@@ -148,17 +114,7 @@ export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFiel
 // Previous Page Button Mapper
 // =============================================================================
 
-/**
- * Mapper for previous page button - preconfigures PreviousPageEvent
- * Note: Does not auto-disable based on validation. Users can explicitly disable if needed.
- *
- * Hidden state is resolved using the non-field-hidden resolver which considers:
- * 1. Explicit `hidden: true` on the field definition
- * 2. Field-level `logic` array with `type: 'hidden'` conditions
- *
- * @param fieldDef The previous button field definition
- * @returns Signal containing Record of input names to values for ngComponentOutlet
- */
+/** Mapper for previous page button — preconfigures PreviousPageEvent. */
 export function previousButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
   const rootFormRegistry = inject(RootFormRegistryService);
@@ -179,7 +135,6 @@ export function previousButtonFieldMapper<TProps>(fieldDef: BaseNavigationButton
       inputs['disabled'] = fieldDef.disabled;
     }
 
-    // Resolve hidden state using non-field-hidden resolver (supports logic array)
     const hidden = resolveHiddenValue(rootForm, fieldWithLogic);
     if (hidden !== undefined) {
       inputs['hidden'] = hidden;

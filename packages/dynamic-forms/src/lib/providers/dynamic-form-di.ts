@@ -20,18 +20,7 @@ import { DERIVATION_LOG_CONFIG } from './features/logger/with-logger-config';
 import { DerivationLogConfig } from '../models/logic/logic-config';
 import { FieldDef } from '../definitions/base/field-def';
 
-/**
- * Creates all providers needed by the DynamicForm component.
- *
- * Extracts provider setup from the component decorator to:
- * - Eliminate circular dependency (DERIVATION_ORCHESTRATOR previously depended on DynamicForm)
- * - Centralize provider configuration in one place
- * - Make the component class thinner
- *
- * @returns Array of providers for the DynamicForm component
- *
- * @internal
- */
+/** @internal */
 export function provideDynamicFormDI(): Provider[] {
   return [
     EventBus,
@@ -70,8 +59,6 @@ export function provideDynamicFormDI(): Provider[] {
         const config: DerivationOrchestratorConfig = {
           schemaFields: computed(() => stateManager.formSetup()?.schemaFields as FieldDef<unknown>[] | undefined),
           formValue: stateManager.formValue as Signal<Record<string, unknown>>,
-          // Safe: form() returns Angular Signals Form instance which implements FieldTree at runtime.
-          // TypeScript can't prove compatibility due to generic erasure between form<TModel> and FieldTree<unknown>.
           form: computed(() => stateManager.form() as unknown as FieldTree<unknown>),
           derivationLogger: computed(() => createDerivationLogger(logConfig, logger)),
           externalData: computed(() => stateManager.activeConfig()?.externalData),

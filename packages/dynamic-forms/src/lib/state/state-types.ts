@@ -72,23 +72,7 @@ export type EffectType = (typeof Effect)[keyof typeof Effect];
 // State types
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Form lifecycle states representing the complete state machine for config transitions.
- *
- * State flow:
- * 1. `uninitialized` → Initial state before any config is provided
- * 2. `initializing` → First config received, setting up form
- * 3. `ready` → Form is fully initialized and rendering
- * 4. `transitioning` → Config change detected, managing teardown and apply phases
- * 5. `destroyed` → Component destroyed, cleanup complete
- *
- * The transitioning state has three phases:
- * - `teardown` - Hide old components (shouldRender = false)
- * - `applying` - Create new form with new config
- * - `restoring` - Restore preserved values to new form
- *
- * @internal
- */
+/** @internal */
 export type FormLifecycleState<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> =
   | FormLifecycleUninitialized
   | FormLifecycleInitializing<TFields>
@@ -96,38 +80,23 @@ export type FormLifecycleState<TFields extends RegisteredFieldTypes[] = Register
   | FormLifecycleTransitioning<TFields>
   | FormLifecycleDestroyed;
 
-/**
- * Initial state before any config is provided.
- */
 export interface FormLifecycleUninitialized {
   readonly type: (typeof LifecycleState)['Uninitialized'];
 }
 
-/**
- * First config received, setting up form.
- */
 export interface FormLifecycleInitializing<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
   readonly type: (typeof LifecycleState)['Initializing'];
   readonly config: FormConfig<TFields>;
 }
 
-/**
- * Form is fully initialized and rendering.
- */
 export interface FormLifecycleReady<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
   readonly type: (typeof LifecycleState)['Ready'];
   readonly config: FormConfig<TFields>;
   readonly formSetup: FormSetup<TFields>;
 }
 
-/**
- * Phases during config transition.
- */
 export type TransitionPhase = PhaseType;
 
-/**
- * Config change detected, managing teardown and apply phases.
- */
 export interface FormLifecycleTransitioning<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
   readonly type: (typeof LifecycleState)['Transitioning'];
   readonly phase: TransitionPhase;
@@ -140,50 +109,20 @@ export interface FormLifecycleTransitioning<TFields extends RegisteredFieldTypes
   readonly pendingFormSetup?: FormSetup<TFields>;
 }
 
-/**
- * Component destroyed, cleanup complete.
- */
 export interface FormLifecycleDestroyed {
   readonly type: (typeof LifecycleState)['Destroyed'];
 }
 
-/**
- * Computed form setup derived from active config.
- * Contains all precomputed values needed for form creation and rendering.
- *
- * @internal
- */
+/** @internal */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface FormSetup<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
-  /**
-   * Fields to render (flattened for non-paged, empty for paged).
-   * Paged forms use PageOrchestrator for rendering.
-   */
+  /** Fields to render (flattened for non-paged, empty for paged). */
   readonly fields: FieldDef<unknown>[];
-
-  /**
-   * All schema fields for validation (flattened from all pages/containers).
-   */
+  /** All schema fields for validation (flattened from all pages/containers). */
   readonly schemaFields: FieldDef<unknown>[];
-
-  /**
-   * Original field definitions from config (before flattening).
-   */
   readonly originalFields?: FieldDef<unknown>[];
-
-  /**
-   * Default values computed from field definitions.
-   */
   readonly defaultValues: Record<string, unknown>;
-
-  /**
-   * Detected form mode (paged vs non-paged).
-   */
   readonly mode: FormMode;
-
-  /**
-   * Reference to the field type registry.
-   */
   readonly registry: Map<string, FieldTypeDefinition>;
 }
 
@@ -202,63 +141,39 @@ export type FormStateAction<TFields extends RegisteredFieldTypes[] = RegisteredF
   | RestoreCompleteAction
   | DestroyAction;
 
-/**
- * Initialize with first config.
- */
 export interface InitializeAction<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
   readonly type: (typeof Action)['Initialize'];
   readonly config: FormConfig<TFields>;
 }
 
-/**
- * Config input changed.
- */
 export interface ConfigChangeAction<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
   readonly type: (typeof Action)['ConfigChange'];
   readonly config: FormConfig<TFields>;
 }
 
-/**
- * Form setup computation complete.
- */
 export interface SetupCompleteAction<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
   readonly type: (typeof Action)['SetupComplete'];
   readonly formSetup: FormSetup<TFields>;
 }
 
-/**
- * Value captured from the current form during teardown.
- */
 export interface ValueCapturedAction {
   readonly type: (typeof Action)['ValueCaptured'];
   readonly value: Record<string, unknown>;
 }
 
-/**
- * Teardown phase complete (old components destroyed).
- */
 export interface TeardownCompleteAction {
   readonly type: (typeof Action)['TeardownComplete'];
 }
 
-/**
- * Apply phase complete (new form created).
- */
 export interface ApplyCompleteAction<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
   readonly type: (typeof Action)['ApplyComplete'];
   readonly formSetup: FormSetup<TFields>;
 }
 
-/**
- * Restore phase complete (values restored).
- */
 export interface RestoreCompleteAction {
   readonly type: (typeof Action)['RestoreComplete'];
 }
 
-/**
- * Component being destroyed.
- */
 export interface DestroyAction {
   readonly type: (typeof Action)['Destroy'];
 }
@@ -307,53 +222,33 @@ export interface FieldLoadingError {
   readonly error: Error;
 }
 
-/**
- * Type guard for ready state.
- *
- * @internal
- */
+/** @internal */
 export function isReadyState<TFields extends RegisteredFieldTypes[]>(
   state: FormLifecycleState<TFields>,
 ): state is FormLifecycleReady<TFields> {
   return state.type === LifecycleState.Ready;
 }
 
-/**
- * Type guard for transitioning state.
- *
- * @internal
- */
+/** @internal */
 export function isTransitioningState<TFields extends RegisteredFieldTypes[]>(
   state: FormLifecycleState<TFields>,
 ): state is FormLifecycleTransitioning<TFields> {
   return state.type === LifecycleState.Transitioning;
 }
 
-/**
- * Creates the initial uninitialized state.
- *
- * @internal
- */
+/** @internal */
 export function createUninitializedState(): FormLifecycleUninitialized {
   return { type: LifecycleState.Uninitialized };
 }
 
-/**
- * Creates an initializing state.
- *
- * @internal
- */
+/** @internal */
 export function createInitializingState<TFields extends RegisteredFieldTypes[]>(
   config: FormConfig<TFields>,
 ): FormLifecycleInitializing<TFields> {
   return { type: LifecycleState.Initializing, config };
 }
 
-/**
- * Creates a ready state.
- *
- * @internal
- */
+/** @internal */
 export function createReadyState<TFields extends RegisteredFieldTypes[]>(
   config: FormConfig<TFields>,
   formSetup: FormSetup<TFields>,
@@ -361,11 +256,7 @@ export function createReadyState<TFields extends RegisteredFieldTypes[]>(
   return { type: LifecycleState.Ready, config, formSetup };
 }
 
-/**
- * Creates a transitioning state.
- *
- * @internal
- */
+/** @internal */
 export function createTransitioningState<TFields extends RegisteredFieldTypes[]>(
   phase: TransitionPhase,
   currentConfig: FormConfig<TFields>,
@@ -377,11 +268,7 @@ export function createTransitioningState<TFields extends RegisteredFieldTypes[]>
   return { type: LifecycleState.Transitioning, phase, currentConfig, pendingConfig, currentFormSetup, preservedValue, pendingFormSetup };
 }
 
-/**
- * Creates a destroyed state.
- *
- * @internal
- */
+/** @internal */
 export function createDestroyedState(): FormLifecycleDestroyed {
   return { type: LifecycleState.Destroyed };
 }
