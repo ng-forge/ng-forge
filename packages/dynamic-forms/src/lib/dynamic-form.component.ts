@@ -102,14 +102,11 @@ export class DynamicForm<
    * but before stateManager is injected. FormStateManager reads from these signals
    * in computeds/effects, which are all lazy and evaluated after construction.
    */
-  private formStateDeps = (() => {
+  private readonly _ = (() => {
     const deps = inject(FORM_STATE_DEPS);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Signal invariance at DI boundary (see FormStateDeps docs)
-    deps.config = this.config as Signal<FormConfig<any>>;
+    deps.config = this.config as Signal<FormConfig<RegisteredFieldTypes[]>>;
     deps.formOptions = this.formOptions;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- WritableSignal invariance at DI boundary
-    deps.value = this.value as WritableSignal<Partial<any> | undefined>;
-    return deps;
+    deps.value = this.value as WritableSignal<Partial<unknown> | undefined>;
   })();
 
   /** State manager that owns all form state. */

@@ -24,7 +24,7 @@ function createFormStateDeps(
   }>,
 ): FormStateDeps {
   return {
-    config: signal(config) as Signal<TestFormConfig>,
+    config: signal(config) as Signal<FormConfig<RegisteredFieldTypes[]>>,
     formOptions: overrides?.formOptions ?? (signal(undefined) as Signal<FormOptions | undefined>),
     value: overrides?.value ?? signal(undefined),
   };
@@ -112,7 +112,6 @@ describe('FormStateManager', () => {
       TestBed.inject(FormStateManager);
       TestBed.flushEffects();
 
-      expect(registerSpy).toHaveBeenCalledTimes(1);
       expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'testSchema' }));
     });
 

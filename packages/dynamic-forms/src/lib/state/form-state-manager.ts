@@ -64,11 +64,9 @@ import { createFormStateMachine, FormStateMachine } from './form-state-machine';
  * @internal
  */
 export interface FormStateDeps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: Signal<FormConfig<any>> | null;
+  config: Signal<FormConfig<RegisteredFieldTypes[]>> | null;
   formOptions: Signal<FormOptions | undefined> | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value: WritableSignal<Partial<any> | undefined> | null;
+  value: WritableSignal<Partial<unknown> | undefined> | null;
 }
 
 /** @internal */
@@ -263,11 +261,14 @@ export class FormStateManager<
     }
 
     // Bootstrap path: compute form setup before the state machine dispatches 'initialize'.
-    // Validator registration happens in the config-watch effect and createFormSetup callback.
+    // Must register validators/schemas here — the state machine callback hasn't fired yet,
+    // but the form computed already needs registered schemas to build validation.
     const config = this.activeConfig();
     if (!config) {
       return this.createEmptyFormSetup(registry);
     }
+
+    this.registerValidatorsFromConfig(config);
 
     if (config.fields && config.fields.length > 0) {
       const modeDetection = this.formModeDetection();

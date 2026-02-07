@@ -359,7 +359,8 @@ describe('SideEffectScheduler', () => {
       // Give Angular time to process the afterNextRender callback
       await waitForAnimationFrame();
 
-      // The effect should not have emitted because local abort was triggered
+      // The effect should not have run or emitted because local abort was triggered
+      expect(effectFn).not.toHaveBeenCalled();
       expect(next).not.toHaveBeenCalled();
     });
 

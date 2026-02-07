@@ -3,7 +3,7 @@ import { DestroyRef, Injector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { FormStateMachine, FormStateMachineConfig } from './form-state-machine';
-import { Action, FormSetup, LifecycleState, Phase, StateTransition, isTransitioningState, isReadyState } from './state-types';
+import { Action, FormSetup, LifecycleState, Phase, StateTransition, isTransitioningState } from './state-types';
 import { FormConfig } from '../models/form-config';
 import { RegisteredFieldTypes } from '../models/registry/field-registry';
 import { Logger } from '../providers/features/logger/logger.interface';
@@ -84,6 +84,28 @@ const mockPendingFormSetup: FormSetup<TestFields> = {
   mode: 'non-paged',
   registry: new Map(),
 };
+
+/**
+ * Type guard assertion helpers — fail the test immediately if the state
+ * doesn't match, instead of silently skipping assertions inside `if` blocks.
+ */
+function expectReadyState(state: {
+  type: string;
+}): asserts state is { type: typeof LifecycleState.Ready; config: FormConfig<TestFields>; formSetup: FormSetup<TestFields> } {
+  expect(state.type).toBe(LifecycleState.Ready);
+}
+
+function expectTransitioningState(state: { type: string }): asserts state is {
+  type: typeof LifecycleState.Transitioning;
+  phase: string;
+  currentConfig: FormConfig<TestFields>;
+  currentFormSetup: FormSetup<TestFields>;
+  pendingConfig: FormConfig<TestFields>;
+  preservedValue?: Record<string, unknown>;
+  pendingFormSetup?: FormSetup<TestFields>;
+} {
+  expect(state.type).toBe(LifecycleState.Transitioning);
+}
 
 // ---------------------------------------------------------------------------
 // Test suite
@@ -264,10 +286,8 @@ describe('FormStateMachine', () => {
       machine.dispatch({ type: Action.Initialize, config: mockConfig });
       machine.dispatch({ type: Action.ConfigChange, config: mockPendingConfig });
 
-      expect(machine.currentState.type).toBe(LifecycleState.Ready);
-      if (isReadyState(machine.currentState)) {
-        expect(machine.currentState.config).toBe(mockPendingConfig);
-      }
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.config).toBe(mockPendingConfig);
     });
 
     it('should go through Restoring phase when preserved values are non-empty', () => {
@@ -337,16 +357,14 @@ describe('FormStateMachine', () => {
       machine.dispatch({ type: Action.ConfigChange, config: mockPendingConfig });
 
       // State is Transitioning(Teardown) because CaptureValue ran but WaitFrameBoundary is pending.
-      expect(machine.currentState.type).toBe(LifecycleState.Transitioning);
-      if (isTransitioningState(machine.currentState)) {
-        expect(machine.currentState.phase).toBe(Phase.Teardown);
-      }
+      expectTransitioningState(machine.currentState);
+      expect(machine.currentState.phase).toBe(Phase.Teardown);
 
       // Queue a second ConfigChange (queued behind ValueCaptured in actions$).
       machine.dispatch({ type: Action.ConfigChange, config: newestConfig });
 
       // State hasn't changed yet because concatMap blocks on the pending WaitFrameBoundary.
-      expect(machine.currentState.type).toBe(LifecycleState.Transitioning);
+      expectTransitioningState(machine.currentState);
 
       // Now resolve the frame boundary to allow all queued actions to process.
       frameBoundaryResolve?.();
@@ -356,10 +374,8 @@ describe('FormStateMachine', () => {
       //   ConfigChange(newestConfig) (updates pendingConfig — "latest wins")
       //   TeardownComplete (moves to Applying -> CreateForm -> ApplyComplete -> ...)
       // The machine reaches Ready with the newest config.
-      expect(machine.currentState.type).toBe(LifecycleState.Ready);
-      if (isReadyState(machine.currentState)) {
-        expect(machine.currentState.config).toBe(newestConfig);
-      }
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.config).toBe(newestConfig);
     });
 
     it('should be a no-op when dispatched in Destroyed state', () => {
@@ -402,6 +418,7 @@ describe('FormStateMachine', () => {
       // The state was set to Initializing before the effect ran.
       // Due to concatMap, the SetupComplete that would be dispatched
       // from createFormCallback hasn't happened yet.
+      expect(machine.currentState.type).toBe(LifecycleState.Initializing);
 
       // Fire the CreateForm effect manually.
       createFormCallback?.();
@@ -448,11 +465,9 @@ describe('FormStateMachine', () => {
       const valueCapturedTransition = transitions.find((t) => t.action.type === Action.ValueCaptured);
       expect(valueCapturedTransition).toBeDefined();
 
-      const targetState = valueCapturedTransition?.to;
-      expect(targetState?.type).toBe(LifecycleState.Transitioning);
-      if (targetState && isTransitioningState(targetState)) {
-        expect(targetState.preservedValue).toEqual(capturedValues);
-      }
+      const targetState = valueCapturedTransition!.to;
+      expectTransitioningState(targetState);
+      expect(targetState.preservedValue).toEqual(capturedValues);
     });
 
     it('should be a no-op when not in Transitioning state', () => {
@@ -499,11 +514,9 @@ describe('FormStateMachine', () => {
       machine.dispatch({ type: Action.Initialize, config: mockConfig });
       machine.dispatch({ type: Action.ConfigChange, config: mockPendingConfig });
 
-      expect(machine.currentState.type).toBe(LifecycleState.Ready);
-      if (isReadyState(machine.currentState)) {
-        expect(machine.currentState.config).toBe(mockPendingConfig);
-        expect(machine.currentState.formSetup).toBe(mockFormSetup);
-      }
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.config).toBe(mockPendingConfig);
+      expect(machine.currentState.formSetup).toBe(mockFormSetup);
     });
 
     it('should transition to Restoring when preservedValue has keys', () => {
@@ -553,14 +566,12 @@ describe('FormStateMachine', () => {
       machine.dispatch({ type: Action.ConfigChange, config: mockPendingConfig });
 
       // Full cycle completes to Ready.
-      expect(machine.currentState.type).toBe(LifecycleState.Ready);
-      if (isReadyState(machine.currentState)) {
-        expect(machine.currentState.config).toBe(mockPendingConfig);
-        expect(machine.currentState.formSetup).toBe(mockPendingFormSetup);
-      }
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.config).toBe(mockPendingConfig);
+      expect(machine.currentState.formSetup).toBe(mockPendingFormSetup);
     });
 
-    it('should log a warning and recompute formSetup when pendingFormSetup is missing', () => {
+    it('should not warn when pendingFormSetup is set during normal Restoring flow', () => {
       // Simulate a scenario where pendingFormSetup is not set on the Restoring state.
       // This requires intercepting the state between Applying and Restoring.
       // Since the synchronous flow sets pendingFormSetup in handleApplyComplete,
@@ -607,6 +618,70 @@ describe('FormStateMachine', () => {
       machine.dispatch({ type: Action.Destroy });
       expect(machine.currentState.type).toBe(LifecycleState.Destroyed);
     });
+
+    it('should transition to Destroyed from Initializing', () => {
+      let createFormCallback: (() => void) | undefined;
+      const controlledScheduler = {
+        ...createSynchronousScheduler(),
+        executeBlocking: vi.fn(
+          (effect: () => void) =>
+            new Observable<void>((sub) => {
+              createFormCallback = () => {
+                try {
+                  effect();
+                  sub.next(undefined);
+                  sub.complete();
+                } catch (e) {
+                  sub.error(e);
+                }
+              };
+            }),
+        ),
+      } as unknown as SideEffectScheduler;
+
+      const machine = createMachine({ scheduler: controlledScheduler });
+      machine.dispatch({ type: Action.Initialize, config: mockConfig });
+      expect(machine.currentState.type).toBe(LifecycleState.Initializing);
+
+      machine.dispatch({ type: Action.Destroy });
+
+      // Destroy is queued behind the pending CreateForm effect.
+      // Resolve the blocking effect so the queue can process Destroy.
+      createFormCallback?.();
+      expect(machine.currentState.type).toBe(LifecycleState.Destroyed);
+    });
+
+    it('should transition to Destroyed from Transitioning', () => {
+      let frameBoundaryResolve: (() => void) | undefined;
+      const controlledScheduler = createSynchronousScheduler();
+      (controlledScheduler.executeAtFrameBoundary as ReturnType<typeof vi.fn>).mockImplementation(
+        (effect: () => void) =>
+          new Observable<void>((sub) => {
+            frameBoundaryResolve = () => {
+              try {
+                effect();
+                sub.next(undefined);
+                sub.complete();
+              } catch (e) {
+                sub.error(e);
+              }
+            };
+          }),
+      );
+
+      const machine = createMachine({ scheduler: controlledScheduler });
+      machine.dispatch({ type: Action.Initialize, config: mockConfig });
+      expect(machine.currentState.type).toBe(LifecycleState.Ready);
+
+      machine.dispatch({ type: Action.ConfigChange, config: mockPendingConfig });
+      expectTransitioningState(machine.currentState);
+
+      machine.dispatch({ type: Action.Destroy });
+
+      // Resolve the frame boundary so the queue can process Destroy.
+      frameBoundaryResolve?.();
+      expect(machine.currentState.type).toBe(LifecycleState.Destroyed);
+    });
   });
 
   // ── Error recovery ──────────────────────────────────────────────────────
@@ -642,10 +717,9 @@ describe('FormStateMachine', () => {
       expect(machine.currentState.type).toBe(LifecycleState.Ready);
       expect(logger.error).toHaveBeenCalled();
 
-      if (isReadyState(machine.currentState)) {
-        expect(machine.currentState.config).toBe(mockConfig);
-        expect(machine.currentState.formSetup).toBe(mockFormSetup);
-      }
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.config).toBe(mockConfig);
+      expect(machine.currentState.formSetup).toBe(mockFormSetup);
     });
 
     it('should not change state when error occurs in Ready state', () => {
@@ -667,6 +741,47 @@ describe('FormStateMachine', () => {
       // But processAction sets state BEFORE running effects, so the state might have changed.
       // For Ready -> Ready transitions (like SetupComplete from Ready), the state stays Ready.
       expect(machine.currentState.type).toBe(LifecycleState.Ready);
+    });
+
+    it('should revert to Ready when error occurs during Applying phase', () => {
+      const machine = createMachine();
+      machine.dispatch({ type: Action.Initialize, config: mockConfig });
+      expectReadyState(machine.currentState);
+
+      // Make createFormSetup throw on the next call (Applying phase).
+      createFormSetup.mockImplementation(() => {
+        throw new Error('Apply failed');
+      });
+
+      machine.dispatch({ type: Action.ConfigChange, config: mockPendingConfig });
+
+      // Error during Applying (Transitioning) should revert to Ready with currentConfig.
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.config).toBe(mockConfig);
+      expect(logger.error).toHaveBeenCalled();
+    });
+
+    it('should revert to Ready when error occurs during Restoring phase', () => {
+      captureValue.mockReturnValue({ name: 'John' });
+
+      // First createFormSetup call (init): succeed
+      // Second createFormSetup call (apply): succeed with pending setup
+      // restoreValue will throw during Restoring
+      createFormSetup.mockReturnValue(mockPendingFormSetup);
+      restoreValue.mockImplementation(() => {
+        throw new Error('Restore failed');
+      });
+
+      const machine = createMachine();
+      machine.dispatch({ type: Action.Initialize, config: mockConfig });
+      expectReadyState(machine.currentState);
+
+      machine.dispatch({ type: Action.ConfigChange, config: mockPendingConfig });
+
+      // Error during Restoring (Transitioning) should revert to Ready with currentConfig.
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.config).toBe(mockConfig);
+      expect(logger.error).toHaveBeenCalled();
     });
 
     it('should log the error via logger.error', () => {
@@ -896,10 +1011,8 @@ describe('FormStateMachine', () => {
 
       // Step 2: Config change with value preservation.
       machine.dispatch({ type: Action.ConfigChange, config: mockPendingConfig });
-      expect(machine.currentState.type).toBe(LifecycleState.Ready);
-      if (isReadyState(machine.currentState)) {
-        expect(machine.currentState.config).toBe(mockPendingConfig);
-      }
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.config).toBe(mockPendingConfig);
 
       // Step 3: Destroy.
       machine.dispatch({ type: Action.Destroy });
@@ -915,22 +1028,16 @@ describe('FormStateMachine', () => {
       machine.dispatch({ type: Action.Initialize, config: mockConfig });
 
       machine.dispatch({ type: Action.ConfigChange, config: config1 });
-      expect(machine.currentState.type).toBe(LifecycleState.Ready);
-      if (isReadyState(machine.currentState)) {
-        expect(machine.currentState.config).toBe(config1);
-      }
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.config).toBe(config1);
 
       machine.dispatch({ type: Action.ConfigChange, config: config2 });
-      expect(machine.currentState.type).toBe(LifecycleState.Ready);
-      if (isReadyState(machine.currentState)) {
-        expect(machine.currentState.config).toBe(config2);
-      }
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.config).toBe(config2);
 
       machine.dispatch({ type: Action.ConfigChange, config: config3 });
-      expect(machine.currentState.type).toBe(LifecycleState.Ready);
-      if (isReadyState(machine.currentState)) {
-        expect(machine.currentState.config).toBe(config3);
-      }
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.config).toBe(config3);
     });
 
     it('should not process actions after DestroyRef triggers', () => {
@@ -1002,15 +1109,13 @@ describe('FormStateMachine', () => {
       const machine = createMachine();
       machine.dispatch({ type: Action.Initialize, config: mockConfig });
 
-      if (isReadyState(machine.currentState)) {
-        expect(machine.currentState.formSetup.mode).toBe('non-paged');
-      }
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.formSetup.mode).toBe('non-paged');
 
       machine.dispatch({ type: Action.ConfigChange, config: mockPendingConfig });
 
-      if (isReadyState(machine.currentState)) {
-        expect(machine.currentState.formSetup.mode).toBe('paged');
-      }
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.formSetup.mode).toBe('paged');
     });
   });
 });
