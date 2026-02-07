@@ -177,16 +177,25 @@ describe('resolve-field', () => {
       };
     }
 
-    it('should preserve injector when key and component are the same', () => {
+    it('should preserve object identity when key, component, and injector all match', () => {
+      const prev: ResolvedField[] = [createResolvedField('field1', componentA, injector1)];
+      const curr: ResolvedField[] = [createResolvedField('field1', componentA, injector1)];
+
+      const result = reconcileFields(prev, curr);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBe(prev[0]); // Same object reference
+    });
+
+    it('should use new field when injector changes (config change)', () => {
       const prev: ResolvedField[] = [createResolvedField('field1', componentA, injector1)];
       const curr: ResolvedField[] = [createResolvedField('field1', componentA, injector2)];
 
       const result = reconcileFields(prev, curr);
 
       expect(result).toHaveLength(1);
-      expect(result[0].key).toBe('field1');
-      expect(result[0].injector).toBe(injector1); // Preserved from prev
-      expect(result[0].component).toBe(componentA);
+      expect(result[0]).toBe(curr[0]); // New field used
+      expect(result[0].injector).toBe(injector2);
     });
 
     it('should use new injector when component type changes', () => {
@@ -201,7 +210,7 @@ describe('resolve-field', () => {
       expect(result[0].component).toBe(componentB);
     });
 
-    it('should use new injector for new fields', () => {
+    it('should use new field for new keys', () => {
       const prev: ResolvedField[] = [createResolvedField('field1', componentA, injector1)];
       const curr: ResolvedField[] = [
         createResolvedField('field1', componentA, injector2),
@@ -211,7 +220,7 @@ describe('resolve-field', () => {
       const result = reconcileFields(prev, curr);
 
       expect(result).toHaveLength(2);
-      expect(result[0].injector).toBe(injector1); // Preserved
+      expect(result[0].injector).toBe(injector2); // Different injector, new field used
       expect(result[1].injector).toBe(injector3); // New field, new injector
     });
 
@@ -226,7 +235,7 @@ describe('resolve-field', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].key).toBe('field1');
-      expect(result[0].injector).toBe(injector1); // Preserved
+      expect(result[0].injector).toBe(injector3); // Different injector, new field used
     });
 
     it('should handle empty previous array', () => {
@@ -264,7 +273,25 @@ describe('resolve-field', () => {
       expect(result).toHaveLength(0);
     });
 
-    it('should handle reordering of fields', () => {
+    it('should handle reordering of fields with same injector', () => {
+      const prev: ResolvedField[] = [
+        createResolvedField('field1', componentA, injector1),
+        createResolvedField('field2', componentB, injector1),
+      ];
+      const curr: ResolvedField[] = [
+        createResolvedField('field2', componentB, injector1),
+        createResolvedField('field1', componentA, injector1),
+      ];
+
+      const result = reconcileFields(prev, curr);
+
+      expect(result).toHaveLength(2);
+      // Both should preserve object identity (same key, component, injector)
+      expect(result[0]).toBe(prev[1]); // field2 from prev
+      expect(result[1]).toBe(prev[0]); // field1 from prev
+    });
+
+    it('should use new fields when reordering with different injector', () => {
       const prev: ResolvedField[] = [
         createResolvedField('field1', componentA, injector1),
         createResolvedField('field2', componentB, injector2),
@@ -277,15 +304,11 @@ describe('resolve-field', () => {
       const result = reconcileFields(prev, curr);
 
       expect(result).toHaveLength(2);
-      // field2 should preserve injector2
-      expect(result[0].key).toBe('field2');
-      expect(result[0].injector).toBe(injector2);
-      // field1 should preserve injector1
-      expect(result[1].key).toBe('field1');
-      expect(result[1].injector).toBe(injector1);
+      expect(result[0]).toBe(curr[0]); // New field (injector changed)
+      expect(result[1]).toBe(curr[1]); // New field (injector changed)
     });
 
-    it('should update inputs while preserving injector', () => {
+    it('should use new field when injector differs even if inputs differ', () => {
       const oldInputs = computed(() => ({ label: 'Old' }));
       const newInputs = computed(() => ({ label: 'New' }));
 
@@ -308,8 +331,9 @@ describe('resolve-field', () => {
 
       const result = reconcileFields(prev, curr);
 
-      expect(result[0].injector).toBe(injector1); // Preserved
-      expect(result[0].inputs).toBe(newInputs); // Updated from curr
+      expect(result[0]).toBe(curr[0]); // New field used (injector differs)
+      expect(result[0].injector).toBe(injector2);
+      expect(result[0].inputs).toBe(newInputs);
     });
 
     it('should handle multiple fields with mixed scenarios', () => {
@@ -317,31 +341,38 @@ describe('resolve-field', () => {
 
       const prev: ResolvedField[] = [
         createResolvedField('unchanged', componentA, injector1),
+        createResolvedField('injectorChanged', componentA, injector1),
         createResolvedField('typeChanged', componentA, injector1),
         createResolvedField('removed', componentB, injector2),
       ];
       const curr: ResolvedField[] = [
-        createResolvedField('unchanged', componentA, injector3),
+        createResolvedField('unchanged', componentA, injector1),
+        createResolvedField('injectorChanged', componentA, injector3),
         createResolvedField('typeChanged', componentC, injector3),
         createResolvedField('newField', componentB, injector3),
       ];
 
       const result = reconcileFields(prev, curr);
 
-      expect(result).toHaveLength(3);
+      expect(result).toHaveLength(4);
 
-      // unchanged: same key & component -> preserve injector
+      // unchanged: same key, component, injector -> preserve object identity
       const unchanged = result.find((f) => f.key === 'unchanged');
-      expect(unchanged?.injector).toBe(injector1);
+      expect(unchanged).toBe(prev[0]);
 
-      // typeChanged: same key, different component -> new injector
+      // injectorChanged: same key & component, different injector -> new field
+      const injectorChanged = result.find((f) => f.key === 'injectorChanged');
+      expect(injectorChanged).toBe(curr[1]);
+      expect(injectorChanged?.injector).toBe(injector3);
+
+      // typeChanged: same key, different component -> new field
       const typeChanged = result.find((f) => f.key === 'typeChanged');
-      expect(typeChanged?.injector).toBe(injector3);
+      expect(typeChanged).toBe(curr[2]);
       expect(typeChanged?.component).toBe(componentC);
 
-      // newField: new field -> new injector
+      // newField: new field -> new field
       const newField = result.find((f) => f.key === 'newField');
-      expect(newField?.injector).toBe(injector3);
+      expect(newField).toBe(curr[3]);
     });
   });
 });

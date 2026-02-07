@@ -8,9 +8,10 @@ import { validationNavigationScenario } from './scenarios/validation-navigation.
 export const multiPageNavigationSuite: TestSuite = {
   id: 'multi-page-navigation',
   title: 'Multi-Page Navigation',
-  description: 'Testing multi-page form navigation, backward navigation, and page transitions',
+  description: 'Testing multi-page form navigation, backward navigation, page transitions, and conditional visibility',
   path: '/test/multi-page-navigation',
   scenarios: [
+    // Basic Navigation
     multiPageRegistrationScenario,
     validationNavigationScenario,
     backwardNavigationScenario,

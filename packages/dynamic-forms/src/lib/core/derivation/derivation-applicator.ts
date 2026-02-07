@@ -194,8 +194,8 @@ export function applyDerivations(
  * Filters entries by checking if any of their dependencies are in the changed fields set.
  * Also includes all wildcard (*) entries since they depend on any form change.
  *
- * Note: For optimal O(k) performance where k = changed fields count, use
- * DerivationLookup.getEntriesForChangedFields() which uses pre-built indexes.
+ * Note: Performance is O(n) where n = total entries. For large forms with many
+ * derivations, consider optimizing with indexed lookup maps.
  *
  * @internal
  */

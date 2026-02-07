@@ -26,7 +26,7 @@ describe('Array Button Mappers with Logic', () => {
     }));
   }
 
-  function setupMockRegistry(formValue: Record<string, unknown> = {}) {
+  function createMockRegistry(formValue: Record<string, unknown> = {}) {
     const mockForm = createMockForm(formValue);
     mockRootFormRegistry.getRootForm.mockReturnValue(mockForm);
     mockRootFormRegistry.getFormValue.mockReturnValue(formValue);
@@ -50,14 +50,14 @@ describe('Array Button Mappers with Logic', () => {
   }
 
   describe('addArrayItemButtonMapper', () => {
-    function testMapper(fieldDef: BaseArrayAddButtonField, injector: Injector): Record<string, unknown> {
+    function runMapper(fieldDef: BaseArrayAddButtonField, injector: Injector): Record<string, unknown> {
       const inputsSignal = runInInjectionContext(injector, () => addArrayItemButtonMapper(fieldDef));
       return inputsSignal();
     }
 
     describe('hidden logic', () => {
       it('should return hidden=true when explicit hidden is true', () => {
-        setupMockRegistry();
+        createMockRegistry();
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -69,12 +69,12 @@ describe('Array Button Mappers with Logic', () => {
           template: { key: 'name', type: 'input' },
         };
 
-        const inputs = testMapper(fieldDef, injector);
+        const inputs = runMapper(fieldDef, injector);
         expect(inputs['hidden']).toBe(true);
       });
 
       it('should return hidden=true when hidden logic condition is true', () => {
-        setupMockRegistry({ isReadOnly: true });
+        createMockRegistry({ isReadOnly: true });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -96,12 +96,12 @@ describe('Array Button Mappers with Logic', () => {
           ],
         };
 
-        const inputs = testMapper(fieldDef, injector);
+        const inputs = runMapper(fieldDef, injector);
         expect(inputs['hidden']).toBe(true);
       });
 
       it('should return hidden=false when hidden logic condition is false', () => {
-        setupMockRegistry({ isReadOnly: false });
+        createMockRegistry({ isReadOnly: false });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -123,12 +123,12 @@ describe('Array Button Mappers with Logic', () => {
           ],
         };
 
-        const inputs = testMapper(fieldDef, injector);
+        const inputs = runMapper(fieldDef, injector);
         expect(inputs['hidden']).toBe(false);
       });
 
       it('should evaluate expression-based hidden logic', () => {
-        setupMockRegistry({ maxItemsReached: true });
+        createMockRegistry({ maxItemsReached: true });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -145,14 +145,14 @@ describe('Array Button Mappers with Logic', () => {
           ],
         };
 
-        const inputs = testMapper(fieldDef, injector);
+        const inputs = runMapper(fieldDef, injector);
         expect(inputs['hidden']).toBe(true);
       });
     });
 
     describe('disabled logic', () => {
       it('should return disabled=true when explicit disabled is true', () => {
-        setupMockRegistry();
+        createMockRegistry();
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -164,12 +164,12 @@ describe('Array Button Mappers with Logic', () => {
           template: { key: 'name', type: 'input' },
         };
 
-        const inputs = testMapper(fieldDef, injector);
+        const inputs = runMapper(fieldDef, injector);
         expect(inputs['disabled']).toBe(true);
       });
 
       it('should return disabled=true when disabled logic condition is true', () => {
-        setupMockRegistry({ isLocked: true });
+        createMockRegistry({ isLocked: true });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -191,12 +191,12 @@ describe('Array Button Mappers with Logic', () => {
           ],
         };
 
-        const inputs = testMapper(fieldDef, injector);
+        const inputs = runMapper(fieldDef, injector);
         expect(inputs['disabled']).toBe(true);
       });
 
       it('should return disabled=false when disabled logic condition is false', () => {
-        setupMockRegistry({ isLocked: false });
+        createMockRegistry({ isLocked: false });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -218,14 +218,14 @@ describe('Array Button Mappers with Logic', () => {
           ],
         };
 
-        const inputs = testMapper(fieldDef, injector);
+        const inputs = runMapper(fieldDef, injector);
         expect(inputs['disabled']).toBe(false);
       });
     });
 
     describe('combined hidden and disabled logic', () => {
       it('should independently evaluate hidden and disabled from same logic array', () => {
-        setupMockRegistry({ status: 'locked' });
+        createMockRegistry({ status: 'locked' });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const logic: NonFieldLogicConfig[] = [
@@ -258,7 +258,7 @@ describe('Array Button Mappers with Logic', () => {
           logic,
         };
 
-        const inputs = testMapper(fieldDef, injector);
+        const inputs = runMapper(fieldDef, injector);
         // status is 'locked', not 'archived' - so hidden should be false
         expect(inputs['hidden']).toBe(false);
         // status is 'locked' - so disabled should be true
@@ -268,14 +268,14 @@ describe('Array Button Mappers with Logic', () => {
   });
 
   describe('removeArrayItemButtonMapper', () => {
-    function testMapper(fieldDef: BaseArrayRemoveButtonField, injector: Injector): Record<string, unknown> {
+    function runMapper(fieldDef: BaseArrayRemoveButtonField, injector: Injector): Record<string, unknown> {
       const inputsSignal = runInInjectionContext(injector, () => removeArrayItemButtonMapper(fieldDef));
       return inputsSignal();
     }
 
     describe('hidden logic', () => {
       it('should return hidden=true when hidden logic condition is true', () => {
-        setupMockRegistry({ canDelete: false });
+        createMockRegistry({ canDelete: false });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayRemoveButtonField = {
@@ -291,14 +291,14 @@ describe('Array Button Mappers with Logic', () => {
           ],
         };
 
-        const inputs = testMapper(fieldDef, injector);
+        const inputs = runMapper(fieldDef, injector);
         expect(inputs['hidden']).toBe(true);
       });
     });
 
     describe('disabled logic', () => {
       it('should return disabled=true when disabled logic condition is true', () => {
-        setupMockRegistry({ minItemsReached: true });
+        createMockRegistry({ minItemsReached: true });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayRemoveButtonField = {
@@ -314,20 +314,20 @@ describe('Array Button Mappers with Logic', () => {
           ],
         };
 
-        const inputs = testMapper(fieldDef, injector);
+        const inputs = runMapper(fieldDef, injector);
         expect(inputs['disabled']).toBe(true);
       });
     });
   });
 
   describe('prependArrayItemButtonMapper', () => {
-    function testMapper(fieldDef: BaseArrayAddButtonField, injector: Injector): Record<string, unknown> {
+    function runMapper(fieldDef: BaseArrayAddButtonField, injector: Injector): Record<string, unknown> {
       const inputsSignal = runInInjectionContext(injector, () => prependArrayItemButtonMapper(fieldDef));
       return inputsSignal();
     }
 
     it('should evaluate hidden and disabled logic', () => {
-      setupMockRegistry({ isAdmin: false, isFrozen: true });
+      createMockRegistry({ isAdmin: false, isFrozen: true });
       const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
       const fieldDef: BaseArrayAddButtonField = {
@@ -342,20 +342,20 @@ describe('Array Button Mappers with Logic', () => {
         ],
       };
 
-      const inputs = testMapper(fieldDef, injector);
+      const inputs = runMapper(fieldDef, injector);
       expect(inputs['hidden']).toBe(true);
       expect(inputs['disabled']).toBe(true);
     });
   });
 
   describe('popArrayItemButtonMapper', () => {
-    function testMapper(fieldDef: BaseArrayRemoveButtonField, injector: Injector): Record<string, unknown> {
+    function runMapper(fieldDef: BaseArrayRemoveButtonField, injector: Injector): Record<string, unknown> {
       const inputsSignal = runInInjectionContext(injector, () => popArrayItemButtonMapper(fieldDef));
       return inputsSignal();
     }
 
     it('should evaluate hidden and disabled logic', () => {
-      setupMockRegistry({ showPopButton: true, isEmpty: true });
+      createMockRegistry({ showPopButton: true, isEmpty: true });
       const injector = createTestInjector();
 
       const fieldDef: BaseArrayRemoveButtonField = {
@@ -369,20 +369,20 @@ describe('Array Button Mappers with Logic', () => {
         ],
       };
 
-      const inputs = testMapper(fieldDef, injector);
+      const inputs = runMapper(fieldDef, injector);
       expect(inputs['hidden']).toBe(false);
       expect(inputs['disabled']).toBe(true);
     });
   });
 
   describe('shiftArrayItemButtonMapper', () => {
-    function testMapper(fieldDef: BaseArrayRemoveButtonField, injector: Injector): Record<string, unknown> {
+    function runMapper(fieldDef: BaseArrayRemoveButtonField, injector: Injector): Record<string, unknown> {
       const inputsSignal = runInInjectionContext(injector, () => shiftArrayItemButtonMapper(fieldDef));
       return inputsSignal();
     }
 
     it('should evaluate hidden and disabled logic', () => {
-      setupMockRegistry({ showShiftButton: false, hasItems: false });
+      createMockRegistry({ showShiftButton: false, hasItems: false });
       const injector = createTestInjector();
 
       const fieldDef: BaseArrayRemoveButtonField = {
@@ -396,7 +396,7 @@ describe('Array Button Mappers with Logic', () => {
         ],
       };
 
-      const inputs = testMapper(fieldDef, injector);
+      const inputs = runMapper(fieldDef, injector);
       expect(inputs['hidden']).toBe(true);
       expect(inputs['disabled']).toBe(true);
     });

@@ -8,10 +8,14 @@ import { applyValidator } from '../core/validation/validator-factory';
 import { FieldContextRegistryService } from '../core/registry/field-context-registry.service';
 import { FunctionRegistryService } from '../core/registry/function-registry.service';
 import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
+import { FormStateManager } from '../state/form-state-manager';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { ConsoleLogger } from '../providers/features/logger/console-logger';
 
 describe('createResolvedErrorsSignal', () => {
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<any>(undefined);
+
   let injector: Injector;
 
   beforeEach(() => {
@@ -19,7 +23,8 @@ describe('createResolvedErrorsSignal', () => {
       providers: [
         FunctionRegistryService,
         FieldContextRegistryService,
-        RootFormRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+        { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         // Provide ConsoleLogger to enable logging in tests
         { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
       ],

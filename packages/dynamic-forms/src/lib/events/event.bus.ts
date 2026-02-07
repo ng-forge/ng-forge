@@ -106,7 +106,7 @@ export class EventBus {
     const event = new eventConstructor(...args);
 
     if (this.shouldEmitFormValue()) {
-      const formValue = this.rootFormRegistry?.getFormValue();
+      const formValue = this.rootFormRegistry?.formValue();
       // Only attach if form value exists and has at least one field.
       // Empty objects {} are not attached - use hasFormValue() to check.
       if (formValue && Object.keys(formValue).length > 0) {

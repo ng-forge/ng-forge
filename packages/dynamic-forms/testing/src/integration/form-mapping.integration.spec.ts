@@ -9,17 +9,24 @@ import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryS
 
 describe('Form Mapping Pipeline Integration (End-to-End)', () => {
   let injector: Injector;
-  let rootFormRegistry: RootFormRegistryService;
   let schemaRegistry: SchemaRegistryService;
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<unknown>(undefined);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService, SchemaRegistryService],
+      providers: [
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+        SchemaRegistryService,
+      ],
     });
 
     injector = TestBed.inject(Injector);
-    rootFormRegistry = TestBed.inject(RootFormRegistryService);
     schemaRegistry = TestBed.inject(SchemaRegistryService);
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
   });
 
   describe('Simple Field Mapping', () => {
@@ -40,7 +47,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
             mapFieldToForm(fieldDef, path.username);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Should be invalid (empty + required)
         expect(formInstance().valid()).toBe(false);
@@ -71,7 +78,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
             mapFieldToForm(fieldDef, path.email);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -88,7 +95,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         const formValue = signal({ show: false, field: 'test' });
         // Register the form value signal BEFORE form creation for cross-field logic
 
-        rootFormRegistry.registerFormValueSignal(formValue as any);
+        mockEntity.set(formValue() as Record<string, unknown>);
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'field',
@@ -112,7 +119,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
             mapFieldToForm(fieldDef, path.field);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Hidden when show is false
         expect(formInstance.field().hidden()).toBe(true);
@@ -144,7 +151,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
             mapFieldToForm(fieldDef, path.email);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -165,7 +172,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         const formValue = signal({ requirePassword: true, password: '' });
         // Register the form value signal BEFORE form creation for cross-field logic
 
-        rootFormRegistry.registerFormValueSignal(formValue as any);
+        mockEntity.set(formValue() as Record<string, unknown>);
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'password',
@@ -191,7 +198,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
             mapFieldToForm(fieldDef, path.password);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Visible and invalid (required + too short)
         expect(formInstance.password().hidden()).toBe(false);
@@ -233,7 +240,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
             mapFieldToForm(fieldDef, path.username);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // All validators should be applied
         expect(formInstance().valid()).toBe(false);
@@ -282,7 +289,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         });
 
         const formInstance = form(formValue, formSchema);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Both fields should be required at root level
         expect(formInstance().valid()).toBe(false);
@@ -324,7 +331,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         });
 
         const formInstance = form(formValue, formSchema);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Nested fields should be validated
         expect(formInstance().valid()).toBe(false);
@@ -367,7 +374,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         });
 
         const formInstance = form(formValue, formSchema);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Invalid email and phone
         formValue.set({ email: 'invalid', phone: '123' });
@@ -403,7 +410,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         });
 
         const formInstance = form(formValue, formSchema);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Array itself is registered (no validation on empty array for now)
         // TODO: Add array-level validation (minLength, maxLength) once implemented
@@ -453,7 +460,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         });
 
         const formInstance = form(formValue, formSchema);
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Array itself is registered
         expect(formInstance.contacts).toBeDefined();
@@ -487,7 +494,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
             mapFieldToForm(fieldDef, path.email);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -516,7 +523,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
             mapFieldToForm(fieldDef, path.password);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Empty - fails required
         expect(formInstance().valid()).toBe(false);
@@ -552,7 +559,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
             mapFieldToForm(fieldDef, path.age);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Too young
         formValue.set({ age: 10 });
@@ -584,7 +591,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
             mapFieldToForm(fieldDef, path.zipCode);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         formValue.set({ zipCode: '123' });
         expect(formInstance().valid()).toBe(false);
@@ -612,7 +619,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
             mapFieldToForm(fieldDef, path.field);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         expect(formInstance.field().disabled()).toBe(true);
       });
@@ -634,7 +641,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
             mapFieldToForm(fieldDef, path.field);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Should be valid (no validation rules)
         expect(formInstance().valid()).toBe(true);
@@ -669,7 +676,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
             mapFieldToForm(fieldDef, path.email);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Should have both required (from nested schema) and email validation
         expect(formInstance().valid()).toBe(false);

@@ -6,14 +6,19 @@ import { groupNestedScenario } from './scenarios/group-nested.scenario';
 /**
  * Group Fields Suite
  * Tests various group field operations including value propagation,
- * initial values, and nested groups.
+ * initial values, nested groups, and conditional visibility.
  */
 export const groupFieldsSuite: TestSuite = {
   id: 'group-fields',
   title: 'Group Fields Tests',
   description: 'Test scenarios for group field operations',
   path: '/test/group-fields',
-  scenarios: [groupValuePropagationScenario, groupInitialValuesScenario, groupNestedScenario],
+  scenarios: [
+    // Basic Operations
+    groupValuePropagationScenario,
+    groupInitialValuesScenario,
+    groupNestedScenario,
+  ],
 };
 
 /**

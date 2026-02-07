@@ -22,6 +22,10 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getEssentialTestScenario('multi-page-navigation') },
   },
+  {
+    path: 'reactive-config-changes',
+    loadComponent: () => import('./scenarios/reactive-config-changes.component').then((m) => m.ReactiveConfigChangesComponent),
+  },
 ];
 
 export default routes;

@@ -765,17 +765,18 @@ describe('EventBus Form Value Emission', () => {
 
   describe('Global form value emission (withEventFormValue)', () => {
     let eventBus: EventBus;
-    let rootFormRegistry: RootFormRegistryService;
+    const mockEntity = signal<Record<string, unknown>>({ name: 'John', email: 'john@example.com' });
+    const mockFormSignal = signal<unknown>(undefined);
 
     beforeEach(() => {
-      rootFormRegistry = new RootFormRegistryService();
-      rootFormRegistry.registerFormValueSignal(signal({ name: 'John', email: 'john@example.com' }));
+      mockEntity.set({ name: 'John', email: 'john@example.com' });
+      mockFormSignal.set(undefined);
 
       TestBed.configureTestingModule({
         providers: [
           EventBus,
+          { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
           { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true },
-          { provide: RootFormRegistryService, useValue: rootFormRegistry },
         ],
       });
       eventBus = TestBed.inject(EventBus);
@@ -803,7 +804,7 @@ describe('EventBus Form Value Emission', () => {
 
     it('should not attach formValue when form value is empty', async () => {
       // Clear the form value
-      rootFormRegistry.clear();
+      mockEntity.set({});
 
       const eventPromise = firstValueFrom(eventBus.events$.pipe(take(1)));
       eventBus.dispatch(TestEvent);
@@ -814,19 +815,20 @@ describe('EventBus Form Value Emission', () => {
   });
 
   describe('Per-form override via options.emitFormValueOnEvents', () => {
-    let rootFormRegistry: RootFormRegistryService;
+    const mockEntity = signal<Record<string, unknown>>({ name: 'John' });
+    const mockFormSignal = signal<unknown>(undefined);
 
     beforeEach(() => {
-      rootFormRegistry = new RootFormRegistryService();
-      rootFormRegistry.registerFormValueSignal(signal({ name: 'John' }));
+      mockEntity.set({ name: 'John' });
+      mockFormSignal.set(undefined);
     });
 
     it('should enable form value emission when per-form option is true (global disabled)', async () => {
       TestBed.configureTestingModule({
         providers: [
           EventBus,
+          { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
           { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: false },
-          { provide: RootFormRegistryService, useValue: rootFormRegistry },
           { provide: FORM_OPTIONS, useValue: signal({ emitFormValueOnEvents: true }) },
         ],
       });
@@ -843,8 +845,8 @@ describe('EventBus Form Value Emission', () => {
       TestBed.configureTestingModule({
         providers: [
           EventBus,
+          { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
           { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true },
-          { provide: RootFormRegistryService, useValue: rootFormRegistry },
           { provide: FORM_OPTIONS, useValue: signal({ emitFormValueOnEvents: false }) },
         ],
       });
@@ -861,8 +863,8 @@ describe('EventBus Form Value Emission', () => {
       TestBed.configureTestingModule({
         providers: [
           EventBus,
+          { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
           { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true },
-          { provide: RootFormRegistryService, useValue: rootFormRegistry },
           { provide: FORM_OPTIONS, useValue: signal({}) },
         ],
       });
@@ -896,12 +898,6 @@ describe('EventBus Form Value Emission', () => {
   });
 
   describe('Edge cases', () => {
-    let rootFormRegistry: RootFormRegistryService;
-
-    beforeEach(() => {
-      rootFormRegistry = new RootFormRegistryService();
-    });
-
     it('should handle missing RootFormRegistryService gracefully', async () => {
       TestBed.configureTestingModule({
         providers: [EventBus, { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true }],
@@ -917,13 +913,14 @@ describe('EventBus Form Value Emission', () => {
     });
 
     it('should handle missing FORM_OPTIONS gracefully', async () => {
-      rootFormRegistry.registerFormValueSignal(signal({ name: 'John' }));
+      const mockEntity = signal<Record<string, unknown>>({ name: 'John' });
+      const mockFormSignal = signal<unknown>(undefined);
 
       TestBed.configureTestingModule({
         providers: [
           EventBus,
+          { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
           { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true },
-          { provide: RootFormRegistryService, useValue: rootFormRegistry },
         ],
       });
       const eventBus = TestBed.inject(EventBus);

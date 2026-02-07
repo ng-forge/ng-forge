@@ -4,19 +4,27 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { form, schema } from '@angular/forms/signals';
 import { LogicConfig } from '../../models/logic';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
+import { FormStateManager } from '../../state/form-state-manager';
 import { applyLogic, applyMultipleLogic } from './logic-applicator';
 
 describe('logic-applicator', () => {
   let injector: Injector;
-  let rootFormRegistry: RootFormRegistryService;
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<any>(undefined);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService],
+      providers: [
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+        { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
+        FunctionRegistryService,
+        FieldContextRegistryService,
+      ],
     });
 
     injector = TestBed.inject(Injector);
-    rootFormRegistry = TestBed.inject(RootFormRegistryService);
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
   });
 
   describe('applyLogic', () => {
@@ -37,7 +45,7 @@ describe('logic-applicator', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -62,7 +70,7 @@ describe('logic-applicator', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -84,7 +92,7 @@ describe('logic-applicator', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -105,7 +113,7 @@ describe('logic-applicator', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });
@@ -127,7 +135,7 @@ describe('logic-applicator', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -147,7 +155,7 @@ describe('logic-applicator', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -167,7 +175,7 @@ describe('logic-applicator', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });
@@ -188,7 +196,7 @@ describe('logic-applicator', () => {
               applyLogic(config, path.email);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
 
           // Verify that disabled logic is applied
           expect(formInstance.email().disabled()).toBe(true);
@@ -213,7 +221,7 @@ describe('logic-applicator', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });
@@ -238,7 +246,7 @@ describe('logic-applicator', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -259,7 +267,7 @@ describe('logic-applicator', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });
@@ -282,7 +290,7 @@ describe('logic-applicator', () => {
             }).not.toThrow();
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
       });
     });
 
@@ -299,7 +307,7 @@ describe('logic-applicator', () => {
             }).not.toThrow();
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
       });
     });
 
@@ -319,7 +327,7 @@ describe('logic-applicator', () => {
             }).not.toThrow();
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
       });
     });
 
@@ -338,7 +346,7 @@ describe('logic-applicator', () => {
             applyMultipleLogic(configs, path.email);
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
 
         // Verify that both disabled and readonly logic are applied
         expect(formInstance.email().disabled()).toBe(true);

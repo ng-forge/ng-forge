@@ -79,17 +79,8 @@ export interface BaseInsertArrayItemButtonField<TProps = unknown> extends BaseAr
 // =============================================================================
 
 /**
- * Mapper for add array item button - appends new item to end of array.
- *
- * Preconfigures AppendArrayItemEvent with array context.
+ * Mapper for add array item button — appends new item to end of array.
  * Template is REQUIRED to define the field structure for new items.
- *
- * Hidden and disabled states are resolved using non-field logic resolvers which consider:
- * 1. Explicit `hidden: true` / `disabled: true` on the field definition
- * 2. Field-level `logic` array with `type: 'hidden'` or `type: 'disabled'` conditions
- *
- * @param fieldDef The add array item button field definition
- * @returns Signal containing component inputs
  */
 export function addArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
@@ -110,17 +101,8 @@ export function addArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButtonFie
 }
 
 /**
- * Mapper for prepend array item button - inserts new item at beginning of array.
- *
- * Preconfigures PrependArrayItemEvent with array context.
+ * Mapper for prepend array item button — inserts new item at beginning of array.
  * Template is REQUIRED to define the field structure for new items.
- *
- * Hidden and disabled states are resolved using non-field logic resolvers which consider:
- * 1. Explicit `hidden: true` / `disabled: true` on the field definition
- * 2. Field-level `logic` array with `type: 'hidden'` or `type: 'disabled'` conditions
- *
- * @param fieldDef The prepend array item button field definition
- * @returns Signal containing component inputs
  */
 export function prependArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
@@ -141,17 +123,8 @@ export function prependArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButto
 }
 
 /**
- * Mapper for insert array item button - inserts new item at specific index.
- *
- * Preconfigures InsertArrayItemEvent with array context.
+ * Mapper for insert array item button — inserts new item at specific index.
  * Template and index are REQUIRED.
- *
- * Hidden and disabled states are resolved using non-field logic resolvers which consider:
- * 1. Explicit `hidden: true` / `disabled: true` on the field definition
- * 2. Field-level `logic` array with `type: 'hidden'` or `type: 'disabled'` conditions
- *
- * @param fieldDef The insert array item button field definition
- * @returns Signal containing component inputs
  */
 export function insertArrayItemButtonMapper<TProps>(fieldDef: BaseInsertArrayItemButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
@@ -176,18 +149,8 @@ export function insertArrayItemButtonMapper<TProps>(fieldDef: BaseInsertArrayIte
 // =============================================================================
 
 /**
- * Mapper for remove array item button - removes item at current index.
- *
- * Behavior depends on placement:
- * - Inside array: RemoveAtIndexEvent (removes item at current index)
- * - Outside array: PopArrayItemEvent (removes last item)
- *
- * Hidden and disabled states are resolved using non-field logic resolvers which consider:
- * 1. Explicit `hidden: true` / `disabled: true` on the field definition
- * 2. Field-level `logic` array with `type: 'hidden'` or `type: 'disabled'` conditions
- *
- * @param fieldDef The remove array item button field definition
- * @returns Signal containing component inputs
+ * Mapper for remove array item button.
+ * Inside array: RemoveAtIndexEvent. Outside array: PopArrayItemEvent.
  */
 export function removeArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
@@ -213,19 +176,7 @@ export function removeArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveBut
   });
 }
 
-/**
- * Mapper for pop array item button - removes the last item from array.
- *
- * Preconfigures PopArrayItemEvent. Should be placed outside the array.
- * arrayKey is REQUIRED when placed outside an array context.
- *
- * Hidden and disabled states are resolved using non-field logic resolvers which consider:
- * 1. Explicit `hidden: true` / `disabled: true` on the field definition
- * 2. Field-level `logic` array with `type: 'hidden'` or `type: 'disabled'` conditions
- *
- * @param fieldDef The pop array item button field definition
- * @returns Signal containing component inputs
- */
+/** Mapper for pop array item button — removes the last item from array. */
 export function popArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
   const rootFormRegistry = inject(RootFormRegistryService);
@@ -244,19 +195,7 @@ export function popArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButton
   });
 }
 
-/**
- * Mapper for shift array item button - removes the first item from array.
- *
- * Preconfigures ShiftArrayItemEvent. Should be placed outside the array.
- * arrayKey is REQUIRED when placed outside an array context.
- *
- * Hidden and disabled states are resolved using non-field logic resolvers which consider:
- * 1. Explicit `hidden: true` / `disabled: true` on the field definition
- * 2. Field-level `logic` array with `type: 'hidden'` or `type: 'disabled'` conditions
- *
- * @param fieldDef The shift array item button field definition
- * @returns Signal containing component inputs
- */
+/** Mapper for shift array item button — removes the first item from array. */
 export function shiftArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
   const rootFormRegistry = inject(RootFormRegistryService);

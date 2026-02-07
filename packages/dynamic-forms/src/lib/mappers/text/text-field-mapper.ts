@@ -29,7 +29,7 @@ export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unkn
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
     const inputs: Record<string, unknown> = { ...baseInputs };
-    const rootForm = rootFormRegistry.getRootForm();
+    const rootForm = rootFormRegistry.rootForm();
 
     // Resolve hidden state using non-field-hidden resolver (supports logic array)
     // Text fields only support hidden logic (not disabled since they are display-only)
@@ -38,7 +38,7 @@ export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unkn
         form: rootForm,
         fieldLogic: fieldDef.logic,
         explicitValue: fieldDef.hidden,
-        formValue: rootFormRegistry.getFormValue(),
+        formValue: rootFormRegistry.formValue(),
       })();
       inputs['hidden'] = hidden;
     }

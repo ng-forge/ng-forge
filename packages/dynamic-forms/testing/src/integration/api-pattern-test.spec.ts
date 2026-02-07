@@ -11,15 +11,21 @@ import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryS
  */
 describe('Signal Forms API Pattern Confirmation', () => {
   let injector: Injector;
-  let rootFormRegistry: RootFormRegistryService;
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<unknown>(undefined);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService],
+      providers: [
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+      ],
     });
 
     injector = TestBed.inject(Injector);
-    rootFormRegistry = TestBed.inject(RootFormRegistryService);
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
   });
 
   it('should confirm formInstance.fieldName() API pattern works for hidden logic', () => {
@@ -36,7 +42,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
           applyLogic(config, path.email);
         }),
       );
-      rootFormRegistry.registerRootForm(formInstance);
+      mockFormSignal.set(formInstance);
 
       // ✅ CORRECT PATTERN: formInstance.fieldName()
       expect(formInstance.email).toBeDefined(); // Field accessor exists
@@ -65,7 +71,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
           applyLogic(config, path.username);
         }),
       );
-      rootFormRegistry.registerRootForm(formInstance);
+      mockFormSignal.set(formInstance);
 
       // ✅ CORRECT PATTERN
       expect(formInstance.username().readonly()).toBe(true);
@@ -90,7 +96,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
           applyLogic(hiddenConfig, path.email);
         }),
       );
-      rootFormRegistry.registerRootForm(formInstance);
+      mockFormSignal.set(formInstance);
 
       // ROOT-LEVEL ACCESS: formInstance() returns root FieldState
       expect(formInstance().valid()).toBe(true); // Root validation state
@@ -106,7 +112,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
     runInInjectionContext(injector, () => {
       const formValue = signal({ contactMethod: 'phone', email: 'test@example.com' });
       // Register the form value signal BEFORE form creation for cross-field logic
-      rootFormRegistry.registerFormValueSignal(formValue as any);
+      mockEntity.set(formValue() as Record<string, unknown>);
 
       const hiddenConfig: LogicConfig = {
         type: 'hidden',
@@ -126,7 +132,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
       );
 
       // Register AFTER form creation (like component does)
-      rootFormRegistry.registerRootForm(formInstance);
+      mockFormSignal.set(formInstance);
 
       // Email field should be hidden when contactMethod is not 'email'
       expect(formInstance.email().hidden()).toBe(true);

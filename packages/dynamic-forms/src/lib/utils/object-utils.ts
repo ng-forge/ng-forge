@@ -3,6 +3,8 @@
  * These are simple implementations for common object manipulation patterns
  */
 
+import { DynamicFormError } from '../errors/dynamic-form-error';
+
 /**
  * Performs a deep equality comparison between two values.
  *
@@ -216,7 +218,7 @@ const DEFAULT_MEMOIZE_MAX_SIZE = 100;
 
 export interface MemoizeOptions<TFunc extends (...args: never[]) => unknown> {
   /** Optional function to generate cache key from arguments */
-  resolver?: (...args: Parameters<TFunc>) => string;
+  resolver?: (...args: Parameters<TFunc>) => string | number;
   /** Maximum number of entries to keep in cache. Uses LRU eviction when exceeded. Defaults to 100. */
   maxSize?: number;
 }
@@ -243,13 +245,13 @@ export interface MemoizeOptions<TFunc extends (...args: never[]) => unknown> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function memoize<TFunc extends (...args: any[]) => any>(
   fn: TFunc,
-  resolverOrOptions?: ((...args: Parameters<TFunc>) => string) | MemoizeOptions<TFunc>,
+  resolverOrOptions?: ((...args: Parameters<TFunc>) => string | number) | MemoizeOptions<TFunc>,
 ): TFunc {
   const options: MemoizeOptions<TFunc> =
     typeof resolverOrOptions === 'function' ? { resolver: resolverOrOptions } : (resolverOrOptions ?? {});
 
   const { resolver, maxSize = DEFAULT_MEMOIZE_MAX_SIZE } = options;
-  const cache = new Map<string, ReturnType<TFunc>>();
+  const cache = new Map<string | number, ReturnType<TFunc>>();
 
   return ((...args: Parameters<TFunc>): ReturnType<TFunc> => {
     const key = resolver ? resolver(...args) : JSON.stringify(args);
@@ -339,4 +341,42 @@ export function getChangedKeys(
   }
 
   return changedKeys;
+}
+
+/**
+ * Fast 32-bit FNV-1a hash for strings.
+ * Used as a cache key to avoid expensive string concatenation in memoize resolvers.
+ *
+ * @param str - String to hash
+ * @returns 32-bit integer hash
+ */
+export function simpleStringHash(str: string): number {
+  let hash = 0x811c9dc5; // FNV offset basis
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i);
+    hash = (hash * 0x01000193) | 0; // FNV prime, keep as 32-bit int
+  }
+  return hash;
+}
+
+/**
+ * Compile-time exhaustiveness check for discriminated unions.
+ *
+ * Place in the `default` branch of a `switch` over a union's discriminant.
+ * TypeScript narrows the value to `never` only when every member is handled;
+ * adding a new member without a matching `case` produces a type error here.
+ *
+ * At runtime, throws if somehow reached (defensive guard).
+ *
+ * @example
+ * ```ts
+ * switch (action.type) {
+ *   case 'a': return handleA(action);
+ *   case 'b': return handleB(action);
+ *   default:  return assertNever(action);
+ * }
+ * ```
+ */
+export function assertNever(value: never): never {
+  throw new DynamicFormError(`Unexpected value: ${JSON.stringify(value)}`);
 }
