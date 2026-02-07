@@ -5,7 +5,7 @@
  */
 
 // Core service
-export { FormStateManager, FormStateManagerDeps } from './form-state-manager';
+export { FormStateManager, FormStateDeps, FORM_STATE_DEPS } from './form-state-manager';
 
 // State machine
 export { FormStateMachine, FormStateMachineConfig, createFormStateMachine } from './form-state-machine';

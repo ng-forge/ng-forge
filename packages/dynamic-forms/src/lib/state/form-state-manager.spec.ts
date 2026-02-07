@@ -1,11 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { signal, Signal, WritableSignal } from '@angular/core';
 
-import { FormStateManager, FormStateManagerDeps } from './form-state-manager';
+import { FormStateManager, FORM_STATE_DEPS, FormStateDeps } from './form-state-manager';
 import { FormConfig, FormOptions } from '../models/form-config';
 import { RegisteredFieldTypes } from '../models/registry/field-registry';
-import { FieldTypeDefinition } from '../models/field-type';
 import { EventBus } from '../events/event.bus';
 import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
@@ -16,85 +15,70 @@ import { createMockLogger, MockLogger } from '../../../testing/src/mock-logger';
 type TestModel = Record<string, unknown>;
 type TestFields = RegisteredFieldTypes[];
 type TestFormConfig = FormConfig<TestFields>;
-type TestDeps = FormStateManagerDeps<TestFields, TestModel>;
 
-function createFieldRegistry(): TestDeps['fieldRegistry'] {
-  const rawRegistry = new Map<string, FieldTypeDefinition>([
-    [
-      'input',
-      {
-        name: 'input',
-        mapper: vi.fn(),
-        loadComponent: () => Promise.resolve(class MockComponent {}),
-      },
-    ],
-  ]);
-
-  return {
-    raw: rawRegistry,
-    getType: (name: string) => rawRegistry.get(name),
-    getLoadedComponent: vi.fn().mockReturnValue(undefined),
-    loadTypeComponent: vi.fn().mockResolvedValue(undefined),
-  };
-}
-
-function createDeps(
+function createFormStateDeps(
   config: TestFormConfig,
   overrides?: Partial<{
     formOptions: Signal<FormOptions | undefined>;
     value: WritableSignal<Partial<TestModel> | undefined>;
-    fieldRegistry: TestDeps['fieldRegistry'];
   }>,
-): TestDeps {
+): FormStateDeps {
   return {
     config: signal(config) as Signal<TestFormConfig>,
     formOptions: overrides?.formOptions ?? (signal(undefined) as Signal<FormOptions | undefined>),
     value: overrides?.value ?? signal(undefined),
-    fieldRegistry: overrides?.fieldRegistry ?? createFieldRegistry(),
   };
 }
 
-describe('FormStateManager', () => {
-  let stateManager: FormStateManager<TestFields, TestModel>;
-  let mockLogger: MockLogger;
+let mockLogger: MockLogger;
 
-  beforeEach(() => {
-    mockLogger = createMockLogger();
+function initManager(
+  config: TestFormConfig,
+  overrides?: Partial<{
+    formOptions: Signal<FormOptions | undefined>;
+    value: WritableSignal<Partial<TestModel> | undefined>;
+  }>,
+) {
+  mockLogger = createMockLogger();
+  const deps = createFormStateDeps(config, overrides);
 
-    TestBed.configureTestingModule({
-      providers: [
-        FormStateManager,
-        EventBus,
-        { provide: RootFormRegistryService, useValue: new RootFormRegistryService(signal({}), signal(undefined)) },
-        SchemaRegistryService,
-        FunctionRegistryService,
-        { provide: DynamicFormLogger, useValue: mockLogger },
-      ],
-    });
-
-    stateManager = TestBed.inject(FormStateManager) as FormStateManager<TestFields, TestModel>;
+  TestBed.resetTestingModule();
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: FORM_STATE_DEPS, useValue: deps },
+      FormStateManager,
+      EventBus,
+      { provide: RootFormRegistryService, useValue: new RootFormRegistryService(signal({}), signal(undefined)) },
+      SchemaRegistryService,
+      FunctionRegistryService,
+      { provide: DynamicFormLogger, useValue: mockLogger },
+    ],
   });
 
+  const stateManager = TestBed.inject(FormStateManager) as FormStateManager<TestFields, TestModel>;
+  TestBed.flushEffects();
+
+  return { stateManager, deps, mockLogger };
+}
+
+describe('FormStateManager', () => {
   // ─────────────────────────────────────────────────────────────────────
   // Initialization
   // ─────────────────────────────────────────────────────────────────────
 
   describe('initialization', () => {
     it('should be created successfully', () => {
+      const { stateManager } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name' }],
+      } as TestFormConfig);
+
       expect(stateManager).toBeTruthy();
     });
 
-    it('should have undefined activeConfig before initialization', () => {
-      expect(stateManager.activeConfig()).toBeUndefined();
-    });
-
-    it('should set activeConfig after initialize and flushEffects', () => {
-      const config: TestFormConfig = {
+    it('should set activeConfig after creation and flushEffects', () => {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const result = stateManager.activeConfig();
       expect(result).toBeDefined();
@@ -102,38 +86,38 @@ describe('FormStateManager', () => {
       expect(result!.fields[0].key).toBe('name');
     });
 
-    it('should warn via logger on double initialization', () => {
-      const config: TestFormConfig = {
-        fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-      const deps = createDeps(config);
-
-      stateManager.initialize(deps);
-      stateManager.initialize(deps);
-
-      expect(mockLogger.warn).toHaveBeenCalledWith('FormStateManager already initialized');
-    });
-
-    it('should register schemas from config during initialize', () => {
-      const schemaRegistry = TestBed.inject(SchemaRegistryService);
-      const registerSpy = vi.spyOn(schemaRegistry, 'registerSchema');
-
+    it('should register schemas from config during initialization', () => {
+      mockLogger = createMockLogger();
       const config: TestFormConfig = {
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
         schemas: [{ name: 'testSchema', validators: [] }],
       } as unknown as TestFormConfig;
 
-      stateManager.initialize(createDeps(config));
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: FORM_STATE_DEPS, useValue: createFormStateDeps(config) },
+          FormStateManager,
+          EventBus,
+          { provide: RootFormRegistryService, useValue: new RootFormRegistryService(signal({}), signal(undefined)) },
+          SchemaRegistryService,
+          FunctionRegistryService,
+          { provide: DynamicFormLogger, useValue: mockLogger },
+        ],
+      });
+
+      const schemaRegistry = TestBed.inject(SchemaRegistryService);
+      const registerSpy = vi.spyOn(schemaRegistry, 'registerSchema');
+
+      TestBed.inject(FormStateManager);
       TestBed.flushEffects();
 
       expect(registerSpy).toHaveBeenCalledTimes(1);
       expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'testSchema' }));
     });
 
-    it('should register custom functions from config during initialize', () => {
-      const fnRegistry = TestBed.inject(FunctionRegistryService);
-      const registerFnSpy = vi.spyOn(fnRegistry, 'registerCustomFunction');
-
+    it('should register custom functions from config', () => {
+      mockLogger = createMockLogger();
       const customFn = vi.fn();
       const config: TestFormConfig = {
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
@@ -142,16 +126,30 @@ describe('FormStateManager', () => {
         },
       } as TestFormConfig;
 
-      stateManager.initialize(createDeps(config));
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: FORM_STATE_DEPS, useValue: createFormStateDeps(config) },
+          FormStateManager,
+          EventBus,
+          { provide: RootFormRegistryService, useValue: new RootFormRegistryService(signal({}), signal(undefined)) },
+          SchemaRegistryService,
+          FunctionRegistryService,
+          { provide: DynamicFormLogger, useValue: mockLogger },
+        ],
+      });
+
+      const fnRegistry = TestBed.inject(FunctionRegistryService);
+      const registerFnSpy = vi.spyOn(fnRegistry, 'registerCustomFunction');
+
+      TestBed.inject(FormStateManager);
       TestBed.flushEffects();
 
       expect(registerFnSpy).toHaveBeenCalledWith('myFn', customFn);
     });
 
-    it('should register validators from config during initialize', () => {
-      const fnRegistry = TestBed.inject(FunctionRegistryService);
-      const setValidatorsSpy = vi.spyOn(fnRegistry, 'setValidators');
-
+    it('should register validators from config', () => {
+      mockLogger = createMockLogger();
       const myValidator = vi.fn();
       const config: TestFormConfig = {
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
@@ -160,16 +158,30 @@ describe('FormStateManager', () => {
         },
       } as TestFormConfig;
 
-      stateManager.initialize(createDeps(config));
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: FORM_STATE_DEPS, useValue: createFormStateDeps(config) },
+          FormStateManager,
+          EventBus,
+          { provide: RootFormRegistryService, useValue: new RootFormRegistryService(signal({}), signal(undefined)) },
+          SchemaRegistryService,
+          FunctionRegistryService,
+          { provide: DynamicFormLogger, useValue: mockLogger },
+        ],
+      });
+
+      const fnRegistry = TestBed.inject(FunctionRegistryService);
+      const setValidatorsSpy = vi.spyOn(fnRegistry, 'setValidators');
+
+      TestBed.inject(FormStateManager);
       TestBed.flushEffects();
 
       expect(setValidatorsSpy).toHaveBeenCalledWith(expect.objectContaining({ myValidator }));
     });
 
-    it('should register derivation functions from config during initialize', () => {
-      const fnRegistry = TestBed.inject(FunctionRegistryService);
-      const setDerivationsSpy = vi.spyOn(fnRegistry, 'setDerivationFunctions');
-
+    it('should register derivation functions from config', () => {
+      mockLogger = createMockLogger();
       const myDerivation = vi.fn();
       const config: TestFormConfig = {
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
@@ -178,7 +190,23 @@ describe('FormStateManager', () => {
         },
       } as TestFormConfig;
 
-      stateManager.initialize(createDeps(config));
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: FORM_STATE_DEPS, useValue: createFormStateDeps(config) },
+          FormStateManager,
+          EventBus,
+          { provide: RootFormRegistryService, useValue: new RootFormRegistryService(signal({}), signal(undefined)) },
+          SchemaRegistryService,
+          FunctionRegistryService,
+          { provide: DynamicFormLogger, useValue: mockLogger },
+        ],
+      });
+
+      const fnRegistry = TestBed.inject(FunctionRegistryService);
+      const setDerivationsSpy = vi.spyOn(fnRegistry, 'setDerivationFunctions');
+
+      TestBed.inject(FormStateManager);
       TestBed.flushEffects();
 
       expect(setDerivationsSpy).toHaveBeenCalledWith(expect.objectContaining({ myDerivation }));
@@ -191,12 +219,9 @@ describe('FormStateManager', () => {
 
   describe('formModeDetection', () => {
     it('should detect non-paged mode for flat fields', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const detection = stateManager.formModeDetection();
       expect(detection.mode).toBe('non-paged');
@@ -205,24 +230,15 @@ describe('FormStateManager', () => {
     });
 
     it('should detect paged mode for page fields', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [
           { type: 'page', key: 'page1', fields: [{ type: 'input', key: 'name', label: 'Name' }] },
           { type: 'page', key: 'page2', fields: [{ type: 'input', key: 'email', label: 'Email' }] },
         ],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const detection = stateManager.formModeDetection();
       expect(detection.mode).toBe('paged');
-      expect(detection.isValid).toBe(true);
-    });
-
-    it('should return non-paged with valid=true when no config is active', () => {
-      const detection = stateManager.formModeDetection();
-      expect(detection.mode).toBe('non-paged');
       expect(detection.isValid).toBe(true);
     });
   });
@@ -233,39 +249,33 @@ describe('FormStateManager', () => {
 
   describe('effectiveFormOptions', () => {
     it('should return config options when no input options are provided', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
         options: { disabled: true },
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const options = stateManager.effectiveFormOptions();
       expect(options.disabled).toBe(true);
     });
 
     it('should use input options to override config options', () => {
-      const config: TestFormConfig = {
-        fields: [{ type: 'input', key: 'name', label: 'Name' }],
-        options: { disabled: true },
-      } as TestFormConfig;
-
       const formOptions = signal({ disabled: false } as FormOptions | undefined);
-      stateManager.initialize(createDeps(config, { formOptions }));
-      TestBed.flushEffects();
+      const { stateManager } = initManager(
+        {
+          fields: [{ type: 'input', key: 'name', label: 'Name' }],
+          options: { disabled: true },
+        } as TestFormConfig,
+        { formOptions },
+      );
 
       const options = stateManager.effectiveFormOptions();
       expect(options.disabled).toBe(false);
     });
 
     it('should return empty options when neither config nor input options are provided', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const options = stateManager.effectiveFormOptions();
       expect(options).toEqual({});
@@ -277,67 +287,72 @@ describe('FormStateManager', () => {
   // ─────────────────────────────────────────────────────────────────────
 
   describe('form state signals', () => {
-    beforeEach(() => {
-      const config: TestFormConfig = {
-        fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
-    });
-
     it('should report valid as true for a form with no required fields', () => {
+      const { stateManager } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name' }],
+      } as TestFormConfig);
+
       expect(stateManager.valid()).toBe(true);
     });
 
     it('should report invalid as false for a valid form', () => {
+      const { stateManager } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name' }],
+      } as TestFormConfig);
+
       expect(stateManager.invalid()).toBe(false);
     });
 
     it('should report dirty as false initially', () => {
+      const { stateManager } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name' }],
+      } as TestFormConfig);
+
       expect(stateManager.dirty()).toBe(false);
     });
 
     it('should report touched as false initially', () => {
+      const { stateManager } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name' }],
+      } as TestFormConfig);
+
       expect(stateManager.touched()).toBe(false);
     });
 
     it('should report errors as empty initially', () => {
+      const { stateManager } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name' }],
+      } as TestFormConfig);
+
       expect(stateManager.errors()).toEqual([]);
     });
 
     it('should report disabled as false when not configured as disabled', () => {
+      const { stateManager } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name' }],
+      } as TestFormConfig);
+
       expect(stateManager.disabled()).toBe(false);
     });
 
     it('should report disabled as true when options.disabled is true', () => {
-      // The disabled computed checks effectiveFormOptions().disabled first,
-      // which reads from the input formOptions signal. We test it via input override.
-      const config: TestFormConfig = {
-        fields: [{ type: 'input', key: 'name', label: 'Name' }],
-        options: { disabled: true },
-      } as TestFormConfig;
-
       const formOptions = signal({ disabled: true } as FormOptions | undefined);
-      // Re-initialize a fresh TestBed to get a clean FormStateManager
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        providers: [
-          FormStateManager,
-          EventBus,
-          { provide: RootFormRegistryService, useValue: new RootFormRegistryService(signal({}), signal(undefined)) },
-          SchemaRegistryService,
-          FunctionRegistryService,
-          { provide: DynamicFormLogger, useValue: mockLogger },
-        ],
-      });
-      const freshManager = TestBed.inject(FormStateManager) as FormStateManager<TestFields, TestModel>;
-      freshManager.initialize(createDeps(config, { formOptions }));
-      TestBed.flushEffects();
+      const { stateManager } = initManager(
+        {
+          fields: [{ type: 'input', key: 'name', label: 'Name' }],
+          options: { disabled: true },
+        } as TestFormConfig,
+        { formOptions },
+      );
 
-      expect(freshManager.disabled()).toBe(true);
+      expect(stateManager.disabled()).toBe(true);
     });
 
     it('should report submitting as false initially', () => {
+      const { stateManager } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name' }],
+      } as TestFormConfig);
+
       expect(stateManager.submitting()).toBe(false);
     });
   });
@@ -348,15 +363,12 @@ describe('FormStateManager', () => {
 
   describe('defaultValues', () => {
     it('should compute defaults from field value properties', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [
           { type: 'input', key: 'name', label: 'Name', value: 'John' },
           { type: 'input', key: 'email', label: 'Email', value: 'john@example.com' },
         ],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const defaults = stateManager.defaultValues();
       expect(defaults).toEqual(
@@ -368,12 +380,9 @@ describe('FormStateManager', () => {
     });
 
     it('should return empty string defaults for input fields without explicit values', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const defaults = stateManager.defaultValues();
       expect(defaults).toEqual(expect.objectContaining({ name: '' }));
@@ -386,16 +395,16 @@ describe('FormStateManager', () => {
 
   describe('entity', () => {
     it('should merge input value with defaults', () => {
-      const config: TestFormConfig = {
-        fields: [
-          { type: 'input', key: 'name', label: 'Name', value: 'Default' },
-          { type: 'input', key: 'email', label: 'Email', value: 'default@test.com' },
-        ],
-      } as TestFormConfig;
-
       const valueSignal = signal({ name: 'Override' } as Partial<TestModel> | undefined);
-      stateManager.initialize(createDeps(config, { value: valueSignal }));
-      TestBed.flushEffects();
+      const { stateManager } = initManager(
+        {
+          fields: [
+            { type: 'input', key: 'name', label: 'Name', value: 'Default' },
+            { type: 'input', key: 'email', label: 'Email', value: 'default@test.com' },
+          ],
+        } as TestFormConfig,
+        { value: valueSignal },
+      );
 
       const entity = stateManager.entity();
       expect(entity).toEqual(
@@ -407,25 +416,22 @@ describe('FormStateManager', () => {
     });
 
     it('should use only defaults when no input value is provided', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name', value: 'Default' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const entity = stateManager.entity();
       expect(entity).toEqual(expect.objectContaining({ name: 'Default' }));
     });
 
     it('should filter to valid field keys only', () => {
-      const config: TestFormConfig = {
-        fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
       const valueSignal = signal({ name: 'John', extraField: 'should-be-filtered' } as Partial<TestModel> | undefined);
-      stateManager.initialize(createDeps(config, { value: valueSignal }));
-      TestBed.flushEffects();
+      const { stateManager } = initManager(
+        {
+          fields: [{ type: 'input', key: 'name', label: 'Name' }],
+        } as TestFormConfig,
+        { value: valueSignal },
+      );
 
       const entity = stateManager.entity();
       expect(entity).toEqual(expect.objectContaining({ name: 'John' }));
@@ -439,13 +445,13 @@ describe('FormStateManager', () => {
 
   describe('reset', () => {
     it('should set value back to defaults', () => {
-      const config: TestFormConfig = {
-        fields: [{ type: 'input', key: 'name', label: 'Name', value: 'Default' }],
-      } as TestFormConfig;
-
       const valueSignal = signal({ name: 'Changed' } as Partial<TestModel> | undefined);
-      stateManager.initialize(createDeps(config, { value: valueSignal }));
-      TestBed.flushEffects();
+      const { stateManager } = initManager(
+        {
+          fields: [{ type: 'input', key: 'name', label: 'Name', value: 'Default' }],
+        } as TestFormConfig,
+        { value: valueSignal },
+      );
 
       stateManager.reset();
 
@@ -455,13 +461,13 @@ describe('FormStateManager', () => {
 
   describe('clear', () => {
     it('should set value to empty object', () => {
-      const config: TestFormConfig = {
-        fields: [{ type: 'input', key: 'name', label: 'Name', value: 'Default' }],
-      } as TestFormConfig;
-
       const valueSignal = signal({ name: 'Some Value' } as Partial<TestModel> | undefined);
-      stateManager.initialize(createDeps(config, { value: valueSignal }));
-      TestBed.flushEffects();
+      const { stateManager } = initManager(
+        {
+          fields: [{ type: 'input', key: 'name', label: 'Name', value: 'Default' }],
+        } as TestFormConfig,
+        { value: valueSignal },
+      );
 
       stateManager.clear();
 
@@ -475,13 +481,13 @@ describe('FormStateManager', () => {
 
   describe('updateValue', () => {
     it('should set the value signal correctly', () => {
-      const config: TestFormConfig = {
-        fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
       const valueSignal = signal(undefined as Partial<TestModel> | undefined);
-      stateManager.initialize(createDeps(config, { value: valueSignal }));
-      TestBed.flushEffects();
+      const { stateManager } = initManager(
+        {
+          fields: [{ type: 'input', key: 'name', label: 'Name' }],
+        } as TestFormConfig,
+        { value: valueSignal },
+      );
 
       stateManager.updateValue({ name: 'Updated' });
 
@@ -489,13 +495,13 @@ describe('FormStateManager', () => {
     });
 
     it('should overwrite previous value', () => {
-      const config: TestFormConfig = {
-        fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
       const valueSignal = signal({ name: 'Old' } as Partial<TestModel> | undefined);
-      stateManager.initialize(createDeps(config, { value: valueSignal }));
-      TestBed.flushEffects();
+      const { stateManager } = initManager(
+        {
+          fields: [{ type: 'input', key: 'name', label: 'Name' }],
+        } as TestFormConfig,
+        { value: valueSignal },
+      );
 
       stateManager.updateValue({ name: 'New' });
 
@@ -509,26 +515,20 @@ describe('FormStateManager', () => {
 
   describe('pageFieldDefinitions', () => {
     it('should return empty array for non-paged forms', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       expect(stateManager.pageFieldDefinitions()).toEqual([]);
     });
 
     it('should return page fields for paged forms', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [
           { type: 'page', key: 'page1', fields: [{ type: 'input', key: 'name', label: 'Name' }] },
           { type: 'page', key: 'page2', fields: [{ type: 'input', key: 'email', label: 'Email' }] },
         ],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const pages = stateManager.pageFieldDefinitions();
       expect(pages).toHaveLength(2);
@@ -544,27 +544,21 @@ describe('FormStateManager', () => {
 
   describe('formSetup', () => {
     it('should return non-paged mode for flat forms', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const setup = stateManager.formSetup();
       expect(setup.mode).toBe('non-paged');
     });
 
     it('should populate schemaFields for non-paged forms', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [
           { type: 'input', key: 'name', label: 'Name' },
           { type: 'input', key: 'email', label: 'Email' },
         ],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const setup = stateManager.formSetup();
       expect(setup.schemaFields).toBeDefined();
@@ -575,46 +569,30 @@ describe('FormStateManager', () => {
     });
 
     it('should return paged mode for paged forms', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'page', key: 'page1', fields: [{ type: 'input', key: 'name', label: 'Name' }] }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const setup = stateManager.formSetup();
       expect(setup.mode).toBe('paged');
     });
 
     it('should return empty fields array for paged forms (pages handle their own rendering)', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'page', key: 'page1', fields: [{ type: 'input', key: 'name', label: 'Name' }] }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const setup = stateManager.formSetup();
       expect(setup.fields).toEqual([]);
     });
 
     it('should include defaultValues computed from field definitions', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name', value: 'Default' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const setup = stateManager.formSetup();
       expect(setup.defaultValues).toEqual(expect.objectContaining({ name: 'Default' }));
-    });
-
-    it('should return empty formSetup when no config is active', () => {
-      const setup = stateManager.formSetup();
-      expect(setup.fields).toEqual([]);
-      expect(setup.schemaFields).toEqual([]);
-      expect(setup.mode).toBe('non-paged');
     });
   });
 
@@ -623,17 +601,10 @@ describe('FormStateManager', () => {
   // ─────────────────────────────────────────────────────────────────────
 
   describe('fieldLoadingErrors', () => {
-    it('should start with an empty array', () => {
-      expect(stateManager.fieldLoadingErrors()).toEqual([]);
-    });
-
-    it('should still be empty after successful initialization', () => {
-      const config: TestFormConfig = {
+    it('should be empty after successful initialization', () => {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       expect(stateManager.fieldLoadingErrors()).toEqual([]);
     });
@@ -644,34 +615,20 @@ describe('FormStateManager', () => {
   // ─────────────────────────────────────────────────────────────────────
 
   describe('shouldRender', () => {
-    it('should be false before initialization', () => {
-      expect(stateManager.shouldRender()).toBe(false);
-    });
-
     it('should be true after initialization with valid config', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       expect(stateManager.shouldRender()).toBe(true);
     });
   });
 
   describe('renderPhase', () => {
-    it('should be render before initialization', () => {
-      expect(stateManager.renderPhase()).toBe('render');
-    });
-
     it('should be render after initialization', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       expect(stateManager.renderPhase()).toBe('render');
     });
@@ -683,36 +640,27 @@ describe('FormStateManager', () => {
 
   describe('fieldSignalContext', () => {
     it('should provide an injector reference', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const context = stateManager.fieldSignalContext();
       expect(context.injector).toBeDefined();
     });
 
     it('should provide a form instance', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const context = stateManager.fieldSignalContext();
       expect(context.form).toBeDefined();
     });
 
     it('should provide the defaultValues signal', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name', value: 'MyDefault' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const context = stateManager.fieldSignalContext();
       const defaults = context.defaultValues();
@@ -726,12 +674,9 @@ describe('FormStateManager', () => {
 
   describe('form', () => {
     it('should create a form instance with entity values', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name', value: 'Hello' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const formInstance = stateManager.form()();
       expect(formInstance).toBeDefined();
@@ -744,17 +689,10 @@ describe('FormStateManager', () => {
   // ─────────────────────────────────────────────────────────────────────
 
   describe('ngOnDestroy', () => {
-    it('should not throw when called before initialization', () => {
-      expect(() => stateManager.ngOnDestroy()).not.toThrow();
-    });
-
     it('should not throw when called after initialization', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       expect(() => stateManager.ngOnDestroy()).not.toThrow();
     });
@@ -766,16 +704,13 @@ describe('FormStateManager', () => {
 
   describe('multiple fields', () => {
     it('should handle multiple fields with different default values', () => {
-      const config: TestFormConfig = {
+      const { stateManager } = initManager({
         fields: [
           { type: 'input', key: 'firstName', label: 'First Name', value: 'John' },
           { type: 'input', key: 'lastName', label: 'Last Name', value: 'Doe' },
           { type: 'input', key: 'email', label: 'Email' },
         ],
-      } as TestFormConfig;
-
-      stateManager.initialize(createDeps(config));
-      TestBed.flushEffects();
+      } as TestFormConfig);
 
       const defaults = stateManager.defaultValues();
       expect(defaults).toEqual(
@@ -788,16 +723,16 @@ describe('FormStateManager', () => {
     });
 
     it('should handle form value merging with multiple fields', () => {
-      const config: TestFormConfig = {
-        fields: [
-          { type: 'input', key: 'firstName', label: 'First Name', value: 'John' },
-          { type: 'input', key: 'lastName', label: 'Last Name', value: 'Doe' },
-        ],
-      } as TestFormConfig;
-
       const valueSignal = signal({ firstName: 'Jane' } as Partial<TestModel> | undefined);
-      stateManager.initialize(createDeps(config, { value: valueSignal }));
-      TestBed.flushEffects();
+      const { stateManager } = initManager(
+        {
+          fields: [
+            { type: 'input', key: 'firstName', label: 'First Name', value: 'John' },
+            { type: 'input', key: 'lastName', label: 'Last Name', value: 'Doe' },
+          ],
+        } as TestFormConfig,
+        { value: valueSignal },
+      );
 
       const entity = stateManager.entity();
       expect(entity).toEqual(
@@ -815,6 +750,10 @@ describe('FormStateManager', () => {
 
   describe('resolvedFields', () => {
     it('should start as an empty array', () => {
+      const { stateManager } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name' }],
+      } as TestFormConfig);
+
       expect(stateManager.resolvedFields()).toEqual([]);
     });
   });

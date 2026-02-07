@@ -9,6 +9,7 @@ import {
   input,
   model,
   Signal,
+  WritableSignal,
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { FieldTree } from '@angular/forms/signals';
@@ -16,7 +17,6 @@ import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
 import { FormConfig, FormOptions } from './models/form-config';
 import { RegisteredFieldTypes } from './models/registry/field-registry';
-import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
@@ -31,7 +31,7 @@ import { FormResetEvent } from './events/constants/form-reset.event';
 import { PageChangeEvent } from './events/constants/page-change.event';
 import { PageNavigationStateChangeEvent } from './events/constants/page-navigation-state-change.event';
 import { DynamicFormLogger } from './providers/features/logger/logger.token';
-import { FormStateManager } from './state/form-state-manager';
+import { FormStateManager, FORM_STATE_DEPS } from './state/form-state-manager';
 import { provideDynamicFormDI } from './providers/dynamic-form-di';
 
 /**
@@ -75,20 +75,7 @@ export class DynamicForm<
   TModel extends Record<string, unknown> = InferFormValue<TFields> & Record<string, unknown>,
 > {
   // ─────────────────────────────────────────────────────────────────────────────
-  // Dependencies
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  private destroyRef = inject(DestroyRef);
-  private fieldRegistry = injectFieldRegistry();
-  private injector = inject(Injector);
-  private eventBus = inject(EventBus);
-  private logger = inject(DynamicFormLogger);
-
-  /** State manager that owns all form state. */
-  private stateManager = inject(FormStateManager<TFields, TModel>);
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Inputs
+  // Inputs (must be declared BEFORE deps connection and stateManager injection)
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Form configuration defining the structure, validation, and behavior. */
@@ -99,6 +86,34 @@ export class DynamicForm<
 
   /** Form values for two-way data binding. */
   value = model<Partial<TModel> | undefined>(undefined);
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Dependencies
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  private destroyRef = inject(DestroyRef);
+  private injector = inject(Injector);
+  private eventBus = inject(EventBus);
+  private logger = inject(DynamicFormLogger);
+
+  /**
+   * Connect input signals to the shared deps holder BEFORE injecting FormStateManager.
+   * Field initializers run in declaration order, so this runs after inputs are created
+   * but before stateManager is injected. FormStateManager reads from these signals
+   * in computeds/effects, which are all lazy and evaluated after construction.
+   */
+  private formStateDeps = (() => {
+    const deps = inject(FORM_STATE_DEPS);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Signal invariance at DI boundary (see FormStateDeps docs)
+    deps.config = this.config as Signal<FormConfig<any>>;
+    deps.formOptions = this.formOptions;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- WritableSignal invariance at DI boundary
+    deps.value = this.value as WritableSignal<Partial<any> | undefined>;
+    return deps;
+  })();
+
+  /** State manager that owns all form state. */
+  private stateManager = inject(FormStateManager<TFields, TModel>);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Private State
@@ -234,14 +249,6 @@ export class DynamicForm<
   // ─────────────────────────────────────────────────────────────────────────────
 
   constructor() {
-    // Initialize the state manager with component dependencies
-    this.stateManager.initialize({
-      config: this.config,
-      formOptions: this.formOptions,
-      value: this.value,
-      fieldRegistry: this.fieldRegistry,
-    });
-
     this.setupEffects();
     this.setupEventHandlers();
 

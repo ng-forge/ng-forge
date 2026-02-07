@@ -3,13 +3,13 @@ import {
   DestroyRef,
   inject,
   Injectable,
+  InjectionToken,
   Injector,
   linkedSignal,
   OnDestroy,
   runInInjectionContext,
-  Signal,
   signal,
-  Type,
+  Signal,
   untracked,
   WritableSignal,
 } from '@angular/core';
@@ -19,6 +19,7 @@ import { EMPTY, filter, forkJoin, map, Observable, of, pipe, scan, switchMap, ta
 import { explicitEffect } from 'ngxtension/explicit-effect';
 
 import { FieldDef } from '../definitions/base/field-def';
+import { DynamicFormError } from '../errors/dynamic-form-error';
 import { isPageField, PageField } from '../definitions/default/page-field';
 import { EventBus } from '../events/event.bus';
 import { FormClearEvent } from '../events/constants/form-clear.event';
@@ -43,31 +44,35 @@ import { CONTAINER_FIELD_PROCESSORS } from '../utils/container-utils/container-f
 import { derivedFromDeferred } from '../utils/derived-from-deferred/derived-from-deferred';
 import { reconcileFields, ResolvedField, resolveField, resolveFieldSync } from '../utils/resolve-field/resolve-field';
 import { FormModeValidator } from '../utils/form-validation/form-mode-validator';
+import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
 
 import { Action, FieldLoadingError, FormSetup, isReadyState, isTransitioningState, LifecycleState, Phase } from './state-types';
 import { createSideEffectScheduler } from './side-effect-scheduler';
 import { createFormStateMachine, FormStateMachine } from './form-state-machine';
 
 /**
- * Dependencies for initializing the FormStateManager.
+ * Shared deps holder injected by both DynamicForm and FormStateManager.
+ * DynamicForm assigns its input signals to the holder's properties via an IIFE
+ * field initializer (runs before FormStateManager is injected in declaration order);
+ * FormStateManager reads them.
+ *
+ * `any` is required for config/value because Angular DI is non-generic and
+ * Signal/WritableSignal are invariant in TypeScript — Signal<FormConfig<TFields>>
+ * is not assignable to Signal<FormConfig>. Safe because the same component
+ * instance populates and consumes these properties.
  *
  * @internal
  */
-export interface FormStateManagerDeps<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = unknown> {
-  /** Form configuration signal (from component input) */
-  readonly config: Signal<FormConfig<TFields>>;
-  /** Form options input signal (from component input) */
-  readonly formOptions: Signal<FormOptions | undefined>;
-  /** Form value model signal (two-way binding) */
-  readonly value: WritableSignal<Partial<TModel> | undefined>;
-  /** Field registry for loading components */
-  readonly fieldRegistry: {
-    readonly raw: Map<string, FieldTypeDefinition>;
-    getType: (name: string) => FieldTypeDefinition | undefined;
-    getLoadedComponent: (name: string) => Type<unknown> | undefined;
-    loadTypeComponent: (type: string) => Promise<Type<unknown> | undefined>;
-  };
+export interface FormStateDeps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  config: Signal<FormConfig<any>> | null;
+  formOptions: Signal<FormOptions | undefined> | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value: WritableSignal<Partial<any> | undefined> | null;
 }
+
+/** @internal */
+export const FORM_STATE_DEPS = new InjectionToken<FormStateDeps>('FORM_STATE_DEPS');
 
 /**
  * Central service that manages all form state and coordinates the form lifecycle.
@@ -91,22 +96,32 @@ export class FormStateManager<
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly schemaRegistry = inject(SchemaRegistryService);
 
+  /** Host component dependencies (config, formOptions, value). */
+  private readonly deps = (() => {
+    const raw = inject(FORM_STATE_DEPS);
+    if (!raw.config || !raw.formOptions || !raw.value) {
+      throw new DynamicFormError(
+        'FormStateDeps must be connected before FormStateManager is created. ' +
+          'Ensure DynamicForm assigns its input signals to FORM_STATE_DEPS.',
+      );
+    }
+    // Safe cast: DynamicForm populates FormStateDeps with its concrete signals.
+    return raw as {
+      readonly config: Signal<FormConfig<TFields>>;
+      readonly formOptions: Signal<FormOptions | undefined>;
+      readonly value: WritableSignal<Partial<TModel> | undefined>;
+    };
+  })();
+
+  /** Field registry for loading components. */
+  private readonly fieldRegistry = injectFieldRegistry();
+
   // ─────────────────────────────────────────────────────────────────────────────
   // State Machine
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /**
-   * The state machine, wrapped in a signal so computed signals
-   * re-evaluate when it's created during initialize().
-   */
-  private readonly machineSignal = signal<FormStateMachine<TFields> | null>(null);
-
-  /**
-   * Component dependencies, stored as a signal so computed signals
-   * that read from it automatically re-evaluate when initialize() is called.
-   * Null before initialize().
-   */
-  private readonly _setup = signal<FormStateManagerDeps<TFields, TModel> | null>(null);
+  private readonly scheduler = createSideEffectScheduler(this.injector);
+  private readonly machine: FormStateMachine<TFields>;
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Memoized Functions
@@ -155,12 +170,10 @@ export class FormStateManager<
    * available before the state machine dispatches 'initialize'.
    */
   readonly activeConfig = computed(() => {
-    const machine = this.machineSignal();
-    if (!machine) return undefined;
-    const state = machine.state();
+    const state = this.machine.state();
 
     if (state.type === LifecycleState.Uninitialized) {
-      return this._setup()?.config();
+      return this.deps.config();
     }
 
     if (isReadyState(state)) return state.config;
@@ -176,9 +189,7 @@ export class FormStateManager<
    * Current render phase: 'render' = showing form, 'teardown' = hiding old components.
    */
   readonly renderPhase = computed(() => {
-    const machine = this.machineSignal();
-    if (!machine) return 'render';
-    const state = machine.state();
+    const state = this.machine.state();
     if (isTransitioningState(state) && state.phase === Phase.Teardown) return Phase.Teardown;
     return 'render';
   });
@@ -211,7 +222,7 @@ export class FormStateManager<
   readonly effectiveFormOptions = computed(() => {
     const config = this.activeConfig();
     const configOptions = config?.options || {};
-    const inputOptions = this._setup()?.formOptions() ?? undefined;
+    const inputOptions = this.deps.formOptions() ?? undefined;
     return { ...configOptions, ...inputOptions };
   });
 
@@ -233,18 +244,12 @@ export class FormStateManager<
   // Computed Signals - Form Setup
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly rawFieldRegistry = computed(() => this._setup()?.fieldRegistry.raw ?? new Map());
+  private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
   /** Computed form setup — reads from the state machine, computed from config on bootstrap. */
   readonly formSetup = computed(() => {
-    const machine = this.machineSignal();
     const registry = this.rawFieldRegistry();
-
-    if (!machine) {
-      return this.createEmptyFormSetup(registry);
-    }
-
-    const state = machine.state();
+    const state = this.machine.state();
 
     if (isReadyState(state)) {
       return state.formSetup;
@@ -258,7 +263,7 @@ export class FormStateManager<
     }
 
     // Bootstrap path: compute form setup before the state machine dispatches 'initialize'.
-    // Validator registration happens in initialize() and createFormSetup callback.
+    // Validator registration happens in the config-watch effect and createFormSetup callback.
     const config = this.activeConfig();
     if (!config) {
       return this.createEmptyFormSetup(registry);
@@ -293,12 +298,7 @@ export class FormStateManager<
    */
   readonly entity = linkedSignal<TModel>(
     () => {
-      const deps = this._setup();
-      if (!deps) {
-        return {} as TModel;
-      }
-
-      const inputValue = deps.value();
+      const inputValue = this.deps.value();
       const defaults = this.defaultValues();
       const keys = this.validKeys();
 
@@ -359,7 +359,7 @@ export class FormStateManager<
   });
 
   /** Whether resolvedFields has caught up with fieldsSource (set in constructor). */
-  private isFieldPipelineSettled!: Signal<boolean>;
+  private isFieldPipelineSettled: Signal<boolean>;
 
   /**
    * Field signal context injected into child components.
@@ -374,7 +374,7 @@ export class FormStateManager<
 
     return {
       injector: this.injector,
-      value: this._setup()?.value ?? signal(undefined),
+      value: this.deps.value,
       defaultValues: this.defaultValues,
       get form() {
         const currentForm = formSignal();
@@ -436,10 +436,7 @@ export class FormStateManager<
    */
   private readonly fieldsSource = computed(
     () => {
-      const machine = this.machineSignal();
-      if (!machine) return [];
-
-      const state = machine.state();
+      const state = this.machine.state();
 
       if (isTransitioningState(state)) {
         const oldFields = state.currentConfig.fields ?? [];
@@ -469,7 +466,7 @@ export class FormStateManager<
   /**
    * Injector for field components with FIELD_SIGNAL_CONTEXT.
    */
-  private fieldInjector = computed(() =>
+  private readonly fieldInjector = computed(() =>
     Injector.create({
       parent: this.injector,
       providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: this.fieldSignalContext() }],
@@ -494,11 +491,7 @@ export class FormStateManager<
 
   /** Emits once when the state machine reaches 'ready'. Useful for tests. */
   get ready$(): Observable<void> {
-    const machine = this.machineSignal();
-    if (!machine) {
-      return of(undefined);
-    }
-    return machine.state$.pipe(
+    return this.machine.state$.pipe(
       filter(isReadyState),
       take(1),
       map(() => undefined),
@@ -514,8 +507,7 @@ export class FormStateManager<
       this.fieldsSource,
       pipe(
         switchMap((fields) => {
-          const deps = this._setup();
-          if (!fields || fields.length === 0 || !deps) {
+          if (!fields || fields.length === 0) {
             return of([] as (ResolvedField | undefined)[]);
           }
 
@@ -523,7 +515,7 @@ export class FormStateManager<
           const injector = this.fieldInjector();
 
           const syncContext = {
-            getLoadedComponent: (type: string) => deps.fieldRegistry.getLoadedComponent(type),
+            getLoadedComponent: (type: string) => this.fieldRegistry.getLoadedComponent(type),
             registry,
             injector,
           };
@@ -552,8 +544,8 @@ export class FormStateManager<
 
           for (let i = 0; i < fields.length; i++) {
             const f = fields[i];
-            const def = deps.fieldRegistry.getType(f.type);
-            const isCached = !def?.loadComponent || deps.fieldRegistry.getLoadedComponent(f.type);
+            const def = this.fieldRegistry.getType(f.type);
+            const isCached = !def?.loadComponent || this.fieldRegistry.getLoadedComponent(f.type);
 
             if (isCached) {
               results[i] = resolveFieldSync(f, syncContext);
@@ -561,7 +553,7 @@ export class FormStateManager<
               asyncIndexes.push(i);
               asyncObs.push(
                 resolveField(f, {
-                  loadTypeComponent: (type: string) => deps.fieldRegistry.loadTypeComponent(type),
+                  loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
                   registry,
                   injector,
                   destroyRef: this.destroyRef,
@@ -631,26 +623,12 @@ export class FormStateManager<
       map(() => undefined as void),
       takeUntilDestroyed(this.destroyRef),
     );
-  }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Initialization
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Initializes the state manager. Must be called once from the component constructor. */
-  initialize(deps: FormStateManagerDeps<TFields, TModel>): void {
-    if (this.machineSignal()) {
-      this.logger.warn('FormStateManager already initialized');
-      return;
-    }
-
-    this._setup.set(deps);
-
-    const scheduler = createSideEffectScheduler(this.injector);
-    const machine = createFormStateMachine<TFields>({
+    // Create the state machine eagerly
+    this.machine = createFormStateMachine<TFields>({
       injector: this.injector,
       destroyRef: this.destroyRef,
-      scheduler,
+      scheduler: this.scheduler,
       logger: this.logger,
       createFormSetup: (config) => {
         this.registerValidatorsFromConfig(config);
@@ -670,7 +648,7 @@ export class FormStateManager<
           }
         }
         if (Object.keys(filtered).length > 0) {
-          deps.value.update((current) => ({ ...current, ...filtered }) as Partial<TModel>);
+          this.deps.value.update((current) => ({ ...current, ...filtered }) as Partial<TModel>);
         }
       },
       onTransition: (transition) => {
@@ -678,10 +656,8 @@ export class FormStateManager<
       },
     });
 
-    this.machineSignal.set(machine);
-
     runInInjectionContext(this.injector, () => {
-      this.setupEffects(deps);
+      this.setupEffects();
       this.setupEventHandlers();
     });
   }
@@ -694,7 +670,7 @@ export class FormStateManager<
    * Updates the form value model.
    */
   updateValue(value: Partial<TModel>): void {
-    this._setup()?.value.set(value);
+    this.deps.value.set(value);
   }
 
   /**
@@ -703,7 +679,7 @@ export class FormStateManager<
   reset(): void {
     const defaults = this.defaultValues();
     (this.form()().value as WritableSignal<TModel>).set(defaults);
-    this._setup()?.value.set(defaults as Partial<TModel>);
+    this.deps.value.set(defaults as Partial<TModel>);
   }
 
   /**
@@ -712,7 +688,7 @@ export class FormStateManager<
   clear(): void {
     const emptyValue = {} as TModel;
     (this.form()().value as WritableSignal<TModel>).set(emptyValue);
-    this._setup()?.value.set(emptyValue);
+    this.deps.value.set(emptyValue);
   }
 
   /**
@@ -726,25 +702,22 @@ export class FormStateManager<
   // Private Methods - Setup
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private setupEffects(deps: FormStateManagerDeps<TFields, TModel>): void {
-    explicitEffect([deps.config], ([config]) => {
+  private setupEffects(): void {
+    explicitEffect([this.deps.config], ([config]) => {
       this.fieldLoadingErrors.set([]);
 
-      const machine = this.machineSignal();
-      if (!machine) return;
-
-      const state = machine.currentState;
+      const state = this.machine.currentState;
       if (state.type === LifecycleState.Uninitialized) {
-        machine.dispatch({ type: Action.Initialize, config });
+        this.machine.dispatch({ type: Action.Initialize, config });
       } else if (state.type !== LifecycleState.Initializing) {
-        machine.dispatch({ type: Action.ConfigChange, config });
+        this.machine.dispatch({ type: Action.ConfigChange, config });
       }
     });
 
     explicitEffect([this.entity], ([currentEntity]) => {
-      const currentValue = deps.value();
+      const currentValue = this.deps.value();
       if (!isEqual(currentEntity, currentValue)) {
-        deps.value.set(currentEntity);
+        this.deps.value.set(currentEntity);
       }
     });
 
@@ -832,6 +805,6 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   ngOnDestroy(): void {
-    this.machineSignal()?.dispatch({ type: Action.Destroy });
+    this.machine.dispatch({ type: Action.Destroy });
   }
 }
