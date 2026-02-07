@@ -16,7 +16,7 @@ import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-f
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { keyBy, mapValues, memoize } from '../../utils/object-utils';
+import { isEqual, keyBy, mapValues, memoize } from '../../utils/object-utils';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
@@ -143,13 +143,24 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
 
   readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues);
 
-  private readonly entity = linkedSignal(() => {
-    const parentValue = this.parentFieldSignalContext.value();
-    const groupKey = this.field().key;
-    const defaults = this.defaultValues();
-    const groupValue = (parentValue as Record<string, unknown>)?.[groupKey] || {};
-    return { ...defaults, ...groupValue };
-  });
+  /**
+   * Entity computed from parent value, group key, and defaults.
+   * Uses deep equality check to prevent unnecessary updates when
+   * object spread creates new references with identical values.
+   */
+  private readonly entity = linkedSignal(
+    () => {
+      const parentValue = this.parentFieldSignalContext.value();
+      const groupKey = this.field().key;
+      const defaults = this.defaultValues();
+      const groupValue = (parentValue as Record<string, unknown>)?.[groupKey] || {};
+      return { ...defaults, ...groupValue };
+    },
+    {
+      debugName: 'GroupFieldComponent.entity',
+      equal: isEqual,
+    },
+  );
 
   private readonly form = computed(() => {
     return runInInjectionContext(this.injector, () => {
