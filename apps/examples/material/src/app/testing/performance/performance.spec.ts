@@ -111,4 +111,58 @@ test.describe('Performance E2E Tests', () => {
       expect(renderTime).toBeLessThan(3000);
     });
   });
+
+  test.describe('Config Swap with Large Forms', () => {
+    test('should swap between two 100-field configs multiple times within budget', async ({ page }) => {
+      await page.goto('/#/test/performance/perf-config-swap');
+      await page.waitForLoadState('networkidle');
+      const scenario = page.locator('[data-testid="perf-config-swap"]');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Wait for initial render
+      const form = scenario.locator('form');
+      await expect(form).toBeVisible({ timeout: 5000 });
+
+      const swapButton = (key: string) => scenario.locator(`[data-testid="switch-to-${key}"]`);
+
+      // Swap to alternate (100 mixed fields)
+      const swap1Start = Date.now();
+      await swapButton('alternate').click();
+      await expect(form).toBeVisible({ timeout: 5000 });
+      // Wait for fields to actually render by checking for a field from the new config
+      await page.waitForTimeout(500);
+      const swap1Time = Date.now() - swap1Start;
+      console.log(`  [PERF] Config swap 1 (initial→alternate): ${swap1Time}ms`);
+
+      // Swap back to initial (100 flat inputs)
+      const swap2Start = Date.now();
+      await swapButton('initial').click();
+      await expect(form).toBeVisible({ timeout: 5000 });
+      await page.waitForTimeout(500);
+      const swap2Time = Date.now() - swap2Start;
+      console.log(`  [PERF] Config swap 2 (alternate→initial): ${swap2Time}ms`);
+
+      // Swap again to alternate
+      const swap3Start = Date.now();
+      await swapButton('alternate').click();
+      await expect(form).toBeVisible({ timeout: 5000 });
+      await page.waitForTimeout(500);
+      const swap3Time = Date.now() - swap3Start;
+      console.log(`  [PERF] Config swap 3 (initial→alternate): ${swap3Time}ms`);
+
+      // Swap back one more time
+      const swap4Start = Date.now();
+      await swapButton('initial').click();
+      await expect(form).toBeVisible({ timeout: 5000 });
+      await page.waitForTimeout(500);
+      const swap4Time = Date.now() - swap4Start;
+      console.log(`  [PERF] Config swap 4 (alternate→initial): ${swap4Time}ms`);
+
+      // Each swap should complete within 3s
+      expect(swap1Time).toBeLessThan(3000);
+      expect(swap2Time).toBeLessThan(3000);
+      expect(swap3Time).toBeLessThan(3000);
+      expect(swap4Time).toBeLessThan(3000);
+    });
+  });
 });

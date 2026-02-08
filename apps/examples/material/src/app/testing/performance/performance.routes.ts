@@ -37,6 +37,10 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getPerformanceScenario('perf-10-pages-10-fields') },
   },
+  {
+    path: 'perf-config-swap',
+    loadComponent: () => import('./scenarios/perf-config-swap.component').then((m) => m.PerfConfigSwapComponent),
+  },
 ];
 
 export default routes;
