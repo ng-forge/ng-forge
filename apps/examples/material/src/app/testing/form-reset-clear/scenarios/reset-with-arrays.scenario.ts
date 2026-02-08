@@ -70,7 +70,7 @@ const config = {
 } as const satisfies FormConfig;
 
 export const resetWithArraysScenario: TestScenario = {
-  testId: 'reset-with-arrays-test',
+  testId: 'reset-with-arrays',
   title: 'Reset Form with Arrays',
   description: 'Tests that reset restores array fields to their initial state',
   config,

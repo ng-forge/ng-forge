@@ -7,6 +7,51 @@ import { TestScenario } from '../../shared/types';
  * This test verifies that fields within array items can have conditional visibility
  * based on fields outside the array.
  */
+const teamMemberFields = [
+  {
+    key: 'name',
+    type: 'input',
+    label: 'Team Member Name',
+    col: 6,
+    logic: [
+      {
+        type: 'hidden',
+        condition: {
+          type: 'fieldValue',
+          fieldPath: 'subscriptionType',
+          operator: 'notEquals',
+          value: 'pro',
+        },
+      },
+    ],
+    props: {
+      placeholder: 'Enter name',
+    },
+  },
+  {
+    key: 'role',
+    type: 'select',
+    label: 'Role',
+    col: 6,
+    logic: [
+      {
+        type: 'hidden',
+        condition: {
+          type: 'fieldValue',
+          fieldPath: 'subscriptionType',
+          operator: 'notEquals',
+          value: 'pro',
+        },
+      },
+    ],
+    options: [
+      { value: 'admin', label: 'Admin' },
+      { value: 'editor', label: 'Editor' },
+      { value: 'viewer', label: 'Viewer' },
+    ],
+  },
+];
+
 const config = {
   fields: [
     {
@@ -22,52 +67,7 @@ const config = {
     {
       key: 'teamMembers',
       type: 'array',
-      fields: [
-        [
-          {
-            key: 'name',
-            type: 'input',
-            label: 'Team Member Name',
-            col: 6,
-            logic: [
-              {
-                type: 'hidden',
-                condition: {
-                  type: 'fieldValue',
-                  fieldPath: 'subscriptionType',
-                  operator: 'notEquals',
-                  value: 'pro',
-                },
-              },
-            ],
-            props: {
-              placeholder: 'Enter name',
-            },
-          },
-          {
-            key: 'role',
-            type: 'select',
-            label: 'Role',
-            col: 6,
-            logic: [
-              {
-                type: 'hidden',
-                condition: {
-                  type: 'fieldValue',
-                  fieldPath: 'subscriptionType',
-                  operator: 'notEquals',
-                  value: 'pro',
-                },
-              },
-            ],
-            options: [
-              { value: 'admin', label: 'Admin' },
-              { value: 'editor', label: 'Editor' },
-              { value: 'viewer', label: 'Viewer' },
-            ],
-          },
-        ],
-      ],
+      fields: [teamMemberFields],
     },
     {
       key: 'addTeamMember',
@@ -85,50 +85,7 @@ const config = {
           },
         },
       ],
-      template: [
-        {
-          key: 'name',
-          type: 'input',
-          label: 'Team Member Name',
-          col: 6,
-          logic: [
-            {
-              type: 'hidden',
-              condition: {
-                type: 'fieldValue',
-                fieldPath: 'subscriptionType',
-                operator: 'notEquals',
-                value: 'pro',
-              },
-            },
-          ],
-          props: {
-            placeholder: 'Enter name',
-          },
-        },
-        {
-          key: 'role',
-          type: 'select',
-          label: 'Role',
-          col: 6,
-          logic: [
-            {
-              type: 'hidden',
-              condition: {
-                type: 'fieldValue',
-                fieldPath: 'subscriptionType',
-                operator: 'notEquals',
-                value: 'pro',
-              },
-            },
-          ],
-          options: [
-            { value: 'admin', label: 'Admin' },
-            { value: 'editor', label: 'Editor' },
-            { value: 'viewer', label: 'Viewer' },
-          ],
-        },
-      ],
+      template: teamMemberFields,
     },
     {
       key: 'notes',
@@ -139,7 +96,7 @@ const config = {
       },
     },
   ],
-} as const satisfies FormConfig;
+} as FormConfig;
 
 export const arrayConditionalVisibilityScenario: TestScenario = {
   testId: 'array-conditional-visibility',

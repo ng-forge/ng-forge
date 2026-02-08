@@ -16,10 +16,13 @@ import { errorHandlingSuite } from '../error-handling/error-handling.suite';
 import { essentialTestsSuite } from '../essential-tests/essential-tests.suite';
 import { expressionBasedLogicSuite } from '../expression-based-logic/expression-based-logic.suite';
 import { formResetClearSuite } from '../form-reset-clear/form-reset-clear.suite';
+import { groupFieldsSuite } from '../group-fields/group-fields.suite';
 import { materialComponentsSuite } from '../material-components/material-components.suite';
 import { multiPageNavigationSuite } from '../multi-page-navigation/multi-page-navigation.suite';
 import { performanceSuite } from '../performance/performance.suite';
+import { rowFieldsSuite } from '../row-fields/row-fields.suite';
 import { schemaSystemSuite } from '../schema-system/schema-system.suite';
+import { submissionBehaviorSuite } from '../submission-behavior/submission-behavior.suite';
 import { userJourneyFlowsSuite } from '../user-journey-flows/user-journey-flows.suite';
 import { userWorkflowsSuite } from '../user-workflows/user-workflows.suite';
 import { zodSchemaValidationSuite } from '../zod-schema-validation/zod-schema-validation.suite';
@@ -47,10 +50,13 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   essentialTestsSuite,
   expressionBasedLogicSuite,
   formResetClearSuite,
+  groupFieldsSuite,
   materialComponentsSuite,
   multiPageNavigationSuite,
   performanceSuite,
+  rowFieldsSuite,
   schemaSystemSuite,
+  submissionBehaviorSuite,
   userJourneyFlowsSuite,
   userWorkflowsSuite,
   zodSchemaValidationSuite,

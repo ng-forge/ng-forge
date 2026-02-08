@@ -55,7 +55,7 @@ const routes: Routes = [
   {
     path: 'derivation-in-group',
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
-    data: { scenario: getDerivationLogicScenario('derivation-in-group-test') },
+    data: { scenario: getDerivationLogicScenario('derivation-in-group') },
   },
 ];
 

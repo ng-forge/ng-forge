@@ -359,7 +359,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
       await page.goto('/#/test/form-reset-clear/reset-with-groups');
       await page.waitForLoadState('networkidle');
 
-      const scenario = helpers.getScenario('reset-with-groups-test');
+      const scenario = helpers.getScenario('reset-with-groups');
       await expect(scenario).toBeVisible();
 
       const nameInput = scenario.locator('#name input');
@@ -383,12 +383,11 @@ test.describe('Form Reset and Clear Events Tests', () => {
 
       // Click Reset button
       await scenario.locator('#reset-button button').click();
-      await page.waitForTimeout(300);
 
       // Verify values return to defaults
-      expect(await nameInput.inputValue()).toBe('Default Name');
-      expect(await streetInput.inputValue()).toBe('123 Main St');
-      expect(await cityInput.inputValue()).toBe('Springfield');
+      await expect(nameInput).toHaveValue('Default Name', { timeout: 5000 });
+      await expect(streetInput).toHaveValue('123 Main St', { timeout: 5000 });
+      await expect(cityInput).toHaveValue('Springfield', { timeout: 5000 });
     });
   });
 
@@ -397,42 +396,40 @@ test.describe('Form Reset and Clear Events Tests', () => {
       await page.goto('/#/test/form-reset-clear/reset-with-arrays');
       await page.waitForLoadState('networkidle');
 
-      const scenario = helpers.getScenario('reset-with-arrays-test');
+      const scenario = helpers.getScenario('reset-with-arrays');
       await expect(scenario).toBeVisible();
 
       const titleInput = scenario.locator('#title input');
       const tagInputs = scenario.locator('[id^="tag"] input');
 
       // Verify default values
-      expect(await titleInput.inputValue()).toBe('Default Title');
+      await expect(titleInput).toHaveValue('Default Title', { timeout: 5000 });
       await expect(tagInputs).toHaveCount(1);
-      expect(await tagInputs.nth(0).inputValue()).toBe('initial-tag');
+      await expect(tagInputs.nth(0)).toHaveValue('initial-tag', { timeout: 5000 });
 
       // Modify the existing tag value
       await tagInputs.nth(0).fill('modified-tag');
-      expect(await tagInputs.nth(0).inputValue()).toBe('modified-tag');
+      await expect(tagInputs.nth(0)).toHaveValue('modified-tag', { timeout: 5000 });
 
       // Add a new tag
       const addButton = scenario.locator('#addTag button');
       await addButton.click();
-      await page.waitForTimeout(500);
 
       // Should now have 2 tags
-      await expect(tagInputs).toHaveCount(2);
+      await expect(tagInputs).toHaveCount(2, { timeout: 5000 });
 
       // Modify title
       await titleInput.fill('New Title');
 
       // Click Reset button
       await scenario.locator('#reset-button button').click();
-      await page.waitForTimeout(500);
 
       // Verify title returns to default
-      expect(await titleInput.inputValue()).toBe('Default Title');
+      await expect(titleInput).toHaveValue('Default Title', { timeout: 5000 });
 
       // Verify the array returns to initial state (one item with default value)
-      await expect(tagInputs).toHaveCount(1);
-      expect(await tagInputs.nth(0).inputValue()).toBe('initial-tag');
+      await expect(tagInputs).toHaveCount(1, { timeout: 5000 });
+      await expect(tagInputs.nth(0)).toHaveValue('initial-tag', { timeout: 5000 });
     });
   });
 });

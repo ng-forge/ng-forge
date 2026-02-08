@@ -20,7 +20,6 @@ test.describe('Container Nesting E2E Tests', () => {
 
       const addButton = scenario.locator('button:has-text("Add Member")');
       await addButton.click();
-      await page.waitForTimeout(500);
 
       const memberNameInput = scenario.locator('#name_0 input');
       await expect(memberNameInput).toBeVisible({ timeout: 5000 });
@@ -56,7 +55,6 @@ test.describe('Container Nesting E2E Tests', () => {
       // Add another employee
       const addButton = scenario.locator('button:has-text("Add Employee")');
       await addButton.click();
-      await page.waitForTimeout(500);
       const secondEmpName = scenario.locator('#employeeName_1 input');
       await expect(secondEmpName).toBeVisible({ timeout: 5000 });
 
@@ -94,7 +92,6 @@ test.describe('Container Nesting E2E Tests', () => {
       // Add another product
       const addButton = scenario.locator('button:has-text("Add Product")');
       await addButton.click();
-      await page.waitForTimeout(500);
       const secondProductInput = scenario.locator('#product_1 input');
       await expect(secondProductInput).toBeVisible({ timeout: 5000 });
       await secondProductInput.fill('Gadget');
@@ -126,7 +123,6 @@ test.describe('Container Nesting E2E Tests', () => {
 
       const addButton = scenario.locator('button:has-text("Add Department")');
       await addButton.click();
-      await page.waitForTimeout(500);
 
       const deptNameInput = scenario.locator('#name_0 input');
       await expect(deptNameInput).toBeVisible({ timeout: 10000 });

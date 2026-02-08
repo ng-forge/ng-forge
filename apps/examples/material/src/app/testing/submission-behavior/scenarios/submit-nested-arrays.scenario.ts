@@ -71,7 +71,7 @@ const config = {
 } as const satisfies FormConfig;
 
 export const submitNestedArraysScenario: TestScenario = {
-  testId: 'submit-nested-arrays-test',
+  testId: 'submit-nested-arrays',
   title: 'Submit Nested Arrays',
   description: 'Verify submitted JSON shape with arrays of objects',
   config,

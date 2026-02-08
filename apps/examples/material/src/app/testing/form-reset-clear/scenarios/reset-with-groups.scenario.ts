@@ -61,7 +61,7 @@ const config = {
 } as const satisfies FormConfig;
 
 export const resetWithGroupsScenario: TestScenario = {
-  testId: 'reset-with-groups-test',
+  testId: 'reset-with-groups',
   title: 'Reset Form with Groups',
   description: 'Tests that reset restores group field values to their defaults',
   config,

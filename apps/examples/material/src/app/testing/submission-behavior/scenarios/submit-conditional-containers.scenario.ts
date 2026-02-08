@@ -69,7 +69,7 @@ const config = {
 } as const satisfies FormConfig;
 
 export const submitConditionalContainersScenario: TestScenario = {
-  testId: 'submit-conditional-containers-test',
+  testId: 'submit-conditional-containers',
   title: 'Submit with Conditional Containers',
   description: 'Verify submission behavior when containers have conditional visibility',
   config,

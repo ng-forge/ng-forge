@@ -42,7 +42,7 @@ const config = {
 } as const satisfies FormConfig;
 
 export const derivationInGroupScenario: TestScenario = {
-  testId: 'derivation-in-group-test',
+  testId: 'derivation-in-group',
   title: 'Derivation Inside Group',
   description: 'Tests that derivation works for fields inside a group container',
   config,

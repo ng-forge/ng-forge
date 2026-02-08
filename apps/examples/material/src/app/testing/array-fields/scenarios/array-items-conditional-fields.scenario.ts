@@ -6,158 +6,91 @@ import { TestScenario } from '../../shared/types';
  * Uses custom functions to resolve sibling field values within the same array item,
  * since logic conditions evaluate with the root form value and need dynamic path resolution.
  */
+const addressFields = [
+  {
+    key: 'street',
+    type: 'input',
+    label: 'Street',
+    props: {
+      placeholder: 'Enter street address',
+    },
+  },
+  {
+    key: 'city',
+    type: 'input',
+    label: 'City',
+    props: {
+      placeholder: 'Enter city',
+    },
+  },
+  {
+    key: 'hasApartment',
+    type: 'checkbox',
+    label: 'Has Apartment/Unit Number',
+    value: false,
+  },
+  {
+    key: 'apartmentNumber',
+    type: 'input',
+    label: 'Apartment/Unit Number',
+    logic: [
+      {
+        type: 'hidden',
+        condition: {
+          type: 'custom',
+          expression: 'hideApartmentNumber',
+        },
+      },
+    ],
+    props: {
+      placeholder: 'Enter apartment/unit number',
+    },
+  },
+  {
+    key: 'addressType',
+    type: 'radio',
+    label: 'Address Type',
+    options: [
+      { value: 'residential', label: 'Residential' },
+      { value: 'commercial', label: 'Commercial' },
+    ],
+    value: 'residential',
+  },
+  {
+    key: 'businessName',
+    type: 'input',
+    label: 'Business Name',
+    logic: [
+      {
+        type: 'hidden',
+        condition: {
+          type: 'custom',
+          expression: 'hideBusinessName',
+        },
+      },
+    ],
+    props: {
+      placeholder: 'Enter business name',
+    },
+  },
+];
+
 const config = {
   fields: [
     {
       key: 'addresses',
       type: 'array',
-      fields: [
-        [
-          {
-            key: 'street',
-            type: 'input',
-            label: 'Street',
-            props: {
-              placeholder: 'Enter street address',
-            },
-          },
-          {
-            key: 'city',
-            type: 'input',
-            label: 'City',
-            props: {
-              placeholder: 'Enter city',
-            },
-          },
-          {
-            key: 'hasApartment',
-            type: 'checkbox',
-            label: 'Has Apartment/Unit Number',
-            value: false,
-          },
-          {
-            key: 'apartmentNumber',
-            type: 'input',
-            label: 'Apartment/Unit Number',
-            logic: [
-              {
-                type: 'hidden',
-                condition: {
-                  type: 'custom',
-                  expression: 'hideApartmentNumber',
-                },
-              },
-            ],
-            props: {
-              placeholder: 'Enter apartment/unit number',
-            },
-          },
-          {
-            key: 'addressType',
-            type: 'radio',
-            label: 'Address Type',
-            options: [
-              { value: 'residential', label: 'Residential' },
-              { value: 'commercial', label: 'Commercial' },
-            ],
-            value: 'residential',
-          },
-          {
-            key: 'businessName',
-            type: 'input',
-            label: 'Business Name',
-            logic: [
-              {
-                type: 'hidden',
-                condition: {
-                  type: 'custom',
-                  expression: 'hideBusinessName',
-                },
-              },
-            ],
-            props: {
-              placeholder: 'Enter business name',
-            },
-          },
-        ],
-      ],
+      fields: [addressFields],
     },
     {
       key: 'addAddress',
       type: 'addArrayItem',
       arrayKey: 'addresses',
       label: 'Add Address',
-      template: [
-        {
-          key: 'street',
-          type: 'input',
-          label: 'Street',
-          props: {
-            placeholder: 'Enter street address',
-          },
-        },
-        {
-          key: 'city',
-          type: 'input',
-          label: 'City',
-          props: {
-            placeholder: 'Enter city',
-          },
-        },
-        {
-          key: 'hasApartment',
-          type: 'checkbox',
-          label: 'Has Apartment/Unit Number',
-          value: false,
-        },
-        {
-          key: 'apartmentNumber',
-          type: 'input',
-          label: 'Apartment/Unit Number',
-          logic: [
-            {
-              type: 'hidden',
-              condition: {
-                type: 'custom',
-                expression: 'hideApartmentNumber',
-              },
-            },
-          ],
-          props: {
-            placeholder: 'Enter apartment/unit number',
-          },
-        },
-        {
-          key: 'addressType',
-          type: 'radio',
-          label: 'Address Type',
-          options: [
-            { value: 'residential', label: 'Residential' },
-            { value: 'commercial', label: 'Commercial' },
-          ],
-          value: 'residential',
-        },
-        {
-          key: 'businessName',
-          type: 'input',
-          label: 'Business Name',
-          logic: [
-            {
-              type: 'hidden',
-              condition: {
-                type: 'custom',
-                expression: 'hideBusinessName',
-              },
-            },
-          ],
-          props: {
-            placeholder: 'Enter business name',
-          },
-        },
-      ],
+      template: addressFields,
     },
   ],
-} as const satisfies FormConfig;
+} as FormConfig;
 
 /**
  * Helper to resolve a sibling field value within the same array item.

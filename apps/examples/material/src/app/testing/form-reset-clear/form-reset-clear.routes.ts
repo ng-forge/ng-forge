@@ -65,12 +65,12 @@ const routes: Routes = [
   {
     path: 'reset-with-arrays',
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
-    data: { scenario: getFormResetClearScenario('reset-with-arrays-test') },
+    data: { scenario: getFormResetClearScenario('reset-with-arrays') },
   },
   {
     path: 'reset-with-groups',
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
-    data: { scenario: getFormResetClearScenario('reset-with-groups-test') },
+    data: { scenario: getFormResetClearScenario('reset-with-groups') },
   },
 ];
 

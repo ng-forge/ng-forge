@@ -485,7 +485,7 @@ test.describe('Submission Behavior Tests', () => {
     test('should submit correct JSON shape with array data', async ({ page, helpers }) => {
       await page.goto('/#/test/submission-behavior/submit-nested-arrays');
       await page.waitForLoadState('networkidle');
-      const scenario = helpers.getScenario('submit-nested-arrays-test');
+      const scenario = helpers.getScenario('submit-nested-arrays');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
       const data = await helpers.submitFormAndCapture(scenario);
@@ -503,7 +503,7 @@ test.describe('Submission Behavior Tests', () => {
     test('should include visible container fields in submission', async ({ page, helpers }) => {
       await page.goto('/#/test/submission-behavior/submit-conditional-containers');
       await page.waitForLoadState('networkidle');
-      const scenario = helpers.getScenario('submit-conditional-containers-test');
+      const scenario = helpers.getScenario('submit-conditional-containers');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
       // With address included (default)
@@ -518,13 +518,12 @@ test.describe('Submission Behavior Tests', () => {
     test('should handle hidden container fields in submission', async ({ page, helpers }) => {
       await page.goto('/#/test/submission-behavior/submit-conditional-containers');
       await page.waitForLoadState('networkidle');
-      const scenario = helpers.getScenario('submit-conditional-containers-test');
+      const scenario = helpers.getScenario('submit-conditional-containers');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
       // Uncheck "Include Address" to hide the group fields
       const checkbox = helpers.getCheckbox(scenario, 'includeAddress');
       await checkbox.click();
-      await page.waitForTimeout(300);
 
       // Wait for fields to hide
       const streetInput = scenario.locator('#addressGroup #street input');

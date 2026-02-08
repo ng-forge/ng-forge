@@ -684,7 +684,7 @@ test.describe('Value Derivation Logic Tests', () => {
     test('should derive fullName from firstName and lastName inside a group', async ({ page, helpers }) => {
       await page.goto(testUrl('/test/derivation-logic/derivation-in-group'));
       await page.waitForLoadState('networkidle');
-      const scenario = helpers.getScenario('derivation-in-group-test');
+      const scenario = helpers.getScenario('derivation-in-group');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
       const firstNameInput = scenario.locator('#person #firstName input');

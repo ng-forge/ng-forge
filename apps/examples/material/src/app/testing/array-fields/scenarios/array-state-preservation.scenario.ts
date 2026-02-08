@@ -6,6 +6,76 @@ import { TestScenario } from '../../shared/types';
  * Note: Arrays themselves don't support logic - they're data containers.
  * This test verifies that values in conditionally hidden fields are preserved.
  */
+const contactRowFields = [
+  {
+    key: 'contactRow',
+    type: 'row',
+    fields: [
+      {
+        key: 'name',
+        type: 'input',
+        label: 'Contact Name',
+        col: 4,
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'enableContacts',
+              operator: 'equals',
+              value: false,
+            },
+          },
+        ],
+        props: {
+          placeholder: 'Enter name',
+        },
+      },
+      {
+        key: 'email',
+        type: 'input',
+        label: 'Email',
+        col: 4,
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'enableContacts',
+              operator: 'equals',
+              value: false,
+            },
+          },
+        ],
+        props: {
+          type: 'email',
+          placeholder: 'Enter email',
+        },
+      },
+      {
+        key: 'phone',
+        type: 'input',
+        label: 'Phone',
+        col: 4,
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'enableContacts',
+              operator: 'equals',
+              value: false,
+            },
+          },
+        ],
+        props: {
+          placeholder: 'Enter phone',
+        },
+      },
+    ],
+  },
+];
+
 const config = {
   fields: [
     {
@@ -17,146 +87,7 @@ const config = {
     {
       key: 'contacts',
       type: 'array',
-      fields: [
-        [
-          {
-            key: 'contactRow',
-            type: 'row',
-            fields: [
-              {
-                key: 'name',
-                type: 'input',
-                label: 'Contact Name',
-                col: 4,
-                logic: [
-                  {
-                    type: 'hidden',
-                    condition: {
-                      type: 'fieldValue',
-                      fieldPath: 'enableContacts',
-                      operator: 'equals',
-                      value: false,
-                    },
-                  },
-                ],
-                props: {
-                  placeholder: 'Enter name',
-                },
-              },
-              {
-                key: 'email',
-                type: 'input',
-                label: 'Email',
-                col: 4,
-                logic: [
-                  {
-                    type: 'hidden',
-                    condition: {
-                      type: 'fieldValue',
-                      fieldPath: 'enableContacts',
-                      operator: 'equals',
-                      value: false,
-                    },
-                  },
-                ],
-                props: {
-                  type: 'email',
-                  placeholder: 'Enter email',
-                },
-              },
-              {
-                key: 'phone',
-                type: 'input',
-                label: 'Phone',
-                col: 4,
-                logic: [
-                  {
-                    type: 'hidden',
-                    condition: {
-                      type: 'fieldValue',
-                      fieldPath: 'enableContacts',
-                      operator: 'equals',
-                      value: false,
-                    },
-                  },
-                ],
-                props: {
-                  placeholder: 'Enter phone',
-                },
-              },
-            ],
-          },
-        ],
-        [
-          {
-            key: 'contactRow',
-            type: 'row',
-            fields: [
-              {
-                key: 'name',
-                type: 'input',
-                label: 'Contact Name',
-                col: 4,
-                logic: [
-                  {
-                    type: 'hidden',
-                    condition: {
-                      type: 'fieldValue',
-                      fieldPath: 'enableContacts',
-                      operator: 'equals',
-                      value: false,
-                    },
-                  },
-                ],
-                props: {
-                  placeholder: 'Enter name',
-                },
-              },
-              {
-                key: 'email',
-                type: 'input',
-                label: 'Email',
-                col: 4,
-                logic: [
-                  {
-                    type: 'hidden',
-                    condition: {
-                      type: 'fieldValue',
-                      fieldPath: 'enableContacts',
-                      operator: 'equals',
-                      value: false,
-                    },
-                  },
-                ],
-                props: {
-                  type: 'email',
-                  placeholder: 'Enter email',
-                },
-              },
-              {
-                key: 'phone',
-                type: 'input',
-                label: 'Phone',
-                col: 4,
-                logic: [
-                  {
-                    type: 'hidden',
-                    condition: {
-                      type: 'fieldValue',
-                      fieldPath: 'enableContacts',
-                      operator: 'equals',
-                      value: false,
-                    },
-                  },
-                ],
-                props: {
-                  placeholder: 'Enter phone',
-                },
-              },
-            ],
-          },
-        ],
-      ],
+      fields: [contactRowFields, contactRowFields],
     },
     {
       key: 'addContact',
@@ -174,75 +105,7 @@ const config = {
           },
         },
       ],
-      template: [
-        {
-          key: 'contactRow',
-          type: 'row',
-          fields: [
-            {
-              key: 'name',
-              type: 'input',
-              label: 'Contact Name',
-              col: 4,
-              logic: [
-                {
-                  type: 'hidden',
-                  condition: {
-                    type: 'fieldValue',
-                    fieldPath: 'enableContacts',
-                    operator: 'equals',
-                    value: false,
-                  },
-                },
-              ],
-              props: {
-                placeholder: 'Enter name',
-              },
-            },
-            {
-              key: 'email',
-              type: 'input',
-              label: 'Email',
-              col: 4,
-              logic: [
-                {
-                  type: 'hidden',
-                  condition: {
-                    type: 'fieldValue',
-                    fieldPath: 'enableContacts',
-                    operator: 'equals',
-                    value: false,
-                  },
-                },
-              ],
-              props: {
-                type: 'email',
-                placeholder: 'Enter email',
-              },
-            },
-            {
-              key: 'phone',
-              type: 'input',
-              label: 'Phone',
-              col: 4,
-              logic: [
-                {
-                  type: 'hidden',
-                  condition: {
-                    type: 'fieldValue',
-                    fieldPath: 'enableContacts',
-                    operator: 'equals',
-                    value: false,
-                  },
-                },
-              ],
-              props: {
-                placeholder: 'Enter phone',
-              },
-            },
-          ],
-        },
-      ],
+      template: contactRowFields,
     },
     {
       key: 'alwaysVisibleField',
@@ -253,7 +116,7 @@ const config = {
       },
     },
   ],
-} as const satisfies FormConfig;
+} as FormConfig;
 
 export const arrayStatePreservationScenario: TestScenario = {
   testId: 'array-state-preservation',
