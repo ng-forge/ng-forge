@@ -3,7 +3,7 @@ import { FormConfig } from '@ng-forge/dynamic-forms';
 /**
  * Generate a flat form with N input fields.
  */
-export function generateFlatFields(count: number, type: string = 'input'): FormConfig {
+export function generateFlatFields(count: number, type = 'input'): FormConfig {
   const fields = Array.from({ length: count }, (_, i) => ({
     key: `field${i}`,
     type,
