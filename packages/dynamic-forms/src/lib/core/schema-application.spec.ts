@@ -3,9 +3,10 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { runInInjectionContext, Injector, signal } from '@angular/core';
 import { form, schema } from '@angular/forms/signals';
 import { SchemaRegistryService } from './registry/schema-registry.service';
-import { RootFormRegistryService } from './registry/root-form-registry.service';
 import { FunctionRegistryService } from './registry/function-registry.service';
+import { RootFormRegistryService } from './registry/root-form-registry.service';
 import { FieldContextRegistryService } from './registry/field-context-registry.service';
+import { FormStateManager } from '../state/form-state-manager';
 import { SchemaApplicationConfig, SchemaDefinition } from '../models';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { ConsoleLogger } from '../providers/features/logger/console-logger';
@@ -20,8 +21,10 @@ import { applySchema, createSchemaFunction } from './schema-application';
  */
 
 describe('schema-application', () => {
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<any>(undefined);
+
   let schemaRegistry: SchemaRegistryService;
-  let rootFormRegistry: RootFormRegistryService;
   let injector: Injector;
   let consoleSpy: ReturnType<typeof vi.spyOn>;
 
@@ -30,8 +33,9 @@ describe('schema-application', () => {
     TestBed.configureTestingModule({
       providers: [
         SchemaRegistryService,
-        RootFormRegistryService,
         FunctionRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+        { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         FieldContextRegistryService,
         // Provide ConsoleLogger to enable logging in tests
         { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
@@ -40,11 +44,13 @@ describe('schema-application', () => {
 
     injector = TestBed.inject(Injector);
     schemaRegistry = TestBed.inject(SchemaRegistryService);
-    rootFormRegistry = TestBed.inject(RootFormRegistryService);
 
     consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {
       // Suppress console output in tests
     });
+
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
   });
 
   afterEach(() => {
@@ -67,7 +73,7 @@ describe('schema-application', () => {
               applySchema(config, path);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining("Schema not found: 'nonexistent-schema'"));
@@ -90,7 +96,7 @@ describe('schema-application', () => {
               applySchema(config, path);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('Available schemas: schema1, schema2'));
@@ -110,7 +116,7 @@ describe('schema-application', () => {
               applySchema(config, path);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('Available schemas: <none>'));
@@ -131,7 +137,7 @@ describe('schema-application', () => {
                 applySchema(config, path);
               }),
             );
-            rootFormRegistry.registerRootForm(formInstance);
+            mockFormSignal.set(formInstance);
           });
         }).not.toThrow();
       });
@@ -160,7 +166,7 @@ describe('schema-application', () => {
               applySchema(config, path.email);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         // Verify the form was created and schema applied (no error thrown)
@@ -189,7 +195,7 @@ describe('schema-application', () => {
               applySchema(config, path.name);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(formInstance).toBeDefined();
@@ -221,7 +227,7 @@ describe('schema-application', () => {
               applySchema(config, path.email);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(formInstance).toBeDefined();
@@ -251,7 +257,7 @@ describe('schema-application', () => {
               applySchema(config, path.name);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         // Should not throw and no error logged
@@ -284,7 +290,7 @@ describe('schema-application', () => {
               applySchema(config, path.value);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(formInstance).toBeDefined();
@@ -314,7 +320,7 @@ describe('schema-application', () => {
               applySchema(config, path.value);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(formInstance).toBeDefined();
@@ -345,7 +351,7 @@ describe('schema-application', () => {
               applySchema(config, path.items);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(formInstance).toBeDefined();
@@ -375,7 +381,7 @@ describe('schema-application', () => {
                 applySchema(config, path.name);
               }),
             );
-            rootFormRegistry.registerRootForm(formInstance);
+            mockFormSignal.set(formInstance);
           });
         }).not.toThrow();
       });
@@ -395,7 +401,7 @@ describe('schema-application', () => {
                 applySchema(config, path.name);
               }),
             );
-            rootFormRegistry.registerRootForm(formInstance);
+            mockFormSignal.set(formInstance);
           });
         }).not.toThrow();
       });
@@ -434,7 +440,7 @@ describe('schema-application', () => {
               schemaFn(path.email);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(formInstance).toBeDefined();
@@ -458,7 +464,7 @@ describe('schema-application', () => {
               schemaFn(path.username);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(formInstance).toBeDefined();
@@ -481,7 +487,7 @@ describe('schema-application', () => {
                 schemaFn(path.name);
               }),
             );
-            rootFormRegistry.registerRootForm(formInstance);
+            mockFormSignal.set(formInstance);
           });
         }).not.toThrow();
       });
@@ -509,7 +515,7 @@ describe('schema-application', () => {
               schemaFn(path.email);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(formInstance).toBeDefined();
@@ -532,7 +538,7 @@ describe('schema-application', () => {
                 schemaFn(path.name);
               }),
             );
-            rootFormRegistry.registerRootForm(formInstance);
+            mockFormSignal.set(formInstance);
           });
         }).not.toThrow();
       });
@@ -563,7 +569,7 @@ describe('schema-application', () => {
               schemaFn(path.email);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(formInstance).toBeDefined();
@@ -595,7 +601,7 @@ describe('schema-application', () => {
               schemaFn(path.field);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(formInstance).toBeDefined();
@@ -618,7 +624,7 @@ describe('schema-application', () => {
                 schemaFn(path.name);
               }),
             );
-            rootFormRegistry.registerRootForm(formInstance);
+            mockFormSignal.set(formInstance);
           });
         }).not.toThrow();
       });
@@ -650,7 +656,7 @@ describe('schema-application', () => {
               schemaFn(path.email);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(formInstance).toBeDefined();
@@ -673,7 +679,7 @@ describe('schema-application', () => {
                 schemaFn(path.name);
               }),
             );
-            rootFormRegistry.registerRootForm(formInstance);
+            mockFormSignal.set(formInstance);
           });
         }).not.toThrow();
       });
@@ -701,7 +707,7 @@ describe('schema-application', () => {
               schemaFn(path.email);
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
 
         expect(formInstance).toBeDefined();

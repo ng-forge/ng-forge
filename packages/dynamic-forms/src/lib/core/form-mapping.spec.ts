@@ -5,19 +5,28 @@ import { form, schema } from '@angular/forms/signals';
 import { FieldDef } from '../definitions/base/field-def';
 import { FieldWithValidation } from '../definitions/base/field-with-validation';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService, SchemaRegistryService } from './registry';
+import { FormStateManager } from '../state/form-state-manager';
 import { mapFieldToForm } from './form-mapping';
 
 describe('form-mapping', () => {
   let injector: Injector;
-  let rootFormRegistry: RootFormRegistryService;
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<any>(undefined);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService, SchemaRegistryService],
+      providers: [
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+        { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        SchemaRegistryService,
+      ],
     });
 
     injector = TestBed.inject(Injector);
-    rootFormRegistry = TestBed.inject(RootFormRegistryService);
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
   });
 
   describe('mapFieldToForm', () => {
@@ -41,7 +50,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -65,7 +74,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -86,7 +95,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });
@@ -109,7 +118,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -130,7 +139,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -151,7 +160,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -172,7 +181,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -193,7 +202,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -214,7 +223,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -235,7 +244,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -256,7 +265,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -276,7 +285,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });
@@ -299,7 +308,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -323,7 +332,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -344,7 +353,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -368,7 +377,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });
@@ -391,7 +400,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -413,7 +422,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -433,7 +442,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });
@@ -458,7 +467,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -481,7 +490,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -501,7 +510,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -520,7 +529,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -546,7 +555,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });
@@ -572,7 +581,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -596,7 +605,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -617,7 +626,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -637,7 +646,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -667,7 +676,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });

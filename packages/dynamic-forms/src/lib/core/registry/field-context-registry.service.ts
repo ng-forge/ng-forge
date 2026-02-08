@@ -32,29 +32,15 @@ export class FieldContextRegistryService {
   createEvaluationContext<TValue>(
     fieldContext: FieldContext<TValue>,
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
-    formId = 'default',
   ): EvaluationContext {
     // Use untracked() to read the field value WITHOUT creating a reactive dependency.
     // This prevents infinite loops when logic functions are evaluated inside computed signals.
     const fieldValue = untracked(() => fieldContext.value());
 
-    // Get form value using the unified method, wrapped in untracked() to prevent
-    // reactive dependencies. This allows validators and dynamic values to access
-    // form values without causing infinite loops.
-    //
-    // Without untracked():
-    // 1. Validator runs and reads formValue via this context
-    // 2. This creates a signal dependency on the form's value
-    // 3. Any field change updates the form value signal
-    // 4. All validators that read formValue re-run
-    // 5. They read formValue again, creating new dependencies
-    // 6. Infinite loop until browser freezes
-    //
-    // With untracked():
-    // - Form value is read as a snapshot, no dependency is created
-    // - Validators still run when their own field value changes (via fieldValue)
-    // - Cross-field validation still works, just without cascading re-evaluation
-    const formValue = untracked(() => this.rootFormRegistry.getFormValue(formId));
+    // Get form value wrapped in untracked() to prevent reactive dependencies.
+    // This allows validators and dynamic values to access form values without
+    // causing infinite loops.
+    const formValue = untracked(() => this.rootFormRegistry.formValue());
     const fieldPath = this.extractFieldPath(fieldContext);
 
     return {
@@ -91,15 +77,18 @@ export class FieldContextRegistryService {
    * @returns Record of resolved external data values, or undefined if no external data.
    */
   private resolveExternalData(reactive: boolean): Record<string, unknown> | undefined {
-    const externalDataRecord = reactive ? this.externalDataSignal?.() : untracked(() => this.externalDataSignal?.());
+    const externalDataSignal = this.externalDataSignal;
+    if (!externalDataSignal) return undefined;
+
+    const externalDataRecord = reactive ? externalDataSignal() : untracked(() => externalDataSignal());
 
     if (!externalDataRecord) {
       return undefined;
     }
 
     const resolved: Record<string, unknown> = {};
-    for (const [key, signal] of Object.entries(externalDataRecord)) {
-      resolved[key] = reactive ? (signal as Signal<unknown>)() : untracked(() => (signal as Signal<unknown>)());
+    for (const [key, value] of Object.entries(externalDataRecord)) {
+      resolved[key] = reactive ? (value as Signal<unknown>)() : untracked(() => (value as Signal<unknown>)());
     }
 
     return resolved;
@@ -114,11 +103,6 @@ export class FieldContextRegistryService {
    *
    * When a dependent field value changes, the logic function will be re-evaluated.
    *
-   * IMPORTANT: For this to work correctly, the form value signal should be
-   * registered with rootFormRegistry.registerFormValueSignal() BEFORE the
-   * form is created. This ensures the logic function can read form values
-   * during schema evaluation.
-   *
    * NOTE: This should ONLY be used for logic functions, not validators.
    * Validators should use createEvaluationContext with untracked() to prevent
    * infinite reactive loops. Validators with cross-field dependencies should be
@@ -127,10 +111,9 @@ export class FieldContextRegistryService {
   createReactiveEvaluationContext<TValue>(
     fieldContext: FieldContext<TValue>,
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
-    formId = 'default',
   ): EvaluationContext {
     const fieldValue = fieldContext.value();
-    const formValue = this.rootFormRegistry.getFormValue(formId);
+    const formValue = this.rootFormRegistry.formValue();
     const fieldPath = this.extractFieldPath(fieldContext);
 
     return {
@@ -155,14 +138,12 @@ export class FieldContextRegistryService {
    *
    * @param fieldPath - The key/path of the display-only component
    * @param customFunctions - Optional custom functions for expression evaluation
-   * @param formId - Optional form identifier (defaults to 'default')
    */
   createDisplayOnlyContext(
     fieldPath: string,
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
-    formId = 'default',
   ): EvaluationContext {
-    const formValue = this.rootFormRegistry.getFormValue(formId);
+    const formValue = this.rootFormRegistry.formValue();
 
     return {
       fieldValue: undefined,

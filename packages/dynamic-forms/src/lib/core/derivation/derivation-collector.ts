@@ -33,9 +33,8 @@ interface CollectionContext {
  * and reactive evaluation. Entries are sorted topologically so derivations
  * are processed in dependency order.
  *
- * Lookup maps (byTarget, byDependency, etc.) are NOT built here - they are
- * computed lazily via {@link DerivationLookup} to avoid hidden mutation
- * and reduce the size of the returned collection.
+ * Lookup maps (byTarget, byDependency, etc.) are NOT built here to
+ * reduce the size of the returned collection.
  *
  * @param fields - Array of field definitions to traverse
  * @returns Collection containing sorted derivation entries

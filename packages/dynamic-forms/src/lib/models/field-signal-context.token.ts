@@ -2,6 +2,7 @@ import { InjectionToken, Signal } from '@angular/core';
 import type { FieldSignalContext, ArrayContext } from '../mappers/types';
 import type { ValidationMessages } from './validation-types';
 import type { FormOptions } from './form-config';
+import { DynamicFormError } from '../errors/dynamic-form-error';
 
 /**
  * Injection token for providing field signal context to mappers and components.
@@ -35,7 +36,7 @@ import type { FormOptions } from './form-config';
 export const FIELD_SIGNAL_CONTEXT = new InjectionToken<FieldSignalContext>('FIELD_SIGNAL_CONTEXT', {
   providedIn: null, // Not provided at root - must be provided by DynamicForm
   factory: () => {
-    throw new Error(
+    throw new DynamicFormError(
       'FIELD_SIGNAL_CONTEXT was not provided. ' +
         'This token must be provided by DynamicFormComponent or a container field component. ' +
         'If you are calling a mapper function directly, ensure it runs within runInInjectionContext() ' +
@@ -145,33 +146,14 @@ export const DEFAULT_VALIDATION_MESSAGES = new InjectionToken<Signal<ValidationM
 export const FORM_OPTIONS = new InjectionToken<Signal<FormOptions | undefined>>('FORM_OPTIONS');
 
 /**
- * Injection token for external data signals.
+ * Injection token for form-level external data.
  *
- * External data provides a way to inject application state into form expressions.
- * Each property in the record is a Signal that gets unwrapped and made available
- * in the `EvaluationContext` under `externalData`.
+ * Provides a Signal of the external data record from the form config.
+ * Used by `FieldContextRegistryService` to resolve external data for expression evaluation
+ * without coupling to `FormStateManager` directly.
  *
  * Like DEFAULT_PROPS, this token is provided ONCE at the DynamicForm level
  * and inherited by all children via Angular's hierarchical injector.
- *
- * The token provides a Signal containing the external data record, which itself
- * contains Signals. This allows the form to react to changes in which external
- * data is available (outer Signal) and to changes in the external data values
- * (inner Signals).
- *
- * @example
- * ```typescript
- * // In FieldContextRegistryService
- * const externalDataSignal = inject(EXTERNAL_DATA, { optional: true });
- *
- * // When creating evaluation context:
- * const externalDataRecord = externalDataSignal?.();
- * const resolvedExternalData = externalDataRecord
- *   ? Object.fromEntries(
- *       Object.entries(externalDataRecord).map(([k, v]) => [k, v()])
- *     )
- *   : {};
- * ```
  */
 export const EXTERNAL_DATA = new InjectionToken<Signal<Record<string, Signal<unknown>> | undefined>>('EXTERNAL_DATA');
 

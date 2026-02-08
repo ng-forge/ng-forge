@@ -1,4 +1,3 @@
-import { InjectionToken } from '@angular/core';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { DerivationLogConfig, createDefaultDerivationLogConfig, shouldLog } from '../../models/logic/logic-config';
 import { DerivationProcessingResult } from './derivation-types';
@@ -8,7 +7,7 @@ import { DerivationLogEntry } from './derivation-logger';
  * Service interface for derivation logging.
  *
  * Provides methods to log derivation processing events at different verbosity levels.
- * Use `DERIVATION_LOGGER` injection token to get an instance.
+ * Use `createDerivationLogger` factory to create an instance.
  *
  * @public
  */
@@ -162,13 +161,6 @@ class NoopDerivationLogger implements DerivationLogger {
 
 /** Singleton no-op instance to avoid creating new objects */
 const NOOP_INSTANCE = new NoopDerivationLogger();
-
-/**
- * Injection token for the derivation logger service.
- *
- * @public
- */
-export const DERIVATION_LOGGER = new InjectionToken<DerivationLogger>('DerivationLogger');
 
 /**
  * Factory function to create a DerivationLogger.

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi, Mock } from 'vitest';
 import { form, schema, FieldContext } from '@angular/forms/signals';
 import { AsyncValidatorConfig, HttpValidatorConfig } from '../../models/validation/validator-config';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
+import { FormStateManager } from '../../state/form-state-manager';
 import { applyValidator } from './validator-factory';
 import { AsyncCustomValidator, HttpCustomValidator } from './validator-types';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
@@ -20,13 +21,15 @@ type MockResourceRef<T> = {
 
 describe('Async and HTTP Validator Integration', () => {
   let injector: Injector;
-  let rootFormRegistry: RootFormRegistryService;
   let functionRegistry: FunctionRegistryService;
+  const mockEntity = signal<Record<string, unknown>>({});
+  const mockFormSignal = signal<any>(undefined);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        RootFormRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+        { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         FunctionRegistryService,
         FieldContextRegistryService,
         // Provide ConsoleLogger to enable logging in tests
@@ -35,8 +38,9 @@ describe('Async and HTTP Validator Integration', () => {
     });
 
     injector = TestBed.inject(Injector);
-    rootFormRegistry = TestBed.inject(RootFormRegistryService);
     functionRegistry = TestBed.inject(FunctionRegistryService);
+    mockEntity.set({});
+    mockFormSignal.set(undefined);
   });
 
   describe('AsyncValidator', () => {
@@ -120,7 +124,7 @@ describe('Async and HTTP Validator Integration', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -181,7 +185,7 @@ describe('Async and HTTP Validator Integration', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });
@@ -223,7 +227,7 @@ describe('Async and HTTP Validator Integration', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });
@@ -320,7 +324,7 @@ describe('Async and HTTP Validator Integration', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -372,7 +376,7 @@ describe('Async and HTTP Validator Integration', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -402,7 +406,7 @@ describe('Async and HTTP Validator Integration', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });
@@ -446,7 +450,7 @@ describe('Async and HTTP Validator Integration', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -481,7 +485,7 @@ describe('Async and HTTP Validator Integration', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });
@@ -577,7 +581,7 @@ describe('Async and HTTP Validator Integration', () => {
             }).not.toThrow();
           }),
         );
-        rootFormRegistry.registerRootForm(formInstance);
+        mockFormSignal.set(formInstance);
       });
     });
 

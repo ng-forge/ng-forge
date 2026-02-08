@@ -84,6 +84,49 @@ export function resolveField(fieldDef: FieldDef<unknown>, context: ResolveFieldC
 }
 
 /**
+ * Context for synchronous field resolution when components are already cached.
+ */
+export interface SyncResolveFieldContext {
+  /** Returns a previously loaded component, or undefined if not cached */
+  getLoadedComponent: (type: string) => Type<unknown> | undefined;
+  /** The raw field registry map for mappers */
+  registry: Map<string, FieldTypeDefinition>;
+  /** The injector to use for the resolved field */
+  injector: Injector;
+}
+
+/**
+ * Synchronously resolves a field definition to a ResolvedField using cached components.
+ *
+ * This is the fast path for fields whose components have already been loaded.
+ * Returns undefined for componentless fields (e.g., hidden fields).
+ *
+ * @param fieldDef - The field definition to resolve
+ * @param context - The context containing cached components and dependencies
+ * @returns ResolvedField or undefined (for componentless fields)
+ */
+export function resolveFieldSync(fieldDef: FieldDef<unknown>, context: SyncResolveFieldContext): ResolvedField | undefined {
+  const component = context.getLoadedComponent(fieldDef.type);
+
+  if (!component) {
+    return undefined;
+  }
+
+  const inputs = runInInjectionContext(context.injector, () => mapFieldToInputs(fieldDef, context.registry));
+
+  if (!inputs) {
+    return undefined;
+  }
+
+  return {
+    key: fieldDef.key,
+    component,
+    injector: context.injector,
+    inputs,
+  };
+}
+
+/**
  * Reconciles previous and current resolved fields to preserve injector instances
  * for fields that haven't changed type, preventing unnecessary component recreation.
  *
@@ -97,15 +140,12 @@ export function reconcileFields(prev: ResolvedField[], curr: ResolvedField[]): R
   return curr.map((field) => {
     const existing = prevMap.get(field.key);
 
-    if (existing && existing.component === field.component) {
-      // Same key & type - reuse existing injector, update inputs
-      return {
-        ...field,
-        injector: existing.injector,
-      };
+    if (existing && existing.component === field.component && existing.injector === field.injector) {
+      // Truly unchanged - preserve object identity for signal stability
+      return existing;
     }
 
-    // New field or type changed - use new injector
+    // New field, type changed, or context changed (new injector) - use new field
     return field;
   });
 }

@@ -104,8 +104,6 @@ export interface DerivationEntry {
  * Collection of all derivation entries from a form's field definitions.
  *
  * This interface is intentionally minimal - it contains only the core data.
- * Lookup maps are provided via {@link DerivationLookup} which computes
- * them lazily on demand.
  *
  * @public
  */

@@ -1,6 +1,21 @@
-import { inject, Type } from '@angular/core';
+import { inject, InjectionToken, Type } from '@angular/core';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
+
+/**
+ * Cache for resolved field type components.
+ *
+ * Using an InjectionToken with `providedIn: 'root'` ensures:
+ * - SSR safety: Angular creates a fresh root injector per SSR request,
+ *   so the cache is properly isolated and garbage-collected
+ * - Shared across all `injectFieldRegistry()` calls within the same app/request
+ *
+ * @internal
+ */
+export const COMPONENT_CACHE = new InjectionToken<Map<string, Type<unknown>>>('COMPONENT_CACHE', {
+  providedIn: 'root',
+  factory: () => new Map(),
+});
 
 /**
  * Injection function for accessing the dynamic form field registry.
@@ -43,6 +58,7 @@ import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
  */
 export function injectFieldRegistry() {
   const registry = inject(FIELD_REGISTRY);
+  const componentCache = inject(COMPONENT_CACHE);
 
   return {
     /**
@@ -115,15 +131,45 @@ export function injectFieldRegistry() {
         return undefined;
       }
 
+      // Check cache first for instant resolution
+      const cached = componentCache.get(name);
+      if (cached) {
+        return cached;
+      }
+
       // Handle async loading
       try {
         const result = await fieldType.loadComponent();
         // Handle ES module imports - extract default export if needed
         const moduleResult = result as { default?: Type<unknown> } | Type<unknown>;
-        return (typeof moduleResult === 'object' && 'default' in moduleResult && moduleResult.default) || (result as Type<unknown>);
+        const component =
+          (typeof moduleResult === 'object' && 'default' in moduleResult && moduleResult.default) || (result as Type<unknown>);
+
+        // Populate cache for future sync lookups
+        if (component) {
+          componentCache.set(name, component);
+        }
+
+        return component;
       } catch (error) {
         throw new DynamicFormError(`Failed to load component for field type "${name}": ${error}`);
       }
+    },
+
+    /**
+     * Returns a previously loaded component from cache, or undefined if not yet loaded.
+     *
+     * This enables synchronous field resolution for components that have already
+     * been loaded (e.g., after first render). Returns undefined for:
+     * - Components not yet loaded (first render)
+     * - Componentless field types (e.g., hidden)
+     * - Unregistered field types
+     *
+     * @param name - The name of the field type
+     * @returns The cached component constructor, or undefined
+     */
+    getLoadedComponent(name: string): Type<unknown> | undefined {
+      return componentCache.get(name);
     },
 
     /**
