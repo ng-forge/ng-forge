@@ -37,10 +37,22 @@ export default [
     loadChildren: () => import('./async-validation/async-validation.routes'),
   },
 
+  // Config Change Tests - Dynamic FormConfig changes at runtime
+  {
+    path: 'config-change',
+    loadChildren: () => import('./config-change/config-change.routes'),
+  },
+
   // Comprehensive Field Tests - Refactored into folder structure
   {
     path: 'comprehensive-field-tests',
     loadChildren: () => import('./comprehensive-field-tests/comprehensive-field-tests.routes'),
+  },
+
+  // Container Nesting Tests - Cross-container nesting interactions
+  {
+    path: 'container-nesting',
+    loadChildren: () => import('./container-nesting/container-nesting.routes'),
   },
 
   // Cross-Field Validation Tests - Refactored into folder structure
@@ -119,6 +131,18 @@ export default [
   {
     path: 'multi-page-navigation',
     loadChildren: () => import('./multi-page-navigation/multi-page-navigation.routes'),
+  },
+
+  // Performance Tests - Large form rendering benchmarks
+  {
+    path: 'performance',
+    loadChildren: () => import('./performance/performance.routes'),
+  },
+
+  // Row Fields Tests - Tests for row container layout and conditional visibility
+  {
+    path: 'row-fields',
+    loadChildren: () => import('./row-fields/row-fields.routes'),
   },
 
   // Schema System Tests - Reusable schema configurations for validation and logic

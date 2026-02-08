@@ -8,6 +8,7 @@ import { chainDerivationScenario } from './scenarios/chain-derivation.scenario';
 import { shorthandDerivationScenario } from './scenarios/shorthand-derivation.scenario';
 import { arrayFieldDerivationScenario } from './scenarios/array-field-derivation.scenario';
 import { bidirectionalFloatScenario } from './scenarios/bidirectional-float.scenario';
+import { derivationInGroupScenario } from './scenarios/derivation-in-group.scenario';
 
 export const derivationLogicSuite: TestSuite = {
   id: 'derivation-logic',
@@ -24,6 +25,7 @@ export const derivationLogicSuite: TestSuite = {
     shorthandDerivationScenario,
     arrayFieldDerivationScenario,
     bidirectionalFloatScenario,
+    derivationInGroupScenario,
   ],
 };
 

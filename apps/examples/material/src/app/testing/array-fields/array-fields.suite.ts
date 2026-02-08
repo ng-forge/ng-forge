@@ -24,6 +24,9 @@ import { arrayRemoveScenario } from './scenarios/array-remove.scenario';
 import { arrayScreenReaderLabelsScenario } from './scenarios/array-screen-reader-labels.scenario';
 import { arrayShiftScenario } from './scenarios/array-shift.scenario';
 import { arrayValuesScenario } from './scenarios/array-values.scenario';
+import { arrayConditionalVisibilityScenario } from './scenarios/array-conditional-visibility.scenario';
+import { arrayStatePreservationScenario } from './scenarios/array-state-preservation.scenario';
+import { arrayItemsConditionalFieldsScenario } from './scenarios/array-items-conditional-fields.scenario';
 
 /**
  * Array Fields Suite
@@ -80,6 +83,11 @@ export const arrayFieldsSuite: TestSuite = {
     // Button logic (hidden/disabled)
     arrayButtonHiddenLogicScenario,
     arrayButtonDisabledLogicScenario,
+
+    // Conditional Visibility
+    arrayConditionalVisibilityScenario,
+    arrayStatePreservationScenario,
+    arrayItemsConditionalFieldsScenario,
   ],
 };
 

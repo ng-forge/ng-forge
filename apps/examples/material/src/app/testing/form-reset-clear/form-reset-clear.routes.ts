@@ -62,6 +62,16 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getFormResetClearScenario('multiple-cycles') },
   },
+  {
+    path: 'reset-with-arrays',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getFormResetClearScenario('reset-with-arrays') },
+  },
+  {
+    path: 'reset-with-groups',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getFormResetClearScenario('reset-with-groups') },
+  },
 ];
 
 export default routes;
