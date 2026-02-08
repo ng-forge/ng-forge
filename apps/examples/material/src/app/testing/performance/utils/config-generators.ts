@@ -159,28 +159,32 @@ export function generateArrayConfig(itemCount: number, fieldsPerItem: number): F
  * Generate a multi-page form config.
  */
 export function generatePagedConfig(pages: number, fieldsPerPage: number): FormConfig {
-  const pageFields = Array.from({ length: pages }, (_, pageIndex) => ({
-    key: `page${pageIndex}`,
-    type: 'page',
-    fields: Array.from({ length: fieldsPerPage }, (_, fieldIndex) => ({
+  const pageFields = Array.from({ length: pages }, (_, pageIndex) => {
+    const fields: Record<string, unknown>[] = Array.from({ length: fieldsPerPage }, (_, fieldIndex) => ({
       key: `p${pageIndex}f${fieldIndex}`,
       type: 'input',
       label: `Page ${pageIndex + 1} - Field ${fieldIndex + 1}`,
       props: { placeholder: `Enter value` },
       col: 6,
-    })),
-  }));
+    }));
 
-  return {
-    fields: [
-      ...pageFields,
-      {
+    // Add submit button to the last page
+    if (pageIndex === pages - 1) {
+      fields.push({
         key: 'submit',
         type: 'submit',
         label: 'Submit',
         props: { type: 'submit', color: 'primary' },
         col: 12,
-      },
-    ],
-  } as FormConfig;
+      });
+    }
+
+    return {
+      key: `page${pageIndex}`,
+      type: 'page',
+      fields,
+    };
+  });
+
+  return { fields: pageFields } as FormConfig;
 }
