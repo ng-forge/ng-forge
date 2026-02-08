@@ -304,6 +304,26 @@ test.describe('Array Fields E2E Tests', () => {
       // Fields should be marked as required
       expect(await nameInput.getAttribute('required')).not.toBeNull();
       expect(await emailInput.getAttribute('required')).not.toBeNull();
+
+      // Touch fields and blur to trigger validation errors
+      await nameInput.focus();
+      await nameInput.blur();
+      await emailInput.focus();
+      await emailInput.blur();
+
+      // Error messages should be visible for empty required fields
+      const nameErrors = scenario.locator('#name_0 mat-error');
+      const emailErrors = scenario.locator('#email_0 mat-error');
+      await expect(nameErrors).toBeVisible({ timeout: 5000 });
+      await expect(emailErrors).toBeVisible({ timeout: 5000 });
+
+      // Fill name and verify error clears
+      await nameInput.fill('John');
+      await expect(nameErrors).not.toBeVisible({ timeout: 5000 });
+
+      // Fill email and verify error clears
+      await emailInput.fill('john@example.com');
+      await expect(emailErrors).not.toBeVisible({ timeout: 5000 });
     });
 
     test('should enforce minimum array length', async ({ page, helpers }) => {
@@ -312,8 +332,29 @@ test.describe('Array Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
-      // Submit button should be present
-      await expect(scenario.locator('#submit button')).toBeVisible();
+      // Should start with one item
+      const inputs = scenario.locator('#items input');
+      await expect(inputs).toHaveCount(1, { timeout: 10000 });
+
+      // Submit button should be present and functional
+      const submitButton = scenario.locator('#submit button');
+      await expect(submitButton).toBeVisible();
+
+      // Add another item
+      const addButton = scenario.locator('button:has-text("Add Item")');
+      await addButton.click();
+      await expect(inputs).toHaveCount(2, { timeout: 5000 });
+
+      // Fill both items and submit
+      await inputs.nth(0).fill('Item A');
+      await inputs.nth(1).fill('Item B');
+
+      const data = await helpers.submitFormAndCapture(scenario);
+      expect(data).toHaveProperty('items');
+      const items = data['items'] as Record<string, unknown>[];
+      expect(items).toHaveLength(2);
+      expect(items[0]['item']).toBe('Item A');
+      expect(items[1]['item']).toBe('Item B');
     });
 
     test('should enforce maximum array length', async ({ page, helpers }) => {
@@ -764,6 +805,208 @@ test.describe('Array Fields E2E Tests', () => {
       const addButton = scenario.locator('button:has-text("Add Item")');
       await addButton.click();
       await expect(inputs).toHaveCount(3, { timeout: 5000 });
+    });
+  });
+
+  test.describe('Conditional Visibility', () => {
+    test('should show/hide entire array based on radio selection', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-conditional-visibility');
+      await page.goto('/#/test/array-fields/array-conditional-visibility');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Get radio buttons
+      const freeRadio = scenario.locator('#subscriptionType mat-radio-button:has-text("Free")');
+      const proRadio = scenario.locator('#subscriptionType mat-radio-button:has-text("Pro")');
+
+      // Get array elements - exclude hidden field components (hidden attr is on df-mat-input host, not the input)
+      const teamMemberInputs = scenario.locator('#teamMembers df-mat-input:not([hidden]) input');
+      const addButton = scenario.locator('button:has-text("Add Team Member")');
+
+      // Notes field should always be visible
+      const notesField = scenario.locator('#notes textarea');
+      await expect(notesField).toBeVisible({ timeout: 5000 });
+
+      // Initially free is selected, so array should be hidden
+      await expect(freeRadio).toBeVisible({ timeout: 5000 });
+      await expect(teamMemberInputs).toHaveCount(0, { timeout: 5000 });
+      await expect(addButton).not.toBeVisible({ timeout: 5000 });
+
+      // Screenshot: Free plan selected, array hidden
+      await helpers.expectScreenshotMatch(scenario, 'material-array-conditional-visibility-free');
+
+      // Switch to pro
+      await proRadio.click();
+
+      // Array should now be visible with initial item
+      await expect(teamMemberInputs).toHaveCount(1, { timeout: 10000 });
+      await expect(addButton).toBeVisible({ timeout: 5000 });
+
+      // Fill array item (fields inside array get index suffix: role_0 for first item)
+      await teamMemberInputs.first().fill('John Doe');
+      const roleSelect = helpers.getSelect(scenario, 'role_0');
+      await helpers.selectOption(roleSelect, 'Admin');
+
+      // Add another team member
+      await addButton.click();
+      await expect(teamMemberInputs).toHaveCount(2, { timeout: 10000 });
+      await teamMemberInputs.nth(1).fill('Jane Smith');
+
+      // Screenshot: Pro plan selected, array visible
+      await helpers.expectScreenshotMatch(scenario, 'material-array-conditional-visibility-pro');
+
+      // Switch back to free
+      await freeRadio.click();
+
+      // Array should be hidden
+      await expect(teamMemberInputs).toHaveCount(0, { timeout: 5000 });
+      await expect(addButton).not.toBeVisible({ timeout: 5000 });
+
+      // Switch to pro again - values should be preserved
+      await proRadio.click();
+      await expect(teamMemberInputs).toHaveCount(2, { timeout: 10000 });
+      await expect(teamMemberInputs.first()).toHaveValue('John Doe', { timeout: 5000 });
+      await expect(teamMemberInputs.nth(1)).toHaveValue('Jane Smith', { timeout: 5000 });
+    });
+
+    test('should preserve array items through visibility toggle', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-state-preservation');
+      await page.goto('/#/test/array-fields/array-state-preservation');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Get controls - exclude hidden field components (hidden attr is on df-mat-input host, not the input)
+      const enableContactsCheckbox = helpers.getCheckbox(scenario, 'enableContacts');
+      const contactInputs = scenario.locator('#contacts df-mat-input:not([hidden]) input');
+      const addButton = scenario.locator('button:has-text("Add Contact")');
+
+      // Always visible field
+      const alwaysVisibleInput = scenario.locator('#alwaysVisibleField input');
+      await expect(alwaysVisibleInput).toBeVisible({ timeout: 5000 });
+
+      // Initially array should be hidden
+      await expect(contactInputs).toHaveCount(0, { timeout: 5000 });
+      await expect(addButton).not.toBeVisible({ timeout: 5000 });
+
+      // Screenshot: Array hidden
+      await helpers.expectScreenshotMatch(scenario, 'material-array-state-preservation-hidden');
+
+      // Enable contacts
+      await enableContactsCheckbox.click();
+
+      // Array should be visible with 2 initial items (6 inputs: 2 items × 3 fields)
+      await expect(contactInputs).toHaveCount(6, { timeout: 10000 });
+      await expect(addButton).toBeVisible({ timeout: 5000 });
+
+      // Fill first contact
+      await contactInputs.nth(0).fill('Alice');
+      await contactInputs.nth(1).fill('alice@example.com');
+      await contactInputs.nth(2).fill('555-1111');
+
+      // Fill second contact
+      await contactInputs.nth(3).fill('Bob');
+      await contactInputs.nth(4).fill('bob@example.com');
+      await contactInputs.nth(5).fill('555-2222');
+
+      // Add a third contact
+      await addButton.click();
+      await expect(contactInputs).toHaveCount(9, { timeout: 10000 });
+      await contactInputs.nth(6).fill('Charlie');
+
+      // Screenshot: Array visible with data
+      await helpers.expectScreenshotMatch(scenario, 'material-array-state-preservation-filled');
+
+      // Toggle off and on
+      await enableContactsCheckbox.click();
+      await expect(contactInputs).toHaveCount(0, { timeout: 5000 });
+
+      await enableContactsCheckbox.click();
+      await expect(contactInputs).toHaveCount(9, { timeout: 10000 });
+
+      // Values should be preserved
+      await expect(contactInputs.nth(0)).toHaveValue('Alice', { timeout: 5000 });
+      await expect(contactInputs.nth(1)).toHaveValue('alice@example.com', { timeout: 5000 });
+      await expect(contactInputs.nth(3)).toHaveValue('Bob', { timeout: 5000 });
+      await expect(contactInputs.nth(6)).toHaveValue('Charlie', { timeout: 5000 });
+    });
+
+    test('should handle conditional fields within array items', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-items-conditional-fields');
+      await page.goto('/#/test/array-fields/array-items-conditional-fields');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Get first item's fields (fields inside array have index suffix: street_0, city_0, etc.)
+      const streetInput = scenario.locator('#addresses #street_0 input');
+      const cityInput = scenario.locator('#addresses #city_0 input');
+      const hasApartmentCheckbox = helpers.getCheckbox(scenario, 'hasApartment_0');
+      const apartmentInput = scenario.locator('#addresses #apartmentNumber_0 input');
+      const residentialRadio = scenario.locator('#addresses #addressType_0 mat-radio-button:has-text("Residential")');
+      const commercialRadio = scenario.locator('#addresses #addressType_0 mat-radio-button:has-text("Commercial")');
+      const businessNameInput = scenario.locator('#addresses #businessName_0 input');
+
+      // Initial state - apartment and business fields should be hidden
+      await expect(streetInput).toBeVisible({ timeout: 5000 });
+      await expect(cityInput).toBeVisible({ timeout: 5000 });
+      await expect(apartmentInput).not.toBeVisible({ timeout: 5000 });
+      await expect(businessNameInput).not.toBeVisible({ timeout: 5000 });
+
+      // Screenshot: Initial state
+      await helpers.expectScreenshotMatch(scenario, 'material-array-items-conditional-initial');
+
+      // Fill basic fields
+      await streetInput.fill('123 Main St');
+      await cityInput.fill('Springfield');
+
+      // Enable apartment number
+      await hasApartmentCheckbox.click();
+      await expect(apartmentInput).toBeVisible({ timeout: 5000 });
+      await apartmentInput.fill('4B');
+
+      // Screenshot: Apartment enabled
+      await helpers.expectScreenshotMatch(scenario, 'material-array-items-conditional-apartment');
+
+      // Switch to commercial
+      await commercialRadio.click();
+      await expect(businessNameInput).toBeVisible({ timeout: 5000 });
+      await businessNameInput.fill('Acme Corp');
+
+      // Screenshot: Commercial enabled
+      await helpers.expectScreenshotMatch(scenario, 'material-array-items-conditional-commercial');
+
+      // Add a second address
+      const addButton = scenario.locator('button:has-text("Add Address")');
+      await addButton.click();
+
+      // Second item should have its own independent visibility (second item has index 1: street_1, etc.)
+      const secondStreetInput = scenario.locator('#addresses #street_1 input');
+      const secondApartmentInput = scenario.locator('#addresses #apartmentNumber_1 input');
+      const secondBusinessInput = scenario.locator('#addresses #businessName_1 input');
+
+      await expect(secondStreetInput).toBeVisible({ timeout: 5000 });
+      // Second item starts with default values (no apartment, residential)
+      await expect(secondApartmentInput).not.toBeVisible({ timeout: 5000 });
+      await expect(secondBusinessInput).not.toBeVisible({ timeout: 5000 });
+
+      // First item's values should be preserved
+      await expect(streetInput).toHaveValue('123 Main St', { timeout: 5000 });
+      await expect(apartmentInput).toHaveValue('4B', { timeout: 5000 });
+      await expect(businessNameInput).toHaveValue('Acme Corp', { timeout: 5000 });
+
+      // Toggle first item's apartment off and on
+      await hasApartmentCheckbox.click();
+      await expect(apartmentInput).not.toBeVisible({ timeout: 5000 });
+      await hasApartmentCheckbox.click();
+      await expect(apartmentInput).toBeVisible({ timeout: 5000 });
+      await expect(apartmentInput).toHaveValue('4B', { timeout: 5000 });
+
+      // Switch first item back to residential
+      await residentialRadio.click();
+      await expect(businessNameInput).not.toBeVisible({ timeout: 5000 });
+
+      // Switch back to commercial - value should be preserved
+      await commercialRadio.click();
+      await expect(businessNameInput).toHaveValue('Acme Corp', { timeout: 5000 });
     });
   });
 });

@@ -425,4 +425,242 @@ test.describe('Multi-Page Navigation Tests', () => {
       expect((submittedData as any).data2).toBe('Additional data for page 2');
     });
   });
+
+  test.describe('Conditional Page Visibility', () => {
+    test('should skip hidden pages during navigation (individual accounts)', async ({ page, helpers }) => {
+      await page.goto('/#/test/multi-page-navigation/page-conditional-visibility');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('page-conditional-visibility');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // PAGE 1: Basic Info
+      await expect(scenario.locator('#fullName input')).toBeVisible({ timeout: 5000 });
+
+      // Fill name and keep individual selected (default)
+      await scenario.locator('#fullName input').fill('John Doe');
+
+      // Verify individual is selected
+      const individualRadio = scenario.locator('#accountType mat-radio-button:has-text("Individual")');
+      await expect(individualRadio).toBeVisible({ timeout: 5000 });
+
+      // Screenshot: Page 1 with individual selected
+      await helpers.expectScreenshotMatch(scenario, 'material-page-conditional-individual-page1');
+
+      // Navigate to next page
+      await scenario.locator('#nextToBusinessPage button').click();
+      await page.waitForTimeout(500);
+
+      // Should skip business page and go directly to confirmation
+      // Verify we're on confirmation page (not business page)
+      await expect(scenario.locator('#termsAccepted mat-checkbox')).toBeVisible({ timeout: 5000 });
+      await expect(scenario.locator('#companyName input')).not.toBeVisible({ timeout: 1000 });
+
+      // Screenshot: Skipped to confirmation
+      await helpers.expectScreenshotMatch(scenario, 'material-page-conditional-individual-confirmation');
+
+      // Navigate back
+      await scenario.locator('#previousToBusinessOrBasicPage button').click();
+      await page.waitForTimeout(500);
+
+      // Should go back to page 1 (skipping hidden business page)
+      await expect(scenario.locator('#fullName input')).toBeVisible({ timeout: 5000 });
+      await expect(scenario.locator('#fullName input')).toHaveValue('John Doe', { timeout: 5000 });
+    });
+
+    test('should show conditional page for business accounts', async ({ page, helpers }) => {
+      await page.goto('/#/test/multi-page-navigation/page-conditional-visibility');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('page-conditional-visibility');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // PAGE 1: Select business account
+      await scenario.locator('#fullName input').fill('Business User');
+
+      const businessRadio = scenario.locator('#accountType mat-radio-button:has-text("Business")');
+      await businessRadio.click();
+      await page.waitForTimeout(200);
+
+      // Screenshot: Page 1 with business selected
+      await helpers.expectScreenshotMatch(scenario, 'material-page-conditional-business-page1');
+
+      // Navigate to next page
+      await scenario.locator('#nextToBusinessPage button').click();
+      await page.waitForTimeout(500);
+
+      // Should show business page (not skip to confirmation)
+      await expect(scenario.locator('#companyName input')).toBeVisible({ timeout: 5000 });
+
+      // Fill business details
+      await scenario.locator('#companyName input').fill('Acme Corp');
+      await scenario.locator('#taxId input').fill('12-3456789');
+      const employeeSelect = helpers.getSelect(scenario, 'employeeCount');
+      await helpers.selectOption(employeeSelect, '11-50');
+
+      // Screenshot: Business page filled
+      await helpers.expectScreenshotMatch(scenario, 'material-page-conditional-business-page2');
+
+      // Navigate to confirmation
+      await scenario.locator('#nextToConfirmationPage button').click();
+      await page.waitForTimeout(500);
+
+      await expect(scenario.locator('#termsAccepted mat-checkbox')).toBeVisible({ timeout: 5000 });
+
+      // Navigate back to business page
+      await scenario.locator('#previousToBusinessOrBasicPage button').click();
+      await page.waitForTimeout(500);
+
+      // Values should be preserved
+      await expect(scenario.locator('#companyName input')).toHaveValue('Acme Corp', { timeout: 5000 });
+      await expect(scenario.locator('#taxId input')).toHaveValue('12-3456789', { timeout: 5000 });
+
+      // Navigate back to page 1
+      await scenario.locator('#previousToBasicPage button').click();
+      await page.waitForTimeout(500);
+
+      // Change to individual
+      const individualRadio = scenario.locator('#accountType mat-radio-button:has-text("Individual")');
+      await individualRadio.click();
+      await page.waitForTimeout(200);
+
+      // Navigate forward - should skip business page now
+      await scenario.locator('#nextToBusinessPage button').click();
+      await page.waitForTimeout(500);
+
+      // Should be on confirmation, not business
+      await expect(scenario.locator('#termsAccepted mat-checkbox')).toBeVisible({ timeout: 5000 });
+
+      // Change back to business - values should be preserved
+      await scenario.locator('#previousToBusinessOrBasicPage button').click();
+      await page.waitForTimeout(500);
+      await businessRadio.click();
+      await page.waitForTimeout(200);
+      await scenario.locator('#nextToBusinessPage button').click();
+      await page.waitForTimeout(500);
+
+      await expect(scenario.locator('#companyName input')).toHaveValue('Acme Corp', { timeout: 5000 });
+    });
+
+    test('should handle dynamic page visibility based on survey type', async ({ page, helpers }) => {
+      await page.goto('/#/test/multi-page-navigation/page-dynamic-navigation');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('page-dynamic-navigation');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Start with Quick survey (default)
+      await expect(scenario.locator('#respondentName input')).toBeVisible({ timeout: 5000 });
+      await scenario.locator('#respondentName input').fill('Quick Tester');
+
+      // Screenshot: Quick survey selected
+      await helpers.expectScreenshotMatch(scenario, 'material-page-dynamic-quick-start');
+
+      // Navigate through quick survey (2 pages + summary = 3 visible pages)
+      await scenario.locator('#nextFromSurveyType button').click();
+      await page.waitForTimeout(500);
+
+      // Should be on basic questions
+      await expect(scenario.locator('#satisfaction mat-slider')).toBeVisible({ timeout: 5000 });
+      await scenario.locator('#nextFromBasicQuestions button').click();
+      await page.waitForTimeout(500);
+
+      // Should skip detailed and in-depth, go to summary
+      await expect(scenario.locator('#additionalComments textarea')).toBeVisible({ timeout: 5000 });
+      await expect(scenario.locator('#usageFrequency')).not.toBeVisible({ timeout: 1000 });
+
+      // Screenshot: Quick survey summary
+      await helpers.expectScreenshotMatch(scenario, 'material-page-dynamic-quick-summary');
+
+      // Go back and change to Standard survey
+      await scenario.locator('#previousFromSummary button').click();
+      await page.waitForTimeout(500);
+      await scenario.locator('#previousToSurveyType button').click();
+      await page.waitForTimeout(500);
+
+      const standardRadio = scenario.locator('#surveyType mat-radio-button:has-text("Standard")');
+      await standardRadio.click();
+      await page.waitForTimeout(200);
+
+      // Navigate through standard survey (3 pages + summary)
+      await scenario.locator('#nextFromSurveyType button').click();
+      await page.waitForTimeout(500);
+      await scenario.locator('#nextFromBasicQuestions button').click();
+      await page.waitForTimeout(500);
+
+      // Should be on detailed questions now
+      await expect(scenario.locator('#usageFrequency mat-select')).toBeVisible({ timeout: 5000 });
+      await scenario.locator('#favoriteFeature input').fill('Speed');
+
+      // Screenshot: Standard survey detailed page
+      await helpers.expectScreenshotMatch(scenario, 'material-page-dynamic-standard-detailed');
+
+      await scenario.locator('#nextFromDetailed button').click();
+      await page.waitForTimeout(500);
+
+      // Should skip in-depth, go to summary
+      await expect(scenario.locator('#additionalComments textarea')).toBeVisible({ timeout: 5000 });
+      await expect(scenario.locator('#improvementSuggestion textarea')).not.toBeVisible({ timeout: 1000 });
+
+      // Go back and change to Detailed survey
+      await scenario.locator('#previousFromSummary button').click();
+      await page.waitForTimeout(500);
+      await scenario.locator('#previousFromDetailed button').click();
+      await page.waitForTimeout(500);
+      await scenario.locator('#previousToSurveyType button').click();
+      await page.waitForTimeout(500);
+
+      const detailedRadio = scenario.locator('#surveyType mat-radio-button:has-text("Detailed")');
+      await detailedRadio.click();
+      await page.waitForTimeout(200);
+
+      // Navigate through detailed survey (4 pages + summary)
+      await scenario.locator('#nextFromSurveyType button').click();
+      await page.waitForTimeout(500);
+      await scenario.locator('#nextFromBasicQuestions button').click();
+      await page.waitForTimeout(500);
+
+      // Detailed page should have preserved value
+      await expect(scenario.locator('#favoriteFeature input')).toHaveValue('Speed', { timeout: 5000 });
+      await scenario.locator('#nextFromDetailed button').click();
+      await page.waitForTimeout(500);
+
+      // Should be on in-depth questions now
+      await expect(scenario.locator('#improvementSuggestion textarea')).toBeVisible({ timeout: 5000 });
+      await scenario.locator('#improvementSuggestion textarea').fill('More features');
+
+      // Screenshot: Detailed survey in-depth page
+      await helpers.expectScreenshotMatch(scenario, 'material-page-dynamic-detailed-indepth');
+
+      await scenario.locator('#nextFromInDepth button').click();
+      await page.waitForTimeout(500);
+
+      // Should be on summary
+      await expect(scenario.locator('#additionalComments textarea')).toBeVisible({ timeout: 5000 });
+
+      // Submit and verify all data
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      await scenario.locator('#submitSurvey button').click();
+      const submittedData = await submittedDataPromise;
+
+      expect(submittedData).toMatchObject({
+        respondentName: 'Quick Tester',
+        surveyType: 'detailed',
+        favoriteFeature: 'Speed',
+        improvementSuggestion: 'More features',
+      });
+    });
+  });
 });

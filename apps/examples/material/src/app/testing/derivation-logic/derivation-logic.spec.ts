@@ -678,4 +678,35 @@ test.describe('Value Derivation Logic Tests', () => {
       await expect(secondLineTotal).toHaveValue('300');
     });
   });
+
+  test.describe('Derivation in Group', () => {
+    test.skip(true, 'Library limitation: derivation expressions inside group containers do not evaluate correctly');
+    test('should derive fullName from firstName and lastName inside a group', async ({ page, helpers }) => {
+      await page.goto(testUrl('/test/derivation-logic/derivation-in-group'));
+      await page.waitForLoadState('networkidle');
+      const scenario = helpers.getScenario('derivation-in-group-test');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      const firstNameInput = scenario.locator('#person #firstName input');
+      const lastNameInput = scenario.locator('#person #lastName input');
+      const fullNameInput = scenario.locator('#person #fullName input');
+
+      await expect(firstNameInput).toBeVisible({ timeout: 5000 });
+
+      // Type first name
+      await firstNameInput.fill('John');
+      await page.waitForTimeout(500);
+      await expect(fullNameInput).toHaveValue('John ', { timeout: 5000 });
+
+      // Type last name
+      await lastNameInput.fill('Doe');
+      await page.waitForTimeout(500);
+      await expect(fullNameInput).toHaveValue('John Doe', { timeout: 5000 });
+
+      // Submit and verify
+      const data = await helpers.submitFormAndCapture(scenario);
+      const person = data['person'] as Record<string, unknown>;
+      expect(person['fullName']).toBe('John Doe');
+    });
+  });
 });

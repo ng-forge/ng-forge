@@ -10,6 +10,8 @@ import { resetNestedScenario } from './scenarios/reset-nested.scenario';
 import { resetSelectScenario } from './scenarios/reset-select.scenario';
 import { resetValidationScenario } from './scenarios/reset-validation.scenario';
 import { resetVsClearScenario } from './scenarios/reset-vs-clear.scenario';
+import { resetWithArraysScenario } from './scenarios/reset-with-arrays.scenario';
+import { resetWithGroupsScenario } from './scenarios/reset-with-groups.scenario';
 
 export const formResetClearSuite: TestSuite = {
   id: 'form-reset-clear',
@@ -28,6 +30,8 @@ export const formResetClearSuite: TestSuite = {
     requiredResetClearScenario,
     resetNestedScenario,
     multipleCyclesScenario,
+    resetWithArraysScenario,
+    resetWithGroupsScenario,
   ],
 };
 

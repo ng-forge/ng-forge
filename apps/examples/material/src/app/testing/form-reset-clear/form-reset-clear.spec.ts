@@ -353,4 +353,86 @@ test.describe('Form Reset and Clear Events Tests', () => {
       expect(await input.inputValue()).toBe('Default'); // Falls back to config default
     });
   });
+
+  test.describe('Reset Form with Groups', () => {
+    test('should reset group field values to defaults', async ({ page, helpers }) => {
+      await page.goto('/#/test/form-reset-clear/reset-with-groups');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('reset-with-groups-test');
+      await expect(scenario).toBeVisible();
+
+      const nameInput = scenario.locator('#name input');
+      const streetInput = scenario.locator('#address #street input');
+      const cityInput = scenario.locator('#address #city input');
+
+      // Verify default values
+      expect(await nameInput.inputValue()).toBe('Default Name');
+      expect(await streetInput.inputValue()).toBe('123 Main St');
+      expect(await cityInput.inputValue()).toBe('Springfield');
+
+      // Modify the fields
+      await nameInput.fill('New Name');
+      await streetInput.fill('999 New St');
+      await cityInput.fill('New York');
+
+      // Verify modified values
+      expect(await nameInput.inputValue()).toBe('New Name');
+      expect(await streetInput.inputValue()).toBe('999 New St');
+      expect(await cityInput.inputValue()).toBe('New York');
+
+      // Click Reset button
+      await scenario.locator('#reset-button button').click();
+      await page.waitForTimeout(300);
+
+      // Verify values return to defaults
+      expect(await nameInput.inputValue()).toBe('Default Name');
+      expect(await streetInput.inputValue()).toBe('123 Main St');
+      expect(await cityInput.inputValue()).toBe('Springfield');
+    });
+  });
+
+  test.describe('Reset Form with Arrays', () => {
+    test('should reset array fields to initial state', async ({ page, helpers }) => {
+      await page.goto('/#/test/form-reset-clear/reset-with-arrays');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('reset-with-arrays-test');
+      await expect(scenario).toBeVisible();
+
+      const titleInput = scenario.locator('#title input');
+      const tagInputs = scenario.locator('[id^="tag"] input');
+
+      // Verify default values
+      expect(await titleInput.inputValue()).toBe('Default Title');
+      await expect(tagInputs).toHaveCount(1);
+      expect(await tagInputs.nth(0).inputValue()).toBe('initial-tag');
+
+      // Modify the existing tag value
+      await tagInputs.nth(0).fill('modified-tag');
+      expect(await tagInputs.nth(0).inputValue()).toBe('modified-tag');
+
+      // Add a new tag
+      const addButton = scenario.locator('#addTag button');
+      await addButton.click();
+      await page.waitForTimeout(500);
+
+      // Should now have 2 tags
+      await expect(tagInputs).toHaveCount(2);
+
+      // Modify title
+      await titleInput.fill('New Title');
+
+      // Click Reset button
+      await scenario.locator('#reset-button button').click();
+      await page.waitForTimeout(500);
+
+      // Verify title returns to default
+      expect(await titleInput.inputValue()).toBe('Default Title');
+
+      // Verify the array returns to initial state (one item with default value)
+      await expect(tagInputs).toHaveCount(1);
+      expect(await tagInputs.nth(0).inputValue()).toBe('initial-tag');
+    });
+  });
 });
