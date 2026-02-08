@@ -1,10 +1,22 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
+type DynamicField = Record<string, unknown>;
+
+function submitButton(): DynamicField {
+  return {
+    key: 'submit',
+    type: 'submit',
+    label: 'Submit',
+    props: { type: 'submit', color: 'primary' },
+    col: 12,
+  };
+}
+
 /**
  * Generate a flat form with N input fields.
  */
 export function generateFlatFields(count: number, type = 'input'): FormConfig {
-  const fields = Array.from({ length: count }, (_, i) => ({
+  const fields: DynamicField[] = Array.from({ length: count }, (_, i) => ({
     key: `field${i}`,
     type,
     label: `Field ${i + 1}`,
@@ -12,13 +24,7 @@ export function generateFlatFields(count: number, type = 'input'): FormConfig {
     col: 12,
   }));
 
-  fields.push({
-    key: 'submit',
-    type: 'submit',
-    label: 'Submit',
-    props: { type: 'submit', color: 'primary' } as any,
-    col: 12,
-  });
+  fields.push(submitButton());
 
   return { fields } as FormConfig;
 }
@@ -28,9 +34,9 @@ export function generateFlatFields(count: number, type = 'input'): FormConfig {
  */
 export function generateMixedFields(count: number): FormConfig {
   const types = ['input', 'select', 'checkbox', 'radio', 'textarea', 'slider'];
-  const fields = Array.from({ length: count }, (_, i) => {
+  const fields: DynamicField[] = Array.from({ length: count }, (_, i) => {
     const fieldType = types[i % types.length];
-    const base: Record<string, unknown> = {
+    const base: DynamicField = {
       key: `field${i}`,
       type: fieldType,
       label: `${fieldType.charAt(0).toUpperCase() + fieldType.slice(1)} ${i + 1}`,
@@ -61,13 +67,7 @@ export function generateMixedFields(count: number): FormConfig {
     return base;
   });
 
-  fields.push({
-    key: 'submit',
-    type: 'submit',
-    label: 'Submit',
-    props: { type: 'submit', color: 'primary' },
-    col: 12,
-  });
+  fields.push(submitButton());
 
   return { fields } as FormConfig;
 }
@@ -76,7 +76,7 @@ export function generateMixedFields(count: number): FormConfig {
  * Generate a form with fields that have conditional logic.
  */
 export function generateConditionalFields(totalFields: number, conditionalCount: number): FormConfig {
-  const fields: Record<string, unknown>[] = [
+  const fields: DynamicField[] = [
     {
       key: 'toggleField',
       type: 'checkbox',
@@ -87,7 +87,7 @@ export function generateConditionalFields(totalFields: number, conditionalCount:
   ];
 
   for (let i = 0; i < totalFields - 1; i++) {
-    const field: Record<string, unknown> = {
+    const field: DynamicField = {
       key: `field${i}`,
       type: 'input',
       label: `Field ${i + 1}`,
@@ -112,13 +112,7 @@ export function generateConditionalFields(totalFields: number, conditionalCount:
     fields.push(field);
   }
 
-  fields.push({
-    key: 'submit',
-    type: 'submit',
-    label: 'Submit',
-    props: { type: 'submit', color: 'primary' },
-    col: 12,
-  });
+  fields.push(submitButton());
 
   return { fields } as FormConfig;
 }
@@ -127,7 +121,7 @@ export function generateConditionalFields(totalFields: number, conditionalCount:
  * Generate an array config with N items, each having M fields.
  */
 export function generateArrayConfig(itemCount: number, fieldsPerItem: number): FormConfig {
-  const itemTemplate = Array.from({ length: fieldsPerItem }, (_, i) => ({
+  const itemTemplate: DynamicField[] = Array.from({ length: fieldsPerItem }, (_, i) => ({
     key: `itemField${i}`,
     type: 'input',
     label: `Item Field ${i + 1}`,
@@ -144,13 +138,7 @@ export function generateArrayConfig(itemCount: number, fieldsPerItem: number): F
         type: 'array',
         fields: items,
       },
-      {
-        key: 'submit',
-        type: 'submit',
-        label: 'Submit',
-        props: { type: 'submit', color: 'primary' },
-        col: 12,
-      },
+      submitButton(),
     ],
   } as FormConfig;
 }
@@ -159,8 +147,8 @@ export function generateArrayConfig(itemCount: number, fieldsPerItem: number): F
  * Generate a multi-page form config.
  */
 export function generatePagedConfig(pages: number, fieldsPerPage: number): FormConfig {
-  const pageFields = Array.from({ length: pages }, (_, pageIndex) => {
-    const fields: Record<string, unknown>[] = Array.from({ length: fieldsPerPage }, (_, fieldIndex) => ({
+  const pageFields: DynamicField[] = Array.from({ length: pages }, (_, pageIndex) => {
+    const fields: DynamicField[] = Array.from({ length: fieldsPerPage }, (_, fieldIndex) => ({
       key: `p${pageIndex}f${fieldIndex}`,
       type: 'input',
       label: `Page ${pageIndex + 1} - Field ${fieldIndex + 1}`,
@@ -168,15 +156,8 @@ export function generatePagedConfig(pages: number, fieldsPerPage: number): FormC
       col: 6,
     }));
 
-    // Add submit button to the last page
     if (pageIndex === pages - 1) {
-      fields.push({
-        key: 'submit',
-        type: 'submit',
-        label: 'Submit',
-        props: { type: 'submit', color: 'primary' },
-        col: 12,
-      });
+      fields.push(submitButton());
     }
 
     return {

@@ -24,9 +24,9 @@ test.describe('Group Fields E2E Tests', () => {
       await nameInput.fill('Test User');
 
       // Fill nested group fields
-      const streetInput = scenario.locator('#address input').first();
-      const cityInput = scenario.locator('#address input').nth(1);
-      const zipInput = scenario.locator('#address input').nth(2);
+      const streetInput = scenario.locator('#street input');
+      const cityInput = scenario.locator('#city input');
+      const zipInput = scenario.locator('#zip input');
 
       await expect(streetInput).toBeVisible({ timeout: 5000 });
       await streetInput.fill('123 Main St');
@@ -54,7 +54,7 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
       // Fill a nested field
-      const streetInput = scenario.locator('#address input').first();
+      const streetInput = scenario.locator('#street input');
       await expect(streetInput).toBeVisible({ timeout: 5000 });
       await streetInput.fill('456 Oak Ave');
 
@@ -74,12 +74,9 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
       // Verify initial values are displayed
-      const inputs = scenario.locator('#profile input');
-      await expect(inputs).toHaveCount(3, { timeout: 10000 });
-
-      await expect(inputs.nth(0)).toHaveValue('John', { timeout: 5000 });
-      await expect(inputs.nth(1)).toHaveValue('Doe', { timeout: 5000 });
-      await expect(inputs.nth(2)).toHaveValue('john.doe@example.com', { timeout: 5000 });
+      await expect(scenario.locator('#firstName input')).toHaveValue('John', { timeout: 5000 });
+      await expect(scenario.locator('#lastName input')).toHaveValue('Doe', { timeout: 5000 });
+      await expect(scenario.locator('#email input')).toHaveValue('john.doe@example.com', { timeout: 5000 });
     });
 
     test('should allow editing initial values in group fields', async ({ page, helpers }) => {
@@ -89,7 +86,7 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
       // Edit the first name
-      const firstNameInput = scenario.locator('#profile input').first();
+      const firstNameInput = scenario.locator('#firstName input');
       await expect(firstNameInput).toHaveValue('John', { timeout: 5000 });
 
       await firstNameInput.clear();
@@ -98,8 +95,7 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(firstNameInput).toHaveValue('Jane', { timeout: 5000 });
 
       // Other fields should remain unchanged
-      const lastNameInput = scenario.locator('#profile input').nth(1);
-      await expect(lastNameInput).toHaveValue('Doe', { timeout: 5000 });
+      await expect(scenario.locator('#lastName input')).toHaveValue('Doe', { timeout: 5000 });
     });
   });
 
@@ -111,24 +107,26 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
       // Fill personal group fields
-      const personalInputs = scenario.locator('#personal input');
-      await expect(personalInputs).toHaveCount(2, { timeout: 10000 });
+      const firstNameInput = scenario.locator('#firstName input');
+      const lastNameInput = scenario.locator('#lastName input');
+      await expect(firstNameInput).toBeVisible({ timeout: 5000 });
 
-      await personalInputs.nth(0).fill('John');
-      await personalInputs.nth(1).fill('Doe');
+      await firstNameInput.fill('John');
+      await lastNameInput.fill('Doe');
 
       // Fill work group fields
-      const workInputs = scenario.locator('#work input');
-      await expect(workInputs).toHaveCount(2, { timeout: 10000 });
+      const companyInput = scenario.locator('#company input');
+      const positionInput = scenario.locator('#position input');
+      await expect(companyInput).toBeVisible({ timeout: 5000 });
 
-      await workInputs.nth(0).fill('Acme Corp');
-      await workInputs.nth(1).fill('Developer');
+      await companyInput.fill('Acme Corp');
+      await positionInput.fill('Developer');
 
       // Verify all values are maintained
-      await expect(personalInputs.nth(0)).toHaveValue('John', { timeout: 5000 });
-      await expect(personalInputs.nth(1)).toHaveValue('Doe', { timeout: 5000 });
-      await expect(workInputs.nth(0)).toHaveValue('Acme Corp', { timeout: 5000 });
-      await expect(workInputs.nth(1)).toHaveValue('Developer', { timeout: 5000 });
+      await expect(firstNameInput).toHaveValue('John', { timeout: 5000 });
+      await expect(lastNameInput).toHaveValue('Doe', { timeout: 5000 });
+      await expect(companyInput).toHaveValue('Acme Corp', { timeout: 5000 });
+      await expect(positionInput).toHaveValue('Developer', { timeout: 5000 });
 
       // Screenshot: Multiple groups filled
       await helpers.expectScreenshotMatch(scenario, 'material-group-nested-filled');
@@ -141,12 +139,12 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
       // Fill work group first
-      const companyInput = scenario.locator('#work input').first();
+      const companyInput = scenario.locator('#company input');
       await expect(companyInput).toBeVisible({ timeout: 5000 });
       await companyInput.fill('TechCorp');
 
       // Then fill personal group
-      const firstNameInput = scenario.locator('#personal input').first();
+      const firstNameInput = scenario.locator('#firstName input');
       await firstNameInput.fill('Jane');
 
       // Verify work group value is maintained
@@ -167,8 +165,8 @@ test.describe('Group Fields E2E Tests', () => {
       const businessRadio = scenario.locator('#accountType mat-radio-button:has-text("Business")');
 
       // Get business group fields
-      const companyNameInput = scenario.locator('#businessDetails input').first();
-      const taxIdInput = scenario.locator('#businessDetails input').nth(1);
+      const companyNameInput = scenario.locator('#companyName input');
+      const taxIdInput = scenario.locator('#taxId input');
       const employeeCountSelect = helpers.getSelect(scenario, 'employeeCount');
 
       // Common field should always be visible
@@ -221,12 +219,12 @@ test.describe('Group Fields E2E Tests', () => {
       const includeBillingCheckbox = helpers.getCheckbox(scenario, 'includeBilling');
 
       // Get address group fields
-      const streetInput = scenario.locator('#address input').first();
-      const cityInput = scenario.locator('#address input').nth(1);
+      const streetInput = scenario.locator('#street input');
+      const cityInput = scenario.locator('#city input');
       const stateSelect = helpers.getSelect(scenario, 'state');
 
       // Get billing group fields
-      const billingStreetInput = scenario.locator('#billing input').first();
+      const billingStreetInput = scenario.locator('#billingStreet input');
 
       // Initially both groups should be hidden
       await expect(streetInput).not.toBeVisible({ timeout: 5000 });

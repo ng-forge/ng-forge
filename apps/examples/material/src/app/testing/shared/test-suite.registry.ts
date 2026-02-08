@@ -1,6 +1,7 @@
 import { TestSuite } from './types';
 
 // Import all test suites
+import { accessibilitySuite } from '../accessibility/accessibility.suite';
 import { advancedValidationSuite } from '../advanced-validation/advanced-validation.suite';
 import { angularSchemaValidationSuite } from '../angular-schema-validation/angular-schema-validation.suite';
 import { arrayFieldsSuite } from '../array-fields/array-fields.suite';
@@ -15,6 +16,7 @@ import { derivationLogicSuite } from '../derivation-logic/derivation-logic.suite
 import { errorHandlingSuite } from '../error-handling/error-handling.suite';
 import { essentialTestsSuite } from '../essential-tests/essential-tests.suite';
 import { expressionBasedLogicSuite } from '../expression-based-logic/expression-based-logic.suite';
+import { fieldMetaSuite } from '../field-meta/field-meta.suite';
 import { formResetClearSuite } from '../form-reset-clear/form-reset-clear.suite';
 import { groupFieldsSuite } from '../group-fields/group-fields.suite';
 import { materialComponentsSuite } from '../material-components/material-components.suite';
@@ -35,6 +37,7 @@ import { zodSchemaValidationSuite } from '../zod-schema-validation/zod-schema-va
  * - TestScenarioComponent (renders individual scenarios)
  */
 export const TEST_SUITE_REGISTRY: TestSuite[] = [
+  accessibilitySuite,
   advancedValidationSuite,
   angularSchemaValidationSuite,
   arrayFieldsSuite,
@@ -49,6 +52,7 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   errorHandlingSuite,
   essentialTestsSuite,
   expressionBasedLogicSuite,
+  fieldMetaSuite,
   formResetClearSuite,
   groupFieldsSuite,
   materialComponentsSuite,
