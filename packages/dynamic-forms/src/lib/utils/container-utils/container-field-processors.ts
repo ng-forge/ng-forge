@@ -17,6 +17,9 @@ export function createContainerFieldProcessors() {
   const memoizedFlattenFields = memoize(
     (fields: readonly FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields([...fields], registry),
     {
+      // registry.size is a valid cache key proxy because the field registry is populated
+      // once at bootstrap and never mutated at runtime. If the registry were mutable,
+      // we would need a content-based hash instead.
       resolver: (fields, registry) => {
         let key = '';
         for (const f of fields) {
@@ -43,6 +46,8 @@ export function createContainerFieldProcessors() {
     <T extends FieldDef<unknown>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) =>
       mapValues(fieldsById, (field) => getFieldDefaultValue(field, registry)),
     {
+      // registry.size is a valid cache key proxy because the field registry is populated
+      // once at bootstrap and never mutated at runtime.
       resolver: (fieldsById, registry) => {
         const keys = Object.keys(fieldsById).sort();
         return keys.join('|') + '|' + registry.size;
@@ -56,9 +61,16 @@ export function createContainerFieldProcessors() {
 
 /**
  * Shared container field processors injection token.
- * Provided at the DynamicForm component level so one form + all its nested groups
- * share a single memoize cache, while different form instances stay isolated.
- * The root-level factory acts as a fallback for standalone usage (e.g. tests).
+ *
+ * Provided at the DynamicForm component level via `provideDynamicFormDI()` so one
+ * form + all its nested groups share a single memoize cache, while different form
+ * instances stay isolated.
+ *
+ * The `providedIn: 'root'` factory is a fallback only — it ensures tests and
+ * standalone containers (e.g. a bare GroupFieldComponent in a unit test) can
+ * resolve the token without an explicit provider. In a running application, the
+ * component-level provider from `provideDynamicFormDI()` always shadows this root
+ * instance, so each form gets its own isolated cache.
  *
  * @internal
  */

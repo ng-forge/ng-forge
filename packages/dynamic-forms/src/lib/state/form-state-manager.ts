@@ -130,6 +130,9 @@ export class FormStateManager<
   private readonly memoizedFlattenFieldsForRendering = memoize(
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry, { preserveRows: true }),
     {
+      // registry.size is a valid cache key proxy because the field registry is populated
+      // once at bootstrap and never mutated at runtime. If the registry were mutable,
+      // we would need a content-based hash instead.
       resolver: (fields, registry) => {
         let key = '';
         for (const f of fields) {
@@ -261,14 +264,17 @@ export class FormStateManager<
     }
 
     // Bootstrap path: compute form setup before the state machine dispatches 'initialize'.
-    // Must register validators/schemas here — the state machine callback hasn't fired yet,
-    // but the form computed already needs registered schemas to build validation.
+    // Register validators/schemas here so they are available before the first form is built.
+    // This is a controlled side effect: registerValidatorsFromConfig is idempotent and only
+    // mutates external registries (SchemaRegistry, FunctionRegistry), not reactive state.
+    // The state machine's createFormSetup callback handles registration for subsequent configs.
     const config = this.activeConfig();
+    if (config) {
+      this.registerValidatorsFromConfig(config as FormConfig<TFields>);
+    }
     if (!config) {
       return this.createEmptyFormSetup(registry);
     }
-
-    this.registerValidatorsFromConfig(config);
 
     if (config.fields && config.fields.length > 0) {
       const modeDetection = this.formModeDetection();
@@ -296,6 +302,19 @@ export class FormStateManager<
 
   /**
    * Entity (form value merged with defaults).
+   *
+   * Bidirectional sync with `deps.value`:
+   *
+   * 1. **Inward** (deps.value → entity): When the host component sets `value` externally
+   *    (e.g. two-way binding), this `linkedSignal` source recomputes, merging the new
+   *    input with field defaults and filtering to valid keys.
+   *
+   * 2. **Outward** (entity → deps.value): An `explicitEffect` in `setupEffects()` watches
+   *    `entity` and writes changes back to `deps.value`, keeping the host's model signal
+   *    in sync with internal form state (e.g. after derivations or reset).
+   *
+   * The `isEqual` guard on the effect prevents infinite ping-pong: if entity already
+   * matches deps.value, the write-back is skipped.
    */
   readonly entity = linkedSignal<TModel>(
     () => {
@@ -466,6 +485,12 @@ export class FormStateManager<
 
   /**
    * Injector for field components with FIELD_SIGNAL_CONTEXT.
+   *
+   * Recreates the Injector on every `fieldSignalContext` change. This is intentional:
+   * `reconcileFields()` compares the injector reference to detect context changes
+   * (e.g. after a config transition). A new injector reference signals that
+   * `NgComponentOutlet` should pick up the updated context, while an unchanged
+   * reference preserves object identity to avoid unnecessary re-renders.
    */
   private readonly fieldInjector = computed(() =>
     Injector.create({
@@ -655,6 +680,9 @@ export class FormStateManager<
       onTransition: (transition) => {
         this.logger.debug('State transition:', transition.from.type, '→', transition.to.type, transition.action.type);
       },
+      onError: (error, action) => {
+        this.logger.error(`State machine error recovery triggered for action '${action.type}':`, error);
+      },
     });
 
     runInInjectionContext(this.injector, () => {
@@ -710,11 +738,13 @@ export class FormStateManager<
       const state = this.machine.currentState;
       if (state.type === LifecycleState.Uninitialized) {
         this.machine.dispatch({ type: Action.Initialize, config });
-      } else if (state.type !== LifecycleState.Initializing) {
+      } else {
         this.machine.dispatch({ type: Action.ConfigChange, config });
       }
     });
 
+    // Outward sync: write entity changes back to deps.value (see entity JSDoc for full explanation).
+    // The isEqual guard prevents infinite ping-pong between this effect and the linkedSignal source.
     explicitEffect([this.entity], ([currentEntity]) => {
       const currentValue = this.deps.value();
       if (!isEqual(currentEntity, currentValue)) {
@@ -770,11 +800,7 @@ export class FormStateManager<
     this.functionRegistry.setHttpValidators(customFnConfig.httpValidators);
   }
 
-  private createFormSetupFromConfig(
-    fields: FieldDef<unknown>[],
-    mode: FormMode,
-    registry: Map<string, FieldTypeDefinition>,
-  ): FormSetup<TFields> {
+  private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: FormMode, registry: Map<string, FieldTypeDefinition>): FormSetup {
     const flattenedFields = this.fieldProcessors.memoizedFlattenFields(fields, registry);
     const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(fields, registry);
     const fieldsById = this.fieldProcessors.memoizedKeyBy(flattenedFields);
@@ -791,7 +817,7 @@ export class FormStateManager<
     };
   }
 
-  private createEmptyFormSetup(registry: Map<string, FieldTypeDefinition>): FormSetup<TFields> {
+  private createEmptyFormSetup(registry: Map<string, FieldTypeDefinition>): FormSetup {
     return {
       fields: [],
       schemaFields: [],

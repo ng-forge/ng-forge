@@ -102,7 +102,7 @@ export class DynamicForm<
    * but before stateManager is injected. FormStateManager reads from these signals
    * in computeds/effects, which are all lazy and evaluated after construction.
    */
-  private readonly _ = (() => {
+  private readonly _connectStateDeps = (() => {
     const deps = inject(FORM_STATE_DEPS);
     deps.config = this.config as Signal<FormConfig<RegisteredFieldTypes[]>>;
     deps.formOptions = this.formOptions;

@@ -92,7 +92,7 @@ export interface FormLifecycleInitializing<TFields extends RegisteredFieldTypes[
 export interface FormLifecycleReady<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
   readonly type: (typeof LifecycleState)['Ready'];
   readonly config: FormConfig<TFields>;
-  readonly formSetup: FormSetup<TFields>;
+  readonly formSetup: FormSetup;
 }
 
 export type TransitionPhase = PhaseType;
@@ -104,9 +104,9 @@ export interface FormLifecycleTransitioning<TFields extends RegisteredFieldTypes
   readonly pendingConfig: FormConfig<TFields>;
   readonly preservedValue?: Record<string, unknown>;
   /** FormSetup from the ready state that initiated this transition */
-  readonly currentFormSetup: FormSetup<TFields>;
+  readonly currentFormSetup: FormSetup;
   /** FormSetup computed for the pending config (set when apply-complete fires) */
-  readonly pendingFormSetup?: FormSetup<TFields>;
+  readonly pendingFormSetup?: FormSetup;
 }
 
 export interface FormLifecycleDestroyed {
@@ -114,8 +114,7 @@ export interface FormLifecycleDestroyed {
 }
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface FormSetup<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
+export interface FormSetup {
   /** Fields to render (flattened for non-paged, empty for paged). */
   readonly fields: FieldDef<unknown>[];
   /** All schema fields for validation (flattened from all pages/containers). */
@@ -134,10 +133,10 @@ export interface FormSetup<TFields extends RegisteredFieldTypes[] = RegisteredFi
 export type FormStateAction<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> =
   | InitializeAction<TFields>
   | ConfigChangeAction<TFields>
-  | SetupCompleteAction<TFields>
+  | SetupCompleteAction
   | ValueCapturedAction
   | TeardownCompleteAction
-  | ApplyCompleteAction<TFields>
+  | ApplyCompleteAction
   | RestoreCompleteAction
   | DestroyAction;
 
@@ -151,9 +150,9 @@ export interface ConfigChangeAction<TFields extends RegisteredFieldTypes[] = Reg
   readonly config: FormConfig<TFields>;
 }
 
-export interface SetupCompleteAction<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
+export interface SetupCompleteAction {
   readonly type: (typeof Action)['SetupComplete'];
-  readonly formSetup: FormSetup<TFields>;
+  readonly formSetup: FormSetup;
 }
 
 export interface ValueCapturedAction {
@@ -165,9 +164,9 @@ export interface TeardownCompleteAction {
   readonly type: (typeof Action)['TeardownComplete'];
 }
 
-export interface ApplyCompleteAction<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {
+export interface ApplyCompleteAction {
   readonly type: (typeof Action)['ApplyComplete'];
-  readonly formSetup: FormSetup<TFields>;
+  readonly formSetup: FormSetup;
 }
 
 export interface RestoreCompleteAction {
@@ -251,7 +250,7 @@ export function createInitializingState<TFields extends RegisteredFieldTypes[]>(
 /** @internal */
 export function createReadyState<TFields extends RegisteredFieldTypes[]>(
   config: FormConfig<TFields>,
-  formSetup: FormSetup<TFields>,
+  formSetup: FormSetup,
 ): FormLifecycleReady<TFields> {
   return { type: LifecycleState.Ready, config, formSetup };
 }
@@ -261,9 +260,9 @@ export function createTransitioningState<TFields extends RegisteredFieldTypes[]>
   phase: TransitionPhase,
   currentConfig: FormConfig<TFields>,
   pendingConfig: FormConfig<TFields>,
-  currentFormSetup: FormSetup<TFields>,
+  currentFormSetup: FormSetup,
   preservedValue?: Record<string, unknown>,
-  pendingFormSetup?: FormSetup<TFields>,
+  pendingFormSetup?: FormSetup,
 ): FormLifecycleTransitioning<TFields> {
   return { type: LifecycleState.Transitioning, phase, currentConfig, pendingConfig, currentFormSetup, preservedValue, pendingFormSetup };
 }

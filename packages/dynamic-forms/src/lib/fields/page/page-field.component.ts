@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
@@ -68,20 +69,7 @@ export default class PageFieldComponent {
 
   readonly disabled = computed(() => this.field().disabled || false);
 
-  readonly isValid = computed(() => {
-    const pageField = this.field();
-    const valid = validatePageNesting(pageField);
-
-    if (!valid) {
-      this.logger.error(
-        `Invalid configuration: Page '${pageField.key}' contains nested page fields. ` +
-          `Pages cannot contain other pages. Consider using groups or rows for nested structure.`,
-        pageField,
-      );
-    }
-
-    return valid;
-  });
+  readonly isValid = computed(() => validatePageNesting(this.field()));
 
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
@@ -137,5 +125,15 @@ export default class PageFieldComponent {
 
   private setupEffects(): void {
     setupContainerInitEffect(this.resolvedFields, this.eventBus, 'page', () => this.field().key, this.injector);
+
+    explicitEffect([this.isValid, this.field], ([valid, pageField]) => {
+      if (!valid) {
+        this.logger.error(
+          `Invalid configuration: Page '${pageField.key}' contains nested page fields. ` +
+            `Pages cannot contain other pages. Consider using groups or rows for nested structure.`,
+          pageField,
+        );
+      }
+    });
   }
 }

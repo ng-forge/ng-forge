@@ -13,6 +13,7 @@ import { firstValueFrom, timeout } from 'rxjs';
 import { FormResetEvent } from './events/constants/form-reset.event';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormStateManager } from './state/form-state-manager';
+import { EventBus } from './events/event.bus';
 
 // Test specific form config type
 type TestFormConfig = {
@@ -2173,7 +2174,7 @@ describe('DynamicFormComponent', () => {
       });
 
       // Dispatch FormResetEvent via the event bus
-      (component as any).eventBus.dispatch(FormResetEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormResetEvent);
       await delay();
       fixture.detectChanges();
 
@@ -2220,10 +2221,10 @@ describe('DynamicFormComponent', () => {
       });
 
       // Wait for clear event emission
-      const clearPromise = firstValueFrom((component as any).eventBus.on('form-clear'));
+      const clearPromise = firstValueFrom(fixture.debugElement.injector.get(EventBus).on('form-clear'));
 
       // Dispatch FormClearEvent via the event bus
-      (component as any).eventBus.dispatch(FormClearEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormClearEvent);
 
       // Verify clear event was emitted
       await expect(clearPromise).resolves.toBeDefined();
@@ -2253,7 +2254,7 @@ describe('DynamicFormComponent', () => {
       ]);
 
       // Dispatch FormResetEvent
-      (component as any).eventBus.dispatch(FormResetEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormResetEvent);
       fixture.detectChanges();
 
       // Should complete proving reset was emitted
@@ -2284,7 +2285,7 @@ describe('DynamicFormComponent', () => {
       ]);
 
       // Dispatch FormClearEvent
-      (component as any).eventBus.dispatch(FormClearEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormClearEvent);
       fixture.detectChanges();
 
       // Should complete proving cleared was emitted
@@ -2331,7 +2332,7 @@ describe('DynamicFormComponent', () => {
       });
 
       // Reset should restore to type-appropriate defaults
-      (component as any).eventBus.dispatch(FormResetEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormResetEvent);
       await delay();
       fixture.detectChanges();
 
@@ -2385,7 +2386,7 @@ describe('DynamicFormComponent', () => {
       fixture.detectChanges();
 
       // Reset to defaults
-      (component as any).eventBus.dispatch(FormResetEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormResetEvent);
       await delay();
       fixture.detectChanges();
 
@@ -2407,7 +2408,7 @@ describe('DynamicFormComponent', () => {
       expect(component.formValue()).toEqual({});
 
       // Clear should work even on empty form
-      (component as any).eventBus.dispatch(FormClearEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormClearEvent);
       await delay();
       fixture.detectChanges();
 
@@ -2441,7 +2442,7 @@ describe('DynamicFormComponent', () => {
       expect(component.valid()).toBe(false);
 
       // Reset should restore valid state
-      (component as any).eventBus.dispatch(FormResetEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormResetEvent);
       await delay();
       fixture.detectChanges();
 
@@ -2469,10 +2470,10 @@ describe('DynamicFormComponent', () => {
       expect(component.valid()).toBe(true);
 
       // Wait for clear event
-      const clearPromise = firstValueFrom((component as any).eventBus.on('form-clear'));
+      const clearPromise = firstValueFrom(fixture.debugElement.injector.get(EventBus).on('form-clear'));
 
       // Dispatch clear event
-      (component as any).eventBus.dispatch(FormClearEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormClearEvent);
 
       // Verify clear event was emitted
       await expect(clearPromise).resolves.toBeDefined();
@@ -2498,19 +2499,19 @@ describe('DynamicFormComponent', () => {
       // Change and reset multiple times
       component.value.set({ firstName: 'Jane' });
       await delay();
-      (component as any).eventBus.dispatch(FormResetEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormResetEvent);
       await delay();
       expect(component.formValue()).toEqual({ firstName: 'John' });
 
       component.value.set({ firstName: 'Bob' });
       await delay();
-      (component as any).eventBus.dispatch(FormResetEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormResetEvent);
       await delay();
       expect(component.formValue()).toEqual({ firstName: 'John' });
 
       component.value.set({ firstName: 'Alice' });
       await delay();
-      (component as any).eventBus.dispatch(FormResetEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormResetEvent);
       await delay();
       expect(component.formValue()).toEqual({ firstName: 'John' });
     });
@@ -2542,17 +2543,17 @@ describe('DynamicFormComponent', () => {
       });
 
       // Wait for clear event
-      let clearPromise = firstValueFrom((component as any).eventBus.on('form-clear'));
+      let clearPromise = firstValueFrom(fixture.debugElement.injector.get(EventBus).on('form-clear'));
 
       // Clear the form
-      (component as any).eventBus.dispatch(FormClearEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormClearEvent);
       await expect(clearPromise).resolves.toBeDefined();
 
       // Wait for reset event
-      const resetPromise = firstValueFrom((component as any).eventBus.on('form-reset'));
+      const resetPromise = firstValueFrom(fixture.debugElement.injector.get(EventBus).on('form-reset'));
 
       // Reset should restore defaults even after clear
-      (component as any).eventBus.dispatch(FormResetEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormResetEvent);
       await expect(resetPromise).resolves.toBeDefined();
 
       expect(component.formValue()).toEqual({
@@ -2561,10 +2562,10 @@ describe('DynamicFormComponent', () => {
       });
 
       // Wait for another clear event
-      clearPromise = firstValueFrom((component as any).eventBus.on('form-clear'));
+      clearPromise = firstValueFrom(fixture.debugElement.injector.get(EventBus).on('form-clear'));
 
       // Clear again
-      (component as any).eventBus.dispatch(FormClearEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormClearEvent);
       await expect(clearPromise).resolves.toBeDefined();
     });
 
@@ -2621,7 +2622,7 @@ describe('DynamicFormComponent', () => {
       });
 
       // Reset should restore nested defaults
-      (component as any).eventBus.dispatch(FormResetEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormResetEvent);
       await delay();
       fixture.detectChanges();
 
@@ -2669,10 +2670,10 @@ describe('DynamicFormComponent', () => {
       });
 
       // Wait for clear event
-      const clearPromise = firstValueFrom((component as any).eventBus.on('form-clear'));
+      const clearPromise = firstValueFrom(fixture.debugElement.injector.get(EventBus).on('form-clear'));
 
       // Clear should empty everything
-      (component as any).eventBus.dispatch(FormClearEvent);
+      fixture.debugElement.injector.get(EventBus).dispatch(FormClearEvent);
 
       // Verify clear event was emitted
       await expect(clearPromise).resolves.toBeDefined();

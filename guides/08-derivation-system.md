@@ -25,9 +25,9 @@ The derivation system automatically computes field values based on other form va
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                          Runtime Processing                                 │
 │  ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────────┐  │
-│  │ Derivation       │ → │ DerivationLookup │ → │ RxJS Streams          │  │
-│  │ Orchestrator     │   │ (lazy maps)      │   │ (onChange/debounce)   │  │
-│  └──────────────────┘    └──────────────────┘    └──────────────────────┘  │
+│  │ Derivation       │ ────────────────────→ │ RxJS Streams          │  │
+│  │ Orchestrator     │                       │ (onChange/debounce)   │  │
+│  └──────────────────┘                        └──────────────────────┘  │
 │                                                            │               │
 │                                                            ▼               │
 │                                                  ┌──────────────────────┐  │
@@ -142,51 +142,7 @@ After sorting:  [subtotal, tax, total]
 
 **Optimization:** Uses pre-built index (`producersByTarget`) for O(1) lookups instead of O(n) scanning.
 
-### 4. Derivation Lookup (`derivation-lookup.ts`)
-
-Injectable service that provides lazy-computed lookup maps for efficient entry access.
-
-**Design rationale:** Instead of pre-computing all lookup maps at collection time (which caused hidden mutation), this service computes maps lazily on first access and caches them.
-
-```typescript
-@Injectable()
-export class DerivationLookup {
-  private readonly entriesSignal = inject(DERIVATION_ENTRIES);
-
-  // Cached lookup maps (built lazily on first access)
-  private _byTarget?: Map<string, DerivationEntry[]>;
-  private _byDependency?: Map<string, DerivationEntry[]>;
-  private _wildcardEntries?: DerivationEntry[];
-  // ...
-
-  get byTarget(): Map<string, DerivationEntry[]> {
-    return (this._byTarget ??= this.buildByTargetMap());
-  }
-
-  get byDependency(): Map<string, DerivationEntry[]> {
-    return (this._byDependency ??= this.buildByDependencyMap());
-  }
-
-  get wildcardEntries(): DerivationEntry[] {
-    return (this._wildcardEntries ??= this.buildWildcardEntries());
-  }
-
-  /** O(k) lookup where k = number of changed fields */
-  getEntriesForChangedFields(changedFields: Set<string>): DerivationEntry[] {
-    // Uses indexed maps for efficient lookup
-  }
-
-  getOnChangeEntries(): DerivationEntry[] {
-    return (this._onChangeEntries ??= this.entries.filter((e) => e.trigger !== 'debounced'));
-  }
-
-  getDebouncedEntries(debounceMs: number): DerivationEntry[] {
-    // Lazy build and cache by debounce period
-  }
-}
-```
-
-### 5. Derivation Orchestrator (`derivation-orchestrator.ts`)
+### 4. Derivation Orchestrator (`derivation-orchestrator.ts`)
 
 Central coordinator that sets up RxJS streams for reactive derivation processing.
 
@@ -277,7 +233,7 @@ formValue$
 | `switchMap`          | Cancels pending debounced work on new changes  |
 | `takeUntilDestroyed` | Automatic cleanup on component destruction     |
 
-### 6. Derivation Applicator (`derivation-applicator.ts`)
+### 5. Derivation Applicator (`derivation-applicator.ts`)
 
 Executes derivation logic and applies values to the form.
 
@@ -608,52 +564,36 @@ Applied: 15, Skipped: 3, Errors: 0
 
 Reduces iterations by processing derivations in dependency order. Without sorting, the loop might need multiple iterations to stabilize. With sorting, most cases complete in 1-2 iterations.
 
-### 2. Lazy-Computed Lookup Maps
+### 2. Indexed Lookup Maps
 
-`DerivationLookup` computes maps lazily on first access instead of pre-computing everything at collection time:
-
-```typescript
-// DerivationLookup
-get byDependency(): Map<string, DerivationEntry[]> {
-  return (this._byDependency ??= this.buildByDependencyMap());
-}
-```
-
-Benefits:
-
-- No hidden mutation of the collection object
-- Maps only built when needed
-- Clear ownership (lookup service owns the maps)
-
-### 3. Indexed Lookup Maps
-
-O(1) access via `byDependency`, `byField` maps instead of O(n) filtering:
+O(1) access via pre-built `byDependency`, `byField` maps instead of O(n) filtering:
 
 ```typescript
 // Instead of O(n) filter
 const affected = entries.filter((e) => e.dependsOn.includes(changedField));
 
-// O(1) map lookup via DerivationLookup
-const affected = lookup.byDependency.get(changedField);
+// O(1) map lookup
+const affected = byDependency.get(changedField);
 ```
 
-### 4. Changed Field Filtering
+These maps are built once from the collected derivation entries and cached for the lifetime of the form.
+
+### 3. Changed Field Filtering
 
 Only processes derivations affected by changed fields:
 
 ```typescript
-// DerivationLookup.getEntriesForChangedFields
 // O(k) where k = number of changed fields
 for (const fieldKey of changedFields) {
-  this.byDependency.get(fieldKey)?.forEach((e) => entries.add(e));
-  this.byArrayPath.get(fieldKey)?.forEach((e) => entries.add(e));
+  byDependency.get(fieldKey)?.forEach((e) => entries.add(e));
+  byArrayPath.get(fieldKey)?.forEach((e) => entries.add(e));
 }
 
 // O(w) where w = number of wildcard entries
-this.wildcardEntries.forEach((e) => entries.add(e));
+wildcardEntries.forEach((e) => entries.add(e));
 ```
 
-### 5. Batched Synchronous Emissions
+### 4. Batched Synchronous Emissions
 
 Uses `auditTime(0)` to batch synchronous emissions from Angular's change detection:
 
@@ -718,8 +658,6 @@ Use `debugName` on derivation configs for easier identification:
 | File                            | Purpose                                        |
 | ------------------------------- | ---------------------------------------------- |
 | `derivation-types.ts`           | TypeScript interfaces and factory functions    |
-| `derivation-tokens.ts`          | DI tokens (`DERIVATION_ENTRIES`)               |
-| `derivation-lookup.ts`          | Lazy-computed lookup maps service              |
 | `derivation-collector.ts`       | Traverses fields, extracts derivations         |
 | `cycle-detector.ts`             | Validates no cycles, warns about bidirectional |
 | `derivation-sorter.ts`          | Topological sort using Kahn's algorithm        |

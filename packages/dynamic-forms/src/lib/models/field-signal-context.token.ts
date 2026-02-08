@@ -2,6 +2,7 @@ import { InjectionToken, Signal } from '@angular/core';
 import type { FieldSignalContext, ArrayContext } from '../mappers/types';
 import type { ValidationMessages } from './validation-types';
 import type { FormOptions } from './form-config';
+import { DynamicFormError } from '../errors/dynamic-form-error';
 
 /**
  * Injection token for providing field signal context to mappers and components.
@@ -35,7 +36,7 @@ import type { FormOptions } from './form-config';
 export const FIELD_SIGNAL_CONTEXT = new InjectionToken<FieldSignalContext>('FIELD_SIGNAL_CONTEXT', {
   providedIn: null, // Not provided at root - must be provided by DynamicForm
   factory: () => {
-    throw new Error(
+    throw new DynamicFormError(
       'FIELD_SIGNAL_CONTEXT was not provided. ' +
         'This token must be provided by DynamicFormComponent or a container field component. ' +
         'If you are calling a mapper function directly, ensure it runs within runInInjectionContext() ' +

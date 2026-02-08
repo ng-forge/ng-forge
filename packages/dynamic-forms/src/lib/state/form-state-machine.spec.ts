@@ -69,7 +69,7 @@ const mockPendingConfig: FormConfig<TestFields> = {
   fields: [{ type: 'input', key: 'name', label: 'Name' }],
 } as FormConfig<TestFields>;
 
-const mockFormSetup: FormSetup<TestFields> = {
+const mockFormSetup: FormSetup = {
   fields: [],
   schemaFields: [],
   defaultValues: {},
@@ -77,9 +77,9 @@ const mockFormSetup: FormSetup<TestFields> = {
   registry: new Map(),
 };
 
-const mockPendingFormSetup: FormSetup<TestFields> = {
+const mockPendingFormSetup: FormSetup = {
   fields: [],
-  schemaFields: [{ key: 'name' } as FormSetup<TestFields>['schemaFields'][number]],
+  schemaFields: [{ key: 'name' } as FormSetup['schemaFields'][number]],
   defaultValues: { name: '' },
   mode: 'non-paged',
   registry: new Map(),
@@ -91,7 +91,7 @@ const mockPendingFormSetup: FormSetup<TestFields> = {
  */
 function expectReadyState(state: {
   type: string;
-}): asserts state is { type: typeof LifecycleState.Ready; config: FormConfig<TestFields>; formSetup: FormSetup<TestFields> } {
+}): asserts state is { type: typeof LifecycleState.Ready; config: FormConfig<TestFields>; formSetup: FormSetup } {
   expect(state.type).toBe(LifecycleState.Ready);
 }
 
@@ -99,10 +99,10 @@ function expectTransitioningState(state: { type: string }): asserts state is {
   type: typeof LifecycleState.Transitioning;
   phase: string;
   currentConfig: FormConfig<TestFields>;
-  currentFormSetup: FormSetup<TestFields>;
+  currentFormSetup: FormSetup;
   pendingConfig: FormConfig<TestFields>;
   preservedValue?: Record<string, unknown>;
-  pendingFormSetup?: FormSetup<TestFields>;
+  pendingFormSetup?: FormSetup;
 } {
   expect(state.type).toBe(LifecycleState.Transitioning);
 }
@@ -376,6 +376,47 @@ describe('FormStateMachine', () => {
       // The machine reaches Ready with the newest config.
       expectReadyState(machine.currentState);
       expect(machine.currentState.config).toBe(newestConfig);
+    });
+
+    it('should restart initialization when dispatched during Initializing state', () => {
+      // Use a controlled scheduler so we can observe the Initializing state.
+      let createFormCallback: (() => void) | undefined;
+      const controlledScheduler = {
+        ...createSynchronousScheduler(),
+        executeBlocking: vi.fn(
+          (effect: () => void) =>
+            new Observable<void>((sub) => {
+              createFormCallback = () => {
+                try {
+                  effect();
+                  sub.next(undefined);
+                  sub.complete();
+                } catch (e) {
+                  sub.error(e);
+                }
+              };
+            }),
+        ),
+      } as unknown as SideEffectScheduler;
+
+      const machine = createMachine({ scheduler: controlledScheduler });
+      machine.dispatch({ type: Action.Initialize, config: mockConfig });
+
+      // Machine is in Initializing, waiting for CreateForm to complete.
+      expect(machine.currentState.type).toBe(LifecycleState.Initializing);
+
+      // Dispatch ConfigChange with a new config while still Initializing.
+      machine.dispatch({ type: Action.ConfigChange, config: mockPendingConfig });
+
+      // Resolve the first CreateForm effect (from Initialize).
+      createFormCallback?.();
+
+      // The ConfigChange should have restarted initialization with the new config.
+      // After the second CreateForm resolves, the machine should be Ready with mockPendingConfig.
+      createFormCallback?.();
+
+      expectReadyState(machine.currentState);
+      expect(machine.currentState.config).toBe(mockPendingConfig);
     });
 
     it('should be a no-op when dispatched in Destroyed state', () => {
@@ -794,6 +835,50 @@ describe('FormStateMachine', () => {
 
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining("Action 'initialize' failed:"), expect.any(Error));
     });
+
+    it('should call onError callback with error and action', () => {
+      const onError = vi.fn();
+      createFormSetup.mockImplementation(() => {
+        throw new Error('Boom');
+      });
+
+      const machine = createMachine({ onError });
+      machine.dispatch({ type: Action.Initialize, config: mockConfig });
+
+      expect(onError).toHaveBeenCalledTimes(1);
+      expect(onError).toHaveBeenCalledWith(expect.any(Error), { type: Action.Initialize, config: mockConfig });
+      expect((onError.mock.calls[0][0] as Error).message).toBe('Boom');
+    });
+
+    it('should call onError callback during Transitioning error recovery', () => {
+      const onError = vi.fn();
+      const machine = createMachine({ onError });
+      machine.dispatch({ type: Action.Initialize, config: mockConfig });
+      expect(machine.currentState.type).toBe(LifecycleState.Ready);
+
+      captureValue.mockImplementation(() => {
+        throw new Error('Capture failed');
+      });
+
+      machine.dispatch({ type: Action.ConfigChange, config: mockPendingConfig });
+
+      expect(onError).toHaveBeenCalledTimes(1);
+      expect(onError).toHaveBeenCalledWith(expect.any(Error), { type: Action.ConfigChange, config: mockPendingConfig });
+    });
+
+    it('should handle onError being undefined without errors', () => {
+      createFormSetup.mockImplementation(() => {
+        throw new Error('Boom');
+      });
+
+      const machine = createMachine({ onError: undefined });
+
+      expect(() => {
+        machine.dispatch({ type: Action.Initialize, config: mockConfig });
+      }).not.toThrow();
+
+      expect(machine.currentState.type).toBe(LifecycleState.Uninitialized);
+    });
   });
 
   // ── Side effects execution ──────────────────────────────────────────────
@@ -1101,8 +1186,8 @@ describe('FormStateMachine', () => {
     });
 
     it('should handle createFormSetup returning different setups for init vs config change', () => {
-      const initSetup: FormSetup<TestFields> = { ...mockFormSetup, mode: 'non-paged' };
-      const changeSetup: FormSetup<TestFields> = { ...mockPendingFormSetup, mode: 'paged' };
+      const initSetup: FormSetup = { ...mockFormSetup, mode: 'non-paged' };
+      const changeSetup: FormSetup = { ...mockPendingFormSetup, mode: 'paged' };
 
       createFormSetup.mockReturnValueOnce(initSetup).mockReturnValueOnce(changeSetup);
 

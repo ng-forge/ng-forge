@@ -58,13 +58,7 @@ export default class RowFieldComponent {
 
   readonly hostClasses = computed(() => computeContainerHostClasses('row', this.className()));
 
-  readonly disabled = computed(() => {
-    try {
-      return this.field().disabled || false;
-    } catch {
-      return false;
-    }
-  });
+  readonly disabled = computed(() => this.field().disabled || false);
 
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 

@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
@@ -27,7 +28,6 @@ import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { EventBus } from '../../events/event.bus';
 import { SubmitEvent } from '../../events/constants/submit.event';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
 
 /**
  * Container component for rendering nested form groups.
@@ -159,18 +159,10 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   readonly errors = computed(() => this.form()().errors());
   readonly disabled = computed(() => this.form()().disabled());
 
-  private readonly nestedFieldTree = computed((): FieldTree<Record<string, unknown>> => {
+  private readonly nestedFieldTree = computed((): FieldTree<Record<string, unknown>> | undefined => {
     const parentForm = this.parentFieldSignalContext.form as Record<string, FieldTree<Record<string, unknown>>>;
     const groupKey = this.field().key;
-    const child = parentForm[groupKey];
-
-    if (!child) {
-      throw new DynamicFormError(
-        `Group field "${groupKey}" not found in parent form. ` + `Ensure the parent form schema includes this group field.`,
-      );
-    }
-
-    return child;
+    return parentForm[groupKey];
   });
 
   private readonly groupFieldSignalContext: FieldSignalContext<Record<string, unknown>> = (() => {
@@ -180,7 +172,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
       value: this.parentFieldSignalContext.value,
       defaultValues: this.defaultValues,
       get form() {
-        return nestedFieldTree();
+        return nestedFieldTree() ?? ({} as FieldTree<Record<string, unknown>>);
       },
     };
   })();
@@ -237,6 +229,15 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
 
   private setupEffects(): void {
     setupContainerInitEffect(this.resolvedFields, this.eventBus, 'group', () => this.field().key, this.injector);
+
+    explicitEffect([this.nestedFieldTree], ([tree]) => {
+      if (!tree) {
+        const groupKey = this.field().key;
+        this.logger.warn(
+          `Group field "${groupKey}" not found in parent form. ` + `Ensure the parent form schema includes this group field.`,
+        );
+      }
+    });
   }
 }
 

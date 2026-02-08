@@ -39,7 +39,7 @@ export interface FormStateMachineConfig<TFields extends RegisteredFieldTypes[] =
   /** Side effect scheduler for controlled timing */
   readonly scheduler: SideEffectScheduler;
   /** Callback to create form setup from config */
-  readonly createFormSetup: (config: FormConfig<TFields>) => FormSetup<TFields>;
+  readonly createFormSetup: (config: FormConfig<TFields>) => FormSetup;
   /** Callback to capture current form value */
   readonly captureValue: () => Record<string, unknown>;
   /** Callback to restore form value */
@@ -47,11 +47,13 @@ export interface FormStateMachineConfig<TFields extends RegisteredFieldTypes[] =
   /** Predicate returning true when the field pipeline has already settled (all components cached) */
   readonly isFieldPipelineSettled?: () => boolean;
   /** Callback when form is created (for registration) */
-  readonly onFormCreated?: (formSetup: FormSetup<TFields>) => void;
+  readonly onFormCreated?: (formSetup: FormSetup) => void;
   /** Logger instance for error reporting */
   readonly logger: Logger;
   /** Callback for logging/debugging state transitions */
   readonly onTransition?: (transition: StateTransition<TFields>) => void;
+  /** Callback when an action fails and error recovery runs */
+  readonly onError?: (error: unknown, action: FormStateAction<TFields>) => void;
 }
 
 /**
@@ -100,7 +102,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
           this.processAction(action).pipe(
             catchError((error) => {
               this.config.logger.error(`Action '${action.type}' failed:`, error);
-              this.recoverFromError();
+              this.recoverFromError(error, action);
               return EMPTY;
             }),
           ),
@@ -134,7 +136,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
    * Recovers from a failed action by reverting to the last stable state.
    * Initializing → Uninitialized, Transitioning → Ready (using current setup).
    */
-  private recoverFromError(): void {
+  private recoverFromError(error: unknown, action: FormStateAction<TFields>): void {
     const state = this._state();
 
     if (state.type === LifecycleState.Initializing) {
@@ -142,6 +144,8 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     } else if (isTransitioningState(state)) {
       this._state.set(createReadyState(state.currentConfig, state.currentFormSetup));
     }
+
+    this.config.onError?.(error, action);
   }
 
   /** Pure transition: current state + action → next state + side effects. */
@@ -154,7 +158,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
         return this.handleConfigChange(state, action.config);
 
       case Action.SetupComplete:
-        return this.handleSetupComplete(state, action.formSetup as FormSetup<TFields>);
+        return this.handleSetupComplete(state, action.formSetup as FormSetup);
 
       case Action.ValueCaptured:
         return this.handleValueCaptured(state, action.value);
@@ -163,7 +167,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
         return this.handleTeardownComplete(state);
 
       case Action.ApplyComplete:
-        return this.handleApplyComplete(state, action.formSetup as FormSetup<TFields>);
+        return this.handleApplyComplete(state, action.formSetup as FormSetup);
 
       case Action.RestoreComplete:
         return this.handleRestoreComplete(state);
@@ -195,6 +199,13 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       };
     }
 
+    if (state.type === LifecycleState.Initializing) {
+      return {
+        state: createInitializingState(config),
+        sideEffects: [{ type: Effect.CreateForm }],
+      };
+    }
+
     if (isReadyState(state)) {
       return {
         state: createTransitioningState(Phase.Teardown, state.config, config, state.formSetup),
@@ -220,7 +231,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     return { state, sideEffects: [] };
   }
 
-  private handleSetupComplete(state: FormLifecycleState<TFields>, formSetup: FormSetup<TFields>): TransitionResult<TFields> {
+  private handleSetupComplete(state: FormLifecycleState<TFields>, formSetup: FormSetup): TransitionResult<TFields> {
     if (state.type === LifecycleState.Initializing) {
       return {
         state: createReadyState(state.config, formSetup),
@@ -266,7 +277,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
     };
   }
 
-  private handleApplyComplete(state: FormLifecycleState<TFields>, formSetup: FormSetup<TFields>): TransitionResult<TFields> {
+  private handleApplyComplete(state: FormLifecycleState<TFields>, formSetup: FormSetup): TransitionResult<TFields> {
     if (!isTransitioningState(state) || state.phase !== Phase.Applying) {
       return { state, sideEffects: [] };
     }
