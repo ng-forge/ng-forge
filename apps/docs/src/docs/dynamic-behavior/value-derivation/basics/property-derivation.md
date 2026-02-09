@@ -344,7 +344,24 @@ const travelForm = {
         {
           type: 'propertyDerivation',
           targetProperty: 'props.appearance',
-          expression: 'formValue.country === "DE" ? "fill" : "outline"',
+          value: 'fill',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'country',
+            operator: 'equals',
+            value: 'DE',
+          },
+        },
+        {
+          type: 'propertyDerivation',
+          targetProperty: 'props.appearance',
+          value: 'outline',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'country',
+            operator: 'notEquals',
+            value: 'DE',
+          },
         },
       ],
     },
@@ -418,12 +435,29 @@ interface PropertyDerivationLogicConfig {
 
 ## External Data in Property Derivations
 
-Use external application state in property derivation expressions:
+Use external application state in property derivation custom functions:
 
 ```typescript
 const config = {
   externalData: {
     userRegion: computed(() => this.regionService.current()),
+  },
+  customFnConfig: {
+    propertyDerivations: {
+      getCurrencyOptions: (ctx) => {
+        const optionsByRegion: Record<string, { label: string; value: string }[]> = {
+          EU: [
+            { label: 'EUR', value: 'eur' },
+            { label: 'GBP', value: 'gbp' },
+          ],
+          US: [
+            { label: 'USD', value: 'usd' },
+            { label: 'CAD', value: 'cad' },
+          ],
+        };
+        return optionsByRegion[ctx.externalData.userRegion as string] ?? [];
+      },
+    },
   },
   fields: [
     {
@@ -435,7 +469,7 @@ const config = {
         {
           type: 'propertyDerivation',
           targetProperty: 'options',
-          expression: 'externalData.userRegion === "EU" ? [{ label: "EUR", value: "eur" }] : [{ label: "USD", value: "usd" }]',
+          functionName: 'getCurrencyOptions',
         },
       ],
     },
