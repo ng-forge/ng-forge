@@ -3,7 +3,14 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { ConditionalExpression } from '../expressions/conditional-expression';
-import type { LogicConfig, FormStateCondition, StateLogicConfig, DerivationLogicConfig, DerivationTrigger } from './logic-config';
+import type {
+  LogicConfig,
+  FormStateCondition,
+  StateLogicConfig,
+  DerivationLogicConfig,
+  DerivationTrigger,
+  PropertyDerivationLogicConfig,
+} from './logic-config';
 import { isFormStateCondition } from './logic-config';
 import type { RequiredKeys } from '@ng-forge/utils';
 
@@ -135,13 +142,16 @@ describe('DerivationLogicConfig - Property Types', () => {
 // ============================================================================
 
 describe('LogicConfig - Union Type', () => {
-  it('should be union of StateLogicConfig and DerivationLogicConfig', () => {
+  it('should be union of StateLogicConfig, DerivationLogicConfig and PropertyDerivationLogicConfig', () => {
     expectTypeOf<StateLogicConfig>().toMatchTypeOf<LogicConfig>();
     expectTypeOf<DerivationLogicConfig>().toMatchTypeOf<LogicConfig>();
+    expectTypeOf<PropertyDerivationLogicConfig>().toMatchTypeOf<LogicConfig>();
   });
 
   it('type should include all logic types', () => {
-    expectTypeOf<LogicConfig['type']>().toEqualTypeOf<'hidden' | 'readonly' | 'disabled' | 'required' | 'derivation'>();
+    expectTypeOf<LogicConfig['type']>().toEqualTypeOf<
+      'hidden' | 'readonly' | 'disabled' | 'required' | 'derivation' | 'propertyDerivation'
+    >();
   });
 });
 
