@@ -112,7 +112,7 @@ jobs:
         if: inputs.environment == 'production'
         run: |
           echo "Verifying deployment is accessible..."
-          curl --fail --retry 5 --retry-delay 10 "${{ steps.deploy.outputs.url }}/dynamic-forms/" > /dev/null
+          curl --fail --retry 5 --retry-delay 10 "https://ng-forge.com/dynamic-forms/" > /dev/null
           echo "Deployment verified successfully"
 
       - name: Output Deployment URL
