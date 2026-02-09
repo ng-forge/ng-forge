@@ -5,7 +5,7 @@ const DerivationPage: NgDocPage = {
   title: 'Derivation',
   mdFile: ['./index.md', './property-derivation.md'],
   category: DynamicBehaviorCategory,
-  route: 'value-derivation',
+  route: 'derivation',
   order: 2,
 };
 
