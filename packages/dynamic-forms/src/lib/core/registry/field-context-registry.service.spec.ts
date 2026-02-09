@@ -12,11 +12,12 @@ describe('FieldContextRegistryService', () => {
   const mockFormSignal = signal<unknown>(undefined);
   const externalDataSignal = signal<Record<string, Signal<unknown>> | undefined>(undefined);
 
-  function createMockFieldContext<T>(value: T): FieldContext<T> {
+  function createMockFieldContext<T>(value: T, pathKeys: readonly string[] = []): FieldContext<T> {
     return {
-      value: vi.fn(() => value),
-      touched: vi.fn(() => false),
-      valid: vi.fn(() => true),
+      value: signal(value),
+      touched: signal(false),
+      valid: signal(true),
+      pathKeys: signal(pathKeys),
     } as unknown as FieldContext<T>;
   }
 
@@ -343,6 +344,120 @@ describe('FieldContextRegistryService', () => {
       const result = service.createEvaluationContext(fieldContext);
 
       expect(result.externalData).toEqual({});
+    });
+  });
+
+  describe('array-scoped context creation via pathKeys', () => {
+    const arrayFormValue = {
+      addresses: [
+        { street: '123 Main St', city: 'Springfield', hasApartment: true },
+        { street: '456 Oak Ave', city: 'Shelbyville', hasApartment: false },
+      ],
+      globalField: 'global',
+    };
+
+    it('createReactiveEvaluationContext should scope formValue to array item', () => {
+      mockEntity.set(arrayFormValue);
+      const fieldContext: any = createMockFieldContext('123 Main St', ['addresses', '0', 'street']);
+      fieldContext.key = signal('street');
+
+      const result = service.createReactiveEvaluationContext(fieldContext);
+
+      expect(result.formValue).toEqual({ street: '123 Main St', city: 'Springfield', hasApartment: true });
+    });
+
+    it('should set rootFormValue to the full root form value', () => {
+      mockEntity.set(arrayFormValue);
+      const fieldContext: any = createMockFieldContext('123 Main St', ['addresses', '0', 'street']);
+      fieldContext.key = signal('street');
+
+      const result = service.createReactiveEvaluationContext(fieldContext);
+
+      expect(result.rootFormValue).toEqual(arrayFormValue);
+    });
+
+    it('should set arrayIndex and arrayPath correctly', () => {
+      mockEntity.set(arrayFormValue);
+      const fieldContext: any = createMockFieldContext('456 Oak Ave', ['addresses', '1', 'street']);
+      fieldContext.key = signal('street');
+
+      const result = service.createReactiveEvaluationContext(fieldContext);
+
+      expect(result.arrayIndex).toBe(1);
+      expect(result.arrayPath).toBe('addresses');
+    });
+
+    it('should build fieldPath as arrayKey.index.localKey', () => {
+      mockEntity.set(arrayFormValue);
+      const fieldContext: any = createMockFieldContext(true, ['addresses', '0', 'hasApartment']);
+      fieldContext.key = signal('hasApartment');
+
+      const result = service.createReactiveEvaluationContext(fieldContext);
+
+      expect(result.fieldPath).toBe('addresses.0.hasApartment');
+    });
+
+    it('different index should return different array item', () => {
+      mockEntity.set(arrayFormValue);
+      const fieldContext0: any = createMockFieldContext('123 Main St', ['addresses', '0', 'street']);
+      fieldContext0.key = signal('street');
+      const fieldContext1: any = createMockFieldContext('456 Oak Ave', ['addresses', '1', 'street']);
+      fieldContext1.key = signal('street');
+
+      const result0 = service.createReactiveEvaluationContext(fieldContext0);
+      const result1 = service.createReactiveEvaluationContext(fieldContext1);
+
+      expect(result0.formValue).toEqual({ street: '123 Main St', city: 'Springfield', hasApartment: true });
+      expect(result1.formValue).toEqual({ street: '456 Oak Ave', city: 'Shelbyville', hasApartment: false });
+    });
+
+    it('createEvaluationContext should scope formValue to array item', () => {
+      mockEntity.set(arrayFormValue);
+      const fieldContext: any = createMockFieldContext('Springfield', ['addresses', '0', 'city']);
+      fieldContext.key = signal('city');
+
+      const result = service.createEvaluationContext(fieldContext);
+
+      expect(result.formValue).toEqual({ street: '123 Main St', city: 'Springfield', hasApartment: true });
+      expect(result.rootFormValue).toEqual(arrayFormValue);
+      expect(result.fieldPath).toBe('addresses.0.city');
+    });
+
+    it('should fall back to root form when array data is missing', () => {
+      const formWithoutArray = { globalField: 'global' };
+      mockEntity.set(formWithoutArray);
+      const fieldContext: any = createMockFieldContext('test', ['addresses', '0', 'street']);
+      fieldContext.key = signal('street');
+
+      const result = service.createReactiveEvaluationContext(fieldContext);
+
+      expect(result.formValue).toEqual(formWithoutArray);
+      expect(result.rootFormValue).toBeUndefined();
+      expect(result.arrayIndex).toBeUndefined();
+    });
+
+    it('should fall back to root form when index is out of bounds', () => {
+      mockEntity.set(arrayFormValue);
+      const fieldContext: any = createMockFieldContext('test', ['addresses', '99', 'street']);
+      fieldContext.key = signal('street');
+
+      const result = service.createReactiveEvaluationContext(fieldContext);
+
+      expect(result.formValue).toEqual(arrayFormValue);
+      expect(result.rootFormValue).toBeUndefined();
+    });
+
+    it('should have unchanged behavior when pathKeys has no array segment', () => {
+      mockEntity.set(arrayFormValue);
+      const fieldContext: any = createMockFieldContext('test', ['street']);
+      fieldContext.key = signal('street');
+
+      const result = service.createReactiveEvaluationContext(fieldContext);
+
+      expect(result.formValue).toEqual(arrayFormValue);
+      expect(result.rootFormValue).toBeUndefined();
+      expect(result.arrayIndex).toBeUndefined();
+      expect(result.arrayPath).toBeUndefined();
     });
   });
 });

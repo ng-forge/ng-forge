@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { compareValues, getNestedValue } from './value-utils';
+import { compareValues, getNestedValue, hasNestedProperty } from './value-utils';
 
 describe('value-utils', () => {
   describe('compareValues', () => {
@@ -351,6 +351,45 @@ describe('value-utils', () => {
         const deepPath = Array(100).fill('level').join('.') + '.value';
         expect(getNestedValue(deepObj, deepPath)).toBe('found');
       });
+    });
+  });
+
+  describe('hasNestedProperty', () => {
+    it('should return true for existing top-level properties', () => {
+      expect(hasNestedProperty({ name: 'John' }, 'name')).toBe(true);
+    });
+
+    it('should return true for existing nested properties', () => {
+      expect(hasNestedProperty({ address: { city: 'NY' } }, 'address.city')).toBe(true);
+    });
+
+    it('should return true when property exists with value undefined', () => {
+      expect(hasNestedProperty({ field: undefined }, 'field')).toBe(true);
+    });
+
+    it('should return true when nested property exists with value undefined', () => {
+      expect(hasNestedProperty({ nested: { field: undefined } }, 'nested.field')).toBe(true);
+    });
+
+    it('should return false for non-existent properties', () => {
+      expect(hasNestedProperty({ name: 'John' }, 'age')).toBe(false);
+    });
+
+    it('should return false for non-existent nested properties', () => {
+      expect(hasNestedProperty({ address: { city: 'NY' } }, 'address.zip')).toBe(false);
+    });
+
+    it('should return false when parent path does not exist', () => {
+      expect(hasNestedProperty({ name: 'John' }, 'address.city')).toBe(false);
+    });
+
+    it('should return false for null/undefined input', () => {
+      expect(hasNestedProperty(null, 'field')).toBe(false);
+      expect(hasNestedProperty(undefined, 'field')).toBe(false);
+    });
+
+    it('should return false when traversing through non-objects', () => {
+      expect(hasNestedProperty({ name: 'John' }, 'name.length')).toBe(false);
     });
   });
 });

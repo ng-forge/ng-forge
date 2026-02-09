@@ -19,8 +19,6 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal
   const context = inject(FIELD_SIGNAL_CONTEXT);
   const defaultProps = inject(DEFAULT_PROPS);
   const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES);
-  const formRoot = context.form as Record<string, FieldTree<unknown> | undefined>;
-  const fieldTree = formRoot[fieldDef.key];
 
   return computed(() => {
     const omittedFields = omit(fieldDef, ['value']) as FieldDef<unknown>;
@@ -40,6 +38,10 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal
       inputs['defaultValidationMessages'] = validationMessages;
     }
 
+    // Access form inside computed for reactivity and to handle cases where
+    // form may not be immediately available (e.g., during array item initialization)
+    const formRoot = context.form as Record<string, FieldTree<unknown> | undefined> | undefined;
+    const fieldTree = formRoot?.[fieldDef.key];
     if (fieldTree !== undefined) {
       inputs['field'] = fieldTree;
     }
