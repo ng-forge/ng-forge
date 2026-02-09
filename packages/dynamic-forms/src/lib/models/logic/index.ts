@@ -3,6 +3,7 @@ export type {
   StateLogicConfig,
   StateLogicType,
   DerivationLogicConfig,
+  PropertyDerivationLogicConfig,
   DerivationTrigger,
   FormStateCondition,
   DerivationLogLevel,
@@ -12,6 +13,7 @@ export {
   isFormStateCondition,
   isStateLogicConfig,
   isDerivationLogicConfig,
+  isPropertyDerivationLogicConfig,
   createDefaultDerivationLogConfig,
   shouldLog,
 } from './logic-config';

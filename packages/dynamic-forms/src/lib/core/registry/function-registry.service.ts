@@ -61,6 +61,7 @@ export class FunctionRegistryService {
   private readonly customFunctions = new Map<string, CustomFunction>();
   private readonly customFunctionScopes = new Map<string, CustomFunctionScope>();
   private readonly derivationFunctions = new Map<string, CustomFunction>();
+  private readonly propertyDerivationFunctions = new Map<string, CustomFunction>();
   private readonly validators = new Map<string, CustomValidator>();
   private readonly asyncValidators = new Map<string, AsyncCustomValidator>();
   private readonly httpValidators = new Map<string, HttpCustomValidator>();
@@ -179,6 +180,55 @@ export class FunctionRegistryService {
    */
   clearDerivationFunctions(): void {
     this.derivationFunctions.clear();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Property Derivation Functions
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Register a property derivation function.
+   *
+   * Property derivation functions compute derived values for field properties
+   * (like `minDate`, `options`, `label`) and are called when a
+   * `PropertyDerivationLogicConfig` references them by `functionName`.
+   *
+   * @param name - Unique identifier for the function
+   * @param fn - Function that receives EvaluationContext and returns the derived property value
+   */
+  registerPropertyDerivationFunction(name: string, fn: CustomFunction): void {
+    this.propertyDerivationFunctions.set(name, fn);
+  }
+
+  /**
+   * Get a property derivation function by name
+   */
+  getPropertyDerivationFunction(name: string): CustomFunction | undefined {
+    return this.propertyDerivationFunctions.get(name);
+  }
+
+  /**
+   * Get all property derivation functions as an object
+   */
+  getPropertyDerivationFunctions(): Record<string, CustomFunction> {
+    return Object.fromEntries(this.propertyDerivationFunctions);
+  }
+
+  /**
+   * Set property derivation functions from a config object.
+   * Only updates functions if their references have changed.
+   *
+   * @param functions - Object mapping function names to property derivation functions
+   */
+  setPropertyDerivationFunctions(functions: Record<string, CustomFunction> | undefined): void {
+    this.setRegistryIfChanged(this.propertyDerivationFunctions, functions);
+  }
+
+  /**
+   * Clear all property derivation functions
+   */
+  clearPropertyDerivationFunctions(): void {
+    this.propertyDerivationFunctions.clear();
   }
 
   /**
@@ -413,6 +463,7 @@ export class FunctionRegistryService {
   clearAll(): void {
     this.clearCustomFunctions();
     this.clearDerivationFunctions();
+    this.clearPropertyDerivationFunctions();
     this.clearValidators();
     this.clearAsyncValidators();
     this.clearHttpValidators();

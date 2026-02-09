@@ -433,14 +433,196 @@ interface DebouncedDerivationLogicConfig extends BaseDerivationLogicConfig {
 export type DerivationLogicConfig = OnChangeDerivationLogicConfig | DebouncedDerivationLogicConfig;
 
 /**
+ * Base configuration for property derivation logic.
+ *
+ * Property derivations compute values for field properties (like `minDate`, `options`,
+ * `label`, `placeholder`) based on form values and external data. Unlike value derivations
+ * which set the field's value, property derivations update component input properties.
+ *
+ * All property derivations are self-targeting: the logic is placed on the field whose
+ * property should be derived.
+ *
+ * @internal
+ */
+interface BasePropertyDerivationLogicConfig {
+  /**
+   * Logic type identifier for property derivation.
+   */
+  type: 'propertyDerivation';
+
+  /**
+   * The target property to set on the field component.
+   *
+   * Supports dot-notation for nested properties (max 2 levels):
+   * - Simple: `'minDate'`, `'options'`, `'label'`, `'placeholder'`
+   * - Nested (1 dot): `'props.appearance'`, `'meta.autocomplete'`
+   *
+   * @example
+   * ```typescript
+   * targetProperty: 'minDate'
+   * targetProperty: 'options'
+   * targetProperty: 'props.appearance'
+   * ```
+   */
+  targetProperty: string;
+
+  /**
+   * Optional name for this derivation for debugging purposes.
+   *
+   * When provided, this name appears in property derivation debug logs.
+   */
+  debugName?: string;
+
+  /**
+   * Condition that determines when this property derivation applies.
+   *
+   * Defaults to `true` (always apply).
+   *
+   * Note: FormStateCondition is not supported for property derivations.
+   */
+  condition?: ConditionalExpression | boolean;
+
+  /**
+   * Static value to set on the target property.
+   *
+   * Mutually exclusive with `expression` and `functionName`.
+   */
+  value?: unknown;
+
+  /**
+   * JavaScript expression to evaluate for the derived property value.
+   *
+   * Has access to `formValue` object containing all form values.
+   * For array fields, `formValue` is scoped to the current array item.
+   *
+   * Mutually exclusive with `value` and `functionName`.
+   *
+   * @example
+   * ```typescript
+   * expression: 'formValue.startDate'
+   * expression: 'formValue.quantity > 10 ? "bulk" : "standard"'
+   * ```
+   */
+  expression?: string;
+
+  /**
+   * Name of a registered custom property derivation function.
+   *
+   * Register functions in `customFnConfig.propertyDerivations`.
+   * Mutually exclusive with `value` and `expression`.
+   */
+  functionName?: string;
+
+  /**
+   * Explicit field dependencies for property derivations.
+   *
+   * When using `functionName`, you can optionally specify which fields
+   * the function depends on. If not provided with `functionName`, defaults
+   * to all fields ('*').
+   * For `expression`, dependencies are automatically extracted.
+   * For `value`, no dependencies are needed (static value).
+   */
+  dependsOn?: string[];
+}
+
+/**
+ * Property derivation that evaluates immediately on change (default).
+ *
+ * @internal
+ */
+interface OnChangePropertyDerivationLogicConfig extends BasePropertyDerivationLogicConfig {
+  /**
+   * Trigger for immediate evaluation.
+   * @default 'onChange'
+   */
+  trigger?: 'onChange';
+  /** Not allowed for onChange trigger */
+  debounceMs?: never;
+}
+
+/**
+ * Property derivation that evaluates after a debounce period.
+ *
+ * @internal
+ */
+interface DebouncedPropertyDerivationLogicConfig extends BasePropertyDerivationLogicConfig {
+  /**
+   * Trigger for debounced evaluation.
+   */
+  trigger: 'debounced';
+  /**
+   * Debounce duration in milliseconds.
+   * @default 500
+   */
+  debounceMs?: number;
+}
+
+/**
+ * Configuration for property derivation logic.
+ *
+ * Enables reactive derivation of field properties (like `minDate`, `options`,
+ * `label`, `placeholder`) based on form values and external data.
+ *
+ * Property derivations are self-targeting: the logic is placed on the field
+ * whose property should be derived.
+ *
+ * @example
+ * ```typescript
+ * // Derive endDate's minDate from startDate value
+ * {
+ *   key: 'endDate',
+ *   type: 'datepicker',
+ *   logic: [{
+ *     type: 'propertyDerivation',
+ *     targetProperty: 'minDate',
+ *     expression: 'formValue.startDate'
+ *   }]
+ * }
+ *
+ * // Derive options from another field's value
+ * {
+ *   key: 'city',
+ *   type: 'select',
+ *   logic: [{
+ *     type: 'propertyDerivation',
+ *     targetProperty: 'options',
+ *     functionName: 'getCitiesForCountry',
+ *     dependsOn: ['country']
+ *   }]
+ * }
+ *
+ * // Derive label conditionally
+ * {
+ *   key: 'phone',
+ *   type: 'input',
+ *   logic: [{
+ *     type: 'propertyDerivation',
+ *     targetProperty: 'label',
+ *     value: 'Mobile Phone',
+ *     condition: {
+ *       type: 'fieldValue',
+ *       fieldPath: 'contactType',
+ *       operator: 'equals',
+ *       value: 'mobile'
+ *     }
+ *   }]
+ * }
+ * ```
+ *
+ * @public
+ */
+export type PropertyDerivationLogicConfig = OnChangePropertyDerivationLogicConfig | DebouncedPropertyDerivationLogicConfig;
+
+/**
  * Union type for all logic configurations.
  *
  * - `StateLogicConfig`: For field state changes (hidden, readonly, disabled, required)
  * - `DerivationLogicConfig`: For value derivation
+ * - `PropertyDerivationLogicConfig`: For property derivation
  *
  * @public
  */
-export type LogicConfig = StateLogicConfig | DerivationLogicConfig;
+export type LogicConfig = StateLogicConfig | DerivationLogicConfig | PropertyDerivationLogicConfig;
 
 /**
  * Log level for derivation debug output.
@@ -529,4 +711,16 @@ export function isStateLogicConfig(config: LogicConfig): config is StateLogicCon
  */
 export function isDerivationLogicConfig(config: LogicConfig): config is DerivationLogicConfig {
   return config.type === 'derivation';
+}
+
+/**
+ * Type guard to check if a logic config is a PropertyDerivationLogicConfig.
+ *
+ * @param config - The logic config to check
+ * @returns true if the config is for property derivation
+ *
+ * @public
+ */
+export function isPropertyDerivationLogicConfig(config: LogicConfig): config is PropertyDerivationLogicConfig {
+  return config.type === 'propertyDerivation';
 }

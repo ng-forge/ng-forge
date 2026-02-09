@@ -32,6 +32,10 @@ function getConfigDebounceMs(config: LogicConfig): number | undefined {
 }
 
 export function applyLogic<TValue>(config: LogicConfig, fieldPath: SchemaPath<TValue> | SchemaPathTree<TValue>): void {
+  // Only state logic configs (hidden/readonly/disabled/required) are applied to the schema.
+  // Value derivations and property derivations are handled by their respective orchestrators.
+  if (!isStateLogicConfig(config)) return;
+
   const path = fieldPath as SchemaPath<TValue>;
   const trigger = getConfigTrigger(config);
   const debounceMs = getConfigDebounceMs(config) ?? DEFAULT_DEBOUNCE_MS;

@@ -20,6 +20,16 @@ import { DERIVATION_LOG_CONFIG } from './features/logger/with-logger-config';
 import { DerivationLogConfig } from '../models/logic/logic-config';
 import { FieldDef } from '../definitions/base/field-def';
 import { CONTAINER_FIELD_PROCESSORS, createContainerFieldProcessors } from '../utils/container-utils/container-field-processors';
+import {
+  createPropertyOverrideStore,
+  PROPERTY_OVERRIDE_STORE,
+  PropertyOverrideStore,
+} from '../core/property-derivation/property-override-store';
+import {
+  createPropertyDerivationOrchestrator,
+  PROPERTY_DERIVATION_ORCHESTRATOR,
+  PropertyDerivationOrchestratorConfig,
+} from '../core/property-derivation/property-derivation-orchestrator';
 
 /** @internal */
 export function provideDynamicFormDI(): Provider[] {
@@ -85,6 +95,24 @@ export function provideDynamicFormDI(): Provider[] {
         return createDerivationOrchestrator(config);
       },
       deps: [FormStateManager, DynamicFormLogger, DERIVATION_LOG_CONFIG, EXTERNAL_DATA],
+    },
+    { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
+    {
+      provide: PROPERTY_DERIVATION_ORCHESTRATOR,
+      useFactory: (
+        stateManager: FormStateManager,
+        externalData: Signal<Record<string, Signal<unknown>> | undefined>,
+        store: PropertyOverrideStore,
+      ) => {
+        const config: PropertyDerivationOrchestratorConfig = {
+          schemaFields: computed(() => stateManager.formSetup()?.schemaFields as FieldDef<unknown>[] | undefined),
+          formValue: stateManager.formValue as Signal<Record<string, unknown>>,
+          store,
+          externalData,
+        };
+        return createPropertyDerivationOrchestrator(config);
+      },
+      deps: [FormStateManager, EXTERNAL_DATA, PROPERTY_OVERRIDE_STORE],
     },
   ];
 }

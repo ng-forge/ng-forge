@@ -5,6 +5,9 @@ import { FieldTypeDefinition } from '../../models/field-type';
 import { ARRAY_CONTEXT } from '../../models/field-signal-context.token';
 import { ArrayContext } from '../../mappers/types';
 import { baseFieldMapper } from '../../mappers/base/base-field-mapper';
+import { PROPERTY_OVERRIDE_STORE, PropertyOverrideStore } from '../../core/property-derivation/property-override-store';
+import { applyPropertyOverrides } from '../../core/property-derivation/apply-property-overrides';
+import { buildPropertyOverrideKey } from '../../core/property-derivation/property-override-key';
 
 /**
  * Merges forwarded props into meta, with meta taking precedence.
@@ -86,6 +89,10 @@ function applyIndexSuffix(inputs: Record<string, unknown>, index: number): Recor
  * is automatically suffixed with the item index to ensure unique DOM IDs. The form
  * schema keys remain clean (unsuffixed) so derivations and validations work correctly.
  *
+ * Property overrides from the PropertyOverrideStore are applied AFTER all static
+ * mapper logic, so they always take precedence. Only fields with registered property
+ * derivations incur the overhead of reading from the store.
+ *
  * @param fieldDef The field definition to map
  * @param fieldRegistry The registry of field type definitions
  * @returns Signal containing Record of input names to values, or undefined for componentless fields
@@ -111,6 +118,15 @@ export function mapFieldToInputs(
     // Not in an injection context or ARRAY_CONTEXT not provided
   }
 
+  // Inject the property override store — try-catch mirrors ARRAY_CONTEXT pattern above
+  // because mapFieldToInputs can be called outside an injection context in tests
+  let store: PropertyOverrideStore | null = null;
+  try {
+    store = inject(PROPERTY_OVERRIDE_STORE, { optional: true });
+  } catch {
+    // Not in an injection context
+  }
+
   // Get the base mapper result
   const mapperResult: Signal<Record<string, unknown>> = fieldType?.mapper ? fieldType.mapper(fieldDef) : baseFieldMapper(fieldDef);
 
@@ -120,8 +136,13 @@ export function mapFieldToInputs(
   const indexSignal = arrayContext?.index;
   const hasArrayContext = indexSignal !== undefined && isSignal(indexSignal);
 
+  // Fast-path check for property overrides: only fields with registered derivations
+  // enter the computed() wrapper for overrides. hasField() is a non-reactive Map.has() — O(1).
+  // Uses placeholder format (e.g., 'items.$.endDate') matching what the collector/orchestrator registers.
+  const hasOverrides = store?.hasField(arrayContext ? `${arrayContext.arrayKey}.$.${fieldDef.key}` : fieldDef.key) ?? false;
+
   // Fast path: no transformations needed
-  if (!hasPropsForwarding && !hasArrayContext) {
+  if (!hasPropsForwarding && !hasArrayContext && !hasOverrides) {
     return mapperResult;
   }
 
@@ -138,6 +159,17 @@ export function mapFieldToInputs(
     if (hasArrayContext) {
       const index = indexSignal();
       inputs = applyIndexSuffix(inputs, index);
+    }
+
+    // Apply property overrides from the store (AFTER all static transformations)
+    if (store && hasOverrides) {
+      // Build the store key inside computed() so index signal read establishes reactive dependency
+      // Safe to access arrayContext/indexSignal directly — hasArrayContext already confirmed they exist
+      const key = hasArrayContext
+        ? buildPropertyOverrideKey((arrayContext as ArrayContext).arrayKey, (indexSignal as Signal<number>)(), fieldDef.key)
+        : fieldDef.key;
+      const overrides = store.getOverrides(key)();
+      inputs = applyPropertyOverrides(inputs, overrides);
     }
 
     return inputs;
