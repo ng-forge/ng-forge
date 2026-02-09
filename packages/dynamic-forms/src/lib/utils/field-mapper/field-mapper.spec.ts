@@ -1,15 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { computed, Signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { mapFieldToInputs } from './field-mapper';
 import { FieldDef } from '../../definitions/base';
 import { FieldTypeDefinition } from '../../models/field-type';
+import { createPropertyOverrideStore, PROPERTY_OVERRIDE_STORE } from '../../core/property-derivation/property-override-store';
 
 describe('mapFieldToInputs', () => {
   let registry: Map<string, FieldTypeDefinition>;
 
   beforeEach(() => {
     registry = new Map<string, FieldTypeDefinition>();
+    TestBed.configureTestingModule({
+      providers: [{ provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore }],
+    });
   });
+
+  function run<T>(fn: () => T): T {
+    return TestBed.runInInjectionContext(fn);
+  }
 
   describe('custom mapper', () => {
     it('should use custom mapper when field type has one', () => {
@@ -21,7 +30,7 @@ describe('mapFieldToInputs', () => {
       });
 
       const field: FieldDef<any> = { type: 'input', key: 'email' };
-      const resultSignal = mapFieldToInputs(field, registry);
+      const resultSignal = run(() => mapFieldToInputs(field, registry));
 
       expect(customMapper).toHaveBeenCalledWith(field);
       expect(resultSignal()).toEqual({ custom: 'result' });
@@ -41,7 +50,7 @@ describe('mapFieldToInputs', () => {
         label: 'Country',
       };
 
-      mapFieldToInputs(field, registry);
+      run(() => mapFieldToInputs(field, registry));
 
       expect(customMapper).toHaveBeenCalledWith(field);
     });
@@ -56,7 +65,7 @@ describe('mapFieldToInputs', () => {
       });
 
       const field: FieldDef<any> = { type: 'input', key: 'name' };
-      const resultSignal = mapFieldToInputs(field, registry);
+      const resultSignal = run(() => mapFieldToInputs(field, registry));
 
       // Base mapper should return a signal
       expect(resultSignal).toBeDefined();
@@ -69,7 +78,7 @@ describe('mapFieldToInputs', () => {
 
     it('should handle fields without registry entry using base mapper', () => {
       const field: FieldDef<any> = { type: 'unknown', key: 'test' };
-      const resultSignal = mapFieldToInputs(field, registry);
+      const resultSignal = run(() => mapFieldToInputs(field, registry));
 
       expect(resultSignal).toBeDefined();
       expect(typeof resultSignal).toBe('function'); // Signal is a function
@@ -87,7 +96,7 @@ describe('mapFieldToInputs', () => {
       });
 
       const field: FieldDef<any> = { type: 'hidden', key: 'id', value: 'test-id' };
-      const result = mapFieldToInputs(field, registry);
+      const result = run(() => mapFieldToInputs(field, registry));
 
       // Should return undefined for componentless fields - nothing to map
       expect(result).toBeUndefined();
@@ -103,8 +112,8 @@ describe('mapFieldToInputs', () => {
       const field1: FieldDef<any> = { type: 'hidden', key: 'id1', value: 'val1' };
       const field2: FieldDef<any> = { type: 'hidden', key: 'id2', value: 'val2' };
 
-      expect(mapFieldToInputs(field1, registry)).toBeUndefined();
-      expect(mapFieldToInputs(field2, registry)).toBeUndefined();
+      expect(run(() => mapFieldToInputs(field1, registry))).toBeUndefined();
+      expect(run(() => mapFieldToInputs(field2, registry))).toBeUndefined();
     });
 
     it('should not call base mapper for componentless fields', () => {
@@ -115,7 +124,7 @@ describe('mapFieldToInputs', () => {
       });
 
       const field: FieldDef<any> = { type: 'hidden', key: 'id', value: 123 };
-      const result = mapFieldToInputs(field, registry);
+      const result = run(() => mapFieldToInputs(field, registry));
 
       // Undefined for componentless fields - base mapper should not be called
       expect(result).toBeUndefined();
@@ -132,7 +141,7 @@ describe('mapFieldToInputs', () => {
       });
 
       const field: FieldDef<any> = { type: 'email', key: 'userEmail' };
-      mapFieldToInputs(field, registry);
+      run(() => mapFieldToInputs(field, registry));
 
       expect(customMapper).toHaveBeenCalled();
     });
@@ -147,8 +156,8 @@ describe('mapFieldToInputs', () => {
       const field1: FieldDef<any> = { type: 'Input', key: 'field1' };
       const field2: FieldDef<any> = { type: 'input', key: 'field2' };
 
-      mapFieldToInputs(field1, registry);
-      mapFieldToInputs(field2, registry);
+      run(() => mapFieldToInputs(field1, registry));
+      run(() => mapFieldToInputs(field2, registry));
 
       expect(mapper1).toHaveBeenCalledTimes(1);
       expect(mapper2).toHaveBeenCalledTimes(1);
@@ -169,7 +178,7 @@ describe('mapFieldToInputs', () => {
       });
 
       const field: FieldDef<any> = { type: 'custom', key: 'test' };
-      const resultSignal = mapFieldToInputs(field, registry);
+      const resultSignal = run(() => mapFieldToInputs(field, registry));
       const result = resultSignal(); // Call signal to get inputs
 
       expect(Object.keys(result)).toHaveLength(2);
@@ -186,7 +195,7 @@ describe('mapFieldToInputs', () => {
       });
 
       const field: FieldDef<any> = { type: 'minimal', key: 'test' };
-      const resultSignal = mapFieldToInputs(field, registry);
+      const resultSignal = run(() => mapFieldToInputs(field, registry));
 
       expect(resultSignal()).toEqual({});
     });
@@ -210,7 +219,7 @@ describe('mapFieldToInputs', () => {
         disabled: false,
       };
 
-      mapFieldToInputs(field, registry);
+      run(() => mapFieldToInputs(field, registry));
 
       expect(customMapper).toHaveBeenCalledWith(field);
       expect(customMapper.mock.calls[0][0]).toEqual(field);
@@ -233,7 +242,7 @@ describe('mapFieldToInputs', () => {
         },
       };
 
-      mapFieldToInputs(field, registry);
+      run(() => mapFieldToInputs(field, registry));
 
       expect(customMapper).toHaveBeenCalledWith(field);
     });
@@ -249,7 +258,7 @@ describe('mapFieldToInputs', () => {
       });
 
       const field: FieldDef<any> = { type: 'test', key: 'field' };
-      mapFieldToInputs(field, registry);
+      run(() => mapFieldToInputs(field, registry));
 
       expect(customMapper).toHaveBeenCalledTimes(1);
       expect(customMapper.mock.calls[0]).toHaveLength(1);
@@ -272,7 +281,7 @@ describe('mapFieldToInputs', () => {
       });
 
       const field: FieldDef<any> = { type: 'test', key: 'field' };
-      const resultSignal = mapFieldToInputs(field, registry);
+      const resultSignal = run(() => mapFieldToInputs(field, registry));
 
       // The result should be the same signal instance
       expect(resultSignal).toBe(signalInstance);
@@ -291,9 +300,9 @@ describe('mapFieldToInputs', () => {
       registry.set('type2', { component: {} as any, mapper: mapper2 });
       registry.set('type3', { component: {} as any, mapper: mapper3 });
 
-      mapFieldToInputs({ type: 'type1', key: 'f1' }, registry);
-      mapFieldToInputs({ type: 'type2', key: 'f2' }, registry);
-      mapFieldToInputs({ type: 'type3', key: 'f3' }, registry);
+      run(() => mapFieldToInputs({ type: 'type1', key: 'f1' }, registry));
+      run(() => mapFieldToInputs({ type: 'type2', key: 'f2' }, registry));
+      run(() => mapFieldToInputs({ type: 'type3', key: 'f3' }, registry));
 
       expect(mapper1).toHaveBeenCalledTimes(1);
       expect(mapper2).toHaveBeenCalledTimes(1);
@@ -304,7 +313,7 @@ describe('mapFieldToInputs', () => {
       const emptyRegistry = new Map<string, FieldTypeDefinition>();
       const field: FieldDef<any> = { type: 'unknown', key: 'test' };
 
-      const resultSignal = mapFieldToInputs(field, emptyRegistry);
+      const resultSignal = run(() => mapFieldToInputs(field, emptyRegistry));
 
       expect(resultSignal).toBeDefined();
       expect(typeof resultSignal).toBe('function'); // Signal is a function
