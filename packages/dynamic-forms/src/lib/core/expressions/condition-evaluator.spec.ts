@@ -425,6 +425,98 @@ describe('condition-evaluator', () => {
       });
     });
 
+    describe('fieldValue with array-scoped context', () => {
+      it('should resolve field from scoped formValue (sibling field in array item)', () => {
+        const arrayContext: EvaluationContext = {
+          ...mockContext,
+          formValue: { street: '123 Main St', hasApartment: true },
+          rootFormValue: { addresses: [{ street: '123 Main St', hasApartment: true }] },
+          arrayIndex: 0,
+          arrayPath: 'addresses',
+        };
+
+        const expression: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'hasApartment',
+          operator: 'equals',
+          value: true,
+        };
+
+        expect(evaluateCondition(expression, arrayContext)).toBe(true);
+      });
+
+      it('should fall back to rootFormValue for fields outside the array', () => {
+        const arrayContext: EvaluationContext = {
+          ...mockContext,
+          formValue: { name: 'John', role: 'admin' },
+          rootFormValue: { subscriptionType: 'pro', teamMembers: [{ name: 'John', role: 'admin' }] },
+          arrayIndex: 0,
+          arrayPath: 'teamMembers',
+        };
+
+        const expression: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'subscriptionType',
+          operator: 'equals',
+          value: 'pro',
+        };
+
+        expect(evaluateCondition(expression, arrayContext)).toBe(true);
+      });
+
+      it('should not fall back when field exists in scoped formValue', () => {
+        const arrayContext: EvaluationContext = {
+          ...mockContext,
+          formValue: { status: 'active' },
+          rootFormValue: { status: 'inactive', items: [{ status: 'active' }] },
+          arrayIndex: 0,
+          arrayPath: 'items',
+        };
+
+        const expression: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'status',
+          operator: 'equals',
+          value: 'active',
+        };
+
+        // Should use scoped formValue ('active'), not rootFormValue ('inactive')
+        expect(evaluateCondition(expression, arrayContext)).toBe(true);
+      });
+
+      it('should not fall back when scoped field exists with value undefined', () => {
+        const arrayContext: EvaluationContext = {
+          ...mockContext,
+          formValue: { optionalField: undefined },
+          rootFormValue: { optionalField: 'root-value', items: [{ optionalField: undefined }] },
+          arrayIndex: 0,
+          arrayPath: 'items',
+        };
+
+        const expression: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'optionalField',
+          operator: 'equals',
+          value: undefined,
+        };
+
+        // Should match scoped undefined, NOT fall back to root 'root-value'
+        expect(evaluateCondition(expression, arrayContext)).toBe(true);
+      });
+
+      it('should not fall back when rootFormValue is not set', () => {
+        const expression: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'nonexistent',
+          operator: 'equals',
+          value: 'test',
+        };
+
+        // mockContext has no rootFormValue
+        expect(evaluateCondition(expression, mockContext)).toBe(false);
+      });
+    });
+
     describe('invalid type', () => {
       it('should return false for unknown expression types', () => {
         const expression: ConditionalExpression = {

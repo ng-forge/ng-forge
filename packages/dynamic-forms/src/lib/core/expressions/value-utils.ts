@@ -96,3 +96,26 @@ export function getNestedValue(obj: unknown, path: string): unknown {
     return current && typeof current === 'object' ? (current as Record<string, unknown>)[key] : undefined;
   }, obj);
 }
+
+/**
+ * Checks whether a nested property exists in an object using dot notation path.
+ *
+ * Unlike `getNestedValue`, this distinguishes between a property that exists
+ * with value `undefined` and a property path that doesn't exist at all.
+ *
+ * @param obj - The object to check
+ * @param path - Dot-separated path to the property
+ * @returns True if the property exists (even if its value is undefined)
+ */
+export function hasNestedProperty(obj: unknown, path: string): boolean {
+  const keys = path.split('.');
+  let current: unknown = obj;
+
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (!current || typeof current !== 'object') return false;
+    current = (current as Record<string, unknown>)[keys[i]];
+  }
+
+  if (!current || typeof current !== 'object') return false;
+  return keys[keys.length - 1] in (current as Record<string, unknown>);
+}

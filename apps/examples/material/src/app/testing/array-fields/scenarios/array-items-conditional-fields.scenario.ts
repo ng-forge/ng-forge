@@ -1,10 +1,10 @@
-import { FormConfig, EvaluationContext } from '@ng-forge/dynamic-forms';
+import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 /**
  * Test conditional visibility of fields inside array items.
- * Uses custom functions to resolve sibling field values within the same array item,
- * since logic conditions evaluate with the root form value and need dynamic path resolution.
+ * Uses native fieldValue conditions that are automatically scoped to the
+ * current array item, so sibling field lookups work without custom functions.
  */
 const addressFields = [
   {
@@ -37,8 +37,10 @@ const addressFields = [
       {
         type: 'hidden',
         condition: {
-          type: 'custom',
-          expression: 'hideApartmentNumber',
+          type: 'fieldValue',
+          fieldPath: 'hasApartment',
+          operator: 'notEquals',
+          value: true,
         },
       },
     ],
@@ -64,8 +66,10 @@ const addressFields = [
       {
         type: 'hidden',
         condition: {
-          type: 'custom',
-          expression: 'hideBusinessName',
+          type: 'fieldValue',
+          fieldPath: 'addressType',
+          operator: 'notEquals',
+          value: 'commercial',
         },
       },
     ],
@@ -92,39 +96,9 @@ const config = {
   ],
 } as FormConfig;
 
-/**
- * Helper to resolve a sibling field value within the same array item.
- * Given a fieldPath like 'addresses.0.apartmentNumber', extracts the array item path
- * ('addresses.0') and looks up the sibling field value.
- */
-function getArraySiblingValue(formValue: Record<string, unknown>, fieldPath: string, siblingKey: string): unknown {
-  const parts = fieldPath.split('.');
-  // Navigate to the array item: e.g., addresses.0
-  const arrayItemPath = parts.slice(0, -1);
-  let current: unknown = formValue;
-  for (const part of arrayItemPath) {
-    if (current == null || typeof current !== 'object') return undefined;
-    current = (current as Record<string, unknown>)[part];
-  }
-  if (current == null || typeof current !== 'object') return undefined;
-  return (current as Record<string, unknown>)[siblingKey];
-}
-
 export const arrayItemsConditionalFieldsScenario: TestScenario = {
   testId: 'array-items-conditional-fields',
   title: 'Array Items with Conditional Fields',
   description: 'Verify that individual fields within array items can have their own conditional visibility',
   config,
-  customFnConfig: {
-    customFunctions: {
-      hideApartmentNumber: (context: EvaluationContext) => {
-        const hasApartment = getArraySiblingValue(context.formValue, context.fieldPath, 'hasApartment');
-        return hasApartment !== true;
-      },
-      hideBusinessName: (context: EvaluationContext) => {
-        const addressType = getArraySiblingValue(context.formValue, context.fieldPath, 'addressType');
-        return addressType !== 'commercial';
-      },
-    },
-  },
 };

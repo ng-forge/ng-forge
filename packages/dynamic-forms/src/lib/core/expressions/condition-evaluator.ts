@@ -1,6 +1,6 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
-import { compareValues, getNestedValue } from './value-utils';
+import { compareValues, getNestedValue, hasNestedProperty } from './value-utils';
 import { ExpressionParser } from './parser/expression-parser';
 
 /**
@@ -38,7 +38,16 @@ function evaluateFieldValueCondition(expression: ConditionalExpression, context:
     return false;
   }
 
-  const fieldValue = getNestedValue(context.formValue, expression.fieldPath);
+  // Try scoped formValue first (handles sibling field lookups within array items).
+  // Fall back to rootFormValue for fields outside the current array scope.
+  // Use hasNestedProperty to distinguish "field exists with value undefined"
+  // from "field path doesn't exist" — prevents incorrect fallback when an
+  // optional array item field is intentionally undefined.
+  const fieldValue = hasNestedProperty(context.formValue, expression.fieldPath)
+    ? getNestedValue(context.formValue, expression.fieldPath)
+    : context.rootFormValue
+      ? getNestedValue(context.rootFormValue, expression.fieldPath)
+      : undefined;
   return compareValues(fieldValue, expression.value, expression.operator);
 }
 
