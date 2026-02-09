@@ -1,3 +1,170 @@
+## 0.5.2 (2026-02-09)
+
+### 🚀 Features
+
+- **dynamic-forms:** add generalized non-field logic resolvers ([#224](https://github.com/ng-forge/ng-forge/pull/224))
+- **dynamic-forms:** add property derivation system for reactive field properties ([#232](https://github.com/ng-forge/ng-forge/pull/232), [#220](https://github.com/ng-forge/ng-forge/issues/220))
+
+### 🐛 Bug Fixes
+
+- **config:** use production domain URL for deployment smoke test ([#233](https://github.com/ng-forge/ng-forge/pull/233))
+- **docs:** correct broken iframe routes and array example configuration ([#213](https://github.com/ng-forge/ng-forge/pull/213))
+- **dynamic-forms:** make logic condition evaluation array-aware via pathKeys ([#231](https://github.com/ng-forge/ng-forge/pull/231))
+
+### ⚡ Performance Improvements
+
+- **dynamic-forms:** prevent redundant recalculations with deep equality checks ([#177](https://github.com/ng-forge/ng-forge/pull/177))
+
+### ♻️ Code Refactoring
+
+- **dynamic-forms:** replace array events with semantic event classes and builder API ([#218](https://github.com/ng-forge/ng-forge/pull/218))
+- ⚠️ **dynamic-forms:** implement direct root form binding with UUID keys for array items ([#219](https://github.com/ng-forge/ng-forge/pull/219), [#218](https://github.com/ng-forge/ng-forge/issues/218))
+- **dynamic-forms:** extract and optimize form state management ([#223](https://github.com/ng-forge/ng-forge/pull/223))
+
+### ✅ Tests
+
+- **examples:** add comprehensive E2E test suites and edge case coverage ([#225](https://github.com/ng-forge/ng-forge/pull/225))
+
+### ⚠️ Breaking Changes
+
+- **dynamic-forms:** implement direct root form binding with UUID keys for array items ([#219](https://github.com/ng-forge/ng-forge/pull/219), [#218](https://github.com/ng-forge/ng-forge/issues/218))
+  ArrayField.fields is now `FieldDef[][]` instead of `FieldDef[]`
+  The outer array defines initial items (each element = one array item).
+  The inner arrays define the field structure for each item.
+  Values are now embedded in field definitions via the `value` property.
+  Before:
+  ```typescript
+  {
+    key: 'contacts',
+    type: 'array',
+    fields: [{ key: 'name', type: 'input' }]
+  }
+  // + initialValue: { contacts: [{name: 'Alice'}] }
+  ```
+  After:
+  ```typescript
+  {
+    key: 'contacts',
+    type: 'array',
+    fields: [
+      [{ key: 'name', type: 'input', value: 'Alice' }]
+    ]
+  }
+  // No separate initialValue needed
+  ```
+
+  - Update ArrayField type with ArrayItemTemplate type alias
+  - Update isArrayField type guard to validate nested structure
+  - Update ArrayFieldComponent to resolve items from fields[][]
+  - Update form schema mapping to handle heterogeneous items
+  - Update default value computation for new structure
+  - Update field flattener and form mode validator
+  - Update all example scenarios across all UI libraries
+  - Update unit tests for new structure
+  * refactor(dynamic-forms): improve row layout and array example styling
+  - Add df-col-auto class for natural content width in rows
+  - Add df-row-mobile-keep-cols class to maintain horizontal layout on mobile
+  - Use baseline alignment for better button/input vertical alignment
+  - Set consistent 156px min-width for form buttons
+  - Add gap between array items for visual separation
+  - Update array example with side-by-side Add First/Add Contact buttons
+  - Add ARRAY_TEMPLATE_REGISTRY token for tracking item templates
+  * fix(dynamic-forms): update type tests for ArrayItemTemplate[] structure
+    Update type tests in array-field.type-test.ts to use ArrayItemTemplate[]
+    instead of ArrayAllowedChildren[] to match the new nested array structure
+    (FieldDef[][]) introduced in the array field refactoring.
+  * chore(mcp): regenerate registry with updated array docs
+  * revert(dynamic-forms): restore original row and grid styling
+    Revert library styling changes made in e5bb3f250 that should have been
+    in docs-specific styles, not core library files.
+  - Restore row-field.component.scss to use flex-start alignment and
+    natural content sizing (flex: 0 0 auto) for items without col classes
+  - Restore 576px mobile breakpoint instead of 768px
+  - Remove df-col-auto from array example (not needed with original styling)
+  * refactor(examples): move row styling overrides to example-specific styles
+    Add row layout overrides to \_examples.scss instead of modifying library:
+  - Baseline alignment for better button/input vertical alignment
+  - Equal space distribution for children (flex: 1 1 0)
+  - df-col-auto class for natural content width
+  - 768px responsive breakpoint for example container width
+  - df-row-mobile-keep-cols opt-in for horizontal mobile layout
+    Restore df-col-auto classes on array example buttons.
+  * fix(examples): correct row field selector to [row-field]
+  * fix(dynamic-forms): address array field review concerns
+  - Add fallback for crypto.randomUUID() for older browsers/non-HTTPS contexts
+  - Fix formValue snapshot issue by using getter for reactive access
+  * refactor(dynamic-forms): simplify array item ID generation to counter
+  * refactor(dynamic-forms): remove dead key-suffix code
+  * perf(dynamic-forms): optimize array remove operations to avoid recreates
+    Update resolvedItems BEFORE form value for all remove operations (pop,
+    shift, removeAt). This ensures differential update sees "none" (lengths
+    already match) and avoids unnecessary component recreates. Remaining
+    items' linkedSignal indices auto-update via itemOrderSignal.
+    Also removes unused 'pop' type variant from DifferentialUpdateOperation
+    since all removes now use the same optimized path.
+  * chore(dynamic-forms): remove unused ArrayTemplateRegistry type import
+  * refactor(dynamic-forms): remove unused fieldTree and explicitDefaultValue parameters
+    These parameters were passed through the array item resolution chain but
+    never actually used:
+  - createArrayItemInjectorAndInputs now gets form from RootFormRegistryService
+  - explicitDefaultValue was never read by any function
+    Removed from:
+  - CreateArrayItemInjectorOptions interface
+  - ResolveArrayItemOptions interface
+  - All callers in array-field.component.ts
+  * perf(dynamic-forms): optimize array item index lookup from O(n) to O(1)
+    Replace itemOrderSignal (string[]) with itemPositionMap (Map<string, number>)
+    for position lookup. Each array item's linkedSignal was doing indexOf() which
+    is O(n) per item, resulting in O(n²) total on every array mutation.
+    Now uses Map.get() for O(1) per item, O(n) total.
+    Also:
+  - Replace redundant linkedSignal wrapper with computed for resolvedItems
+  - Remove unused linkedSignal import from array-field.component
+  * fix(dynamic-forms): scope array item ID generator to component for SSR compatibility
+    Replace module-level counter with DI-based ID generator per array instance.
+    Each ArrayFieldComponent now provides its own ARRAY_ITEM_ID_GENERATOR via
+    createArrayItemIdGenerator factory, ensuring:
+  - SSR hydration compatibility (server and client generate same IDs)
+  - No global state pollution between form instances
+  - Deterministic IDs within each array's lifecycle
+  * feat(dynamic-forms): support primitive arrays alongside object arrays
+    Add ArrayItemDefinition type to support both primitive and object array items:
+  - Single FieldDef (not wrapped) creates primitive item (extracts value directly)
+  - Array of FieldDefs creates object item (merges fields into object)
+    This enables three array patterns:
+  - Primitive arrays: ['tag1', 'tag2']
+  - Object arrays: [{ name: 'Alice', email: '...' }]
+  - Heterogeneous arrays: [{ value: 'x' }, 'y']
+    Updated components:
+  - ArrayField interface and isArrayField type guard
+  - Default value computation for primitive items
+  - Form schema mapping for primitive/mixed arrays
+  - Array component to normalize and handle both formats
+  - Event types to accept single field or array templates
+  - Button types for all UI libraries
+  * docs(dynamic-forms): update array documentation for primitive array support
+  - Fix programmatic approach section to use correct API syntax
+  - Update "Complete Example: Flat Array" to use primitive array syntax
+  - Add form value comments to show expected output
+  - Document both primitive and object template formats
+  * docs(dynamic-forms): update events documentation for required array templates
+  - Update array events section to show required template parameter
+  - Add examples for both primitive and object item templates
+  - Regenerate MCP registry with updated documentation
+  * fix(dynamic-forms): use core package field types in array type tests
+    Change type tests to use 'hidden' instead of 'input' since 'input' is
+    only available in UI library packages, not in the core dynamic-forms
+    package. The 'hidden' type is a value field in the core registry.
+  * fix(dynamic-forms): correct array derivation traversal for primitive/object items
+  - Fix derivation collector to properly handle (FieldDef | FieldDef[])[] format
+  - Add scoped styling for array docs example via formClassName property
+  - Add formClassName to ExampleScenario interface for custom form classes
+
+### ❤️ Thank You
+
+- Antim Prisacaru @antimprisacaru
+- Artur @arturovt
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
