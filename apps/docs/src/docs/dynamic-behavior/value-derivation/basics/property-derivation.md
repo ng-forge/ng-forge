@@ -1,5 +1,5 @@
 ---
-title: Property Derivation
+title: Properties
 route: property
 ---
 
