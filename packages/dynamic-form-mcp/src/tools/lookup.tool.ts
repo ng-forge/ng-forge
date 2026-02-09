@@ -47,6 +47,7 @@ function getTopicList(): string {
     'validation-messages',
     'conditional',
     'derivation',
+    'property-derivation',
     'options-format',
     'expression-variables',
     'async-validators',
@@ -171,7 +172,7 @@ Field types: input, select, slider, radio, checkbox, textarea, datepicker, toggl
 
 Containers: group, row, array, page
 
-Concepts: validation, conditional, derivation, options-format, expression-variables, async-validators
+Concepts: validation, conditional, derivation, property-derivation, options-format, expression-variables, async-validators
 
 Patterns: field-placement, logic-matrix, context-api, containers, multi-page-gotchas
 
@@ -180,7 +181,7 @@ Use topic="list" to see all available topics.`,
       topic: z
         .string()
         .describe(
-          'Topic to look up: field types (input, select, hidden, group, row, array, page), concepts (validation, conditional, derivation, options-format), patterns (golden-path, pitfalls, multi-page-gotchas), or "list" to see all topics',
+          'Topic to look up: field types (input, select, hidden, group, row, array, page), concepts (validation, conditional, derivation, property-derivation, options-format), patterns (golden-path, pitfalls, multi-page-gotchas), or "list" to see all topics',
         ),
       depth: z
         .enum(['brief', 'full', 'schema'])

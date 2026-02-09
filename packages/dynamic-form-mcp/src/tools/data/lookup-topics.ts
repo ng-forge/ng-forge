@@ -558,7 +558,8 @@ See topic \`external-data\` for full documentation.`,
 logic: [{ type: 'derivation', expression: 'formValue.firstName + " " + formValue.lastName' }]
 \`\`\`
 Derivation is always defined ON the field that receives the computed value (self-targeting).
-**Variables:** \`formValue\`, \`fieldValue\`, \`externalData\` (see topic: external-data)`,
+**Variables:** \`formValue\`, \`fieldValue\`, \`externalData\` (see topic: external-data)
+**For deriving component properties** (minDate, options, label): see topic \`property-derivation\``,
 
     full: `# Value Derivation (Computed Fields)
 
@@ -641,7 +642,9 @@ derivation: \`(() => {
   const price = formValue.unitPrice || 0;
   return qty * price;
 })()\`
-\`\`\``,
+\`\`\`
+
+**See also:** \`property-derivation\` topic for deriving component properties (minDate, options, label, etc.)`,
   },
 
   'options-format': {
@@ -732,6 +735,181 @@ expression: 'externalData.permissions.includes("edit")'
 1. **Always use optional chaining** (\`?.\`) for nested paths
 2. **Provide defaults** for potentially undefined values: \`formValue.count || 0\`
 3. **Use nullish coalescing** (\`??\`) when 0 or empty string are valid: \`formValue.score ?? 'N/A'\``,
+  },
+
+  'property-derivation': {
+    brief: `\`\`\`typescript
+// Derive endDate's minDate from startDate value
+logic: [{ type: 'propertyDerivation', targetProperty: 'minDate', expression: 'formValue.startDate' }]
+
+// Derive select options from another field
+logic: [{ type: 'propertyDerivation', targetProperty: 'options', functionName: 'getCitiesForCountry', dependsOn: ['country'] }]
+\`\`\`
+Unlike value derivation (which sets the field's **value**), property derivation sets **component input properties** like minDate, options, label, placeholder, props.appearance.`,
+
+    full: `# Property Derivation (Dynamic Field Properties)
+
+Reactively derive field component properties based on form values. Unlike value derivations (which compute the field's value), property derivations compute **component input properties** like \`minDate\`, \`options\`, \`label\`, \`placeholder\`, \`props.appearance\`, etc.
+
+Property derivations are self-targeting: the logic is placed on the field whose property should be derived.
+
+## Basic Syntax
+
+\`\`\`typescript
+{
+  key: 'endDate',
+  type: 'datepicker',
+  label: 'End Date',
+  logic: [{
+    type: 'propertyDerivation',
+    targetProperty: 'minDate',
+    expression: 'formValue.startDate',
+  }]
+}
+\`\`\`
+
+When \`startDate\` changes, the \`minDate\` property on the \`endDate\` datepicker is automatically updated.
+
+## Derivation Sources
+
+### Expression-Based
+\`\`\`typescript
+logic: [{
+  type: 'propertyDerivation',
+  targetProperty: 'minDate',
+  expression: 'formValue.startDate',
+}]
+\`\`\`
+
+### Static Value
+\`\`\`typescript
+logic: [{
+  type: 'propertyDerivation',
+  targetProperty: 'label',
+  value: 'Mobile Phone',
+  condition: { type: 'fieldValue', fieldPath: 'contactType', operator: 'equals', value: 'mobile' },
+}]
+\`\`\`
+
+### Custom Function
+\`\`\`typescript
+// Register in customFnConfig
+customFnConfig: {
+  propertyDerivations: {
+    getCitiesForCountry: (ctx) => {
+      const cities = { 'US': [{ label: 'NYC', value: 'nyc' }], 'DE': [{ label: 'Berlin', value: 'berlin' }] };
+      return cities[ctx.formValue.country as string] ?? [];
+    },
+  },
+}
+
+// Use in field config
+{
+  key: 'city',
+  type: 'select',
+  label: 'City',
+  logic: [{
+    type: 'propertyDerivation',
+    targetProperty: 'options',
+    functionName: 'getCitiesForCountry',
+    dependsOn: ['country'],
+  }]
+}
+\`\`\`
+
+## Supported Target Properties
+
+### Simple Properties (1 level)
+\`minDate\`, \`maxDate\`, \`options\`, \`label\`, \`placeholder\`, \`hint\`, \`disabled\`, \`readonly\`, \`required\`, \`rows\`, \`cols\`, etc.
+
+### Nested Properties (max 2 levels)
+\`props.appearance\`, \`props.color\`, \`props.variant\`, \`meta.autocomplete\`, etc.
+
+⚠️ Deeper nesting (3+ levels) is **not supported**.
+
+## Trigger Timing
+
+| Trigger     | Description                           | Use Case                          |
+|-------------|---------------------------------------|-----------------------------------|
+| \`onChange\`  | Immediately on change (default)       | Date constraints, dynamic options |
+| \`debounced\` | After value stabilizes                | Expensive lookups, API calls      |
+
+\`\`\`typescript
+logic: [{
+  type: 'propertyDerivation',
+  targetProperty: 'options',
+  functionName: 'searchProducts',
+  trigger: 'debounced',
+  debounceMs: 300,
+  dependsOn: ['searchQuery'],
+}]
+\`\`\`
+
+## Conditional Property Derivation
+
+\`\`\`typescript
+logic: [{
+  type: 'propertyDerivation',
+  targetProperty: 'label',
+  value: 'Company Email',
+  condition: { type: 'fieldValue', fieldPath: 'accountType', operator: 'equals', value: 'business' },
+}]
+\`\`\`
+
+## Array Fields
+
+Inside arrays, \`formValue\` is scoped to the current array item:
+\`\`\`typescript
+{
+  key: 'lineItems',
+  type: 'array',
+  fields: [{
+    key: 'item',
+    type: 'group',
+    fields: [
+      { key: 'startDate', type: 'datepicker', label: 'Start' },
+      {
+        key: 'endDate',
+        type: 'datepicker',
+        label: 'End',
+        logic: [{
+          type: 'propertyDerivation',
+          targetProperty: 'minDate',
+          expression: 'formValue.startDate',  // Scoped to current array item
+        }]
+      }
+    ]
+  }]
+}
+\`\`\`
+
+## Key Differences from Value Derivation
+
+| Aspect | Value Derivation | Property Derivation |
+|--------|-----------------|---------------------|
+| Sets | Field's form value | Component input property |
+| Type | \`type: 'derivation'\` | \`type: 'propertyDerivation'\` |
+| Target | Implicit (self) | \`targetProperty: 'minDate'\` |
+| Shorthand | \`derivation: 'expr'\` | None (must use logic block) |
+| Chaining | Topologically sorted | No chaining (single pass) |
+| Functions | \`customFnConfig.derivations\` | \`customFnConfig.propertyDerivations\` |
+
+## PropertyDerivationLogicConfig Interface
+
+\`\`\`typescript
+interface PropertyDerivationLogicConfig {
+  type: 'propertyDerivation';
+  targetProperty: string;               // Property to set (e.g., 'minDate', 'options')
+  debugName?: string;                   // For logging/debugging
+  condition?: ConditionalExpression | boolean;  // When to apply (default: true)
+  value?: unknown;                      // Static value (mutually exclusive)
+  expression?: string;                  // JavaScript expression (mutually exclusive)
+  functionName?: string;                // Custom function name (mutually exclusive)
+  dependsOn?: string[];                 // Explicit field dependencies
+  trigger?: 'onChange' | 'debounced';   // Evaluation timing (default: 'onChange')
+  debounceMs?: number;                  // Debounce duration (default: 500)
+}
+\`\`\``,
   },
 
   'external-data': {
@@ -976,35 +1154,37 @@ validators: [{
   // ========== PATTERNS & RULES ==========
   'logic-matrix': {
     brief: `**Containers:** group/row/array have NO logic (apply to children)
-**Page:** hidden only | **Value fields:** all logic types | **Buttons:** hidden, disabled`,
+**Page:** hidden only | **Value fields:** all logic types incl. propertyDerivation | **Buttons:** hidden, disabled`,
 
     full: `# Logic Support Matrix
 
-| Field Type     | hidden | disabled | required | readonly | derivation |
-|----------------|--------|----------|----------|----------|------------|
-| page           |   Y    |    N     |    N     |    N     |     N      |
-| group          |   N    |    N     |    N     |    N     |     N      |
-| row            |   N    |    N     |    N     |    N     |     N      |
-| array          |   N    |    N     |    N     |    N     |     N      |
-| input          |   Y    |    Y     |    Y     |    Y     |     Y      |
-| select         |   Y    |    Y     |    Y     |    Y     |     Y      |
-| checkbox       |   Y    |    Y     |    Y     |    Y     |     Y      |
-| radio          |   Y    |    Y     |    Y     |    Y     |     Y      |
-| multi-checkbox |   Y    |    Y     |    Y     |    Y     |     Y      |
-| textarea       |   Y    |    Y     |    Y     |    Y     |     Y      |
-| datepicker     |   Y    |    Y     |    Y     |    Y     |     Y      |
-| toggle         |   Y    |    Y     |    Y     |    Y     |     Y      |
-| slider         |   Y    |    Y     |    Y     |    Y     |     Y      |
-| hidden         |   N    |    N     |    N     |    N     |     N      |
-| text           |   Y    |    N     |    N     |    N     |     N      |
-| button/submit  |   Y    |    Y     |    N     |    N     |     N      |
-| next/previous  |   Y    |    Y     |    N     |    N     |     N      |
+| Field Type     | hidden | disabled | required | readonly | derivation | propertyDerivation |
+|----------------|--------|----------|----------|----------|------------|--------------------|
+| page           |   Y    |    N     |    N     |    N     |     N      |         N          |
+| group          |   N    |    N     |    N     |    N     |     N      |         N          |
+| row            |   N    |    N     |    N     |    N     |     N      |         N          |
+| array          |   N    |    N     |    N     |    N     |     N      |         N          |
+| input          |   Y    |    Y     |    Y     |    Y     |     Y      |         Y          |
+| select         |   Y    |    Y     |    Y     |    Y     |     Y      |         Y          |
+| checkbox       |   Y    |    Y     |    Y     |    Y     |     Y      |         Y          |
+| radio          |   Y    |    Y     |    Y     |    Y     |     Y      |         Y          |
+| multi-checkbox |   Y    |    Y     |    Y     |    Y     |     Y      |         Y          |
+| textarea       |   Y    |    Y     |    Y     |    Y     |     Y      |         Y          |
+| datepicker     |   Y    |    Y     |    Y     |    Y     |     Y      |         Y          |
+| toggle         |   Y    |    Y     |    Y     |    Y     |     Y      |         Y          |
+| slider         |   Y    |    Y     |    Y     |    Y     |     Y      |         Y          |
+| hidden         |   N    |    N     |    N     |    N     |     N      |         N          |
+| text           |   Y    |    N     |    N     |    N     |     N      |         Y          |
+| button/submit  |   Y    |    Y     |    N     |    N     |     N      |         N          |
+| next/previous  |   Y    |    Y     |    N     |    N     |     N      |         N          |
 
 **Key takeaways:**
 - Containers (group, row, array) do NOT support logic - apply to children instead
 - Page only supports \`hidden\` logic (for conditional pages)
 - Hidden fields have NO logic support at all
-- Value fields (input, select, etc.) support ALL logic types`,
+- Value fields (input, select, etc.) support ALL logic types including \`propertyDerivation\`
+- \`propertyDerivation\` sets component input properties (e.g., \`minDate\`, \`options\`), NOT the field's form value
+- Text (display) fields support \`propertyDerivation\` for dynamic labels`,
   },
 
   'context-api': {
@@ -1791,6 +1971,15 @@ export const TOPIC_ALIASES: Record<string, string> = {
   computed: 'derivation',
   calculate: 'derivation',
   expression: 'derivation',
+  // Property derivation aliases
+  'property-derive': 'property-derivation',
+  propertyderivation: 'property-derivation',
+  'dynamic-properties': 'property-derivation',
+  'derived-properties': 'property-derivation',
+  'dynamic-options': 'property-derivation',
+  'dynamic-label': 'property-derivation',
+  mindate: 'property-derivation',
+  maxdate: 'property-derivation',
   // Validation aliases
   validators: 'validation',
   required: 'validation',
