@@ -94,7 +94,9 @@ export class PropertyDerivationOrchestrator {
     });
 
     // Side effects react to collection changes: clear the store, register fields, warn.
-    explicitEffect([this.propertyDerivationCollection], ([collection]) => {
+    // schemaFields is included in the dependency array to ensure the field count is always
+    // in sync with the collection (avoids reading a stale value via untracked).
+    explicitEffect([this.propertyDerivationCollection, this.config.schemaFields], ([collection, fields]) => {
       config.store.clear();
 
       if (!collection) return;
@@ -103,7 +105,6 @@ export class PropertyDerivationOrchestrator {
         config.store.registerField(entry.fieldKey);
       }
 
-      const fields = untracked(() => config.schemaFields());
       this.warnAboutWildcardDependencies(collection.entries, fields?.length ?? 0);
     });
 
@@ -164,20 +165,12 @@ export class PropertyDerivationOrchestrator {
   private createPeriodStream(debounceMs: number, collection: PropertyDerivationCollection, changedFields: Set<string>) {
     const additionalWait = Math.max(0, debounceMs - DEFAULT_DEBOUNCE_MS);
 
-    if (additionalWait === 0) {
-      return of(null).pipe(
-        map(() => {
-          this.applyDebouncedEntriesForPeriod(debounceMs, collection, changedFields);
-        }),
-      );
-    }
-
     return timer(additionalWait).pipe(
       map(() => {
-        const currentCollection = untracked(() => this.propertyDerivationCollection());
-        if (currentCollection) {
-          this.applyDebouncedEntriesForPeriod(debounceMs, currentCollection, changedFields);
-        }
+        // For periods beyond DEFAULT_DEBOUNCE_MS, re-read collection as it may have changed during the wait.
+        // For zero-wait periods, use the original collection directly since no time has elapsed.
+        const currentCollection = additionalWait > 0 ? (untracked(() => this.propertyDerivationCollection()) ?? collection) : collection;
+        this.applyDebouncedEntriesForPeriod(debounceMs, currentCollection, changedFields);
       }),
     );
   }
@@ -250,6 +243,15 @@ export class PropertyDerivationOrchestrator {
     }
   }
 
+  /**
+   * Resolves external data signals to their current values.
+   *
+   * Called on every onChange and debounced application. Each call iterates all
+   * external data entries and resolves signals via untracked(). For forms with
+   * many external data entries, this could be optimized by caching the resolved
+   * record and only invalidating when external data signal values change.
+   * In practice, external data entries are few, so the linear scan is acceptable.
+   */
   private resolveExternalData(): Record<string, unknown> | undefined {
     const externalDataRecord = untracked(() => this.config.externalData?.());
 

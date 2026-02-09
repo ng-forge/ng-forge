@@ -39,7 +39,13 @@ export interface PropertyDerivationEntry {
   /**
    * Condition that determines when this property derivation applies.
    *
-   * Defaults to `true` (always apply) if not specified.
+   * Defaults to `true` (always apply) if not specified in the config.
+   *
+   * Note: This default behavior is consistent with `DerivationLogicConfig` (where
+   * `condition` is also optional and defaults to `true`) but differs from
+   * `StateLogicConfig` where `condition` is **required**. This is intentional:
+   * state logic always needs a condition to evaluate, whereas derivations and
+   * property derivations make sense as unconditional by default (always compute).
    */
   condition: ConditionalExpression | boolean;
 

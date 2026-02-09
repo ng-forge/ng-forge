@@ -1,6 +1,13 @@
+import { isDevMode } from '@angular/core';
 import { disabled, hidden, readonly, required, LogicFn } from '@angular/forms/signals';
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
-import { LogicConfig, isStateLogicConfig, LogicTrigger } from '../../models/logic/logic-config';
+import {
+  LogicConfig,
+  isStateLogicConfig,
+  isDerivationLogicConfig,
+  isPropertyDerivationLogicConfig,
+  LogicTrigger,
+} from '../../models/logic/logic-config';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { createLogicFunction, createDebouncedLogicFunction } from '../expressions/logic-function-factory';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
@@ -32,9 +39,19 @@ function getConfigDebounceMs(config: LogicConfig): number | undefined {
 }
 
 export function applyLogic<TValue>(config: LogicConfig, fieldPath: SchemaPath<TValue> | SchemaPathTree<TValue>): void {
-  // Only state logic configs (hidden/readonly/disabled/required) are applied to the schema.
-  // Value derivations and property derivations are handled by their respective orchestrators.
-  if (!isStateLogicConfig(config)) return;
+  // Value derivations and property derivations are handled by their respective orchestrators — skip them.
+  if (isDerivationLogicConfig(config) || isPropertyDerivationLogicConfig(config)) return;
+
+  // Guard against unrecognized logic types that may be added in the future.
+  if (!isStateLogicConfig(config)) {
+    if (isDevMode()) {
+      console.warn(
+        `[Dynamic Forms] Unrecognized logic config type '${(config as { type: string }).type}' in applyLogic. ` +
+          'This config will be ignored. If this is a new logic type, ensure it is handled explicitly.',
+      );
+    }
+    return;
+  }
 
   const path = fieldPath as SchemaPath<TValue>;
   const trigger = getConfigTrigger(config);

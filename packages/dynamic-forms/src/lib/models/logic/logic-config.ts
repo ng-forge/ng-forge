@@ -453,15 +453,25 @@ interface BasePropertyDerivationLogicConfig {
   /**
    * The target property to set on the field component.
    *
-   * Supports dot-notation for nested properties (max 2 levels):
+   * **Depth limit (max 2 levels):** Only simple and single-dot-nested paths are
+   * supported. Paths with 2+ dots (e.g., `'a.b.c'`) will throw a `DynamicFormError`
+   * at runtime. This is an architectural constraint of the override merging strategy.
+   *
+   * Supported formats:
    * - Simple: `'minDate'`, `'options'`, `'label'`, `'placeholder'`
    * - Nested (1 dot): `'props.appearance'`, `'meta.autocomplete'`
    *
+   * **Note:** There is no compile-time validation that the property name matches
+   * an actual input on the field component. Typos will silently write to the
+   * override store with no visible effect. A dev-mode warning is emitted when
+   * the override key doesn't match any existing input property.
+   *
    * @example
    * ```typescript
-   * targetProperty: 'minDate'
-   * targetProperty: 'options'
-   * targetProperty: 'props.appearance'
+   * targetProperty: 'minDate'           // ✅ Simple property
+   * targetProperty: 'options'           // ✅ Simple property
+   * targetProperty: 'props.appearance'  // ✅ Single-nested property
+   * targetProperty: 'a.b.c'            // ❌ Throws DynamicFormError (too deep)
    * ```
    */
   targetProperty: string;

@@ -20,23 +20,19 @@ test.describe('Property Derivation Logic Tests', () => {
       await expect(titleLabel).toHaveText('Job Title (Engineering)');
     });
 
-    test('should update derived label when select value changes', async ({ page, helpers }) => {
+    test('should update derived label when select value changes', async ({ helpers }) => {
       const scenario = helpers.getScenario('expression-property-test');
       await expect(scenario).toBeVisible();
 
       const departmentSelect = helpers.getSelect(scenario, 'department');
       const titleLabel = scenario.locator('#title mat-label');
 
-      // Change to Marketing
+      // Change to Marketing — Playwright auto-retries toHaveText until reactivity settles
       await helpers.selectOption(departmentSelect, 'Marketing');
-      await page.waitForTimeout(500);
-
       await expect(titleLabel).toHaveText('Job Title (Marketing)');
 
       // Change to Design
       await helpers.selectOption(departmentSelect, 'Design');
-      await page.waitForTimeout(500);
-
       await expect(titleLabel).toHaveText('Job Title (Design)');
     });
   });
@@ -56,23 +52,19 @@ test.describe('Property Derivation Logic Tests', () => {
       await expect(emailLabel).toHaveText('Personal Email');
     });
 
-    test('should update derived label when condition changes', async ({ page, helpers }) => {
+    test('should update derived label when condition changes', async ({ helpers }) => {
       const scenario = helpers.getScenario('conditional-property-test');
       await expect(scenario).toBeVisible();
 
       const accountTypeSelect = helpers.getSelect(scenario, 'accountType');
       const emailLabel = scenario.locator('#email mat-label');
 
-      // Change to business
+      // Change to business — Playwright auto-retries toHaveText until reactivity settles
       await helpers.selectOption(accountTypeSelect, 'Business');
-      await page.waitForTimeout(500);
-
       await expect(emailLabel).toHaveText('Work Email');
 
       // Change back to personal
       await helpers.selectOption(accountTypeSelect, 'Personal');
-      await page.waitForTimeout(500);
-
       await expect(emailLabel).toHaveText('Personal Email');
     });
   });
@@ -92,11 +84,9 @@ test.describe('Property Derivation Logic Tests', () => {
 
       // Select USA
       await helpers.selectOption(countrySelect, 'USA');
-      await page.waitForTimeout(500);
 
-      // Open city select and verify US city options
+      // Open city select and verify US city options — toHaveCount auto-retries
       await citySelect.click();
-      await page.waitForTimeout(300);
 
       const options = page.locator('mat-option');
       await expect(options).toHaveCount(3);
@@ -116,15 +106,12 @@ test.describe('Property Derivation Logic Tests', () => {
 
       // First select USA
       await helpers.selectOption(countrySelect, 'USA');
-      await page.waitForTimeout(500);
 
       // Now change to Germany
       await helpers.selectOption(countrySelect, 'Germany');
-      await page.waitForTimeout(500);
 
-      // Open city select and verify German city options
+      // Open city select and verify German city options — toHaveCount auto-retries
       await citySelect.click();
-      await page.waitForTimeout(300);
 
       const options = page.locator('mat-option');
       await expect(options).toHaveCount(2);
@@ -134,19 +121,16 @@ test.describe('Property Derivation Logic Tests', () => {
       await page.keyboard.press('Escape');
     });
 
-    test('should allow selecting a derived option and include it in form value', async ({ page, helpers }) => {
+    test('should allow selecting a derived option and include it in form value', async ({ helpers }) => {
       const scenario = helpers.getScenario('function-property-test');
       await expect(scenario).toBeVisible();
 
       const countrySelect = helpers.getSelect(scenario, 'country');
       const citySelect = helpers.getSelect(scenario, 'city');
 
-      // Select USA then pick a city
+      // Select USA then pick a city — Playwright auto-waits for options to appear
       await helpers.selectOption(countrySelect, 'USA');
-      await page.waitForTimeout(500);
-
       await helpers.selectOption(citySelect, 'New York');
-      await page.waitForTimeout(500);
 
       // Submit and verify the form value includes the selected city
       const formData = await helpers.submitFormAndCapture(scenario);
@@ -169,7 +153,6 @@ test.describe('Property Derivation Logic Tests', () => {
       // Open endDate calendar
       const endDateToggle = scenario.locator('#endDate mat-datepicker-toggle button');
       await endDateToggle.click();
-      await page.waitForTimeout(300);
 
       // Verify some calendar cells are disabled (dates before 15th)
       const disabledCells = page.locator('.mat-calendar-body-cell[aria-disabled="true"]');
@@ -189,11 +172,13 @@ test.describe('Property Derivation Logic Tests', () => {
       // Count disabled cells with initial startDate (15th)
       const endDateToggle = scenario.locator('#endDate mat-datepicker-toggle button');
       await endDateToggle.click();
-      await page.waitForTimeout(300);
+      // Wait for calendar to render before counting
+      await expect(page.locator('.mat-calendar-body-cell').first()).toBeVisible();
 
       const initialDisabledCount = await page.locator('.mat-calendar-body-cell[aria-disabled="true"]').count();
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(300);
+      // Wait for calendar to close before interacting with input
+      await expect(page.locator('mat-datepicker-content')).not.toBeVisible();
 
       // Change startDate to the 25th of the current month (more dates should be disabled)
       const startDateInput = helpers.getInput(scenario, 'startDate');
@@ -201,16 +186,17 @@ test.describe('Property Derivation Logic Tests', () => {
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const year = now.getFullYear();
       await helpers.clearAndFill(startDateInput, `${month}/25/${year}`);
-      await page.waitForTimeout(500);
 
       // Open endDate calendar again
       await endDateToggle.click();
-      await page.waitForTimeout(300);
+      await expect(page.locator('.mat-calendar-body-cell').first()).toBeVisible();
 
-      const updatedDisabledCount = await page.locator('.mat-calendar-body-cell[aria-disabled="true"]').count();
-
-      // More dates should be disabled now (moved from 15th to 25th)
-      expect(updatedDisabledCount).toBeGreaterThan(initialDisabledCount);
+      // Use poll to auto-retry the count comparison as property derivation settles
+      await expect
+        .poll(async () => {
+          return page.locator('.mat-calendar-body-cell[aria-disabled="true"]').count();
+        })
+        .toBeGreaterThan(initialDisabledCount);
 
       await page.keyboard.press('Escape');
     });
@@ -231,23 +217,19 @@ test.describe('Property Derivation Logic Tests', () => {
       await expect(notesFormField).toHaveClass(/mat-form-field-appearance-outline/);
     });
 
-    test('should switch to fill appearance when style changes', async ({ page, helpers }) => {
+    test('should switch to fill appearance when style changes', async ({ helpers }) => {
       const scenario = helpers.getScenario('appearance-property-test');
       await expect(scenario).toBeVisible();
 
       const styleSelect = helpers.getSelect(scenario, 'style');
       const notesFormField = scenario.locator('#notes mat-form-field');
 
-      // Change to classic
+      // Change to classic — Playwright auto-retries toHaveClass until reactivity settles
       await helpers.selectOption(styleSelect, 'Classic');
-      await page.waitForTimeout(500);
-
       await expect(notesFormField).toHaveClass(/mat-form-field-appearance-fill/);
 
       // Change back to modern
       await helpers.selectOption(styleSelect, 'Modern');
-      await page.waitForTimeout(500);
-
       await expect(notesFormField).toHaveClass(/mat-form-field-appearance-outline/);
     });
   });
@@ -270,7 +252,6 @@ test.describe('Property Derivation Logic Tests', () => {
       const firstContactType = scenario.locator('#contactType_0 mat-select');
       await firstContactType.click();
       await page.locator('mat-option:has-text("Phone")').click();
-      await page.waitForTimeout(500);
 
       await expect(firstItemLabel).toHaveText('Phone Number');
     });
@@ -282,7 +263,6 @@ test.describe('Property Derivation Logic Tests', () => {
       // Add a second contact item
       const addButton = scenario.locator('button:has-text("Add Contact")');
       await addButton.click();
-      await page.waitForTimeout(500);
 
       // Both items default to 'email', so both should show 'Email Address'
       const firstItemLabel = scenario.locator('#contactValue_0 mat-label');
@@ -294,7 +274,6 @@ test.describe('Property Derivation Logic Tests', () => {
       const secondContactType = scenario.locator('#contactType_1 mat-select');
       await secondContactType.click();
       await page.locator('mat-option:has-text("Phone")').click();
-      await page.waitForTimeout(500);
 
       // First item still 'Email Address', second is now 'Phone Number'
       await expect(firstItemLabel).toHaveText('Email Address');

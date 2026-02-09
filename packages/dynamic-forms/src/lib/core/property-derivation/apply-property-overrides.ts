@@ -1,3 +1,4 @@
+import { isDevMode } from '@angular/core';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 
 /**
@@ -8,8 +9,16 @@ import { DynamicFormError } from '../../errors/dynamic-form-error';
  * - Nested (1 dot): `overrides['props.appearance']` → `inputs.props.appearance = value`
  * - Deeper paths (2+ dots): throws DynamicFormError
  *
+ * **Important:** Only simple (e.g., `'minDate'`) and single-nested (e.g., `'props.appearance'`)
+ * paths are supported. Paths with 2+ dots will throw a `DynamicFormError` at runtime.
+ * This is an architectural constraint — deeper nesting would require recursive cloning
+ * and complicate the override merging strategy.
+ *
  * Array-valued overrides replace wholesale (no merging).
  * Returns `inputs` unchanged if overrides is empty (no clone).
+ *
+ * In dev mode, warns when an override key doesn't match any existing input property,
+ * which may indicate a typo in the `targetProperty` configuration.
  *
  * @param inputs - The current field inputs record
  * @param overrides - Record of property names to override values
@@ -28,6 +37,20 @@ export function applyPropertyOverrides(inputs: Record<string, unknown>, override
   for (const key of keys) {
     const value = overrides[key];
     const dotIndex = key.indexOf('.');
+
+    // Dev-mode check: warn if the override key doesn't match any existing input property.
+    // This catches typos like 'mindata' instead of 'minDate'. False positives are possible
+    // for properties intentionally added by derivations that aren't in the initial config.
+    if (isDevMode()) {
+      const topLevelKey = dotIndex === -1 ? key : key.substring(0, dotIndex);
+      if (!(topLevelKey in inputs)) {
+        console.warn(
+          `[Dynamic Forms] Property override '${key}' does not match any existing input property. ` +
+            'This may indicate a typo in the targetProperty configuration. ' +
+            `Available properties: ${Object.keys(inputs).join(', ')}`,
+        );
+      }
+    }
 
     if (dotIndex === -1) {
       // Simple property: direct assignment
