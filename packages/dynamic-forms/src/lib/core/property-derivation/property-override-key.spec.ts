@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPropertyOverrideKey } from './property-override-key';
+import { buildPropertyOverrideKey, PLACEHOLDER_INDEX } from './property-override-key';
 
 describe('buildPropertyOverrideKey', () => {
   it('should return just the fieldKey for non-array fields', () => {
@@ -24,5 +24,13 @@ describe('buildPropertyOverrideKey', () => {
 
   it('should return just fieldKey when index is null', () => {
     expect(buildPropertyOverrideKey('items', undefined, 'name')).toBe('name');
+  });
+
+  it('should return placeholder key with PLACEHOLDER_INDEX', () => {
+    expect(buildPropertyOverrideKey('items', PLACEHOLDER_INDEX, 'endDate')).toBe('items.$.endDate');
+  });
+
+  it('should return just fieldKey when using PLACEHOLDER_INDEX without arrayKey', () => {
+    expect(buildPropertyOverrideKey(undefined, PLACEHOLDER_INDEX, 'name')).toBe('name');
   });
 });

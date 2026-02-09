@@ -7,7 +7,7 @@ import { ArrayContext } from '../../mappers/types';
 import { baseFieldMapper } from '../../mappers/base/base-field-mapper';
 import { PROPERTY_OVERRIDE_STORE, PropertyOverrideStore } from '../../core/property-derivation/property-override-store';
 import { applyPropertyOverrides } from '../../core/property-derivation/apply-property-overrides';
-import { buildPropertyOverrideKey } from '../../core/property-derivation/property-override-key';
+import { buildPropertyOverrideKey, PLACEHOLDER_INDEX } from '../../core/property-derivation/property-override-key';
 
 /**
  * Merges forwarded props into meta, with meta taking precedence.
@@ -138,8 +138,10 @@ export function mapFieldToInputs(
 
   // Fast-path check for property overrides: only fields with registered derivations
   // enter the computed() wrapper for overrides. hasField() is a non-reactive Map.has() — O(1).
-  // Uses placeholder format (e.g., 'items.$.endDate') matching what the collector/orchestrator registers.
-  const hasOverrides = store?.hasField(arrayContext ? `${arrayContext.arrayKey}.$.${fieldDef.key}` : fieldDef.key) ?? false;
+  // Uses PLACEHOLDER_INDEX to produce the wildcard format (e.g., 'items.$.endDate') matching
+  // what the collector/orchestrator registers. The computed block below uses a concrete index instead.
+  const hasOverrides =
+    store?.hasField(buildPropertyOverrideKey(arrayContext?.arrayKey, arrayContext ? PLACEHOLDER_INDEX : undefined, fieldDef.key)) ?? false;
 
   // Fast path: no transformations needed
   if (!hasPropsForwarding && !hasArrayContext && !hasOverrides) {

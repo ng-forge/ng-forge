@@ -7,7 +7,7 @@ export type { PropertyOverrideStore } from './property-override-store';
 export { createPropertyOverrideStore, PROPERTY_OVERRIDE_STORE } from './property-override-store';
 
 // Key utility
-export { buildPropertyOverrideKey } from './property-override-key';
+export { buildPropertyOverrideKey, PLACEHOLDER_INDEX } from './property-override-key';
 
 // Collector
 export { collectPropertyDerivations } from './property-derivation-collector';

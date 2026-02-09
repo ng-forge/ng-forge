@@ -4,6 +4,7 @@ import { isPropertyDerivationLogicConfig, PropertyDerivationLogicConfig } from '
 import { hasChildFields } from '../../models/types/type-guards';
 import { normalizeFieldsArray } from '../../utils/object-utils';
 import { extractExpressionDependencies, extractStringDependencies } from '../cross-field/cross-field-detector';
+import { buildPropertyOverrideKey, PLACEHOLDER_INDEX } from './property-override-key';
 import { PropertyDerivationCollection, PropertyDerivationEntry } from './property-derivation-types';
 
 /**
@@ -105,7 +106,7 @@ function createPropertyDerivationEntry(
   config: PropertyDerivationLogicConfig,
   context: CollectionContext,
 ): PropertyDerivationEntry {
-  const effectiveFieldKey = context.arrayPath ? `${context.arrayPath}.$.${fieldKey}` : fieldKey;
+  const effectiveFieldKey = buildPropertyOverrideKey(context.arrayPath, context.arrayPath ? PLACEHOLDER_INDEX : undefined, fieldKey);
   const dependsOn = extractDependencies(config);
   const condition = config.condition ?? true;
   const trigger = config.trigger ?? 'onChange';
