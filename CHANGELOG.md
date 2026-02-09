@@ -33,6 +33,7 @@
   The inner arrays define the field structure for each item.
   Values are now embedded in field definitions via the `value` property.
   Before:
+
   ```typescript
   {
     key: 'contacts',
@@ -41,7 +42,9 @@
   }
   // + initialValue: { contacts: [{name: 'Alice'}] }
   ```
+
   After:
+
   ```typescript
   {
     key: 'contacts',
