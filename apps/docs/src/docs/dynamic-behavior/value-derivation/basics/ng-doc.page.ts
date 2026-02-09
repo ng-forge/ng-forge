@@ -2,7 +2,7 @@ import { NgDocPage } from '@ng-doc/core';
 import DynamicBehaviorCategory from '../../ng-doc.category';
 
 const DerivationPage: NgDocPage = {
-  title: 'Value Derivation',
+  title: 'Derivation',
   mdFile: ['./index.md', './property-derivation.md'],
   category: DynamicBehaviorCategory,
   route: 'value-derivation',
