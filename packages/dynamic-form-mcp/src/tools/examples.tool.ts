@@ -1000,6 +1000,430 @@ These will cause validation errors:
 \`\`\``,
   },
 
+  'property-derivation': {
+    description: 'Derive field properties (minDate, options, label) from form values',
+    minimal: `import { FormConfig } from '@ng-forge/dynamic-forms';
+
+const formConfig = {
+  fields: [
+    { key: 'startDate', type: 'datepicker', label: 'Start Date' },
+    {
+      key: 'endDate',
+      type: 'datepicker',
+      label: 'End Date',
+      logic: [{
+        type: 'propertyDerivation',
+        targetProperty: 'minDate',
+        expression: 'formValue.startDate',
+      }]
+    },
+    { key: 'submit', type: 'submit', label: 'Submit' }
+  ]
+} as const satisfies FormConfig;`,
+
+    brief: `// Derive component properties from form values
+import { FormConfig } from '@ng-forge/dynamic-forms';
+
+const formConfig = {
+  fields: [
+    { key: 'startDate', type: 'datepicker', label: 'Start Date' },
+    {
+      key: 'endDate',
+      type: 'datepicker',
+      label: 'End Date',
+      // ⚠️ type: 'propertyDerivation' (NOT 'derivation')
+      // ⚠️ targetProperty specifies WHICH property to set
+      logic: [{
+        type: 'propertyDerivation',
+        targetProperty: 'minDate',
+        expression: 'formValue.startDate',
+      }]
+    },
+    {
+      key: 'country',
+      type: 'select',
+      label: 'Country',
+      options: [{ label: 'USA', value: 'US' }, { label: 'Germany', value: 'DE' }]
+    },
+    {
+      key: 'city',
+      type: 'select',
+      label: 'City',
+      options: [],
+      // Dynamic options from custom function
+      logic: [{
+        type: 'propertyDerivation',
+        targetProperty: 'options',
+        functionName: 'getCitiesForCountry',
+        dependsOn: ['country'],
+      }]
+    },
+    { key: 'submit', type: 'submit', label: 'Submit' }
+  ]
+} as const satisfies FormConfig;
+
+// Key points:
+// - type: 'propertyDerivation' sets component PROPERTIES (not form value)
+// - targetProperty: which input property to set (e.g., 'minDate', 'options')
+// - Supports: expression, value, functionName (mutually exclusive)
+// - Register functions in customFnConfig.propertyDerivations`,
+
+    full: `# Property Derivation (Dynamic Field Properties)
+
+Derive field component properties reactively based on form values.
+
+\`\`\`typescript
+import { FormConfig } from '@ng-forge/dynamic-forms';
+
+const formConfig = {
+  fields: [
+    // ========== DATE RANGE: minDate from startDate ==========
+    { key: 'startDate', type: 'datepicker', label: 'Start Date' },
+    {
+      key: 'endDate',
+      type: 'datepicker',
+      label: 'End Date',
+      logic: [{
+        type: 'propertyDerivation',
+        targetProperty: 'minDate',        // Set minDate property
+        expression: 'formValue.startDate', // From startDate's value
+      }]
+    },
+
+    // ========== DYNAMIC OPTIONS: cities from country ==========
+    {
+      key: 'country',
+      type: 'select',
+      label: 'Country',
+      options: [
+        { label: 'USA', value: 'US' },
+        { label: 'Germany', value: 'DE' }
+      ]
+    },
+    {
+      key: 'city',
+      type: 'select',
+      label: 'City',
+      options: [],  // Initial empty, filled by property derivation
+      logic: [{
+        type: 'propertyDerivation',
+        targetProperty: 'options',
+        functionName: 'getCitiesForCountry',
+        dependsOn: ['country'],
+      }]
+    },
+
+    // ========== CONDITIONAL LABEL ==========
+    {
+      key: 'phone',
+      type: 'input',
+      label: 'Phone',
+      logic: [{
+        type: 'propertyDerivation',
+        targetProperty: 'label',
+        value: 'Mobile Phone',
+        condition: {
+          type: 'fieldValue',
+          fieldPath: 'contactType',
+          operator: 'equals',
+          value: 'mobile'
+        },
+      }]
+    },
+
+    // ========== NESTED PROPERTY ==========
+    {
+      key: 'notes',
+      type: 'textarea',
+      label: 'Notes',
+      logic: [{
+        type: 'propertyDerivation',
+        targetProperty: 'props.appearance',  // Dot-notation for nested
+        expression: 'formValue.isPremium ? "fill" : "outline"',
+      }]
+    },
+
+    { key: 'submit', type: 'submit', label: 'Submit' }
+  ]
+} as const satisfies FormConfig;
+\`\`\`
+
+## Custom Function Registration
+
+\`\`\`typescript
+// customFnConfig is a property of FormConfig, not a provider option
+const formConfig = {
+  customFnConfig: {
+    propertyDerivations: {
+      getCitiesForCountry: (ctx) => {
+        const cities: Record<string, { label: string; value: string }[]> = {
+          'US': [{ label: 'New York', value: 'nyc' }, { label: 'LA', value: 'la' }],
+          'DE': [{ label: 'Berlin', value: 'berlin' }, { label: 'Munich', value: 'munich' }],
+        };
+        return cities[ctx.formValue.country as string] ?? [];
+      },
+    },
+  },
+  fields: [
+    // ... fields with propertyDerivation logic referencing 'getCitiesForCountry'
+  ],
+} as const satisfies FormConfig;
+\`\`\`
+
+## Key Differences from Value Derivation
+
+| Feature | \`type: 'derivation'\` | \`type: 'propertyDerivation'\` |
+|---------|----------------------|-------------------------------|
+| Sets | Field's form value | Component property |
+| Target | Implicit (self) | \`targetProperty: 'minDate'\` |
+| Shorthand | \`derivation: 'expr'\` | None |
+| Functions | \`customFnConfig.derivations\` | \`customFnConfig.propertyDerivations\` |`,
+
+    explained: `# Property Derivation - Complete Explanation
+
+## What is Property Derivation?
+
+Property derivation allows you to **reactively update component input properties** based on form state. While value derivations (\`type: 'derivation'\`) compute a field's form value, property derivations (\`type: 'propertyDerivation'\`) compute the field's component properties like \`minDate\`, \`options\`, \`label\`, \`placeholder\`, \`props.appearance\`, etc.
+
+## When to Use Property Derivation
+
+Use property derivation when:
+- **Date constraints**: endDate's minDate should follow startDate
+- **Dynamic options**: City options depend on selected country
+- **Dynamic labels**: Field label changes based on another field
+- **Dynamic appearance**: Input style changes based on form state
+- **Conditional placeholders**: Placeholder text depends on context
+
+## Syntax
+
+\`\`\`typescript
+{
+  key: 'endDate',
+  type: 'datepicker',
+  label: 'End Date',
+  logic: [{
+    type: 'propertyDerivation',    // ⚠️ NOT 'derivation'!
+    targetProperty: 'minDate',      // Which property to set
+    expression: 'formValue.startDate', // How to compute it
+  }]
+}
+\`\`\`
+
+## Three Ways to Compute Values
+
+### 1. Expression (inline JavaScript)
+\`\`\`typescript
+logic: [{
+  type: 'propertyDerivation',
+  targetProperty: 'minDate',
+  expression: 'formValue.startDate',  // Access form values
+}]
+\`\`\`
+
+### 2. Static Value (with condition)
+\`\`\`typescript
+logic: [{
+  type: 'propertyDerivation',
+  targetProperty: 'label',
+  value: 'Business Email',           // Fixed value
+  condition: { type: 'fieldValue', fieldPath: 'type', operator: 'equals', value: 'business' },
+}]
+\`\`\`
+
+### 3. Custom Function (for complex logic)
+\`\`\`typescript
+// In form config
+customFnConfig: {
+  propertyDerivations: {
+    getCitiesForCountry: (ctx) => {
+      // ctx.formValue contains all form values
+      // ctx.externalData contains external signals (unwrapped)
+      return lookupCities(ctx.formValue.country);
+    },
+  },
+}
+
+// In field
+logic: [{
+  type: 'propertyDerivation',
+  targetProperty: 'options',
+  functionName: 'getCitiesForCountry',
+  dependsOn: ['country'],  // ⚠️ Recommended for custom functions!
+}]
+\`\`\`
+
+## Target Property Formats
+
+### Simple properties (1 level)
+\`\`\`typescript
+targetProperty: 'minDate'       // Direct property
+targetProperty: 'options'       // Array of options
+targetProperty: 'label'         // Field label
+targetProperty: 'placeholder'   // Field placeholder
+targetProperty: 'hint'          // Hint text
+\`\`\`
+
+### Nested properties (2 levels max)
+\`\`\`typescript
+targetProperty: 'props.appearance'   // Nested in props
+targetProperty: 'props.color'        // Material color
+targetProperty: 'meta.autocomplete'  // Custom metadata
+\`\`\`
+
+### ❌ Not supported (3+ levels)
+\`\`\`typescript
+targetProperty: 'props.nested.deep'  // ❌ Too deep!
+\`\`\`
+
+## Trigger Timing
+
+\`\`\`typescript
+// Default: evaluate immediately on form value change
+logic: [{
+  type: 'propertyDerivation',
+  targetProperty: 'options',
+  expression: '...',
+  trigger: 'onChange',  // default
+}]
+
+// Debounced: wait for typing to stop
+logic: [{
+  type: 'propertyDerivation',
+  targetProperty: 'options',
+  functionName: 'searchProducts',
+  trigger: 'debounced',
+  debounceMs: 300,
+  dependsOn: ['searchQuery'],
+}]
+\`\`\`
+
+## Array Field Support
+
+Inside arrays, \`formValue\` is scoped to the current array item:
+
+\`\`\`typescript
+{
+  key: 'lineItems',
+  type: 'array',
+  fields: [{
+    key: 'item', type: 'group',
+    fields: [
+      { key: 'startDate', type: 'datepicker', label: 'Start' },
+      {
+        key: 'endDate', type: 'datepicker', label: 'End',
+        logic: [{
+          type: 'propertyDerivation',
+          targetProperty: 'minDate',
+          expression: 'formValue.startDate',  // Refers to THIS item's startDate
+        }]
+      }
+    ]
+  }]
+}
+\`\`\`
+
+## Dependencies
+
+### Automatic (for expressions)
+Dependencies are auto-extracted from expressions:
+\`\`\`typescript
+expression: 'formValue.startDate'  // Automatically depends on 'startDate'
+\`\`\`
+
+### Explicit (for custom functions)
+\`\`\`typescript
+functionName: 'getCities',
+dependsOn: ['country'],  // Only re-evaluate when 'country' changes
+\`\`\`
+
+### Wildcard (default for functions without dependsOn)
+Functions without \`dependsOn\` re-evaluate on ANY form change. Add \`dependsOn\` for performance.
+
+## Complete Example
+
+\`\`\`typescript
+import { FormConfig } from '@ng-forge/dynamic-forms';
+
+const travelForm = {
+  customFnConfig: {
+    propertyDerivations: {
+      getCitiesForCountry: (ctx) => {
+        const cities: Record<string, { label: string; value: string }[]> = {
+          'US': [{ label: 'New York', value: 'nyc' }, { label: 'LA', value: 'la' }],
+          'DE': [{ label: 'Berlin', value: 'berlin' }],
+        };
+        return cities[ctx.formValue.country as string] ?? [];
+      },
+    },
+  },
+  fields: [
+    {
+      key: 'country',
+      type: 'select',
+      label: 'Country',
+      options: [
+        { label: 'USA', value: 'US' },
+        { label: 'Germany', value: 'DE' },
+      ],
+    },
+    {
+      key: 'city',
+      type: 'select',
+      label: 'City',
+      options: [],
+      logic: [{
+        type: 'propertyDerivation',
+        targetProperty: 'options',
+        functionName: 'getCitiesForCountry',
+        dependsOn: ['country'],
+      }],
+    },
+    { key: 'startDate', type: 'datepicker', label: 'Travel Start' },
+    {
+      key: 'endDate',
+      type: 'datepicker',
+      label: 'Travel End',
+      logic: [{
+        type: 'propertyDerivation',
+        targetProperty: 'minDate',
+        expression: 'formValue.startDate',
+      }],
+    },
+    { key: 'submit', type: 'submit', label: 'Book Trip' },
+  ],
+} as const satisfies FormConfig;
+\`\`\`
+
+## Common Mistakes
+
+❌ Confusing with value derivation:
+\`\`\`typescript
+// WRONG - 'derivation' changes the form value, not a property
+logic: [{ type: 'derivation', expression: 'formValue.startDate' }]
+
+// CORRECT - 'propertyDerivation' changes a component property
+logic: [{ type: 'propertyDerivation', targetProperty: 'minDate', expression: 'formValue.startDate' }]
+\`\`\`
+
+❌ Missing targetProperty:
+\`\`\`typescript
+// WRONG - must specify which property to set
+logic: [{ type: 'propertyDerivation', expression: '...' }]
+
+// CORRECT
+logic: [{ type: 'propertyDerivation', targetProperty: 'options', expression: '...' }]
+\`\`\`
+
+❌ Using wrong customFnConfig key:
+\`\`\`typescript
+// WRONG - derivations is for value derivation functions
+customFnConfig: { derivations: { getCities: ... } }
+
+// CORRECT - propertyDerivations is for property derivation functions
+customFnConfig: { propertyDerivations: { getCities: ... } }
+\`\`\``,
+  },
+
   // ========== STANDARD PATTERNS ==========
   derivation: {
     description: 'Computed field values from other fields',
@@ -1671,7 +2095,7 @@ function getPatternList(): string {
       'minimal-validation',
       'minimal-hidden',
     ],
-    'Standard Patterns': ['derivation', 'multi-page', 'conditional', 'validation'],
+    'Standard Patterns': ['derivation', 'property-derivation', 'multi-page', 'conditional', 'validation'],
   };
 
   for (const [category, patterns] of Object.entries(categories)) {
@@ -1706,7 +2130,7 @@ Minimal patterns (~20-50 lines):
 - minimal-validation: Password confirmation
 - minimal-hidden: Hidden fields in multi-page
 
-Standard patterns: derivation, multi-page, conditional, validation
+Standard patterns: derivation, property-derivation, multi-page, conditional, validation
 
 Use pattern="list" to see all available patterns.
 Use depth="minimal" for code-only output (no markdown).`,
@@ -1715,7 +2139,7 @@ Use depth="minimal" for code-only output (no markdown).`,
         .string()
         .optional()
         .describe(
-          'Pattern to get: minimal-multipage, minimal-array, minimal-conditional, minimal-validation, minimal-hidden, derivation, multi-page, conditional, validation, complete, mega. Use "list" to see all.',
+          'Pattern to get: minimal-multipage, minimal-array, minimal-conditional, minimal-validation, minimal-hidden, derivation, property-derivation, multi-page, conditional, validation, complete, mega. Use "list" to see all.',
         ),
       depth: z
         .enum(['minimal', 'brief', 'full', 'explained'])

@@ -5,6 +5,9 @@ import { FieldTypeDefinition } from '../../models/field-type';
 import { ARRAY_CONTEXT } from '../../models/field-signal-context.token';
 import { ArrayContext } from '../../mappers/types';
 import { baseFieldMapper } from '../../mappers/base/base-field-mapper';
+import { PROPERTY_OVERRIDE_STORE } from '../../core/property-derivation/property-override-store';
+import { applyPropertyOverrides } from '../../core/property-derivation/apply-property-overrides';
+import { buildPropertyOverrideKey, PLACEHOLDER_INDEX } from '../../core/property-derivation/property-override-key';
 
 /**
  * Merges forwarded props into meta, with meta taking precedence.
@@ -86,6 +89,10 @@ function applyIndexSuffix(inputs: Record<string, unknown>, index: number): Recor
  * is automatically suffixed with the item index to ensure unique DOM IDs. The form
  * schema keys remain clean (unsuffixed) so derivations and validations work correctly.
  *
+ * Property overrides from the PropertyOverrideStore are applied AFTER all static
+ * mapper logic, so they always take precedence. Only fields with registered property
+ * derivations incur the overhead of reading from the store.
+ *
  * @param fieldDef The field definition to map
  * @param fieldRegistry The registry of field type definitions
  * @returns Signal containing Record of input names to values, or undefined for componentless fields
@@ -103,13 +110,12 @@ export function mapFieldToInputs(
   }
 
   // Check if we're inside an array item context - if so, we need to suffix keys
-  // Use try-catch because inject() throws when called outside an injection context
-  let arrayContext: ArrayContext | null = null;
-  try {
-    arrayContext = inject(ARRAY_CONTEXT, { optional: true });
-  } catch {
-    // Not in an injection context or ARRAY_CONTEXT not provided
-  }
+  // Optional because ARRAY_CONTEXT is only provided inside array item injectors
+  const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+
+  // Inject the property override store for property derivation overrides
+  // Always available — provided at the DynamicForm component level via provideDynamicFormDI
+  const store = inject(PROPERTY_OVERRIDE_STORE);
 
   // Get the base mapper result
   const mapperResult: Signal<Record<string, unknown>> = fieldType?.mapper ? fieldType.mapper(fieldDef) : baseFieldMapper(fieldDef);
@@ -120,8 +126,15 @@ export function mapFieldToInputs(
   const indexSignal = arrayContext?.index;
   const hasArrayContext = indexSignal !== undefined && isSignal(indexSignal);
 
+  // Fast-path check for property overrides: only fields with registered derivations
+  // enter the computed() wrapper for overrides. hasField() is a non-reactive Map.has() — O(1).
+  // Uses PLACEHOLDER_INDEX to produce the wildcard format (e.g., 'items.$.endDate') matching
+  // what the collector/orchestrator registers. The computed block below uses a concrete index instead.
+  const hasOverrides =
+    store?.hasField(buildPropertyOverrideKey(arrayContext?.arrayKey, arrayContext ? PLACEHOLDER_INDEX : undefined, fieldDef.key)) ?? false;
+
   // Fast path: no transformations needed
-  if (!hasPropsForwarding && !hasArrayContext) {
+  if (!hasPropsForwarding && !hasArrayContext && !hasOverrides) {
     return mapperResult;
   }
 
@@ -138,6 +151,17 @@ export function mapFieldToInputs(
     if (hasArrayContext) {
       const index = indexSignal();
       inputs = applyIndexSuffix(inputs, index);
+    }
+
+    // Apply property overrides from the store (AFTER all static transformations)
+    if (hasOverrides) {
+      // Build the store key inside computed() so index signal read establishes reactive dependency
+      // Safe to access arrayContext/indexSignal directly — hasArrayContext already confirmed they exist
+      const key = hasArrayContext
+        ? buildPropertyOverrideKey((arrayContext as ArrayContext).arrayKey, (indexSignal as Signal<number>)(), fieldDef.key)
+        : fieldDef.key;
+      const overrides = store.getOverrides(key)();
+      inputs = applyPropertyOverrides(inputs, overrides);
     }
 
     return inputs;

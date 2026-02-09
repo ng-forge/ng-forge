@@ -72,7 +72,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/dynamic-behavior/value-derivation</loc>
+    <loc>https://ng-forge.com/dynamic-forms/dynamic-behavior/derivation</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/dynamic-behavior/derivation/property</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

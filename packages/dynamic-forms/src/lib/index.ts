@@ -86,7 +86,8 @@ export type {
 export type { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from './core/validation';
 
 // Logic & Expression Types
-export type { ConditionalExpression, EvaluationContext, LogicConfig, StateLogicConfig } from './models';
+export type { ConditionalExpression, EvaluationContext, LogicConfig, StateLogicConfig, PropertyDerivationLogicConfig } from './models';
+export { isPropertyDerivationLogicConfig } from './models';
 
 // Schema Types
 export type { SchemaApplicationConfig, SchemaDefinition } from './models';

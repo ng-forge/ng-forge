@@ -79,6 +79,12 @@ export default [
     loadChildren: () => import('./derivation-logic/derivation-logic.routes'),
   },
 
+  // Property Derivation Logic Tests - Reactive property derivation based on form values
+  {
+    path: 'property-derivation-logic',
+    loadChildren: () => import('./property-derivation-logic/property-derivation-logic.routes'),
+  },
+
   // Error Handling Tests - Refactored into folder structure
   {
     path: 'error-handling',

@@ -795,6 +795,10 @@ export class FormStateManager<
       this.functionRegistry.setDerivationFunctions(customFnConfig.derivations);
     }
 
+    if (customFnConfig.propertyDerivations) {
+      this.functionRegistry.setPropertyDerivationFunctions(customFnConfig.propertyDerivations);
+    }
+
     this.functionRegistry.setValidators(customFnConfig.validators);
     this.functionRegistry.setAsyncValidators(customFnConfig.asyncValidators);
     this.functionRegistry.setHttpValidators(customFnConfig.httpValidators);

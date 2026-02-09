@@ -25,6 +25,7 @@ import { InferFormValue } from './models/types/form-value-inference';
 import { isContainerField } from './models/types/type-guards';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { DERIVATION_ORCHESTRATOR } from './core/derivation/derivation-orchestrator';
+import { PROPERTY_DERIVATION_ORCHESTRATOR } from './core/property-derivation/property-derivation-orchestrator';
 import { PageOrchestratorComponent } from './core/page-orchestrator/page-orchestrator.component';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormResetEvent } from './events/constants/form-reset.event';
@@ -249,10 +250,11 @@ export class DynamicForm<
     this.setupEffects();
     this.setupEventHandlers();
 
-    // Lazily inject the derivation orchestrator to avoid circular dependency.
-    // The orchestrator's constructor sets up RxJS subscriptions that process derivations.
+    // Lazily inject orchestrators to avoid circular dependency.
+    // The orchestrators' constructors set up RxJS subscriptions that process derivations.
     afterNextRender(() => {
       this.injector.get(DERIVATION_ORCHESTRATOR);
+      this.injector.get(PROPERTY_DERIVATION_ORCHESTRATOR);
     });
   }
 

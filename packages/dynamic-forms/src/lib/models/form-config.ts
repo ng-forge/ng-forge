@@ -387,6 +387,47 @@ export interface CustomFnConfig {
   derivations?: Record<string, CustomFunction>;
 
   /**
+   * Custom property derivation functions for reactive property updates.
+   *
+   * These functions compute derived values for field properties (like `minDate`,
+   * `options`, `label`, `placeholder`) and are called when a
+   * `PropertyDerivationLogicConfig` references them by `functionName`.
+   *
+   * Property derivation functions:
+   * - Receive an `EvaluationContext` with access to `formValue`
+   * - Return the value to set on the target property
+   * - Are called reactively when dependencies change
+   *
+   * @example
+   * ```typescript
+   * propertyDerivations: {
+   *   getCitiesForCountry: (context) => {
+   *     const countryCities: Record<string, Array<{ label: string; value: string }>> = {
+   *       'USA': [{ label: 'New York', value: 'ny' }, { label: 'LA', value: 'la' }],
+   *       'Germany': [{ label: 'Berlin', value: 'berlin' }, { label: 'Munich', value: 'munich' }],
+   *     };
+   *     return countryCities[context.formValue.country as string] ?? [];
+   *   },
+   * }
+   * ```
+   *
+   * Field configuration using a property derivation function:
+   * ```typescript
+   * {
+   *   key: 'city',
+   *   type: 'select',
+   *   logic: [{
+   *     type: 'propertyDerivation',
+   *     targetProperty: 'options',
+   *     functionName: 'getCitiesForCountry',
+   *     dependsOn: ['country']
+   *   }]
+   * }
+   * ```
+   */
+  propertyDerivations?: Record<string, CustomFunction>;
+
+  /**
    * Custom validators using Angular's public FieldContext API
    *
    * (ctx, params?) => ValidationError | ValidationError[] | null

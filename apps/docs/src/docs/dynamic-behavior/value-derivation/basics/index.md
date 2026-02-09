@@ -1,3 +1,7 @@
+---
+title: Values
+---
+
 Automatically compute and set field values based on other form values. Derivations enable calculated fields, auto-fill patterns, and value transformations.
 
 ## Quick Start
@@ -477,6 +481,7 @@ External data values are reactively tracked - when signals change, derivations a
 
 ## Related
 
+- **Property Derivation** (see tab above) - Derive component properties (minDate, options, label) from form values
 - **[Conditional Logic](../conditional-logic/overview/)** - Control field visibility and state
 - **[Array Fields](../../prebuilt/form-arrays/)** - Working with array fields
 - **[Examples](/docs/examples)** - Real-world form patterns

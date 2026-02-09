@@ -13,6 +13,7 @@ import { crossFieldValidationSuite } from '../cross-field-validation/cross-field
 import { crossPageValidationSuite } from '../cross-page-validation/cross-page-validation.suite';
 import { demoScenariosSuite } from '../demo-scenarios/demo-scenarios.suite';
 import { derivationLogicSuite } from '../derivation-logic/derivation-logic.suite';
+import { propertyDerivationLogicSuite } from '../property-derivation-logic/property-derivation-logic.suite';
 import { errorHandlingSuite } from '../error-handling/error-handling.suite';
 import { essentialTestsSuite } from '../essential-tests/essential-tests.suite';
 import { expressionBasedLogicSuite } from '../expression-based-logic/expression-based-logic.suite';
@@ -49,6 +50,7 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   crossPageValidationSuite,
   demoScenariosSuite,
   derivationLogicSuite,
+  propertyDerivationLogicSuite,
   errorHandlingSuite,
   essentialTestsSuite,
   expressionBasedLogicSuite,
