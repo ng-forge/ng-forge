@@ -117,6 +117,12 @@ pnpm run serve:docs
 
 See [Developer Guides](./guides/) for architecture docs, testing strategy, and creating UI adapters.
 
+## 🤝 Backers
+
+A huge thank you to the following supporters of ng-forge! 🙏
+
+<a href="https://github.com/scottmccaughey"><img src="https://github.com/scottmccaughey.png" width="60" height="60" alt="scottmccaughey"></a>
+
 ## 📄 License
 
 MIT © ng-forge
