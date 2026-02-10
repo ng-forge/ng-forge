@@ -12,7 +12,21 @@ import type { RequiredKeys, OptionalKeys } from '@ng-forge/utils';
 
 describe('FieldDef - Exhaustive Whitelist', () => {
   type TestProps = { placeholder?: string };
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'meta';
+  type ExpectedKeys =
+    | 'key'
+    | 'type'
+    | 'label'
+    | 'props'
+    | 'className'
+    | 'disabled'
+    | 'readonly'
+    | 'hidden'
+    | 'tabIndex'
+    | 'col'
+    | 'meta'
+    | 'excludeValueIfHidden'
+    | 'excludeValueIfDisabled'
+    | 'excludeValueIfReadonly';
   type ActualKeys = keyof FieldDef<TestProps>;
 
   it('should have exactly the expected keys', () => {
@@ -36,7 +50,18 @@ describe('FieldDef - Exhaustive Whitelist', () => {
   describe('optional keys', () => {
     it('all optional keys', () => {
       expectTypeOf<OptionalKeys<FieldDef<TestProps>>>().toEqualTypeOf<
-        'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'meta'
+        | 'label'
+        | 'props'
+        | 'className'
+        | 'disabled'
+        | 'readonly'
+        | 'hidden'
+        | 'tabIndex'
+        | 'col'
+        | 'meta'
+        | 'excludeValueIfHidden'
+        | 'excludeValueIfDisabled'
+        | 'excludeValueIfReadonly'
       >();
     });
 
