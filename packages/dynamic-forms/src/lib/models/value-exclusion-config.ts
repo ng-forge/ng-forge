@@ -2,7 +2,7 @@
  * Configuration for excluding field values from form submission output
  * based on their reactive state (hidden, disabled, readonly).
  *
- * Supports a 3-tier configuration hierarchy: Global > Form > Field.
+ * Supports a 3-tier configuration hierarchy: Field > Form > Global.
  * The most specific level wins for each property.
  *
  * @public

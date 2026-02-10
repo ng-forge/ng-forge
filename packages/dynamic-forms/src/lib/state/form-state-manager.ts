@@ -443,7 +443,7 @@ export class FormStateManager<
    *
    * Excludes field values from the output based on their reactive state
    * (hidden, disabled, readonly) and the 3-tier exclusion config
-   * (Global > Form > Field). Only affects submission output — internal
+   * (Field > Form > Global). Only affects submission output — internal
    * form state and two-way binding are unaffected.
    */
   readonly filteredFormValue = computed(() => {
