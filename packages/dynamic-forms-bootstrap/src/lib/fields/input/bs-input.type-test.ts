@@ -76,6 +76,10 @@ describe('BsInputField (String) - Exhaustive Whitelist', () => {
     | 'tabIndex'
     | 'col'
     | 'meta'
+    // Value exclusion config
+    | 'excludeValueIfHidden'
+    | 'excludeValueIfDisabled'
+    | 'excludeValueIfReadonly'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -220,6 +224,10 @@ describe('BsInputField (Number) - Exhaustive Whitelist', () => {
     | 'tabIndex'
     | 'col'
     | 'meta'
+    // Value exclusion config
+    | 'excludeValueIfHidden'
+    | 'excludeValueIfDisabled'
+    | 'excludeValueIfReadonly'
     | 'required'
     | 'email'
     | 'min'

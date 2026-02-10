@@ -24,7 +24,19 @@ export function isCheckedField<TProps, TMeta extends FieldMeta = FieldMeta>(
 }
 
 // Note: 'meta' is NOT excluded - components must handle meta attributes
-type ExcludedKeys = 'type' | 'conditionals' | 'value' | 'disabled' | 'readonly' | 'hidden' | 'col' | keyof FieldWithValidation;
+type ExcludedKeys =
+  | 'type'
+  | 'conditionals'
+  | 'value'
+  | 'disabled'
+  | 'readonly'
+  | 'hidden'
+  | 'col'
+  | keyof FieldWithValidation
+  // Value exclusion config (submission-only, not component inputs)
+  | 'excludeValueIfHidden'
+  | 'excludeValueIfDisabled'
+  | 'excludeValueIfReadonly';
 
 export type CheckedFieldComponent<T extends BaseCheckedField<Record<string, unknown> | unknown>> = Prettify<
   WithInputSignals<Omit<T, ExcludedKeys>>

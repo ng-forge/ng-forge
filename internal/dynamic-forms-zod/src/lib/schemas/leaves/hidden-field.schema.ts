@@ -32,6 +32,9 @@ export const HiddenFieldSchema = BaseFieldDefSchema.omit({
   hidden: true,
   tabIndex: true,
   col: true,
+  excludeValueIfHidden: true,
+  excludeValueIfDisabled: true,
+  excludeValueIfReadonly: true,
 }).extend({
   /**
    * Field type discriminant.

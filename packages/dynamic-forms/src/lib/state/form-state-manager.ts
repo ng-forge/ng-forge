@@ -14,7 +14,7 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { form, Schema } from '@angular/forms/signals';
+import { FieldTree, form, Schema } from '@angular/forms/signals';
 import { EMPTY, filter, forkJoin, map, Observable, of, pipe, scan, switchMap, take } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 
@@ -45,6 +45,9 @@ import { derivedFromDeferred } from '../utils/derived-from-deferred/derived-from
 import { reconcileFields, ResolvedField, resolveField, resolveFieldSync } from '../utils/resolve-field/resolve-field';
 import { FormModeValidator } from '../utils/form-validation/form-mode-validator';
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
+import { VALUE_EXCLUSION_DEFAULTS } from '../providers/features/value-exclusion/value-exclusion.token';
+import { filterFormValue } from '../utils/value-filter/value-filter';
+import { ValueExclusionConfig } from '../models/value-exclusion-config';
 
 import { Action, FieldLoadingError, FormSetup, isReadyState, isTransitioningState, LifecycleState, Phase } from './state-types';
 import { createSideEffectScheduler } from './side-effect-scheduler';
@@ -71,6 +74,18 @@ export interface FormStateDeps {
 
 /** @internal */
 export const FORM_STATE_DEPS = new InjectionToken<FormStateDeps>('FORM_STATE_DEPS');
+
+/**
+ * Casts a FieldTree to a record of per-key sub-trees.
+ *
+ * FieldTree<TModel> is structurally a callable that exposes per-key child trees
+ * via bracket access (e.g., `tree['fieldKey']`), but TypeScript's FieldTree type
+ * doesn't surface this as an index signature. This helper makes the cast explicit
+ * and centralizes it to a single location.
+ */
+function asFieldTreeRecord(tree: FieldTree<unknown>): Record<string, FieldTree<unknown>> {
+  return tree as unknown as Record<string, FieldTree<unknown>>;
+}
 
 /**
  * Central service that manages all form state and coordinates the form lifecycle.
@@ -110,6 +125,9 @@ export class FormStateManager<
       readonly value: WritableSignal<Partial<TModel> | undefined>;
     };
   })();
+
+  /** Global value exclusion defaults. */
+  private readonly valueExclusionDefaults = inject(VALUE_EXCLUSION_DEFAULTS);
 
   /** Field registry for loading components. */
   private readonly fieldRegistry = injectFieldRegistry();
@@ -420,6 +438,49 @@ export class FormStateManager<
   /** Current form values (reactive). */
   readonly formValue = computed(() => this.formInstance().value());
 
+  /**
+   * Form values filtered by value exclusion rules.
+   *
+   * Excludes field values from the output based on their reactive state
+   * (hidden, disabled, readonly) and the 3-tier exclusion config
+   * (Field > Form > Global). Only affects submission output — internal
+   * form state and two-way binding are unaffected.
+   */
+  readonly filteredFormValue = computed(() => {
+    const rawValue = this.formValue();
+    const setup = this.formSetup();
+    const options = this.effectiveFormOptions();
+
+    if (!setup.schemaFields || setup.schemaFields.length === 0) {
+      return rawValue;
+    }
+
+    // form() returns the FieldTree<TModel> — a callable with per-key sub-trees.
+    // formInstance() returns form()() — the FieldState. We need the FieldTree for
+    // per-field state access (e.g., formTree[key]() gives FieldState with hidden/disabled/readonly).
+    const formTree = this.form();
+
+    const formOptions: ValueExclusionConfig = {
+      excludeValueIfHidden: options.excludeValueIfHidden,
+      excludeValueIfDisabled: options.excludeValueIfDisabled,
+      excludeValueIfReadonly: options.excludeValueIfReadonly,
+    };
+
+    // FieldTree<TModel> is structurally a callable that also exposes per-key sub-trees
+    // via bracket access (e.g., formTree['fieldKey']). TypeScript's nominal typing for
+    // FieldTree doesn't expose this index signature, so we use a helper cast.
+    const fieldTreeRecord = asFieldTreeRecord(formTree);
+
+    return filterFormValue(
+      rawValue as Record<string, unknown>,
+      setup.schemaFields,
+      fieldTreeRecord,
+      setup.registry,
+      this.valueExclusionDefaults,
+      formOptions,
+    );
+  });
+
   /** Whether the form is currently valid. */
   readonly valid = computed(() => this.formInstance().valid());
 
@@ -635,7 +696,7 @@ export class FormStateManager<
           return EMPTY;
         }
 
-        return of(this.formValue() as TModel);
+        return of(this.filteredFormValue() as TModel);
       }),
       takeUntilDestroyed(this.destroyRef),
     );

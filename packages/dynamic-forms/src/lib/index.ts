@@ -39,6 +39,10 @@ export { NoopLogger } from './providers/features/logger/noop-logger';
 export { withEventFormValue } from './providers/features/event-form-value';
 export { hasFormValue } from './events/interfaces/form-event';
 
+// Value Exclusion Feature
+export { withValueExclusionDefaults } from './providers/features/value-exclusion';
+export type { ValueExclusionConfig, ResolvedValueExclusionConfig } from './models/value-exclusion-config';
+
 // Configuration Types
 export type { CustomFnConfig, FormConfig, FormOptions } from './models';
 export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from './models';

@@ -141,7 +141,10 @@
         "col",
         "logic",
         "validators",
-        "validationMessages"
+        "validationMessages",
+        "excludeValueIfHidden",
+        "excludeValueIfDisabled",
+        "excludeValueIfReadonly"
       ],
       "propsObject": ["type", "placeholder", "appearance", "hint"],
       "copyPaste": "{ type: 'input', key: 'name', label: 'Name', value: '' }",
@@ -164,7 +167,10 @@
         "col",
         "logic",
         "validators",
-        "validationMessages"
+        "validationMessages",
+        "excludeValueIfHidden",
+        "excludeValueIfDisabled",
+        "excludeValueIfReadonly"
       ],
       "propsObject": ["multiple", "placeholder", "appearance"],
       "copyPaste": "{ type: 'select', key: 'country', label: 'Country', options: [{ value: 'us', label: 'USA' }], value: 'us' }",
@@ -186,7 +192,10 @@
         "col",
         "logic",
         "validators",
-        "validationMessages"
+        "validationMessages",
+        "excludeValueIfHidden",
+        "excludeValueIfDisabled",
+        "excludeValueIfReadonly"
       ],
       "propsObject": [],
       "copyPaste": "{ type: 'radio', key: 'gender', label: 'Gender', options: [{ value: 'm', label: 'Male' }, { value: 'f', label: 'Female' }] }",
@@ -207,7 +216,10 @@
         "col",
         "logic",
         "validators",
-        "validationMessages"
+        "validationMessages",
+        "excludeValueIfHidden",
+        "excludeValueIfDisabled",
+        "excludeValueIfReadonly"
       ],
       "propsObject": ["color"],
       "copyPaste": "{ type: 'checkbox', key: 'accept', label: 'Accept terms', value: false }"
@@ -228,7 +240,10 @@
         "col",
         "logic",
         "validators",
-        "validationMessages"
+        "validationMessages",
+        "excludeValueIfHidden",
+        "excludeValueIfDisabled",
+        "excludeValueIfReadonly"
       ],
       "propsObject": [],
       "copyPaste": "{ type: 'multi-checkbox', key: 'tags', label: 'Tags', options: [{ value: 'a', label: 'A' }], value: [] }",
@@ -251,7 +266,10 @@
         "col",
         "logic",
         "validators",
-        "validationMessages"
+        "validationMessages",
+        "excludeValueIfHidden",
+        "excludeValueIfDisabled",
+        "excludeValueIfReadonly"
       ],
       "propsObject": ["rows", "placeholder", "appearance"],
       "copyPaste": "{ type: 'textarea', key: 'bio', label: 'Bio', props: { rows: 4 } }"
@@ -271,7 +289,10 @@
         "col",
         "logic",
         "validators",
-        "validationMessages"
+        "validationMessages",
+        "excludeValueIfHidden",
+        "excludeValueIfDisabled",
+        "excludeValueIfReadonly"
       ],
       "propsObject": ["minDate", "maxDate", "startView", "appearance"],
       "copyPaste": "{ type: 'datepicker', key: 'dob', label: 'Date of Birth', value: undefined }"
@@ -291,7 +312,10 @@
         "col",
         "logic",
         "validators",
-        "validationMessages"
+        "validationMessages",
+        "excludeValueIfHidden",
+        "excludeValueIfDisabled",
+        "excludeValueIfReadonly"
       ],
       "propsObject": ["color"],
       "copyPaste": "{ type: 'toggle', key: 'notify', label: 'Enable notifications', value: false }"
@@ -314,7 +338,10 @@
         "col",
         "logic",
         "validators",
-        "validationMessages"
+        "validationMessages",
+        "excludeValueIfHidden",
+        "excludeValueIfDisabled",
+        "excludeValueIfReadonly"
       ],
       "propsObject": ["thumbLabel", "tickInterval", "color"],
       "copyPaste": "{ type: 'slider', key: 'rating', label: 'Rating', minValue: 1, maxValue: 10, step: 1, value: 5 }",

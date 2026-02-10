@@ -214,6 +214,33 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
   tabIndex?: number | undefined;
 
   /**
+   * Whether to exclude this field's value from submission output when hidden.
+   *
+   * Overrides both the global `withValueExclusionDefaults()` and form-level `FormOptions` settings.
+   *
+   * @default undefined (uses form-level or global setting)
+   */
+  excludeValueIfHidden?: boolean;
+
+  /**
+   * Whether to exclude this field's value from submission output when disabled.
+   *
+   * Overrides both the global `withValueExclusionDefaults()` and form-level `FormOptions` settings.
+   *
+   * @default undefined (uses form-level or global setting)
+   */
+  excludeValueIfDisabled?: boolean;
+
+  /**
+   * Whether to exclude this field's value from submission output when readonly.
+   *
+   * Overrides both the global `withValueExclusionDefaults()` and form-level `FormOptions` settings.
+   *
+   * @default undefined (uses form-level or global setting)
+   */
+  excludeValueIfReadonly?: boolean;
+
+  /**
    * Column sizing configuration for responsive grid layout.
    *
    * Specifies how many columns this field should span in a 12-column

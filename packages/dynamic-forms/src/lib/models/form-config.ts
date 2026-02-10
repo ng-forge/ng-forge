@@ -693,6 +693,36 @@ export interface FormOptions {
   nextButton?: NextButtonOptions;
 
   /**
+   * Whether to exclude values of hidden fields from submission output.
+   *
+   * Overrides the global `withValueExclusionDefaults()` setting for this form.
+   * Can be further overridden per-field on individual `FieldDef` entries.
+   *
+   * @default undefined (uses global setting)
+   */
+  excludeValueIfHidden?: boolean;
+
+  /**
+   * Whether to exclude values of disabled fields from submission output.
+   *
+   * Overrides the global `withValueExclusionDefaults()` setting for this form.
+   * Can be further overridden per-field on individual `FieldDef` entries.
+   *
+   * @default undefined (uses global setting)
+   */
+  excludeValueIfDisabled?: boolean;
+
+  /**
+   * Whether to exclude values of readonly fields from submission output.
+   *
+   * Overrides the global `withValueExclusionDefaults()` setting for this form.
+   * Can be further overridden per-field on individual `FieldDef` entries.
+   *
+   * @default undefined (uses global setting)
+   */
+  excludeValueIfReadonly?: boolean;
+
+  /**
    * Whether to attach the current form value to all events dispatched through the EventBus.
    *
    * This per-form setting overrides the global `withEventFormValue()` feature:

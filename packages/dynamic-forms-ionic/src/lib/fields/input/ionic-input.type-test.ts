@@ -101,6 +101,10 @@ describe('IonicInputField (String) - Exhaustive Whitelist', () => {
     | 'tabIndex'
     | 'col'
     | 'meta'
+    // Value exclusion config
+    | 'excludeValueIfHidden'
+    | 'excludeValueIfDisabled'
+    | 'excludeValueIfReadonly'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -245,6 +249,10 @@ describe('IonicInputField (Number) - Exhaustive Whitelist', () => {
     | 'tabIndex'
     | 'col'
     | 'meta'
+    // Value exclusion config
+    | 'excludeValueIfHidden'
+    | 'excludeValueIfDisabled'
+    | 'excludeValueIfReadonly'
     | 'required'
     | 'email'
     | 'min'

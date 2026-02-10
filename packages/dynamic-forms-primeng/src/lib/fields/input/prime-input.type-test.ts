@@ -68,6 +68,10 @@ describe('PrimeInputField (String) - Exhaustive Whitelist', () => {
     | 'tabIndex'
     | 'col'
     | 'meta'
+    // Value exclusion config
+    | 'excludeValueIfHidden'
+    | 'excludeValueIfDisabled'
+    | 'excludeValueIfReadonly'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -212,6 +216,10 @@ describe('PrimeInputField (Number) - Exhaustive Whitelist', () => {
     | 'tabIndex'
     | 'col'
     | 'meta'
+    // Value exclusion config
+    | 'excludeValueIfHidden'
+    | 'excludeValueIfDisabled'
+    | 'excludeValueIfReadonly'
     | 'required'
     | 'email'
     | 'min'
