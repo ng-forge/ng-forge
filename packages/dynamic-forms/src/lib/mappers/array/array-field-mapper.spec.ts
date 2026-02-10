@@ -163,5 +163,53 @@ describe('arrayFieldMapper', () => {
       const inputs = testMapper(fieldDef);
       expect(inputs['hidden']).toBe(false);
     });
+
+    it('should evaluate hidden logic with conditional expression (hidden when condition met)', () => {
+      mockFormValue.set({ showItems: false });
+
+      const fieldDef: ArrayField = {
+        key: 'items',
+        type: 'array',
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'showItems',
+              operator: 'equals',
+              value: false,
+            },
+          },
+        ],
+        fields: [{ key: 'item', type: 'input' }],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs['hidden']).toBe(true);
+    });
+
+    it('should evaluate hidden logic with conditional expression (visible when condition not met)', () => {
+      mockFormValue.set({ showItems: true });
+
+      const fieldDef: ArrayField = {
+        key: 'items',
+        type: 'array',
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'showItems',
+              operator: 'equals',
+              value: false,
+            },
+          },
+        ],
+        fields: [{ key: 'item', type: 'input' }],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs['hidden']).toBe(false);
+    });
   });
 });

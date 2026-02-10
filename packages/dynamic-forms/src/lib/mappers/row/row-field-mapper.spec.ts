@@ -160,5 +160,53 @@ describe('rowFieldMapper', () => {
       const inputs = testMapper(fieldDef);
       expect(inputs['hidden']).toBe(false);
     });
+
+    it('should evaluate hidden logic with conditional expression (hidden when condition met)', () => {
+      mockFormValue.set({ enableAdvanced: false });
+
+      const fieldDef: RowField = {
+        key: 'advancedRow',
+        type: 'row',
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'enableAdvanced',
+              operator: 'equals',
+              value: false,
+            },
+          },
+        ],
+        fields: [{ key: 'setting', type: 'input' }],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs['hidden']).toBe(true);
+    });
+
+    it('should evaluate hidden logic with conditional expression (visible when condition not met)', () => {
+      mockFormValue.set({ enableAdvanced: true });
+
+      const fieldDef: RowField = {
+        key: 'advancedRow',
+        type: 'row',
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'enableAdvanced',
+              operator: 'equals',
+              value: false,
+            },
+          },
+        ],
+        fields: [{ key: 'setting', type: 'input' }],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs['hidden']).toBe(false);
+    });
   });
 });

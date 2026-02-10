@@ -2,10 +2,6 @@
 @use 'sass:math';
 @use '../../styles/grid-system.scss';
 
-:host.df-container-hidden {
-  display: none !important;
-}
-
 :host {
   // Row flex container - items use natural size unless col is specified
   display: flex;
@@ -53,6 +49,10 @@
         max-width: calc(50% - var(--df-grid-gap) / 2);
       }
     }
+  }
+
+  &.df-container-hidden {
+    display: none;
   }
 }
 

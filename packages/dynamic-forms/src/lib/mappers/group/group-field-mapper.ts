@@ -2,7 +2,7 @@ import { computed, inject, Signal } from '@angular/core';
 import { GroupField } from '../../definitions/default/group-field';
 import { buildClassName } from '../../utils/grid-classes/grid-classes';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
-import { resolveNonFieldHidden } from '../../core/logic/non-field-logic-resolver';
+import { evaluateNonFieldHidden } from '../../core/logic/non-field-logic-resolver';
 
 /**
  * Maps a group field definition to component inputs.
@@ -29,12 +29,12 @@ export function groupFieldMapper(fieldDef: GroupField): Signal<Record<string, un
 
     const rootForm = rootFormRegistry.rootForm();
     if (rootForm && (fieldDef.hidden !== undefined || fieldDef.logic?.some((l) => l.type === 'hidden'))) {
-      inputs['hidden'] = resolveNonFieldHidden({
+      inputs['hidden'] = evaluateNonFieldHidden({
         form: rootForm,
         fieldLogic: fieldDef.logic,
         explicitValue: fieldDef.hidden,
         formValue: rootFormRegistry.formValue(),
-      })();
+      });
     }
 
     return inputs;

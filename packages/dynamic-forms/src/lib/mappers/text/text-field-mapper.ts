@@ -3,7 +3,7 @@ import { TextField } from '../../definitions/default/text-field';
 import { buildBaseInputs } from '../base/base-field-mapper';
 import { DEFAULT_PROPS } from '../../models/field-signal-context.token';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
-import { resolveNonFieldHidden } from '../../core/logic/non-field-logic-resolver';
+import { evaluateNonFieldHidden } from '../../core/logic/non-field-logic-resolver';
 
 /**
  * Maps a text field definition to component inputs.
@@ -31,16 +31,13 @@ export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unkn
     const inputs: Record<string, unknown> = { ...baseInputs };
     const rootForm = rootFormRegistry.rootForm();
 
-    // Resolve hidden state using non-field-hidden resolver (supports logic array)
-    // Text fields only support hidden logic (not disabled since they are display-only)
     if (rootForm && (fieldDef.hidden !== undefined || fieldDef.logic?.some((l) => l.type === 'hidden'))) {
-      const hidden = resolveNonFieldHidden({
+      inputs['hidden'] = evaluateNonFieldHidden({
         form: rootForm,
         fieldLogic: fieldDef.logic,
         explicitValue: fieldDef.hidden,
         formValue: rootFormRegistry.formValue(),
-      })();
-      inputs['hidden'] = hidden;
+      });
     }
 
     return inputs;

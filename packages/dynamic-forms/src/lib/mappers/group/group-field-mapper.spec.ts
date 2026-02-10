@@ -158,5 +158,53 @@ describe('groupFieldMapper', () => {
       const inputs = testMapper(fieldDef);
       expect(inputs['hidden']).toBe(false);
     });
+
+    it('should evaluate hidden logic with conditional expression (hidden when condition met)', () => {
+      mockFormValue.set({ accountType: 'personal' });
+
+      const fieldDef: GroupField = {
+        key: 'businessDetails',
+        type: 'group',
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'accountType',
+              operator: 'notEquals',
+              value: 'business',
+            },
+          },
+        ],
+        fields: [{ key: 'companyName', type: 'input' }],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs['hidden']).toBe(true);
+    });
+
+    it('should evaluate hidden logic with conditional expression (visible when condition not met)', () => {
+      mockFormValue.set({ accountType: 'business' });
+
+      const fieldDef: GroupField = {
+        key: 'businessDetails',
+        type: 'group',
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'accountType',
+              operator: 'notEquals',
+              value: 'business',
+            },
+          },
+        ],
+        fields: [{ key: 'companyName', type: 'input' }],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs['hidden']).toBe(false);
+    });
   });
 });

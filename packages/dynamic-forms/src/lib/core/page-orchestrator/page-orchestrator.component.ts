@@ -3,7 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
 import { NavigationResult, PageOrchestratorState } from './page-orchestrator.interfaces';
-import { PageField, PageLogicConfig } from '../../definitions/default/page-field';
+import { PageField } from '../../definitions/default/page-field';
+import { ContainerLogicConfig } from '../../definitions/base/container-logic-config';
 import { FieldSignalContext } from '../../mappers/types';
 import PageFieldComponent from '../../fields/page/page-field.component';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -379,7 +380,7 @@ export class PageOrchestratorComponent {
     }
 
     // Filter to only hidden logic (pages only support hidden type)
-    const hiddenLogic = page.logic.filter((l): l is PageLogicConfig => l.type === 'hidden');
+    const hiddenLogic = page.logic.filter((l): l is ContainerLogicConfig => l.type === 'hidden');
 
     // If no hidden logic, page is visible
     if (hiddenLogic.length === 0) {
