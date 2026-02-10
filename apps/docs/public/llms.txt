@@ -13,8 +13,11 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - Built-in validation with expression-based validators
 - Conditional logic for showing/hiding fields
 - Value derivation for computed fields
+- Property derivation for dynamic field properties
 - Type-safe form configurations
-- Reactive forms under the hood
+- Reactive forms under the hood (Angular Signal Forms)
+- Value exclusion for controlling submitted form data
+- AI integration via MCP server
 
 ## Documentation Structure
 
@@ -27,8 +30,8 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - /ui-libs-integrations/ionic: Ionic integration
 - /ui-libs-integrations/bootstrap: Bootstrap integration
 
-### Schema & Fields
-- /schema-fields/field-types: Available field types (input, select, checkbox, etc.)
+### Field Types
+- /field-types: Available field types (input, select, checkbox, radio, toggle, textarea, datepicker, slider, multi-checkbox, button, submit, next, previous)
 
 ### Validation
 - /validation/basics: Validation configuration basics
@@ -37,8 +40,9 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - /validation/reference: Complete validation reference
 
 ### Dynamic Behavior
-- /dynamic-behavior/conditional-logic: Show/hide fields based on conditions
-- /dynamic-behavior/value-derivation: Computed field values
+- /dynamic-behavior/overview: Conditional logic - show/hide fields based on conditions
+- /dynamic-behavior/derivation: Value derivation - computed field values
+- /dynamic-behavior/derivation/property: Property derivation - dynamic field properties
 - /dynamic-behavior/i18n: Internationalization support
 - /dynamic-behavior/submission: Form submission handling
 
@@ -69,13 +73,17 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - /examples/enterprise-features: Complex multi-condition form
 
 ### Advanced Topics
-- /advanced/type-safety: TypeScript type safety features
+- /advanced/basics: TypeScript type safety features
 - /advanced/events: Form and field event handling
 - /advanced/expression-parser: Expression syntax for validators and conditions
 - /advanced/custom-integrations: Creating custom UI library integrations
+- /advanced/value-exclusion: Controlling which fields are included in submitted form values
+
+### AI Integration
+- /ai-integration: MCP server for AI-assisted form schema generation
 
 ### API Reference
-- /api-reference: Complete API documentation for all packages
+- /api: Complete API documentation for all packages
 
 ## Installation
 
@@ -88,31 +96,25 @@ npm install @ng-forge/dynamic-forms-material
 ## Quick Example
 
 ```typescript
-import { DynamicForm } from '@ng-forge/dynamic-forms';
-import '@ng-forge/dynamic-forms-material';
+import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dynamic-forms';
 
-const formConfig = {
-  fields: [
-    {
-      key: 'email',
-      type: 'input',
-      props: {
-        label: 'Email',
-        type: 'email',
-        required: true
-      }
-    },
-    {
-      key: 'password',
-      type: 'input',
-      props: {
-        label: 'Password',
-        type: 'password',
-        required: true
-      }
-    }
-  ]
-};
+@Component({
+  imports: [DynamicForm],
+  template: `<form [dynamic-form]="config" (submitted)="onSubmit($event)"></form>`,
+})
+export class LoginComponent {
+  config = {
+    fields: [
+      { key: 'email', type: 'input', value: '', label: 'Email', required: true, email: true },
+      { key: 'password', type: 'input', value: '', label: 'Password', required: true, minLength: 8, props: { type: 'password' } },
+      { type: 'submit', key: 'submit', label: 'Sign In' },
+    ],
+  } as const satisfies FormConfig;
+
+  onSubmit(value: InferFormValue<typeof this.config.fields>) {
+    console.log('Form submitted:', value);
+  }
+}
 ```
 
 ## Repository
