@@ -1,35 +1,36 @@
 /**
- * Exhaustive type tests for PageField and PageLogicConfig types.
+ * Exhaustive type tests for PageField and ContainerLogicConfig types.
  */
 import { expectTypeOf } from 'vitest';
-import type { PageField, PageLogicConfig } from './page-field';
+import type { PageField } from './page-field';
+import type { ContainerLogicConfig } from '../base/container-logic-config';
 import type { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import type { PageAllowedChildren } from '../../models/types/nesting-constraints';
 import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
-// PageLogicConfig - Whitelist Test
+// ContainerLogicConfig - Whitelist Test
 // ============================================================================
 
-describe('PageLogicConfig - Exhaustive Whitelist', () => {
+describe('ContainerLogicConfig - Exhaustive Whitelist', () => {
   type ExpectedKeys = 'type' | 'condition';
-  type ActualKeys = keyof PageLogicConfig;
+  type ActualKeys = keyof ContainerLogicConfig;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
   });
 
   it('should have all keys required', () => {
-    expectTypeOf<RequiredKeys<PageLogicConfig>>().toEqualTypeOf<'type' | 'condition'>();
+    expectTypeOf<RequiredKeys<ContainerLogicConfig>>().toEqualTypeOf<'type' | 'condition'>();
   });
 
   describe('property types', () => {
     it('type is literal hidden', () => {
-      expectTypeOf<PageLogicConfig['type']>().toEqualTypeOf<'hidden'>();
+      expectTypeOf<ContainerLogicConfig['type']>().toEqualTypeOf<'hidden'>();
     });
 
     it('condition', () => {
-      expectTypeOf<PageLogicConfig['condition']>().toEqualTypeOf<ConditionalExpression | boolean>();
+      expectTypeOf<ContainerLogicConfig['condition']>().toEqualTypeOf<ConditionalExpression | boolean>();
     });
   });
 });
@@ -120,7 +121,7 @@ describe('PageField - Exhaustive Whitelist', () => {
     });
 
     it('logic', () => {
-      expectTypeOf<PageField['logic']>().toEqualTypeOf<PageLogicConfig[] | undefined>();
+      expectTypeOf<PageField['logic']>().toEqualTypeOf<ContainerLogicConfig[] | undefined>();
     });
   });
 
