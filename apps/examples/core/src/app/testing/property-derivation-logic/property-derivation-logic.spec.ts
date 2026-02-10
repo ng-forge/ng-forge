@@ -169,34 +169,27 @@ test.describe('Property Derivation Logic Tests', () => {
       const scenario = helpers.getScenario('datepicker-mindate-test');
       await expect(scenario).toBeVisible();
 
-      // Count disabled cells with initial startDate (15th)
-      const endDateToggle = scenario.locator('#endDate mat-datepicker-toggle button');
-      await endDateToggle.click();
-      // Wait for calendar to render before counting
-      await expect(page.locator('.mat-calendar-body-cell').first()).toBeVisible();
-
-      const initialDisabledCount = await page.locator('.mat-calendar-body-cell[aria-disabled="true"]').count();
-      await page.keyboard.press('Escape');
-      // Wait for calendar to close before interacting with input
-      await expect(page.locator('mat-datepicker-content')).not.toBeVisible();
-
-      // Change startDate to the 25th of the current month (more dates should be disabled)
+      // Change startDate from 15th to 25th BEFORE opening the calendar
+      // The initial startDate (15th) would disable ~14 cells (dates 1-14),
+      // so after changing to 25th, there should be ~24 disabled cells (dates 1-24)
       const startDateInput = helpers.getInput(scenario, 'startDate');
       const now = new Date();
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const year = now.getFullYear();
       await helpers.clearAndFill(startDateInput, `${month}/25/${year}`);
 
-      // Open endDate calendar again
+      // Open endDate calendar and verify more dates are now disabled
+      const endDateToggle = scenario.locator('#endDate mat-datepicker-toggle button');
       await endDateToggle.click();
       await expect(page.locator('.mat-calendar-body-cell').first()).toBeVisible();
 
-      // Use poll to auto-retry the count comparison as property derivation settles
+      // With startDate=25th, there should be more disabled cells than with startDate=15th
+      // The initial config had 15th → ~14 disabled cells; now with 25th → ~24 disabled cells
       await expect
         .poll(async () => {
           return page.locator('.mat-calendar-body-cell[aria-disabled="true"]').count();
         })
-        .toBeGreaterThan(initialDisabledCount);
+        .toBeGreaterThan(14);
 
       await page.keyboard.press('Escape');
     });
