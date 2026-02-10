@@ -3,6 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { ArrayField, ArrayComponent, ArrayItemDefinition, ArrayItemTemplate } from './array-field';
+import type { ContainerLogicConfig } from '../base/container-logic-config';
 import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
@@ -29,7 +30,8 @@ describe('ArrayField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
-    | 'fields';
+    | 'fields'
+    | 'logic';
 
   type ActualKeys = keyof ArrayField;
 
@@ -87,6 +89,10 @@ describe('ArrayField - Exhaustive Whitelist', () => {
 
     it('col', () => {
       expectTypeOf<ArrayField['col']>().toEqualTypeOf<number | undefined>();
+    });
+
+    it('logic', () => {
+      expectTypeOf<ArrayField['logic']>().toEqualTypeOf<ContainerLogicConfig[] | undefined>();
     });
   });
 
@@ -184,6 +190,27 @@ describe('ArrayField - Usage Tests', () => {
     } as const satisfies ArrayField;
 
     expectTypeOf(field.hidden).toEqualTypeOf<true>();
+  });
+
+  it('should accept array with logic configuration', () => {
+    const field = {
+      key: 'conditionalArray',
+      type: 'array',
+      fields: [],
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'showItems',
+            operator: 'equals',
+            value: false,
+          },
+        },
+      ],
+    } as const satisfies ArrayField;
+
+    expectTypeOf(field.logic).not.toBeUndefined();
   });
 
   it('should accept primitive array items (single field per item)', () => {
