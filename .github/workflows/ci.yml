@@ -307,6 +307,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - app: core-examples
+            short: core
           - app: bootstrap-examples
             short: bootstrap
           - app: material-examples
