@@ -75,6 +75,24 @@ export const BaseFieldDefSchema = z.object({
    * Grid column width (1-12) in a 12-column layout system.
    */
   col: z.number().min(1).max(12).optional(),
+
+  /**
+   * Whether to exclude this field's value from submission output when hidden.
+   * Overrides both the global and form-level settings.
+   */
+  excludeValueIfHidden: z.boolean().optional(),
+
+  /**
+   * Whether to exclude this field's value from submission output when disabled.
+   * Overrides both the global and form-level settings.
+   */
+  excludeValueIfDisabled: z.boolean().optional(),
+
+  /**
+   * Whether to exclude this field's value from submission output when readonly.
+   * Overrides both the global and form-level settings.
+   */
+  excludeValueIfReadonly: z.boolean().optional(),
 });
 
 /**

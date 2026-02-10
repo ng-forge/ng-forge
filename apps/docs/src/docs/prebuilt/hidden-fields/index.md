@@ -163,6 +163,17 @@ if (isHiddenField(field)) {
 }
 ```
 
+## Value Exclusion
+
+The `HiddenField` type (`type: 'hidden'`) is **not affected** by value exclusion. Hidden fields:
+
+- Have no reactive `hidden()` state (they don't render a component)
+- Are always included in submission output, regardless of `excludeValueIfHidden` settings
+
+This is different from regular fields with `hidden: true` or fields hidden via conditional logic. Those fields have a reactive `hidden()` state that value exclusion checks.
+
+See the **Value Exclusion** page under Recipes for full details.
+
 ## Technical Details
 
 - **Componentless**: Hidden fields have no Angular component and render zero DOM elements

@@ -69,6 +69,24 @@ export const FormOptionsSchema = z.object({
    * Options for the next button behavior (multi-page forms).
    */
   nextButton: NextButtonOptionsSchema.optional(),
+
+  /**
+   * Whether to exclude values of hidden fields from submission output.
+   * Overrides the global withValueExclusion() setting for this form.
+   */
+  excludeValueIfHidden: z.boolean().optional(),
+
+  /**
+   * Whether to exclude values of disabled fields from submission output.
+   * Overrides the global withValueExclusion() setting for this form.
+   */
+  excludeValueIfDisabled: z.boolean().optional(),
+
+  /**
+   * Whether to exclude values of readonly fields from submission output.
+   * Overrides the global withValueExclusion() setting for this form.
+   */
+  excludeValueIfReadonly: z.boolean().optional(),
 });
 
 export type FormOptionsSchemaType = z.infer<typeof FormOptionsSchema>;

@@ -177,6 +177,24 @@ Combine form state conditions with custom expressions:
 }
 ```
 
+## Value Exclusion
+
+By default, field values are excluded from the `(submitted)` output when the field is hidden, disabled, or readonly. This prevents stale or irrelevant data from being submitted.
+
+Value exclusion supports a 3-tier configuration hierarchy: **Global > Form > Field**, where the most specific level wins. Internal form state and two-way binding are unaffected.
+
+```typescript
+// Disable hidden value exclusion for this form
+const config: FormConfig = {
+  fields: [...],
+  options: {
+    excludeValueIfHidden: false,
+  }
+};
+```
+
+See the **Value Exclusion** page under Recipes for full documentation on configuration tiers, per-field overrides, and migration instructions.
+
 ## Manual Submission
 
 If you prefer manual control, use the `(submitted)` output instead:
