@@ -1,3 +1,14 @@
+/**
+ * Page Field Styling
+ *
+ * CSS variables (must be defined by consumer or via defaults):
+ * --df-grid-row-gap: gap between rows
+ * --df-page-custom-spacing: custom spacing for pages
+ * --df-page-transition-duration: transition duration
+ * --df-page-transition-timing: transition timing function
+ * --df-page-slide-offset: slide offset for page transitions
+ */
+
 @use '../../styles/grid-system.scss';
 
 :host {
@@ -5,12 +16,12 @@
   display: grid;
   grid-template-columns: 1fr;
   width: 100%;
-  gap: var(--df-grid-row-gap);
-  transition: opacity 0.2s ease-in-out;
+  gap: var(--df-grid-row-gap, 0.5rem);
+  transition: opacity var(--df-page-transition-duration, 0.3s) var(--df-page-transition-timing, ease-in-out);
 
   // Allow custom spacing for pages
   &.df-page-spacing-custom {
-    --df-grid-row-gap: var(--page-custom-spacing, 1.5rem);
+    --df-grid-row-gap: var(--df-page-custom-spacing, 1.5rem);
   }
 
   // Page visibility states
@@ -35,8 +46,8 @@
 @media (prefers-reduced-motion: no-preference) {
   :host {
     transition:
-      opacity 0.3s ease-in-out,
-      transform 0.3s ease-in-out;
+      opacity var(--df-page-transition-duration, 0.3s) var(--df-page-transition-timing, ease-in-out),
+      transform var(--df-page-transition-duration, 0.3s) var(--df-page-transition-timing, ease-in-out);
   }
 
   :host.df-page-visible {
@@ -44,7 +55,7 @@
   }
 
   :host.df-page-hidden {
-    transform: translateX(-10px);
+    transform: translateX(var(--df-page-slide-offset, -10px));
   }
 }
 
