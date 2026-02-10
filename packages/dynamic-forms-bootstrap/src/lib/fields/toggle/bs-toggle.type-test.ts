@@ -60,6 +60,10 @@ describe('BsToggleField - Exhaustive Whitelist', () => {
     | 'tabIndex'
     | 'col'
     | 'meta'
+    // Value exclusion config
+    | 'excludeValueIfHidden'
+    | 'excludeValueIfDisabled'
+    | 'excludeValueIfReadonly'
     // From FieldWithValidation
     | 'required'
     | 'email'
