@@ -1,5 +1,6 @@
 import { FieldComponent, FieldDef } from '../base/field-def';
 import { GroupAllowedChildren } from '../../models/types/nesting-constraints';
+import { ContainerLogicConfig } from '../base/container-logic-config';
 
 /**
  * Group field interface for creating logical field groupings that map to object values
@@ -22,6 +23,12 @@ export interface GroupField<TFields extends readonly GroupAllowedChildren[] = re
 
   /** Groups do not support meta - they have no native form element **/
   readonly meta?: never;
+
+  /**
+   * Logic configurations for conditional group visibility.
+   * Only 'hidden' type logic is supported for groups.
+   */
+  readonly logic?: ContainerLogicConfig[];
 }
 
 /**

@@ -1,7 +1,43 @@
+import { EnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { arrayFieldMapper } from './array-field-mapper';
 import { ArrayField } from '../../definitions/default/array-field';
+import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
+import { vi } from 'vitest';
 
 describe('arrayFieldMapper', () => {
+  let parentInjector: EnvironmentInjector;
+  const mockFormValue = signal<Record<string, unknown>>({});
+  const mockForm = vi.fn(() => ({
+    value: vi.fn().mockReturnValue({}),
+    valid: vi.fn().mockReturnValue(true),
+    submitting: vi.fn().mockReturnValue(false),
+  }));
+  let mockRootFormRegistry: {
+    rootForm: ReturnType<typeof signal>;
+    formValue: ReturnType<typeof signal>;
+  };
+
+  beforeEach(async () => {
+    mockFormValue.set({});
+
+    mockRootFormRegistry = {
+      rootForm: signal(mockForm),
+      formValue: mockFormValue,
+    };
+
+    await TestBed.configureTestingModule({
+      providers: [{ provide: RootFormRegistryService, useValue: mockRootFormRegistry }],
+    }).compileComponents();
+
+    parentInjector = TestBed.inject(EnvironmentInjector);
+  });
+
+  function testMapper(fieldDef: ArrayField): Record<string, unknown> {
+    const inputsSignal = runInInjectionContext(parentInjector, () => arrayFieldMapper(fieldDef));
+    return inputsSignal();
+  }
+
   it('should create inputs object with key and field for minimal array field', () => {
     const fieldDef: ArrayField = {
       key: 'items',
@@ -9,9 +45,7 @@ describe('arrayFieldMapper', () => {
       fields: [{ key: 'item', type: 'input' }],
     };
 
-    const inputsSignal = arrayFieldMapper(fieldDef);
-    const inputs = inputsSignal();
-    expect(Object.keys(inputs)).toHaveLength(2);
+    const inputs = testMapper(fieldDef);
     expect(inputs).toHaveProperty('key', 'items');
     expect(inputs).toHaveProperty('field');
   });
@@ -25,9 +59,7 @@ describe('arrayFieldMapper', () => {
       fields: [{ key: 'item', type: 'input' }],
     };
 
-    const inputsSignal = arrayFieldMapper(fieldDef);
-    const inputs = inputsSignal();
-    expect(Object.keys(inputs)).toHaveLength(3);
+    const inputs = testMapper(fieldDef);
     expect(inputs).toHaveProperty('key');
     expect(inputs).toHaveProperty('field');
     expect(inputs).toHaveProperty('className', 'array-class');
@@ -49,9 +81,7 @@ describe('arrayFieldMapper', () => {
       ],
     };
 
-    const inputsSignal = arrayFieldMapper(fieldDef);
-    const inputs = inputsSignal();
-    expect(Object.keys(inputs)).toHaveLength(2);
+    const inputs = testMapper(fieldDef);
     expect(inputs).toHaveProperty('key');
     expect(inputs).toHaveProperty('field');
   });
@@ -68,9 +98,7 @@ describe('arrayFieldMapper', () => {
     ];
 
     testCases.forEach((fieldDef) => {
-      const inputsSignal = arrayFieldMapper(fieldDef);
-      const inputs = inputsSignal();
-      expect(Object.keys(inputs)).toHaveLength(2);
+      const inputs = testMapper(fieldDef);
       expect(inputs).toHaveProperty('key');
       expect(inputs).toHaveProperty('field');
     });
@@ -84,8 +112,56 @@ describe('arrayFieldMapper', () => {
       fields: [{ key: 'tag', type: 'input' }],
     };
 
-    const inputsSignal = arrayFieldMapper(fieldDef);
-    const inputs = inputsSignal();
+    const inputs = testMapper(fieldDef);
     expect(inputs['field']).toBe(fieldDef);
+  });
+
+  describe('hidden logic', () => {
+    it('should NOT include hidden when no logic or hidden property is defined', () => {
+      const fieldDef: ArrayField = {
+        key: 'items',
+        type: 'array',
+        fields: [{ key: 'item', type: 'input' }],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs).not.toHaveProperty('hidden');
+    });
+
+    it('should resolve static hidden: true', () => {
+      const fieldDef: ArrayField = {
+        key: 'items',
+        type: 'array',
+        hidden: true,
+        fields: [{ key: 'item', type: 'input' }],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs['hidden']).toBe(true);
+    });
+
+    it('should evaluate hidden logic with boolean condition true', () => {
+      const fieldDef: ArrayField = {
+        key: 'items',
+        type: 'array',
+        logic: [{ type: 'hidden', condition: true }],
+        fields: [{ key: 'item', type: 'input' }],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs['hidden']).toBe(true);
+    });
+
+    it('should evaluate hidden logic with boolean condition false', () => {
+      const fieldDef: ArrayField = {
+        key: 'items',
+        type: 'array',
+        logic: [{ type: 'hidden', condition: false }],
+        fields: [{ key: 'item', type: 'input' }],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs['hidden']).toBe(false);
+    });
   });
 });

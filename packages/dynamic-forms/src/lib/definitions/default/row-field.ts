@@ -2,6 +2,7 @@ import { FieldComponent, FieldDef } from '../base/field-def';
 import { RowAllowedChildren } from '../../models/types/nesting-constraints';
 import { isHiddenField } from './hidden-field';
 import { isGroupField } from './group-field';
+import { ContainerLogicConfig } from '../base/container-logic-config';
 
 /**
  * Row field interface for creating horizontal layouts
@@ -26,6 +27,12 @@ export interface RowField<TFields extends readonly RowAllowedChildren[] = readon
 
   /** Rows do not support meta - they have no native form element **/
   readonly meta?: never;
+
+  /**
+   * Logic configurations for conditional row visibility.
+   * Only 'hidden' type logic is supported for rows.
+   */
+  readonly logic?: ContainerLogicConfig[];
 }
 
 /**

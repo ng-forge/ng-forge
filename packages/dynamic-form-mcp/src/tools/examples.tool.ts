@@ -322,7 +322,7 @@ const formConfig = {
     {
       key: 'contacts',
       type: 'array',
-      // ⚠️ Arrays have NO LABEL, NO LOGIC!
+      // ⚠️ Arrays have NO LABEL! Supports only 'hidden' logic type.
       // ⚠️ Use 'fields' property, NOT 'template'!
       fields: [
         {

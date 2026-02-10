@@ -163,7 +163,7 @@ Validate FormConfig and get detailed error feedback.
 
 - "Hidden field missing REQUIRED value property"
 - "options MUST be at FIELD level, NOT inside props"
-- "row containers do NOT support logic blocks"
+- "containers only support 'hidden' logic type"
 
 ---
 

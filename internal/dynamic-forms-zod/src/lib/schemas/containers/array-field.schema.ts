@@ -1,5 +1,6 @@
 import { z, ZodTypeAny } from 'zod';
 import { BaseFieldDefSchema } from '../field/field-def.schema';
+import { ContainerLogicConfigSchema } from './page-field.schema';
 
 /**
  * Creates an ArrayField schema with the specified child field schema.
@@ -11,6 +12,7 @@ import { BaseFieldDefSchema } from '../field/field-def.schema';
  *   readonly fields: TFields;
  *   readonly label?: never;
  *   readonly meta?: never;
+ *   readonly logic?: ContainerLogicConfig[];
  * }
  * ```
  *
@@ -38,6 +40,11 @@ export function createArrayFieldSchema<T extends ZodTypeAny>(childFieldSchema: T
      * Each array item will contain these fields.
      */
     fields: z.array(childFieldSchema),
+
+    /**
+     * Container logic (only 'hidden' is allowed).
+     */
+    logic: z.array(ContainerLogicConfigSchema).optional(),
   });
 }
 
@@ -51,6 +58,7 @@ export const BaseArrayFieldSchema = BaseFieldDefSchema.omit({
 }).extend({
   type: z.literal('array'),
   fields: z.array(z.any()),
+  logic: z.array(ContainerLogicConfigSchema).optional(),
 });
 
 export type BaseArrayFieldSchemaType = z.infer<typeof BaseArrayFieldSchema>;

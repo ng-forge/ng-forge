@@ -2,23 +2,13 @@ import { FieldDef } from '../base/field-def';
 import { PageAllowedChildren } from '../../models/types/nesting-constraints';
 import { isRowField } from './row-field';
 import { isGroupField } from './group-field';
-import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import { ContainerLogicConfig } from '../base/container-logic-config';
 
 /**
  * Logic configuration for page fields.
- * Pages only support the 'hidden' logic type since they are layout containers,
- * not form controls (they can't be readonly, disabled, or required).
+ * @deprecated Use `ContainerLogicConfig` instead. This is a backwards-compatible alias.
  */
-export interface PageLogicConfig {
-  /** Only 'hidden' is supported for pages */
-  type: 'hidden';
-
-  /**
-   * Condition that determines when this page is hidden.
-   * Can be a boolean or a conditional expression evaluated against form values.
-   */
-  condition: ConditionalExpression | boolean;
-}
+export type PageLogicConfig = ContainerLogicConfig;
 
 /**
  * Page field interface for creating top-level page layouts
@@ -67,7 +57,7 @@ export interface PageField<TFields extends readonly PageAllowedChildren[] = Page
    * }
    * ```
    */
-  readonly logic?: PageLogicConfig[];
+  readonly logic?: ContainerLogicConfig[];
 }
 
 /**

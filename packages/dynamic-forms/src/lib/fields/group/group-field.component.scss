@@ -20,4 +20,8 @@
   > * {
     grid-column: 1 / -1;
   }
+
+  &.df-container-hidden {
+    display: none !important;
+  }
 }

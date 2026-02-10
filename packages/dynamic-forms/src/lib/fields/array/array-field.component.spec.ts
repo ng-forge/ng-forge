@@ -934,4 +934,38 @@ describe('ArrayFieldComponent', () => {
       expect(inputs).toHaveProperty('defaultValidationMessages');
     });
   });
+
+  describe('hidden input', () => {
+    it('should not have df-container-hidden class when hidden is false', () => {
+      const field: ArrayField<unknown> = {
+        key: 'testArray',
+        type: 'array',
+        fields: [],
+      };
+
+      const { fixture } = setupArrayTest(field);
+      fixture.componentRef.setInput('hidden', false);
+      fixture.detectChanges();
+
+      const element = fixture.nativeElement;
+      expect(element.classList.contains('df-container-hidden')).toBe(false);
+      expect(element.getAttribute('aria-hidden')).toBeNull();
+    });
+
+    it('should have df-container-hidden class and aria-hidden when hidden is true', () => {
+      const field: ArrayField<unknown> = {
+        key: 'testArray',
+        type: 'array',
+        fields: [],
+      };
+
+      const { fixture } = setupArrayTest(field);
+      fixture.componentRef.setInput('hidden', true);
+      fixture.detectChanges();
+
+      const element = fixture.nativeElement;
+      expect(element.classList.contains('df-container-hidden')).toBe(true);
+      expect(element.getAttribute('aria-hidden')).toBe('true');
+    });
+  });
 });

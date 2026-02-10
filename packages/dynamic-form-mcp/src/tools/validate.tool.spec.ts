@@ -390,7 +390,7 @@ describe('Validate Tool', () => {
       expect(content.errors.length).toBeGreaterThan(0);
     });
 
-    it('reports error for logic on group container', async () => {
+    it('allows hidden logic on group container', async () => {
       const result = await registeredTool.handler({
         uiIntegration: 'material',
         config: {
@@ -413,11 +413,10 @@ describe('Validate Tool', () => {
           .replace(/\n```$/, ''),
       );
 
-      expect(content.valid).toBe(false);
-      expect(content.errors.length).toBeGreaterThan(0);
+      expect(content.valid).toBe(true);
     });
 
-    it('reports error for logic on row container', async () => {
+    it('allows hidden logic on row container', async () => {
       const result = await registeredTool.handler({
         uiIntegration: 'material',
         config: {
@@ -440,11 +439,10 @@ describe('Validate Tool', () => {
           .replace(/\n```$/, ''),
       );
 
-      expect(content.valid).toBe(false);
-      expect(content.errors.length).toBeGreaterThan(0);
+      expect(content.valid).toBe(true);
     });
 
-    it('reports error for logic on array container', async () => {
+    it('allows hidden logic on array container', async () => {
       const result = await registeredTool.handler({
         uiIntegration: 'material',
         config: {
@@ -454,6 +452,32 @@ describe('Validate Tool', () => {
               type: 'array',
               fields: [{ key: 'item', type: 'input', label: 'Item' }],
               logic: [{ type: 'hidden', condition: true }],
+            },
+          ],
+        },
+      });
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
+
+      expect(content.valid).toBe(true);
+    });
+
+    it('reports error for non-hidden logic on group container', async () => {
+      const result = await registeredTool.handler({
+        uiIntegration: 'material',
+        config: {
+          fields: [
+            {
+              key: 'address',
+              type: 'group',
+              fields: [{ key: 'street', type: 'input', label: 'Street' }],
+              logic: [{ type: 'disabled', condition: true }],
             },
           ],
         },
@@ -898,7 +922,7 @@ describe('Validate Tool', () => {
       expect(markdownReport).toContain('label');
     });
 
-    it('provides fix suggestion for logic on container field', async () => {
+    it('provides fix suggestion for non-hidden logic on container field', async () => {
       const result = await registeredTool.handler({
         uiIntegration: 'material',
         config: {
@@ -907,7 +931,7 @@ describe('Validate Tool', () => {
               key: 'group1',
               type: 'group',
               fields: [{ key: 'name', type: 'input', label: 'Name' }],
-              logic: [{ type: 'hidden', condition: true }],
+              logic: [{ type: 'disabled', condition: true }],
             },
           ],
         },

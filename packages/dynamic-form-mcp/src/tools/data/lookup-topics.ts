@@ -302,7 +302,7 @@ Included in form value but not rendered.
     brief: `\`\`\`typescript
 { key: 'address', type: 'group', fields: [{ key: 'city', type: 'input', label: 'City' }] }
 \`\`\`
-⚠️ **NO label, NO logic** - creates nested object { address: { city: '...' } }`,
+⚠️ **NO label** - supports only \`hidden\` logic - creates nested object { address: { city: '...' } }`,
 
     full: `# Group Container (Nested Object)
 
@@ -310,7 +310,8 @@ Included in form value but not rendered.
 {
   key: 'address',
   type: 'group',
-  // ⚠️ NO LABEL! NO LOGIC!
+  // ⚠️ NO LABEL! Supports only 'hidden' logic type.
+  logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'showAddress', operator: 'equals', value: false } }],
   fields: [
     { key: 'street', type: 'input', label: 'Street' },
     { key: 'city', type: 'input', label: 'City' }
@@ -321,7 +322,7 @@ Included in form value but not rendered.
 
 **⚠️ Common mistakes:**
 - Adding \`label\` to group (not allowed)
-- Adding \`logic\` to group (apply to child fields instead)
+- Using non-hidden logic types on group (only \`hidden\` is supported, apply other logic types to child fields instead)
 
 **Can contain:** rows, leaf fields (NOT pages, NOT nested groups)`,
   },
@@ -330,7 +331,7 @@ Included in form value but not rendered.
     brief: `\`\`\`typescript
 { key: 'nameRow', type: 'row', fields: [{ key: 'first', type: 'input', label: 'First', col: 6 }, { key: 'last', type: 'input', label: 'Last', col: 6 }] }
 \`\`\`
-⚠️ **NO label, NO logic, NO hidden fields inside**`,
+⚠️ **NO label, NO hidden fields inside** - supports only \`hidden\` logic type`,
 
     full: `# Row Container (Horizontal Layout)
 
@@ -338,7 +339,8 @@ Included in form value but not rendered.
 {
   key: 'nameRow',
   type: 'row',
-  // ⚠️ NO LABEL! NO LOGIC!
+  // ⚠️ NO LABEL! Supports only 'hidden' logic type.
+  logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'showNameRow', operator: 'equals', value: false } }],
   fields: [
     { key: 'firstName', type: 'input', label: 'First', col: 6 },
     { key: 'lastName', type: 'input', label: 'Last', col: 6 }
@@ -346,7 +348,7 @@ Included in form value but not rendered.
 }
 \`\`\`
 
-Use \`col\` (1-12) on child fields for grid width. Row is purely for layout.
+Use \`col\` (1-12) on child fields for grid width. Row is purely for layout. Supports only \`hidden\` logic type for conditional visibility.
 
 **Allowed children:** groups, arrays, value fields (input, select, checkbox, etc.)
 **NOT allowed:** \`hidden\` fields, \`page\` containers, nested \`row\` containers
@@ -358,7 +360,7 @@ Use \`col\` (1-12) on child fields for grid width. Row is purely for layout.
     brief: `\`\`\`typescript
 { key: 'contacts', type: 'array', fields: [{ key: 'item', type: 'group', fields: [{ key: 'name', type: 'input', label: 'Name' }] }] }
 \`\`\`
-⚠️ Uses **fields** NOT template, **NO label, NO logic**`,
+⚠️ Uses **fields** NOT template, **NO label** - supports only \`hidden\` logic type`,
 
     full: `# Array Container (Dynamic List)
 
@@ -366,7 +368,8 @@ Use \`col\` (1-12) on child fields for grid width. Row is purely for layout.
 {
   key: 'contacts',
   type: 'array',
-  // ⚠️ NO LABEL! NO LOGIC! Uses 'fields', NOT 'template'!
+  // ⚠️ NO LABEL! Uses 'fields', NOT 'template'! Supports only 'hidden' logic type.
+  logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'hasContacts', operator: 'equals', value: false } }],
   fields: [
     {
       key: 'contactItem',
@@ -383,7 +386,8 @@ Use \`col\` (1-12) on child fields for grid width. Row is purely for layout.
 
 **⚠️ Common mistakes:**
 - Using \`template\` (doesn't exist) - use \`fields\`
-- Adding \`label\` or \`logic\` to array container
+- Adding \`label\` to array container (not allowed)
+- Using non-hidden logic types on array (only \`hidden\` is supported)
 
 **Can contain:** rows, groups, leaf fields (NOT pages, NOT nested arrays)`,
   },
@@ -1153,7 +1157,7 @@ validators: [{
 
   // ========== PATTERNS & RULES ==========
   'logic-matrix': {
-    brief: `**Containers:** group/row/array have NO logic (apply to children)
+    brief: `**Containers:** group/row/array support only \`hidden\` logic (same as pages). For other logic types, apply to children.
 **Page:** hidden only | **Value fields:** all logic types incl. propertyDerivation | **Buttons:** hidden, disabled`,
 
     full: `# Logic Support Matrix
@@ -1161,9 +1165,9 @@ validators: [{
 | Field Type     | hidden | disabled | required | readonly | derivation | propertyDerivation |
 |----------------|--------|----------|----------|----------|------------|--------------------|
 | page           |   Y    |    N     |    N     |    N     |     N      |         N          |
-| group          |   N    |    N     |    N     |    N     |     N      |         N          |
-| row            |   N    |    N     |    N     |    N     |     N      |         N          |
-| array          |   N    |    N     |    N     |    N     |     N      |         N          |
+| group          |   Y    |    N     |    N     |    N     |     N      |         N          |
+| row            |   Y    |    N     |    N     |    N     |     N      |         N          |
+| array          |   Y    |    N     |    N     |    N     |     N      |         N          |
 | input          |   Y    |    Y     |    Y     |    Y     |     Y      |         Y          |
 | select         |   Y    |    Y     |    Y     |    Y     |     Y      |         Y          |
 | checkbox       |   Y    |    Y     |    Y     |    Y     |     Y      |         Y          |
@@ -1179,7 +1183,7 @@ validators: [{
 | next/previous  |   Y    |    Y     |    N     |    N     |     N      |         N          |
 
 **Key takeaways:**
-- Containers (group, row, array) do NOT support logic - apply to children instead
+- Containers (group, row, array) support only \`hidden\` logic type (same as pages) for conditional visibility. For other logic types, apply to child fields instead.
 - Page only supports \`hidden\` logic (for conditional pages)
 - Hidden fields have NO logic support at all
 - Value fields (input, select, etc.) support ALL logic types including \`propertyDerivation\`
@@ -1240,21 +1244,22 @@ provideDynamicForm({
     brief: `| Container | Label? | Logic? | Notes |
 |-----------|--------|--------|-------|
 | page | NO | hidden only | Nav buttons INSIDE |
-| group | NO | NO | Creates nested object |
-| array | NO | NO | Uses \`fields\` not \`template\` |
-| row | NO | NO | Layout only, no hidden fields |`,
+| group | NO | hidden only | Creates nested object |
+| array | NO | hidden only | Uses \`fields\` not \`template\` |
+| row | NO | hidden only | Layout only, no hidden fields |`,
 
     full: `# Container Rules
 
 | Container | Label? | Logic? | Allowed Children | Notes |
 |-----------|--------|--------|------------------|-------|
 | page | NO | YES (hidden only) | rows, groups, arrays, leaf fields, buttons | Nav buttons go INSIDE |
-| group | NO | NO | rows, leaf fields (NOT pages, groups) | Creates nested object |
-| array | NO | NO | rows, groups, leaf fields (NOT pages, arrays) | Uses \`fields\`, not \`template\` |
-| row | NO | NO | groups, arrays, leaf fields (NOT hidden, pages, rows) | Layout only |
+| group | NO | YES (hidden only) | rows, leaf fields (NOT pages, groups) | Creates nested object |
+| array | NO | YES (hidden only) | rows, groups, leaf fields (NOT pages, arrays) | Uses \`fields\`, not \`template\` |
+| row | NO | YES (hidden only) | groups, arrays, leaf fields (NOT hidden, pages, rows) | Layout only |
 
 **CRITICAL:**
-- If you need conditional visibility for a container, apply logic to each CHILD field instead.
+- All containers (page, group, row, array) support only the \`hidden\` logic type for conditional visibility.
+- For other logic types (disabled, required, readonly, derivation), apply them to child fields instead.
 - Hidden fields cannot be inside rows - place them at page/form level.
 - Pages cannot be nested - ALL top-level fields must be pages if using multi-page mode.`,
   },
@@ -1460,7 +1465,7 @@ const formConfig = {
   pitfalls: {
     brief: `1. Hidden field missing \`value\` - REQUIRED!
 2. Hidden field with label/logic/validators - FORBIDDEN!
-3. Container (group/row/array) with logic - apply to children!
+3. Container (group/row/array) only supports 'hidden' logic - other types go on children!
 4. options/minValue/maxValue in props - must be at FIELD level!
 5. Generic button without \`event\` - use submit/next/previous!`,
 
@@ -1491,16 +1496,17 @@ const formConfig = {
 { key: 'userId', type: 'hidden', value: '123' }  // ✅
 \`\`\`
 
-## 3. Container fields don't support logic
+## 3. Containers only support 'hidden' logic
 \`\`\`typescript
-// WRONG - logic on group/row/array
-{ type: 'group', logic: [...] }  // ❌ TypeScript error!
+// WRONG - non-hidden logic on group/row/array
+{ type: 'group', logic: [{ type: 'disabled', condition: {...} }] }  // ❌
 
-// CORRECT - apply logic to child fields
+// CORRECT - containers support 'hidden' logic for conditional visibility
 {
   type: 'group',
+  logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'showGroup', operator: 'equals', value: false } }],  // ✅
   fields: [
-    { key: 'city', type: 'input', label: 'City', logic: [...] }  // ✅
+    { key: 'city', type: 'input', label: 'City', logic: [...] }  // ✅ Other logic types on children
   ]
 }
 \`\`\`

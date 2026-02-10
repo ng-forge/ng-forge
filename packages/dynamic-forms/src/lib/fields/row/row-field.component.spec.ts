@@ -68,4 +68,38 @@ describe('RowFieldComponent', () => {
     expect(element.classList.contains('df-field')).toBe(true);
     expect(element.classList.contains('df-row')).toBe(true);
   });
+
+  it('should not have df-container-hidden class when hidden is false', () => {
+    const field: RowField<never[]> = {
+      key: 'testRow',
+      type: 'row',
+      fields: [],
+    };
+
+    const { fixture } = setupSimpleTest(RowFieldComponent, {
+      field,
+      hidden: false,
+    });
+
+    const element = fixture.nativeElement;
+    expect(element.classList.contains('df-container-hidden')).toBe(false);
+    expect(element.getAttribute('aria-hidden')).toBeNull();
+  });
+
+  it('should have df-container-hidden class and aria-hidden when hidden is true', () => {
+    const field: RowField<never[]> = {
+      key: 'testRow',
+      type: 'row',
+      fields: [],
+    };
+
+    const { fixture } = setupSimpleTest(RowFieldComponent, {
+      field,
+      hidden: true,
+    });
+
+    const element = fixture.nativeElement;
+    expect(element.classList.contains('df-container-hidden')).toBe(true);
+    expect(element.getAttribute('aria-hidden')).toBe('true');
+  });
 });

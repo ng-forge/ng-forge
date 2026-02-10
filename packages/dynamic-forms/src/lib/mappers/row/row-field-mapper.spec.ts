@@ -1,11 +1,42 @@
+import { EnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { rowFieldMapper } from './row-field-mapper';
-import { RowField } from '../../definitions';
+import { RowField } from '../../definitions/default/row-field';
+import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
+import { vi } from 'vitest';
 
 describe('rowFieldMapper', () => {
+  let parentInjector: EnvironmentInjector;
+  const mockFormValue = signal<Record<string, unknown>>({});
+  const mockForm = vi.fn(() => ({
+    value: vi.fn().mockReturnValue({}),
+    valid: vi.fn().mockReturnValue(true),
+    submitting: vi.fn().mockReturnValue(false),
+  }));
+  let mockRootFormRegistry: {
+    rootForm: ReturnType<typeof signal>;
+    formValue: ReturnType<typeof signal>;
+  };
+
   beforeEach(async () => {
-    await TestBed.configureTestingModule({}).compileComponents();
+    mockFormValue.set({});
+
+    mockRootFormRegistry = {
+      rootForm: signal(mockForm),
+      formValue: mockFormValue,
+    };
+
+    await TestBed.configureTestingModule({
+      providers: [{ provide: RootFormRegistryService, useValue: mockRootFormRegistry }],
+    }).compileComponents();
+
+    parentInjector = TestBed.inject(EnvironmentInjector);
   });
+
+  function testMapper(fieldDef: RowField): Record<string, unknown> {
+    const inputsSignal = runInInjectionContext(parentInjector, () => rowFieldMapper(fieldDef));
+    return inputsSignal();
+  }
 
   it('should create inputs object with key and field for minimal row field', () => {
     const fieldDef: RowField = {
@@ -14,9 +45,7 @@ describe('rowFieldMapper', () => {
       fields: [],
     };
 
-    const inputsSignal = rowFieldMapper(fieldDef);
-    const inputs = inputsSignal(); // Call the signal to get the actual inputs
-    expect(Object.keys(inputs)).toHaveLength(2);
+    const inputs = testMapper(fieldDef);
     expect(inputs).toHaveProperty('key', 'testRow');
     expect(inputs).toHaveProperty('field');
   });
@@ -32,9 +61,7 @@ describe('rowFieldMapper', () => {
       fields: [],
     };
 
-    const inputsSignal = rowFieldMapper(fieldDef);
-    const inputs = inputsSignal(); // Call the signal to get the actual inputs
-    expect(Object.keys(inputs)).toHaveLength(3);
+    const inputs = testMapper(fieldDef);
     expect(inputs).toHaveProperty('key');
     expect(inputs).toHaveProperty('field');
     expect(inputs).toHaveProperty('className', 'row-class');
@@ -55,9 +82,7 @@ describe('rowFieldMapper', () => {
       ],
     };
 
-    const inputsSignal = rowFieldMapper(fieldDef);
-    const inputs = inputsSignal(); // Call the signal to get the actual inputs
-    expect(Object.keys(inputs)).toHaveLength(2);
+    const inputs = testMapper(fieldDef);
     expect(inputs).toHaveProperty('key');
     expect(inputs).toHaveProperty('field');
   });
@@ -82,11 +107,58 @@ describe('rowFieldMapper', () => {
     ];
 
     testCases.forEach((fieldDef) => {
-      const inputsSignal = rowFieldMapper(fieldDef);
-      const inputs = inputsSignal(); // Call the signal to get the actual inputs
-      expect(Object.keys(inputs)).toHaveLength(2);
+      const inputs = testMapper(fieldDef);
       expect(inputs).toHaveProperty('key');
       expect(inputs).toHaveProperty('field');
+    });
+  });
+
+  describe('hidden logic', () => {
+    it('should NOT include hidden when no logic or hidden property is defined', () => {
+      const fieldDef: RowField = {
+        key: 'testRow',
+        type: 'row',
+        fields: [],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs).not.toHaveProperty('hidden');
+    });
+
+    it('should resolve static hidden: true', () => {
+      const fieldDef: RowField = {
+        key: 'testRow',
+        type: 'row',
+        hidden: true,
+        fields: [],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs['hidden']).toBe(true);
+    });
+
+    it('should evaluate hidden logic with boolean condition true', () => {
+      const fieldDef: RowField = {
+        key: 'testRow',
+        type: 'row',
+        logic: [{ type: 'hidden', condition: true }],
+        fields: [],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs['hidden']).toBe(true);
+    });
+
+    it('should evaluate hidden logic with boolean condition false', () => {
+      const fieldDef: RowField = {
+        key: 'testRow',
+        type: 'row',
+        logic: [{ type: 'hidden', condition: false }],
+        fields: [],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs['hidden']).toBe(false);
     });
   });
 });

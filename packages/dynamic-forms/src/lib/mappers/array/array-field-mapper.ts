@@ -1,6 +1,8 @@
-import { computed, Signal } from '@angular/core';
+import { computed, inject, Signal } from '@angular/core';
 import { ArrayField } from '../../definitions/default/array-field';
 import { buildClassName } from '../../utils/grid-classes/grid-classes';
+import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
+import { resolveNonFieldHidden } from '../../core/logic/non-field-logic-resolver';
 
 /**
  * Maps an array field definition to component inputs.
@@ -9,16 +11,32 @@ import { buildClassName } from '../../utils/grid-classes/grid-classes';
  * The array component will inject the parent FIELD_SIGNAL_CONTEXT and create
  * a scoped child injector for its array item fields.
  *
+ * Supports hidden state resolution via `logic` array or static `hidden` property.
+ *
  * @param fieldDef The array field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function arrayFieldMapper(fieldDef: ArrayField): Signal<Record<string, unknown>> {
+  const rootFormRegistry = inject(RootFormRegistryService);
   const className = buildClassName(fieldDef);
 
-  // Array inputs are static (no reactive dependencies)
-  return computed(() => ({
-    key: fieldDef.key,
-    field: fieldDef,
-    ...(className !== undefined && { className }),
-  }));
+  return computed(() => {
+    const inputs: Record<string, unknown> = {
+      key: fieldDef.key,
+      field: fieldDef,
+      ...(className !== undefined && { className }),
+    };
+
+    const rootForm = rootFormRegistry.rootForm();
+    if (rootForm && (fieldDef.hidden !== undefined || fieldDef.logic?.some((l) => l.type === 'hidden'))) {
+      inputs['hidden'] = resolveNonFieldHidden({
+        form: rootForm,
+        fieldLogic: fieldDef.logic,
+        explicitValue: fieldDef.hidden,
+        formValue: rootFormRegistry.formValue(),
+      })();
+    }
+
+    return inputs;
+  });
 }

@@ -2,6 +2,10 @@
 @use 'sass:math';
 @use '../../styles/grid-system.scss';
 
+:host.df-container-hidden {
+  display: none !important;
+}
+
 :host {
   // Row flex container - items use natural size unless col is specified
   display: flex;

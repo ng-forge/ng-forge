@@ -98,7 +98,7 @@ describe('Lookup Tool', () => {
 
       expect(content).toContain('# Group Container');
       expect(content).toContain('NO LABEL');
-      expect(content).toContain('NO LOGIC');
+      expect(content).toContain('hidden');
     });
 
     it('returns row documentation', async () => {

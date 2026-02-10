@@ -2,9 +2,14 @@ import { DynamicFormError } from '../errors/dynamic-form-error';
 import { AvailableFieldTypes, ExtractField } from '../models';
 
 /**
- * Container field types that do NOT support labels or most logic
+ * Container field types that do NOT support labels
  */
 const CONTAINER_TYPES = ['group', 'row', 'array'] as const;
+
+/**
+ * Container and page field types that only support 'hidden' logic
+ */
+const HIDDEN_ONLY_LOGIC_TYPES = ['group', 'row', 'array', 'page'] as const;
 
 /**
  * Field types that support options at the field level
@@ -20,11 +25,6 @@ const SLIDER_TYPE = 'slider' as const;
  * Hidden field type - no logic, no validators, no label
  */
 const HIDDEN_TYPE = 'hidden' as const;
-
-/**
- * Page field type - only supports hidden logic
- */
-const PAGE_TYPE = 'page' as const;
 
 /**
  * Creates a typed field configuration with helpful error messages for common mistakes.
@@ -91,27 +91,19 @@ export function createField<T extends AvailableFieldTypes>(type: T, config: Omit
     }
   }
 
-  // Container validation: no logic allowed (except page with hidden)
-  if (CONTAINER_TYPES.includes(type as (typeof CONTAINER_TYPES)[number])) {
+  // Container + page validation: only hidden logic allowed
+  if (HIDDEN_ONLY_LOGIC_TYPES.includes(type as (typeof HIDDEN_ONLY_LOGIC_TYPES)[number])) {
     if ('logic' in configWithProps && configWithProps['logic'] !== undefined) {
-      throw new DynamicFormError(
-        `createField('${type}'): Container fields (${CONTAINER_TYPES.join(', ')}) do NOT support 'logic'. ` +
-          `Apply logic to child fields instead, or use 'page' containers which support 'hidden' logic only.`,
-      );
-    }
-  }
-
-  // Page validation: only hidden logic allowed
-  if ((type as string) === PAGE_TYPE && 'logic' in configWithProps) {
-    const logic = configWithProps['logic'] as Array<{ type: string }>;
-    if (Array.isArray(logic)) {
-      const nonHiddenLogic = logic.filter((l) => l.type !== 'hidden');
-      if (nonHiddenLogic.length > 0) {
-        throw new DynamicFormError(
-          `createField('page'): Pages only support 'hidden' logic type. ` +
-            `Found unsupported logic types: ${nonHiddenLogic.map((l) => l.type).join(', ')}. ` +
-            `For other logic types, apply them to child fields instead.`,
-        );
+      const logic = configWithProps['logic'] as Array<{ type: string }>;
+      if (Array.isArray(logic)) {
+        const nonHiddenLogic = logic.filter((l) => l.type !== 'hidden');
+        if (nonHiddenLogic.length > 0) {
+          throw new DynamicFormError(
+            `createField('${type}'): Only 'hidden' logic type is supported. ` +
+              `Found unsupported logic types: ${nonHiddenLogic.map((l) => l.type).join(', ')}. ` +
+              `For other logic types, apply them to child fields instead.`,
+          );
+        }
       }
     }
   }

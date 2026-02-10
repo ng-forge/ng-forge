@@ -417,7 +417,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     type: 'row',
     category: 'container',
     description:
-      'Horizontal layout container for grouping fields in columns. Rows do NOT have a label property and do NOT support logic blocks.',
+      "Horizontal layout container for grouping fields in columns. Rows do NOT have a label property. Supports only 'hidden' logic type for conditional visibility.",
     valueType: undefined,
     baseInterface: 'FieldDef',
     props: {
@@ -455,7 +455,8 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     example: `{
   key: 'nameRow',
   type: 'row',
-  // NOTE: Rows do NOT have label or logic properties
+  // NOTE: Rows do NOT have a label property
+  // Rows support only 'hidden' logic type for conditional visibility
   fields: [
     { key: 'firstName', type: 'input', label: 'First Name', col: 6 },
     { key: 'lastName', type: 'input', label: 'Last Name', col: 6 }
@@ -471,7 +472,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     type: 'group',
     category: 'container',
     description:
-      'Nested form group container creating a sub-object in form values. Groups are logical containers only and do NOT have a label property.',
+      "Nested form group container creating a sub-object in form values. Groups are logical containers only and do NOT have a label property. Supports only 'hidden' logic type for conditional visibility.",
     valueType: 'object',
     baseInterface: 'FieldDef',
     props: {
@@ -521,7 +522,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     type: 'array',
     category: 'container',
     description:
-      'Repeatable field group for dynamic lists/arrays. Arrays do NOT have label, minItems, or maxItems properties. Use "fields" (not "template") to define the item template.',
+      'Repeatable field group for dynamic lists/arrays. Arrays do NOT have label, minItems, or maxItems properties. Use "fields" (not "template") to define the item template. Supports only \'hidden\' logic type for conditional visibility.',
     valueType: 'T[]',
     baseInterface: 'FieldDef',
     props: {

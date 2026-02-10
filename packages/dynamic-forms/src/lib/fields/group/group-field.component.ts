@@ -49,6 +49,8 @@ import { SubmitEvent } from '../../events/constants/submit.event';
     '[class]': 'hostClasses()',
     role: 'group',
     '[class.disabled]': 'disabled()',
+    '[class.df-container-hidden]': 'hidden()',
+    '[attr.aria-hidden]': 'hidden() || null',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
@@ -79,6 +81,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   field = input.required<GroupField>();
   key = input.required<string>();
   className = input<string>();
+  hidden = input(false);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals
