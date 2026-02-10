@@ -13,88 +13,28 @@ export default [
     loadChildren: () => import('./accessibility/accessibility.routes'),
   },
 
-  // Advanced Validation Tests - Refactored into folder structure
-  {
-    path: 'advanced-validation',
-    loadChildren: () => import('./advanced-validation/advanced-validation.routes'),
-  },
-
-  // Angular Schema Validation Tests - Form-level validation using native Angular schema callbacks
-  {
-    path: 'angular-schema-validation',
-    loadChildren: () => import('./angular-schema-validation/angular-schema-validation.routes'),
-  },
-
-  // Array Fields Tests - Tests for array field manipulation (add/remove items)
+  // Array Fields Tests
   {
     path: 'array-fields',
     loadChildren: () => import('./array-fields/array-fields.routes'),
   },
 
-  // Async Validation Tests - Refactored into folder structure
-  {
-    path: 'async-validation',
-    loadChildren: () => import('./async-validation/async-validation.routes'),
-  },
-
-  // Comprehensive Field Tests - Refactored into folder structure
+  // Comprehensive Field Tests
   {
     path: 'comprehensive-field-tests',
     loadChildren: () => import('./comprehensive-field-tests/comprehensive-field-tests.routes'),
   },
 
-  // Cross-Field Validation Tests - Refactored into folder structure
-  {
-    path: 'cross-field-validation',
-    loadChildren: () => import('./cross-field-validation/cross-field-validation.routes'),
-  },
-
-  // Cross-Page Validation Tests - Refactored into folder structure
-  {
-    path: 'cross-page-validation',
-    loadChildren: () => import('./cross-page-validation/cross-page-validation.routes'),
-  },
-
-  // Demo Scenarios Tests - Refactored into folder structure
-  {
-    path: 'demo-scenarios',
-    loadChildren: () => import('./demo-scenarios/demo-scenarios.routes'),
-  },
-
-  // Derivation Logic Tests - Value derivation based on field values, expressions, and custom functions
-  {
-    path: 'derivation-logic',
-    loadChildren: () => import('./derivation-logic/derivation-logic.routes'),
-  },
-
-  // Error Handling Tests - Refactored into folder structure
+  // Error Handling Tests
   {
     path: 'error-handling',
     loadChildren: () => import('./error-handling/error-handling.routes'),
-  },
-
-  // Essential Tests - Refactored into folder structure
-  {
-    path: 'essential-tests',
-    loadChildren: () => import('./essential-tests/essential-tests.routes'),
-  },
-
-  // Expression-Based Logic Tests - Refactored into folder structure
-  {
-    path: 'expression-based-logic',
-    loadChildren: () => import('./expression-based-logic/expression-based-logic.routes'),
   },
 
   // Field Meta Tests - Tests for meta attribute passthrough
   {
     path: 'field-meta',
     loadChildren: () => import('./field-meta/field-meta.routes'),
-  },
-
-  // Form Reset/Clear Tests - Refactored into folder structure
-  {
-    path: 'form-reset-clear',
-    loadChildren: () => import('./form-reset-clear/form-reset-clear.routes'),
   },
 
   // Group Fields Tests - Tests for nested group field value propagation
@@ -109,39 +49,9 @@ export default [
     loadChildren: () => import('./ionic-components/ionic-components.routes'),
   },
 
-  // Multi-Page Navigation Tests - Refactored into folder structure
-  {
-    path: 'multi-page-navigation',
-    loadChildren: () => import('./multi-page-navigation/multi-page-navigation.routes'),
-  },
-
-  // Schema System Tests - Reusable schema configurations for validation and logic
-  {
-    path: 'schema-system',
-    loadChildren: () => import('./schema-system/schema-system.routes'),
-  },
-
   // Submission Behavior Tests - Tests for form submission and button disabled states
   {
     path: 'submission-behavior',
     loadChildren: () => import('./submission-behavior/submission-behavior.routes'),
-  },
-
-  // User Journey Flows Tests - Refactored into folder structure
-  {
-    path: 'user-journey-flows',
-    loadChildren: () => import('./user-journey-flows/user-journey-flows.routes'),
-  },
-
-  // User Workflows Tests - Refactored into folder structure
-  {
-    path: 'user-workflows',
-    loadChildren: () => import('./user-workflows/user-workflows.routes'),
-  },
-
-  // Zod Schema Validation Tests - Form-level validation using Zod with Standard Schema
-  {
-    path: 'zod-schema-validation',
-    loadChildren: () => import('./zod-schema-validation/zod-schema-validation.routes'),
   },
 ] satisfies Route[];

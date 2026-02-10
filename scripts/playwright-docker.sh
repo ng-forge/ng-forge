@@ -43,10 +43,10 @@ fi
 
 # Validate app name
 case $APP in
-  material-examples|primeng-examples|ionic-examples|bootstrap-examples) ;;
+  material-examples|primeng-examples|ionic-examples|bootstrap-examples|core-examples) ;;
   *)
     echo "Unknown app: $APP"
-    echo "Valid apps: ionic-examples, material-examples, bootstrap-examples, primeng-examples"
+    echo "Valid apps: core-examples, ionic-examples, material-examples, bootstrap-examples, primeng-examples"
     exit 1
     ;;
 esac

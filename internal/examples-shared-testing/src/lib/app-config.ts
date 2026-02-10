@@ -7,6 +7,7 @@ export const APP_PORTS = {
   'primeng-examples': 4202,
   'ionic-examples': 4203,
   'bootstrap-examples': 4204,
+  'core-examples': 4205,
 } as const;
 
 export type ExampleApp = keyof typeof APP_PORTS;

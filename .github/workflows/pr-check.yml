@@ -313,7 +313,7 @@ jobs:
       - name: Build affected example apps
         run: |
           AFFECTED=$(pnpm nx show projects --affected --base=origin/main)
-          EXAMPLES=$(echo "$AFFECTED" | grep -E "(material-examples|bootstrap-examples|primeng-examples|ionic-examples)" || true)
+          EXAMPLES=$(echo "$AFFECTED" | grep -E "(core-examples|material-examples|bootstrap-examples|primeng-examples|ionic-examples)" || true)
           if [ -n "$EXAMPLES" ]; then
             echo "Building affected example apps:"
             echo "$EXAMPLES"
@@ -335,7 +335,7 @@ jobs:
           MATRIX='{"include":['
           FIRST=true
 
-          for APP in bootstrap-examples material-examples primeng-examples ionic-examples; do
+          for APP in core-examples bootstrap-examples material-examples primeng-examples ionic-examples; do
             if echo "$AFFECTED" | grep -q "$APP"; then
               SHORT=$(echo "$APP" | sed 's/-examples//')
               if [ "$FIRST" = true ]; then
