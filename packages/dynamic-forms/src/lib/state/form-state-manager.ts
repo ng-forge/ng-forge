@@ -76,6 +76,18 @@ export interface FormStateDeps {
 export const FORM_STATE_DEPS = new InjectionToken<FormStateDeps>('FORM_STATE_DEPS');
 
 /**
+ * Casts a FieldTree to a record of per-key sub-trees.
+ *
+ * FieldTree<TModel> is structurally a callable that exposes per-key child trees
+ * via bracket access (e.g., `tree['fieldKey']`), but TypeScript's FieldTree type
+ * doesn't surface this as an index signature. This helper makes the cast explicit
+ * and centralizes it to a single location.
+ */
+function asFieldTreeRecord(tree: FieldTree<unknown>): Record<string, FieldTree<unknown>> {
+  return tree as unknown as Record<string, FieldTree<unknown>>;
+}
+
+/**
  * Central service that manages all form state and coordinates the form lifecycle.
  * Single source of truth for lifecycle state, field resolution, form signals, and events.
  *
@@ -454,10 +466,15 @@ export class FormStateManager<
       excludeValueIfReadonly: options.excludeValueIfReadonly,
     };
 
+    // FieldTree<TModel> is structurally a callable that also exposes per-key sub-trees
+    // via bracket access (e.g., formTree['fieldKey']). TypeScript's nominal typing for
+    // FieldTree doesn't expose this index signature, so we use a helper cast.
+    const fieldTreeRecord = asFieldTreeRecord(formTree);
+
     return filterFormValue(
       rawValue as Record<string, unknown>,
       setup.schemaFields,
-      formTree as unknown as Record<string, FieldTree<unknown>>,
+      fieldTreeRecord,
       setup.registry,
       this.valueExclusionDefaults,
       formOptions,

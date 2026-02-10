@@ -96,6 +96,18 @@ describe('FieldDef - Exhaustive Whitelist', () => {
     it('col', () => {
       expectTypeOf<FieldDef<TestProps>['col']>().toEqualTypeOf<number | undefined>();
     });
+
+    it('excludeValueIfHidden', () => {
+      expectTypeOf<FieldDef<TestProps>['excludeValueIfHidden']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('excludeValueIfDisabled', () => {
+      expectTypeOf<FieldDef<TestProps>['excludeValueIfDisabled']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('excludeValueIfReadonly', () => {
+      expectTypeOf<FieldDef<TestProps>['excludeValueIfReadonly']>().toEqualTypeOf<boolean | undefined>();
+    });
   });
 });
 

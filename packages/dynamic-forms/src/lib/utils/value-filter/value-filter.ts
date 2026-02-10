@@ -95,9 +95,9 @@ export function filterFormValue<T extends Record<string, unknown>>(
 
     // Resolve per-field exclusion config
     const fieldExclusion: ValueExclusionConfig = {
-      excludeValueIfHidden: (field as FieldDef<unknown> & ValueExclusionConfig).excludeValueIfHidden,
-      excludeValueIfDisabled: (field as FieldDef<unknown> & ValueExclusionConfig).excludeValueIfDisabled,
-      excludeValueIfReadonly: (field as FieldDef<unknown> & ValueExclusionConfig).excludeValueIfReadonly,
+      excludeValueIfHidden: field.excludeValueIfHidden,
+      excludeValueIfDisabled: field.excludeValueIfDisabled,
+      excludeValueIfReadonly: field.excludeValueIfReadonly,
     };
     const resolvedConfig = resolveExclusionConfig(globalDefaults, formOptions, fieldExclusion);
 
