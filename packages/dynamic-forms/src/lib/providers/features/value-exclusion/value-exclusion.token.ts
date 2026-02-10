@@ -12,7 +12,7 @@ import { ResolvedValueExclusionConfig } from '../../../models/value-exclusion-co
  * - Disabled fields are excluded from submission
  * - Readonly fields are excluded from submission
  *
- * This token is configured via `withValueExclusion()` feature function.
+ * This token is configured via `withValueExclusionDefaults()` feature function.
  * Per-form overrides can be set via `FormOptions`.
  * Per-field overrides can be set on individual `FieldDef` entries.
  *

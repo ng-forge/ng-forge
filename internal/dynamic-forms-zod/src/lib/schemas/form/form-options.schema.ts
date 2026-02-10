@@ -72,19 +72,19 @@ export const FormOptionsSchema = z.object({
 
   /**
    * Whether to exclude values of hidden fields from submission output.
-   * Overrides the global withValueExclusion() setting for this form.
+   * Overrides the global withValueExclusionDefaults() setting for this form.
    */
   excludeValueIfHidden: z.boolean().optional(),
 
   /**
    * Whether to exclude values of disabled fields from submission output.
-   * Overrides the global withValueExclusion() setting for this form.
+   * Overrides the global withValueExclusionDefaults() setting for this form.
    */
   excludeValueIfDisabled: z.boolean().optional(),
 
   /**
    * Whether to exclude values of readonly fields from submission output.
-   * Overrides the global withValueExclusion() setting for this form.
+   * Overrides the global withValueExclusionDefaults() setting for this form.
    */
   excludeValueIfReadonly: z.boolean().optional(),
 });

@@ -40,7 +40,7 @@ export { withEventFormValue } from './providers/features/event-form-value';
 export { hasFormValue } from './events/interfaces/form-event';
 
 // Value Exclusion Feature
-export { withValueExclusion } from './providers/features/value-exclusion';
+export { withValueExclusionDefaults } from './providers/features/value-exclusion';
 export type { ValueExclusionConfig, ResolvedValueExclusionConfig } from './models/value-exclusion-config';
 
 // Configuration Types

@@ -22,31 +22,31 @@ When no configuration is specified, the defaults are:
 
 Value exclusion supports a 3-tier configuration hierarchy. The most specific level wins for each property:
 
-| Priority | Level  | Where to set                               |
-| -------- | ------ | ------------------------------------------ |
-| 1 (wins) | Field  | `excludeValueIf*` on individual `FieldDef` |
-| 2        | Form   | `excludeValueIf*` on `FormOptions`         |
-| 3        | Global | `withValueExclusion()` feature function    |
+| Priority | Level  | Where to set                                    |
+| -------- | ------ | ----------------------------------------------- |
+| 1 (wins) | Field  | `excludeValueIf*` on individual `FieldDef`      |
+| 2        | Form   | `excludeValueIf*` on `FormOptions`              |
+| 3        | Global | `withValueExclusionDefaults()` feature function |
 
 If a property is `undefined` at a given level, the next level down is checked.
 
 ## Global Configuration
 
-Use `withValueExclusion()` in your provider setup to configure global defaults:
+Use `withValueExclusionDefaults()` in your provider setup to configure global defaults:
 
 ```typescript
-import { provideDynamicForm, withValueExclusion } from '@ng-forge/dynamic-forms';
+import { provideDynamicForm, withValueExclusionDefaults } from '@ng-forge/dynamic-forms';
 
 // All exclusions enabled (same as default)
-provideDynamicForm(...withMaterialFields(), withValueExclusion());
+provideDynamicForm(...withMaterialFields(), withValueExclusionDefaults());
 
 // Disable readonly exclusion globally
-provideDynamicForm(...withMaterialFields(), withValueExclusion({ excludeValueIfReadonly: false }));
+provideDynamicForm(...withMaterialFields(), withValueExclusionDefaults({ excludeValueIfReadonly: false }));
 
 // Disable all exclusions globally (pre-1.0 behavior)
 provideDynamicForm(
   ...withMaterialFields(),
-  withValueExclusion({
+  withValueExclusionDefaults({
     excludeValueIfHidden: false,
     excludeValueIfDisabled: false,
     excludeValueIfReadonly: false,
@@ -135,7 +135,7 @@ If you relied on all field values being present in `(submitted)` output, disable
 ```typescript
 provideDynamicForm(
   ...withMaterialFields(),
-  withValueExclusion({
+  withValueExclusionDefaults({
     excludeValueIfHidden: false,
     excludeValueIfDisabled: false,
     excludeValueIfReadonly: false,

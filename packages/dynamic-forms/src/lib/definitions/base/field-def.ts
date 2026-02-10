@@ -216,7 +216,7 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
   /**
    * Whether to exclude this field's value from submission output when hidden.
    *
-   * Overrides both the global `withValueExclusion()` and form-level `FormOptions` settings.
+   * Overrides both the global `withValueExclusionDefaults()` and form-level `FormOptions` settings.
    *
    * @default undefined (uses form-level or global setting)
    */
@@ -225,7 +225,7 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
   /**
    * Whether to exclude this field's value from submission output when disabled.
    *
-   * Overrides both the global `withValueExclusion()` and form-level `FormOptions` settings.
+   * Overrides both the global `withValueExclusionDefaults()` and form-level `FormOptions` settings.
    *
    * @default undefined (uses form-level or global setting)
    */
@@ -234,7 +234,7 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
   /**
    * Whether to exclude this field's value from submission output when readonly.
    *
-   * Overrides both the global `withValueExclusion()` and form-level `FormOptions` settings.
+   * Overrides both the global `withValueExclusionDefaults()` and form-level `FormOptions` settings.
    *
    * @default undefined (uses form-level or global setting)
    */

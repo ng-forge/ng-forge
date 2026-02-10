@@ -5,15 +5,16 @@ import { VALUE_EXCLUSION_DEFAULTS } from './value-exclusion.token';
 /**
  * Configures global value exclusion defaults for form submission output.
  *
- * When enabled (default), field values are excluded from the `(submitted)` output
- * based on their reactive state. This does NOT affect two-way binding (`value` model /
+ * Value exclusion is **enabled by default** — field values are excluded from the
+ * `(submitted)` output based on their reactive state. Use this feature to
+ * override those defaults. This does NOT affect two-way binding (`value` model /
  * `entity`) — fields retain their values internally.
  *
  * @example Default behavior (all exclusions enabled)
  * ```typescript
  * provideDynamicForm(
  *   ...withMaterialFields(),
- *   withValueExclusion()
+ *   withValueExclusionDefaults()
  * )
  * ```
  *
@@ -21,7 +22,7 @@ import { VALUE_EXCLUSION_DEFAULTS } from './value-exclusion.token';
  * ```typescript
  * provideDynamicForm(
  *   ...withMaterialFields(),
- *   withValueExclusion({ excludeValueIfReadonly: false })
+ *   withValueExclusionDefaults({ excludeValueIfReadonly: false })
  * )
  * ```
  *
@@ -29,7 +30,7 @@ import { VALUE_EXCLUSION_DEFAULTS } from './value-exclusion.token';
  * ```typescript
  * provideDynamicForm(
  *   ...withMaterialFields(),
- *   withValueExclusion({
+ *   withValueExclusionDefaults({
  *     excludeValueIfHidden: false,
  *     excludeValueIfDisabled: false,
  *     excludeValueIfReadonly: false,
@@ -41,7 +42,7 @@ import { VALUE_EXCLUSION_DEFAULTS } from './value-exclusion.token';
  * **Precedence rules:**
  * 1. Per-field `excludeValueIf*` on `FieldDef` — wins for that field
  * 2. Per-form `excludeValueIf*` on `FormOptions` — wins for all fields in that form
- * 3. Global `withValueExclusion()` — baseline default
+ * 3. Global `withValueExclusionDefaults()` — baseline default
  * 4. No global feature — uses token default (all enabled)
  *
  * @param config - Partial override of exclusion rules. Unspecified properties default to `true`.
@@ -49,7 +50,7 @@ import { VALUE_EXCLUSION_DEFAULTS } from './value-exclusion.token';
  *
  * @public
  */
-export function withValueExclusion(config?: Partial<ValueExclusionConfig>): DynamicFormFeature<'value-exclusion'> {
+export function withValueExclusionDefaults(config?: Partial<ValueExclusionConfig>): DynamicFormFeature<'value-exclusion'> {
   const resolved = {
     excludeValueIfHidden: config?.excludeValueIfHidden ?? true,
     excludeValueIfDisabled: config?.excludeValueIfDisabled ?? true,

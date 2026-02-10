@@ -695,7 +695,7 @@ export interface FormOptions {
   /**
    * Whether to exclude values of hidden fields from submission output.
    *
-   * Overrides the global `withValueExclusion()` setting for this form.
+   * Overrides the global `withValueExclusionDefaults()` setting for this form.
    * Can be further overridden per-field on individual `FieldDef` entries.
    *
    * @default undefined (uses global setting)
@@ -705,7 +705,7 @@ export interface FormOptions {
   /**
    * Whether to exclude values of disabled fields from submission output.
    *
-   * Overrides the global `withValueExclusion()` setting for this form.
+   * Overrides the global `withValueExclusionDefaults()` setting for this form.
    * Can be further overridden per-field on individual `FieldDef` entries.
    *
    * @default undefined (uses global setting)
@@ -715,7 +715,7 @@ export interface FormOptions {
   /**
    * Whether to exclude values of readonly fields from submission output.
    *
-   * Overrides the global `withValueExclusion()` setting for this form.
+   * Overrides the global `withValueExclusionDefaults()` setting for this form.
    * Can be further overridden per-field on individual `FieldDef` entries.
    *
    * @default undefined (uses global setting)
