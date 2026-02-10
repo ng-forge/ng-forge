@@ -93,9 +93,9 @@ Input, Textarea, Select, Checkbox, Radio, Datepicker, Slider, Toggle, Multi-Chec
 ## Documentation
 
 - [Material Integration](https://ng-forge.com/dynamic-forms/ui-libs-integrations/material)
-- [Field Types](https://ng-forge.com/dynamic-forms/core/field-types)
-- [Validation](https://ng-forge.com/dynamic-forms/core/validation)
-- [Conditional Logic](https://ng-forge.com/dynamic-forms/core/conditional-logic)
+- [Field Types](https://ng-forge.com/dynamic-forms/field-types)
+- [Validation](https://ng-forge.com/dynamic-forms/validation/basics)
+- [Conditional Logic](https://ng-forge.com/dynamic-forms/dynamic-behavior/overview)
 
 ## Changelog
 

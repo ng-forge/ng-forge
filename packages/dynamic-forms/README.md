@@ -89,19 +89,19 @@ This core library requires a UI integration. Choose one:
 | [@ng-forge/dynamic-forms-primeng](https://www.npmjs.com/package/@ng-forge/dynamic-forms-primeng)     | PrimeNG          |
 | [@ng-forge/dynamic-forms-ionic](https://www.npmjs.com/package/@ng-forge/dynamic-forms-ionic)         | Ionic            |
 
-Or [create your own](https://ng-forge.com/dynamic-forms/deep-dive/custom-integrations).
+Or [create your own](https://ng-forge.com/dynamic-forms/advanced/custom-integrations).
 
 ## Documentation
 
 - [Installation](https://ng-forge.com/dynamic-forms/installation)
-- [Field Types](https://ng-forge.com/dynamic-forms/core/field-types)
-- [Validation](https://ng-forge.com/dynamic-forms/core/validation)
-- [Conditional Logic](https://ng-forge.com/dynamic-forms/core/conditional-logic)
-- [Value Derivation](https://ng-forge.com/dynamic-forms/core/derivation)
-- [Type Safety](https://ng-forge.com/dynamic-forms/core/type-safety)
-- [Events](https://ng-forge.com/dynamic-forms/core/events)
-- [i18n](https://ng-forge.com/dynamic-forms/core/i18n)
-- [Custom Integrations](https://ng-forge.com/dynamic-forms/deep-dive/custom-integrations)
+- [Field Types](https://ng-forge.com/dynamic-forms/field-types)
+- [Validation](https://ng-forge.com/dynamic-forms/validation/basics)
+- [Conditional Logic](https://ng-forge.com/dynamic-forms/dynamic-behavior/overview)
+- [Value Derivation](https://ng-forge.com/dynamic-forms/dynamic-behavior/derivation)
+- [Type Safety](https://ng-forge.com/dynamic-forms/advanced/basics)
+- [Events](https://ng-forge.com/dynamic-forms/advanced/events)
+- [i18n](https://ng-forge.com/dynamic-forms/dynamic-behavior/i18n)
+- [Custom Integrations](https://ng-forge.com/dynamic-forms/advanced/custom-integrations)
 
 ## Changelog
 

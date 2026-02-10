@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.svg" alt="ng-forge Dynamic Forms" width="400"/>
+  <img src="./logo.svg" alt="ng-forge Dynamic Forms" width="400"/>
 </p>
 
 <p align="center">
@@ -98,12 +98,12 @@ export class LoginComponent {
 ## 📖 Documentation
 
 - [Installation](https://ng-forge.com/dynamic-forms/installation)
-- [Field Types](https://ng-forge.com/dynamic-forms/core/field-types)
-- [Validation](https://ng-forge.com/dynamic-forms/core/validation)
-- [Conditional Logic](https://ng-forge.com/dynamic-forms/core/conditional-logic)
-- [Type Safety](https://ng-forge.com/dynamic-forms/core/type-safety)
-- [i18n](https://ng-forge.com/dynamic-forms/core/i18n)
-- [Custom Integrations](https://ng-forge.com/dynamic-forms/deep-dive/custom-integrations)
+- [Field Types](https://ng-forge.com/dynamic-forms/field-types)
+- [Validation](https://ng-forge.com/dynamic-forms/validation/basics)
+- [Conditional Logic](https://ng-forge.com/dynamic-forms/dynamic-behavior/overview)
+- [Type Safety](https://ng-forge.com/dynamic-forms/advanced/basics)
+- [i18n](https://ng-forge.com/dynamic-forms/dynamic-behavior/i18n)
+- [Custom Integrations](https://ng-forge.com/dynamic-forms/advanced/custom-integrations)
 
 ## 🛠️ Development
 

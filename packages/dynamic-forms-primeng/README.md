@@ -99,9 +99,9 @@ Input, Textarea, Select, Checkbox, Toggle, Radio, Multi-Checkbox, Datepicker, Sl
 ## Documentation
 
 - [PrimeNG Integration](https://ng-forge.com/dynamic-forms/ui-libs-integrations/primeng)
-- [Field Types](https://ng-forge.com/dynamic-forms/core/field-types)
-- [Validation](https://ng-forge.com/dynamic-forms/core/validation)
-- [Conditional Logic](https://ng-forge.com/dynamic-forms/core/conditional-logic)
+- [Field Types](https://ng-forge.com/dynamic-forms/field-types)
+- [Validation](https://ng-forge.com/dynamic-forms/validation/basics)
+- [Conditional Logic](https://ng-forge.com/dynamic-forms/dynamic-behavior/overview)
 
 ## Changelog
 
