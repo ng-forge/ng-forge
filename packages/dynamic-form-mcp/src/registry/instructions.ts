@@ -121,13 +121,13 @@ Use when you need nested object structure in form values:
 
 #### Array (Repeatable Items)
 
-Use for dynamic lists:
+Use for dynamic lists. Each item is wrapped in a \`<div class="df-array-item">\` with \`role="group"\` and \`aria-label="Item N"\` for accessibility. Use \`--df-array-item-gap\` CSS variable to control spacing between items.
 
 \`\`\`typescript
 {
   key: 'contacts',
   type: 'array',
-  label: 'Emergency Contacts',
+  // ⚠️ NO label property on arrays!
   fields: [
     {
       key: 'contact',

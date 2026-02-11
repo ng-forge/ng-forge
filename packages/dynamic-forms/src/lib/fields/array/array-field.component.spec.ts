@@ -935,6 +935,171 @@ describe('ArrayFieldComponent', () => {
     });
   });
 
+  describe('df-array-item wrapper', () => {
+    it('should render wrapper divs matching the number of items', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'value1')], [createSimpleTestField('item', 'Item', 'value2')]],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.resolvedItems().length < 2 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await delay(100);
+        attempts++;
+      }
+
+      fixture.detectChanges();
+
+      const wrappers = fixture.nativeElement.querySelectorAll('.df-array-item');
+      expect(wrappers).toHaveLength(2);
+    });
+
+    it('should set role="group" on each wrapper', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'value1')], [createSimpleTestField('item', 'Item', 'value2')]],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.resolvedItems().length < 2 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await delay(100);
+        attempts++;
+      }
+
+      fixture.detectChanges();
+
+      const wrappers = fixture.nativeElement.querySelectorAll('.df-array-item');
+      wrappers.forEach((wrapper: HTMLElement) => {
+        expect(wrapper.getAttribute('role')).toBe('group');
+      });
+    });
+
+    it('should set 1-based aria-label on each wrapper', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [
+          [createSimpleTestField('item', 'Item', 'value1')],
+          [createSimpleTestField('item', 'Item', 'value2')],
+          [createSimpleTestField('item', 'Item', 'value3')],
+        ],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await delay(100);
+        attempts++;
+      }
+
+      fixture.detectChanges();
+
+      const wrappers = fixture.nativeElement.querySelectorAll('.df-array-item');
+      expect(wrappers[0].getAttribute('aria-label')).toBe('Item 1');
+      expect(wrappers[1].getAttribute('aria-label')).toBe('Item 2');
+      expect(wrappers[2].getAttribute('aria-label')).toBe('Item 3');
+    });
+
+    it('should set data-array-item-id on each wrapper', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'value1')]],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.resolvedItems().length < 1 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await delay(100);
+        attempts++;
+      }
+
+      fixture.detectChanges();
+
+      const wrapper = fixture.nativeElement.querySelector('.df-array-item');
+      const itemId = wrapper.getAttribute('data-array-item-id');
+      expect(itemId).toBeTruthy();
+      expect(itemId).toBe(component.resolvedItems()[0].id);
+    });
+
+    it('should set data-array-item-index matching position', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'value1')], [createSimpleTestField('item', 'Item', 'value2')]],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.resolvedItems().length < 2 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await delay(100);
+        attempts++;
+      }
+
+      fixture.detectChanges();
+
+      const wrappers = fixture.nativeElement.querySelectorAll('.df-array-item');
+      expect(wrappers[0].getAttribute('data-array-item-index')).toBe('0');
+      expect(wrappers[1].getAttribute('data-array-item-index')).toBe('1');
+    });
+
+    it('should render child fields inside their wrapper', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'value1')]],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.resolvedItems().length < 1 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await delay(100);
+        attempts++;
+      }
+
+      fixture.detectChanges();
+
+      const wrapper = fixture.nativeElement.querySelector('.df-array-item');
+      expect(wrapper).toBeTruthy();
+      // The wrapper should contain child elements (the rendered field components)
+      expect(wrapper.children.length).toBeGreaterThan(0);
+    });
+  });
+
   describe('hidden input', () => {
     it('should not have df-container-hidden class when hidden is false', () => {
       const field: ArrayField<unknown> = {

@@ -384,6 +384,12 @@ Use \`col\` (1-12) on child fields for grid width. Row is purely for layout. Sup
 // Output: { contacts: [{ name: '...', phone: '...' }, ...] }
 \`\`\`
 
+**DOM Structure:**
+Each array item is wrapped in a \`<div class="df-array-item">\` with:
+- \`role="group"\` + \`aria-label="Item N"\` (1-based) for accessibility
+- \`data-array-item-id\` (stable ID) and \`data-array-item-index\` (current position) for testing/CSS
+- Use \`--df-array-item-gap\` CSS variable to control spacing between items
+
 **⚠️ Common mistakes:**
 - Using \`template\` (doesn't exist) - use \`fields\`
 - Adding \`label\` to array container (not allowed)

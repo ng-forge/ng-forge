@@ -7,15 +7,27 @@
   // Single column flow like parent dynamic-form
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--df-grid-row-gap, 0.5rem);
+  gap: var(--df-array-item-gap, var(--df-grid-row-gap, 0.5rem));
   width: 100%;
 
-  // Each field by default takes one row
+  // Each item wrapper takes one row
   > * {
     grid-column: 1 / -1;
   }
 
   &.df-container-hidden {
     display: none;
+  }
+}
+
+.df-array-item {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--df-grid-row-gap, 0.5rem);
+  width: 100%;
+
+  // Each field by default takes one row
+  > * {
+    grid-column: 1 / -1;
   }
 }
