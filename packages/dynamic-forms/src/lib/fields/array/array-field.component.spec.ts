@@ -1098,6 +1098,100 @@ describe('ArrayFieldComponent', () => {
       // The wrapper should contain child elements (the rendered field components)
       expect(wrapper.children.length).toBeGreaterThan(0);
     });
+
+    it('should add a wrapper div when an item is dynamically appended', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'value1')]],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      const eventBus = TestBed.inject(EventBus);
+
+      // Wait for initial item
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.resolvedItems().length < 1 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await delay(100);
+        attempts++;
+      }
+
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelectorAll('.df-array-item')).toHaveLength(1);
+
+      // Dynamically append a second item
+      const template = [createSimpleTestField('item', 'Item')];
+      eventBus.dispatch(AppendArrayItemEvent, 'items', template);
+
+      attempts = 0;
+      while (component.resolvedItems().length < 2 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await delay(100);
+        attempts++;
+      }
+
+      fixture.detectChanges();
+
+      const wrappers = fixture.nativeElement.querySelectorAll('.df-array-item');
+      expect(wrappers).toHaveLength(2);
+      expect(wrappers[0].getAttribute('data-array-item-index')).toBe('0');
+      expect(wrappers[1].getAttribute('data-array-item-index')).toBe('1');
+      expect(wrappers[1].getAttribute('aria-label')).toBe('Item 2');
+    });
+
+    it('should remove a wrapper div when an item is dynamically removed', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [
+          [createSimpleTestField('item', 'Item', 'value1')],
+          [createSimpleTestField('item', 'Item', 'value2')],
+          [createSimpleTestField('item', 'Item', 'value3')],
+        ],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      const eventBus = TestBed.inject(EventBus);
+
+      // Wait for initial items
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await delay(100);
+        attempts++;
+      }
+
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelectorAll('.df-array-item')).toHaveLength(3);
+
+      // Remove the middle item
+      eventBus.dispatch(RemoveAtIndexEvent, 'items', 1);
+
+      attempts = 0;
+      while (component.resolvedItems().length > 2 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await delay(100);
+        attempts++;
+      }
+
+      fixture.detectChanges();
+
+      const wrappers = fixture.nativeElement.querySelectorAll('.df-array-item');
+      expect(wrappers).toHaveLength(2);
+      expect(wrappers[0].getAttribute('aria-label')).toBe('Item 1');
+      expect(wrappers[1].getAttribute('aria-label')).toBe('Item 2');
+    });
   });
 
   describe('hidden input', () => {
