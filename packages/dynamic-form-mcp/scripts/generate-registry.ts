@@ -522,7 +522,7 @@ const CORE_FIELD_TYPES: FieldTypeInfo[] = [
     type: 'array',
     category: 'container',
     description:
-      'Repeatable field group for dynamic lists/arrays. Arrays do NOT have label, minItems, or maxItems properties. Use "fields" (not "template") to define the item template. Supports only \'hidden\' logic type for conditional visibility.',
+      'Repeatable field group for dynamic lists/arrays. Arrays do NOT have label, minItems, or maxItems properties. Use "fields" (not "template") to define the item template. Supports only \'hidden\' logic type for conditional visibility. Each array item is rendered inside a `<div class="df-array-item">` wrapper with `role="group"`, `aria-label="Item N"` (1-based), `data-array-item-id`, and `data-array-item-index` attributes for styling, accessibility, and testing.',
     valueType: 'T[]',
     baseInterface: 'FieldDef',
     props: {

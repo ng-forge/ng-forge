@@ -31,6 +31,9 @@
   --df-grid-row-gap-lg: 0.5rem;
   --df-grid-row-gap-xl: 0.5rem;
 
+  /* Array Item Spacing */
+  --df-array-item-gap: var(--df-grid-row-gap);
+
   /* Group Field Styling Variables */
   --df-group-gap: var(--df-grid-gap);
   --df-group-padding: var(--df-grid-gap);

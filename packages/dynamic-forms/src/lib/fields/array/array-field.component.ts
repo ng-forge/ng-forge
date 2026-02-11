@@ -37,10 +37,18 @@ import { ArrayFieldTree } from '../../core/field-tree-utils';
   selector: 'array-field',
   imports: [NgComponentOutlet],
   template: `
-    @for (item of resolvedItems(); track item.id) {
-      @for (field of item.fields; track $index) {
-        <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
-      }
+    @for (item of resolvedItems(); track item.id; let i = $index) {
+      <div
+        class="df-array-item"
+        role="group"
+        [attr.aria-label]="'Item ' + (i + 1)"
+        [attr.data-array-item-id]="item.id"
+        [attr.data-array-item-index]="i"
+      >
+        @for (field of item.fields; track $index) {
+          <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+        }
+      </div>
     }
   `,
   styleUrl: './array-field.component.scss',

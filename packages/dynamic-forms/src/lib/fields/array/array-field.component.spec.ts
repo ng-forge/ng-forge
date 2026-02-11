@@ -3,7 +3,7 @@ import { ArrayField } from '../../definitions/default/array-field';
 import { RowField } from '../../definitions/default/row-field';
 import { delay } from '@ng-forge/utils';
 import { createSimpleTestField, TestFieldComponent } from '../../../../testing/src/simple-test-utils';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { baseFieldMapper, FieldSignalContext, rowFieldMapper } from '../../mappers';
@@ -20,6 +20,24 @@ import { FunctionRegistryService } from '../../core/registry/function-registry.s
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { createPropertyOverrideStore, PROPERTY_OVERRIDE_STORE } from '../../core/property-derivation/property-override-store';
+
+/**
+ * Polls until the component's resolvedItems count satisfies the predicate.
+ * Flushes Angular effects and change detection each tick.
+ */
+async function waitForItems(
+  component: ArrayFieldComponent,
+  fixture: ComponentFixture<ArrayFieldComponent>,
+  predicate: (count: number) => boolean,
+): Promise<void> {
+  while (!predicate(component.resolvedItems().length)) {
+    await fixture.whenStable();
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    await delay(50);
+  }
+  fixture.detectChanges();
+}
 
 describe('ArrayFieldComponent', () => {
   function setupArrayTest(field: ArrayField<unknown>, value?: Record<string, unknown>) {
@@ -162,31 +180,18 @@ describe('ArrayFieldComponent', () => {
   });
 
   it('should create field instances for items defined in fields array', async () => {
-    // New structure: fields[][] where each inner array defines one item
     const field: ArrayField<unknown> = {
       key: 'items',
       type: 'array',
       fields: [
-        [createSimpleTestField('item', 'Item', 'value1')], // Item 0
-        [createSimpleTestField('item', 'Item', 'value2')], // Item 1
-        [createSimpleTestField('item', 'Item', 'value3')], // Item 2
+        [createSimpleTestField('item', 'Item', 'value1')],
+        [createSimpleTestField('item', 'Item', 'value2')],
+        [createSimpleTestField('item', 'Item', 'value3')],
       ],
     };
 
     const { component, fixture } = setupArrayTest(field);
-
-    // The component loads array items asynchronously via forkJoin in a switchMap
-    // Poll until the fields are loaded or timeout
-    const maxAttempts = 50; // 5 seconds max
-    let attempts = 0;
-
-    while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
-      await fixture.whenStable();
-      fixture.detectChanges();
-      TestBed.flushEffects();
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      attempts++;
-    }
+    await waitForItems(component, fixture, (n) => n >= 3);
 
     expect(component.resolvedItems()).toHaveLength(3);
   });
@@ -224,29 +229,18 @@ describe('ArrayFieldComponent', () => {
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
-        fields: [], // Empty - items added via buttons
+        fields: [],
       };
 
       const { component, fixture } = setupArrayTest(field, { items: [] });
       const eventBus = TestBed.inject(EventBus);
 
-      // Initially empty
       expect(component.resolvedItems()).toHaveLength(0);
 
-      // Dispatch event with field template (array of fields) - template is required
       const template = [createSimpleTestField('item', 'Item')];
       eventBus.dispatch(AppendArrayItemEvent, 'items', template);
 
-      // Wait for async component loading
-      const maxAttempts = 50;
-      let attempts = 0;
-      while (component.resolvedItems().length < 1 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await delay(100);
-        attempts++;
-      }
+      await waitForItems(component, fixture, (n) => n >= 1);
 
       expect(component.resolvedItems()).toHaveLength(1);
     });
@@ -255,17 +249,15 @@ describe('ArrayFieldComponent', () => {
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
-        fields: [], // Empty - items added via buttons
+        fields: [],
       };
 
       const { component, fixture } = setupArrayTest(field, { items: [] });
       const eventBus = TestBed.inject(EventBus);
       const consoleSpy = vi.spyOn(console, 'error');
 
-      // Initially empty
       expect(component.resolvedItems()).toHaveLength(0);
 
-      // Dispatch event with empty template array - should fail
       eventBus.dispatch(AppendArrayItemEvent, 'items', []);
 
       await fixture.whenStable();
@@ -278,7 +270,6 @@ describe('ArrayFieldComponent', () => {
 
   describe('InsertArrayItemEvent', () => {
     it('should add item at specific index when InsertArrayItemEvent is dispatched', async () => {
-      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
@@ -290,35 +281,15 @@ describe('ArrayFieldComponent', () => {
       };
 
       const { component, fixture } = setupArrayTest(field);
-
       const eventBus = TestBed.inject(EventBus);
 
-      // Wait for initial items to load
-      const maxAttempts = 50;
-      let attempts = 0;
-      while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        attempts++;
-      }
-
+      await waitForItems(component, fixture, (n) => n >= 3);
       expect(component.resolvedItems()).toHaveLength(3);
 
-      // Add at index 1 (between first and second) - template is required
       const template = [createSimpleTestField('item', 'Item')];
       eventBus.dispatch(InsertArrayItemEvent, 'items', 1, template);
 
-      // Wait for new item
-      attempts = 0;
-      while (component.resolvedItems().length < 4 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        attempts++;
-      }
+      await waitForItems(component, fixture, (n) => n >= 4);
 
       expect(component.resolvedItems()).toHaveLength(4);
     });
@@ -326,7 +297,6 @@ describe('ArrayFieldComponent', () => {
 
   describe('PopArrayItemEvent', () => {
     it('should remove last item when PopArrayItemEvent is dispatched', async () => {
-      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
@@ -338,34 +308,14 @@ describe('ArrayFieldComponent', () => {
       };
 
       const { component, fixture } = setupArrayTest(field);
-
       const eventBus = TestBed.inject(EventBus);
 
-      // Wait for initial items
-      const maxAttempts = 50;
-      let attempts = 0;
-      while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        attempts++;
-      }
-
+      await waitForItems(component, fixture, (n) => n >= 3);
       expect(component.resolvedItems()).toHaveLength(3);
 
-      // Remove last item
       eventBus.dispatch(PopArrayItemEvent, 'items');
 
-      // Wait for the component to update
-      attempts = 0;
-      while (component.resolvedItems().length > 2 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await delay(100);
-        attempts++;
-      }
+      await waitForItems(component, fixture, (n) => n <= 2);
 
       expect(component.resolvedItems()).toHaveLength(2);
     });
@@ -374,7 +324,7 @@ describe('ArrayFieldComponent', () => {
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
-        fields: [], // Empty - no initial items
+        fields: [],
       };
 
       const { component, fixture } = setupArrayTest(field, { items: [] });
@@ -382,7 +332,6 @@ describe('ArrayFieldComponent', () => {
 
       expect(component.resolvedItems()).toHaveLength(0);
 
-      // Try to remove from empty array
       eventBus.dispatch(PopArrayItemEvent, 'items');
 
       await fixture.whenStable();
@@ -394,7 +343,6 @@ describe('ArrayFieldComponent', () => {
 
   describe('RemoveAtIndexEvent', () => {
     it('should remove item at specific index when RemoveAtIndexEvent is dispatched', async () => {
-      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'items',
         type: 'array',
@@ -406,34 +354,14 @@ describe('ArrayFieldComponent', () => {
       };
 
       const { component, fixture } = setupArrayTest(field);
-
       const eventBus = TestBed.inject(EventBus);
 
-      // Wait for initial items
-      const maxAttempts = 50;
-      let attempts = 0;
-      while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await delay(100);
-        attempts++;
-      }
-
+      await waitForItems(component, fixture, (n) => n >= 3);
       expect(component.resolvedItems()).toHaveLength(3);
 
-      // Remove item at index 1 (middle item)
       eventBus.dispatch(RemoveAtIndexEvent, 'items', 1);
 
-      // Wait for the component to update
-      attempts = 0;
-      while (component.resolvedItems().length > 2 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await delay(100);
-        attempts++;
-      }
+      await waitForItems(component, fixture, (n) => n <= 2);
 
       expect(component.resolvedItems()).toHaveLength(2);
     });
@@ -546,8 +474,6 @@ describe('ArrayFieldComponent', () => {
     }
 
     it('should create field instances for array items with nested object structure', async () => {
-      // This tests the key fix: arrays with objects like contacts: [{name: 'Alice', email: '...'}]
-      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'contacts',
         type: 'array',
@@ -576,24 +502,12 @@ describe('ArrayFieldComponent', () => {
       };
 
       const { component, fixture } = setupNestedObjectArrayTest(field);
+      await waitForItems(component, fixture, (n) => n >= 2);
 
-      // Wait for async component loading
-      const maxAttempts = 50;
-      let attempts = 0;
-      while (component.resolvedItems().length < 2 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await delay(100);
-        attempts++;
-      }
-
-      // Should have 2 field instances (one per contact object)
       expect(component.resolvedItems()).toHaveLength(2);
     });
 
     it('should handle adding items to array with nested object structure', async () => {
-      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'contacts',
         type: 'array',
@@ -612,23 +526,11 @@ describe('ArrayFieldComponent', () => {
       };
 
       const { component, fixture } = setupNestedObjectArrayTest(field);
-
       const eventBus = TestBed.inject(EventBus);
 
-      // Wait for initial item
-      const maxAttempts = 50;
-      let attempts = 0;
-      while (component.resolvedItems().length < 1 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await delay(100);
-        attempts++;
-      }
-
+      await waitForItems(component, fixture, (n) => n >= 1);
       expect(component.resolvedItems()).toHaveLength(1);
 
-      // Add another contact using row template (as array) - button templates remain FieldDef[]
       const rowTemplate: RowField<unknown> = {
         key: 'row1',
         type: 'row',
@@ -639,21 +541,12 @@ describe('ArrayFieldComponent', () => {
       };
       eventBus.dispatch(AppendArrayItemEvent, 'contacts', [rowTemplate]);
 
-      // Wait for new item
-      attempts = 0;
-      while (component.resolvedItems().length < 2 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await delay(100);
-        attempts++;
-      }
+      await waitForItems(component, fixture, (n) => n >= 2);
 
       expect(component.resolvedItems()).toHaveLength(2);
     });
 
     it('should handle removing items from array with nested object structure', async () => {
-      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'contacts',
         type: 'array',
@@ -692,41 +585,19 @@ describe('ArrayFieldComponent', () => {
       };
 
       const { component, fixture } = setupNestedObjectArrayTest(field);
-
       const eventBus = TestBed.inject(EventBus);
 
-      // Wait for initial items
-      const maxAttempts = 50;
-      let attempts = 0;
-      while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await delay(100);
-        attempts++;
-      }
-
+      await waitForItems(component, fixture, (n) => n >= 3);
       expect(component.resolvedItems()).toHaveLength(3);
 
-      // Remove middle item (index 1)
       eventBus.dispatch(RemoveAtIndexEvent, 'contacts', 1);
 
-      // Wait for removal
-      attempts = 0;
-      while (component.resolvedItems().length > 2 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await delay(100);
-        attempts++;
-      }
+      await waitForItems(component, fixture, (n) => n <= 2);
 
       expect(component.resolvedItems()).toHaveLength(2);
     });
 
     it('should create fields for array with simple input template', async () => {
-      // Test simpler case: arrays with single input field as template (using object items)
-      // New structure: fields[][] where each inner array defines one item
       const field: ArrayField<unknown> = {
         key: 'emails',
         type: 'array',
@@ -737,26 +608,16 @@ describe('ArrayFieldComponent', () => {
       };
 
       const { component, fixture } = setupNestedObjectArrayTest(field);
-
-      const maxAttempts = 50;
-      let attempts = 0;
-      while (component.resolvedItems().length < 2 && attempts < maxAttempts) {
-        await fixture.whenStable();
-        fixture.detectChanges();
-        TestBed.flushEffects();
-        await delay(100);
-        attempts++;
-      }
+      await waitForItems(component, fixture, (n) => n >= 2);
 
       expect(component.resolvedItems()).toHaveLength(2);
     });
 
     it('should handle empty nested object array gracefully', async () => {
-      // New structure: empty fields[] means no initial items
       const field: ArrayField<unknown> = {
         key: 'contacts',
         type: 'array',
-        fields: [], // Empty - no initial items
+        fields: [],
       };
 
       const { component, fixture } = setupNestedObjectArrayTest(field, {
@@ -932,6 +793,156 @@ describe('ArrayFieldComponent', () => {
       expect(Object.keys(inputs)).toHaveLength(5);
       expect(inputs).toHaveProperty('field');
       expect(inputs).toHaveProperty('defaultValidationMessages');
+    });
+  });
+
+  describe('df-array-item wrapper', () => {
+    it('should render wrapper divs matching the number of items', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'value1')], [createSimpleTestField('item', 'Item', 'value2')]],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      await waitForItems(component, fixture, (n) => n >= 2);
+
+      const wrappers = fixture.nativeElement.querySelectorAll('.df-array-item');
+      expect(wrappers).toHaveLength(2);
+    });
+
+    it('should set role="group" on each wrapper', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'value1')], [createSimpleTestField('item', 'Item', 'value2')]],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      await waitForItems(component, fixture, (n) => n >= 2);
+
+      const wrappers = fixture.nativeElement.querySelectorAll('.df-array-item');
+      wrappers.forEach((wrapper: HTMLElement) => {
+        expect(wrapper.getAttribute('role')).toBe('group');
+      });
+    });
+
+    it('should set 1-based aria-label on each wrapper', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [
+          [createSimpleTestField('item', 'Item', 'value1')],
+          [createSimpleTestField('item', 'Item', 'value2')],
+          [createSimpleTestField('item', 'Item', 'value3')],
+        ],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      await waitForItems(component, fixture, (n) => n >= 3);
+
+      const wrappers = fixture.nativeElement.querySelectorAll('.df-array-item');
+      expect(wrappers[0].getAttribute('aria-label')).toBe('Item 1');
+      expect(wrappers[1].getAttribute('aria-label')).toBe('Item 2');
+      expect(wrappers[2].getAttribute('aria-label')).toBe('Item 3');
+    });
+
+    it('should set data-array-item-id on each wrapper', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'value1')]],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      await waitForItems(component, fixture, (n) => n >= 1);
+
+      const wrapper = fixture.nativeElement.querySelector('.df-array-item');
+      const itemId = wrapper.getAttribute('data-array-item-id');
+      expect(itemId).toBeTruthy();
+      expect(itemId).toBe(component.resolvedItems()[0].id);
+    });
+
+    it('should set data-array-item-index matching position', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'value1')], [createSimpleTestField('item', 'Item', 'value2')]],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      await waitForItems(component, fixture, (n) => n >= 2);
+
+      const wrappers = fixture.nativeElement.querySelectorAll('.df-array-item');
+      expect(wrappers[0].getAttribute('data-array-item-index')).toBe('0');
+      expect(wrappers[1].getAttribute('data-array-item-index')).toBe('1');
+    });
+
+    it('should render child fields inside their wrapper', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'value1')]],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      await waitForItems(component, fixture, (n) => n >= 1);
+
+      const wrapper = fixture.nativeElement.querySelector('.df-array-item');
+      expect(wrapper).toBeTruthy();
+      expect(wrapper.children.length).toBeGreaterThan(0);
+    });
+
+    it('should add a wrapper div when an item is dynamically appended', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'value1')]],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      const eventBus = TestBed.inject(EventBus);
+
+      await waitForItems(component, fixture, (n) => n >= 1);
+      expect(fixture.nativeElement.querySelectorAll('.df-array-item')).toHaveLength(1);
+
+      const template = [createSimpleTestField('item', 'Item')];
+      eventBus.dispatch(AppendArrayItemEvent, 'items', template);
+
+      await waitForItems(component, fixture, (n) => n >= 2);
+
+      const wrappers = fixture.nativeElement.querySelectorAll('.df-array-item');
+      expect(wrappers).toHaveLength(2);
+      expect(wrappers[0].getAttribute('data-array-item-index')).toBe('0');
+      expect(wrappers[1].getAttribute('data-array-item-index')).toBe('1');
+      expect(wrappers[1].getAttribute('aria-label')).toBe('Item 2');
+    });
+
+    it('should remove a wrapper div when an item is dynamically removed', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [
+          [createSimpleTestField('item', 'Item', 'value1')],
+          [createSimpleTestField('item', 'Item', 'value2')],
+          [createSimpleTestField('item', 'Item', 'value3')],
+        ],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      const eventBus = TestBed.inject(EventBus);
+
+      await waitForItems(component, fixture, (n) => n >= 3);
+      expect(fixture.nativeElement.querySelectorAll('.df-array-item')).toHaveLength(3);
+
+      eventBus.dispatch(RemoveAtIndexEvent, 'items', 1);
+
+      await waitForItems(component, fixture, (n) => n <= 2);
+
+      const wrappers = fixture.nativeElement.querySelectorAll('.df-array-item');
+      expect(wrappers).toHaveLength(2);
+      expect(wrappers[0].getAttribute('aria-label')).toBe('Item 1');
+      expect(wrappers[1].getAttribute('aria-label')).toBe('Item 2');
     });
   });
 
