@@ -36,21 +36,59 @@ describe('createField', () => {
       ).toThrow("do NOT support 'label'");
     });
 
-    it('should throw when row has logic', () => {
+    it('should throw when row has non-hidden logic', () => {
       expect(() =>
         createField('row', {
           key: 'nameRow',
           fields: [],
-          logic: [{ type: 'hidden', condition: { type: 'true' } }],
+          logic: [{ type: 'disabled', condition: { type: 'true' } }],
         } as unknown as Parameters<typeof createField>[1]),
       ).toThrow(DynamicFormError);
       expect(() =>
         createField('row', {
           key: 'nameRow',
           fields: [],
-          logic: [{ type: 'hidden', condition: { type: 'true' } }],
+          logic: [{ type: 'disabled', condition: { type: 'true' } }],
         } as unknown as Parameters<typeof createField>[1]),
-      ).toThrow("do NOT support 'logic'");
+      ).toThrow("Only 'hidden' logic type is supported");
+    });
+
+    it('should allow group with hidden logic', () => {
+      const result = createField('group', {
+        key: 'address',
+        fields: [],
+        logic: [{ type: 'hidden', condition: true }],
+      });
+      expect(result.type).toBe('group');
+      expect(result.logic).toEqual([{ type: 'hidden', condition: true }]);
+    });
+
+    it('should allow row with hidden logic', () => {
+      const result = createField('row', {
+        key: 'nameRow',
+        fields: [],
+        logic: [{ type: 'hidden', condition: { type: 'true' } }],
+      });
+      expect(result.type).toBe('row');
+    });
+
+    it('should allow array with hidden logic', () => {
+      const result = createField('array', {
+        key: 'contacts',
+        fields: [],
+        logic: [{ type: 'hidden', condition: false }],
+      });
+      expect(result.type).toBe('array');
+    });
+
+    it('should throw when container has disabled logic', () => {
+      expect(() =>
+        createField('group', {
+          key: 'address',
+          fields: [],
+          logic: [{ type: 'disabled', condition: true }],
+        } as unknown as Parameters<typeof createField>[1]),
+      ).toThrow("Only 'hidden' logic type is supported");
     });
 
     it('should allow group without label', () => {
@@ -76,7 +114,7 @@ describe('createField', () => {
           fields: [],
           logic: [{ type: 'disabled', condition: { type: 'true' } }],
         } as unknown as Parameters<typeof createField>[1]),
-      ).toThrow("only support 'hidden' logic type");
+      ).toThrow("Only 'hidden' logic type is supported");
     });
   });
 

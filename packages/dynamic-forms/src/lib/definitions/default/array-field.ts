@@ -1,5 +1,6 @@
 import { FieldComponent, FieldDef } from '../base/field-def';
 import { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
+import { ContainerLogicConfig } from '../base/container-logic-config';
 
 /**
  * An array item template is an array of allowed children that defines one OBJECT array item's fields.
@@ -97,6 +98,12 @@ export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = rea
 
   /** Arrays do not support meta - they have no native form element **/
   readonly meta?: never;
+
+  /**
+   * Logic configurations for conditional array visibility.
+   * Only 'hidden' type logic is supported for arrays.
+   */
+  readonly logic?: ContainerLogicConfig[];
 }
 
 /**

@@ -24,9 +24,10 @@ export interface GenericField {
 }
 
 /**
- * Page logic config schema (only 'hidden' type allowed).
+ * Container logic config schema (only 'hidden' type allowed).
+ * Used by all container types: page, row, group, and array.
  */
-const PageLogicSchema = z.object({
+const ContainerLogicSchema = z.object({
   type: z.literal('hidden'),
   condition: z.union([ConditionalExpressionSchema, z.boolean()]),
 });
@@ -86,37 +87,37 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
   const PageFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('page'),
     fields: z.array(AnyFieldSchema),
-    logic: z.array(PageLogicSchema).optional(),
+    logic: z.array(ContainerLogicSchema).optional(),
     // Also forbid title (common mistake)
     title: z.never().optional(),
   });
 
   // Row can contain: groups, arrays, leaves (no pages, rows)
-  // Rows do NOT support logic blocks - apply logic to child fields instead
+  // Rows support only 'hidden' logic type for conditional visibility
   const RowFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('row'),
     fields: z.array(AnyFieldSchema),
-    // Explicitly forbid logic on rows
-    logic: z.never().optional(),
+    // Container logic - only 'hidden' type allowed (same as pages)
+    logic: z.array(ContainerLogicSchema).optional(),
   });
 
   // Group can contain: rows, leaves (no pages, groups)
-  // Groups do NOT support logic blocks - apply logic to child fields instead
+  // Groups support only 'hidden' logic type for conditional visibility
   const GroupFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('group'),
     fields: z.array(AnyFieldSchema),
-    // Explicitly forbid logic on groups
-    logic: z.never().optional(),
+    // Container logic - only 'hidden' type allowed (same as pages)
+    logic: z.array(ContainerLogicSchema).optional(),
   });
 
   // Array can contain: rows, groups, leaves (no pages, arrays)
-  // Arrays do NOT support logic blocks - apply logic to child fields instead
+  // Arrays support only 'hidden' logic type for conditional visibility
   // Also forbid template (common mistake - should use 'fields')
   const ArrayFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('array'),
     fields: z.array(AnyFieldSchema),
-    // Explicitly forbid logic on arrays
-    logic: z.never().optional(),
+    // Container logic - only 'hidden' type allowed (same as pages)
+    logic: z.array(ContainerLogicSchema).optional(),
     template: z.never().optional(),
     minItems: z.never().optional(),
     maxItems: z.never().optional(),

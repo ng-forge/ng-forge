@@ -6,9 +6,9 @@
     "columns": ["hidden", "disabled", "required", "readonly", "derivation"],
     "fields": {
       "page": ["Y", "N", "N", "N", "N"],
-      "group": ["N", "N", "N", "N", "N"],
-      "row": ["N", "N", "N", "N", "N"],
-      "array": ["N", "N", "N", "N", "N"],
+      "group": ["Y", "N", "N", "N", "N"],
+      "row": ["Y", "N", "N", "N", "N"],
+      "array": ["Y", "N", "N", "N", "N"],
       "input": ["Y", "Y", "Y", "Y", "Y"],
       "select": ["Y", "Y", "Y", "Y", "Y"],
       "checkbox": ["Y", "Y", "Y", "Y", "Y"],
@@ -56,7 +56,8 @@
     },
     "group": {
       "hasLabel": false,
-      "supportsLogic": false,
+      "supportsLogic": true,
+      "logicTypes": ["hidden"],
       "allowedChildren": [
         "row",
         "input",
@@ -78,7 +79,8 @@
     },
     "row": {
       "hasLabel": false,
-      "supportsLogic": false,
+      "supportsLogic": true,
+      "logicTypes": ["hidden"],
       "allowedChildren": [
         "group",
         "array",
@@ -100,7 +102,8 @@
     },
     "array": {
       "hasLabel": false,
-      "supportsLogic": false,
+      "supportsLogic": true,
+      "logicTypes": ["hidden"],
       "allowedChildren": [
         "row",
         "group",
@@ -366,26 +369,29 @@
     "group": {
       "category": "container",
       "valueType": "object",
-      "fieldLevelProps": ["key", "type", "fields"],
+      "fieldLevelProps": ["key", "type", "fields", "logic"],
       "propsObject": [],
       "copyPaste": "{ type: 'group', key: 'address', fields: [{ type: 'input', key: 'city', label: 'City' }] }",
-      "doesNotSupport": ["label", "logic"]
+      "doesNotSupport": ["label"],
+      "notes": "Only supports 'hidden' logic type for conditional visibility."
     },
     "row": {
       "category": "container",
       "valueType": null,
-      "fieldLevelProps": ["key", "type", "fields"],
+      "fieldLevelProps": ["key", "type", "fields", "logic"],
       "propsObject": [],
       "copyPaste": "{ type: 'row', key: 'nameRow', fields: [{ type: 'input', key: 'first', label: 'First', col: 6 }, { type: 'input', key: 'last', label: 'Last', col: 6 }] }",
-      "doesNotSupport": ["label", "logic"]
+      "doesNotSupport": ["label"],
+      "notes": "Only supports 'hidden' logic type for conditional visibility."
     },
     "array": {
       "category": "container",
       "valueType": "T[]",
-      "fieldLevelProps": ["key", "type", "fields"],
+      "fieldLevelProps": ["key", "type", "fields", "logic"],
       "propsObject": [],
       "copyPaste": "{ type: 'array', key: 'contacts', fields: [{ type: 'group', key: 'item', fields: [{ type: 'input', key: 'name', label: 'Name' }] }] }",
-      "doesNotSupport": ["label", "logic", "minItems", "maxItems", "template"]
+      "doesNotSupport": ["label", "minItems", "maxItems", "template"],
+      "notes": "Only supports 'hidden' logic type for conditional visibility."
     },
     "page": {
       "category": "container",
@@ -527,7 +533,7 @@
     }
   },
   "commonPitfalls": [
-    "Container fields (group, row, array) do NOT support logic - apply to children instead",
+    "Container fields (group, row, array) only support 'hidden' logic type - for other logic types (disabled, required, readonly, derivation), apply to children instead",
     "options/minValue/maxValue/arrayKey go at FIELD level, NOT in props",
     "Validators use ctx.value() and ctx.valueOf(), NOT formValue",
     "Type annotation (: FormConfig) loses inference - use 'as const satisfies'",

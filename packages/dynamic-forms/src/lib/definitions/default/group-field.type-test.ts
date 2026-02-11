@@ -3,6 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { GroupField, GroupComponent } from './group-field';
+import type { ContainerLogicConfig } from '../base/container-logic-config';
 import type { GroupAllowedChildren } from '../../models/types/nesting-constraints';
 import type { RequiredKeys } from '@ng-forge/utils';
 
@@ -30,7 +31,8 @@ describe('GroupField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
-    | 'fields';
+    | 'fields'
+    | 'logic';
 
   type ActualKeys = keyof GroupField;
 
@@ -88,6 +90,10 @@ describe('GroupField - Exhaustive Whitelist', () => {
 
     it('col', () => {
       expectTypeOf<GroupField['col']>().toEqualTypeOf<number | undefined>();
+    });
+
+    it('logic', () => {
+      expectTypeOf<GroupField['logic']>().toEqualTypeOf<ContainerLogicConfig[] | undefined>();
     });
   });
 
@@ -174,6 +180,27 @@ describe('GroupField - Usage Tests', () => {
     } as const satisfies GroupField;
 
     expectTypeOf(field.hidden).toEqualTypeOf<true>();
+  });
+
+  it('should accept group with logic configuration', () => {
+    const field = {
+      key: 'conditionalGroup',
+      type: 'group',
+      fields: [],
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'notEquals',
+            value: 'business',
+          },
+        },
+      ],
+    } as const satisfies GroupField;
+
+    expectTypeOf(field.logic).not.toBeUndefined();
   });
 
   it('should accept group with col sizing', () => {

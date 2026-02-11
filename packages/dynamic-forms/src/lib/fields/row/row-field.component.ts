@@ -28,6 +28,8 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
   host: {
     '[class]': 'hostClasses()',
     '[class.disabled]': 'disabled()',
+    '[class.df-container-hidden]': 'hidden()',
+    '[attr.aria-hidden]': 'hidden() || null',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
@@ -51,6 +53,7 @@ export default class RowFieldComponent {
   field = input.required<RowField>();
   key = input.required<string>();
   className = input<string>();
+  hidden = input(false);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals

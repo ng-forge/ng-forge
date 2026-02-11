@@ -109,7 +109,7 @@ const PROPERTY_GUIDANCE: Record<string, string> = {
   maxItems: 'Array fields do NOT have minItems/maxItems properties',
   expressions: 'Use "derivation" or "logic" instead of "expressions"',
   logic:
-    'Only PAGE and LEAF fields support logic blocks. Row, group, and array containers do NOT support logic - apply logic to their child fields instead',
+    'Container fields (page, group, row, array) only support the "hidden" logic type. For other logic types (disabled, required, readonly, derivation), apply them to child fields instead',
 };
 
 /**
@@ -209,9 +209,19 @@ function formatZodError(error: ZodError, config?: unknown): FormattedValidationE
               mistakes.push('Use "fields" instead of "template"');
             }
 
-            // Check for logic on containers that don't support it
+            // Check for non-hidden logic types on containers
             if (['row', 'group', 'array'].includes(fieldType) && 'logic' in field) {
-              mistakes.push(`"${fieldType}" containers do NOT support logic blocks - apply logic to individual child fields instead`);
+              const logicArr = field['logic'];
+              if (Array.isArray(logicArr)) {
+                const nonHidden = (logicArr as Array<Record<string, unknown>>).filter(
+                  (l) => l && typeof l === 'object' && l['type'] !== 'hidden',
+                );
+                if (nonHidden.length > 0) {
+                  mistakes.push(
+                    `"${fieldType}" containers only support 'hidden' logic type - for other logic types, apply to child fields instead`,
+                  );
+                }
+              }
             }
 
             // Check for hidden field issues
@@ -543,12 +553,18 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
         }
       }
 
-      // Check for logic on non-supported containers
-      if ('logic' in f) {
-        errors.push({
-          path: `${path}.logic`,
-          message: `"${fieldType}" containers do NOT support logic blocks. Only PAGE and LEAF fields (input, select, etc.) support logic. Apply logic to individual child fields instead.`,
-        });
+      // Check for non-hidden logic types on containers
+      if ('logic' in f && Array.isArray(f['logic'])) {
+        const nonHiddenLogic = (f['logic'] as Array<Record<string, unknown>>).filter(
+          (l) => l && typeof l === 'object' && l['type'] !== 'hidden',
+        );
+        if (nonHiddenLogic.length > 0) {
+          const invalidTypes = nonHiddenLogic.map((l) => `"${l['type']}"`).join(', ');
+          errors.push({
+            path: `${path}.logic`,
+            message: `"${fieldType}" containers only support 'hidden' logic type. Found unsupported logic types: ${invalidTypes}. For other logic types (disabled, required, readonly, derivation), apply them to child fields instead.`,
+          });
+        }
       }
     }
 

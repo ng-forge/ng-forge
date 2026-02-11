@@ -35,7 +35,8 @@ const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 const FIX_SUGGESTIONS: Record<string, string> = {
   options: 'Move `options` from `props: { options: [...] }` to field level: `{ key, type, options: [...] }`',
   label: 'Remove `label` from this container field (page/group/row/array). Use a `text` field inside for headings.',
-  logic: "Move `logic` to individual child fields. Containers (row/group/array) don't support logic - only their children do.",
+  logic:
+    "Containers (group, row, array) only support 'hidden' logic type (same as pages). For other logic types (disabled, required, readonly, derivation), apply them to child fields instead.",
   minValue: 'Use `minValue` at field level for sliders, not `min` in props.',
   maxValue: 'Use `maxValue` at field level for sliders, not `max` in props.',
   step: 'Use `step` at field level for sliders, not in props.',
@@ -291,7 +292,7 @@ Returns SPECIFIC error messages with:
 Example errors you'll see:
 - "Hidden field missing REQUIRED value property"
 - "options MUST be at FIELD level, NOT inside props"
-- "row containers do NOT support logic blocks"`,
+- "containers only support 'hidden' logic type"`,
     {
       config: z
         .union([z.string(), z.object({}).passthrough()])

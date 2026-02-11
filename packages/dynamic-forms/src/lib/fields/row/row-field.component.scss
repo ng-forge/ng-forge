@@ -50,6 +50,10 @@
       }
     }
   }
+
+  &.df-container-hidden {
+    display: none;
+  }
 }
 
 // Responsive behavior for rows

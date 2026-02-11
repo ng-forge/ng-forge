@@ -340,118 +340,101 @@ export function resolveNextButtonDisabled(ctx: ButtonLogicContext): Signal<boole
 }
 
 /**
- * Resolves the hidden state for non-form-bound elements (buttons, text fields, etc.).
+ * Evaluates the hidden state for non-form-bound elements synchronously.
  *
- * This is a generalized function that can be used by any field mapper (buttons, text fields,
- * or any non-form-bound elements) to evaluate hidden logic. It's particularly useful for
- * elements that don't have a FieldTree but still need conditional visibility.
+ * This is a pure function (no signal allocation) that can be called directly inside
+ * an existing `computed()` block without creating ephemeral signal allocations.
  *
  * The hidden state is determined by (in order of precedence):
  * 1. Explicit `hidden: true` on the field definition
  * 2. Field-level `logic` array with `type: 'hidden'` conditions
  *
  * @param ctx - The context containing form, logic array, and explicit hidden state
+ * @returns true when the element should be hidden
+ *
+ * @public
+ */
+export function evaluateNonFieldHidden(ctx: NonFieldLogicContext): boolean {
+  // 1. Explicit hidden always wins
+  if (ctx.explicitValue) {
+    return true;
+  }
+
+  // 2. Evaluate hidden logic conditions
+  if (hasCustomLogicOfType(ctx.fieldLogic, 'hidden')) {
+    return evaluateLogicOfType(ctx.fieldLogic, 'hidden', {
+      form: ctx.form,
+      formValue: ctx.formValue,
+      logger: ctx.logger,
+    });
+  }
+
+  // 3. No hidden conditions - element is visible
+  return false;
+}
+
+/**
+ * Resolves the hidden state for non-form-bound elements as a reactive signal.
+ *
+ * Wraps {@link evaluateNonFieldHidden} in a `computed()` for use cases where a standalone
+ * signal is needed. When calling from inside an existing `computed()`, prefer
+ * {@link evaluateNonFieldHidden} directly to avoid ephemeral signal allocation.
+ *
+ * @param ctx - The context containing form, logic array, and explicit hidden state
  * @returns A computed signal that returns true when the element should be hidden
- *
- * @example
- * ```typescript
- * // In an array button mapper
- * const hiddenSignal = resolveNonFieldHidden({
- *   form: rootFormRegistry.getRootForm()!,
- *   fieldLogic: buttonField.logic,
- *   explicitValue: buttonField.hidden,
- *   formValue: rootFormRegistry.getFormValue(),
- * });
- *
- * return computed(() => ({
- *   ...baseInputs,
- *   hidden: hiddenSignal(),
- * }));
- * ```
- *
- * @example
- * ```typescript
- * // In a text field mapper
- * const hiddenSignal = resolveNonFieldHidden({
- *   form: rootFormRegistry.getRootForm()!,
- *   fieldLogic: textField.logic,
- *   explicitValue: textField.hidden,
- *   formValue: rootFormRegistry.getFormValue(),
- * });
- * ```
  *
  * @public
  */
 export function resolveNonFieldHidden(ctx: NonFieldLogicContext): Signal<boolean> {
-  return computed(() => {
-    // 1. Explicit hidden always wins
-    if (ctx.explicitValue) {
-      return true;
-    }
-
-    // 2. Evaluate hidden logic conditions
-    if (hasCustomLogicOfType(ctx.fieldLogic, 'hidden')) {
-      return evaluateLogicOfType(ctx.fieldLogic, 'hidden', {
-        form: ctx.form,
-        formValue: ctx.formValue,
-        logger: ctx.logger,
-      });
-    }
-
-    // 3. No hidden conditions - element is visible
-    return false;
-  });
+  return computed(() => evaluateNonFieldHidden(ctx));
 }
 
 /**
- * Resolves the disabled state for non-form-bound elements (buttons, text fields, etc.).
+ * Evaluates the disabled state for non-form-bound elements synchronously.
  *
- * This is a generalized function that can be used by any field mapper to evaluate
- * disabled logic. It handles elements that don't have form-level disabled defaults
- * (unlike submit/next buttons which have form-level config).
+ * This is a pure function (no signal allocation) that can be called directly inside
+ * an existing `computed()` block without creating ephemeral signal allocations.
  *
  * The disabled state is determined by (in order of precedence):
  * 1. Explicit `disabled: true` on the field definition
  * 2. Field-level `logic` array with `type: 'disabled'` conditions
  *
  * @param ctx - The context containing form, logic array, and explicit disabled state
+ * @returns true when the element should be disabled
+ *
+ * @public
+ */
+export function evaluateNonFieldDisabled(ctx: NonFieldLogicContext): boolean {
+  // 1. Explicit disabled always wins
+  if (ctx.explicitValue) {
+    return true;
+  }
+
+  // 2. Evaluate disabled logic conditions
+  if (hasCustomLogicOfType(ctx.fieldLogic, 'disabled')) {
+    return evaluateLogicOfType(ctx.fieldLogic, 'disabled', {
+      form: ctx.form,
+      formValue: ctx.formValue,
+      logger: ctx.logger,
+    });
+  }
+
+  // 3. No disabled conditions - element is enabled
+  return false;
+}
+
+/**
+ * Resolves the disabled state for non-form-bound elements as a reactive signal.
+ *
+ * Wraps {@link evaluateNonFieldDisabled} in a `computed()` for use cases where a standalone
+ * signal is needed. When calling from inside an existing `computed()`, prefer
+ * {@link evaluateNonFieldDisabled} directly to avoid ephemeral signal allocation.
+ *
+ * @param ctx - The context containing form, logic array, and explicit disabled state
  * @returns A computed signal that returns true when the element should be disabled
- *
- * @example
- * ```typescript
- * // In an array button mapper
- * const disabledSignal = resolveNonFieldDisabled({
- *   form: rootFormRegistry.getRootForm()!,
- *   fieldLogic: buttonField.logic,
- *   explicitValue: buttonField.disabled,
- *   formValue: rootFormRegistry.getFormValue(),
- * });
- *
- * return computed(() => ({
- *   ...baseInputs,
- *   disabled: disabledSignal(),
- * }));
- * ```
  *
  * @public
  */
 export function resolveNonFieldDisabled(ctx: NonFieldLogicContext): Signal<boolean> {
-  return computed(() => {
-    // 1. Explicit disabled always wins
-    if (ctx.explicitValue) {
-      return true;
-    }
-
-    // 2. Evaluate disabled logic conditions
-    if (hasCustomLogicOfType(ctx.fieldLogic, 'disabled')) {
-      return evaluateLogicOfType(ctx.fieldLogic, 'disabled', {
-        form: ctx.form,
-        formValue: ctx.formValue,
-        logger: ctx.logger,
-      });
-    }
-
-    // 3. No disabled conditions - element is enabled
-    return false;
-  });
+  return computed(() => evaluateNonFieldDisabled(ctx));
 }

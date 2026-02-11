@@ -46,6 +46,8 @@ import { ArrayFieldTree } from '../../core/field-tree-utils';
   styleUrl: './array-field.component.scss',
   host: {
     '[class]': 'hostClasses()',
+    '[class.df-container-hidden]': 'hidden()',
+    '[attr.aria-hidden]': 'hidden() || null',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
@@ -78,6 +80,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   field = input.required<ArrayField>();
   key = input.required<string>();
   className = input<string>();
+  hidden = input(false);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals

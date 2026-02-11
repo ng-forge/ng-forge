@@ -72,11 +72,6 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getSubmissionBehaviorScenario('submit-nested-arrays') },
   },
-  {
-    path: 'submit-conditional-containers',
-    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
-    data: { scenario: getSubmissionBehaviorScenario('submit-conditional-containers') },
-  },
 ];
 
 export default routes;

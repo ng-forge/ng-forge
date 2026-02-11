@@ -22,21 +22,6 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getGroupFieldsScenario('group-nested') },
   },
-  {
-    path: 'group-conditional-visibility',
-    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
-    data: { scenario: getGroupFieldsScenario('group-conditional-visibility') },
-  },
-  {
-    path: 'group-state-preservation',
-    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
-    data: { scenario: getGroupFieldsScenario('group-state-preservation') },
-  },
-  {
-    path: 'group-nested-conditional',
-    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
-    data: { scenario: getGroupFieldsScenario('group-nested-conditional') },
-  },
 ];
 
 export default routes;

@@ -3,12 +3,18 @@ import { BaseFieldDefSchema } from '../field/field-def.schema';
 import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema';
 
 /**
- * Schema for page-specific logic (only 'hidden' type allowed).
+ * Schema for container logic configuration (only 'hidden' type allowed).
+ * Shared by page, group, row, and array containers.
  */
-export const PageLogicConfigSchema = z.object({
+export const ContainerLogicConfigSchema = z.object({
   type: z.literal('hidden'),
   condition: z.union([ConditionalExpressionSchema, z.boolean()]),
 });
+
+/**
+ * @deprecated Use `ContainerLogicConfigSchema` instead.
+ */
+export const PageLogicConfigSchema = ContainerLogicConfigSchema;
 
 /**
  * Creates a PageField schema with the specified child field schema.

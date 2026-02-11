@@ -3,8 +3,8 @@ import { TestScenario } from '../../shared/types';
 
 /**
  * Test conditional visibility of fields across multiple rows.
- * Note: Rows themselves don't support logic - they're layout-only containers.
- * This test verifies that fields in different rows can have independent visibility logic.
+ * Tests logic on fields inside the container.
+ * Note: containers also support `logic: [{ type: 'hidden' }]` directly.
  */
 const config = {
   fields: [

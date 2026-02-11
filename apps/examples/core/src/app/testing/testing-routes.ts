@@ -31,6 +31,12 @@ export default [
     loadChildren: () => import('./config-change/config-change.routes'),
   },
 
+  // Container Conditional Visibility Tests
+  {
+    path: 'container-conditional-visibility',
+    loadChildren: () => import('./container-conditional-visibility/container-conditional-visibility.routes'),
+  },
+
   // Container Nesting Tests
   {
     path: 'container-nesting',

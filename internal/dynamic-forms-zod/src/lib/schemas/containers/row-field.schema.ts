@@ -1,5 +1,6 @@
 import { z, ZodTypeAny } from 'zod';
 import { BaseFieldDefSchema } from '../field/field-def.schema';
+import { ContainerLogicConfigSchema } from './page-field.schema';
 
 /**
  * Creates a RowField schema with the specified child field schema.
@@ -11,6 +12,7 @@ import { BaseFieldDefSchema } from '../field/field-def.schema';
  *   readonly fields: TFields;
  *   readonly label?: never;
  *   readonly meta?: never;
+ *   readonly logic?: ContainerLogicConfig[];
  * }
  * ```
  *
@@ -34,6 +36,11 @@ export function createRowFieldSchema<T extends ZodTypeAny>(childFieldSchema: T) 
      * Array of child fields within this row.
      */
     fields: z.array(childFieldSchema),
+
+    /**
+     * Container logic (only 'hidden' is allowed).
+     */
+    logic: z.array(ContainerLogicConfigSchema).optional(),
   });
 }
 
@@ -47,6 +54,7 @@ export const BaseRowFieldSchema = BaseFieldDefSchema.omit({
 }).extend({
   type: z.literal('row'),
   fields: z.array(z.any()),
+  logic: z.array(ContainerLogicConfigSchema).optional(),
 });
 
 export type BaseRowFieldSchemaType = z.infer<typeof BaseRowFieldSchema>;

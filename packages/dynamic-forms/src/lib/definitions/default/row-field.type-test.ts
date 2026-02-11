@@ -3,6 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { RowField, RowComponent } from './row-field';
+import type { ContainerLogicConfig } from '../base/container-logic-config';
 import type { RowAllowedChildren } from '../../models/types/nesting-constraints';
 import type { RequiredKeys } from '@ng-forge/utils';
 
@@ -30,7 +31,8 @@ describe('RowField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
-    | 'fields';
+    | 'fields'
+    | 'logic';
 
   type ActualKeys = keyof RowField;
 
@@ -88,6 +90,10 @@ describe('RowField - Exhaustive Whitelist', () => {
 
     it('col', () => {
       expectTypeOf<RowField['col']>().toEqualTypeOf<number | undefined>();
+    });
+
+    it('logic', () => {
+      expectTypeOf<RowField['logic']>().toEqualTypeOf<ContainerLogicConfig[] | undefined>();
     });
   });
 
@@ -174,6 +180,27 @@ describe('RowField - Usage Tests', () => {
     } as const satisfies RowField;
 
     expectTypeOf(field.hidden).toEqualTypeOf<true>();
+  });
+
+  it('should accept row with logic configuration', () => {
+    const field = {
+      key: 'conditionalRow',
+      type: 'row',
+      fields: [],
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'enableAdvanced',
+            operator: 'equals',
+            value: false,
+          },
+        },
+      ],
+    } as const satisfies RowField;
+
+    expectTypeOf(field.logic).not.toBeUndefined();
   });
 
   it('should accept row with col sizing', () => {
