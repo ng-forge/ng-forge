@@ -3,9 +3,8 @@ import { TestScenario } from '../../shared/types';
 
 /**
  * Test conditional visibility of fields INSIDE an array.
- * Note: Arrays themselves don't support logic - they're data containers.
- * This test verifies that fields within array items can have conditional visibility
- * based on fields outside the array.
+ * Tests logic on fields inside the container.
+ * Note: containers also support `logic: [{ type: 'hidden' }]` directly.
  */
 const teamMemberFields = [
   {

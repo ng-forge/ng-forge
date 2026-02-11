@@ -498,42 +498,4 @@ test.describe('Submission Behavior Tests', () => {
       expect(tasks[1]['priority']).toBe('high');
     });
   });
-
-  test.describe('Submit with Conditional Containers', () => {
-    test('should include visible container fields in submission', async ({ page, helpers }) => {
-      await page.goto('/#/test/submission-behavior/submit-conditional-containers');
-      await page.waitForLoadState('networkidle');
-      const scenario = helpers.getScenario('submit-conditional-containers');
-      await expect(scenario).toBeVisible({ timeout: 10000 });
-
-      // With address included (default)
-      const data = await helpers.submitFormAndCapture(scenario);
-      expect(data['name']).toBe('Test User');
-      expect(data).toHaveProperty('addressGroup');
-      const address = data['addressGroup'] as Record<string, unknown>;
-      expect(address['street']).toBe('456 Oak Ave');
-      expect(address['city']).toBe('Portland');
-    });
-
-    test('should handle hidden container fields in submission', async ({ page, helpers }) => {
-      await page.goto('/#/test/submission-behavior/submit-conditional-containers');
-      await page.waitForLoadState('networkidle');
-      const scenario = helpers.getScenario('submit-conditional-containers');
-      await expect(scenario).toBeVisible({ timeout: 10000 });
-
-      // Uncheck "Include Address" to hide the group fields
-      const checkbox = helpers.getCheckbox(scenario, 'includeAddress');
-      await checkbox.click();
-
-      // Wait for fields to hide
-      const streetInput = scenario.locator('#addressGroup #street input');
-      await expect(streetInput).not.toBeVisible({ timeout: 5000 });
-
-      // Submit and check data
-      const data = await helpers.submitFormAndCapture(scenario);
-      expect(data['name']).toBe('Test User');
-      // Hidden fields should still be in the form value (they're hidden, not removed)
-      expect(data).toHaveProperty('addressGroup');
-    });
-  });
 });

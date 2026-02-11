@@ -5,6 +5,7 @@ import { advancedValidationSuite } from '../advanced-validation/advanced-validat
 import { angularSchemaValidationSuite } from '../angular-schema-validation/angular-schema-validation.suite';
 import { asyncValidationSuite } from '../async-validation/async-validation.suite';
 import { configChangeSuite } from '../config-change/config-change.suite';
+import { containerConditionalVisibilitySuite } from '../container-conditional-visibility/container-conditional-visibility.suite';
 import { containerNestingSuite } from '../container-nesting/container-nesting.suite';
 import { crossFieldValidationSuite } from '../cross-field-validation/cross-field-validation.suite';
 import { crossPageValidationSuite } from '../cross-page-validation/cross-page-validation.suite';
@@ -30,6 +31,7 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   angularSchemaValidationSuite,
   asyncValidationSuite,
   configChangeSuite,
+  containerConditionalVisibilitySuite,
   containerNestingSuite,
   crossFieldValidationSuite,
   crossPageValidationSuite,

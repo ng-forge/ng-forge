@@ -11,7 +11,6 @@ import {
   httpErrorHandlingScenario,
   nextButtonNeverDisabledScenario,
   nextButtonPageValidationScenario,
-  submitConditionalContainersScenario,
   submitInsideGroupScenario,
   submitNestedArraysScenario,
 } from './scenarios';
@@ -35,7 +34,6 @@ export const submissionBehaviorSuite: TestSuite = {
     hiddenFieldScenario,
     submitInsideGroupScenario,
     submitNestedArraysScenario,
-    submitConditionalContainersScenario,
   ],
 };
 

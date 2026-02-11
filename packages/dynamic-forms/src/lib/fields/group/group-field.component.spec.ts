@@ -1,5 +1,6 @@
 import { GroupFieldComponent } from './group-field.component';
 import { GroupField } from '../../definitions/default/group-field';
+import { FieldDef } from '../../definitions/base/field-def';
 import { createSimpleTestField, TestFieldComponent } from '../../../../testing/src/simple-test-utils';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
@@ -13,7 +14,7 @@ import { EventBus } from '../../events';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 
 describe('GroupFieldComponent', () => {
-  function setupGroupTest(field: GroupField<any>, groupValue?: Record<string, unknown>) {
+  function setupGroupTest(field: GroupField<readonly FieldDef<unknown>[]>, groupValue?: Record<string, unknown>) {
     const mockFieldType: FieldTypeDefinition = {
       name: 'test',
       loadComponent: async () => TestFieldComponent,
@@ -64,7 +65,7 @@ describe('GroupFieldComponent', () => {
   }
 
   it('should create', () => {
-    const field: GroupField<any> = {
+    const field: GroupField<readonly FieldDef<unknown>[]> = {
       key: 'testGroup',
       type: 'group',
       label: 'Test Group',
@@ -78,7 +79,7 @@ describe('GroupFieldComponent', () => {
   });
 
   it('should have field input property', () => {
-    const field: GroupField<any> = {
+    const field: GroupField<readonly FieldDef<unknown>[]> = {
       key: 'testGroup',
       type: 'group',
       label: 'Test Group',
@@ -91,7 +92,7 @@ describe('GroupFieldComponent', () => {
   });
 
   it('should render with child fields', () => {
-    const field: GroupField<any> = {
+    const field: GroupField<readonly FieldDef<unknown>[]> = {
       key: 'testGroup',
       type: 'group',
       label: 'Test Group',
@@ -108,7 +109,7 @@ describe('GroupFieldComponent', () => {
   });
 
   it('should have host classes', () => {
-    const field: GroupField<any> = {
+    const field: GroupField<readonly FieldDef<unknown>[]> = {
       key: 'testGroup',
       type: 'group',
       label: 'Test Group',
@@ -123,7 +124,7 @@ describe('GroupFieldComponent', () => {
   });
 
   it('should not have df-container-hidden class when hidden is false', () => {
-    const field: GroupField<any> = {
+    const field: GroupField<readonly FieldDef<unknown>[]> = {
       key: 'testGroup',
       type: 'group',
       fields: [],
@@ -139,7 +140,7 @@ describe('GroupFieldComponent', () => {
   });
 
   it('should have df-container-hidden class and aria-hidden when hidden is true', () => {
-    const field: GroupField<any> = {
+    const field: GroupField<readonly FieldDef<unknown>[]> = {
       key: 'testGroup',
       type: 'group',
       fields: [],

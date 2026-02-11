@@ -24,9 +24,10 @@ export interface GenericField {
 }
 
 /**
- * Page logic config schema (only 'hidden' type allowed).
+ * Container logic config schema (only 'hidden' type allowed).
+ * Used by all container types: page, row, group, and array.
  */
-const PageLogicSchema = z.object({
+const ContainerLogicSchema = z.object({
   type: z.literal('hidden'),
   condition: z.union([ConditionalExpressionSchema, z.boolean()]),
 });
@@ -86,7 +87,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
   const PageFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('page'),
     fields: z.array(AnyFieldSchema),
-    logic: z.array(PageLogicSchema).optional(),
+    logic: z.array(ContainerLogicSchema).optional(),
     // Also forbid title (common mistake)
     title: z.never().optional(),
   });
@@ -97,7 +98,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     type: z.literal('row'),
     fields: z.array(AnyFieldSchema),
     // Container logic - only 'hidden' type allowed (same as pages)
-    logic: z.array(PageLogicSchema).optional(),
+    logic: z.array(ContainerLogicSchema).optional(),
   });
 
   // Group can contain: rows, leaves (no pages, groups)
@@ -106,7 +107,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     type: z.literal('group'),
     fields: z.array(AnyFieldSchema),
     // Container logic - only 'hidden' type allowed (same as pages)
-    logic: z.array(PageLogicSchema).optional(),
+    logic: z.array(ContainerLogicSchema).optional(),
   });
 
   // Array can contain: rows, groups, leaves (no pages, arrays)
@@ -116,7 +117,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     type: z.literal('array'),
     fields: z.array(AnyFieldSchema),
     // Container logic - only 'hidden' type allowed (same as pages)
-    logic: z.array(PageLogicSchema).optional(),
+    logic: z.array(ContainerLogicSchema).optional(),
     template: z.never().optional(),
     minItems: z.never().optional(),
     maxItems: z.never().optional(),

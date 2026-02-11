@@ -3,7 +3,7 @@ import { TextField } from '../../definitions/default/text-field';
 import { buildBaseInputs } from '../base/base-field-mapper';
 import { DEFAULT_PROPS } from '../../models/field-signal-context.token';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
-import { evaluateNonFieldHidden } from '../../core/logic/non-field-logic-resolver';
+import { applyHiddenLogic } from '../apply-hidden-logic';
 
 /**
  * Maps a text field definition to component inputs.
@@ -29,16 +29,8 @@ export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unkn
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
     const inputs: Record<string, unknown> = { ...baseInputs };
-    const rootForm = rootFormRegistry.rootForm();
 
-    if (rootForm && (fieldDef.hidden !== undefined || fieldDef.logic?.some((l) => l.type === 'hidden'))) {
-      inputs['hidden'] = evaluateNonFieldHidden({
-        form: rootForm,
-        fieldLogic: fieldDef.logic,
-        explicitValue: fieldDef.hidden,
-        formValue: rootFormRegistry.formValue(),
-      });
-    }
+    applyHiddenLogic(inputs, fieldDef, rootFormRegistry);
 
     return inputs;
   });

@@ -3,8 +3,8 @@ import { TestScenario } from '../../shared/types';
 
 /**
  * Test conditional visibility of fields INSIDE a group.
- * Note: Groups themselves don't support logic - they're data containers.
- * This test verifies that fields within a group can have conditional visibility.
+ * Tests logic on fields inside the container.
+ * Note: containers also support `logic: [{ type: 'hidden' }]` directly.
  */
 const config = {
   fields: [

@@ -3,8 +3,8 @@ import { TestScenario } from '../../shared/types';
 
 /**
  * Test state preservation for conditional fields inside arrays.
- * Note: Arrays themselves don't support logic - they're data containers.
- * This test verifies that values in conditionally hidden fields are preserved.
+ * Tests logic on fields inside the container.
+ * Note: containers also support `logic: [{ type: 'hidden' }]` directly.
  */
 const contactRowFields = [
   {
