@@ -312,6 +312,95 @@ test.describe('Config Change E2E Tests', () => {
     });
   });
 
+  test.describe('Value Two-Way Binding', () => {
+    test('should update form fields when value is set programmatically', async ({ page, helpers }) => {
+      await page.goto('/#/test/config-change/value-binding');
+      await page.waitForLoadState('networkidle');
+      const scenario = helpers.getScenario('value-binding');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      const firstNameInput = scenario.locator('#firstName input');
+      const lastNameInput = scenario.locator('#lastName input');
+      const emailInput = scenario.locator('#email input');
+      await expect(firstNameInput).toBeVisible({ timeout: 5000 });
+
+      // Fields should start empty
+      await expect(firstNameInput).toHaveValue('', { timeout: 5000 });
+      await expect(lastNameInput).toHaveValue('', { timeout: 5000 });
+      await expect(emailInput).toHaveValue('', { timeout: 5000 });
+
+      // Set value A programmatically
+      await scenario.locator('[data-testid="set-value-a"]').click();
+
+      // Form fields should reflect the new value
+      await expect(firstNameInput).toHaveValue('Alice', { timeout: 5000 });
+      await expect(lastNameInput).toHaveValue('Smith', { timeout: 5000 });
+      await expect(emailInput).toHaveValue('alice@example.com', { timeout: 5000 });
+    });
+
+    test('should update form fields when value changes to a different preset', async ({ page, helpers }) => {
+      await page.goto('/#/test/config-change/value-binding');
+      await page.waitForLoadState('networkidle');
+      const scenario = helpers.getScenario('value-binding');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      const firstNameInput = scenario.locator('#firstName input');
+      const lastNameInput = scenario.locator('#lastName input');
+      const emailInput = scenario.locator('#email input');
+
+      // Set value A
+      await scenario.locator('[data-testid="set-value-a"]').click();
+      await expect(firstNameInput).toHaveValue('Alice', { timeout: 5000 });
+
+      // Switch to value B
+      await scenario.locator('[data-testid="set-value-b"]').click();
+
+      // Form fields should update to value B
+      await expect(firstNameInput).toHaveValue('Bob', { timeout: 5000 });
+      await expect(lastNameInput).toHaveValue('Builder', { timeout: 5000 });
+      await expect(emailInput).toHaveValue('bob@example.com', { timeout: 5000 });
+    });
+
+    test('should clear form fields when value is cleared', async ({ page, helpers }) => {
+      await page.goto('/#/test/config-change/value-binding');
+      await page.waitForLoadState('networkidle');
+      const scenario = helpers.getScenario('value-binding');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      const firstNameInput = scenario.locator('#firstName input');
+      const lastNameInput = scenario.locator('#lastName input');
+      const emailInput = scenario.locator('#email input');
+
+      // Set value A first
+      await scenario.locator('[data-testid="set-value-a"]').click();
+      await expect(firstNameInput).toHaveValue('Alice', { timeout: 5000 });
+
+      // Clear value
+      await scenario.locator('[data-testid="clear-value"]').click();
+
+      // Form fields should be empty
+      await expect(firstNameInput).toHaveValue('', { timeout: 5000 });
+      await expect(lastNameInput).toHaveValue('', { timeout: 5000 });
+      await expect(emailInput).toHaveValue('', { timeout: 5000 });
+    });
+
+    test('should reflect programmatic value in debug output', async ({ page, helpers }) => {
+      await page.goto('/#/test/config-change/value-binding');
+      await page.waitForLoadState('networkidle');
+      const scenario = helpers.getScenario('value-binding');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Set value A
+      await scenario.locator('[data-testid="set-value-a"]').click();
+
+      // Debug output should contain the value
+      const debugOutput = scenario.locator('[data-testid="form-value-value-binding"]');
+      await expect(debugOutput).toContainText('Alice', { timeout: 5000 });
+      await expect(debugOutput).toContainText('Smith', { timeout: 5000 });
+      await expect(debugOutput).toContainText('alice@example.com', { timeout: 5000 });
+    });
+  });
+
   test.describe('Config Swap with Pages', () => {
     test('should render initial two-page config', async ({ page, helpers }) => {
       await page.goto('/#/test/config-change/config-swap-pages');
