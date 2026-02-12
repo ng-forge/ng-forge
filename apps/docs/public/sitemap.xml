@@ -151,7 +151,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/prebuilt/form-arrays</loc>
+    <loc>https://ng-forge.com/dynamic-forms/prebuilt/form-arrays/simplified</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/prebuilt/form-arrays/complete</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -219,6 +224,16 @@
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/examples/enterprise-features</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/examples/simplified-array-form</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/examples/array-form</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

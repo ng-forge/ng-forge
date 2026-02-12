@@ -237,7 +237,7 @@ Show a field only when another field has a specific value:
 }
 ```
 
-This field is hidden unless `contactMethod === 'email'`, and required when visible. See the [Examples](/docs/examples) page for complete form implementations.
+This field is hidden unless `contactMethod === 'email'`, and required when visible. See the [Examples](/examples) page for complete form implementations.
 
 ## When Logic Runs
 
@@ -1005,4 +1005,4 @@ const config = {
 - **[Value Derivation](../value-derivation/basics/)** - Computed field values
 - **[Validation](../../validation/basics/)** - Conditional validation
 - **[Type Safety](../../advanced/type-safety/basics/)** - TypeScript integration
-- **[Examples](/docs/examples)** - Real-world form patterns
+- **[Examples](/examples)** - Real-world form patterns

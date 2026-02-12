@@ -77,6 +77,20 @@ export const EXAMPLES_REGISTRY: ExampleItem[] = [
     tags: ['Conditional', 'Advanced'],
     path: '/examples/enterprise-features',
   },
+  {
+    id: 'simplified-array-form',
+    title: 'Simplified Array Form',
+    description: 'Dynamic arrays with auto-generated add/remove buttons using the simplified API',
+    tags: ['Layout', 'Arrays'],
+    path: '/examples/simplified-array-form',
+  },
+  {
+    id: 'array-form',
+    title: 'Array Form (Complete)',
+    description: 'Dynamic arrays with declarative buttons and custom placement using the complete API',
+    tags: ['Layout', 'Arrays'],
+    path: '/examples/array-form',
+  },
 ];
 
 export const ALL_TAGS = [...new Set(EXAMPLES_REGISTRY.flatMap((e) => e.tags))].sort();

@@ -226,8 +226,8 @@ Now that you have ng-forge dynamic forms installed, explore the core features:
 
 ### Build Advanced Forms
 
-- **[Multi-Step Forms](../layout-components/form-pages)** - Create wizard-style forms with page navigation
-- **[Repeatable Sections](../layout-components/form-arrays)** - Dynamic form arrays for adding/removing fields
+- **[Multi-Step Forms](../prebuilt/form-pages)** - Create wizard-style forms with page navigation
+- **[Repeatable Sections](../prebuilt/form-arrays/simplified)** - Dynamic form arrays for adding/removing fields
 - **[Conditional Validation](../validation/advanced#conditional-validators)** - Validators that activate based on conditions
 
 ### Customize and Extend

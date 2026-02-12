@@ -5,7 +5,7 @@ const HiddenFieldsPage: NgDocPage = {
   title: 'Hidden Fields',
   mdFile: './index.md',
   category: LayoutComponentsCategory,
-  order: 5,
+  order: 6,
 };
 
 export default HiddenFieldsPage;

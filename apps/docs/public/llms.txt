@@ -55,7 +55,8 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - /prebuilt/form-pages: Page container components
 - /prebuilt/form-groups: Field grouping components
 - /prebuilt/form-rows: Row layout components
-- /prebuilt/form-arrays: Dynamic array fields
+- /prebuilt/form-arrays/simplified: Simplified array API (recommended)
+- /prebuilt/form-arrays/complete: Complete array API (advanced)
 - /prebuilt/text-components: Text and label components
 - /prebuilt/hidden-fields: Hidden field components
 
@@ -71,6 +72,8 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - /examples/shipping-billing-address: Shipping same-as-billing example
 - /examples/age-conditional-form: Age-based conditional form
 - /examples/enterprise-features: Complex multi-condition form
+- /examples/simplified-array-form: Simplified array API example
+- /examples/array-form: Complete array API example
 
 ### Advanced Topics
 - /advanced/basics: TypeScript type safety features
