@@ -1,5 +1,7 @@
 Arrays create dynamic collections of field values. Each item in the `fields` array defines **one array item** with its structure and initial values.
 
+> For most use cases, the **simplified array API** is recommended. See [Form Arrays (Simplified)](/docs/prebuilt/form-arrays-simplified) for details. This page documents the complete API for advanced use cases.
+
 ## Interactive Demo
 
 <iframe src="http://localhost:4201/#/examples/array" class="example-frame" title="Array Field Demo"></iframe>
@@ -490,3 +492,15 @@ Arrays can contain these field types:
 - Button fields (for remove operations inside each item)
 
 See [Type Safety & Inference](../advanced/type-safety/basics) for details on how arrays affect type inference.
+
+## When to Use the Complete API
+
+The complete API documented on this page is the right choice when you need capabilities beyond what the simplified API offers:
+
+- **Heterogeneous items** -- Different field structures per item (e.g. some items have 2 fields, others have 5)
+- **Custom button placement** -- Positioning add/remove/prepend/insert buttons in specific locations relative to the array
+- **Programmatic control via EventBus** -- Dispatching `arrayEvent` commands for append, prepend, insertAt, pop, shift, and removeAt operations from component code
+- **Custom templates per button action** -- Different add buttons that each insert a different item structure (e.g. an "Add Simple" and an "Add Detailed" button)
+- **Mixed primitive and object items** -- Arrays containing both primitive values and object values in the same collection
+
+For all other scenarios, the [simplified array API](/docs/prebuilt/form-arrays-simplified) provides a more concise configuration with auto-generated buttons.

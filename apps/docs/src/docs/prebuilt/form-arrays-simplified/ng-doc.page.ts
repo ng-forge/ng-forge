@@ -1,11 +1,11 @@
 import { NgDocPage } from '@ng-doc/core';
 import LayoutComponentsCategory from '../ng-doc.category';
 
-const FormArraysPage: NgDocPage = {
-  title: 'Form Arrays (Complete)',
+const FormArraysSimplifiedPage: NgDocPage = {
+  title: 'Form Arrays (Simplified)',
   mdFile: './index.md',
   category: LayoutComponentsCategory,
-  order: 4,
+  order: 3,
 };
 
-export default FormArraysPage;
+export default FormArraysSimplifiedPage;

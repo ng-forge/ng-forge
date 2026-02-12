@@ -80,8 +80,18 @@ export type {
 export { isCheckedField, isValueField } from './definitions';
 
 // Built-in Container Field Types
-export type { ArrayField, GroupField, PageField, RowField, TextField, TextElementType, TextProps } from './definitions/default';
-export { isRowField } from './definitions/default';
+export type {
+  ArrayButtonConfig,
+  ArrayField,
+  GroupField,
+  PageField,
+  RowField,
+  SimplifiedArrayField,
+  TextField,
+  TextElementType,
+  TextProps,
+} from './definitions/default';
+export { isRowField, isSimplifiedArrayField } from './definitions/default';
 
 // Validation Config Types
 export type {

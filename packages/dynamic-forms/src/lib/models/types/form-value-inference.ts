@@ -60,30 +60,40 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
           ? { [P in K]: InferFormValueWithDepth<F, Depth[D]> }
           : { [P in K]: Record<string, unknown> }
         : never
-      : // Container: array - wrap children type in array under key
-        T extends { type: 'array'; key: infer K; fields: infer F }
+      : // Simplified array with template and value — infer item type from value
+        T extends { type: 'array'; key: infer K; template: unknown; value: readonly (infer Item)[] }
         ? K extends string
-          ? F extends RegisteredFieldTypes[]
-            ? { [P in K]: InferFormValueWithDepth<F, Depth[D]>[] }
-            : { [P in K]: unknown[] }
+          ? { [P in K]: Widen<Item>[] }
           : never
-        : // Display-only: text - exclude
-          T extends { type: 'text' }
-          ? never
-          : // Button fields - exclude (they don't hold values)
-            T extends { type: 'submit' | 'button' | 'next' | 'previous' | 'addArrayItem' | 'removeArrayItem' }
-            ? never
-            : // Value fields with explicit value: infer type and optionality
-              T extends { key: infer K; value: infer V }
-              ? K extends string
-                ? { [P in K]: MaybeOptional<T, InferValueType<T, V>> }
-                : never
-              : // Value fields without explicit value: include as string (default input type)
-                T extends { key: infer K }
-                ? K extends string
-                  ? { [P in K]: MaybeOptional<T, string> }
-                  : never
-                : never;
+        : // Simplified array with template but no value — unknown[]
+          T extends { type: 'array'; key: infer K; template: unknown }
+          ? K extends string
+            ? { [P in K]: unknown[] }
+            : never
+          : // Container: array (full API) - wrap children type in array under key
+            T extends { type: 'array'; key: infer K; fields: infer F }
+            ? K extends string
+              ? F extends RegisteredFieldTypes[]
+                ? { [P in K]: InferFormValueWithDepth<F, Depth[D]>[] }
+                : { [P in K]: unknown[] }
+              : never
+            : // Display-only: text - exclude
+              T extends { type: 'text' }
+              ? never
+              : // Button fields - exclude (they don't hold values)
+                T extends { type: 'submit' | 'button' | 'next' | 'previous' | 'addArrayItem' | 'removeArrayItem' }
+                ? never
+                : // Value fields with explicit value: infer type and optionality
+                  T extends { key: infer K; value: infer V }
+                  ? K extends string
+                    ? { [P in K]: MaybeOptional<T, InferValueType<T, V>> }
+                    : never
+                  : // Value fields without explicit value: include as string (default input type)
+                    T extends { key: infer K }
+                    ? K extends string
+                      ? { [P in K]: MaybeOptional<T, string> }
+                      : never
+                    : never;
 
 /**
  * Internal helper with depth tracking

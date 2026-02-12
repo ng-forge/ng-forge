@@ -1,7 +1,7 @@
 import { LeafFieldTypes } from '../registry/field-registry';
 import type { RowField } from '../../definitions/default/row-field';
 import type { GroupField } from '../../definitions/default/group-field';
-import type { ArrayField } from '../../definitions/default/array-field';
+import type { ArrayField, SimplifiedArrayField } from '../../definitions/default/array-field';
 import type { HiddenField } from '../../definitions/default/hidden-field';
 
 /**
@@ -15,14 +15,14 @@ import type { HiddenField } from '../../definitions/default/hidden-field';
  * Fields that are allowed as children of Page fields
  * Pages can contain: rows, groups, arrays, and leaf fields (but NOT other pages)
  */
-export type PageAllowedChildren = LeafFieldTypes | RowField | GroupField | ArrayField;
+export type PageAllowedChildren = LeafFieldTypes | RowField | GroupField | ArrayField | SimplifiedArrayField;
 
 /**
  * Fields that are allowed as children of Row fields
  * Rows can contain: groups, arrays, and leaf fields (but NOT pages, other rows, or hidden fields)
  * Hidden fields are excluded because rows are for horizontal layouts and hidden fields don't render
  */
-export type RowAllowedChildren = Exclude<LeafFieldTypes, HiddenField> | GroupField | ArrayField;
+export type RowAllowedChildren = Exclude<LeafFieldTypes, HiddenField> | GroupField | ArrayField | SimplifiedArrayField;
 
 /**
  * Fields that are allowed as children of Group fields

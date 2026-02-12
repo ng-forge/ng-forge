@@ -13,5 +13,15 @@ export type {
 export { isCheckedField, isValueField } from './base';
 
 // Default field definitions (core/built-in fields)
-export type { ArrayField, GroupField, PageField, RowField, TextElementType, TextField, TextProps } from './default';
-export { isRowField } from './default';
+export type {
+  ArrayButtonConfig,
+  ArrayField,
+  GroupField,
+  PageField,
+  RowField,
+  SimplifiedArrayField,
+  TextElementType,
+  TextField,
+  TextProps,
+} from './default';
+export { isRowField, isSimplifiedArrayField } from './default';

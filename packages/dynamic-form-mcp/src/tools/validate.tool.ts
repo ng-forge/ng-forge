@@ -40,7 +40,8 @@ const FIX_SUGGESTIONS: Record<string, string> = {
   minValue: 'Use `minValue` at field level for sliders, not `min` in props.',
   maxValue: 'Use `maxValue` at field level for sliders, not `max` in props.',
   step: 'Use `step` at field level for sliders, not in props.',
-  template: 'Use `fields` instead of `template` for array item definition.',
+  template:
+    'Arrays support two APIs: (1) Full API with `fields` for explicit item definitions, or (2) Simplified API with `template` + `value` for common cases. If using `template`, provide a single field for primitive arrays or an array of fields for object arrays.',
   content: 'Use `label` for text content and `props: { elementType }` for HTML element.',
   element: 'Use `props: { elementType }` not `element` for text field HTML element.',
   hideWhen: "Use `logic: [{ type: 'hidden', condition: {...} }]` - no `hideWhen` shorthand exists.",
