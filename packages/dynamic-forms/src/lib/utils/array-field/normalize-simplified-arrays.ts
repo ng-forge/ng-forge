@@ -118,6 +118,7 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
       arrayKey: key,
       template: addTemplate,
       ...(buttonConfig.props && { props: buttonConfig.props }),
+      ...(logic && { logic }),
     } as unknown as FieldDef<unknown>;
   }
 
@@ -135,8 +136,8 @@ function buildPrimitiveItem(
   const templateField = { ...template, value } as ArrayAllowedChildren;
 
   if (removeButton === false) {
-    // No remove button — single field item (primitive)
-    return templateField;
+    // No remove button — wrap in array for consistent ArrayField.fields structure (FieldDef[][])
+    return [templateField];
   }
 
   // Wrap in a row with remove button
@@ -179,9 +180,9 @@ function buildObjectItem(
 function buildPrimitiveItemTemplate(
   template: ArrayAllowedChildren,
   removeButton: ArrayButtonConfig | false | undefined,
-): ArrayAllowedChildren | readonly ArrayAllowedChildren[] {
+): readonly ArrayAllowedChildren[] {
   if (removeButton === false) {
-    return template;
+    return [template];
   }
 
   return [

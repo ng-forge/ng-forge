@@ -3,9 +3,9 @@ import { normalizeSimplifiedArrays } from './normalize-simplified-arrays';
 import { FieldDef } from '../../definitions/base/field-def';
 
 // Helper to cast field literals to FieldDef<unknown>
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const f = (field: any) => field as FieldDef<unknown>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const fields = (...defs: any[]) => defs as FieldDef<unknown>[];
 
 describe('normalizeSimplifiedArrays', () => {
@@ -329,13 +329,14 @@ describe('normalizeSimplifiedArrays', () => {
       });
 
       const result = normalizeSimplifiedArrays(input);
-      const items = (result[0] as Record<string, unknown>).fields as unknown[];
+      const items = (result[0] as Record<string, unknown>).fields as unknown[][];
 
-      // Primitive without remove button: single field, not wrapped in row
+      // Primitive without remove button: wrapped in array (consistent FieldDef[][] structure), no row
       expect(items).toHaveLength(1);
-      const item = items[0] as Record<string, unknown>;
-      expect(item.type).toBe('input');
-      expect(item.value).toBe('angular');
+      const itemFields = items[0] as Record<string, unknown>[];
+      expect(itemFields).toHaveLength(1);
+      expect(itemFields[0].type).toBe('input');
+      expect(itemFields[0].value).toBe('angular');
     });
 
     it('should not generate remove button for object arrays when removeButton: false', () => {
@@ -437,7 +438,7 @@ describe('normalizeSimplifiedArrays', () => {
   });
 
   describe('logic config preservation', () => {
-    it('should preserve logic config on the expanded array field', () => {
+    it('should preserve logic config on the expanded array field and add button', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
@@ -449,6 +450,10 @@ describe('normalizeSimplifiedArrays', () => {
 
       const arrayField = result[0] as Record<string, unknown>;
       expect(arrayField.logic).toEqual([{ type: 'hidden', condition: true }]);
+
+      // Add button should also inherit the logic config
+      const addButton = result[1] as Record<string, unknown>;
+      expect(addButton.logic).toEqual([{ type: 'hidden', condition: true }]);
     });
   });
 

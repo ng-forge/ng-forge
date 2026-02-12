@@ -142,6 +142,37 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getArrayFieldsScenario('array-button-disabled-logic') },
   },
+  // Simplified array API (template + value)
+  {
+    path: 'simplified-array-primitive',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('simplified-array-primitive') },
+  },
+  {
+    path: 'simplified-array-object',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('simplified-array-object') },
+  },
+  {
+    path: 'simplified-array-empty',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('simplified-array-empty') },
+  },
+  {
+    path: 'simplified-array-button-customization',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('simplified-array-button-customization') },
+  },
+  {
+    path: 'simplified-array-button-optout',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('simplified-array-button-optout') },
+  },
+  {
+    path: 'simplified-array-conditional',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('simplified-array-conditional') },
+  },
 ];
 
 export default routes;

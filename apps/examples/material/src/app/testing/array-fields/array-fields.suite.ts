@@ -24,6 +24,12 @@ import { arrayRemoveScenario } from './scenarios/array-remove.scenario';
 import { arrayScreenReaderLabelsScenario } from './scenarios/array-screen-reader-labels.scenario';
 import { arrayShiftScenario } from './scenarios/array-shift.scenario';
 import { arrayValuesScenario } from './scenarios/array-values.scenario';
+import { simplifiedArrayPrimitiveScenario } from './scenarios/simplified-array-primitive.scenario';
+import { simplifiedArrayObjectScenario } from './scenarios/simplified-array-object.scenario';
+import { simplifiedArrayEmptyScenario } from './scenarios/simplified-array-empty.scenario';
+import { simplifiedArrayButtonCustomizationScenario } from './scenarios/simplified-array-button-customization.scenario';
+import { simplifiedArrayButtonOptoutScenario } from './scenarios/simplified-array-button-optout.scenario';
+import { simplifiedArrayConditionalScenario } from './scenarios/simplified-array-conditional.scenario';
 /**
  * Array Fields Suite
  * Tests various array field operations including add, remove,
@@ -79,6 +85,14 @@ export const arrayFieldsSuite: TestSuite = {
     // Button logic (hidden/disabled)
     arrayButtonHiddenLogicScenario,
     arrayButtonDisabledLogicScenario,
+
+    // Simplified array API (template + value)
+    simplifiedArrayPrimitiveScenario,
+    simplifiedArrayObjectScenario,
+    simplifiedArrayEmptyScenario,
+    simplifiedArrayButtonCustomizationScenario,
+    simplifiedArrayButtonOptoutScenario,
+    simplifiedArrayConditionalScenario,
   ],
 };
 
