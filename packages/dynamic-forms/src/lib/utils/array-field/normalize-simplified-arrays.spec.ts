@@ -36,7 +36,7 @@ describe('normalizeSimplifiedArrays', () => {
   });
 
   describe('primitive array expansion', () => {
-    it('should expand a primitive simplified array with values', () => {
+    it('should expand a primitive simplified array with values as single FieldDefs', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
@@ -54,19 +54,20 @@ describe('normalizeSimplifiedArrays', () => {
       expect(arrayField.key).toBe('tags');
       expect(arrayField.type).toBe('array');
 
-      const items = arrayField.fields as unknown[][];
+      // Items are single FieldDefs (primitive items), NOT wrapped in arrays/rows
+      const items = arrayField.fields as Record<string, unknown>[];
       expect(items).toHaveLength(2);
+      expect(items[0].type).toBe('input');
+      expect(items[0].value).toBe('angular');
+      expect(items[0].key).toBe('value');
+      expect(items[1].type).toBe('input');
+      expect(items[1].value).toBe('typescript');
 
-      // Each item should be wrapped in [row[template + remove]]
-      const firstItem = items[0] as Record<string, unknown>[];
-      expect(firstItem).toHaveLength(1);
-      const row = firstItem[0] as Record<string, unknown>;
-      expect(row.type).toBe('row');
-      const rowFields = row.fields as Record<string, unknown>[];
-      expect(rowFields).toHaveLength(2);
-      expect(rowFields[0].value).toBe('angular');
-      expect(rowFields[0].type).toBe('input');
-      expect(rowFields[1].type).toBe('removeArrayItem');
+      // __autoRemoveButton should be set for rendering remove buttons alongside items
+      expect(arrayField.__autoRemoveButton).toBeDefined();
+      const autoRemove = arrayField.__autoRemoveButton as Record<string, unknown>;
+      expect(autoRemove.type).toBe('removeArrayItem');
+      expect(autoRemove.label).toBe('Remove');
 
       // Add button
       const addButton = result[1] as Record<string, unknown>;
@@ -248,15 +249,13 @@ describe('normalizeSimplifiedArrays', () => {
 
       const result = normalizeSimplifiedArrays(input);
       const addButton = result[1] as Record<string, unknown>;
-      const addTemplate = addButton.template as Record<string, unknown>[];
+      const addTemplate = addButton.template as Record<string, unknown>;
 
-      // Template should be [row[input, removeButton]]
-      expect(addTemplate).toHaveLength(1);
-      const row = addTemplate[0] as Record<string, unknown>;
-      expect(row.type).toBe('row');
-      const rowFields = row.fields as Record<string, unknown>[];
-      expect(rowFields[0].type).toBe('input');
-      expect(rowFields[1].type).toBe('removeArrayItem');
+      // Template should be the single field (not wrapped in row/array)
+      // Remove button is handled via __autoRemoveButton on the array field
+      expect(addTemplate.type).toBe('input');
+      expect(addTemplate.key).toBe('value');
+      expect(addTemplate.label).toBe('Tag');
     });
 
     it('should generate add button with correct template for object items', () => {
@@ -282,7 +281,7 @@ describe('normalizeSimplifiedArrays', () => {
   });
 
   describe('remove button', () => {
-    it('should generate remove button with default label', () => {
+    it('should generate remove button via __autoRemoveButton with default label', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
@@ -291,16 +290,22 @@ describe('normalizeSimplifiedArrays', () => {
       });
 
       const result = normalizeSimplifiedArrays(input);
-      const items = (result[0] as Record<string, unknown>).fields as unknown[][];
-      const row = (items[0] as Record<string, unknown>[])[0] as Record<string, unknown>;
-      const rowFields = row.fields as Record<string, unknown>[];
-      const removeBtn = rowFields[1];
+      const arrayField = result[0] as Record<string, unknown>;
 
+      // Items are single FieldDefs (not wrapped in rows)
+      const items = arrayField.fields as Record<string, unknown>[];
+      expect(items).toHaveLength(1);
+      expect(items[0].type).toBe('input');
+      expect(items[0].value).toBe('angular');
+
+      // Remove button is stored as metadata on the array field
+      const removeBtn = arrayField.__autoRemoveButton as Record<string, unknown>;
+      expect(removeBtn).toBeDefined();
       expect(removeBtn.type).toBe('removeArrayItem');
       expect(removeBtn.label).toBe('Remove');
     });
 
-    it('should generate remove button with custom label and props', () => {
+    it('should generate remove button via __autoRemoveButton with custom label and props', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
@@ -310,11 +315,17 @@ describe('normalizeSimplifiedArrays', () => {
       });
 
       const result = normalizeSimplifiedArrays(input);
-      const items = (result[0] as Record<string, unknown>).fields as unknown[][];
-      const row = (items[0] as Record<string, unknown>[])[0] as Record<string, unknown>;
-      const rowFields = row.fields as Record<string, unknown>[];
-      const removeBtn = rowFields[1];
+      const arrayField = result[0] as Record<string, unknown>;
 
+      // Items are single FieldDefs (not wrapped in rows)
+      const items = arrayField.fields as Record<string, unknown>[];
+      expect(items).toHaveLength(1);
+      expect(items[0].type).toBe('input');
+      expect(items[0].value).toBe('angular');
+
+      // Remove button metadata with custom config
+      const removeBtn = arrayField.__autoRemoveButton as Record<string, unknown>;
+      expect(removeBtn).toBeDefined();
       expect(removeBtn.label).toBe('Delete');
       expect(removeBtn.props).toEqual({ color: 'warn' });
     });
@@ -329,14 +340,16 @@ describe('normalizeSimplifiedArrays', () => {
       });
 
       const result = normalizeSimplifiedArrays(input);
-      const items = (result[0] as Record<string, unknown>).fields as unknown[][];
+      const arrayField = result[0] as Record<string, unknown>;
 
-      // Primitive without remove button: wrapped in array (consistent FieldDef[][] structure), no row
+      // Primitive without remove button: single FieldDef items, no __autoRemoveButton
+      const items = arrayField.fields as Record<string, unknown>[];
       expect(items).toHaveLength(1);
-      const itemFields = items[0] as Record<string, unknown>[];
-      expect(itemFields).toHaveLength(1);
-      expect(itemFields[0].type).toBe('input');
-      expect(itemFields[0].value).toBe('angular');
+      expect(items[0].type).toBe('input');
+      expect(items[0].value).toBe('angular');
+
+      // No __autoRemoveButton metadata
+      expect(arrayField.__autoRemoveButton).toBeUndefined();
     });
 
     it('should not generate remove button for object arrays when removeButton: false', () => {

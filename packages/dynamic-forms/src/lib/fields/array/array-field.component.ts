@@ -103,19 +103,43 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
   /**
+   * Gets the auto-remove button FieldDef from the array field config.
+   * Set by simplified array normalization for primitive arrays with remove buttons.
+   * The button is rendered alongside each item without wrapping in a row,
+   * preserving flat primitive form values.
+   */
+  private readonly autoRemoveButton = computed<FieldDef<unknown> | undefined>(() => {
+    const arrayField = this.field();
+    const button = (arrayField as unknown as Record<string, unknown>)['__autoRemoveButton'];
+    return button ? (button as FieldDef<unknown>) : undefined;
+  });
+
+  /**
    * Gets the item templates (field definitions) for the array.
    * Each element can be either:
    * - A single FieldDef (primitive item) - normalized to [FieldDef]
    * - An array of FieldDefs (object item) - used as-is
+   *
+   * When __autoRemoveButton is set, the remove button is appended to each item's
+   * template list for rendering. This is purely visual — the form schema uses the
+   * original primitive item definition (single FieldDef → FormControl → flat value).
    *
    * Returns normalized templates where all items are arrays for consistent handling.
    */
   private readonly itemTemplates = computed<ArrayItemTemplate[]>(() => {
     const arrayField = this.field();
     const definitions = (arrayField.fields as ArrayItemDefinition[]) || [];
+    const removeButton = this.autoRemoveButton();
 
     // Normalize: single FieldDef → [FieldDef], array stays as-is
-    return definitions.map((def) => (Array.isArray(def) ? def : [def]) as ArrayItemTemplate);
+    // Append auto-remove button if configured (for primitive simplified arrays)
+    return definitions.map((def) => {
+      const normalized = (Array.isArray(def) ? def : [def]) as ArrayItemTemplate;
+      if (removeButton) {
+        return [...normalized, removeButton] as unknown as ArrayItemTemplate;
+      }
+      return normalized;
+    });
   });
 
   private readonly arrayFieldTrees = computed<readonly (FieldTree<unknown> | null)[]>(() => {
@@ -259,11 +283,14 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     this.updateVersion.update((v) => v + 1);
     const currentVersion = this.updateVersion();
 
+    // Append auto-remove button to resolution templates (for rendering only)
+    const resolveTemplates = this.withAutoRemove(templates);
+
     // Resolve the new item
     const resolvedItem = await firstValueFrom(
       resolveArrayItem({
         index: insertIndex,
-        templates,
+        templates: resolveTemplates,
         arrayField: this.field(),
         itemPositionMap: this.itemPositionMap,
         parentFieldSignalContext: this.parentFieldSignalContext,
@@ -447,7 +474,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     if (overrideTemplate && overrideTemplate.length > 0) {
       return resolveArrayItem({
         index,
-        templates: overrideTemplate,
+        templates: this.withAutoRemove(overrideTemplate),
         arrayField: this.field(),
         itemPositionMap: this.itemPositionMap,
         parentFieldSignalContext: this.parentFieldSignalContext,
@@ -483,6 +510,18 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         'This may indicate a bug - dynamically added items should have their templates stored.',
     );
     return of(undefined);
+  }
+
+  /**
+   * Appends the auto-remove button to a templates array for rendering.
+   * The button is added for visual rendering only — it doesn't affect the form schema.
+   * Original templates are stored in templateRegistry WITHOUT the remove button,
+   * so this method is called during resolution to add it dynamically.
+   */
+  private withAutoRemove(templates: FieldDef<unknown>[]): FieldDef<unknown>[] {
+    const removeButton = this.autoRemoveButton();
+    if (!removeButton) return templates;
+    return [...templates, removeButton];
   }
 
   /**

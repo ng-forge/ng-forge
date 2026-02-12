@@ -870,10 +870,10 @@ test.describe('Array Fields E2E Tests', () => {
 
         const data = await helpers.submitFormAndCapture(scenario);
         expect(data).toHaveProperty('tags');
-        const tags = data['tags'] as Record<string, unknown>[];
+        const tags = data['tags'] as string[];
         expect(tags).toHaveLength(2);
-        expect(tags[0]['value']).toBe('angular');
-        expect(tags[1]['value']).toBe('typescript');
+        expect(tags[0]).toBe('angular');
+        expect(tags[1]).toBe('typescript');
       });
     });
 

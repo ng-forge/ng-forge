@@ -156,7 +156,6 @@ describe('Form Submission Integration', () => {
           return result;
         };
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Testing edge case with invalid return type
         await submit(formInstance, wrappedAction as any);
 
         // Non-TreeValidationResult returns are treated as success
@@ -285,7 +284,7 @@ describe('Form Submission Integration', () => {
         mockFormSignal.set(formInstance);
 
         // Submit with action returning null (treated as success)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Testing edge case with null return
+
         await submit(formInstance, async () => null as any);
 
         // Should complete without errors

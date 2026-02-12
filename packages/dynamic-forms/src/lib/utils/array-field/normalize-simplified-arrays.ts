@@ -91,13 +91,20 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
     if (isObjectTemplate) {
       return buildObjectItem(template as readonly ArrayAllowedChildren[], v as Record<string, unknown>, removeButton);
     }
-    return buildPrimitiveItem(template as ArrayAllowedChildren, v, removeButton);
+    return buildPrimitiveItem(template as ArrayAllowedChildren, v);
   });
 
   // Build the add button template (item structure without values)
-  const addTemplate = isObjectTemplate
+  // For primitive arrays, the add template is a single field (not wrapped in array)
+  // so that handleAddFromEvent treats it as a primitive item
+  const addTemplate: ArrayAllowedChildren | readonly ArrayAllowedChildren[] = isObjectTemplate
     ? buildObjectItemTemplate(template as readonly ArrayAllowedChildren[], removeButton)
-    : buildPrimitiveItemTemplate(template as ArrayAllowedChildren, removeButton);
+    : (template as ArrayAllowedChildren);
+
+  // For primitive arrays with remove buttons, store the remove button config
+  // on the array field itself. The array component renders remove buttons alongside
+  // each item without wrapping in a row, preserving flat primitive form values.
+  const hasAutoRemove = !isObjectTemplate && removeButton !== false;
 
   // Construct the full ArrayField — cast through unknown since we're building the shape manually
   const arrayField = {
@@ -105,6 +112,7 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
     type: 'array' as const,
     fields: items,
     ...(logic && { logic }),
+    ...(hasAutoRemove && { __autoRemoveButton: buildRemoveButton(removeButton) }),
   } as unknown as FieldDef<unknown>;
 
   // Construct the add button (sibling, placed after the array)
@@ -126,29 +134,17 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
 }
 
 /**
- * Builds a primitive array item: wraps template field + remove button in a row.
+ * Builds a primitive array item as a single FieldDef (not wrapped in array).
+ *
+ * This ensures the form schema creates FormControls (not FormGroups) for each item,
+ * producing flat primitive values like `['angular', 'typescript']` instead of
+ * `[{ value: 'angular' }, { value: 'typescript' }]`.
+ *
+ * Remove buttons are handled separately via `__autoRemoveButton` on the array field,
+ * which the array component renders alongside each item without affecting form values.
  */
-function buildPrimitiveItem(
-  template: ArrayAllowedChildren,
-  value: unknown,
-  removeButton: ArrayButtonConfig | false | undefined,
-): ArrayItemDefinition {
-  const templateField = { ...template, value } as ArrayAllowedChildren;
-
-  if (removeButton === false) {
-    // No remove button — wrap in array for consistent ArrayField.fields structure (FieldDef[][])
-    return [templateField];
-  }
-
-  // Wrap in a row with remove button
-  const removeBtn = buildRemoveButton(removeButton);
-  return [
-    {
-      key: template.key,
-      type: 'row',
-      fields: [templateField, removeBtn],
-    } as unknown as ArrayAllowedChildren,
-  ];
+function buildPrimitiveItem(template: ArrayAllowedChildren, value: unknown): ArrayItemDefinition {
+  return { ...template, value } as ArrayAllowedChildren;
 }
 
 /**
@@ -172,26 +168,6 @@ function buildObjectItem(
   }
 
   return [...fieldsWithValues, buildRemoveButton(removeButton)];
-}
-
-/**
- * Builds the add button template for primitive items (item structure without values).
- */
-function buildPrimitiveItemTemplate(
-  template: ArrayAllowedChildren,
-  removeButton: ArrayButtonConfig | false | undefined,
-): readonly ArrayAllowedChildren[] {
-  if (removeButton === false) {
-    return [template];
-  }
-
-  return [
-    {
-      key: template.key,
-      type: 'row',
-      fields: [template, buildRemoveButton(removeButton)],
-    } as unknown as ArrayAllowedChildren,
-  ];
 }
 
 /**
