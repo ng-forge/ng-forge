@@ -25,6 +25,17 @@ export interface CreateArrayItemInjectorOptions<TModel extends Record<string, un
   registry: Map<string, FieldTypeDefinition>;
   /** The array field definition containing this item. */
   arrayField: ArrayField;
+  /**
+   * For primitive array items, the key of the value field in the template (e.g., 'value').
+   * When set, the form getter wraps the raw FormControl in `{ [primitiveFieldKey]: FormControl }`
+   * so that `getFieldTree(key)` can navigate to the control by key.
+   *
+   * Primitive items store flat values (e.g., `['angular']` not `[{value: 'angular'}]`),
+   * so the FieldTree at `rootForm['arrayKey'][index]` is a FormControl, not a FormGroup.
+   * Without wrapping, `getFieldTree('value')` would access the FormControl's `.value`
+   * property (a WritableSignal) instead of a child FieldTree.
+   */
+  primitiveFieldKey?: string;
 }
 
 /**
@@ -54,7 +65,7 @@ export interface ArrayItemInjectorResult {
 export function createArrayItemInjectorAndInputs<TModel extends Record<string, unknown>>(
   options: CreateArrayItemInjectorOptions<TModel>,
 ): ArrayItemInjectorResult {
-  const { template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField } = options;
+  const { template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField, primitiveFieldKey } = options;
 
   // Get root form registry - it's guaranteed to be available since root form
   // is registered before resolvedFields computes (dependency chain ensures this)
@@ -87,6 +98,7 @@ export function createArrayItemInjectorAndInputs<TModel extends Record<string, u
     parentFieldSignalContext,
     parentInjector,
     arrayField,
+    primitiveFieldKey,
   });
 
   // mapFieldToInputs automatically reads ARRAY_CONTEXT from the injector
@@ -104,6 +116,7 @@ interface CreateItemInjectorOptions<TModel extends Record<string, unknown>> {
   parentFieldSignalContext: FieldSignalContext<TModel>;
   parentInjector: Injector;
   arrayField: ArrayField;
+  primitiveFieldKey?: string;
 }
 
 /**
@@ -116,7 +129,7 @@ interface CreateItemInjectorOptions<TModel extends Record<string, unknown>> {
  * automatically update when array items reorder.
  */
 function createItemInjector<TModel extends Record<string, unknown>>(options: CreateItemInjectorOptions<TModel>): Injector {
-  const { itemFormAccessor, indexSignal, parentFieldSignalContext, parentInjector, arrayField } = options;
+  const { itemFormAccessor, indexSignal, parentFieldSignalContext, parentInjector, arrayField, primitiveFieldKey } = options;
 
   // Use getter for formValue to ensure it's always current, not a stale snapshot.
   // Components accessing arrayContext.formValue will get the current value.
@@ -137,7 +150,20 @@ function createItemInjector<TModel extends Record<string, unknown>>(options: Cre
     value: parentFieldSignalContext.value,
     defaultValues: () => ({}),
     get form(): FieldTree<Record<string, unknown>> {
-      return itemFormAccessor() as FieldTree<Record<string, unknown>>;
+      const raw = itemFormAccessor();
+      if (!raw) {
+        return raw as unknown as FieldTree<Record<string, unknown>>;
+      }
+
+      // For primitive array items, the FieldTree is a FormControl (the item IS the control).
+      // Wrap it in an object so getFieldTree(primitiveFieldKey) returns the FormControl itself.
+      // Without this, getFieldTree('value') would access FormControl['value'] (the WritableSignal),
+      // not a child FieldTree, causing NG0950 errors.
+      if (primitiveFieldKey) {
+        return { [primitiveFieldKey]: raw } as FieldTree<Record<string, unknown>>;
+      }
+
+      return raw as FieldTree<Record<string, unknown>>;
     },
   };
 

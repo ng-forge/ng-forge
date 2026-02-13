@@ -115,6 +115,32 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   });
 
   /**
+   * Tracks the primitive field key discovered from dynamically added items.
+   * Needed for arrays that start empty — definitions.length === 0 means we can't
+   * detect primitiveness until the first add event arrives with a template.
+   */
+  private readonly _dynamicPrimitiveFieldKey = signal<string | undefined>(undefined);
+
+  /**
+   * For primitive array items, the key of the value field template (e.g., 'value').
+   * Used to wrap the FormControl in the item context so getFieldTree(key) works.
+   * Returns undefined for object arrays (FormGroup items have natural child navigation).
+   *
+   * Detection order:
+   * 1. Existing item definitions (non-empty arrays)
+   * 2. Dynamically discovered key from handleAddFromEvent (empty arrays)
+   */
+  private readonly primitiveFieldKey = computed<string | undefined>(() => {
+    const definitions = (this.field().fields as ArrayItemDefinition[]) || [];
+    // Primitive items are single FieldDefs (not arrays) in the definitions
+    if (definitions.length > 0 && !Array.isArray(definitions[0])) {
+      return (definitions[0] as FieldDef<unknown>).key;
+    }
+    // Fall back to dynamically discovered key (from first add to an empty array)
+    return this._dynamicPrimitiveFieldKey();
+  });
+
+  /**
    * Gets the item templates (field definitions) for the array.
    * Each element can be either:
    * - A single FieldDef (primitive item) - normalized to [FieldDef]
@@ -237,6 +263,11 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     const templates = Array.isArray(template) ? template : [template];
     const isPrimitiveItem = !Array.isArray(template);
 
+    // Track primitive field key for arrays that start empty (can't detect from definitions)
+    if (isPrimitiveItem && templates[0].key && !this._dynamicPrimitiveFieldKey()) {
+      this._dynamicPrimitiveFieldKey.set(templates[0].key);
+    }
+
     if (templates.length === 0) {
       this.logger.error(
         `Cannot add item to array '${this.field().key}': no field templates provided. ` +
@@ -299,6 +330,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
         generateItemId: this.generateItemId,
+        primitiveFieldKey: isPrimitiveItem ? templates[0].key : undefined,
       }).pipe(
         catchError((error) => {
           this.logger.error(`Failed to resolve array item at index ${insertIndex}:`, error);
@@ -469,6 +501,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    */
   private createResolveItemObservable(index: number, overrideTemplate?: FieldDef<unknown>[]): Observable<ResolvedArrayItem | undefined> {
     const itemTemplates = this.itemTemplates();
+    const primitiveKey = this.primitiveFieldKey();
 
     // Priority 1: Use override template (from recreate with stored templates)
     if (overrideTemplate && overrideTemplate.length > 0) {
@@ -483,6 +516,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
         generateItemId: this.generateItemId,
+        primitiveFieldKey: primitiveKey,
       });
     }
 
@@ -500,6 +534,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
         generateItemId: this.generateItemId,
+        primitiveFieldKey: primitiveKey,
       });
     }
 
