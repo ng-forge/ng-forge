@@ -3,10 +3,7 @@ import { normalizeSimplifiedArrays } from './normalize-simplified-arrays';
 import { FieldDef } from '../../definitions/base/field-def';
 
 // Helper to cast field literals to FieldDef<unknown>
-
-const f = (field: any) => field as FieldDef<unknown>;
-
-const fields = (...defs: any[]) => defs as FieldDef<unknown>[];
+const fields = (...defs: Record<string, unknown>[]) => defs as FieldDef<unknown>[];
 
 describe('normalizeSimplifiedArrays', () => {
   describe('passthrough', () => {
@@ -483,6 +480,62 @@ describe('normalizeSimplifiedArrays', () => {
       const secondPass = normalizeSimplifiedArrays(firstPass);
 
       expect(secondPass).toEqual(firstPass);
+    });
+  });
+
+  describe('primitive value shape preservation', () => {
+    it('should produce flat primitive items from template (add button template is single FieldDef)', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: { key: 'value', type: 'input', label: 'Tag' },
+        value: ['angular', 'typescript'],
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+      const arrayField = result[0] as Record<string, unknown>;
+      const items = arrayField.fields as Record<string, unknown>[];
+
+      // Each item is a single FieldDef (NOT wrapped in an array), ensuring FormControl (not FormGroup)
+      for (const item of items) {
+        expect(Array.isArray(item)).toBe(false);
+        expect(item.type).toBe('input');
+        expect(item.key).toBe('value');
+      }
+
+      // The add button template should also be a single FieldDef (not an array)
+      const addButton = result[1] as Record<string, unknown>;
+      const addTemplate = addButton.template as Record<string, unknown>;
+      expect(Array.isArray(addTemplate)).toBe(false);
+      expect(addTemplate.type).toBe('input');
+      expect(addTemplate.key).toBe('value');
+    });
+  });
+
+  describe('removing all items', () => {
+    it('should produce empty fields array when value is empty', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: { key: 'value', type: 'input', label: 'Tag' },
+        value: [],
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.fields).toEqual([]);
+    });
+
+    it('should produce empty fields array when no value is provided', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: { key: 'value', type: 'input', label: 'Tag' },
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.fields).toEqual([]);
     });
   });
 

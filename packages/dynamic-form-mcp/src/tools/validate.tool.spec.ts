@@ -1346,6 +1346,144 @@ export const formConfig = {
     });
   });
 
+  describe('simplified arrays', () => {
+    it('validates simplified array with template and value', async () => {
+      const result = await registeredTool.handler({
+        uiIntegration: 'material',
+        config: {
+          fields: [
+            {
+              key: 'tags',
+              type: 'array',
+              template: { key: 'tag', type: 'input', label: 'Tag' },
+              value: ['angular', 'typescript'],
+            },
+          ],
+        },
+      });
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
+
+      expect(content.valid).toBe(true);
+    });
+
+    it('validates simplified array with template only (no value)', async () => {
+      const result = await registeredTool.handler({
+        uiIntegration: 'material',
+        config: {
+          fields: [
+            {
+              key: 'items',
+              type: 'array',
+              template: [
+                { key: 'name', type: 'input', label: 'Name' },
+                { key: 'quantity', type: 'input', label: 'Quantity' },
+              ],
+            },
+          ],
+        },
+      });
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
+
+      expect(content.valid).toBe(true);
+    });
+
+    it('reports error for array with both fields and template', async () => {
+      const result = await registeredTool.handler({
+        uiIntegration: 'material',
+        config: {
+          fields: [
+            {
+              key: 'items',
+              type: 'array',
+              fields: [{ key: 'item', type: 'input', label: 'Item' }],
+              template: [{ key: 'item', type: 'input', label: 'Item' }],
+            },
+          ],
+        },
+      });
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
+
+      expect(content.valid).toBe(false);
+      expect(content.errors.length).toBeGreaterThan(0);
+    });
+
+    it('validates simplified array with addButton and removeButton config', async () => {
+      const result = await registeredTool.handler({
+        uiIntegration: 'material',
+        config: {
+          fields: [
+            {
+              key: 'phones',
+              type: 'array',
+              template: { key: 'phone', type: 'input', label: 'Phone' },
+              value: ['+1234567890'],
+              addButton: { label: 'Add Phone' },
+              removeButton: { label: 'Remove' },
+            },
+          ],
+        },
+      });
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
+
+      expect(content.valid).toBe(true);
+    });
+
+    it('validates simplified array with buttons disabled (false)', async () => {
+      const result = await registeredTool.handler({
+        uiIntegration: 'material',
+        config: {
+          fields: [
+            {
+              key: 'emails',
+              type: 'array',
+              template: { key: 'email', type: 'input', label: 'Email' },
+              addButton: false,
+              removeButton: false,
+            },
+          ],
+        },
+      });
+      // content[1] contains the JSON output (content[0] is markdown report)
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
+
+      expect(content.valid).toBe(true);
+    });
+  });
+
   describe('parseConfigInput edge cases', () => {
     beforeEach(() => {
       vi.clearAllMocks();

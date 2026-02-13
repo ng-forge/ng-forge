@@ -12,7 +12,7 @@ type UnionToIntersection<U> = (U extends U ? (k: U) => void : never) extends (k:
 type Depth = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 /**
- * Widens literal types to their primitive equivalents.
+ * Widens literal types to their primitive equivalents, recursively for objects and arrays.
  * This prevents `as const` from over-narrowing types like `''` to literal `''` instead of `string`.
  *
  * @example
@@ -21,9 +21,20 @@ type Depth = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
  * type B = Widen<false>; // boolean
  * type C = Widen<42>; // number
  * type D = Widen<string[]>; // string[]
+ * type E = Widen<{ name: 'Jane' }>; // { name: string }
  * ```
  */
-type Widen<T> = T extends string ? string : T extends number ? number : T extends boolean ? boolean : T;
+type Widen<T> = T extends string
+  ? string
+  : T extends number
+    ? number
+    : T extends boolean
+      ? boolean
+      : T extends readonly (infer U)[]
+        ? Widen<U>[]
+        : T extends Record<string, unknown>
+          ? { -readonly [K in keyof T]: Widen<T[K]> }
+          : T;
 
 /**
  * Infer value type based on field type and props.

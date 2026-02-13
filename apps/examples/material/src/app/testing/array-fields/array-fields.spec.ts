@@ -4,10 +4,6 @@ setupTestLogging();
 setupConsoleCheck();
 
 test.describe('Array Fields E2E Tests', () => {
-  test.beforeEach(async ({ helpers }) => {
-    await helpers.navigateToScenario('/test/array-fields');
-  });
-
   test.describe('Basic Array Operations', () => {
     test('should add new array items dynamically', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-add');
@@ -829,6 +825,9 @@ test.describe('Array Fields E2E Tests', () => {
         // Remove buttons should be visible (one per item)
         const removeButtons = scenario.locator('#tags button:has-text("Remove")');
         await expect(removeButtons).toHaveCount(2, { timeout: 5000 });
+
+        // Screenshot: Simplified primitive array initial state
+        await helpers.expectScreenshotMatch(scenario, 'material-simplified-array-primitive-initial');
       });
 
       test('should add and remove primitive items', async ({ page, helpers }) => {
@@ -875,6 +874,55 @@ test.describe('Array Fields E2E Tests', () => {
         expect(tags[0]).toBe('angular');
         expect(tags[1]).toBe('typescript');
       });
+
+      test('should produce flat primitive values after adding an item', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-primitive');
+        await page.goto('/#/test/array-fields/simplified-array-primitive');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        const inputs = scenario.locator('#tags input');
+        await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+        // Add a new item
+        const addButton = scenario.locator('button:has-text("Add")');
+        await addButton.click();
+        await expect(inputs).toHaveCount(3, { timeout: 10000 });
+
+        // Fill the new item
+        await inputs.nth(2).fill('react');
+
+        // Submit and verify flat array shape (not [{value: '...'}, ...])
+        const data = await helpers.submitFormAndCapture(scenario);
+        expect(data).toHaveProperty('tags');
+        const tags = data['tags'] as string[];
+        expect(tags).toHaveLength(3);
+        expect(tags[0]).toBe('angular');
+        expect(tags[1]).toBe('typescript');
+        expect(tags[2]).toBe('react');
+      });
+
+      test('should remove all items and submit empty array', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-primitive');
+        await page.goto('/#/test/array-fields/simplified-array-primitive');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        const inputs = scenario.locator('#tags input');
+        await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+        // Remove both items
+        const removeButtons = scenario.locator('#tags button:has-text("Remove")');
+        await removeButtons.first().click();
+        await expect(inputs).toHaveCount(1, { timeout: 10000 });
+        await removeButtons.first().click();
+        await expect(inputs).toHaveCount(0, { timeout: 10000 });
+
+        // Submit and verify empty array
+        const data = await helpers.submitFormAndCapture(scenario);
+        expect(data).toHaveProperty('tags');
+        expect(data['tags']).toEqual([]);
+      });
     });
 
     test.describe('Object Array', () => {
@@ -900,6 +948,9 @@ test.describe('Array Fields E2E Tests', () => {
 
         const removeButtons = scenario.locator('#contacts button:has-text("Remove")');
         await expect(removeButtons).toHaveCount(2, { timeout: 5000 });
+
+        // Screenshot: Simplified object array initial state
+        await helpers.expectScreenshotMatch(scenario, 'material-simplified-array-object-initial');
       });
 
       test('should add and remove object items', async ({ page, helpers }) => {

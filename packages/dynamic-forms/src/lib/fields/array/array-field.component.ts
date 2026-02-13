@@ -3,7 +3,7 @@ import { NgComponentOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { ArrayField, ArrayItemDefinition, ArrayItemTemplate } from '../../definitions/default/array-field';
+import { ArrayField, ArrayItemDefinition, ArrayItemTemplate, NormalizedArrayField } from '../../definitions/default/array-field';
 import { isGroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldTree } from '@angular/forms/signals';
@@ -109,9 +109,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * preserving flat primitive form values.
    */
   private readonly autoRemoveButton = computed<FieldDef<unknown> | undefined>(() => {
-    const arrayField = this.field();
-    const button = (arrayField as unknown as Record<string, unknown>)['__autoRemoveButton'];
-    return button ? (button as FieldDef<unknown>) : undefined;
+    const arrayField = this.field() as NormalizedArrayField;
+    return arrayField.__autoRemoveButton;
   });
 
   /**

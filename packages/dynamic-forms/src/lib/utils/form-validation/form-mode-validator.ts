@@ -3,7 +3,7 @@ import { RegisteredFieldTypes } from '../../models/registry';
 import { validatePageNesting } from '../../definitions/default/page-field';
 import { isRowField, validateRowNesting } from '../../definitions/default/row-field';
 import { isGroupField } from '../../definitions/default/group-field';
-import { isArrayField } from '../../definitions/default/array-field';
+import { isArrayField, isSimplifiedArrayField } from '../../definitions/default/array-field';
 import { FieldDef } from '../../definitions/base/field-def';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 
@@ -136,6 +136,10 @@ export class FormModeValidator {
       } else if (isGroupField(field)) {
         // Check rows within groups
         warnings.push(...this.collectRowHiddenFieldWarnings(field.fields, fieldPath));
+      } else if (isSimplifiedArrayField(field)) {
+        // Simplified arrays are normalized later; check template fields if present
+        const templateFields = Array.isArray(field.template) ? [...field.template] : [field.template];
+        warnings.push(...this.collectRowHiddenFieldWarnings(templateFields as FieldDef<unknown>[], fieldPath));
       } else if (isArrayField(field)) {
         // Check rows within array templates — items may be single FieldDef (primitive) or FieldDef[] (object)
         const itemTemplates = field.fields as readonly (FieldDef<unknown> | readonly FieldDef<unknown>[])[];

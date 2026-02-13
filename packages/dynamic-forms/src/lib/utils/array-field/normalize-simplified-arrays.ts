@@ -5,6 +5,7 @@ import {
   ArrayButtonConfig,
   ArrayField,
   isArrayField,
+  NormalizedArrayField,
 } from '../../definitions/default/array-field';
 import { isPageField, PageField } from '../../definitions/default/page-field';
 import { isRowField, RowField } from '../../definitions/default/row-field';
@@ -113,7 +114,7 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
     fields: items,
     ...(logic && { logic }),
     ...(hasAutoRemove && { __autoRemoveButton: buildRemoveButton(removeButton) }),
-  } as unknown as FieldDef<unknown>;
+  } as unknown as NormalizedArrayField as FieldDef<unknown>;
 
   // Construct the add button (sibling, placed after the array)
   let addButtonField: FieldDef<unknown> | undefined;
@@ -126,6 +127,8 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
       arrayKey: key,
       template: addTemplate,
       ...(buttonConfig.props && { props: buttonConfig.props }),
+      // Logic is intentionally shared with the array field so the add button
+      // hides/shows together with the array (e.g., when a hidden condition applies).
       ...(logic && { logic }),
     } as unknown as FieldDef<unknown>;
   }
@@ -159,7 +162,7 @@ function buildObjectItem(
     (templateField) =>
       ({
         ...templateField,
-        ...(templateField.key in valueObj && { value: valueObj[templateField.key] }),
+        ...(Object.hasOwn(valueObj, templateField.key) && { value: valueObj[templateField.key] }),
       }) as ArrayAllowedChildren,
   );
 

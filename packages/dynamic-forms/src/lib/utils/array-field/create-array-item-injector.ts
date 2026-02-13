@@ -127,6 +127,9 @@ interface CreateItemInjectorOptions<TModel extends Record<string, unknown>> {
  * This makes form access reactive - when mappers access context.form['fieldKey'], the getter runs,
  * evaluating the computed which tracks indexSignal as a dependency. This ensures components
  * automatically update when array items reorder.
+ *
+ * Uses `useFactory` with `deps: [Injector]` to provide FIELD_SIGNAL_CONTEXT. Angular resolves
+ * the `Injector` dep as the child injector being created, eliminating any temporal gap.
  */
 function createItemInjector<TModel extends Record<string, unknown>>(options: CreateItemInjectorOptions<TModel>): Injector {
   const { itemFormAccessor, indexSignal, parentFieldSignalContext, parentInjector, arrayField, primitiveFieldKey } = options;
@@ -142,40 +145,40 @@ function createItemInjector<TModel extends Record<string, unknown>>(options: Cre
     field: arrayField,
   };
 
-  // Use object with getter to make form access reactive.
-  // When mappers access context.form, the getter evaluates itemFormAccessor().
-  // If this is inside another computed (like mapper's return), dependency tracking works correctly.
-  const itemFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
-    injector: undefined as unknown as Injector,
-    value: parentFieldSignalContext.value,
-    defaultValues: () => ({}),
-    get form(): FieldTree<Record<string, unknown>> {
-      const raw = itemFormAccessor();
-      if (!raw) {
-        return raw as unknown as FieldTree<Record<string, unknown>>;
-      }
-
-      // For primitive array items, the FieldTree is a FormControl (the item IS the control).
-      // Wrap it in an object so getFieldTree(primitiveFieldKey) returns the FormControl itself.
-      // Without this, getFieldTree('value') would access FormControl['value'] (the WritableSignal),
-      // not a child FieldTree, causing NG0950 errors.
-      if (primitiveFieldKey) {
-        return { [primitiveFieldKey]: raw } as FieldTree<Record<string, unknown>>;
-      }
-
-      return raw as FieldTree<Record<string, unknown>>;
-    },
-  };
-
-  const injector = Injector.create({
+  return Injector.create({
     parent: parentInjector,
     providers: [
-      { provide: FIELD_SIGNAL_CONTEXT, useValue: itemFieldSignalContext },
+      {
+        provide: FIELD_SIGNAL_CONTEXT,
+        // Angular resolves `Injector` in deps as the child injector being created,
+        // so no temporal gap exists — the injector reference is immediately available.
+        useFactory: (injector: Injector): FieldSignalContext<Record<string, unknown>> => ({
+          injector,
+          value: parentFieldSignalContext.value,
+          defaultValues: () => ({}),
+          get form(): FieldTree<Record<string, unknown>> {
+            const raw = itemFormAccessor();
+            if (!raw) {
+              // During initialization or transitions, the FieldTree may not be available yet.
+              // Return an empty object so that downstream getFieldTree(key) calls return undefined
+              // rather than causing a runtime error on a truly undefined value.
+              return {} as FieldTree<Record<string, unknown>>;
+            }
+
+            // For primitive array items, the FieldTree is a FormControl (the item IS the control).
+            // Wrap it in an object so getFieldTree(primitiveFieldKey) returns the FormControl itself.
+            // Without this, getFieldTree('value') would access FormControl['value'] (the WritableSignal),
+            // not a child FieldTree, causing NG0950 errors.
+            if (primitiveFieldKey) {
+              return { [primitiveFieldKey]: raw } as FieldTree<Record<string, unknown>>;
+            }
+
+            return raw as FieldTree<Record<string, unknown>>;
+          },
+        }),
+        deps: [Injector],
+      },
       { provide: ARRAY_CONTEXT, useValue: arrayContext },
     ],
   });
-
-  itemFieldSignalContext.injector = injector;
-
-  return injector;
 }
