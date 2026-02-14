@@ -22,7 +22,7 @@ The `template` shape determines the array variant:
 
 ```typescript
 // Discriminant: template is a single field → primitive array
-{ key: 'tags', type: 'array', template: { type: 'input', label: 'Tag' } }
+{ key: 'tags', type: 'array', template: { key: 'value', type: 'input', label: 'Tag' } }
 
 // Discriminant: template is an array of fields → object array
 { key: 'contacts', type: 'array', template: [
@@ -39,7 +39,7 @@ For simple arrays of scalar values like `['angular', 'typescript']`, provide a s
 {
   key: 'tags',
   type: 'array',
-  template: { type: 'input', label: 'Tag', required: true },
+  template: { key: 'value', type: 'input', label: 'Tag', required: true },
   value: ['angular', 'typescript'],
 }
 ```
@@ -95,7 +95,7 @@ Omit `value` or set `value: []` to start with an empty array. Users populate it 
 {
   key: 'tags',
   type: 'array',
-  template: { type: 'input', label: 'Tag' },
+  template: { key: 'value', type: 'input', label: 'Tag' },
 }
 
 // Explicit empty array — same behavior
@@ -121,7 +121,7 @@ By default, the library generates an **Add** button (label: `"Add"`) after the a
 {
   key: 'tags',
   type: 'array',
-  template: { type: 'input', label: 'Tag' },
+  template: { key: 'value', type: 'input', label: 'Tag' },
   value: ['angular'],
   addButton: { label: 'Add Tag', props: { color: 'primary' } },
   removeButton: { label: 'Delete', props: { color: 'warn' } },
@@ -144,7 +144,7 @@ Set `addButton: false` or `removeButton: false` to suppress the corresponding au
 {
   key: 'defaultTags',
   type: 'array',
-  template: { type: 'input', label: 'Tag' },
+  template: { key: 'value', type: 'input', label: 'Tag' },
   value: ['featured', 'popular'],
   addButton: false,
 }
@@ -153,7 +153,7 @@ Set `addButton: false` or `removeButton: false` to suppress the corresponding au
 {
   key: 'skills',
   type: 'array',
-  template: { type: 'input', label: 'Skill' },
+  template: { key: 'value', type: 'input', label: 'Skill' },
   value: ['TypeScript'],
   removeButton: false,
 }
@@ -162,7 +162,7 @@ Set `addButton: false` or `removeButton: false` to suppress the corresponding au
 {
   key: 'readonlyItems',
   type: 'array',
-  template: { type: 'input', label: 'Item' },
+  template: { key: 'value', type: 'input', label: 'Item' },
   value: ['A', 'B', 'C'],
   addButton: false,
   removeButton: false,
@@ -189,7 +189,7 @@ const formConfig: FormConfig = {
     {
       key: 'tags',
       type: 'array',
-      template: { type: 'input', label: 'Tag', required: true, minLength: 2 },
+      template: { key: 'value', type: 'input', label: 'Tag', required: true, minLength: 2 },
       value: ['angular', 'open-source'],
       addButton: { label: 'Add Tag' },
       removeButton: { label: 'Remove Tag' },
@@ -274,7 +274,7 @@ Simplified arrays support `logic` for conditional visibility, just like the comp
 {
   key: 'extras',
   type: 'array',
-  template: { type: 'input', label: 'Extra' },
+  template: { key: 'value', type: 'input', label: 'Extra' },
   value: [],
   logic: [{ type: 'hidden', condition: { field: 'showExtras', value: false } }],
 }

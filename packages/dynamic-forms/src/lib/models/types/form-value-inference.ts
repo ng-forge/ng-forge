@@ -18,6 +18,10 @@ type Depth = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
  * Depth-limited to prevent slow type checking on deeply nested `as const` objects.
  * Falls back to `T` (unwidened) when depth is exhausted.
  *
+ * Note: For object types, `readonly` modifiers are intentionally stripped (`-readonly`)
+ * so that inferred form value types have mutable properties. This is by design since
+ * `as const` adds `readonly` to all properties, but form values should be mutable.
+ *
  * @example
  * ```typescript
  * type A = Widen<''>; // string

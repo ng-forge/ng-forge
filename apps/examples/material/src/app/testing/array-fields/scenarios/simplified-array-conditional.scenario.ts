@@ -28,6 +28,11 @@ const config = {
         },
       ],
     },
+    {
+      key: 'submit',
+      type: 'submit',
+      label: 'Submit',
+    },
   ],
 } as const satisfies FormConfig;
 

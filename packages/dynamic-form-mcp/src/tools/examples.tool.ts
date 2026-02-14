@@ -298,7 +298,7 @@ const formConfig = {
 // Output: { contacts: [{ name: 'Jane', phone: '555-1234' }, ...] }
 
 // For primitive arrays:
-// { key: 'tags', type: 'array', template: { type: 'input', label: 'Tag' }, value: ['a', 'b'] }
+// { key: 'tags', type: 'array', template: { key: 'value', type: 'input', label: 'Tag' }, value: ['a', 'b'] }
 // Output: { tags: ['a', 'b'] }`,
 
     full: `# Minimal Array Form
@@ -341,7 +341,7 @@ const tagForm = {
       key: 'tags',
       type: 'array',
       // template: single field = primitive items
-      template: { type: 'input', label: 'Tag' },
+      template: { key: 'value', type: 'input', label: 'Tag' },
       value: ['angular', 'typescript']
     },
     { key: 'submit', type: 'submit', label: 'Submit' }
@@ -400,7 +400,7 @@ The simplified API uses \`template\` + \`value\` and auto-generates add/remove b
 {
   key: 'tags',
   type: 'array',
-  template: { type: 'input', label: 'Tag' },  // Single field = primitive
+  template: { key: 'value', type: 'input', label: 'Tag' },  // Single field = primitive
   value: ['angular', 'typescript']
 }
 // Output: { tags: ['angular', 'typescript'] }
@@ -425,7 +425,7 @@ The simplified API uses \`template\` + \`value\` and auto-generates add/remove b
 {
   key: 'items',
   type: 'array',
-  template: { type: 'input', label: 'Item' },
+  template: { key: 'value', type: 'input', label: 'Item' },
   addButton: { label: 'Add Item', props: { color: 'primary' } },
   removeButton: false  // Disable remove buttons
 }
@@ -517,7 +517,7 @@ const formConfig = {
     {
       key: 'tags',
       type: 'array',
-      template: { type: 'input', label: 'Tag' },
+      template: { key: 'value', type: 'input', label: 'Tag' },
       value: ['angular', 'typescript']
     },
     { key: 'submit', type: 'submit', label: 'Submit' }
@@ -533,7 +533,7 @@ const formConfig = {
     {
       key: 'tags',
       type: 'array',
-      template: { type: 'input', label: 'Tag' },  // Single field = primitive
+      template: { key: 'value', type: 'input', label: 'Tag' },  // Single field = primitive
       value: ['angular', 'typescript']
     },
     // Object array
@@ -566,7 +566,7 @@ const formConfig = {
     {
       key: 'tags',
       type: 'array',
-      template: { type: 'input', label: 'Tag' },  // Single field = primitive items
+      template: { key: 'value', type: 'input', label: 'Tag' },  // Single field = primitive items
       value: ['angular', 'typescript']               // Initial values
       // Add/remove buttons are auto-generated!
     },
@@ -2209,23 +2209,20 @@ const megaFormConfig = {
           ]
         },
 
-        // ARRAY
+        // ARRAY (Simplified API - recommended)
         {
           key: 'itemsHeader', type: 'text', label: 'Dynamic Array:', props: { elementType: 'h3' }
         },
         {
           key: 'demoArray',
           type: 'array',
-          fields: [{
-            key: 'arrayItem',
-            type: 'group',
-            fields: [
-              { key: 'itemName', type: 'input', label: 'Item Name' },
-              { key: 'itemQty', type: 'input', label: 'Qty', props: { type: 'number' } }
-            ]
-          }]
+          template: [
+            { key: 'itemName', type: 'input', label: 'Item Name' },
+            { key: 'itemQty', type: 'input', label: 'Qty', props: { type: 'number' } }
+          ],
+          value: [{ itemName: 'Widget', itemQty: '5' }],
+          addButton: { label: 'Add Item' }
         },
-        { key: 'addItem', type: 'addArrayItem', label: 'Add Item', arrayKey: 'demoArray' },
 
         {
           key: 'containersNav',
@@ -2245,7 +2242,7 @@ const megaFormConfig = {
 
 - **All field types:** input, select, radio, checkbox, multi-checkbox, textarea, toggle, slider, datepicker, text, hidden
 - **All container types:** page, row, group, array
-- **All button types:** submit, next, previous, addArrayItem
+- **All button types:** submit, next, previous, auto-generated add/remove (simplified array)
 - **Logic types:** hidden, required, derivation
 - **Condition types:** fieldValue with operators
 - **Layout:** col property for grid widths`;

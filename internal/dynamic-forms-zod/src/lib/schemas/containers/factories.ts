@@ -127,11 +127,20 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     maxItems: z.never().optional(),
   });
 
+  // Schema for array-allowed children: excludes pages and nested arrays from templates.
+  // Uses a refinement on AnyFieldSchema since the recursive structure makes static exclusion complex.
+  const ArrayAllowedChildSchema: z.ZodType<GenericField> = z.lazy(() =>
+    AnyFieldSchema.refine((field) => field.type !== 'page' && field.type !== 'array', {
+      message: 'Array templates cannot contain page or array fields. Only leaf fields, rows, and groups are allowed.',
+    }),
+  );
+
   // Simplified Array API: uses `template` + `value` with auto-generated buttons
   const SimplifiedArrayFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('array'),
     // Template: single field (primitive array) or array of fields (object array)
-    template: z.union([AnyFieldSchema, z.array(AnyFieldSchema)]),
+    // Only ArrayAllowedChildren (leaf fields, rows, groups) are valid — no pages or nested arrays.
+    template: z.union([ArrayAllowedChildSchema, z.array(ArrayAllowedChildSchema)]),
     // Initial values for the array
     value: z.array(z.unknown()).optional(),
     // Button customization or opt-out (false to disable)

@@ -142,7 +142,7 @@ export interface ArrayButtonConfig {
  * {
  *   key: 'tags',
  *   type: 'array',
- *   template: { type: 'input', label: 'Tag', required: true },
+ *   template: { key: 'value', type: 'input', label: 'Tag', required: true },
  *   value: ['angular', 'typescript']
  * }
  *
@@ -163,7 +163,7 @@ export interface ArrayButtonConfig {
  * {
  *   key: 'tags',
  *   type: 'array',
- *   template: { type: 'input', label: 'Tag' },
+ *   template: { key: 'value', type: 'input', label: 'Tag' },
  *   addButton: { label: 'Add Tag', props: { color: 'primary' } },
  *   removeButton: false
  * }

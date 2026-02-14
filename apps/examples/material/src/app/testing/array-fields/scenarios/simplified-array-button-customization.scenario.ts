@@ -14,6 +14,11 @@ const config = {
       addButton: { label: 'Add Tag', props: { color: 'primary' } },
       removeButton: { label: 'Delete', props: { color: 'warn' } },
     },
+    {
+      key: 'submit',
+      type: 'submit',
+      label: 'Submit',
+    },
   ],
 } as const satisfies FormConfig;
 

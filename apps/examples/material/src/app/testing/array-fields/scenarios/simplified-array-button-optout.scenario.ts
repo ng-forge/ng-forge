@@ -29,6 +29,11 @@ const config = {
       addButton: false,
       removeButton: false,
     },
+    {
+      key: 'submit',
+      type: 'submit',
+      label: 'Submit',
+    },
   ],
 } as const satisfies FormConfig;
 

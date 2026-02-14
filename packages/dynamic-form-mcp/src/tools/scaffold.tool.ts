@@ -138,10 +138,10 @@ ${indent}}`;
 
 /**
  * Generate an array skeleton using the simplified API.
- * Returns a single string (no separate add button needed - it's auto-generated).
+ * No separate add button needed - it's auto-generated.
  */
-function generateArray(name: string, indent: string): string[] {
-  const array = `${indent}{
+function generateArray(name: string, indent: string): string {
+  return `${indent}{
 ${indent}  key: '${name}',
 ${indent}  type: 'array',
 ${indent}  template: [
@@ -151,9 +151,6 @@ ${indent}  ],
 ${indent}  value: [],
 ${indent}  addButton: { label: 'Add ${capitalize(name)}' }
 ${indent}}`;
-
-  // No separate add button needed - simplified API auto-generates it
-  return [array];
 }
 
 /**
@@ -211,12 +208,12 @@ function generateScaffold(options: { pages: number; arrays: string[]; groups: st
       const arraysForThisPage = pages > 2 && p > 1 && p < pages ? arrays : p === Math.ceil(pages / 2) ? arrays : [];
       if (pages <= 2 && isFirst) {
         for (const a of arrays) {
-          const [arrayDef] = generateArray(a, '        ');
+          const arrayDef = generateArray(a, '        ');
           lines.push(arrayDef + ',');
         }
       } else {
         for (const a of arraysForThisPage) {
-          const [arrayDef] = generateArray(a, '        ');
+          const arrayDef = generateArray(a, '        ');
           lines.push(arrayDef + ',');
         }
       }
@@ -274,7 +271,7 @@ function generateScaffold(options: { pages: number; arrays: string[]; groups: st
 
     // Arrays
     for (const a of arrays) {
-      const [arrayDef] = generateArray(a, '    ');
+      const arrayDef = generateArray(a, '    ');
       lines.push(arrayDef + ',');
     }
 

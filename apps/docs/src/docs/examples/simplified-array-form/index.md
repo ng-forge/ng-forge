@@ -37,6 +37,7 @@ export class SimplifiedArrayFormComponent {
         key: 'tags',
         type: 'array',
         template: {
+          key: 'value',
           type: 'input',
           label: 'Tag',
           required: true,
@@ -80,6 +81,7 @@ export class SimplifiedArrayFormComponent {
         key: 'notes',
         type: 'array',
         template: {
+          key: 'text',
           type: 'input',
           label: 'Note',
           props: { placeholder: 'Enter a note' },
@@ -91,7 +93,7 @@ export class SimplifiedArrayFormComponent {
       {
         key: 'categories',
         type: 'array',
-        template: { type: 'input', label: 'Category' },
+        template: { key: 'name', type: 'input', label: 'Category' },
         value: ['Frontend', 'Backend'],
         removeButton: false,
         addButton: { label: 'Add Category' },
@@ -113,7 +115,7 @@ Define the item structure once via `template`, and provide initial data via `val
 {
   key: 'tags',
   type: 'array',
-  template: { type: 'input', label: 'Tag', required: true },
+  template: { key: 'value', type: 'input', label: 'Tag', required: true },
   value: ['angular', 'typescript'],
 }
 ```

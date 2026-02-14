@@ -71,7 +71,7 @@ describe('normalizeSimplifiedArrays', () => {
       expect(items[1].type).toBe('input');
       expect(items[1].value).toBe('typescript');
 
-      // Auto-remove button stored in WeakMap metadata
+      // Auto-remove button stored in Symbol metadata
       const metadata = getNormalizedArrayMetadata(arrayField);
       expect(metadata).toBeDefined();
       expect(metadata!.autoRemoveButton).toBeDefined();
@@ -253,7 +253,7 @@ describe('normalizeSimplifiedArrays', () => {
       const addTemplate = addButton.template as Record<string, unknown>;
 
       // Template should be the single field (not wrapped in row/array)
-      // Remove button is handled via WeakMap metadata on the array field
+      // Remove button is handled via Symbol metadata on the array field
       expect(addTemplate.type).toBe('input');
       expect(addTemplate.key).toBe('value');
       expect(addTemplate.label).toBe('Tag');
@@ -296,7 +296,7 @@ describe('normalizeSimplifiedArrays', () => {
       expect(items[0].type).toBe('input');
       expect(items[0].value).toBe('angular');
 
-      // Remove button is stored in WeakMap metadata
+      // Remove button is stored in Symbol metadata
       const metadata = getNormalizedArrayMetadata(arrayField);
       expect(metadata).toBeDefined();
       const removeBtn = metadata!.autoRemoveButton as Record<string, unknown>;

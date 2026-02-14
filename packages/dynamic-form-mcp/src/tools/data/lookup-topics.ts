@@ -358,7 +358,7 @@ Use \`col\` (1-12) on child fields for grid width. Row is purely for layout. Sup
 
   array: {
     brief: `**Two APIs available:**
-**Simplified (recommended):** \`{ key: 'tags', type: 'array', template: { type: 'input', label: 'Tag' }, value: ['a', 'b'] }\`
+**Simplified (recommended):** \`{ key: 'tags', type: 'array', template: { key: 'value', type: 'input', label: 'Tag' }, value: ['a', 'b'] }\`
 **Full:** \`{ key: 'contacts', type: 'array', fields: [[{ key: 'name', type: 'input', value: 'Alice' }]] }\`
 ⚠️ **NO label** - supports only \`hidden\` logic type. See topic \`simplified-array\` for the simplified API.`,
 
@@ -375,7 +375,7 @@ Use \`template\` + \`value\` for common array patterns. Add/remove buttons are a
 {
   key: 'tags',
   type: 'array',
-  template: { type: 'input', label: 'Tag' },
+  template: { key: 'value', type: 'input', label: 'Tag' },
   value: ['angular', 'typescript']
 }
 
@@ -394,7 +394,7 @@ Use \`template\` + \`value\` for common array patterns. Add/remove buttons are a
 {
   key: 'items',
   type: 'array',
-  template: { type: 'input', label: 'Item' },
+  template: { key: 'value', type: 'input', label: 'Item' },
   addButton: { label: 'Add Item', props: { color: 'primary' } },
   removeButton: false  // Disable remove buttons
 }
@@ -439,7 +439,7 @@ Each array item is wrapped in a \`<div class="df-array-item">\` with:
 
   'simplified-array': {
     brief: `\`\`\`typescript
-// Primitive: { key: 'tags', type: 'array', template: { type: 'input', label: 'Tag' }, value: ['a', 'b'] }
+// Primitive: { key: 'tags', type: 'array', template: { key: 'value', type: 'input', label: 'Tag' }, value: ['a', 'b'] }
 // Object: { key: 'contacts', type: 'array', template: [{ key: 'name', type: 'input' }, { key: 'phone', type: 'input' }], value: [{ name: 'Jane', phone: '555' }] }
 // Buttons: { addButton: { label: 'Add Tag', props: { color: 'primary' } }, removeButton: false }
 \`\`\`
@@ -469,7 +469,7 @@ Each item is a single value (string, number, etc.):
 {
   key: 'tags',
   type: 'array',
-  template: { type: 'input', label: 'Tag', required: true },
+  template: { key: 'value', type: 'input', label: 'Tag', required: true },
   value: ['angular', 'typescript']
 }
 // Output: { tags: ['angular', 'typescript'] }
@@ -506,7 +506,7 @@ Each item is an object with multiple fields:
 {
   key: 'tags',
   type: 'array',
-  template: { type: 'input', label: 'Tag' },
+  template: { key: 'value', type: 'input', label: 'Tag' },
   addButton: {
     label: 'Add New Tag',
     props: { color: 'primary' }
@@ -519,7 +519,7 @@ Each item is an object with multiple fields:
 {
   key: 'items',
   type: 'array',
-  template: { type: 'input', label: 'Item' },
+  template: { key: 'value', type: 'input', label: 'Item' },
   removeButton: {
     label: 'Delete',
     props: { color: 'warn' }
@@ -532,7 +532,7 @@ Each item is an object with multiple fields:
 {
   key: 'tags',
   type: 'array',
-  template: { type: 'input', label: 'Tag' },
+  template: { key: 'value', type: 'input', label: 'Tag' },
   addButton: false,     // No add button
   removeButton: false   // No remove button per item
 }
@@ -576,7 +576,7 @@ The simplified API is normalized into the full API at runtime:
 {
   key: 'tags',
   type: 'array',
-  template: { type: 'input', label: 'Tag' },
+  template: { key: 'value', type: 'input', label: 'Tag' },
   logic: [{
     type: 'hidden',
     condition: { type: 'fieldValue', fieldPath: 'hasTags', operator: 'equals', value: false }
@@ -592,7 +592,7 @@ The simplified API is normalized into the full API at runtime:
 { type: 'array', fields: [...], template: {...} }
 
 // CORRECT - use one or the other
-{ type: 'array', template: { type: 'input', label: 'Tag' }, value: ['a'] }
+{ type: 'array', template: { key: 'value', type: 'input', label: 'Tag' }, value: ['a'] }
 { type: 'array', fields: [{ key: 'tag', type: 'input', value: 'a' }] }
 \`\`\`
 
@@ -1753,7 +1753,7 @@ const formConfig = {
 { type: 'array', fields: [...], template: {...} }  // ❌ mutually exclusive
 
 // CORRECT - Simplified API (recommended for common cases)
-{ type: 'array', template: { type: 'input', label: 'Tag' }, value: ['a', 'b'] }  // ✅
+{ type: 'array', template: { key: 'value', type: 'input', label: 'Tag' }, value: ['a', 'b'] }  // ✅
 
 // CORRECT - Full API (for advanced use cases)
 { type: 'array', fields: [{ key: 'tag', type: 'input', value: 'a' }] }  // ✅

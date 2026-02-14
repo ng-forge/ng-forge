@@ -10,6 +10,7 @@ import { isContainerField, hasChildFields } from '../../models/types/type-guards
 import { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
 import { ArrayItemDefinition } from '../../definitions/default/array-field';
 import { setNormalizedArrayMetadata } from './normalized-array-metadata';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 
 /**
  * Normalizes simplified array fields into full array field definitions.
@@ -52,12 +53,53 @@ interface ExpandedArray {
 }
 
 /**
+ * Invalid field types that are not allowed as array children.
+ * TypeScript enforces this via ArrayAllowedChildren at compile time,
+ * but runtime validation is needed for JavaScript users and dynamic configs.
+ */
+const INVALID_ARRAY_CHILD_TYPES = new Set(['page', 'array']);
+
+/**
+ * Validates a simplified array field's template configuration.
+ * Throws DynamicFormError for invalid configurations that would silently produce broken output.
+ */
+function validateSimplifiedTemplate(field: SimplifiedArrayField): void {
+  const { template, key } = field;
+  const isObjectTemplate = Array.isArray(template);
+
+  if (isObjectTemplate) {
+    const templateFields = template as readonly ArrayAllowedChildren[];
+    for (const tmpl of templateFields) {
+      // Cast to FieldDef for runtime check — TypeScript prevents this statically,
+      // but dynamic configs (e.g., from JSON) may violate the constraint.
+      if (INVALID_ARRAY_CHILD_TYPES.has((tmpl as FieldDef<unknown>).type)) {
+        throw new DynamicFormError(
+          `Simplified array "${key}" template contains a '${tmpl.type}' field (key: '${tmpl.key}'). ` +
+            `Only leaf fields, rows, and groups are allowed as array children.`,
+        );
+      }
+    }
+  } else {
+    const singleTemplate = template as FieldDef<unknown>;
+    if (INVALID_ARRAY_CHILD_TYPES.has(singleTemplate.type)) {
+      throw new DynamicFormError(
+        `Simplified array "${key}" template has type '${singleTemplate.type}'. ` +
+          `Only leaf fields, rows, and groups are allowed as array children.`,
+      );
+    }
+  }
+}
+
+/**
  * Expands a simplified array field into a full ArrayField + optional add button.
  */
 function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
   const { template, value = [], addButton, removeButton, key, logic } = field;
   const isObjectTemplate = Array.isArray(template);
   const values = value as unknown[];
+
+  // Validate template before expansion
+  validateSimplifiedTemplate(field);
 
   // Build items from values
   const items: ArrayItemDefinition[] = values.map((v) => {
@@ -75,7 +117,7 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
     : (template as ArrayAllowedChildren);
 
   // For primitive arrays with remove buttons, store the remove button config
-  // via WeakMap metadata. The array component renders remove buttons alongside
+  // via Symbol metadata. The array component renders remove buttons alongside
   // each item without wrapping in a row, preserving flat primitive form values.
   const hasAutoRemove = !isObjectTemplate && removeButton !== false;
 
@@ -92,7 +134,7 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
   // Safe cast: we're constructing a valid ArrayField shape with key, type, and fields
   const arrayField = arrayFieldObj as unknown as FieldDef<unknown>;
 
-  // Store normalization metadata via WeakMap instead of a runtime property
+  // Store normalization metadata via Symbol property instead of a runtime property
   const primitiveFieldKey = !isObjectTemplate ? (template as ArrayAllowedChildren).key : undefined;
   if (hasAutoRemove || primitiveFieldKey) {
     setNormalizedArrayMetadata(arrayFieldObj, {
@@ -129,7 +171,7 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
  * producing flat primitive values like `['angular', 'typescript']` instead of
  * `[{ value: 'angular' }, { value: 'typescript' }]`.
  *
- * Remove buttons are handled separately via WeakMap metadata on the array field,
+ * Remove buttons are handled separately via Symbol metadata on the array field,
  * which the array component renders alongside each item without affecting form values.
  */
 function buildPrimitiveItem(template: ArrayAllowedChildren, value: unknown): ArrayItemDefinition {

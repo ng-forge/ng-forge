@@ -217,8 +217,10 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   /**
    * Caches the result of appending the auto-remove button to template arrays.
-   * Avoids creating new arrays on every resolution when the same template
-   * reference is used (e.g., during recreate operations with stored templates).
+   * Keyed by template array reference — cache hits occur during recreate/resolution
+   * operations where stored template references are reused. Add operations via
+   * handleAddFromEvent always create a fresh `[...template]` copy (line ~277),
+   * so each add is a cache miss by design (the spread is needed for mutability).
    */
   private readonly autoRemoveCache = new WeakMap<readonly FieldDef<unknown>[], FieldDef<unknown>[]>();
 
@@ -568,8 +570,10 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * Original templates are stored in templateRegistry WITHOUT the remove button,
    * so this method is called during resolution to add it dynamically.
    *
-   * Uses a WeakMap cache to avoid creating new arrays when the same template
-   * reference is passed (e.g., during recreate operations with stored templates).
+   * Uses a WeakMap cache keyed by template array reference. Cache hits occur
+   * during recreate/resolution paths where stored templates are reused.
+   * Add operations always pass a fresh `[...template]` copy, so they miss
+   * the cache intentionally (the copy is needed for mutable item construction).
    */
   private withAutoRemove(templates: FieldDef<unknown>[]): FieldDef<unknown>[] {
     const removeButton = this.autoRemoveButton();

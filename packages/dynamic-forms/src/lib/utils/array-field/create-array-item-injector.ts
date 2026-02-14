@@ -145,6 +145,11 @@ function createItemInjector<TModel extends Record<string, unknown>>(options: Cre
     field: arrayField,
   };
 
+  // Cache for the primitive wrapper object — avoids creating a new { [primitiveFieldKey]: raw }
+  // on every form getter access, which would defeat reference-equality checks downstream.
+  let cachedPrimitiveRaw: FieldTree<unknown> | undefined;
+  let cachedPrimitiveWrapped: FieldTree<Record<string, unknown>> | undefined;
+
   return Injector.create({
     parent: parentInjector,
     providers: [
@@ -174,7 +179,12 @@ function createItemInjector<TModel extends Record<string, unknown>>(options: Cre
             // Without this, getFieldTree('value') would access FormControl['value'] (the WritableSignal),
             // not a child FieldTree, causing NG0950 errors.
             if (primitiveFieldKey) {
-              return { [primitiveFieldKey]: raw } as FieldTree<Record<string, unknown>>;
+              // Cache the wrapper to preserve reference identity when raw hasn't changed
+              if (raw !== cachedPrimitiveRaw) {
+                cachedPrimitiveRaw = raw;
+                cachedPrimitiveWrapped = { [primitiveFieldKey]: raw } as FieldTree<Record<string, unknown>>;
+              }
+              return cachedPrimitiveWrapped!;
             }
 
             return raw as FieldTree<Record<string, unknown>>;
