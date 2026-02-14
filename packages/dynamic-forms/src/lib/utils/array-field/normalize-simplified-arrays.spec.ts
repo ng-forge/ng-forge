@@ -1,9 +1,20 @@
 import { describe, it, expect } from 'vitest';
 import { normalizeSimplifiedArrays } from './normalize-simplified-arrays';
+import { getNormalizedArrayMetadata } from './normalized-array-metadata';
 import { FieldDef } from '../../definitions/base/field-def';
 
 // Helper to cast field literals to FieldDef<unknown>
 const fields = (...defs: Record<string, unknown>[]) => defs as FieldDef<unknown>[];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared test fixtures
+// ─────────────────────────────────────────────────────────────────────────────
+
+const primitiveTemplate = { key: 'value', type: 'input', label: 'Tag' } as const;
+const objectTemplate = [
+  { key: 'name', type: 'input', label: 'Name' },
+  { key: 'phone', type: 'input', label: 'Phone' },
+] as const;
 
 describe('normalizeSimplifiedArrays', () => {
   describe('passthrough', () => {
@@ -37,7 +48,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
         value: ['angular', 'typescript'],
       });
 
@@ -60,9 +71,11 @@ describe('normalizeSimplifiedArrays', () => {
       expect(items[1].type).toBe('input');
       expect(items[1].value).toBe('typescript');
 
-      // __autoRemoveButton should be set for rendering remove buttons alongside items
-      expect(arrayField.__autoRemoveButton).toBeDefined();
-      const autoRemove = arrayField.__autoRemoveButton as Record<string, unknown>;
+      // Auto-remove button stored in WeakMap metadata
+      const metadata = getNormalizedArrayMetadata(arrayField);
+      expect(metadata).toBeDefined();
+      expect(metadata!.autoRemoveButton).toBeDefined();
+      const autoRemove = metadata!.autoRemoveButton as Record<string, unknown>;
       expect(autoRemove.type).toBe('removeArrayItem');
       expect(autoRemove.label).toBe('Remove');
 
@@ -78,7 +91,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
       });
 
       const result = normalizeSimplifiedArrays(input);
@@ -97,7 +110,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
         value: [],
       });
 
@@ -114,10 +127,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'contacts',
         type: 'array',
-        template: [
-          { key: 'name', type: 'input', label: 'Name' },
-          { key: 'phone', type: 'input', label: 'Phone' },
-        ],
+        template: objectTemplate,
         value: [{ name: 'Jane', phone: '555' }],
       });
 
@@ -146,10 +156,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'contacts',
         type: 'array',
-        template: [
-          { key: 'name', type: 'input', label: 'Name' },
-          { key: 'phone', type: 'input', label: 'Phone' },
-        ],
+        template: objectTemplate,
       });
 
       const result = normalizeSimplifiedArrays(input);
@@ -163,10 +170,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'contacts',
         type: 'array',
-        template: [
-          { key: 'name', type: 'input', label: 'Name' },
-          { key: 'phone', type: 'input', label: 'Phone' },
-        ],
+        template: objectTemplate,
         value: [{ name: 'Jane' }], // phone not provided
       });
 
@@ -184,7 +188,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
       });
 
       const result = normalizeSimplifiedArrays(input);
@@ -198,7 +202,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
         addButton: { label: 'Add Tag' },
       });
 
@@ -212,7 +216,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
         addButton: { label: 'Add Tag', props: { color: 'primary' } },
       });
 
@@ -226,7 +230,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
         addButton: false,
       });
 
@@ -241,7 +245,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
       });
 
       const result = normalizeSimplifiedArrays(input);
@@ -249,7 +253,7 @@ describe('normalizeSimplifiedArrays', () => {
       const addTemplate = addButton.template as Record<string, unknown>;
 
       // Template should be the single field (not wrapped in row/array)
-      // Remove button is handled via __autoRemoveButton on the array field
+      // Remove button is handled via WeakMap metadata on the array field
       expect(addTemplate.type).toBe('input');
       expect(addTemplate.key).toBe('value');
       expect(addTemplate.label).toBe('Tag');
@@ -259,10 +263,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'contacts',
         type: 'array',
-        template: [
-          { key: 'name', type: 'input', label: 'Name' },
-          { key: 'phone', type: 'input', label: 'Phone' },
-        ],
+        template: objectTemplate,
       });
 
       const result = normalizeSimplifiedArrays(input);
@@ -278,11 +279,11 @@ describe('normalizeSimplifiedArrays', () => {
   });
 
   describe('remove button', () => {
-    it('should generate remove button via __autoRemoveButton with default label', () => {
+    it('should store auto-remove button in metadata with default label', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
         value: ['angular'],
       });
 
@@ -295,18 +296,20 @@ describe('normalizeSimplifiedArrays', () => {
       expect(items[0].type).toBe('input');
       expect(items[0].value).toBe('angular');
 
-      // Remove button is stored as metadata on the array field
-      const removeBtn = arrayField.__autoRemoveButton as Record<string, unknown>;
+      // Remove button is stored in WeakMap metadata
+      const metadata = getNormalizedArrayMetadata(arrayField);
+      expect(metadata).toBeDefined();
+      const removeBtn = metadata!.autoRemoveButton as Record<string, unknown>;
       expect(removeBtn).toBeDefined();
       expect(removeBtn.type).toBe('removeArrayItem');
       expect(removeBtn.label).toBe('Remove');
     });
 
-    it('should generate remove button via __autoRemoveButton with custom label and props', () => {
+    it('should store auto-remove button in metadata with custom label and props', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
         value: ['angular'],
         removeButton: { label: 'Delete', props: { color: 'warn' } },
       });
@@ -321,17 +324,19 @@ describe('normalizeSimplifiedArrays', () => {
       expect(items[0].value).toBe('angular');
 
       // Remove button metadata with custom config
-      const removeBtn = arrayField.__autoRemoveButton as Record<string, unknown>;
+      const metadata = getNormalizedArrayMetadata(arrayField);
+      expect(metadata).toBeDefined();
+      const removeBtn = metadata!.autoRemoveButton as Record<string, unknown>;
       expect(removeBtn).toBeDefined();
       expect(removeBtn.label).toBe('Delete');
       expect(removeBtn.props).toEqual({ color: 'warn' });
     });
 
-    it('should not generate remove button when removeButton: false', () => {
+    it('should not store auto-remove metadata when removeButton: false', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
         value: ['angular'],
         removeButton: false,
       });
@@ -339,24 +344,22 @@ describe('normalizeSimplifiedArrays', () => {
       const result = normalizeSimplifiedArrays(input);
       const arrayField = result[0] as Record<string, unknown>;
 
-      // Primitive without remove button: single FieldDef items, no __autoRemoveButton
+      // Primitive without remove button: single FieldDef items
       const items = arrayField.fields as Record<string, unknown>[];
       expect(items).toHaveLength(1);
       expect(items[0].type).toBe('input');
       expect(items[0].value).toBe('angular');
 
-      // No __autoRemoveButton metadata
-      expect(arrayField.__autoRemoveButton).toBeUndefined();
+      // No auto-remove metadata (but may have primitiveFieldKey)
+      const metadata = getNormalizedArrayMetadata(arrayField);
+      expect(metadata?.autoRemoveButton).toBeUndefined();
     });
 
     it('should not generate remove button for object arrays when removeButton: false', () => {
       const input = fields({
         key: 'contacts',
         type: 'array',
-        template: [
-          { key: 'name', type: 'input', label: 'Name' },
-          { key: 'phone', type: 'input', label: 'Phone' },
-        ],
+        template: objectTemplate,
         value: [{ name: 'Jane', phone: '555' }],
         removeButton: false,
       });
@@ -371,6 +374,36 @@ describe('normalizeSimplifiedArrays', () => {
     });
   });
 
+  describe('primitive field key metadata', () => {
+    it('should store primitiveFieldKey in metadata for primitive arrays', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: primitiveTemplate,
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+      const arrayField = result[0] as Record<string, unknown>;
+
+      const metadata = getNormalizedArrayMetadata(arrayField);
+      expect(metadata?.primitiveFieldKey).toBe('value');
+    });
+
+    it('should not store primitiveFieldKey for object arrays', () => {
+      const input = fields({
+        key: 'contacts',
+        type: 'array',
+        template: objectTemplate,
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+      const arrayField = result[0] as Record<string, unknown>;
+
+      const metadata = getNormalizedArrayMetadata(arrayField);
+      expect(metadata?.primitiveFieldKey).toBeUndefined();
+    });
+  });
+
   describe('recursive normalization', () => {
     it('should normalize simplified arrays inside page containers', () => {
       const input = fields({
@@ -380,7 +413,7 @@ describe('normalizeSimplifiedArrays', () => {
           {
             key: 'tags',
             type: 'array',
-            template: { key: 'value', type: 'input', label: 'Tag' },
+            template: primitiveTemplate,
             value: ['angular'],
           },
         ],
@@ -406,7 +439,7 @@ describe('normalizeSimplifiedArrays', () => {
           {
             key: 'tags',
             type: 'array',
-            template: { key: 'value', type: 'input', label: 'Tag' },
+            template: primitiveTemplate,
             value: ['angular'],
           },
         ],
@@ -430,7 +463,7 @@ describe('normalizeSimplifiedArrays', () => {
           {
             key: 'tags',
             type: 'array',
-            template: { key: 'value', type: 'input', label: 'Tag' },
+            template: primitiveTemplate,
             value: ['angular'],
           },
         ],
@@ -452,7 +485,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
         logic: [{ type: 'hidden', condition: true }],
       });
 
@@ -472,7 +505,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
         value: ['angular', 'typescript'],
       });
 
@@ -488,7 +521,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
         value: ['angular', 'typescript'],
       });
 
@@ -517,7 +550,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
         value: [],
       });
 
@@ -530,7 +563,7 @@ describe('normalizeSimplifiedArrays', () => {
       const input = fields({
         key: 'tags',
         type: 'array',
-        template: { key: 'value', type: 'input', label: 'Tag' },
+        template: primitiveTemplate,
       });
 
       const result = normalizeSimplifiedArrays(input);
@@ -545,7 +578,7 @@ describe('normalizeSimplifiedArrays', () => {
         {
           key: 'simpleTags',
           type: 'array',
-          template: { key: 'value', type: 'input', label: 'Tag' },
+          template: primitiveTemplate,
           value: ['angular'],
         },
         {

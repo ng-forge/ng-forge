@@ -155,11 +155,15 @@ function createItemInjector<TModel extends Record<string, unknown>>(options: Cre
         useFactory: (injector: Injector): FieldSignalContext<Record<string, unknown>> => ({
           injector,
           value: parentFieldSignalContext.value,
+          // Array items don't propagate parent default values because each item's defaults
+          // are determined by its template fields at creation time (via getFieldDefaultValue).
+          // The parent's defaultValues contain top-level form defaults, not per-item defaults.
           defaultValues: () => ({}),
           get form(): FieldTree<Record<string, unknown>> {
             const raw = itemFormAccessor();
             if (!raw) {
               // During initialization or transitions, the FieldTree may not be available yet.
+              // This occurs in the window between item creation and Angular's form tree construction.
               // Return an empty object so that downstream getFieldTree(key) calls return undefined
               // rather than causing a runtime error on a truly undefined value.
               return {} as FieldTree<Record<string, unknown>>;

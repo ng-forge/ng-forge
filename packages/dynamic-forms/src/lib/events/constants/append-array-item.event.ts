@@ -1,22 +1,15 @@
 import { FormEvent } from '../interfaces/form-event';
-import { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
+import { ArrayItemDefinition, ArrayItemTemplate } from '../../definitions/default/array-field';
 
 /**
- * Template type for OBJECT array items: array of field configurations.
- * Each field's value is merged into the item object.
+ * Template type for array items used in events.
+ * Canonical definition lives in {@link ArrayItemDefinition} — this alias
+ * preserves the events-specific naming convention.
  */
-export type ArrayItemTemplate = ArrayAllowedChildren[];
+export type ArrayItemDefinitionTemplate = ArrayItemDefinition;
 
-/**
- * Template type for array items that can be either:
- * - A single field (ArrayAllowedChildren) for PRIMITIVE items - extracts field value directly
- * - An array of fields (ArrayItemTemplate) for OBJECT items - merges fields into object
- *
- * Examples:
- * - Primitive: `{ key: 'tag', type: 'input', value: 'angular' }` → 'angular'
- * - Object: `[{ key: 'name', type: 'input' }, { key: 'email', type: 'input' }]` → { name: '', email: '' }
- */
-export type ArrayItemDefinitionTemplate = ArrayAllowedChildren | ArrayItemTemplate;
+// Re-export the canonical ArrayItemTemplate for backwards-compatible event API surface
+export type { ArrayItemTemplate };
 
 /**
  * Event dispatched to append a new item at the END of an array field.

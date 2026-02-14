@@ -5,13 +5,11 @@ import {
   ArrayButtonConfig,
   ArrayField,
   isArrayField,
-  NormalizedArrayField,
 } from '../../definitions/default/array-field';
-import { isPageField, PageField } from '../../definitions/default/page-field';
-import { isRowField, RowField } from '../../definitions/default/row-field';
-import { isGroupField, GroupField } from '../../definitions/default/group-field';
+import { isContainerField, hasChildFields } from '../../models/types/type-guards';
 import { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
 import { ArrayItemDefinition } from '../../definitions/default/array-field';
+import { setNormalizedArrayMetadata } from './normalized-array-metadata';
 
 /**
  * Normalizes simplified array fields into full array field definitions.
@@ -23,55 +21,29 @@ import { ArrayItemDefinition } from '../../definitions/default/array-field';
  * already-normalized output produces the same result.
  */
 export function normalizeSimplifiedArrays(fields: FieldDef<unknown>[]): FieldDef<unknown>[] {
-  const result: FieldDef<unknown>[] = [];
-
-  for (const field of fields) {
-    // Recurse into containers that have nested fields
-    if (isPageField(field)) {
-      const normalizedChildren = normalizeSimplifiedArrays(field.fields as FieldDef<unknown>[]);
-      result.push({ ...field, fields: normalizedChildren } as PageField as FieldDef<unknown>);
-      continue;
-    }
-
-    if (isGroupField(field)) {
-      const normalizedChildren = normalizeSimplifiedArrays(field.fields as FieldDef<unknown>[]);
-      result.push({ ...field, fields: normalizedChildren } as GroupField as FieldDef<unknown>);
-      continue;
-    }
-
-    if (isRowField(field)) {
-      const normalizedChildren = normalizeSimplifiedArrays(field.fields as FieldDef<unknown>[]);
-      result.push({ ...field, fields: normalizedChildren } as RowField as FieldDef<unknown>);
-      continue;
+  return fields.flatMap((field): FieldDef<unknown>[] => {
+    // Recurse into non-array containers (page, group, row) that have child fields
+    if (isContainerField(field) && !isArrayField(field) && hasChildFields(field)) {
+      return [{ ...field, fields: normalizeSimplifiedArrays(field.fields as FieldDef<unknown>[]) } as FieldDef<unknown>];
     }
 
     // Full-API arrays may have simplified arrays nested inside their item templates
     if (isArrayField(field) && !isSimplifiedArrayField(field)) {
-      const normalizedItems = field.fields.map((item: ArrayItemDefinition) => {
-        if (Array.isArray(item)) {
-          return normalizeSimplifiedArrays(item as FieldDef<unknown>[]);
-        }
-        return item;
-      });
-      result.push({ ...field, fields: normalizedItems } as ArrayField as FieldDef<unknown>);
-      continue;
+      const normalizedItems = field.fields.map((item: ArrayItemDefinition) =>
+        Array.isArray(item) ? normalizeSimplifiedArrays(item as FieldDef<unknown>[]) : item,
+      );
+      return [{ ...field, fields: normalizedItems } as ArrayField as FieldDef<unknown>];
     }
 
     // Expand simplified array fields
     if (isSimplifiedArrayField(field)) {
       const { arrayField, addButton } = expandSimplifiedArray(field);
-      result.push(arrayField);
-      if (addButton) {
-        result.push(addButton);
-      }
-      continue;
+      return addButton ? [arrayField, addButton] : [arrayField];
     }
 
     // Pass through all other fields unchanged
-    result.push(field);
-  }
-
-  return result;
+    return [field];
+  });
 }
 
 interface ExpandedArray {
@@ -103,23 +75,37 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
     : (template as ArrayAllowedChildren);
 
   // For primitive arrays with remove buttons, store the remove button config
-  // on the array field itself. The array component renders remove buttons alongside
+  // via WeakMap metadata. The array component renders remove buttons alongside
   // each item without wrapping in a row, preserving flat primitive form values.
   const hasAutoRemove = !isObjectTemplate && removeButton !== false;
 
-  // Construct the full ArrayField — cast through unknown since we're building the shape manually
-  const arrayField = {
+  // Construct the full ArrayField
+  const arrayFieldObj: Record<string, unknown> = {
     key,
     type: 'array' as const,
     fields: items,
-    ...(logic && { logic }),
-    ...(hasAutoRemove && { __autoRemoveButton: buildRemoveButton(removeButton) }),
-  } as unknown as NormalizedArrayField as FieldDef<unknown>;
+  };
+  if (logic) {
+    arrayFieldObj['logic'] = logic;
+  }
+
+  // Safe cast: we're constructing a valid ArrayField shape with key, type, and fields
+  const arrayField = arrayFieldObj as unknown as FieldDef<unknown>;
+
+  // Store normalization metadata via WeakMap instead of a runtime property
+  const primitiveFieldKey = !isObjectTemplate ? (template as ArrayAllowedChildren).key : undefined;
+  if (hasAutoRemove || primitiveFieldKey) {
+    setNormalizedArrayMetadata(arrayFieldObj, {
+      ...(hasAutoRemove && { autoRemoveButton: buildRemoveButton(removeButton) }),
+      ...(primitiveFieldKey && { primitiveFieldKey }),
+    });
+  }
 
   // Construct the add button (sibling, placed after the array)
   let addButtonField: FieldDef<unknown> | undefined;
   if (addButton !== false) {
     const buttonConfig = (typeof addButton === 'object' ? addButton : {}) as ArrayButtonConfig;
+    // Safe cast: we're constructing a valid addArrayItem field shape
     addButtonField = {
       key: `${key}__add`,
       type: 'addArrayItem',
@@ -143,7 +129,7 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
  * producing flat primitive values like `['angular', 'typescript']` instead of
  * `[{ value: 'angular' }, { value: 'typescript' }]`.
  *
- * Remove buttons are handled separately via `__autoRemoveButton` on the array field,
+ * Remove buttons are handled separately via WeakMap metadata on the array field,
  * which the array component renders alongside each item without affecting form values.
  */
 function buildPrimitiveItem(template: ArrayAllowedChildren, value: unknown): ArrayItemDefinition {
@@ -192,6 +178,7 @@ function buildObjectItemTemplate(
  */
 function buildRemoveButton(config: ArrayButtonConfig | undefined): ArrayAllowedChildren {
   const buttonConfig = (typeof config === 'object' ? config : {}) as ArrayButtonConfig;
+  // Safe cast: removeArrayItem fields are valid ArrayAllowedChildren but not in the static union
   return {
     key: '__remove',
     type: 'removeArrayItem',

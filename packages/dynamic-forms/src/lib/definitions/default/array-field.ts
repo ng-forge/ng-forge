@@ -119,18 +119,6 @@ export function isArrayField(field: FieldDef<any>): field is ArrayField {
 export type ArrayComponent<T extends ArrayItemTemplate[]> = FieldComponent<ArrayField<T>>;
 
 /**
- * @internal Used by simplified array normalization. Not part of the public API.
- *
- * Extends ArrayField with an optional `__autoRemoveButton` property that stores
- * the remove button FieldDef for primitive simplified arrays. The array component
- * renders this button alongside each item without wrapping in a row, preserving
- * flat primitive form values.
- */
-export interface NormalizedArrayField extends ArrayField {
-  readonly __autoRemoveButton?: FieldDef<unknown>;
-}
-
-/**
  * Configuration for auto-generated add/remove buttons in simplified array fields.
  */
 export interface ArrayButtonConfig {

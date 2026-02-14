@@ -15,6 +15,9 @@ type Depth = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
  * Widens literal types to their primitive equivalents, recursively for objects and arrays.
  * This prevents `as const` from over-narrowing types like `''` to literal `''` instead of `string`.
  *
+ * Depth-limited to prevent slow type checking on deeply nested `as const` objects.
+ * Falls back to `T` (unwidened) when depth is exhausted.
+ *
  * @example
  * ```typescript
  * type A = Widen<''>; // string
@@ -24,17 +27,19 @@ type Depth = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
  * type E = Widen<{ name: 'Jane' }>; // { name: string }
  * ```
  */
-type Widen<T> = T extends string
-  ? string
-  : T extends number
-    ? number
-    : T extends boolean
-      ? boolean
-      : T extends readonly (infer U)[]
-        ? Widen<U>[]
-        : T extends Record<string, unknown>
-          ? { -readonly [K in keyof T]: Widen<T[K]> }
-          : T;
+type Widen<T, D extends number = 5> = [D] extends [never]
+  ? T
+  : T extends string
+    ? string
+    : T extends number
+      ? number
+      : T extends boolean
+        ? boolean
+        : T extends readonly (infer U)[]
+          ? Widen<U, Depth[D]>[]
+          : T extends Record<string, unknown>
+            ? { -readonly [K in keyof T]: Widen<T[K], Depth[D]> }
+            : T;
 
 /**
  * Infer value type based on field type and props.
@@ -55,6 +60,23 @@ type InferValueType<T, V> = T extends { type: 'slider' }
 type MaybeOptional<T, V> = T extends { type: 'hidden' } ? V : T extends { required: true } ? V : V | undefined;
 
 /**
+ * Infers the value type for an array field.
+ * Handles three cases:
+ * 1. Simplified array with template + value → infer item type from value
+ * 2. Simplified array with template only → unknown[]
+ * 3. Full-API array with fields → infer from children
+ */
+type InferArrayValue<T, D extends number> = T extends { template: unknown; value: readonly (infer Item)[] }
+  ? Widen<Item>[]
+  : T extends { template: unknown }
+    ? unknown[]
+    : T extends { fields: infer F }
+      ? F extends RegisteredFieldTypes[]
+        ? InferFormValueWithDepth<F, Depth[D]>[]
+        : unknown[]
+      : unknown[];
+
+/**
  * Process a single field and determine its contribution to the form value type
  */
 type ProcessField<T, D extends number = 5> = [D] extends [never]
@@ -71,40 +93,28 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
           ? { [P in K]: InferFormValueWithDepth<F, Depth[D]> }
           : { [P in K]: Record<string, unknown> }
         : never
-      : // Simplified array with template and value — infer item type from value
-        T extends { type: 'array'; key: infer K; template: unknown; value: readonly (infer Item)[] }
+      : // Container: array (simplified or full API) - wrap value in array under key
+        T extends { type: 'array'; key: infer K }
         ? K extends string
-          ? { [P in K]: Widen<Item>[] }
+          ? { [P in K]: InferArrayValue<T, D> }
           : never
-        : // Simplified array with template but no value — unknown[]
-          T extends { type: 'array'; key: infer K; template: unknown }
-          ? K extends string
-            ? { [P in K]: unknown[] }
-            : never
-          : // Container: array (full API) - wrap children type in array under key
-            T extends { type: 'array'; key: infer K; fields: infer F }
-            ? K extends string
-              ? F extends RegisteredFieldTypes[]
-                ? { [P in K]: InferFormValueWithDepth<F, Depth[D]>[] }
-                : { [P in K]: unknown[] }
-              : never
-            : // Display-only: text - exclude
-              T extends { type: 'text' }
-              ? never
-              : // Button fields - exclude (they don't hold values)
-                T extends { type: 'submit' | 'button' | 'next' | 'previous' | 'addArrayItem' | 'removeArrayItem' }
-                ? never
-                : // Value fields with explicit value: infer type and optionality
-                  T extends { key: infer K; value: infer V }
-                  ? K extends string
-                    ? { [P in K]: MaybeOptional<T, InferValueType<T, V>> }
-                    : never
-                  : // Value fields without explicit value: include as string (default input type)
-                    T extends { key: infer K }
-                    ? K extends string
-                      ? { [P in K]: MaybeOptional<T, string> }
-                      : never
-                    : never;
+        : // Display-only: text - exclude
+          T extends { type: 'text' }
+          ? never
+          : // Button fields - exclude (they don't hold values)
+            T extends { type: 'submit' | 'button' | 'next' | 'previous' | 'addArrayItem' | 'removeArrayItem' }
+            ? never
+            : // Value fields with explicit value: infer type and optionality
+              T extends { key: infer K; value: infer V }
+              ? K extends string
+                ? { [P in K]: MaybeOptional<T, InferValueType<T, V>> }
+                : never
+              : // Value fields without explicit value: include as string (default input type)
+                T extends { key: infer K }
+                ? K extends string
+                  ? { [P in K]: MaybeOptional<T, string> }
+                  : never
+                : never;
 
 /**
  * Internal helper with depth tracking
