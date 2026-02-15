@@ -25,6 +25,17 @@ export interface CreateArrayItemInjectorOptions<TModel extends Record<string, un
   registry: Map<string, FieldTypeDefinition>;
   /** The array field definition containing this item. */
   arrayField: ArrayField;
+  /**
+   * For primitive array items, the key of the value field in the template (e.g., 'value').
+   * When set, the form getter wraps the raw FormControl in `{ [primitiveFieldKey]: FormControl }`
+   * so that `getFieldTree(key)` can navigate to the control by key.
+   *
+   * Primitive items store flat values (e.g., `['angular']` not `[{value: 'angular'}]`),
+   * so the FieldTree at `rootForm['arrayKey'][index]` is a FormControl, not a FormGroup.
+   * Without wrapping, `getFieldTree('value')` would access the FormControl's `.value`
+   * property (a WritableSignal) instead of a child FieldTree.
+   */
+  primitiveFieldKey?: string;
 }
 
 /**
@@ -54,7 +65,7 @@ export interface ArrayItemInjectorResult {
 export function createArrayItemInjectorAndInputs<TModel extends Record<string, unknown>>(
   options: CreateArrayItemInjectorOptions<TModel>,
 ): ArrayItemInjectorResult {
-  const { template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField } = options;
+  const { template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField, primitiveFieldKey } = options;
 
   // Get root form registry - it's guaranteed to be available since root form
   // is registered before resolvedFields computes (dependency chain ensures this)
@@ -87,6 +98,7 @@ export function createArrayItemInjectorAndInputs<TModel extends Record<string, u
     parentFieldSignalContext,
     parentInjector,
     arrayField,
+    primitiveFieldKey,
   });
 
   // mapFieldToInputs automatically reads ARRAY_CONTEXT from the injector
@@ -104,6 +116,7 @@ interface CreateItemInjectorOptions<TModel extends Record<string, unknown>> {
   parentFieldSignalContext: FieldSignalContext<TModel>;
   parentInjector: Injector;
   arrayField: ArrayField;
+  primitiveFieldKey?: string;
 }
 
 /**
@@ -114,9 +127,12 @@ interface CreateItemInjectorOptions<TModel extends Record<string, unknown>> {
  * This makes form access reactive - when mappers access context.form['fieldKey'], the getter runs,
  * evaluating the computed which tracks indexSignal as a dependency. This ensures components
  * automatically update when array items reorder.
+ *
+ * Uses `useFactory` with `deps: [Injector]` to provide FIELD_SIGNAL_CONTEXT. Angular resolves
+ * the `Injector` dep as the child injector being created, eliminating any temporal gap.
  */
 function createItemInjector<TModel extends Record<string, unknown>>(options: CreateItemInjectorOptions<TModel>): Injector {
-  const { itemFormAccessor, indexSignal, parentFieldSignalContext, parentInjector, arrayField } = options;
+  const { itemFormAccessor, indexSignal, parentFieldSignalContext, parentInjector, arrayField, primitiveFieldKey } = options;
 
   // Use getter for formValue to ensure it's always current, not a stale snapshot.
   // Components accessing arrayContext.formValue will get the current value.
@@ -129,27 +145,54 @@ function createItemInjector<TModel extends Record<string, unknown>>(options: Cre
     field: arrayField,
   };
 
-  // Use object with getter to make form access reactive.
-  // When mappers access context.form, the getter evaluates itemFormAccessor().
-  // If this is inside another computed (like mapper's return), dependency tracking works correctly.
-  const itemFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
-    injector: undefined as unknown as Injector,
-    value: parentFieldSignalContext.value,
-    defaultValues: () => ({}),
-    get form(): FieldTree<Record<string, unknown>> {
-      return itemFormAccessor() as FieldTree<Record<string, unknown>>;
-    },
-  };
+  // Cache for the primitive wrapper object — avoids creating a new { [primitiveFieldKey]: raw }
+  // on every form getter access, which would defeat reference-equality checks downstream.
+  let cachedPrimitiveRaw: FieldTree<unknown> | undefined;
+  let cachedPrimitiveWrapped: FieldTree<Record<string, unknown>> | undefined;
 
-  const injector = Injector.create({
+  return Injector.create({
     parent: parentInjector,
     providers: [
-      { provide: FIELD_SIGNAL_CONTEXT, useValue: itemFieldSignalContext },
+      {
+        provide: FIELD_SIGNAL_CONTEXT,
+        // Angular resolves `Injector` in deps as the child injector being created,
+        // so no temporal gap exists — the injector reference is immediately available.
+        useFactory: (injector: Injector): FieldSignalContext<Record<string, unknown>> => ({
+          injector,
+          value: parentFieldSignalContext.value,
+          // Array items don't propagate parent default values because each item's defaults
+          // are determined by its template fields at creation time (via getFieldDefaultValue).
+          // The parent's defaultValues contain top-level form defaults, not per-item defaults.
+          defaultValues: () => ({}),
+          get form(): FieldTree<Record<string, unknown>> {
+            const raw = itemFormAccessor();
+            if (!raw) {
+              // During initialization or transitions, the FieldTree may not be available yet.
+              // This occurs in the window between item creation and Angular's form tree construction.
+              // Return an empty object so that downstream getFieldTree(key) calls return undefined
+              // rather than causing a runtime error on a truly undefined value.
+              return {} as FieldTree<Record<string, unknown>>;
+            }
+
+            // For primitive array items, the FieldTree is a FormControl (the item IS the control).
+            // Wrap it in an object so getFieldTree(primitiveFieldKey) returns the FormControl itself.
+            // Without this, getFieldTree('value') would access FormControl['value'] (the WritableSignal),
+            // not a child FieldTree, causing NG0950 errors.
+            if (primitiveFieldKey) {
+              // Cache the wrapper to preserve reference identity when raw hasn't changed
+              if (raw !== cachedPrimitiveRaw) {
+                cachedPrimitiveRaw = raw;
+                cachedPrimitiveWrapped = { [primitiveFieldKey]: raw } as FieldTree<Record<string, unknown>>;
+              }
+              return cachedPrimitiveWrapped!;
+            }
+
+            return raw as FieldTree<Record<string, unknown>>;
+          },
+        }),
+        deps: [Injector],
+      },
       { provide: ARRAY_CONTEXT, useValue: arrayContext },
     ],
   });
-
-  itemFieldSignalContext.injector = injector;
-
-  return injector;
 }

@@ -137,27 +137,20 @@ ${indent}}`;
 }
 
 /**
- * Generate an array skeleton with add button.
+ * Generate an array skeleton using the simplified API.
+ * No separate add button needed - it's auto-generated.
  */
-function generateArray(name: string, indent: string): string[] {
-  const array = `${indent}{
+function generateArray(name: string, indent: string): string {
+  return `${indent}{
 ${indent}  key: '${name}',
 ${indent}  type: 'array',
-${indent}  fields: [
-${indent}    {
-${indent}      key: '${name}Item',
-${indent}      type: 'group',
-${indent}      fields: [
-${indent}        { key: 'itemName', type: 'input', label: 'Name' },
-${indent}        { key: 'itemValue', type: 'input', label: 'Value' }
-${indent}      ]
-${indent}    }
-${indent}  ]
+${indent}  template: [
+${indent}    { key: 'itemName', type: 'input', label: 'Name' },
+${indent}    { key: 'itemValue', type: 'input', label: 'Value' }
+${indent}  ],
+${indent}  value: [],
+${indent}  addButton: { label: 'Add ${capitalize(name)}' }
 ${indent}}`;
-
-  const addButton = `${indent}{ key: 'add${capitalize(name)}', type: 'addArrayItem', label: 'Add ${capitalize(name)}', arrayKey: '${name}' }`;
-
-  return [array, addButton];
 }
 
 /**
@@ -215,15 +208,13 @@ function generateScaffold(options: { pages: number; arrays: string[]; groups: st
       const arraysForThisPage = pages > 2 && p > 1 && p < pages ? arrays : p === Math.ceil(pages / 2) ? arrays : [];
       if (pages <= 2 && isFirst) {
         for (const a of arrays) {
-          const [arrayDef, addBtn] = generateArray(a, '        ');
+          const arrayDef = generateArray(a, '        ');
           lines.push(arrayDef + ',');
-          lines.push(addBtn + ',');
         }
       } else {
         for (const a of arraysForThisPage) {
-          const [arrayDef, addBtn] = generateArray(a, '        ');
+          const arrayDef = generateArray(a, '        ');
           lines.push(arrayDef + ',');
-          lines.push(addBtn + ',');
         }
       }
 
@@ -280,9 +271,8 @@ function generateScaffold(options: { pages: number; arrays: string[]; groups: st
 
     // Arrays
     for (const a of arrays) {
-      const [arrayDef, addBtn] = generateArray(a, '    ');
+      const arrayDef = generateArray(a, '    ');
       lines.push(arrayDef + ',');
-      lines.push(addBtn + ',');
     }
 
     // Fields

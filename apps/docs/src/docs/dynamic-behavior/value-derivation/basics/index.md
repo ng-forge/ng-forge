@@ -483,5 +483,5 @@ External data values are reactively tracked - when signals change, derivations a
 
 - **Property Derivation** (see tab above) - Derive component properties (minDate, options, label) from form values
 - **[Conditional Logic](../conditional-logic/overview/)** - Control field visibility and state
-- **[Array Fields](../../prebuilt/form-arrays/)** - Working with array fields
-- **[Examples](/docs/examples)** - Real-world form patterns
+- **[Array Fields](../../prebuilt/form-arrays/simplified/)** - Working with array fields
+- **[Examples](/examples)** - Real-world form patterns

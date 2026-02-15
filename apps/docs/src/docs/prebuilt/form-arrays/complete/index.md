@@ -1,5 +1,7 @@
 Arrays create dynamic collections of field values. Each item in the `fields` array defines **one array item** with its structure and initial values.
 
+> For most use cases, the **simplified array API** is recommended. See [Form Arrays (Simplified)](/prebuilt/form-arrays/simplified) for details. This page documents the complete API for advanced use cases.
+
 ## Interactive Demo
 
 <iframe src="http://localhost:4201/#/examples/array" class="example-frame" title="Array Field Demo"></iframe>
@@ -307,132 +309,155 @@ Arrays are ideal for:
 
 ## Complete Example: Primitive Array with Initial Values
 
-Here's a complete working example of a primitive array field (simple value list) with initial values and dynamic add/remove:
+Here's a complete working example of a primitive array field (simple value list) with initial values and declarative add/remove buttons:
 
 ```typescript
-import { Component, inject } from '@angular/core';
-import { DynamicForm, EventBus, arrayEvent } from '@ng-forge/dynamic-forms';
+import { FormConfig } from '@ng-forge/dynamic-forms';
 
-@Component({
-  selector: 'app-tags-form',
-  imports: [DynamicForm],
-  template: `
-    <form [dynamic-form]="formConfig"></form>
-    <button (click)="addTag()">Add Tag</button>
-  `,
-})
-export class TagsFormComponent {
-  private eventBus = inject(EventBus);
+// Template for new tags - a row with an input and a remove button
+const tagTemplate = {
+  key: 'tag',
+  type: 'row',
+  fields: [
+    {
+      key: 'value',
+      type: 'input',
+      label: 'Tag',
+      required: true,
+      minLength: 2,
+    },
+    {
+      key: 'removeTag',
+      type: 'removeArrayItem',
+      label: 'Remove',
+      props: { color: 'warn' },
+    },
+  ],
+} as const;
 
-  // Template for new tags - single field (primitive item)
-  private tagTemplate = {
-    key: 'tag',
-    type: 'input',
-    label: 'Tag',
-    value: '',
-    required: true,
-    minLength: 2,
-  };
-
-  formConfig = {
-    fields: [
-      {
-        key: 'tags',
-        type: 'array',
-        // Start with two initial tags (primitive items - not wrapped in arrays)
-        fields: [
-          { key: 'tag', type: 'input', label: 'Tag', value: 'featured', required: true, minLength: 2 },
-          { key: 'tag', type: 'input', label: 'Tag', value: 'popular', required: true, minLength: 2 },
+const formConfig = {
+  fields: [
+    {
+      key: 'tags',
+      type: 'array',
+      // Start with two initial tags using the same row structure
+      fields: [
+        [
+          {
+            key: 'tag',
+            type: 'row',
+            fields: [
+              { key: 'value', type: 'input', label: 'Tag', value: 'featured', required: true, minLength: 2 },
+              { key: 'removeTag', type: 'removeArrayItem', label: 'Remove', props: { color: 'warn' } },
+            ],
+          },
         ],
-      },
-    ],
-  };
+        [
+          {
+            key: 'tag',
+            type: 'row',
+            fields: [
+              { key: 'value', type: 'input', label: 'Tag', value: 'popular', required: true, minLength: 2 },
+              { key: 'removeTag', type: 'removeArrayItem', label: 'Remove', props: { color: 'warn' } },
+            ],
+          },
+        ],
+      ],
+    },
+    // Declarative add button - no EventBus needed
+    {
+      key: 'addTag',
+      type: 'addArrayItem',
+      label: 'Add Tag',
+      arrayKey: 'tags',
+      template: [tagTemplate],
+      props: { color: 'primary' },
+    },
+  ],
+} as const satisfies FormConfig;
 
-  // Form value: { tags: ['featured', 'popular'] }
-
-  addTag() {
-    this.eventBus.dispatch(arrayEvent('tags').append(this.tagTemplate));
-  }
-
-  removeTag(index: number) {
-    this.eventBus.dispatch(arrayEvent('tags').removeAt(index));
-  }
-}
+// Form value: { tags: [{ tag: { value: 'featured' } }, { tag: { value: 'popular' } }] }
 ```
 
 ## Complete Example: Object Array with Initial Values
 
-Here's a complete working example of an object array field with initial values and validation:
+Here's a complete working example of an object array field with initial values, validation, and declarative buttons:
 
 ```typescript
-import { Component, inject } from '@angular/core';
-import { DynamicForm, EventBus, arrayEvent } from '@ng-forge/dynamic-forms';
+import { FormConfig } from '@ng-forge/dynamic-forms';
 
-@Component({
-  selector: 'app-contacts-form',
-  imports: [DynamicForm],
-  template: `
-    <form [dynamic-form]="formConfig"></form>
-    <button (click)="addContact()">Add Contact</button>
-  `,
-})
-export class ContactsFormComponent {
-  private eventBus = inject(EventBus);
+// Template for new contacts - includes a remove button inside each item
+const contactTemplate = [
+  { key: 'name', type: 'input', label: 'Contact Name', required: true, minLength: 2 },
+  { key: 'phone', type: 'input', label: 'Phone Number', required: true, pattern: /^\d{10}$/ },
+  {
+    key: 'relationship',
+    type: 'select',
+    label: 'Relationship',
+    options: [
+      { label: 'Family', value: 'family' },
+      { label: 'Friend', value: 'friend' },
+      { label: 'Colleague', value: 'colleague' },
+    ],
+  },
+  {
+    key: 'removeContact',
+    type: 'removeArrayItem',
+    label: 'Remove Contact',
+    props: { color: 'warn' },
+  },
+] as const;
 
-  // Template for new contacts
-  private contactTemplate = [
-    { key: 'name', type: 'input', label: 'Contact Name', value: '', required: true, minLength: 2 },
-    { key: 'phone', type: 'input', label: 'Phone Number', value: '', required: true, pattern: /^\d{10}$/ },
+const formConfig = {
+  fields: [
     {
-      key: 'relationship',
-      type: 'select',
-      label: 'Relationship',
-      value: 'friend',
-      options: [
-        { label: 'Family', value: 'family' },
-        { label: 'Friend', value: 'friend' },
-        { label: 'Colleague', value: 'colleague' },
+      key: 'contacts',
+      type: 'array',
+      // Start with one pre-filled contact (includes remove button)
+      fields: [
+        [
+          { key: 'name', type: 'input', label: 'Contact Name', value: 'John Doe', required: true, minLength: 2 },
+          {
+            key: 'phone',
+            type: 'input',
+            label: 'Phone Number',
+            value: '5551234567',
+            required: true,
+            pattern: /^\d{10}$/,
+          },
+          {
+            key: 'relationship',
+            type: 'select',
+            label: 'Relationship',
+            value: 'family',
+            options: [
+              { label: 'Family', value: 'family' },
+              { label: 'Friend', value: 'friend' },
+              { label: 'Colleague', value: 'colleague' },
+            ],
+          },
+          {
+            key: 'removeContact',
+            type: 'removeArrayItem',
+            label: 'Remove Contact',
+            props: { color: 'warn' },
+          },
+        ],
       ],
     },
-  ];
+    // Declarative add button - no EventBus needed
+    {
+      key: 'addContact',
+      type: 'addArrayItem',
+      label: 'Add Contact',
+      arrayKey: 'contacts',
+      template: contactTemplate,
+      props: { color: 'primary' },
+    },
+  ],
+} as const satisfies FormConfig;
 
-  formConfig = {
-    fields: [
-      {
-        key: 'contacts',
-        type: 'array',
-        // Start with one pre-filled contact
-        fields: [
-          [
-            { key: 'name', type: 'input', label: 'Contact Name', value: 'John Doe', required: true, minLength: 2 },
-            { key: 'phone', type: 'input', label: 'Phone Number', value: '5551234567', required: true, pattern: /^\d{10}$/ },
-            {
-              key: 'relationship',
-              type: 'select',
-              label: 'Relationship',
-              value: 'family',
-              options: [
-                { label: 'Family', value: 'family' },
-                { label: 'Friend', value: 'friend' },
-                { label: 'Colleague', value: 'colleague' },
-              ],
-            },
-          ],
-        ],
-      },
-    ],
-  };
-
-  // Form value: { contacts: [{ name: 'John Doe', phone: '5551234567', relationship: 'family' }] }
-
-  addContact() {
-    this.eventBus.dispatch(arrayEvent('contacts').append(this.contactTemplate));
-  }
-
-  removeContact(index: number) {
-    this.eventBus.dispatch(arrayEvent('contacts').removeAt(index));
-  }
-}
+// Form value: { contacts: [{ name: 'John Doe', phone: '5551234567', relationship: 'family' }] }
 ```
 
 ## Template Requirement
@@ -490,3 +515,15 @@ Arrays can contain these field types:
 - Button fields (for remove operations inside each item)
 
 See [Type Safety & Inference](../advanced/type-safety/basics) for details on how arrays affect type inference.
+
+## When to Use the Complete API
+
+The complete API documented on this page is the right choice when you need capabilities beyond what the simplified API offers:
+
+- **Heterogeneous items** -- Different field structures per item (e.g. some items have 2 fields, others have 5)
+- **Custom button placement** -- Positioning add/remove/prepend/insert buttons in specific locations relative to the array
+- **Programmatic control via EventBus** -- Dispatching `arrayEvent` commands for append, prepend, insertAt, pop, shift, and removeAt operations from component code
+- **Custom templates per button action** -- Different add buttons that each insert a different item structure (e.g. an "Add Simple" and an "Add Detailed" button)
+- **Mixed primitive and object items** -- Arrays containing both primitive values and object values in the same collection
+
+For all other scenarios, the [simplified array API](/prebuilt/form-arrays/simplified) provides a more concise configuration with auto-generated buttons.

@@ -312,13 +312,43 @@ describe('MatFormConfigSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should reject array field with template instead of fields', () => {
+    it('should accept array field with template (simplified API)', () => {
       const config = {
         fields: [
           {
             key: 'items',
             type: 'array',
-            template: [{ key: 'item', type: 'input', label: 'Item' }], // Should be 'fields' not 'template'
+            template: [{ key: 'item', type: 'input', label: 'Item' }],
+          },
+        ],
+      };
+      const result = MatFormConfigSchema.safeParse(config);
+      expect(result.success).toBe(true);
+    });
+
+    it('should accept array field with single template field (primitive simplified API)', () => {
+      const config = {
+        fields: [
+          {
+            key: 'tags',
+            type: 'array',
+            template: { key: 'tag', type: 'input', label: 'Tag' },
+            value: ['angular', 'typescript'],
+          },
+        ],
+      };
+      const result = MatFormConfigSchema.safeParse(config);
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject array field with both fields and template', () => {
+      const config = {
+        fields: [
+          {
+            key: 'items',
+            type: 'array',
+            fields: [{ key: 'item', type: 'input', label: 'Item' }],
+            template: [{ key: 'item', type: 'input', label: 'Item' }],
           },
         ],
       };

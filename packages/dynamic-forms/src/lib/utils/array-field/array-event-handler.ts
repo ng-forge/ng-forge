@@ -38,7 +38,7 @@ const ARRAY_EVENT_TYPES: ArrayEvent['type'][] = [
  * - Array of FieldDefs for object items (fields merged into object)
  */
 export type ArrayAction =
-  | { action: 'add'; template: FieldDef<unknown> | FieldDef<unknown>[]; index?: number }
+  | { action: 'add'; template: FieldDef<unknown> | readonly FieldDef<unknown>[]; index?: number }
   | { action: 'remove'; index?: number };
 
 /**

@@ -110,18 +110,51 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     logic: z.array(ContainerLogicSchema).optional(),
   });
 
-  // Array can contain: rows, groups, leaves (no pages, arrays)
-  // Arrays support only 'hidden' logic type for conditional visibility
-  // Also forbid template (common mistake - should use 'fields')
-  const ArrayFieldSchema = ContainerBaseSchema.extend({
+  // Array button config for simplified API
+  const ArrayButtonConfigSchema = z.object({
+    label: z.string().optional(),
+    props: z.record(z.unknown()).optional(),
+  });
+
+  // Full Array API: uses `fields` to define item definitions directly
+  const FullArrayFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('array'),
     fields: z.array(AnyFieldSchema),
-    // Container logic - only 'hidden' type allowed (same as pages)
     logic: z.array(ContainerLogicSchema).optional(),
+    // Full API does not use template
     template: z.never().optional(),
     minItems: z.never().optional(),
     maxItems: z.never().optional(),
   });
+
+  // Schema for array-allowed children: excludes pages and nested arrays from templates.
+  // Uses a refinement on AnyFieldSchema since the recursive structure makes static exclusion complex.
+  const ArrayAllowedChildSchema: z.ZodType<GenericField> = z.lazy(() =>
+    AnyFieldSchema.refine((field) => field.type !== 'page' && field.type !== 'array', {
+      message: 'Array templates cannot contain page or array fields. Only leaf fields, rows, and groups are allowed.',
+    }),
+  );
+
+  // Simplified Array API: uses `template` + `value` with auto-generated buttons
+  const SimplifiedArrayFieldSchema = ContainerBaseSchema.extend({
+    type: z.literal('array'),
+    // Template: single field (primitive array) or array of fields (object array)
+    // Only ArrayAllowedChildren (leaf fields, rows, groups) are valid — no pages or nested arrays.
+    template: z.union([ArrayAllowedChildSchema, z.array(ArrayAllowedChildSchema)]),
+    // Initial values for the array
+    value: z.array(z.unknown()).optional(),
+    // Button customization or opt-out (false to disable)
+    addButton: z.union([ArrayButtonConfigSchema, z.literal(false)]).optional(),
+    removeButton: z.union([ArrayButtonConfigSchema, z.literal(false)]).optional(),
+    logic: z.array(ContainerLogicSchema).optional(),
+    // Simplified API does not use fields
+    fields: z.never().optional(),
+    minItems: z.never().optional(),
+    maxItems: z.never().optional(),
+  });
+
+  // Array field: either full API (fields) or simplified API (template + value)
+  const ArrayFieldSchema = z.union([FullArrayFieldSchema, SimplifiedArrayFieldSchema]);
 
   // All fields union
   const AllFieldsSchema = AnyFieldSchema;

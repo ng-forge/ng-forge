@@ -1,4 +1,4 @@
-import { ArrayField } from '../../definitions/default/array-field';
+import { ArrayField, SimplifiedArrayField } from '../../definitions/default/array-field';
 import { GroupField } from '../../definitions/default/group-field';
 import { HiddenField } from '../../definitions/default/hidden-field';
 import { PageField } from '../../definitions/default/page-field';
@@ -21,7 +21,7 @@ export interface FieldRegistryContainers {
   page: PageField;
   row: RowField;
   group: GroupField;
-  array: ArrayField;
+  array: ArrayField | SimplifiedArrayField;
 }
 
 /**

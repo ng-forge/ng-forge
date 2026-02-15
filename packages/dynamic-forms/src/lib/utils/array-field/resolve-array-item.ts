@@ -38,6 +38,11 @@ export interface ResolveArrayItemOptions<TModel extends Record<string, unknown>>
    * to ensure SSR hydration compatibility (server and client generate same IDs).
    */
   generateItemId: () => string;
+  /**
+   * For primitive array items, the key of the value field in the template.
+   * Passed through to createArrayItemInjectorAndInputs for form context wrapping.
+   */
+  primitiveFieldKey?: string;
 }
 
 /**
@@ -61,6 +66,7 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
     destroyRef,
     loadTypeComponent,
     generateItemId,
+    primitiveFieldKey,
   } = options;
 
   if (templates.length === 0) {
@@ -96,6 +102,7 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
           parentInjector,
           registry,
           arrayField,
+          primitiveFieldKey,
         });
 
         // Array item templates should always have inputs (componentless fields are handled above)

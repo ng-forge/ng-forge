@@ -4,10 +4,6 @@ setupTestLogging();
 setupConsoleCheck();
 
 test.describe('Array Fields E2E Tests', () => {
-  test.beforeEach(async ({ helpers }) => {
-    await helpers.navigateToScenario('/test/array-fields');
-  });
-
   test.describe('Basic Array Operations', () => {
     test('should add new array items dynamically', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-add');
@@ -805,6 +801,380 @@ test.describe('Array Fields E2E Tests', () => {
       const addButton = scenario.locator('button:has-text("Add Item")');
       await addButton.click();
       await expect(inputs).toHaveCount(3, { timeout: 5000 });
+    });
+  });
+
+  test.describe('Simplified Array API', () => {
+    test.describe('Primitive Array', () => {
+      test('should render initial primitive values with add and remove buttons', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-primitive');
+        await page.goto('/#/test/array-fields/simplified-array-primitive');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        // Should have 2 inputs with pre-filled values
+        const inputs = scenario.locator('#tags input');
+        await expect(inputs).toHaveCount(2, { timeout: 10000 });
+        await expect(inputs.nth(0)).toHaveValue('angular', { timeout: 5000 });
+        await expect(inputs.nth(1)).toHaveValue('typescript', { timeout: 5000 });
+
+        // Add button should be visible (auto-generated with key tags__add)
+        const addButton = scenario.locator('button:has-text("Add")');
+        await expect(addButton).toBeVisible({ timeout: 5000 });
+
+        // Remove buttons should be visible (one per item)
+        const removeButtons = scenario.locator('#tags button:has-text("Remove")');
+        await expect(removeButtons).toHaveCount(2, { timeout: 5000 });
+
+        // Screenshot: Simplified primitive array initial state
+        await helpers.expectScreenshotMatch(scenario, 'material-simplified-array-primitive-initial');
+      });
+
+      test('should add and remove primitive items', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-primitive');
+        await page.goto('/#/test/array-fields/simplified-array-primitive');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        const inputs = scenario.locator('#tags input');
+        await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+        // Click add → 3 inputs
+        const addButton = scenario.locator('button:has-text("Add")');
+        await addButton.click();
+        await expect(inputs).toHaveCount(3, { timeout: 10000 });
+
+        // Original values should persist
+        await expect(inputs.nth(0)).toHaveValue('angular', { timeout: 5000 });
+        await expect(inputs.nth(1)).toHaveValue('typescript', { timeout: 5000 });
+
+        // Click remove on last item → back to 2
+        const removeButtons = scenario.locator('#tags button:has-text("Remove")');
+        await removeButtons.last().click();
+        await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+        // Values should still persist
+        await expect(inputs.nth(0)).toHaveValue('angular', { timeout: 5000 });
+        await expect(inputs.nth(1)).toHaveValue('typescript', { timeout: 5000 });
+      });
+
+      test('should submit primitive array values', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-primitive');
+        await page.goto('/#/test/array-fields/simplified-array-primitive');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        const inputs = scenario.locator('#tags input');
+        await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+        const data = await helpers.submitFormAndCapture(scenario);
+        expect(data).toHaveProperty('tags');
+        const tags = data['tags'] as string[];
+        expect(tags).toHaveLength(2);
+        expect(tags[0]).toBe('angular');
+        expect(tags[1]).toBe('typescript');
+      });
+
+      test('should produce flat primitive values after adding an item', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-primitive');
+        await page.goto('/#/test/array-fields/simplified-array-primitive');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        const inputs = scenario.locator('#tags input');
+        await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+        // Add a new item
+        const addButton = scenario.locator('button:has-text("Add")');
+        await addButton.click();
+        await expect(inputs).toHaveCount(3, { timeout: 10000 });
+
+        // Fill the new item
+        await inputs.nth(2).fill('react');
+
+        // Submit and verify flat array shape (not [{value: '...'}, ...])
+        const data = await helpers.submitFormAndCapture(scenario);
+        expect(data).toHaveProperty('tags');
+        const tags = data['tags'] as string[];
+        expect(tags).toHaveLength(3);
+        expect(tags[0]).toBe('angular');
+        expect(tags[1]).toBe('typescript');
+        expect(tags[2]).toBe('react');
+      });
+
+      test('should remove all items and submit empty array', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-primitive');
+        await page.goto('/#/test/array-fields/simplified-array-primitive');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        const inputs = scenario.locator('#tags input');
+        await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+        // Remove both items
+        const removeButtons = scenario.locator('#tags button:has-text("Remove")');
+        await removeButtons.first().click();
+        await expect(inputs).toHaveCount(1, { timeout: 10000 });
+        await removeButtons.first().click();
+        await expect(inputs).toHaveCount(0, { timeout: 10000 });
+
+        // Submit and verify empty array
+        const data = await helpers.submitFormAndCapture(scenario);
+        expect(data).toHaveProperty('tags');
+        expect(data['tags']).toEqual([]);
+      });
+    });
+
+    test.describe('Object Array', () => {
+      test('should render initial object values with add and remove buttons', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-object');
+        await page.goto('/#/test/array-fields/simplified-array-object');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        // Should have 4 inputs (2 contacts x 2 fields each)
+        const inputs = scenario.locator('#contacts input');
+        await expect(inputs).toHaveCount(4, { timeout: 10000 });
+
+        // Verify initial values
+        await expect(inputs.nth(0)).toHaveValue('Jane Smith', { timeout: 5000 });
+        await expect(inputs.nth(1)).toHaveValue('555-1234', { timeout: 5000 });
+        await expect(inputs.nth(2)).toHaveValue('Bob Jones', { timeout: 5000 });
+        await expect(inputs.nth(3)).toHaveValue('555-5678', { timeout: 5000 });
+
+        // Add button and remove buttons should be visible
+        const addButton = scenario.locator('button:has-text("Add")');
+        await expect(addButton).toBeVisible({ timeout: 5000 });
+
+        const removeButtons = scenario.locator('#contacts button:has-text("Remove")');
+        await expect(removeButtons).toHaveCount(2, { timeout: 5000 });
+
+        // Screenshot: Simplified object array initial state
+        await helpers.expectScreenshotMatch(scenario, 'material-simplified-array-object-initial');
+      });
+
+      test('should add and remove object items', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-object');
+        await page.goto('/#/test/array-fields/simplified-array-object');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        const inputs = scenario.locator('#contacts input');
+        await expect(inputs).toHaveCount(4, { timeout: 10000 });
+
+        // Click add → 6 inputs (3 contacts x 2 fields)
+        const addButton = scenario.locator('button:has-text("Add")');
+        await addButton.click();
+        await expect(inputs).toHaveCount(6, { timeout: 10000 });
+
+        // Remove first contact → 4 inputs; second contact shifts up
+        const removeButtons = scenario.locator('#contacts button:has-text("Remove")');
+        await removeButtons.first().click();
+        await expect(inputs).toHaveCount(4, { timeout: 10000 });
+
+        // Bob Jones should now be first
+        await expect(inputs.nth(0)).toHaveValue('Bob Jones', { timeout: 5000 });
+        await expect(inputs.nth(1)).toHaveValue('555-5678', { timeout: 5000 });
+      });
+
+      test('should submit object array values', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-object');
+        await page.goto('/#/test/array-fields/simplified-array-object');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        const inputs = scenario.locator('#contacts input');
+        await expect(inputs).toHaveCount(4, { timeout: 10000 });
+
+        const data = await helpers.submitFormAndCapture(scenario);
+        expect(data).toHaveProperty('contacts');
+        const contacts = data['contacts'] as Record<string, unknown>[];
+        expect(contacts).toHaveLength(2);
+        expect(contacts[0]['name']).toBe('Jane Smith');
+        expect(contacts[0]['phone']).toBe('555-1234');
+        expect(contacts[1]['name']).toBe('Bob Jones');
+        expect(contacts[1]['phone']).toBe('555-5678');
+      });
+    });
+
+    test.describe('Empty Array', () => {
+      test('should start empty and allow adding items', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-empty');
+        await page.goto('/#/test/array-fields/simplified-array-empty');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        // Should start with 0 inputs
+        const inputs = scenario.locator('#notes input');
+        await expect(inputs).toHaveCount(0, { timeout: 5000 });
+
+        // Add button should be visible
+        const addButton = scenario.locator('button:has-text("Add")');
+        await expect(addButton).toBeVisible({ timeout: 5000 });
+
+        // Click add → 1 input
+        await addButton.click();
+        await expect(inputs).toHaveCount(1, { timeout: 10000 });
+
+        // Fill and add another
+        await inputs.first().fill('First note');
+        await addButton.click();
+        await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+        // Fill second
+        await inputs.nth(1).fill('Second note');
+
+        // Both values should persist
+        await expect(inputs.nth(0)).toHaveValue('First note', { timeout: 5000 });
+        await expect(inputs.nth(1)).toHaveValue('Second note', { timeout: 5000 });
+      });
+
+      test('should submit empty array', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-empty');
+        await page.goto('/#/test/array-fields/simplified-array-empty');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        // Submit with no items
+        const data = await helpers.submitFormAndCapture(scenario);
+        expect(data).toHaveProperty('notes');
+        expect(data['notes']).toEqual([]);
+      });
+    });
+
+    test.describe('Button Customization', () => {
+      test('should display custom button labels', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-button-customization');
+        await page.goto('/#/test/array-fields/simplified-array-button-customization');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        // Custom add button label
+        const addButton = scenario.locator('button:has-text("Add Tag")');
+        await expect(addButton).toBeVisible({ timeout: 5000 });
+
+        // Custom remove button label
+        const deleteButton = scenario.locator('#tags button:has-text("Delete")');
+        await expect(deleteButton).toBeVisible({ timeout: 5000 });
+
+        // Both buttons should be functional
+        await addButton.click();
+        const inputs = scenario.locator('#tags input');
+        await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+        // Delete button on new item should also have custom label
+        const deleteButtons = scenario.locator('#tags button:has-text("Delete")');
+        await expect(deleteButtons).toHaveCount(2, { timeout: 5000 });
+        await deleteButtons.last().click();
+        await expect(inputs).toHaveCount(1, { timeout: 10000 });
+      });
+    });
+
+    test.describe('Button Opt-out', () => {
+      test('should not show add button when addButton is false', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-button-optout');
+        await page.goto('/#/test/array-fields/simplified-array-button-optout');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        // noAddButton array: should have 2 inputs with values
+        const noAddInputs = scenario.locator('#noAddButton input');
+        await expect(noAddInputs).toHaveCount(2, { timeout: 10000 });
+        await expect(noAddInputs.nth(0)).toHaveValue('featured', { timeout: 5000 });
+        await expect(noAddInputs.nth(1)).toHaveValue('popular', { timeout: 5000 });
+
+        // Add button should NOT exist for noAddButton
+        await expect(scenario.locator('#noAddButton__add')).toHaveCount(0);
+
+        // Remove buttons should still exist inside the array
+        const removeButtons = scenario.locator('#noAddButton button:has-text("Remove")');
+        await expect(removeButtons).toHaveCount(2, { timeout: 5000 });
+      });
+
+      test('should not show remove buttons when removeButton is false', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-button-optout');
+        await page.goto('/#/test/array-fields/simplified-array-button-optout');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        // noRemoveButton array: should have 1 input with value
+        const noRemoveInputs = scenario.locator('#noRemoveButton input');
+        await expect(noRemoveInputs).toHaveCount(1, { timeout: 10000 });
+        await expect(noRemoveInputs.nth(0)).toHaveValue('TypeScript', { timeout: 5000 });
+
+        // Add button should exist for noRemoveButton
+        const addButton = scenario.locator('#noRemoveButton__add');
+        await expect(addButton).toBeVisible({ timeout: 5000 });
+
+        // Remove buttons should NOT exist inside the array
+        const removeButtons = scenario.locator('#noRemoveButton button:has-text("Remove")');
+        await expect(removeButtons).toHaveCount(0);
+      });
+
+      test('should not show any buttons when both are false', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-button-optout');
+        await page.goto('/#/test/array-fields/simplified-array-button-optout');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        // staticList array: should have 3 inputs with values A, B, C
+        const staticInputs = scenario.locator('#staticList input');
+        await expect(staticInputs).toHaveCount(3, { timeout: 10000 });
+        await expect(staticInputs.nth(0)).toHaveValue('A', { timeout: 5000 });
+        await expect(staticInputs.nth(1)).toHaveValue('B', { timeout: 5000 });
+        await expect(staticInputs.nth(2)).toHaveValue('C', { timeout: 5000 });
+
+        // No add button
+        await expect(scenario.locator('#staticList__add')).toHaveCount(0);
+
+        // No remove buttons
+        const removeButtons = scenario.locator('#staticList button:has-text("Remove")');
+        await expect(removeButtons).toHaveCount(0);
+      });
+    });
+
+    test.describe('Conditional Visibility', () => {
+      test('should hide array when condition is met', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-conditional');
+        await page.goto('/#/test/array-fields/simplified-array-conditional');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        // Array should be hidden initially (showExtras is false)
+        const arrayField = scenario.locator('#extras');
+        await expect(arrayField).toBeHidden({ timeout: 5000 });
+
+        // Add button should also be hidden
+        const addButton = scenario.locator('#extras__add');
+        await expect(addButton).toBeHidden({ timeout: 5000 });
+      });
+
+      test('should toggle array visibility with checkbox', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-conditional');
+        await page.goto('/#/test/array-fields/simplified-array-conditional');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        // Check checkbox to show the array
+        const checkbox = scenario.locator('mat-checkbox');
+        await checkbox.click();
+
+        // Array should become visible with 1 pre-filled item
+        const arrayField = scenario.locator('#extras');
+        await expect(arrayField).toBeVisible({ timeout: 5000 });
+
+        const inputs = scenario.locator('#extras input');
+        await expect(inputs).toHaveCount(1, { timeout: 10000 });
+        await expect(inputs.first()).toHaveValue('bonus', { timeout: 5000 });
+
+        // Add button should also be visible
+        const addButton = scenario.locator('#extras__add');
+        await expect(addButton).toBeVisible({ timeout: 5000 });
+
+        // Uncheck to hide again
+        await checkbox.click();
+        await expect(arrayField).toBeHidden({ timeout: 5000 });
+      });
     });
   });
 });

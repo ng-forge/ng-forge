@@ -257,7 +257,7 @@ Show/hide pages based on conditions:
   },
 
   'minimal-array': {
-    description: 'Dynamic array with add/remove (~30 lines)',
+    description: 'Dynamic array with simplified API (~15 lines)',
     minimal: `import { FormConfig } from '@ng-forge/dynamic-forms';
 
 const formConfig = {
@@ -265,23 +265,17 @@ const formConfig = {
     {
       key: 'contacts',
       type: 'array',
-      fields: [
-        {
-          key: 'item',
-          type: 'group',
-          fields: [
-            { key: 'name', type: 'input', label: 'Name', required: true },
-            { key: 'phone', type: 'input', label: 'Phone' }
-          ]
-        }
-      ]
+      template: [
+        { key: 'name', type: 'input', label: 'Name', required: true },
+        { key: 'phone', type: 'input', label: 'Phone' }
+      ],
+      value: [{ name: 'Jane', phone: '555-1234' }]
     },
-    { key: 'addContact', type: 'addArrayItem', label: 'Add Contact', arrayKey: 'contacts' },
     { key: 'submit', type: 'submit', label: 'Submit' }
   ]
 } as const satisfies FormConfig;`,
 
-    brief: `// Dynamic array form
+    brief: `// Dynamic array form using simplified API
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
 const formConfig = {
@@ -289,60 +283,71 @@ const formConfig = {
     {
       key: 'contacts',
       type: 'array',
-      // ⚠️ NO LABEL! Uses 'fields', NOT 'template'
-      fields: [
-        {
-          key: 'item',
-          type: 'group',
-          fields: [
-            { key: 'name', type: 'input', label: 'Name', required: true },
-            { key: 'phone', type: 'input', label: 'Phone' }
-          ]
-        }
-      ]
+      // Simplified API: template + value
+      // Add/remove buttons are auto-generated!
+      template: [
+        { key: 'name', type: 'input', label: 'Name', required: true },
+        { key: 'phone', type: 'input', label: 'Phone' }
+      ],
+      value: [{ name: 'Jane', phone: '555-1234' }]
     },
-    // ⚠️ arrayKey at FIELD level, NOT in props!
-    { key: 'addContact', type: 'addArrayItem', label: 'Add Contact', arrayKey: 'contacts' },
     { key: 'submit', type: 'submit', label: 'Submit' }
   ]
 } as const satisfies FormConfig;
 
-// Output: { contacts: [{ name: '...', phone: '...' }, ...] }`,
+// Output: { contacts: [{ name: 'Jane', phone: '555-1234' }, ...] }
+
+// For primitive arrays:
+// { key: 'tags', type: 'array', template: { key: 'value', type: 'input', label: 'Tag' }, value: ['a', 'b'] }
+// Output: { tags: ['a', 'b'] }`,
 
     full: `# Minimal Array Form
 
-A dynamic list with add/remove functionality.
+Dynamic lists with the simplified array API. Add/remove buttons are auto-generated.
+
+## Simplified API (Recommended)
 
 \`\`\`typescript
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
 const formConfig = {
   fields: [
-    // ========== ARRAY CONTAINER ==========
+    // ========== OBJECT ARRAY ==========
     {
       key: 'contacts',
       type: 'array',
-      // ⚠️ Arrays have NO LABEL! Supports only 'hidden' logic type.
-      // ⚠️ Use 'fields' property, NOT 'template'!
-      fields: [
-        {
-          key: 'item',
-          type: 'group',  // Wrapping group creates objects in the array
-          fields: [
-            { key: 'name', type: 'input', label: 'Name', required: true },
-            { key: 'phone', type: 'input', label: 'Phone' },
-            // Optional: remove button inside each item
-            // { key: 'remove', type: 'removeArrayItem', label: 'Remove' }
-          ]
-        }
-      ]
+      // template: array of fields = object items
+      template: [
+        { key: 'name', type: 'input', label: 'Name', required: true },
+        { key: 'phone', type: 'input', label: 'Phone' }
+      ],
+      // Initial values (each element creates one item)
+      value: [{ name: 'Jane', phone: '555-1234' }],
+      // Optional: customize buttons
+      addButton: { label: 'Add Contact' },
+      // removeButton: false  // disable remove buttons
     },
-    // ========== ADD BUTTON (outside array) ==========
-    // ⚠️ arrayKey goes at FIELD level, NOT in props!
-    { key: 'addContact', type: 'addArrayItem', label: 'Add Contact', arrayKey: 'contacts' },
     { key: 'submit', type: 'submit', label: 'Submit' }
   ]
 } as const satisfies FormConfig;
+\`\`\`
+
+## Primitive Array
+
+\`\`\`typescript
+const tagForm = {
+  fields: [
+    {
+      key: 'tags',
+      type: 'array',
+      // template: single field = primitive items
+      template: { key: 'value', type: 'input', label: 'Tag' },
+      value: ['angular', 'typescript']
+    },
+    { key: 'submit', type: 'submit', label: 'Submit' }
+  ]
+} as const satisfies FormConfig;
+// Output: { tags: ['angular', 'typescript'] }
 \`\`\`
 
 ## Output Shape
@@ -350,7 +355,7 @@ const formConfig = {
 \`\`\`typescript
 {
   contacts: [
-    { name: 'Alice', phone: '555-1234' },
+    { name: 'Jane', phone: '555-1234' },
     { name: 'Bob', phone: '555-5678' }
   ]
 }
@@ -358,40 +363,95 @@ const formConfig = {
 
 ## Key Rules
 
-- Arrays use \`fields\` property (NOT \`template\`)
-- \`arrayKey\` goes at field level (NOT in props)
-- Arrays have NO label or logic support`,
+- **Simplified API:** Use \`template\` + \`value\` (add/remove buttons are auto-generated)
+- **Full API:** Use \`fields\` (you manage add/remove buttons manually)
+- \`fields\` and \`template\` are **mutually exclusive**
+- Arrays have NO label property
+- Only \`hidden\` logic type is supported
 
-    explained: `# Array Fields - Complete Explanation
+## Full API (Advanced)
 
-Arrays create dynamic, repeatable lists of items.
-
-## Structure
+For full control, use the \`fields\`-based API with explicit add/remove buttons:
 
 \`\`\`typescript
 {
   key: 'contacts',
   type: 'array',
-  // ⚠️ Arrays DO NOT support:
-  // - label (no visual label)
-  // - logic (apply logic to children instead)
-  // - minItems/maxItems (not implemented)
-  // - template (use 'fields' instead)
   fields: [
-    // Template for each array item
-    {
-      key: 'item',
-      type: 'group',  // Creates objects in the array
-      fields: [
-        { key: 'name', type: 'input', label: 'Name' },
-        { key: 'phone', type: 'input', label: 'Phone' }
-      ]
-    }
+    [
+      { key: 'name', type: 'input', label: 'Name', value: 'Alice' },
+      { key: 'phone', type: 'input', label: 'Phone', value: '555' }
+    ]
+  ]
+}
+// + separate addArrayItem button with arrayKey
+\`\`\``,
+
+    explained: `# Array Fields - Complete Explanation
+
+Arrays create dynamic, repeatable lists of items. Two APIs are available.
+
+## Simplified API (Recommended)
+
+The simplified API uses \`template\` + \`value\` and auto-generates add/remove buttons.
+
+### Primitive Array
+\`\`\`typescript
+{
+  key: 'tags',
+  type: 'array',
+  template: { key: 'value', type: 'input', label: 'Tag' },  // Single field = primitive
+  value: ['angular', 'typescript']
+}
+// Output: { tags: ['angular', 'typescript'] }
+\`\`\`
+
+### Object Array
+\`\`\`typescript
+{
+  key: 'contacts',
+  type: 'array',
+  template: [                                   // Array = object items
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'phone', type: 'input', label: 'Phone' }
+  ],
+  value: [{ name: 'Jane', phone: '555' }]
+}
+// Output: { contacts: [{ name: 'Jane', phone: '555' }] }
+\`\`\`
+
+### Button Customization
+\`\`\`typescript
+{
+  key: 'items',
+  type: 'array',
+  template: { key: 'value', type: 'input', label: 'Item' },
+  addButton: { label: 'Add Item', props: { color: 'primary' } },
+  removeButton: false  // Disable remove buttons
+}
+\`\`\`
+
+## Full API (Advanced)
+
+For full control, use \`fields\` with explicit item definitions and manual add/remove buttons.
+
+\`\`\`typescript
+{
+  key: 'contacts',
+  type: 'array',
+  fields: [
+    // Each element is one array item:
+    // - Single FieldDef = primitive item
+    // - Array of FieldDefs = object item
+    [
+      { key: 'name', type: 'input', label: 'Name', value: 'Alice' },
+      { key: 'phone', type: 'input', label: 'Phone', value: '555' }
+    ]
   ]
 }
 \`\`\`
 
-## Add/Remove Buttons
+### Manual Add/Remove Buttons (Full API)
 
 \`\`\`typescript
 // ADD button - place OUTSIDE the array
@@ -406,14 +466,12 @@ Arrays create dynamic, repeatable lists of items.
 {
   key: 'contacts',
   type: 'array',
-  fields: [{
-    key: 'item',
-    type: 'group',
-    fields: [
+  fields: [
+    [
       { key: 'name', type: 'input', label: 'Name' },
-      { key: 'remove', type: 'removeArrayItem', label: 'Remove' }  // No arrayKey needed
+      { key: 'remove', type: 'removeArrayItem', label: 'Remove' }
     ]
-  }]
+  ]
 }
 \`\`\`
 
@@ -432,17 +490,128 @@ expression: '(formValue.items || []).reduce((sum, item) => sum + (item.price || 
 
 ## Common Mistakes
 
-❌ Using \`template\` instead of \`fields\`:
+❌ Mixing \`fields\` and \`template\`:
 \`\`\`typescript
-{ type: 'array', template: [...] }  // WRONG - template doesn't exist
-{ type: 'array', fields: [...] }    // CORRECT
+{ type: 'array', fields: [...], template: {...} }  // WRONG - mutually exclusive
 \`\`\`
 
-❌ Putting \`arrayKey\` in props:
+❌ Wrong value shape for object templates:
+\`\`\`typescript
+{ template: [{ key: 'name', type: 'input' }], value: ['Jane'] }  // WRONG
+{ template: [{ key: 'name', type: 'input' }], value: [{ name: 'Jane' }] }  // CORRECT
+\`\`\`
+
+❌ Putting \`arrayKey\` in props (full API):
 \`\`\`typescript
 { type: 'addArrayItem', props: { arrayKey: 'x' } }  // WRONG
 { type: 'addArrayItem', arrayKey: 'x' }             // CORRECT
 \`\`\``,
+  },
+
+  'minimal-simplified-array': {
+    description: 'Simplified array API with template + value (~15 lines)',
+    minimal: `import { FormConfig } from '@ng-forge/dynamic-forms';
+
+const formConfig = {
+  fields: [
+    {
+      key: 'tags',
+      type: 'array',
+      template: { key: 'value', type: 'input', label: 'Tag' },
+      value: ['angular', 'typescript']
+    },
+    { key: 'submit', type: 'submit', label: 'Submit' }
+  ]
+} as const satisfies FormConfig;`,
+
+    brief: `// Simplified array - primitive values
+import { FormConfig } from '@ng-forge/dynamic-forms';
+
+const formConfig = {
+  fields: [
+    // Primitive array with auto add/remove buttons
+    {
+      key: 'tags',
+      type: 'array',
+      template: { key: 'value', type: 'input', label: 'Tag' },  // Single field = primitive
+      value: ['angular', 'typescript']
+    },
+    // Object array
+    {
+      key: 'contacts',
+      type: 'array',
+      template: [  // Array of fields = object items
+        { key: 'name', type: 'input', label: 'Name', required: true },
+        { key: 'phone', type: 'input', label: 'Phone' }
+      ],
+      value: [{ name: 'Jane', phone: '555' }],
+      addButton: { label: 'Add Contact' },
+      removeButton: { label: 'Delete', props: { color: 'warn' } }
+    },
+    { key: 'submit', type: 'submit', label: 'Submit' }
+  ]
+} as const satisfies FormConfig;`,
+
+    full: `# Simplified Array API
+
+The concise way to define dynamic arrays. Auto-generates add/remove buttons.
+
+## Primitive Array
+
+\`\`\`typescript
+import { FormConfig } from '@ng-forge/dynamic-forms';
+
+const formConfig = {
+  fields: [
+    {
+      key: 'tags',
+      type: 'array',
+      template: { key: 'value', type: 'input', label: 'Tag' },  // Single field = primitive items
+      value: ['angular', 'typescript']               // Initial values
+      // Add/remove buttons are auto-generated!
+    },
+    { key: 'submit', type: 'submit', label: 'Submit' }
+  ]
+} as const satisfies FormConfig;
+// Output: { tags: ['angular', 'typescript'] }
+\`\`\`
+
+## Object Array
+
+\`\`\`typescript
+const contactForm = {
+  fields: [
+    {
+      key: 'contacts',
+      type: 'array',
+      template: [                                   // Array = object items
+        { key: 'name', type: 'input', label: 'Name', required: true },
+        { key: 'phone', type: 'input', label: 'Phone' }
+      ],
+      value: [
+        { name: 'Jane', phone: '555-1234' },
+        { name: 'John', phone: '555-5678' }
+      ],
+      addButton: { label: 'Add Contact', props: { color: 'primary' } },
+      removeButton: { label: 'Delete' }
+    },
+    { key: 'submit', type: 'submit', label: 'Submit' }
+  ]
+} as const satisfies FormConfig;
+// Output: { contacts: [{ name: 'Jane', phone: '555-1234' }, ...] }
+\`\`\`
+
+## Key Points
+
+- **Single field template** = primitive array (each item is a value)
+- **Array of fields template** = object array (each item is an object)
+- **Add/remove buttons** are auto-generated by default
+- Use \`addButton: false\` or \`removeButton: false\` to disable
+- \`template\` and \`fields\` are **mutually exclusive**`,
+
+    explained: `# Simplified Array API - Complete Explanation
+
+See the \`simplified-array\` lookup topic for full documentation.`,
   },
 
   'minimal-conditional': {
@@ -2040,23 +2209,20 @@ const megaFormConfig = {
           ]
         },
 
-        // ARRAY
+        // ARRAY (Simplified API - recommended)
         {
           key: 'itemsHeader', type: 'text', label: 'Dynamic Array:', props: { elementType: 'h3' }
         },
         {
           key: 'demoArray',
           type: 'array',
-          fields: [{
-            key: 'arrayItem',
-            type: 'group',
-            fields: [
-              { key: 'itemName', type: 'input', label: 'Item Name' },
-              { key: 'itemQty', type: 'input', label: 'Qty', props: { type: 'number' } }
-            ]
-          }]
+          template: [
+            { key: 'itemName', type: 'input', label: 'Item Name' },
+            { key: 'itemQty', type: 'input', label: 'Qty', props: { type: 'number' } }
+          ],
+          value: [{ itemName: 'Widget', itemQty: '5' }],
+          addButton: { label: 'Add Item' }
         },
-        { key: 'addItem', type: 'addArrayItem', label: 'Add Item', arrayKey: 'demoArray' },
 
         {
           key: 'containersNav',
@@ -2076,7 +2242,7 @@ const megaFormConfig = {
 
 - **All field types:** input, select, radio, checkbox, multi-checkbox, textarea, toggle, slider, datepicker, text, hidden
 - **All container types:** page, row, group, array
-- **All button types:** submit, next, previous, addArrayItem
+- **All button types:** submit, next, previous, auto-generated add/remove (simplified array)
 - **Logic types:** hidden, required, derivation
 - **Condition types:** fieldValue with operators
 - **Layout:** col property for grid widths`;
@@ -2091,6 +2257,7 @@ function getPatternList(): string {
     'Minimal Patterns (~20-50 lines)': [
       'minimal-multipage',
       'minimal-array',
+      'minimal-simplified-array',
       'minimal-conditional',
       'minimal-validation',
       'minimal-hidden',
@@ -2125,7 +2292,8 @@ Recommended starting points:
 
 Minimal patterns (~20-50 lines):
 - minimal-multipage: 2-page wizard
-- minimal-array: Dynamic list with add/remove
+- minimal-array: Dynamic list with add/remove (simplified API)
+- minimal-simplified-array: Simplified array with template + value
 - minimal-conditional: Show/hide field
 - minimal-validation: Password confirmation
 - minimal-hidden: Hidden fields in multi-page
@@ -2139,7 +2307,7 @@ Use depth="minimal" for code-only output (no markdown).`,
         .string()
         .optional()
         .describe(
-          'Pattern to get: minimal-multipage, minimal-array, minimal-conditional, minimal-validation, minimal-hidden, derivation, property-derivation, multi-page, conditional, validation, complete, mega. Use "list" to see all.',
+          'Pattern to get: minimal-multipage, minimal-array, minimal-simplified-array, minimal-conditional, minimal-validation, minimal-hidden, derivation, property-derivation, multi-page, conditional, validation, complete, mega. Use "list" to see all.',
         ),
       depth: z
         .enum(['minimal', 'brief', 'full', 'explained'])

@@ -5,7 +5,7 @@ const TextComponentsPage: NgDocPage = {
   title: 'Text Components',
   mdFile: './index.md',
   category: LayoutComponentsCategory,
-  order: 4,
+  order: 5,
 };
 
 export default TextComponentsPage;

@@ -12,8 +12,15 @@ type UnionToIntersection<U> = (U extends U ? (k: U) => void : never) extends (k:
 type Depth = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 /**
- * Widens literal types to their primitive equivalents.
+ * Widens literal types to their primitive equivalents, recursively for objects and arrays.
  * This prevents `as const` from over-narrowing types like `''` to literal `''` instead of `string`.
+ *
+ * Depth-limited to prevent slow type checking on deeply nested `as const` objects.
+ * Falls back to `T` (unwidened) when depth is exhausted.
+ *
+ * Note: For object types, `readonly` modifiers are intentionally stripped (`-readonly`)
+ * so that inferred form value types have mutable properties. This is by design since
+ * `as const` adds `readonly` to all properties, but form values should be mutable.
  *
  * @example
  * ```typescript
@@ -21,9 +28,22 @@ type Depth = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
  * type B = Widen<false>; // boolean
  * type C = Widen<42>; // number
  * type D = Widen<string[]>; // string[]
+ * type E = Widen<{ name: 'Jane' }>; // { name: string }
  * ```
  */
-type Widen<T> = T extends string ? string : T extends number ? number : T extends boolean ? boolean : T;
+type Widen<T, D extends number = 5> = [D] extends [never]
+  ? T
+  : T extends string
+    ? string
+    : T extends number
+      ? number
+      : T extends boolean
+        ? boolean
+        : T extends readonly (infer U)[]
+          ? Widen<U, Depth[D]>[]
+          : T extends Record<string, unknown>
+            ? { -readonly [K in keyof T]: Widen<T[K], Depth[D]> }
+            : T;
 
 /**
  * Infer value type based on field type and props.
@@ -44,6 +64,23 @@ type InferValueType<T, V> = T extends { type: 'slider' }
 type MaybeOptional<T, V> = T extends { type: 'hidden' } ? V : T extends { required: true } ? V : V | undefined;
 
 /**
+ * Infers the value type for an array field.
+ * Handles three cases:
+ * 1. Simplified array with template + value → infer item type from value
+ * 2. Simplified array with template only → unknown[]
+ * 3. Full-API array with fields → infer from children
+ */
+type InferArrayValue<T, D extends number> = T extends { template: unknown; value: readonly (infer Item)[] }
+  ? Widen<Item>[]
+  : T extends { template: unknown }
+    ? unknown[]
+    : T extends { fields: infer F }
+      ? F extends RegisteredFieldTypes[]
+        ? InferFormValueWithDepth<F, Depth[D]>[]
+        : unknown[]
+      : unknown[];
+
+/**
  * Process a single field and determine its contribution to the form value type
  */
 type ProcessField<T, D extends number = 5> = [D] extends [never]
@@ -60,12 +97,10 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
           ? { [P in K]: InferFormValueWithDepth<F, Depth[D]> }
           : { [P in K]: Record<string, unknown> }
         : never
-      : // Container: array - wrap children type in array under key
-        T extends { type: 'array'; key: infer K; fields: infer F }
+      : // Container: array (simplified or full API) - wrap value in array under key
+        T extends { type: 'array'; key: infer K }
         ? K extends string
-          ? F extends RegisteredFieldTypes[]
-            ? { [P in K]: InferFormValueWithDepth<F, Depth[D]>[] }
-            : { [P in K]: unknown[] }
+          ? { [P in K]: InferArrayValue<T, D> }
           : never
         : // Display-only: text - exclude
           T extends { type: 'text' }

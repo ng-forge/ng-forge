@@ -102,7 +102,8 @@ const PROPERTY_GUIDANCE: Record<string, string> = {
   maxValue: 'maxValue should be at FIELD level, not inside props',
   step: 'step should be at FIELD level, not inside props (for slider)',
   fields: 'fields should be at FIELD level, contains child fields for containers',
-  template: 'Use "fields" instead of "template" for array items',
+  template:
+    'Arrays support two APIs: (1) Full API with `fields` for explicit item definitions, or (2) Simplified API with `template` + `value` for common cases. `fields` and `template` are mutually exclusive.',
   label: 'Container types (row, group, array, page) do NOT have a label property',
   title: 'Page fields do NOT have a title property',
   minItems: 'Array fields do NOT have minItems/maxItems properties',
@@ -136,7 +137,8 @@ const DID_YOU_MEAN: Record<string, string> = {
   min: 'Did you mean `minValue` at field level (for slider) or `min` shorthand validator (for numbers)?',
   max: 'Did you mean `maxValue` at field level (for slider) or `max` shorthand validator (for numbers)?',
   items: 'Did you mean `options` for select/radio/multi-checkbox, or `fields` for array containers?',
-  template: 'Did you mean `fields`? Arrays use `fields` to define the template for each item.',
+  template:
+    'Arrays support `template` (simplified API) or `fields` (full API). If using `template`, also provide `value` for initial data. They are mutually exclusive - do not use both.',
   element: 'Did you mean `props: { elementType: "..." }`? For text fields, use elementType inside props.',
   content: 'Did you mean `label`? For text fields, the content goes in the label property.',
   title: 'Did you mean to use a `text` field with `label: "..." and props: { elementType: "h1" }`? Pages don\'t have titles.',
@@ -204,9 +206,14 @@ function formatZodError(error: ZodError, config?: unknown): FormattedValidationE
               }
             }
 
-            // Check for template instead of fields
-            if (['array', 'group', 'row', 'page'].includes(fieldType) && 'template' in field) {
+            // Check for template on non-array containers (template is valid on arrays via simplified API)
+            if (['group', 'row', 'page'].includes(fieldType) && 'template' in field) {
               mistakes.push('Use "fields" instead of "template"');
+            }
+
+            // Check for mutual exclusivity of fields and template on arrays
+            if (fieldType === 'array' && 'template' in field && 'fields' in field) {
+              mistakes.push('"fields" and "template" are mutually exclusive on arrays. Use one or the other.');
             }
 
             // Check for non-hidden logic types on containers
@@ -239,6 +246,8 @@ function formatZodError(error: ZodError, config?: unknown): FormattedValidationE
             // Check for "did you mean" properties
             for (const [wrongProp, suggestion] of Object.entries(DID_YOU_MEAN)) {
               if (wrongProp in field) {
+                // Skip 'template' suggestion for array fields (template is valid via simplified API)
+                if (wrongProp === 'template' && fieldType === 'array') continue;
                 mistakes.push(suggestion);
               }
             }
@@ -459,7 +468,7 @@ const EXPECTED_STRUCTURE: Record<string, string> = {
   slider: `{ key: 'fieldKey', type: 'slider', label: 'Label', minValue: 0, maxValue: 100, step: 1 }`,
   row: `{ key: 'rowKey', type: 'row', fields: [...childFields] }`,
   group: `{ key: 'groupKey', type: 'group', fields: [...childFields] }`,
-  array: `{ key: 'arrayKey', type: 'array', fields: [...templateFields] }`,
+  array: `Full API: { key: 'arrayKey', type: 'array', fields: [...itemDefs] } OR Simplified API: { key: 'arrayKey', type: 'array', template: { type: 'input', label: 'Item' }, value: [] }`,
   page: `{ key: 'pageKey', type: 'page', fields: [...childFields, { key: 'next', type: 'next', label: 'Next' }] }`,
 };
 
@@ -543,8 +552,13 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       }
 
       // Check for forbidden validation-related properties
+      // Note: 'value' is allowed on array fields using the simplified API (template + value)
       for (const prop of CONTAINER_FORBIDDEN_PROPS) {
         if (prop in f) {
+          // Skip 'value' check for arrays with 'template' (simplified API uses value for initial data)
+          if (prop === 'value' && fieldType === 'array' && 'template' in f) {
+            continue;
+          }
           const expected = EXPECTED_STRUCTURE[fieldType || ''] || '';
           errors.push({
             path: `${path}.${prop}`,
@@ -682,8 +696,8 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       }
     }
 
-    // Check for missing 'fields' on containers
-    if (['row', 'group', 'array', 'page'].includes(fieldType || '')) {
+    // Check for missing 'fields' on containers (array supports either 'fields' or 'template')
+    if (['row', 'group', 'page'].includes(fieldType || '')) {
       if (!('fields' in f)) {
         errors.push({
           path: `${path}.fields`,
@@ -697,12 +711,49 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       }
     }
 
+    // Array-specific: requires either 'fields' (full API) or 'template' (simplified API)
+    if (fieldType === 'array') {
+      const hasFields = 'fields' in f;
+      const hasTemplate = 'template' in f;
+
+      if (hasFields && hasTemplate) {
+        errors.push({
+          path: path,
+          message: `Array "${fieldKey || 'unknown'}" has BOTH "fields" and "template". These are mutually exclusive. Use "fields" for the full API or "template" + "value" for the simplified API. ${EXPECTED_STRUCTURE['array']}`,
+        });
+      } else if (!hasFields && !hasTemplate) {
+        errors.push({
+          path: path,
+          message: `Array "${fieldKey || 'unknown'}" is MISSING both "fields" and "template". Use "fields" (full API) or "template" + "value" (simplified API). ${EXPECTED_STRUCTURE['array']}`,
+        });
+      } else if (hasFields && !Array.isArray(f['fields'])) {
+        errors.push({
+          path: `${path}.fields`,
+          message: `Array "${fieldKey || 'unknown'}" has invalid "fields" - must be an array of field objects, not ${typeof f['fields']}.`,
+        });
+      }
+    }
+
     // Recursively check child fields with parent context
     const childFields = f['fields'];
     if (Array.isArray(childFields)) {
       childFields.forEach((child, idx) => {
         checkField(child, `${path}.fields[${idx}]`, fieldType);
       });
+    }
+
+    // Recursively check template fields for simplified arrays
+    if (fieldType === 'array' && 'template' in f) {
+      const template = f['template'];
+      if (Array.isArray(template)) {
+        // Object array template: array of fields
+        template.forEach((child, idx) => {
+          checkField(child, `${path}.template[${idx}]`, fieldType);
+        });
+      } else if (template && typeof template === 'object') {
+        // Primitive array template: single field
+        checkField(template, `${path}.template`, fieldType);
+      }
     }
   }
 

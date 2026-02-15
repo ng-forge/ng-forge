@@ -19,6 +19,7 @@ import { EMPTY, filter, forkJoin, map, Observable, of, pipe, scan, switchMap, ta
 import { explicitEffect } from 'ngxtension/explicit-effect';
 
 import { FieldDef } from '../definitions/base/field-def';
+import { normalizeSimplifiedArrays } from '../utils/array-field/normalize-simplified-arrays';
 import { DynamicFormError } from '../errors/dynamic-form-error';
 import { isPageField, PageField } from '../definitions/default/page-field';
 import { EventBus } from '../events/event.bus';
@@ -866,8 +867,9 @@ export class FormStateManager<
   }
 
   private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: FormMode, registry: Map<string, FieldTypeDefinition>): FormSetup {
-    const flattenedFields = this.fieldProcessors.memoizedFlattenFields(fields, registry);
-    const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(fields, registry);
+    const normalizedFields = normalizeSimplifiedArrays(fields);
+    const flattenedFields = this.fieldProcessors.memoizedFlattenFields(normalizedFields, registry);
+    const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(normalizedFields, registry);
     const fieldsById = this.fieldProcessors.memoizedKeyBy(flattenedFields);
     const defaultValues = this.fieldProcessors.memoizedDefaultValues(fieldsById, registry);
     const fieldsToRender = mode === 'paged' ? [] : flattenedFieldsForRendering;

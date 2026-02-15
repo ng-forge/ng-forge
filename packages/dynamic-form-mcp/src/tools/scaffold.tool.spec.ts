@@ -213,7 +213,7 @@ describe('Scaffold Tool', () => {
   });
 
   describe('arrays', () => {
-    it('generates form with array', async () => {
+    it('generates form with array using simplified API', async () => {
       const result = await registeredTool.handler({
         pages: 0,
         arrays: ['contacts'],
@@ -222,9 +222,11 @@ describe('Scaffold Tool', () => {
 
       expect(content).toContain("key: 'contacts'");
       expect(content).toContain("type: 'array'");
-      expect(content).toContain("key: 'contactsItem'");
-      expect(content).toContain("type: 'addArrayItem'");
-      expect(content).toContain("arrayKey: 'contacts'");
+      expect(content).toContain('template:');
+      expect(content).toContain("key: 'itemName'");
+      expect(content).toContain("key: 'itemValue'");
+      expect(content).toContain('value: []');
+      expect(content).toContain("label: 'Add Contacts'");
     });
 
     it('generates form with multiple arrays', async () => {
@@ -236,8 +238,8 @@ describe('Scaffold Tool', () => {
 
       expect(content).toContain("key: 'contacts'");
       expect(content).toContain("key: 'addresses'");
-      expect(content).toContain("arrayKey: 'contacts'");
-      expect(content).toContain("arrayKey: 'addresses'");
+      expect(content).toContain("label: 'Add Contacts'");
+      expect(content).toContain("label: 'Add Addresses'");
     });
   });
 

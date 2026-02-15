@@ -136,11 +136,21 @@ export function flattenFields(
     } else if (isArrayField(field)) {
       // Step 5: Handle array fields - preserve structure for array form values
       // Array fields create an array in the form value: { arrayKey: [item1, item2, ...] }
-      // New structure: fields is FieldDef[][] (array of item templates)
-      const itemTemplates = field.fields as readonly (readonly FieldDef<unknown>[])[];
-
-      // Flatten each item template's fields
-      const flattenedItemTemplates = itemTemplates.map((itemFields) => flattenFields([...itemFields], registry, options));
+      // field.fields is ArrayItemDefinition[] — each item is either:
+      // - ArrayAllowedChildren (primitive item) → preserved as single FlattenedField
+      // - ArrayItemTemplate (readonly ArrayAllowedChildren[]) → flattened as FlattenedField[]
+      //
+      // IMPORTANT: Preserve the primitive/object distinction so getFieldDefaultValue
+      // can produce flat values (['angular']) vs nested values ([{value: 'angular'}]).
+      const flattenedItemTemplates = field.fields.map((itemDef) => {
+        if (!Array.isArray(itemDef)) {
+          // Primitive item: single ArrayAllowedChildren → flatten, preserve non-array structure
+          const flattened = flattenFields([itemDef as FieldDef<unknown>], registry, options);
+          return flattened[0];
+        }
+        // Object item: ArrayItemTemplate (field[]) → flatten all fields as array
+        return flattenFields([...(itemDef as FieldDef<unknown>[])], registry, options);
+      });
 
       // Keep the array field with its flattened item templates nested under its key
       result.push({

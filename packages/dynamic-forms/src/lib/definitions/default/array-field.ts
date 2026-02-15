@@ -117,3 +117,103 @@ export function isArrayField(field: FieldDef<any>): field is ArrayField {
 }
 
 export type ArrayComponent<T extends ArrayItemTemplate[]> = FieldComponent<ArrayField<T>>;
+
+/**
+ * Configuration for auto-generated add/remove buttons in simplified array fields.
+ */
+export interface ArrayButtonConfig {
+  /** Custom label for the button */
+  readonly label?: string;
+  /** Additional properties passed to the button component */
+  readonly props?: Record<string, unknown>;
+}
+
+/**
+ * Simplified array field interface for common use cases.
+ *
+ * Instead of manually specifying each item in `fields`, provide a `template` that defines
+ * the structure of a single item, and a `value` array with initial data.
+ * The library auto-generates add/remove buttons.
+ *
+ * Discriminant: `template` presence → simplified API; `Array.isArray(template)` → object vs primitive.
+ *
+ * @example
+ * // Primitive array: ['angular', 'typescript']
+ * {
+ *   key: 'tags',
+ *   type: 'array',
+ *   template: { key: 'value', type: 'input', label: 'Tag', required: true },
+ *   value: ['angular', 'typescript']
+ * }
+ *
+ * @example
+ * // Object array: [{ name: 'Jane', phone: '555' }]
+ * {
+ *   key: 'contacts',
+ *   type: 'array',
+ *   template: [
+ *     { key: 'name', type: 'input', label: 'Contact Name', required: true },
+ *     { key: 'phone', type: 'input', label: 'Phone Number' },
+ *   ],
+ *   value: [{ name: 'Jane', phone: '555' }]
+ * }
+ *
+ * @example
+ * // Button customization / opt-out
+ * {
+ *   key: 'tags',
+ *   type: 'array',
+ *   template: { key: 'value', type: 'input', label: 'Tag' },
+ *   addButton: { label: 'Add Tag', props: { color: 'primary' } },
+ *   removeButton: false
+ * }
+ */
+export interface SimplifiedArrayField extends FieldDef<never> {
+  type: 'array';
+
+  /**
+   * Template defining the structure of a single array item.
+   * - Single field (ArrayAllowedChildren) → primitive array (each item is a single value)
+   * - Array of fields (readonly ArrayAllowedChildren[]) → object array (each item is an object)
+   */
+  readonly template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
+
+  /** Initial values for the array. Each element creates one array item. */
+  readonly value?: readonly unknown[];
+
+  /**
+   * Configuration for the auto-generated "Add" button, or `false` to disable it.
+   * Defaults to a button with label "Add".
+   */
+  readonly addButton?: ArrayButtonConfig | false;
+
+  /**
+   * Configuration for the auto-generated "Remove" button on each item, or `false` to disable it.
+   * Defaults to a button with label "Remove".
+   */
+  readonly removeButton?: ArrayButtonConfig | false;
+
+  /** Simplified arrays do not support the label property */
+  readonly label?: never;
+
+  /** Simplified arrays do not support meta */
+  readonly meta?: never;
+
+  /**
+   * Logic configurations for conditional array visibility.
+   * Only 'hidden' type logic is supported for arrays.
+   */
+  readonly logic?: ContainerLogicConfig[];
+
+  /** Mutually exclusive with `template` — use `fields` for the full API instead */
+  readonly fields?: never;
+}
+
+/**
+ * Type guard for SimplifiedArrayField.
+ * Checks for `type: 'array'` with a `template` property (discriminant from full ArrayField).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Type guard must accept any field type
+export function isSimplifiedArrayField(field: FieldDef<any>): field is SimplifiedArrayField {
+  return field.type === 'array' && 'template' in field;
+}

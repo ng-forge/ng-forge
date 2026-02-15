@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input, linkedSignal, signal } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of } from 'rxjs';
@@ -24,6 +24,7 @@ import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 import { observeArrayActions } from '../../utils/array-field/array-event-handler';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { ArrayFieldTree } from '../../core/field-tree-utils';
+import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-array-metadata';
 
 /**
  * Container component for rendering dynamic arrays of fields.
@@ -103,19 +104,71 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
   /**
+   * Gets the auto-remove button FieldDef from normalization metadata.
+   * Set by simplified array normalization for primitive arrays with remove buttons.
+   * The button is rendered alongside each item without wrapping in a row,
+   * preserving flat primitive form values.
+   */
+  private readonly autoRemoveButton = computed<FieldDef<unknown> | undefined>(() => {
+    const metadata = getNormalizedArrayMetadata(this.field());
+    return metadata?.autoRemoveButton;
+  });
+
+  /**
+   * For primitive array items, the key of the value field template (e.g., 'value').
+   * Used to wrap the FormControl in the item context so getFieldTree(key) works.
+   * Returns undefined for object arrays (FormGroup items have natural child navigation).
+   *
+   * Detection order:
+   * 1. Normalization metadata (for simplified arrays — always available at normalization time)
+   * 2. Existing item definitions (non-empty full-API arrays)
+   * 3. Dynamically discovered key from handleAddFromEvent (empty full-API arrays)
+   *
+   * Uses linkedSignal: recomputes when field() changes, supports manual set()
+   * for the dynamic discovery case.
+   */
+  private readonly primitiveFieldKey = linkedSignal<string | undefined>(() => {
+    // Priority 1: Normalization metadata (simplified arrays always have this)
+    const metadata = getNormalizedArrayMetadata(this.field());
+    if (metadata?.primitiveFieldKey) {
+      return metadata.primitiveFieldKey;
+    }
+
+    // Priority 2: Existing item definitions (full-API arrays with initial items)
+    const definitions = (this.field().fields as ArrayItemDefinition[]) || [];
+    if (definitions.length > 0 && !Array.isArray(definitions[0])) {
+      return (definitions[0] as FieldDef<unknown>).key;
+    }
+
+    return undefined;
+  });
+
+  /**
    * Gets the item templates (field definitions) for the array.
    * Each element can be either:
    * - A single FieldDef (primitive item) - normalized to [FieldDef]
    * - An array of FieldDefs (object item) - used as-is
+   *
+   * When auto-remove is configured, the remove button is appended to each item's
+   * template list for rendering. This is purely visual — the form schema uses the
+   * original primitive item definition (single FieldDef → FormControl → flat value).
    *
    * Returns normalized templates where all items are arrays for consistent handling.
    */
   private readonly itemTemplates = computed<ArrayItemTemplate[]>(() => {
     const arrayField = this.field();
     const definitions = (arrayField.fields as ArrayItemDefinition[]) || [];
+    const removeButton = this.autoRemoveButton();
 
     // Normalize: single FieldDef → [FieldDef], array stays as-is
-    return definitions.map((def) => (Array.isArray(def) ? def : [def]) as ArrayItemTemplate);
+    // Append auto-remove button if configured (for primitive simplified arrays)
+    return definitions.map((def) => {
+      const normalized = (Array.isArray(def) ? def : [def]) as ArrayItemTemplate;
+      if (removeButton) {
+        return [...normalized, removeButton] as unknown as ArrayItemTemplate;
+      }
+      return normalized;
+    });
   });
 
   private readonly arrayFieldTrees = computed<readonly (FieldTree<unknown> | null)[]>(() => {
@@ -157,6 +210,19 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   /** Read-only view of resolved items for template consumption. */
   readonly resolvedItems = computed(() => this.resolvedItemsSignal());
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Auto-remove Cache
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Caches the result of appending the auto-remove button to template arrays.
+   * Keyed by template array reference — cache hits occur during recreate/resolution
+   * operations where stored template references are reused. Add operations via
+   * handleAddFromEvent always create a fresh `[...template]` copy (line ~277),
+   * so each add is a cache miss by design (the spread is needed for mutability).
+   */
+  private readonly autoRemoveCache = new WeakMap<readonly FieldDef<unknown>[], FieldDef<unknown>[]>();
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Constructor
@@ -208,10 +274,16 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    *
    * Supports both primitive (single FieldDef) and object (FieldDef[]) templates.
    */
-  private async handleAddFromEvent(template: FieldDef<unknown> | FieldDef<unknown>[], index?: number): Promise<void> {
-    // Normalize template to array for consistent handling
-    const templates = Array.isArray(template) ? template : [template];
+  private async handleAddFromEvent(template: FieldDef<unknown> | readonly FieldDef<unknown>[], index?: number): Promise<void> {
+    // Normalize template to mutable array for consistent handling
+    const templates: FieldDef<unknown>[] = Array.isArray(template) ? [...template] : [template];
     const isPrimitiveItem = !Array.isArray(template);
+
+    // Track primitive field key for full-API arrays that start empty.
+    // Simplified arrays already have this info from normalization metadata.
+    if (isPrimitiveItem && templates[0].key && !this.primitiveFieldKey()) {
+      this.primitiveFieldKey.set(templates[0].key);
+    }
 
     if (templates.length === 0) {
       this.logger.error(
@@ -259,11 +331,14 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     this.updateVersion.update((v) => v + 1);
     const currentVersion = this.updateVersion();
 
+    // Append auto-remove button to resolution templates (for rendering only)
+    const resolveTemplates = this.withAutoRemove(templates);
+
     // Resolve the new item
     const resolvedItem = await firstValueFrom(
       resolveArrayItem({
         index: insertIndex,
-        templates,
+        templates: resolveTemplates,
         arrayField: this.field(),
         itemPositionMap: this.itemPositionMap,
         parentFieldSignalContext: this.parentFieldSignalContext,
@@ -272,6 +347,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
         generateItemId: this.generateItemId,
+        primitiveFieldKey: isPrimitiveItem ? templates[0].key : undefined,
       }).pipe(
         catchError((error) => {
           this.logger.error(`Failed to resolve array item at index ${insertIndex}:`, error);
@@ -442,12 +518,13 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    */
   private createResolveItemObservable(index: number, overrideTemplate?: FieldDef<unknown>[]): Observable<ResolvedArrayItem | undefined> {
     const itemTemplates = this.itemTemplates();
+    const primitiveKey = this.primitiveFieldKey();
 
     // Priority 1: Use override template (from recreate with stored templates)
     if (overrideTemplate && overrideTemplate.length > 0) {
       return resolveArrayItem({
         index,
-        templates: overrideTemplate,
+        templates: this.withAutoRemove(overrideTemplate),
         arrayField: this.field(),
         itemPositionMap: this.itemPositionMap,
         parentFieldSignalContext: this.parentFieldSignalContext,
@@ -456,6 +533,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
         generateItemId: this.generateItemId,
+        primitiveFieldKey: primitiveKey,
       });
     }
 
@@ -473,6 +551,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
         generateItemId: this.generateItemId,
+        primitiveFieldKey: primitiveKey,
       });
     }
 
@@ -483,6 +562,29 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         'This may indicate a bug - dynamically added items should have their templates stored.',
     );
     return of(undefined);
+  }
+
+  /**
+   * Appends the auto-remove button to a templates array for rendering.
+   * The button is added for visual rendering only — it doesn't affect the form schema.
+   * Original templates are stored in templateRegistry WITHOUT the remove button,
+   * so this method is called during resolution to add it dynamically.
+   *
+   * Uses a WeakMap cache keyed by template array reference. Cache hits occur
+   * during recreate/resolution paths where stored templates are reused.
+   * Add operations always pass a fresh `[...template]` copy, so they miss
+   * the cache intentionally (the copy is needed for mutable item construction).
+   */
+  private withAutoRemove(templates: FieldDef<unknown>[]): FieldDef<unknown>[] {
+    const removeButton = this.autoRemoveButton();
+    if (!removeButton) return templates;
+
+    let cached = this.autoRemoveCache.get(templates);
+    if (cached) return cached;
+
+    cached = [...templates, removeButton];
+    this.autoRemoveCache.set(templates, cached);
+    return cached;
   }
 
   /**

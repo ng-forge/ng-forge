@@ -357,31 +357,69 @@ Use \`col\` (1-12) on child fields for grid width. Row is purely for layout. Sup
   },
 
   array: {
-    brief: `\`\`\`typescript
-{ key: 'contacts', type: 'array', fields: [{ key: 'item', type: 'group', fields: [{ key: 'name', type: 'input', label: 'Name' }] }] }
-\`\`\`
-⚠️ Uses **fields** NOT template, **NO label** - supports only \`hidden\` logic type`,
+    brief: `**Two APIs available:**
+**Simplified (recommended):** \`{ key: 'tags', type: 'array', template: { key: 'value', type: 'input', label: 'Tag' }, value: ['a', 'b'] }\`
+**Full:** \`{ key: 'contacts', type: 'array', fields: [[{ key: 'name', type: 'input', value: 'Alice' }]] }\`
+⚠️ **NO label** - supports only \`hidden\` logic type. See topic \`simplified-array\` for the simplified API.`,
 
     full: `# Array Container (Dynamic List)
+
+Arrays support two APIs: **Simplified** (recommended for common cases) and **Full** (for advanced use cases).
+
+## Simplified API (Recommended)
+
+Use \`template\` + \`value\` for common array patterns. Add/remove buttons are auto-generated.
+
+\`\`\`typescript
+// Primitive array: ['angular', 'typescript']
+{
+  key: 'tags',
+  type: 'array',
+  template: { key: 'value', type: 'input', label: 'Tag' },
+  value: ['angular', 'typescript']
+}
+
+// Object array: [{ name: 'Jane', phone: '555' }]
+{
+  key: 'contacts',
+  type: 'array',
+  template: [
+    { key: 'name', type: 'input', label: 'Name', required: true },
+    { key: 'phone', type: 'input', label: 'Phone' }
+  ],
+  value: [{ name: 'Jane', phone: '555' }]
+}
+
+// Custom button config
+{
+  key: 'items',
+  type: 'array',
+  template: { key: 'value', type: 'input', label: 'Item' },
+  addButton: { label: 'Add Item', props: { color: 'primary' } },
+  removeButton: false  // Disable remove buttons
+}
+\`\`\`
+
+See topic \`simplified-array\` for full documentation on the simplified API.
+
+## Full API (Advanced)
+
+Use \`fields\` for explicit item definitions with full control.
 
 \`\`\`typescript
 {
   key: 'contacts',
   type: 'array',
-  // ⚠️ NO LABEL! Uses 'fields', NOT 'template'! Supports only 'hidden' logic type.
+  // ⚠️ NO LABEL! Supports only 'hidden' logic type.
   logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'hasContacts', operator: 'equals', value: false } }],
   fields: [
-    {
-      key: 'contactItem',
-      type: 'group',
-      fields: [
-        { key: 'name', type: 'input', label: 'Name' },
-        { key: 'phone', type: 'input', label: 'Phone' }
-      ]
-    }
+    [
+      { key: 'name', type: 'input', label: 'Name', value: 'Alice' },
+      { key: 'phone', type: 'input', label: 'Phone', value: '555' }
+    ]
   ]
 }
-// Output: { contacts: [{ name: '...', phone: '...' }, ...] }
+// Output: { contacts: [{ name: 'Alice', phone: '555' }] }
 \`\`\`
 
 **DOM Structure:**
@@ -390,12 +428,182 @@ Each array item is wrapped in a \`<div class="df-array-item">\` with:
 - \`data-array-item-id\` (stable ID) and \`data-array-item-index\` (current position) for testing/CSS
 - Use \`--df-array-item-gap\` CSS variable to control spacing between items
 
-**⚠️ Common mistakes:**
-- Using \`template\` (doesn't exist) - use \`fields\`
-- Adding \`label\` to array container (not allowed)
-- Using non-hidden logic types on array (only \`hidden\` is supported)
+**Key rules:**
+- \`fields\` and \`template\` are **mutually exclusive** - use one or the other
+- NO \`label\` property on arrays
+- Only \`hidden\` logic type is supported
+- Arrays cannot contain pages or other arrays
 
 **Can contain:** rows, groups, leaf fields (NOT pages, NOT nested arrays)`,
+  },
+
+  'simplified-array': {
+    brief: `\`\`\`typescript
+// Primitive: { key: 'tags', type: 'array', template: { key: 'value', type: 'input', label: 'Tag' }, value: ['a', 'b'] }
+// Object: { key: 'contacts', type: 'array', template: [{ key: 'name', type: 'input' }, { key: 'phone', type: 'input' }], value: [{ name: 'Jane', phone: '555' }] }
+// Buttons: { addButton: { label: 'Add Tag', props: { color: 'primary' } }, removeButton: false }
+\`\`\`
+Discriminant: \`template\` presence = simplified API; \`Array.isArray(template)\` = object vs primitive.`,
+
+    full: `# Simplified Array API
+
+The simplified array API provides a concise way to define dynamic arrays using \`template\` + \`value\` instead of verbose \`fields\` definitions. Add/remove buttons are auto-generated.
+
+## When to Use
+
+Use the simplified API when:
+- You have a common primitive or object array pattern
+- You want auto-generated add/remove buttons
+- Initial values are known and simple
+
+Use the full API (\`fields\`) when:
+- You need heterogeneous items (different field configs per item)
+- You need custom button placement
+- You need explicit control over each item's structure
+
+## Primitive Array
+
+Each item is a single value (string, number, etc.):
+
+\`\`\`typescript
+{
+  key: 'tags',
+  type: 'array',
+  template: { key: 'value', type: 'input', label: 'Tag', required: true },
+  value: ['angular', 'typescript']
+}
+// Output: { tags: ['angular', 'typescript'] }
+\`\`\`
+
+**Discriminant:** \`template\` is a single field definition (not an array).
+
+## Object Array
+
+Each item is an object with multiple fields:
+
+\`\`\`typescript
+{
+  key: 'contacts',
+  type: 'array',
+  template: [
+    { key: 'name', type: 'input', label: 'Contact Name', required: true },
+    { key: 'phone', type: 'input', label: 'Phone Number' }
+  ],
+  value: [
+    { name: 'Jane Doe', phone: '555-1234' },
+    { name: 'John Smith', phone: '555-5678' }
+  ]
+}
+// Output: { contacts: [{ name: 'Jane Doe', phone: '555-1234' }, ...] }
+\`\`\`
+
+**Discriminant:** \`template\` is an array of field definitions.
+
+## Button Configuration
+
+### Custom Add Button
+\`\`\`typescript
+{
+  key: 'tags',
+  type: 'array',
+  template: { key: 'value', type: 'input', label: 'Tag' },
+  addButton: {
+    label: 'Add New Tag',
+    props: { color: 'primary' }
+  }
+}
+\`\`\`
+
+### Custom Remove Button
+\`\`\`typescript
+{
+  key: 'items',
+  type: 'array',
+  template: { key: 'value', type: 'input', label: 'Item' },
+  removeButton: {
+    label: 'Delete',
+    props: { color: 'warn' }
+  }
+}
+\`\`\`
+
+### Disable Buttons
+\`\`\`typescript
+{
+  key: 'tags',
+  type: 'array',
+  template: { key: 'value', type: 'input', label: 'Tag' },
+  addButton: false,     // No add button
+  removeButton: false   // No remove button per item
+}
+\`\`\`
+
+## ArrayButtonConfig Interface
+
+\`\`\`typescript
+interface ArrayButtonConfig {
+  label?: string;                    // Custom button label
+  props?: Record<string, unknown>;   // Additional button component properties
+}
+\`\`\`
+
+## SimplifiedArrayField Interface
+
+\`\`\`typescript
+interface SimplifiedArrayField {
+  type: 'array';
+  key: string;
+  template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];  // Item structure
+  value?: readonly unknown[];         // Initial values
+  addButton?: ArrayButtonConfig | false;    // Add button config (default: { label: 'Add' })
+  removeButton?: ArrayButtonConfig | false; // Remove button config (default: { label: 'Remove' })
+  logic?: ContainerLogicConfig[];     // Only 'hidden' type supported
+  // label is NOT supported
+  // fields is NOT supported (mutually exclusive with template)
+}
+\`\`\`
+
+## How It Works Internally
+
+The simplified API is normalized into the full API at runtime:
+1. Each \`value\` element creates an item using the \`template\` structure
+2. An \`addArrayItem\` button is auto-generated after the array (unless \`addButton: false\`)
+3. A \`removeArrayItem\` button is added to each item (unless \`removeButton: false\`)
+
+## Conditional Visibility
+
+\`\`\`typescript
+{
+  key: 'tags',
+  type: 'array',
+  template: { key: 'value', type: 'input', label: 'Tag' },
+  logic: [{
+    type: 'hidden',
+    condition: { type: 'fieldValue', fieldPath: 'hasTags', operator: 'equals', value: false }
+  }]
+}
+\`\`\`
+
+## Common Mistakes
+
+❌ Mixing \`fields\` and \`template\`:
+\`\`\`typescript
+// WRONG - mutually exclusive
+{ type: 'array', fields: [...], template: {...} }
+
+// CORRECT - use one or the other
+{ type: 'array', template: { key: 'value', type: 'input', label: 'Tag' }, value: ['a'] }
+{ type: 'array', fields: [{ key: 'tag', type: 'input', value: 'a' }] }
+\`\`\`
+
+❌ Wrong value shape for object templates:
+\`\`\`typescript
+// WRONG - value should match template keys
+{ template: [{ key: 'name', type: 'input' }], value: ['Jane'] }
+
+// CORRECT - value elements are objects matching template keys
+{ template: [{ key: 'name', type: 'input' }], value: [{ name: 'Jane' }] }
+\`\`\``,
   },
 
   page: {
@@ -1251,7 +1459,7 @@ provideDynamicForm({
 |-----------|--------|--------|-------|
 | page | NO | hidden only | Nav buttons INSIDE |
 | group | NO | hidden only | Creates nested object |
-| array | NO | hidden only | Uses \`fields\` not \`template\` |
+| array | NO | hidden only | Two APIs: \`template\`+\`value\` (simplified) or \`fields\` (full) |
 | row | NO | hidden only | Layout only, no hidden fields |`,
 
     full: `# Container Rules
@@ -1260,7 +1468,7 @@ provideDynamicForm({
 |-----------|--------|--------|------------------|-------|
 | page | NO | YES (hidden only) | rows, groups, arrays, leaf fields, buttons | Nav buttons go INSIDE |
 | group | NO | YES (hidden only) | rows, leaf fields (NOT pages, groups) | Creates nested object |
-| array | NO | YES (hidden only) | rows, groups, leaf fields (NOT pages, arrays) | Uses \`fields\`, not \`template\` |
+| array | NO | YES (hidden only) | rows, groups, leaf fields (NOT pages, arrays) | Two APIs: \`template\`+\`value\` (simplified) or \`fields\` (full) |
 | row | NO | YES (hidden only) | groups, arrays, leaf fields (NOT hidden, pages, rows) | Layout only |
 
 **CRITICAL:**
@@ -1473,7 +1681,8 @@ const formConfig = {
 2. Hidden field with label/logic/validators - FORBIDDEN!
 3. Container (group/row/array) only supports 'hidden' logic - other types go on children!
 4. options/minValue/maxValue in props - must be at FIELD level!
-5. Generic button without \`event\` - use submit/next/previous!`,
+5. Generic button without \`event\` - use submit/next/previous!
+6. Array: \`fields\` and \`template\` are mutually exclusive - use one or the other!`,
 
     full: `# Common Pitfalls & Solutions
 
@@ -1538,13 +1747,16 @@ const formConfig = {
 { type: 'button', label: 'Click', event: MyEvent }  // ✅
 \`\`\`
 
-## 6. Array using 'template' instead of 'fields'
+## 6. Array: 'fields' vs 'template' (two APIs)
 \`\`\`typescript
-// WRONG
-{ type: 'array', template: [...] }  // ❌ 'template' doesn't exist
+// WRONG - mixing both APIs
+{ type: 'array', fields: [...], template: {...} }  // ❌ mutually exclusive
 
-// CORRECT
-{ type: 'array', fields: [...] }    // ✅
+// CORRECT - Simplified API (recommended for common cases)
+{ type: 'array', template: { key: 'value', type: 'input', label: 'Tag' }, value: ['a', 'b'] }  // ✅
+
+// CORRECT - Full API (for advanced use cases)
+{ type: 'array', fields: [{ key: 'tag', type: 'input', value: 'a' }] }  // ✅
 \`\`\`
 
 ## 7. Type annotation loses inference
@@ -1966,6 +2178,12 @@ export const TOPIC_ALIASES: Record<string, string> = {
   list: 'array',
   dynamic: 'array',
   repeater: 'array',
+  // Simplified array aliases
+  'simplified-arrays': 'simplified-array',
+  'simple-array': 'simplified-array',
+  'array-template': 'simplified-array',
+  'template-array': 'simplified-array',
+  'array-simplified': 'simplified-array',
   layout: 'row',
   columns: 'row',
   grid: 'row',
