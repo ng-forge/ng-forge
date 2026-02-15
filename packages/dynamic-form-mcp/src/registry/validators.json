@@ -163,7 +163,7 @@
       "http": {
         "name": "http",
         "type": "HttpRequestConfig",
-        "description": "HTTP request configuration: { url, method?, queryParams?, body?, bodyExpressions?, headers?, debounceMs? }. queryParams values are expressions. When bodyExpressions is true, top-level string values in body are evaluated as expressions (shallow only).",
+        "description": "HTTP request configuration: { url, method?, queryParams?, body?, evaluateBodyExpressions?, headers?, debounceMs? }. queryParams values are expressions. When evaluateBodyExpressions is true, top-level string values in body are evaluated as expressions (shallow only).",
         "required": true
       },
       "responseMapping": {
