@@ -120,6 +120,38 @@ describe('field-state-extractor', () => {
 
       expect((proxy as Record<string, unknown>)['nonexistent']).toBeUndefined();
     });
+
+    it('should accept a direct field instance object (FieldContext path)', () => {
+      const instance = createMockFieldInstance({ touched: true, dirty: false, valid: true });
+      const proxy = createFieldStateProxy(instance as unknown as Record<string, unknown>, false);
+
+      expect(proxy).toBeDefined();
+      expect(proxy!.touched).toBe(true);
+      expect(proxy!.dirty).toBe(false);
+      expect(proxy!.pristine).toBe(true);
+      expect(proxy!.valid).toBe(true);
+    });
+
+    it('should reflect signal changes on direct instance', () => {
+      const touchedSignal = signal(false);
+      const instance = {
+        touched: touchedSignal,
+        dirty: signal(false),
+        valid: signal(true),
+        invalid: signal(false),
+        pending: signal(false),
+        hidden: signal(false),
+        readonly: signal(false),
+        disabled: signal(false),
+        value: signal('test'),
+      };
+
+      const proxy = createFieldStateProxy(instance as unknown as Record<string, unknown>, true);
+
+      expect(proxy!.touched).toBe(false);
+      touchedSignal.set(true);
+      expect(proxy!.touched).toBe(true);
+    });
   });
 
   describe('createFormFieldStateProxy', () => {

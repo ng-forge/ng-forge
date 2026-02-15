@@ -103,8 +103,9 @@ export interface DerivationEntry {
    * When true, the derivation stops running after the user manually
    * edits the target field.
    *
-   * Uses the field's `dirty()` signal — derivations call `markAsPristine()`
-   * after applying values, so `dirty === true` reliably indicates user modification.
+   * Uses the field's `dirty()` signal — derivations write directly to
+   * `value.set()` which does not trigger `markAsDirty()`, so
+   * `dirty === true` reliably indicates user modification.
    */
   stopOnUserOverride?: boolean;
 

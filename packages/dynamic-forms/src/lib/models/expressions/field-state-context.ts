@@ -14,8 +14,26 @@ export interface FieldStateInfo {
   readonly valid: boolean;
   readonly invalid: boolean;
   readonly pending: boolean;
+  /**
+   * Whether the field is currently hidden.
+   *
+   * Note: This is a library-managed property, not a native Angular Signal Forms
+   * property. Returns `false` if the field instance does not expose a `hidden` signal.
+   */
   readonly hidden: boolean;
+  /**
+   * Whether the field is currently readonly.
+   *
+   * Note: This is a library-managed property, not a native Angular Signal Forms
+   * property. Returns `false` if the field instance does not expose a `readonly` signal.
+   */
   readonly readonly: boolean;
+  /**
+   * Whether the field is currently disabled.
+   *
+   * Note: This is a library-managed property, not a native Angular Signal Forms
+   * property. Returns `false` if the field instance does not expose a `disabled` signal.
+   */
   readonly disabled: boolean;
 }
 

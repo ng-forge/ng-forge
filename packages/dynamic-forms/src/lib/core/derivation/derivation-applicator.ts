@@ -710,15 +710,10 @@ function setFieldValue(
   const valueSignal = fieldInstance.value;
 
   if (isWritableSignal(valueSignal)) {
+    // Writing directly to value.set() does NOT trigger markAsDirty() —
+    // only user interaction through setControlValue() does. So derivation-applied
+    // values leave the field pristine, and dirty() reliably indicates user edits.
     valueSignal.set(value);
-
-    // Mark field as pristine after derivation-applied value change.
-    // This ensures dirty() only reflects user modifications, not programmatic ones.
-    const fieldWithState = fieldInstance as Record<string, unknown>;
-    if (typeof fieldWithState['markAsPristine'] === 'function') {
-      (fieldWithState['markAsPristine'] as () => void)();
-    }
-
     return true;
   } else {
     warnMissingField(fieldKey, logger, warningTracker);
@@ -751,14 +746,17 @@ function warnMissingField(fieldKey: string, logger?: Logger, warningTracker?: De
 }
 
 /**
- * Reads the dirty() signal from a field at the given path.
+ * Navigates the form tree to resolve a field instance at the given path.
  *
- * Returns `true` if the field is dirty, `false` if pristine,
- * or `undefined` if the field cannot be found.
+ * Walks the tree following the same pattern as `setFieldValue`:
+ * each segment is looked up on the current node, and signal accessors
+ * are called to get the next level.
+ *
+ * @returns The field instance object, or `undefined` if the path is invalid
  *
  * @internal
  */
-function readFieldDirty(rootForm: FieldTree<unknown>, fieldPath: string): boolean | undefined {
+function resolveFieldInstance(rootForm: FieldTree<unknown>, fieldPath: string): Record<string, unknown> | undefined {
   const parts = fieldPath.split('.');
   let current: unknown = rootForm;
 
@@ -775,6 +773,21 @@ function readFieldDirty(rootForm: FieldTree<unknown>, fieldPath: string): boolea
   const fieldInstance = (fieldAccessor as () => Record<string, unknown>)();
   if (!fieldInstance || typeof fieldInstance !== 'object') return undefined;
 
+  return fieldInstance;
+}
+
+/**
+ * Reads the dirty() signal from a field at the given path.
+ *
+ * Returns `true` if the field is dirty, `false` if pristine,
+ * or `undefined` if the field cannot be found.
+ *
+ * @internal
+ */
+function readFieldDirty(rootForm: FieldTree<unknown>, fieldPath: string): boolean | undefined {
+  const fieldInstance = resolveFieldInstance(rootForm, fieldPath);
+  if (!fieldInstance) return undefined;
+
   const dirtySignal = fieldInstance['dirty'];
   if (!isSignal(dirtySignal)) return undefined;
 
@@ -782,32 +795,22 @@ function readFieldDirty(rootForm: FieldTree<unknown>, fieldPath: string): boolea
 }
 
 /**
- * Marks a field at the given path as pristine (not dirty).
+ * Resets a field's dirty/touched state at the given path.
  *
  * Used for re-engagement: when a dependency changes, clear the user override
  * so the derivation can re-apply.
  *
+ * Uses the public `reset()` API on FieldState, which clears both
+ * dirty and touched without changing the field's value.
+ *
  * @internal
  */
-function markFieldAsPristine(rootForm: FieldTree<unknown>, fieldPath: string): void {
-  const parts = fieldPath.split('.');
-  let current: unknown = rootForm;
+function resetFieldState(rootForm: FieldTree<unknown>, fieldPath: string): void {
+  const fieldInstance = resolveFieldInstance(rootForm, fieldPath);
+  if (!fieldInstance) return;
 
-  for (let i = 0; i < parts.length - 1; i++) {
-    const next = (current as Record<string, unknown>)[parts[i]];
-    if (next === undefined || next === null) return;
-    current = isSignal(next) ? (next as () => unknown)() : next;
-  }
-
-  const finalKey = parts[parts.length - 1];
-  const fieldAccessor = (current as Record<string, unknown>)[finalKey];
-  if (!isSignal(fieldAccessor)) return;
-
-  const fieldInstance = (fieldAccessor as () => Record<string, unknown>)();
-  if (!fieldInstance || typeof fieldInstance !== 'object') return;
-
-  if (typeof fieldInstance['markAsPristine'] === 'function') {
-    (fieldInstance['markAsPristine'] as () => void)();
+  if (typeof fieldInstance['reset'] === 'function') {
+    (fieldInstance['reset'] as () => void)();
   }
 }
 
@@ -828,25 +831,16 @@ function shouldSkipForUserOverride(
 ): boolean {
   if (!entry.stopOnUserOverride) return false;
 
-  const fieldDirty = readFieldDirty(context.rootForm, resolvedFieldKey);
-  if (fieldDirty === undefined) return false;
-
   // Re-engagement: reset dirty state if any dependency changed
   // Guard: changedFields is undefined on initial onChange evaluation
   if (entry.reEngageOnDependencyChange && chainContext.changedFields) {
     const dependencyChanged = entry.dependsOn.some((dep) => dep === '*' || chainContext.changedFields!.has(dep));
     if (dependencyChanged) {
-      markFieldAsPristine(context.rootForm, resolvedFieldKey);
+      resetFieldState(context.rootForm, resolvedFieldKey);
     }
   }
 
-  // Re-read after potential re-engagement
-  const isDirty =
-    entry.reEngageOnDependencyChange && chainContext.changedFields
-      ? (readFieldDirty(context.rootForm, resolvedFieldKey) ?? false)
-      : fieldDirty;
-
-  return isDirty;
+  return readFieldDirty(context.rootForm, resolvedFieldKey) ?? false;
 }
 
 /**

@@ -34,16 +34,12 @@ describe('derivation-applicator', () => {
   /**
    * Mock form that mimics Angular Signal Forms structure.
    *
-   * Real structure: form[key] is callable (and is a signal), form[key]() returns
-   * { value: WritableSignal, dirty: Signal<boolean>, markAsPristine: () => void }
+   * Real structure: form[key] is a signal (FieldTree). Calling form[key]() returns
+   * a FieldState with: value (WritableSignal), dirty (Signal<boolean>),
+   * touched (Signal<boolean>), reset() (method that clears dirty+touched).
    */
   function createMockForm(initialValue: Record<string, unknown>): {
-    form: Record<
-      string,
-      (() => { value: WritableSignal<unknown>; dirty: WritableSignal<boolean>; markAsPristine: () => void }) & {
-        [Symbol.toStringTag]?: string;
-      }
-    >;
+    form: Record<string, unknown>;
     values: Record<string, unknown>;
     dirtyStates: Record<string, WritableSignal<boolean>>;
   } {
@@ -54,19 +50,23 @@ describe('derivation-applicator', () => {
     for (const key of Object.keys(initialValue)) {
       // Create a writable signal for the value
       const valueSignal = signal(values[key]);
-      // Create a dirty signal (defaults to false = pristine)
+      // Create dirty/touched signals (defaults to false = pristine/untouched)
       const dirtySignal = signal(false);
+      const touchedSignal = signal(false);
       dirtyStates[key] = dirtySignal;
 
-      // Create a callable field accessor that returns { value, dirty, markAsPristine }
-      // Must look like a signal to isSignal() — use signal() to create the accessor
+      // FieldState instance — matches the public Angular Signal Forms API
       const fieldInstance = {
         value: valueSignal,
         dirty: dirtySignal,
-        markAsPristine: () => dirtySignal.set(false),
+        touched: touchedSignal,
+        reset: () => {
+          dirtySignal.set(false);
+          touchedSignal.set(false);
+        },
       };
 
-      // Angular Signal Forms field accessors are signals themselves.
+      // Angular Signal Forms field accessors are signals (FieldTree).
       // We use a computed signal that always returns the field instance.
       form[key] = computed(() => fieldInstance);
 
@@ -482,21 +482,45 @@ describe('derivation-applicator', () => {
         // Each item field is a FieldTree-like object with child fields
         // Field accessors must be signals (pass isSignal() check)
         const dirtySignal = signal(false);
+        const touchedSignal = signal(false);
         const qDirty = signal(false);
+        const qTouched = signal(false);
         const upDirty = signal(false);
+        const upTouched = signal(false);
         return {
-          quantity: computed(() => ({ value: quantitySignal, dirty: qDirty, markAsPristine: () => qDirty.set(false) })),
-          unitPrice: computed(() => ({ value: unitPriceSignal, dirty: upDirty, markAsPristine: () => upDirty.set(false) })),
+          quantity: computed(() => ({
+            value: quantitySignal,
+            dirty: qDirty,
+            touched: qTouched,
+            reset: () => {
+              qDirty.set(false);
+              qTouched.set(false);
+            },
+          })),
+          unitPrice: computed(() => ({
+            value: unitPriceSignal,
+            dirty: upDirty,
+            touched: upTouched,
+            reset: () => {
+              upDirty.set(false);
+              upTouched.set(false);
+            },
+          })),
           lineTotal: computed(() => ({
             value: lineTotalSignal,
             dirty: dirtySignal,
-            markAsPristine: () => dirtySignal.set(false),
+            touched: touchedSignal,
+            reset: () => {
+              dirtySignal.set(false);
+              touchedSignal.set(false);
+            },
           })),
         };
       });
 
       const globalDiscountSignal = signal(values.globalDiscount);
       const globalDiscountDirty = signal(false);
+      const globalDiscountTouched = signal(false);
 
       // Array field must be both callable (for getting value) AND have numeric indices
       // Use Object.assign on a computed to keep signal identity + numeric indices
@@ -518,7 +542,11 @@ describe('derivation-applicator', () => {
         globalDiscount: computed(() => ({
           value: globalDiscountSignal,
           dirty: globalDiscountDirty,
-          markAsPristine: () => globalDiscountDirty.set(false),
+          touched: globalDiscountTouched,
+          reset: () => {
+            globalDiscountDirty.set(false);
+            globalDiscountTouched.set(false);
+          },
         })),
       };
 
@@ -731,14 +759,14 @@ describe('derivation-applicator', () => {
           computed(() => ({ value: signal(values.items) })),
           {
             0: {
-              quantity: computed(() => ({ value: signal(values.items[0].quantity), dirty: d0q, markAsPristine: () => d0q.set(false) })),
-              unitPrice: computed(() => ({ value: signal(values.items[0].unitPrice), dirty: d0u, markAsPristine: () => d0u.set(false) })),
-              lineTotal: computed(() => ({ value: lineTotalSignal0, dirty: d0l, markAsPristine: () => d0l.set(false) })),
+              quantity: computed(() => ({ value: signal(values.items[0].quantity), dirty: d0q, reset: () => d0q.set(false) })),
+              unitPrice: computed(() => ({ value: signal(values.items[0].unitPrice), dirty: d0u, reset: () => d0u.set(false) })),
+              lineTotal: computed(() => ({ value: lineTotalSignal0, dirty: d0l, reset: () => d0l.set(false) })),
             },
             1: {
-              quantity: computed(() => ({ value: signal(values.items[1].quantity), dirty: d1q, markAsPristine: () => d1q.set(false) })),
-              unitPrice: computed(() => ({ value: signal(values.items[1].unitPrice), dirty: d1u, markAsPristine: () => d1u.set(false) })),
-              lineTotal: computed(() => ({ value: lineTotalSignal1, dirty: d1l, markAsPristine: () => d1l.set(false) })),
+              quantity: computed(() => ({ value: signal(values.items[1].quantity), dirty: d1q, reset: () => d1q.set(false) })),
+              unitPrice: computed(() => ({ value: signal(values.items[1].unitPrice), dirty: d1u, reset: () => d1u.set(false) })),
+              lineTotal: computed(() => ({ value: lineTotalSignal1, dirty: d1l, reset: () => d1l.set(false) })),
             },
           },
         ),

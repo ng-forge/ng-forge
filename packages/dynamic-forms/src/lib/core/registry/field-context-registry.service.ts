@@ -12,6 +12,17 @@ function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is 
 }
 
 /**
+ * Extracts the FieldState from a FieldContext using the public `.state` property.
+ *
+ * FieldContext.state is a FieldState object that has all signal properties
+ * (dirty, touched, valid, etc.) needed by the field state proxy.
+ */
+function extractFieldState(fieldContext: FieldContext<unknown>): Record<string, unknown> | undefined {
+  if (!fieldContext || !('state' in fieldContext)) return undefined;
+  return fieldContext.state as unknown as Record<string, unknown>;
+}
+
+/**
  * Safely reads `pathKeys` from a FieldContext.
  * Returns an empty array if `pathKeys` is not available (e.g., in tests or older Angular versions).
  *
@@ -99,7 +110,7 @@ export class FieldContextRegistryService {
     }
 
     const rootForm = untracked(() => this.rootFormRegistry.rootForm()) as FieldTree<unknown>;
-    const fieldStateProxy = createFieldStateProxy(() => fieldContext as unknown as Record<string, unknown>, false);
+    const fieldStateProxy = createFieldStateProxy(extractFieldState(fieldContext), false);
     const formFieldStateProxy = createFormFieldStateProxy(rootForm, false);
 
     return {
@@ -164,9 +175,7 @@ export class FieldContextRegistryService {
     const rootForm = (
       reactive ? this.rootFormRegistry.rootForm() : untracked(() => this.rootFormRegistry.rootForm())
     ) as FieldTree<unknown>;
-    const fieldStateProxy = fieldContext
-      ? createFieldStateProxy(() => fieldContext as unknown as Record<string, unknown>, reactive)
-      : undefined;
+    const fieldStateProxy = fieldContext ? createFieldStateProxy(extractFieldState(fieldContext), reactive) : undefined;
     const formFieldStateProxy = createFormFieldStateProxy(rootForm, reactive);
 
     // Fall back to root form value if array item lookup fails
@@ -252,7 +261,7 @@ export class FieldContextRegistryService {
 
     const localKey = this.extractFieldPath(fieldContext);
     const rootForm = this.rootFormRegistry.rootForm() as FieldTree<unknown>;
-    const fieldStateProxy = createFieldStateProxy(() => fieldContext as unknown as Record<string, unknown>, true);
+    const fieldStateProxy = createFieldStateProxy(extractFieldState(fieldContext), true);
     const formFieldStateProxy = createFormFieldStateProxy(rootForm, true);
 
     return {

@@ -340,8 +340,9 @@ interface BaseDerivationLogicConfig {
    * This is useful for "smart defaults" — values that should be
    * auto-filled initially but respected once the user explicitly changes them.
    *
-   * Requires the `UserInteractionTracker` to be provided (automatically
-   * available when using `provideDynamicForm()`).
+   * Uses the field's `dirty()` signal to detect user modification.
+   * Derivations write directly to `value.set()` which does not trigger
+   * `markAsDirty()`, so `dirty === true` reliably indicates a user edit.
    *
    * @example
    * ```typescript

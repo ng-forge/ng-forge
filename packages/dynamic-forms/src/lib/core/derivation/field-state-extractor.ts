@@ -20,39 +20,49 @@ function readFieldSignal(fieldInstance: Record<string, unknown>, prop: string, r
 }
 
 /**
- * Creates a Proxy-based FieldStateInfo for a specific field accessor.
+ * Creates a Proxy-based FieldStateInfo for a field source.
  *
  * Property access (e.g., `.touched`) lazily reads the field's signal.
  * `pristine` is computed as `!dirty`.
  *
- * @param fieldAccessor - A function that, when called, returns the field instance
+ * Accepts either:
+ * - A signal accessor (from form tree) — called to get the field instance
+ * - A direct field instance object (from FieldContext) — used directly
+ *
+ * @param fieldSource - A signal accessor or direct field instance
  * @param reactive - If true, reads signals reactively (creates dependencies).
  *                   If false, reads signals with `untracked()` (no dependencies).
- * @returns A FieldStateInfo proxy, or undefined if the field accessor is invalid
+ * @returns A FieldStateInfo proxy, or undefined if the source is invalid
  *
  * @internal
  */
 export function createFieldStateProxy(
-  fieldAccessor: (() => Record<string, unknown>) | undefined,
+  fieldSource: (() => Record<string, unknown>) | Record<string, unknown> | undefined,
   reactive: boolean,
 ): FieldStateInfo | undefined {
-  if (!fieldAccessor || !isSignal(fieldAccessor)) {
+  if (!fieldSource || (typeof fieldSource !== 'object' && !isSignal(fieldSource))) {
     return undefined;
   }
+
+  const getInstance = (): Record<string, unknown> | undefined => {
+    if (isSignal(fieldSource)) {
+      return reactive ? (fieldSource as () => Record<string, unknown>)() : untracked(fieldSource as () => Record<string, unknown>);
+    }
+    return fieldSource as Record<string, unknown>;
+  };
 
   return new Proxy({} as FieldStateInfo, {
     get(_target, prop: string): boolean | undefined {
       if (prop === 'pristine') {
-        // pristine = !dirty, for ergonomics
-        const instance = fieldAccessor();
+        const instance = getInstance();
         if (!instance || typeof instance !== 'object') return undefined;
-        return !readFieldSignal(instance as Record<string, unknown>, 'dirty', reactive);
+        return !readFieldSignal(instance, 'dirty', reactive);
       }
 
       if (STATE_PROPERTIES.includes(prop as (typeof STATE_PROPERTIES)[number])) {
-        const instance = fieldAccessor();
+        const instance = getInstance();
         if (!instance || typeof instance !== 'object') return undefined;
-        return readFieldSignal(instance as Record<string, unknown>, prop, reactive);
+        return readFieldSignal(instance, prop, reactive);
       }
 
       return undefined;
