@@ -19,6 +19,7 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       [id]="toggleId"
       [formField]="f"
       [meta]="meta()"
+      [key]="key()"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"
       [justify]="props()?.justify"
       [color]="props()?.color ?? 'primary'"

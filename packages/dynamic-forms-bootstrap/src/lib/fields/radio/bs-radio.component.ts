@@ -1,7 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  setupUserInteractionTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { BsRadioComponent, BsRadioProps } from './bs-radio.type';
 import { AsyncPipe } from '@angular/common';
 import { BsRadioGroupComponent } from './bs-radio-group.component';
@@ -79,6 +84,7 @@ export default class BsRadioFieldComponent implements BsRadioComponent {
       selector: 'input[type="radio"]',
       dependents: [this.options],
     });
+    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input[type="radio"]' });
   }
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));

@@ -332,6 +332,57 @@ interface BaseDerivationLogicConfig {
    * ```
    */
   dependsOn?: string[];
+
+  /**
+   * When true, the derivation stops running after the user manually
+   * edits the target field.
+   *
+   * This is useful for "smart defaults" — values that should be
+   * auto-filled initially but respected once the user explicitly changes them.
+   *
+   * Requires the `UserInteractionTracker` to be provided (automatically
+   * available when using `provideDynamicForm()`).
+   *
+   * @example
+   * ```typescript
+   * // Auto-fill display name from first + last name, but stop if user edits it
+   * {
+   *   key: 'displayName',
+   *   logic: [{
+   *     type: 'derivation',
+   *     expression: 'formValue.firstName + " " + formValue.lastName',
+   *     stopOnUserOverride: true
+   *   }]
+   * }
+   * ```
+   */
+  stopOnUserOverride?: boolean;
+
+  /**
+   * When true (and `stopOnUserOverride` is also true), clears the
+   * user-override flag when any dependency of this derivation changes,
+   * allowing the derivation to run again.
+   *
+   * This is useful when a user override should only persist until the
+   * underlying data changes — e.g., when switching countries, the
+   * phone prefix should re-derive even if the user previously edited it.
+   *
+   * @example
+   * ```typescript
+   * {
+   *   key: 'phonePrefix',
+   *   logic: [{
+   *     type: 'derivation',
+   *     value: '+1',
+   *     condition: { type: 'fieldValue', fieldPath: 'country', operator: 'equals', value: 'USA' },
+   *     stopOnUserOverride: true,
+   *     reEngageOnDependencyChange: true,
+   *     dependsOn: ['country']
+   *   }]
+   * }
+   * ```
+   */
+  reEngageOnDependencyChange?: boolean;
 }
 
 /**

@@ -9,3 +9,7 @@ export { isEqual } from '@ng-forge/dynamic-forms';
 // Meta tracking utilities
 export { setupMetaTracking } from './setup-meta-tracking';
 export type { MetaTrackingOptions } from './setup-meta-tracking';
+
+// User interaction tracking utilities
+export { setupUserInteractionTracking } from './setup-user-interaction-tracking';
+export type { UserInteractionTrackingOptions } from './setup-user-interaction-tracking';

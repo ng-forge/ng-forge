@@ -1,10 +1,11 @@
 import { inject, Injectable, isSignal, Signal, untracked } from '@angular/core';
-import { ChildFieldContext, FieldContext } from '@angular/forms/signals';
+import { ChildFieldContext, FieldContext, FieldTree } from '@angular/forms/signals';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
 import { RootFormRegistryService } from './root-form-registry.service';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { getNestedValue } from '../expressions/value-utils';
+import { createFieldStateProxy, createFormFieldStateProxy } from '../derivation/field-state-extractor';
 
 function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is ChildFieldContext<TValue> {
   return 'key' in context && isSignal(context.key);
@@ -94,8 +95,12 @@ export class FieldContextRegistryService {
     const arrayScope = detectArrayScope(pathKeys);
 
     if (arrayScope) {
-      return this.buildArrayScopedContext(rootFormValue, arrayScope, fieldValue, customFunctions, false);
+      return this.buildArrayScopedContext(rootFormValue, arrayScope, fieldValue, customFunctions, false, fieldContext);
     }
+
+    const rootForm = untracked(() => this.rootFormRegistry.rootForm()) as FieldTree<unknown>;
+    const fieldStateProxy = createFieldStateProxy(() => fieldContext as unknown as Record<string, unknown>, false);
+    const formFieldStateProxy = createFormFieldStateProxy(rootForm, false);
 
     return {
       fieldValue,
@@ -104,6 +109,8 @@ export class FieldContextRegistryService {
       customFunctions: customFunctions || {},
       externalData: this.resolveExternalData(false),
       logger: this.logger,
+      fieldState: fieldStateProxy,
+      formFieldState: formFieldStateProxy,
     };
   }
 
@@ -139,6 +146,7 @@ export class FieldContextRegistryService {
     fieldValue: TValue,
     customFunctions: Record<string, (context: EvaluationContext) => unknown> | undefined,
     reactive: boolean,
+    fieldContext?: FieldContext<unknown>,
   ): EvaluationContext {
     const { arrayKey, index, localKey } = arrayScope;
 
@@ -153,6 +161,14 @@ export class FieldContextRegistryService {
       }
     }
 
+    const rootForm = (
+      reactive ? this.rootFormRegistry.rootForm() : untracked(() => this.rootFormRegistry.rootForm())
+    ) as FieldTree<unknown>;
+    const fieldStateProxy = fieldContext
+      ? createFieldStateProxy(() => fieldContext as unknown as Record<string, unknown>, reactive)
+      : undefined;
+    const formFieldStateProxy = createFormFieldStateProxy(rootForm, reactive);
+
     // Fall back to root form value if array item lookup fails
     if (!scopedFormValue) {
       return {
@@ -162,6 +178,8 @@ export class FieldContextRegistryService {
         customFunctions: customFunctions || {},
         externalData: this.resolveExternalData(reactive),
         logger: this.logger,
+        fieldState: fieldStateProxy,
+        formFieldState: formFieldStateProxy,
       };
     }
 
@@ -175,6 +193,8 @@ export class FieldContextRegistryService {
       customFunctions: customFunctions || {},
       externalData: this.resolveExternalData(reactive),
       logger: this.logger,
+      fieldState: fieldStateProxy,
+      formFieldState: formFieldStateProxy,
     };
   }
 
@@ -227,10 +247,13 @@ export class FieldContextRegistryService {
     const arrayScope = detectArrayScope(pathKeys);
 
     if (arrayScope) {
-      return this.buildArrayScopedContext(rootFormValue, arrayScope, fieldValue, customFunctions, true);
+      return this.buildArrayScopedContext(rootFormValue, arrayScope, fieldValue, customFunctions, true, fieldContext);
     }
 
     const localKey = this.extractFieldPath(fieldContext);
+    const rootForm = this.rootFormRegistry.rootForm() as FieldTree<unknown>;
+    const fieldStateProxy = createFieldStateProxy(() => fieldContext as unknown as Record<string, unknown>, true);
+    const formFieldStateProxy = createFormFieldStateProxy(rootForm, true);
 
     return {
       fieldValue,
@@ -239,6 +262,8 @@ export class FieldContextRegistryService {
       customFunctions: customFunctions || {},
       externalData: this.resolveExternalData(true),
       logger: this.logger,
+      fieldState: fieldStateProxy,
+      formFieldState: formFieldStateProxy,
     };
   }
 
@@ -265,6 +290,8 @@ export class FieldContextRegistryService {
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
   ): EvaluationContext {
     const formValue = this.rootFormRegistry.formValue();
+    const rootForm = this.rootFormRegistry.rootForm() as FieldTree<unknown>;
+    const formFieldStateProxy = createFormFieldStateProxy(rootForm, true);
 
     return {
       fieldValue: undefined,
@@ -273,6 +300,7 @@ export class FieldContextRegistryService {
       customFunctions: customFunctions || {},
       externalData: this.resolveExternalData(true),
       logger: this.logger,
+      formFieldState: formFieldStateProxy,
     };
   }
 }

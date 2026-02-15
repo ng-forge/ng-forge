@@ -1,7 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  setupUserInteractionTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { BsSelectComponent, BsSelectProps } from './bs-select.type';
 import { AsyncPipe } from '@angular/common';
 import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
@@ -87,6 +92,7 @@ export default class BsSelectFieldComponent implements BsSelectComponent {
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'select' });
+    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'select' });
   }
 
   defaultCompare = Object.is;

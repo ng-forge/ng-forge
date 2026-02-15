@@ -4,6 +4,7 @@ import { applyDerivations, applyDerivationsForTrigger, DerivationApplicatorConte
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { DerivationLogger } from './derivation-logger.service';
+import { UserInteractionTracker } from './user-interaction-tracker';
 
 describe('derivation-applicator', () => {
   /**
@@ -78,6 +79,8 @@ describe('derivation-applicator', () => {
       functionName: options.functionName,
       trigger: options.trigger ?? 'onChange',
       isShorthand: options.isShorthand ?? false,
+      stopOnUserOverride: options.stopOnUserOverride,
+      reEngageOnDependencyChange: options.reEngageOnDependencyChange,
     };
   }
 
@@ -801,6 +804,281 @@ describe('derivation-applicator', () => {
 
       expect(result.appliedCount).toBe(0);
       expect(result.skippedCount).toBe(0);
+    });
+  });
+
+  describe('stopOnUserOverride', () => {
+    let logger: Logger;
+    let formValueSignal: WritableSignal<Record<string, unknown>>;
+
+    beforeEach(() => {
+      logger = createMockLogger();
+      formValueSignal = signal({ country: 'USA', phonePrefix: '', displayName: '' });
+    });
+
+    it('should skip derivation when user has modified the field', () => {
+      const { form } = createMockForm({ country: 'USA', phonePrefix: '', displayName: '' });
+      formValueSignal = signal({ country: 'USA', phonePrefix: '', displayName: '' });
+
+      const tracker = new UserInteractionTracker();
+      tracker.markUserModified('phonePrefix');
+
+      const entry = createEntry('phonePrefix', {
+        value: '+1',
+        dependsOn: ['country'],
+        stopOnUserOverride: true,
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+        userInteractionTracker: tracker,
+      };
+
+      const result = applyDerivations(createCollection([entry]), context);
+      expect(result.appliedCount).toBe(0);
+      expect(result.skippedCount).toBe(1);
+    });
+
+    it('should apply derivation when user has NOT modified the field', () => {
+      const { form, values } = createMockForm({ country: 'USA', phonePrefix: '', displayName: '' });
+      formValueSignal = signal({ country: 'USA', phonePrefix: '', displayName: '' });
+
+      const tracker = new UserInteractionTracker();
+      // NOT marking phonePrefix as modified
+
+      const entry = createEntry('phonePrefix', {
+        value: '+1',
+        dependsOn: ['country'],
+        stopOnUserOverride: true,
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+        userInteractionTracker: tracker,
+      };
+
+      const result = applyDerivations(createCollection([entry]), context);
+      expect(result.appliedCount).toBe(1);
+      expect(values['phonePrefix']).toBe('+1');
+    });
+
+    it('should apply derivation when stopOnUserOverride is false even if user modified', () => {
+      const { form, values } = createMockForm({ country: 'USA', phonePrefix: '' });
+      formValueSignal = signal({ country: 'USA', phonePrefix: '' });
+
+      const tracker = new UserInteractionTracker();
+      tracker.markUserModified('phonePrefix');
+
+      const entry = createEntry('phonePrefix', {
+        value: '+1',
+        dependsOn: ['country'],
+        stopOnUserOverride: false,
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+        userInteractionTracker: tracker,
+      };
+
+      const result = applyDerivations(createCollection([entry]), context);
+      expect(result.appliedCount).toBe(1);
+      expect(values['phonePrefix']).toBe('+1');
+    });
+
+    it('should work without tracker (no-op when tracker not provided)', () => {
+      const { form, values } = createMockForm({ country: 'USA', phonePrefix: '' });
+      formValueSignal = signal({ country: 'USA', phonePrefix: '' });
+
+      const entry = createEntry('phonePrefix', {
+        value: '+1',
+        dependsOn: ['country'],
+        stopOnUserOverride: true,
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+        // No userInteractionTracker
+      };
+
+      const result = applyDerivations(createCollection([entry]), context);
+      expect(result.appliedCount).toBe(1);
+      expect(values['phonePrefix']).toBe('+1');
+    });
+
+    describe('reEngageOnDependencyChange', () => {
+      it('should clear override when dependency changes', () => {
+        const { form, values } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
+        formValueSignal = signal({ country: 'UK', phonePrefix: '+44-custom' });
+
+        const tracker = new UserInteractionTracker();
+        tracker.markUserModified('phonePrefix');
+
+        const entry = createEntry('phonePrefix', {
+          value: '+44',
+          dependsOn: ['country'],
+          stopOnUserOverride: true,
+          reEngageOnDependencyChange: true,
+        });
+
+        const context: DerivationApplicatorContext = {
+          formValue: formValueSignal,
+          rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+          logger,
+          derivationLogger: createMockDerivationLogger(),
+          userInteractionTracker: tracker,
+        };
+
+        // Simulate that 'country' changed
+        const changedFields = new Set(['country']);
+        const result = applyDerivations(createCollection([entry]), context, changedFields);
+
+        // Override should be cleared, derivation should apply
+        expect(result.appliedCount).toBe(1);
+        expect(values['phonePrefix']).toBe('+44');
+        expect(tracker.isUserModified('phonePrefix')).toBe(false);
+      });
+
+      it('should keep override when dependency has NOT changed', () => {
+        const { form } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
+        formValueSignal = signal({ country: 'UK', phonePrefix: '+44-custom' });
+
+        const tracker = new UserInteractionTracker();
+        tracker.markUserModified('phonePrefix');
+
+        const entry = createEntry('phonePrefix', {
+          value: '+44',
+          dependsOn: ['country'],
+          stopOnUserOverride: true,
+          reEngageOnDependencyChange: true,
+        });
+
+        const context: DerivationApplicatorContext = {
+          formValue: formValueSignal,
+          rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+          logger,
+          derivationLogger: createMockDerivationLogger(),
+          userInteractionTracker: tracker,
+        };
+
+        // Simulate that some other field changed, NOT 'country'
+        const changedFields = new Set(['otherField']);
+        const result = applyDerivations(createCollection([entry]), context, changedFields);
+
+        // Override should persist, derivation should be skipped
+        expect(result.appliedCount).toBe(0);
+        expect(tracker.isUserModified('phonePrefix')).toBe(true);
+      });
+
+      it('should guard against null changedFields (initial evaluation)', () => {
+        const { form } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
+        formValueSignal = signal({ country: 'UK', phonePrefix: '+44-custom' });
+
+        const tracker = new UserInteractionTracker();
+        tracker.markUserModified('phonePrefix');
+
+        const entry = createEntry('phonePrefix', {
+          value: '+44',
+          dependsOn: ['country'],
+          stopOnUserOverride: true,
+          reEngageOnDependencyChange: true,
+        });
+
+        const context: DerivationApplicatorContext = {
+          formValue: formValueSignal,
+          rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+          logger,
+          derivationLogger: createMockDerivationLogger(),
+          userInteractionTracker: tracker,
+        };
+
+        // No changedFields (initial evaluation)
+        const result = applyDerivations(createCollection([entry]), context);
+
+        // reEngageOnDependencyChange should NOT clear override when changedFields is undefined
+        expect(result.appliedCount).toBe(0);
+        expect(tracker.isUserModified('phonePrefix')).toBe(true);
+      });
+
+      it('should not re-engage when reEngageOnDependencyChange is false', () => {
+        const { form } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
+        formValueSignal = signal({ country: 'UK', phonePrefix: '+44-custom' });
+
+        const tracker = new UserInteractionTracker();
+        tracker.markUserModified('phonePrefix');
+
+        const entry = createEntry('phonePrefix', {
+          value: '+44',
+          dependsOn: ['country'],
+          stopOnUserOverride: true,
+          reEngageOnDependencyChange: false,
+        });
+
+        const context: DerivationApplicatorContext = {
+          formValue: formValueSignal,
+          rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+          logger,
+          derivationLogger: createMockDerivationLogger(),
+          userInteractionTracker: tracker,
+        };
+
+        // Even though 'country' changed, re-engagement is disabled
+        const changedFields = new Set(['country']);
+        const result = applyDerivations(createCollection([entry]), context, changedFields);
+
+        expect(result.appliedCount).toBe(0);
+        expect(tracker.isUserModified('phonePrefix')).toBe(true);
+      });
+    });
+  });
+
+  describe('evaluation context properties', () => {
+    let logger: Logger;
+    let formValueSignal: WritableSignal<Record<string, unknown>>;
+
+    beforeEach(() => {
+      logger = createMockLogger();
+    });
+
+    it('should include formFieldState in evaluation context for expression evaluation', () => {
+      const { form } = createMockForm({ source: 'test', target: '' });
+      formValueSignal = signal({ source: 'test', target: '' });
+
+      // Create an entry with a functionName to capture the context
+      let capturedContext: Record<string, unknown> | undefined;
+      const entry = createEntry('target', {
+        functionName: 'captureContext',
+        dependsOn: ['source'],
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+        derivationFunctions: {
+          captureContext: (ctx) => {
+            capturedContext = ctx as unknown as Record<string, unknown>;
+            return 'derived';
+          },
+        },
+      };
+
+      applyDerivations(createCollection([entry]), context);
+
+      expect(capturedContext).toBeDefined();
+      expect(capturedContext!['formFieldState']).toBeDefined();
     });
   });
 });

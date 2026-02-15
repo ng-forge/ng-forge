@@ -2,7 +2,12 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  setupUserInteractionTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { MatRadioComponent, MatRadioProps } from './mat-radio.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
@@ -82,6 +87,7 @@ export default class MatRadioFieldComponent implements MatRadioComponent {
       selector: 'input[type="radio"]',
       dependents: [this.options],
     });
+    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input[type="radio"]' });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

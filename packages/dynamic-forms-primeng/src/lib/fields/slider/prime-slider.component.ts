@@ -1,7 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  setupUserInteractionTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { PrimeSliderComponent, PrimeSliderProps } from './prime-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { Slider } from 'primeng/slider';
@@ -72,6 +77,7 @@ export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'p-slider' });
   }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);

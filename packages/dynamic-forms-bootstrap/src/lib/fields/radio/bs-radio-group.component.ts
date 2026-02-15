@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, input, model } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { setupMetaTracking, setupUserInteractionTracking } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 
 export interface BsRadioGroupProps {
@@ -109,6 +109,7 @@ export class BsRadioGroupComponent implements FormValueControl<ValueType | undef
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input[type="radio"]', dependents: [this.options] });
+    setupUserInteractionTracking(this.elementRef, this.name, { selector: 'input[type="radio"]' });
   }
 
   /**

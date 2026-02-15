@@ -299,4 +299,85 @@ describe('ExpressionParser', () => {
       expect(() => ExpressionParser.evaluate('obj.__proto__.polluted = true', scope)).toThrow();
     });
   });
+
+  describe('fieldState and formFieldState in scope', () => {
+    it('should access fieldState properties', () => {
+      const scope = {
+        fieldValue: 'test',
+        formValue: { name: 'test' },
+        fieldState: {
+          touched: true,
+          dirty: false,
+          pristine: true,
+          valid: true,
+          invalid: false,
+          pending: false,
+          hidden: false,
+          readonly: false,
+          disabled: false,
+        },
+      };
+
+      expect(ExpressionParser.evaluate('fieldState.touched', scope)).toBe(true);
+      expect(ExpressionParser.evaluate('fieldState.dirty', scope)).toBe(false);
+      expect(ExpressionParser.evaluate('fieldState.pristine', scope)).toBe(true);
+      expect(ExpressionParser.evaluate('fieldState.valid', scope)).toBe(true);
+    });
+
+    it('should access formFieldState properties by field key', () => {
+      const scope = {
+        fieldValue: 'test',
+        formValue: { name: 'test', email: 'test@test.com' },
+        formFieldState: {
+          name: {
+            touched: true,
+            dirty: true,
+            pristine: false,
+            valid: true,
+            invalid: false,
+            pending: false,
+            hidden: false,
+            readonly: false,
+            disabled: false,
+          },
+          email: {
+            touched: false,
+            dirty: false,
+            pristine: true,
+            valid: false,
+            invalid: true,
+            pending: false,
+            hidden: false,
+            readonly: false,
+            disabled: false,
+          },
+        },
+      };
+
+      expect(ExpressionParser.evaluate('formFieldState.name.dirty', scope)).toBe(true);
+      expect(ExpressionParser.evaluate('formFieldState.email.invalid', scope)).toBe(true);
+      expect(ExpressionParser.evaluate('formFieldState.email.pristine', scope)).toBe(true);
+    });
+
+    it('should use fieldState in conditional expressions', () => {
+      const scope = {
+        fieldValue: 'hello',
+        formValue: { greeting: 'hello' },
+        fieldState: {
+          touched: true,
+          dirty: true,
+          pristine: false,
+          valid: true,
+          invalid: false,
+          pending: false,
+          hidden: false,
+          readonly: false,
+          disabled: false,
+        },
+      };
+
+      expect(ExpressionParser.evaluate('fieldState.touched && fieldState.dirty', scope)).toBe(true);
+      expect(ExpressionParser.evaluate('fieldState.touched && !fieldState.valid', scope)).toBe(false);
+    });
+  });
 });

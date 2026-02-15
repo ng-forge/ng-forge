@@ -3,7 +3,13 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createResolvedErrorsSignal,
+  InputMeta,
+  setupMetaTracking,
+  setupUserInteractionTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { IonicInputComponent, IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
 import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
@@ -86,6 +92,7 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'ion-input',
     });
+    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'ion-input' });
 
     // Workaround: Ionic's ion-input does NOT automatically propagate aria-describedby changes
     // to the native input element inside its shadow DOM. This effect imperatively syncs the attribute

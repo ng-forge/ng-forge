@@ -4,7 +4,12 @@ import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatHint } from '@angular/material/input';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  setupUserInteractionTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { MatSelectComponent, MatSelectProps } from './mat-select.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
@@ -97,6 +102,7 @@ export default class MatSelectFieldComponent implements MatSelectComponent {
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'mat-select',
     });
+    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'mat-select' });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

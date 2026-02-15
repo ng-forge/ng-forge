@@ -20,6 +20,8 @@ import {
 import { DerivationWarningTracker } from './derivation-warning-tracker';
 import { MAX_DERIVATION_ITERATIONS } from './derivation-constants';
 import { DerivationLogger } from './derivation-logger.service';
+import { UserInteractionTracker } from './user-interaction-tracker';
+import { createFieldStateProxy, createFormFieldStateProxy } from './field-state-extractor';
 
 // Re-export for backwards compatibility
 export type { DerivationProcessingResult } from './derivation-types';
@@ -68,6 +70,14 @@ export interface DerivationApplicatorContext {
    * Falls back to MAX_DERIVATION_ITERATIONS constant if not provided.
    */
   maxIterations?: number;
+
+  /**
+   * Tracker for user interactions.
+   *
+   * When provided, enables `stopOnUserOverride` and `reEngageOnDependencyChange`
+   * on derivation entries.
+   */
+  userInteractionTracker?: UserInteractionTracker;
 }
 
 /**
@@ -128,6 +138,7 @@ export function applyDerivations(
   changedFields?: Set<string>,
 ): DerivationProcessingResult {
   const chainContext = createDerivationChainContext();
+  chainContext.changedFields = changedFields;
   const { derivationLogger } = context;
   const maxIterations = context.maxIterations ?? MAX_DERIVATION_ITERATIONS;
   let appliedCount = 0;
@@ -253,6 +264,31 @@ function tryApplyDerivation(
       skipReason: 'already-applied',
     });
     return { applied: false, fieldKey: entry.fieldKey };
+  }
+
+  // Check stopOnUserOverride
+  if (entry.stopOnUserOverride && context.userInteractionTracker) {
+    const tracker = context.userInteractionTracker;
+
+    // Re-engagement: clear override if any dependency changed
+    // Guard: changedFields is undefined on initial onChange evaluation
+    if (entry.reEngageOnDependencyChange && chainContext.changedFields) {
+      const dependencyChanged = entry.dependsOn.some((dep) => dep === '*' || chainContext.changedFields!.has(dep));
+      if (dependencyChanged) {
+        tracker.clearUserModified(entry.fieldKey);
+      }
+    }
+
+    // Skip if user has overridden
+    if (tracker.isUserModified(entry.fieldKey)) {
+      derivationLogger.evaluation({
+        debugName: entry.debugName,
+        fieldKey: entry.fieldKey,
+        result: 'skipped',
+        skipReason: 'user-override',
+      });
+      return { applied: false, fieldKey: entry.fieldKey };
+    }
   }
 
   // Create evaluation context
@@ -393,6 +429,23 @@ function tryApplyArrayDerivation(
       continue;
     }
 
+    // Check stopOnUserOverride for array items
+    if (entry.stopOnUserOverride && context.userInteractionTracker) {
+      const tracker = context.userInteractionTracker;
+
+      // Re-engagement: clear override if any dependency changed
+      if (entry.reEngageOnDependencyChange && chainContext.changedFields) {
+        const dependencyChanged = entry.dependsOn.some((dep) => dep === '*' || chainContext.changedFields!.has(dep));
+        if (dependencyChanged) {
+          tracker.clearUserModified(resolvedPath);
+        }
+      }
+
+      if (tracker.isUserModified(resolvedPath)) {
+        continue;
+      }
+    }
+
     // Create evaluation context scoped to this array item
     const arrayItem = arrayValue[i] as Record<string, unknown>;
     const evalContext = createArrayItemEvaluationContext(entry, arrayItem, formValue, i, arrayPath, context);
@@ -444,6 +497,12 @@ function createEvaluationContext(
 ): EvaluationContext {
   const fieldValue = getNestedValue(formValue, entry.fieldKey);
 
+  // Create field state proxies (non-reactive for derivation applicator context)
+  const fieldAccessor = (context.rootForm as Record<string, unknown>)[entry.fieldKey];
+  const fieldState =
+    typeof fieldAccessor === 'function' ? createFieldStateProxy(fieldAccessor as () => Record<string, unknown>, false) : undefined;
+  const formFieldState = createFormFieldStateProxy(context.rootForm, false);
+
   return {
     fieldValue,
     formValue,
@@ -451,6 +510,8 @@ function createEvaluationContext(
     customFunctions: context.customFunctions,
     externalData: context.externalData,
     logger: context.logger,
+    fieldState,
+    formFieldState,
   };
 }
 
@@ -473,6 +534,29 @@ function createArrayItemEvaluationContext(
   // For array item expressions, formValue should be the array item
   // This allows expressions like 'formValue.quantity * formValue.unitPrice'
   // to work within the context of each array item
+
+  // Create field state proxy for the specific array item field
+  // Navigate: rootForm[arrayPath][index][fieldKey]
+  const pathInfo = parseArrayPath(entry.fieldKey);
+  let fieldState: ReturnType<typeof createFieldStateProxy> | undefined;
+
+  if (pathInfo.isArrayPath && pathInfo.relativePath) {
+    const arrayAccessor = (context.rootForm as Record<string, unknown>)[arrayPath];
+    if (typeof arrayAccessor === 'function') {
+      const arrayInstance = arrayAccessor() as Record<string, unknown>;
+      const itemAccessor = arrayInstance?.[String(itemIndex)];
+      if (typeof itemAccessor === 'function') {
+        const itemInstance = (itemAccessor as () => Record<string, unknown>)();
+        const fieldAccessor = itemInstance?.[pathInfo.relativePath];
+        if (typeof fieldAccessor === 'function') {
+          fieldState = createFieldStateProxy(fieldAccessor as () => Record<string, unknown>, false);
+        }
+      }
+    }
+  }
+
+  const formFieldState = createFormFieldStateProxy(context.rootForm, false);
+
   return {
     fieldValue: arrayItem,
     formValue: arrayItem,
@@ -484,6 +568,8 @@ function createArrayItemEvaluationContext(
     rootFormValue,
     arrayIndex: itemIndex,
     arrayPath,
+    fieldState,
+    formFieldState,
   };
 }
 

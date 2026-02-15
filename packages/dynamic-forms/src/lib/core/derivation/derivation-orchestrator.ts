@@ -29,6 +29,7 @@ import { validateNoCycles } from './cycle-detector';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
 import { DERIVATION_WARNING_TRACKER } from './derivation-warning-tracker';
+import { USER_INTERACTION_TRACKER, UserInteractionTracker } from './user-interaction-tracker';
 
 /**
  * Minimal configuration for creating a DerivationOrchestrator.
@@ -73,6 +74,7 @@ export class DerivationOrchestrator {
   private readonly warningTracker = inject(DERIVATION_WARNING_TRACKER);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly formOptions = inject(FORM_OPTIONS);
+  private readonly userInteractionTracker = inject(USER_INTERACTION_TRACKER, { optional: true }) as UserInteractionTracker | null;
 
   /**
    * Computed signal containing the collected and validated derivations.
@@ -87,6 +89,8 @@ export class DerivationOrchestrator {
       const fields = config.schemaFields();
 
       if (!fields || fields.length === 0) {
+        // Reset tracker when form has no fields (reinit/teardown)
+        this.userInteractionTracker?.reset();
         return null;
       }
 
@@ -98,6 +102,9 @@ export class DerivationOrchestrator {
 
       validateNoCycles(collection, this.logger);
       this.warnAboutWildcardDependencies(collection.entries, fields.length);
+
+      // Reset tracker on config change (form reinit)
+      this.userInteractionTracker?.reset();
 
       return collection;
     });
@@ -226,6 +233,7 @@ export class DerivationOrchestrator {
       warningTracker: this.warningTracker,
       derivationLogger: untracked(() => this.config.derivationLogger()),
       maxIterations: untracked(() => this.formOptions()?.maxDerivationIterations),
+      userInteractionTracker: this.userInteractionTracker ?? undefined,
     };
 
     const result = applyDerivationsForTrigger(collection, 'onChange', applicatorContext);
@@ -269,6 +277,7 @@ export class DerivationOrchestrator {
       warningTracker: this.warningTracker,
       derivationLogger: untracked(() => this.config.derivationLogger()),
       maxIterations: untracked(() => this.formOptions()?.maxDerivationIterations),
+      userInteractionTracker: this.userInteractionTracker ?? undefined,
     };
 
     const result = applyDerivationsForTrigger(filteredCollection, 'debounced', applicatorContext, changedFields);

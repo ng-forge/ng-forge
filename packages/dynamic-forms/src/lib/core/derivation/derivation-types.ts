@@ -98,6 +98,21 @@ export interface DerivationEntry {
    * appears in verbose derivation logs instead of the field key.
    */
   debugName?: string;
+
+  /**
+   * When true, the derivation stops running after the user manually
+   * edits the target field.
+   *
+   * Requires `UserInteractionTracker` to be provided.
+   */
+  stopOnUserOverride?: boolean;
+
+  /**
+   * When true (and `stopOnUserOverride` is also true), clears the
+   * user-override flag when any dependency of this derivation changes,
+   * allowing the derivation to run again.
+   */
+  reEngageOnDependencyChange?: boolean;
 }
 
 /**
@@ -173,6 +188,15 @@ export interface DerivationChainContext {
    * Current iteration count in the derivation processing loop.
    */
   iteration: number;
+
+  /**
+   * Set of field keys that changed in this cycle.
+   *
+   * Used by `reEngageOnDependencyChange` to determine whether to
+   * clear a user-override flag. `undefined` on initial onChange evaluation
+   * (when no prior value exists to compare against).
+   */
+  changedFields?: Set<string>;
 }
 
 /**

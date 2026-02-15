@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, inject, input, model } 
 import { FormsModule } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
 import { DynamicTextPipe, FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { setupMetaTracking, setupUserInteractionTracking } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 import { RadioButton } from 'primeng/radiobutton';
 
@@ -83,5 +83,6 @@ export class PrimeRadioGroupComponent implements FormValueControl<ValueType | un
       selector: 'input[type="radio"]',
       dependents: [this.options],
     });
+    setupUserInteractionTracking(this.elementRef, this.name, { selector: 'input[type="radio"]' });
   }
 }

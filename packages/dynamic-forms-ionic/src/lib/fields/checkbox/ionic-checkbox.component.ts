@@ -2,7 +2,12 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonCheckbox, IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  setupUserInteractionTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { IonicCheckboxComponent, IonicCheckboxProps } from './ionic-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
@@ -81,6 +86,7 @@ export default class IonicCheckboxFieldComponent implements IonicCheckboxCompone
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'ion-checkbox',
     });
+    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'ion-checkbox' });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

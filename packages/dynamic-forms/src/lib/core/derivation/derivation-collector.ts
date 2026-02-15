@@ -201,6 +201,8 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
     isShorthand: false,
     originalConfig: config,
     debugName: config.debugName,
+    stopOnUserOverride: config.stopOnUserOverride,
+    reEngageOnDependencyChange: config.reEngageOnDependencyChange,
   };
 }
 

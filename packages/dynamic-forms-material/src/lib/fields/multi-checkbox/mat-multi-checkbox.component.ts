@@ -2,7 +2,13 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, isEqual, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createResolvedErrorsSignal,
+  isEqual,
+  setupMetaTracking,
+  setupUserInteractionTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { MatMultiCheckboxComponent, MatMultiCheckboxProps } from './mat-multi-checkbox.type';
 import { MatError } from '@angular/material/input';
@@ -96,6 +102,7 @@ export default class MatMultiCheckboxFieldComponent implements MatMultiCheckboxC
       selector: 'input[type="checkbox"]',
       dependents: [this.options],
     });
+    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input[type="checkbox"]' });
 
     explicitEffect([this.valueViewModel], ([selectedOptions]) => {
       const selectedValues = selectedOptions.map((option) => option.value);
