@@ -94,7 +94,7 @@ function validateSimplifiedTemplate(field: SimplifiedArrayField): void {
  * Expands a simplified array field into a full ArrayField + optional add button.
  */
 function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
-  const { template, value = [], addButton, removeButton, key, logic } = field;
+  const { template, value = [], addButton, removeButton, key, logic, minLength, maxLength } = field;
   const isObjectTemplate = Array.isArray(template);
   const values = value as unknown[];
 
@@ -129,6 +129,12 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
   };
   if (logic) {
     arrayFieldObj['logic'] = logic;
+  }
+  if (minLength !== undefined) {
+    arrayFieldObj['minLength'] = minLength;
+  }
+  if (maxLength !== undefined) {
+    arrayFieldObj['maxLength'] = maxLength;
   }
 
   // Safe cast: we're constructing a valid ArrayField shape with key, type, and fields

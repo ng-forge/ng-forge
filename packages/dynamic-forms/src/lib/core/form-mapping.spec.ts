@@ -700,7 +700,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -722,7 +722,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -745,7 +745,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
 
@@ -766,7 +766,7 @@ describe('form-mapping', () => {
               }).not.toThrow();
             }),
           );
-          rootFormRegistry.registerRootForm(formInstance);
+          mockFormSignal.set(formInstance);
         });
       });
     });

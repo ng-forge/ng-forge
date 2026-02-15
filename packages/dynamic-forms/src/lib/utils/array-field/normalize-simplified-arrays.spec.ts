@@ -500,6 +500,67 @@ describe('normalizeSimplifiedArrays', () => {
     });
   });
 
+  describe('minLength/maxLength preservation', () => {
+    it('should preserve minLength on the expanded array field', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: primitiveTemplate,
+        minLength: 2,
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.minLength).toBe(2);
+    });
+
+    it('should preserve maxLength on the expanded array field', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: primitiveTemplate,
+        maxLength: 5,
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.maxLength).toBe(5);
+    });
+
+    it('should preserve both minLength and maxLength on the expanded array field', () => {
+      const input = fields({
+        key: 'contacts',
+        type: 'array',
+        template: objectTemplate,
+        value: [{ name: 'Alice', email: 'alice@example.com' }],
+        minLength: 1,
+        maxLength: 10,
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.minLength).toBe(1);
+      expect(arrayField.maxLength).toBe(10);
+    });
+
+    it('should not include minLength/maxLength when not specified', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: primitiveTemplate,
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField).not.toHaveProperty('minLength');
+      expect(arrayField).not.toHaveProperty('maxLength');
+    });
+  });
+
   describe('idempotency', () => {
     it('should produce the same result when called on already-normalized output', () => {
       const input = fields({
