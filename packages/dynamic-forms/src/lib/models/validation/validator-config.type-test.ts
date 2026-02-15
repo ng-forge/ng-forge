@@ -9,9 +9,12 @@ import type {
   BuiltInValidatorConfig,
   CustomValidatorConfig,
   AsyncValidatorConfig,
+  DeclarativeHttpValidatorConfig,
   HttpValidatorConfig,
   ValidatorConfig,
 } from './validator-config';
+import type { HttpRequestConfig } from '../http/http-request-config';
+import type { HttpValidationResponseMapping } from '../http/http-response-mapping';
 
 // ============================================================================
 // BaseValidatorConfig - Whitelist Test
@@ -204,12 +207,112 @@ describe('HttpValidatorConfig - Exhaustive Whitelist', () => {
 });
 
 // ============================================================================
+// DeclarativeHttpValidatorConfig - Whitelist Test
+// ============================================================================
+
+describe('DeclarativeHttpValidatorConfig - Exhaustive Whitelist', () => {
+  type ExpectedKeys = 'type' | 'http' | 'responseMapping' | 'when';
+  type ActualKeys = keyof DeclarativeHttpValidatorConfig;
+
+  it('should have exactly the expected keys', () => {
+    expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
+  });
+
+  describe('required keys', () => {
+    it('should have type, http, and responseMapping as required', () => {
+      expectTypeOf<RequiredKeys<DeclarativeHttpValidatorConfig>>().toEqualTypeOf<'type' | 'http' | 'responseMapping'>();
+    });
+  });
+
+  describe('property types', () => {
+    it('type should be literal http', () => {
+      expectTypeOf<DeclarativeHttpValidatorConfig['type']>().toEqualTypeOf<'http'>();
+    });
+
+    it('http should be HttpRequestConfig', () => {
+      expectTypeOf<DeclarativeHttpValidatorConfig['http']>().toEqualTypeOf<HttpRequestConfig>();
+    });
+
+    it('responseMapping should be HttpValidationResponseMapping', () => {
+      expectTypeOf<DeclarativeHttpValidatorConfig['responseMapping']>().toEqualTypeOf<HttpValidationResponseMapping>();
+    });
+
+    it('when should be ConditionalExpression', () => {
+      expectTypeOf<DeclarativeHttpValidatorConfig['when']>().toEqualTypeOf<ConditionalExpression | undefined>();
+    });
+  });
+});
+
+// ============================================================================
+// DeclarativeHttpValidatorConfig - Usage Examples
+// ============================================================================
+
+describe('DeclarativeHttpValidatorConfig - Usage Examples', () => {
+  it('should accept declarative http validator with GET and query params', () => {
+    const validator = {
+      type: 'http',
+      http: {
+        url: '/api/validate-username',
+        method: 'GET',
+        queryParams: { username: 'fieldValue' },
+      },
+      responseMapping: {
+        validWhen: 'response.available',
+        errorKind: 'usernameTaken',
+      },
+    } as const satisfies DeclarativeHttpValidatorConfig;
+
+    expectTypeOf(validator.type).toEqualTypeOf<'http'>();
+  });
+
+  it('should accept declarative http validator with POST and body expressions', () => {
+    const validator = {
+      type: 'http',
+      http: {
+        url: '/api/validate-email',
+        method: 'POST',
+        body: { email: 'fieldValue' },
+        bodyExpressions: true,
+      },
+      responseMapping: {
+        validWhen: 'response.valid',
+        errorKind: 'emailInvalid',
+        errorParams: { suggestion: 'response.suggestion' },
+      },
+    } as const satisfies DeclarativeHttpValidatorConfig;
+
+    expectTypeOf(validator.http.bodyExpressions).toEqualTypeOf<true>();
+  });
+
+  it('should accept declarative http validator with when condition', () => {
+    const validator = {
+      type: 'http',
+      http: { url: '/api/check' },
+      responseMapping: { validWhen: 'response.ok', errorKind: 'failed' },
+      when: {
+        type: 'fieldValue',
+        fieldPath: 'enableCheck',
+        operator: 'equals',
+        value: true,
+      },
+    } as const satisfies DeclarativeHttpValidatorConfig;
+
+    expectTypeOf(validator.when).toMatchTypeOf<ConditionalExpression>();
+  });
+});
+
+// ============================================================================
 // ValidatorConfig - Discriminated Union
 // ============================================================================
 
 describe('ValidatorConfig - Discriminated Union', () => {
   it('should be union of all validator config types', () => {
-    type ExpectedUnion = BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | HttpValidatorConfig;
+    type ExpectedUnion =
+      | BuiltInValidatorConfig
+      | CustomValidatorConfig
+      | AsyncValidatorConfig
+      | HttpValidatorConfig
+      | DeclarativeHttpValidatorConfig;
     expectTypeOf<ValidatorConfig>().toEqualTypeOf<ExpectedUnion>();
   });
 
@@ -227,6 +330,10 @@ describe('ValidatorConfig - Discriminated Union', () => {
 
   it('should accept HttpValidatorConfig', () => {
     expectTypeOf<HttpValidatorConfig>().toMatchTypeOf<ValidatorConfig>();
+  });
+
+  it('should accept DeclarativeHttpValidatorConfig', () => {
+    expectTypeOf<DeclarativeHttpValidatorConfig>().toMatchTypeOf<ValidatorConfig>();
   });
 });
 
@@ -488,6 +595,11 @@ describe('ValidatorConfig - Array Usage', () => {
       { type: 'custom', functionName: 'passwordStrength' },
       { type: 'customAsync', functionName: 'checkEmailAvailability' },
       { type: 'customHttp', functionName: 'validateDomain' },
+      {
+        type: 'http',
+        http: { url: '/api/check', queryParams: { val: 'fieldValue' } },
+        responseMapping: { validWhen: 'response.ok', errorKind: 'failed' },
+      },
     ] as const satisfies ValidatorConfig[];
 
     expectTypeOf(validators).toMatchTypeOf<readonly ValidatorConfig[]>();
