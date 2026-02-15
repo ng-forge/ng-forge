@@ -2,7 +2,7 @@
  * Configuration for an HTTP request used by declarative HTTP validators, derivations, and conditions.
  *
  * All string values in `queryParams` are treated as expressions evaluated by ExpressionParser.
- * When `bodyExpressions` is true, top-level string values in `body` are also evaluated as expressions (shallow only).
+ * When `evaluateBodyExpressions` is true, top-level string values in `body` are also evaluated as expressions (shallow only).
  */
 export interface HttpRequestConfig {
   /** URL to send the request to */
@@ -24,7 +24,7 @@ export interface HttpRequestConfig {
    * When true, top-level string values in `body` are treated as expressions
    * and evaluated by ExpressionParser (shallow only — nested objects are passed through as-is).
    */
-  bodyExpressions?: boolean;
+  evaluateBodyExpressions?: boolean;
 
   /** HTTP headers to include in the request */
   headers?: Record<string, string>;

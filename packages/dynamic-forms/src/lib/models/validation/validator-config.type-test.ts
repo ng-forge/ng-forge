@@ -272,7 +272,7 @@ describe('DeclarativeHttpValidatorConfig - Usage Examples', () => {
         url: '/api/validate-email',
         method: 'POST',
         body: { email: 'fieldValue' },
-        bodyExpressions: true,
+        evaluateBodyExpressions: true,
       },
       responseMapping: {
         validWhen: 'response.valid',
@@ -281,7 +281,7 @@ describe('DeclarativeHttpValidatorConfig - Usage Examples', () => {
       },
     } as const satisfies DeclarativeHttpValidatorConfig;
 
-    expectTypeOf(validator.http.bodyExpressions).toEqualTypeOf<true>();
+    expectTypeOf(validator.http.evaluateBodyExpressions).toEqualTypeOf<true>();
   });
 
   it('should accept declarative http validator with when condition', () => {

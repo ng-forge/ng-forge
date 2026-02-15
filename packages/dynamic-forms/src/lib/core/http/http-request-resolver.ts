@@ -31,7 +31,7 @@ export function resolveHttpRequest(config: HttpRequestConfig, context: Evaluatio
   };
 
   if (config.body) {
-    if (config.bodyExpressions) {
+    if (config.evaluateBodyExpressions) {
       const resolvedBody: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(config.body)) {
         if (typeof value === 'string') {

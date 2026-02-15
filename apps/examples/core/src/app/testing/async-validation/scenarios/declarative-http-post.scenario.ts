@@ -3,7 +3,7 @@ import { TestScenario } from '../../shared/types';
 
 /**
  * Declarative HTTP POST validator scenario with body expressions.
- * Demonstrates `bodyExpressions: true` for expression-resolved request bodies.
+ * Demonstrates `evaluateBodyExpressions: true` for expression-resolved request bodies.
  */
 const config = {
   defaultValidationMessages: {
@@ -24,7 +24,7 @@ const config = {
             body: {
               email: 'fieldValue',
             },
-            bodyExpressions: true,
+            evaluateBodyExpressions: true,
           },
           responseMapping: {
             validWhen: 'response.valid',

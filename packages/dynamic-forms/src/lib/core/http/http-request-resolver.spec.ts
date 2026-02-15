@@ -1,14 +1,19 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { resolveHttpRequest } from './http-request-resolver';
 import { HttpRequestConfig } from '../../models/http/http-request-config';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
+import { Logger } from '../../providers/features/logger/logger.interface';
 
 describe('resolveHttpRequest', () => {
+  const noopLogger: Logger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+
   function createContext(overrides: Partial<EvaluationContext> = {}): EvaluationContext {
     return {
       fieldValue: 'test-value',
       formValue: { username: 'john', age: 25 },
       rootFormValue: { username: 'john', age: 25 },
+      fieldPath: 'username',
+      logger: noopLogger,
       customFunctions: {},
       ...overrides,
     };
@@ -63,7 +68,7 @@ describe('resolveHttpRequest', () => {
     expect(result.url).toContain('missing=');
   });
 
-  it('should pass body through unchanged when bodyExpressions is false', () => {
+  it('should pass body through unchanged when evaluateBodyExpressions is false', () => {
     const body = { key: 'formValue.username', nested: { deep: true } };
     const config: HttpRequestConfig = { url: '/api', method: 'POST', body };
     const result = resolveHttpRequest(config, createContext());
@@ -71,7 +76,7 @@ describe('resolveHttpRequest', () => {
     expect(result.body).toEqual(body);
   });
 
-  it('should pass body through unchanged when bodyExpressions is not set', () => {
+  it('should pass body through unchanged when evaluateBodyExpressions is not set', () => {
     const body = { key: 'formValue.username' };
     const config: HttpRequestConfig = { url: '/api', method: 'POST', body };
     const result = resolveHttpRequest(config, createContext());
@@ -79,19 +84,19 @@ describe('resolveHttpRequest', () => {
     expect(result.body).toEqual(body);
   });
 
-  it('should evaluate top-level string values in body when bodyExpressions is true', () => {
+  it('should evaluate top-level string values in body when evaluateBodyExpressions is true', () => {
     const config: HttpRequestConfig = {
       url: '/api',
       method: 'POST',
       body: { name: 'formValue.username', age: 'formValue.age' },
-      bodyExpressions: true,
+      evaluateBodyExpressions: true,
     };
     const result = resolveHttpRequest(config, createContext());
 
     expect(result.body).toEqual({ name: 'john', age: 25 });
   });
 
-  it('should NOT recursively evaluate nested objects when bodyExpressions is true (shallow only)', () => {
+  it('should NOT recursively evaluate nested objects when evaluateBodyExpressions is true (shallow only)', () => {
     const nested = { innerExpr: 'formValue.username' };
     const config: HttpRequestConfig = {
       url: '/api',
@@ -100,7 +105,7 @@ describe('resolveHttpRequest', () => {
         topLevel: 'fieldValue',
         nested,
       },
-      bodyExpressions: true,
+      evaluateBodyExpressions: true,
     };
     const result = resolveHttpRequest(config, createContext());
     const resultBody = result.body as Record<string, unknown>;
@@ -110,12 +115,12 @@ describe('resolveHttpRequest', () => {
     expect(resultBody['nested']).toEqual(nested);
   });
 
-  it('should pass non-string body values through when bodyExpressions is true', () => {
+  it('should pass non-string body values through when evaluateBodyExpressions is true', () => {
     const config: HttpRequestConfig = {
       url: '/api',
       method: 'POST',
       body: { count: 42, active: true, name: 'fieldValue' },
-      bodyExpressions: true,
+      evaluateBodyExpressions: true,
     };
     const result = resolveHttpRequest(config, createContext());
     const resultBody = result.body as Record<string, unknown>;

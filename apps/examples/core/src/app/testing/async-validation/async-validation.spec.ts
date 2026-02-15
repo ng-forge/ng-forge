@@ -218,30 +218,17 @@ test.describe('Async Validation Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
-      // Try taken username
-      await scenario.locator('#username input').fill('admin');
-      await page.waitForTimeout(1000);
+      // Try taken username — error must appear
+      const usernameInput = scenario.locator('#username input');
+      await usernameInput.fill('admin');
+      await usernameInput.blur();
+      const errorLocator = scenario.getByText('Username is taken');
+      await expect(errorLocator).toBeVisible({ timeout: 5000 });
 
-      const usernameField = scenario.locator('#username');
-      const errorVisible = await usernameField
-        .locator('..')
-        .locator('mat-error:has-text("Username is taken")')
-        .isVisible()
-        .catch(() => false);
-
-      if (errorVisible) {
-        // Try available username
-        await scenario.locator('#username input').fill('newuser123');
-        await page.waitForTimeout(1000);
-
-        const errorGone = await usernameField
-          .locator('..')
-          .locator('mat-error:has-text("Username is taken")')
-          .isVisible()
-          .catch(() => false);
-
-        expect(errorGone).toBe(false);
-      }
+      // Try available username — error must disappear
+      await usernameInput.fill('newuser123');
+      await usernameInput.blur();
+      await expect(errorLocator).toBeHidden({ timeout: 5000 });
     });
   });
 
@@ -271,30 +258,17 @@ test.describe('Async Validation Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
-      // Try invalid email
-      await scenario.locator('#email input').fill('invalid@test.com');
-      await page.waitForTimeout(1000);
+      // Try invalid email — error must appear
+      const emailInput = scenario.locator('#email input');
+      await emailInput.fill('invalid@test.com');
+      await emailInput.blur();
+      const errorLocator = scenario.getByText('not valid');
+      await expect(errorLocator).toBeVisible({ timeout: 5000 });
 
-      const emailField = scenario.locator('#email');
-      const errorVisible = await emailField
-        .locator('..')
-        .locator('mat-error:has-text("not valid")')
-        .isVisible()
-        .catch(() => false);
-
-      if (errorVisible) {
-        // Try valid email
-        await scenario.locator('#email input').fill('valid@example.com');
-        await page.waitForTimeout(1000);
-
-        const errorGone = await emailField
-          .locator('..')
-          .locator('mat-error:has-text("not valid")')
-          .isVisible()
-          .catch(() => false);
-
-        expect(errorGone).toBe(false);
-      }
+      // Try valid email — error must disappear
+      await emailInput.fill('valid@example.com');
+      await emailInput.blur();
+      await expect(errorLocator).toBeHidden({ timeout: 5000 });
     });
   });
 
