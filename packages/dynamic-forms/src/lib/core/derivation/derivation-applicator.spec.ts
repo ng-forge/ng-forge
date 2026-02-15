@@ -80,7 +80,7 @@ describe('derivation-applicator', () => {
       });
     }
 
-    return { form: form as any, values, dirtyStates };
+    return { form: form as Record<string, unknown>, values, dirtyStates };
   }
 
   /**

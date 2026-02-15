@@ -257,39 +257,15 @@ function tryApplyDerivation(
     return { applied: false, fieldKey: entry.fieldKey };
   }
 
-  // Check stopOnUserOverride — uses the field's dirty() signal to determine
-  // if the user has manually edited the target field. Derivations call
-  // markAsPristine() after applying values, so dirty === true means user-modified.
-  if (entry.stopOnUserOverride) {
-    const fieldDirty = readFieldDirty(context.rootForm, entry.fieldKey);
-
-    if (fieldDirty !== undefined) {
-      // Re-engagement: reset dirty state if any dependency changed
-      // Guard: changedFields is undefined on initial onChange evaluation
-      if (entry.reEngageOnDependencyChange && chainContext.changedFields) {
-        const dependencyChanged = entry.dependsOn.some((dep) => dep === '*' || chainContext.changedFields!.has(dep));
-        if (dependencyChanged) {
-          markFieldAsPristine(context.rootForm, entry.fieldKey);
-        }
-      }
-
-      // Re-read after potential re-engagement
-      const isDirty =
-        entry.reEngageOnDependencyChange && chainContext.changedFields
-          ? (readFieldDirty(context.rootForm, entry.fieldKey) ?? false)
-          : fieldDirty;
-
-      // Skip if user has overridden (field is dirty)
-      if (isDirty) {
-        derivationLogger.evaluation({
-          debugName: entry.debugName,
-          fieldKey: entry.fieldKey,
-          result: 'skipped',
-          skipReason: 'user-override',
-        });
-        return { applied: false, fieldKey: entry.fieldKey };
-      }
-    }
+  // Check stopOnUserOverride — skip if the user has manually edited the target field
+  if (shouldSkipForUserOverride(entry, entry.fieldKey, context, chainContext)) {
+    derivationLogger.evaluation({
+      debugName: entry.debugName,
+      fieldKey: entry.fieldKey,
+      result: 'skipped',
+      skipReason: 'user-override',
+    });
+    return { applied: false, fieldKey: entry.fieldKey };
   }
 
   // Create evaluation context
@@ -431,27 +407,14 @@ function tryApplyArrayDerivation(
     }
 
     // Check stopOnUserOverride for array items using dirty() signal
-    if (entry.stopOnUserOverride) {
-      const fieldDirty = readFieldDirty(context.rootForm, resolvedPath);
-
-      if (fieldDirty !== undefined) {
-        // Re-engagement: reset dirty state if any dependency changed
-        if (entry.reEngageOnDependencyChange && chainContext.changedFields) {
-          const dependencyChanged = entry.dependsOn.some((dep) => dep === '*' || chainContext.changedFields!.has(dep));
-          if (dependencyChanged) {
-            markFieldAsPristine(context.rootForm, resolvedPath);
-          }
-        }
-
-        const isDirty =
-          entry.reEngageOnDependencyChange && chainContext.changedFields
-            ? (readFieldDirty(context.rootForm, resolvedPath) ?? false)
-            : fieldDirty;
-
-        if (isDirty) {
-          continue;
-        }
-      }
+    if (shouldSkipForUserOverride(entry, resolvedPath, context, chainContext)) {
+      context.derivationLogger.evaluation({
+        debugName: entry.debugName,
+        fieldKey: resolvedPath,
+        result: 'skipped',
+        skipReason: 'user-override',
+      });
+      continue;
     }
 
     // Create evaluation context scoped to this array item
@@ -846,6 +809,44 @@ function markFieldAsPristine(rootForm: FieldTree<unknown>, fieldPath: string): v
   if (typeof fieldInstance['markAsPristine'] === 'function') {
     (fieldInstance['markAsPristine'] as () => void)();
   }
+}
+
+/**
+ * Checks whether a derivation should be skipped due to the user having manually
+ * edited the target field. Handles re-engagement when `reEngageOnDependencyChange`
+ * is set and a dependency has changed.
+ *
+ * @returns `true` if the derivation should be skipped, `false` otherwise
+ *
+ * @internal
+ */
+function shouldSkipForUserOverride(
+  entry: DerivationEntry,
+  resolvedFieldKey: string,
+  context: DerivationApplicatorContext,
+  chainContext: DerivationChainContext,
+): boolean {
+  if (!entry.stopOnUserOverride) return false;
+
+  const fieldDirty = readFieldDirty(context.rootForm, resolvedFieldKey);
+  if (fieldDirty === undefined) return false;
+
+  // Re-engagement: reset dirty state if any dependency changed
+  // Guard: changedFields is undefined on initial onChange evaluation
+  if (entry.reEngageOnDependencyChange && chainContext.changedFields) {
+    const dependencyChanged = entry.dependsOn.some((dep) => dep === '*' || chainContext.changedFields!.has(dep));
+    if (dependencyChanged) {
+      markFieldAsPristine(context.rootForm, resolvedFieldKey);
+    }
+  }
+
+  // Re-read after potential re-engagement
+  const isDirty =
+    entry.reEngageOnDependencyChange && chainContext.changedFields
+      ? (readFieldDirty(context.rootForm, resolvedFieldKey) ?? false)
+      : fieldDirty;
+
+  return isDirty;
 }
 
 /**

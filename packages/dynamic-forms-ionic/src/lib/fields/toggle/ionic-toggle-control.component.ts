@@ -75,7 +75,6 @@ export class IonicToggleControlComponent implements FormCheckboxControl {
   readonly tabIndex = input<number | undefined>(undefined);
   readonly meta = input<FieldMeta>();
   readonly ariaDescribedBy = input<string | null>(null);
-  readonly key = input.required<string>();
 
   constructor() {
     // Shadow DOM - apply meta to ion-toggle element
