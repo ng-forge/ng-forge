@@ -1,12 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, viewChild } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsCheckboxComponent, BsCheckboxProps } from './bs-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
@@ -91,7 +86,6 @@ export default class BsCheckboxFieldComponent implements BsCheckboxComponent {
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input[type="checkbox"]' });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input[type="checkbox"]' });
 
     // Handle indeterminate state
     effect(() => {

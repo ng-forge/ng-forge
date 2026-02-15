@@ -2,13 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  InputMeta,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
@@ -74,7 +68,6 @@ export default class MatSliderFieldComponent implements MatSliderComponent {
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input' });
   }
 
   readonly label = input<DynamicText>();

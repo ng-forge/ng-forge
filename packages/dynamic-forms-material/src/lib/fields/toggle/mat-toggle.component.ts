@@ -2,12 +2,7 @@ import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, Elemen
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 
 import { MatToggleComponent, MatToggleProps } from './mat-toggle.type';
 import { MatError } from '@angular/material/input';
@@ -83,7 +78,6 @@ export default class MatToggleFieldComponent implements MatToggleComponent {
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'button[role="switch"]',
     });
-    setupUserInteractionTracking(this.elementRef, this.key);
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

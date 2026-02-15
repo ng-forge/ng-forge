@@ -1,4 +1,4 @@
-import { untracked } from '@angular/core';
+import { isSignal, untracked } from '@angular/core';
 import type { FieldTree } from '@angular/forms/signals';
 import type { FieldStateInfo, FormFieldStateMap } from '../../models/expressions/field-state-context';
 
@@ -15,8 +15,8 @@ const STATE_PROPERTIES = ['touched', 'dirty', 'valid', 'invalid', 'pending', 'hi
  */
 function readFieldSignal(fieldInstance: Record<string, unknown>, prop: string, reactive: boolean): boolean {
   const signalFn = fieldInstance[prop];
-  if (typeof signalFn !== 'function') return false;
-  return reactive ? !!signalFn() : !!untracked(() => signalFn());
+  if (!isSignal(signalFn)) return false;
+  return reactive ? !!(signalFn as () => boolean)() : !!untracked(signalFn as () => boolean);
 }
 
 /**
@@ -36,7 +36,7 @@ export function createFieldStateProxy(
   fieldAccessor: (() => Record<string, unknown>) | undefined,
   reactive: boolean,
 ): FieldStateInfo | undefined {
-  if (!fieldAccessor || typeof fieldAccessor !== 'function') {
+  if (!fieldAccessor || !isSignal(fieldAccessor)) {
     return undefined;
   }
 
@@ -115,9 +115,9 @@ function navigateToFieldAccessor(rootForm: FieldTree<unknown>, keyPath: string):
 
     if (next === undefined || next === null) return undefined;
 
-    // If it's a field accessor function, call it to get the field tree
-    if (typeof next === 'function') {
-      current = next();
+    // If it's a signal (field accessor), call it to get the field tree
+    if (isSignal(next)) {
+      current = (next as () => unknown)();
     } else {
       current = next;
     }
@@ -127,7 +127,7 @@ function navigateToFieldAccessor(rootForm: FieldTree<unknown>, keyPath: string):
   const finalKey = parts[parts.length - 1];
   const accessor = (current as Record<string, unknown>)[finalKey];
 
-  if (typeof accessor === 'function') {
+  if (isSignal(accessor)) {
     return accessor as () => Record<string, unknown>;
   }
 

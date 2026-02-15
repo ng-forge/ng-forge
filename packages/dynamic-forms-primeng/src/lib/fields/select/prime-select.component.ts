@@ -1,12 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
 import { PrimeSelectControlComponent } from './prime-select-control.component';
@@ -81,7 +76,6 @@ export default class PrimeSelectFieldComponent implements PrimeSelectComponent {
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta);
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'p-select' });
   }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);

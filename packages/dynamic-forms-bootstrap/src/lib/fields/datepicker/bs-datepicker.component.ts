@@ -1,13 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  InputMeta,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsDatepickerComponent, BsDatepickerProps } from './bs-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
@@ -132,7 +126,6 @@ export default class BsDatepickerFieldComponent implements BsDatepickerComponent
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input' });
   }
 
   // Helper methods to convert Date to string for HTML attributes

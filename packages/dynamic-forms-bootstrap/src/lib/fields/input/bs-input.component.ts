@@ -1,13 +1,7 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  InputMeta,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsInputComponent, BsInputProps } from './bs-input.type';
 import { AsyncPipe } from '@angular/common';
 import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
@@ -154,7 +148,6 @@ export default class BsInputFieldComponent implements BsInputComponent {
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input' });
   }
 
   readonly effectiveSize = computed(() => this.props()?.size ?? this.bootstrapConfig?.size);

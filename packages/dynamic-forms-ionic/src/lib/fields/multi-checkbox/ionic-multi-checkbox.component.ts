@@ -2,13 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FieldTree } from '@angular/forms/signals';
 import { IonCheckbox, IonItem, IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  isEqual,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, isEqual, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { IonicMultiCheckboxComponent, IonicMultiCheckboxProps } from './ionic-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
@@ -166,7 +160,6 @@ export default class IonicMultiCheckboxFieldComponent implements IonicMultiCheck
       selector: 'ion-checkbox',
       dependents: [this.options],
     });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'ion-checkbox' });
 
     explicitEffect([this.valueViewModel], ([selectedOptions]) => {
       const selectedValues = selectedOptions.map((option) => option.value);

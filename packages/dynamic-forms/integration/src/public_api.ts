@@ -108,13 +108,6 @@ export { setupMetaTracking } from './utils';
 export type { MetaTrackingOptions } from './utils';
 
 // =============================================================================
-// User Interaction Tracking Utilities
-// =============================================================================
-
-export { setupUserInteractionTracking } from './utils';
-export type { UserInteractionTrackingOptions } from './utils';
-
-// =============================================================================
 // Non-Field Logic Resolvers (re-exported from @ng-forge/dynamic-forms)
 // =============================================================================
 

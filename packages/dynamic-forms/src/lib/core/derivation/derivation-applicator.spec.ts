@@ -1,10 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { signal, WritableSignal } from '@angular/core';
+import { computed, signal, WritableSignal } from '@angular/core';
 import { applyDerivations, applyDerivationsForTrigger, DerivationApplicatorContext } from './derivation-applicator';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { DerivationLogger } from './derivation-logger.service';
-import { UserInteractionTracker } from './user-interaction-tracker';
 
 describe('derivation-applicator', () => {
   /**
@@ -35,23 +34,41 @@ describe('derivation-applicator', () => {
   /**
    * Mock form that mimics Angular Signal Forms structure.
    *
-   * Real structure: form[key] is callable, form[key]() returns { value: WritableSignal }
+   * Real structure: form[key] is callable (and is a signal), form[key]() returns
+   * { value: WritableSignal, dirty: Signal<boolean>, markAsPristine: () => void }
    */
   function createMockForm(initialValue: Record<string, unknown>): {
-    form: Record<string, () => { value: WritableSignal<unknown> }>;
+    form: Record<
+      string,
+      (() => { value: WritableSignal<unknown>; dirty: WritableSignal<boolean>; markAsPristine: () => void }) & {
+        [Symbol.toStringTag]?: string;
+      }
+    >;
     values: Record<string, unknown>;
+    dirtyStates: Record<string, WritableSignal<boolean>>;
   } {
     const values = { ...initialValue };
-    const form: Record<string, () => { value: WritableSignal<unknown> }> = {};
+    const form: Record<string, unknown> = {};
+    const dirtyStates: Record<string, WritableSignal<boolean>> = {};
 
     for (const key of Object.keys(initialValue)) {
       // Create a writable signal for the value
       const valueSignal = signal(values[key]);
+      // Create a dirty signal (defaults to false = pristine)
+      const dirtySignal = signal(false);
+      dirtyStates[key] = dirtySignal;
 
-      // Create a callable field accessor that returns { value: WritableSignal }
-      form[key] = () => ({
+      // Create a callable field accessor that returns { value, dirty, markAsPristine }
+      // Must look like a signal to isSignal() — use signal() to create the accessor
+      const fieldInstance = {
         value: valueSignal,
-      });
+        dirty: dirtySignal,
+        markAsPristine: () => dirtySignal.set(false),
+      };
+
+      // Angular Signal Forms field accessors are signals themselves.
+      // We use a computed signal that always returns the field instance.
+      form[key] = computed(() => fieldInstance);
 
       // Sync signal changes back to our values object for assertions
       // This is a test helper - in real code the signal IS the source of truth
@@ -63,7 +80,7 @@ describe('derivation-applicator', () => {
       });
     }
 
-    return { form, values };
+    return { form: form as any, values, dirtyStates };
   }
 
   /**
@@ -463,20 +480,29 @@ describe('derivation-applicator', () => {
         });
 
         // Each item field is a FieldTree-like object with child fields
-        // Accessing itemFieldTree['lineTotal'] returns a callable FieldTree
+        // Field accessors must be signals (pass isSignal() check)
+        const dirtySignal = signal(false);
+        const qDirty = signal(false);
+        const upDirty = signal(false);
         return {
-          quantity: Object.assign(() => ({ value: quantitySignal }), {}),
-          unitPrice: Object.assign(() => ({ value: unitPriceSignal }), {}),
-          lineTotal: Object.assign(() => ({ value: lineTotalSignal }), {}),
+          quantity: computed(() => ({ value: quantitySignal, dirty: qDirty, markAsPristine: () => qDirty.set(false) })),
+          unitPrice: computed(() => ({ value: unitPriceSignal, dirty: upDirty, markAsPristine: () => upDirty.set(false) })),
+          lineTotal: computed(() => ({
+            value: lineTotalSignal,
+            dirty: dirtySignal,
+            markAsPristine: () => dirtySignal.set(false),
+          })),
         };
       });
 
       const globalDiscountSignal = signal(values.globalDiscount);
+      const globalDiscountDirty = signal(false);
 
       // Array field must be both callable (for getting value) AND have numeric indices
+      // Use Object.assign on a computed to keep signal identity + numeric indices
+      const itemsComputed = computed(() => ({ value: signal(values.items) }));
       const itemsArrayField = Object.assign(
-        // Callable part - returns array value
-        () => ({ value: signal(values.items) }),
+        itemsComputed,
         // Numeric indices for direct field access
         itemFieldTrees.reduce(
           (acc, tree, idx) => {
@@ -489,7 +515,11 @@ describe('derivation-applicator', () => {
 
       const form = {
         items: itemsArrayField,
-        globalDiscount: () => ({ value: globalDiscountSignal }),
+        globalDiscount: computed(() => ({
+          value: globalDiscountSignal,
+          dirty: globalDiscountDirty,
+          markAsPristine: () => globalDiscountDirty.set(false),
+        })),
       };
 
       return { form, values };
@@ -690,19 +720,28 @@ describe('derivation-applicator', () => {
         configurable: true,
       });
 
+      const d0q = signal(false);
+      const d0u = signal(false);
+      const d0l = signal(false);
+      const d1q = signal(false);
+      const d1u = signal(false);
+      const d1l = signal(false);
       const form = {
-        items: Object.assign(() => ({ value: signal(values.items) }), {
-          0: {
-            quantity: () => ({ value: signal(values.items[0].quantity) }),
-            unitPrice: () => ({ value: signal(values.items[0].unitPrice) }),
-            lineTotal: () => ({ value: lineTotalSignal0 }),
+        items: Object.assign(
+          computed(() => ({ value: signal(values.items) })),
+          {
+            0: {
+              quantity: computed(() => ({ value: signal(values.items[0].quantity), dirty: d0q, markAsPristine: () => d0q.set(false) })),
+              unitPrice: computed(() => ({ value: signal(values.items[0].unitPrice), dirty: d0u, markAsPristine: () => d0u.set(false) })),
+              lineTotal: computed(() => ({ value: lineTotalSignal0, dirty: d0l, markAsPristine: () => d0l.set(false) })),
+            },
+            1: {
+              quantity: computed(() => ({ value: signal(values.items[1].quantity), dirty: d1q, markAsPristine: () => d1q.set(false) })),
+              unitPrice: computed(() => ({ value: signal(values.items[1].unitPrice), dirty: d1u, markAsPristine: () => d1u.set(false) })),
+              lineTotal: computed(() => ({ value: lineTotalSignal1, dirty: d1l, markAsPristine: () => d1l.set(false) })),
+            },
           },
-          1: {
-            quantity: () => ({ value: signal(values.items[1].quantity) }),
-            unitPrice: () => ({ value: signal(values.items[1].unitPrice) }),
-            lineTotal: () => ({ value: lineTotalSignal1 }),
-          },
-        }),
+        ),
       };
 
       const formValueSignal = signal({
@@ -816,12 +855,12 @@ describe('derivation-applicator', () => {
       formValueSignal = signal({ country: 'USA', phonePrefix: '', displayName: '' });
     });
 
-    it('should skip derivation when user has modified the field', () => {
-      const { form } = createMockForm({ country: 'USA', phonePrefix: '', displayName: '' });
+    it('should skip derivation when field is dirty (user-modified)', () => {
+      const { form, dirtyStates } = createMockForm({ country: 'USA', phonePrefix: '', displayName: '' });
       formValueSignal = signal({ country: 'USA', phonePrefix: '', displayName: '' });
 
-      const tracker = new UserInteractionTracker();
-      tracker.markUserModified('phonePrefix');
+      // Simulate user editing phonePrefix
+      dirtyStates['phonePrefix'].set(true);
 
       const entry = createEntry('phonePrefix', {
         value: '+1',
@@ -834,7 +873,6 @@ describe('derivation-applicator', () => {
         rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
         logger,
         derivationLogger: createMockDerivationLogger(),
-        userInteractionTracker: tracker,
       };
 
       const result = applyDerivations(createCollection([entry]), context);
@@ -842,12 +880,11 @@ describe('derivation-applicator', () => {
       expect(result.skippedCount).toBe(1);
     });
 
-    it('should apply derivation when user has NOT modified the field', () => {
+    it('should apply derivation when field is pristine (not user-modified)', () => {
       const { form, values } = createMockForm({ country: 'USA', phonePrefix: '', displayName: '' });
       formValueSignal = signal({ country: 'USA', phonePrefix: '', displayName: '' });
 
-      const tracker = new UserInteractionTracker();
-      // NOT marking phonePrefix as modified
+      // dirtyStates['phonePrefix'] defaults to false (pristine)
 
       const entry = createEntry('phonePrefix', {
         value: '+1',
@@ -860,7 +897,6 @@ describe('derivation-applicator', () => {
         rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
         logger,
         derivationLogger: createMockDerivationLogger(),
-        userInteractionTracker: tracker,
       };
 
       const result = applyDerivations(createCollection([entry]), context);
@@ -868,12 +904,11 @@ describe('derivation-applicator', () => {
       expect(values['phonePrefix']).toBe('+1');
     });
 
-    it('should apply derivation when stopOnUserOverride is false even if user modified', () => {
-      const { form, values } = createMockForm({ country: 'USA', phonePrefix: '' });
+    it('should apply derivation when stopOnUserOverride is false even if field is dirty', () => {
+      const { form, values, dirtyStates } = createMockForm({ country: 'USA', phonePrefix: '' });
       formValueSignal = signal({ country: 'USA', phonePrefix: '' });
 
-      const tracker = new UserInteractionTracker();
-      tracker.markUserModified('phonePrefix');
+      dirtyStates['phonePrefix'].set(true);
 
       const entry = createEntry('phonePrefix', {
         value: '+1',
@@ -886,7 +921,6 @@ describe('derivation-applicator', () => {
         rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
         logger,
         derivationLogger: createMockDerivationLogger(),
-        userInteractionTracker: tracker,
       };
 
       const result = applyDerivations(createCollection([entry]), context);
@@ -894,14 +928,13 @@ describe('derivation-applicator', () => {
       expect(values['phonePrefix']).toBe('+1');
     });
 
-    it('should work without tracker (no-op when tracker not provided)', () => {
-      const { form, values } = createMockForm({ country: 'USA', phonePrefix: '' });
+    it('should mark field as pristine after applying derivation value', () => {
+      const { form, dirtyStates } = createMockForm({ country: 'USA', phonePrefix: '' });
       formValueSignal = signal({ country: 'USA', phonePrefix: '' });
 
       const entry = createEntry('phonePrefix', {
         value: '+1',
         dependsOn: ['country'],
-        stopOnUserOverride: true,
       });
 
       const context: DerivationApplicatorContext = {
@@ -909,21 +942,21 @@ describe('derivation-applicator', () => {
         rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
         logger,
         derivationLogger: createMockDerivationLogger(),
-        // No userInteractionTracker
       };
 
-      const result = applyDerivations(createCollection([entry]), context);
-      expect(result.appliedCount).toBe(1);
-      expect(values['phonePrefix']).toBe('+1');
+      applyDerivations(createCollection([entry]), context);
+
+      // After derivation applies value, field should be pristine
+      expect(dirtyStates['phonePrefix']()).toBe(false);
     });
 
     describe('reEngageOnDependencyChange', () => {
-      it('should clear override when dependency changes', () => {
-        const { form, values } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
+      it('should clear dirty state and apply when dependency changes', () => {
+        const { form, values, dirtyStates } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
         formValueSignal = signal({ country: 'UK', phonePrefix: '+44-custom' });
 
-        const tracker = new UserInteractionTracker();
-        tracker.markUserModified('phonePrefix');
+        // Simulate user editing phonePrefix
+        dirtyStates['phonePrefix'].set(true);
 
         const entry = createEntry('phonePrefix', {
           value: '+44',
@@ -937,25 +970,23 @@ describe('derivation-applicator', () => {
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
           derivationLogger: createMockDerivationLogger(),
-          userInteractionTracker: tracker,
         };
 
         // Simulate that 'country' changed
         const changedFields = new Set(['country']);
         const result = applyDerivations(createCollection([entry]), context, changedFields);
 
-        // Override should be cleared, derivation should apply
+        // Dirty state should be cleared, derivation should apply
         expect(result.appliedCount).toBe(1);
         expect(values['phonePrefix']).toBe('+44');
-        expect(tracker.isUserModified('phonePrefix')).toBe(false);
+        expect(dirtyStates['phonePrefix']()).toBe(false);
       });
 
-      it('should keep override when dependency has NOT changed', () => {
-        const { form } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
+      it('should keep dirty state when dependency has NOT changed', () => {
+        const { form, dirtyStates } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
         formValueSignal = signal({ country: 'UK', phonePrefix: '+44-custom' });
 
-        const tracker = new UserInteractionTracker();
-        tracker.markUserModified('phonePrefix');
+        dirtyStates['phonePrefix'].set(true);
 
         const entry = createEntry('phonePrefix', {
           value: '+44',
@@ -969,7 +1000,6 @@ describe('derivation-applicator', () => {
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
           derivationLogger: createMockDerivationLogger(),
-          userInteractionTracker: tracker,
         };
 
         // Simulate that some other field changed, NOT 'country'
@@ -978,15 +1008,14 @@ describe('derivation-applicator', () => {
 
         // Override should persist, derivation should be skipped
         expect(result.appliedCount).toBe(0);
-        expect(tracker.isUserModified('phonePrefix')).toBe(true);
+        expect(dirtyStates['phonePrefix']()).toBe(true);
       });
 
       it('should guard against null changedFields (initial evaluation)', () => {
-        const { form } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
+        const { form, dirtyStates } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
         formValueSignal = signal({ country: 'UK', phonePrefix: '+44-custom' });
 
-        const tracker = new UserInteractionTracker();
-        tracker.markUserModified('phonePrefix');
+        dirtyStates['phonePrefix'].set(true);
 
         const entry = createEntry('phonePrefix', {
           value: '+44',
@@ -1000,23 +1029,21 @@ describe('derivation-applicator', () => {
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
           derivationLogger: createMockDerivationLogger(),
-          userInteractionTracker: tracker,
         };
 
         // No changedFields (initial evaluation)
         const result = applyDerivations(createCollection([entry]), context);
 
-        // reEngageOnDependencyChange should NOT clear override when changedFields is undefined
+        // reEngageOnDependencyChange should NOT clear dirty when changedFields is undefined
         expect(result.appliedCount).toBe(0);
-        expect(tracker.isUserModified('phonePrefix')).toBe(true);
+        expect(dirtyStates['phonePrefix']()).toBe(true);
       });
 
       it('should not re-engage when reEngageOnDependencyChange is false', () => {
-        const { form } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
+        const { form, dirtyStates } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
         formValueSignal = signal({ country: 'UK', phonePrefix: '+44-custom' });
 
-        const tracker = new UserInteractionTracker();
-        tracker.markUserModified('phonePrefix');
+        dirtyStates['phonePrefix'].set(true);
 
         const entry = createEntry('phonePrefix', {
           value: '+44',
@@ -1030,7 +1057,6 @@ describe('derivation-applicator', () => {
           rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           logger,
           derivationLogger: createMockDerivationLogger(),
-          userInteractionTracker: tracker,
         };
 
         // Even though 'country' changed, re-engagement is disabled
@@ -1038,7 +1064,7 @@ describe('derivation-applicator', () => {
         const result = applyDerivations(createCollection([entry]), context, changedFields);
 
         expect(result.appliedCount).toBe(0);
-        expect(tracker.isUserModified('phonePrefix')).toBe(true);
+        expect(dirtyStates['phonePrefix']()).toBe(true);
       });
     });
   });

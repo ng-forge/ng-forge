@@ -25,7 +25,6 @@ import {
   PROPERTY_OVERRIDE_STORE,
   PropertyOverrideStore,
 } from '../core/property-derivation/property-override-store';
-import { USER_INTERACTION_TRACKER, UserInteractionTracker } from '../core/derivation/user-interaction-tracker';
 import {
   createPropertyDerivationOrchestrator,
   PROPERTY_DERIVATION_ORCHESTRATOR,
@@ -75,7 +74,6 @@ export function provideDynamicFormDI(): Provider[] {
       deps: [FormStateManager],
     },
     { provide: DERIVATION_WARNING_TRACKER, useFactory: createDerivationWarningTracker },
-    { provide: USER_INTERACTION_TRACKER, useFactory: () => new UserInteractionTracker() },
     {
       provide: DERIVATION_ORCHESTRATOR,
       useFactory: (

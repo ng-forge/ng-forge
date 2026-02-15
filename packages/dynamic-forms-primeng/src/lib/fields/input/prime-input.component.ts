@@ -1,13 +1,7 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  InputMeta,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeInputComponent, PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
 import { InputText } from 'primeng/inputtext';
@@ -112,7 +106,6 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input' });
   }
 
   readonly effectiveSize = computed(() => this.props()?.size ?? this.primeNGConfig?.size);

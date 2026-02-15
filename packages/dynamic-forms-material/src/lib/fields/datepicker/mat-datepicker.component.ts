@@ -4,13 +4,7 @@ import { MatError, MatFormField, MatLabel, MatSuffix } from '@angular/material/f
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  InputMeta,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatDatepickerComponent, MatDatepickerProps } from './mat-datepicker.type';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AsyncPipe } from '@angular/common';
@@ -92,7 +86,6 @@ export default class MatDatepickerFieldComponent implements MatDatepickerCompone
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input' });
   }
 
   readonly label = input<DynamicText>();

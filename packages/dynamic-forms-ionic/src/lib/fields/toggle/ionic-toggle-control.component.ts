@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import type { FormCheckboxControl } from '@angular/forms/signals';
 import { IonToggle } from '@ionic/angular/standalone';
 import { FieldMeta } from '@ng-forge/dynamic-forms';
-import { setupMetaTracking, setupUserInteractionTracking } from '@ng-forge/dynamic-forms/integration';
+import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 
 /**
  * A wrapper component for Ionic's ion-toggle that implements FormCheckboxControl.
@@ -82,7 +82,6 @@ export class IonicToggleControlComponent implements FormCheckboxControl {
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'ion-toggle',
     });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'ion-toggle' });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

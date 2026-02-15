@@ -3,13 +3,7 @@ import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  InputMeta,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatInputComponent, MatInputProps } from './mat-input.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
@@ -79,7 +73,6 @@ export default class MatInputFieldComponent implements MatInputComponent {
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input' });
   }
 
   /**

@@ -224,6 +224,3 @@ export { RootFormRegistryService } from './core/registry/root-form-registry.serv
 
 // Field State types (for consumers writing custom expressions)
 export type { FieldStateInfo, FieldStateContext, FormFieldStateMap } from './models/expressions/field-state-context';
-
-// User Interaction Tracker (for UI library authors)
-export { UserInteractionTracker, USER_INTERACTION_TRACKER } from './core/derivation/user-interaction-tracker';

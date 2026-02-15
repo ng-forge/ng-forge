@@ -3,13 +3,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonNote, IonTextarea } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-  TextareaMeta,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { IonicTextareaComponent, IonicTextareaProps } from './ionic-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
@@ -85,7 +79,6 @@ export default class IonicTextareaFieldComponent implements IonicTextareaCompone
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'ion-textarea',
     });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'ion-textarea' });
 
     // Workaround: Ionic's ion-textarea does NOT automatically propagate aria-describedby changes
     // to the native textarea element inside its shadow DOM. This effect imperatively syncs the attribute

@@ -1,12 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeRadioComponent, PrimeRadioProps } from './prime-radio.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeRadioGroupComponent } from './prime-radio-group.component';
@@ -83,7 +78,6 @@ export default class PrimeRadioFieldComponent implements PrimeRadioComponent {
       selector: 'input[type="radio"]',
       dependents: [this.options],
     });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input[type="radio"]' });
   }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);

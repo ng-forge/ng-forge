@@ -1,4 +1,4 @@
-import { isWritableSignal, Signal, untracked } from '@angular/core';
+import { isSignal, isWritableSignal, Signal, untracked } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
@@ -20,7 +20,6 @@ import {
 import { DerivationWarningTracker } from './derivation-warning-tracker';
 import { MAX_DERIVATION_ITERATIONS } from './derivation-constants';
 import { DerivationLogger } from './derivation-logger.service';
-import { UserInteractionTracker } from './user-interaction-tracker';
 import { createFieldStateProxy, createFormFieldStateProxy } from './field-state-extractor';
 
 // Re-export for backwards compatibility
@@ -70,14 +69,6 @@ export interface DerivationApplicatorContext {
    * Falls back to MAX_DERIVATION_ITERATIONS constant if not provided.
    */
   maxIterations?: number;
-
-  /**
-   * Tracker for user interactions.
-   *
-   * When provided, enables `stopOnUserOverride` and `reEngageOnDependencyChange`
-   * on derivation entries.
-   */
-  userInteractionTracker?: UserInteractionTracker;
 }
 
 /**
@@ -266,28 +257,38 @@ function tryApplyDerivation(
     return { applied: false, fieldKey: entry.fieldKey };
   }
 
-  // Check stopOnUserOverride
-  if (entry.stopOnUserOverride && context.userInteractionTracker) {
-    const tracker = context.userInteractionTracker;
+  // Check stopOnUserOverride — uses the field's dirty() signal to determine
+  // if the user has manually edited the target field. Derivations call
+  // markAsPristine() after applying values, so dirty === true means user-modified.
+  if (entry.stopOnUserOverride) {
+    const fieldDirty = readFieldDirty(context.rootForm, entry.fieldKey);
 
-    // Re-engagement: clear override if any dependency changed
-    // Guard: changedFields is undefined on initial onChange evaluation
-    if (entry.reEngageOnDependencyChange && chainContext.changedFields) {
-      const dependencyChanged = entry.dependsOn.some((dep) => dep === '*' || chainContext.changedFields!.has(dep));
-      if (dependencyChanged) {
-        tracker.clearUserModified(entry.fieldKey);
+    if (fieldDirty !== undefined) {
+      // Re-engagement: reset dirty state if any dependency changed
+      // Guard: changedFields is undefined on initial onChange evaluation
+      if (entry.reEngageOnDependencyChange && chainContext.changedFields) {
+        const dependencyChanged = entry.dependsOn.some((dep) => dep === '*' || chainContext.changedFields!.has(dep));
+        if (dependencyChanged) {
+          markFieldAsPristine(context.rootForm, entry.fieldKey);
+        }
       }
-    }
 
-    // Skip if user has overridden
-    if (tracker.isUserModified(entry.fieldKey)) {
-      derivationLogger.evaluation({
-        debugName: entry.debugName,
-        fieldKey: entry.fieldKey,
-        result: 'skipped',
-        skipReason: 'user-override',
-      });
-      return { applied: false, fieldKey: entry.fieldKey };
+      // Re-read after potential re-engagement
+      const isDirty =
+        entry.reEngageOnDependencyChange && chainContext.changedFields
+          ? (readFieldDirty(context.rootForm, entry.fieldKey) ?? false)
+          : fieldDirty;
+
+      // Skip if user has overridden (field is dirty)
+      if (isDirty) {
+        derivationLogger.evaluation({
+          debugName: entry.debugName,
+          fieldKey: entry.fieldKey,
+          result: 'skipped',
+          skipReason: 'user-override',
+        });
+        return { applied: false, fieldKey: entry.fieldKey };
+      }
     }
   }
 
@@ -429,20 +430,27 @@ function tryApplyArrayDerivation(
       continue;
     }
 
-    // Check stopOnUserOverride for array items
-    if (entry.stopOnUserOverride && context.userInteractionTracker) {
-      const tracker = context.userInteractionTracker;
+    // Check stopOnUserOverride for array items using dirty() signal
+    if (entry.stopOnUserOverride) {
+      const fieldDirty = readFieldDirty(context.rootForm, resolvedPath);
 
-      // Re-engagement: clear override if any dependency changed
-      if (entry.reEngageOnDependencyChange && chainContext.changedFields) {
-        const dependencyChanged = entry.dependsOn.some((dep) => dep === '*' || chainContext.changedFields!.has(dep));
-        if (dependencyChanged) {
-          tracker.clearUserModified(resolvedPath);
+      if (fieldDirty !== undefined) {
+        // Re-engagement: reset dirty state if any dependency changed
+        if (entry.reEngageOnDependencyChange && chainContext.changedFields) {
+          const dependencyChanged = entry.dependsOn.some((dep) => dep === '*' || chainContext.changedFields!.has(dep));
+          if (dependencyChanged) {
+            markFieldAsPristine(context.rootForm, resolvedPath);
+          }
         }
-      }
 
-      if (tracker.isUserModified(resolvedPath)) {
-        continue;
+        const isDirty =
+          entry.reEngageOnDependencyChange && chainContext.changedFields
+            ? (readFieldDirty(context.rootForm, resolvedPath) ?? false)
+            : fieldDirty;
+
+        if (isDirty) {
+          continue;
+        }
       }
     }
 
@@ -499,8 +507,7 @@ function createEvaluationContext(
 
   // Create field state proxies (non-reactive for derivation applicator context)
   const fieldAccessor = (context.rootForm as Record<string, unknown>)[entry.fieldKey];
-  const fieldState =
-    typeof fieldAccessor === 'function' ? createFieldStateProxy(fieldAccessor as () => Record<string, unknown>, false) : undefined;
+  const fieldState = isSignal(fieldAccessor) ? createFieldStateProxy(fieldAccessor as () => Record<string, unknown>, false) : undefined;
   const formFieldState = createFormFieldStateProxy(context.rootForm, false);
 
   return {
@@ -542,13 +549,13 @@ function createArrayItemEvaluationContext(
 
   if (pathInfo.isArrayPath && pathInfo.relativePath) {
     const arrayAccessor = (context.rootForm as Record<string, unknown>)[arrayPath];
-    if (typeof arrayAccessor === 'function') {
-      const arrayInstance = arrayAccessor() as Record<string, unknown>;
+    if (isSignal(arrayAccessor)) {
+      const arrayInstance = (arrayAccessor as () => Record<string, unknown>)() as Record<string, unknown>;
       const itemAccessor = arrayInstance?.[String(itemIndex)];
-      if (typeof itemAccessor === 'function') {
+      if (isSignal(itemAccessor)) {
         const itemInstance = (itemAccessor as () => Record<string, unknown>)();
         const fieldAccessor = itemInstance?.[pathInfo.relativePath];
-        if (typeof fieldAccessor === 'function') {
+        if (isSignal(fieldAccessor)) {
           fieldState = createFieldStateProxy(fieldAccessor as () => Record<string, unknown>, false);
         }
       }
@@ -722,14 +729,14 @@ function setFieldValue(
     return false;
   }
 
-  // Angular Signal Forms: field accessor is a callable function
-  if (typeof fieldAccessor !== 'function') {
+  // Angular Signal Forms: field accessor is a signal
+  if (!isSignal(fieldAccessor)) {
     warnMissingField(fieldKey, logger, warningTracker);
     return false;
   }
 
   // Call the accessor to get the field instance
-  const fieldInstance = fieldAccessor();
+  const fieldInstance = (fieldAccessor as () => unknown)();
 
   if (!fieldInstance || typeof fieldInstance !== 'object' || !('value' in fieldInstance)) {
     warnMissingField(fieldKey, logger, warningTracker);
@@ -741,6 +748,14 @@ function setFieldValue(
 
   if (isWritableSignal(valueSignal)) {
     valueSignal.set(value);
+
+    // Mark field as pristine after derivation-applied value change.
+    // This ensures dirty() only reflects user modifications, not programmatic ones.
+    const fieldWithState = fieldInstance as Record<string, unknown>;
+    if (typeof fieldWithState['markAsPristine'] === 'function') {
+      (fieldWithState['markAsPristine'] as () => void)();
+    }
+
     return true;
   } else {
     warnMissingField(fieldKey, logger, warningTracker);
@@ -770,6 +785,67 @@ function warnMissingField(fieldKey: string, logger?: Logger, warningTracker?: De
       `Ensure the field is defined in your form configuration. ` +
       `This warning is shown once per field.`,
   );
+}
+
+/**
+ * Reads the dirty() signal from a field at the given path.
+ *
+ * Returns `true` if the field is dirty, `false` if pristine,
+ * or `undefined` if the field cannot be found.
+ *
+ * @internal
+ */
+function readFieldDirty(rootForm: FieldTree<unknown>, fieldPath: string): boolean | undefined {
+  const parts = fieldPath.split('.');
+  let current: unknown = rootForm;
+
+  for (let i = 0; i < parts.length - 1; i++) {
+    const next = (current as Record<string, unknown>)[parts[i]];
+    if (next === undefined || next === null) return undefined;
+    current = isSignal(next) ? (next as () => unknown)() : next;
+  }
+
+  const finalKey = parts[parts.length - 1];
+  const fieldAccessor = (current as Record<string, unknown>)[finalKey];
+  if (!isSignal(fieldAccessor)) return undefined;
+
+  const fieldInstance = (fieldAccessor as () => Record<string, unknown>)();
+  if (!fieldInstance || typeof fieldInstance !== 'object') return undefined;
+
+  const dirtySignal = fieldInstance['dirty'];
+  if (!isSignal(dirtySignal)) return undefined;
+
+  return untracked(dirtySignal as () => boolean);
+}
+
+/**
+ * Marks a field at the given path as pristine (not dirty).
+ *
+ * Used for re-engagement: when a dependency changes, clear the user override
+ * so the derivation can re-apply.
+ *
+ * @internal
+ */
+function markFieldAsPristine(rootForm: FieldTree<unknown>, fieldPath: string): void {
+  const parts = fieldPath.split('.');
+  let current: unknown = rootForm;
+
+  for (let i = 0; i < parts.length - 1; i++) {
+    const next = (current as Record<string, unknown>)[parts[i]];
+    if (next === undefined || next === null) return;
+    current = isSignal(next) ? (next as () => unknown)() : next;
+  }
+
+  const finalKey = parts[parts.length - 1];
+  const fieldAccessor = (current as Record<string, unknown>)[finalKey];
+  if (!isSignal(fieldAccessor)) return;
+
+  const fieldInstance = (fieldAccessor as () => Record<string, unknown>)();
+  if (!fieldInstance || typeof fieldInstance !== 'object') return;
+
+  if (typeof fieldInstance['markAsPristine'] === 'function') {
+    (fieldInstance['markAsPristine'] as () => void)();
+  }
 }
 
 /**

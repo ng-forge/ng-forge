@@ -1,13 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  isEqual,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, isEqual, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { BsMultiCheckboxComponent, BsMultiCheckboxProps } from './bs-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
@@ -123,7 +117,6 @@ export default class BsMultiCheckboxFieldComponent implements BsMultiCheckboxCom
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input[type="checkbox"]', dependents: [this.options] });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input[type="checkbox"]' });
 
     explicitEffect([this.valueViewModel], ([selectedOptions]: [FieldOption<ValueType>[]]) => {
       const selectedValues = selectedOptions.map((option: FieldOption<ValueType>) => option.value);

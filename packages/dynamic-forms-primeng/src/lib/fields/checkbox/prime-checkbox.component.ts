@@ -2,12 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeCheckboxComponent, PrimeCheckboxProps } from './prime-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
@@ -88,7 +83,6 @@ export default class PrimeCheckboxFieldComponent implements PrimeCheckboxCompone
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'input[type="checkbox"]',
     });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input[type="checkbox"]' });
   }
 
   readonly checkboxClasses = computed(() => {

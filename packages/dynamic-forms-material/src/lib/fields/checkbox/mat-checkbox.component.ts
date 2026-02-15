@@ -2,12 +2,7 @@ import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, Elemen
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
@@ -80,7 +75,6 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'input[type="checkbox"]',
     });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'input[type="checkbox"]' });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

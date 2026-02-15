@@ -13,13 +13,7 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createResolvedErrorsSignal,
-  InputMeta,
-  setupMetaTracking,
-  setupUserInteractionTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicDatepickerComponent, IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
@@ -149,7 +143,6 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'ion-input',
     });
-    setupUserInteractionTracking(this.elementRef, this.key, { selector: 'ion-input' });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

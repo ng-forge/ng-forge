@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
-import { signal } from '@angular/core';
+import { describe, expect, it } from 'vitest';
+import { computed, signal } from '@angular/core';
 import { createFieldStateProxy, createFormFieldStateProxy } from './field-state-extractor';
 
 describe('field-state-extractor', () => {
@@ -30,12 +30,13 @@ describe('field-state-extractor', () => {
   }
 
   /**
-   * Creates a mock form with field accessors.
+   * Creates a mock form with signal-based field accessors.
+   * Uses computed() so accessors pass isSignal() checks.
    */
   function createMockForm(fields: Record<string, ReturnType<typeof createMockFieldInstance>>) {
-    const form: Record<string, () => ReturnType<typeof createMockFieldInstance>> = {};
+    const form: Record<string, unknown> = {};
     for (const [key, instance] of Object.entries(fields)) {
-      form[key] = () => instance;
+      form[key] = computed(() => instance);
     }
     return form;
   }
@@ -52,7 +53,10 @@ describe('field-state-extractor', () => {
 
     it('should lazily read state properties', () => {
       const instance = createMockFieldInstance({ touched: true, dirty: true, valid: false });
-      const proxy = createFieldStateProxy(() => instance as unknown as Record<string, unknown>, false);
+      const proxy = createFieldStateProxy(
+        computed(() => instance as unknown as Record<string, unknown>),
+        false,
+      );
 
       expect(proxy).toBeDefined();
       expect(proxy!.touched).toBe(true);
@@ -69,8 +73,14 @@ describe('field-state-extractor', () => {
       const dirtyInstance = createMockFieldInstance({ dirty: true });
       const cleanInstance = createMockFieldInstance({ dirty: false });
 
-      const dirtyProxy = createFieldStateProxy(() => dirtyInstance as unknown as Record<string, unknown>, false);
-      const cleanProxy = createFieldStateProxy(() => cleanInstance as unknown as Record<string, unknown>, false);
+      const dirtyProxy = createFieldStateProxy(
+        computed(() => dirtyInstance as unknown as Record<string, unknown>),
+        false,
+      );
+      const cleanProxy = createFieldStateProxy(
+        computed(() => cleanInstance as unknown as Record<string, unknown>),
+        false,
+      );
 
       expect(dirtyProxy!.pristine).toBe(false);
       expect(cleanProxy!.pristine).toBe(true);
@@ -90,7 +100,10 @@ describe('field-state-extractor', () => {
         value: signal('test'),
       };
 
-      const proxy = createFieldStateProxy(() => instance as unknown as Record<string, unknown>, true);
+      const proxy = createFieldStateProxy(
+        computed(() => instance as unknown as Record<string, unknown>),
+        true,
+      );
 
       expect(proxy!.touched).toBe(false);
 
@@ -100,7 +113,10 @@ describe('field-state-extractor', () => {
 
     it('should return undefined for unknown properties', () => {
       const instance = createMockFieldInstance({});
-      const proxy = createFieldStateProxy(() => instance as unknown as Record<string, unknown>, false);
+      const proxy = createFieldStateProxy(
+        computed(() => instance as unknown as Record<string, unknown>),
+        false,
+      );
 
       expect((proxy as Record<string, unknown>)['nonexistent']).toBeUndefined();
     });
