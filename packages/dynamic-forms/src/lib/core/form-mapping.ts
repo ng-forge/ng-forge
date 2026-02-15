@@ -252,10 +252,10 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
 
   // Apply array-level length validation
   if (arrayField.minLength !== undefined) {
-    minLength(fieldPath as SchemaPath<string>, arrayField.minLength);
+    minLength(fieldPath as SchemaPath<unknown[]>, arrayField.minLength);
   }
   if (arrayField.maxLength !== undefined) {
-    maxLength(fieldPath as SchemaPath<string>, arrayField.maxLength);
+    maxLength(fieldPath as SchemaPath<unknown[]>, arrayField.maxLength);
   }
 
   // Fields can be either FieldDef (primitive) or FieldDef[] (object)

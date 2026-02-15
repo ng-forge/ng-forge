@@ -332,14 +332,18 @@ test.describe('Array Fields E2E Tests', () => {
       const inputs = scenario.locator('#items input');
       await expect(inputs).toHaveCount(1, { timeout: 10000 });
 
-      // Submit button should be present and functional
+      // Submit button should be disabled (1 item < minLength: 2)
       const submitButton = scenario.locator('#submit button');
       await expect(submitButton).toBeVisible();
+      await expect(submitButton).toBeDisabled({ timeout: 5000 });
 
-      // Add another item
+      // Add another item to satisfy minLength
       const addButton = scenario.locator('button:has-text("Add Item")');
       await addButton.click();
       await expect(inputs).toHaveCount(2, { timeout: 5000 });
+
+      // Submit button should now be enabled (2 items >= minLength: 2)
+      await expect(submitButton).toBeEnabled({ timeout: 5000 });
 
       // Fill both items and submit
       await inputs.nth(0).fill('Item A');
@@ -1130,6 +1134,84 @@ test.describe('Array Fields E2E Tests', () => {
         // No remove buttons
         const removeButtons = scenario.locator('#staticList button:has-text("Remove")');
         await expect(removeButtons).toHaveCount(0);
+      });
+    });
+
+    test.describe('Simplified Array Validation', () => {
+      test('should enforce minLength on simplified array', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-min-length');
+        await page.goto('/#/test/array-fields/simplified-array-min-length');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        // Should have 1 input with pre-filled value
+        const inputs = scenario.locator('#tags input');
+        await expect(inputs).toHaveCount(1, { timeout: 10000 });
+        await expect(inputs.nth(0)).toHaveValue('angular', { timeout: 5000 });
+
+        // Submit button should be disabled (1 item < minLength: 2)
+        const submitButton = scenario.locator('#submit button');
+        await expect(submitButton).toBeVisible({ timeout: 5000 });
+        await expect(submitButton).toBeDisabled({ timeout: 5000 });
+
+        // Add item to satisfy minLength
+        const addButton = scenario.locator('button:has-text("Add")');
+        await addButton.click();
+        await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+        // Submit button should now be enabled (2 items >= minLength: 2)
+        await expect(submitButton).toBeEnabled({ timeout: 5000 });
+
+        // Fill new item and submit
+        await inputs.nth(1).fill('typescript');
+        const data = await helpers.submitFormAndCapture(scenario);
+        expect(data).toHaveProperty('tags');
+        const tags = data['tags'] as string[];
+        expect(tags).toHaveLength(2);
+        expect(tags[0]).toBe('angular');
+        expect(tags[1]).toBe('typescript');
+      });
+
+      test('should enforce maxLength on simplified array', async ({ page, helpers }) => {
+        const scenario = helpers.getScenario('simplified-array-max-length');
+        await page.goto('/#/test/array-fields/simplified-array-max-length');
+        await page.waitForLoadState('networkidle');
+        await expect(scenario).toBeVisible({ timeout: 10000 });
+
+        // Should have 2 inputs with pre-filled values
+        const inputs = scenario.locator('#tags input');
+        await expect(inputs).toHaveCount(2, { timeout: 10000 });
+        await expect(inputs.nth(0)).toHaveValue('angular', { timeout: 5000 });
+        await expect(inputs.nth(1)).toHaveValue('typescript', { timeout: 5000 });
+
+        // Submit button should be enabled (2 items = maxLength: 2)
+        const submitButton = scenario.locator('#submit button');
+        await expect(submitButton).toBeVisible({ timeout: 5000 });
+        await expect(submitButton).toBeEnabled({ timeout: 5000 });
+
+        // Add item to exceed maxLength
+        const addButton = scenario.locator('button:has-text("Add")');
+        await addButton.click();
+        await expect(inputs).toHaveCount(3, { timeout: 10000 });
+
+        // Submit button should now be disabled (3 items > maxLength: 2)
+        await expect(submitButton).toBeDisabled({ timeout: 5000 });
+
+        // Remove the extra item to go back to valid state
+        const removeButtons = scenario.locator('#tags button:has-text("Remove")');
+        await removeButtons.last().click();
+        await expect(inputs).toHaveCount(2, { timeout: 10000 });
+
+        // Submit button should be enabled again
+        await expect(submitButton).toBeEnabled({ timeout: 5000 });
+
+        // Submit and verify data
+        const data = await helpers.submitFormAndCapture(scenario);
+        expect(data).toHaveProperty('tags');
+        const tags = data['tags'] as string[];
+        expect(tags).toHaveLength(2);
+        expect(tags[0]).toBe('angular');
+        expect(tags[1]).toBe('typescript');
       });
     });
 
