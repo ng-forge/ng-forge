@@ -159,7 +159,7 @@ Accessing properties on `null` or `undefined` returns `undefined` instead of thr
 
 ### Security
 
-Expressions use **secure AST-based parsing** - no `eval()` or `new Function()`. Only safe JavaScript operations are allowed.
+Expressions use **secure AST-based parsing**. Only safe JavaScript operations are allowed.
 
 ## Function-Based Validators
 

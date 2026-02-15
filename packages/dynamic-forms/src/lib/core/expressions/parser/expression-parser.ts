@@ -62,7 +62,7 @@ class LRUCache<K, V> {
 const astCache = new LRUCache<string, ASTNode>(MAX_AST_CACHE_SIZE);
 
 /**
- * Secure expression parser that uses AST-based evaluation instead of eval() or new Function()
+ * Secure expression parser that uses AST-based evaluation
  *
  * This parser provides:
  * - Security: No arbitrary code execution, only whitelisted operations

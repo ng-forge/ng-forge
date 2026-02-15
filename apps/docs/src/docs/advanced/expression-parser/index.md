@@ -251,7 +251,7 @@ const config = {
 
 For dynamic forms, the parser prevents:
 
-- ✅ **Code Injection**: Can't execute `Function()`, `eval()`, or create new code
+- ✅ **Code Injection**: Can't execute arbitrary code or create new code
 - ✅ **Prototype Pollution**: Can't access `constructor` or `__proto__`
 - ✅ **Unsafe Operations**: Can't call methods that modify state or access globals
 

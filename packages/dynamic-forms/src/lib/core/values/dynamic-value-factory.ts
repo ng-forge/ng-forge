@@ -13,7 +13,7 @@ const dynamicValueFunctionCache = new WeakMap<FieldContextRegistryService, Map<s
 
 /**
  * Create a dynamic value function from an expression string.
- * Uses secure AST-based parsing instead of eval() or new Function().
+ * Uses secure AST-based parsing.
  *
  * @param expression The expression string to evaluate
  * @returns A LogicFn that evaluates the expression in the context of a field
