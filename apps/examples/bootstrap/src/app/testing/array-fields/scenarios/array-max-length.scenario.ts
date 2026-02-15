@@ -6,7 +6,7 @@ const config = {
     {
       key: 'tags',
       type: 'array',
-      // maxLength: 3, // TODO: uncomment when maxLength is implemented
+      maxLength: 3,
       fields: [[{ key: 'tag', type: 'input', label: 'Tag', value: 'tag1' }], [{ key: 'tag', type: 'input', label: 'Tag', value: 'tag2' }]],
     },
     {

@@ -104,6 +104,18 @@ export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = rea
    * Only 'hidden' type logic is supported for arrays.
    */
   readonly logic?: ContainerLogicConfig[];
+
+  /**
+   * Minimum number of items required in the array.
+   * Validation fails if the array has fewer items than this value.
+   */
+  readonly minLength?: number;
+
+  /**
+   * Maximum number of items allowed in the array.
+   * Validation fails if the array has more items than this value.
+   */
+  readonly maxLength?: number;
 }
 
 /**
@@ -204,6 +216,18 @@ export interface SimplifiedArrayField extends FieldDef<never> {
    * Only 'hidden' type logic is supported for arrays.
    */
   readonly logic?: ContainerLogicConfig[];
+
+  /**
+   * Minimum number of items required in the array.
+   * Validation fails if the array has fewer items than this value.
+   */
+  readonly minLength?: number;
+
+  /**
+   * Maximum number of items allowed in the array.
+   * Validation fails if the array has more items than this value.
+   */
+  readonly maxLength?: number;
 
   /** Mutually exclusive with `template` — use `fields` for the full API instead */
   readonly fields?: never;

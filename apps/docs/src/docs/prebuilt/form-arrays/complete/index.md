@@ -49,6 +49,29 @@ For arrays that start empty and are populated via buttons:
 }
 ```
 
+## Array Size Validation
+
+Use `minLength` and `maxLength` on the array field to constrain the number of items. When violated, the form becomes invalid (e.g. submit button is disabled), but no field-level error message is shown.
+
+```typescript
+{
+  key: 'tags',
+  type: 'array',
+  minLength: 1,  // At least 1 item required
+  maxLength: 5,  // No more than 5 items
+  fields: [
+    [{ key: 'tag', type: 'input', label: 'Tag', value: 'default' }]
+  ]
+}
+```
+
+| Property    | Type     | Description                   |
+| ----------- | -------- | ----------------------------- |
+| `minLength` | `number` | Minimum number of array items |
+| `maxLength` | `number` | Maximum number of array items |
+
+Both properties are optional and can be used independently or together.
+
 ## Initial Values
 
 Initial values are defined directly on each field via the `value` property - no separate `initialValue` is needed:

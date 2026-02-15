@@ -106,8 +106,6 @@ const PROPERTY_GUIDANCE: Record<string, string> = {
     'Arrays support two APIs: (1) Full API with `fields` for explicit item definitions, or (2) Simplified API with `template` + `value` for common cases. `fields` and `template` are mutually exclusive.',
   label: 'Container types (row, group, array, page) do NOT have a label property',
   title: 'Page fields do NOT have a title property',
-  minItems: 'Array fields do NOT have minItems/maxItems properties',
-  maxItems: 'Array fields do NOT have minItems/maxItems properties',
   expressions: 'Use "derivation" or "logic" instead of "expressions"',
   logic:
     'Container fields (page, group, row, array) only support the "hidden" logic type. For other logic types (disabled, required, readonly, derivation), apply them to child fields instead',

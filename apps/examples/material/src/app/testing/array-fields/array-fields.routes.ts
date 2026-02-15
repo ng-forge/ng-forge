@@ -173,6 +173,17 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getArrayFieldsScenario('simplified-array-conditional') },
   },
+  // Simplified array validation (minLength/maxLength)
+  {
+    path: 'simplified-array-min-length',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('simplified-array-min-length') },
+  },
+  {
+    path: 'simplified-array-max-length',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('simplified-array-max-length') },
+  },
 ];
 
 export default routes;

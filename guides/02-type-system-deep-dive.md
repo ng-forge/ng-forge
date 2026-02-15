@@ -173,13 +173,9 @@ export type ContainerField<TProps> = FieldDef<TProps> & {
 export type ArrayField<TProps> = FieldDef<TProps> & {
   key: string;
   value: unknown[];
-  itemTemplate: {
-    fields: AnyField[];
-  };
-  minItems?: number;
-  maxItems?: number;
-  addButtonLabel?: DynamicText;
-  removeButtonLabel?: DynamicText;
+  fields: AnyField[];
+  minLength?: number;
+  maxLength?: number;
 };
 ```
 

@@ -329,7 +329,7 @@
   {
     "type": "array",
     "category": "container",
-    "description": "Repeatable field group for dynamic lists/arrays. Arrays do NOT have label, minItems, or maxItems properties. Use \"fields\" (not \"template\") to define the item template. Supports only 'hidden' logic type for conditional visibility. Each array item is rendered inside a `<div class=\"df-array-item\">` wrapper with `role=\"group\"`, `aria-label=\"Item N\"` (1-based), `data-array-item-id`, and `data-array-item-index` attributes for styling, accessibility, and testing.",
+    "description": "Repeatable field group for dynamic lists/arrays. Arrays do NOT have a label property. Use \"fields\" (not \"template\") to define the item template. Supports only 'hidden' logic type for conditional visibility. Supports minLength/maxLength for array size validation. Each array item is rendered inside a `<div class=\"df-array-item\">` wrapper with `role=\"group\"`, `aria-label=\"Item N\"` (1-based), `data-array-item-id`, and `data-array-item-index` attributes for styling, accessibility, and testing.",
     "valueType": "T[]",
     "baseInterface": "FieldDef",
     "props": {
@@ -338,9 +338,21 @@
         "type": "ArrayAllowedChildren[]",
         "description": "Template field(s) for each array item. Allowed: rows, groups, leaf fields (NOT pages or other arrays)",
         "required": true
+      },
+      "minLength": {
+        "name": "minLength",
+        "type": "number",
+        "description": "Minimum number of items required in the array. Validation fails if fewer items.",
+        "required": false
+      },
+      "maxLength": {
+        "name": "maxLength",
+        "type": "number",
+        "description": "Maximum number of items allowed in the array. Validation fails if more items.",
+        "required": false
       }
     },
-    "validationSupported": false,
+    "validationSupported": true,
     "source": "core",
     "allowedIn": ["top-level", "page", "row", "group"],
     "notAllowedIn": ["array"],
@@ -364,7 +376,7 @@
       "previous"
     ],
     "cannotContain": ["page", "array"],
-    "example": "// Flat array (primitive values)\n{\n  key: 'tags',\n  type: 'array',\n  // NOTE: Arrays do NOT have label, minItems, or maxItems\n  fields: [\n    { key: 'tag', type: 'input', label: 'Tag' }\n  ]\n}\n// Result: { tags: ['value1', 'value2'] }\n\n// Object array (nested groups)\n{\n  key: 'contacts',\n  type: 'array',\n  fields: [{\n    type: 'group',\n    fields: [\n      { key: 'name', type: 'input', label: 'Name' },\n      { key: 'email', type: 'input', label: 'Email' }\n    ]\n  }]\n}\n// Result: { contacts: [{name: '', email: ''}, ...] }",
+    "example": "// Flat array with length validation\n{\n  key: 'tags',\n  type: 'array',\n  minLength: 1,  // At least one tag required\n  maxLength: 5,  // No more than 5 tags\n  fields: [\n    { key: 'tag', type: 'input', label: 'Tag' }\n  ]\n}\n// Result: { tags: ['value1', 'value2'] }\n\n// Object array (nested groups)\n{\n  key: 'contacts',\n  type: 'array',\n  minLength: 1,\n  fields: [{\n    type: 'group',\n    fields: [\n      { key: 'name', type: 'input', label: 'Name' },\n      { key: 'email', type: 'input', label: 'Email' }\n    ]\n  }]\n}\n// Result: { contacts: [{name: '', email: ''}, ...] }",
     "minimalExample": "{ key: 'items', type: 'array', fields: [...] }"
   },
   {

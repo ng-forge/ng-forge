@@ -10,10 +10,12 @@ The simplified array API provides a concise way to define dynamic arrays. Instea
 
 The simplified API uses two key properties:
 
-| Property   | Description                                                                |
-| ---------- | -------------------------------------------------------------------------- |
-| `template` | Defines the structure of a single array item (single field or field array) |
-| `value`    | Initial data array -- each element creates one pre-filled item             |
+| Property    | Description                                                                |
+| ----------- | -------------------------------------------------------------------------- |
+| `template`  | Defines the structure of a single array item (single field or field array) |
+| `value`     | Initial data array -- each element creates one pre-filled item             |
+| `minLength` | Minimum number of array items (form invalid if fewer)                      |
+| `maxLength` | Maximum number of array items (form invalid if more)                       |
 
 The `template` shape determines the array variant:
 
@@ -265,6 +267,23 @@ The simplified API produces the same form values as the complete API:
 | Single field    | Flat array of scalars | `{ tags: ['angular', 'typescript'] }`            |
 | Array of fields | Array of objects      | `{ contacts: [{ name: 'Jane', phone: '555' }] }` |
 | Any template    | `[]` or omitted       | `{ items: [] }`                                  |
+
+## Array Size Validation
+
+Use `minLength` and `maxLength` to constrain the number of items. When violated, the form becomes invalid (e.g. submit button is disabled).
+
+```typescript
+{
+  key: 'tags',
+  type: 'array',
+  template: { key: 'value', type: 'input', label: 'Tag' },
+  value: ['angular'],
+  minLength: 1,
+  maxLength: 5,
+}
+```
+
+Both properties are optional and can be used independently or together.
 
 ## Conditional Visibility
 

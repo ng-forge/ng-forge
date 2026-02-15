@@ -123,8 +123,9 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     logic: z.array(ContainerLogicSchema).optional(),
     // Full API does not use template
     template: z.never().optional(),
-    minItems: z.never().optional(),
-    maxItems: z.never().optional(),
+    // Array length validation
+    minLength: z.number().int().min(0).optional(),
+    maxLength: z.number().int().min(0).optional(),
   });
 
   // Schema for array-allowed children: excludes pages and nested arrays from templates.
@@ -147,6 +148,9 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     addButton: z.union([ArrayButtonConfigSchema, z.literal(false)]).optional(),
     removeButton: z.union([ArrayButtonConfigSchema, z.literal(false)]).optional(),
     logic: z.array(ContainerLogicSchema).optional(),
+    // Array length validation
+    minLength: z.number().int().min(0).optional(),
+    maxLength: z.number().int().min(0).optional(),
     // Simplified API does not use fields
     fields: z.never().optional(),
     minItems: z.never().optional(),

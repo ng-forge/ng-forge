@@ -680,5 +680,125 @@ describe('form-mapping', () => {
         });
       });
     });
+
+    describe('array field validation', () => {
+      it('should produce minlength error when array has fewer items than minLength', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ items: [{ item: '' }] });
+          const arrayField: FieldDef = {
+            key: 'items',
+            type: 'array',
+            minLength: 2,
+            fields: [{ key: 'item', type: 'input' }],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(arrayField, path.items as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // 1 item with minLength: 2 → form should be invalid
+          const rootState = formInstance();
+          expect(rootState.valid()).toBe(false);
+          expect(rootState.errorSummary().length).toBeGreaterThan(0);
+        });
+      });
+
+      it('should produce maxlength error when array has more items than maxLength', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ tags: [{ tag: '' }, { tag: '' }, { tag: '' }] });
+          const arrayField: FieldDef = {
+            key: 'tags',
+            type: 'array',
+            maxLength: 2,
+            fields: [{ key: 'tag', type: 'input' }],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(arrayField, path.tags as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // 3 items with maxLength: 2 → form should be invalid
+          const rootState = formInstance();
+          expect(rootState.valid()).toBe(false);
+          expect(rootState.errorSummary().length).toBeGreaterThan(0);
+        });
+      });
+
+      it('should be valid when array satisfies minLength constraint', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ items: [{ item: '' }] });
+          const arrayField: FieldDef = {
+            key: 'items',
+            type: 'array',
+            minLength: 1,
+            fields: [{ key: 'item', type: 'input' }],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(arrayField, path.items as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // 1 item with minLength: 1 → form should be valid
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('should be valid when array satisfies both minLength and maxLength constraints', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ items: [{ item: 'a' }, { item: 'b' }] });
+          const arrayField: FieldDef = {
+            key: 'items',
+            type: 'array',
+            minLength: 1,
+            maxLength: 5,
+            fields: [{ key: 'item', type: 'input' }],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(arrayField, path.items as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // 2 items within [1, 5] → form should be valid
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('should handle array field without length constraints without throwing', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ items: [{ item: '' }] });
+          const arrayField: FieldDef = {
+            key: 'items',
+            type: 'array',
+            fields: [{ key: 'item', type: 'input' }],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(arrayField, path.items as any);
+              }).not.toThrow();
+            }),
+          );
+          mockFormSignal.set(formInstance);
+        });
+      });
+    });
   });
 });

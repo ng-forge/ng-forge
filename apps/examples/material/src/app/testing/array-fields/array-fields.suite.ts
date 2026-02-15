@@ -30,6 +30,8 @@ import { simplifiedArrayEmptyScenario } from './scenarios/simplified-array-empty
 import { simplifiedArrayButtonCustomizationScenario } from './scenarios/simplified-array-button-customization.scenario';
 import { simplifiedArrayButtonOptoutScenario } from './scenarios/simplified-array-button-optout.scenario';
 import { simplifiedArrayConditionalScenario } from './scenarios/simplified-array-conditional.scenario';
+import { simplifiedArrayMinLengthScenario } from './scenarios/simplified-array-min-length.scenario';
+import { simplifiedArrayMaxLengthScenario } from './scenarios/simplified-array-max-length.scenario';
 /**
  * Array Fields Suite
  * Tests various array field operations including add, remove,
@@ -93,6 +95,10 @@ export const arrayFieldsSuite: TestSuite = {
     simplifiedArrayButtonCustomizationScenario,
     simplifiedArrayButtonOptoutScenario,
     simplifiedArrayConditionalScenario,
+
+    // Simplified array validation (minLength/maxLength)
+    simplifiedArrayMinLengthScenario,
+    simplifiedArrayMaxLengthScenario,
   ],
 };
 
