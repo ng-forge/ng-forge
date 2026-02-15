@@ -24,9 +24,14 @@ export type {
   BaseValidatorConfig,
   BuiltInValidatorConfig,
   CustomValidatorConfig,
+  DeclarativeHttpValidatorConfig,
   HttpValidatorConfig,
   ValidatorConfig,
 } from './validation';
+
+// HTTP
+export type { HttpRequestConfig } from './http/http-request-config';
+export type { HttpValidationResponseMapping } from './http/http-response-mapping';
 
 // Logic
 export type { LogicConfig, StateLogicConfig, PropertyDerivationLogicConfig, FormStateCondition } from './logic';

@@ -154,5 +154,25 @@
       }
     },
     "example": "{\n  type: 'customHttp',\n  functionName: 'validateEmailExists'\n}"
+  },
+  {
+    "type": "http",
+    "category": "http",
+    "description": "HTTP validator — fully JSON-serializable, no function registration required. Uses HttpRequestConfig to define the request and HttpValidationResponseMapping to interpret the response. Query param values and (optionally) body values are expressions evaluated against the form context. Response mapping uses validWhen (truthy = valid) and errorKind (maps to field-level validationMessages).",
+    "parameters": {
+      "http": {
+        "name": "http",
+        "type": "HttpRequestConfig",
+        "description": "HTTP request configuration: { url, method?, queryParams?, body?, bodyExpressions?, headers?, debounceMs? }. queryParams values are expressions. When bodyExpressions is true, top-level string values in body are evaluated as expressions (shallow only).",
+        "required": true
+      },
+      "responseMapping": {
+        "name": "responseMapping",
+        "type": "HttpValidationResponseMapping",
+        "description": "Response mapping: { validWhen, errorKind, errorParams? }. validWhen is an expression evaluated with { response } scope — truthy means valid. errorKind maps to field-level validationMessages. errorParams values are expressions evaluated with { response } scope.",
+        "required": true
+      }
+    },
+    "example": "// HTTP validator (fully JSON-serializable)\n{\n  type: 'http',\n  http: {\n    url: '/api/validate-username',\n    method: 'GET',\n    queryParams: {\n      username: 'fieldValue'\n    }\n  },\n  responseMapping: {\n    validWhen: 'response.available',\n    errorKind: 'usernameTaken',\n    errorParams: {\n      suggestion: 'response.suggestion'\n    }\n  }\n}\n\n// COMPLETE FIELD with validationMessages at FIELD level:\n{\n  key: 'username',\n  type: 'input',\n  label: 'Username',\n  validators: [\n    {\n      type: 'http',\n      http: {\n        url: '/api/validate-username',\n        method: 'GET',\n        queryParams: { username: 'fieldValue' }\n      },\n      responseMapping: {\n        validWhen: 'response.available',\n        errorKind: 'usernameTaken',\n        errorParams: { suggestion: 'response.suggestion' }\n      }\n    }\n  ],\n  validationMessages: {\n    usernameTaken: 'Username is taken. Try {{suggestion}}'\n  }\n}"
   }
 ]

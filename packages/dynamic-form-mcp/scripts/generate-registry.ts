@@ -966,6 +966,71 @@ const VALIDATORS: ValidatorInfo[] = [
   functionName: 'validateEmailExists'
 }`,
   },
+  {
+    type: 'http',
+    category: 'http',
+    description:
+      'HTTP validator — fully JSON-serializable, no function registration required. Uses HttpRequestConfig to define the request and HttpValidationResponseMapping to interpret the response. Query param values and (optionally) body values are expressions evaluated against the form context. Response mapping uses validWhen (truthy = valid) and errorKind (maps to field-level validationMessages).',
+    parameters: {
+      http: {
+        name: 'http',
+        type: 'HttpRequestConfig',
+        description:
+          'HTTP request configuration: { url, method?, queryParams?, body?, bodyExpressions?, headers?, debounceMs? }. queryParams values are expressions. When bodyExpressions is true, top-level string values in body are evaluated as expressions (shallow only).',
+        required: true,
+      },
+      responseMapping: {
+        name: 'responseMapping',
+        type: 'HttpValidationResponseMapping',
+        description:
+          'Response mapping: { validWhen, errorKind, errorParams? }. validWhen is an expression evaluated with { response } scope — truthy means valid. errorKind maps to field-level validationMessages. errorParams values are expressions evaluated with { response } scope.',
+        required: true,
+      },
+    },
+    example: `// HTTP validator (fully JSON-serializable)
+{
+  type: 'http',
+  http: {
+    url: '/api/validate-username',
+    method: 'GET',
+    queryParams: {
+      username: 'fieldValue'
+    }
+  },
+  responseMapping: {
+    validWhen: 'response.available',
+    errorKind: 'usernameTaken',
+    errorParams: {
+      suggestion: 'response.suggestion'
+    }
+  }
+}
+
+// COMPLETE FIELD with validationMessages at FIELD level:
+{
+  key: 'username',
+  type: 'input',
+  label: 'Username',
+  validators: [
+    {
+      type: 'http',
+      http: {
+        url: '/api/validate-username',
+        method: 'GET',
+        queryParams: { username: 'fieldValue' }
+      },
+      responseMapping: {
+        validWhen: 'response.available',
+        errorKind: 'usernameTaken',
+        errorParams: { suggestion: 'response.suggestion' }
+      }
+    }
+  ],
+  validationMessages: {
+    usernameTaken: 'Username is taken. Try {{suggestion}}'
+  }
+}`,
+  },
 ];
 
 // UI Adapter configurations

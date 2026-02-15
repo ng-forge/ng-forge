@@ -32,6 +32,16 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getAsyncValidationScenario('multiple-validators-test') },
   },
+  {
+    path: 'declarative-http-get',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAsyncValidationScenario('declarative-http-get-test') },
+  },
+  {
+    path: 'declarative-http-post',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAsyncValidationScenario('declarative-http-post-test') },
+  },
 ];
 
 export default routes;

@@ -192,6 +192,112 @@ test.describe('Async Validation Tests', () => {
     });
   });
 
+  test.describe('Declarative HTTP GET Validator', () => {
+    test('should validate username using declarative HTTP GET validator (no function registration)', async ({ page, helpers }) => {
+      await page.route('**/api/users/check-availability*', (route) => {
+        const url = route.request().url();
+        const username = new URL(url).searchParams.get('username');
+
+        if (username === 'admin') {
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ available: false, suggestion: 'admin_123' }),
+          });
+        } else {
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ available: true }),
+          });
+        }
+      });
+
+      const scenario = helpers.getScenario('declarative-http-get-test');
+      await page.goto('/#/test/async-validation/declarative-http-get');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible();
+
+      // Try taken username
+      await scenario.locator('#username input').fill('admin');
+      await page.waitForTimeout(1000);
+
+      const usernameField = scenario.locator('#username');
+      const errorVisible = await usernameField
+        .locator('..')
+        .locator('mat-error:has-text("Username is taken")')
+        .isVisible()
+        .catch(() => false);
+
+      if (errorVisible) {
+        // Try available username
+        await scenario.locator('#username input').fill('newuser123');
+        await page.waitForTimeout(1000);
+
+        const errorGone = await usernameField
+          .locator('..')
+          .locator('mat-error:has-text("Username is taken")')
+          .isVisible()
+          .catch(() => false);
+
+        expect(errorGone).toBe(false);
+      }
+    });
+  });
+
+  test.describe('Declarative HTTP POST Validator', () => {
+    test('should validate email using declarative HTTP POST validator with body expressions', async ({ page, helpers }) => {
+      await page.route('**/api/users/validate-email', async (route) => {
+        const request = route.request();
+        const body = request.postDataJSON();
+
+        if (body.email === 'invalid@test.com') {
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ valid: false }),
+          });
+        } else {
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ valid: true }),
+          });
+        }
+      });
+
+      const scenario = helpers.getScenario('declarative-http-post-test');
+      await page.goto('/#/test/async-validation/declarative-http-post');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible();
+
+      // Try invalid email
+      await scenario.locator('#email input').fill('invalid@test.com');
+      await page.waitForTimeout(1000);
+
+      const emailField = scenario.locator('#email');
+      const errorVisible = await emailField
+        .locator('..')
+        .locator('mat-error:has-text("not valid")')
+        .isVisible()
+        .catch(() => false);
+
+      if (errorVisible) {
+        // Try valid email
+        await scenario.locator('#email input').fill('valid@example.com');
+        await page.waitForTimeout(1000);
+
+        const errorGone = await emailField
+          .locator('..')
+          .locator('mat-error:has-text("not valid")')
+          .isVisible()
+          .catch(() => false);
+
+        expect(errorGone).toBe(false);
+      }
+    });
+  });
+
   test.describe('Multiple Validators', () => {
     test('should validate multiple async validators on same field', async ({ page, helpers }) => {
       // Mock API responses

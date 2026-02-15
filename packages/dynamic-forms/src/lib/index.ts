@@ -99,9 +99,13 @@ export type {
   BaseValidatorConfig,
   BuiltInValidatorConfig,
   CustomValidatorConfig,
+  DeclarativeHttpValidatorConfig,
   HttpValidatorConfig,
   ValidatorConfig,
 } from './models';
+
+// HTTP Config Types
+export type { HttpRequestConfig, HttpValidationResponseMapping } from './models';
 
 // Validator Function Types (for customFnConfig)
 export type { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from './core/validation';

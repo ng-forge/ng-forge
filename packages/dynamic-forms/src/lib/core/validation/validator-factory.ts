@@ -20,9 +20,12 @@ import { DynamicFormError } from '../../errors/dynamic-form-error';
 import {
   AsyncValidatorConfig,
   CustomValidatorConfig,
+  DeclarativeHttpValidatorConfig,
   HttpValidatorConfig,
   ValidatorConfig,
 } from '../../models/validation/validator-config';
+import { resolveHttpRequest } from '../http/http-request-resolver';
+import { evaluateHttpValidationResponse } from '../http/http-response-evaluator';
 import { createLogicFunction } from '../expressions/logic-function-factory';
 import { createDynamicValueFunction } from '../values/dynamic-value-factory';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
@@ -135,6 +138,9 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       break;
     case 'customHttp':
       applyHttpValidator(config, path);
+      break;
+    case 'http':
+      applyDeclarativeHttpValidator(config, path);
       break;
   }
 }
@@ -286,6 +292,34 @@ function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<u
   };
 
   validateHttp(fieldPath, httpOptions as Parameters<typeof validateHttp>[1]);
+}
+
+/**
+ * Apply declarative HTTP validator — fully JSON-serializable, no function registration needed.
+ *
+ * Uses `resolveHttpRequest` to build the request from expressions and `evaluateHttpValidationResponse`
+ * to map the HTTP response to a validation result.
+ */
+function applyDeclarativeHttpValidator(config: DeclarativeHttpValidatorConfig, fieldPath: SchemaPath<unknown>): void {
+  const fieldContextRegistry = inject(FieldContextRegistryService);
+  const functionRegistry = inject(FunctionRegistryService);
+  const logger = inject(DynamicFormLogger);
+  const whenLogic = createConditionalLogic(config.when);
+
+  validateHttp(fieldPath, {
+    request: (ctx: FieldContext<unknown>) => {
+      if (whenLogic && !whenLogic(ctx)) return undefined;
+      const evalCtx = fieldContextRegistry.createEvaluationContext(ctx, functionRegistry.getCustomFunctions());
+      return resolveHttpRequest(config.http, evalCtx);
+    },
+    onSuccess: (response: unknown) => {
+      return evaluateHttpValidationResponse(response, config.responseMapping, logger);
+    },
+    onError: (error: unknown) => {
+      logger.warn('HTTP validator request failed:', error);
+      return { kind: config.responseMapping.errorKind };
+    },
+  } as Parameters<typeof validateHttp>[1]);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic forms require any at the Angular API boundary
