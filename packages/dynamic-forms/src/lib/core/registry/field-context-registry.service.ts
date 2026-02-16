@@ -16,10 +16,19 @@ function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is 
  *
  * FieldContext.state is a FieldState object that has all signal properties
  * (dirty, touched, valid, etc.) needed for field state snapshots.
+ *
+ * IMPORTANT: Always reads with `untracked()` because accessing `.state` on a
+ * FieldContext can trigger reactive reads inside Angular's internal computation
+ * graph. Without `untracked()`, validators would cycle (validator → state → valid
+ * → validator) and logic conditions like `hidden()` would cycle (hidden → state →
+ * hidden). The FieldState object reference is stable — individual signal properties
+ * within it are read reactively or untracked by the Proxy as needed.
  */
 function extractFieldState(fieldContext: FieldContext<unknown>): FieldState<unknown> | undefined {
-  if (!fieldContext || !('state' in fieldContext)) return undefined;
-  return fieldContext.state;
+  return untracked(() => {
+    if (!fieldContext || !('state' in fieldContext)) return undefined;
+    return fieldContext.state;
+  });
 }
 
 /**
