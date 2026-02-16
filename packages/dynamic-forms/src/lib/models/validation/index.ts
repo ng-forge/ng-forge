@@ -3,6 +3,7 @@ export type {
   BaseValidatorConfig,
   BuiltInValidatorConfig,
   CustomValidatorConfig,
+  DeclarativeHttpValidatorConfig,
   HttpValidatorConfig,
   ValidatorConfig,
 } from './validator-config';

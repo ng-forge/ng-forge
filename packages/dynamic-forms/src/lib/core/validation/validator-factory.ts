@@ -20,16 +20,24 @@ import { DynamicFormError } from '../../errors/dynamic-form-error';
 import {
   AsyncValidatorConfig,
   CustomValidatorConfig,
+  DeclarativeHttpValidatorConfig,
   HttpValidatorConfig,
   ValidatorConfig,
 } from '../../models/validation/validator-config';
+import { resolveHttpRequest } from '../http/http-request-resolver';
+import { evaluateHttpValidationResponse } from '../http/http-response-evaluator';
 import { createLogicFunction } from '../expressions/logic-function-factory';
 import { createDynamicValueFunction } from '../values/dynamic-value-factory';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { ExpressionParser } from '../expressions/parser/expression-parser';
-import { isCrossFieldValidator, isCrossFieldBuiltInValidator, hasCrossFieldWhenCondition } from '../cross-field/cross-field-detector';
+import {
+  isCrossFieldValidator,
+  isCrossFieldBuiltInValidator,
+  hasCrossFieldWhenCondition,
+  isResourceBasedValidator,
+} from '../cross-field/cross-field-detector';
 
 function applyEmailValidator(path: SchemaPath<string>): void {
   email(path);
@@ -86,7 +94,7 @@ function createConditionalLogic(when: ConditionalExpression | undefined): LogicF
 export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   const path = fieldPath as SchemaPath<unknown>;
 
-  if (isCrossFieldBuiltInValidator(config) || hasCrossFieldWhenCondition(config)) {
+  if (!isResourceBasedValidator(config) && (isCrossFieldBuiltInValidator(config) || hasCrossFieldWhenCondition(config))) {
     return;
   }
 
@@ -135,6 +143,9 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       break;
     case 'customHttp':
       applyHttpValidator(config, path);
+      break;
+    case 'http':
+      applyDeclarativeHttpValidator(config, path);
       break;
   }
 }
@@ -286,6 +297,41 @@ function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<u
   };
 
   validateHttp(fieldPath, httpOptions as Parameters<typeof validateHttp>[1]);
+}
+
+/**
+ * Apply declarative HTTP validator — fully JSON-serializable, no function registration needed.
+ *
+ * Uses `resolveHttpRequest` to build the request from expressions and `evaluateHttpValidationResponse`
+ * to map the HTTP response to a validation result.
+ */
+function applyDeclarativeHttpValidator(config: DeclarativeHttpValidatorConfig, fieldPath: SchemaPath<unknown>): void {
+  const fieldContextRegistry = inject(FieldContextRegistryService);
+  const functionRegistry = inject(FunctionRegistryService);
+  const logger = inject(DynamicFormLogger);
+  const whenLogic = createConditionalLogic(config.when);
+
+  if (config.http.debounceMs != null) {
+    logger.warn('debounceMs is ignored on HTTP validators — it only applies to HTTP derivations and conditions.');
+  }
+
+  validateHttp(fieldPath, {
+    request: (ctx: FieldContext<unknown>) => {
+      if (whenLogic && !whenLogic(ctx)) return undefined;
+      // Use createReactiveEvaluationContext (not createEvaluationContext) because
+      // validateHttp's request runs inside Angular's resource API — it NEEDS reactive
+      // dependencies to re-trigger when the field value changes.
+      const evalCtx = fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions());
+      return resolveHttpRequest(config.http, evalCtx);
+    },
+    onSuccess: (response: unknown) => {
+      return evaluateHttpValidationResponse(response, config.responseMapping, logger);
+    },
+    onError: (error: unknown) => {
+      logger.warn('HTTP validator request failed:', error);
+      return { kind: config.responseMapping.errorKind };
+    },
+  } as Parameters<typeof validateHttp>[1]);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic forms require any at the Angular API boundary
