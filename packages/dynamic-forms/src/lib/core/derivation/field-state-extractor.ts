@@ -26,8 +26,12 @@ function readStateSignal(fieldState: FieldState<unknown>, prop: StateProperty, r
  * Resolves a field source (FieldTree or FieldState) to its FieldState.
  *
  * Accepts either:
- * - A FieldTree (signal accessor from form tree) — called to get the FieldState
+ * - A FieldTree (signal or callable Proxy from form tree) — called to get the FieldState
  * - A direct FieldState object (from FieldContext) — used directly
+ *
+ * FieldTree accessors may be Angular signals (pass `isSignal()`) or Proxy-wrapped
+ * callables (fail `isSignal()` but pass `typeof === 'function'`). Both are handled
+ * by the callable check.
  *
  * @internal
  */
@@ -37,16 +41,12 @@ function resolveFieldState(
 ): FieldState<unknown> | undefined {
   if (!fieldSource) return undefined;
 
-  if (isSignal(fieldSource)) {
-    return reactive ? (fieldSource as FieldTree<unknown>)() : untracked(fieldSource as FieldTree<unknown>);
-  }
-
-  // FieldTree accessors are callable functions that may not be recognized by isSignal().
-  // Calling them returns the FieldState object with dirty, touched, valid, etc. signals.
+  // FieldTree: signal or callable Proxy — invoke to get the FieldState
   if (typeof fieldSource === 'function') {
     return reactive ? (fieldSource as FieldTree<unknown>)() : untracked(fieldSource as FieldTree<unknown>);
   }
 
+  // Direct FieldState object (from FieldContext)
   if (typeof fieldSource === 'object') {
     return fieldSource as FieldState<unknown>;
   }

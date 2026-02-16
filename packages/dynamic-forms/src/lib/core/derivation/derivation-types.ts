@@ -1,4 +1,5 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import type { FormFieldStateMap } from '../../models/expressions/field-state-context';
 import { DerivationLogicConfig, LogicTrigger } from '../../models/logic/logic-config';
 
 /**
@@ -199,6 +200,14 @@ export interface DerivationChainContext {
    * (when no prior value exists to compare against).
    */
   changedFields?: Set<string>;
+
+  /**
+   * Cached FormFieldStateMap for this cycle.
+   *
+   * Created once per `applyDerivations` call and reused across all entry
+   * evaluations to avoid allocating a new Proxy + Map per entry.
+   */
+  formFieldState?: FormFieldStateMap;
 }
 
 /**

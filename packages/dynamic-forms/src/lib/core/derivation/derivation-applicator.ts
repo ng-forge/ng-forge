@@ -132,6 +132,8 @@ export function applyDerivations(
 ): DerivationProcessingResult {
   const chainContext = createDerivationChainContext();
   chainContext.changedFields = changedFields;
+  // Cache formFieldState map per cycle to avoid allocating a new Proxy + Map per entry
+  chainContext.formFieldState = createFormFieldStateMap(context.rootForm, false);
   const { derivationLogger } = context;
   const maxIterations = context.maxIterations ?? MAX_DERIVATION_ITERATIONS;
   let appliedCount = 0;
@@ -197,6 +199,13 @@ export function applyDerivations(
  *
  * Filters entries by checking if any of their dependencies are in the changed fields set.
  * Also includes all wildcard (*) entries since they depend on any form change.
+ *
+ * **Parent-key matching:** Since `changedFields` contains root-level keys (e.g., `'address'`),
+ * but derivation entries may target or depend on nested paths (e.g., `'address.city'`),
+ * this function checks `startsWith(changed + '.')` to include entries whose field or
+ * dependencies live under a changed parent. This is intentionally broad — false positives
+ * are acceptable for filtering because entries are still guarded by value-equality checks
+ * (`isEqual`) in `tryApplyDerivation` and will be skipped if the value hasn't changed.
  *
  * Note: Performance is O(n) where n = total entries. For large forms with many
  * derivations, consider optimizing with indexed lookup maps.
@@ -286,7 +295,7 @@ function tryApplyDerivation(
 
   // Create evaluation context
   const formValue = untracked(() => context.formValue());
-  const evalContext = createEvaluationContext(entry, formValue, context);
+  const evalContext = createEvaluationContext(entry, formValue, context, chainContext);
 
   // Evaluate condition
   if (!evaluateDerivationCondition(entry.condition, evalContext)) {
@@ -435,7 +444,7 @@ function tryApplyArrayDerivation(
 
     // Create evaluation context scoped to this array item
     const arrayItem = arrayValue[i] as Record<string, unknown>;
-    const evalContext = createArrayItemEvaluationContext(entry, arrayItem, formValue, i, arrayPath, context);
+    const evalContext = createArrayItemEvaluationContext(entry, arrayItem, formValue, i, arrayPath, context, chainContext);
 
     // Evaluate condition
     if (!evaluateDerivationCondition(entry.condition, evalContext)) {
@@ -481,13 +490,13 @@ function createEvaluationContext(
   entry: DerivationEntry,
   formValue: Record<string, unknown>,
   context: DerivationApplicatorContext,
+  chainContext: DerivationChainContext,
 ): EvaluationContext {
   const fieldValue = getNestedValue(formValue, entry.fieldKey);
 
-  // Create field state snapshots (non-reactive for derivation applicator context)
+  // Create field state snapshot for this specific field (non-reactive)
   const fieldAccessor = (context.rootForm as FieldTreeRecord)[entry.fieldKey];
   const fieldState = fieldAccessor ? readFieldStateInfo(fieldAccessor, false) : undefined;
-  const formFieldState = createFormFieldStateMap(context.rootForm, false);
 
   return {
     fieldValue,
@@ -497,7 +506,7 @@ function createEvaluationContext(
     externalData: context.externalData,
     logger: context.logger,
     fieldState,
-    formFieldState,
+    formFieldState: chainContext.formFieldState,
   };
 }
 
@@ -516,6 +525,7 @@ function createArrayItemEvaluationContext(
   itemIndex: number,
   arrayPath: string,
   context: DerivationApplicatorContext,
+  chainContext: DerivationChainContext,
 ): EvaluationContext {
   // For array item expressions, formValue should be the array item
   // This allows expressions like 'formValue.quantity * formValue.unitPrice'
@@ -542,8 +552,6 @@ function createArrayItemEvaluationContext(
     }
   }
 
-  const formFieldState = createFormFieldStateMap(context.rootForm, false);
-
   return {
     fieldValue: arrayItem,
     formValue: arrayItem,
@@ -556,7 +564,7 @@ function createArrayItemEvaluationContext(
     arrayIndex: itemIndex,
     arrayPath,
     fieldState,
-    formFieldState,
+    formFieldState: chainContext.formFieldState,
   };
 }
 
@@ -851,16 +859,25 @@ function shouldSkipForUserOverride(
 ): boolean {
   if (!entry.stopOnUserOverride) return false;
 
-  // Re-engagement: reset dirty state if any dependency changed
-  // Guard: changedFields is undefined on initial onChange evaluation
+  const isDirty = readFieldDirty(context.rootForm, resolvedFieldKey) ?? false;
+
+  // If the field isn't dirty, no override to skip — and no re-engagement needed.
+  // This also avoids wasteful resetFieldState calls on initial form render where
+  // changedFields contains all keys (from startWith(null) + pairwise()) but fields
+  // are all pristine.
+  if (!isDirty) return false;
+
+  // Re-engagement: reset dirty state if a dependency changed, allowing re-derivation
   if (entry.reEngageOnDependencyChange && chainContext.changedFields) {
-    const dependencyChanged = hasDependencyChanged(entry, chainContext.changedFields);
-    if (dependencyChanged) {
+    if (hasDependencyChanged(entry, chainContext.changedFields)) {
       resetFieldState(context.rootForm, resolvedFieldKey);
+      // Re-read after reset — field is now pristine, so derivation proceeds
+      return false;
     }
   }
 
-  return readFieldDirty(context.rootForm, resolvedFieldKey) ?? false;
+  // Field is dirty and no re-engagement triggered — skip derivation
+  return true;
 }
 
 /**
