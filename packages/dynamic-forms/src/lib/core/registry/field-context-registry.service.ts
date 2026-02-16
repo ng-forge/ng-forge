@@ -118,10 +118,11 @@ export class FieldContextRegistryService {
       return this.buildArrayScopedContext(rootFormValue, arrayScope, fieldValue, customFunctions, false, fieldContext);
     }
 
-    const rootForm = untracked(() => this.rootFormRegistry.rootForm()) as FieldTree<unknown>;
-    const fieldStateSnapshot = readFieldStateInfo(extractFieldState(fieldContext), false);
-    const formFieldStateMap = createFormFieldStateMap(rootForm, false);
-
+    // Use getters for fieldState/formFieldState to defer signal reads until
+    // the expression actually accesses them. Validators that only use fieldValue
+    // will never trigger these getters, avoiding reactive cycles in Angular's
+    // internal signal graph (validator → state → valid → validator).
+    const rootFormSignal = this.rootFormRegistry.rootForm;
     return {
       fieldValue,
       formValue: rootFormValue,
@@ -129,8 +130,12 @@ export class FieldContextRegistryService {
       customFunctions: customFunctions || {},
       externalData: this.resolveExternalData(false),
       logger: this.logger,
-      fieldState: fieldStateSnapshot,
-      formFieldState: formFieldStateMap,
+      get fieldState() {
+        return readFieldStateInfo(extractFieldState(fieldContext), false);
+      },
+      get formFieldState() {
+        return createFormFieldStateMap(untracked(rootFormSignal) as FieldTree<unknown>, false);
+      },
     };
   }
 
@@ -181,11 +186,13 @@ export class FieldContextRegistryService {
       }
     }
 
-    const rootForm = (
-      reactive ? this.rootFormRegistry.rootForm() : untracked(() => this.rootFormRegistry.rootForm())
-    ) as FieldTree<unknown>;
-    const fieldStateSnapshot = fieldContext ? readFieldStateInfo(extractFieldState(fieldContext), reactive) : undefined;
-    const formFieldStateMap = createFormFieldStateMap(rootForm, reactive);
+    // Use getters to defer fieldState/formFieldState construction.
+    // Same rationale as createEvaluationContext — avoids reactive cycles
+    // when expressions don't actually access these properties.
+    const rootFormSignal = this.rootFormRegistry.rootForm;
+    const fieldStateGetter = fieldContext ? () => readFieldStateInfo(extractFieldState(fieldContext), reactive) : () => undefined;
+    const formFieldStateGetter = () =>
+      createFormFieldStateMap((reactive ? rootFormSignal() : untracked(rootFormSignal)) as FieldTree<unknown>, reactive);
 
     // Fall back to root form value if array item lookup fails
     if (!scopedFormValue) {
@@ -196,8 +203,12 @@ export class FieldContextRegistryService {
         customFunctions: customFunctions || {},
         externalData: this.resolveExternalData(reactive),
         logger: this.logger,
-        fieldState: fieldStateSnapshot,
-        formFieldState: formFieldStateMap,
+        get fieldState() {
+          return fieldStateGetter();
+        },
+        get formFieldState() {
+          return formFieldStateGetter();
+        },
       };
     }
 
@@ -211,8 +222,12 @@ export class FieldContextRegistryService {
       customFunctions: customFunctions || {},
       externalData: this.resolveExternalData(reactive),
       logger: this.logger,
-      fieldState: fieldStateSnapshot,
-      formFieldState: formFieldStateMap,
+      get fieldState() {
+        return fieldStateGetter();
+      },
+      get formFieldState() {
+        return formFieldStateGetter();
+      },
     };
   }
 
@@ -269,9 +284,7 @@ export class FieldContextRegistryService {
     }
 
     const localKey = this.extractFieldPath(fieldContext);
-    const rootForm = this.rootFormRegistry.rootForm() as FieldTree<unknown>;
-    const fieldStateSnapshot = readFieldStateInfo(extractFieldState(fieldContext), true);
-    const formFieldStateMap = createFormFieldStateMap(rootForm, true);
+    const rootFormSignal = this.rootFormRegistry.rootForm;
 
     return {
       fieldValue,
@@ -280,8 +293,12 @@ export class FieldContextRegistryService {
       customFunctions: customFunctions || {},
       externalData: this.resolveExternalData(true),
       logger: this.logger,
-      fieldState: fieldStateSnapshot,
-      formFieldState: formFieldStateMap,
+      get fieldState() {
+        return readFieldStateInfo(extractFieldState(fieldContext), true);
+      },
+      get formFieldState() {
+        return createFormFieldStateMap(rootFormSignal() as FieldTree<unknown>, true);
+      },
     };
   }
 
@@ -308,8 +325,7 @@ export class FieldContextRegistryService {
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
   ): EvaluationContext {
     const formValue = this.rootFormRegistry.formValue();
-    const rootForm = this.rootFormRegistry.rootForm() as FieldTree<unknown>;
-    const formFieldStateMap = createFormFieldStateMap(rootForm, true);
+    const rootFormSignal = this.rootFormRegistry.rootForm;
 
     return {
       fieldValue: undefined,
@@ -318,7 +334,9 @@ export class FieldContextRegistryService {
       customFunctions: customFunctions || {},
       externalData: this.resolveExternalData(true),
       logger: this.logger,
-      formFieldState: formFieldStateMap,
+      get formFieldState() {
+        return createFormFieldStateMap(rootFormSignal() as FieldTree<unknown>, true);
+      },
     };
   }
 }
