@@ -1,22 +1,30 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { form, schema } from '@angular/forms/signals';
 import { ValidatorConfig } from '../../models/validation/validator-config';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { FormStateManager } from '../../state/form-state-manager';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { applyValidator, applyValidators } from './validator-factory';
 
 describe('validator-factory', () => {
   let injector: Injector;
   const mockEntity = signal<Record<string, unknown>>({});
   const mockFormSignal = signal<any>(undefined);
+  const mockLogger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
 
   beforeEach(() => {
+    mockLogger.debug.mockReset();
+    mockLogger.info.mockReset();
+    mockLogger.warn.mockReset();
+    mockLogger.error.mockReset();
+
     TestBed.configureTestingModule({
       providers: [
         { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
         { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
+        { provide: DynamicFormLogger, useValue: mockLogger },
         FunctionRegistryService,
         FieldContextRegistryService,
       ],
@@ -324,6 +332,154 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.email);
               }).not.toThrow();
+            }),
+          );
+          mockFormSignal.set(formInstance);
+        });
+      });
+    });
+
+    describe('declarative HTTP validator (type: http)', () => {
+      it('should apply HTTP validator without throwing', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ username: 'test' });
+          const config: ValidatorConfig = {
+            type: 'http',
+            http: {
+              url: '/api/check',
+              method: 'GET',
+              queryParams: { username: 'fieldValue' },
+            },
+            responseMapping: {
+              validWhen: 'response.available',
+              errorKind: 'usernameTaken',
+            },
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.username);
+              }).not.toThrow();
+            }),
+          );
+          mockFormSignal.set(formInstance);
+        });
+      });
+
+      it('should apply HTTP validator with POST method and body without throwing', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ email: 'test@example.com' });
+          const config: ValidatorConfig = {
+            type: 'http',
+            http: {
+              url: '/api/validate-email',
+              method: 'POST',
+              body: { email: 'fieldValue' },
+              evaluateBodyExpressions: true,
+            },
+            responseMapping: {
+              validWhen: 'response.valid',
+              errorKind: 'emailInvalid',
+            },
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.email);
+              }).not.toThrow();
+            }),
+          );
+          mockFormSignal.set(formInstance);
+        });
+      });
+
+      it('should apply HTTP validator with when condition without throwing', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ username: 'test' });
+          const config: ValidatorConfig = {
+            type: 'http',
+            http: {
+              url: '/api/check',
+              method: 'GET',
+              queryParams: { username: 'fieldValue' },
+            },
+            responseMapping: {
+              validWhen: 'response.available',
+              errorKind: 'usernameTaken',
+            },
+            when: {
+              type: 'javascript',
+              expression: 'fieldValue !== ""',
+            },
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.username);
+              }).not.toThrow();
+            }),
+          );
+          mockFormSignal.set(formInstance);
+        });
+      });
+
+      it('should warn when debounceMs is set', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ username: 'test' });
+          const config: ValidatorConfig = {
+            type: 'http',
+            http: {
+              url: '/api/check',
+              method: 'GET',
+              queryParams: { username: 'fieldValue' },
+              debounceMs: 500,
+            },
+            responseMapping: {
+              validWhen: 'response.available',
+              errorKind: 'usernameTaken',
+            },
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              applyValidator(config, path.username);
+              expect(mockLogger.warn).toHaveBeenCalledWith(
+                'debounceMs is ignored on HTTP validators — it only applies to HTTP derivations and conditions.',
+              );
+            }),
+          );
+          mockFormSignal.set(formInstance);
+        });
+      });
+
+      it('should not warn when debounceMs is not set', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ username: 'test' });
+          const config: ValidatorConfig = {
+            type: 'http',
+            http: {
+              url: '/api/check',
+              method: 'GET',
+              queryParams: { username: 'fieldValue' },
+            },
+            responseMapping: {
+              validWhen: 'response.available',
+              errorKind: 'usernameTaken',
+            },
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              applyValidator(config, path.username);
+              expect(mockLogger.warn).not.toHaveBeenCalled();
             }),
           );
           mockFormSignal.set(formInstance);

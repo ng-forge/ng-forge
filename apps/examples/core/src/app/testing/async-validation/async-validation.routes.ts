@@ -42,6 +42,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getAsyncValidationScenario('declarative-http-post-test') },
   },
+  {
+    path: 'declarative-http-error-handling',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAsyncValidationScenario('declarative-http-error-handling-test') },
+  },
 ];
 
 export default routes;

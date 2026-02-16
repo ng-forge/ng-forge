@@ -3,6 +3,7 @@ import { resolveHttpRequest } from './http-request-resolver';
 import { HttpRequestConfig } from '../../models/http/http-request-config';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { Logger } from '../../providers/features/logger/logger.interface';
+import { ExpressionParserError } from '../expressions/parser/types';
 
 describe('resolveHttpRequest', () => {
   const noopLogger: Logger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
@@ -155,5 +156,91 @@ describe('resolveHttpRequest', () => {
     const result = resolveHttpRequest(config, createContext());
 
     expect(result).not.toHaveProperty('debounceMs');
+  });
+
+  describe('expression error handling', () => {
+    it('should return undefined (coerced to empty string) for a deeply nested path that does not exist in queryParams', () => {
+      const config: HttpRequestConfig = {
+        url: '/api/check',
+        queryParams: { deep: 'formValue.a.b.c.d' },
+      };
+      const ctx = createContext({ formValue: { username: 'john' } });
+      const result = resolveHttpRequest(config, ctx);
+
+      // ExpressionParser.evaluate traverses: formValue.a -> undefined, then .b on undefined -> undefined, etc.
+      // resolveHttpRequest coerces null/undefined to '' via `value != null ? String(value) : ''`
+      expect(result.url).toBe('/api/check?deep=');
+    });
+
+    it('should throw ExpressionParserError for invalid expression syntax in queryParams', () => {
+      const config: HttpRequestConfig = {
+        url: '/api/check',
+        queryParams: { bad: '@#$invalid' },
+      };
+
+      // The parser throws ExpressionParserError for unexpected characters.
+      // resolveHttpRequest does NOT catch this — it propagates to the caller.
+      expect(() => resolveHttpRequest(config, createContext())).toThrow(ExpressionParserError);
+    });
+
+    it('should throw ExpressionParserError for an empty string expression in queryParams', () => {
+      const config: HttpRequestConfig = {
+        url: '/api/check',
+        queryParams: { empty: '' },
+      };
+
+      // The parser throws ExpressionParserError('Empty expression') for empty strings.
+      expect(() => resolveHttpRequest(config, createContext())).toThrow(ExpressionParserError);
+    });
+
+    it('should resolve to undefined for a body expression referencing a non-existent path when evaluateBodyExpressions is true', () => {
+      const config: HttpRequestConfig = {
+        url: '/api',
+        method: 'POST',
+        body: { missing: 'formValue.x.y.z' },
+        evaluateBodyExpressions: true,
+      };
+      const result = resolveHttpRequest(config, createContext());
+      const resultBody = result.body as Record<string, unknown>;
+
+      // MemberAccess on undefined returns undefined (no throw), so the body value is undefined.
+      expect(resultBody['missing']).toBeUndefined();
+    });
+
+    it('should throw ExpressionParserError for malformed expression in body when evaluateBodyExpressions is true', () => {
+      const config: HttpRequestConfig = {
+        url: '/api',
+        method: 'POST',
+        body: { broken: '@invalid' },
+        evaluateBodyExpressions: true,
+      };
+
+      // The tokenizer throws ExpressionParserError('Unexpected character: @') for invalid characters.
+      // resolveHttpRequest does NOT catch expression errors — they propagate.
+      expect(() => resolveHttpRequest(config, createContext())).toThrow(ExpressionParserError);
+    });
+
+    it('should throw ExpressionParserError for unterminated string literal in queryParams', () => {
+      const config: HttpRequestConfig = {
+        url: '/api/check',
+        queryParams: { bad: "'unterminated" },
+      };
+
+      // The tokenizer throws ExpressionParserError('Unterminated string literal') when a string is not closed.
+      expect(() => resolveHttpRequest(config, createContext())).toThrow(ExpressionParserError);
+    });
+
+    it('should not throw for body with malformed expression when evaluateBodyExpressions is false', () => {
+      const config: HttpRequestConfig = {
+        url: '/api',
+        method: 'POST',
+        body: { broken: '@#$invalid' },
+        evaluateBodyExpressions: false,
+      };
+
+      // With evaluateBodyExpressions=false, body is passed through without expression evaluation.
+      const result = resolveHttpRequest(config, createContext());
+      expect(result.body).toEqual({ broken: '@#$invalid' });
+    });
   });
 });

@@ -1,5 +1,6 @@
 import { TestSuite } from '../shared/types';
 import { asyncResourceValidatorScenario } from './scenarios/async-resource-validator.scenario';
+import { declarativeHttpErrorHandlingScenario } from './scenarios/declarative-http-error-handling.scenario';
 import { declarativeHttpGetScenario } from './scenarios/declarative-http-get.scenario';
 import { declarativeHttpPostScenario } from './scenarios/declarative-http-post.scenario';
 import { httpErrorHandlingScenario } from './scenarios/http-error-handling.scenario';
@@ -25,6 +26,7 @@ export const asyncValidationSuite: TestSuite = {
     multipleValidatorsScenario,
     declarativeHttpGetScenario,
     declarativeHttpPostScenario,
+    declarativeHttpErrorHandlingScenario,
   ],
 };
 
