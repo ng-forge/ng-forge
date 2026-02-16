@@ -57,6 +57,31 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getDerivationLogicScenario('derivation-in-group') },
   },
+  {
+    path: 'stop-on-user-override',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('stop-on-user-override-test') },
+  },
+  {
+    path: 're-engage-on-dependency-change',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('re-engage-on-dependency-change-test') },
+  },
+  {
+    path: 'field-state-condition',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('field-state-condition-test') },
+  },
+  {
+    path: 'field-state-advanced',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('field-state-advanced-test') },
+  },
+  {
+    path: 'array-stop-on-user-override',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('array-stop-on-user-override-test') },
+  },
 ];
 
 export default routes;

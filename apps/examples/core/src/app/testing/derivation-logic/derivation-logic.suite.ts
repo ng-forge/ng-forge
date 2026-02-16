@@ -9,6 +9,11 @@ import { shorthandDerivationScenario } from './scenarios/shorthand-derivation.sc
 import { arrayFieldDerivationScenario } from './scenarios/array-field-derivation.scenario';
 import { bidirectionalFloatScenario } from './scenarios/bidirectional-float.scenario';
 import { derivationInGroupScenario } from './scenarios/derivation-in-group.scenario';
+import { stopOnUserOverrideScenario } from './scenarios/stop-on-user-override.scenario';
+import { reEngageOnDependencyChangeScenario } from './scenarios/re-engage-on-dependency-change.scenario';
+import { fieldStateConditionScenario } from './scenarios/field-state-condition.scenario';
+import { fieldStateAdvancedScenario } from './scenarios/field-state-advanced.scenario';
+import { arrayStopOnUserOverrideScenario } from './scenarios/array-stop-on-user-override.scenario';
 
 export const derivationLogicSuite: TestSuite = {
   id: 'derivation-logic',
@@ -26,6 +31,11 @@ export const derivationLogicSuite: TestSuite = {
     arrayFieldDerivationScenario,
     bidirectionalFloatScenario,
     derivationInGroupScenario,
+    stopOnUserOverrideScenario,
+    reEngageOnDependencyChangeScenario,
+    fieldStateConditionScenario,
+    fieldStateAdvancedScenario,
+    arrayStopOnUserOverrideScenario,
   ],
 };
 

@@ -91,7 +91,18 @@ describe('StateLogicConfig - Property Types', () => {
 // ============================================================================
 
 describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'type' | 'condition' | 'value' | 'expression' | 'functionName' | 'trigger' | 'debounceMs' | 'debugName' | 'dependsOn';
+  type ExpectedKeys =
+    | 'type'
+    | 'condition'
+    | 'value'
+    | 'expression'
+    | 'functionName'
+    | 'trigger'
+    | 'debounceMs'
+    | 'debugName'
+    | 'dependsOn'
+    | 'stopOnUserOverride'
+    | 'reEngageOnDependencyChange';
   type ActualKeys = keyof DerivationLogicConfig;
 
   it('should have exactly the expected keys', () => {

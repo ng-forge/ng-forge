@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { Signal, signal } from '@angular/core';
+import { computed, Signal, signal } from '@angular/core';
 import { FieldContextRegistryService } from './field-context-registry.service';
 import { RootFormRegistryService } from './root-form-registry.service';
 import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
@@ -13,10 +13,21 @@ describe('FieldContextRegistryService', () => {
   const externalDataSignal = signal<Record<string, Signal<unknown>> | undefined>(undefined);
 
   function createMockFieldContext<T>(value: T, pathKeys: readonly string[] = []): FieldContext<T> {
-    return {
+    // FieldContext has .state (a FieldState) which holds signal properties
+    const state = {
       value: signal(value),
       touched: signal(false),
+      dirty: signal(false),
       valid: signal(true),
+      invalid: signal(false),
+      pending: signal(false),
+      hidden: signal(false),
+      readonly: signal(false),
+      disabled: signal(false),
+    };
+    return {
+      value: signal(value),
+      state,
       pathKeys: signal(pathKeys),
     } as unknown as FieldContext<T>;
   }
@@ -458,6 +469,103 @@ describe('FieldContextRegistryService', () => {
       expect(result.rootFormValue).toBeUndefined();
       expect(result.arrayIndex).toBeUndefined();
       expect(result.arrayPath).toBeUndefined();
+    });
+  });
+
+  describe('fieldState and formFieldState in evaluation context', () => {
+    function createMockFieldContextWithState<T>(
+      value: T,
+      stateOverrides: { touched?: boolean; dirty?: boolean; valid?: boolean; invalid?: boolean } = {},
+    ): FieldContext<T> {
+      // FieldContext.state is a FieldState with signal properties
+      const fieldState = {
+        value: signal(value),
+        touched: signal(stateOverrides.touched ?? false),
+        dirty: signal(stateOverrides.dirty ?? false),
+        valid: signal(stateOverrides.valid ?? true),
+        invalid: signal(stateOverrides.invalid ?? false),
+        pending: signal(false),
+        hidden: signal(false),
+        readonly: signal(false),
+        disabled: signal(false),
+      };
+      return {
+        value: signal(value),
+        state: fieldState,
+        pathKeys: signal([]),
+      } as unknown as FieldContext<T>;
+    }
+
+    function setupMockRootForm(fields: Record<string, { touched?: boolean; dirty?: boolean; valid?: boolean }>) {
+      const form: Record<string, unknown> = {};
+      for (const [key, state] of Object.entries(fields)) {
+        form[key] = computed(() => ({
+          value: signal(''),
+          touched: signal(state.touched ?? false),
+          dirty: signal(state.dirty ?? false),
+          valid: signal(state.valid ?? true),
+          invalid: signal(!(state.valid ?? true)),
+          pending: signal(false),
+        }));
+      }
+      mockFormSignal.set(form);
+      return form;
+    }
+
+    it('createEvaluationContext should include fieldState from field context', () => {
+      setupMockRootForm({ name: {} });
+      const fieldContext = createMockFieldContextWithState('test', { touched: true, dirty: true });
+
+      const result = service.createEvaluationContext(fieldContext);
+
+      expect(result.fieldState).toBeDefined();
+      expect(result.fieldState!.touched).toBe(true);
+      expect(result.fieldState!.dirty).toBe(true);
+      expect(result.fieldState!.pristine).toBe(false);
+    });
+
+    it('createReactiveEvaluationContext should include fieldState from field context', () => {
+      setupMockRootForm({ name: {} });
+      const fieldContext = createMockFieldContextWithState('test', { touched: false, valid: false });
+
+      const result = service.createReactiveEvaluationContext(fieldContext);
+
+      expect(result.fieldState).toBeDefined();
+      expect(result.fieldState!.touched).toBe(false);
+      expect(result.fieldState!.valid).toBe(false);
+    });
+
+    it('createEvaluationContext should include formFieldState proxy', () => {
+      setupMockRootForm({ name: { touched: true }, email: { dirty: true, valid: false } });
+      const fieldContext = createMockFieldContextWithState('test');
+
+      const result = service.createEvaluationContext(fieldContext);
+
+      expect(result.formFieldState).toBeDefined();
+      expect(result.formFieldState!['name']).toBeDefined();
+      expect(result.formFieldState!['name']!.touched).toBe(true);
+      expect(result.formFieldState!['email']!.dirty).toBe(true);
+      expect(result.formFieldState!['email']!.valid).toBe(false);
+    });
+
+    it('createDisplayOnlyContext should include formFieldState but not fieldState', () => {
+      setupMockRootForm({ name: { touched: true } });
+
+      const result = service.createDisplayOnlyContext('infoText');
+
+      expect(result.formFieldState).toBeDefined();
+      expect(result.formFieldState!['name']).toBeDefined();
+      expect(result.formFieldState!['name']!.touched).toBe(true);
+      expect(result.fieldState).toBeUndefined();
+    });
+
+    it('formFieldState should return undefined for non-existent fields', () => {
+      setupMockRootForm({ name: {} });
+      const fieldContext = createMockFieldContextWithState('test');
+
+      const result = service.createEvaluationContext(fieldContext);
+
+      expect(result.formFieldState!['nonexistent']).toBeUndefined();
     });
   });
 });

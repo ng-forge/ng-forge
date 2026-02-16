@@ -1,7 +1,9 @@
 import { isWritableSignal, Signal, untracked } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import type { FieldState, FieldTree } from '@angular/forms/signals';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
+import type { FieldStateInfo } from '../../models/expressions/field-state-context';
+import type { FieldTreeRecord } from '../field-tree-utils';
 import { isEqual } from '../../utils/object-utils';
 import { parseArrayPath, resolveArrayPath, isArrayPlaceholderPath } from '../../utils/path-utils/path-utils';
 import { CustomFunction } from '../expressions/custom-function-types';
@@ -20,6 +22,7 @@ import {
 import { DerivationWarningTracker } from './derivation-warning-tracker';
 import { MAX_DERIVATION_ITERATIONS } from './derivation-constants';
 import { DerivationLogger } from './derivation-logger.service';
+import { readFieldStateInfo, createFormFieldStateMap } from './field-state-extractor';
 
 // Re-export for backwards compatibility
 export type { DerivationProcessingResult } from './derivation-types';
@@ -128,6 +131,9 @@ export function applyDerivations(
   changedFields?: Set<string>,
 ): DerivationProcessingResult {
   const chainContext = createDerivationChainContext();
+  chainContext.changedFields = changedFields;
+  // Cache formFieldState map per cycle to avoid allocating a new Proxy + Map per entry
+  chainContext.formFieldState = createFormFieldStateMap(context.rootForm, false);
   const { derivationLogger } = context;
   const maxIterations = context.maxIterations ?? MAX_DERIVATION_ITERATIONS;
   let appliedCount = 0;
@@ -194,6 +200,13 @@ export function applyDerivations(
  * Filters entries by checking if any of their dependencies are in the changed fields set.
  * Also includes all wildcard (*) entries since they depend on any form change.
  *
+ * **Parent-key matching:** Since `changedFields` contains root-level keys (e.g., `'address'`),
+ * but derivation entries may target or depend on nested paths (e.g., `'address.city'`),
+ * this function checks `startsWith(changed + '.')` to include entries whose field or
+ * dependencies live under a changed parent. This is intentionally broad — false positives
+ * are acceptable for filtering because entries are still guarded by value-equality checks
+ * (`isEqual`) in `tryApplyDerivation` and will be skipped if the value hasn't changed.
+ *
  * Note: Performance is O(n) where n = total entries. For large forms with many
  * derivations, consider optimizing with indexed lookup maps.
  *
@@ -201,13 +214,27 @@ export function applyDerivations(
  */
 function getEntriesForChangedFields(entries: DerivationEntry[], changedFields: Set<string>): DerivationEntry[] {
   return entries.filter((entry) => {
-    // Wildcard entries are always included
-    if (entry.dependsOn.includes('*')) {
+    // Entries with no dependencies or wildcard dependencies always run
+    if (entry.dependsOn.length === 0 || entry.dependsOn.includes('*')) {
       return true;
     }
 
-    // Check if any dependency is in changed fields
-    return entry.dependsOn.some((dep) => changedFields.has(dep));
+    // Check if any dependency matches a changed field directly
+    if (entry.dependsOn.some((dep) => changedFields.has(dep))) {
+      return true;
+    }
+
+    // For array entries (fieldKey contains '$'), check if the entry's parent
+    // array key changed. Array derivations have relative dependencies
+    // (e.g., 'quantity') but changedFields contains root keys (e.g., 'lineItems').
+    for (const changed of changedFields) {
+      // Check if this entry lives under a changed parent (array or nested)
+      if (entry.fieldKey.startsWith(changed + '.')) return true;
+      // Check if a dependency is nested under a changed parent
+      if (entry.dependsOn.some((dep) => dep.startsWith(changed + '.'))) return true;
+    }
+
+    return false;
   });
 }
 
@@ -255,9 +282,20 @@ function tryApplyDerivation(
     return { applied: false, fieldKey: entry.fieldKey };
   }
 
+  // Check stopOnUserOverride — skip if the user has manually edited the target field
+  if (shouldSkipForUserOverride(entry, entry.fieldKey, context, chainContext)) {
+    derivationLogger.evaluation({
+      debugName: entry.debugName,
+      fieldKey: entry.fieldKey,
+      result: 'skipped',
+      skipReason: 'user-override',
+    });
+    return { applied: false, fieldKey: entry.fieldKey };
+  }
+
   // Create evaluation context
   const formValue = untracked(() => context.formValue());
-  const evalContext = createEvaluationContext(entry, formValue, context);
+  const evalContext = createEvaluationContext(entry, formValue, context, chainContext);
 
   // Evaluate condition
   if (!evaluateDerivationCondition(entry.condition, evalContext)) {
@@ -393,9 +431,20 @@ function tryApplyArrayDerivation(
       continue;
     }
 
+    // Check stopOnUserOverride for array items using dirty() signal
+    if (shouldSkipForUserOverride(entry, resolvedPath, context, chainContext)) {
+      context.derivationLogger.evaluation({
+        debugName: entry.debugName,
+        fieldKey: resolvedPath,
+        result: 'skipped',
+        skipReason: 'user-override',
+      });
+      continue;
+    }
+
     // Create evaluation context scoped to this array item
     const arrayItem = arrayValue[i] as Record<string, unknown>;
-    const evalContext = createArrayItemEvaluationContext(entry, arrayItem, formValue, i, arrayPath, context);
+    const evalContext = createArrayItemEvaluationContext(entry, arrayItem, formValue, i, arrayPath, context, chainContext);
 
     // Evaluate condition
     if (!evaluateDerivationCondition(entry.condition, evalContext)) {
@@ -441,8 +490,13 @@ function createEvaluationContext(
   entry: DerivationEntry,
   formValue: Record<string, unknown>,
   context: DerivationApplicatorContext,
+  chainContext: DerivationChainContext,
 ): EvaluationContext {
   const fieldValue = getNestedValue(formValue, entry.fieldKey);
+
+  // Create field state snapshot for this specific field (non-reactive)
+  const fieldAccessor = (context.rootForm as FieldTreeRecord)[entry.fieldKey];
+  const fieldState = fieldAccessor ? readFieldStateInfo(fieldAccessor, false) : undefined;
 
   return {
     fieldValue,
@@ -451,6 +505,8 @@ function createEvaluationContext(
     customFunctions: context.customFunctions,
     externalData: context.externalData,
     logger: context.logger,
+    fieldState,
+    formFieldState: chainContext.formFieldState,
   };
 }
 
@@ -469,10 +525,33 @@ function createArrayItemEvaluationContext(
   itemIndex: number,
   arrayPath: string,
   context: DerivationApplicatorContext,
+  chainContext: DerivationChainContext,
 ): EvaluationContext {
   // For array item expressions, formValue should be the array item
   // This allows expressions like 'formValue.quantity * formValue.unitPrice'
   // to work within the context of each array item
+
+  // Create field state snapshot for the specific array item field
+  // Navigate: rootForm[arrayPath][index][fieldKey]
+  const pathInfo = parseArrayPath(entry.fieldKey);
+  let fieldState: FieldStateInfo | undefined;
+
+  if (pathInfo.isArrayPath && pathInfo.relativePath) {
+    const rootFormRecord = context.rootForm as FieldTreeRecord;
+    const arrayAccessor = rootFormRecord[arrayPath];
+    if (arrayAccessor) {
+      const arrayItems = arrayAccessor as FieldTreeRecord;
+      const itemAccessor = arrayItems[String(itemIndex)];
+      if (itemAccessor) {
+        const itemFields = itemAccessor as FieldTreeRecord;
+        const fieldAccessor = itemFields[pathInfo.relativePath];
+        if (fieldAccessor) {
+          fieldState = readFieldStateInfo(fieldAccessor, false);
+        }
+      }
+    }
+  }
+
   return {
     fieldValue: arrayItem,
     formValue: arrayItem,
@@ -484,6 +563,8 @@ function createArrayItemEvaluationContext(
     rootFormValue,
     arrayIndex: itemIndex,
     arrayPath,
+    fieldState,
+    formFieldState: chainContext.formFieldState,
   };
 }
 
@@ -553,12 +634,12 @@ function applyValueToForm(
 ): boolean {
   // Handle simple top-level fields
   if (!targetPath.includes('.')) {
-    return setFieldValue(rootForm, targetPath, value, logger, warningTracker);
+    return setFieldValue(rootForm as FieldTreeRecord, targetPath, value, logger, warningTracker);
   }
 
   // Handle nested paths (e.g., 'address.city' or 'items.$.quantity')
   const parts = targetPath.split('.');
-  let current: unknown = rootForm;
+  let current = rootForm as FieldTreeRecord;
 
   for (let i = 0; i < parts.length - 1; i++) {
     const part = parts[i];
@@ -571,12 +652,12 @@ function applyValueToForm(
     }
 
     // Navigate to the next level using bracket notation
-    const next = (current as Record<string, unknown>)[part];
-    if (next === undefined || next === null) {
+    const next = current[part];
+    if (!next) {
       warnMissingField(targetPath, logger, warningTracker);
       return false; // Path doesn't exist
     }
-    current = next;
+    current = next as FieldTreeRecord;
   }
 
   // Set the final value
@@ -622,30 +703,23 @@ function formatDerivationError(entry: DerivationEntry, phase: 'compute' | 'apply
  * @internal
  */
 function setFieldValue(
-  parent: unknown,
+  parent: FieldTreeRecord,
   fieldKey: string,
   value: unknown,
   logger?: Logger,
   warningTracker?: DerivationWarningTracker,
 ): boolean {
-  // Access child field via bracket notation (same pattern as group-field/array-field)
-  const fieldAccessor = (parent as Record<string, unknown>)[fieldKey];
+  const fieldAccessor = parent[fieldKey];
 
-  if (fieldAccessor === undefined || fieldAccessor === null) {
+  if (!fieldAccessor) {
     warnMissingField(fieldKey, logger, warningTracker);
     return false;
   }
 
-  // Angular Signal Forms: field accessor is a callable function
-  if (typeof fieldAccessor !== 'function') {
-    warnMissingField(fieldKey, logger, warningTracker);
-    return false;
-  }
+  // Call the FieldTree to get the FieldState
+  const fieldInstance = untracked(fieldAccessor);
 
-  // Call the accessor to get the field instance
-  const fieldInstance = fieldAccessor();
-
-  if (!fieldInstance || typeof fieldInstance !== 'object' || !('value' in fieldInstance)) {
+  if (!fieldInstance || typeof fieldInstance !== 'object') {
     warnMissingField(fieldKey, logger, warningTracker);
     return false;
   }
@@ -654,6 +728,9 @@ function setFieldValue(
   const valueSignal = fieldInstance.value;
 
   if (isWritableSignal(valueSignal)) {
+    // Writing directly to value.set() does NOT trigger markAsDirty() —
+    // only user interaction through setControlValue() does. So derivation-applied
+    // values leave the field pristine, and dirty() reliably indicates user edits.
     valueSignal.set(value);
     return true;
   } else {
@@ -684,6 +761,123 @@ function warnMissingField(fieldKey: string, logger?: Logger, warningTracker?: De
       `Ensure the field is defined in your form configuration. ` +
       `This warning is shown once per field.`,
   );
+}
+
+/**
+ * Navigates the form tree to resolve a field instance at the given path.
+ *
+ * Walks the tree following the same pattern as `setFieldValue`:
+ * each segment is looked up on the current node, and signal accessors
+ * are called to get the next level.
+ *
+ * @returns The field instance object, or `undefined` if the path is invalid
+ *
+ * @internal
+ */
+function resolveFieldInstance(rootForm: FieldTree<unknown>, fieldPath: string): FieldState<unknown> | undefined {
+  const parts = fieldPath.split('.');
+  let current = rootForm as FieldTreeRecord;
+
+  for (let i = 0; i < parts.length - 1; i++) {
+    const next = current[parts[i]];
+    if (!next) return undefined;
+    current = next as FieldTreeRecord;
+  }
+
+  const fieldAccessor = current[parts[parts.length - 1]];
+  if (!fieldAccessor) return undefined;
+
+  return untracked(fieldAccessor);
+}
+
+/**
+ * Reads the dirty() signal from a field at the given path.
+ *
+ * Returns `true` if the field is dirty, `false` if pristine,
+ * or `undefined` if the field cannot be found.
+ *
+ * @internal
+ */
+function readFieldDirty(rootForm: FieldTree<unknown>, fieldPath: string): boolean | undefined {
+  const fieldInstance = resolveFieldInstance(rootForm, fieldPath);
+  if (!fieldInstance) return undefined;
+  return untracked(fieldInstance.dirty);
+}
+
+/**
+ * Resets a field's dirty/touched state at the given path.
+ *
+ * Used for re-engagement: when a dependency changes, clear the user override
+ * so the derivation can re-apply.
+ *
+ * Uses the public `reset()` API on FieldState, which clears both
+ * dirty and touched without changing the field's value.
+ *
+ * @internal
+ */
+function resetFieldState(rootForm: FieldTree<unknown>, fieldPath: string): void {
+  const fieldInstance = resolveFieldInstance(rootForm, fieldPath);
+  if (!fieldInstance) return;
+  fieldInstance.reset();
+}
+
+/**
+ * Checks whether any of the entry's dependencies appear in the changed fields set.
+ *
+ * **Known limitation for array derivations:** `changedFields` contains root-level keys
+ * (e.g., `'lineItems'`) produced by `getChangedKeys()`, but array derivation dependencies
+ * use relative names (e.g., `['quantity', 'unitPrice']`). This means `reEngageOnDependencyChange`
+ * only fires for root-level dependencies (e.g., `'discountRate'`) — NOT for intra-item
+ * dependencies like `'quantity'` within the same array item.
+ *
+ * Adding parent-key matching (checking if `entry.fieldKey.startsWith(changed + '.')`)
+ * was attempted but causes false positives: editing the TARGET field also triggers
+ * `changedFields = {'lineItems'}`, which would reset dirty immediately and break
+ * `stopOnUserOverride`. Fixing this requires per-field change tracking instead of
+ * per-root-key tracking — a more significant architectural change.
+ *
+ * @internal
+ */
+function hasDependencyChanged(entry: DerivationEntry, changedFields: Set<string>): boolean {
+  return entry.dependsOn.some((dep) => dep === '*' || changedFields.has(dep));
+}
+
+/**
+ * Checks whether a derivation should be skipped due to the user having manually
+ * edited the target field. Handles re-engagement when `reEngageOnDependencyChange`
+ * is set and a dependency has changed.
+ *
+ * @returns `true` if the derivation should be skipped, `false` otherwise
+ *
+ * @internal
+ */
+function shouldSkipForUserOverride(
+  entry: DerivationEntry,
+  resolvedFieldKey: string,
+  context: DerivationApplicatorContext,
+  chainContext: DerivationChainContext,
+): boolean {
+  if (!entry.stopOnUserOverride) return false;
+
+  const isDirty = readFieldDirty(context.rootForm, resolvedFieldKey) ?? false;
+
+  // If the field isn't dirty, no override to skip — and no re-engagement needed.
+  // This also avoids wasteful resetFieldState calls on initial form render where
+  // changedFields contains all keys (from startWith(null) + pairwise()) but fields
+  // are all pristine.
+  if (!isDirty) return false;
+
+  // Re-engagement: reset dirty state if a dependency changed, allowing re-derivation
+  if (entry.reEngageOnDependencyChange && chainContext.changedFields) {
+    if (hasDependencyChanged(entry, chainContext.changedFields)) {
+      resetFieldState(context.rootForm, resolvedFieldKey);
+      // Re-read after reset — field is now pristine, so derivation proceeds
+      return false;
+    }
+  }
+
+  // Field is dirty and no re-engagement triggered — skip derivation
+  return true;
 }
 
 /**
