@@ -252,6 +252,52 @@ test.describe('Async Validation Tests', () => {
     });
   });
 
+  test.describe('Declarative HTTP Conditional Validator', () => {
+    test('should validate when when-condition is true and skip when false', async ({ page, helpers }) => {
+      await page.route('**/api/users/check-username*', (route) => {
+        const url = route.request().url();
+        const username = new URL(url).searchParams.get('username');
+
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ available: username !== 'admin' }),
+        });
+      });
+
+      const scenario = helpers.getScenario('declarative-http-conditional-test');
+      await page.goto('/#/test/async-validation/declarative-http-conditional');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible();
+
+      const usernameInput = scenario.locator('#username input');
+      const checkbox = scenario.locator('#checkAvailability mat-checkbox');
+      const errorLocator = scenario.getByText('already taken');
+
+      // Checkbox starts checked (defaultValue: true) — validator is active.
+
+      // Step 1: Type taken username — HTTP validator fires, error appears.
+      await usernameInput.fill('admin');
+      await usernameInput.blur();
+      await expect(errorLocator).toBeVisible({ timeout: 5000 });
+
+      // Step 2: Type valid username — error disappears.
+      await usernameInput.fill('newuser123');
+      await usernameInput.blur();
+      await expect(errorLocator).toBeHidden({ timeout: 5000 });
+
+      // Step 3: Uncheck checkbox — when-condition becomes false, validator should be skipped.
+      await checkbox.click();
+
+      // Step 4: Type taken username again — no validation error (validator skipped).
+      await usernameInput.fill('admin');
+      await usernameInput.blur();
+      // Wait to ensure no late-arriving validation error
+      await page.waitForTimeout(2000);
+      await expect(errorLocator).toBeHidden();
+    });
+  });
+
   test.describe('Multiple Validators', () => {
     test('should validate multiple async validators on same field', async ({ page, helpers }) => {
       // Mock API responses

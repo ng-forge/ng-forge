@@ -89,7 +89,11 @@ function createConditionalLogic(when: ConditionalExpression | undefined): LogicF
 export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   const path = fieldPath as SchemaPath<unknown>;
 
-  if (isCrossFieldBuiltInValidator(config) || hasCrossFieldWhenCondition(config)) {
+  // Resource-based validators (customAsync, customHttp, http) handle cross-field
+  // when-conditions internally via their request/params callbacks returning undefined.
+  // They must NOT be skipped here — validateHttp/validateAsync need field-level registration.
+  const isResourceBasedValidator = config.type === 'customAsync' || config.type === 'customHttp' || config.type === 'http';
+  if (!isResourceBasedValidator && (isCrossFieldBuiltInValidator(config) || hasCrossFieldWhenCondition(config))) {
     return;
   }
 
