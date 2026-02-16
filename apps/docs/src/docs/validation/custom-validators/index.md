@@ -289,6 +289,8 @@ const passwordMatch: CustomValidator = (ctx) => {
 
 ## Async Validators (Resource-based)
 
+> **Deprecation notice:** The old `type: 'customAsync'` still works but is deprecated. Use `type: 'async'` instead.
+
 Async validators use Angular's resource API for database lookups or complex async operations.
 
 ### Basic Example
@@ -334,7 +336,7 @@ const config = {
     {
       key: 'username',
       type: 'input',
-      validators: [{ type: 'customAsync', functionName: 'checkUsernameAvailable' }],
+      validators: [{ type: 'async', functionName: 'checkUsernameAvailable' }],
       validationMessages: {
         usernameTaken: 'This username is already taken',
       },
@@ -374,6 +376,8 @@ interface AsyncCustomValidator<TValue, TParams, TResult> {
 ```
 
 ## HTTP Validators
+
+> **Deprecation notice:** The old `type: 'customHttp'` still works but is deprecated. Use `type: 'http'` instead.
 
 HTTP validators provide optimized HTTP validation with automatic request cancellation.
 
@@ -415,7 +419,7 @@ const config = {
     {
       key: 'email',
       type: 'input',
-      validators: [{ type: 'customHttp', functionName: 'checkEmailDomain' }],
+      validators: [{ type: 'http', functionName: 'checkEmailDomain' }],
       validationMessages: {
         invalidDomain: 'This email domain is not allowed',
       },
