@@ -1,7 +1,9 @@
-import { isSignal, isWritableSignal, Signal, untracked } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import { isWritableSignal, Signal, untracked } from '@angular/core';
+import type { FieldState, FieldTree } from '@angular/forms/signals';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
+import type { FieldStateInfo } from '../../models/expressions/field-state-context';
+import type { FieldTreeRecord } from '../field-tree-utils';
 import { isEqual } from '../../utils/object-utils';
 import { parseArrayPath, resolveArrayPath, isArrayPlaceholderPath } from '../../utils/path-utils/path-utils';
 import { CustomFunction } from '../expressions/custom-function-types';
@@ -20,7 +22,7 @@ import {
 import { DerivationWarningTracker } from './derivation-warning-tracker';
 import { MAX_DERIVATION_ITERATIONS } from './derivation-constants';
 import { DerivationLogger } from './derivation-logger.service';
-import { createFieldStateProxy, createFormFieldStateProxy } from './field-state-extractor';
+import { readFieldStateInfo, createFormFieldStateMap } from './field-state-extractor';
 
 // Re-export for backwards compatibility
 export type { DerivationProcessingResult } from './derivation-types';
@@ -468,10 +470,10 @@ function createEvaluationContext(
 ): EvaluationContext {
   const fieldValue = getNestedValue(formValue, entry.fieldKey);
 
-  // Create field state proxies (non-reactive for derivation applicator context)
-  const fieldAccessor = (context.rootForm as Record<string, unknown>)[entry.fieldKey];
-  const fieldState = isSignal(fieldAccessor) ? createFieldStateProxy(fieldAccessor as () => Record<string, unknown>, false) : undefined;
-  const formFieldState = createFormFieldStateProxy(context.rootForm, false);
+  // Create field state snapshots (non-reactive for derivation applicator context)
+  const fieldAccessor = (context.rootForm as FieldTreeRecord)[entry.fieldKey];
+  const fieldState = fieldAccessor ? readFieldStateInfo(fieldAccessor, false) : undefined;
+  const formFieldState = createFormFieldStateMap(context.rootForm, false);
 
   return {
     fieldValue,
@@ -505,27 +507,28 @@ function createArrayItemEvaluationContext(
   // This allows expressions like 'formValue.quantity * formValue.unitPrice'
   // to work within the context of each array item
 
-  // Create field state proxy for the specific array item field
+  // Create field state snapshot for the specific array item field
   // Navigate: rootForm[arrayPath][index][fieldKey]
   const pathInfo = parseArrayPath(entry.fieldKey);
-  let fieldState: ReturnType<typeof createFieldStateProxy> | undefined;
+  let fieldState: FieldStateInfo | undefined;
 
   if (pathInfo.isArrayPath && pathInfo.relativePath) {
-    const arrayAccessor = (context.rootForm as Record<string, unknown>)[arrayPath];
-    if (isSignal(arrayAccessor)) {
-      const arrayInstance = (arrayAccessor as () => Record<string, unknown>)() as Record<string, unknown>;
-      const itemAccessor = arrayInstance?.[String(itemIndex)];
-      if (isSignal(itemAccessor)) {
-        const itemInstance = (itemAccessor as () => Record<string, unknown>)();
-        const fieldAccessor = itemInstance?.[pathInfo.relativePath];
-        if (isSignal(fieldAccessor)) {
-          fieldState = createFieldStateProxy(fieldAccessor as () => Record<string, unknown>, false);
+    const rootFormRecord = context.rootForm as FieldTreeRecord;
+    const arrayAccessor = rootFormRecord[arrayPath];
+    if (arrayAccessor) {
+      const arrayItems = arrayAccessor as FieldTreeRecord;
+      const itemAccessor = arrayItems[String(itemIndex)];
+      if (itemAccessor) {
+        const itemFields = itemAccessor as FieldTreeRecord;
+        const fieldAccessor = itemFields[pathInfo.relativePath];
+        if (fieldAccessor) {
+          fieldState = readFieldStateInfo(fieldAccessor, false);
         }
       }
     }
   }
 
-  const formFieldState = createFormFieldStateProxy(context.rootForm, false);
+  const formFieldState = createFormFieldStateMap(context.rootForm, false);
 
   return {
     fieldValue: arrayItem,
@@ -609,12 +612,12 @@ function applyValueToForm(
 ): boolean {
   // Handle simple top-level fields
   if (!targetPath.includes('.')) {
-    return setFieldValue(rootForm, targetPath, value, logger, warningTracker);
+    return setFieldValue(rootForm as FieldTreeRecord, targetPath, value, logger, warningTracker);
   }
 
   // Handle nested paths (e.g., 'address.city' or 'items.$.quantity')
   const parts = targetPath.split('.');
-  let current: unknown = rootForm;
+  let current = rootForm as FieldTreeRecord;
 
   for (let i = 0; i < parts.length - 1; i++) {
     const part = parts[i];
@@ -627,12 +630,12 @@ function applyValueToForm(
     }
 
     // Navigate to the next level using bracket notation
-    const next = (current as Record<string, unknown>)[part];
-    if (next === undefined || next === null) {
+    const next = current[part];
+    if (!next) {
       warnMissingField(targetPath, logger, warningTracker);
       return false; // Path doesn't exist
     }
-    current = next;
+    current = next as FieldTreeRecord;
   }
 
   // Set the final value
@@ -678,30 +681,23 @@ function formatDerivationError(entry: DerivationEntry, phase: 'compute' | 'apply
  * @internal
  */
 function setFieldValue(
-  parent: unknown,
+  parent: FieldTreeRecord,
   fieldKey: string,
   value: unknown,
   logger?: Logger,
   warningTracker?: DerivationWarningTracker,
 ): boolean {
-  // Access child field via bracket notation (same pattern as group-field/array-field)
-  const fieldAccessor = (parent as Record<string, unknown>)[fieldKey];
+  const fieldAccessor = parent[fieldKey];
 
-  if (fieldAccessor === undefined || fieldAccessor === null) {
+  if (!fieldAccessor) {
     warnMissingField(fieldKey, logger, warningTracker);
     return false;
   }
 
-  // Angular Signal Forms: field accessor is a signal
-  if (!isSignal(fieldAccessor)) {
-    warnMissingField(fieldKey, logger, warningTracker);
-    return false;
-  }
+  // Call the FieldTree to get the FieldState
+  const fieldInstance = untracked(fieldAccessor);
 
-  // Call the accessor to get the field instance
-  const fieldInstance = (fieldAccessor as () => unknown)();
-
-  if (!fieldInstance || typeof fieldInstance !== 'object' || !('value' in fieldInstance)) {
+  if (!fieldInstance || typeof fieldInstance !== 'object') {
     warnMissingField(fieldKey, logger, warningTracker);
     return false;
   }
@@ -756,24 +752,20 @@ function warnMissingField(fieldKey: string, logger?: Logger, warningTracker?: De
  *
  * @internal
  */
-function resolveFieldInstance(rootForm: FieldTree<unknown>, fieldPath: string): Record<string, unknown> | undefined {
+function resolveFieldInstance(rootForm: FieldTree<unknown>, fieldPath: string): FieldState<unknown> | undefined {
   const parts = fieldPath.split('.');
-  let current: unknown = rootForm;
+  let current = rootForm as FieldTreeRecord;
 
   for (let i = 0; i < parts.length - 1; i++) {
-    const next = (current as Record<string, unknown>)[parts[i]];
-    if (next === undefined || next === null) return undefined;
-    current = isSignal(next) ? (next as () => unknown)() : next;
+    const next = current[parts[i]];
+    if (!next) return undefined;
+    current = next as FieldTreeRecord;
   }
 
-  const finalKey = parts[parts.length - 1];
-  const fieldAccessor = (current as Record<string, unknown>)[finalKey];
-  if (!isSignal(fieldAccessor)) return undefined;
+  const fieldAccessor = current[parts[parts.length - 1]];
+  if (!fieldAccessor) return undefined;
 
-  const fieldInstance = (fieldAccessor as () => Record<string, unknown>)();
-  if (!fieldInstance || typeof fieldInstance !== 'object') return undefined;
-
-  return fieldInstance;
+  return untracked(fieldAccessor);
 }
 
 /**
@@ -787,11 +779,7 @@ function resolveFieldInstance(rootForm: FieldTree<unknown>, fieldPath: string): 
 function readFieldDirty(rootForm: FieldTree<unknown>, fieldPath: string): boolean | undefined {
   const fieldInstance = resolveFieldInstance(rootForm, fieldPath);
   if (!fieldInstance) return undefined;
-
-  const dirtySignal = fieldInstance['dirty'];
-  if (!isSignal(dirtySignal)) return undefined;
-
-  return untracked(dirtySignal as () => boolean);
+  return untracked(fieldInstance.dirty);
 }
 
 /**
@@ -808,10 +796,7 @@ function readFieldDirty(rootForm: FieldTree<unknown>, fieldPath: string): boolea
 function resetFieldState(rootForm: FieldTree<unknown>, fieldPath: string): void {
   const fieldInstance = resolveFieldInstance(rootForm, fieldPath);
   if (!fieldInstance) return;
-
-  if (typeof fieldInstance['reset'] === 'function') {
-    (fieldInstance['reset'] as () => void)();
-  }
+  fieldInstance.reset();
 }
 
 /**
