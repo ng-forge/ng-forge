@@ -8,6 +8,15 @@ import { FormStateManager } from '../../state/form-state-manager';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { applyValidator, applyValidators } from './validator-factory';
 
+// Mock only validateHttp to capture callback options passed by applyDeclarativeHttpValidator.
+// All other exports (form, schema, validate, etc.) are preserved from the real module.
+// vi.hoisted() ensures the mock reference is available in the hoisted vi.mock() factory.
+const { mockValidateHttp } = vi.hoisted(() => ({ mockValidateHttp: vi.fn() }));
+vi.mock('@angular/forms/signals', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('@angular/forms/signals')>();
+  return { ...mod, validateHttp: mockValidateHttp };
+});
+
 describe('validator-factory', () => {
   let injector: Injector;
   const mockEntity = signal<Record<string, unknown>>({});
@@ -19,6 +28,7 @@ describe('validator-factory', () => {
     mockLogger.info.mockReset();
     mockLogger.warn.mockReset();
     mockLogger.error.mockReset();
+    mockValidateHttp.mockClear();
 
     TestBed.configureTestingModule({
       providers: [
@@ -538,6 +548,137 @@ describe('validator-factory', () => {
           }),
         );
         mockFormSignal.set(formInstance);
+      });
+    });
+  });
+
+  describe('declarative HTTP validator callback behavior', () => {
+    // These tests mock validateHttp to capture the options object and verify
+    // the behavior of request/onSuccess/onError callbacks in isolation.
+
+    function getCapturedOptions(): {
+      request: (ctx: unknown) => unknown;
+      onSuccess: (response: unknown) => unknown;
+      onError: (error: unknown) => unknown;
+    } {
+      const lastCall = mockValidateHttp.mock.calls[mockValidateHttp.mock.calls.length - 1];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- test utility
+      return lastCall[1] as any;
+    }
+
+    it('should return undefined from request callback when when-condition is false (C1)', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ username: 'test' });
+        const config: ValidatorConfig = {
+          type: 'http',
+          http: { url: '/api/check', queryParams: { username: 'fieldValue' } },
+          responseMapping: { validWhen: 'response.available', errorKind: 'taken' },
+          when: { type: 'javascript', expression: 'fieldValue === "special"' },
+        };
+
+        form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator(config, path.username);
+          }),
+        );
+
+        const options = getCapturedOptions();
+
+        // Mock FieldContext where value is 'not_special' — when condition evaluates to false
+        mockEntity.set({ username: 'not_special' });
+        const mockCtx = { value: signal('not_special') };
+
+        expect(options.request(mockCtx)).toBeUndefined();
+      });
+    });
+
+    it('should use createReactiveEvaluationContext (not createEvaluationContext) in request callback (C2)', () => {
+      const fieldContextRegistry = TestBed.inject(FieldContextRegistryService);
+      const reactiveSpy = vi.spyOn(fieldContextRegistry, 'createReactiveEvaluationContext');
+      const nonReactiveSpy = vi.spyOn(fieldContextRegistry, 'createEvaluationContext');
+
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ username: 'test' });
+        const config: ValidatorConfig = {
+          type: 'http',
+          http: { url: '/api/check', queryParams: { username: 'fieldValue' } },
+          responseMapping: { validWhen: 'response.available', errorKind: 'taken' },
+          // No `when` condition — isolates the createReactiveEvaluationContext call
+        };
+
+        form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator(config, path.username);
+          }),
+        );
+
+        const options = getCapturedOptions();
+        mockEntity.set({ username: 'test' });
+        const mockCtx = { value: signal('test') };
+
+        options.request(mockCtx);
+
+        expect(reactiveSpy).toHaveBeenCalled();
+        expect(nonReactiveSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should delegate onSuccess to evaluateHttpValidationResponse (M1)', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ username: 'test' });
+        const config: ValidatorConfig = {
+          type: 'http',
+          http: { url: '/api/check' },
+          responseMapping: {
+            validWhen: 'response.available',
+            errorKind: 'taken',
+            errorParams: { suggestion: 'response.suggestion' },
+          },
+        };
+
+        form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator(config, path.username);
+          }),
+        );
+
+        const options = getCapturedOptions();
+
+        // Valid response → null
+        expect(options.onSuccess({ available: true })).toBeNull();
+
+        // Invalid response → error with kind and interpolated errorParams
+        expect(options.onSuccess({ available: false, suggestion: 'admin_123' })).toEqual({
+          kind: 'taken',
+          suggestion: 'admin_123',
+        });
+      });
+    });
+
+    it('should return error with errorKind and log warning from onError callback (M2)', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ username: 'test' });
+        const config: ValidatorConfig = {
+          type: 'http',
+          http: { url: '/api/check' },
+          responseMapping: { validWhen: 'response.available', errorKind: 'taken' },
+        };
+
+        form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator(config, path.username);
+          }),
+        );
+
+        const options = getCapturedOptions();
+        const error = new Error('Network failure');
+
+        expect(options.onError(error)).toEqual({ kind: 'taken' });
+        expect(mockLogger.warn).toHaveBeenCalledWith('HTTP validator request failed:', error);
       });
     });
   });

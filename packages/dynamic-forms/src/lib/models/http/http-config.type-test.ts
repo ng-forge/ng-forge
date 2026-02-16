@@ -1,10 +1,13 @@
 /**
- * Exhaustive type tests for HttpRequestConfig and HttpValidationResponseMapping interfaces.
+ * Exhaustive type tests for HttpRequestConfig, HttpValidationResponseMapping,
+ * DeclarativeHttpValidatorConfig, and ValidatorConfig union.
  */
 import { expectTypeOf } from 'vitest';
 import type { RequiredKeys, OptionalKeys } from '@ng-forge/utils';
 import type { HttpRequestConfig } from './http-request-config';
 import type { HttpValidationResponseMapping } from './http-response-mapping';
+import type { DeclarativeHttpValidatorConfig, ValidatorConfig } from '../validation/validator-config';
+import type { ConditionalExpression } from '../expressions/conditional-expression';
 
 // ============================================================================
 // HttpRequestConfig - Whitelist Test
@@ -194,5 +197,76 @@ describe('HttpValidationResponseMapping - Usage Examples', () => {
     } as const satisfies HttpValidationResponseMapping;
 
     expectTypeOf(mapping.errorParams).toMatchTypeOf<Record<string, string>>();
+  });
+});
+
+// ============================================================================
+// DeclarativeHttpValidatorConfig - Whitelist Test (L2)
+// ============================================================================
+
+describe('DeclarativeHttpValidatorConfig - Exhaustive Whitelist', () => {
+  type ExpectedKeys = 'type' | 'http' | 'responseMapping' | 'when';
+  type ActualKeys = keyof DeclarativeHttpValidatorConfig;
+
+  it('should have exactly the expected keys', () => {
+    expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
+  });
+
+  describe('required keys', () => {
+    it('should have type, http, and responseMapping as required', () => {
+      expectTypeOf<RequiredKeys<DeclarativeHttpValidatorConfig>>().toEqualTypeOf<'type' | 'http' | 'responseMapping'>();
+    });
+  });
+
+  describe('optional keys', () => {
+    it('should have when as optional', () => {
+      expectTypeOf<OptionalKeys<DeclarativeHttpValidatorConfig>>().toEqualTypeOf<'when'>();
+    });
+  });
+
+  describe('property types', () => {
+    it('type should be literal "http"', () => {
+      expectTypeOf<DeclarativeHttpValidatorConfig['type']>().toEqualTypeOf<'http'>();
+    });
+
+    it('http should be HttpRequestConfig', () => {
+      expectTypeOf<DeclarativeHttpValidatorConfig['http']>().toEqualTypeOf<HttpRequestConfig>();
+    });
+
+    it('responseMapping should be HttpValidationResponseMapping', () => {
+      expectTypeOf<DeclarativeHttpValidatorConfig['responseMapping']>().toEqualTypeOf<HttpValidationResponseMapping>();
+    });
+
+    it('when should be ConditionalExpression | undefined', () => {
+      expectTypeOf<DeclarativeHttpValidatorConfig['when']>().toEqualTypeOf<ConditionalExpression | undefined>();
+    });
+  });
+});
+
+// ============================================================================
+// ValidatorConfig Union Membership (L3)
+// ============================================================================
+
+describe('ValidatorConfig union', () => {
+  it('should include DeclarativeHttpValidatorConfig as a member', () => {
+    const config: DeclarativeHttpValidatorConfig = {
+      type: 'http',
+      http: { url: '/api/validate' },
+      responseMapping: { validWhen: 'response.ok', errorKind: 'error' },
+    };
+
+    expectTypeOf(config).toMatchTypeOf<ValidatorConfig>();
+  });
+
+  it('should discriminate DeclarativeHttpValidatorConfig by type: "http"', () => {
+    const config: ValidatorConfig = {
+      type: 'http',
+      http: { url: '/api' },
+      responseMapping: { validWhen: 'response.ok', errorKind: 'error' },
+    };
+
+    if (config.type === 'http') {
+      expectTypeOf(config).toEqualTypeOf<DeclarativeHttpValidatorConfig>();
+    }
   });
 });

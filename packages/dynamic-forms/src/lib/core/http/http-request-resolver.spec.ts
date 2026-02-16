@@ -58,6 +58,16 @@ describe('resolveHttpRequest', () => {
     expect(result.url).toBe('/api/check?existing=true&name=john');
   });
 
+  it('should not modify URL when queryParams is an empty object (L1)', () => {
+    const config: HttpRequestConfig = {
+      url: '/api/check',
+      queryParams: {},
+    };
+    const result = resolveHttpRequest(config, createContext());
+
+    expect(result.url).toBe('/api/check');
+  });
+
   it('should handle null/undefined expression values as empty strings in query params', () => {
     const config: HttpRequestConfig = {
       url: '/api/check',
