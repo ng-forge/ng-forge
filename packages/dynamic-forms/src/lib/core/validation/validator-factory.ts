@@ -32,7 +32,12 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { ExpressionParser } from '../expressions/parser/expression-parser';
-import { isCrossFieldValidator, isCrossFieldBuiltInValidator, hasCrossFieldWhenCondition } from '../cross-field/cross-field-detector';
+import {
+  isCrossFieldValidator,
+  isCrossFieldBuiltInValidator,
+  hasCrossFieldWhenCondition,
+  isResourceBasedValidator,
+} from '../cross-field/cross-field-detector';
 
 function applyEmailValidator(path: SchemaPath<string>): void {
   email(path);
@@ -89,11 +94,7 @@ function createConditionalLogic(when: ConditionalExpression | undefined): LogicF
 export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   const path = fieldPath as SchemaPath<unknown>;
 
-  // Resource-based validators (customAsync, customHttp, http) handle cross-field
-  // when-conditions internally via their request/params callbacks returning undefined.
-  // They must NOT be skipped here — validateHttp/validateAsync need field-level registration.
-  const isResourceBasedValidator = config.type === 'customAsync' || config.type === 'customHttp' || config.type === 'http';
-  if (!isResourceBasedValidator && (isCrossFieldBuiltInValidator(config) || hasCrossFieldWhenCondition(config))) {
+  if (!isResourceBasedValidator(config) && (isCrossFieldBuiltInValidator(config) || hasCrossFieldWhenCondition(config))) {
     return;
   }
 
