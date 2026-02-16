@@ -98,6 +98,7 @@ export class DerivationOrchestrator {
 
       validateNoCycles(collection, this.logger);
       this.warnAboutWildcardDependencies(collection.entries, fields.length);
+      this.warnAboutMisconfiguredReEngagement(collection.entries);
 
       return collection;
     });
@@ -121,12 +122,23 @@ export class DerivationOrchestrator {
         // we only process derivations once after all updates complete (microtask timing).
         auditTime(0),
 
+        // startWith + pairwise: Track previous and current values to detect changed fields.
+        // This enables reEngageOnDependencyChange for onChange derivations.
+        startWith(null as [DerivationCollection, Record<string, unknown>, FieldTree<unknown>] | null),
+        pairwise(),
+        filter((pair): pair is [(typeof pair)[0], [DerivationCollection, Record<string, unknown>, FieldTree<unknown>]] => pair[1] !== null),
+        map(([previous, current]) => ({
+          collection: current[0],
+          formAccessor: current[2],
+          changedFields: getChangedKeys(previous?.[1] ?? null, current[1]),
+        })),
+
         // exhaustMap: Prevents re-entry while processing derivations.
         // If form value changes DURING derivation processing (from our own setValue calls),
         // we ignore those emissions and complete the current cycle first.
         // switchMap would cancel mid-processing, causing incomplete derivation chains.
-        exhaustMap(([collection, , formAccessor]) => {
-          this.applyOnChangeDerivations(collection, formAccessor);
+        exhaustMap(({ collection, formAccessor, changedFields }) => {
+          this.applyOnChangeDerivations(collection, formAccessor, changedFields);
 
           // scheduled with queueScheduler: Ensures the observable completes
           // in the next microtask, allowing exhaustMap to accept new emissions.
@@ -215,7 +227,7 @@ export class DerivationOrchestrator {
     );
   }
 
-  private applyOnChangeDerivations(collection: DerivationCollection, formAccessor: FieldTree<unknown>): void {
+  private applyOnChangeDerivations(collection: DerivationCollection, formAccessor: FieldTree<unknown>, changedFields?: Set<string>): void {
     const applicatorContext = {
       formValue: this.config.formValue,
       rootForm: formAccessor,
@@ -228,7 +240,7 @@ export class DerivationOrchestrator {
       maxIterations: untracked(() => this.formOptions()?.maxDerivationIterations),
     };
 
-    const result = applyDerivationsForTrigger(collection, 'onChange', applicatorContext);
+    const result = applyDerivationsForTrigger(collection, 'onChange', applicatorContext, changedFields);
 
     if (result.maxIterationsReached) {
       this.logger.warn(
@@ -316,6 +328,26 @@ export class DerivationOrchestrator {
         derivationDescs,
       );
     }
+  }
+
+  /**
+   * Warns about derivations with `reEngageOnDependencyChange: true` but without
+   * `stopOnUserOverride: true`. The re-engagement flag only has an effect when
+   * `stopOnUserOverride` is enabled — without it, `reEngageOnDependencyChange` is a no-op.
+   */
+  private warnAboutMisconfiguredReEngagement(entries: DerivationEntry[]): void {
+    if (!isDevMode()) return;
+
+    const misconfigured = entries.filter((entry) => entry.reEngageOnDependencyChange && !entry.stopOnUserOverride);
+    if (misconfigured.length === 0) return;
+
+    const fieldKeys = misconfigured.map((e) => e.debugName ?? e.fieldKey);
+    this.logger.warn(
+      '[Derivation] Derivations with reEngageOnDependencyChange but without stopOnUserOverride detected. ' +
+        'reEngageOnDependencyChange only takes effect when stopOnUserOverride is true. ' +
+        'Either add stopOnUserOverride: true or remove reEngageOnDependencyChange.',
+      fieldKeys,
+    );
   }
 
   /**

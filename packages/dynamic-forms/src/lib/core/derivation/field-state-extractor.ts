@@ -41,6 +41,12 @@ function resolveFieldState(
     return reactive ? (fieldSource as FieldTree<unknown>)() : untracked(fieldSource as FieldTree<unknown>);
   }
 
+  // FieldTree accessors are callable functions that may not be recognized by isSignal().
+  // Calling them returns the FieldState object with dirty, touched, valid, etc. signals.
+  if (typeof fieldSource === 'function') {
+    return reactive ? (fieldSource as FieldTree<unknown>)() : untracked(fieldSource as FieldTree<unknown>);
+  }
+
   if (typeof fieldSource === 'object') {
     return fieldSource as FieldState<unknown>;
   }
@@ -49,7 +55,12 @@ function resolveFieldState(
 }
 
 /**
- * Reads all state properties from a field source into a plain FieldStateInfo snapshot.
+ * Creates a lazy FieldStateInfo that only reads state properties when accessed.
+ *
+ * This prevents reactive cycles when fieldState/formFieldState is used inside
+ * logic conditions (readonly, hidden, disabled). Eagerly reading all properties
+ * (e.g., `valid`, `readonly`) would create circular dependencies when the
+ * logic condition itself controls one of those properties.
  *
  * Accepts either:
  * - A FieldTree (signal accessor from form tree) — called to get the FieldState
@@ -58,7 +69,7 @@ function resolveFieldState(
  * @param fieldSource - A FieldTree or direct FieldState instance
  * @param reactive - If true, reads signals reactively (creates dependencies).
  *                   If false, reads signals with `untracked()` (no dependencies).
- * @returns A FieldStateInfo snapshot, or undefined if the source is invalid
+ * @returns A FieldStateInfo proxy with lazy property access, or undefined if the source is invalid
  *
  * @internal
  */
@@ -69,9 +80,17 @@ export function readFieldStateInfo(
   const state = resolveFieldState(fieldSource, reactive);
   if (!state || typeof state !== 'object') return undefined;
 
-  const entries = STATE_PROPERTIES.map((prop) => [prop, readStateSignal(state, prop, reactive)] as const);
-  const dirty = entries.find(([prop]) => prop === 'dirty')![1];
-  return Object.fromEntries([...entries, ['pristine', !dirty]]) as Record<StateProperty | 'pristine', boolean>;
+  return new Proxy({} as FieldStateInfo, {
+    get(_target, prop: string): boolean {
+      if (prop === 'pristine') {
+        return !readStateSignal(state, 'dirty', reactive);
+      }
+      if (STATE_PROPERTIES.includes(prop as StateProperty)) {
+        return readStateSignal(state, prop as StateProperty, reactive);
+      }
+      return false;
+    },
+  });
 }
 
 /**

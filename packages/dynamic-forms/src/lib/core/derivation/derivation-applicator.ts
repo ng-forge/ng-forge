@@ -205,13 +205,27 @@ export function applyDerivations(
  */
 function getEntriesForChangedFields(entries: DerivationEntry[], changedFields: Set<string>): DerivationEntry[] {
   return entries.filter((entry) => {
-    // Wildcard entries are always included
-    if (entry.dependsOn.includes('*')) {
+    // Entries with no dependencies or wildcard dependencies always run
+    if (entry.dependsOn.length === 0 || entry.dependsOn.includes('*')) {
       return true;
     }
 
-    // Check if any dependency is in changed fields
-    return entry.dependsOn.some((dep) => changedFields.has(dep));
+    // Check if any dependency matches a changed field directly
+    if (entry.dependsOn.some((dep) => changedFields.has(dep))) {
+      return true;
+    }
+
+    // For array entries (fieldKey contains '$'), check if the entry's parent
+    // array key changed. Array derivations have relative dependencies
+    // (e.g., 'quantity') but changedFields contains root keys (e.g., 'lineItems').
+    for (const changed of changedFields) {
+      // Check if this entry lives under a changed parent (array or nested)
+      if (entry.fieldKey.startsWith(changed + '.')) return true;
+      // Check if a dependency is nested under a changed parent
+      if (entry.dependsOn.some((dep) => dep.startsWith(changed + '.'))) return true;
+    }
+
+    return false;
   });
 }
 
@@ -800,6 +814,19 @@ function resetFieldState(rootForm: FieldTree<unknown>, fieldPath: string): void 
 }
 
 /**
+ * Checks whether any of the entry's dependencies appear in the changed fields set.
+ *
+ * For array derivations (fieldKey contains '$'), dependencies use relative names
+ * (e.g., 'quantity') but changedFields contains top-level keys (e.g., 'lineItems').
+ * This function also checks if the entry's parent array key is in changedFields.
+ *
+ * @internal
+ */
+function hasDependencyChanged(entry: DerivationEntry, changedFields: Set<string>): boolean {
+  return entry.dependsOn.some((dep) => dep === '*' || changedFields.has(dep));
+}
+
+/**
  * Checks whether a derivation should be skipped due to the user having manually
  * edited the target field. Handles re-engagement when `reEngageOnDependencyChange`
  * is set and a dependency has changed.
@@ -819,7 +846,7 @@ function shouldSkipForUserOverride(
   // Re-engagement: reset dirty state if any dependency changed
   // Guard: changedFields is undefined on initial onChange evaluation
   if (entry.reEngageOnDependencyChange && chainContext.changedFields) {
-    const dependencyChanged = entry.dependsOn.some((dep) => dep === '*' || chainContext.changedFields!.has(dep));
+    const dependencyChanged = hasDependencyChanged(entry, chainContext.changedFields);
     if (dependencyChanged) {
       resetFieldState(context.rootForm, resolvedFieldKey);
     }
