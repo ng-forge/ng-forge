@@ -137,6 +137,25 @@ describe('field-state-extractor', () => {
       expect(snapshot!.valid).toBe(true);
     });
 
+    it('should support "in" operator for known state properties', () => {
+      const fieldState = createMockFieldState({});
+      const snapshot = readFieldStateInfo(createMockFieldTree(fieldState), false);
+
+      expect(snapshot).toBeDefined();
+      expect('dirty' in snapshot!).toBe(true);
+      expect('touched' in snapshot!).toBe(true);
+      expect('valid' in snapshot!).toBe(true);
+      expect('pristine' in snapshot!).toBe(true);
+      expect('hidden' in snapshot!).toBe(true);
+      expect('readonly' in snapshot!).toBe(true);
+      expect('disabled' in snapshot!).toBe(true);
+      expect('pending' in snapshot!).toBe(true);
+      expect('invalid' in snapshot!).toBe(true);
+      // Unknown properties should not be "in" the map
+      expect('nonexistent' in snapshot!).toBe(false);
+      expect('value' in snapshot!).toBe(false);
+    });
+
     it('should read state from a plain function accessor (real FieldTree behavior)', () => {
       const fieldState = createMockFieldState({ touched: true, dirty: true, valid: false });
       const fieldTree = createMockFieldTreeAsFunction(fieldState);
@@ -244,15 +263,25 @@ describe('field-state-extractor', () => {
       expect(map['nonexistent.deeply.nested']).toBeUndefined();
     });
 
-    it('should return false for "in" operator (Proxy has no "has" trap)', () => {
+    it('should support "in" operator for existing fields', () => {
       const nameState = createMockFieldState({ dirty: true });
       const form = createMockForm({ name: nameState });
       const map = createFormFieldStateMap(form, false);
 
-      // The Proxy only defines a "get" trap. The "in" operator uses the "has" trap,
-      // which defaults to checking own properties of the target (empty object {}).
-      // Consumers should use bracket access (map['name']) instead of 'name' in map.
-      expect('name' in map).toBe(false);
+      expect('name' in map).toBe(true);
+      expect('nonexistent' in map).toBe(false);
+    });
+
+    it('should support "in" operator for nested field paths', () => {
+      const cityState = createMockFieldState({ dirty: true });
+      const addressGroup: Record<string, unknown> = {
+        city: createMockFieldTree(cityState),
+      };
+      const form = { address: addressGroup } as unknown as FieldTree<unknown>;
+      const map = createFormFieldStateMap(form, false);
+
+      expect('address.city' in map).toBe(true);
+      expect('address.missing' in map).toBe(false);
     });
 
     it('should return empty array for Object.keys() (Proxy has no "ownKeys" trap)', () => {
@@ -261,9 +290,9 @@ describe('field-state-extractor', () => {
       const form = createMockForm({ name: nameState, email: emailState });
       const map = createFormFieldStateMap(form, false);
 
-      // The Proxy only defines a "get" trap. Object.keys() uses the "ownKeys" trap,
-      // which defaults to the target's own keys (empty object {}).
-      // Consumers should NOT rely on iteration — use direct bracket access only.
+      // Object.keys() uses the "ownKeys" trap, which is intentionally not implemented.
+      // FormFieldStateMap is a lazy accessor — consumers should use direct bracket
+      // access (map['name']) rather than iteration.
       expect(Object.keys(map)).toEqual([]);
     });
   });

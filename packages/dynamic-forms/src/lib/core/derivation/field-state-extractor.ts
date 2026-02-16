@@ -80,6 +80,8 @@ export function readFieldStateInfo(
   const state = resolveFieldState(fieldSource, reactive);
   if (!state || typeof state !== 'object') return undefined;
 
+  const knownProperties = new Set<string>([...STATE_PROPERTIES, 'pristine']);
+
   return new Proxy({} as FieldStateInfo, {
     get(_target, prop: string): boolean {
       if (prop === 'pristine') {
@@ -89,6 +91,9 @@ export function readFieldStateInfo(
         return readStateSignal(state, prop as StateProperty, reactive);
       }
       return false;
+    },
+    has(_target, prop: string): boolean {
+      return knownProperties.has(prop);
     },
   });
 }
@@ -122,6 +127,9 @@ export function createFormFieldStateMap(rootForm: FieldTree<unknown>, reactive: 
       const snapshot = readFieldStateInfo(fieldAccessor, reactive);
       cache.set(key, snapshot);
       return snapshot;
+    },
+    has(_target, key: string): boolean {
+      return navigateToFieldAccessor(rootForm, key) !== undefined;
     },
   });
 }

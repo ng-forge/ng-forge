@@ -816,9 +816,17 @@ function resetFieldState(rootForm: FieldTree<unknown>, fieldPath: string): void 
 /**
  * Checks whether any of the entry's dependencies appear in the changed fields set.
  *
- * For array derivations (fieldKey contains '$'), dependencies use relative names
- * (e.g., 'quantity') but changedFields contains top-level keys (e.g., 'lineItems').
- * This function also checks if the entry's parent array key is in changedFields.
+ * **Known limitation for array derivations:** `changedFields` contains root-level keys
+ * (e.g., `'lineItems'`) produced by `getChangedKeys()`, but array derivation dependencies
+ * use relative names (e.g., `['quantity', 'unitPrice']`). This means `reEngageOnDependencyChange`
+ * only fires for root-level dependencies (e.g., `'discountRate'`) — NOT for intra-item
+ * dependencies like `'quantity'` within the same array item.
+ *
+ * Adding parent-key matching (checking if `entry.fieldKey.startsWith(changed + '.')`)
+ * was attempted but causes false positives: editing the TARGET field also triggers
+ * `changedFields = {'lineItems'}`, which would reset dirty immediately and break
+ * `stopOnUserOverride`. Fixing this requires per-field change tracking instead of
+ * per-root-key tracking — a more significant architectural change.
  *
  * @internal
  */
