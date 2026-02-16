@@ -8,6 +8,7 @@ import { SchemaRegistryService } from '../core/registry/schema-registry.service'
 import { FormStateManager, FORM_STATE_DEPS, FormStateDeps } from '../state/form-state-manager';
 import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, EXTERNAL_DATA, FORM_OPTIONS } from '../models/field-signal-context.token';
 import { DERIVATION_WARNING_TRACKER, createDerivationWarningTracker } from '../core/derivation/derivation-warning-tracker';
+import { DEPRECATION_WARNING_TRACKER, createDeprecationWarningTracker } from '../utils/deprecation-warning-tracker';
 import {
   DERIVATION_ORCHESTRATOR,
   createDerivationOrchestrator,
@@ -74,6 +75,7 @@ export function provideDynamicFormDI(): Provider[] {
       deps: [FormStateManager],
     },
     { provide: DERIVATION_WARNING_TRACKER, useFactory: createDerivationWarningTracker },
+    { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
     {
       provide: DERIVATION_ORCHESTRATOR,
       useFactory: (

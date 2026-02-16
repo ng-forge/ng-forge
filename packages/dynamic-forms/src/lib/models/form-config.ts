@@ -387,6 +387,9 @@ export interface CustomFnConfig {
   derivations?: Record<string, CustomFunction>;
 
   /**
+   * @deprecated Register functions under `derivations` instead. Use `type: 'derivation'`
+   * with `targetProperty` in field logic configs. Will be removed in a future minor version.
+   *
    * Custom property derivation functions for reactive property updates.
    *
    * These functions compute derived values for field properties (like `minDate`,
@@ -546,6 +549,10 @@ export interface CustomFnConfig {
   asyncValidators?: Record<string, AsyncCustomValidator>;
 
   /**
+   * @deprecated Prefer declarative HTTP validators using `type: 'http'` with `http` + `responseMapping`
+   * in the validators array. Function-based HTTP validators now also use `type: 'http'` with `functionName`.
+   * Will be removed in a future minor version.
+   *
    * HTTP validators using Angular's validateHttp() API
    *
    * Angular's validateHttp provides HTTP validation with automatic request

@@ -24,6 +24,7 @@ import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { getChangedKeys } from '../../utils/object-utils';
 import { FunctionRegistryService } from '../registry';
 import { DERIVATION_WARNING_TRACKER } from '../derivation/derivation-warning-tracker';
+import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { applyPropertyDerivationsForTrigger } from './property-derivation-applicator';
 import { collectPropertyDerivations } from './property-derivation-collector';
 import { PropertyDerivationCollection, PropertyDerivationEntry } from './property-derivation-types';
@@ -64,6 +65,7 @@ export class PropertyDerivationOrchestrator {
   private readonly destroyRef = inject(DestroyRef);
   private readonly logger = inject(DynamicFormLogger);
   private readonly warningTracker = inject(DERIVATION_WARNING_TRACKER);
+  private readonly deprecationTracker = inject(DEPRECATION_WARNING_TRACKER);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly formOptions = inject(FORM_OPTIONS);
 
@@ -84,7 +86,7 @@ export class PropertyDerivationOrchestrator {
         return null;
       }
 
-      const collection = collectPropertyDerivations(fields);
+      const collection = collectPropertyDerivations(fields, this.logger, this.deprecationTracker);
 
       if (collection.entries.length === 0) {
         return null;

@@ -21,9 +21,11 @@ import {
   AsyncValidatorConfig,
   CustomValidatorConfig,
   DeclarativeHttpValidatorConfig,
-  HttpValidatorConfig,
+  FunctionHttpValidatorConfig,
   ValidatorConfig,
 } from '../../models/validation/validator-config';
+import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
+import { warnDeprecated } from '../../utils/deprecation-warnings';
 import { resolveHttpRequest } from '../http/http-request-resolver';
 import { evaluateHttpValidationResponse } from '../http/http-response-evaluator';
 import { createLogicFunction } from '../expressions/logic-function-factory';
@@ -98,6 +100,9 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
     return;
   }
 
+  const logger = inject(DynamicFormLogger);
+  const tracker = inject(DEPRECATION_WARNING_TRACKER);
+
   switch (config.type) {
     case 'required':
       if (config.when) {
@@ -138,14 +143,24 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
     case 'custom':
       applyCustomValidator(config, path);
       break;
+    case 'async':
+      applyAsyncValidator(config, path);
+      break;
     case 'customAsync':
+      warnDeprecated(logger, tracker, 'type:customAsync', "Validator type 'customAsync' is deprecated. Use type: 'async' instead.");
       applyAsyncValidator(config, path);
       break;
     case 'customHttp':
-      applyHttpValidator(config, path);
+      warnDeprecated(
+        logger,
+        tracker,
+        'type:customHttp',
+        "Validator type 'customHttp' is deprecated. Use type: 'http' with functionName instead.",
+      );
+      applyFunctionHttpValidator(config as FunctionHttpValidatorConfig, path);
       break;
     case 'http':
-      applyDeclarativeHttpValidator(config, path);
+      applyUnifiedHttpValidator(config, path);
       break;
   }
 }
@@ -271,14 +286,29 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
 }
 
 /**
- * Apply HTTP validator to field path using Angular's public validateHttp() API
+ * Unified handler for `type: 'http'` — discriminates between function-based and declarative
+ * based on property presence.
+ */
+function applyUnifiedHttpValidator(
+  config: FunctionHttpValidatorConfig | DeclarativeHttpValidatorConfig,
+  fieldPath: SchemaPath<unknown>,
+): void {
+  if ('functionName' in config && config.functionName) {
+    applyFunctionHttpValidator(config as FunctionHttpValidatorConfig, fieldPath);
+  } else {
+    applyDeclarativeHttpValidator(config as DeclarativeHttpValidatorConfig, fieldPath);
+  }
+}
+
+/**
+ * Apply function-based HTTP validator to field path using Angular's public validateHttp() API.
  *
  * Angular's validateHttp requires:
  * - request: Function that returns URL string or HttpResourceRequest
  * - onSuccess: Maps HTTP response to validation errors (inverted logic!)
  * - onError: Optional handler for HTTP errors
  */
-function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<unknown>): void {
+function applyFunctionHttpValidator(config: FunctionHttpValidatorConfig, fieldPath: SchemaPath<unknown>): void {
   const registry = inject(FunctionRegistryService);
   const httpValidatorConfig = registry.getHttpValidator(config.functionName);
 

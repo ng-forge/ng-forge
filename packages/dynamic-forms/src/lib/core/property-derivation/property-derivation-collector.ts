@@ -1,7 +1,16 @@
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
-import { isPropertyDerivationLogicConfig, PropertyDerivationLogicConfig } from '../../models/logic/logic-config';
+import {
+  DerivationLogicConfig,
+  isDerivationLogicConfig,
+  isPropertyDerivationLogicConfig,
+  hasTargetProperty,
+  PropertyDerivationLogicConfig,
+} from '../../models/logic/logic-config';
 import { hasChildFields } from '../../models/types/type-guards';
+import { Logger } from '../../providers/features/logger/logger.interface';
+import { DeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
+import { warnDeprecated } from '../../utils/deprecation-warnings';
 import { normalizeFieldsArray } from '../../utils/object-utils';
 import { extractExpressionDependencies, extractStringDependencies } from '../cross-field/cross-field-detector';
 import { buildPropertyOverrideKey, PLACEHOLDER_INDEX } from './property-override-key';
@@ -15,6 +24,8 @@ import { PropertyDerivationCollection, PropertyDerivationEntry } from './propert
 interface CollectionContext {
   /** Current array path for resolving relative field references. */
   arrayPath?: string;
+  logger: Logger;
+  tracker: DeprecationWarningTracker;
 }
 
 /**
@@ -31,9 +42,13 @@ interface CollectionContext {
  *
  * @public
  */
-export function collectPropertyDerivations(fields: FieldDef<unknown>[]): PropertyDerivationCollection {
+export function collectPropertyDerivations(
+  fields: FieldDef<unknown>[],
+  logger: Logger,
+  tracker: DeprecationWarningTracker,
+): PropertyDerivationCollection {
   const entries: PropertyDerivationEntry[] = [];
-  const context: CollectionContext = {};
+  const context: CollectionContext = { logger, tracker };
 
   traverseFields(fields, entries, context);
 
@@ -89,7 +104,18 @@ function collectFromField(field: FieldDef<unknown>, entries: PropertyDerivationE
   if (validationField.logic) {
     for (const logicConfig of validationField.logic) {
       if (isPropertyDerivationLogicConfig(logicConfig)) {
+        // Deprecated path — emit warning, then process normally
+        warnDeprecated(
+          context.logger,
+          context.tracker,
+          'type:propertyDerivation',
+          "Logic type 'propertyDerivation' is deprecated. Use type: 'derivation' with targetProperty instead.",
+        );
         const entry = createPropertyDerivationEntry(fieldKey, logicConfig, context);
+        entries.push(entry);
+      } else if (isDerivationLogicConfig(logicConfig) && hasTargetProperty(logicConfig)) {
+        // New unified path: type: 'derivation' + targetProperty → property derivation pipeline
+        const entry = createPropertyDerivationEntryFromDerivation(fieldKey, logicConfig, context);
         entries.push(entry);
       }
     }
@@ -128,11 +154,45 @@ function createPropertyDerivationEntry(
 }
 
 /**
+ * Creates a property derivation entry from a `DerivationLogicConfig` that has `targetProperty`.
+ *
+ * This handles the new unified path where `type: 'derivation'` configs with `targetProperty`
+ * are routed to the property derivation pipeline.
+ *
+ * @internal
+ */
+function createPropertyDerivationEntryFromDerivation(
+  fieldKey: string,
+  config: DerivationLogicConfig & { targetProperty: string },
+  context: CollectionContext,
+): PropertyDerivationEntry {
+  const effectiveFieldKey = buildPropertyOverrideKey(context.arrayPath, context.arrayPath ? PLACEHOLDER_INDEX : undefined, fieldKey);
+  const dependsOn = extractDependencies(config);
+  const condition = config.condition ?? true;
+  const trigger = config.trigger ?? 'onChange';
+  const debounceMs = trigger === 'debounced' ? (config as { debounceMs?: number }).debounceMs : undefined;
+
+  return {
+    fieldKey: effectiveFieldKey,
+    targetProperty: config.targetProperty,
+    dependsOn,
+    condition,
+    value: config.value,
+    expression: config.expression,
+    functionName: config.functionName,
+    trigger,
+    debounceMs,
+    debugName: config.debugName,
+    originalConfig: config,
+  };
+}
+
+/**
  * Extracts all field dependencies from a property derivation config.
  *
  * @internal
  */
-function extractDependencies(config: PropertyDerivationLogicConfig): string[] {
+function extractDependencies(config: PropertyDerivationLogicConfig | DerivationLogicConfig): string[] {
   const deps = new Set<string>();
 
   if (config.dependsOn && config.dependsOn.length > 0) {

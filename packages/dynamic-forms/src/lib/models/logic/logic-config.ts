@@ -201,6 +201,44 @@ interface BaseDerivationLogicConfig {
   type: 'derivation';
 
   /**
+   * Target property name for property derivation.
+   *
+   * When set, this derivation targets a field property (like `minDate`, `options`,
+   * `label`, `placeholder`) instead of the field's value. The derivation is routed
+   * to the property derivation pipeline.
+   *
+   * When absent, the derivation targets the field's value (default behavior).
+   *
+   * **Depth limit (max 2 levels):** Only simple and single-dot-nested paths are
+   * supported. Paths with 2+ dots (e.g., `'a.b.c'`) will throw at runtime.
+   *
+   * @example
+   * ```typescript
+   * // Property derivation (new unified API)
+   * {
+   *   key: 'endDate',
+   *   type: 'datepicker',
+   *   logic: [{
+   *     type: 'derivation',
+   *     targetProperty: 'minDate',
+   *     expression: 'formValue.startDate'
+   *   }]
+   * }
+   *
+   * // Value derivation (no targetProperty — existing behavior)
+   * {
+   *   key: 'total',
+   *   type: 'input',
+   *   logic: [{
+   *     type: 'derivation',
+   *     expression: 'formValue.quantity * formValue.unitPrice'
+   *   }]
+   * }
+   * ```
+   */
+  targetProperty?: string;
+
+  /**
    * Optional name for this derivation for debugging purposes.
    *
    * When provided, this name appears in derivation debug logs,
@@ -570,54 +608,19 @@ interface DebouncedPropertyDerivationLogicConfig extends BasePropertyDerivationL
 /**
  * Configuration for property derivation logic.
  *
- * Enables reactive derivation of field properties (like `minDate`, `options`,
- * `label`, `placeholder`) based on form values and external data.
+ * @deprecated Use `DerivationLogicConfig` with `targetProperty` instead.
+ * The unified `type: 'derivation'` with `targetProperty` provides the same
+ * functionality with a simpler API surface.
  *
- * Property derivations are self-targeting: the logic is placed on the field
- * whose property should be derived.
- *
- * @example
  * ```typescript
- * // Derive endDate's minDate from startDate value
- * {
- *   key: 'endDate',
- *   type: 'datepicker',
- *   logic: [{
- *     type: 'propertyDerivation',
- *     targetProperty: 'minDate',
- *     expression: 'formValue.startDate'
- *   }]
- * }
+ * // Before (deprecated)
+ * { type: 'propertyDerivation', targetProperty: 'minDate', expression: '...' }
  *
- * // Derive options from another field's value
- * {
- *   key: 'city',
- *   type: 'select',
- *   logic: [{
- *     type: 'propertyDerivation',
- *     targetProperty: 'options',
- *     functionName: 'getCitiesForCountry',
- *     dependsOn: ['country']
- *   }]
- * }
- *
- * // Derive label conditionally
- * {
- *   key: 'phone',
- *   type: 'input',
- *   logic: [{
- *     type: 'propertyDerivation',
- *     targetProperty: 'label',
- *     value: 'Mobile Phone',
- *     condition: {
- *       type: 'fieldValue',
- *       fieldPath: 'contactType',
- *       operator: 'equals',
- *       value: 'mobile'
- *     }
- *   }]
- * }
+ * // After (preferred)
+ * { type: 'derivation', targetProperty: 'minDate', expression: '...' }
  * ```
+ *
+ * Will be removed in a future minor version.
  *
  * @public
  */
@@ -726,6 +729,9 @@ export function isDerivationLogicConfig(config: LogicConfig): config is Derivati
 /**
  * Type guard to check if a logic config is a PropertyDerivationLogicConfig.
  *
+ * @deprecated Use `isDerivationLogicConfig(config) && hasTargetProperty(config)` instead.
+ * Will be removed in a future minor version.
+ *
  * @param config - The logic config to check
  * @returns true if the config is for property derivation
  *
@@ -733,4 +739,19 @@ export function isDerivationLogicConfig(config: LogicConfig): config is Derivati
  */
 export function isPropertyDerivationLogicConfig(config: LogicConfig): config is PropertyDerivationLogicConfig {
   return config.type === 'propertyDerivation';
+}
+
+/**
+ * Type guard to check if a derivation config targets a property rather than the field value.
+ *
+ * When `targetProperty` is present on a `type: 'derivation'` config, it is routed
+ * to the property derivation pipeline instead of the value derivation pipeline.
+ *
+ * @param config - The derivation logic config to check
+ * @returns true if the config has a targetProperty (property derivation)
+ *
+ * @public
+ */
+export function hasTargetProperty(config: DerivationLogicConfig): config is DerivationLogicConfig & { targetProperty: string } {
+  return 'targetProperty' in config && typeof config.targetProperty === 'string' && config.targetProperty.length > 0;
 }

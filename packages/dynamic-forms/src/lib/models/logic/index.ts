@@ -14,6 +14,7 @@ export {
   isStateLogicConfig,
   isDerivationLogicConfig,
   isPropertyDerivationLogicConfig,
+  hasTargetProperty,
   createDefaultDerivationLogConfig,
   shouldLog,
 } from './logic-config';

@@ -25,6 +25,7 @@ export type {
   BuiltInValidatorConfig,
   CustomValidatorConfig,
   DeclarativeHttpValidatorConfig,
+  FunctionHttpValidatorConfig,
   HttpValidatorConfig,
   ValidatorConfig,
 } from './validation';
@@ -35,10 +36,20 @@ export type { HttpValidationResponseMapping } from './http/http-response-mapping
 
 // Logic
 export type { LogicConfig, StateLogicConfig, PropertyDerivationLogicConfig, FormStateCondition } from './logic';
-export { isFormStateCondition, isPropertyDerivationLogicConfig } from './logic';
+export { isFormStateCondition, isPropertyDerivationLogicConfig, hasTargetProperty } from './logic';
 
 // Expressions
-export type { ConditionalExpression, EvaluationContext } from './expressions';
+export type {
+  ComparisonOperator,
+  ConditionalExpression,
+  FieldValueCondition,
+  FormValueCondition,
+  CustomCondition,
+  JavascriptCondition,
+  AndCondition,
+  OrCondition,
+  EvaluationContext,
+} from './expressions';
 
 // Schemas
 export type { SchemaApplicationConfig, SchemaDefinition } from './schemas';

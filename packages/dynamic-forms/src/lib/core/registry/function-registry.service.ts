@@ -204,7 +204,7 @@ export class FunctionRegistryService {
    * Get a property derivation function by name
    */
   getPropertyDerivationFunction(name: string): CustomFunction | undefined {
-    return this.propertyDerivationFunctions.get(name);
+    return this.propertyDerivationFunctions.get(name) ?? this.derivationFunctions.get(name);
   }
 
   /**

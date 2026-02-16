@@ -34,6 +34,8 @@ import { RegisteredFieldTypes } from '../models/registry/field-registry';
 import { detectFormMode, FormMode } from '../models/types/form-mode';
 import { InferFormValue } from '../models/types/form-value-inference';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { DEPRECATION_WARNING_TRACKER } from '../utils/deprecation-warning-tracker';
+import { warnDeprecated } from '../utils/deprecation-warnings';
 import { FunctionRegistryService } from '../core/registry/function-registry.service';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
 import { createSchemaFromFields } from '../core/schema-builder';
@@ -858,11 +860,28 @@ export class FormStateManager<
     }
 
     if (customFnConfig.propertyDerivations) {
+      const deprecationTracker = inject(DEPRECATION_WARNING_TRACKER);
+      warnDeprecated(
+        this.logger,
+        deprecationTracker,
+        'customFnConfig:propertyDerivations',
+        "customFnConfig.propertyDerivations is deprecated. Register functions under 'derivations' instead and use type: 'derivation' with targetProperty.",
+      );
       this.functionRegistry.setPropertyDerivationFunctions(customFnConfig.propertyDerivations);
     }
 
     this.functionRegistry.setValidators(customFnConfig.validators);
     this.functionRegistry.setAsyncValidators(customFnConfig.asyncValidators);
+
+    if (customFnConfig.httpValidators) {
+      const deprecationTracker = inject(DEPRECATION_WARNING_TRACKER);
+      warnDeprecated(
+        this.logger,
+        deprecationTracker,
+        'customFnConfig:httpValidators',
+        "customFnConfig.httpValidators is deprecated. Prefer declarative HTTP validators using type: 'http' with http + responseMapping.",
+      );
+    }
     this.functionRegistry.setHttpValidators(customFnConfig.httpValidators);
   }
 
