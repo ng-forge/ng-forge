@@ -256,6 +256,18 @@ export function isCrossFieldBuiltInValidator(config: ValidatorConfig): boolean {
 }
 
 /**
+ * Checks if a validator uses Angular's resource API (validateHttp / validateAsync).
+ *
+ * Resource-based validators handle cross-field when-conditions internally
+ * via their request/params callbacks returning `undefined`. They must NOT
+ * be skipped by the cross-field early-return guard in `applyValidator`,
+ * because they require field-level registration.
+ */
+export function isResourceBasedValidator(config: ValidatorConfig): boolean {
+  return config.type === 'customAsync' || config.type === 'customHttp' || config.type === 'http';
+}
+
+/**
  * Detects if a validator's `when` condition is cross-field.
  *
  * @param config The validator configuration to check

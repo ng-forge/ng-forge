@@ -1,4 +1,6 @@
 import { ConditionalExpression } from '../expressions/conditional-expression';
+import { HttpRequestConfig } from '../http/http-request-config';
+import { HttpValidationResponseMapping } from '../http/http-response-mapping';
 
 /**
  * Base configuration shared by all validators
@@ -91,7 +93,31 @@ export interface HttpValidatorConfig extends BaseValidatorConfig {
 }
 
 /**
+ * Declarative HTTP validator configuration — fully JSON-serializable, no function registration required.
+ *
+ * Uses `HttpRequestConfig` to define the HTTP request and `HttpValidationResponseMapping`
+ * to interpret the response as a validation result. Powered by Angular's `validateHttp` API.
+ *
+ * Discriminated from `HttpValidatorConfig` (`type: 'customHttp'`) by type literal.
+ */
+export interface DeclarativeHttpValidatorConfig extends BaseValidatorConfig {
+  /** Validator type identifier */
+  type: 'http';
+
+  /** HTTP request configuration with expression-based query params and body */
+  http: HttpRequestConfig;
+
+  /** Mapping that interprets the HTTP response as a validation result */
+  responseMapping: HttpValidationResponseMapping;
+}
+
+/**
  * Configuration for signal forms validator functions that can be serialized from API
  * Discriminated union type for type-safe validator configuration
  */
-export type ValidatorConfig = BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | HttpValidatorConfig;
+export type ValidatorConfig =
+  | BuiltInValidatorConfig
+  | CustomValidatorConfig
+  | AsyncValidatorConfig
+  | HttpValidatorConfig
+  | DeclarativeHttpValidatorConfig;
