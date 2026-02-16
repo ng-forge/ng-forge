@@ -243,5 +243,28 @@ describe('field-state-extractor', () => {
       expect(map['address.city']).toBeUndefined();
       expect(map['nonexistent.deeply.nested']).toBeUndefined();
     });
+
+    it('should return false for "in" operator (Proxy has no "has" trap)', () => {
+      const nameState = createMockFieldState({ dirty: true });
+      const form = createMockForm({ name: nameState });
+      const map = createFormFieldStateMap(form, false);
+
+      // The Proxy only defines a "get" trap. The "in" operator uses the "has" trap,
+      // which defaults to checking own properties of the target (empty object {}).
+      // Consumers should use bracket access (map['name']) instead of 'name' in map.
+      expect('name' in map).toBe(false);
+    });
+
+    it('should return empty array for Object.keys() (Proxy has no "ownKeys" trap)', () => {
+      const nameState = createMockFieldState({ dirty: true });
+      const emailState = createMockFieldState({ touched: true });
+      const form = createMockForm({ name: nameState, email: emailState });
+      const map = createFormFieldStateMap(form, false);
+
+      // The Proxy only defines a "get" trap. Object.keys() uses the "ownKeys" trap,
+      // which defaults to the target's own keys (empty object {}).
+      // Consumers should NOT rely on iteration — use direct bracket access only.
+      expect(Object.keys(map)).toEqual([]);
+    });
   });
 });

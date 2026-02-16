@@ -1384,6 +1384,47 @@ describe('derivation-applicator', () => {
       expect(result.skippedCount).toBe(1);
     });
 
+    it('should handle two derivations targeting the same field with stopOnUserOverride (chain tracking blocks second)', () => {
+      const { form, values, dirtyStates } = createMockForm({ country: 'USA', phonePrefix: '+custom' });
+      formValueSignal = signal({ country: 'USA', phonePrefix: '+custom' });
+
+      // Simulate user having overridden phonePrefix
+      dirtyStates['phonePrefix'].set(true);
+
+      // Two derivations target the same field, both with stopOnUserOverride
+      // The first has reEngageOnDependencyChange and its dependency changed
+      // The second does NOT have reEngageOnDependencyChange
+      const entry1 = createEntry('phonePrefix', {
+        value: '+1',
+        dependsOn: ['country'],
+        stopOnUserOverride: true,
+        reEngageOnDependencyChange: true,
+      });
+      const entry2 = createEntry('phonePrefix', {
+        value: '+1-alt',
+        dependsOn: ['country'],
+        stopOnUserOverride: true,
+        // No reEngageOnDependencyChange
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      // country changed → entry1's reEngage resets dirty → entry1 applies '+1'
+      // entry2 is blocked by chain tracking (same derivation key 'phonePrefix' already applied)
+      // This prevents the first derivation's reset() from unexpectedly enabling the second
+      const changedFields = new Set(['country']);
+      const result = applyDerivations(createCollection([entry1, entry2]), context, changedFields);
+
+      expect(result.appliedCount).toBe(1);
+      expect(values['phonePrefix']).toBe('+1');
+      expect(dirtyStates['phonePrefix']()).toBe(false);
+    });
+
     it('should apply derivation when stopOnUserOverride targets non-existent field path', () => {
       const { form } = createMockForm({ country: 'USA' });
       formValueSignal = signal({ country: 'USA', missingField: '' });
