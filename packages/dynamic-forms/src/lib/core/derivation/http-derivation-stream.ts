@@ -15,7 +15,7 @@ import { Logger } from '../../providers/features/logger/logger.interface';
 import { DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
 import { DerivationWarningTracker } from './derivation-warning-tracker';
-import { readFieldDirty, applyValueToForm } from './field-value-utils';
+import { readFieldDirty, resetFieldState, applyValueToForm } from './field-value-utils';
 import { readFieldStateInfo, createFormFieldStateMap } from './field-state-extractor';
 import type { FieldTreeRecord } from '../field-tree-utils';
 
@@ -40,11 +40,11 @@ export interface HttpDerivationStreamContext {
   /** Signal containing the derivation logger */
   derivationLogger: Signal<DerivationLogger>;
 
-  /** Custom functions for expression evaluation */
-  customFunctions?: Record<string, CustomFunction>;
+  /** Lazy resolver for custom functions — called per-emission to get fresh values */
+  customFunctions?: () => Record<string, CustomFunction> | undefined;
 
-  /** External data for expression evaluation */
-  externalData?: Record<string, unknown>;
+  /** Lazy resolver for external data — called per-emission to get fresh values */
+  externalData?: () => Record<string, unknown> | undefined;
 
   /** Warning tracker to suppress duplicate missing-field warnings */
   warningTracker?: DerivationWarningTracker;
@@ -91,6 +91,8 @@ export function createHttpDerivationStream(
     return EMPTY;
   }
 
+  // Capture after the guard — TS narrows this to `string` here
+  const responseExpression = entry.responseExpression;
   const debounceMs = entry.http.debounceMs ?? DEFAULT_HTTP_DEBOUNCE_MS;
 
   return formValue$.pipe(
@@ -106,7 +108,7 @@ export function createHttpDerivationStream(
       return entry.dependsOn.some((dep) => changedFields.has(dep));
     }),
     debounceTime(debounceMs),
-    switchMap(({ current }) => {
+    switchMap(({ current, changedFields }) => {
       return new Observable<void>((subscriber) => {
         const formAccessor = untracked(() => context.form());
 
@@ -114,17 +116,40 @@ export function createHttpDerivationStream(
         if (entry.stopOnUserOverride) {
           const isDirty = readFieldDirty(formAccessor, entry.fieldKey);
           if (isDirty) {
-            const derivationLogger = untracked(() => context.derivationLogger());
-            derivationLogger.evaluation({
-              debugName: entry.debugName,
-              fieldKey: entry.fieldKey,
-              result: 'skipped',
-              skipReason: 'user-override',
-            });
-            subscriber.complete();
-            return;
+            // Re-engage: if a dependency changed, clear dirty state so derivation resumes
+            if (entry.reEngageOnDependencyChange && changedFields.size > 0) {
+              if (entry.dependsOn.some((dep) => changedFields.has(dep))) {
+                resetFieldState(formAccessor, entry.fieldKey);
+                // Fall through — proceed with the HTTP request
+              } else {
+                // Dependency didn't change, still skip
+                const derivationLogger = untracked(() => context.derivationLogger());
+                derivationLogger.evaluation({
+                  debugName: entry.debugName,
+                  fieldKey: entry.fieldKey,
+                  result: 'skipped',
+                  skipReason: 'user-override',
+                });
+                subscriber.complete();
+                return;
+              }
+            } else {
+              const derivationLogger = untracked(() => context.derivationLogger());
+              derivationLogger.evaluation({
+                debugName: entry.debugName,
+                fieldKey: entry.fieldKey,
+                result: 'skipped',
+                skipReason: 'user-override',
+              });
+              subscriber.complete();
+              return;
+            }
           }
         }
+
+        // Resolve lazy context values per-emission
+        const customFunctions = context.customFunctions?.();
+        const externalData = context.externalData?.();
 
         // Build evaluation context for condition check and request resolution
         const fieldValue = getNestedValue(current, entry.fieldKey);
@@ -135,8 +160,8 @@ export function createHttpDerivationStream(
           fieldValue,
           formValue: current,
           fieldPath: entry.fieldKey,
-          customFunctions: context.customFunctions,
-          externalData: context.externalData,
+          customFunctions,
+          externalData,
           logger: context.logger,
           fieldState,
           formFieldState: createFormFieldStateMap(formAccessor, false),
@@ -172,7 +197,7 @@ export function createHttpDerivationStream(
             next: (response) => {
               try {
                 // Extract value from response using responseExpression
-                const newValue = ExpressionParser.evaluate(entry.responseExpression, { response });
+                const newValue = ExpressionParser.evaluate(responseExpression, { response });
 
                 // Compare with current value — skip if unchanged
                 const currentFormValue = untracked(() => context.formValue());

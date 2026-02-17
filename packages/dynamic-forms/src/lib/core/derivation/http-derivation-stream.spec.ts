@@ -89,6 +89,7 @@ describe('createHttpDerivationStream', () => {
       trigger: options.trigger ?? 'onChange',
       isShorthand: options.isShorthand ?? false,
       stopOnUserOverride: options.stopOnUserOverride,
+      reEngageOnDependencyChange: options.reEngageOnDependencyChange,
       debugName: options.debugName,
     };
   }
@@ -396,6 +397,40 @@ describe('createHttpDerivationStream', () => {
       vi.advanceTimersByTime(300);
 
       expect(mockHttpClient.request).toHaveBeenCalledTimes(1);
+    });
+
+    it('should re-engage HTTP derivation when reEngageOnDependencyChange is true and dependency changes after user override', () => {
+      const { form, values, dirtyStates } = createMockForm({ country: 'USA', rate: 0 });
+      const formValueSignal = signal<Record<string, unknown>>({ country: 'USA', rate: 0 });
+
+      const entry = createHttpEntry('rate', {
+        dependsOn: ['country'],
+        stopOnUserOverride: true,
+        reEngageOnDependencyChange: true,
+      });
+
+      const context = createContext(form, formValueSignal);
+      const stream$ = createHttpDerivationStream(entry, formValue$, context);
+      stream$.subscribe();
+
+      // Initial derivation fires (startWith(null) → pairwise → all keys changed)
+      formValue$.next({ country: 'USA', rate: 0 });
+      vi.advanceTimersByTime(300);
+      expect(mockHttpClient.request).toHaveBeenCalledTimes(1);
+      expect(values.rate).toBe(1.5);
+
+      // Simulate user override — mark field as dirty
+      dirtyStates['rate'].set(true);
+
+      // Change dependency → should re-engage (clear dirty) and fire HTTP
+      mockHttpClient.request.mockReturnValue(of({ rate: 2.5 }));
+      formValue$.next({ country: 'UK', rate: 0 });
+      vi.advanceTimersByTime(300);
+
+      expect(mockHttpClient.request).toHaveBeenCalledTimes(2);
+      expect(values.rate).toBe(2.5);
+      // Dirty state should be cleared by resetFieldState
+      expect(dirtyStates['rate']()).toBe(false);
     });
   });
 

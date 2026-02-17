@@ -97,6 +97,16 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getDerivationLogicScenario('http-derivation-stop-override-test') },
   },
+  {
+    path: 'http-derivation-re-engage',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('http-derivation-re-engage-test') },
+  },
+  {
+    path: 'http-derivation-condition',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('http-derivation-condition-test') },
+  },
 ];
 
 export default routes;

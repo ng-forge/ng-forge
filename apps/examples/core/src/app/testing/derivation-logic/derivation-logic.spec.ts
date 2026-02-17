@@ -1600,4 +1600,131 @@ test.describe('Value Derivation Logic Tests', () => {
       expect(data['timezone']).toBe('My/Timezone');
     });
   });
+
+  test.describe('HTTP Derivation Re-Engage', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.route('**/api/timezone*', async (route) => {
+        const url = new URL(route.request().url());
+        const country = url.searchParams.get('country');
+        const timezones: Record<string, string> = {
+          US: 'America/New_York',
+          UK: 'Europe/London',
+          DE: 'Europe/Berlin',
+        };
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ timezone: timezones[country ?? ''] ?? 'UTC' }),
+        });
+      });
+
+      await page.goto(testUrl('/test/derivation-logic/http-derivation-re-engage'));
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('should derive timezone via HTTP when country changes', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('http-derivation-re-engage-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const timezoneInput = helpers.getInput(scenario, 'timezone');
+
+      // Select US → timezone = America/New_York
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(1000);
+      await expect(timezoneInput).toHaveValue('America/New_York');
+    });
+
+    test('should stop deriving after user manually edits timezone', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('http-derivation-re-engage-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const timezoneInput = helpers.getInput(scenario, 'timezone');
+
+      // Derive initial value
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(1000);
+      await expect(timezoneInput).toHaveValue('America/New_York');
+
+      // User manually overrides timezone
+      await helpers.clearAndFill(timezoneInput, 'Custom/Timezone');
+      await page.waitForTimeout(500);
+      await expect(timezoneInput).toHaveValue('Custom/Timezone');
+    });
+
+    test('should re-engage HTTP derivation when country changes after user override', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('http-derivation-re-engage-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const timezoneInput = helpers.getInput(scenario, 'timezone');
+
+      // Step 1: Derive timezone via HTTP
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(1000);
+      await expect(timezoneInput).toHaveValue('America/New_York');
+
+      // Step 2: User manually overrides timezone (marks field as dirty)
+      await helpers.clearAndFill(timezoneInput, 'Custom/Timezone');
+      await page.waitForTimeout(500);
+
+      // Step 3: Change country → re-engagement clears dirty, HTTP fires again
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United Kingdom")').click();
+      await page.waitForTimeout(1000);
+      await expect(timezoneInput).toHaveValue('Europe/London');
+    });
+  });
+
+  test.describe('HTTP Derivation Condition', () => {
+    test.beforeEach(async ({ page, mockApi }) => {
+      await mockApi.mockSuccess('/api/lookup-city*', {
+        body: { city: 'Springfield' },
+      });
+
+      await page.goto(testUrl('/test/derivation-logic/http-derivation-condition'));
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('should not fire HTTP when condition is false (toggle off)', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('http-derivation-condition-test');
+      await expect(scenario).toBeVisible();
+
+      const zipCodeInput = helpers.getInput(scenario, 'zipCode');
+      const cityInput = helpers.getInput(scenario, 'city');
+
+      // Toggle is off by default — type zip code
+      await helpers.fillInput(zipCodeInput, '62701');
+      await page.waitForTimeout(1000);
+
+      // City should remain empty (HTTP not fired due to condition)
+      await expect(cityInput).toHaveValue('');
+    });
+
+    test('should fire HTTP when condition becomes true (toggle on)', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('http-derivation-condition-test');
+      await expect(scenario).toBeVisible();
+
+      const toggleField = scenario.locator('#enableLookup');
+      const zipCodeInput = helpers.getInput(scenario, 'zipCode');
+      const cityInput = helpers.getInput(scenario, 'city');
+
+      // Enable lookup
+      await toggleField.locator('button[role="switch"]').click();
+      await page.waitForTimeout(300);
+
+      // Type zip code → HTTP fires → city derived
+      await helpers.fillInput(zipCodeInput, '62701');
+      await page.waitForTimeout(1000);
+      await expect(cityInput).toHaveValue('Springfield');
+    });
+  });
 });

@@ -349,8 +349,8 @@ export class DerivationOrchestrator {
             httpClient: this.httpClient,
             logger: this.logger,
             derivationLogger: this.config.derivationLogger,
-            customFunctions: this.functionRegistry.getCustomFunctions(),
-            externalData: this.resolveExternalData(),
+            customFunctions: () => this.functionRegistry.getCustomFunctions(),
+            externalData: () => this.resolveExternalData(),
             warningTracker: this.warningTracker,
           };
 
@@ -380,7 +380,7 @@ export class DerivationOrchestrator {
    * Used for smart teardown comparison.
    */
   private computeHttpEntryKeys(entries: DerivationEntry[]): Set<string> {
-    return new Set(entries.map((entry) => `${entry.fieldKey}:${JSON.stringify(entry.http)}`));
+    return new Set(entries.map((entry) => `${entry.fieldKey}:${JSON.stringify(entry.http, Object.keys(entry.http ?? {}).sort())}`));
   }
 
   /**
