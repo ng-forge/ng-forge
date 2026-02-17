@@ -8,6 +8,7 @@ import { FormStateManager } from '../../state/form-state-manager';
 import { createLogicFunction } from './logic-function-factory';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
+import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 
 describe('logic-function-factory', () => {
   const mockEntity = signal<Record<string, unknown>>({});
@@ -27,6 +28,7 @@ describe('logic-function-factory', () => {
         { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
         { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         { provide: DynamicFormLogger, useValue: mockLogger },
+        { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
       ],
     });
 
