@@ -12,6 +12,9 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
 import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { HTTP_CONDITION_CACHE, HttpConditionCache } from '../http/http-condition-cache';
+import { LogicFunctionCacheService } from './logic-function-cache.service';
+import { HttpConditionFunctionCacheService } from './http-condition-function-cache.service';
+import { DynamicValueFunctionCacheService } from '../values/dynamic-value-function-cache.service';
 
 describe('logic-function-factory', () => {
   const mockEntity = signal<Record<string, unknown>>({});
@@ -34,6 +37,9 @@ describe('logic-function-factory', () => {
         { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
         { provide: HttpClient, useValue: { request: vi.fn().mockReturnValue(of({ allowed: true })) } },
         { provide: HTTP_CONDITION_CACHE, useValue: new HttpConditionCache() },
+        LogicFunctionCacheService,
+        HttpConditionFunctionCacheService,
+        DynamicValueFunctionCacheService,
       ],
     });
 
@@ -352,6 +358,61 @@ describe('logic-function-factory', () => {
 
         // Should return pendingValue (true) since HTTP hasn't resolved yet
         expect(result).toBe(true);
+      });
+    });
+
+    describe('HTTP condition nested validation', () => {
+      it('should throw when HTTP condition is nested inside and composite', () => {
+        const expression: ConditionalExpression = {
+          type: 'and',
+          conditions: [
+            { type: 'fieldValue', fieldPath: 'username', operator: 'equals', value: 'test' },
+            { type: 'http', http: { url: '/api/check' } },
+          ],
+        };
+
+        expect(() => runLogicFunctionTest(expression, 'test')).toThrowError(/HTTP conditions cannot be nested inside 'and' composites/);
+      });
+
+      it('should throw when HTTP condition is nested inside or composite', () => {
+        const expression: ConditionalExpression = {
+          type: 'or',
+          conditions: [
+            { type: 'fieldValue', fieldPath: 'username', operator: 'equals', value: 'test' },
+            { type: 'http', http: { url: '/api/check' } },
+          ],
+        };
+
+        expect(() => runLogicFunctionTest(expression, 'test')).toThrowError(/HTTP conditions cannot be nested inside 'or' composites/);
+      });
+
+      it('should throw when HTTP condition is deeply nested inside composites', () => {
+        const expression: ConditionalExpression = {
+          type: 'and',
+          conditions: [
+            {
+              type: 'or',
+              conditions: [
+                { type: 'fieldValue', fieldPath: 'a', operator: 'equals', value: 1 },
+                { type: 'http', http: { url: '/api/check' } },
+              ],
+            },
+          ],
+        };
+
+        expect(() => runLogicFunctionTest(expression, 'test')).toThrowError(/HTTP conditions cannot be nested inside 'or' composites/);
+      });
+
+      it('should not throw for and/or composites without HTTP conditions', () => {
+        const expression: ConditionalExpression = {
+          type: 'and',
+          conditions: [
+            { type: 'fieldValue', fieldPath: 'username', operator: 'equals', value: 'test' },
+            { type: 'fieldValue', fieldPath: 'email', operator: 'equals', value: 'test@example.com' },
+          ],
+        };
+
+        expect(() => runLogicFunctionTest(expression, 'test')).not.toThrow();
       });
     });
 

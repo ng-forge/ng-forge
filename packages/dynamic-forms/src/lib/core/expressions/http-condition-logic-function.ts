@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injector, signal, Signal, untracked } from '@angular/core';
+import { inject, Injector, signal, untracked } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
 import { catchError, debounceTime, distinctUntilChanged, filter, map, of, startWith, switchMap, tap } from 'rxjs';
 import { HttpCondition } from '../../models/expressions/conditional-expression';
+import { stableStringify } from '../../utils/stable-stringify';
 import { HttpResourceRequest } from '../validation/validator-types';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { FunctionRegistryService } from '../registry/function-registry.service';
@@ -12,90 +13,22 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { resolveHttpRequest } from '../http/http-request-resolver';
 import { ExpressionParser } from './parser/expression-parser';
-
-/**
- * Serializes a value to a deterministic string for cache key generation.
- * Sorts object keys to ensure consistent output regardless of property insertion order.
- */
-function stableStringify(value: unknown): string {
-  if (value === null || value === undefined) {
-    return String(value);
-  }
-
-  if (typeof value !== 'object') {
-    return JSON.stringify(value);
-  }
-
-  if (Array.isArray(value)) {
-    return '[' + value.map(stableStringify).join(',') + ']';
-  }
-
-  const obj = value as Record<string, unknown>;
-  const sortedKeys = Object.keys(obj).sort();
-  const pairs = sortedKeys.map((key) => JSON.stringify(key) + ':' + stableStringify(obj[key]));
-  return '{' + pairs.join(',') + '}';
-}
-
-/**
- * Per-field signal pair for HTTP condition resolution.
- * Created once per field context — LogicFn updates the resolvedRequest signal,
- * the pipeline reacts and updates resultValue.
- */
-interface FieldSignalPair {
-  resolvedRequest: ReturnType<typeof signal<HttpResourceRequest | undefined>>;
-  resultValue: Signal<boolean>;
-}
-
-/**
- * Cache for HTTP condition logic functions, keyed by injection context.
- */
-const httpConditionFunctionCache = new WeakMap<
-  FunctionRegistryService,
-  WeakMap<FieldContextRegistryService, Map<string, LogicFn<unknown, boolean>>>
->();
-
-/**
- * Per-field signal store for HTTP condition resolution.
- */
-const httpConditionSignalStore = new WeakMap<FunctionRegistryService, WeakMap<object, FieldSignalPair>>();
-
-function getHttpConditionFunctionCache(
-  functionRegistry: FunctionRegistryService,
-  fieldContextRegistry: FieldContextRegistryService,
-): Map<string, LogicFn<unknown, boolean>> {
-  let outerCache = httpConditionFunctionCache.get(functionRegistry);
-  if (!outerCache) {
-    outerCache = new WeakMap();
-    httpConditionFunctionCache.set(functionRegistry, outerCache);
-  }
-
-  let innerCache = outerCache.get(fieldContextRegistry);
-  if (!innerCache) {
-    innerCache = new Map();
-    outerCache.set(fieldContextRegistry, innerCache);
-  }
-
-  return innerCache;
-}
-
-function getHttpConditionSignalStore(functionRegistry: FunctionRegistryService): WeakMap<object, FieldSignalPair> {
-  let store = httpConditionSignalStore.get(functionRegistry);
-  if (!store) {
-    store = new WeakMap();
-    httpConditionSignalStore.set(functionRegistry, store);
-  }
-  return store;
-}
+import { HttpConditionFunctionCacheService } from './http-condition-function-cache.service';
 
 /**
  * Extracts a boolean from an HTTP response using an optional expression.
  * When `responseExpression` is provided, evaluates it with `{ response }` scope.
  * Otherwise, coerces the response to boolean.
  */
-function extractBoolean(response: unknown, responseExpression: string | undefined): boolean {
+function extractBoolean(response: unknown, responseExpression: string | undefined, pendingValue: boolean, logger: Logger): boolean {
   if (responseExpression) {
-    const result = ExpressionParser.evaluate(responseExpression, { response });
-    return !!result;
+    try {
+      const result = ExpressionParser.evaluate(responseExpression, { response });
+      return !!result;
+    } catch (error) {
+      logger.warn(`[Dynamic Forms] Failed to evaluate responseExpression '${responseExpression}':`, error);
+      return pendingValue;
+    }
   }
   return !!response;
 }
@@ -112,30 +45,28 @@ function extractBoolean(response: unknown, responseExpression: string | undefine
  */
 export function createHttpConditionLogicFunction<TValue>(condition: HttpCondition): LogicFn<TValue, boolean> {
   const httpClient = inject(HttpClient);
-  const functionRegistry = inject(FunctionRegistryService);
   const fieldContextRegistry = inject(FieldContextRegistryService);
+  const functionRegistry = inject(FunctionRegistryService);
   const injector = inject(Injector);
   const cache = inject(HTTP_CONDITION_CACHE);
   const logger = inject(DynamicFormLogger) as Logger;
+  const cacheService = inject(HttpConditionFunctionCacheService);
 
   const pendingValue = condition.pendingValue ?? false;
   const cacheDurationMs = condition.cacheDurationMs ?? 30000;
   const debounceMs = condition.http.debounceMs ?? 300;
 
   // Check function cache
-  const functionCache = getHttpConditionFunctionCache(functionRegistry, fieldContextRegistry);
   const cacheKey = stableStringify(condition);
 
-  const cached = functionCache.get(cacheKey);
+  const cached = cacheService.httpConditionFunctionCache.get(cacheKey);
   if (cached) {
     return cached as LogicFn<TValue, boolean>;
   }
 
-  const signalStore = getHttpConditionSignalStore(functionRegistry);
-
   const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
     const contextKey = ctx as unknown as object;
-    let signalPair = signalStore.get(contextKey);
+    let signalPair = cacheService.httpConditionSignalStore.get(contextKey);
 
     if (!signalPair) {
       const resolvedRequest = signal<HttpResourceRequest | undefined>(undefined);
@@ -156,7 +87,7 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
             if (request.headers) options['headers'] = request.headers;
 
             return httpClient.request(method, request.url, options).pipe(
-              map((response) => extractBoolean(response, condition.responseExpression)),
+              map((response) => extractBoolean(response, condition.responseExpression, pendingValue, logger)),
               tap((value) => {
                 const requestKey = stableStringify(request);
                 cache.set(requestKey, value, cacheDurationMs);
@@ -174,7 +105,7 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
       });
 
       signalPair = { resolvedRequest, resultValue };
-      signalStore.set(contextKey, signalPair);
+      cacheService.httpConditionSignalStore.set(contextKey, signalPair);
     }
 
     // Build reactive evaluation context (creates signal dependencies on form values)
@@ -202,6 +133,6 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
     return resultValue();
   };
 
-  functionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
+  cacheService.httpConditionFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
   return fn;
 }

@@ -27,6 +27,9 @@ import {
   PropertyOverrideStore,
 } from '../core/property-derivation/property-override-store';
 import { HTTP_CONDITION_CACHE, HttpConditionCache } from '../core/http/http-condition-cache';
+import { LogicFunctionCacheService } from '../core/expressions/logic-function-cache.service';
+import { HttpConditionFunctionCacheService } from '../core/expressions/http-condition-function-cache.service';
+import { DynamicValueFunctionCacheService } from '../core/values/dynamic-value-function-cache.service';
 import {
   createPropertyDerivationOrchestrator,
   PROPERTY_DERIVATION_ORCHESTRATOR,
@@ -99,7 +102,10 @@ export function provideDynamicFormDI(): Provider[] {
       },
       deps: [FormStateManager, DynamicFormLogger, DERIVATION_LOG_CONFIG, EXTERNAL_DATA],
     },
-    { provide: HTTP_CONDITION_CACHE, useFactory: () => new HttpConditionCache() },
+    { provide: HTTP_CONDITION_CACHE, useFactory: () => new HttpConditionCache(100) },
+    LogicFunctionCacheService,
+    HttpConditionFunctionCacheService,
+    DynamicValueFunctionCacheService,
     { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
     {
       provide: PROPERTY_DERIVATION_ORCHESTRATOR,

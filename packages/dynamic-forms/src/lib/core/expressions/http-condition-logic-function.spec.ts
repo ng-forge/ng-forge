@@ -14,6 +14,10 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
 import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { createHttpConditionLogicFunction } from './http-condition-logic-function';
+import { HttpConditionFunctionCacheService } from './http-condition-function-cache.service';
+import { LogicFunctionCacheService } from './logic-function-cache.service';
+import { DynamicValueFunctionCacheService } from '../values/dynamic-value-function-cache.service';
+import { stableStringify } from '../../utils/stable-stringify';
 
 describe('createHttpConditionLogicFunction', () => {
   const mockEntity = signal<Record<string, unknown>>({});
@@ -39,6 +43,9 @@ describe('createHttpConditionLogicFunction', () => {
         { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
         { provide: HttpClient, useValue: httpClient },
         { provide: HTTP_CONDITION_CACHE, useValue: conditionCache },
+        HttpConditionFunctionCacheService,
+        LogicFunctionCacheService,
+        DynamicValueFunctionCacheService,
       ],
     });
 
@@ -129,10 +136,10 @@ describe('createHttpConditionLogicFunction', () => {
       http: { url: '/api/check' },
     };
 
-    // Pre-populate cache with the expected cache key
-    // resolveHttpRequest returns { url: '/api/check', method: undefined }
-    // stableStringify sorts keys: method before url, undefined → "undefined"
-    conditionCache.set('{"method":undefined,"url":"/api/check"}', true, 30000);
+    // Pre-populate cache with the expected cache key using the same serialization
+    // as the production code: resolveHttpRequest → stableStringify
+    const expectedKey = stableStringify({ url: '/api/check', method: undefined });
+    conditionCache.set(expectedKey, true, 30000);
 
     const result = runInInjectionContext(injector, () => {
       const fn = createHttpConditionLogicFunction(condition);
@@ -220,7 +227,8 @@ describe('createHttpConditionLogicFunction', () => {
 
   it('should use responseExpression to extract boolean from response', () => {
     // Pre-populate the cache to test responseExpression without async
-    conditionCache.set('{"method":undefined,"url":"/api/check"}', true, 30000);
+    const expectedKey = stableStringify({ url: '/api/check', method: undefined });
+    conditionCache.set(expectedKey, true, 30000);
 
     const condition: HttpCondition = {
       type: 'http',
@@ -257,5 +265,52 @@ describe('createHttpConditionLogicFunction', () => {
     // The function resolved the request — it won't have called HTTP yet due to debounce,
     // but the resolved request signal was updated
     // We can't easily assert on the signal value, but no errors means success
+  });
+
+  it('should handle malformed responseExpression gracefully', () => {
+    const condition: HttpCondition = {
+      type: 'http',
+      http: { url: '/api/check', debounceMs: 0 },
+      responseExpression: 'response.!!!invalid@@@syntax',
+      pendingValue: false,
+    };
+
+    // The malformed expression should not throw — extractBoolean catches and returns pendingValue
+    runInInjectionContext(injector, () => {
+      const fn = createHttpConditionLogicFunction(condition);
+      const ctx = createMockFieldContext('test');
+      const result = fn(ctx);
+      // Before async resolution, should return pendingValue
+      expect(result).toBe(false);
+    });
+  });
+
+  it('should handle cacheDurationMs of 0 (effectively disables cache)', () => {
+    vi.useFakeTimers();
+    try {
+      const condition: HttpCondition = {
+        type: 'http',
+        http: { url: '/api/check' },
+        cacheDurationMs: 0,
+      };
+
+      // Pre-populate cache with TTL of 0
+      const expectedKey = stableStringify({ url: '/api/check', method: undefined });
+      conditionCache.set(expectedKey, true, 0);
+
+      // Advance time by 1ms to ensure the entry expires immediately
+      vi.advanceTimersByTime(1);
+
+      const result = runInInjectionContext(injector, () => {
+        const fn = createHttpConditionLogicFunction(condition);
+        const ctx = createMockFieldContext('test');
+        return fn(ctx);
+      });
+
+      // Cache should have expired, so pendingValue (false) is returned
+      expect(result).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

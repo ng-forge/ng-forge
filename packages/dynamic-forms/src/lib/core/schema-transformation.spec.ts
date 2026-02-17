@@ -8,6 +8,9 @@ import { FieldTypeDefinition } from '../models/field-type';
 import { SchemaRegistryService, FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from './registry';
 import { FormStateManager } from '../state/form-state-manager';
 import { applySchema, createSchemaFunction } from './schema-application';
+import { LogicFunctionCacheService } from './expressions/logic-function-cache.service';
+import { HttpConditionFunctionCacheService } from './expressions/http-condition-function-cache.service';
+import { DynamicValueFunctionCacheService } from './values/dynamic-value-function-cache.service';
 import { createSchemaFromFields, fieldsToDefaultValues } from './schema-builder';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { ConsoleLogger } from '../providers/features/logger/console-logger';
@@ -29,6 +32,9 @@ describe('schema-transformation', () => {
         FieldContextRegistryService,
         // Provide ConsoleLogger to enable logging in tests
         { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
+        LogicFunctionCacheService,
+        HttpConditionFunctionCacheService,
+        DynamicValueFunctionCacheService,
       ],
     });
 

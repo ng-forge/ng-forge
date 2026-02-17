@@ -43,14 +43,18 @@ test.describe('HTTP Conditions Tests', () => {
       const roleSelect = helpers.getSelect(scenario, 'userRole');
 
       // Select "Admin" → adminPanel should become visible
+      const responseAdmin = page.waitForResponse((r) => r.url().includes('/api/permissions'));
       await helpers.selectOption(roleSelect, 'Admin');
+      await responseAdmin;
       await expect(adminPanelField).toBeVisible({ timeout: 5000 });
 
       // Switch to "Viewer" → adminPanel should be hidden
+      const responseViewer = page.waitForResponse((r) => r.url().includes('/api/permissions'));
       await helpers.selectOption(roleSelect, 'Viewer');
+      await responseViewer;
       await expect(adminPanelField).toBeHidden({ timeout: 5000 });
 
-      // Switch back to "Admin" → adminPanel should be visible again
+      // Switch back to "Admin" → adminPanel should be visible again (may use cache)
       await helpers.selectOption(roleSelect, 'Admin');
       await expect(adminPanelField).toBeVisible({ timeout: 5000 });
     });
@@ -86,13 +90,17 @@ test.describe('HTTP Conditions Tests', () => {
       const taxExemptionInput = scenario.locator('#taxExemption input');
 
       // Type "US-CA" → taxExemption should be enabled (taxExemptionAllowed: true → !true = false → not disabled)
+      const responseCA = page.waitForResponse((r) => r.url().includes('/api/tax/check'));
       await regionInput.fill('US-CA');
       await regionInput.blur();
+      await responseCA;
       await expect(taxExemptionInput).toBeEnabled({ timeout: 5000 });
 
       // Clear and type "EU-DE" → taxExemption should be disabled
+      const responseDE = page.waitForResponse((r) => r.url().includes('/api/tax/check'));
       await regionInput.fill('EU-DE');
       await regionInput.blur();
+      await responseDE;
       await expect(taxExemptionInput).toBeDisabled({ timeout: 5000 });
     });
   });
@@ -117,21 +125,20 @@ test.describe('HTTP Conditions Tests', () => {
       await expect(scenario).toBeVisible();
 
       const countrySelect = helpers.getSelect(scenario, 'country');
-      const taxIdInput = scenario.locator('#taxId input');
+      const taxIdField = scenario.locator('#taxId');
 
       // Select "US" → taxId becomes required
+      const responseUS = page.waitForResponse((r) => r.url().includes('/api/tax-rules'));
       await helpers.selectOption(countrySelect, 'United States');
-
-      // Wait for HTTP to resolve and required state to apply
-      await page.waitForTimeout(1000);
+      await responseUS;
 
       // Check that the field has required indicator (asterisk in label or aria-required)
-      const taxIdField = scenario.locator('#taxId');
       await expect(taxIdField.locator('.mdc-floating-label--required, [aria-required="true"]').first()).toBeVisible({ timeout: 5000 });
 
       // Select "UK" → taxId becomes optional
+      const responseUK = page.waitForResponse((r) => r.url().includes('/api/tax-rules'));
       await helpers.selectOption(countrySelect, 'United Kingdom');
-      await page.waitForTimeout(1000);
+      await responseUK;
 
       // Required indicator should disappear
       const requiredIndicator = taxIdField.locator('[aria-required="true"]');
@@ -162,13 +169,17 @@ test.describe('HTTP Conditions Tests', () => {
       const displayNameInput = scenario.locator('#displayName input');
 
       // Type "admin" → displayName should be editable (canEditDisplayName: true → !true = false → not readonly)
+      const responseAdmin = page.waitForResponse((r) => r.url().includes('/api/users/permissions'));
       await usernameInput.fill('admin');
       await usernameInput.blur();
+      await responseAdmin;
       await expect(displayNameInput).not.toHaveAttribute('readonly', { timeout: 5000 });
 
       // Type "guest" → displayName should be readonly
+      const responseGuest = page.waitForResponse((r) => r.url().includes('/api/users/permissions'));
       await usernameInput.fill('guest');
       await usernameInput.blur();
+      await responseGuest;
       await expect(displayNameInput).toHaveAttribute('readonly', { timeout: 5000 });
     });
   });
@@ -219,23 +230,31 @@ test.describe('HTTP Conditions Tests', () => {
       const coercedField = scenario.locator('#coercedStatus');
 
       // Test nested expression: code "active" → response.data.isActive = true → hidden
+      const responseNested1 = page.waitForResponse((r) => r.url().includes('/api/status/nested'));
       await codeInput.fill('active');
       await codeInput.blur();
+      await responseNested1;
       await expect(nestedField).toBeHidden({ timeout: 5000 });
 
       // Test nested expression: code "inactive" → response.data.isActive = false → visible
+      const responseNested2 = page.waitForResponse((r) => r.url().includes('/api/status/nested'));
       await codeInput.fill('inactive');
       await codeInput.blur();
+      await responseNested2;
       await expect(nestedField).toBeVisible({ timeout: 5000 });
 
       // Test coerced: code "hide" → !!{someData: true} = true → hidden
+      const responseCoerced1 = page.waitForResponse((r) => r.url().includes('/api/status/coerced'));
       await codeInput.fill('hide');
       await codeInput.blur();
+      await responseCoerced1;
       await expect(coercedField).toBeHidden({ timeout: 5000 });
 
       // Test coerced: code "show" → !!null = false → visible
+      const responseCoerced2 = page.waitForResponse((r) => r.url().includes('/api/status/coerced'));
       await codeInput.fill('show');
       await codeInput.blur();
+      await responseCoerced2;
       await expect(coercedField).toBeVisible({ timeout: 5000 });
     });
   });
@@ -262,14 +281,13 @@ test.describe('HTTP Conditions Tests', () => {
       const queryInput = scenario.locator('#query input');
       const resultField = scenario.locator('#result');
 
-      // Field starts visible (no HTTP request yet, pendingValue: true → hidden is true initially,
-      // but the field state depends on when the condition is first evaluated)
-
       // Trigger the HTTP request by typing
+      const responsePromise = page.waitForResponse((r) => r.url().includes('/api/slow-check'));
       await queryInput.fill('test');
       await queryInput.blur();
 
       // After the HTTP response resolves (shouldHide: false), field should be visible
+      await responsePromise;
       await expect(resultField).toBeVisible({ timeout: 5000 });
     });
   });
@@ -289,7 +307,7 @@ test.describe('HTTP Conditions Tests', () => {
       const emailInput = scenario.locator('#email input');
       const verifiedField = scenario.locator('#verified');
 
-      // Fill email — API will fail
+      // Fill email — API will fail, no successful response expected
       await emailInput.fill('test@example.com');
       await emailInput.blur();
 
@@ -323,21 +341,25 @@ test.describe('HTTP Conditions Tests', () => {
       callCount = 0;
 
       // Select A → API call #1
+      const responseA = page.waitForResponse((r) => r.url().includes('/api/cache-test'));
       await helpers.selectOption(optionSelect, 'Option A');
-      await page.waitForTimeout(1500);
+      await responseA;
       const countAfterA = callCount;
       expect(countAfterA).toBeGreaterThanOrEqual(1);
 
       // Select B → API call #2 (different params)
+      const responseB = page.waitForResponse((r) => r.url().includes('/api/cache-test'));
       await helpers.selectOption(optionSelect, 'Option B');
-      await page.waitForTimeout(1500);
+      await responseB;
       const countAfterB = callCount;
       expect(countAfterB).toBeGreaterThan(countAfterA);
 
       // Select A again → should use cache (no new API call)
       const countBeforeSecondA = callCount;
       await helpers.selectOption(optionSelect, 'Option A');
-      await page.waitForTimeout(1500);
+      // No waitForResponse here — we expect NO HTTP request due to caching
+      // Use a short timeout to verify no new call was made
+      await page.waitForTimeout(500);
       expect(callCount).toBe(countBeforeSecondA);
     });
   });
