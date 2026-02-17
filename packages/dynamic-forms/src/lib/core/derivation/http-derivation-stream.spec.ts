@@ -530,7 +530,10 @@ describe('createHttpDerivationStream', () => {
       expect(mockHttpClient.request).not.toHaveBeenCalled();
     });
 
-    it('should make HTTP request when wildcard dependency is used', () => {
+    it('should not trigger when dependsOn contains wildcard (blocked at collector level)', () => {
+      // Wildcard dependencies are rejected by the collector at config validation time.
+      // This test verifies the stream filter does NOT match wildcards — if one somehow
+      // slips through, it should NOT trigger HTTP requests on every change.
       const { form } = createMockForm({ country: 'USA', name: 'Alice', rate: 0 });
       const formValueSignal = signal<Record<string, unknown>>({ country: 'USA', name: 'Alice', rate: 0 });
 
@@ -547,7 +550,8 @@ describe('createHttpDerivationStream', () => {
 
       vi.advanceTimersByTime(300);
 
-      expect(mockHttpClient.request).toHaveBeenCalledTimes(1);
+      // Wildcard is no longer matched in the stream filter — no HTTP request should fire
+      expect(mockHttpClient.request).not.toHaveBeenCalled();
     });
   });
 

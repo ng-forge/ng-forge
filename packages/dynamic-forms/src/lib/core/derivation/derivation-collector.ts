@@ -203,6 +203,12 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
           `Wildcard dependencies would trigger HTTP requests on every form change.`,
       );
     }
+    if (config.dependsOn.includes('*')) {
+      throw new DynamicFormError(
+        `HTTP derivation for '${effectiveFieldKey}' cannot use wildcard ('*') in 'dependsOn'. ` +
+          `Wildcards would trigger HTTP requests on every form change. Specify explicit field dependencies instead.`,
+      );
+    }
     if (!config.responseExpression) {
       throw new DynamicFormError(
         `HTTP derivation for '${effectiveFieldKey}' requires 'responseExpression' to extract the value from the response.`,

@@ -14,6 +14,7 @@ import { resolveHttpRequest } from '../http/http-request-resolver';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
+import { DerivationWarningTracker } from './derivation-warning-tracker';
 import { readFieldDirty, applyValueToForm } from './field-value-utils';
 import { readFieldStateInfo, createFormFieldStateMap } from './field-state-extractor';
 import type { FieldTreeRecord } from '../field-tree-utils';
@@ -44,6 +45,9 @@ export interface HttpDerivationStreamContext {
 
   /** External data for expression evaluation */
   externalData?: Record<string, unknown>;
+
+  /** Warning tracker to suppress duplicate missing-field warnings */
+  warningTracker?: DerivationWarningTracker;
 }
 
 const LOG_PREFIX = '[HTTP Derivation]';
@@ -56,6 +60,11 @@ const DEFAULT_HTTP_DEBOUNCE_MS = 300;
  * - `debounceTime` to batch rapid changes
  * - `switchMap` to auto-cancel in-flight requests
  * - `catchError` inside the switchMap projection to prevent stream termination
+ *
+ * **Note:** The stream uses `startWith(null) → pairwise()` to detect changed fields.
+ * This means the first form value emission (initial load) will fire an HTTP request
+ * for all `dependsOn` fields, since every field appears "changed" relative to `null`.
+ * This is intentional — it ensures derived values are populated on initial form load.
  *
  * @param entry - The derivation entry with HTTP configuration
  * @param formValue$ - Observable of form value changes
@@ -78,7 +87,7 @@ export function createHttpDerivationStream(
     return EMPTY;
   }
 
-  if (!entry.http) {
+  if (!entry.http || !entry.responseExpression) {
     return EMPTY;
   }
 
@@ -94,7 +103,7 @@ export function createHttpDerivationStream(
     // Only proceed when a dependency in entry.dependsOn changed
     filter(({ changedFields }) => {
       if (changedFields.size === 0) return false;
-      return entry.dependsOn.some((dep) => dep === '*' || changedFields.has(dep));
+      return entry.dependsOn.some((dep) => changedFields.has(dep));
     }),
     debounceTime(debounceMs),
     switchMap(({ current }) => {
@@ -163,7 +172,7 @@ export function createHttpDerivationStream(
             next: (response) => {
               try {
                 // Extract value from response using responseExpression
-                const newValue = ExpressionParser.evaluate(entry.responseExpression!, { response });
+                const newValue = ExpressionParser.evaluate(entry.responseExpression, { response });
 
                 // Compare with current value — skip if unchanged
                 const currentFormValue = untracked(() => context.formValue());
@@ -183,7 +192,7 @@ export function createHttpDerivationStream(
 
                 // Apply the value to the form
                 const currentForm = untracked(() => context.form());
-                applyValueToForm(entry.fieldKey, newValue, currentForm, context.logger);
+                applyValueToForm(entry.fieldKey, newValue, currentForm, context.logger, context.warningTracker);
 
                 const derivationLogger = untracked(() => context.derivationLogger());
                 derivationLogger.evaluation({

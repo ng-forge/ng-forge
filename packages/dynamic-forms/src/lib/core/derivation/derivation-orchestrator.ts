@@ -351,6 +351,7 @@ export class DerivationOrchestrator {
             derivationLogger: this.config.derivationLogger,
             customFunctions: this.functionRegistry.getCustomFunctions(),
             externalData: this.resolveExternalData(),
+            warningTracker: this.warningTracker,
           };
 
           const stream = createHttpDerivationStream(entry, formValue$, context).pipe(takeUntilDestroyed(this.destroyRef));
