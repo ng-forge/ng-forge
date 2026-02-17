@@ -1,14 +1,17 @@
+import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { FieldContext } from '@angular/forms/signals';
+import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../registry';
 import { FormStateManager } from '../../state/form-state-manager';
-import { createLogicFunction } from './logic-function-factory';
+import { createLogicFunction, createDebouncedLogicFunction } from './logic-function-factory';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
 import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
+import { HTTP_CONDITION_CACHE, HttpConditionCache } from '../http/http-condition-cache';
 
 describe('logic-function-factory', () => {
   const mockEntity = signal<Record<string, unknown>>({});
@@ -29,6 +32,8 @@ describe('logic-function-factory', () => {
         { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         { provide: DynamicFormLogger, useValue: mockLogger },
         { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
+        { provide: HttpClient, useValue: { request: vi.fn().mockReturnValue(of({ allowed: true })) } },
+        { provide: HTTP_CONDITION_CACHE, useValue: new HttpConditionCache() },
       ],
     });
 
@@ -302,6 +307,51 @@ describe('logic-function-factory', () => {
         expect(runLogicFunctionTest(truthyExpression, [])).toBe(true);
         expect(runLogicFunctionTest(truthyExpression, null)).toBe(false);
         expect(runLogicFunctionTest(truthyExpression, undefined)).toBe(false);
+      });
+    });
+
+    describe('HTTP condition intercept', () => {
+      it('should intercept HTTP conditions in createLogicFunction', () => {
+        const expression: ConditionalExpression = {
+          type: 'http',
+          http: { url: '/api/check' },
+        };
+
+        const result = runLogicFunctionTest(expression, 'test');
+        // HTTP conditions return pendingValue (default false) synchronously
+        expect(typeof result).toBe('boolean');
+      });
+
+      it('should intercept HTTP conditions in createDebouncedLogicFunction', () => {
+        const expression: ConditionalExpression = {
+          type: 'http',
+          http: { url: '/api/check' },
+          pendingValue: true,
+        };
+
+        const result = runInInjectionContext(injector, () => {
+          const formValueObj = { username: 'test', email: 'test@example.com' };
+          mockEntity.set(formValueObj);
+          const mockFormValue = signal(formValueObj);
+          const mockRootField = Object.assign(
+            () => ({
+              value: mockFormValue,
+              valid: signal(true),
+              errors: signal(null),
+              touched: signal(false),
+              dirty: signal(false),
+            }),
+            { formValue: mockFormValue },
+          ) as any;
+          mockFormSignal.set(mockRootField);
+
+          const logicFn = createDebouncedLogicFunction(expression, 500);
+          const fieldContext = createMockFieldContext('test');
+          return logicFn(fieldContext);
+        });
+
+        // Should return pendingValue (true) since HTTP hasn't resolved yet
+        expect(result).toBe(true);
       });
     });
 

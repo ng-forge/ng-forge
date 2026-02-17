@@ -468,6 +468,7 @@
       "javascript": "{ type: 'javascript', expression: 'formValue.age >= 18' }",
       "and": "{ type: 'and', conditions: [...] }",
       "or": "{ type: 'or', conditions: [...] }",
+      "http": "{ type: 'http', http: { url: '/api/check', queryParams: { field: 'formValue.x' } }, responseExpression: 'response.allowed', pendingValue: false, cacheDurationMs: 30000 }",
       "true": "{ type: 'true' }",
       "false": "{ type: 'false' }"
     },

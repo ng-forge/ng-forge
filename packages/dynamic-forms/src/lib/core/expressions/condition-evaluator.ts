@@ -45,6 +45,13 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
     case 'or':
       return evaluateOrCondition(expression, context);
 
+    case 'http':
+      context.logger.warn(
+        '[Dynamic Forms] HTTP conditions are resolved asynchronously via createHttpConditionLogicFunction(). ' +
+          'When used inside and/or composites, the HTTP result is not available synchronously. Returning false.',
+      );
+      return false;
+
     default:
       return false;
   }

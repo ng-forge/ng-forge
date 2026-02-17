@@ -6,6 +6,7 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { evaluateCondition } from './condition-evaluator';
+import { createHttpConditionLogicFunction } from './http-condition-logic-function';
 
 /**
  * Cache key combining both services to represent the injection context.
@@ -93,6 +94,11 @@ function getContextCache(ctx: InjectionContextKey): Map<string, LogicFn<unknown,
  * @returns A LogicFn that evaluates the condition in the context of a field
  */
 export function createLogicFunction<TValue>(expression: ConditionalExpression): LogicFn<TValue, boolean> {
+  // HTTP conditions handle their own debouncing and async resolution
+  if (expression?.type === 'http') {
+    return createHttpConditionLogicFunction(expression);
+  }
+
   // Inject services during factory creation, not during execution
   const functionRegistry = inject(FunctionRegistryService);
   const fieldContextRegistry = inject(FieldContextRegistryService);
@@ -184,6 +190,11 @@ function getDebouncedSignalStore(functionRegistry: FunctionRegistryService) {
  * @returns A LogicFn that evaluates the condition with debouncing
  */
 export function createDebouncedLogicFunction<TValue>(expression: ConditionalExpression, debounceMs: number): LogicFn<TValue, boolean> {
+  // HTTP conditions handle their own debouncing via condition.http.debounceMs
+  if (expression?.type === 'http') {
+    return createHttpConditionLogicFunction(expression);
+  }
+
   // Inject services during factory creation, not during execution
   const functionRegistry = inject(FunctionRegistryService);
   const fieldContextRegistry = inject(FieldContextRegistryService);
