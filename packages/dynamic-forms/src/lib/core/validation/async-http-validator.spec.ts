@@ -9,6 +9,7 @@ import { applyValidator } from './validator-factory';
 import { AsyncCustomValidator, HttpCustomValidator } from './validator-types';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { ConsoleLogger } from '../../providers/features/logger/console-logger';
+import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 
 // Helper type for mock ResourceRef
 type MockResourceRef<T> = {
@@ -34,6 +35,7 @@ describe('Async and HTTP Validator Integration', () => {
         FieldContextRegistryService,
         // Provide ConsoleLogger to enable logging in tests
         { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
+        { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
       ],
     });
 

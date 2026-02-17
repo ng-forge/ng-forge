@@ -22,6 +22,7 @@ import {
   CustomValidatorConfig,
   DeclarativeHttpValidatorConfig,
   FunctionHttpValidatorConfig,
+  isFunctionHttpValidator,
   ValidatorConfig,
 } from '../../models/validation/validator-config';
 import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
@@ -298,10 +299,10 @@ function applyUnifiedHttpValidator(
   config: FunctionHttpValidatorConfig | DeclarativeHttpValidatorConfig,
   fieldPath: SchemaPath<unknown>,
 ): void {
-  if ('functionName' in config && config.functionName) {
-    applyFunctionHttpValidator(config as FunctionHttpValidatorConfig, fieldPath);
+  if (isFunctionHttpValidator(config)) {
+    applyFunctionHttpValidator(config, fieldPath);
   } else {
-    applyDeclarativeHttpValidator(config as DeclarativeHttpValidatorConfig, fieldPath);
+    applyDeclarativeHttpValidator(config, fieldPath);
   }
 }
 

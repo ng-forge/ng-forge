@@ -8,3 +8,4 @@ export type {
   HttpValidatorConfig,
   ValidatorConfig,
 } from './validator-config';
+export { isFunctionHttpValidator } from './validator-config';

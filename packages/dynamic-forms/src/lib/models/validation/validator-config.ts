@@ -144,6 +144,7 @@ export interface DeclarativeHttpValidatorConfig extends BaseValidatorConfig {
  *
  * Note: `FunctionHttpValidatorConfig` and `DeclarativeHttpValidatorConfig` both use `type: 'http'`.
  * They are discriminated by property presence: `functionName` → function-based, `http` → declarative.
+ * Use `isFunctionHttpValidator()` for type-safe narrowing when `type` alone is insufficient.
  */
 export type ValidatorConfig =
   | BuiltInValidatorConfig
@@ -151,3 +152,15 @@ export type ValidatorConfig =
   | AsyncValidatorConfig
   | FunctionHttpValidatorConfig
   | DeclarativeHttpValidatorConfig;
+
+/**
+ * Type guard to distinguish function-based HTTP validators from declarative ones.
+ *
+ * Both use `type: 'http'`, so `switch (config.type)` cannot narrow between them.
+ * Use this guard when you need type-safe access to `FunctionHttpValidatorConfig` properties.
+ */
+export function isFunctionHttpValidator(
+  config: FunctionHttpValidatorConfig | DeclarativeHttpValidatorConfig,
+): config is FunctionHttpValidatorConfig {
+  return 'functionName' in config && !!config.functionName;
+}

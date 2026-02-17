@@ -20,10 +20,7 @@ export interface DeprecationWarningTracker {
  *
  * @public
  */
-export const DEPRECATION_WARNING_TRACKER = new InjectionToken<DeprecationWarningTracker>('DeprecationWarningTracker', {
-  providedIn: null,
-  factory: () => ({ warnedKeys: new Set<string>() }),
-});
+export const DEPRECATION_WARNING_TRACKER = new InjectionToken<DeprecationWarningTracker>('DeprecationWarningTracker');
 
 /**
  * Creates a fresh deprecation warning tracker instance.

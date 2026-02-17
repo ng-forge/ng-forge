@@ -98,7 +98,7 @@ describe('property-derivation-collector', () => {
       expect(localTracker.warnedKeys.has('type:propertyDerivation')).toBe(true);
     });
 
-    it('should ignore state logic and value derivation entries (only collects type: propertyDerivation)', () => {
+    it('should ignore state logic and value derivation entries (only collects property derivations)', () => {
       const fields: FieldDef<unknown>[] = [
         {
           key: 'myField',

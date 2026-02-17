@@ -108,7 +108,7 @@ export class FormStateManager<
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   private readonly logger = inject(DynamicFormLogger);
-  private readonly deprecationTracker = inject(DEPRECATION_WARNING_TRACKER);
+  private readonly deprecationTracker = inject(DEPRECATION_WARNING_TRACKER, { optional: true });
   private readonly eventBus = inject(EventBus);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly schemaRegistry = inject(SchemaRegistryService);
@@ -862,12 +862,14 @@ export class FormStateManager<
 
     // TODO(@ng-forge): remove deprecated code in next minor
     if (customFnConfig.propertyDerivations) {
-      warnDeprecated(
-        this.logger,
-        this.deprecationTracker,
-        'customFnConfig:propertyDerivations',
-        "customFnConfig.propertyDerivations is deprecated. Register functions under 'derivations' instead and use type: 'derivation' with targetProperty.",
-      );
+      if (this.deprecationTracker) {
+        warnDeprecated(
+          this.logger,
+          this.deprecationTracker,
+          'customFnConfig:propertyDerivations',
+          "customFnConfig.propertyDerivations is deprecated. Register functions under 'derivations' instead and use type: 'derivation' with targetProperty.",
+        );
+      }
       this.functionRegistry.setPropertyDerivationFunctions(customFnConfig.propertyDerivations);
     }
 
@@ -875,12 +877,12 @@ export class FormStateManager<
     this.functionRegistry.setAsyncValidators(customFnConfig.asyncValidators);
 
     // TODO(@ng-forge): remove deprecated code in next minor
-    if (customFnConfig.httpValidators) {
+    if (customFnConfig.httpValidators && this.deprecationTracker) {
       warnDeprecated(
         this.logger,
         this.deprecationTracker,
         'customFnConfig:httpValidators',
-        "customFnConfig.httpValidators is deprecated. Prefer declarative HTTP validators using type: 'http' with http + responseMapping.",
+        "customFnConfig.httpValidators registration path is deprecated. Use type: 'http' with functionName (for function-based) or http + responseMapping (for declarative).",
       );
     }
     this.functionRegistry.setHttpValidators(customFnConfig.httpValidators);
