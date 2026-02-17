@@ -1,5 +1,6 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import type { FormFieldStateMap } from '../../models/expressions/field-state-context';
+import { HttpRequestConfig } from '../../models/http/http-request-config';
 import { DerivationLogicConfig, LogicTrigger } from '../../models/logic/logic-config';
 
 /**
@@ -58,9 +59,24 @@ export interface DerivationEntry {
   /**
    * Name of a registered custom derivation function.
    *
-   * Mutually exclusive with `value` and `expression`.
+   * Mutually exclusive with `value`, `expression`, and `http`.
    */
   functionName?: string;
+
+  /**
+   * HTTP request configuration for server-driven derivations.
+   *
+   * Mutually exclusive with `value`, `expression`, and `functionName`.
+   * Processed asynchronously in a dedicated RxJS stream, not in the sync loop.
+   */
+  http?: HttpRequestConfig;
+
+  /**
+   * Expression to extract the derived value from an HTTP response.
+   *
+   * Required when `http` is set.
+   */
+  responseExpression?: string;
 
   /**
    * When to evaluate the derivation.

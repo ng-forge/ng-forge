@@ -40,6 +40,13 @@ export { createDefaultDerivationLogConfig } from './derivation-logger';
 export type { DerivationLogger } from './derivation-logger.service';
 export { createDerivationLogger } from './derivation-logger.service';
 
+// HTTP Derivation Stream
+export type { HttpDerivationStreamContext } from './http-derivation-stream';
+export { createHttpDerivationStream } from './http-derivation-stream';
+
+// Field Value Utilities
+export { applyValueToForm, readFieldDirty, resetFieldState, resolveFieldInstance, warnMissingField } from './field-value-utils';
+
 // Derivation Orchestrator
 export type { DerivationOrchestratorConfig } from './derivation-orchestrator';
 export {

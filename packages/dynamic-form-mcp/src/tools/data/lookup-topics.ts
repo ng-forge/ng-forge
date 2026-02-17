@@ -777,6 +777,9 @@ logic: [{ type: 'derivation', expression: 'formValue.firstName + " " + formValue
 
 // Stop on user edit (with optional re-engagement)
 logic: [{ type: 'derivation', expression: '...', stopOnUserOverride: true, reEngageOnDependencyChange: true }]
+
+// HTTP derivation (server-driven values)
+logic: [{ type: 'derivation', http: { url: '/api/rate', queryParams: { from: 'formValue.currency' } }, responseExpression: 'response.rate', dependsOn: ['currency'] }]
 \`\`\`
 Derivation is always defined ON the field that receives the computed value (self-targeting).
 **Variables:** \`formValue\`, \`fieldValue\`, \`fieldState\`, \`formFieldState\`, \`externalData\` (see topic: expression-variables)
@@ -842,6 +845,43 @@ Derivations are always defined ON the field that receives the computed value (se
   }]
 }
 \`\`\`
+
+## HTTP Derivation (Server-Driven Values)
+
+Fetch derived values from an HTTP endpoint. Requires \`dependsOn\` (explicit) and \`responseExpression\`.
+
+\`\`\`typescript
+{
+  key: 'exchangeRate',
+  type: 'input',
+  label: 'Exchange Rate',
+  readonly: true,
+  logic: [{
+    type: 'derivation',
+    http: {
+      url: '/api/exchange-rate',
+      method: 'GET',
+      queryParams: {
+        from: 'formValue.sourceCurrency',
+        to: 'formValue.targetCurrency'
+      },
+      debounceMs: 500  // Optional, defaults to 300
+    },
+    responseExpression: 'response.rate',  // Extract value from response
+    dependsOn: ['sourceCurrency', 'targetCurrency']  // Required for HTTP
+  }]
+}
+\`\`\`
+
+**Key rules:**
+- \`http\` is mutually exclusive with \`expression\`, \`value\`, and \`functionName\`
+- \`dependsOn\` is **required** (prevents wildcard triggering on every keystroke)
+- \`responseExpression\` is **required** (extracts value from HTTP response body)
+- \`queryParams\` values are expressions evaluated by ExpressionParser
+- Requests are automatically debounced and cancelled (switchMap)
+- HTTP errors are caught and logged (stream continues)
+- Array fields (\`items.$.rate\`) are NOT supported for HTTP derivations
+- Works with \`stopOnUserOverride\` and \`condition\`
 
 ## Stop on User Override
 

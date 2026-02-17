@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { computed, DestroyRef, inject, InjectionToken, Injector, isDevMode, isSignal, Signal, untracked } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FieldTree } from '@angular/forms/signals';
@@ -14,6 +15,7 @@ import {
   queueScheduler,
   scheduled,
   startWith,
+  Subscription,
   switchMap,
   timer,
 } from 'rxjs';
@@ -29,6 +31,7 @@ import { validateNoCycles } from './cycle-detector';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
 import { DERIVATION_WARNING_TRACKER } from './derivation-warning-tracker';
+import { createHttpDerivationStream } from './http-derivation-stream';
 
 /**
  * Minimal configuration for creating a DerivationOrchestrator.
@@ -73,6 +76,13 @@ export class DerivationOrchestrator {
   private readonly warningTracker = inject(DERIVATION_WARNING_TRACKER);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly formOptions = inject(FORM_OPTIONS);
+  private readonly httpClient = inject(HttpClient, { optional: true });
+
+  /** Active HTTP derivation stream subscriptions */
+  private httpSubscriptions: Subscription[] = [];
+
+  /** Identity keys of current HTTP entries for smart teardown comparison */
+  private lastHttpEntryKeys: Set<string> | null = null;
 
   /**
    * Computed signal containing the collected and validated derivations.
@@ -105,6 +115,7 @@ export class DerivationOrchestrator {
 
     this.setupOnChangeStream();
     this.setupDebouncedStream();
+    this.setupHttpStreams();
   }
 
   private setupOnChangeStream(): void {
@@ -294,6 +305,95 @@ export class DerivationOrchestrator {
   }
 
   /**
+   * Sets up reactive HTTP derivation streams that react to collection changes.
+   *
+   * Subscribes to derivationCollection changes and creates per-entry HTTP streams.
+   * Uses smart teardown: only recreates streams when HTTP entries actually change.
+   */
+  private setupHttpStreams(): void {
+    toObservable(this.derivationCollection, { injector: this.injector })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((collection) => {
+        const httpEntries = collection?.entries.filter((entry) => entry.http) ?? [];
+
+        if (httpEntries.length === 0) {
+          this.teardownHttpStreams();
+          this.lastHttpEntryKeys = null;
+          return;
+        }
+
+        // Smart teardown: compare entry identity keys to avoid redundant stream recreation
+        const newKeys = this.computeHttpEntryKeys(httpEntries);
+        if (this.lastHttpEntryKeys && this.setsEqual(this.lastHttpEntryKeys, newKeys)) {
+          return; // No change in HTTP entries — keep existing streams
+        }
+
+        // Validate HttpClient availability
+        if (!this.httpClient) {
+          this.logger.error(
+            '[HTTP Derivation] HttpClient is not available. ' + 'Ensure provideHttpClient() is included in your application providers.',
+          );
+          return;
+        }
+
+        // Tear down previous streams and create new ones
+        this.teardownHttpStreams();
+        this.lastHttpEntryKeys = newKeys;
+
+        const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
+
+        for (const entry of httpEntries) {
+          const context = {
+            formValue: this.config.formValue,
+            form: this.config.form,
+            httpClient: this.httpClient,
+            logger: this.logger,
+            derivationLogger: this.config.derivationLogger,
+            customFunctions: this.functionRegistry.getCustomFunctions(),
+            externalData: this.resolveExternalData(),
+          };
+
+          const stream = createHttpDerivationStream(entry, formValue$, context).pipe(takeUntilDestroyed(this.destroyRef));
+
+          this.httpSubscriptions.push(
+            stream.subscribe({
+              error: (err) => this.logger.error(`[HTTP Derivation] Stream error for '${entry.fieldKey}'`, err),
+            }),
+          );
+        }
+      });
+  }
+
+  /**
+   * Tears down all active HTTP derivation streams.
+   */
+  private teardownHttpStreams(): void {
+    for (const sub of this.httpSubscriptions) {
+      sub.unsubscribe();
+    }
+    this.httpSubscriptions = [];
+  }
+
+  /**
+   * Computes a set of identity keys for HTTP entries.
+   * Used for smart teardown comparison.
+   */
+  private computeHttpEntryKeys(entries: DerivationEntry[]): Set<string> {
+    return new Set(entries.map((entry) => `${entry.fieldKey}:${JSON.stringify(entry.http)}`));
+  }
+
+  /**
+   * Compares two sets for equality.
+   */
+  private setsEqual(a: Set<string>, b: Set<string>): boolean {
+    if (a.size !== b.size) return false;
+    for (const item of a) {
+      if (!b.has(item)) return false;
+    }
+    return true;
+  }
+
+  /**
    * Gets all unique debounce periods from entries with trigger 'debounced'.
    */
   private getDebouncePeriods(entries: DerivationEntry[]): number[] {
@@ -314,8 +414,9 @@ export class DerivationOrchestrator {
     if (wildcardEntries.length === 0) return;
 
     // Find implicit wildcards (custom functions without explicit dependsOn)
+    // HTTP entries are excluded because they require explicit dependsOn (validated at collection time)
     const implicitWildcards = wildcardEntries.filter(
-      (entry) => entry.functionName && (!entry.originalConfig?.dependsOn || entry.originalConfig.dependsOn.length === 0),
+      (entry) => !entry.http && entry.functionName && (!entry.originalConfig?.dependsOn || entry.originalConfig.dependsOn.length === 0),
     );
 
     if (implicitWildcards.length > 0) {

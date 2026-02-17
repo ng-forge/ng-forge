@@ -984,6 +984,69 @@ describe('derivation-applicator', () => {
     });
   });
 
+  describe('HTTP entries in sync loop', () => {
+    let logger: Logger;
+    let formValueSignal: WritableSignal<Record<string, unknown>>;
+
+    beforeEach(() => {
+      logger = createMockLogger();
+      formValueSignal = signal({ country: 'USA', rate: 0 });
+    });
+
+    it('should return applied: false for HTTP entries in tryApplyDerivation', () => {
+      const { form, values } = createMockForm({ country: 'USA', rate: 0 });
+      formValueSignal.set({ country: 'USA', rate: 0 });
+
+      const collection = createCollection([
+        createEntry('rate', {
+          http: { url: 'https://api.example.com/rate', method: 'GET' },
+          responseExpression: 'response.rate',
+          dependsOn: ['country'],
+        }),
+      ]);
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      const result = applyDerivations(collection, context);
+
+      // HTTP entries should be skipped in sync processing
+      expect(result.appliedCount).toBe(0);
+      expect(values.rate).toBe(0); // Value unchanged
+    });
+
+    it('should process sync entries alongside HTTP entries (only sync entries applied)', () => {
+      const { form, values } = createMockForm({ country: 'USA', rate: 0, prefix: '' });
+      formValueSignal.set({ country: 'USA', rate: 0, prefix: '' });
+
+      const collection = createCollection([
+        createEntry('prefix', { value: '+1' }),
+        createEntry('rate', {
+          http: { url: 'https://api.example.com/rate', method: 'GET' },
+          responseExpression: 'response.rate',
+          dependsOn: ['country'],
+        }),
+      ]);
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      const result = applyDerivations(collection, context);
+
+      expect(result.appliedCount).toBe(1); // Only sync entry
+      expect(values.prefix).toBe('+1');
+      expect(values.rate).toBe(0); // HTTP entry not applied
+    });
+  });
+
   describe('applyDerivationsForTrigger', () => {
     let logger: Logger;
     let formValueSignal: WritableSignal<Record<string, unknown>>;
@@ -1054,6 +1117,60 @@ describe('derivation-applicator', () => {
 
       expect(result.appliedCount).toBe(0);
       expect(result.skippedCount).toBe(0);
+    });
+
+    it('should exclude HTTP entries from onChange processing', () => {
+      const { form, values } = createMockForm({ field1: 'a', target1: '', target2: '' });
+      formValueSignal.set({ field1: 'a', target1: '', target2: '' });
+
+      const collection = createCollection([
+        createEntry('target1', { value: 'sync-value', trigger: 'onChange' }),
+        createEntry('target2', {
+          trigger: 'onChange',
+          http: { url: 'https://api.example.com/data', method: 'GET' },
+          responseExpression: 'response.value',
+          dependsOn: ['field1'],
+        }),
+      ]);
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      applyDerivationsForTrigger(collection, 'onChange', context);
+
+      expect(values.target1).toBe('sync-value');
+      expect(values.target2).toBe(''); // HTTP entry excluded from sync processing
+    });
+
+    it('should exclude HTTP entries from debounced processing', () => {
+      const { form, values } = createMockForm({ field1: 'a', target1: '', target2: '' });
+      formValueSignal.set({ field1: 'a', target1: '', target2: '' });
+
+      const collection = createCollection([
+        createEntry('target1', { value: 'debounced-value', trigger: 'debounced' }),
+        createEntry('target2', {
+          trigger: 'debounced',
+          http: { url: 'https://api.example.com/data', method: 'GET' },
+          responseExpression: 'response.value',
+          dependsOn: ['field1'],
+        }),
+      ]);
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      applyDerivationsForTrigger(collection, 'debounced', context);
+
+      expect(values.target1).toBe('debounced-value');
+      expect(values.target2).toBe(''); // HTTP entry excluded
     });
   });
 
