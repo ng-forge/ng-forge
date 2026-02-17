@@ -100,9 +100,6 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
     return;
   }
 
-  const logger = inject(DynamicFormLogger);
-  const tracker = inject(DEPRECATION_WARNING_TRACKER);
-
   switch (config.type) {
     case 'required':
       if (config.when) {
@@ -146,11 +143,18 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
     case 'async':
       applyAsyncValidator(config, path);
       break;
-    case 'customAsync': // TODO(@ng-forge): remove deprecated code in next minor
+    case 'customAsync': {
+      // TODO(@ng-forge): remove deprecated code in next minor
+      const logger = inject(DynamicFormLogger);
+      const tracker = inject(DEPRECATION_WARNING_TRACKER);
       warnDeprecated(logger, tracker, 'type:customAsync', "Validator type 'customAsync' is deprecated. Use type: 'async' instead.");
       applyAsyncValidator(config, path);
       break;
-    case 'customHttp': // TODO(@ng-forge): remove deprecated code in next minor
+    }
+    case 'customHttp': {
+      // TODO(@ng-forge): remove deprecated code in next minor
+      const logger = inject(DynamicFormLogger);
+      const tracker = inject(DEPRECATION_WARNING_TRACKER);
       warnDeprecated(
         logger,
         tracker,
@@ -159,6 +163,7 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       );
       applyFunctionHttpValidator(config as FunctionHttpValidatorConfig, path);
       break;
+    }
     case 'http':
       applyUnifiedHttpValidator(config, path);
       break;

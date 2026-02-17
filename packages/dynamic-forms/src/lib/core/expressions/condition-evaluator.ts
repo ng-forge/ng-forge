@@ -98,11 +98,13 @@ function evaluateCustomFunction(expression: CustomCondition, context: Evaluation
 }
 
 function evaluateAndCondition(expression: AndCondition, context: EvaluationContext): boolean {
+  if (!expression.conditions || expression.conditions.length === 0) return false;
   // All conditions must be true for AND logic
   return expression.conditions.every((condition) => evaluateCondition(condition, context));
 }
 
 function evaluateOrCondition(expression: OrCondition, context: EvaluationContext): boolean {
+  if (!expression.conditions || expression.conditions.length === 0) return false;
   // At least one condition must be true for OR logic
   return expression.conditions.some((condition) => evaluateCondition(condition, context));
 }
