@@ -30,6 +30,7 @@ export interface FieldValueCondition {
   value?: unknown;
 }
 
+// TODO(@ng-forge): remove deprecated code in next minor
 /**
  * Condition that compares the entire form value against an expected value.
  *

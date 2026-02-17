@@ -859,6 +859,7 @@ export class FormStateManager<
       this.functionRegistry.setDerivationFunctions(customFnConfig.derivations);
     }
 
+    // TODO(@ng-forge): remove deprecated code in next minor
     if (customFnConfig.propertyDerivations) {
       const deprecationTracker = inject(DEPRECATION_WARNING_TRACKER);
       warnDeprecated(
@@ -873,6 +874,7 @@ export class FormStateManager<
     this.functionRegistry.setValidators(customFnConfig.validators);
     this.functionRegistry.setAsyncValidators(customFnConfig.asyncValidators);
 
+    // TODO(@ng-forge): remove deprecated code in next minor
     if (customFnConfig.httpValidators) {
       const deprecationTracker = inject(DEPRECATION_WARNING_TRACKER);
       warnDeprecated(

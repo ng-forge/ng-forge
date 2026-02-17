@@ -1,4 +1,5 @@
 import type { Logger } from '../../providers/features/logger/logger.interface';
+import type { DeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
 
 export interface EvaluationContext<TValue = unknown> {
   /** Current field value */
@@ -79,6 +80,12 @@ export interface EvaluationContext<TValue = unknown> {
    * ```
    */
   externalData?: Record<string, unknown>;
+
+  /**
+   * DI-scoped tracker for deprecation warnings.
+   * Used by the condition evaluator to deduplicate deprecation warnings.
+   */
+  deprecationTracker?: DeprecationWarningTracker;
 
   /** Allow additional properties for flexible expression evaluation */
   [key: string]: unknown;

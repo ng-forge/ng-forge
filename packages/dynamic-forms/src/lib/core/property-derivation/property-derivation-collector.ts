@@ -104,6 +104,7 @@ function collectFromField(field: FieldDef<unknown>, entries: PropertyDerivationE
   if (validationField.logic) {
     for (const logicConfig of validationField.logic) {
       if (isPropertyDerivationLogicConfig(logicConfig)) {
+        // TODO(@ng-forge): remove deprecated code in next minor
         // Deprecated path — emit warning, then process normally
         warnDeprecated(
           context.logger,

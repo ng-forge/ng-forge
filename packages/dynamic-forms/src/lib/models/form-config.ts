@@ -386,6 +386,7 @@ export interface CustomFnConfig {
    */
   derivations?: Record<string, CustomFunction>;
 
+  // TODO(@ng-forge): remove deprecated code in next minor
   /**
    * @deprecated Register functions under `derivations` instead. Use `type: 'derivation'`
    * with `targetProperty` in field logic configs. Will be removed in a future minor version.
@@ -548,6 +549,7 @@ export interface CustomFnConfig {
    */
   asyncValidators?: Record<string, AsyncCustomValidator>;
 
+  // TODO(@ng-forge): remove deprecated code in next minor
   /**
    * @deprecated Prefer declarative HTTP validators using `type: 'http'` with `http` + `responseMapping`
    * in the validators array. Function-based HTTP validators now also use `type: 'http'` with `functionName`.

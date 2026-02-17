@@ -61,6 +61,7 @@ export class FunctionRegistryService {
   private readonly customFunctions = new Map<string, CustomFunction>();
   private readonly customFunctionScopes = new Map<string, CustomFunctionScope>();
   private readonly derivationFunctions = new Map<string, CustomFunction>();
+  // TODO(@ng-forge): remove deprecated code in next minor
   private readonly propertyDerivationFunctions = new Map<string, CustomFunction>();
   private readonly validators = new Map<string, CustomValidator>();
   private readonly asyncValidators = new Map<string, AsyncCustomValidator>();
@@ -184,6 +185,7 @@ export class FunctionRegistryService {
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Property Derivation Functions
+  // TODO(@ng-forge): remove deprecated code in next minor
   // ─────────────────────────────────────────────────────────────────────────────
 
   /**

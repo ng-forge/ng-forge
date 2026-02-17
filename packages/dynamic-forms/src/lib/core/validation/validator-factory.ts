@@ -146,11 +146,11 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
     case 'async':
       applyAsyncValidator(config, path);
       break;
-    case 'customAsync':
+    case 'customAsync': // TODO(@ng-forge): remove deprecated code in next minor
       warnDeprecated(logger, tracker, 'type:customAsync', "Validator type 'customAsync' is deprecated. Use type: 'async' instead.");
       applyAsyncValidator(config, path);
       break;
-    case 'customHttp':
+    case 'customHttp': // TODO(@ng-forge): remove deprecated code in next minor
       warnDeprecated(
         logger,
         tracker,

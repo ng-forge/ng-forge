@@ -75,7 +75,7 @@ export interface AsyncValidatorConfig extends BaseValidatorConfig {
    * Use `'async'` for new code. `'customAsync'` is accepted for backward compatibility
    * but emits a deprecation warning in dev mode.
    */
-  type: 'async' | 'customAsync';
+  type: 'async' | 'customAsync'; // TODO(@ng-forge): remove 'customAsync' in next minor
 
   /** Name of registered async validator function */
   functionName: string;
@@ -104,7 +104,7 @@ export interface FunctionHttpValidatorConfig extends BaseValidatorConfig {
    * Use `'http'` for new code. `'customHttp'` is accepted for backward compatibility
    * but emits a deprecation warning in dev mode.
    */
-  type: 'http' | 'customHttp';
+  type: 'http' | 'customHttp'; // TODO(@ng-forge): remove 'customHttp' in next minor
 
   /** Name of registered HTTP validator configuration */
   functionName: string;

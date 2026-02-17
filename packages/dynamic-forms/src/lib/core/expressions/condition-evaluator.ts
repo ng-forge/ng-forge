@@ -8,6 +8,7 @@ import {
   OrCondition,
 } from '../../models/expressions/conditional-expression';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
+import { warnDeprecated } from '../../utils/deprecation-warnings';
 import { compareValues, getNestedValue, hasNestedProperty } from './value-utils';
 import { ExpressionParser } from './parser/expression-parser';
 
@@ -21,6 +22,15 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
       return evaluateFieldValueCondition(expression, context);
 
     case 'formValue':
+      // TODO(@ng-forge): remove deprecated code in next minor
+      if (context.deprecationTracker) {
+        warnDeprecated(
+          context.logger,
+          context.deprecationTracker,
+          'condition:formValue',
+          "Condition type 'formValue' is deprecated. Use 'fieldValue' with a specific fieldPath, or 'javascript' for complex form-level comparisons.",
+        );
+      }
       return evaluateFormValueCondition(expression, context);
 
     case 'javascript':
@@ -41,6 +51,9 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
 }
 
 function evaluateFieldValueCondition(expression: FieldValueCondition, context: EvaluationContext): boolean {
+  // Guard against missing fieldPath — invalid config, return false
+  if (!expression.fieldPath) return false;
+
   // Try scoped formValue first (handles sibling field lookups within array items).
   // Fall back to rootFormValue for fields outside the current array scope.
   // Use hasNestedProperty to distinguish "field exists with value undefined"

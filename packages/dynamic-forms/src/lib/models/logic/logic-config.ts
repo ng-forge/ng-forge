@@ -470,6 +470,7 @@ interface DebouncedDerivationLogicConfig extends BaseDerivationLogicConfig {
  */
 export type DerivationLogicConfig = OnChangeDerivationLogicConfig | DebouncedDerivationLogicConfig;
 
+// TODO(@ng-forge): remove deprecated code in next minor
 /**
  * Base configuration for property derivation logic.
  *
@@ -605,6 +606,7 @@ interface DebouncedPropertyDerivationLogicConfig extends BasePropertyDerivationL
   debounceMs?: number;
 }
 
+// TODO(@ng-forge): remove deprecated code in next minor
 /**
  * Configuration for property derivation logic.
  *
@@ -726,6 +728,7 @@ export function isDerivationLogicConfig(config: LogicConfig): config is Derivati
   return config.type === 'derivation';
 }
 
+// TODO(@ng-forge): remove deprecated code in next minor
 /**
  * Type guard to check if a logic config is a PropertyDerivationLogicConfig.
  *

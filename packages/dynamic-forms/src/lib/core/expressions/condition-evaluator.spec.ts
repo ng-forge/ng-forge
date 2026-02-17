@@ -3,6 +3,7 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { evaluateCondition } from './condition-evaluator';
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
+import { createDeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
 
 describe('condition-evaluator', () => {
   let mockContext: EvaluationContext;
@@ -151,6 +152,25 @@ describe('condition-evaluator', () => {
 
         const result = evaluateCondition(expression, mockContext);
         expect(result).toBe(false);
+      });
+
+      it('should emit deprecation warning when deprecationTracker is provided', () => {
+        const tracker = createDeprecationWarningTracker();
+        const contextWithTracker: EvaluationContext = {
+          ...mockContext,
+          deprecationTracker: tracker,
+        };
+
+        const expression: ConditionalExpression = {
+          type: 'formValue',
+          operator: 'equals',
+          value: mockContext.formValue,
+        };
+
+        evaluateCondition(expression, contextWithTracker);
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining("'formValue' is deprecated"));
+        expect(tracker.warnedKeys.has('condition:formValue')).toBe(true);
       });
 
       it('should handle different operators with form value', () => {
