@@ -102,7 +102,8 @@ describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
     | 'debugName'
     | 'dependsOn'
     | 'stopOnUserOverride'
-    | 'reEngageOnDependencyChange';
+    | 'reEngageOnDependencyChange'
+    | 'targetProperty';
   type ActualKeys = keyof DerivationLogicConfig;
 
   it('should have exactly the expected keys', () => {

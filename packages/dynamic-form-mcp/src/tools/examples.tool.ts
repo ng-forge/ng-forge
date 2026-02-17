@@ -1009,7 +1009,7 @@ provideDynamicForm({
 })
 
 // 3. Use
-validators: [{ type: 'customAsync', functionName: 'checkEmailAvailable' }]
+validators: [{ type: 'async', functionName: 'checkEmailAvailable' }]
 \`\`\`
 
 ## Error Messages
@@ -1183,7 +1183,7 @@ const formConfig = {
       type: 'datepicker',
       label: 'End Date',
       logic: [{
-        type: 'propertyDerivation',
+        type: 'derivation',
         targetProperty: 'minDate',
         expression: 'formValue.startDate',
       }]
@@ -1202,10 +1202,10 @@ const formConfig = {
       key: 'endDate',
       type: 'datepicker',
       label: 'End Date',
-      // ⚠️ type: 'propertyDerivation' (NOT 'derivation')
-      // ⚠️ targetProperty specifies WHICH property to set
+      // type: 'derivation' + targetProperty = PROPERTY derivation
+      // Without targetProperty, it would be a VALUE derivation
       logic: [{
-        type: 'propertyDerivation',
+        type: 'derivation',
         targetProperty: 'minDate',
         expression: 'formValue.startDate',
       }]
@@ -1223,7 +1223,7 @@ const formConfig = {
       options: [],
       // Dynamic options from custom function
       logic: [{
-        type: 'propertyDerivation',
+        type: 'derivation',
         targetProperty: 'options',
         functionName: 'getCitiesForCountry',
         dependsOn: ['country'],
@@ -1234,10 +1234,10 @@ const formConfig = {
 } as const satisfies FormConfig;
 
 // Key points:
-// - type: 'propertyDerivation' sets component PROPERTIES (not form value)
+// - type: 'derivation' sets component PROPERTIES (not form value)
 // - targetProperty: which input property to set (e.g., 'minDate', 'options')
 // - Supports: expression, value, functionName (mutually exclusive)
-// - Register functions in customFnConfig.propertyDerivations`,
+// - Register functions in customFnConfig.derivations`,
 
     full: `# Property Derivation (Dynamic Field Properties)
 
@@ -1255,7 +1255,7 @@ const formConfig = {
       type: 'datepicker',
       label: 'End Date',
       logic: [{
-        type: 'propertyDerivation',
+        type: 'derivation',
         targetProperty: 'minDate',        // Set minDate property
         expression: 'formValue.startDate', // From startDate's value
       }]
@@ -1277,7 +1277,7 @@ const formConfig = {
       label: 'City',
       options: [],  // Initial empty, filled by property derivation
       logic: [{
-        type: 'propertyDerivation',
+        type: 'derivation',
         targetProperty: 'options',
         functionName: 'getCitiesForCountry',
         dependsOn: ['country'],
@@ -1290,7 +1290,7 @@ const formConfig = {
       type: 'input',
       label: 'Phone',
       logic: [{
-        type: 'propertyDerivation',
+        type: 'derivation',
         targetProperty: 'label',
         value: 'Mobile Phone',
         condition: {
@@ -1308,7 +1308,7 @@ const formConfig = {
       type: 'textarea',
       label: 'Notes',
       logic: [{
-        type: 'propertyDerivation',
+        type: 'derivation',
         targetProperty: 'props.appearance',  // Dot-notation for nested
         expression: 'formValue.isPremium ? "fill" : "outline"',
       }]
@@ -1325,7 +1325,7 @@ const formConfig = {
 // customFnConfig is a property of FormConfig, not a provider option
 const formConfig = {
   customFnConfig: {
-    propertyDerivations: {
+    derivations: {
       getCitiesForCountry: (ctx) => {
         const cities: Record<string, { label: string; value: string }[]> = {
           'US': [{ label: 'New York', value: 'nyc' }, { label: 'LA', value: 'la' }],
@@ -1336,25 +1336,28 @@ const formConfig = {
     },
   },
   fields: [
-    // ... fields with propertyDerivation logic referencing 'getCitiesForCountry'
+    // ... fields with derivation + targetProperty logic referencing 'getCitiesForCountry'
   ],
 } as const satisfies FormConfig;
 \`\`\`
 
 ## Key Differences from Value Derivation
 
-| Feature | \`type: 'derivation'\` | \`type: 'propertyDerivation'\` |
+| Feature | Value Derivation | Property Derivation |
 |---------|----------------------|-------------------------------|
+| Type | \`type: 'derivation'\` | \`type: 'derivation'\` + \`targetProperty\` |
 | Sets | Field's form value | Component property |
 | Target | Implicit (self) | \`targetProperty: 'minDate'\` |
 | Shorthand | \`derivation: 'expr'\` | None |
-| Functions | \`customFnConfig.derivations\` | \`customFnConfig.propertyDerivations\` |`,
+| Functions | \`customFnConfig.derivations\` | \`customFnConfig.derivations\` |
+
+The presence of \`targetProperty\` distinguishes a property derivation from a value derivation.`,
 
     explained: `# Property Derivation - Complete Explanation
 
 ## What is Property Derivation?
 
-Property derivation allows you to **reactively update component input properties** based on form state. While value derivations (\`type: 'derivation'\`) compute a field's form value, property derivations (\`type: 'propertyDerivation'\`) compute the field's component properties like \`minDate\`, \`options\`, \`label\`, \`placeholder\`, \`props.appearance\`, etc.
+Property derivation allows you to **reactively update component input properties** based on form state. Both value and property derivations use \`type: 'derivation'\`. The distinction is the \`targetProperty\` field: when present, the derivation targets a component property; when absent, it targets the field's form value.
 
 ## When to Use Property Derivation
 
@@ -1373,8 +1376,8 @@ Use property derivation when:
   type: 'datepicker',
   label: 'End Date',
   logic: [{
-    type: 'propertyDerivation',    // ⚠️ NOT 'derivation'!
-    targetProperty: 'minDate',      // Which property to set
+    type: 'derivation',              // Same type as value derivation
+    targetProperty: 'minDate',      // targetProperty makes it a PROPERTY derivation
     expression: 'formValue.startDate', // How to compute it
   }]
 }
@@ -1385,7 +1388,7 @@ Use property derivation when:
 ### 1. Expression (inline JavaScript)
 \`\`\`typescript
 logic: [{
-  type: 'propertyDerivation',
+  type: 'derivation',
   targetProperty: 'minDate',
   expression: 'formValue.startDate',  // Access form values
 }]
@@ -1394,7 +1397,7 @@ logic: [{
 ### 2. Static Value (with condition)
 \`\`\`typescript
 logic: [{
-  type: 'propertyDerivation',
+  type: 'derivation',
   targetProperty: 'label',
   value: 'Business Email',           // Fixed value
   condition: { type: 'fieldValue', fieldPath: 'type', operator: 'equals', value: 'business' },
@@ -1405,7 +1408,7 @@ logic: [{
 \`\`\`typescript
 // In form config
 customFnConfig: {
-  propertyDerivations: {
+  derivations: {
     getCitiesForCountry: (ctx) => {
       // ctx.formValue contains all form values
       // ctx.externalData contains external signals (unwrapped)
@@ -1416,7 +1419,7 @@ customFnConfig: {
 
 // In field
 logic: [{
-  type: 'propertyDerivation',
+  type: 'derivation',
   targetProperty: 'options',
   functionName: 'getCitiesForCountry',
   dependsOn: ['country'],  // ⚠️ Recommended for custom functions!
@@ -1451,7 +1454,7 @@ targetProperty: 'props.nested.deep'  // ❌ Too deep!
 \`\`\`typescript
 // Default: evaluate immediately on form value change
 logic: [{
-  type: 'propertyDerivation',
+  type: 'derivation',
   targetProperty: 'options',
   expression: '...',
   trigger: 'onChange',  // default
@@ -1459,7 +1462,7 @@ logic: [{
 
 // Debounced: wait for typing to stop
 logic: [{
-  type: 'propertyDerivation',
+  type: 'derivation',
   targetProperty: 'options',
   functionName: 'searchProducts',
   trigger: 'debounced',
@@ -1483,7 +1486,7 @@ Inside arrays, \`formValue\` is scoped to the current array item:
       {
         key: 'endDate', type: 'datepicker', label: 'End',
         logic: [{
-          type: 'propertyDerivation',
+          type: 'derivation',
           targetProperty: 'minDate',
           expression: 'formValue.startDate',  // Refers to THIS item's startDate
         }]
@@ -1517,7 +1520,7 @@ import { FormConfig } from '@ng-forge/dynamic-forms';
 
 const travelForm = {
   customFnConfig: {
-    propertyDerivations: {
+    derivations: {
       getCitiesForCountry: (ctx) => {
         const cities: Record<string, { label: string; value: string }[]> = {
           'US': [{ label: 'New York', value: 'nyc' }, { label: 'LA', value: 'la' }],
@@ -1543,7 +1546,7 @@ const travelForm = {
       label: 'City',
       options: [],
       logic: [{
-        type: 'propertyDerivation',
+        type: 'derivation',
         targetProperty: 'options',
         functionName: 'getCitiesForCountry',
         dependsOn: ['country'],
@@ -1555,7 +1558,7 @@ const travelForm = {
       type: 'datepicker',
       label: 'Travel End',
       logic: [{
-        type: 'propertyDerivation',
+        type: 'derivation',
         targetProperty: 'minDate',
         expression: 'formValue.startDate',
       }],
@@ -1572,26 +1575,26 @@ const travelForm = {
 // WRONG - 'derivation' changes the form value, not a property
 logic: [{ type: 'derivation', expression: 'formValue.startDate' }]
 
-// CORRECT - 'propertyDerivation' changes a component property
-logic: [{ type: 'propertyDerivation', targetProperty: 'minDate', expression: 'formValue.startDate' }]
+// CORRECT - targetProperty makes it a PROPERTY derivation
+logic: [{ type: 'derivation', targetProperty: 'minDate', expression: 'formValue.startDate' }]
 \`\`\`
 
 ❌ Missing targetProperty:
 \`\`\`typescript
 // WRONG - must specify which property to set
-logic: [{ type: 'propertyDerivation', expression: '...' }]
+logic: [{ type: 'derivation', expression: '...' }]
 
 // CORRECT
-logic: [{ type: 'propertyDerivation', targetProperty: 'options', expression: '...' }]
+logic: [{ type: 'derivation', targetProperty: 'options', expression: '...' }]
 \`\`\`
 
-❌ Using wrong customFnConfig key:
+❌ Forgetting targetProperty entirely:
 \`\`\`typescript
-// WRONG - derivations is for value derivation functions
-customFnConfig: { derivations: { getCities: ... } }
+// WRONG - this is a VALUE derivation (overwrites the field value)
+logic: [{ type: 'derivation', functionName: 'getCities' }]
 
-// CORRECT - propertyDerivations is for property derivation functions
-customFnConfig: { propertyDerivations: { getCities: ... } }
+// CORRECT - targetProperty makes it set the 'options' PROPERTY
+logic: [{ type: 'derivation', targetProperty: 'options', functionName: 'getCities' }]
 \`\`\``,
   },
 

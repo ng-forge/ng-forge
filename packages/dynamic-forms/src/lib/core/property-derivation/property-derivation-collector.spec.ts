@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { collectPropertyDerivations } from './property-derivation-collector';
 import { FieldDef } from '../../definitions/base/field-def';
+import { createMockLogger } from '../../../../testing/src/mock-logger';
+import { createDeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
 
 describe('property-derivation-collector', () => {
+  const logger = createMockLogger();
+  const tracker = createDeprecationWarningTracker();
+
   describe('collectPropertyDerivations', () => {
     it('should return empty collection when no fields have propertyDerivation logic', () => {
       const fields: FieldDef<unknown>[] = [
@@ -15,7 +20,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields);
+      const collection = collectPropertyDerivations(fields, logger, tracker);
 
       expect(collection.entries).toHaveLength(0);
     });
@@ -35,7 +40,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields);
+      const collection = collectPropertyDerivations(fields, logger, tracker);
 
       expect(collection.entries).toHaveLength(1);
       expect(collection.entries[0].fieldKey).toBe('endDate');
@@ -45,7 +50,55 @@ describe('property-derivation-collector', () => {
       expect(collection.entries[0].condition).toBe(true);
     });
 
-    it('should ignore state logic and value derivation entries (only collects type: propertyDerivation)', () => {
+    it('should collect type: derivation with targetProperty as property derivation entry', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'endDate',
+          type: 'datepicker',
+          logic: [
+            {
+              type: 'derivation',
+              targetProperty: 'minDate',
+              expression: 'formValue.startDate',
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      const collection = collectPropertyDerivations(fields, logger, tracker);
+
+      expect(collection.entries).toHaveLength(1);
+      expect(collection.entries[0].fieldKey).toBe('endDate');
+      expect(collection.entries[0].targetProperty).toBe('minDate');
+      expect(collection.entries[0].expression).toBe('formValue.startDate');
+    });
+
+    it('should still accept deprecated type: propertyDerivation (backward compat)', () => {
+      const localTracker = createDeprecationWarningTracker();
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'city',
+          type: 'select',
+          logic: [
+            {
+              type: 'propertyDerivation',
+              targetProperty: 'options',
+              functionName: 'getCitiesForCountry',
+              dependsOn: ['country'],
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      const collection = collectPropertyDerivations(fields, logger, localTracker);
+
+      expect(collection.entries).toHaveLength(1);
+      expect(collection.entries[0].fieldKey).toBe('city');
+      expect(collection.entries[0].targetProperty).toBe('options');
+      expect(localTracker.warnedKeys.has('type:propertyDerivation')).toBe(true);
+    });
+
+    it('should ignore state logic and value derivation entries (only collects property derivations)', () => {
       const fields: FieldDef<unknown>[] = [
         {
           key: 'myField',
@@ -65,7 +118,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields);
+      const collection = collectPropertyDerivations(fields, logger, tracker);
 
       expect(collection.entries).toHaveLength(1);
       expect(collection.entries[0].fieldKey).toBe('myField');
@@ -117,7 +170,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields);
+      const collection = collectPropertyDerivations(fields, logger, tracker);
 
       expect(collection.entries).toHaveLength(3);
       expect(collection.entries[0].fieldKey).toBe('endDate');
@@ -169,7 +222,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields);
+      const collection = collectPropertyDerivations(fields, logger, tracker);
 
       expect(collection.entries).toHaveLength(2);
       expect(collection.entries[0].fieldKey).toBe('zipField');
@@ -199,7 +252,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields);
+      const collection = collectPropertyDerivations(fields, logger, tracker);
 
       expect(collection.entries).toHaveLength(1);
       expect(collection.entries[0].fieldKey).toBe('items.$.endDate');
@@ -221,7 +274,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields);
+      const collection = collectPropertyDerivations(fields, logger, tracker);
 
       expect(collection.entries[0].dependsOn).toContain('quantity');
       expect(collection.entries[0].dependsOn).toContain('unitPrice');
@@ -243,7 +296,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields);
+      const collection = collectPropertyDerivations(fields, logger, tracker);
 
       expect(collection.entries[0].dependsOn).toEqual(['country']);
       expect(collection.entries[0].dependsOn).not.toContain('*');
@@ -264,7 +317,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields);
+      const collection = collectPropertyDerivations(fields, logger, tracker);
 
       expect(collection.entries[0].dependsOn).toContain('*');
     });
@@ -290,7 +343,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields);
+      const collection = collectPropertyDerivations(fields, logger, tracker);
 
       expect(collection.entries[0].dependsOn).toContain('contactType');
     });
@@ -324,7 +377,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields);
+      const collection = collectPropertyDerivations(fields, logger, tracker);
 
       expect(collection.entries[0].trigger).toBe('debounced');
       expect(collection.entries[0].debounceMs).toBe(300);

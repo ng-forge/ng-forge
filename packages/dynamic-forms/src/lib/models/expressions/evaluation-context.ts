@@ -1,4 +1,5 @@
 import type { Logger } from '../../providers/features/logger/logger.interface';
+import type { DeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
 import type { FieldStateContext, FormFieldStateMap } from './field-state-context';
 
 export interface EvaluationContext<TValue = unknown> {
@@ -80,6 +81,12 @@ export interface EvaluationContext<TValue = unknown> {
    * ```
    */
   externalData?: Record<string, unknown>;
+
+  /**
+   * DI-scoped tracker for deprecation warnings.
+   * Used by the condition evaluator to deduplicate deprecation warnings.
+   */
+  deprecationTracker?: DeprecationWarningTracker;
 
   /**
    * State of the current field being evaluated.

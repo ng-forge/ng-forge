@@ -1,6 +1,6 @@
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
-import { DerivationLogicConfig, isDerivationLogicConfig } from '../../models/logic/logic-config';
+import { DerivationLogicConfig, hasTargetProperty, isDerivationLogicConfig } from '../../models/logic/logic-config';
 import { hasChildFields } from '../../models/types/type-guards';
 import { normalizeFieldsArray } from '../../utils/object-utils';
 import { extractExpressionDependencies, extractStringDependencies } from '../cross-field/cross-field-detector';
@@ -132,6 +132,7 @@ function collectFromField(field: FieldDef<unknown>, entries: DerivationEntry[], 
   if (validationField.logic) {
     for (const logicConfig of validationField.logic) {
       if (isDerivationLogicConfig(logicConfig)) {
+        if (hasTargetProperty(logicConfig)) continue;
         const entry = createLogicEntry(fieldKey, logicConfig, context);
         entries.push(entry);
       }

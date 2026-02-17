@@ -1,5 +1,5 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { LogicTrigger, PropertyDerivationLogicConfig } from '../../models/logic/logic-config';
+import { DerivationLogicConfig, LogicTrigger, PropertyDerivationLogicConfig } from '../../models/logic/logic-config';
 
 /**
  * Entry representing a collected property derivation from field definitions.
@@ -93,7 +93,7 @@ export interface PropertyDerivationEntry {
   /**
    * The original logic config if this entry was created from a full logic config.
    */
-  originalConfig?: PropertyDerivationLogicConfig;
+  originalConfig?: PropertyDerivationLogicConfig | DerivationLogicConfig;
 }
 
 /**

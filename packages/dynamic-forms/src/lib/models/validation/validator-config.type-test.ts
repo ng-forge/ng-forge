@@ -151,8 +151,8 @@ describe('AsyncValidatorConfig - Exhaustive Whitelist', () => {
   });
 
   describe('property types', () => {
-    it('type should be literal customAsync', () => {
-      expectTypeOf<AsyncValidatorConfig['type']>().toEqualTypeOf<'customAsync'>();
+    it('type should be async or customAsync (deprecated)', () => {
+      expectTypeOf<AsyncValidatorConfig['type']>().toEqualTypeOf<'async' | 'customAsync'>();
     });
 
     it('functionName should be string', () => {
@@ -188,8 +188,8 @@ describe('HttpValidatorConfig - Exhaustive Whitelist', () => {
   });
 
   describe('property types', () => {
-    it('type should be literal customHttp', () => {
-      expectTypeOf<HttpValidatorConfig['type']>().toEqualTypeOf<'customHttp'>();
+    it('type should be http or customHttp (deprecated)', () => {
+      expectTypeOf<HttpValidatorConfig['type']>().toEqualTypeOf<'http' | 'customHttp'>();
     });
 
     it('functionName should be string', () => {
@@ -500,7 +500,17 @@ describe('CustomValidatorConfig - Usage Examples', () => {
 // ============================================================================
 
 describe('AsyncValidatorConfig - Usage Examples', () => {
-  it('should accept async validator without params', () => {
+  it('should accept async validator with preferred type', () => {
+    const validator = {
+      type: 'async',
+      functionName: 'checkEmailAvailability',
+    } as const satisfies AsyncValidatorConfig;
+
+    expectTypeOf(validator.type).toEqualTypeOf<'async'>();
+    expectTypeOf(validator.functionName).toEqualTypeOf<'checkEmailAvailability'>();
+  });
+
+  it('should accept async validator with deprecated type', () => {
     const validator = {
       type: 'customAsync',
       functionName: 'checkEmailAvailability',
@@ -543,7 +553,17 @@ describe('AsyncValidatorConfig - Usage Examples', () => {
 // ============================================================================
 
 describe('HttpValidatorConfig - Usage Examples', () => {
-  it('should accept http validator without params', () => {
+  it('should accept http validator with preferred type', () => {
+    const validator = {
+      type: 'http',
+      functionName: 'validateUsername',
+    } as const satisfies HttpValidatorConfig;
+
+    expectTypeOf(validator.type).toEqualTypeOf<'http'>();
+    expectTypeOf(validator.functionName).toEqualTypeOf<'validateUsername'>();
+  });
+
+  it('should accept http validator with deprecated type', () => {
     const validator = {
       type: 'customHttp',
       functionName: 'validateUsername',

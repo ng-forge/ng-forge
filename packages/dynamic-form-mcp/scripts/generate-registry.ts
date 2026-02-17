@@ -921,9 +921,10 @@ const VALIDATORS: ValidatorInfo[] = [
 }`,
   },
   {
-    type: 'customAsync',
+    type: 'async',
     category: 'async',
-    description: 'Async validator using registered async function',
+    description:
+      'Async validator using registered async function (resource-based). Register the function via customFnConfig.asyncValidators.',
     parameters: {
       functionName: {
         name: 'functionName',
@@ -939,6 +940,30 @@ const VALIDATORS: ValidatorInfo[] = [
       },
     },
     example: `{
+  type: 'async',
+  functionName: 'checkUsernameAvailability'
+}`,
+  },
+  {
+    type: 'customAsync',
+    category: 'async',
+    description: "DEPRECATED — use type: 'async' instead. Async validator using registered async function.",
+    parameters: {
+      functionName: {
+        name: 'functionName',
+        type: 'string',
+        description: 'Name of registered async validator function',
+        required: true,
+      },
+      params: {
+        name: 'params',
+        type: 'Record<string, unknown>',
+        description: 'Parameters to pass to validator function',
+        required: false,
+      },
+    },
+    example: `// DEPRECATED — use type: 'async' instead
+{
   type: 'customAsync',
   functionName: 'checkUsernameAvailability'
 }`,
@@ -946,7 +971,7 @@ const VALIDATORS: ValidatorInfo[] = [
   {
     type: 'customHttp',
     category: 'http',
-    description: 'HTTP-based validator with automatic request cancellation',
+    description: "DEPRECATED — use type: 'http' with functionName instead. HTTP-based validator with automatic request cancellation.",
     parameters: {
       functionName: {
         name: 'functionName',
@@ -961,7 +986,8 @@ const VALIDATORS: ValidatorInfo[] = [
         required: false,
       },
     },
-    example: `{
+    example: `// DEPRECATED — use type: 'http' with functionName instead
+{
   type: 'customHttp',
   functionName: 'validateEmailExists'
 }`,
@@ -970,21 +996,33 @@ const VALIDATORS: ValidatorInfo[] = [
     type: 'http',
     category: 'http',
     description:
-      'HTTP validator — fully JSON-serializable, no function registration required. Uses HttpRequestConfig to define the request and HttpValidationResponseMapping to interpret the response. Query param values and (optionally) body values are expressions evaluated against the form context. Response mapping uses validWhen (truthy = valid) and errorKind (maps to field-level validationMessages).',
+      'HTTP validator — supports two modes: (1) Declarative (fully JSON-serializable, no function registration) using http + responseMapping properties, or (2) Function-based using functionName to reference a registered HTTP validator function. Query param values and (optionally) body values are expressions evaluated against the form context. Response mapping uses validWhen (truthy = valid) and errorKind (maps to field-level validationMessages).',
     parameters: {
+      functionName: {
+        name: 'functionName',
+        type: 'string',
+        description: 'Name of registered HTTP validator function (function-based mode). Mutually exclusive with http + responseMapping.',
+        required: false,
+      },
       http: {
         name: 'http',
         type: 'HttpRequestConfig',
         description:
-          'HTTP request configuration: { url, method?, queryParams?, body?, evaluateBodyExpressions?, headers?, debounceMs? }. queryParams values are expressions. When evaluateBodyExpressions is true, top-level string values in body are evaluated as expressions (shallow only).',
-        required: true,
+          'HTTP request configuration: { url, method?, queryParams?, body?, evaluateBodyExpressions?, headers?, debounceMs? }. queryParams values are expressions. When evaluateBodyExpressions is true, top-level string values in body are evaluated as expressions (shallow only). Required for declarative mode.',
+        required: false,
       },
       responseMapping: {
         name: 'responseMapping',
         type: 'HttpValidationResponseMapping',
         description:
-          'Response mapping: { validWhen, errorKind, errorParams? }. validWhen is an expression evaluated with { response } scope — truthy means valid. errorKind maps to field-level validationMessages. errorParams values are expressions evaluated with { response } scope.',
-        required: true,
+          'Response mapping: { validWhen, errorKind, errorParams? }. validWhen is an expression evaluated with { response } scope — truthy means valid. errorKind maps to field-level validationMessages. Required for declarative mode.',
+        required: false,
+      },
+      params: {
+        name: 'params',
+        type: 'Record<string, unknown>',
+        description: 'Parameters to pass to HTTP validator function (function-based mode only).',
+        required: false,
       },
     },
     example: `// HTTP validator (fully JSON-serializable)

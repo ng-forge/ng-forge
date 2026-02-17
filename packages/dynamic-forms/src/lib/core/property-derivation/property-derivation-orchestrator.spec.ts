@@ -9,6 +9,7 @@ import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logge
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { createDerivationWarningTracker, DERIVATION_WARNING_TRACKER } from '../derivation/derivation-warning-tracker';
+import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { createPropertyOverrideStore, PropertyOverrideStore } from './property-override-store';
 import { PropertyDerivationOrchestrator, PropertyDerivationOrchestratorConfig } from './property-derivation-orchestrator';
 
@@ -95,6 +96,10 @@ describe('PropertyDerivationOrchestrator', () => {
         {
           provide: DERIVATION_WARNING_TRACKER,
           useFactory: createDerivationWarningTracker,
+        },
+        {
+          provide: DEPRECATION_WARNING_TRACKER,
+          useFactory: createDeprecationWarningTracker,
         },
         { provide: FORM_OPTIONS, useValue: signal(undefined) },
       ],

@@ -1,5 +1,14 @@
-import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import {
+  AndCondition,
+  ConditionalExpression,
+  CustomCondition,
+  FieldValueCondition,
+  FormValueCondition,
+  JavascriptCondition,
+  OrCondition,
+} from '../../models/expressions/conditional-expression';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
+import { warnDeprecated } from '../../utils/deprecation-warnings';
 import { compareValues, getNestedValue, hasNestedProperty } from './value-utils';
 import { ExpressionParser } from './parser/expression-parser';
 
@@ -13,6 +22,15 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
       return evaluateFieldValueCondition(expression, context);
 
     case 'formValue':
+      // TODO(@ng-forge): remove deprecated code in next minor
+      if (context.deprecationTracker) {
+        warnDeprecated(
+          context.logger,
+          context.deprecationTracker,
+          'condition:formValue',
+          "Condition type 'formValue' is deprecated. Use 'fieldValue' with a specific fieldPath, or 'javascript' for complex form-level comparisons.",
+        );
+      }
       return evaluateFormValueCondition(expression, context);
 
     case 'javascript':
@@ -32,11 +50,9 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
   }
 }
 
-function evaluateFieldValueCondition(expression: ConditionalExpression, context: EvaluationContext): boolean {
-  if (!expression.fieldPath || !expression.operator) {
-    context.logger.debug('Invalid fieldValue condition config: missing fieldPath or operator', expression);
-    return false;
-  }
+function evaluateFieldValueCondition(expression: FieldValueCondition, context: EvaluationContext): boolean {
+  // Guard against missing fieldPath — invalid config, return false
+  if (!expression.fieldPath) return false;
 
   // Try scoped formValue first (handles sibling field lookups within array items).
   // Fall back to rootFormValue for fields outside the current array scope.
@@ -51,17 +67,11 @@ function evaluateFieldValueCondition(expression: ConditionalExpression, context:
   return compareValues(fieldValue, expression.value, expression.operator);
 }
 
-function evaluateFormValueCondition(expression: ConditionalExpression, context: EvaluationContext): boolean {
-  if (!expression.operator) {
-    context.logger.debug('Invalid formValue condition config: missing operator', expression);
-    return false;
-  }
+function evaluateFormValueCondition(expression: FormValueCondition, context: EvaluationContext): boolean {
   return compareValues(context.formValue, expression.value, expression.operator);
 }
 
-function evaluateJavaScriptExpression(expression: ConditionalExpression, context: EvaluationContext): boolean {
-  if (!expression.expression) return false;
-
+function evaluateJavaScriptExpression(expression: JavascriptCondition, context: EvaluationContext): boolean {
   try {
     // Use secure AST-based expression parser instead of new Function()
     const result = ExpressionParser.evaluate(expression.expression, context);
@@ -72,9 +82,7 @@ function evaluateJavaScriptExpression(expression: ConditionalExpression, context
   }
 }
 
-function evaluateCustomFunction(expression: ConditionalExpression, context: EvaluationContext): boolean {
-  if (!expression.expression) return false;
-
+function evaluateCustomFunction(expression: CustomCondition, context: EvaluationContext): boolean {
   const customFn = context.customFunctions?.[expression.expression];
   if (!customFn) {
     context.logger.error('Custom function not found:', expression.expression);
@@ -89,16 +97,14 @@ function evaluateCustomFunction(expression: ConditionalExpression, context: Eval
   }
 }
 
-function evaluateAndCondition(expression: ConditionalExpression, context: EvaluationContext): boolean {
-  if (!expression.conditions || expression.conditions.length === 0) return false;
-
+function evaluateAndCondition(expression: AndCondition, context: EvaluationContext): boolean {
+  if (expression.conditions.length === 0) return false;
   // All conditions must be true for AND logic
   return expression.conditions.every((condition) => evaluateCondition(condition, context));
 }
 
-function evaluateOrCondition(expression: ConditionalExpression, context: EvaluationContext): boolean {
-  if (!expression.conditions || expression.conditions.length === 0) return false;
-
+function evaluateOrCondition(expression: OrCondition, context: EvaluationContext): boolean {
+  if (expression.conditions.length === 0) return false;
   // At least one condition must be true for OR logic
   return expression.conditions.some((condition) => evaluateCondition(condition, context));
 }

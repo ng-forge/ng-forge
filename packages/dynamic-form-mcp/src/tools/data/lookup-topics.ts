@@ -684,7 +684,7 @@ The simplified API is normalized into the full API at runtime:
 
 **Async validators:**
 \`\`\`typescript
-validators: [{ type: 'customAsync', functionName: 'checkEmailAvailable' }]
+validators: [{ type: 'async', functionName: 'checkEmailAvailable' }]
 \`\`\`
 
 **Custom error messages (validationMessages at FIELD level):**
@@ -780,7 +780,7 @@ logic: [{ type: 'derivation', expression: '...', stopOnUserOverride: true, reEng
 \`\`\`
 Derivation is always defined ON the field that receives the computed value (self-targeting).
 **Variables:** \`formValue\`, \`fieldValue\`, \`fieldState\`, \`formFieldState\`, \`externalData\` (see topic: expression-variables)
-**For deriving component properties** (minDate, options, label): see topic \`property-derivation\``,
+**For deriving component properties** (minDate, options, label): use \`targetProperty\` (see topic \`property-derivation\`)`,
 
     full: `# Value Derivation (Computed Fields)
 
@@ -1075,10 +1075,10 @@ expression: 'formFieldState.price?.valid ? formValue.price * 1.2 : null'
   'property-derivation': {
     brief: `\`\`\`typescript
 // Derive endDate's minDate from startDate value
-logic: [{ type: 'propertyDerivation', targetProperty: 'minDate', expression: 'formValue.startDate' }]
+logic: [{ type: 'derivation', targetProperty: 'minDate', expression: 'formValue.startDate' }]
 
 // Derive select options from another field
-logic: [{ type: 'propertyDerivation', targetProperty: 'options', functionName: 'getCitiesForCountry', dependsOn: ['country'] }]
+logic: [{ type: 'derivation', targetProperty: 'options', functionName: 'getCitiesForCountry', dependsOn: ['country'] }]
 \`\`\`
 Unlike value derivation (which sets the field's **value**), property derivation sets **component input properties** like minDate, options, label, placeholder, props.appearance.`,
 
@@ -1096,7 +1096,7 @@ Property derivations are self-targeting: the logic is placed on the field whose 
   type: 'datepicker',
   label: 'End Date',
   logic: [{
-    type: 'propertyDerivation',
+    type: 'derivation',
     targetProperty: 'minDate',
     expression: 'formValue.startDate',
   }]
@@ -1110,7 +1110,7 @@ When \`startDate\` changes, the \`minDate\` property on the \`endDate\` datepick
 ### Expression-Based
 \`\`\`typescript
 logic: [{
-  type: 'propertyDerivation',
+  type: 'derivation',
   targetProperty: 'minDate',
   expression: 'formValue.startDate',
 }]
@@ -1119,7 +1119,7 @@ logic: [{
 ### Static Value
 \`\`\`typescript
 logic: [{
-  type: 'propertyDerivation',
+  type: 'derivation',
   targetProperty: 'label',
   value: 'Mobile Phone',
   condition: { type: 'fieldValue', fieldPath: 'contactType', operator: 'equals', value: 'mobile' },
@@ -1130,7 +1130,7 @@ logic: [{
 \`\`\`typescript
 // Register in customFnConfig
 customFnConfig: {
-  propertyDerivations: {
+  derivations: {
     getCitiesForCountry: (ctx) => {
       const cities = { 'US': [{ label: 'NYC', value: 'nyc' }], 'DE': [{ label: 'Berlin', value: 'berlin' }] };
       return cities[ctx.formValue.country as string] ?? [];
@@ -1144,7 +1144,7 @@ customFnConfig: {
   type: 'select',
   label: 'City',
   logic: [{
-    type: 'propertyDerivation',
+    type: 'derivation',
     targetProperty: 'options',
     functionName: 'getCitiesForCountry',
     dependsOn: ['country'],
@@ -1171,7 +1171,7 @@ customFnConfig: {
 
 \`\`\`typescript
 logic: [{
-  type: 'propertyDerivation',
+  type: 'derivation',
   targetProperty: 'options',
   functionName: 'searchProducts',
   trigger: 'debounced',
@@ -1184,7 +1184,7 @@ logic: [{
 
 \`\`\`typescript
 logic: [{
-  type: 'propertyDerivation',
+  type: 'derivation',
   targetProperty: 'label',
   value: 'Company Email',
   condition: { type: 'fieldValue', fieldPath: 'accountType', operator: 'equals', value: 'business' },
@@ -1208,7 +1208,7 @@ Inside arrays, \`formValue\` is scoped to the current array item:
         type: 'datepicker',
         label: 'End',
         logic: [{
-          type: 'propertyDerivation',
+          type: 'derivation',
           targetProperty: 'minDate',
           expression: 'formValue.startDate',  // Scoped to current array item
         }]
@@ -1223,17 +1223,17 @@ Inside arrays, \`formValue\` is scoped to the current array item:
 | Aspect | Value Derivation | Property Derivation |
 |--------|-----------------|---------------------|
 | Sets | Field's form value | Component input property |
-| Type | \`type: 'derivation'\` | \`type: 'propertyDerivation'\` |
+| Type | \`type: 'derivation'\` | \`type: 'derivation'\` |
 | Target | Implicit (self) | \`targetProperty: 'minDate'\` |
 | Shorthand | \`derivation: 'expr'\` | None (must use logic block) |
 | Chaining | Topologically sorted | No chaining (single pass) |
-| Functions | \`customFnConfig.derivations\` | \`customFnConfig.propertyDerivations\` |
+| Functions | \`customFnConfig.derivations\` | \`customFnConfig.derivations\` |
 
-## PropertyDerivationLogicConfig Interface
+## DerivationLogicConfig Interface (with targetProperty)
 
 \`\`\`typescript
-interface PropertyDerivationLogicConfig {
-  type: 'propertyDerivation';
+interface DerivationLogicConfig {
+  type: 'derivation';
   targetProperty: string;               // Property to set (e.g., 'minDate', 'options')
   debugName?: string;                   // For logging/debugging
   condition?: ConditionalExpression | boolean;  // When to apply (default: true)
@@ -1348,7 +1348,7 @@ logic: [{
 
   'async-validators': {
     brief: `\`\`\`typescript
-validators: [{ type: 'customAsync', functionName: 'checkEmailAvailable' }]
+validators: [{ type: 'async', functionName: 'checkEmailAvailable' }]
 \`\`\`
 Define function, register in provideDynamicForm, use in config.`,
 
@@ -1389,7 +1389,7 @@ provideDynamicForm({
   type: 'input',
   label: 'Email',
   validators: [
-    { type: 'customAsync', functionName: 'checkEmailAvailable' }
+    { type: 'async', functionName: 'checkEmailAvailable' }
   ],
   validationMessages: { emailTaken: 'This email is already registered' }
 }
@@ -1489,11 +1489,11 @@ validators: [{
   // ========== PATTERNS & RULES ==========
   'logic-matrix': {
     brief: `**Containers:** group/row/array support only \`hidden\` logic (same as pages). For other logic types, apply to children.
-**Page:** hidden only | **Value fields:** all logic types incl. propertyDerivation | **Buttons:** hidden, disabled`,
+**Page:** hidden only | **Value fields:** all logic types incl. derivation + targetProperty | **Buttons:** hidden, disabled`,
 
     full: `# Logic Support Matrix
 
-| Field Type     | hidden | disabled | required | readonly | derivation | propertyDerivation |
+| Field Type     | hidden | disabled | required | readonly | derivation | derivation+targetProperty |
 |----------------|--------|----------|----------|----------|------------|--------------------|
 | page           |   Y    |    N     |    N     |    N     |     N      |         N          |
 | group          |   Y    |    N     |    N     |    N     |     N      |         N          |
@@ -1517,9 +1517,9 @@ validators: [{
 - Containers (group, row, array) support only \`hidden\` logic type (same as pages) for conditional visibility. For other logic types, apply to child fields instead.
 - Page only supports \`hidden\` logic (for conditional pages)
 - Hidden fields have NO logic support at all
-- Value fields (input, select, etc.) support ALL logic types including \`propertyDerivation\`
-- \`propertyDerivation\` sets component input properties (e.g., \`minDate\`, \`options\`), NOT the field's form value
-- Text (display) fields support \`propertyDerivation\` for dynamic labels`,
+- Value fields (input, select, etc.) support ALL logic types including \`derivation\` with \`targetProperty\`
+- \`derivation\` with \`targetProperty\` sets component input properties (e.g., \`minDate\`, \`options\`), NOT the field's form value
+- Text (display) fields support \`derivation\` with \`targetProperty\` for dynamic labels`,
   },
 
   'context-api': {

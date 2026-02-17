@@ -124,7 +124,7 @@ Regular expression validation.
 Validators support a `when` property for conditional validation. See **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** for the complete reference on:
 
 - All operators (`equals`, `notEquals`, `greater`, `less`, `contains`, `matches`, etc.)
-- Expression types (`fieldValue`, `formValue`, `javascript`, `custom`)
+- Expression types (`fieldValue`, `formValue` (deprecated), `javascript`, `custom`)
 - Combining conditions with `and`/`or` logic
 
 **Quick example:**
@@ -145,7 +145,7 @@ Validators support a `when` property for conditional validation. See **[Conditio
 
 ## ValidatorConfig Types
 
-ValidatorConfig is a discriminated union type with four variants:
+ValidatorConfig is a discriminated union type with five variants:
 
 ```typescript
 // Built-in validators (required, email, min, max, etc.)
@@ -169,56 +169,131 @@ interface CustomValidatorConfig {
 
 // Async validators (for debounced validation, database lookups)
 interface AsyncValidatorConfig {
-  type: 'customAsync';
+  // 'async' is preferred; 'customAsync' is deprecated and emits a warning in dev mode
+  type: 'async' | 'customAsync';
   functionName: string;
   params?: Record<string, unknown>;
   when?: ConditionalExpression;
 }
 
-// HTTP validators (optimized HTTP validation with auto-cancellation)
-interface HttpValidatorConfig {
-  type: 'customHttp';
+// Function-based HTTP validators (requires a registered function)
+interface FunctionHttpValidatorConfig {
+  // 'http' is preferred; 'customHttp' is deprecated and emits a warning in dev mode
+  type: 'http' | 'customHttp';
   functionName: string;
   params?: Record<string, unknown>;
   when?: ConditionalExpression;
 }
 
-type ValidatorConfig = BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | HttpValidatorConfig;
+// Declarative HTTP validators (fully JSON-serializable, no function registration)
+interface DeclarativeHttpValidatorConfig {
+  type: 'http';
+  http: HttpRequestConfig;
+  responseMapping: HttpValidationResponseMapping;
+  when?: ConditionalExpression;
+}
+
+type ValidatorConfig =
+  | BuiltInValidatorConfig
+  | CustomValidatorConfig
+  | AsyncValidatorConfig
+  | FunctionHttpValidatorConfig
+  | DeclarativeHttpValidatorConfig;
 ```
 
-## ConditionalExpression Interface
+> **Deprecation notes:**
+>
+> - `type: 'customAsync'` is deprecated. Use `type: 'async'` instead.
+> - `type: 'customHttp'` is deprecated. Use `type: 'http'` instead.
+> - `FunctionHttpValidatorConfig` and `DeclarativeHttpValidatorConfig` both use `type: 'http'`. They are discriminated by property presence: `functionName` indicates function-based, `http` + `responseMapping` indicates declarative.
+
+### HttpRequestConfig
+
+Used by `DeclarativeHttpValidatorConfig` to define the HTTP request:
 
 ```typescript
-interface ConditionalExpression {
-  // Expression type - includes 'and' and 'or' for combining conditions
-  type: 'fieldValue' | 'formValue' | 'custom' | 'javascript' | 'and' | 'or';
-
-  // Field path for fieldValue type
-  fieldPath?: string;
-
-  // Comparison operator
-  operator?:
-    | 'equals'
-    | 'notEquals'
-    | 'greater'
-    | 'less'
-    | 'greaterOrEqual'
-    | 'lessOrEqual'
-    | 'contains'
-    | 'startsWith'
-    | 'endsWith'
-    | 'matches';
-
-  // Value to compare against
-  value?: unknown;
-
-  // JavaScript expression for custom logic
-  expression?: string;
-
-  // Array of sub-conditions for 'and' and 'or' types
-  conditions?: ConditionalExpression[];
+interface HttpRequestConfig {
+  url: string;
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'; // defaults to 'GET'
+  queryParams?: Record<string, string>; // values are expressions
+  body?: Record<string, unknown>;
+  evaluateBodyExpressions?: boolean; // when true, top-level string values in body are evaluated as expressions
+  headers?: Record<string, string>;
 }
 ```
+
+### HttpValidationResponseMapping
+
+Used by `DeclarativeHttpValidatorConfig` to interpret the HTTP response:
+
+```typescript
+interface HttpValidationResponseMapping {
+  validWhen: string; // expression evaluated with { response } scope; truthy = valid
+  errorKind: string; // error kind for validationMessages lookup
+  errorParams?: Record<string, string>; // parameter expressions evaluated against { response }
+}
+```
+
+## ConditionalExpression Types
+
+`ConditionalExpression` is a discriminated union of six condition types. Each variant only allows the properties relevant to its type, providing compile-time safety against invalid property combinations.
+
+```typescript
+// Compare a specific field's value
+interface FieldValueCondition {
+  type: 'fieldValue';
+  fieldPath: string;
+  operator: ComparisonOperator;
+  value?: unknown;
+}
+
+// Compare the entire form value (deprecated — use FieldValueCondition or JavascriptCondition instead)
+interface FormValueCondition {
+  type: 'formValue';
+  operator: ComparisonOperator;
+  value?: unknown;
+}
+
+// Invoke a registered custom function by name
+interface CustomCondition {
+  type: 'custom';
+  expression: string; // registered function name
+}
+
+// Evaluate a JavaScript expression via the secure AST-based parser
+interface JavascriptCondition {
+  type: 'javascript';
+  expression: string; // has access to formValue, fieldValue, externalData, etc.
+}
+
+// Logical AND — all sub-conditions must be true
+interface AndCondition {
+  type: 'and';
+  conditions: ConditionalExpression[];
+}
+
+// Logical OR — at least one sub-condition must be true
+interface OrCondition {
+  type: 'or';
+  conditions: ConditionalExpression[];
+}
+
+type ComparisonOperator =
+  | 'equals'
+  | 'notEquals'
+  | 'greater'
+  | 'less'
+  | 'greaterOrEqual'
+  | 'lessOrEqual'
+  | 'contains'
+  | 'startsWith'
+  | 'endsWith'
+  | 'matches';
+
+type ConditionalExpression = FieldValueCondition | FormValueCondition | CustomCondition | JavascriptCondition | AndCondition | OrCondition;
+```
+
+> **Deprecation note:** `FormValueCondition` (`type: 'formValue'`) is deprecated. Use `FieldValueCondition` for specific field checks, or `JavascriptCondition` with an expression for complex form-level comparisons.
 
 ## Validation Messages
 

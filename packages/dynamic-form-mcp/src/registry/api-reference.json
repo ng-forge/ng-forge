@@ -450,8 +450,10 @@
         "maxLength": "{ type: 'maxLength', value: 50 }",
         "pattern": "{ type: 'pattern', value: '^[A-Z]+$' }",
         "custom": "{ type: 'custom', expression: 'fieldValue !== formValue.other', kind: 'errorKind' }",
-        "customAsync": "{ type: 'customAsync', functionName: 'checkAvailability' }",
-        "customHttp": "{ type: 'customHttp', functionName: 'validateOnServer' }"
+        "async": "{ type: 'async', functionName: 'checkAvailability' }",
+        "customAsync": "DEPRECATED — use type: 'async'. { type: 'customAsync', functionName: 'checkAvailability' }",
+        "http (function-based)": "{ type: 'http', functionName: 'validateOnServer' }",
+        "customHttp": "DEPRECATED — use type: 'http' with functionName. { type: 'customHttp', functionName: 'validateOnServer' }"
       }
     },
     "errorMessages": {

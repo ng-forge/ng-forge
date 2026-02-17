@@ -4,6 +4,7 @@ import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
 import { RootFormRegistryService } from './root-form-registry.service';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { getNestedValue } from '../expressions/value-utils';
 import { readFieldStateInfo, createFormFieldStateMap } from '../derivation/field-state-extractor';
 
@@ -89,6 +90,7 @@ function detectArrayScope(pathKeys: readonly string[]): { arrayKey: string; inde
 export class FieldContextRegistryService {
   private rootFormRegistry = inject(RootFormRegistryService);
   private logger = inject(DynamicFormLogger);
+  private deprecationTracker = inject(DEPRECATION_WARNING_TRACKER, { optional: true });
   private externalDataSignal = inject(EXTERNAL_DATA, { optional: true });
 
   /**
@@ -130,6 +132,7 @@ export class FieldContextRegistryService {
       customFunctions: customFunctions || {},
       externalData: this.resolveExternalData(false),
       logger: this.logger,
+      deprecationTracker: this.deprecationTracker ?? undefined,
       get fieldState() {
         return readFieldStateInfo(extractFieldState(fieldContext), false);
       },
@@ -203,6 +206,7 @@ export class FieldContextRegistryService {
         customFunctions: customFunctions || {},
         externalData: this.resolveExternalData(reactive),
         logger: this.logger,
+        deprecationTracker: this.deprecationTracker ?? undefined,
         get fieldState() {
           return fieldStateGetter();
         },
@@ -222,6 +226,7 @@ export class FieldContextRegistryService {
       customFunctions: customFunctions || {},
       externalData: this.resolveExternalData(reactive),
       logger: this.logger,
+      deprecationTracker: this.deprecationTracker ?? undefined,
       get fieldState() {
         return fieldStateGetter();
       },
@@ -293,6 +298,7 @@ export class FieldContextRegistryService {
       customFunctions: customFunctions || {},
       externalData: this.resolveExternalData(true),
       logger: this.logger,
+      deprecationTracker: this.deprecationTracker ?? undefined,
       get fieldState() {
         return readFieldStateInfo(extractFieldState(fieldContext), true);
       },
@@ -334,6 +340,7 @@ export class FieldContextRegistryService {
       customFunctions: customFunctions || {},
       externalData: this.resolveExternalData(true),
       logger: this.logger,
+      deprecationTracker: this.deprecationTracker ?? undefined,
       get formFieldState() {
         return createFormFieldStateMap(rootFormSignal() as FieldTree<unknown>, true);
       },

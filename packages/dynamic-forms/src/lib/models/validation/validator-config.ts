@@ -63,12 +63,19 @@ export interface CustomValidatorConfig extends BaseValidatorConfig {
 }
 
 /**
- * Async custom validator configuration using Angular's validateAsync API
- * Returns Observable<ValidationError | ValidationError[] | null>
+ * Async custom validator configuration using Angular's validateAsync API.
+ * Returns Observable<ValidationError | ValidationError[] | null>.
+ *
+ * Accepts both `'async'` (preferred) and `'customAsync'` (deprecated) type literals.
  */
 export interface AsyncValidatorConfig extends BaseValidatorConfig {
-  /** Validator type identifier */
-  type: 'customAsync';
+  /**
+   * Validator type identifier.
+   *
+   * Use `'async'` for new code. `'customAsync'` is accepted for backward compatibility
+   * but emits a deprecation warning in dev mode.
+   */
+  type: 'async' | 'customAsync'; // TODO(@ng-forge): remove 'customAsync' in next minor
 
   /** Name of registered async validator function */
   functionName: string;
@@ -78,12 +85,26 @@ export interface AsyncValidatorConfig extends BaseValidatorConfig {
 }
 
 /**
- * HTTP validator configuration using Angular's validateHttp API
- * Provides optimized HTTP validation with automatic request cancellation
+ * Function-based HTTP validator configuration — requires a registered function.
+ *
+ * Uses Angular's `validateHttp` API. The function is registered via
+ * `customFnConfig.httpValidators`.
+ *
+ * Discriminated from `DeclarativeHttpValidatorConfig` by the presence of `functionName`.
+ *
+ * Accepts both `'http'` (preferred) and `'customHttp'` (deprecated) type literals.
+ *
+ * @deprecated Prefer `DeclarativeHttpValidatorConfig` (`type: 'http'` with `http` + `responseMapping`)
+ * for fully JSON-serializable validation. Use this form only when function registration is required.
  */
-export interface HttpValidatorConfig extends BaseValidatorConfig {
-  /** Validator type identifier */
-  type: 'customHttp';
+export interface FunctionHttpValidatorConfig extends BaseValidatorConfig {
+  /**
+   * Validator type identifier.
+   *
+   * Use `'http'` for new code. `'customHttp'` is accepted for backward compatibility
+   * but emits a deprecation warning in dev mode.
+   */
+  type: 'http' | 'customHttp'; // TODO(@ng-forge): remove 'customHttp' in next minor
 
   /** Name of registered HTTP validator configuration */
   functionName: string;
@@ -93,12 +114,18 @@ export interface HttpValidatorConfig extends BaseValidatorConfig {
 }
 
 /**
+ * @deprecated Use `FunctionHttpValidatorConfig` instead. Will be removed in a future minor version.
+ */
+export type HttpValidatorConfig = FunctionHttpValidatorConfig;
+
+/**
  * Declarative HTTP validator configuration — fully JSON-serializable, no function registration required.
  *
  * Uses `HttpRequestConfig` to define the HTTP request and `HttpValidationResponseMapping`
  * to interpret the response as a validation result. Powered by Angular's `validateHttp` API.
  *
- * Discriminated from `HttpValidatorConfig` (`type: 'customHttp'`) by type literal.
+ * Discriminated from `FunctionHttpValidatorConfig` by the presence of `http` + `responseMapping`
+ * (and absence of `functionName`).
  */
 export interface DeclarativeHttpValidatorConfig extends BaseValidatorConfig {
   /** Validator type identifier */
@@ -112,12 +139,28 @@ export interface DeclarativeHttpValidatorConfig extends BaseValidatorConfig {
 }
 
 /**
- * Configuration for signal forms validator functions that can be serialized from API
- * Discriminated union type for type-safe validator configuration
+ * Configuration for signal forms validator functions that can be serialized from API.
+ * Discriminated union type for type-safe validator configuration.
+ *
+ * Note: `FunctionHttpValidatorConfig` and `DeclarativeHttpValidatorConfig` both use `type: 'http'`.
+ * They are discriminated by property presence: `functionName` → function-based, `http` → declarative.
+ * Use `isFunctionHttpValidator()` for type-safe narrowing when `type` alone is insufficient.
  */
 export type ValidatorConfig =
   | BuiltInValidatorConfig
   | CustomValidatorConfig
   | AsyncValidatorConfig
-  | HttpValidatorConfig
+  | FunctionHttpValidatorConfig
   | DeclarativeHttpValidatorConfig;
+
+/**
+ * Type guard to distinguish function-based HTTP validators from declarative ones.
+ *
+ * Both use `type: 'http'`, so `switch (config.type)` cannot narrow between them.
+ * Use this guard when you need type-safe access to `FunctionHttpValidatorConfig` properties.
+ */
+export function isFunctionHttpValidator(
+  config: FunctionHttpValidatorConfig | DeclarativeHttpValidatorConfig,
+): config is FunctionHttpValidatorConfig {
+  return 'functionName' in config && !!config.functionName;
+}

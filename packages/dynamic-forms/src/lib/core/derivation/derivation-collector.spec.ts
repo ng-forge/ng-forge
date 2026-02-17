@@ -243,6 +243,29 @@ describe('derivation-collector', () => {
       });
     });
 
+    describe('property derivation routing', () => {
+      it('should skip type: derivation with targetProperty (routed to property derivation pipeline)', () => {
+        const fields: FieldDef<unknown>[] = [
+          {
+            key: 'endDate',
+            type: 'datepicker',
+            logic: [
+              {
+                type: 'derivation',
+                targetProperty: 'minDate',
+                expression: 'formValue.startDate',
+              },
+            ],
+          } as unknown as FieldDef<unknown>,
+        ];
+
+        const collection = collectDerivations(fields);
+
+        // Should not be collected as a value derivation because it has targetProperty
+        expect(collection.entries.length).toBe(0);
+      });
+    });
+
     describe('edge cases', () => {
       it('should handle empty fields array', () => {
         const collection = collectDerivations([]);

@@ -34,6 +34,8 @@ import { RegisteredFieldTypes } from '../models/registry/field-registry';
 import { detectFormMode, FormMode } from '../models/types/form-mode';
 import { InferFormValue } from '../models/types/form-value-inference';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { DEPRECATION_WARNING_TRACKER } from '../utils/deprecation-warning-tracker';
+import { warnDeprecated } from '../utils/deprecation-warnings';
 import { FunctionRegistryService } from '../core/registry/function-registry.service';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
 import { createSchemaFromFields } from '../core/schema-builder';
@@ -106,6 +108,7 @@ export class FormStateManager<
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   private readonly logger = inject(DynamicFormLogger);
+  private readonly deprecationTracker = inject(DEPRECATION_WARNING_TRACKER, { optional: true });
   private readonly eventBus = inject(EventBus);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly schemaRegistry = inject(SchemaRegistryService);
@@ -857,12 +860,31 @@ export class FormStateManager<
       this.functionRegistry.setDerivationFunctions(customFnConfig.derivations);
     }
 
+    // TODO(@ng-forge): remove deprecated code in next minor
     if (customFnConfig.propertyDerivations) {
+      if (this.deprecationTracker) {
+        warnDeprecated(
+          this.logger,
+          this.deprecationTracker,
+          'customFnConfig:propertyDerivations',
+          "customFnConfig.propertyDerivations is deprecated. Register functions under 'derivations' instead and use type: 'derivation' with targetProperty.",
+        );
+      }
       this.functionRegistry.setPropertyDerivationFunctions(customFnConfig.propertyDerivations);
     }
 
     this.functionRegistry.setValidators(customFnConfig.validators);
     this.functionRegistry.setAsyncValidators(customFnConfig.asyncValidators);
+
+    // TODO(@ng-forge): remove deprecated code in next minor
+    if (customFnConfig.httpValidators && this.deprecationTracker) {
+      warnDeprecated(
+        this.logger,
+        this.deprecationTracker,
+        'customFnConfig:httpValidators',
+        "customFnConfig.httpValidators registration path is deprecated. Use type: 'http' with functionName (for function-based) or http + responseMapping (for declarative).",
+      );
+    }
     this.functionRegistry.setHttpValidators(customFnConfig.httpValidators);
   }
 
