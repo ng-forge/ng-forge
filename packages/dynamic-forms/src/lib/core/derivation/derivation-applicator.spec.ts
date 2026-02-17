@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { signal, WritableSignal } from '@angular/core';
+import { computed, signal, WritableSignal } from '@angular/core';
 import { applyDerivations, applyDerivationsForTrigger, DerivationApplicatorContext } from './derivation-applicator';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { Logger } from '../../providers/features/logger/logger.interface';
@@ -34,23 +34,41 @@ describe('derivation-applicator', () => {
   /**
    * Mock form that mimics Angular Signal Forms structure.
    *
-   * Real structure: form[key] is callable, form[key]() returns { value: WritableSignal }
+   * Real structure: form[key] is a signal (FieldTree). Calling form[key]() returns
+   * a FieldState with: value (WritableSignal), dirty (Signal<boolean>),
+   * touched (Signal<boolean>), reset() (method that clears dirty+touched).
    */
   function createMockForm(initialValue: Record<string, unknown>): {
-    form: Record<string, () => { value: WritableSignal<unknown> }>;
+    form: Record<string, unknown>;
     values: Record<string, unknown>;
+    dirtyStates: Record<string, WritableSignal<boolean>>;
   } {
     const values = { ...initialValue };
-    const form: Record<string, () => { value: WritableSignal<unknown> }> = {};
+    const form: Record<string, unknown> = {};
+    const dirtyStates: Record<string, WritableSignal<boolean>> = {};
 
     for (const key of Object.keys(initialValue)) {
       // Create a writable signal for the value
       const valueSignal = signal(values[key]);
+      // Create dirty/touched signals (defaults to false = pristine/untouched)
+      const dirtySignal = signal(false);
+      const touchedSignal = signal(false);
+      dirtyStates[key] = dirtySignal;
 
-      // Create a callable field accessor that returns { value: WritableSignal }
-      form[key] = () => ({
+      // FieldState instance — matches the public Angular Signal Forms API
+      const fieldInstance = {
         value: valueSignal,
-      });
+        dirty: dirtySignal,
+        touched: touchedSignal,
+        reset: () => {
+          dirtySignal.set(false);
+          touchedSignal.set(false);
+        },
+      };
+
+      // Angular Signal Forms field accessors are signals (FieldTree).
+      // We use a computed signal that always returns the field instance.
+      form[key] = computed(() => fieldInstance);
 
       // Sync signal changes back to our values object for assertions
       // This is a test helper - in real code the signal IS the source of truth
@@ -62,7 +80,7 @@ describe('derivation-applicator', () => {
       });
     }
 
-    return { form, values };
+    return { form: form as Record<string, unknown>, values, dirtyStates };
   }
 
   /**
@@ -78,6 +96,8 @@ describe('derivation-applicator', () => {
       functionName: options.functionName,
       trigger: options.trigger ?? 'onChange',
       isShorthand: options.isShorthand ?? false,
+      stopOnUserOverride: options.stopOnUserOverride,
+      reEngageOnDependencyChange: options.reEngageOnDependencyChange,
     };
   }
 
@@ -460,20 +480,53 @@ describe('derivation-applicator', () => {
         });
 
         // Each item field is a FieldTree-like object with child fields
-        // Accessing itemFieldTree['lineTotal'] returns a callable FieldTree
+        // Field accessors must be signals (pass isSignal() check)
+        const dirtySignal = signal(false);
+        const touchedSignal = signal(false);
+        const qDirty = signal(false);
+        const qTouched = signal(false);
+        const upDirty = signal(false);
+        const upTouched = signal(false);
         return {
-          quantity: Object.assign(() => ({ value: quantitySignal }), {}),
-          unitPrice: Object.assign(() => ({ value: unitPriceSignal }), {}),
-          lineTotal: Object.assign(() => ({ value: lineTotalSignal }), {}),
+          quantity: computed(() => ({
+            value: quantitySignal,
+            dirty: qDirty,
+            touched: qTouched,
+            reset: () => {
+              qDirty.set(false);
+              qTouched.set(false);
+            },
+          })),
+          unitPrice: computed(() => ({
+            value: unitPriceSignal,
+            dirty: upDirty,
+            touched: upTouched,
+            reset: () => {
+              upDirty.set(false);
+              upTouched.set(false);
+            },
+          })),
+          lineTotal: computed(() => ({
+            value: lineTotalSignal,
+            dirty: dirtySignal,
+            touched: touchedSignal,
+            reset: () => {
+              dirtySignal.set(false);
+              touchedSignal.set(false);
+            },
+          })),
         };
       });
 
       const globalDiscountSignal = signal(values.globalDiscount);
+      const globalDiscountDirty = signal(false);
+      const globalDiscountTouched = signal(false);
 
       // Array field must be both callable (for getting value) AND have numeric indices
+      // Use Object.assign on a computed to keep signal identity + numeric indices
+      const itemsComputed = computed(() => ({ value: signal(values.items) }));
       const itemsArrayField = Object.assign(
-        // Callable part - returns array value
-        () => ({ value: signal(values.items) }),
+        itemsComputed,
         // Numeric indices for direct field access
         itemFieldTrees.reduce(
           (acc, tree, idx) => {
@@ -486,10 +539,121 @@ describe('derivation-applicator', () => {
 
       const form = {
         items: itemsArrayField,
-        globalDiscount: () => ({ value: globalDiscountSignal }),
+        globalDiscount: computed(() => ({
+          value: globalDiscountSignal,
+          dirty: globalDiscountDirty,
+          touched: globalDiscountTouched,
+          reset: () => {
+            globalDiscountDirty.set(false);
+            globalDiscountTouched.set(false);
+          },
+        })),
       };
 
       return { form, values };
+    }
+
+    /**
+     * Creates a mock form with array structure that also exposes dirty signals.
+     * Extends createMockArrayForm for tests that need stopOnUserOverride behavior.
+     */
+    function createMockArrayFormWithDirtyAccess(initialValue: {
+      items: Array<{ quantity: number; unitPrice: number; lineTotal: number }>;
+      globalDiscount: number;
+    }): {
+      form: Record<string, unknown>;
+      values: typeof initialValue;
+      itemDirtyStates: Array<Record<string, WritableSignal<boolean>>>;
+    } {
+      const values = { ...initialValue, items: [...initialValue.items.map((item) => ({ ...item }))] };
+      const itemDirtyStates: Array<Record<string, WritableSignal<boolean>>> = [];
+
+      const itemFieldTrees = values.items.map((item, index) => {
+        const quantitySignal = signal(item.quantity);
+        const unitPriceSignal = signal(item.unitPrice);
+        const lineTotalSignal = signal(item.lineTotal);
+
+        Object.defineProperty(values.items[index], 'lineTotal', {
+          get: () => lineTotalSignal(),
+          set: (v: number) => lineTotalSignal.set(v),
+          enumerable: true,
+          configurable: true,
+        });
+
+        const ltDirty = signal(false);
+        const ltTouched = signal(false);
+        const qDirty = signal(false);
+        const qTouched = signal(false);
+        const upDirty = signal(false);
+        const upTouched = signal(false);
+
+        itemDirtyStates.push({
+          lineTotal: ltDirty,
+          quantity: qDirty,
+          unitPrice: upDirty,
+        });
+
+        return {
+          quantity: computed(() => ({
+            value: quantitySignal,
+            dirty: qDirty,
+            touched: qTouched,
+            reset: () => {
+              qDirty.set(false);
+              qTouched.set(false);
+            },
+          })),
+          unitPrice: computed(() => ({
+            value: unitPriceSignal,
+            dirty: upDirty,
+            touched: upTouched,
+            reset: () => {
+              upDirty.set(false);
+              upTouched.set(false);
+            },
+          })),
+          lineTotal: computed(() => ({
+            value: lineTotalSignal,
+            dirty: ltDirty,
+            touched: ltTouched,
+            reset: () => {
+              ltDirty.set(false);
+              ltTouched.set(false);
+            },
+          })),
+        };
+      });
+
+      const globalDiscountSignal = signal(values.globalDiscount);
+      const globalDiscountDirty = signal(false);
+      const globalDiscountTouched = signal(false);
+
+      const itemsComputed = computed(() => ({ value: signal(values.items) }));
+      const itemsArrayField = Object.assign(
+        itemsComputed,
+        itemFieldTrees.reduce(
+          (acc, tree, idx) => {
+            acc[idx] = tree;
+            return acc;
+          },
+          {} as Record<number, (typeof itemFieldTrees)[0]>,
+        ),
+      );
+
+      const form = {
+        items: itemsArrayField,
+        globalDiscount: computed(() => ({
+          value: globalDiscountSignal,
+          dirty: globalDiscountDirty,
+          touched: globalDiscountTouched,
+          reset: () => {
+            globalDiscountDirty.set(false);
+            globalDiscountTouched.set(false);
+          },
+        })),
+      };
+
+      return { form, values, itemDirtyStates };
     }
 
     it('should apply array item derivation using formValue (scoped to item)', () => {
@@ -562,6 +726,86 @@ describe('derivation-applicator', () => {
       // Each item should apply the global discount
       expect(values.items[0].lineTotal).toBe(180); // 2 * 100 * 0.9
       expect(values.items[1].lineTotal).toBe(45); // 1 * 50 * 0.9
+    });
+
+    it('should skip array item derivation when that item field is dirty (stopOnUserOverride)', () => {
+      const { form, values, itemDirtyStates } = createMockArrayFormWithDirtyAccess({
+        items: [
+          { quantity: 2, unitPrice: 10, lineTotal: 0 },
+          { quantity: 3, unitPrice: 20, lineTotal: 0 },
+        ],
+        globalDiscount: 0,
+      });
+
+      // Simulate user editing lineTotal of item 0 only
+      itemDirtyStates[0]['lineTotal'].set(true);
+
+      const formValueSignal = signal({
+        items: values.items,
+        globalDiscount: 0,
+      });
+
+      const collection = createCollection([
+        createEntry('items.$.lineTotal', {
+          expression: 'formValue.quantity * formValue.unitPrice',
+          dependsOn: ['quantity', 'unitPrice'],
+          stopOnUserOverride: true,
+        }),
+      ]);
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      applyDerivations(collection, context);
+
+      // Item 0's lineTotal should NOT be derived (user override)
+      expect(values.items[0].lineTotal).toBe(0);
+      // Item 1's lineTotal SHOULD be derived (no user override)
+      expect(values.items[1].lineTotal).toBe(60); // 3 * 20
+    });
+
+    it('should re-engage array item derivation when top-level dependency changes (reEngageOnDependencyChange)', () => {
+      const { form, values, itemDirtyStates } = createMockArrayFormWithDirtyAccess({
+        items: [{ quantity: 2, unitPrice: 10, lineTotal: 99 }],
+        globalDiscount: 10,
+      });
+
+      // Simulate user having overridden lineTotal
+      itemDirtyStates[0]['lineTotal'].set(true);
+
+      const formValueSignal = signal({
+        items: values.items,
+        globalDiscount: 10,
+      });
+
+      const collection = createCollection([
+        createEntry('items.$.lineTotal', {
+          expression: 'formValue.quantity * formValue.unitPrice',
+          dependsOn: ['quantity', 'unitPrice', 'globalDiscount'],
+          stopOnUserOverride: true,
+          reEngageOnDependencyChange: true,
+        }),
+      ]);
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      // changedFields contains the top-level dependency key (direct match with dependsOn)
+      const changedFields = new Set(['globalDiscount']);
+      const result = applyDerivations(collection, context, changedFields);
+
+      // Dirty state should be cleared, derivation should re-apply
+      expect(result.appliedCount).toBe(1);
+      expect(values.items[0].lineTotal).toBe(20); // 2 * 10
+      expect(itemDirtyStates[0]['lineTotal']()).toBe(false);
     });
   });
 
@@ -687,19 +931,28 @@ describe('derivation-applicator', () => {
         configurable: true,
       });
 
+      const d0q = signal(false);
+      const d0u = signal(false);
+      const d0l = signal(false);
+      const d1q = signal(false);
+      const d1u = signal(false);
+      const d1l = signal(false);
       const form = {
-        items: Object.assign(() => ({ value: signal(values.items) }), {
-          0: {
-            quantity: () => ({ value: signal(values.items[0].quantity) }),
-            unitPrice: () => ({ value: signal(values.items[0].unitPrice) }),
-            lineTotal: () => ({ value: lineTotalSignal0 }),
+        items: Object.assign(
+          computed(() => ({ value: signal(values.items) })),
+          {
+            0: {
+              quantity: computed(() => ({ value: signal(values.items[0].quantity), dirty: d0q, reset: () => d0q.set(false) })),
+              unitPrice: computed(() => ({ value: signal(values.items[0].unitPrice), dirty: d0u, reset: () => d0u.set(false) })),
+              lineTotal: computed(() => ({ value: lineTotalSignal0, dirty: d0l, reset: () => d0l.set(false) })),
+            },
+            1: {
+              quantity: computed(() => ({ value: signal(values.items[1].quantity), dirty: d1q, reset: () => d1q.set(false) })),
+              unitPrice: computed(() => ({ value: signal(values.items[1].unitPrice), dirty: d1u, reset: () => d1u.set(false) })),
+              lineTotal: computed(() => ({ value: lineTotalSignal1, dirty: d1l, reset: () => d1l.set(false) })),
+            },
           },
-          1: {
-            quantity: () => ({ value: signal(values.items[1].quantity) }),
-            unitPrice: () => ({ value: signal(values.items[1].unitPrice) }),
-            lineTotal: () => ({ value: lineTotalSignal1 }),
-          },
-        }),
+        ),
       };
 
       const formValueSignal = signal({
@@ -801,6 +1054,439 @@ describe('derivation-applicator', () => {
 
       expect(result.appliedCount).toBe(0);
       expect(result.skippedCount).toBe(0);
+    });
+  });
+
+  describe('stopOnUserOverride', () => {
+    let logger: Logger;
+    let formValueSignal: WritableSignal<Record<string, unknown>>;
+
+    beforeEach(() => {
+      logger = createMockLogger();
+      formValueSignal = signal({ country: 'USA', phonePrefix: '', displayName: '' });
+    });
+
+    it('should skip derivation when field is dirty (user-modified)', () => {
+      const { form, dirtyStates } = createMockForm({ country: 'USA', phonePrefix: '', displayName: '' });
+      formValueSignal = signal({ country: 'USA', phonePrefix: '', displayName: '' });
+
+      // Simulate user editing phonePrefix
+      dirtyStates['phonePrefix'].set(true);
+
+      const entry = createEntry('phonePrefix', {
+        value: '+1',
+        dependsOn: ['country'],
+        stopOnUserOverride: true,
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      const result = applyDerivations(createCollection([entry]), context);
+      expect(result.appliedCount).toBe(0);
+      expect(result.skippedCount).toBe(1);
+    });
+
+    it('should apply derivation when field is pristine (not user-modified)', () => {
+      const { form, values } = createMockForm({ country: 'USA', phonePrefix: '', displayName: '' });
+      formValueSignal = signal({ country: 'USA', phonePrefix: '', displayName: '' });
+
+      // dirtyStates['phonePrefix'] defaults to false (pristine)
+
+      const entry = createEntry('phonePrefix', {
+        value: '+1',
+        dependsOn: ['country'],
+        stopOnUserOverride: true,
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      const result = applyDerivations(createCollection([entry]), context);
+      expect(result.appliedCount).toBe(1);
+      expect(values['phonePrefix']).toBe('+1');
+    });
+
+    it('should apply derivation when stopOnUserOverride is false even if field is dirty', () => {
+      const { form, values, dirtyStates } = createMockForm({ country: 'USA', phonePrefix: '' });
+      formValueSignal = signal({ country: 'USA', phonePrefix: '' });
+
+      dirtyStates['phonePrefix'].set(true);
+
+      const entry = createEntry('phonePrefix', {
+        value: '+1',
+        dependsOn: ['country'],
+        stopOnUserOverride: false,
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      const result = applyDerivations(createCollection([entry]), context);
+      expect(result.appliedCount).toBe(1);
+      expect(values['phonePrefix']).toBe('+1');
+    });
+
+    it('should mark field as pristine after applying derivation value', () => {
+      const { form, dirtyStates } = createMockForm({ country: 'USA', phonePrefix: '' });
+      formValueSignal = signal({ country: 'USA', phonePrefix: '' });
+
+      const entry = createEntry('phonePrefix', {
+        value: '+1',
+        dependsOn: ['country'],
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      applyDerivations(createCollection([entry]), context);
+
+      // After derivation applies value, field should be pristine
+      expect(dirtyStates['phonePrefix']()).toBe(false);
+    });
+
+    describe('reEngageOnDependencyChange', () => {
+      it('should clear dirty state and apply when dependency changes', () => {
+        const { form, values, dirtyStates } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
+        formValueSignal = signal({ country: 'UK', phonePrefix: '+44-custom' });
+
+        // Simulate user editing phonePrefix
+        dirtyStates['phonePrefix'].set(true);
+
+        const entry = createEntry('phonePrefix', {
+          value: '+44',
+          dependsOn: ['country'],
+          stopOnUserOverride: true,
+          reEngageOnDependencyChange: true,
+        });
+
+        const context: DerivationApplicatorContext = {
+          formValue: formValueSignal,
+          rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+          logger,
+          derivationLogger: createMockDerivationLogger(),
+        };
+
+        // Simulate that 'country' changed
+        const changedFields = new Set(['country']);
+        const result = applyDerivations(createCollection([entry]), context, changedFields);
+
+        // Dirty state should be cleared, derivation should apply
+        expect(result.appliedCount).toBe(1);
+        expect(values['phonePrefix']).toBe('+44');
+        expect(dirtyStates['phonePrefix']()).toBe(false);
+      });
+
+      it('should keep dirty state when dependency has NOT changed', () => {
+        const { form, dirtyStates } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
+        formValueSignal = signal({ country: 'UK', phonePrefix: '+44-custom' });
+
+        dirtyStates['phonePrefix'].set(true);
+
+        const entry = createEntry('phonePrefix', {
+          value: '+44',
+          dependsOn: ['country'],
+          stopOnUserOverride: true,
+          reEngageOnDependencyChange: true,
+        });
+
+        const context: DerivationApplicatorContext = {
+          formValue: formValueSignal,
+          rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+          logger,
+          derivationLogger: createMockDerivationLogger(),
+        };
+
+        // Simulate that some other field changed, NOT 'country'
+        const changedFields = new Set(['otherField']);
+        const result = applyDerivations(createCollection([entry]), context, changedFields);
+
+        // Override should persist, derivation should be skipped
+        expect(result.appliedCount).toBe(0);
+        expect(dirtyStates['phonePrefix']()).toBe(true);
+      });
+
+      it('should guard against null changedFields (initial evaluation)', () => {
+        const { form, dirtyStates } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
+        formValueSignal = signal({ country: 'UK', phonePrefix: '+44-custom' });
+
+        dirtyStates['phonePrefix'].set(true);
+
+        const entry = createEntry('phonePrefix', {
+          value: '+44',
+          dependsOn: ['country'],
+          stopOnUserOverride: true,
+          reEngageOnDependencyChange: true,
+        });
+
+        const context: DerivationApplicatorContext = {
+          formValue: formValueSignal,
+          rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+          logger,
+          derivationLogger: createMockDerivationLogger(),
+        };
+
+        // No changedFields (initial evaluation)
+        const result = applyDerivations(createCollection([entry]), context);
+
+        // reEngageOnDependencyChange should NOT clear dirty when changedFields is undefined
+        expect(result.appliedCount).toBe(0);
+        expect(dirtyStates['phonePrefix']()).toBe(true);
+      });
+
+      it('should not re-engage when reEngageOnDependencyChange is false', () => {
+        const { form, dirtyStates } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
+        formValueSignal = signal({ country: 'UK', phonePrefix: '+44-custom' });
+
+        dirtyStates['phonePrefix'].set(true);
+
+        const entry = createEntry('phonePrefix', {
+          value: '+44',
+          dependsOn: ['country'],
+          stopOnUserOverride: true,
+          reEngageOnDependencyChange: false,
+        });
+
+        const context: DerivationApplicatorContext = {
+          formValue: formValueSignal,
+          rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+          logger,
+          derivationLogger: createMockDerivationLogger(),
+        };
+
+        // Even though 'country' changed, re-engagement is disabled
+        const changedFields = new Set(['country']);
+        const result = applyDerivations(createCollection([entry]), context, changedFields);
+
+        expect(result.appliedCount).toBe(0);
+        expect(dirtyStates['phonePrefix']()).toBe(true);
+      });
+
+      it('should treat reEngageOnDependencyChange as a no-op without stopOnUserOverride', () => {
+        const { form, values, dirtyStates } = createMockForm({ country: 'UK', phonePrefix: '+44-custom' });
+        formValueSignal = signal({ country: 'UK', phonePrefix: '+44-custom' });
+
+        dirtyStates['phonePrefix'].set(true);
+
+        const entry = createEntry('phonePrefix', {
+          value: '+44',
+          dependsOn: ['country'],
+          stopOnUserOverride: false,
+          reEngageOnDependencyChange: true,
+        });
+
+        const context: DerivationApplicatorContext = {
+          formValue: formValueSignal,
+          rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+          logger,
+          derivationLogger: createMockDerivationLogger(),
+        };
+
+        const changedFields = new Set(['country']);
+        const result = applyDerivations(createCollection([entry]), context, changedFields);
+
+        // Without stopOnUserOverride, derivation applies regardless of dirty state
+        expect(result.appliedCount).toBe(1);
+        expect(values['phonePrefix']).toBe('+44');
+        // Dirty state should NOT be reset (reEngageOnDependencyChange is ignored)
+        expect(dirtyStates['phonePrefix']()).toBe(true);
+      });
+    });
+
+    it('should skip nested field derivation when field is dirty (stopOnUserOverride)', () => {
+      // Create a mock form with nested structure: address.city
+      const cityValue = signal('');
+      const cityDirty = signal(false);
+      const cityTouched = signal(false);
+      const streetValue = signal('');
+      const streetDirty = signal(false);
+      const streetTouched = signal(false);
+      const countryValue = signal('USA');
+      const countryDirty = signal(false);
+      const countryTouched = signal(false);
+
+      const values: Record<string, unknown> = {};
+      Object.defineProperty(values, 'city', {
+        get: () => cityValue(),
+        set: (v: unknown) => cityValue.set(v as string),
+        enumerable: true,
+        configurable: true,
+      });
+
+      const form: Record<string, unknown> = {
+        address: {
+          city: computed(() => ({
+            value: cityValue,
+            dirty: cityDirty,
+            touched: cityTouched,
+            reset: () => {
+              cityDirty.set(false);
+              cityTouched.set(false);
+            },
+          })),
+          street: computed(() => ({
+            value: streetValue,
+            dirty: streetDirty,
+            touched: streetTouched,
+            reset: () => {
+              streetDirty.set(false);
+              streetTouched.set(false);
+            },
+          })),
+        },
+        country: computed(() => ({
+          value: countryValue,
+          dirty: countryDirty,
+          touched: countryTouched,
+          reset: () => {
+            countryDirty.set(false);
+            countryTouched.set(false);
+          },
+        })),
+      };
+
+      // Simulate user editing address.city
+      cityDirty.set(true);
+
+      formValueSignal = signal({ address: { city: '', street: '' }, country: 'USA' });
+
+      const entry = createEntry('address.city', {
+        value: 'Default City',
+        dependsOn: ['country'],
+        stopOnUserOverride: true,
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      const result = applyDerivations(createCollection([entry]), context);
+      expect(result.appliedCount).toBe(0);
+      expect(result.skippedCount).toBe(1);
+    });
+
+    it('should handle two derivations targeting the same field with stopOnUserOverride (chain tracking blocks second)', () => {
+      const { form, values, dirtyStates } = createMockForm({ country: 'USA', phonePrefix: '+custom' });
+      formValueSignal = signal({ country: 'USA', phonePrefix: '+custom' });
+
+      // Simulate user having overridden phonePrefix
+      dirtyStates['phonePrefix'].set(true);
+
+      // Two derivations target the same field, both with stopOnUserOverride
+      // The first has reEngageOnDependencyChange and its dependency changed
+      // The second does NOT have reEngageOnDependencyChange
+      const entry1 = createEntry('phonePrefix', {
+        value: '+1',
+        dependsOn: ['country'],
+        stopOnUserOverride: true,
+        reEngageOnDependencyChange: true,
+      });
+      const entry2 = createEntry('phonePrefix', {
+        value: '+1-alt',
+        dependsOn: ['country'],
+        stopOnUserOverride: true,
+        // No reEngageOnDependencyChange
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      // country changed → entry1's reEngage resets dirty → entry1 applies '+1'
+      // entry2 is blocked by chain tracking (same derivation key 'phonePrefix' already applied)
+      // This prevents the first derivation's reset() from unexpectedly enabling the second
+      const changedFields = new Set(['country']);
+      const result = applyDerivations(createCollection([entry1, entry2]), context, changedFields);
+
+      expect(result.appliedCount).toBe(1);
+      expect(values['phonePrefix']).toBe('+1');
+      expect(dirtyStates['phonePrefix']()).toBe(false);
+    });
+
+    it('should apply derivation when stopOnUserOverride targets non-existent field path', () => {
+      const { form } = createMockForm({ country: 'USA' });
+      formValueSignal = signal({ country: 'USA', missingField: '' });
+
+      const entry = createEntry('missingField', {
+        value: 'derived',
+        dependsOn: ['country'],
+        stopOnUserOverride: true,
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      // Non-existent field → readFieldDirty returns undefined → defaults to false
+      // Derivation should proceed (and fail at value-setting, but that's downstream)
+      const result = applyDerivations(createCollection([entry]), context);
+      // The derivation attempts to apply but the value can't be set (no form accessor)
+      // This results in a warning, not an applied derivation
+      expect(result.appliedCount).toBe(0);
+    });
+  });
+
+  describe('evaluation context properties', () => {
+    let logger: Logger;
+    let formValueSignal: WritableSignal<Record<string, unknown>>;
+
+    beforeEach(() => {
+      logger = createMockLogger();
+    });
+
+    it('should include formFieldState in evaluation context for expression evaluation', () => {
+      const { form } = createMockForm({ source: 'test', target: '' });
+      formValueSignal = signal({ source: 'test', target: '' });
+
+      // Create an entry with a functionName to capture the context
+      let capturedContext: Record<string, unknown> | undefined;
+      const entry = createEntry('target', {
+        functionName: 'captureContext',
+        dependsOn: ['source'],
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+        derivationFunctions: {
+          captureContext: (ctx) => {
+            capturedContext = ctx as unknown as Record<string, unknown>;
+            return 'derived';
+          },
+        },
+      };
+
+      applyDerivations(createCollection([entry]), context);
+
+      expect(capturedContext).toBeDefined();
+      expect(capturedContext!['formFieldState']).toBeDefined();
     });
   });
 });

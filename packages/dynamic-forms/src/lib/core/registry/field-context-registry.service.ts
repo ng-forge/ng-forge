@@ -1,14 +1,35 @@
 import { inject, Injectable, isSignal, Signal, untracked } from '@angular/core';
-import { ChildFieldContext, FieldContext } from '@angular/forms/signals';
+import { ChildFieldContext, FieldContext, FieldState, FieldTree } from '@angular/forms/signals';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
 import { RootFormRegistryService } from './root-form-registry.service';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { getNestedValue } from '../expressions/value-utils';
+import { readFieldStateInfo, createFormFieldStateMap } from '../derivation/field-state-extractor';
 
 function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is ChildFieldContext<TValue> {
   return 'key' in context && isSignal(context.key);
+}
+
+/**
+ * Extracts the FieldState from a FieldContext using the public `.state` property.
+ *
+ * FieldContext.state is a FieldState object that has all signal properties
+ * (dirty, touched, valid, etc.) needed for field state snapshots.
+ *
+ * IMPORTANT: Always reads with `untracked()` because accessing `.state` on a
+ * FieldContext can trigger reactive reads inside Angular's internal computation
+ * graph. Without `untracked()`, validators would cycle (validator → state → valid
+ * → validator) and logic conditions like `hidden()` would cycle (hidden → state →
+ * hidden). The FieldState object reference is stable — individual signal properties
+ * within it are read reactively or untracked by the Proxy as needed.
+ */
+function extractFieldState(fieldContext: FieldContext<unknown>): FieldState<unknown> | undefined {
+  return untracked(() => {
+    if (!fieldContext || !('state' in fieldContext)) return undefined;
+    return fieldContext.state;
+  });
 }
 
 /**
@@ -96,9 +117,14 @@ export class FieldContextRegistryService {
     const arrayScope = detectArrayScope(pathKeys);
 
     if (arrayScope) {
-      return this.buildArrayScopedContext(rootFormValue, arrayScope, fieldValue, customFunctions, false);
+      return this.buildArrayScopedContext(rootFormValue, arrayScope, fieldValue, customFunctions, false, fieldContext);
     }
 
+    // Use getters for fieldState/formFieldState to defer signal reads until
+    // the expression actually accesses them. Validators that only use fieldValue
+    // will never trigger these getters, avoiding reactive cycles in Angular's
+    // internal signal graph (validator → state → valid → validator).
+    const rootFormSignal = this.rootFormRegistry.rootForm;
     return {
       fieldValue,
       formValue: rootFormValue,
@@ -107,6 +133,12 @@ export class FieldContextRegistryService {
       externalData: this.resolveExternalData(false),
       logger: this.logger,
       deprecationTracker: this.deprecationTracker ?? undefined,
+      get fieldState() {
+        return readFieldStateInfo(extractFieldState(fieldContext), false);
+      },
+      get formFieldState() {
+        return createFormFieldStateMap(untracked(rootFormSignal) as FieldTree<unknown>, false);
+      },
     };
   }
 
@@ -142,6 +174,7 @@ export class FieldContextRegistryService {
     fieldValue: TValue,
     customFunctions: Record<string, (context: EvaluationContext) => unknown> | undefined,
     reactive: boolean,
+    fieldContext?: FieldContext<unknown>,
   ): EvaluationContext {
     const { arrayKey, index, localKey } = arrayScope;
 
@@ -156,6 +189,14 @@ export class FieldContextRegistryService {
       }
     }
 
+    // Use getters to defer fieldState/formFieldState construction.
+    // Same rationale as createEvaluationContext — avoids reactive cycles
+    // when expressions don't actually access these properties.
+    const rootFormSignal = this.rootFormRegistry.rootForm;
+    const fieldStateGetter = fieldContext ? () => readFieldStateInfo(extractFieldState(fieldContext), reactive) : () => undefined;
+    const formFieldStateGetter = () =>
+      createFormFieldStateMap((reactive ? rootFormSignal() : untracked(rootFormSignal)) as FieldTree<unknown>, reactive);
+
     // Fall back to root form value if array item lookup fails
     if (!scopedFormValue) {
       return {
@@ -166,6 +207,12 @@ export class FieldContextRegistryService {
         externalData: this.resolveExternalData(reactive),
         logger: this.logger,
         deprecationTracker: this.deprecationTracker ?? undefined,
+        get fieldState() {
+          return fieldStateGetter();
+        },
+        get formFieldState() {
+          return formFieldStateGetter();
+        },
       };
     }
 
@@ -180,6 +227,12 @@ export class FieldContextRegistryService {
       externalData: this.resolveExternalData(reactive),
       logger: this.logger,
       deprecationTracker: this.deprecationTracker ?? undefined,
+      get fieldState() {
+        return fieldStateGetter();
+      },
+      get formFieldState() {
+        return formFieldStateGetter();
+      },
     };
   }
 
@@ -232,10 +285,11 @@ export class FieldContextRegistryService {
     const arrayScope = detectArrayScope(pathKeys);
 
     if (arrayScope) {
-      return this.buildArrayScopedContext(rootFormValue, arrayScope, fieldValue, customFunctions, true);
+      return this.buildArrayScopedContext(rootFormValue, arrayScope, fieldValue, customFunctions, true, fieldContext);
     }
 
     const localKey = this.extractFieldPath(fieldContext);
+    const rootFormSignal = this.rootFormRegistry.rootForm;
 
     return {
       fieldValue,
@@ -245,6 +299,12 @@ export class FieldContextRegistryService {
       externalData: this.resolveExternalData(true),
       logger: this.logger,
       deprecationTracker: this.deprecationTracker ?? undefined,
+      get fieldState() {
+        return readFieldStateInfo(extractFieldState(fieldContext), true);
+      },
+      get formFieldState() {
+        return createFormFieldStateMap(rootFormSignal() as FieldTree<unknown>, true);
+      },
     };
   }
 
@@ -271,6 +331,7 @@ export class FieldContextRegistryService {
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
   ): EvaluationContext {
     const formValue = this.rootFormRegistry.formValue();
+    const rootFormSignal = this.rootFormRegistry.rootForm;
 
     return {
       fieldValue: undefined,
@@ -280,6 +341,9 @@ export class FieldContextRegistryService {
       externalData: this.resolveExternalData(true),
       logger: this.logger,
       deprecationTracker: this.deprecationTracker ?? undefined,
+      get formFieldState() {
+        return createFormFieldStateMap(rootFormSignal() as FieldTree<unknown>, true);
+      },
     };
   }
 }

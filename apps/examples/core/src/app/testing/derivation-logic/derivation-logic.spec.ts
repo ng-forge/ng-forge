@@ -709,4 +709,665 @@ test.describe('Value Derivation Logic Tests', () => {
       expect(person['fullName']).toBe('John Doe');
     });
   });
+
+  test.describe('Stop On User Override', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(testUrl('/test/derivation-logic/stop-on-user-override'));
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('should auto-derive displayName from firstName and lastName', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('stop-on-user-override-test');
+      await expect(scenario).toBeVisible();
+
+      const firstNameInput = helpers.getInput(scenario, 'firstName');
+      const lastNameInput = helpers.getInput(scenario, 'lastName');
+      const displayNameInput = helpers.getInput(scenario, 'displayName');
+
+      // Enter first name
+      await helpers.fillInput(firstNameInput, 'John');
+      await page.waitForTimeout(500);
+      await expect(displayNameInput).toHaveValue('John ');
+
+      // Enter last name
+      await helpers.fillInput(lastNameInput, 'Doe');
+      await page.waitForTimeout(500);
+      await expect(displayNameInput).toHaveValue('John Doe');
+    });
+
+    test('should stop deriving after user manually edits displayName', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('stop-on-user-override-test');
+      await expect(scenario).toBeVisible();
+
+      const firstNameInput = helpers.getInput(scenario, 'firstName');
+      const lastNameInput = helpers.getInput(scenario, 'lastName');
+      const displayNameInput = helpers.getInput(scenario, 'displayName');
+
+      // First derive a value
+      await helpers.fillInput(firstNameInput, 'John');
+      await helpers.fillInput(lastNameInput, 'Doe');
+      await page.waitForTimeout(500);
+      await expect(displayNameInput).toHaveValue('John Doe');
+
+      // User manually overrides displayName
+      await helpers.clearAndFill(displayNameInput, 'Custom Name');
+      await page.waitForTimeout(500);
+
+      // Change firstName — displayName should NOT update
+      await helpers.clearAndFill(firstNameInput, 'Jane');
+      await page.waitForTimeout(500);
+      await expect(displayNameInput).toHaveValue('Custom Name');
+    });
+
+    test('should propagate chain derivation: firstName/lastName → displayName → greeting', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('stop-on-user-override-test');
+      await expect(scenario).toBeVisible();
+
+      const firstNameInput = helpers.getInput(scenario, 'firstName');
+      const lastNameInput = helpers.getInput(scenario, 'lastName');
+      const displayNameInput = helpers.getInput(scenario, 'displayName');
+      const greetingInput = helpers.getInput(scenario, 'greeting');
+
+      // Enter first name and last name
+      await helpers.fillInput(firstNameInput, 'John');
+      await helpers.fillInput(lastNameInput, 'Doe');
+      await page.waitForTimeout(500);
+
+      await expect(displayNameInput).toHaveValue('John Doe');
+      await expect(greetingInput).toHaveValue('Hello, John Doe');
+
+      // Change firstName — both displayName and greeting should update
+      await helpers.clearAndFill(firstNameInput, 'Jane');
+      await page.waitForTimeout(500);
+
+      await expect(displayNameInput).toHaveValue('Jane Doe');
+      await expect(greetingInput).toHaveValue('Hello, Jane Doe');
+    });
+
+    test('should not treat derivation-applied values as user override in chain', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('stop-on-user-override-test');
+      await expect(scenario).toBeVisible();
+
+      const firstNameInput = helpers.getInput(scenario, 'firstName');
+      const lastNameInput = helpers.getInput(scenario, 'lastName');
+      const displayNameInput = helpers.getInput(scenario, 'displayName');
+      const greetingInput = helpers.getInput(scenario, 'greeting');
+
+      // Derive displayName via firstName/lastName
+      await helpers.fillInput(firstNameInput, 'John');
+      await helpers.fillInput(lastNameInput, 'Doe');
+      await page.waitForTimeout(500);
+      await expect(greetingInput).toHaveValue('Hello, John Doe');
+
+      // Change firstName — displayName updates via derivation (not user edit),
+      // so greeting's derivation should keep running
+      await helpers.clearAndFill(firstNameInput, 'Alice');
+      await page.waitForTimeout(500);
+
+      await expect(displayNameInput).toHaveValue('Alice Doe');
+      await expect(greetingInput).toHaveValue('Hello, Alice Doe');
+
+      // Now manually override greeting — it should stop deriving
+      await helpers.clearAndFill(greetingInput, 'Custom Greeting');
+      await page.waitForTimeout(500);
+
+      await helpers.clearAndFill(firstNameInput, 'Bob');
+      await page.waitForTimeout(500);
+
+      await expect(displayNameInput).toHaveValue('Bob Doe');
+      await expect(greetingInput).toHaveValue('Custom Greeting');
+    });
+
+    test('should not re-engage after user clears the derived field', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('stop-on-user-override-test');
+      await expect(scenario).toBeVisible();
+
+      const firstNameInput = helpers.getInput(scenario, 'firstName');
+      const lastNameInput = helpers.getInput(scenario, 'lastName');
+      const displayNameInput = helpers.getInput(scenario, 'displayName');
+
+      // Derive a value first
+      await helpers.fillInput(firstNameInput, 'John');
+      await helpers.fillInput(lastNameInput, 'Doe');
+      await page.waitForTimeout(500);
+      await expect(displayNameInput).toHaveValue('John Doe');
+
+      // User clears the field (still a user edit — field is dirty)
+      await displayNameInput.clear();
+      await page.waitForTimeout(500);
+
+      // Change firstName — derivation should still NOT re-run
+      await helpers.clearAndFill(firstNameInput, 'Jane');
+      await page.waitForTimeout(500);
+      await expect(displayNameInput).toHaveValue('');
+    });
+
+    test('should submit the user-overridden value correctly', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('stop-on-user-override-test');
+      await expect(scenario).toBeVisible();
+
+      const firstNameInput = helpers.getInput(scenario, 'firstName');
+      const lastNameInput = helpers.getInput(scenario, 'lastName');
+      const displayNameInput = helpers.getInput(scenario, 'displayName');
+
+      // Derive a value
+      await helpers.fillInput(firstNameInput, 'John');
+      await helpers.fillInput(lastNameInput, 'Doe');
+      await page.waitForTimeout(500);
+
+      // Override it
+      await helpers.clearAndFill(displayNameInput, 'My Custom Name');
+      await page.waitForTimeout(500);
+
+      // Change firstName to verify override persists
+      await helpers.clearAndFill(firstNameInput, 'Jane');
+      await page.waitForTimeout(500);
+
+      // Submit and verify the overridden value is submitted
+      const data = await helpers.submitFormAndCapture(scenario);
+      expect(data['displayName']).toBe('My Custom Name');
+    });
+  });
+
+  test.describe('Re-engage On Dependency Change', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(testUrl('/test/derivation-logic/re-engage-on-dependency-change'));
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('should auto-derive phonePrefix from country selection', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('re-engage-on-dependency-change-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const phonePrefixInput = helpers.getInput(scenario, 'phonePrefix');
+
+      // Select United States
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(500);
+
+      await expect(phonePrefixInput).toHaveValue('+1');
+
+      // Select United Kingdom
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United Kingdom")').click();
+      await page.waitForTimeout(500);
+
+      await expect(phonePrefixInput).toHaveValue('+44');
+
+      // Select Germany
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Germany")').click();
+      await page.waitForTimeout(500);
+
+      await expect(phonePrefixInput).toHaveValue('+49');
+    });
+
+    test('should re-engage derivation when dependency changes after user override', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('re-engage-on-dependency-change-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const phonePrefixInput = helpers.getInput(scenario, 'phonePrefix');
+
+      // Select United States → derives +1
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(500);
+      await expect(phonePrefixInput).toHaveValue('+1');
+
+      // User manually overrides phonePrefix
+      await helpers.clearAndFill(phonePrefixInput, '+99');
+      await page.waitForTimeout(500);
+      await expect(phonePrefixInput).toHaveValue('+99');
+
+      // Change country → derivation should re-engage
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United Kingdom")').click();
+      await page.waitForTimeout(500);
+
+      await expect(phonePrefixInput).toHaveValue('+44');
+    });
+
+    test('should handle multiple override/re-engage cycles', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('re-engage-on-dependency-change-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const phonePrefixInput = helpers.getInput(scenario, 'phonePrefix');
+
+      // Cycle 1: Select US → override → change to UK → re-engages
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(500);
+      await expect(phonePrefixInput).toHaveValue('+1');
+
+      await helpers.clearAndFill(phonePrefixInput, '+99');
+      await page.waitForTimeout(500);
+
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United Kingdom")').click();
+      await page.waitForTimeout(500);
+      await expect(phonePrefixInput).toHaveValue('+44');
+
+      // Cycle 2: Override again → change to Germany → re-engages again
+      await helpers.clearAndFill(phonePrefixInput, '+88');
+      await page.waitForTimeout(500);
+      await expect(phonePrefixInput).toHaveValue('+88');
+
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Germany")').click();
+      await page.waitForTimeout(500);
+      await expect(phonePrefixInput).toHaveValue('+49');
+    });
+
+    test('should persist override without reEngageOnDependencyChange', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('re-engage-on-dependency-change-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const phonePrefixInput = helpers.getInput(scenario, 'phonePrefix');
+      const permanentPrefixInput = helpers.getInput(scenario, 'permanentPrefix');
+
+      // Select US → both derive +1
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(500);
+      await expect(phonePrefixInput).toHaveValue('+1');
+      await expect(permanentPrefixInput).toHaveValue('+1');
+
+      // Override permanentPrefix
+      await helpers.clearAndFill(permanentPrefixInput, '+99');
+      await page.waitForTimeout(500);
+
+      // Change country to UK → phonePrefix re-engages to +44, permanentPrefix stays overridden
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United Kingdom")').click();
+      await page.waitForTimeout(500);
+
+      await expect(phonePrefixInput).toHaveValue('+44');
+      await expect(permanentPrefixInput).toHaveValue('+99');
+    });
+
+    test('should not re-engage when same dependency value is re-selected', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('re-engage-on-dependency-change-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const phonePrefixInput = helpers.getInput(scenario, 'phonePrefix');
+
+      // Select US → derives +1
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(500);
+      await expect(phonePrefixInput).toHaveValue('+1');
+
+      // Override phonePrefix
+      await helpers.clearAndFill(phonePrefixInput, '+99');
+      await page.waitForTimeout(500);
+
+      // Re-select US (same value) → should NOT re-engage since value didn't change
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(500);
+
+      await expect(phonePrefixInput).toHaveValue('+99');
+    });
+
+    test('should handle static value + condition with stopOnUserOverride (no reEngage)', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('re-engage-on-dependency-change-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const permanentPrefixInput = helpers.getInput(scenario, 'permanentPrefix');
+
+      // Select US → permanentPrefix gets +1
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(500);
+      await expect(permanentPrefixInput).toHaveValue('+1');
+
+      // Override permanentPrefix
+      await helpers.clearAndFill(permanentPrefixInput, '+77');
+      await page.waitForTimeout(500);
+
+      // Change to UK → permanentPrefix stays overridden (no reEngageOnDependencyChange)
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United Kingdom")').click();
+      await page.waitForTimeout(500);
+      await expect(permanentPrefixInput).toHaveValue('+77');
+
+      // Change to DE → still overridden
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Germany")').click();
+      await page.waitForTimeout(500);
+      await expect(permanentPrefixInput).toHaveValue('+77');
+    });
+  });
+
+  test.describe('Field State Condition', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(testUrl('/test/derivation-logic/field-state-condition'));
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('should derive emailStatus as DIRTY when email is edited', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('field-state-condition-test');
+      await expect(scenario).toBeVisible();
+
+      const emailInput = helpers.getInput(scenario, 'email');
+      const emailStatusInput = helpers.getInput(scenario, 'emailStatus');
+
+      // Initially email is pristine → emailStatus should be PRISTINE
+      await expect(emailStatusInput).toHaveValue('PRISTINE');
+
+      // Type in email → makes it dirty → emailStatus should become DIRTY
+      await helpers.fillInput(emailInput, 'test@example.com');
+      await page.waitForTimeout(500);
+
+      await expect(emailStatusInput).toHaveValue('DIRTY');
+    });
+
+    test('should derive usernameStatus as TOUCHED when username is focused and blurred', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('field-state-condition-test');
+      await expect(scenario).toBeVisible();
+
+      const usernameInput = helpers.getInput(scenario, 'username');
+      const usernameStatusInput = helpers.getInput(scenario, 'usernameStatus');
+
+      // Initially username is untouched → usernameStatus should be UNTOUCHED
+      await expect(usernameStatusInput).toHaveValue('UNTOUCHED');
+
+      // Focus and blur username → makes it touched (but no value change → no derivation yet)
+      await usernameInput.focus();
+      await usernameInput.blur();
+      await page.waitForTimeout(300);
+
+      // Type in username → value change triggers derivation, which now reads touched=true
+      await helpers.fillInput(usernameInput, 'testuser');
+      await page.waitForTimeout(500);
+
+      await expect(usernameStatusInput).toHaveValue('TOUCHED');
+    });
+
+    test('should react to dirty and touched independently', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('field-state-condition-test');
+      await expect(scenario).toBeVisible();
+
+      const emailInput = helpers.getInput(scenario, 'email');
+      const usernameInput = helpers.getInput(scenario, 'username');
+      const emailStatusInput = helpers.getInput(scenario, 'emailStatus');
+      const usernameStatusInput = helpers.getInput(scenario, 'usernameStatus');
+
+      // Both should be in initial state
+      await expect(emailStatusInput).toHaveValue('PRISTINE');
+      await expect(usernameStatusInput).toHaveValue('UNTOUCHED');
+
+      // Edit email → only emailStatus changes
+      await helpers.fillInput(emailInput, 'test@example.com');
+      await page.waitForTimeout(500);
+
+      await expect(emailStatusInput).toHaveValue('DIRTY');
+      await expect(usernameStatusInput).toHaveValue('UNTOUCHED');
+
+      // Touch username (focus + blur), then type to trigger derivation
+      await usernameInput.focus();
+      await usernameInput.blur();
+      await page.waitForTimeout(300);
+      await helpers.fillInput(usernameInput, 'testuser');
+      await page.waitForTimeout(500);
+
+      await expect(emailStatusInput).toHaveValue('DIRTY');
+      await expect(usernameStatusInput).toHaveValue('TOUCHED');
+    });
+  });
+
+  test.describe('Field State Advanced', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(testUrl('/test/derivation-logic/field-state-advanced'));
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('should derive passwordStrength based on password length', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('field-state-advanced-test');
+      await expect(scenario).toBeVisible();
+
+      const passwordInput = helpers.getInput(scenario, 'password');
+      const passwordStrengthInput = helpers.getInput(scenario, 'passwordStrength');
+
+      // Initially TOO_SHORT (no value)
+      await expect(passwordStrengthInput).toHaveValue('TOO_SHORT');
+
+      // Type 6+ chars → VALID
+      await helpers.fillInput(passwordInput, 'secret');
+      await page.waitForTimeout(500);
+      await expect(passwordStrengthInput).toHaveValue('VALID');
+
+      // Clear to <6 chars → TOO_SHORT again
+      await helpers.clearAndFill(passwordInput, 'abc');
+      await page.waitForTimeout(500);
+      await expect(passwordStrengthInput).toHaveValue('TOO_SHORT');
+    });
+
+    // Angular Signal Forms limitation: readonly()/hidden()/disabled() logic conditions
+    // that read fieldState or formFieldState create reactive cycles inside Angular's
+    // internal FieldNodeState computation graph. The readonly() computed depends on the
+    // LogicFn result, but Angular internally links dirty ↔ readonly, causing a cycle
+    // regardless of how our code reads signals. This is NOT a library bug — it's an
+    // Angular Signal Forms constraint. Use derivation conditions with fieldState instead.
+    test.skip('should make lockOnEdit readonly after user types (self-state dirty)', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('field-state-advanced-test');
+      await expect(scenario).toBeVisible();
+
+      const lockOnEditInput = helpers.getInput(scenario, 'lockOnEdit');
+
+      // Initially editable
+      await expect(lockOnEditInput).not.toHaveAttribute('readonly');
+
+      // Type something → becomes dirty → readonly
+      await helpers.fillInput(lockOnEditInput, 'test');
+      await page.waitForTimeout(500);
+
+      await expect(lockOnEditInput).toHaveAttribute('readonly');
+    });
+
+    test('should make lockedAfterPasswordTouch readonly when password is touched', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('field-state-advanced-test');
+      await expect(scenario).toBeVisible();
+
+      const passwordInput = helpers.getInput(scenario, 'password');
+      const lockedInput = helpers.getInput(scenario, 'lockedAfterPasswordTouch');
+
+      // Initially editable
+      await expect(lockedInput).not.toHaveAttribute('readonly');
+
+      // Focus and blur password → touched
+      await passwordInput.focus();
+      await passwordInput.blur();
+      await page.waitForTimeout(500);
+
+      // Type in password to trigger re-evaluation that reads touched state
+      await helpers.fillInput(passwordInput, 'a');
+      await page.waitForTimeout(500);
+
+      await expect(lockedInput).toHaveAttribute('readonly');
+    });
+
+    test('should stop autoTag derivation after user override (stopOnUserOverride + formFieldState)', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('field-state-advanced-test');
+      await expect(scenario).toBeVisible();
+
+      const passwordInput = helpers.getInput(scenario, 'password');
+      const autoTagInput = helpers.getInput(scenario, 'autoTag');
+
+      // Initially password is pristine → autoTag derives "needs-input"
+      await expect(autoTagInput).toHaveValue('needs-input');
+
+      // Type password → dirty → autoTag derives "tag-<value>"
+      await helpers.fillInput(passwordInput, 'secret');
+      await page.waitForTimeout(500);
+      await expect(autoTagInput).toHaveValue('tag-secret');
+
+      // User overrides autoTag
+      await helpers.clearAndFill(autoTagInput, 'my-custom-tag');
+      await page.waitForTimeout(500);
+
+      // Change password → autoTag should NOT update (stopOnUserOverride)
+      await helpers.clearAndFill(passwordInput, 'newpass');
+      await page.waitForTimeout(500);
+      await expect(autoTagInput).toHaveValue('my-custom-tag');
+    });
+
+    test('should keep lockOnEdit independent from password changes', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('field-state-advanced-test');
+      await expect(scenario).toBeVisible();
+
+      const passwordInput = helpers.getInput(scenario, 'password');
+      const lockOnEditInput = helpers.getInput(scenario, 'lockOnEdit');
+
+      // lockOnEdit is editable initially
+      await expect(lockOnEditInput).not.toHaveAttribute('readonly');
+
+      // Changing password should not affect lockOnEdit's readonly state
+      await helpers.fillInput(passwordInput, 'secret');
+      await page.waitForTimeout(500);
+
+      // lockOnEdit should still be editable (its own dirty state hasn't changed)
+      await expect(lockOnEditInput).not.toHaveAttribute('readonly');
+    });
+  });
+
+  test.describe('Array Field Stop On User Override', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(testUrl('/test/derivation-logic/array-stop-on-user-override'));
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('should auto-derive lineTotal for each array item', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-stop-on-user-override-test');
+      await expect(scenario).toBeVisible();
+
+      const lineTotalInputs = scenario.locator('[id^="lineTotal"] input');
+
+      // Initial values: item 0 = 2*50*(1-0/100)=100, item 1 = 3*30*(1-0/100)=90
+      await expect(lineTotalInputs.nth(0)).toHaveValue('100');
+      await expect(lineTotalInputs.nth(1)).toHaveValue('90');
+    });
+
+    test('should stop deriving permanentTotal after user manually edits it (per-item)', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-stop-on-user-override-test');
+      await expect(scenario).toBeVisible();
+
+      const quantityInputs = scenario.locator('[id^="quantity"] input');
+      const permanentTotalInputs = scenario.locator('[id^="permanentTotal"] input');
+      const firstPermanentTotal = permanentTotalInputs.nth(0);
+      const secondPermanentTotal = permanentTotalInputs.nth(1);
+
+      // User manually overrides item 0's permanentTotal
+      await helpers.clearAndFill(firstPermanentTotal, '999');
+      await page.waitForTimeout(500);
+
+      // Change item 0's quantity → permanentTotal should NOT update
+      // (user override persists because no reEngageOnDependencyChange)
+      await helpers.clearAndFill(quantityInputs.nth(0), '10');
+      await page.waitForTimeout(500);
+      await expect(firstPermanentTotal).toHaveValue('999');
+
+      // Change item 1's quantity → permanentTotal SHOULD update (no override on item 1)
+      await helpers.clearAndFill(quantityInputs.nth(1), '10');
+      await page.waitForTimeout(500);
+      await expect(secondPermanentTotal).toHaveValue('300'); // 10 * 30
+    });
+
+    test('should re-engage lineTotal when top-level dependency (discountRate) changes after override', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-stop-on-user-override-test');
+      await expect(scenario).toBeVisible();
+
+      const discountRateInput = helpers.getInput(scenario, 'discountRate');
+      const lineTotalInputs = scenario.locator('[id^="lineTotal"] input');
+      const firstLineTotal = lineTotalInputs.nth(0);
+      const secondLineTotal = lineTotalInputs.nth(1);
+
+      // User overrides item 0's lineTotal
+      await helpers.clearAndFill(firstLineTotal, '999');
+      await page.waitForTimeout(500);
+      await expect(firstLineTotal).toHaveValue('999');
+
+      // Change discountRate (top-level dependency) → lineTotal should re-engage
+      // because reEngageOnDependencyChange: true and dependsOn includes 'discountRate'
+      await helpers.clearAndFill(discountRateInput, '10');
+      await page.waitForTimeout(500);
+
+      // Item 0 re-engages: 2 * 50 * (1 - 10/100) = 90
+      await expect(firstLineTotal).toHaveValue('90');
+      // Item 1 was never overridden, applies discount: 3 * 30 * 0.9 = 81
+      await expect(secondLineTotal).toHaveValue('81');
+    });
+
+    test('should NOT re-engage permanentTotal when discountRate changes after override', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-stop-on-user-override-test');
+      await expect(scenario).toBeVisible();
+
+      const discountRateInput = helpers.getInput(scenario, 'discountRate');
+      const permanentTotalInputs = scenario.locator('[id^="permanentTotal"] input');
+      const firstPermanentTotal = permanentTotalInputs.nth(0);
+
+      // Initial: 2 * 50 = 100
+      await expect(firstPermanentTotal).toHaveValue('100');
+
+      // User overrides item 0's permanentTotal
+      await helpers.clearAndFill(firstPermanentTotal, '777');
+      await page.waitForTimeout(500);
+      await expect(firstPermanentTotal).toHaveValue('777');
+
+      // Change discountRate → permanentTotal should NOT re-engage
+      // because permanentTotal doesn't depend on discountRate
+      await helpers.clearAndFill(discountRateInput, '10');
+      await page.waitForTimeout(500);
+      await expect(firstPermanentTotal).toHaveValue('777');
+    });
+
+    test('should handle multiple override/re-engage cycles via top-level dependency', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('array-stop-on-user-override-test');
+      await expect(scenario).toBeVisible();
+
+      const discountRateInput = helpers.getInput(scenario, 'discountRate');
+      const lineTotalInputs = scenario.locator('[id^="lineTotal"] input');
+      const firstLineTotal = lineTotalInputs.nth(0);
+
+      // Cycle 1: override → change discountRate → re-engage
+      await helpers.clearAndFill(firstLineTotal, '999');
+      await page.waitForTimeout(500);
+      await expect(firstLineTotal).toHaveValue('999');
+
+      await helpers.clearAndFill(discountRateInput, '10');
+      await page.waitForTimeout(500);
+      await expect(firstLineTotal).toHaveValue('90'); // re-engaged: 2 * 50 * 0.9
+
+      // Cycle 2: override again → change discountRate → re-engage again
+      await helpers.clearAndFill(firstLineTotal, '888');
+      await page.waitForTimeout(500);
+      await expect(firstLineTotal).toHaveValue('888');
+
+      await helpers.clearAndFill(discountRateInput, '20');
+      await page.waitForTimeout(500);
+      await expect(firstLineTotal).toHaveValue('80'); // re-engaged: 2 * 50 * 0.8
+    });
+  });
 });

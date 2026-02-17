@@ -774,9 +774,12 @@ See topic \`external-data\` for full documentation.`,
 
 // Logic block (for conditions, debounce, etc.)
 logic: [{ type: 'derivation', expression: 'formValue.firstName + " " + formValue.lastName' }]
+
+// Stop on user edit (with optional re-engagement)
+logic: [{ type: 'derivation', expression: '...', stopOnUserOverride: true, reEngageOnDependencyChange: true }]
 \`\`\`
 Derivation is always defined ON the field that receives the computed value (self-targeting).
-**Variables:** \`formValue\`, \`fieldValue\`, \`externalData\` (see topic: external-data)
+**Variables:** \`formValue\`, \`fieldValue\`, \`fieldState\`, \`formFieldState\`, \`externalData\` (see topic: expression-variables)
 **For deriving component properties** (minDate, options, label): use \`targetProperty\` (see topic \`property-derivation\`)`,
 
     full: `# Value Derivation (Computed Fields)
@@ -840,9 +843,51 @@ Derivations are always defined ON the field that receives the computed value (se
 }
 \`\`\`
 
+## Stop on User Override
+
+When \`stopOnUserOverride: true\`, the derivation stops running after the user manually edits the target field:
+
+\`\`\`typescript
+{
+  key: 'fullName',
+  type: 'input',
+  label: 'Full Name',
+  logic: [{
+    type: 'derivation',
+    expression: 'formValue.firstName + " " + formValue.lastName',
+    stopOnUserOverride: true  // Derivation stops after user manually edits fullName
+  }]
+}
+\`\`\`
+
+### Re-engagement on Dependency Change
+
+Combine \`reEngageOnDependencyChange: true\` with \`stopOnUserOverride\` to clear user overrides when dependencies change:
+
+\`\`\`typescript
+{
+  key: 'fullName',
+  type: 'input',
+  label: 'Full Name',
+  logic: [{
+    type: 'derivation',
+    expression: 'formValue.firstName + " " + formValue.lastName',
+    stopOnUserOverride: true,
+    reEngageOnDependencyChange: true  // Clears user override when firstName/lastName changes
+  }]
+}
+\`\`\`
+
+**Use cases:**
+- Allow users to customize computed values
+- Reset customizations when source data changes
+- Smart defaults that defer to user input
+
 **Variables in expressions:**
 - \`formValue\`: Complete form value object
 - \`fieldValue\`: This field's current value
+- \`fieldState\`: Current field's state (touched, dirty, valid, etc.)
+- \`formFieldState\`: All fields' states keyed by field key
 - \`externalData\`: External application state (user roles, feature flags, etc.)
 
 **Nested access:**
@@ -909,6 +954,8 @@ Wrong: Wrong property names
   'expression-variables': {
     brief: `**formValue** - complete form object: \`formValue.fieldName\`, \`formValue.address?.city\`
 **fieldValue** - current field's value (in custom validators)
+**fieldState** - current field state: \`fieldState.touched\`, \`fieldState.valid\`, \`fieldState.dirty\`
+**formFieldState** - all field states: \`formFieldState.email.valid\`, \`formFieldState.password.pristine\`
 **externalData** - external signals: \`externalData.userRole\`, \`externalData.featureFlags.enabled\``,
 
     full: `# Variables in Expressions
@@ -919,6 +966,8 @@ Wrong: Wrong property names
 |----------|------|--------------|-------------|
 | \`formValue\` | object | Derivations, conditions, custom validators | Complete form values as nested object |
 | \`fieldValue\` | any | Custom validator expressions only | Current field's value |
+| \`fieldState\` | object | Derivations, conditions | Current field's state (touched, dirty, valid, etc.) |
+| \`formFieldState\` | object | Derivations, conditions | All fields' states keyed by field key |
 | \`externalData\` | object | Derivations, conditions | External application state (from \`externalData\` in FormConfig) |
 
 ## Accessing Values
@@ -941,6 +990,56 @@ expression: 'formValue.contacts?.[0]?.name'
 expression: '(formValue.items?.length || 0) + " items"'
 \`\`\`
 
+### Field State Access
+
+\`fieldState\` provides access to the current field's state properties:
+
+\`\`\`typescript
+// Check if current field has been touched
+expression: 'fieldState.touched ? "Modified" : "Untouched"'
+
+// Check if current field is valid
+expression: 'fieldState.valid && formValue.email'
+
+// Check if current field is dirty
+expression: 'fieldState.dirty ? "Changed from initial" : "Unchanged"'
+\`\`\`
+
+**Available \`fieldState\` properties:**
+- \`touched\`: boolean - Field has been focused and blurred
+- \`dirty\`: boolean - Value differs from initial value
+- \`pristine\`: boolean - Value matches initial value
+- \`valid\`: boolean - No validation errors
+- \`invalid\`: boolean - Has validation errors
+- \`pending\`: boolean - Async validation in progress
+- \`hidden\`: boolean - Field is currently hidden
+- \`readonly\`: boolean - Field is currently readonly
+- \`disabled\`: boolean - Field is currently disabled
+
+### Form Field State Access
+
+\`formFieldState\` provides access to any field's state by key:
+
+\`\`\`typescript
+// Check if email field is valid
+expression: 'formFieldState.email?.valid'
+
+// Conditional logic based on multiple field states
+expression: 'formFieldState.password?.valid && formFieldState.confirmPassword?.touched'
+
+// Check if any field is invalid
+expression: '!formFieldState.email?.valid || !formFieldState.password?.valid'
+\`\`\`
+
+**Nested field paths:**
+\`\`\`typescript
+// Access nested group field state
+expression: 'formFieldState["address.city"]?.dirty'
+
+// Access array item field state
+expression: 'formFieldState["contacts.0.name"]?.valid'
+\`\`\`
+
 ### External Data Access
 \`\`\`typescript
 expression: "externalData.userRole === 'admin'"
@@ -948,11 +1047,29 @@ expression: 'externalData.featureFlags.advancedMode === true'
 expression: 'externalData.permissions.includes("edit")'
 \`\`\`
 
+## Common Patterns
+
+### Conditional derivation based on field state
+\`\`\`typescript
+// Only compute if other field is valid
+expression: 'formFieldState.email?.valid ? formValue.email.toLowerCase() : ""'
+
+// Show warning if field is touched but invalid
+expression: 'fieldState.touched && fieldState.invalid ? "Please fix errors" : ""'
+\`\`\`
+
+### Validation-aware derivations
+\`\`\`typescript
+// Only use value if source field is valid
+expression: 'formFieldState.price?.valid ? formValue.price * 1.2 : null'
+\`\`\`
+
 ## Safety Tips
 
-1. **Always use optional chaining** (\`?.\`) for nested paths
+1. **Always use optional chaining** (\`?.\`) for nested paths and field state access
 2. **Provide defaults** for potentially undefined values: \`formValue.count || 0\`
-3. **Use nullish coalescing** (\`??\`) when 0 or empty string are valid: \`formValue.score ?? 'N/A'\``,
+3. **Use nullish coalescing** (\`??\`) when 0 or empty string are valid: \`formValue.score ?? 'N/A'\`
+4. **Check field existence** when using \`formFieldState\`: \`formFieldState.fieldKey?.valid\``,
   },
 
   'property-derivation': {

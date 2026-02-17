@@ -1,4 +1,5 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import type { FormFieldStateMap } from '../../models/expressions/field-state-context';
 import { DerivationLogicConfig, LogicTrigger } from '../../models/logic/logic-config';
 
 /**
@@ -98,6 +99,23 @@ export interface DerivationEntry {
    * appears in verbose derivation logs instead of the field key.
    */
   debugName?: string;
+
+  /**
+   * When true, the derivation stops running after the user manually
+   * edits the target field.
+   *
+   * Uses the field's `dirty()` signal — derivations write directly to
+   * `value.set()` which does not trigger `markAsDirty()`, so
+   * `dirty === true` reliably indicates user modification.
+   */
+  stopOnUserOverride?: boolean;
+
+  /**
+   * When true (and `stopOnUserOverride` is also true), clears the
+   * user-override flag when any dependency of this derivation changes,
+   * allowing the derivation to run again.
+   */
+  reEngageOnDependencyChange?: boolean;
 }
 
 /**
@@ -173,6 +191,23 @@ export interface DerivationChainContext {
    * Current iteration count in the derivation processing loop.
    */
   iteration: number;
+
+  /**
+   * Set of field keys that changed in this cycle.
+   *
+   * Used by `reEngageOnDependencyChange` to determine whether to
+   * clear a user-override flag. `undefined` on initial onChange evaluation
+   * (when no prior value exists to compare against).
+   */
+  changedFields?: Set<string>;
+
+  /**
+   * Cached FormFieldStateMap for this cycle.
+   *
+   * Created once per `applyDerivations` call and reused across all entry
+   * evaluations to avoid allocating a new Proxy + Map per entry.
+   */
+  formFieldState?: FormFieldStateMap;
 }
 
 /**

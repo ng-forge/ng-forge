@@ -129,6 +129,10 @@ class ActiveDerivationLogger implements DerivationLogger {
         return 'value unchanged';
       case 'already-applied':
         return 'already applied this cycle';
+      case 'user-override':
+        return 'user override active';
+      case 'target-not-found':
+        return 'target not found';
       default:
         return 'unknown';
     }

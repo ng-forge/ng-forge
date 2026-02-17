@@ -1,5 +1,6 @@
 import type { Logger } from '../../providers/features/logger/logger.interface';
 import type { DeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
+import type { FieldStateContext, FormFieldStateMap } from './field-state-context';
 
 export interface EvaluationContext<TValue = unknown> {
   /** Current field value */
@@ -86,6 +87,40 @@ export interface EvaluationContext<TValue = unknown> {
    * Used by the condition evaluator to deduplicate deprecation warnings.
    */
   deprecationTracker?: DeprecationWarningTracker;
+
+  /**
+   * State of the current field being evaluated.
+   *
+   * Provides access to field state properties like `touched`, `dirty`, `valid`, etc.
+   * Uses a Proxy for lazy evaluation — properties are only read when accessed.
+   *
+   * @example
+   * ```typescript
+   * // In a JavaScript expression:
+   * condition: {
+   *   type: 'javascript',
+   *   expression: "fieldState.touched && fieldState.dirty"
+   * }
+   * ```
+   */
+  fieldState?: FieldStateContext;
+
+  /**
+   * State of all fields in the form, keyed by field key.
+   *
+   * Provides access to any field's state properties by key.
+   * Uses a Proxy for lazy evaluation — field state is only read when accessed.
+   *
+   * @example
+   * ```typescript
+   * // In a JavaScript expression:
+   * condition: {
+   *   type: 'javascript',
+   *   expression: "formFieldState.email.dirty && formFieldState.email.valid"
+   * }
+   * ```
+   */
+  formFieldState?: FormFieldStateMap;
 
   /** Allow additional properties for flexible expression evaluation */
   [key: string]: unknown;
