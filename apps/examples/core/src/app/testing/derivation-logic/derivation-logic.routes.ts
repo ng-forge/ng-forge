@@ -82,6 +82,21 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getDerivationLogicScenario('array-stop-on-user-override-test') },
   },
+  {
+    path: 'http-derivation',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('http-derivation-test') },
+  },
+  {
+    path: 'http-derivation-error',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('http-derivation-error-test') },
+  },
+  {
+    path: 'http-derivation-stop-override',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('http-derivation-stop-override-test') },
+  },
 ];
 
 export default routes;

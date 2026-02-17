@@ -2,7 +2,9 @@ import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fix
 import { testUrl } from '../shared/test-utils';
 
 setupTestLogging();
-setupConsoleCheck();
+setupConsoleCheck({
+  ignorePatterns: [/Failed to load resource/],
+});
 
 test.describe('Value Derivation Logic Tests', () => {
   test.describe('Static Value Derivation', () => {
@@ -1368,6 +1370,234 @@ test.describe('Value Derivation Logic Tests', () => {
       await helpers.clearAndFill(discountRateInput, '20');
       await page.waitForTimeout(500);
       await expect(firstLineTotal).toHaveValue('80'); // re-engaged: 2 * 50 * 0.8
+    });
+  });
+
+  test.describe('HTTP Derivation', () => {
+    test.beforeEach(async ({ page, mockApi }) => {
+      // Set up default mock before navigation (trailing * matches query params)
+      await mockApi.mockSuccess('/api/exchange-rate*', {
+        body: { rate: 0.85 },
+      });
+      await page.goto(testUrl('/test/derivation-logic/http-derivation'));
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('should derive exchange rate via HTTP when currency changes', async ({ page, helpers, mockApi }) => {
+      const scenario = helpers.getScenario('http-derivation-test');
+      await expect(scenario).toBeVisible();
+
+      const currencySelect = scenario.locator('#currency');
+      const exchangeRateInput = helpers.getInput(scenario, 'exchangeRate');
+
+      // Select EUR → HTTP fires → exchangeRate = 0.85
+      await currencySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Euro (EUR)")').click();
+      await page.waitForTimeout(1000);
+
+      await expect(exchangeRateInput).toHaveValue('0.85');
+    });
+
+    test('should update derived value when currency changes again', async ({ page, helpers, mockApi }) => {
+      const scenario = helpers.getScenario('http-derivation-test');
+      await expect(scenario).toBeVisible();
+
+      const currencySelect = scenario.locator('#currency');
+      const exchangeRateInput = helpers.getInput(scenario, 'exchangeRate');
+
+      // Select EUR → rate = 0.85
+      await currencySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Euro (EUR)")').click();
+      await page.waitForTimeout(1000);
+      await expect(exchangeRateInput).toHaveValue('0.85');
+
+      // Re-route to return a different rate for GBP
+      await page.unroute('**/api/exchange-rate*');
+      await mockApi.mockSuccess('/api/exchange-rate*', {
+        body: { rate: 0.73 },
+      });
+
+      // Select GBP → rate = 0.73
+      await currencySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("British Pound (GBP)")').click();
+      await page.waitForTimeout(1000);
+      await expect(exchangeRateInput).toHaveValue('0.73');
+    });
+
+    test('should chain HTTP derivation to expression derivation (currency → rate → convertedAmount)', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('http-derivation-test');
+      await expect(scenario).toBeVisible();
+
+      const currencySelect = scenario.locator('#currency');
+      const exchangeRateInput = helpers.getInput(scenario, 'exchangeRate');
+      const amountInput = helpers.getInput(scenario, 'amount');
+      const convertedAmountInput = helpers.getInput(scenario, 'convertedAmount');
+
+      // Initial amount is 100
+      await expect(amountInput).toHaveValue('100');
+
+      // Select EUR → rate = 0.85 → converted = 100 * 0.85 = 85
+      await currencySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Euro (EUR)")').click();
+      await page.waitForTimeout(1000);
+
+      await expect(exchangeRateInput).toHaveValue('0.85');
+      await expect(convertedAmountInput).toHaveValue('85');
+
+      // Change amount to 200 → converted = 200 * 0.85 = 170
+      await helpers.clearAndFill(amountInput, '200');
+      await page.waitForTimeout(500);
+      await expect(convertedAmountInput).toHaveValue('170');
+    });
+  });
+
+  test.describe('HTTP Derivation Error Handling', () => {
+    test('should retain previous value on HTTP error and recover on next valid request', async ({ page, helpers, mockApi }) => {
+      // First mock success (trailing * matches query params)
+      await mockApi.mockSuccess('/api/lookup-city*', {
+        body: { city: 'New York' },
+      });
+
+      await page.goto(testUrl('/test/derivation-logic/http-derivation-error'));
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('http-derivation-error-test');
+      await expect(scenario).toBeVisible();
+
+      const zipCodeInput = helpers.getInput(scenario, 'zipCode');
+      const cityInput = helpers.getInput(scenario, 'city');
+
+      // Enter valid zip → city populates
+      await helpers.fillInput(zipCodeInput, '10001');
+      await page.waitForTimeout(1000);
+      await expect(cityInput).toHaveValue('New York');
+
+      // Now mock an error for the next request
+      await page.unroute('**/api/lookup-city*');
+      await mockApi.mockError('/api/lookup-city*', {
+        status: 500,
+        body: { error: 'Internal server error' },
+      });
+
+      // Enter another zip → HTTP 500 → city should keep previous value
+      await helpers.clearAndFill(zipCodeInput, '99999');
+      await page.waitForTimeout(1000);
+      await expect(cityInput).toHaveValue('New York');
+
+      // Restore success mock
+      await page.unroute('**/api/lookup-city*');
+      await mockApi.mockSuccess('/api/lookup-city*', {
+        body: { city: 'Los Angeles' },
+      });
+
+      // Enter new valid zip → city updates again (stream recovered)
+      await helpers.clearAndFill(zipCodeInput, '90001');
+      await page.waitForTimeout(1000);
+      await expect(cityInput).toHaveValue('Los Angeles');
+    });
+  });
+
+  test.describe('HTTP Derivation Stop On User Override', () => {
+    test.beforeEach(async ({ page, mockApi }) => {
+      // Set up mock with different responses per country
+      await page.route('**/api/timezone*', async (route) => {
+        const url = new URL(route.request().url());
+        const country = url.searchParams.get('country');
+        const timezones: Record<string, string> = {
+          US: 'America/New_York',
+          UK: 'Europe/London',
+          DE: 'Europe/Berlin',
+        };
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ timezone: timezones[country ?? ''] ?? 'UTC' }),
+        });
+      });
+
+      await page.goto(testUrl('/test/derivation-logic/http-derivation-stop-override'));
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('should derive timezone via HTTP when country changes', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('http-derivation-stop-override-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const timezoneInput = helpers.getInput(scenario, 'timezone');
+
+      // Select US → timezone = America/New_York
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(1000);
+      await expect(timezoneInput).toHaveValue('America/New_York');
+
+      // Select UK → timezone = Europe/London
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United Kingdom")').click();
+      await page.waitForTimeout(1000);
+      await expect(timezoneInput).toHaveValue('Europe/London');
+    });
+
+    test('should stop HTTP derivation after user manually edits timezone', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('http-derivation-stop-override-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const timezoneInput = helpers.getInput(scenario, 'timezone');
+
+      // Select US → timezone derived via HTTP
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(1000);
+      await expect(timezoneInput).toHaveValue('America/New_York');
+
+      // User manually overrides timezone
+      await helpers.clearAndFill(timezoneInput, 'Custom/Timezone');
+      await page.waitForTimeout(500);
+
+      // Change country to UK → timezone should NOT update (user override)
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United Kingdom")').click();
+      await page.waitForTimeout(1000);
+      await expect(timezoneInput).toHaveValue('Custom/Timezone');
+    });
+
+    test('should submit the user-overridden HTTP-derived value correctly', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('http-derivation-stop-override-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const timezoneInput = helpers.getInput(scenario, 'timezone');
+
+      // Derive a value via HTTP
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(1000);
+      await expect(timezoneInput).toHaveValue('America/New_York');
+
+      // Override it
+      await helpers.clearAndFill(timezoneInput, 'My/Timezone');
+      await page.waitForTimeout(500);
+
+      // Change country to verify override persists
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Germany")').click();
+      await page.waitForTimeout(1000);
+
+      // Submit and verify the overridden value
+      const data = await helpers.submitFormAndCapture(scenario);
+      expect(data['timezone']).toBe('My/Timezone');
     });
   });
 });
