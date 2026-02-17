@@ -140,32 +140,38 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
     if (!signalPair) {
       const resolvedRequest = signal<HttpResourceRequest | undefined>(undefined);
 
-      const pipeline = toObservable(resolvedRequest, { injector }).pipe(
-        debounceTime(debounceMs),
-        distinctUntilChanged((prev, curr) => stableStringify(prev) === stableStringify(curr)),
-        filter((request): request is HttpResourceRequest => request !== undefined),
-        switchMap((request) => {
-          const method = request.method ?? 'GET';
-          const options: Record<string, unknown> = {};
-          if (request.body) options['body'] = request.body;
-          if (request.headers) options['headers'] = request.headers;
+      // Wrap in untracked() to avoid NG0602: toObservable() internally calls effect(),
+      // which cannot be created inside a reactive context (computed). The LogicFn runs
+      // inside Angular Signal Forms' BooleanOrLogic.compute (a computed), so we must
+      // clear the active reactive consumer before creating the observable pipeline.
+      const resultValue = untracked(() => {
+        const pipeline = toObservable(resolvedRequest, { injector }).pipe(
+          debounceTime(debounceMs),
+          distinctUntilChanged((prev, curr) => stableStringify(prev) === stableStringify(curr)),
+          filter((request): request is HttpResourceRequest => request !== undefined),
+          switchMap((request) => {
+            const method = request.method ?? 'GET';
+            const options: Record<string, unknown> = {};
+            if (request.body) options['body'] = request.body;
+            if (request.headers) options['headers'] = request.headers;
 
-          return httpClient.request(method, request.url, options).pipe(
-            map((response) => extractBoolean(response, condition.responseExpression)),
-            tap((value) => {
-              const requestKey = stableStringify(request);
-              cache.set(requestKey, value, cacheDurationMs);
-            }),
-            catchError((error) => {
-              logger.warn('[Dynamic Forms] HTTP condition request failed:', error);
-              return of(pendingValue);
-            }),
-          );
-        }),
-        startWith(pendingValue),
-      );
+            return httpClient.request(method, request.url, options).pipe(
+              map((response) => extractBoolean(response, condition.responseExpression)),
+              tap((value) => {
+                const requestKey = stableStringify(request);
+                cache.set(requestKey, value, cacheDurationMs);
+              }),
+              catchError((error) => {
+                logger.warn('[Dynamic Forms] HTTP condition request failed:', error);
+                return of(pendingValue);
+              }),
+            );
+          }),
+          startWith(pendingValue),
+        );
 
-      const resultValue = toSignal(pipeline, { injector, initialValue: pendingValue });
+        return toSignal(pipeline, { injector, initialValue: pendingValue });
+      });
 
       signalPair = { resolvedRequest, resultValue };
       signalStore.set(contextKey, signalPair);

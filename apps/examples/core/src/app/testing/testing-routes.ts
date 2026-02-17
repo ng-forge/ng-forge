@@ -73,6 +73,12 @@ export default [
     loadChildren: () => import('./essential-tests/essential-tests.routes'),
   },
 
+  // HTTP Conditions Tests
+  {
+    path: 'http-conditions',
+    loadChildren: () => import('./http-conditions/http-conditions.routes'),
+  },
+
   // Expression-Based Logic Tests
   {
     path: 'expression-based-logic',

@@ -226,14 +226,18 @@ export function createDebouncedLogicFunction<TValue>(expression: ConditionalExpr
       // Create a signal to hold the immediate evaluation result
       const immediateValue = signal(false);
 
-      // Create a debounced signal using RxJS
-      const immediateValue$ = toObservable(immediateValue, { injector }).pipe(
-        debounceTime(debounceMs),
-        distinctUntilChanged(),
-        startWith(false),
-      );
+      // Wrap in untracked() to avoid NG0602: toObservable() internally calls effect(),
+      // which cannot be created inside a reactive context (computed). The LogicFn runs
+      // inside Angular Signal Forms' BooleanOrLogic.compute (a computed).
+      const debouncedValue = untracked(() => {
+        const immediateValue$ = toObservable(immediateValue, { injector }).pipe(
+          debounceTime(debounceMs),
+          distinctUntilChanged(),
+          startWith(false),
+        );
 
-      const debouncedValue = toSignal(immediateValue$, { injector, initialValue: false });
+        return toSignal(immediateValue$, { injector, initialValue: false });
+      });
 
       signalPair = { immediateValue, debouncedValue };
       signalStore.set(contextKey, signalPair);
