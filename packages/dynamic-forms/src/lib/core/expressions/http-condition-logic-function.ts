@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injector, signal, untracked } from '@angular/core';
+import { inject, Injector, Signal, signal, untracked } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
 import { catchError, debounceTime, distinctUntilChanged, filter, map, of, startWith, switchMap, tap } from 'rxjs';
@@ -64,9 +64,16 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
     return cached as LogicFn<TValue, boolean>;
   }
 
+  // Each condition needs its own per-field signal store. The shared service-level WeakMap
+  // would collide when multiple HTTP conditions exist on the same field (same FieldContext key).
+  const perFunctionSignalStore = new WeakMap<
+    object,
+    { resolvedRequest: ReturnType<typeof signal<HttpResourceRequest | undefined>>; resultValue: Signal<boolean> }
+  >();
+
   const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
     const contextKey = ctx as unknown as object;
-    let signalPair = cacheService.httpConditionSignalStore.get(contextKey);
+    let signalPair = perFunctionSignalStore.get(contextKey);
 
     if (!signalPair) {
       const resolvedRequest = signal<HttpResourceRequest | undefined>(undefined);
@@ -105,7 +112,7 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
       });
 
       signalPair = { resolvedRequest, resultValue };
-      cacheService.httpConditionSignalStore.set(contextKey, signalPair);
+      perFunctionSignalStore.set(contextKey, signalPair);
     }
 
     // Build reactive evaluation context (creates signal dependencies on form values)

@@ -47,6 +47,16 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getHttpConditionsScenario('cache-behavior-test') },
   },
+  {
+    path: 'debounce-coalescing',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getHttpConditionsScenario('debounce-coalescing-test') },
+  },
+  {
+    path: 'multiple-http-logic',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getHttpConditionsScenario('multiple-http-logic-test') },
+  },
 ];
 
 export default routes;

@@ -363,4 +363,111 @@ test.describe('HTTP Conditions Tests', () => {
       expect(callCount).toBe(countBeforeSecondA);
     });
   });
+
+  test.describe('Debounce Coalescing', () => {
+    test('should coalesce rapid input changes into fewer HTTP requests', async ({ page, helpers }) => {
+      let callCount = 0;
+
+      await page.route('**/api/debounce-test*', (route) => {
+        callCount++;
+        const url = route.request().url();
+        const q = new URL(url).searchParams.get('q');
+
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ shouldHide: q === 'final' }),
+        });
+      });
+
+      await page.goto('/#/test/http-conditions/debounce-coalescing');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('debounce-coalescing-test');
+      await expect(scenario).toBeVisible();
+
+      const searchInput = scenario.locator('#search input');
+      const resultField = scenario.locator('#result');
+
+      // Reset counter after page load
+      callCount = 0;
+
+      // Type rapidly — intermediate values should be debounced away
+      // The scenario has debounceMs: 500, so typing within 500ms windows should coalesce
+      await searchInput.fill('a');
+      await searchInput.fill('ab');
+      await searchInput.fill('abc');
+      await searchInput.fill('final');
+      await searchInput.blur();
+
+      // Wait for the debounced HTTP request to resolve
+      const response = page.waitForResponse((r) => r.url().includes('/api/debounce-test'));
+      await response;
+
+      // Should have made significantly fewer calls than the number of input changes
+      // With 500ms debounce, rapid fills within the window should coalesce to ~1 request
+      expect(callCount).toBeLessThanOrEqual(2);
+
+      // "final" → shouldHide: true → field is hidden
+      await expect(resultField).toBeHidden({ timeout: 5000 });
+    });
+  });
+
+  test.describe('Multiple HTTP Logic Types', () => {
+    test('should apply independent HTTP conditions for hidden and disabled on same field', async ({ page, helpers }) => {
+      await page.route('**/api/multi-logic/visibility*', (route) => {
+        const url = route.request().url();
+        const role = new URL(url).searchParams.get('role');
+
+        // viewer → hide, admin/editor → show
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ shouldHide: role === 'viewer' }),
+        });
+      });
+
+      await page.route('**/api/multi-logic/editability*', (route) => {
+        const url = route.request().url();
+        const role = new URL(url).searchParams.get('role');
+
+        // editor → disable, admin → enable
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ shouldDisable: role === 'editor' }),
+        });
+      });
+
+      await page.goto('/#/test/http-conditions/multiple-http-logic');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('multiple-http-logic-test');
+      await expect(scenario).toBeVisible();
+
+      const roleSelect = helpers.getSelect(scenario, 'role');
+      const secretField = scenario.locator('#secretField');
+      const secretInput = scenario.locator('#secretField input');
+
+      // Select "Admin" → visible + enabled
+      const adminResponse = page.waitForResponse((r) => r.url().includes('/api/multi-logic/'));
+      await helpers.selectOption(roleSelect, 'Admin');
+      await adminResponse;
+      await expect(secretField).toBeVisible({ timeout: 5000 });
+      await expect(secretInput).toBeEnabled({ timeout: 5000 });
+
+      // Select "Editor" → visible + disabled
+      const editorResponse = page.waitForResponse((r) => r.url().includes('/api/multi-logic/'));
+      await helpers.selectOption(roleSelect, 'Editor');
+      await editorResponse;
+      await expect(secretField).toBeVisible({ timeout: 5000 });
+      await expect(secretInput).toBeDisabled({ timeout: 5000 });
+
+      // Select "Viewer" → hidden (disabled state irrelevant when hidden)
+      const viewerResponse = page.waitForResponse((r) => r.url().includes('/api/multi-logic/'));
+      await helpers.selectOption(roleSelect, 'Viewer');
+      await viewerResponse;
+      await expect(secretField).toBeHidden({ timeout: 5000 });
+    });
+  });
 });

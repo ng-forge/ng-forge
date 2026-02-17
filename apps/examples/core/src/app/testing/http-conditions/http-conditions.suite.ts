@@ -7,6 +7,8 @@ import { responseExpressionScenario } from './scenarios/response-expression.scen
 import { pendingValueScenario } from './scenarios/pending-value.scenario';
 import { httpErrorFallbackScenario } from './scenarios/http-error-fallback.scenario';
 import { cacheBehaviorScenario } from './scenarios/cache-behavior.scenario';
+import { debounceCoalescingScenario } from './scenarios/debounce-coalescing.scenario';
+import { multipleHttpLogicScenario } from './scenarios/multiple-http-logic.scenario';
 
 /**
  * HTTP Conditions Suite
@@ -27,6 +29,8 @@ export const httpConditionsSuite: TestSuite = {
     pendingValueScenario,
     httpErrorFallbackScenario,
     cacheBehaviorScenario,
+    debounceCoalescingScenario,
+    multipleHttpLogicScenario,
   ],
 };
 
