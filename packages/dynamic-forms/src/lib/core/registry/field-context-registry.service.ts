@@ -4,7 +4,7 @@ import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
 import { RootFormRegistryService } from './root-form-registry.service';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { DEPRECATION_WARNING_TRACKER, DeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
+import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { getNestedValue } from '../expressions/value-utils';
 
 function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is ChildFieldContext<TValue> {
