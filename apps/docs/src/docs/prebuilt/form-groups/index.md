@@ -130,3 +130,32 @@ Groups can contain:
 - Row fields (for horizontal layouts within the group)
 
 See [Type Safety & Inference](../advanced/type-safety/basics) for details on how groups affect type inference.
+
+## Conditional Visibility
+
+Group containers support the `logic` property to conditionally show or hide the entire group (and all its nested fields) based on form state.
+
+```typescript
+{
+  key: 'addressGroup',
+  type: 'group',
+  logic: [{
+    type: 'hidden',
+    condition: {
+      type: 'fieldValue',
+      fieldPath: 'sameAsBilling',
+      operator: 'equals',
+      value: true,
+    },
+  }],
+  fields: [
+    { key: 'street', type: 'input', label: 'Street', value: '' },
+    { key: 'city', type: 'input', label: 'City', value: '' },
+    { key: 'zip', type: 'input', label: 'ZIP', value: '' },
+  ],
+}
+```
+
+When the group is hidden, all its nested fields are hidden with it. Only `'hidden'` is supported as a logic type on containers (not `required`, `readonly`, or `disabled`).
+
+For all available condition types and operators, see [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/).

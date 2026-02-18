@@ -156,6 +156,35 @@ Pages can contain:
 - Row fields (for horizontal layouts)
 - Group fields (for nested data structures)
 
+## Conditional Visibility
+
+Pages support the `logic` property to conditionally skip a page (hide it from the page navigation and progression) based on form state.
+
+```typescript
+{
+  key: 'businessDetails',
+  type: 'page',
+  label: 'Business Details',
+  logic: [{
+    type: 'hidden',
+    condition: {
+      type: 'fieldValue',
+      fieldPath: 'accountType',
+      operator: 'notEquals',
+      value: 'business',
+    },
+  }],
+  fields: [
+    { key: 'companyName', type: 'input', label: 'Company Name', value: '' },
+    { key: 'taxId', type: 'input', label: 'Tax ID', value: '' },
+  ],
+}
+```
+
+When a page is hidden, it is excluded from the multi-step navigation — users skip directly past it. Only `'hidden'` is supported as a logic type on containers.
+
+For all available condition types and operators, see [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/).
+
 ## CSS Classes
 
 Page fields use these classes for styling:

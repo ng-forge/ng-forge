@@ -27,6 +27,7 @@ export { shippingBillingAddressScenario } from './shipping-billing-address.scena
 export { ageConditionalFormScenario } from './age-conditional-form.scenario';
 export { enterpriseFeaturesScenario } from './enterprise-features.scenario';
 export { simplifiedArrayScenario } from './simplified-array.scenario';
+export { expressionValidatorsScenario } from './expression-validators.scenario';
 
 import { inputScenario } from './input.scenario';
 import { checkboxScenario } from './checkbox.scenario';
@@ -57,6 +58,7 @@ import { shippingBillingAddressScenario } from './shipping-billing-address.scena
 import { ageConditionalFormScenario } from './age-conditional-form.scenario';
 import { enterpriseFeaturesScenario } from './enterprise-features.scenario';
 import { simplifiedArrayScenario } from './simplified-array.scenario';
+import { expressionValidatorsScenario } from './expression-validators.scenario';
 import { ExampleScenario } from '../shared/types';
 
 export const ALL_SCENARIOS: ExampleScenario[] = [
@@ -89,6 +91,7 @@ export const ALL_SCENARIOS: ExampleScenario[] = [
   ageConditionalFormScenario,
   enterpriseFeaturesScenario,
   simplifiedArrayScenario,
+  expressionValidatorsScenario,
 ];
 
 export function getScenarioById(id: string): ExampleScenario | undefined {

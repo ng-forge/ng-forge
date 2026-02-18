@@ -2,11 +2,12 @@ Custom validation functions for complex validation logic that goes beyond built-
 
 ## Overview
 
-ng-forge supports three types of custom validators using Angular's Signal Forms API:
+ng-forge supports four types of custom validators:
 
-1. **CustomValidator** - Synchronous validators with access to FieldContext
-2. **AsyncCustomValidator** - Async validators using Angular's resource API
-3. **HttpCustomValidator** - HTTP-specific validators with automatic request cancellation
+1. **Declarative HTTP** (`type: 'http'`) - Validate against an HTTP endpoint with no function registration
+2. **CustomValidator** - Synchronous validators with access to FieldContext
+3. **AsyncCustomValidator** - Async validators using Angular's resource API
+4. **HttpCustomValidator** (function-based) - HTTP validators with full programmatic control
 
 **Key Principle:** Validators should focus on validation logic, NOT presentation. Return only the error `kind` and configure messages at field level for proper i18n support.
 
@@ -14,7 +15,7 @@ ng-forge supports three types of custom validators using Angular's Signal Forms 
 
 Try the interactive example below to see both expression-based and function-based validators in action:
 
-<iframe src="http://localhost:4201/#/examples/expression-validators" class="example-frame" title="Expression Validators Demo"></iframe>
+<iframe src="http://localhost:4201/#/examples/expression-validators-demo" class="example-frame" title="Expression Validators Demo"></iframe>
 
 ## Message Resolution (STRICT)
 
@@ -375,11 +376,119 @@ interface AsyncCustomValidator<TValue, TParams, TResult> {
 }
 ```
 
-## HTTP Validators
+## Declarative HTTP Validators
 
-> **Deprecation notice:** The old `type: 'customHttp'` still works but is deprecated. Use `type: 'http'` instead.
+The simplest way to validate against an HTTP endpoint. No function registration required — configure the request and response mapping inline.
 
-HTTP validators provide optimized HTTP validation with automatic request cancellation.
+### Basic Example
+
+```typescript
+{
+  key: 'username',
+  type: 'input',
+  validators: [
+    {
+      type: 'http',
+      http: {
+        url: '/api/users/check-availability',
+        method: 'GET',
+        queryParams: {
+          username: 'fieldValue', // fieldValue refers to the current field
+        },
+      },
+      responseMapping: {
+        validWhen: 'response.available', // Truthy = valid
+        errorKind: 'usernameTaken',
+      },
+    },
+  ],
+  validationMessages: {
+    usernameTaken: 'This username is already taken',
+  },
+}
+```
+
+**Key points:**
+
+- `fieldValue` is available as an expression in `params`, `queryParams`, and `body` (refers to the current field's value)
+- Use `params` with `:key` URL placeholders for path parameters (e.g. `url: '/api/users/:id'` + `params: { id: 'fieldValue' }`)
+- `validWhen` is evaluated with `{ response }` in scope — truthy means validation passed
+- **Fail-closed:** if the HTTP request errors, the validator returns `{ kind: errorKind }` by default (prevents submission on network failure)
+
+### POST with Body Expressions
+
+```typescript
+{
+  type: 'http',
+  http: {
+    url: '/api/validate-email',
+    method: 'POST',
+    body: {
+      email: 'fieldValue',
+    },
+    evaluateBodyExpressions: true,
+  },
+  responseMapping: {
+    validWhen: 'response.valid',
+    errorKind: 'emailInvalid',
+  },
+}
+```
+
+### Error Message Interpolation
+
+Use `errorParams` to include response data in validation messages:
+
+```typescript
+{
+  type: 'http',
+  http: {
+    url: '/api/users/check-availability',
+    queryParams: { username: 'fieldValue' },
+  },
+  responseMapping: {
+    validWhen: 'response.available',
+    errorKind: 'usernameTaken',
+    errorParams: {
+      suggestion: 'response.suggestion', // Maps to {{suggestion}} in the message
+    },
+  },
+}
+// Message: 'Username is taken. Try {{suggestion}}'
+```
+
+### HttpValidationResponseMapping Interface
+
+```typescript
+interface HttpValidationResponseMapping {
+  /** Expression evaluated with { response }. Truthy = valid (no error). */
+  validWhen: string;
+
+  /** Error kind returned when validWhen is falsy — maps to validationMessages. */
+  errorKind: string;
+
+  /**
+   * Optional parameters for message interpolation.
+   * Keys become {{paramName}} placeholders. Values are expressions evaluated with { response }.
+   */
+  errorParams?: Record<string, string>;
+}
+```
+
+**When to use declarative vs function-based:**
+
+| Scenario                                        | Use                                              |
+| ----------------------------------------------- | ------------------------------------------------ |
+| Standard availability check                     | Declarative (`type: 'http'` + `responseMapping`) |
+| Need `inject()` for Angular services            | Function-based (`HttpCustomValidator`)           |
+| Conditional request (skip based on field state) | Function-based (`HttpCustomValidator`)           |
+| Custom error handling (fail-open on error)      | Function-based (`HttpCustomValidator`)           |
+
+## HTTP Validators (Function-Based)
+
+> **Deprecation notice:** The old `type: 'customHttp'` still works but is deprecated. Use `type: 'http'` with `functionName` instead.
+
+Function-based HTTP validators give you full programmatic control over request construction and response handling.
 
 ### Basic Example
 
