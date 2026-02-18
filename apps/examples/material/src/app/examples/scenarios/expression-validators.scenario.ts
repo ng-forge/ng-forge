@@ -16,6 +16,7 @@ export const expressionValidatorsScenario: ExampleScenario = {
   config: {
     defaultValidationMessages: {
       required: 'This field is required',
+      minLength: 'Must be at least 8 characters',
       passwordMismatch: 'Passwords must match',
       endDateBeforeStart: 'End date must be after start date',
       ageOutOfRange: 'Age must be within the specified range',
