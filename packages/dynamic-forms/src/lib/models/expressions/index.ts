@@ -6,6 +6,7 @@ export type {
   CustomCondition,
   JavascriptCondition,
   HttpCondition,
+  AsyncCondition,
   AndCondition,
   OrCondition,
 } from './conditional-expression';

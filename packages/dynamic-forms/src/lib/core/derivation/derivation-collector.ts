@@ -190,6 +190,7 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
       config.expression && 'expression',
       config.value !== undefined && 'value',
       config.functionName && 'functionName',
+      config.asyncFunctionName && 'asyncFunctionName',
     ].filter(Boolean);
     if (otherSources.length > 0) {
       throw new DynamicFormError(
@@ -216,6 +217,34 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
     }
   }
 
+  // Validate async derivation constraints
+  if (config.asyncFunctionName) {
+    const otherSources = [
+      config.expression && 'expression',
+      config.value !== undefined && 'value',
+      config.functionName && 'functionName',
+      config.http && 'http',
+    ].filter(Boolean);
+    if (otherSources.length > 0) {
+      throw new DynamicFormError(
+        `Derivation for '${effectiveFieldKey}' has 'asyncFunctionName' combined with ${otherSources.join(', ')}. ` +
+          `Async derivations are mutually exclusive with other value sources.`,
+      );
+    }
+    if (!config.dependsOn || config.dependsOn.length === 0) {
+      throw new DynamicFormError(
+        `Async derivation for '${effectiveFieldKey}' requires explicit 'dependsOn'. ` +
+          `Wildcard dependencies would trigger async functions on every form change.`,
+      );
+    }
+    if (config.dependsOn.includes('*')) {
+      throw new DynamicFormError(
+        `Async derivation for '${effectiveFieldKey}' cannot use wildcard ('*') in 'dependsOn'. ` +
+          `Wildcards would trigger async functions on every form change. Specify explicit field dependencies instead.`,
+      );
+    }
+  }
+
   const dependsOn = extractDependencies(config);
   const condition = config.condition ?? true;
   const trigger = config.trigger ?? 'onChange';
@@ -233,6 +262,7 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
     functionName: config.functionName,
     http: config.http,
     responseExpression: config.responseExpression,
+    asyncFunctionName: config.asyncFunctionName,
     trigger,
     debounceMs,
     isShorthand: false,

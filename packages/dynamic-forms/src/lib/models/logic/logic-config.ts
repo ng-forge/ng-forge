@@ -343,7 +343,7 @@ interface BaseDerivationLogicConfig {
    * The request is sent when dependencies change, with automatic
    * debouncing and cancellation of in-flight requests.
    *
-   * Mutually exclusive with `value`, `expression`, and `functionName`.
+   * Mutually exclusive with `value`, `expression`, `functionName`, and `asyncFunctionName`.
    * Requires `dependsOn` to be explicitly specified (to avoid wildcard
    * triggering on every keystroke).
    * Requires `responseExpression` to extract the value from the response.
@@ -369,6 +369,30 @@ interface BaseDerivationLogicConfig {
    * ```
    */
   http?: HttpRequestConfig;
+
+  /**
+   * Name of a registered async derivation function.
+   *
+   * The function receives the evaluation context and returns a Promise or Observable
+   * of the derived value. Register functions in `customFnConfig.asyncDerivations`.
+   *
+   * Mutually exclusive with `value`, `expression`, `functionName`, and `http`.
+   * Requires `dependsOn` to be explicitly specified (to avoid triggering on every
+   * form change, since async functions may involve expensive I/O operations).
+   *
+   * @example
+   * ```typescript
+   * {
+   *   key: 'suggestedPrice',
+   *   logic: [{
+   *     type: 'derivation',
+   *     asyncFunctionName: 'fetchSuggestedPrice',
+   *     dependsOn: ['productId', 'quantity'],
+   *   }]
+   * }
+   * ```
+   */
+  asyncFunctionName?: string;
 
   /**
    * Expression to extract the derived value from an HTTP response.

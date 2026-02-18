@@ -883,6 +883,55 @@ Fetch derived values from an HTTP endpoint. Requires \`dependsOn\` (explicit) an
 - Array fields (\`items.$.rate\`) are NOT supported for HTTP derivations
 - Works with \`stopOnUserOverride\` and \`condition\`
 
+## Async Derivation (Custom Async Functions)
+
+Call a registered async function (Promise or Observable) to derive values. Requires \`dependsOn\` (explicit).
+
+\`\`\`typescript
+{
+  key: 'suggestedPrice',
+  type: 'input',
+  label: 'Suggested Price',
+  readonly: true,
+  logic: [{
+    type: 'derivation',
+    asyncFunctionName: 'fetchSuggestedPrice',
+    dependsOn: ['productId', 'quantity']  // Required for async
+  }]
+}
+\`\`\`
+
+Register the function in \`customFnConfig.asyncDerivations\`:
+
+\`\`\`typescript
+customFnConfig: {
+  asyncDerivations: {
+    fetchSuggestedPrice: async (context) => {
+      const response = await fetch(\`/api/price?product=\${context.formValue.productId}\`);
+      const data = await response.json();
+      return data.suggestedPrice;
+    },
+    // Observable-based alternative
+    lookupAddress: (context) => {
+      return addressService.lookup(context.formValue.zipCode).pipe(
+        map(result => result.formattedAddress)
+      );
+    },
+  }
+}
+\`\`\`
+
+**Key rules:**
+- \`asyncFunctionName\` is mutually exclusive with \`expression\`, \`value\`, \`functionName\`, and \`http\`
+- \`dependsOn\` is **required** (prevents triggering on every form change)
+- Wildcards (\`'*'\`) are **not allowed** in \`dependsOn\`
+- The function returns the value directly (no \`responseExpression\` needed)
+- Functions handle their own I/O (no HttpClient provided)
+- Requests are automatically debounced and cancelled (switchMap)
+- Errors are caught and logged (previous value retained)
+- Array fields (\`items.$.rate\`) are NOT supported
+- Works with \`stopOnUserOverride\` and \`condition\`
+
 ## Stop on User Override
 
 When \`stopOnUserOverride: true\`, the derivation stops running after the user manually edits the target field:
@@ -2025,6 +2074,45 @@ condition: {
 - \`cacheDurationMs\` (optional, default \`30000\`): TTL for cached responses
 
 **Important:** HTTP conditions are resolved asynchronously via signals. They cannot be used inside \`and\`/\`or\` composites (will return \`false\` with a warning). Use them as standalone conditions.
+
+## Async Conditions (Custom Async Functions)
+
+Use \`type: 'async'\` to determine field state based on a registered async function:
+
+\`\`\`typescript
+// Check permission via custom service
+condition: {
+  type: 'async',
+  asyncFunctionName: 'checkPermission',
+  pendingValue: false,  // visible while loading
+  debounceMs: 500
+}
+\`\`\`
+
+Register the function in \`customFnConfig.asyncConditions\`:
+
+\`\`\`typescript
+customFnConfig: {
+  asyncConditions: {
+    checkPermission: async (context) => {
+      const response = await fetch(\`/api/permissions?role=\${context.formValue.role}\`);
+      const data = await response.json();
+      return data.canEdit;
+    },
+    // Observable-based alternative
+    hasFeatureFlag: (context) => {
+      return featureService.isEnabled('advancedMode').pipe(map(r => r.enabled));
+    },
+  }
+}
+\`\`\`
+
+**Properties:**
+- \`asyncFunctionName\` (required): Name of the registered async condition function
+- \`pendingValue\` (optional, default \`false\`): Value returned while async resolution is pending
+- \`debounceMs\` (optional, default \`300\`): Debounce for re-evaluation
+
+**Important:** Async conditions are resolved asynchronously via signals. They cannot be used inside \`and\`/\`or\` composites (will return \`false\` with a warning). Use them as standalone conditions.
 
 ## Button-Only Conditions
 

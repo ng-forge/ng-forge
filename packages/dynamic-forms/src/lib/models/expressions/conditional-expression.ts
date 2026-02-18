@@ -115,6 +115,40 @@ export interface HttpCondition {
 }
 
 /**
+ * Condition that evaluates based on a registered async function.
+ *
+ * The function is resolved reactively — when dependent form values change,
+ * the function is re-evaluated (with debouncing). The result is cached per
+ * evaluation to avoid redundant calls.
+ *
+ * Since `LogicFn` must return `boolean` synchronously, this condition uses
+ * a signal-based async resolution pattern internally.
+ *
+ * @public
+ */
+export interface AsyncCondition {
+  type: 'async';
+  /** Name of the registered async condition function */
+  asyncFunctionName: string;
+  /**
+   * Value to return while async resolution is pending.
+   *
+   * Choose based on the logic type and desired UX:
+   * - For `hidden`: `false` = visible while loading, `true` = hidden while loading
+   * - For `disabled`: `false` = enabled while loading, `true` = disabled while loading
+   * - For `required`: `false` = optional while loading, `true` = required while loading
+   *
+   * @default false
+   */
+  pendingValue?: boolean;
+  /**
+   * Debounce ms for re-evaluation.
+   * @default 300
+   */
+  debounceMs?: number;
+}
+
+/**
  * Logical AND — all sub-conditions must be true.
  *
  * @public
@@ -150,5 +184,6 @@ export type ConditionalExpression =
   | CustomCondition
   | JavascriptCondition
   | HttpCondition
+  | AsyncCondition
   | AndCondition
   | OrCondition;

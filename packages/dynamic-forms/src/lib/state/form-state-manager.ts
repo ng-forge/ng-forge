@@ -873,6 +873,13 @@ export class FormStateManager<
       this.functionRegistry.setPropertyDerivationFunctions(customFnConfig.propertyDerivations);
     }
 
+    if (customFnConfig.asyncDerivations) {
+      this.functionRegistry.setAsyncDerivationFunctions(customFnConfig.asyncDerivations);
+    }
+    if (customFnConfig.asyncConditions) {
+      this.functionRegistry.setAsyncConditionFunctions(customFnConfig.asyncConditions);
+    }
+
     this.functionRegistry.setValidators(customFnConfig.validators);
     this.functionRegistry.setAsyncValidators(customFnConfig.asyncValidators);
 

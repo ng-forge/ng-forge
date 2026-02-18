@@ -29,6 +29,7 @@ import {
 import { HTTP_CONDITION_CACHE, HttpConditionCache } from '../core/http/http-condition-cache';
 import { LogicFunctionCacheService } from '../core/expressions/logic-function-cache.service';
 import { HttpConditionFunctionCacheService } from '../core/expressions/http-condition-function-cache.service';
+import { AsyncConditionFunctionCacheService } from '../core/expressions/async-condition-function-cache.service';
 import { DynamicValueFunctionCacheService } from '../core/values/dynamic-value-function-cache.service';
 import {
   createPropertyDerivationOrchestrator,
@@ -105,6 +106,7 @@ export function provideDynamicFormDI(): Provider[] {
     { provide: HTTP_CONDITION_CACHE, useFactory: () => new HttpConditionCache(100) },
     LogicFunctionCacheService,
     HttpConditionFunctionCacheService,
+    AsyncConditionFunctionCacheService,
     DynamicValueFunctionCacheService,
     { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
     {

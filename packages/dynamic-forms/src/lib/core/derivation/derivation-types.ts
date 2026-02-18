@@ -66,10 +66,18 @@ export interface DerivationEntry {
   /**
    * HTTP request configuration for server-driven derivations.
    *
-   * Mutually exclusive with `value`, `expression`, and `functionName`.
+   * Mutually exclusive with `value`, `expression`, `functionName`, and `asyncFunctionName`.
    * Processed asynchronously in a dedicated RxJS stream, not in the sync loop.
    */
   http?: HttpRequestConfig;
+
+  /**
+   * Name of a registered async derivation function.
+   *
+   * Mutually exclusive with `value`, `expression`, `functionName`, and `http`.
+   * Processed asynchronously in a dedicated RxJS stream, not in the sync loop.
+   */
+  asyncFunctionName?: string;
 
   /**
    * Expression to extract the derived value from an HTTP response.

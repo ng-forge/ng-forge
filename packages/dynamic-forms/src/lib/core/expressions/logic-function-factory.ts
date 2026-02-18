@@ -9,21 +9,23 @@ import { FieldContextRegistryService } from '../registry/field-context-registry.
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { evaluateCondition } from './condition-evaluator';
 import { createHttpConditionLogicFunction } from './http-condition-logic-function';
+import { createAsyncConditionLogicFunction } from './async-condition-logic-function';
 import { LogicFunctionCacheService } from './logic-function-cache.service';
 import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
 
 /**
- * Recursively validates that HTTP conditions are not nested inside and/or composites.
- * HTTP conditions require async resolution via `createHttpConditionLogicFunction()` and
- * cannot be evaluated synchronously inside composite conditions.
+ * Recursively validates that HTTP/async conditions are not nested inside and/or composites.
+ * These conditions require async resolution and cannot be evaluated synchronously
+ * inside composite conditions.
  */
 function validateNoNestedHttpConditions(expression: ConditionalExpression): void {
   if (expression.type === 'and' || expression.type === 'or') {
     for (const sub of expression.conditions) {
-      if (sub.type === 'http') {
+      if (sub.type === 'http' || sub.type === 'async') {
+        const label = sub.type === 'http' ? 'HTTP' : 'Async';
         throw new DynamicFormError(
-          `HTTP conditions cannot be nested inside '${expression.type}' composites. ` +
-            `Move the HTTP condition to a separate logic entry on the field.`,
+          `${label} conditions cannot be nested inside '${expression.type}' composites. ` +
+            `Move the ${label} condition to a separate logic entry on the field.`,
         );
       }
       validateNoNestedHttpConditions(sub);
@@ -47,6 +49,11 @@ function validateNoNestedHttpConditions(expression: ConditionalExpression): void
  * @returns A LogicFn that evaluates the condition in the context of a field
  */
 export function createLogicFunction<TValue>(expression: ConditionalExpression): LogicFn<TValue, boolean> {
+  // Async conditions handle their own debouncing and async resolution
+  if (expression?.type === 'async') {
+    return createAsyncConditionLogicFunction(expression);
+  }
+
   // HTTP conditions handle their own debouncing and async resolution
   if (expression?.type === 'http') {
     return createHttpConditionLogicFunction(expression);
@@ -96,6 +103,11 @@ export function createLogicFunction<TValue>(expression: ConditionalExpression): 
  * @returns A LogicFn that evaluates the condition with debouncing
  */
 export function createDebouncedLogicFunction<TValue>(expression: ConditionalExpression, debounceMs: number): LogicFn<TValue, boolean> {
+  // Async conditions handle their own debouncing via condition.debounceMs
+  if (expression?.type === 'async') {
+    return createAsyncConditionLogicFunction(expression);
+  }
+
   // HTTP conditions handle their own debouncing via condition.http.debounceMs
   if (expression?.type === 'http') {
     return createHttpConditionLogicFunction(expression);

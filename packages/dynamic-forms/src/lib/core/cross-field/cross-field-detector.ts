@@ -100,6 +100,11 @@ export function isCrossFieldExpression(
       return true;
     }
 
+    case 'async':
+      // Async conditions create their own toObservable → toSignal pipeline
+      // and manage reactivity independently — not cross-field in the sync graph
+      return false;
+
     case 'and':
     case 'or':
       // Recursively check nested conditions, passing context through
@@ -148,6 +153,10 @@ export function extractExpressionDependencies(expr: ConditionalExpression | bool
     case 'custom':
       // Custom functions have full form access - conservative approach
       deps.add('*');
+      break;
+
+    case 'async':
+      // Async conditions manage their own reactivity — no auto-extractable dependencies
       break;
 
     case 'and':

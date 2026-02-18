@@ -4,6 +4,7 @@ import { NarrowFields, RegisteredFieldTypes } from './registry/field-registry';
 import { SchemaDefinition } from './schemas/schema-definition';
 import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../core/validation/validator-types';
 import { CustomFunction } from '../core/expressions/custom-function-types';
+import type { AsyncConditionFunction, AsyncDerivationFunction } from '../core/expressions/async-custom-function-types';
 import { ValidationMessages } from './validation-types';
 import { SubmissionConfig } from './submission-config';
 import type { FormSchema } from '@ng-forge/dynamic-forms/schema';
@@ -430,6 +431,62 @@ export interface CustomFnConfig {
    * ```
    */
   propertyDerivations?: Record<string, CustomFunction>;
+
+  /**
+   * Async derivation functions for asynchronous value derivation logic.
+   *
+   * These functions perform asynchronous operations (service calls, complex pipelines)
+   * and return the derived value via a Promise or Observable. They are called when a
+   * `DerivationLogicConfig` references them by `asyncFunctionName`.
+   *
+   * Async derivation functions:
+   * - Receive an `EvaluationContext` with access to `formValue`
+   * - Return a Promise or Observable of the value to set on the target field
+   * - Handle their own I/O (no HttpClient provided — use injected services)
+   * - Require explicit `dependsOn` to avoid triggering on every form change
+   *
+   * @example
+   * ```typescript
+   * asyncDerivations: {
+   *   fetchSuggestedPrice: async (context) => {
+   *     const response = await fetch(`/api/price?product=${context.formValue.productId}`);
+   *     const data = await response.json();
+   *     return data.suggestedPrice;
+   *   },
+   *   lookupAddress: (context) => {
+   *     return addressService.lookup(context.formValue.zipCode).pipe(
+   *       map(result => result.formattedAddress)
+   *     );
+   *   },
+   * }
+   * ```
+   */
+  asyncDerivations?: Record<string, AsyncDerivationFunction>;
+
+  /**
+   * Async condition functions for asynchronous field state logic.
+   *
+   * These functions perform asynchronous operations and return a boolean
+   * indicating whether the condition is met. They are referenced by
+   * `asyncFunctionName` in `AsyncCondition` expressions.
+   *
+   * Async condition functions:
+   * - Receive an `EvaluationContext` with access to `formValue`
+   * - Return a Promise or Observable of boolean
+   * - Handle their own I/O (use injected services)
+   *
+   * @example
+   * ```typescript
+   * asyncConditions: {
+   *   checkPermission: async (context) => {
+   *     const response = await fetch(`/api/permissions?role=${context.formValue.role}`);
+   *     const data = await response.json();
+   *     return data.canEdit;
+   *   },
+   * }
+   * ```
+   */
+  asyncConditions?: Record<string, AsyncConditionFunction>;
 
   /**
    * Custom validators using Angular's public FieldContext API
