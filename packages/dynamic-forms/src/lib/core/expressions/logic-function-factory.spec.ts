@@ -416,6 +416,49 @@ describe('logic-function-factory', () => {
       });
     });
 
+    describe('Async condition nested validation', () => {
+      it('should throw when async condition is nested inside and composite', () => {
+        const expression: ConditionalExpression = {
+          type: 'and',
+          conditions: [
+            { type: 'fieldValue', fieldPath: 'username', operator: 'equals', value: 'test' },
+            { type: 'async', asyncFunctionName: 'checkPermission' },
+          ],
+        };
+
+        expect(() => runLogicFunctionTest(expression, 'test')).toThrowError(/Async conditions cannot be nested inside 'and' composites/);
+      });
+
+      it('should throw when async condition is nested inside or composite', () => {
+        const expression: ConditionalExpression = {
+          type: 'or',
+          conditions: [
+            { type: 'fieldValue', fieldPath: 'username', operator: 'equals', value: 'test' },
+            { type: 'async', asyncFunctionName: 'checkPermission' },
+          ],
+        };
+
+        expect(() => runLogicFunctionTest(expression, 'test')).toThrowError(/Async conditions cannot be nested inside 'or' composites/);
+      });
+
+      it('should throw when async condition is deeply nested inside composites', () => {
+        const expression: ConditionalExpression = {
+          type: 'and',
+          conditions: [
+            {
+              type: 'or',
+              conditions: [
+                { type: 'fieldValue', fieldPath: 'a', operator: 'equals', value: 1 },
+                { type: 'async', asyncFunctionName: 'checkPermission' },
+              ],
+            },
+          ],
+        };
+
+        expect(() => runLogicFunctionTest(expression, 'test')).toThrowError(/Async conditions cannot be nested inside 'or' composites/);
+      });
+    });
+
     describe('edge cases', () => {
       it('should handle invalid expression types', () => {
         const expression: ConditionalExpression = {
