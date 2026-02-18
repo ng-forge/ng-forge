@@ -348,6 +348,103 @@ describe('createAsyncDerivationStream', () => {
     });
   });
 
+  describe('reEngageOnDependencyChange', () => {
+    it('should re-engage async derivation when dependency changes after user override', () => {
+      const { form, values, dirtyStates } = createMockForm({ productId: 'abc', price: 0 });
+      const formValueSignal = signal<Record<string, unknown>>({ productId: 'abc', price: 0 });
+
+      const entry = createAsyncEntry('price', {
+        dependsOn: ['productId'],
+        asyncFunctionName: 'fetchValue',
+        stopOnUserOverride: true,
+        reEngageOnDependencyChange: true,
+      });
+
+      const context = createContext(form, formValueSignal);
+      const stream$ = createAsyncDerivationStream(entry, formValue$, context);
+      stream$.subscribe();
+
+      // Initial emission + change → triggers async
+      formValue$.next({ productId: 'abc', price: 0 });
+      formValue$.next({ productId: 'xyz', price: 0 });
+      vi.advanceTimersByTime(300);
+      expect(mockAsyncFn).toHaveBeenCalledTimes(1);
+      expect(values.price).toBe(42);
+
+      // Mark field as dirty (user override)
+      dirtyStates['price'].set(true);
+
+      // Change dependency → should re-engage (clear dirty and fire async)
+      mockAsyncFn.mockReturnValue(of(99));
+      formValue$.next({ productId: 'new', price: 42 });
+      vi.advanceTimersByTime(300);
+      expect(mockAsyncFn).toHaveBeenCalledTimes(2);
+      expect(values.price).toBe(99);
+    });
+  });
+
+  describe('custom debounceMs', () => {
+    it('should respect custom debounceMs value', () => {
+      const { form, values } = createMockForm({ productId: 'abc', price: 0 });
+      const formValueSignal = signal<Record<string, unknown>>({ productId: 'abc', price: 0 });
+
+      const entry = createAsyncEntry('price', {
+        dependsOn: ['productId'],
+        asyncFunctionName: 'fetchValue',
+        debounceMs: 600,
+      });
+
+      const context = createContext(form, formValueSignal);
+      const stream$ = createAsyncDerivationStream(entry, formValue$, context);
+      stream$.subscribe();
+
+      formValue$.next({ productId: 'abc', price: 0 });
+      formValue$.next({ productId: 'xyz', price: 0 });
+
+      // At 300ms (default debounce), should not have fired yet
+      vi.advanceTimersByTime(300);
+      expect(mockAsyncFn).not.toHaveBeenCalled();
+
+      // At 600ms, should fire
+      vi.advanceTimersByTime(300);
+      expect(mockAsyncFn).toHaveBeenCalledTimes(1);
+      expect(values.price).toBe(42);
+    });
+  });
+
+  describe('stream continues after error', () => {
+    it('should continue processing after an async function error', () => {
+      const { form, values } = createMockForm({ productId: 'abc', price: 0 });
+      const formValueSignal = signal<Record<string, unknown>>({ productId: 'abc', price: 0 });
+
+      // First call errors
+      mockAsyncFn.mockReturnValueOnce(throwError(() => new Error('Network error')));
+      // Second call succeeds
+      mockAsyncFn.mockReturnValueOnce(of(99));
+
+      const entry = createAsyncEntry('price', {
+        dependsOn: ['productId'],
+        asyncFunctionName: 'fetchValue',
+      });
+
+      const context = createContext(form, formValueSignal);
+      const stream$ = createAsyncDerivationStream(entry, formValue$, context);
+      stream$.subscribe();
+
+      // First emission → triggers error
+      formValue$.next({ productId: 'abc', price: 0 });
+      formValue$.next({ productId: 'xyz', price: 0 });
+      vi.advanceTimersByTime(300);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Async function failed'));
+
+      // Second emission → should succeed (stream not terminated)
+      formValue$.next({ productId: 'new', price: 0 });
+      vi.advanceTimersByTime(300);
+      expect(mockAsyncFn).toHaveBeenCalledTimes(2);
+      expect(values.price).toBe(99);
+    });
+  });
+
   describe('array field guard', () => {
     it('should return EMPTY for array placeholder paths', () => {
       const { form } = createMockForm({ items: [] });

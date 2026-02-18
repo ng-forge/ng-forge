@@ -147,6 +147,50 @@ describe('createAsyncConditionLogicFunction', () => {
     expect(result).toBe(false);
   });
 
+  it('should reuse signal pair for same FieldContext', () => {
+    functionRegistry.registerAsyncConditionFunction('checkPermission', async () => true);
+
+    const condition: AsyncCondition = {
+      type: 'async',
+      asyncFunctionName: 'checkPermission',
+      pendingValue: false,
+    };
+
+    const [result1, result2] = runInInjectionContext(injector, () => {
+      const fn = createAsyncConditionLogicFunction(condition);
+      const ctx = createMockFieldContext('test');
+      // Call twice with the same context → should return the same pending value
+      const r1 = fn(ctx);
+      const r2 = fn(ctx);
+      return [r1, r2];
+    });
+
+    // Both calls return pendingValue initially (same signal pair reused)
+    expect(result1).toBe(false);
+    expect(result2).toBe(false);
+  });
+
+  it('should return pendingValue when async function rejects', () => {
+    functionRegistry.registerAsyncConditionFunction('checkPermission', async () => {
+      throw new Error('Simulated rejection');
+    });
+
+    const condition: AsyncCondition = {
+      type: 'async',
+      asyncFunctionName: 'checkPermission',
+      pendingValue: true,
+    };
+
+    const result = runInInjectionContext(injector, () => {
+      const fn = createAsyncConditionLogicFunction(condition);
+      const ctx = createMockFieldContext('test');
+      return fn(ctx);
+    });
+
+    // Returns pendingValue (true) since error has not resolved yet and pending value is used
+    expect(result).toBe(true);
+  });
+
   it('should default pendingValue to false', () => {
     functionRegistry.registerAsyncConditionFunction('checkPermission', async () => true);
 

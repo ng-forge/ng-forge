@@ -13,6 +13,12 @@ export default [
     loadChildren: () => import('./advanced-validation/advanced-validation.routes'),
   },
 
+  // Async Conditions Tests
+  {
+    path: 'async-conditions',
+    loadChildren: () => import('./async-conditions/async-conditions.routes'),
+  },
+
   // Angular Schema Validation Tests
   {
     path: 'angular-schema-validation',
