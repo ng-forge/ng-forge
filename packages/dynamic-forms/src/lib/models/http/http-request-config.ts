@@ -12,6 +12,21 @@ export interface HttpRequestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
   /**
+   * URL path parameters. Keys correspond to `:key` placeholders in the URL.
+   * Values are expressions evaluated by ExpressionParser against the current EvaluationContext.
+   *
+   * @example
+   * ```typescript
+   * {
+   *   url: '/api/users/:userId/orders/:orderId',
+   *   params: { userId: 'formValue.userId', orderId: 'fieldValue' }
+   * }
+   * // With userId=42 and fieldValue='abc' → '/api/users/42/orders/abc'
+   * ```
+   */
+  params?: Record<string, string>;
+
+  /**
    * Query parameters appended to the URL.
    * Values are expressions evaluated by ExpressionParser against the current EvaluationContext.
    */

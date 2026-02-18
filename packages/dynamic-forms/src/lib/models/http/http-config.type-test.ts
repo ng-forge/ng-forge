@@ -14,7 +14,7 @@ import type { ConditionalExpression } from '../expressions/conditional-expressio
 // ============================================================================
 
 describe('HttpRequestConfig - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'url' | 'method' | 'queryParams' | 'body' | 'evaluateBodyExpressions' | 'headers';
+  type ExpectedKeys = 'url' | 'method' | 'params' | 'queryParams' | 'body' | 'evaluateBodyExpressions' | 'headers';
   type ActualKeys = keyof HttpRequestConfig;
 
   it('should have exactly the expected keys', () => {
@@ -28,9 +28,9 @@ describe('HttpRequestConfig - Exhaustive Whitelist', () => {
   });
 
   describe('optional keys', () => {
-    it('should have method, queryParams, body, evaluateBodyExpressions, and headers as optional', () => {
+    it('should have method, params, queryParams, body, evaluateBodyExpressions, and headers as optional', () => {
       expectTypeOf<OptionalKeys<HttpRequestConfig>>().toEqualTypeOf<
-        'method' | 'queryParams' | 'body' | 'evaluateBodyExpressions' | 'headers'
+        'method' | 'params' | 'queryParams' | 'body' | 'evaluateBodyExpressions' | 'headers'
       >();
     });
   });
@@ -42,6 +42,10 @@ describe('HttpRequestConfig - Exhaustive Whitelist', () => {
 
     it('method should be HTTP method union', () => {
       expectTypeOf<HttpRequestConfig['method']>().toEqualTypeOf<'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | undefined>();
+    });
+
+    it('params should be Record<string, string>', () => {
+      expectTypeOf<HttpRequestConfig['params']>().toEqualTypeOf<Record<string, string> | undefined>();
     });
 
     it('queryParams should be Record<string, string>', () => {
@@ -107,10 +111,30 @@ describe('HttpRequestConfig - Usage Examples', () => {
     expectTypeOf(config.headers).toMatchTypeOf<Record<string, string>>();
   });
 
+  it('should accept config with path params', () => {
+    const config = {
+      url: '/api/users/:userId/orders/:orderId',
+      params: { userId: 'formValue.userId', orderId: 'fieldValue' },
+    } as const satisfies HttpRequestConfig;
+
+    expectTypeOf(config.params).toMatchTypeOf<Record<string, string>>();
+  });
+
+  it('should accept config with path params and query params combined', () => {
+    const config = {
+      url: '/api/users/:userId',
+      params: { userId: 'formValue.userId' },
+      queryParams: { status: "'active'" },
+    } as const satisfies HttpRequestConfig;
+
+    expectTypeOf(config).toMatchTypeOf<HttpRequestConfig>();
+  });
+
   it('should accept full config with all properties', () => {
     const config = {
-      url: '/api/validate',
+      url: '/api/users/:userId',
       method: 'PUT',
+      params: { userId: 'formValue.userId' },
       queryParams: { id: 'formValue.id' },
       body: { data: 'fieldValue' },
       evaluateBodyExpressions: true,

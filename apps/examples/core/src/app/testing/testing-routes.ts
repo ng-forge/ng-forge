@@ -85,6 +85,12 @@ export default [
     loadChildren: () => import('./http-conditions/http-conditions.routes'),
   },
 
+  // HTTP Path Params Tests
+  {
+    path: 'http-path-params',
+    loadChildren: () => import('./http-path-params/http-path-params.routes'),
+  },
+
   // Expression-Based Logic Tests
   {
     path: 'expression-based-logic',
