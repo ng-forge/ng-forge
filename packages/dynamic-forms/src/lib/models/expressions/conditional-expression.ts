@@ -55,22 +55,22 @@ export interface FormValueCondition {
  *
  * Register functions via `customFnConfig.customFunctions`.
  *
- * @public
+ * @internal
  */
-export interface CustomConditionNew {
+interface CustomConditionNew {
   type: 'custom';
   /** Name of the registered custom function to invoke */
   functionName: string;
 }
 
 /**
- * @deprecated Use `CustomConditionNew` with `functionName` instead.
+ * @deprecated Use `CustomCondition` with `functionName` instead.
  * The `expression` field was misnamed — it holds a function registry key, not a JS expression.
  * Will be removed in a future minor version.
  *
- * @public
+ * @internal
  */
-export interface CustomConditionDeprecated {
+interface CustomConditionDeprecated {
   type: 'custom';
   /**
    * @deprecated Use `functionName` instead. Will be removed in a future minor version.
