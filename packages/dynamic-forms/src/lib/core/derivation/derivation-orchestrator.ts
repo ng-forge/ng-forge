@@ -331,7 +331,7 @@ export class DerivationOrchestrator {
         // Validate HttpClient availability
         if (!this.httpClient) {
           this.logger.error(
-            '[HTTP Derivation] HttpClient is not available. ' + 'Ensure provideHttpClient() is included in your application providers.',
+            'HTTP Derivation - HttpClient is not available. ' + 'Ensure provideHttpClient() is included in your application providers.',
           );
           return;
         }
@@ -358,7 +358,7 @@ export class DerivationOrchestrator {
 
           this.httpSubscriptions.push(
             stream.subscribe({
-              error: (err) => this.logger.error(`[HTTP Derivation] Stream error for '${entry.fieldKey}'`, err),
+              error: (err) => this.logger.error(`HTTP Derivation - Stream error for '${entry.fieldKey}'`, err),
             }),
           );
         }

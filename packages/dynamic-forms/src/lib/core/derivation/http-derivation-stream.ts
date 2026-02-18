@@ -50,7 +50,7 @@ export interface HttpDerivationStreamContext {
   warningTracker?: DerivationWarningTracker;
 }
 
-const LOG_PREFIX = '[HTTP Derivation]';
+const LOG_PREFIX = 'HTTP Derivation -';
 const DEFAULT_HTTP_DEBOUNCE_MS = 300;
 
 /**
