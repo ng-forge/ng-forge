@@ -15,7 +15,7 @@ env:
 
 jobs:
   setup:
-    name: Setup
+    name: Setup & Checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -36,33 +36,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Cache node_modules
-        uses: actions/cache/save@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-
-      - name: Cache Playwright browsers
-        uses: actions/cache/save@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
-
-  checks:
-    name: Checks
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: setup
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Node and restore cache
-        uses: ./.github/actions/setup-node-restore
-        with:
-          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
-
       - name: Check formatting
         run: |
           echo "Checking code formatting with Prettier..."
@@ -81,6 +54,18 @@ jobs:
             exit 1
           }
           echo "✅ Dependency graph is valid"
+
+      - name: Cache node_modules
+        uses: actions/cache/save@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+      - name: Cache Playwright browsers
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
 
   build:
     name: Build & Verify
@@ -136,39 +121,8 @@ jobs:
             dist/packages/dynamic-form-mcp
           key: build-${{ github.sha }}
 
-  quality:
-    name: Lint
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [setup, build]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Node and restore cache
-        uses: ./.github/actions/setup-node-restore
-        with:
-          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
-
-      - name: Restore build artifacts
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            dist/packages/dynamic-forms
-            dist/packages/dynamic-forms-material
-            dist/packages/dynamic-forms-bootstrap
-            dist/packages/dynamic-forms-ionic
-            dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-form-mcp
-          key: build-${{ github.sha }}
-          fail-on-cache-miss: true
-
-      - name: Lint all projects
-        run: pnpm nx run-many -t lint --parallel=3
-
-  test:
-    name: Unit Tests
+  lint-and-test:
+    name: Lint & Test
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [setup, build]
@@ -201,6 +155,9 @@ jobs:
             dist/packages/dynamic-form-mcp
           key: build-${{ github.sha }}
           fail-on-cache-miss: true
+
+      - name: Lint all projects
+        run: pnpm nx run-many -t lint --parallel=3
 
       - name: Run tests
         run: pnpm nx run-many -t test --parallel=3 --configuration=ci --coverage
@@ -264,7 +221,7 @@ jobs:
 
   mcp-registry:
     name: MCP Registry Check
-    needs: [setup, build]
+    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -302,7 +259,7 @@ jobs:
     name: E2E Tests (${{ matrix.app }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [quality, test, build-apps]
+    needs: [lint-and-test, build-apps]
     strategy:
       fail-fast: false
       matrix:
@@ -346,7 +303,7 @@ jobs:
   ci-success:
     name: CI Complete
     if: always()
-    needs: [checks, build, quality, test, mcp-registry, build-apps, e2e]
+    needs: [build, lint-and-test, mcp-registry, build-apps, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

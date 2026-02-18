@@ -33,7 +33,7 @@ jobs:
           fi
 
   setup:
-    name: Setup
+    name: Setup & Checks
     needs: should-run
     if: needs.should-run.outputs.should-skip != 'true'
     runs-on: ubuntu-latest
@@ -41,6 +41,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Fetch base branch for affected detection
+        run: git fetch origin main:main
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -55,38 +60,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Cache node_modules
-        uses: actions/cache/save@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-
-      - name: Cache Playwright browsers
-        uses: actions/cache/save@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
-
-  checks:
-    name: Checks
-    needs: setup
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Fetch base branch for affected detection
-        run: git fetch origin main:main
-
-      - name: Setup Node and restore cache
-        uses: ./.github/actions/setup-node-restore
-        with:
-          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
       - name: Validate PR title
         run: |
@@ -122,6 +95,18 @@ jobs:
           echo ""
           echo "Affected projects and their dependents:"
           pnpm nx show projects --affected --base=origin/main --with-target=build || true
+
+      - name: Cache node_modules
+        uses: actions/cache/save@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+      - name: Cache Playwright browsers
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
 
   build:
     name: Build & Verify
@@ -186,43 +171,8 @@ jobs:
             dist/packages/dynamic-form-mcp
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
-  quality:
-    name: Lint
-    needs: [setup, build]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Fetch base branch for affected detection
-        run: git fetch origin main:main
-
-      - name: Setup Node and restore cache
-        uses: ./.github/actions/setup-node-restore
-        with:
-          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
-
-      - name: Restore build artifacts
-        uses: actions/cache@v5
-        with:
-          path: |
-            dist/packages/dynamic-forms
-            dist/packages/dynamic-forms-material
-            dist/packages/dynamic-forms-bootstrap
-            dist/packages/dynamic-forms-ionic
-            dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-form-mcp
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-
-      - name: Lint affected projects
-        run: pnpm nx affected -t lint --base=origin/main
-
-  test:
-    name: Unit Tests
+  lint-and-test:
+    name: Lint & Test
     needs: [setup, build]
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -259,6 +209,9 @@ jobs:
             dist/packages/dynamic-forms-primeng
             dist/packages/dynamic-form-mcp
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
+
+      - name: Lint affected projects
+        run: pnpm nx affected -t lint --base=origin/main
 
       - name: Test affected projects
         run: pnpm nx affected -t test --base=origin/main --configuration=ci --coverage
@@ -364,7 +317,7 @@ jobs:
 
   mcp-registry:
     name: MCP Registry Check
-    needs: [setup, build]
+    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -400,7 +353,7 @@ jobs:
 
   e2e:
     name: E2E Tests (${{ matrix.app }})
-    needs: [quality, test, build-apps]
+    needs: [lint-and-test, build-apps]
     if: needs.build-apps.outputs.has-e2e == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -435,7 +388,7 @@ jobs:
   ci-success:
     name: PR Check Complete
     if: always()
-    needs: [should-run, setup, checks, build, quality, test, mcp-registry, build-apps, e2e]
+    needs: [should-run, setup, build, lint-and-test, mcp-registry, build-apps, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -443,5 +396,5 @@ jobs:
         uses: re-actors/alls-green@release/v1
         with:
           # e2e may be skipped if no E2E apps are affected
-          allowed-skips: setup, checks, build, quality, test, mcp-registry, build-apps, e2e
+          allowed-skips: setup, build, lint-and-test, mcp-registry, build-apps, e2e
           jobs: ${{ toJSON(needs) }}
