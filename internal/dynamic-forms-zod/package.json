@@ -1,5 +1,6 @@
 {
   "name": "@ng-forge/dynamic-forms-zod",
+  "private": true,
   "version": "0.4.0",
   "description": "Zod schemas for validating @ng-forge/dynamic-forms configurations.",
   "type": "module",
