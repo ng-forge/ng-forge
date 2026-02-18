@@ -10,6 +10,9 @@ import { AsyncCustomValidator, HttpCustomValidator } from './validator-types';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { ConsoleLogger } from '../../providers/features/logger/console-logger';
 import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
+import { LogicFunctionCacheService } from '../expressions/logic-function-cache.service';
+import { HttpConditionFunctionCacheService } from '../expressions/http-condition-function-cache.service';
+import { DynamicValueFunctionCacheService } from '../values/dynamic-value-function-cache.service';
 
 // Helper type for mock ResourceRef
 type MockResourceRef<T> = {
@@ -36,6 +39,9 @@ describe('Async and HTTP Validator Integration', () => {
         // Provide ConsoleLogger to enable logging in tests
         { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
         { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
+        LogicFunctionCacheService,
+        HttpConditionFunctionCacheService,
+        DynamicValueFunctionCacheService,
       ],
     });
 

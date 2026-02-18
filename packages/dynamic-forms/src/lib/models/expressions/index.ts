@@ -5,6 +5,7 @@ export type {
   FormValueCondition,
   CustomCondition,
   JavascriptCondition,
+  HttpCondition,
   AndCondition,
   OrCondition,
 } from './conditional-expression';

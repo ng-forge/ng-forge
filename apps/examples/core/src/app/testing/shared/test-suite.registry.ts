@@ -13,6 +13,7 @@ import { demoScenariosSuite } from '../demo-scenarios/demo-scenarios.suite';
 import { derivationLogicSuite } from '../derivation-logic/derivation-logic.suite';
 import { essentialTestsSuite } from '../essential-tests/essential-tests.suite';
 import { expressionBasedLogicSuite } from '../expression-based-logic/expression-based-logic.suite';
+import { httpConditionsSuite } from '../http-conditions/http-conditions.suite';
 import { formResetClearSuite } from '../form-reset-clear/form-reset-clear.suite';
 import { multiPageNavigationSuite } from '../multi-page-navigation/multi-page-navigation.suite';
 import { performanceSuite } from '../performance/performance.suite';
@@ -39,6 +40,7 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   derivationLogicSuite,
   essentialTestsSuite,
   expressionBasedLogicSuite,
+  httpConditionsSuite,
   formResetClearSuite,
   multiPageNavigationSuite,
   performanceSuite,

@@ -111,7 +111,14 @@ export type { HttpRequestConfig, HttpValidationResponseMapping } from './models'
 export type { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from './core/validation';
 
 // Logic & Expression Types
-export type { ConditionalExpression, EvaluationContext, LogicConfig, StateLogicConfig, PropertyDerivationLogicConfig } from './models';
+export type {
+  ConditionalExpression,
+  HttpCondition,
+  EvaluationContext,
+  LogicConfig,
+  StateLogicConfig,
+  PropertyDerivationLogicConfig,
+} from './models';
 export { isPropertyDerivationLogicConfig } from './models';
 
 // Schema Types

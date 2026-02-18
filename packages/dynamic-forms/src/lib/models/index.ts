@@ -46,6 +46,7 @@ export type {
   FormValueCondition,
   CustomCondition,
   JavascriptCondition,
+  HttpCondition,
   AndCondition,
   OrCondition,
   EvaluationContext,

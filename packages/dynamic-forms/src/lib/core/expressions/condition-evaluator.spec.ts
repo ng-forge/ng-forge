@@ -537,6 +537,36 @@ describe('condition-evaluator', () => {
       });
     });
 
+    describe('http type (synchronous fallback)', () => {
+      it('should return false and log warning for HTTP conditions', () => {
+        const expression: ConditionalExpression = {
+          type: 'http',
+          http: { url: '/api/check' },
+        };
+
+        const result = evaluateCondition(expression, mockContext);
+
+        expect(result).toBe(false);
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('HTTP conditions are resolved asynchronously'));
+      });
+
+      it('should return false for HTTP condition inside and composite', () => {
+        const expression: ConditionalExpression = {
+          type: 'and',
+          conditions: [
+            { type: 'fieldValue', fieldPath: 'name', operator: 'equals', value: 'John' },
+            { type: 'http', http: { url: '/api/check' } },
+          ],
+        };
+
+        const result = evaluateCondition(expression, mockContext);
+
+        // AND short-circuits: first condition is true, HTTP returns false → false
+        expect(result).toBe(false);
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('HTTP conditions are resolved asynchronously'));
+      });
+    });
+
     describe('invalid type', () => {
       it('should return false for unknown expression types', () => {
         const expression: ConditionalExpression = {

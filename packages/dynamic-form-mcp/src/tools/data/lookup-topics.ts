@@ -1929,7 +1929,8 @@ const config = { fields: [...] } as const satisfies FormConfig;
   conditions: {
     brief: `**Operators:** equals, notEquals, greater, less, greaterOrEqual, lessOrEqual, contains, startsWith, endsWith, matches
 **Combine:** \`{ type: 'and', conditions: [...] }\` or \`{ type: 'or', conditions: [...] }\`
-**JavaScript:** \`{ type: 'javascript', expression: 'formValue.age >= 18' }\``,
+**JavaScript:** \`{ type: 'javascript', expression: 'formValue.age >= 18' }\`
+**HTTP:** \`{ type: 'http', http: { url: '/api/check', queryParams: { field: 'formValue.x' } }, responseExpression: 'response.allowed' }\``,
 
     full: `# Condition Operators & Patterns
 
@@ -1985,6 +1986,45 @@ condition: {
   expression: '(formValue.selectedRoles || []).includes("admin")'
 }
 \`\`\`
+
+## HTTP Conditions (Server-Driven)
+
+Use \`type: 'http'\` to determine field state based on HTTP responses:
+
+\`\`\`typescript
+// Check if user has permission (GET)
+condition: {
+  type: 'http',
+  http: {
+    url: '/api/permissions/check',
+    queryParams: { role: 'formValue.role' },
+    debounceMs: 500
+  },
+  responseExpression: 'response.allowed',
+  pendingValue: false,  // visible while loading
+  cacheDurationMs: 60000
+}
+
+// Check feature flag (POST)
+condition: {
+  type: 'http',
+  http: {
+    url: '/api/feature-flags',
+    method: 'POST',
+    body: { feature: 'advancedMode' },
+    evaluateBodyExpressions: false
+  },
+  responseExpression: 'response.enabled'
+}
+\`\`\`
+
+**Properties:**
+- \`http\` (required): \`HttpRequestConfig\` — URL, method, queryParams, body, headers, debounceMs
+- \`responseExpression\` (optional): Expression to extract boolean from response (scope: \`{ response }\`). When omitted, \`!!response\` is used
+- \`pendingValue\` (optional, default \`false\`): Value returned while HTTP request is in-flight
+- \`cacheDurationMs\` (optional, default \`30000\`): TTL for cached responses
+
+**Important:** HTTP conditions are resolved asynchronously via signals. They cannot be used inside \`and\`/\`or\` composites (will return \`false\` with a warning). Use them as standalone conditions.
 
 ## Button-Only Conditions
 

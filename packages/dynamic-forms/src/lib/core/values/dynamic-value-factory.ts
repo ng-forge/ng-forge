@@ -3,13 +3,7 @@ import { FieldContext, LogicFn } from '@angular/forms/signals';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { ExpressionParser } from '../expressions/parser/expression-parser';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-
-/**
- * Cache for memoized dynamic value functions, keyed by service instance.
- * Uses WeakMap to automatically clean up when service is garbage collected.
- * Inner Map is keyed by expression string.
- */
-const dynamicValueFunctionCache = new WeakMap<FieldContextRegistryService, Map<string, LogicFn<unknown, unknown>>>();
+import { DynamicValueFunctionCacheService } from './dynamic-value-function-cache.service';
 
 /**
  * Create a dynamic value function from an expression string.
@@ -23,16 +17,10 @@ export function createDynamicValueFunction<TValue, TReturn>(expression: string):
   // This captures the service instance in the closure
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const logger = inject(DynamicFormLogger);
-
-  // Get or create cache for this injection context
-  let contextCache = dynamicValueFunctionCache.get(fieldContextRegistry);
-  if (!contextCache) {
-    contextCache = new Map<string, LogicFn<unknown, unknown>>();
-    dynamicValueFunctionCache.set(fieldContextRegistry, contextCache);
-  }
+  const cacheService = inject(DynamicValueFunctionCacheService);
 
   // Check cache first
-  const cached = contextCache.get(expression);
+  const cached = cacheService.dynamicValueFunctionCache.get(expression);
   if (cached) {
     return cached as LogicFn<TValue, TReturn>;
   }
@@ -51,6 +39,6 @@ export function createDynamicValueFunction<TValue, TReturn>(expression: string):
   };
 
   // Cache the function
-  contextCache.set(expression, fn as LogicFn<unknown, unknown>);
+  cacheService.dynamicValueFunctionCache.set(expression, fn as LogicFn<unknown, unknown>);
   return fn;
 }
