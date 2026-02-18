@@ -48,8 +48,8 @@ function traverseFields(fields: FieldDef<unknown>[], collection: CrossFieldColle
     if (hasChildFields(field)) {
       // Groups add their key to the path; page/row are transparent layout containers.
       // Arrays are skipped — items use dynamic indices and are not statically traversable.
-      const isGroup = isGroupField(field) && !!field.key;
-      const childPrefix = isGroup ? (pathPrefix ? `${pathPrefix}.${field.key}` : field.key!) : pathPrefix;
+      const groupKey = isGroupField(field) ? field.key : undefined;
+      const childPrefix = groupKey ? (pathPrefix ? `${pathPrefix}.${groupKey}` : groupKey) : pathPrefix;
       traverseFields(normalizeFieldsArray(field.fields) as FieldDef<unknown>[], collection, childPrefix);
     }
   }

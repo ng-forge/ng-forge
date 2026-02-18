@@ -5,12 +5,12 @@ import { FieldDef } from '../../definitions/base/field-def';
 describe('collectCrossFieldEntries()', () => {
   describe('top-level fields', () => {
     it('stores sourceFieldKey as the simple field key', () => {
-      const fields: FieldDef<unknown>[] = [
+      const fields: FieldDef<any>[] = [
         {
           type: 'input',
           key: 'confirmPassword',
           validators: [{ type: 'custom', expression: 'fieldValue === formValue.password', kind: 'passwordMismatch' }],
-        } as any,
+        },
       ];
 
       const { validators } = collectCrossFieldEntries(fields);
@@ -20,7 +20,7 @@ describe('collectCrossFieldEntries()', () => {
     });
 
     it('collects cross-field logic with simple key', () => {
-      const fields: FieldDef<unknown>[] = [
+      const fields: FieldDef<any>[] = [
         {
           type: 'input',
           key: 'street',
@@ -30,7 +30,7 @@ describe('collectCrossFieldEntries()', () => {
               condition: { type: 'fieldValue', fieldPath: 'country', operator: 'equals', value: 'US' },
             },
           ],
-        } as any,
+        },
       ];
 
       const { logic } = collectCrossFieldEntries(fields);
@@ -42,19 +42,19 @@ describe('collectCrossFieldEntries()', () => {
 
   describe('fields inside a group', () => {
     it('stores sourceFieldKey as dotted path group.field', () => {
-      const fields: FieldDef<unknown>[] = [
+      const fields: FieldDef<any>[] = [
         {
           type: 'group',
           key: 'credentials',
           fields: [
-            { type: 'input', key: 'password' } as any,
+            { type: 'input', key: 'password' },
             {
               type: 'input',
               key: 'confirmPassword',
               validators: [{ type: 'custom', expression: 'fieldValue === formValue.credentials.password', kind: 'passwordMismatch' }],
-            } as any,
+            },
           ],
-        } as any,
+        },
       ];
 
       const { validators } = collectCrossFieldEntries(fields);
@@ -64,7 +64,7 @@ describe('collectCrossFieldEntries()', () => {
     });
 
     it('stores logic sourceFieldKey as dotted path', () => {
-      const fields: FieldDef<unknown>[] = [
+      const fields: FieldDef<any>[] = [
         {
           type: 'group',
           key: 'address',
@@ -78,9 +78,9 @@ describe('collectCrossFieldEntries()', () => {
                   condition: { type: 'fieldValue', fieldPath: 'address.country', operator: 'equals', value: 'US' },
                 },
               ],
-            } as any,
+            },
           ],
-        } as any,
+        },
       ];
 
       const { logic } = collectCrossFieldEntries(fields);
@@ -92,7 +92,7 @@ describe('collectCrossFieldEntries()', () => {
 
   describe('fields inside deeply nested groups', () => {
     it('stores sourceFieldKey as a multi-segment dotted path', () => {
-      const fields: FieldDef<unknown>[] = [
+      const fields: FieldDef<any>[] = [
         {
           type: 'group',
           key: 'outer',
@@ -111,11 +111,11 @@ describe('collectCrossFieldEntries()', () => {
                       kind: 'endBeforeStart',
                     },
                   ],
-                } as any,
+                },
               ],
-            } as any,
+            },
           ],
-        } as any,
+        },
       ];
 
       const { validators } = collectCrossFieldEntries(fields);
@@ -127,7 +127,7 @@ describe('collectCrossFieldEntries()', () => {
 
   describe('page and row containers are transparent', () => {
     it('does not add page key to sourceFieldKey', () => {
-      const fields: FieldDef<unknown>[] = [
+      const fields: FieldDef<any>[] = [
         {
           type: 'page',
           key: 'page1',
@@ -136,9 +136,9 @@ describe('collectCrossFieldEntries()', () => {
               type: 'input',
               key: 'confirmPassword',
               validators: [{ type: 'custom', expression: 'fieldValue === formValue.password', kind: 'passwordMismatch' }],
-            } as any,
+            },
           ],
-        } as any,
+        },
       ];
 
       const { validators } = collectCrossFieldEntries(fields);
@@ -148,7 +148,7 @@ describe('collectCrossFieldEntries()', () => {
     });
 
     it('does not add row key to sourceFieldKey', () => {
-      const fields: FieldDef<unknown>[] = [
+      const fields: FieldDef<any>[] = [
         {
           type: 'row',
           key: 'nameRow',
@@ -157,9 +157,9 @@ describe('collectCrossFieldEntries()', () => {
               type: 'input',
               key: 'confirmPassword',
               validators: [{ type: 'custom', expression: 'fieldValue === formValue.password', kind: 'passwordMismatch' }],
-            } as any,
+            },
           ],
-        } as any,
+        },
       ];
 
       const { validators } = collectCrossFieldEntries(fields);
@@ -169,7 +169,7 @@ describe('collectCrossFieldEntries()', () => {
     });
 
     it('combines group path with transparent row inside group', () => {
-      const fields: FieldDef<unknown>[] = [
+      const fields: FieldDef<any>[] = [
         {
           type: 'group',
           key: 'credentials',
@@ -178,16 +178,16 @@ describe('collectCrossFieldEntries()', () => {
               type: 'row',
               key: 'passwordRow',
               fields: [
-                { type: 'input', key: 'password' } as any,
+                { type: 'input', key: 'password' },
                 {
                   type: 'input',
                   key: 'confirmPassword',
                   validators: [{ type: 'custom', expression: 'fieldValue === formValue.credentials.password', kind: 'passwordMismatch' }],
-                } as any,
+                },
               ],
-            } as any,
+            },
           ],
-        } as any,
+        },
       ];
 
       const { validators } = collectCrossFieldEntries(fields);
@@ -199,7 +199,7 @@ describe('collectCrossFieldEntries()', () => {
 
   describe('array fields are not traversed', () => {
     it('does not recurse into array items', () => {
-      const fields: FieldDef<unknown>[] = [
+      const fields: FieldDef<any>[] = [
         {
           type: 'array',
           key: 'contacts',
@@ -209,10 +209,10 @@ describe('collectCrossFieldEntries()', () => {
                 type: 'input',
                 key: 'email',
                 validators: [{ type: 'custom', expression: 'fieldValue.includes("@")', kind: 'invalidEmail' }],
-              } as any,
+              },
             ],
           ],
-        } as any,
+        },
       ];
 
       const { validators } = collectCrossFieldEntries(fields);
