@@ -18,6 +18,7 @@ Ionic field components for [@ng-forge/dynamic-forms](https://www.npmjs.com/packa
 
 | @ng-forge/dynamic-forms-ionic | @ng-forge/dynamic-forms | Angular       |
 | ----------------------------- | ----------------------- | ------------- |
+| 0.6.x                         | 0.6.x                   | >=21.1.0      |
 | 0.5.x                         | 0.5.x                   | >=21.1.0      |
 | 0.4.x                         | 0.4.x                   | >=21.1.0      |
 | 0.3.x                         | 0.3.x                   | 21.0.7-21.0.x |
