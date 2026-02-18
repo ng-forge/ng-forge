@@ -546,14 +546,15 @@ Evaluate a condition by sending an HTTP request and inspecting the response. The
 
 **`HttpRequestConfig` quick reference:**
 
-| Property                  | Description                                                              |
-| ------------------------- | ------------------------------------------------------------------------ |
-| `url`                     | Request URL                                                              |
-| `method`                  | HTTP method. Defaults to `'GET'`                                         |
-| `queryParams`             | Key/value map. Values are expressions evaluated against form context     |
-| `body`                    | Request body for POST/PUT/PATCH                                          |
-| `evaluateBodyExpressions` | When `true`, top-level `body` string values are evaluated as expressions |
-| `headers`                 | Request headers                                                          |
+| Property                  | Description                                                                         |
+| ------------------------- | ----------------------------------------------------------------------------------- |
+| `url`                     | Request URL. Use `:key` placeholders for path parameters                            |
+| `method`                  | HTTP method. Defaults to `'GET'`                                                    |
+| `params`                  | Path parameters. `:key` placeholders in the URL replaced with evaluated expressions |
+| `queryParams`             | Key/value map. Values are expressions evaluated against form context                |
+| `body`                    | Request body for POST/PUT/PATCH                                                     |
+| `evaluateBodyExpressions` | When `true`, top-level `body` string values are evaluated as expressions            |
+| `headers`                 | Request headers                                                                     |
 
 **HTTP condition on `required` — server-driven required fields:**
 

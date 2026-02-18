@@ -410,7 +410,8 @@ The simplest way to validate against an HTTP endpoint. No function registration 
 
 **Key points:**
 
-- `fieldValue` is available as an expression in `queryParams` and `body` (refers to the current field's value)
+- `fieldValue` is available as an expression in `params`, `queryParams`, and `body` (refers to the current field's value)
+- Use `params` with `:key` URL placeholders for path parameters (e.g. `url: '/api/users/:id'` + `params: { id: 'fieldValue' }`)
 - `validWhen` is evaluated with `{ response }` in scope — truthy means validation passed
 - **Fail-closed:** if the HTTP request errors, the validator returns `{ kind: errorKind }` by default (prevents submission on network failure)
 

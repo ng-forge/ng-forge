@@ -39,12 +39,27 @@ When `currency` changes, a GET request is sent and `response.rate` becomes the n
 
 | Property                  | Type                      | Required | Description                                                                 |
 | ------------------------- | ------------------------- | -------- | --------------------------------------------------------------------------- |
-| `url`                     | `string`                  | Yes      | Request URL                                                                 |
+| `url`                     | `string`                  | Yes      | Request URL. Use `:key` placeholders for path parameters                    |
 | `method`                  | `string`                  | No       | HTTP method. Defaults to `'GET'`                                            |
+| `params`                  | `Record<string, string>`  | No       | Path parameters. Values are expressions evaluated against the form context  |
 | `queryParams`             | `Record<string, string>`  | No       | Query parameters. Values are expressions evaluated against the form context |
 | `body`                    | `Record<string, unknown>` | No       | Request body (for POST/PUT/PATCH)                                           |
 | `evaluateBodyExpressions` | `boolean`                 | No       | When `true`, top-level string values in `body` are treated as expressions   |
 | `headers`                 | `Record<string, string>`  | No       | Request headers                                                             |
+
+### Path Parameters
+
+Use `:key` placeholders in the URL and provide values via `params`. Values are expressions evaluated against the form context, then `encodeURIComponent`-encoded:
+
+```typescript
+http: {
+  url: '/api/users/:userId/orders/:orderId',
+  params: {
+    userId: 'formValue.userId',
+    orderId: 'formValue.orderId',
+  },
+}
+```
 
 ### Query Params as Expressions
 
