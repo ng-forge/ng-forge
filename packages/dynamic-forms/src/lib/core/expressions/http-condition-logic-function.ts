@@ -26,7 +26,7 @@ function extractBoolean(response: unknown, responseExpression: string | undefine
       const result = ExpressionParser.evaluate(responseExpression, { response });
       return !!result;
     } catch (error) {
-      logger.warn(`[Dynamic Forms] Failed to evaluate responseExpression '${responseExpression}':`, error);
+      logger.warn(`Failed to evaluate responseExpression '${responseExpression}':`, error);
       return pendingValue;
     }
   }
@@ -100,7 +100,7 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
                 cache.set(requestKey, value, cacheDurationMs);
               }),
               catchError((error) => {
-                logger.warn('[Dynamic Forms] HTTP condition request failed:', error);
+                logger.warn('HTTP condition request failed:', error);
                 return of(pendingValue);
               }),
             );
