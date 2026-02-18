@@ -32,6 +32,7 @@ import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
 import { DERIVATION_WARNING_TRACKER } from './derivation-warning-tracker';
 import { createHttpDerivationStream } from './http-derivation-stream';
+import { createAsyncDerivationStream } from './async-derivation-stream';
 
 /**
  * Minimal configuration for creating a DerivationOrchestrator.
@@ -84,6 +85,12 @@ export class DerivationOrchestrator {
   /** Identity keys of current HTTP entries for smart teardown comparison */
   private lastHttpEntryKeys: Set<string> | null = null;
 
+  /** Active async function derivation stream subscriptions */
+  private asyncFunctionSubscriptions: Subscription[] = [];
+
+  /** Identity keys of current async entries for smart teardown comparison */
+  private lastAsyncEntryKeys: Set<string> | null = null;
+
   /**
    * Computed signal containing the collected and validated derivations.
    * Returns null if no derivations are defined.
@@ -116,6 +123,7 @@ export class DerivationOrchestrator {
     this.setupOnChangeStream();
     this.setupDebouncedStream();
     this.setupHttpStreams();
+    this.setupAsyncFunctionStreams();
   }
 
   private setupOnChangeStream(): void {
@@ -395,6 +403,88 @@ export class DerivationOrchestrator {
   }
 
   /**
+   * Sets up reactive async function derivation streams that react to collection changes.
+   *
+   * Subscribes to derivationCollection changes and creates per-entry async streams.
+   * Uses smart teardown: only recreates streams when async entries actually change.
+   */
+  private setupAsyncFunctionStreams(): void {
+    toObservable(this.derivationCollection, { injector: this.injector })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((collection) => {
+        const asyncEntries = collection?.entries.filter((entry) => entry.asyncFunctionName) ?? [];
+
+        if (asyncEntries.length === 0) {
+          this.teardownAsyncFunctionStreams();
+          this.lastAsyncEntryKeys = null;
+          return;
+        }
+
+        // Smart teardown: compare entry identity keys to avoid redundant stream recreation
+        const newKeys = this.computeAsyncEntryKeys(asyncEntries);
+        if (this.lastAsyncEntryKeys && this.setsEqual(this.lastAsyncEntryKeys, newKeys)) {
+          return; // No change in async entries — keep existing streams
+        }
+
+        // Tear down previous streams and create new ones
+        this.teardownAsyncFunctionStreams();
+        this.lastAsyncEntryKeys = newKeys;
+
+        const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
+
+        for (const entry of asyncEntries) {
+          const context = {
+            formValue: this.config.formValue,
+            form: this.config.form,
+            logger: this.logger,
+            derivationLogger: this.config.derivationLogger,
+            customFunctions: () => this.functionRegistry.getCustomFunctions(),
+            asyncDerivationFunctions: () => this.functionRegistry.getAsyncDerivationFunctions(),
+            externalData: () => this.resolveExternalData(),
+            warningTracker: this.warningTracker,
+          };
+
+          const stream = createAsyncDerivationStream(entry, formValue$, context).pipe(takeUntilDestroyed(this.destroyRef));
+
+          this.asyncFunctionSubscriptions.push(
+            stream.subscribe({
+              error: (err) => this.logger.error(`Async Derivation - Stream error for '${entry.fieldKey}'`, err),
+            }),
+          );
+        }
+      });
+  }
+
+  /**
+   * Tears down all active async function derivation streams.
+   */
+  private teardownAsyncFunctionStreams(): void {
+    for (const sub of this.asyncFunctionSubscriptions) {
+      sub.unsubscribe();
+    }
+    this.asyncFunctionSubscriptions = [];
+  }
+
+  /**
+   * Computes a set of identity keys for async entries.
+   * Used for smart teardown comparison.
+   */
+  private computeAsyncEntryKeys(entries: DerivationEntry[]): Set<string> {
+    return new Set(
+      entries.map((entry) => {
+        const config = {
+          asyncFunctionName: entry.asyncFunctionName,
+          dependsOn: entry.dependsOn,
+          debounceMs: entry.debounceMs,
+          stopOnUserOverride: entry.stopOnUserOverride,
+          reEngageOnDependencyChange: entry.reEngageOnDependencyChange,
+        };
+        return `${entry.fieldKey}:${JSON.stringify(config, Object.keys(config).sort())}`;
+      }),
+    );
+  }
+
+  /**
    * Gets all unique debounce periods from entries with trigger 'debounced'.
    */
   private getDebouncePeriods(entries: DerivationEntry[]): number[] {
@@ -415,9 +505,13 @@ export class DerivationOrchestrator {
     if (wildcardEntries.length === 0) return;
 
     // Find implicit wildcards (custom functions without explicit dependsOn)
-    // HTTP entries are excluded because they require explicit dependsOn (validated at collection time)
+    // HTTP and async entries are excluded because they require explicit dependsOn (validated at collection time)
     const implicitWildcards = wildcardEntries.filter(
-      (entry) => !entry.http && entry.functionName && (!entry.originalConfig?.dependsOn || entry.originalConfig.dependsOn.length === 0),
+      (entry) =>
+        !entry.http &&
+        !entry.asyncFunctionName &&
+        entry.functionName &&
+        (!entry.originalConfig?.dependsOn || entry.originalConfig.dependsOn.length === 0),
     );
 
     if (implicitWildcards.length > 0) {

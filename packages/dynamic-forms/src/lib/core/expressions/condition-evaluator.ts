@@ -52,6 +52,13 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
       );
       return false;
 
+    case 'async':
+      context.logger.warn(
+        'Async Condition - resolved asynchronously via createAsyncConditionLogicFunction(). ' +
+          'When used inside and/or composites, the async result is not available synchronously. Returning false.',
+      );
+      return false;
+
     default:
       return false;
   }

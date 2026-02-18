@@ -1,9 +1,13 @@
 /**
- * Type-level tests for HttpCondition and ConditionalExpression.
+ * Type-level tests for HttpCondition, AsyncCondition, and ConditionalExpression.
  * This file is never executed — it only needs to compile without errors.
  */
 
-import type { ConditionalExpression, HttpCondition } from './conditional-expression';
+import type { ConditionalExpression, HttpCondition, AsyncCondition } from './conditional-expression';
+
+// ============================================================================
+// HttpCondition tests
+// ============================================================================
 
 // HttpCondition is assignable to ConditionalExpression
 const httpCondition: HttpCondition = {
@@ -55,4 +59,59 @@ const _missingType: HttpCondition = { http: { url: '/api' } };
 // @ts-expect-error — http is required
 const _missingHttp: HttpCondition = { type: 'http' };
 
-void [_asConditional, handleCondition, _requiredOnly, _allProps, _missingType, _missingHttp];
+// ============================================================================
+// AsyncCondition tests
+// ============================================================================
+
+// AsyncCondition is assignable to ConditionalExpression
+const asyncCondition: AsyncCondition = {
+  type: 'async',
+  asyncFunctionName: 'checkPermission',
+};
+const _asyncAsConditional: ConditionalExpression = asyncCondition;
+
+// ConditionalExpression discriminates type: 'async' correctly
+function handleAsyncCondition(expr: ConditionalExpression): void {
+  if (expr.type === 'async') {
+    // Inside this block, expr is narrowed to AsyncCondition
+    const _fnName: string = expr.asyncFunctionName;
+    const _pending: boolean | undefined = expr.pendingValue;
+    const _debounce: number | undefined = expr.debounceMs;
+    void [_fnName, _pending, _debounce];
+  }
+}
+
+// Required properties only
+const _asyncRequiredOnly: AsyncCondition = {
+  type: 'async',
+  asyncFunctionName: 'checkPermission',
+};
+
+// All optional properties
+const _asyncAllProps: AsyncCondition = {
+  type: 'async',
+  asyncFunctionName: 'checkPermission',
+  pendingValue: true,
+  debounceMs: 500,
+};
+
+// @ts-expect-error — type is required
+const _asyncMissingType: AsyncCondition = { asyncFunctionName: 'fn' };
+
+// @ts-expect-error — asyncFunctionName is required
+const _asyncMissingFn: AsyncCondition = { type: 'async' };
+
+void [
+  _asConditional,
+  handleCondition,
+  _requiredOnly,
+  _allProps,
+  _missingType,
+  _missingHttp,
+  _asyncAsConditional,
+  handleAsyncCondition,
+  _asyncRequiredOnly,
+  _asyncAllProps,
+  _asyncMissingType,
+  _asyncMissingFn,
+];

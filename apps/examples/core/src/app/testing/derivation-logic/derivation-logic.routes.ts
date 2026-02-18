@@ -107,6 +107,31 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getDerivationLogicScenario('http-derivation-condition-test') },
   },
+  {
+    path: 'async-derivation',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('async-derivation-test') },
+  },
+  {
+    path: 'async-derivation-error',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('async-derivation-error-test') },
+  },
+  {
+    path: 'async-derivation-stop-override',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('async-derivation-stop-override-test') },
+  },
+  {
+    path: 'async-derivation-re-engage',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('async-derivation-re-engage-test') },
+  },
+  {
+    path: 'async-derivation-condition',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDerivationLogicScenario('async-derivation-condition-test') },
+  },
 ];
 
 export default routes;

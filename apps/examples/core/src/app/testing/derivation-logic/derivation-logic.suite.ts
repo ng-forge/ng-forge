@@ -19,6 +19,11 @@ import { httpDerivationErrorScenario } from './scenarios/http-derivation-error.s
 import { httpDerivationStopOverrideScenario } from './scenarios/http-derivation-stop-override.scenario';
 import { httpDerivationReEngageScenario } from './scenarios/http-derivation-re-engage.scenario';
 import { httpDerivationConditionScenario } from './scenarios/http-derivation-condition.scenario';
+import { asyncDerivationScenario } from './scenarios/async-derivation.scenario';
+import { asyncDerivationErrorScenario } from './scenarios/async-derivation-error.scenario';
+import { asyncDerivationStopOverrideScenario } from './scenarios/async-derivation-stop-override.scenario';
+import { asyncDerivationReEngageScenario } from './scenarios/async-derivation-re-engage.scenario';
+import { asyncDerivationConditionScenario } from './scenarios/async-derivation-condition.scenario';
 
 export const derivationLogicSuite: TestSuite = {
   id: 'derivation-logic',
@@ -46,6 +51,11 @@ export const derivationLogicSuite: TestSuite = {
     httpDerivationStopOverrideScenario,
     httpDerivationReEngageScenario,
     httpDerivationConditionScenario,
+    asyncDerivationScenario,
+    asyncDerivationErrorScenario,
+    asyncDerivationStopOverrideScenario,
+    asyncDerivationReEngageScenario,
+    asyncDerivationConditionScenario,
   ],
 };
 

@@ -1727,4 +1727,276 @@ test.describe('Value Derivation Logic Tests', () => {
       await expect(cityInput).toHaveValue('Springfield');
     });
   });
+
+  test.describe('Async Derivation', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(testUrl('/test/derivation-logic/async-derivation'));
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('should derive price via async function when product changes', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('async-derivation-test');
+      await expect(scenario).toBeVisible();
+
+      const productSelect = scenario.locator('#product');
+      const priceInput = helpers.getInput(scenario, 'price');
+
+      // Select Widget A → fetchPrice returns 9.99
+      await productSelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Widget A")').click();
+      await expect(priceInput).toHaveValue('9.99', { timeout: 5000 });
+    });
+
+    test('should update derived value when product changes again', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('async-derivation-test');
+      await expect(scenario).toBeVisible();
+
+      const productSelect = scenario.locator('#product');
+      const priceInput = helpers.getInput(scenario, 'price');
+
+      // Select Widget A → price = 9.99
+      await productSelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Widget A")').click();
+      await expect(priceInput).toHaveValue('9.99', { timeout: 5000 });
+
+      // Select Widget C → price = 29.99
+      await productSelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Widget C")').click();
+      await expect(priceInput).toHaveValue('29.99', { timeout: 5000 });
+    });
+
+    test('should chain async derivation to expression derivation (product → price → total)', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('async-derivation-test');
+      await expect(scenario).toBeVisible();
+
+      const productSelect = scenario.locator('#product');
+      const priceInput = helpers.getInput(scenario, 'price');
+      const quantityInput = helpers.getInput(scenario, 'quantity');
+      const totalInput = helpers.getInput(scenario, 'total');
+
+      // Initial quantity is 1
+      await expect(quantityInput).toHaveValue('1');
+
+      // Select Widget B → price = 19.99 → total = 19.99 * 1 = 19.99
+      await productSelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Widget B")').click();
+
+      await expect(priceInput).toHaveValue('19.99', { timeout: 5000 });
+      await expect(totalInput).toHaveValue('19.99', { timeout: 5000 });
+
+      // Change quantity to 3 → total = 19.99 * 3 = 59.97
+      await helpers.clearAndFill(quantityInput, '3');
+      await expect(totalInput).toHaveValue('59.97', { timeout: 5000 });
+    });
+  });
+
+  test.describe('Async Derivation Error Handling', () => {
+    test('should retain previous value on error and recover on next valid input', async ({ page, helpers }) => {
+      await page.goto(testUrl('/test/derivation-logic/async-derivation-error'));
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('async-derivation-error-test');
+      await expect(scenario).toBeVisible();
+
+      const lookupKeyInput = helpers.getInput(scenario, 'lookupKey');
+      const resultInput = helpers.getInput(scenario, 'result');
+
+      // Enter valid key → result populates
+      await helpers.fillInput(lookupKeyInput, 'ABC');
+      await expect(resultInput).toHaveValue('Result for ABC', { timeout: 5000 });
+
+      // Enter 'INVALID' → function throws → result retains previous value
+      await helpers.clearAndFill(lookupKeyInput, 'INVALID');
+      // Wait for debounce + async to settle, then verify value unchanged
+      await page.waitForTimeout(600);
+      await expect(resultInput).toHaveValue('Result for ABC');
+
+      // Enter new valid key → stream recovers
+      await helpers.clearAndFill(lookupKeyInput, 'XYZ');
+      await expect(resultInput).toHaveValue('Result for XYZ', { timeout: 5000 });
+    });
+  });
+
+  test.describe('Async Derivation Stop On User Override', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(testUrl('/test/derivation-logic/async-derivation-stop-override'));
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('should derive timezone via async function when country changes', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('async-derivation-stop-override-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const timezoneInput = helpers.getInput(scenario, 'timezone');
+
+      // Select US → timezone = America/New_York
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await expect(timezoneInput).toHaveValue('America/New_York', { timeout: 5000 });
+
+      // Select UK → timezone = Europe/London
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United Kingdom")').click();
+      await expect(timezoneInput).toHaveValue('Europe/London', { timeout: 5000 });
+    });
+
+    test('should stop async derivation after user manually edits timezone', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('async-derivation-stop-override-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const timezoneInput = helpers.getInput(scenario, 'timezone');
+
+      // Select US → timezone derived via async
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await expect(timezoneInput).toHaveValue('America/New_York', { timeout: 5000 });
+
+      // User manually overrides timezone
+      await helpers.clearAndFill(timezoneInput, 'Custom/Timezone');
+
+      // Change country to UK → timezone should NOT update (user override)
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United Kingdom")').click();
+      // Wait for debounce + async to settle, then verify override persists
+      await page.waitForTimeout(600);
+      await expect(timezoneInput).toHaveValue('Custom/Timezone');
+    });
+
+    test('should submit the user-overridden async-derived value correctly', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('async-derivation-stop-override-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const timezoneInput = helpers.getInput(scenario, 'timezone');
+
+      // Derive a value via async
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await expect(timezoneInput).toHaveValue('America/New_York', { timeout: 5000 });
+
+      // Override it
+      await helpers.clearAndFill(timezoneInput, 'My/Timezone');
+
+      // Change country to verify override persists
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Germany")').click();
+      // Wait for debounce + async to settle, then verify override persists
+      await page.waitForTimeout(600);
+
+      // Submit and verify the overridden value
+      const data = await helpers.submitFormAndCapture(scenario);
+      expect(data['timezone']).toBe('My/Timezone');
+    });
+  });
+
+  test.describe('Async Derivation Re-Engage', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(testUrl('/test/derivation-logic/async-derivation-re-engage'));
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('should derive timezone via async function when country changes', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('async-derivation-re-engage-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const timezoneInput = helpers.getInput(scenario, 'timezone');
+
+      // Select US → timezone = America/New_York
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await expect(timezoneInput).toHaveValue('America/New_York', { timeout: 5000 });
+    });
+
+    test('should stop deriving after user manually edits timezone', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('async-derivation-re-engage-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const timezoneInput = helpers.getInput(scenario, 'timezone');
+
+      // Derive initial value
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await expect(timezoneInput).toHaveValue('America/New_York', { timeout: 5000 });
+
+      // User manually overrides timezone
+      await helpers.clearAndFill(timezoneInput, 'Custom/Timezone');
+      await expect(timezoneInput).toHaveValue('Custom/Timezone');
+    });
+
+    test('should re-engage async derivation when country changes after user override', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('async-derivation-re-engage-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const timezoneInput = helpers.getInput(scenario, 'timezone');
+
+      // Step 1: Derive timezone via async
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await expect(timezoneInput).toHaveValue('America/New_York', { timeout: 5000 });
+
+      // Step 2: User manually overrides timezone (marks field as dirty)
+      await helpers.clearAndFill(timezoneInput, 'Custom/Timezone');
+
+      // Step 3: Change country → re-engagement clears dirty, async fires again
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United Kingdom")').click();
+      await expect(timezoneInput).toHaveValue('Europe/London', { timeout: 5000 });
+    });
+  });
+
+  test.describe('Async Derivation Condition', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(testUrl('/test/derivation-logic/async-derivation-condition'));
+      await page.waitForLoadState('networkidle');
+    });
+
+    test('should not fire async function when condition is false (toggle off)', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('async-derivation-condition-test');
+      await expect(scenario).toBeVisible();
+
+      const zipCodeInput = helpers.getInput(scenario, 'zipCode');
+      const cityInput = helpers.getInput(scenario, 'city');
+
+      // Toggle is off by default — type zip code
+      await helpers.fillInput(zipCodeInput, '62701');
+      // Wait for debounce + async to settle, then verify city unchanged
+      await page.waitForTimeout(600);
+      await expect(cityInput).toHaveValue('');
+    });
+
+    test('should fire async function when condition becomes true (toggle on)', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('async-derivation-condition-test');
+      await expect(scenario).toBeVisible();
+
+      const toggleField = scenario.locator('#enableLookup');
+      const zipCodeInput = helpers.getInput(scenario, 'zipCode');
+      const cityInput = helpers.getInput(scenario, 'city');
+
+      // Enable lookup
+      await toggleField.locator('button[role="switch"]').click();
+
+      // Type zip code → async fires → city derived
+      await helpers.fillInput(zipCodeInput, '62701');
+      await expect(cityInput).toHaveValue('Springfield', { timeout: 5000 });
+    });
+  });
 });

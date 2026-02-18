@@ -265,8 +265,8 @@ function tryApplyDerivation(
 ): DerivationResult {
   const { derivationLogger } = context;
 
-  // HTTP entries are processed asynchronously in their own streams — skip in sync loop
-  if (entry.http) {
+  // HTTP and async entries are processed asynchronously in their own streams — skip in sync loop
+  if (entry.http || entry.asyncFunctionName) {
     return { applied: false, fieldKey: entry.fieldKey };
   }
 
@@ -720,9 +720,9 @@ export function applyDerivationsForTrigger(
   context: DerivationApplicatorContext,
   changedFields?: Set<string>,
 ): DerivationProcessingResult {
-  // Filter entries by trigger type, excluding HTTP entries (processed in async streams)
+  // Filter entries by trigger type, excluding HTTP and async entries (processed in async streams)
   const filteredEntries = collection.entries.filter((entry) => {
-    if (entry.http) return false;
+    if (entry.http || entry.asyncFunctionName) return false;
     if (trigger === 'onChange') {
       return !entry.trigger || entry.trigger === 'onChange';
     }

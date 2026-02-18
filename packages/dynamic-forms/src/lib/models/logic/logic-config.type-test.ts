@@ -105,7 +105,8 @@ describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
     | 'reEngageOnDependencyChange'
     | 'targetProperty'
     | 'http'
-    | 'responseExpression';
+    | 'responseExpression'
+    | 'asyncFunctionName';
   type ActualKeys = keyof DerivationLogicConfig;
 
   it('should have exactly the expected keys', () => {

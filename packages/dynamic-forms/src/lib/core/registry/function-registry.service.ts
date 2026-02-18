@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { CustomFunction, CustomFunctionOptions, CustomFunctionScope } from '../expressions/custom-function-types';
+import type { AsyncConditionFunction, AsyncDerivationFunction } from '../expressions/async-custom-function-types';
 import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../validation/validator-types';
 
 /**
  * Registry service for custom functions and validators
  *
- * This service maintains four separate registries:
+ * This service maintains six separate registries:
  *
  * 1. **Custom Functions** - For conditional expressions (when/readonly/disabled)
  *    - Used in: when conditions, readonly logic, disabled logic
@@ -26,6 +27,16 @@ import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../v
  *    - Used in: validators array on fields with type 'customHttp'
  *    - Configuration object with url, method, mapResponse, etc.
  *    - Example: `{ url: '/api/check', method: 'GET', mapResponse: ... }`
+ *
+ * 5. **Async Derivation Functions** - For asynchronous value derivation via Promise/Observable
+ *    - Used in: derivation config with `asyncFunctionName`
+ *    - Return type: Promise<unknown> | Observable<unknown>
+ *    - Example: `fetchPrice: (ctx) => priceService.get(ctx.formValue.productId)`
+ *
+ * 6. **Async Condition Functions** - For asynchronous boolean conditions via Promise/Observable
+ *    - Used in: condition config with `type: 'async'` and `asyncFunctionName`
+ *    - Return type: Promise<boolean> | Observable<boolean>
+ *    - Example: `checkAdmin: (ctx) => authService.hasRole(ctx.formValue.userId, 'admin')`
  *
  * @example
  * ```typescript
@@ -63,6 +74,8 @@ export class FunctionRegistryService {
   private readonly derivationFunctions = new Map<string, CustomFunction>();
   // TODO(@ng-forge): remove deprecated code in next minor
   private readonly propertyDerivationFunctions = new Map<string, CustomFunction>();
+  private readonly asyncDerivationFunctions = new Map<string, AsyncDerivationFunction>();
+  private readonly asyncConditionFunctions = new Map<string, AsyncConditionFunction>();
   private readonly validators = new Map<string, CustomValidator>();
   private readonly asyncValidators = new Map<string, AsyncCustomValidator>();
   private readonly httpValidators = new Map<string, HttpCustomValidator>();
@@ -231,6 +244,101 @@ export class FunctionRegistryService {
    */
   clearPropertyDerivationFunctions(): void {
     this.propertyDerivationFunctions.clear();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Async Derivation Functions
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Register an async derivation function.
+   *
+   * Async derivation functions perform asynchronous operations (service calls,
+   * complex pipelines) and return the derived value via a Promise or Observable.
+   *
+   * @param name - Unique identifier for the function
+   * @param fn - Function that receives EvaluationContext and returns Promise/Observable
+   */
+  registerAsyncDerivationFunction(name: string, fn: AsyncDerivationFunction): void {
+    this.asyncDerivationFunctions.set(name, fn);
+  }
+
+  /**
+   * Get an async derivation function by name
+   */
+  getAsyncDerivationFunction(name: string): AsyncDerivationFunction | undefined {
+    return this.asyncDerivationFunctions.get(name);
+  }
+
+  /**
+   * Get all async derivation functions as an object
+   */
+  getAsyncDerivationFunctions(): Record<string, AsyncDerivationFunction> {
+    return Object.fromEntries(this.asyncDerivationFunctions);
+  }
+
+  /**
+   * Set async derivation functions from a config object.
+   * Only updates functions if their references have changed.
+   *
+   * @param fns - Object mapping function names to async derivation functions
+   */
+  setAsyncDerivationFunctions(fns: Record<string, AsyncDerivationFunction> | undefined): void {
+    this.setRegistryIfChanged(this.asyncDerivationFunctions, fns);
+  }
+
+  /**
+   * Clear all async derivation functions
+   */
+  clearAsyncDerivationFunctions(): void {
+    this.asyncDerivationFunctions.clear();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Async Condition Functions
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Register an async condition function.
+   *
+   * Async condition functions perform asynchronous operations and return a boolean.
+   *
+   * @param name - Unique identifier for the function
+   * @param fn - Function that receives EvaluationContext and returns Promise/Observable of boolean
+   */
+  registerAsyncConditionFunction(name: string, fn: AsyncConditionFunction): void {
+    this.asyncConditionFunctions.set(name, fn);
+  }
+
+  /**
+   * Get an async condition function by name
+   */
+  getAsyncConditionFunction(name: string): AsyncConditionFunction | undefined {
+    return this.asyncConditionFunctions.get(name);
+  }
+
+  /**
+   * Get all async condition functions as an object
+   */
+  getAsyncConditionFunctions(): Record<string, AsyncConditionFunction> {
+    return Object.fromEntries(this.asyncConditionFunctions);
+  }
+
+  /**
+   * Set async condition functions from a config object.
+   * Only updates functions if their references have changed.
+   *
+   * @param fns - Object mapping function names to async condition functions
+   */
+  setAsyncConditionFunctions(fns: Record<string, AsyncConditionFunction> | undefined): void {
+    this.setRegistryIfChanged(this.asyncConditionFunctions, fns);
+  }
+
+  /**
+   * Clear all async condition functions
+   */
+  clearAsyncConditionFunctions(): void {
+    this.asyncConditionFunctions.clear();
   }
 
   /**
@@ -466,6 +574,8 @@ export class FunctionRegistryService {
     this.clearCustomFunctions();
     this.clearDerivationFunctions();
     this.clearPropertyDerivationFunctions();
+    this.clearAsyncDerivationFunctions();
+    this.clearAsyncConditionFunctions();
     this.clearValidators();
     this.clearAsyncValidators();
     this.clearHttpValidators();
