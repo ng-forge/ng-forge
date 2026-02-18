@@ -377,7 +377,7 @@ When the user changes the country, the phone prefix is auto-filled again — ove
 
 ## Related
 
-- **[Values](./basics/)** — Expression, static value, and function-based derivations
-- **[Properties](./property/)** — Derive component properties from form values
+- **[Values](./)** — Expression, static value, and function-based derivations
+- **[Properties](./property-derivation)** — Derive component properties from form values
 - **[HTTP Conditions](../../conditional-logic/overview/)** — HTTP-driven field visibility and state
 - **[Custom Validators](../../../validation/custom-validators/)** — Async and HTTP validation

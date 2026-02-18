@@ -162,6 +162,7 @@ Pages support the `logic` property to conditionally skip a page (hide it from th
 
 ```typescript
 {
+  key: 'businessDetails',
   type: 'page',
   label: 'Business Details',
   logic: [{

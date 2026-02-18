@@ -333,7 +333,7 @@ Compare the entire form value object against a specific value using operators.
 
 **Use when:** Checking if the entire form matches a specific state
 
-**Note:** For complex logic involving multiple fields with JavaScript expressions, use `javascript` or `custom` type instead.
+**Note:** This type is rarely useful in practice — deep equality on an entire form object is an unusual requirement. For conditions that involve multiple specific fields, use `javascript` or `custom` expressions instead (e.g. `formValue.status === 'active' && formValue.role === 'admin'`).
 
 ### javascript
 
@@ -590,14 +590,17 @@ Evaluate a condition using a custom async function registered in `customFnConfig
 
 **Use when:** Condition logic involves Angular service injection, complex async operations, or anything that `http` conditions cannot express directly.
 
+> **Why `inject()` works here:** `customFnConfig` functions are called within an Angular injection context, so Angular's `inject()` API is available — the same way it works in a constructor or field initializer. Import `inject` from `@angular/core` as usual.
+
 **Registration and usage:**
 
 ```typescript
+import { inject } from '@angular/core';
+
 const formConfig = {
   customFnConfig: {
     asyncConditions: {
       checkReadonly: (context) => {
-        // Can use inject() here for Angular services
         return inject(PermissionsService).canEdit(context.formValue.resourceId as string);
       },
     },
@@ -867,9 +870,11 @@ At least one condition must be true.
 }
 ```
 
-**Use case:** Show field for multiple roles.
+**Use case:** Show field for multiple roles — hide unless role is `admin` or `owner`.
 
 ```typescript
+// Hide the panel when role is neither 'admin' nor 'owner'
+// (i.e. hidden when notEquals 'admin' AND notEquals 'owner')
 {
   key: 'adminPanel',
   type: 'group',
@@ -877,7 +882,7 @@ At least one condition must be true.
   logic: [{
     type: 'hidden',
     condition: {
-      type: 'or',
+      type: 'and',
       conditions: [
         {
           type: 'fieldValue',
@@ -1127,7 +1132,7 @@ interface AsyncCondition {
 | `fieldValue` | Sync       | `fieldPath`, `operator`, `value` | Compare a specific field's value                                      |
 | `formValue`  | Sync       | `operator`, `value`              | Compare entire form object                                            |
 | `javascript` | Sync       | `expression`                     | Custom JS with `fieldValue`/`formValue`/`fieldState`/`formFieldState` |
-| `custom`     | Sync       | `expression`                     | Call registered custom function                                       |
+| `custom`     | Sync       | `expression`                     | Inline expression with `fieldValue`/`formValue` (safe member access)  |
 | `and`/`or`   | Sync       | `conditions`                     | Combine multiple conditions                                           |
 | `http`       | Async      | `http`, `responseExpression`     | Server-driven condition via HTTP request                              |
 | `async`      | Async      | `asyncFunctionName`              | Custom async function registered in config                            |
