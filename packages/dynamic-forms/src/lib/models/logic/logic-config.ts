@@ -181,20 +181,6 @@ export type StateLogicConfig = ImmediateStateLogicConfig | DebouncedStateLogicCo
 export type LogicTrigger = 'onChange' | 'debounced';
 
 /**
- * Source discriminant for derivation modes.
- *
- * Use `source` to opt into IDE-guided mode selection with full discriminated narrowing:
- * - `'value'`: Static value derivation
- * - `'expression'`: JavaScript expression derivation
- * - `'function'`: Registered sync custom function derivation
- * - `'http'`: HTTP request-driven derivation (requires `dependsOn` and `responseExpression`)
- * - `'asyncFunction'`: Registered async custom function derivation (requires `dependsOn`)
- *
- * @public
- */
-export type DerivationSource = 'value' | 'expression' | 'function' | 'http' | 'asyncFunction';
-
-/**
  * @deprecated Use `LogicTrigger` instead. Will be removed in a future version.
  * @public
  */
