@@ -1,5 +1,6 @@
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { DerivationLogicConfig, hasTargetProperty, isDerivationLogicConfig } from '../../models/logic/logic-config';
 import { hasChildFields } from '../../models/types/type-guards';
 import { normalizeFieldsArray } from '../../utils/object-utils';
@@ -182,6 +183,39 @@ function createShorthandEntry(fieldKey: string, expression: string, context: Col
 function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, context: CollectionContext): DerivationEntry {
   // Build the effective field key, including array path if in array context
   const effectiveFieldKey = context.arrayPath ? `${context.arrayPath}.$.${fieldKey}` : fieldKey;
+
+  // Validate HTTP derivation constraints
+  if (config.http) {
+    const otherSources = [
+      config.expression && 'expression',
+      config.value !== undefined && 'value',
+      config.functionName && 'functionName',
+    ].filter(Boolean);
+    if (otherSources.length > 0) {
+      throw new DynamicFormError(
+        `Derivation for '${effectiveFieldKey}' has 'http' combined with ${otherSources.join(', ')}. ` +
+          `HTTP derivations are mutually exclusive with other value sources.`,
+      );
+    }
+    if (!config.dependsOn || config.dependsOn.length === 0) {
+      throw new DynamicFormError(
+        `HTTP derivation for '${effectiveFieldKey}' requires explicit 'dependsOn'. ` +
+          `Wildcard dependencies would trigger HTTP requests on every form change.`,
+      );
+    }
+    if (config.dependsOn.includes('*')) {
+      throw new DynamicFormError(
+        `HTTP derivation for '${effectiveFieldKey}' cannot use wildcard ('*') in 'dependsOn'. ` +
+          `Wildcards would trigger HTTP requests on every form change. Specify explicit field dependencies instead.`,
+      );
+    }
+    if (!config.responseExpression) {
+      throw new DynamicFormError(
+        `HTTP derivation for '${effectiveFieldKey}' requires 'responseExpression' to extract the value from the response.`,
+      );
+    }
+  }
+
   const dependsOn = extractDependencies(config);
   const condition = config.condition ?? true;
   const trigger = config.trigger ?? 'onChange';
@@ -197,6 +231,8 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
     value: config.value,
     expression: config.expression,
     functionName: config.functionName,
+    http: config.http,
+    responseExpression: config.responseExpression,
     trigger,
     debounceMs,
     isShorthand: false,

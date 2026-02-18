@@ -487,6 +487,13 @@
     ],
     "buttonConditions": ["formInvalid", "formSubmitting", "pageInvalid"],
     "derivationExample": "{ key: 'fullName', derivation: 'formValue.first + \" \" + formValue.last' }",
+    "httpDerivationExample": "{ key: 'rate', logic: [{ type: 'derivation', http: { url: '/api/rate', queryParams: { from: 'formValue.currency' } }, responseExpression: 'response.rate', dependsOn: ['currency'] }] }",
+    "httpDerivationRules": {
+      "dependsOn": "REQUIRED - prevents wildcard triggering on every keystroke",
+      "responseExpression": "REQUIRED - extracts value from HTTP response body",
+      "mutuallyExclusive": "http cannot be combined with expression, value, or functionName",
+      "noArrays": "Array fields (items.$.rate) are NOT supported for HTTP derivations"
+    },
     "expressionVariables": {
       "formValue": "Complete form value object",
       "fieldValue": "Current field's value"

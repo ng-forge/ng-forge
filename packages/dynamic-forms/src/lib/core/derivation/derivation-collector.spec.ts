@@ -266,6 +266,176 @@ describe('derivation-collector', () => {
       });
     });
 
+    describe('HTTP derivation entries', () => {
+      it('should carry http and responseExpression from config to entry', () => {
+        const fields: FieldDef<unknown>[] = [
+          {
+            key: 'rate',
+            type: 'number',
+            logic: [
+              {
+                type: 'derivation',
+                http: {
+                  url: 'https://api.example.com/rate',
+                  method: 'GET',
+                  queryParams: { from: 'formValue.currency' },
+                },
+                responseExpression: 'response.rate',
+                dependsOn: ['currency'],
+              },
+            ],
+          } as NumberFieldDef,
+        ];
+
+        const collection = collectDerivations(fields);
+
+        expect(collection.entries.length).toBe(1);
+        expect(collection.entries[0].http).toEqual({
+          url: 'https://api.example.com/rate',
+          method: 'GET',
+          queryParams: { from: 'formValue.currency' },
+        });
+        expect(collection.entries[0].responseExpression).toBe('response.rate');
+        expect(collection.entries[0].dependsOn).toContain('currency');
+      });
+
+      it('should throw DynamicFormError when HTTP entry has no dependsOn', () => {
+        const fields: FieldDef<unknown>[] = [
+          {
+            key: 'rate',
+            type: 'number',
+            logic: [
+              {
+                type: 'derivation',
+                http: { url: 'https://api.example.com/rate' },
+                responseExpression: 'response.rate',
+                // No dependsOn
+              },
+            ],
+          } as NumberFieldDef,
+        ];
+
+        expect(() => collectDerivations(fields)).toThrow(/requires explicit 'dependsOn'/);
+      });
+
+      it('should throw DynamicFormError when HTTP is combined with expression', () => {
+        const fields: FieldDef<unknown>[] = [
+          {
+            key: 'rate',
+            type: 'number',
+            logic: [
+              {
+                type: 'derivation',
+                http: { url: 'https://api.example.com/rate' },
+                expression: 'formValue.something',
+                responseExpression: 'response.rate',
+                dependsOn: ['currency'],
+              },
+            ],
+          } as NumberFieldDef,
+        ];
+
+        expect(() => collectDerivations(fields)).toThrow(/mutually exclusive/);
+      });
+
+      it('should throw DynamicFormError when HTTP is combined with value', () => {
+        const fields: FieldDef<unknown>[] = [
+          {
+            key: 'rate',
+            type: 'number',
+            logic: [
+              {
+                type: 'derivation',
+                http: { url: 'https://api.example.com/rate' },
+                value: 42,
+                responseExpression: 'response.rate',
+                dependsOn: ['currency'],
+              },
+            ],
+          } as NumberFieldDef,
+        ];
+
+        expect(() => collectDerivations(fields)).toThrow(/mutually exclusive/);
+      });
+
+      it('should throw DynamicFormError when HTTP is combined with functionName', () => {
+        const fields: FieldDef<unknown>[] = [
+          {
+            key: 'rate',
+            type: 'number',
+            logic: [
+              {
+                type: 'derivation',
+                http: { url: 'https://api.example.com/rate' },
+                functionName: 'getRate',
+                responseExpression: 'response.rate',
+                dependsOn: ['currency'],
+              },
+            ],
+          } as NumberFieldDef,
+        ];
+
+        expect(() => collectDerivations(fields)).toThrow(/mutually exclusive/);
+      });
+
+      it('should throw DynamicFormError when HTTP entry uses wildcard dependsOn', () => {
+        const fields: FieldDef<unknown>[] = [
+          {
+            key: 'rate',
+            type: 'number',
+            logic: [
+              {
+                type: 'derivation',
+                http: { url: 'https://api.example.com/rate' },
+                responseExpression: 'response.rate',
+                dependsOn: ['*'],
+              },
+            ],
+          } as NumberFieldDef,
+        ];
+
+        expect(() => collectDerivations(fields)).toThrow(/cannot use wildcard/);
+      });
+
+      it('should throw DynamicFormError when HTTP entry uses wildcard among other deps', () => {
+        const fields: FieldDef<unknown>[] = [
+          {
+            key: 'rate',
+            type: 'number',
+            logic: [
+              {
+                type: 'derivation',
+                http: { url: 'https://api.example.com/rate' },
+                responseExpression: 'response.rate',
+                dependsOn: ['currency', '*'],
+              },
+            ],
+          } as NumberFieldDef,
+        ];
+
+        expect(() => collectDerivations(fields)).toThrow(/cannot use wildcard/);
+      });
+
+      it('should throw DynamicFormError when HTTP is set without responseExpression', () => {
+        const fields: FieldDef<unknown>[] = [
+          {
+            key: 'rate',
+            type: 'number',
+            logic: [
+              {
+                type: 'derivation',
+                http: { url: 'https://api.example.com/rate' },
+                dependsOn: ['currency'],
+                // No responseExpression
+              },
+            ],
+          } as NumberFieldDef,
+        ];
+
+        expect(() => collectDerivations(fields)).toThrow(/requires 'responseExpression'/);
+      });
+    });
+
     describe('edge cases', () => {
       it('should handle empty fields array', () => {
         const collection = collectDerivations([]);

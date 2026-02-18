@@ -1,4 +1,5 @@
 import { ConditionalExpression } from '../expressions/conditional-expression';
+import { HttpRequestConfig } from '../http/http-request-config';
 
 /**
  * Special form-state conditions for button disabled logic.
@@ -324,7 +325,7 @@ interface BaseDerivationLogicConfig {
    *
    * The function receives the evaluation context and returns the derived value.
    * Register functions in `customFnConfig.derivations`.
-   * Mutually exclusive with `value` and `expression`.
+   * Mutually exclusive with `value`, `expression`, and `http`.
    *
    * @example
    * ```typescript
@@ -334,6 +335,57 @@ interface BaseDerivationLogicConfig {
    * ```
    */
   functionName?: string;
+
+  /**
+   * HTTP request configuration for server-driven derivations.
+   *
+   * When set, the derivation value is fetched from an HTTP endpoint.
+   * The request is sent when dependencies change, with automatic
+   * debouncing and cancellation of in-flight requests.
+   *
+   * Mutually exclusive with `value`, `expression`, and `functionName`.
+   * Requires `dependsOn` to be explicitly specified (to avoid wildcard
+   * triggering on every keystroke).
+   * Requires `responseExpression` to extract the value from the response.
+   *
+   * @example
+   * ```typescript
+   * {
+   *   key: 'exchangeRate',
+   *   logic: [{
+   *     type: 'derivation',
+   *     http: {
+   *       url: '/api/exchange-rate',
+   *       method: 'GET',
+   *       queryParams: {
+   *         from: 'formValue.sourceCurrency',
+   *         to: 'formValue.targetCurrency',
+   *       },
+   *     },
+   *     responseExpression: 'response.rate',
+   *     dependsOn: ['sourceCurrency', 'targetCurrency'],
+   *   }]
+   * }
+   * ```
+   */
+  http?: HttpRequestConfig;
+
+  /**
+   * Expression to extract the derived value from an HTTP response.
+   *
+   * Evaluated via `ExpressionParser` with `{ response }` as the evaluation scope,
+   * where `response` is the parsed HTTP response body.
+   *
+   * Required when `http` is set.
+   *
+   * @example
+   * ```typescript
+   * responseExpression: 'response.rate'
+   * responseExpression: 'response.data.suggestedPrice'
+   * responseExpression: 'response.items[0].name'
+   * ```
+   */
+  responseExpression?: string;
 
   /**
    * Explicit field dependencies for derivations.

@@ -14,6 +14,11 @@ import { reEngageOnDependencyChangeScenario } from './scenarios/re-engage-on-dep
 import { fieldStateConditionScenario } from './scenarios/field-state-condition.scenario';
 import { fieldStateAdvancedScenario } from './scenarios/field-state-advanced.scenario';
 import { arrayStopOnUserOverrideScenario } from './scenarios/array-stop-on-user-override.scenario';
+import { httpDerivationScenario } from './scenarios/http-derivation.scenario';
+import { httpDerivationErrorScenario } from './scenarios/http-derivation-error.scenario';
+import { httpDerivationStopOverrideScenario } from './scenarios/http-derivation-stop-override.scenario';
+import { httpDerivationReEngageScenario } from './scenarios/http-derivation-re-engage.scenario';
+import { httpDerivationConditionScenario } from './scenarios/http-derivation-condition.scenario';
 
 export const derivationLogicSuite: TestSuite = {
   id: 'derivation-logic',
@@ -36,6 +41,11 @@ export const derivationLogicSuite: TestSuite = {
     fieldStateConditionScenario,
     fieldStateAdvancedScenario,
     arrayStopOnUserOverrideScenario,
+    httpDerivationScenario,
+    httpDerivationErrorScenario,
+    httpDerivationStopOverrideScenario,
+    httpDerivationReEngageScenario,
+    httpDerivationConditionScenario,
   ],
 };
 

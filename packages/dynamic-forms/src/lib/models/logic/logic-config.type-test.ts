@@ -103,7 +103,9 @@ describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
     | 'dependsOn'
     | 'stopOnUserOverride'
     | 'reEngageOnDependencyChange'
-    | 'targetProperty';
+    | 'targetProperty'
+    | 'http'
+    | 'responseExpression';
   type ActualKeys = keyof DerivationLogicConfig;
 
   it('should have exactly the expected keys', () => {
