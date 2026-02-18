@@ -516,7 +516,7 @@ interface ExpressionDerivationBase extends SharedDerivationFields {
    * ```
    */
   dependsOn?: string[];
-  // Mutual exclusivity: other sources are not allowed
+  // Mutual exclusivity: other mode payload fields are not allowed
   value?: never;
   functionName?: never;
   http?: never;
@@ -552,7 +552,7 @@ interface ValueDerivationBase extends SharedDerivationFields {
    * Provide `dependsOn` to conditionally re-evaluate when specific fields change.
    */
   dependsOn?: string[];
-  // Mutual exclusivity: other sources are not allowed
+  // Mutual exclusivity: other mode payload fields are not allowed
   expression?: never;
   functionName?: never;
   http?: never;
@@ -602,7 +602,7 @@ interface FunctionDerivationBase extends SharedDerivationFields {
    * ```
    */
   dependsOn?: string[];
-  // Mutual exclusivity: other sources are not allowed
+  // Mutual exclusivity: other mode payload fields are not allowed
   value?: never;
   expression?: never;
   http?: never;
