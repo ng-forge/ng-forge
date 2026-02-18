@@ -15,6 +15,7 @@ import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import type { Logger } from '../providers/features/logger/logger.interface';
 import { EvaluationContext } from '../models/expressions/evaluation-context';
 import { normalizeFieldsArray } from '../utils/object-utils';
+import { getNestedValue } from './expressions/value-utils';
 import { applyFormLevelSchema } from './form-schema-merger';
 import type { FormSchema } from '@ng-forge/dynamic-forms/schema';
 
@@ -227,25 +228,6 @@ function applyCrossFieldTreeValidator<TModel>(
 }
 
 /**
- * Resolves a value from a nested object using a dot-separated path.
- * e.g. resolveNestedValue({ a: { b: 1 } }, 'a.b') === 1
- */
-function resolveNestedValue(obj: Record<string, unknown>, path: string): unknown {
-  if (!path.includes('.')) {
-    return obj[path];
-  }
-  const parts = path.split('.');
-  let current: unknown = obj;
-  for (const part of parts) {
-    if (current == null || typeof current !== 'object') {
-      return undefined;
-    }
-    current = (current as Record<string, unknown>)[part];
-  }
-  return current;
-}
-
-/**
  * Evaluates a single cross-field validator entry and returns an error if validation fails.
  */
 function evaluateCrossFieldValidator<TModel>(
@@ -257,7 +239,7 @@ function evaluateCrossFieldValidator<TModel>(
   logger: Logger,
 ): ValidationError.WithOptionalField | null {
   const { config } = entry;
-  const fieldValue = resolveNestedValue(formValue, sourceFieldKey);
+  const fieldValue = getNestedValue(formValue, sourceFieldKey);
 
   // Create evaluation context for condition/expression evaluation
   const evaluationContext: EvaluationContext = {

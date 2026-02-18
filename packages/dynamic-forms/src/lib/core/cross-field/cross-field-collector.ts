@@ -46,8 +46,11 @@ function traverseFields(fields: FieldDef<unknown>[], collection: CrossFieldColle
 
     // Recursively process container fields (page, row, group, array)
     if (hasChildFields(field)) {
-      // Groups add their key to the path; page/row are transparent layout containers.
-      // Arrays are skipped — items use dynamic indices and are not statically traversable.
+      // Groups add their key to the path prefix; page/row/array are transparent —
+      // their children are still traversed, but those containers don't contribute a
+      // key segment. Arrays are transparent rather than skipped because array items
+      // use dynamic indices that aren't statically knowable, so no path prefix can
+      // be built for them.
       const groupKey = isGroupField(field) ? field.key : undefined;
       const childPrefix = groupKey ? (pathPrefix ? `${pathPrefix}.${groupKey}` : groupKey) : pathPrefix;
       traverseFields(normalizeFieldsArray(field.fields) as FieldDef<unknown>[], collection, childPrefix);
