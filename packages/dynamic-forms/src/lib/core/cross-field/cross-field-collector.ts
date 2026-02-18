@@ -4,7 +4,7 @@ import { isStateLogicConfig, LogicConfig, StateLogicConfig } from '../../models/
 import { ValidatorConfig, CustomValidatorConfig, BuiltInValidatorConfig } from '../../models/validation/validator-config';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
-import { hasChildFields } from '../../models/types/type-guards';
+import { hasChildFields, isGroupField } from '../../models/types/type-guards';
 import { normalizeFieldsArray } from '../../utils/object-utils';
 import {
   isCrossFieldValidator,
@@ -36,31 +36,40 @@ export function createEmptyCollection(): CrossFieldCollection {
 /** Traverses field definitions and collects cross-field entries (validators, logic, schemas). */
 export function collectCrossFieldEntries(fields: FieldDef<unknown>[]): CrossFieldCollection {
   const collection = createEmptyCollection();
-  traverseFields(fields, collection);
+  traverseFields(fields, collection, '');
   return collection;
 }
 
-function traverseFields(fields: FieldDef<unknown>[], collection: CrossFieldCollection): void {
+function traverseFields(fields: FieldDef<unknown>[], collection: CrossFieldCollection, pathPrefix: string): void {
   for (const field of fields) {
-    collectFromField(field, collection);
+    collectFromField(field, collection, pathPrefix);
 
     // Recursively process container fields (page, row, group, array)
     if (hasChildFields(field)) {
-      traverseFields(normalizeFieldsArray(field.fields) as FieldDef<unknown>[], collection);
+      // Groups add their key to the path prefix; page/row/array are transparent —
+      // their children are still traversed, but those containers don't contribute a
+      // key segment. Arrays are transparent rather than skipped because array items
+      // use dynamic indices that aren't statically knowable, so no path prefix can
+      // be built for them.
+      const groupKey = isGroupField(field) ? field.key : undefined;
+      const childPrefix = groupKey ? (pathPrefix ? `${pathPrefix}.${groupKey}` : groupKey) : pathPrefix;
+      traverseFields(normalizeFieldsArray(field.fields) as FieldDef<unknown>[], collection, childPrefix);
     }
   }
 }
 
-function collectFromField(field: FieldDef<unknown>, collection: CrossFieldCollection): void {
+function collectFromField(field: FieldDef<unknown>, collection: CrossFieldCollection, pathPrefix: string): void {
   const fieldKey = field.key;
   if (!fieldKey) return;
+
+  const fullKey = pathPrefix ? `${pathPrefix}.${fieldKey}` : fieldKey;
 
   const validationField = field as FieldDef<unknown> & FieldWithValidation;
 
   // Collect cross-field validators
   if (validationField.validators) {
     for (const config of validationField.validators) {
-      const entry = tryCreateValidatorEntry(fieldKey, config);
+      const entry = tryCreateValidatorEntry(fullKey, config);
       if (entry) {
         collection.validators.push(entry);
       }
@@ -70,7 +79,7 @@ function collectFromField(field: FieldDef<unknown>, collection: CrossFieldCollec
   // Collect cross-field logic
   if (validationField.logic) {
     for (const config of validationField.logic) {
-      const entry = tryCreateLogicEntry(fieldKey, config);
+      const entry = tryCreateLogicEntry(fullKey, config);
       if (entry) {
         collection.logic.push(entry);
       }
@@ -80,7 +89,7 @@ function collectFromField(field: FieldDef<unknown>, collection: CrossFieldCollec
   // Collect cross-field schemas
   if (validationField.schemas) {
     for (const config of validationField.schemas) {
-      const entry = tryCreateSchemaEntry(fieldKey, config);
+      const entry = tryCreateSchemaEntry(fullKey, config);
       if (entry) {
         collection.schemas.push(entry);
       }

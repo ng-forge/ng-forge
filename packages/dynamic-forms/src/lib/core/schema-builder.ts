@@ -15,6 +15,7 @@ import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import type { Logger } from '../providers/features/logger/logger.interface';
 import { EvaluationContext } from '../models/expressions/evaluation-context';
 import { normalizeFieldsArray } from '../utils/object-utils';
+import { getNestedValue } from './expressions/value-utils';
 import { applyFormLevelSchema } from './form-schema-merger';
 import type { FormSchema } from '@ng-forge/dynamic-forms/schema';
 
@@ -238,7 +239,7 @@ function evaluateCrossFieldValidator<TModel>(
   logger: Logger,
 ): ValidationError.WithOptionalField | null {
   const { config } = entry;
-  const fieldValue = formValue[sourceFieldKey];
+  const fieldValue = getNestedValue(formValue, sourceFieldKey);
 
   // Create evaluation context for condition/expression evaluation
   const evaluationContext: EvaluationContext = {
