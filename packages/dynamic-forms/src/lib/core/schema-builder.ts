@@ -38,7 +38,9 @@ function getFieldTreeByKey<TModel>(ctx: FieldContext<TModel>, key: string): Fiel
   let current: unknown = ctx.fieldTree;
 
   for (const part of parts) {
-    if (!current || typeof current !== 'object') {
+    // FieldTree is callable (function), so typeof returns 'function' not 'object'.
+    // Accept both to correctly traverse group sub-fields.
+    if (!current || (typeof current !== 'object' && typeof current !== 'function')) {
       return undefined;
     }
     current = (current as Record<string, unknown>)[part];

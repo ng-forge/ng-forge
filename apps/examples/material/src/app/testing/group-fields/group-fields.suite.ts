@@ -2,6 +2,7 @@ import { TestSuite } from '../shared/types';
 import { groupValuePropagationScenario } from './scenarios/group-value-propagation.scenario';
 import { groupInitialValuesScenario } from './scenarios/group-initial-values.scenario';
 import { groupNestedScenario } from './scenarios/group-nested.scenario';
+import { groupCrossFieldValidationScenario } from './scenarios/group-cross-field-validation.scenario';
 
 /**
  * Group Fields Suite
@@ -18,6 +19,8 @@ export const groupFieldsSuite: TestSuite = {
     groupValuePropagationScenario,
     groupInitialValuesScenario,
     groupNestedScenario,
+    // Cross-field validation
+    groupCrossFieldValidationScenario,
   ],
 };
 

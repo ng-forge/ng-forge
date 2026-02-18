@@ -8,6 +8,54 @@ test.describe('Group Fields E2E Tests', () => {
     await helpers.navigateToScenario('/test/group-fields');
   });
 
+  test.describe('Cross-Field Validation inside Groups', () => {
+    test('should show error on confirm-password when passwords do not match', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('group-cross-field-validation');
+      await page.goto('/#/test/group-fields/group-cross-field-validation');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      const passwordInput = scenario.locator('#password input');
+      const confirmInput = scenario.locator('#confirmPassword input');
+
+      await expect(passwordInput).toBeVisible({ timeout: 5000 });
+
+      // Type mismatched passwords
+      await passwordInput.fill('secret123');
+      await confirmInput.fill('different');
+      await confirmInput.blur();
+
+      // The cross-field error must appear on confirmPassword
+      const errorEl = scenario.locator('#confirmPassword mat-error');
+      await expect(errorEl).toBeVisible({ timeout: 5000 });
+      await expect(errorEl).toContainText('Passwords must match');
+    });
+
+    test('should clear error when passwords match', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('group-cross-field-validation');
+      await page.goto('/#/test/group-fields/group-cross-field-validation');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      const passwordInput = scenario.locator('#password input');
+      const confirmInput = scenario.locator('#confirmPassword input');
+
+      await expect(passwordInput).toBeVisible({ timeout: 5000 });
+
+      // First produce the error
+      await passwordInput.fill('secret123');
+      await confirmInput.fill('different');
+      await confirmInput.blur();
+      await expect(scenario.locator('#confirmPassword mat-error')).toBeVisible({ timeout: 5000 });
+
+      // Now fix by matching the password
+      await confirmInput.fill('secret123');
+      await confirmInput.blur();
+
+      await expect(scenario.locator('#confirmPassword mat-error')).not.toBeVisible({ timeout: 5000 });
+    });
+  });
+
   test.describe('Value Propagation', () => {
     test('should propagate values from nested group fields to parent form', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('group-value-propagation');
