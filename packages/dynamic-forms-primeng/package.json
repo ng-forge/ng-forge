@@ -1,6 +1,6 @@
 {
   "name": "@ng-forge/dynamic-forms-primeng",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "PrimeNG integration for @ng-forge/dynamic-forms. Pre-built PrimeNG form components.",
   "type": "module",
   "license": "MIT",
@@ -31,7 +31,7 @@
     "@angular/common": "~21.1.0",
     "@angular/core": "~21.1.0",
     "@angular/forms": "~21.1.0",
-    "@ng-forge/dynamic-forms": "~0.5.0",
+    "@ng-forge/dynamic-forms": "~0.6.0",
     "primeng": ">=17.0.0",
     "rxjs": ">=7.0.0"
   }

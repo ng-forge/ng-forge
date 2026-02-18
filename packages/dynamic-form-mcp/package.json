@@ -1,6 +1,6 @@
 {
   "name": "@ng-forge/dynamic-form-mcp",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "MCP server for ng-forge dynamic forms - AI-assisted form schema generation",
   "type": "module",
   "license": "MIT",
@@ -51,11 +51,11 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@ng-forge/dynamic-forms": "^0.5.0",
-    "@ng-forge/dynamic-forms-bootstrap": "^0.5.0",
-    "@ng-forge/dynamic-forms-ionic": "^0.5.0",
-    "@ng-forge/dynamic-forms-material": "^0.5.0",
-    "@ng-forge/dynamic-forms-primeng": "^0.5.0",
+    "@ng-forge/dynamic-forms": "^0.6.0",
+    "@ng-forge/dynamic-forms-bootstrap": "^0.6.0",
+    "@ng-forge/dynamic-forms-ionic": "^0.6.0",
+    "@ng-forge/dynamic-forms-material": "^0.6.0",
+    "@ng-forge/dynamic-forms-primeng": "^0.6.0",
     "tsx": "^4.19.0"
   }
 }
