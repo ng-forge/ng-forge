@@ -14,6 +14,7 @@ import { Logger } from '../../providers/features/logger/logger.interface';
 import { resolveHttpRequest } from '../http/http-request-resolver';
 import { ExpressionParser } from './parser/expression-parser';
 import { HttpConditionFunctionCacheService } from './http-condition-function-cache.service';
+import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
 
 /**
  * Extracts a boolean from an HTTP response using an optional expression.
@@ -64,15 +65,15 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
     return cached as LogicFn<TValue, boolean>;
   }
 
-  // Each condition needs its own per-field signal store. The shared service-level WeakMap
-  // would collide when multiple HTTP conditions exist on the same field (same FieldContext key).
-  const perFunctionSignalStore = new WeakMap<
-    object,
+  // Each condition needs its own per-field signal store. A shared store would collide
+  // when multiple HTTP conditions exist on the same field (same FieldContext / path).
+  const perFunctionSignalStore = new Map<
+    string,
     { resolvedRequest: WritableSignal<HttpResourceRequest | undefined>; resultValue: Signal<boolean> }
   >();
 
   const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
-    const contextKey = ctx as unknown as object;
+    const contextKey = safeReadPathKeys(ctx as FieldContext<unknown>).join('.');
     let signalPair = perFunctionSignalStore.get(contextKey);
 
     if (!signalPair) {

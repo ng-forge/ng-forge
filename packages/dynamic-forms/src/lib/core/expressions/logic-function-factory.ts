@@ -10,6 +10,7 @@ import { FunctionRegistryService } from '../registry/function-registry.service';
 import { evaluateCondition } from './condition-evaluator';
 import { createHttpConditionLogicFunction } from './http-condition-logic-function';
 import { LogicFunctionCacheService } from './logic-function-cache.service';
+import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
 
 /**
  * Recursively validates that HTTP conditions are not nested inside and/or composites.
@@ -121,10 +122,7 @@ export function createDebouncedLogicFunction<TValue>(expression: ConditionalExpr
   }
 
   const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
-    // Create a unique key using the context object itself as identifier
-    // Since FieldContext doesn't have a path property, we use a WeakMap approach
-    // by storing the debounced signal directly on the context
-    const contextKey = ctx as unknown as object;
+    const contextKey = safeReadPathKeys(ctx as FieldContext<unknown>).join('.');
     let signalPair = cacheService.debouncedSignalStore.get(contextKey);
 
     if (!signalPair) {

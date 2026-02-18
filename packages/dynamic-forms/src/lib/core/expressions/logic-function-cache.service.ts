@@ -1,11 +1,11 @@
-import { Signal, signal } from '@angular/core';
+import { Signal, WritableSignal } from '@angular/core';
 import { LogicFn } from '@angular/forms/signals';
 
 /**
  * Per-field debounced signal pair.
  */
 interface DebouncedSignalPair {
-  immediateValue: ReturnType<typeof signal<boolean>>;
+  immediateValue: WritableSignal<boolean>;
   debouncedValue: Signal<boolean | undefined>;
 }
 
@@ -22,6 +22,6 @@ export class LogicFunctionCacheService {
   /** Cache for debounced logic functions, keyed by serialized expression + debounceMs. */
   readonly debouncedLogicFunctionCache = new Map<string, LogicFn<unknown, boolean>>();
 
-  /** Per-field signal store for debounced logic, keyed by FieldContext reference. */
-  readonly debouncedSignalStore = new WeakMap<object, DebouncedSignalPair>();
+  /** Per-field signal store for debounced logic, keyed by field path. */
+  readonly debouncedSignalStore = new Map<string, DebouncedSignalPair>();
 }
