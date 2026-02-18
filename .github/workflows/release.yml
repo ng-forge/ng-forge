@@ -182,14 +182,10 @@ jobs:
       - name: Publish to npm (dry-run)
         if: ${{ inputs.mode == 'dry-run' }}
         run: pnpm nx release publish --access public --dry-run
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
         if: ${{ inputs.mode == 'publish' }}
-        run: pnpm nx release publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm nx release publish --access public --provenance
 
       - name: Summary
         run: |
