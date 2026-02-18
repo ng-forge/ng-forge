@@ -25,8 +25,8 @@ const config = {
               queryParams: {
                 q: 'formValue.query',
               },
-              debounceMs: 100,
             },
+            debounceMs: 100,
             responseExpression: 'response.shouldHide',
             pendingValue: true,
           },

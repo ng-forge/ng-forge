@@ -564,36 +564,6 @@ describe('validator-factory', () => {
         });
       });
 
-      it('should warn when debounceMs is set', () => {
-        runInInjectionContext(injector, () => {
-          const formValue = signal({ username: 'test' });
-          const config: ValidatorConfig = {
-            type: 'http',
-            http: {
-              url: '/api/check',
-              method: 'GET',
-              queryParams: { username: 'fieldValue' },
-              debounceMs: 500,
-            },
-            responseMapping: {
-              validWhen: 'response.available',
-              errorKind: 'usernameTaken',
-            },
-          };
-
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>((path) => {
-              applyValidator(config, path.username);
-              expect(mockLogger.warn).toHaveBeenCalledWith(
-                'debounceMs is ignored on HTTP validators — it only applies to HTTP derivations and conditions.',
-              );
-            }),
-          );
-          mockFormSignal.set(formInstance);
-        });
-      });
-
       it('should not warn when debounceMs is not set', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });

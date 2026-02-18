@@ -55,7 +55,7 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
 
   const pendingValue = condition.pendingValue ?? false;
   const cacheDurationMs = condition.cacheDurationMs ?? 30000;
-  const debounceMs = condition.http.debounceMs ?? 300;
+  const debounceMs = condition.debounceMs ?? 300;
 
   // Check function cache
   const cacheKey = stableStringify(condition);

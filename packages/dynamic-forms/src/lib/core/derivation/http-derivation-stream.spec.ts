@@ -87,6 +87,7 @@ describe('createHttpDerivationStream', () => {
       },
       responseExpression: options.responseExpression ?? 'response.rate',
       trigger: options.trigger ?? 'onChange',
+      debounceMs: options.debounceMs,
       isShorthand: options.isShorthand ?? false,
       stopOnUserOverride: options.stopOnUserOverride,
       reEngageOnDependencyChange: options.reEngageOnDependencyChange,
@@ -519,7 +520,9 @@ describe('createHttpDerivationStream', () => {
 
       const entry = createHttpEntry('rate', {
         dependsOn: ['country'],
-        http: { url: 'https://api.example.com/rate', method: 'GET', debounceMs: 500 },
+        http: { url: 'https://api.example.com/rate', method: 'GET' },
+        trigger: 'debounced',
+        debounceMs: 500,
       });
 
       const context = createContext(form, formValueSignal);

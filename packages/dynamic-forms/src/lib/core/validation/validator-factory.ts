@@ -347,10 +347,6 @@ function applyDeclarativeHttpValidator(config: DeclarativeHttpValidatorConfig, f
   const logger = inject(DynamicFormLogger);
   const whenLogic = createConditionalLogic(config.when);
 
-  if (config.http.debounceMs != null) {
-    logger.warn('debounceMs is ignored on HTTP validators — it only applies to HTTP derivations and conditions.');
-  }
-
   validateHttp(fieldPath, {
     request: (ctx: FieldContext<unknown>) => {
       if (whenLogic && !whenLogic(ctx)) return undefined;

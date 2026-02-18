@@ -275,6 +275,7 @@ describe('derivation-collector', () => {
             logic: [
               {
                 type: 'derivation',
+                source: 'http',
                 http: {
                   url: 'https://api.example.com/rate',
                   method: 'GET',
@@ -299,7 +300,7 @@ describe('derivation-collector', () => {
         expect(collection.entries[0].dependsOn).toContain('currency');
       });
 
-      it('should throw DynamicFormError when HTTP entry has no dependsOn', () => {
+      it('should throw DynamicFormError when HTTP entry has empty dependsOn', () => {
         const fields: FieldDef<unknown>[] = [
           {
             key: 'rate',
@@ -307,75 +308,16 @@ describe('derivation-collector', () => {
             logic: [
               {
                 type: 'derivation',
+                source: 'http',
                 http: { url: 'https://api.example.com/rate' },
                 responseExpression: 'response.rate',
-                // No dependsOn
-              },
+                dependsOn: [],
+              } as any,
             ],
           } as NumberFieldDef,
         ];
 
         expect(() => collectDerivations(fields)).toThrow(/requires explicit 'dependsOn'/);
-      });
-
-      it('should throw DynamicFormError when HTTP is combined with expression', () => {
-        const fields: FieldDef<unknown>[] = [
-          {
-            key: 'rate',
-            type: 'number',
-            logic: [
-              {
-                type: 'derivation',
-                http: { url: 'https://api.example.com/rate' },
-                expression: 'formValue.something',
-                responseExpression: 'response.rate',
-                dependsOn: ['currency'],
-              },
-            ],
-          } as NumberFieldDef,
-        ];
-
-        expect(() => collectDerivations(fields)).toThrow(/mutually exclusive/);
-      });
-
-      it('should throw DynamicFormError when HTTP is combined with value', () => {
-        const fields: FieldDef<unknown>[] = [
-          {
-            key: 'rate',
-            type: 'number',
-            logic: [
-              {
-                type: 'derivation',
-                http: { url: 'https://api.example.com/rate' },
-                value: 42,
-                responseExpression: 'response.rate',
-                dependsOn: ['currency'],
-              },
-            ],
-          } as NumberFieldDef,
-        ];
-
-        expect(() => collectDerivations(fields)).toThrow(/mutually exclusive/);
-      });
-
-      it('should throw DynamicFormError when HTTP is combined with functionName', () => {
-        const fields: FieldDef<unknown>[] = [
-          {
-            key: 'rate',
-            type: 'number',
-            logic: [
-              {
-                type: 'derivation',
-                http: { url: 'https://api.example.com/rate' },
-                functionName: 'getRate',
-                responseExpression: 'response.rate',
-                dependsOn: ['currency'],
-              },
-            ],
-          } as NumberFieldDef,
-        ];
-
-        expect(() => collectDerivations(fields)).toThrow(/mutually exclusive/);
       });
 
       it('should throw DynamicFormError when HTTP entry uses wildcard dependsOn', () => {
@@ -386,6 +328,7 @@ describe('derivation-collector', () => {
             logic: [
               {
                 type: 'derivation',
+                source: 'http',
                 http: { url: 'https://api.example.com/rate' },
                 responseExpression: 'response.rate',
                 dependsOn: ['*'],
@@ -405,6 +348,7 @@ describe('derivation-collector', () => {
             logic: [
               {
                 type: 'derivation',
+                source: 'http',
                 http: { url: 'https://api.example.com/rate' },
                 responseExpression: 'response.rate',
                 dependsOn: ['currency', '*'],
@@ -415,24 +359,69 @@ describe('derivation-collector', () => {
 
         expect(() => collectDerivations(fields)).toThrow(/cannot use wildcard/);
       });
+    });
 
-      it('should throw DynamicFormError when HTTP is set without responseExpression', () => {
+    describe('async function derivation entries', () => {
+      it('should carry asyncFunctionName from config to entry', () => {
         const fields: FieldDef<unknown>[] = [
           {
-            key: 'rate',
+            key: 'price',
             type: 'number',
             logic: [
               {
                 type: 'derivation',
-                http: { url: 'https://api.example.com/rate' },
-                dependsOn: ['currency'],
-                // No responseExpression
+                source: 'asyncFunction',
+                asyncFunctionName: 'fetchSuggestedPrice',
+                dependsOn: ['productId', 'quantity'],
               },
             ],
           } as NumberFieldDef,
         ];
 
-        expect(() => collectDerivations(fields)).toThrow(/requires 'responseExpression'/);
+        const collection = collectDerivations(fields);
+
+        expect(collection.entries.length).toBe(1);
+        expect(collection.entries[0].asyncFunctionName).toBe('fetchSuggestedPrice');
+        expect(collection.entries[0].dependsOn).toContain('productId');
+        expect(collection.entries[0].dependsOn).toContain('quantity');
+      });
+
+      it('should throw DynamicFormError when async entry has empty dependsOn', () => {
+        const fields: FieldDef<unknown>[] = [
+          {
+            key: 'price',
+            type: 'number',
+            logic: [
+              {
+                type: 'derivation',
+                source: 'asyncFunction',
+                asyncFunctionName: 'fetchData',
+                dependsOn: [],
+              } as any,
+            ],
+          } as NumberFieldDef,
+        ];
+
+        expect(() => collectDerivations(fields)).toThrow(/requires explicit 'dependsOn'/);
+      });
+
+      it('should throw DynamicFormError when async entry uses wildcard dependsOn', () => {
+        const fields: FieldDef<unknown>[] = [
+          {
+            key: 'price',
+            type: 'number',
+            logic: [
+              {
+                type: 'derivation',
+                source: 'asyncFunction',
+                asyncFunctionName: 'fetchData',
+                dependsOn: ['*'],
+              },
+            ],
+          } as NumberFieldDef,
+        ];
+
+        expect(() => collectDerivations(fields)).toThrow(/cannot use wildcard/);
       });
     });
 

@@ -26,6 +26,7 @@ const config = {
       logic: [
         {
           type: 'derivation',
+          source: 'asyncFunction',
           asyncFunctionName: 'lookupCity',
           dependsOn: ['zipCode'],
           condition: { type: 'fieldValue', fieldPath: 'enableLookup', operator: 'equals', value: true },

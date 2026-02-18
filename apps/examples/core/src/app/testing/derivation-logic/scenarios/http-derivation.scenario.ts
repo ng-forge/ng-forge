@@ -24,6 +24,7 @@ const config = {
       logic: [
         {
           type: 'derivation',
+          source: 'http',
           http: {
             url: '/api/exchange-rate',
             method: 'GET',

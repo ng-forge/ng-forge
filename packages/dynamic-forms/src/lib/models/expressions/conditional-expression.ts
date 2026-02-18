@@ -51,18 +51,42 @@ export interface FormValueCondition {
 }
 
 /**
- * Condition that invokes a registered custom function by name.
+ * Condition that invokes a registered custom function by name (new API).
  *
- * The `expression` field holds the registered function name (not a JS expression).
  * Register functions via `customFnConfig.customFunctions`.
  *
  * @public
  */
-export interface CustomCondition {
+export interface CustomConditionNew {
   type: 'custom';
   /** Name of the registered custom function to invoke */
+  functionName: string;
+}
+
+/**
+ * @deprecated Use `CustomConditionNew` with `functionName` instead.
+ * The `expression` field was misnamed — it holds a function registry key, not a JS expression.
+ * Will be removed in a future minor version.
+ *
+ * @public
+ */
+export interface CustomConditionDeprecated {
+  type: 'custom';
+  /**
+   * @deprecated Use `functionName` instead. Will be removed in a future minor version.
+   */
   expression: string;
 }
+
+/**
+ * Condition that invokes a registered custom function by name.
+ *
+ * Use `functionName` (new API). The `expression` field is deprecated.
+ * Register functions via `customFnConfig.customFunctions`.
+ *
+ * @public
+ */
+export type CustomCondition = CustomConditionNew | CustomConditionDeprecated;
 
 /**
  * Condition that evaluates a JavaScript expression using the secure AST-based parser.
@@ -112,6 +136,11 @@ export interface HttpCondition {
   pendingValue?: boolean;
   /** Cache duration in ms for HTTP responses. @default 30000 */
   cacheDurationMs?: number;
+  /**
+   * Debounce time in milliseconds for re-evaluation when dependent form values change.
+   * @default 300
+   */
+  debounceMs?: number;
 }
 
 /**

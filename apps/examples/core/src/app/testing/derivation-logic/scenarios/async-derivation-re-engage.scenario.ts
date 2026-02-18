@@ -23,6 +23,7 @@ const config = {
       logic: [
         {
           type: 'derivation',
+          source: 'asyncFunction',
           asyncFunctionName: 'lookupTimezone',
           dependsOn: ['country'],
           stopOnUserOverride: true,

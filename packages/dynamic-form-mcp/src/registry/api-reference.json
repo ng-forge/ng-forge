@@ -468,7 +468,9 @@
       "javascript": "{ type: 'javascript', expression: 'formValue.age >= 18' }",
       "and": "{ type: 'and', conditions: [...] }",
       "or": "{ type: 'or', conditions: [...] }",
-      "http": "{ type: 'http', http: { url: '/api/check', queryParams: { field: 'formValue.x' } }, responseExpression: 'response.allowed', pendingValue: false, cacheDurationMs: 30000 }",
+      "http": "{ type: 'http', http: { url: '/api/check', queryParams: { field: 'formValue.x' } }, responseExpression: 'response.allowed', pendingValue: false, cacheDurationMs: 30000, debounceMs: 300 }",
+      "async": "{ type: 'async', asyncFunctionName: 'myAsyncCheck', pendingValue: false, debounceMs: 300 }",
+      "custom": "{ type: 'custom', functionName: 'myConditionFn' }",
       "true": "{ type: 'true' }",
       "false": "{ type: 'false' }"
     },
@@ -488,12 +490,18 @@
     ],
     "buttonConditions": ["formInvalid", "formSubmitting", "pageInvalid"],
     "derivationExample": "{ key: 'fullName', derivation: 'formValue.first + \" \" + formValue.last' }",
-    "httpDerivationExample": "{ key: 'rate', logic: [{ type: 'derivation', http: { url: '/api/rate', queryParams: { from: 'formValue.currency' } }, responseExpression: 'response.rate', dependsOn: ['currency'] }] }",
+    "httpDerivationExample": "{ key: 'rate', logic: [{ type: 'derivation', source: 'http', http: { url: '/api/rate', queryParams: { from: 'formValue.currency' } }, responseExpression: 'response.rate', dependsOn: ['currency'] }] }",
     "httpDerivationRules": {
+      "source": "REQUIRED - use source: 'http' to select HTTP derivation mode",
       "dependsOn": "REQUIRED - prevents wildcard triggering on every keystroke",
       "responseExpression": "REQUIRED - extracts value from HTTP response body",
-      "mutuallyExclusive": "http cannot be combined with expression, value, or functionName",
       "noArrays": "Array fields (items.$.rate) are NOT supported for HTTP derivations"
+    },
+    "asyncFunctionDerivationExample": "{ key: 'price', logic: [{ type: 'derivation', source: 'asyncFunction', asyncFunctionName: 'fetchSuggestedPrice', dependsOn: ['productId', 'quantity'] }] }",
+    "asyncFunctionDerivationRules": {
+      "source": "REQUIRED - use source: 'asyncFunction' to select async derivation mode",
+      "dependsOn": "REQUIRED - prevents wildcard triggering on every form change",
+      "noWildcard": "Wildcards ('*') are NOT allowed in dependsOn for async derivations"
     },
     "expressionVariables": {
       "formValue": "Complete form value object",

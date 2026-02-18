@@ -28,10 +28,4 @@ export interface HttpRequestConfig {
 
   /** HTTP headers to include in the request */
   headers?: Record<string, string>;
-
-  /**
-   * Debounce time in milliseconds. Defaults to 300.
-   * Used by HTTP derivations and conditions (PRs 3-4), NOT by validators.
-   */
-  debounceMs?: number;
 }

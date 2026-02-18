@@ -93,7 +93,7 @@ export function createHttpDerivationStream(
 
   // Capture after the guard — TS narrows this to `string` here
   const responseExpression = entry.responseExpression;
-  const debounceMs = entry.http.debounceMs ?? DEFAULT_HTTP_DEBOUNCE_MS;
+  const debounceMs = entry.debounceMs ?? DEFAULT_HTTP_DEBOUNCE_MS;
 
   return formValue$.pipe(
     startWith(null as Record<string, unknown> | null),
