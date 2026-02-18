@@ -1745,8 +1745,7 @@ test.describe('Value Derivation Logic Tests', () => {
       await productSelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("Widget A")').click();
-      await page.waitForTimeout(1000);
-      await expect(priceInput).toHaveValue('9.99');
+      await expect(priceInput).toHaveValue('9.99', { timeout: 5000 });
     });
 
     test('should update derived value when product changes again', async ({ page, helpers }) => {
@@ -1760,15 +1759,13 @@ test.describe('Value Derivation Logic Tests', () => {
       await productSelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("Widget A")').click();
-      await page.waitForTimeout(1000);
-      await expect(priceInput).toHaveValue('9.99');
+      await expect(priceInput).toHaveValue('9.99', { timeout: 5000 });
 
       // Select Widget C → price = 29.99
       await productSelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("Widget C")').click();
-      await page.waitForTimeout(1000);
-      await expect(priceInput).toHaveValue('29.99');
+      await expect(priceInput).toHaveValue('29.99', { timeout: 5000 });
     });
 
     test('should chain async derivation to expression derivation (product → price → total)', async ({ page, helpers }) => {
@@ -1787,15 +1784,13 @@ test.describe('Value Derivation Logic Tests', () => {
       await productSelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("Widget B")').click();
-      await page.waitForTimeout(1000);
 
-      await expect(priceInput).toHaveValue('19.99');
-      await expect(totalInput).toHaveValue('19.99');
+      await expect(priceInput).toHaveValue('19.99', { timeout: 5000 });
+      await expect(totalInput).toHaveValue('19.99', { timeout: 5000 });
 
       // Change quantity to 3 → total = 19.99 * 3 = 59.97
       await helpers.clearAndFill(quantityInput, '3');
-      await page.waitForTimeout(500);
-      await expect(totalInput).toHaveValue('59.97');
+      await expect(totalInput).toHaveValue('59.97', { timeout: 5000 });
     });
   });
 
@@ -1812,18 +1807,17 @@ test.describe('Value Derivation Logic Tests', () => {
 
       // Enter valid key → result populates
       await helpers.fillInput(lookupKeyInput, 'ABC');
-      await page.waitForTimeout(1000);
-      await expect(resultInput).toHaveValue('Result for ABC');
+      await expect(resultInput).toHaveValue('Result for ABC', { timeout: 5000 });
 
       // Enter 'INVALID' → function throws → result retains previous value
       await helpers.clearAndFill(lookupKeyInput, 'INVALID');
-      await page.waitForTimeout(1000);
+      // Wait for debounce + async to settle, then verify value unchanged
+      await page.waitForTimeout(600);
       await expect(resultInput).toHaveValue('Result for ABC');
 
       // Enter new valid key → stream recovers
       await helpers.clearAndFill(lookupKeyInput, 'XYZ');
-      await page.waitForTimeout(1000);
-      await expect(resultInput).toHaveValue('Result for XYZ');
+      await expect(resultInput).toHaveValue('Result for XYZ', { timeout: 5000 });
     });
   });
 
@@ -1844,15 +1838,13 @@ test.describe('Value Derivation Logic Tests', () => {
       await countrySelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("United States")').click();
-      await page.waitForTimeout(1000);
-      await expect(timezoneInput).toHaveValue('America/New_York');
+      await expect(timezoneInput).toHaveValue('America/New_York', { timeout: 5000 });
 
       // Select UK → timezone = Europe/London
       await countrySelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("United Kingdom")').click();
-      await page.waitForTimeout(1000);
-      await expect(timezoneInput).toHaveValue('Europe/London');
+      await expect(timezoneInput).toHaveValue('Europe/London', { timeout: 5000 });
     });
 
     test('should stop async derivation after user manually edits timezone', async ({ page, helpers }) => {
@@ -1866,18 +1858,17 @@ test.describe('Value Derivation Logic Tests', () => {
       await countrySelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("United States")').click();
-      await page.waitForTimeout(1000);
-      await expect(timezoneInput).toHaveValue('America/New_York');
+      await expect(timezoneInput).toHaveValue('America/New_York', { timeout: 5000 });
 
       // User manually overrides timezone
       await helpers.clearAndFill(timezoneInput, 'Custom/Timezone');
-      await page.waitForTimeout(500);
 
       // Change country to UK → timezone should NOT update (user override)
       await countrySelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("United Kingdom")').click();
-      await page.waitForTimeout(1000);
+      // Wait for debounce + async to settle, then verify override persists
+      await page.waitForTimeout(600);
       await expect(timezoneInput).toHaveValue('Custom/Timezone');
     });
 
@@ -1892,18 +1883,17 @@ test.describe('Value Derivation Logic Tests', () => {
       await countrySelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("United States")').click();
-      await page.waitForTimeout(1000);
-      await expect(timezoneInput).toHaveValue('America/New_York');
+      await expect(timezoneInput).toHaveValue('America/New_York', { timeout: 5000 });
 
       // Override it
       await helpers.clearAndFill(timezoneInput, 'My/Timezone');
-      await page.waitForTimeout(500);
 
       // Change country to verify override persists
       await countrySelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("Germany")').click();
-      await page.waitForTimeout(1000);
+      // Wait for debounce + async to settle, then verify override persists
+      await page.waitForTimeout(600);
 
       // Submit and verify the overridden value
       const data = await helpers.submitFormAndCapture(scenario);
@@ -1928,8 +1918,7 @@ test.describe('Value Derivation Logic Tests', () => {
       await countrySelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("United States")').click();
-      await page.waitForTimeout(1000);
-      await expect(timezoneInput).toHaveValue('America/New_York');
+      await expect(timezoneInput).toHaveValue('America/New_York', { timeout: 5000 });
     });
 
     test('should stop deriving after user manually edits timezone', async ({ page, helpers }) => {
@@ -1943,12 +1932,10 @@ test.describe('Value Derivation Logic Tests', () => {
       await countrySelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("United States")').click();
-      await page.waitForTimeout(1000);
-      await expect(timezoneInput).toHaveValue('America/New_York');
+      await expect(timezoneInput).toHaveValue('America/New_York', { timeout: 5000 });
 
       // User manually overrides timezone
       await helpers.clearAndFill(timezoneInput, 'Custom/Timezone');
-      await page.waitForTimeout(500);
       await expect(timezoneInput).toHaveValue('Custom/Timezone');
     });
 
@@ -1963,19 +1950,16 @@ test.describe('Value Derivation Logic Tests', () => {
       await countrySelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("United States")').click();
-      await page.waitForTimeout(1000);
-      await expect(timezoneInput).toHaveValue('America/New_York');
+      await expect(timezoneInput).toHaveValue('America/New_York', { timeout: 5000 });
 
       // Step 2: User manually overrides timezone (marks field as dirty)
       await helpers.clearAndFill(timezoneInput, 'Custom/Timezone');
-      await page.waitForTimeout(500);
 
       // Step 3: Change country → re-engagement clears dirty, async fires again
       await countrySelect.click();
       await page.waitForTimeout(300);
       await page.locator('mat-option:has-text("United Kingdom")').click();
-      await page.waitForTimeout(1000);
-      await expect(timezoneInput).toHaveValue('Europe/London');
+      await expect(timezoneInput).toHaveValue('Europe/London', { timeout: 5000 });
     });
   });
 
@@ -1994,9 +1978,8 @@ test.describe('Value Derivation Logic Tests', () => {
 
       // Toggle is off by default — type zip code
       await helpers.fillInput(zipCodeInput, '62701');
-      await page.waitForTimeout(1000);
-
-      // City should remain empty (async not fired due to condition)
+      // Wait for debounce + async to settle, then verify city unchanged
+      await page.waitForTimeout(600);
       await expect(cityInput).toHaveValue('');
     });
 
@@ -2010,12 +1993,10 @@ test.describe('Value Derivation Logic Tests', () => {
 
       // Enable lookup
       await toggleField.locator('button[role="switch"]').click();
-      await page.waitForTimeout(300);
 
       // Type zip code → async fires → city derived
       await helpers.fillInput(zipCodeInput, '62701');
-      await page.waitForTimeout(1000);
-      await expect(cityInput).toHaveValue('Springfield');
+      await expect(cityInput).toHaveValue('Springfield', { timeout: 5000 });
     });
   });
 });

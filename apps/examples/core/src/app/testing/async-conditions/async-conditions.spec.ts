@@ -20,17 +20,14 @@ test.describe('Async Conditions Tests', () => {
 
       // Select "Admin" → checkAdminHidden returns false → field visible
       await helpers.selectOption(roleSelect, 'Admin');
-      await page.waitForTimeout(1000);
       await expect(adminPanelField).toBeVisible({ timeout: 5000 });
 
       // Switch to "Viewer" → checkAdminHidden returns true → field hidden
       await helpers.selectOption(roleSelect, 'Viewer');
-      await page.waitForTimeout(1000);
       await expect(adminPanelField).toBeHidden({ timeout: 5000 });
 
       // Switch back to "Admin" → visible again
       await helpers.selectOption(roleSelect, 'Admin');
-      await page.waitForTimeout(1000);
       await expect(adminPanelField).toBeVisible({ timeout: 5000 });
     });
   });
@@ -49,13 +46,11 @@ test.describe('Async Conditions Tests', () => {
       // Type "US-CA" → checkDisabled returns false → field enabled
       await regionInput.fill('US-CA');
       await regionInput.blur();
-      await page.waitForTimeout(1000);
       await expect(taxExemptionInput).toBeEnabled({ timeout: 5000 });
 
       // Type "EU-DE" → checkDisabled returns true → field disabled
       await regionInput.fill('EU-DE');
       await regionInput.blur();
-      await page.waitForTimeout(1000);
       await expect(taxExemptionInput).toBeDisabled({ timeout: 5000 });
     });
   });
@@ -73,12 +68,10 @@ test.describe('Async Conditions Tests', () => {
 
       // Select "US" → checkTaxIdRequired returns true → taxId required
       await helpers.selectOption(countrySelect, 'United States');
-      await page.waitForTimeout(1000);
       await expect(taxIdField.locator('.mdc-floating-label--required, [aria-required="true"]').first()).toBeVisible({ timeout: 5000 });
 
       // Select "UK" → checkTaxIdRequired returns false → taxId optional
       await helpers.selectOption(countrySelect, 'United Kingdom');
-      await page.waitForTimeout(1000);
       const requiredIndicator = taxIdField.locator('[aria-required="true"]');
       await expect(requiredIndicator).toBeHidden({ timeout: 5000 });
     });
@@ -97,12 +90,10 @@ test.describe('Async Conditions Tests', () => {
 
       // Select "Admin" → checkReadonly returns false → salary editable
       await helpers.selectOption(roleSelect, 'Admin');
-      await page.waitForTimeout(1000);
       await expect(salaryInput).not.toHaveAttribute('readonly', { timeout: 5000 });
 
       // Select "Viewer" → checkReadonly returns true → salary readonly
       await helpers.selectOption(roleSelect, 'Viewer');
-      await page.waitForTimeout(1000);
       await expect(salaryInput).toHaveAttribute('readonly', { timeout: 5000 });
     });
   });
@@ -134,6 +125,40 @@ test.describe('Async Conditions Tests', () => {
 
       // After async resolves (shouldHide: false), field should be visible
       await expect(resultField).toBeVisible({ timeout: 10000 });
+    });
+  });
+
+  test.describe('Multiple Logic Types with Async', () => {
+    test('should apply independent async hidden + sync disabled on same field', async ({ page, helpers }) => {
+      await page.goto(testUrl('/test/async-conditions/composite-async'));
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('composite-async-test');
+      await expect(scenario).toBeVisible();
+
+      const roleSelect = helpers.getSelect(scenario, 'userRole');
+      const toggleField = scenario.locator('#featureFlag');
+      const advancedPanel = scenario.locator('#advancedPanel');
+      const advancedInput = scenario.locator('#advancedPanel input');
+
+      // Select "Admin" → async returns false (show) + toggle on (enabled)
+      await helpers.selectOption(roleSelect, 'Admin');
+      await expect(advancedPanel).toBeVisible({ timeout: 5000 });
+      await expect(advancedInput).toBeEnabled({ timeout: 5000 });
+
+      // Disable editing toggle → sync disabled kicks in
+      await toggleField.locator('button[role="switch"]').click();
+      await expect(advancedPanel).toBeVisible({ timeout: 5000 });
+      await expect(advancedInput).toBeDisabled({ timeout: 5000 });
+
+      // Select "Viewer" → async returns true (hide), disabled state irrelevant
+      await helpers.selectOption(roleSelect, 'Viewer');
+      await expect(advancedPanel).toBeHidden({ timeout: 5000 });
+
+      // Select "Editor" → async returns false (show), toggle still off → disabled
+      await helpers.selectOption(roleSelect, 'Editor');
+      await expect(advancedPanel).toBeVisible({ timeout: 5000 });
+      await expect(advancedInput).toBeDisabled({ timeout: 5000 });
     });
   });
 });

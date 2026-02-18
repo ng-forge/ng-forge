@@ -5,6 +5,7 @@ import { requiredAsyncScenario } from './scenarios/required-async.scenario';
 import { readonlyAsyncScenario } from './scenarios/readonly-async.scenario';
 import { asyncErrorFallbackScenario } from './scenarios/async-error-fallback.scenario';
 import { asyncPendingValueScenario } from './scenarios/async-pending-value.scenario';
+import { compositeAsyncScenario } from './scenarios/composite-async.scenario';
 
 /**
  * Async Conditions Suite
@@ -23,6 +24,7 @@ export const asyncConditionsSuite: TestSuite = {
     readonlyAsyncScenario,
     asyncErrorFallbackScenario,
     asyncPendingValueScenario,
+    compositeAsyncScenario,
   ],
 };
 

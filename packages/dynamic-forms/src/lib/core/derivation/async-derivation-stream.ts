@@ -87,6 +87,10 @@ export function createAsyncDerivationStream(
   const asyncFunctionName = entry.asyncFunctionName;
   const debounceMs = entry.debounceMs ?? DEFAULT_ASYNC_DEBOUNCE_MS;
 
+  // startWith(null) → pairwise() causes all fields to appear "changed" on the
+  // first emission (null vs actual form value), so every dependsOn field matches.
+  // This intentionally fires the async derivation on initial form load — same
+  // pattern as http-derivation-stream.ts.
   return formValue$.pipe(
     startWith(null as Record<string, unknown> | null),
     pairwise(),

@@ -37,6 +37,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getAsyncConditionsScenario('async-pending-value-test') },
   },
+  {
+    path: 'composite-async',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAsyncConditionsScenario('composite-async-test') },
+  },
 ];
 
 export default routes;
