@@ -1,3 +1,54 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/).
+
+## [0.6.0](https://github.com/ng-forge/ng-forge/compare/v0.5.2...v0.6.0) (2026-02-19)
+
+### 🚀 Features
+
+- ⚠️ **dynamic-forms:** add 3-tier value exclusion for form submissions ([#240](https://github.com/ng-forge/ng-forge/pull/240))
+- **dynamic-forms:** add hidden logic support to container fields ([#242](https://github.com/ng-forge/ng-forge/pull/242))
+- **dynamic-forms:** add per-item wrapper div to array fields ([#243](https://github.com/ng-forge/ng-forge/pull/243))
+- **dynamic-forms:** add simplified array API with template property ([#245](https://github.com/ng-forge/ng-forge/pull/245))
+- **dynamic-forms:** add minLength/maxLength validation for array fields ([#211](https://github.com/ng-forge/ng-forge/pull/211))
+- **dynamic-forms:** add declarative HTTP validator type ([#249](https://github.com/ng-forge/ng-forge/pull/249))
+- **dynamic-forms:** add field state in evaluation context and stopOnUserOverride ([#248](https://github.com/ng-forge/ng-forge/pull/248))
+- **dynamic-forms:** add HTTP resolver for derivations ([#255](https://github.com/ng-forge/ng-forge/pull/255), [#246](https://github.com/ng-forge/ng-forge/issues/246))
+- **dynamic-forms:** add HTTP condition type for server-driven field state ([#256](https://github.com/ng-forge/ng-forge/pull/256))
+- **dynamic-forms:** add async custom functions for derivations and conditions ([#257](https://github.com/ng-forge/ng-forge/pull/257))
+- **dynamic-forms:** add URL path parameter interpolation to HttpRequestConfig ([#263](https://github.com/ng-forge/ng-forge/pull/263))
+
+### 🐛 Bug Fixes
+
+- **dynamic-forms:** fix cross-field validators silently failing on fields inside groups ([#260](https://github.com/ng-forge/ng-forge/pull/260))
+- **dynamic-forms:** fix cross-field validators not routing errors for fields inside groups ([#262](https://github.com/ng-forge/ng-forge/pull/262))
+
+### ♻️ Code Refactoring
+
+- ⚠️ **dynamic-forms:** simplify logic APIs with deprecation warnings ([#254](https://github.com/ng-forge/ng-forge/pull/254))
+- **dynamic-forms:** improve async/HTTP API ergonomics with source discriminant ([#258](https://github.com/ng-forge/ng-forge/pull/258))
+- **examples:** split E2E tests into core functional and UI visual apps ([#239](https://github.com/ng-forge/ng-forge/pull/239))
+
+### 📚 Documentation
+
+- fix broken documentation links, update sitemap and llms.txt ([#241](https://github.com/ng-forge/ng-forge/pull/241))
+- add backers section to readme ([21740ab7a](https://github.com/ng-forge/ng-forge/commit/21740ab7a))
+- **docs:** document async features, HTTP validators, and container logic ([#259](https://github.com/ng-forge/ng-forge/pull/259))
+- **dynamic-forms:** add CLAUDE.md project documentation and gitignore .claude/plans ([48954c2ff](https://github.com/ng-forge/ng-forge/commit/48954c2ff))
+
+### ✅ Tests
+
+- **dynamic-forms:** add value two-way binding e2e tests ([#244](https://github.com/ng-forge/ng-forge/pull/244))
+
+### ⚠️ Breaking Changes
+
+- **dynamic-forms:** simplify logic APIs with deprecation warnings ([#254](https://github.com/ng-forge/ng-forge/pull/254))
+  `ConditionalExpression` is now a discriminated union. Code that sets invalid property combos (e.g., `fieldPath` on a javascript condition) will fail to compile.
+- **dynamic-forms:** add 3-tier value exclusion for form submissions ([#240](https://github.com/ng-forge/ng-forge/pull/240))
+  Field values are now excluded from submitted output when the field is hidden, disabled, or readonly. To restore previous behavior, use `withValueExclusionDefaults({ excludeValueIfHidden: false, excludeValueIfDisabled: false, excludeValueIfReadonly: false })`.
+
 ## 0.5.2 (2026-02-09)
 
 ### 🚀 Features
