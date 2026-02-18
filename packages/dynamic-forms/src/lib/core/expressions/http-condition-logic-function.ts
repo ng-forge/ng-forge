@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injector, Signal, signal, untracked } from '@angular/core';
+import { inject, Injector, Signal, WritableSignal, signal, untracked } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
 import { catchError, debounceTime, distinctUntilChanged, filter, map, of, startWith, switchMap, tap } from 'rxjs';
@@ -68,7 +68,7 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
   // would collide when multiple HTTP conditions exist on the same field (same FieldContext key).
   const perFunctionSignalStore = new WeakMap<
     object,
-    { resolvedRequest: ReturnType<typeof signal<HttpResourceRequest | undefined>>; resultValue: Signal<boolean> }
+    { resolvedRequest: WritableSignal<HttpResourceRequest | undefined>; resultValue: Signal<boolean> }
   >();
 
   const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
