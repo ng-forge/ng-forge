@@ -227,6 +227,25 @@ function applyCrossFieldTreeValidator<TModel>(
 }
 
 /**
+ * Resolves a value from a nested object using a dot-separated path.
+ * e.g. resolveNestedValue({ a: { b: 1 } }, 'a.b') === 1
+ */
+function resolveNestedValue(obj: Record<string, unknown>, path: string): unknown {
+  if (!path.includes('.')) {
+    return obj[path];
+  }
+  const parts = path.split('.');
+  let current: unknown = obj;
+  for (const part of parts) {
+    if (current == null || typeof current !== 'object') {
+      return undefined;
+    }
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
+}
+
+/**
  * Evaluates a single cross-field validator entry and returns an error if validation fails.
  */
 function evaluateCrossFieldValidator<TModel>(
@@ -238,7 +257,7 @@ function evaluateCrossFieldValidator<TModel>(
   logger: Logger,
 ): ValidationError.WithOptionalField | null {
   const { config } = entry;
-  const fieldValue = formValue[sourceFieldKey];
+  const fieldValue = resolveNestedValue(formValue, sourceFieldKey);
 
   // Create evaluation context for condition/expression evaluation
   const evaluationContext: EvaluationContext = {
