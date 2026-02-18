@@ -1,7 +1,7 @@
 import { inject, Injector, Signal, WritableSignal, signal, untracked } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { catchError, debounceTime, distinctUntilChanged, filter, from, map, of, startWith, switchMap } from 'rxjs';
+import { catchError, concat, debounceTime, distinctUntilChanged, filter, from, map, of, switchMap } from 'rxjs';
 import { AsyncCondition } from '../../models/expressions/conditional-expression';
 import { stableStringify } from '../../utils/stable-stringify';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
@@ -74,15 +74,20 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
               fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions()),
             );
 
-            return from(asyncFn(evaluationContext)).pipe(
-              map((result) => !!result),
-              catchError((error) => {
-                logger.warn('Async Condition - function failed:', error);
-                return of(pendingValue);
-              }),
+            // concat ensures pendingValue is emitted immediately when a new trigger
+            // arrives, before the async call resolves. This prevents the signal from
+            // showing a stale resolved value during re-evaluation.
+            return concat(
+              of(pendingValue),
+              from(asyncFn(evaluationContext)).pipe(
+                map((result) => !!result),
+                catchError((error) => {
+                  logger.warn('Async Condition - function failed:', error);
+                  return of(pendingValue);
+                }),
+              ),
             );
           }),
-          startWith(pendingValue),
         );
 
         return toSignal(pipeline, { injector, initialValue: pendingValue });

@@ -112,22 +112,11 @@ export function createAsyncDerivationStream(
         if (entry.stopOnUserOverride) {
           const isDirty = readFieldDirty(formAccessor, entry.fieldKey);
           if (isDirty) {
-            // Re-engage: if a dependency changed, clear dirty state so derivation resumes
-            if (entry.reEngageOnDependencyChange && changedFields.size > 0) {
-              if (entry.dependsOn.some((dep) => changedFields.has(dep))) {
-                resetFieldState(formAccessor, entry.fieldKey);
-                // Fall through — proceed with the async call
-              } else {
-                const derivationLogger = untracked(() => context.derivationLogger());
-                derivationLogger.evaluation({
-                  debugName: entry.debugName,
-                  fieldKey: entry.fieldKey,
-                  result: 'skipped',
-                  skipReason: 'user-override',
-                });
-                subscriber.complete();
-                return;
-              }
+            // Re-engage: the outer filter already guarantees changedFields is non-empty
+            // and that a dependsOn field changed, so only check reEngageOnDependencyChange.
+            if (entry.reEngageOnDependencyChange) {
+              resetFieldState(formAccessor, entry.fieldKey);
+              // Fall through — proceed with the async call
             } else {
               const derivationLogger = untracked(() => context.derivationLogger());
               derivationLogger.evaluation({
@@ -234,6 +223,11 @@ export function createAsyncDerivationStream(
           error: (error) => {
             const message = error instanceof Error ? error.message : String(error);
             context.logger.warn(`${LOG_PREFIX} Async function failed for '${entry.fieldKey}': ${message}`);
+            subscriber.complete();
+          },
+          complete: () => {
+            // Handles Observables that complete without emitting (e.g. EMPTY),
+            // preventing the inner Observable from staying open indefinitely.
             subscriber.complete();
           },
         });

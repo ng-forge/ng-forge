@@ -470,7 +470,18 @@ export class DerivationOrchestrator {
    * Used for smart teardown comparison.
    */
   private computeAsyncEntryKeys(entries: DerivationEntry[]): Set<string> {
-    return new Set(entries.map((entry) => `${entry.fieldKey}:${entry.asyncFunctionName}`));
+    return new Set(
+      entries.map((entry) => {
+        const config = {
+          asyncFunctionName: entry.asyncFunctionName,
+          dependsOn: entry.dependsOn,
+          debounceMs: entry.debounceMs,
+          stopOnUserOverride: entry.stopOnUserOverride,
+          reEngageOnDependencyChange: entry.reEngageOnDependencyChange,
+        };
+        return `${entry.fieldKey}:${JSON.stringify(config, Object.keys(config).sort())}`;
+      }),
+    );
   }
 
   /**

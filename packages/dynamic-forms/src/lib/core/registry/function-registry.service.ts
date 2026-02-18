@@ -6,7 +6,7 @@ import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../v
 /**
  * Registry service for custom functions and validators
  *
- * This service maintains four separate registries:
+ * This service maintains six separate registries:
  *
  * 1. **Custom Functions** - For conditional expressions (when/readonly/disabled)
  *    - Used in: when conditions, readonly logic, disabled logic
@@ -27,6 +27,16 @@ import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../v
  *    - Used in: validators array on fields with type 'customHttp'
  *    - Configuration object with url, method, mapResponse, etc.
  *    - Example: `{ url: '/api/check', method: 'GET', mapResponse: ... }`
+ *
+ * 5. **Async Derivation Functions** - For asynchronous value derivation via Promise/Observable
+ *    - Used in: derivation config with `asyncFunctionName`
+ *    - Return type: Promise<unknown> | Observable<unknown>
+ *    - Example: `fetchPrice: (ctx) => priceService.get(ctx.formValue.productId)`
+ *
+ * 6. **Async Condition Functions** - For asynchronous boolean conditions via Promise/Observable
+ *    - Used in: condition config with `type: 'async'` and `asyncFunctionName`
+ *    - Return type: Promise<boolean> | Observable<boolean>
+ *    - Example: `checkAdmin: (ctx) => authService.hasRole(ctx.formValue.userId, 'admin')`
  *
  * @example
  * ```typescript
