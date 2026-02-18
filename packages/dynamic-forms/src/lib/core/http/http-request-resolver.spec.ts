@@ -168,6 +168,71 @@ describe('resolveHttpRequest', () => {
     expect(result).not.toHaveProperty('debounceMs');
   });
 
+  describe('path params', () => {
+    it('should replace :key placeholders with evaluated expression values', () => {
+      const config: HttpRequestConfig = {
+        url: '/api/users/:userId',
+        params: { userId: 'formValue.username' },
+      };
+      const result = resolveHttpRequest(config, createContext());
+
+      expect(result.url).toBe('/api/users/john');
+    });
+
+    it('should replace multiple path params in one URL', () => {
+      const config: HttpRequestConfig = {
+        url: '/api/users/:name/age/:age',
+        params: { name: 'formValue.username', age: 'formValue.age' },
+      };
+      const result = resolveHttpRequest(config, createContext());
+
+      expect(result.url).toBe('/api/users/john/age/25');
+    });
+
+    it('should combine path params with query params', () => {
+      const config: HttpRequestConfig = {
+        url: '/api/users/:userId/orders',
+        params: { userId: 'formValue.username' },
+        queryParams: { status: "'active'" },
+      };
+      const result = resolveHttpRequest(config, createContext());
+
+      expect(result.url).toBe('/api/users/john/orders?status=active');
+    });
+
+    it('should URL-encode special characters in path param values', () => {
+      const config: HttpRequestConfig = {
+        url: '/api/users/:userId',
+        params: { userId: 'fieldValue' },
+      };
+      const ctx = createContext({ fieldValue: 'hello world/special&chars' });
+      const result = resolveHttpRequest(config, ctx);
+
+      expect(result.url).toBe('/api/users/hello%20world%2Fspecial%26chars');
+    });
+
+    it('should leave URL unchanged when param key has no matching :placeholder', () => {
+      const config: HttpRequestConfig = {
+        url: '/api/users',
+        params: { userId: 'formValue.username' },
+      };
+      const result = resolveHttpRequest(config, createContext());
+
+      expect(result.url).toBe('/api/users');
+    });
+
+    it('should replace with empty string when expression evaluates to null/undefined', () => {
+      const config: HttpRequestConfig = {
+        url: '/api/users/:userId',
+        params: { userId: 'formValue.nonExistent' },
+      };
+      const ctx = createContext({ formValue: {} });
+      const result = resolveHttpRequest(config, ctx);
+
+      expect(result.url).toBe('/api/users/');
+    });
+  });
+
   describe('expression error handling', () => {
     it('should return undefined (coerced to empty string) for a deeply nested path that does not exist in queryParams', () => {
       const config: HttpRequestConfig = {

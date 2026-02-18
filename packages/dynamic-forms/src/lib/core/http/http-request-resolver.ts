@@ -13,6 +13,13 @@ import { ExpressionParser } from '../expressions/parser/expression-parser';
 export function resolveHttpRequest(config: HttpRequestConfig, context: EvaluationContext): HttpResourceRequest {
   let url = config.url;
 
+  if (config.params) {
+    for (const [key, expression] of Object.entries(config.params)) {
+      const value = ExpressionParser.evaluate(expression, context);
+      url = url.replace(`:${key}`, encodeURIComponent(value != null ? String(value) : ''));
+    }
+  }
+
   if (config.queryParams) {
     const params = new URLSearchParams();
     for (const [key, expression] of Object.entries(config.queryParams)) {
