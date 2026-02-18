@@ -25,6 +25,7 @@ const config = {
       logic: [
         {
           type: 'derivation',
+          source: 'asyncFunction',
           asyncFunctionName: 'fetchPrice',
           dependsOn: ['product'],
         },

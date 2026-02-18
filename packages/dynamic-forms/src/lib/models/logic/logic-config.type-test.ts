@@ -93,6 +93,7 @@ describe('StateLogicConfig - Property Types', () => {
 describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
   type ExpectedKeys =
     | 'type'
+    | 'source'
     | 'condition'
     | 'value'
     | 'expression'
@@ -114,10 +115,29 @@ describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
   });
 
   describe('required keys', () => {
-    // Note: trigger is required in DebouncedDerivationLogicConfig variant,
-    // which makes it appear in RequiredKeys for the union type
-    it('should have type and trigger as required', () => {
-      expectTypeOf<RequiredKeys<DerivationLogicConfig>>().toEqualTypeOf<'type' | 'trigger'>();
+    // RequiredKeys<T> for a union = keys required in at least one member.
+    // With 10 mode × trigger variants, the required keys include:
+    // - type: required in all (SharedDerivationFields)
+    // - trigger: required in all 5 debounced variants
+    // - source: required in HTTP and asyncFunction variants
+    // - http, dependsOn, responseExpression: required in HTTP variants
+    // - asyncFunctionName, dependsOn: required in asyncFunction variants
+    // - expression: required in expression variants
+    // - value: required in value variants
+    // - functionName: required in function variants
+    it('should have type, trigger, source, and all mode-specific required fields', () => {
+      expectTypeOf<RequiredKeys<DerivationLogicConfig>>().toEqualTypeOf<
+        | 'type'
+        | 'trigger'
+        | 'source'
+        | 'http'
+        | 'dependsOn'
+        | 'responseExpression'
+        | 'asyncFunctionName'
+        | 'expression'
+        | 'value'
+        | 'functionName'
+      >();
     });
   });
 });
@@ -149,6 +169,116 @@ describe('DerivationLogicConfig - Property Types', () => {
 
   it('trigger should be DerivationTrigger or undefined', () => {
     expectTypeOf<DerivationLogicConfig['trigger']>().toEqualTypeOf<DerivationTrigger | undefined>();
+  });
+});
+
+// ============================================================================
+// DerivationLogicConfig - Per-source required fields
+// ============================================================================
+
+describe('DerivationLogicConfig - source: http required fields', () => {
+  it('should accept valid HTTP derivation with all required fields', () => {
+    const logic = {
+      type: 'derivation',
+      source: 'http',
+      http: { url: '/api/exchange-rate', queryParams: { from: 'formValue.currency' } },
+      responseExpression: 'response.rate',
+      dependsOn: ['currency'],
+    } as const satisfies DerivationLogicConfig;
+
+    expectTypeOf(logic.source).toEqualTypeOf<'http'>();
+  });
+
+  it('should reject HTTP derivation missing dependsOn', () => {
+    // @ts-expect-error — dependsOn is required for source: 'http'
+    const _missing: DerivationLogicConfig = {
+      type: 'derivation',
+      source: 'http',
+      http: { url: '/api/data' },
+      responseExpression: 'response.value',
+    };
+    void _missing;
+  });
+
+  it('should reject HTTP derivation missing responseExpression', () => {
+    // @ts-expect-error — responseExpression is required for source: 'http'
+    const _missing: DerivationLogicConfig = {
+      type: 'derivation',
+      source: 'http',
+      http: { url: '/api/data' },
+      dependsOn: ['country'],
+    };
+    void _missing;
+  });
+
+  it('should reject HTTP derivation missing http', () => {
+    // @ts-expect-error — http is required for source: 'http'
+    const _missing: DerivationLogicConfig = {
+      type: 'derivation',
+      source: 'http',
+      dependsOn: ['country'],
+      responseExpression: 'response.value',
+    };
+    void _missing;
+  });
+
+  it('should support debounce via trigger mechanism', () => {
+    const logic = {
+      type: 'derivation',
+      source: 'http',
+      http: { url: '/api/data' },
+      responseExpression: 'response.value',
+      dependsOn: ['field1'],
+      trigger: 'debounced',
+      debounceMs: 500,
+    } as const satisfies DerivationLogicConfig;
+
+    expectTypeOf(logic.trigger).toEqualTypeOf<'debounced'>();
+    expectTypeOf(logic.debounceMs).toEqualTypeOf<500>();
+  });
+});
+
+describe('DerivationLogicConfig - source: asyncFunction required fields', () => {
+  it('should accept valid async function derivation', () => {
+    const logic = {
+      type: 'derivation',
+      source: 'asyncFunction',
+      asyncFunctionName: 'fetchSuggestedPrice',
+      dependsOn: ['productId', 'quantity'],
+    } as const satisfies DerivationLogicConfig;
+
+    expectTypeOf(logic.source).toEqualTypeOf<'asyncFunction'>();
+  });
+
+  it('should reject async derivation missing dependsOn', () => {
+    // @ts-expect-error — dependsOn is required for source: 'asyncFunction'
+    const _missing: DerivationLogicConfig = {
+      type: 'derivation',
+      source: 'asyncFunction',
+      asyncFunctionName: 'fetchData',
+    };
+    void _missing;
+  });
+
+  it('should reject async derivation missing asyncFunctionName', () => {
+    // @ts-expect-error — asyncFunctionName is required for source: 'asyncFunction'
+    const _missing: DerivationLogicConfig = {
+      type: 'derivation',
+      source: 'asyncFunction',
+      dependsOn: ['field1'],
+    };
+    void _missing;
+  });
+});
+
+describe('DerivationLogicConfig - sync sources (backwards compatible)', () => {
+  it('should accept expression derivation without source (backwards compat)', () => {
+    const logic = {
+      type: 'derivation',
+      expression: 'formValue.quantity * formValue.price',
+    } as const satisfies DerivationLogicConfig;
+
+    expectTypeOf(logic.type).toEqualTypeOf<'derivation'>();
   });
 });
 

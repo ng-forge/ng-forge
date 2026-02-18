@@ -83,10 +83,10 @@ export function isCrossFieldExpression(
 
     case 'custom': {
       // For custom functions, determine scope from registry or default to cross-field.
-      // The expression.expression property holds the function name.
+      // Support both new API (functionName) and deprecated API (expression).
       //
       // Look up function scope from registry if context is provided
-      const functionName = expr.expression;
+      const functionName = 'functionName' in expr ? expr.functionName : expr.expression;
       if (context?.getFunctionScope && functionName) {
         const scope = context.getFunctionScope(functionName);
         if (scope === 'field') {

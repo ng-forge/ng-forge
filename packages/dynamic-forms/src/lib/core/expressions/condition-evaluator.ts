@@ -97,16 +97,28 @@ function evaluateJavaScriptExpression(expression: JavascriptCondition, context: 
 }
 
 function evaluateCustomFunction(expression: CustomCondition, context: EvaluationContext): boolean {
-  const customFn = context.customFunctions?.[expression.expression];
+  const fnName = 'functionName' in expression ? expression.functionName : expression.expression;
+
+  // TODO(@ng-forge): remove deprecated code in next minor
+  if (!('functionName' in expression) && context.deprecationTracker) {
+    warnDeprecated(
+      context.logger,
+      context.deprecationTracker,
+      'condition:custom:expression',
+      "CustomCondition 'expression' field is deprecated. Use 'functionName' instead.",
+    );
+  }
+
+  const customFn = context.customFunctions?.[fnName];
   if (!customFn) {
-    context.logger.error('Custom function not found:', expression.expression);
+    context.logger.error('Custom function not found:', fnName);
     return false;
   }
 
   try {
     return !!customFn(context);
   } catch (error) {
-    context.logger.error('Error executing custom function:', expression.expression, error);
+    context.logger.error('Error executing custom function:', fnName, error);
     return false;
   }
 }

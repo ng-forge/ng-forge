@@ -25,6 +25,7 @@ const config = {
       logic: [
         {
           type: 'derivation',
+          source: 'http',
           http: {
             url: '/api/lookup-city',
             method: 'GET',

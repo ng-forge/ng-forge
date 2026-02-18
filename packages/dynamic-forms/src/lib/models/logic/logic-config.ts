@@ -187,15 +187,11 @@ export type LogicTrigger = 'onChange' | 'debounced';
 export type DerivationTrigger = LogicTrigger;
 
 /**
- * Base configuration for value derivation logic.
- *
- * All derivations target the field they are defined on (self-targeting).
- * This simplifies configuration by removing the need for `targetField` -
- * derivation logic is placed on the field that should receive the computed value.
+ * Shared fields that appear on all derivation logic config variants.
  *
  * @internal
  */
-interface BaseDerivationLogicConfig {
+interface SharedDerivationFields {
   /**
    * Logic type identifier for value derivation.
    */
@@ -288,166 +284,6 @@ interface BaseDerivationLogicConfig {
   condition?: ConditionalExpression | boolean;
 
   /**
-   * Static value to set on this field.
-   *
-   * Use when the derived value is a constant.
-   * Mutually exclusive with `expression` and `functionName`.
-   *
-   * @example
-   * ```typescript
-   * value: '+1'           // String
-   * value: 100            // Number
-   * value: true           // Boolean
-   * value: { code: 'US' } // Object
-   * ```
-   */
-  value?: unknown;
-
-  /**
-   * JavaScript expression to evaluate for the derived value.
-   *
-   * Has access to `formValue` object containing all form values.
-   * For array fields, `formValue` is scoped to the current array item.
-   * Uses the same secure AST-based parser as other expressions.
-   * Mutually exclusive with `value` and `functionName`.
-   *
-   * @example
-   * ```typescript
-   * expression: 'formValue.quantity * formValue.unitPrice'
-   * expression: 'formValue.firstName + " " + formValue.lastName'
-   * expression: 'formValue.price * (1 - formValue.discount / 100)'
-   * ```
-   */
-  expression?: string;
-
-  /**
-   * Name of a registered custom derivation function.
-   *
-   * The function receives the evaluation context and returns the derived value.
-   * Register functions in `customFnConfig.derivations`.
-   * Mutually exclusive with `value`, `expression`, and `http`.
-   *
-   * @example
-   * ```typescript
-   * functionName: 'getCurrencyForCountry'
-   * functionName: 'calculateTax'
-   * functionName: 'formatPhoneNumber'
-   * ```
-   */
-  functionName?: string;
-
-  /**
-   * HTTP request configuration for server-driven derivations.
-   *
-   * When set, the derivation value is fetched from an HTTP endpoint.
-   * The request is sent when dependencies change, with automatic
-   * debouncing and cancellation of in-flight requests.
-   *
-   * Mutually exclusive with `value`, `expression`, `functionName`, and `asyncFunctionName`.
-   * Requires `dependsOn` to be explicitly specified (to avoid wildcard
-   * triggering on every keystroke).
-   * Requires `responseExpression` to extract the value from the response.
-   *
-   * @example
-   * ```typescript
-   * {
-   *   key: 'exchangeRate',
-   *   logic: [{
-   *     type: 'derivation',
-   *     http: {
-   *       url: '/api/exchange-rate',
-   *       method: 'GET',
-   *       queryParams: {
-   *         from: 'formValue.sourceCurrency',
-   *         to: 'formValue.targetCurrency',
-   *       },
-   *     },
-   *     responseExpression: 'response.rate',
-   *     dependsOn: ['sourceCurrency', 'targetCurrency'],
-   *   }]
-   * }
-   * ```
-   */
-  http?: HttpRequestConfig;
-
-  /**
-   * Name of a registered async derivation function.
-   *
-   * The function receives the evaluation context and returns a Promise or Observable
-   * of the derived value. Register functions in `customFnConfig.asyncDerivations`.
-   *
-   * Mutually exclusive with `value`, `expression`, `functionName`, and `http`.
-   * Requires `dependsOn` to be explicitly specified (to avoid triggering on every
-   * form change, since async functions may involve expensive I/O operations).
-   *
-   * @example
-   * ```typescript
-   * {
-   *   key: 'suggestedPrice',
-   *   logic: [{
-   *     type: 'derivation',
-   *     asyncFunctionName: 'fetchSuggestedPrice',
-   *     dependsOn: ['productId', 'quantity'],
-   *   }]
-   * }
-   * ```
-   */
-  asyncFunctionName?: string;
-
-  /**
-   * Expression to extract the derived value from an HTTP response.
-   *
-   * Evaluated via `ExpressionParser` with `{ response }` as the evaluation scope,
-   * where `response` is the parsed HTTP response body.
-   *
-   * Required when `http` is set.
-   *
-   * @example
-   * ```typescript
-   * responseExpression: 'response.rate'
-   * responseExpression: 'response.data.suggestedPrice'
-   * responseExpression: 'response.items[0].name'
-   * ```
-   */
-  responseExpression?: string;
-
-  /**
-   * Explicit field dependencies for derivations.
-   *
-   * When using `functionName`, you can optionally specify which fields
-   * the function depends on. This enables more efficient re-evaluation
-   * by only triggering when specific dependencies change.
-   *
-   * If not provided with `functionName`, defaults to all fields ('*').
-   * For `expression`, dependencies are automatically extracted from the expression.
-   * For `value`, no dependencies are needed (static value).
-   *
-   * @example
-   * ```typescript
-   * // Only re-evaluate when country changes
-   * {
-   *   key: 'currency',
-   *   logic: [{
-   *     type: 'derivation',
-   *     functionName: 'getCurrencyForCountry',
-   *     dependsOn: ['country']
-   *   }]
-   * }
-   *
-   * // Override automatic detection for complex expressions
-   * {
-   *   key: 'total',
-   *   logic: [{
-   *     type: 'derivation',
-   *     expression: 'calculateTotal(formValue)',
-   *     dependsOn: ['quantity', 'unitPrice', 'discount']
-   *   }]
-   * }
-   * ```
-   */
-  dependsOn?: string[];
-
-  /**
    * When true, the derivation stops running after the user manually
    * edits the target field.
    *
@@ -501,40 +337,324 @@ interface BaseDerivationLogicConfig {
 }
 
 /**
- * Derivation logic that evaluates immediately on change (default).
+ * Trigger variants for derivation timing.
+ * @internal
+ */
+type ImmediateDerivationTrigger = { trigger?: 'onChange'; debounceMs?: never };
+type DebouncedDerivationTrigger = { trigger: 'debounced'; debounceMs?: number };
+
+// ============================================================================
+// HTTP derivation mode (source: 'http' — required; dependsOn/responseExpression — required)
+// ============================================================================
+
+/**
+ * Base for HTTP derivations. `source: 'http'` is required.
+ * TypeScript enforces `dependsOn` and `responseExpression` at the type level.
  *
  * @internal
  */
-interface OnChangeDerivationLogicConfig extends BaseDerivationLogicConfig {
+interface HttpDerivationBase extends SharedDerivationFields {
+  /** Identifies this derivation as HTTP-driven. */
+  source: 'http';
   /**
-   * Trigger for immediate evaluation.
-   * @default 'onChange'
+   * HTTP request configuration for server-driven derivations.
+   *
+   * The request is sent when dependencies change, with automatic
+   * debouncing and cancellation of in-flight requests.
+   *
+   * Configure debounce via the `trigger: 'debounced'` + `debounceMs` mechanism.
+   *
+   * @example
+   * ```typescript
+   * {
+   *   key: 'exchangeRate',
+   *   logic: [{
+   *     type: 'derivation',
+   *     source: 'http',
+   *     http: {
+   *       url: '/api/exchange-rate',
+   *       method: 'GET',
+   *       queryParams: {
+   *         from: 'formValue.sourceCurrency',
+   *         to: 'formValue.targetCurrency',
+   *       },
+   *     },
+   *     responseExpression: 'response.rate',
+   *     dependsOn: ['sourceCurrency', 'targetCurrency'],
+   *   }]
+   * }
+   * ```
    */
-  trigger?: 'onChange';
-  /** Not allowed for onChange trigger */
-  debounceMs?: never;
+  http: HttpRequestConfig;
+  /**
+   * Explicit field dependencies. Required for HTTP derivations to prevent
+   * wildcard triggering on every keystroke.
+   */
+  dependsOn: string[];
+  /**
+   * Expression to extract the derived value from the HTTP response.
+   *
+   * Evaluated via `ExpressionParser` with `{ response }` as the evaluation scope.
+   *
+   * @example
+   * ```typescript
+   * responseExpression: 'response.rate'
+   * responseExpression: 'response.data.suggestedPrice'
+   * ```
+   */
+  responseExpression: string;
+  // Mutual exclusivity: other sources are not allowed
+  value?: never;
+  expression?: never;
+  functionName?: never;
+  asyncFunctionName?: never;
+}
+
+// ============================================================================
+// Async function derivation mode (source: 'asyncFunction' — required; dependsOn — required)
+// ============================================================================
+
+/**
+ * Base for async function derivations. `source: 'asyncFunction'` is required.
+ * TypeScript enforces `dependsOn` at the type level.
+ *
+ * @internal
+ */
+interface AsyncFunctionDerivationBase extends SharedDerivationFields {
+  /** Identifies this derivation as async-function-driven. */
+  source: 'asyncFunction';
+  /**
+   * Name of a registered async derivation function.
+   *
+   * The function receives the evaluation context and returns a Promise or Observable
+   * of the derived value. Register functions in `customFnConfig.asyncDerivations`.
+   *
+   * @example
+   * ```typescript
+   * {
+   *   key: 'suggestedPrice',
+   *   logic: [{
+   *     type: 'derivation',
+   *     source: 'asyncFunction',
+   *     asyncFunctionName: 'fetchSuggestedPrice',
+   *     dependsOn: ['productId', 'quantity'],
+   *   }]
+   * }
+   * ```
+   */
+  asyncFunctionName: string;
+  /**
+   * Explicit field dependencies. Required for async derivations to prevent
+   * wildcard triggering on every form change.
+   */
+  dependsOn: string[];
+  // Mutual exclusivity: other sources are not allowed
+  value?: never;
+  expression?: never;
+  functionName?: never;
+  http?: never;
+  responseExpression?: never;
+}
+
+// ============================================================================
+// Sync derivation modes
+// ============================================================================
+
+/**
+ * Base for expression derivations.
+ *
+ * @internal
+ */
+interface ExpressionDerivationBase extends SharedDerivationFields {
+  source?: never;
+  /**
+   * JavaScript expression to evaluate for the derived value.
+   *
+   * Has access to `formValue` object containing all form values.
+   * For array fields, `formValue` is scoped to the current array item.
+   * Uses the same secure AST-based parser as other expressions.
+   *
+   * @example
+   * ```typescript
+   * expression: 'formValue.quantity * formValue.unitPrice'
+   * expression: 'formValue.firstName + " " + formValue.lastName'
+   * expression: 'formValue.price * (1 - formValue.discount / 100)'
+   * ```
+   */
+  expression: string;
+  /**
+   * Explicit field dependencies for expressions.
+   *
+   * For `expression`, dependencies are automatically extracted from the expression.
+   * Provide `dependsOn` to override automatic detection for complex expressions.
+   *
+   * @example
+   * ```typescript
+   * // Override automatic detection for complex expressions
+   * {
+   *   key: 'total',
+   *   logic: [{
+   *     type: 'derivation',
+   *     expression: 'calculateTotal(formValue)',
+   *     dependsOn: ['quantity', 'unitPrice', 'discount']
+   *   }]
+   * }
+   * ```
+   */
+  dependsOn?: string[];
+  // Mutual exclusivity: other mode payload fields are not allowed
+  value?: never;
+  functionName?: never;
+  http?: never;
+  asyncFunctionName?: never;
+  responseExpression?: never;
 }
 
 /**
- * Derivation logic that evaluates after a debounce period.
- *
- * Use this for self-transforms (lowercase, trim, format) to avoid
- * interrupting the user while they're actively typing.
+ * Base for value derivations.
  *
  * @internal
  */
-interface DebouncedDerivationLogicConfig extends BaseDerivationLogicConfig {
+interface ValueDerivationBase extends SharedDerivationFields {
+  source?: never;
   /**
-   * Trigger for debounced evaluation.
-   * Evaluates after the value has stabilized for the debounce duration.
+   * Static value to set on this field.
+   *
+   * Use when the derived value is a constant.
+   *
+   * @example
+   * ```typescript
+   * value: '+1'           // String
+   * value: 100            // Number
+   * value: true           // Boolean
+   * value: { code: 'US' } // Object
+   * ```
    */
-  trigger: 'debounced';
+  value: unknown;
   /**
-   * Debounce duration in milliseconds.
-   * @default 500
+   * Explicit field dependencies for value derivations.
+   *
+   * For `value` (static), no dependencies are needed.
+   * Provide `dependsOn` to conditionally re-evaluate when specific fields change.
    */
-  debounceMs?: number;
+  dependsOn?: string[];
+  // Mutual exclusivity: other mode payload fields are not allowed
+  expression?: never;
+  functionName?: never;
+  http?: never;
+  asyncFunctionName?: never;
+  responseExpression?: never;
 }
+
+/**
+ * Base for custom sync function derivations.
+ *
+ * @internal
+ */
+interface FunctionDerivationBase extends SharedDerivationFields {
+  source?: never;
+  /**
+   * Name of a registered custom derivation function.
+   *
+   * The function receives the evaluation context and returns the derived value.
+   * Register functions in `customFnConfig.derivations`.
+   *
+   * @example
+   * ```typescript
+   * functionName: 'getCurrencyForCountry'
+   * functionName: 'calculateTax'
+   * functionName: 'formatPhoneNumber'
+   * ```
+   */
+  functionName: string;
+  /**
+   * Explicit field dependencies for function derivations.
+   *
+   * If not provided, defaults to all fields ('*').
+   * Specify `dependsOn` for better performance when the function only
+   * depends on a subset of fields.
+   *
+   * @example
+   * ```typescript
+   * // Only re-evaluate when country changes
+   * {
+   *   key: 'currency',
+   *   logic: [{
+   *     type: 'derivation',
+   *     functionName: 'getCurrencyForCountry',
+   *     dependsOn: ['country']
+   *   }]
+   * }
+   * ```
+   */
+  dependsOn?: string[];
+  // Mutual exclusivity: other mode payload fields are not allowed
+  value?: never;
+  expression?: never;
+  http?: never;
+  asyncFunctionName?: never;
+  responseExpression?: never;
+}
+
+/**
+ * HTTP derivation that evaluates immediately on change (default).
+ * @internal
+ */
+type OnChangeHttpDerivationLogicConfig = HttpDerivationBase & ImmediateDerivationTrigger;
+
+/**
+ * HTTP derivation that evaluates after a debounce period.
+ * @internal
+ */
+type DebouncedHttpDerivationLogicConfig = HttpDerivationBase & DebouncedDerivationTrigger;
+
+/**
+ * Async function derivation that evaluates immediately on change (default).
+ * @internal
+ */
+type OnChangeAsyncFunctionDerivationLogicConfig = AsyncFunctionDerivationBase & ImmediateDerivationTrigger;
+
+/**
+ * Async function derivation that evaluates after a debounce period.
+ * @internal
+ */
+type DebouncedAsyncFunctionDerivationLogicConfig = AsyncFunctionDerivationBase & DebouncedDerivationTrigger;
+
+/**
+ * Expression derivation that evaluates immediately on change (default).
+ * @internal
+ */
+type OnChangeExpressionDerivationLogicConfig = ExpressionDerivationBase & ImmediateDerivationTrigger;
+
+/**
+ * Expression derivation that evaluates after a debounce period.
+ * @internal
+ */
+type DebouncedExpressionDerivationLogicConfig = ExpressionDerivationBase & DebouncedDerivationTrigger;
+
+/**
+ * Value derivation that evaluates immediately on change (default).
+ * @internal
+ */
+type OnChangeValueDerivationLogicConfig = ValueDerivationBase & ImmediateDerivationTrigger;
+
+/**
+ * Value derivation that evaluates after a debounce period.
+ * @internal
+ */
+type DebouncedValueDerivationLogicConfig = ValueDerivationBase & DebouncedDerivationTrigger;
+
+/**
+ * Function derivation that evaluates immediately on change (default).
+ * @internal
+ */
+type OnChangeFunctionDerivationLogicConfig = FunctionDerivationBase & ImmediateDerivationTrigger;
+
+/**
+ * Function derivation that evaluates after a debounce period.
+ * @internal
+ */
+type DebouncedFunctionDerivationLogicConfig = FunctionDerivationBase & DebouncedDerivationTrigger;
 
 /**
  * Configuration for value derivation logic.
@@ -596,7 +716,17 @@ interface DebouncedDerivationLogicConfig extends BaseDerivationLogicConfig {
  *
  * @public
  */
-export type DerivationLogicConfig = OnChangeDerivationLogicConfig | DebouncedDerivationLogicConfig;
+export type DerivationLogicConfig =
+  | OnChangeHttpDerivationLogicConfig
+  | DebouncedHttpDerivationLogicConfig
+  | OnChangeAsyncFunctionDerivationLogicConfig
+  | DebouncedAsyncFunctionDerivationLogicConfig
+  | OnChangeExpressionDerivationLogicConfig
+  | DebouncedExpressionDerivationLogicConfig
+  | OnChangeValueDerivationLogicConfig
+  | DebouncedValueDerivationLogicConfig
+  | OnChangeFunctionDerivationLogicConfig
+  | DebouncedFunctionDerivationLogicConfig;
 
 // TODO(@ng-forge): remove deprecated code in next minor
 /**

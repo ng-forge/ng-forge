@@ -22,6 +22,7 @@ const config = {
       logic: [
         {
           type: 'derivation',
+          source: 'http',
           http: {
             url: '/api/timezone',
             method: 'GET',

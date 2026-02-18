@@ -184,21 +184,11 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
   // Build the effective field key, including array path if in array context
   const effectiveFieldKey = context.arrayPath ? `${context.arrayPath}.$.${fieldKey}` : fieldKey;
 
-  // Validate HTTP derivation constraints
-  if (config.http) {
-    const otherSources = [
-      config.expression && 'expression',
-      config.value !== undefined && 'value',
-      config.functionName && 'functionName',
-      config.asyncFunctionName && 'asyncFunctionName',
-    ].filter(Boolean);
-    if (otherSources.length > 0) {
-      throw new DynamicFormError(
-        `Derivation for '${effectiveFieldKey}' has 'http' combined with ${otherSources.join(', ')}. ` +
-          `HTTP derivations are mutually exclusive with other value sources.`,
-      );
-    }
-    if (!config.dependsOn || config.dependsOn.length === 0) {
+  // Runtime guards for HTTP and async derivations.
+  // Mutual exclusivity and required fields are now enforced by TypeScript (via `source` discriminant).
+  // The wildcard and empty-array checks below are not expressible in the type system.
+  if (config.source === 'http') {
+    if (config.dependsOn.length === 0) {
       throw new DynamicFormError(
         `HTTP derivation for '${effectiveFieldKey}' requires explicit 'dependsOn'. ` +
           `Wildcard dependencies would trigger HTTP requests on every form change.`,
@@ -210,28 +200,10 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
           `Wildcards would trigger HTTP requests on every form change. Specify explicit field dependencies instead.`,
       );
     }
-    if (!config.responseExpression) {
-      throw new DynamicFormError(
-        `HTTP derivation for '${effectiveFieldKey}' requires 'responseExpression' to extract the value from the response.`,
-      );
-    }
   }
 
-  // Validate async derivation constraints
-  if (config.asyncFunctionName) {
-    const otherSources = [
-      config.expression && 'expression',
-      config.value !== undefined && 'value',
-      config.functionName && 'functionName',
-      config.http && 'http',
-    ].filter(Boolean);
-    if (otherSources.length > 0) {
-      throw new DynamicFormError(
-        `Derivation for '${effectiveFieldKey}' has 'asyncFunctionName' combined with ${otherSources.join(', ')}. ` +
-          `Async derivations are mutually exclusive with other value sources.`,
-      );
-    }
-    if (!config.dependsOn || config.dependsOn.length === 0) {
+  if (config.source === 'asyncFunction') {
+    if (config.dependsOn.length === 0) {
       throw new DynamicFormError(
         `Async derivation for '${effectiveFieldKey}' requires explicit 'dependsOn'. ` +
           `Wildcard dependencies would trigger async functions on every form change.`,

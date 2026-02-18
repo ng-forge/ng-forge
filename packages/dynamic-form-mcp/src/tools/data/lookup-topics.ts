@@ -779,7 +779,7 @@ logic: [{ type: 'derivation', expression: 'formValue.firstName + " " + formValue
 logic: [{ type: 'derivation', expression: '...', stopOnUserOverride: true, reEngageOnDependencyChange: true }]
 
 // HTTP derivation (server-driven values)
-logic: [{ type: 'derivation', http: { url: '/api/rate', queryParams: { from: 'formValue.currency' } }, responseExpression: 'response.rate', dependsOn: ['currency'] }]
+logic: [{ type: 'derivation', source: 'http', http: { url: '/api/rate', queryParams: { from: 'formValue.currency' } }, responseExpression: 'response.rate', dependsOn: ['currency'] }]
 \`\`\`
 Derivation is always defined ON the field that receives the computed value (self-targeting).
 **Variables:** \`formValue\`, \`fieldValue\`, \`fieldState\`, \`formFieldState\`, \`externalData\` (see topic: expression-variables)
@@ -858,23 +858,25 @@ Fetch derived values from an HTTP endpoint. Requires \`dependsOn\` (explicit) an
   readonly: true,
   logic: [{
     type: 'derivation',
+    source: 'http',
     http: {
       url: '/api/exchange-rate',
       method: 'GET',
       queryParams: {
         from: 'formValue.sourceCurrency',
         to: 'formValue.targetCurrency'
-      },
-      debounceMs: 500  // Optional, defaults to 300
+      }
     },
     responseExpression: 'response.rate',  // Extract value from response
-    dependsOn: ['sourceCurrency', 'targetCurrency']  // Required for HTTP
+    dependsOn: ['sourceCurrency', 'targetCurrency'],  // Required for HTTP
+    trigger: 'debounced',
+    debounceMs: 500  // Optional, defaults to 300
   }]
 }
 \`\`\`
 
 **Key rules:**
-- \`http\` is mutually exclusive with \`expression\`, \`value\`, and \`functionName\`
+- \`source: 'http'\` is **required** to select HTTP derivation mode
 - \`dependsOn\` is **required** (prevents wildcard triggering on every keystroke)
 - \`responseExpression\` is **required** (extracts value from HTTP response body)
 - \`queryParams\` values are expressions evaluated by ExpressionParser
@@ -895,6 +897,7 @@ Call a registered async function (Promise or Observable) to derive values. Requi
   readonly: true,
   logic: [{
     type: 'derivation',
+    source: 'asyncFunction',
     asyncFunctionName: 'fetchSuggestedPrice',
     dependsOn: ['productId', 'quantity']  // Required for async
   }]
@@ -2046,12 +2049,12 @@ condition: {
   type: 'http',
   http: {
     url: '/api/permissions/check',
-    queryParams: { role: 'formValue.role' },
-    debounceMs: 500
+    queryParams: { role: 'formValue.role' }
   },
   responseExpression: 'response.allowed',
   pendingValue: false,  // visible while loading
-  cacheDurationMs: 60000
+  cacheDurationMs: 60000,
+  debounceMs: 500  // Optional, defaults to 300
 }
 
 // Check feature flag (POST)
@@ -2068,10 +2071,11 @@ condition: {
 \`\`\`
 
 **Properties:**
-- \`http\` (required): \`HttpRequestConfig\` — URL, method, queryParams, body, headers, debounceMs
+- \`http\` (required): \`HttpRequestConfig\` — URL, method, queryParams, body, headers
 - \`responseExpression\` (optional): Expression to extract boolean from response (scope: \`{ response }\`). When omitted, \`!!response\` is used
 - \`pendingValue\` (optional, default \`false\`): Value returned while HTTP request is in-flight
 - \`cacheDurationMs\` (optional, default \`30000\`): TTL for cached responses
+- \`debounceMs\` (optional, default \`300\`): Debounce for re-evaluation when dependent form values change
 
 **Important:** HTTP conditions are resolved asynchronously via signals. They cannot be used inside \`and\`/\`or\` composites (will return \`false\` with a warning). Use them as standalone conditions.
 

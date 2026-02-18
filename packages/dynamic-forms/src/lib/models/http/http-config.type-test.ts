@@ -14,7 +14,7 @@ import type { ConditionalExpression } from '../expressions/conditional-expressio
 // ============================================================================
 
 describe('HttpRequestConfig - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'url' | 'method' | 'queryParams' | 'body' | 'evaluateBodyExpressions' | 'headers' | 'debounceMs';
+  type ExpectedKeys = 'url' | 'method' | 'queryParams' | 'body' | 'evaluateBodyExpressions' | 'headers';
   type ActualKeys = keyof HttpRequestConfig;
 
   it('should have exactly the expected keys', () => {
@@ -28,9 +28,9 @@ describe('HttpRequestConfig - Exhaustive Whitelist', () => {
   });
 
   describe('optional keys', () => {
-    it('should have method, queryParams, body, evaluateBodyExpressions, headers, and debounceMs as optional', () => {
+    it('should have method, queryParams, body, evaluateBodyExpressions, and headers as optional', () => {
       expectTypeOf<OptionalKeys<HttpRequestConfig>>().toEqualTypeOf<
-        'method' | 'queryParams' | 'body' | 'evaluateBodyExpressions' | 'headers' | 'debounceMs'
+        'method' | 'queryParams' | 'body' | 'evaluateBodyExpressions' | 'headers'
       >();
     });
   });
@@ -58,10 +58,6 @@ describe('HttpRequestConfig - Exhaustive Whitelist', () => {
 
     it('headers should be Record<string, string>', () => {
       expectTypeOf<HttpRequestConfig['headers']>().toEqualTypeOf<Record<string, string> | undefined>();
-    });
-
-    it('debounceMs should be number', () => {
-      expectTypeOf<HttpRequestConfig['debounceMs']>().toEqualTypeOf<number | undefined>();
     });
   });
 });
@@ -111,15 +107,6 @@ describe('HttpRequestConfig - Usage Examples', () => {
     expectTypeOf(config.headers).toMatchTypeOf<Record<string, string>>();
   });
 
-  it('should accept config with debounceMs', () => {
-    const config = {
-      url: '/api/search',
-      debounceMs: 500,
-    } as const satisfies HttpRequestConfig;
-
-    expectTypeOf(config.debounceMs).toEqualTypeOf<500>();
-  });
-
   it('should accept full config with all properties', () => {
     const config = {
       url: '/api/validate',
@@ -128,7 +115,6 @@ describe('HttpRequestConfig - Usage Examples', () => {
       body: { data: 'fieldValue' },
       evaluateBodyExpressions: true,
       headers: { Authorization: 'Bearer token' },
-      debounceMs: 300,
     } as const satisfies HttpRequestConfig;
 
     expectTypeOf(config).toMatchTypeOf<HttpRequestConfig>();

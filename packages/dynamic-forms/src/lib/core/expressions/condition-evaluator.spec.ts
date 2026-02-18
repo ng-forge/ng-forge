@@ -304,7 +304,27 @@ describe('condition-evaluator', () => {
     });
 
     describe('custom type', () => {
-      it('should evaluate custom functions correctly', () => {
+      it('should evaluate custom functions correctly via functionName (new API)', () => {
+        const mockCustomFunction = vi.fn().mockReturnValue(true);
+        const contextWithCustomFn: EvaluationContext = {
+          ...mockContext,
+          customFunctions: {
+            testFunction: mockCustomFunction,
+          },
+        };
+
+        const expression: ConditionalExpression = {
+          type: 'custom',
+          functionName: 'testFunction',
+        };
+
+        const result = evaluateCondition(expression, contextWithCustomFn);
+
+        expect(result).toBe(true);
+        expect(mockCustomFunction).toHaveBeenCalledWith(contextWithCustomFn);
+      });
+
+      it('should evaluate custom functions correctly via expression (deprecated API)', () => {
         const mockCustomFunction = vi.fn().mockReturnValue(true);
         const contextWithCustomFn: EvaluationContext = {
           ...mockContext,
@@ -322,6 +342,61 @@ describe('condition-evaluator', () => {
 
         expect(result).toBe(true);
         expect(mockCustomFunction).toHaveBeenCalledWith(contextWithCustomFn);
+      });
+
+      it('should emit deprecation warning when expression field is used', () => {
+        const tracker = createDeprecationWarningTracker();
+        const contextWithTracker: EvaluationContext = {
+          ...mockContext,
+          deprecationTracker: tracker,
+          customFunctions: { myFn: vi.fn().mockReturnValue(true) },
+        };
+
+        const expression: ConditionalExpression = {
+          type: 'custom',
+          expression: 'myFn',
+        };
+
+        evaluateCondition(expression, contextWithTracker);
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining("'expression' field is deprecated"));
+        expect(tracker.warnedKeys.has('condition:custom:expression')).toBe(true);
+      });
+
+      it('should not emit deprecation warning when functionName field is used', () => {
+        const tracker = createDeprecationWarningTracker();
+        const contextWithTracker: EvaluationContext = {
+          ...mockContext,
+          deprecationTracker: tracker,
+          customFunctions: { myFn: vi.fn().mockReturnValue(true) },
+        };
+
+        const expression: ConditionalExpression = {
+          type: 'custom',
+          functionName: 'myFn',
+        };
+
+        evaluateCondition(expression, contextWithTracker);
+
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+        expect(tracker.warnedKeys.has('condition:custom:expression')).toBe(false);
+      });
+
+      it('should emit deprecation warning only once per tracker', () => {
+        const tracker = createDeprecationWarningTracker();
+        const contextWithTracker: EvaluationContext = {
+          ...mockContext,
+          deprecationTracker: tracker,
+          customFunctions: { myFn: vi.fn().mockReturnValue(true) },
+        };
+
+        const expression: ConditionalExpression = { type: 'custom', expression: 'myFn' };
+
+        evaluateCondition(expression, contextWithTracker);
+        evaluateCondition(expression, contextWithTracker);
+        evaluateCondition(expression, contextWithTracker);
+
+        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       });
 
       it('should convert custom function result to boolean', () => {
@@ -349,7 +424,7 @@ describe('condition-evaluator', () => {
 
           const expression: ConditionalExpression = {
             type: 'custom',
-            expression: 'testFunction',
+            functionName: 'testFunction',
           };
 
           const result = evaluateCondition(expression, contextWithCustomFn);
@@ -357,19 +432,10 @@ describe('condition-evaluator', () => {
         });
       });
 
-      it('should return false for missing expression', () => {
+      it('should return false when function registry key does not exist', () => {
         const expression: ConditionalExpression = {
           type: 'custom',
-        };
-
-        const result = evaluateCondition(expression, mockContext);
-        expect(result).toBe(false);
-      });
-
-      it('should handle missing custom functions', () => {
-        const expression: ConditionalExpression = {
-          type: 'custom',
-          expression: 'nonExistentFunction',
+          functionName: 'nonExistentFunction',
         };
 
         const result = evaluateCondition(expression, mockContext);
@@ -392,7 +458,7 @@ describe('condition-evaluator', () => {
 
         const expression: ConditionalExpression = {
           type: 'custom',
-          expression: 'throwingFunction',
+          functionName: 'throwingFunction',
         };
 
         const result = evaluateCondition(expression, contextWithThrowingFn);
@@ -409,7 +475,7 @@ describe('condition-evaluator', () => {
 
         const expression: ConditionalExpression = {
           type: 'custom',
-          expression: 'testFunction',
+          functionName: 'testFunction',
         };
 
         const result = evaluateCondition(expression, contextWithoutCustomFn);
@@ -435,7 +501,7 @@ describe('condition-evaluator', () => {
 
         const expression: ConditionalExpression = {
           type: 'custom',
-          expression: 'contextChecker',
+          functionName: 'contextChecker',
         };
 
         const result = evaluateCondition(expression, contextWithChecker);
@@ -740,7 +806,7 @@ describe('condition-evaluator', () => {
 
         const expression: ConditionalExpression = {
           type: 'custom',
-          expression: 'hasPermission',
+          functionName: 'hasPermission',
         };
 
         const result = evaluateCondition(expression, contextWithExternalData);

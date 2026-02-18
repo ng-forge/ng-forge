@@ -19,6 +19,7 @@ const config = {
       logic: [
         {
           type: 'derivation',
+          source: 'asyncFunction',
           asyncFunctionName: 'lookupValue',
           dependsOn: ['lookupKey'],
         },
