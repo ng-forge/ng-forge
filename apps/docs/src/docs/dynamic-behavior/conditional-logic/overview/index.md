@@ -411,6 +411,238 @@ Advanced custom expressions with access to both field and form values.
 }
 ```
 
+### Field State in Expressions
+
+`javascript` and `custom` expressions have access to two additional variables for querying field interaction state:
+
+- **`fieldState`** — the current field's own state
+- **`formFieldState`** — state of any field in the form, by key
+
+#### fieldState
+
+Use `fieldState` to react to the current field's own interaction state:
+
+```typescript
+// Lock the field as soon as the user edits it
+{
+  key: 'accountNumber',
+  type: 'input',
+  logic: [{
+    type: 'readonly',
+    condition: {
+      type: 'javascript',
+      expression: 'fieldState.dirty',
+    },
+  }],
+}
+```
+
+**Available properties:**
+
+| Property   | Type      | Description                         |
+| ---------- | --------- | ----------------------------------- |
+| `touched`  | `boolean` | User has focused and left the field |
+| `dirty`    | `boolean` | User has changed the field value    |
+| `pristine` | `boolean` | Equivalent to `!dirty`              |
+| `valid`    | `boolean` | Field has no validation errors      |
+| `invalid`  | `boolean` | Field has validation errors         |
+| `pending`  | `boolean` | Async validation is in progress     |
+| `hidden`   | `boolean` | Field is currently hidden           |
+| `readonly` | `boolean` | Field is currently readonly         |
+| `disabled` | `boolean` | Field is currently disabled         |
+
+#### formFieldState
+
+Use `formFieldState` to react to another field's state. Access by field key:
+
+```typescript
+// Make a field readonly once a related field has been touched
+{
+  key: 'billingAddress',
+  type: 'input',
+  logic: [{
+    type: 'readonly',
+    condition: {
+      type: 'javascript',
+      expression: 'formFieldState.shippingAddress.dirty',
+    },
+  }],
+}
+```
+
+`formFieldState` has the same properties as `fieldState`, keyed by field name.
+
+**Example — show a confirmation field only after the primary field is dirty:**
+
+```typescript
+{
+  key: 'confirmEmail',
+  type: 'input',
+  label: 'Confirm Email',
+  logic: [{
+    type: 'hidden',
+    condition: {
+      type: 'javascript',
+      expression: '!formFieldState.email.dirty',
+    },
+  }],
+}
+```
+
+### http
+
+Evaluate a condition by sending an HTTP request and inspecting the response. The request fires automatically when declared query params change, with built-in debouncing.
+
+```typescript
+{
+  type: 'http',
+  http: {
+    url: '/api/permissions',
+    queryParams: {
+      role: 'formValue.userRole',
+    },
+  },
+  responseExpression: 'response.canEdit',
+  pendingValue: false,
+}
+```
+
+**Use when:** Field visibility or state must be determined server-side (permissions, feature flags, country-specific rules).
+
+**Full example — hide an admin panel based on server permissions:**
+
+```typescript
+{
+  key: 'adminPanel',
+  type: 'input',
+  label: 'Admin Panel Access Code',
+  logic: [{
+    type: 'hidden',
+    condition: {
+      type: 'http',
+      http: {
+        url: '/api/permissions',
+        queryParams: {
+          role: 'formValue.userRole',
+        },
+      },
+      responseExpression: 'response.hideAdminPanel',
+      pendingValue: true, // Hide while checking
+    },
+  }],
+}
+```
+
+**HTTP condition properties:**
+
+| Property             | Type                | Required | Default      | Description                                                              |
+| -------------------- | ------------------- | -------- | ------------ | ------------------------------------------------------------------------ |
+| `type`               | `'http'`            | Yes      | —            | Identifies this as an HTTP condition                                     |
+| `http`               | `HttpRequestConfig` | Yes      | —            | Request configuration (see below)                                        |
+| `responseExpression` | `string`            | No       | `!!response` | Expression evaluated with `{ response }` in scope. Must return a boolean |
+| `pendingValue`       | `boolean`           | No       | `false`      | Value returned while the request is in-flight                            |
+| `cacheDurationMs`    | `number`            | No       | `30000`      | How long to cache responses (ms)                                         |
+| `debounceMs`         | `number`            | No       | `300`        | Debounce delay before re-sending (ms)                                    |
+
+**`HttpRequestConfig` quick reference:**
+
+| Property                  | Description                                                              |
+| ------------------------- | ------------------------------------------------------------------------ |
+| `url`                     | Request URL                                                              |
+| `method`                  | HTTP method. Defaults to `'GET'`                                         |
+| `queryParams`             | Key/value map. Values are expressions evaluated against form context     |
+| `body`                    | Request body for POST/PUT/PATCH                                          |
+| `evaluateBodyExpressions` | When `true`, top-level `body` string values are evaluated as expressions |
+| `headers`                 | Request headers                                                          |
+
+**HTTP condition on `required` — server-driven required fields:**
+
+```typescript
+{
+  key: 'taxId',
+  type: 'input',
+  logic: [{
+    type: 'required',
+    condition: {
+      type: 'http',
+      http: {
+        url: '/api/tax-rules',
+        queryParams: { country: 'formValue.country' },
+      },
+      responseExpression: 'response.taxIdRequired',
+      pendingValue: false, // Optional while checking
+    },
+  }],
+}
+```
+
+### async
+
+Evaluate a condition using a custom async function registered in `customFnConfig.asyncConditions`. Functions receive the full form context and must return a `Promise<boolean>` or `Observable<boolean>`.
+
+```typescript
+{
+  type: 'async',
+  asyncFunctionName: 'checkPermission',
+  pendingValue: false,
+}
+```
+
+**Use when:** Condition logic involves Angular service injection, complex async operations, or anything that `http` conditions cannot express directly.
+
+**Registration and usage:**
+
+```typescript
+const formConfig = {
+  customFnConfig: {
+    asyncConditions: {
+      checkReadonly: (context) => {
+        // Can use inject() here for Angular services
+        return inject(PermissionsService).canEdit(context.formValue.resourceId as string);
+      },
+    },
+  },
+
+  fields: [
+    {
+      key: 'salary',
+      type: 'input',
+      label: 'Salary',
+      logic: [
+        {
+          type: 'readonly',
+          condition: {
+            type: 'async',
+            asyncFunctionName: 'checkReadonly',
+            pendingValue: false, // Editable while checking
+          },
+        },
+      ],
+    },
+  ],
+} as const satisfies FormConfig;
+```
+
+**Async condition properties:**
+
+| Property            | Type      | Required | Default | Description                                         |
+| ------------------- | --------- | -------- | ------- | --------------------------------------------------- |
+| `type`              | `'async'` | Yes      | —       | Identifies this as an async condition               |
+| `asyncFunctionName` | `string`  | Yes      | —       | Name registered in `customFnConfig.asyncConditions` |
+| `pendingValue`      | `boolean` | No       | `false` | Value returned while the function is resolving      |
+| `debounceMs`        | `number`  | No       | `300`   | Debounce delay before re-evaluating (ms)            |
+
+**Choosing `pendingValue`:**
+
+The right `pendingValue` depends on the logic type and desired UX:
+
+| Logic type | `pendingValue: false`   | `pendingValue: true`    |
+| ---------- | ----------------------- | ----------------------- |
+| `hidden`   | Visible while checking  | Hidden while checking   |
+| `required` | Optional while checking | Required while checking |
+| `readonly` | Editable while checking | Readonly while checking |
+| `disabled` | Enabled while checking  | Disabled while checking |
+
 ## All Operators
 
 ### Equality Operators
@@ -844,55 +1076,61 @@ Order items become read-only once order is shipped, delivered, or cancelled.
 
 ## ConditionalExpression Interface
 
+`ConditionalExpression` is a discriminated union of all expression types:
+
 ```typescript
-interface ConditionalExpression {
-  /** Expression type - includes 'and' and 'or' for combining conditions */
-  type: 'fieldValue' | 'formValue' | 'javascript' | 'custom' | 'and' | 'or';
+// Sync expressions
+type ConditionalExpression =
+  | { type: 'fieldValue'; fieldPath: string; operator: Operator; value: unknown }
+  | { type: 'formValue'; operator: Operator; value: unknown }
+  | { type: 'javascript'; expression: string }
+  | { type: 'custom'; expression: string }
+  | { type: 'and'; conditions: ConditionalExpression[] }
+  | { type: 'or'; conditions: ConditionalExpression[] }
+  // Async expressions
+  | HttpCondition
+  | AsyncCondition;
 
-  /** Field path for fieldValue type */
-  fieldPath?: string;
+type Operator =
+  | 'equals'
+  | 'notEquals'
+  | 'greater'
+  | 'less'
+  | 'greaterOrEqual'
+  | 'lessOrEqual'
+  | 'contains'
+  | 'startsWith'
+  | 'endsWith'
+  | 'matches';
 
-  /**
-   * Comparison operator
-   * - For 'fieldValue': compares field at fieldPath against value
-   * - For 'formValue': compares entire form object against value
-   */
-  operator?:
-    | 'equals'
-    | 'notEquals'
-    | 'greater'
-    | 'less'
-    | 'greaterOrEqual'
-    | 'lessOrEqual'
-    | 'contains'
-    | 'startsWith'
-    | 'endsWith'
-    | 'matches';
+interface HttpCondition {
+  type: 'http';
+  http: HttpRequestConfig;
+  responseExpression?: string; // Evaluated with { response }. Defaults to !!response
+  pendingValue?: boolean; // Default: false
+  cacheDurationMs?: number; // Default: 30000
+  debounceMs?: number; // Default: 300
+}
 
-  /** Value to compare against (for fieldValue/formValue with operator) */
-  value?: unknown;
-
-  /**
-   * JavaScript expression string
-   * - For 'javascript': Has access to fieldValue and formValue
-   * - For 'custom': Name of registered custom function
-   */
-  expression?: string;
-
-  /** Array of sub-conditions for 'and' and 'or' types */
-  conditions?: ConditionalExpression[];
+interface AsyncCondition {
+  type: 'async';
+  asyncFunctionName: string;
+  pendingValue?: boolean; // Default: false
+  debounceMs?: number; // Default: 300
 }
 ```
 
 **Expression types summary:**
 
-| Type         | Uses                             | Purpose                                        |
-| ------------ | -------------------------------- | ---------------------------------------------- |
-| `fieldValue` | `fieldPath`, `operator`, `value` | Compare a specific field's value               |
-| `formValue`  | `operator`, `value`              | Compare entire form object                     |
-| `javascript` | `expression`                     | Custom JS with `fieldValue`/`formValue` access |
-| `custom`     | `expression`                     | Call registered custom function                |
-| `and`/`or`   | `conditions`                     | Combine multiple conditions                    |
+| Type         | Sync/Async | Key properties                   | Purpose                                                               |
+| ------------ | ---------- | -------------------------------- | --------------------------------------------------------------------- |
+| `fieldValue` | Sync       | `fieldPath`, `operator`, `value` | Compare a specific field's value                                      |
+| `formValue`  | Sync       | `operator`, `value`              | Compare entire form object                                            |
+| `javascript` | Sync       | `expression`                     | Custom JS with `fieldValue`/`formValue`/`fieldState`/`formFieldState` |
+| `custom`     | Sync       | `expression`                     | Call registered custom function                                       |
+| `and`/`or`   | Sync       | `conditions`                     | Combine multiple conditions                                           |
+| `http`       | Async      | `http`, `responseExpression`     | Server-driven condition via HTTP request                              |
+| `async`      | Async      | `asyncFunctionName`              | Custom async function registered in config                            |
 
 ## Common Patterns
 
@@ -1002,7 +1240,9 @@ const config = {
 
 ## Related
 
-- **[Value Derivation](../value-derivation/basics/)** - Computed field values
-- **[Validation](../../validation/basics/)** - Conditional validation
-- **[Type Safety](../../advanced/type-safety/basics/)** - TypeScript integration
-- **[Examples](/examples)** - Real-world form patterns
+- **[Value Derivation](../value-derivation/basics/)** — Computed field values
+- **[Async Derivation](../value-derivation/async/)** — HTTP and async function derivations, stopOnUserOverride
+- **[Validation](../../validation/basics/)** — Conditional validation
+- **[Custom Validators](../../validation/custom-validators/)** — Async and HTTP validators
+- **[Type Safety](../../advanced/type-safety/basics/)** — TypeScript integration
+- **[Examples](/examples)** — Real-world form patterns

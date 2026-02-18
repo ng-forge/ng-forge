@@ -295,7 +295,7 @@ Simplified arrays support `logic` for conditional visibility, just like the comp
   type: 'array',
   template: { key: 'value', type: 'input', label: 'Extra' },
   value: [],
-  logic: [{ type: 'hidden', condition: { field: 'showExtras', value: false } }],
+  logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'showExtras', operator: 'equals', value: false } }],
 }
 ```
 

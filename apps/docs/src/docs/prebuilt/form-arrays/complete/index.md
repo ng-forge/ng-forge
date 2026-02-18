@@ -539,6 +539,31 @@ Arrays can contain these field types:
 
 See [Type Safety & Inference](../advanced/type-safety/basics) for details on how arrays affect type inference.
 
+## Conditional Visibility
+
+Array containers support the `logic` property to conditionally show or hide the entire array section based on form state.
+
+```typescript
+{
+  key: 'dependents',
+  type: 'array',
+  logic: [{
+    type: 'hidden',
+    condition: {
+      type: 'fieldValue',
+      fieldPath: 'hasDependents',
+      operator: 'equals',
+      value: false,
+    },
+  }],
+  fields: [/* ... */],
+}
+```
+
+When the array is hidden, all items and add/remove buttons are hidden with it. Only `'hidden'` is supported as a logic type on containers.
+
+For all available condition types and operators, see [Conditional Logic](../../../dynamic-behavior/conditional-logic/overview/).
+
 ## When to Use the Complete API
 
 The complete API documented on this page is the right choice when you need capabilities beyond what the simplified API offers:

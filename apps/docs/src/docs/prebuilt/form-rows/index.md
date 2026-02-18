@@ -183,3 +183,29 @@ Rows can contain:
 - Leaf fields (input, select, checkbox, etc.)
 - Group fields (for nested data structures within the row)
 - Array fields (for repeating sections within the row)
+
+## Conditional Visibility
+
+Row containers support the `logic` property to conditionally show or hide the entire row (and all its fields) based on form state.
+
+```typescript
+{
+  key: 'contactRow',
+  type: 'row',
+  logic: [{
+    type: 'hidden',
+    condition: {
+      type: 'fieldValue',
+      fieldPath: 'contactPreference',
+      operator: 'equals',
+      value: 'none',
+    },
+  }],
+  fields: [
+    { key: 'phone', type: 'input', label: 'Phone', col: 6 },
+    { key: 'email', type: 'input', label: 'Email', col: 6 },
+  ],
+}
+```
+
+Only `'hidden'` is supported as a logic type on containers. For all available condition types and operators, see [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/).

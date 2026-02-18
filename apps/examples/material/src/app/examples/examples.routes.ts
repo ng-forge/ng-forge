@@ -116,14 +116,15 @@ export default [
     loadComponent: () => import('./shared/example-scenario.component'),
     data: { scenario: getScenarioById('value-derivation') },
   },
+  {
+    path: 'expression-validators-demo',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('expression-validators') },
+  },
   // Special components with custom logic
   {
     path: 'conditional-logic-showcase',
     loadComponent: () => import('./conditional-logic-showcase-demo.component'),
-  },
-  {
-    path: 'expression-validators-demo',
-    loadComponent: () => import('./expression-validators-demo.component'),
   },
   {
     path: 'zod-schema-validation',
