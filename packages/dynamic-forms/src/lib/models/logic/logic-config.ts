@@ -471,7 +471,7 @@ interface AsyncFunctionDerivationBase extends SharedDerivationFields {
 }
 
 // ============================================================================
-// Sync derivation modes (source? is optional for backwards compatibility)
+// Sync derivation modes
 // ============================================================================
 
 /**
@@ -480,12 +480,7 @@ interface AsyncFunctionDerivationBase extends SharedDerivationFields {
  * @internal
  */
 interface ExpressionDerivationBase extends SharedDerivationFields {
-  /**
-   * Optional source discriminant. Set `source: 'expression'` to opt into
-   * IDE-guided mode selection. When absent, the mode is inferred from the
-   * presence of the `expression` property (backwards compatible).
-   */
-  source?: 'expression';
+  source?: never;
   /**
    * JavaScript expression to evaluate for the derived value.
    *
@@ -514,7 +509,6 @@ interface ExpressionDerivationBase extends SharedDerivationFields {
    *   key: 'total',
    *   logic: [{
    *     type: 'derivation',
-   *     source: 'expression',
    *     expression: 'calculateTotal(formValue)',
    *     dependsOn: ['quantity', 'unitPrice', 'discount']
    *   }]
@@ -522,7 +516,7 @@ interface ExpressionDerivationBase extends SharedDerivationFields {
    * ```
    */
   dependsOn?: string[];
-  // Mutual exclusivity: other sources are not allowed when source is specified
+  // Mutual exclusivity: other sources are not allowed
   value?: never;
   functionName?: never;
   http?: never;
@@ -536,12 +530,7 @@ interface ExpressionDerivationBase extends SharedDerivationFields {
  * @internal
  */
 interface ValueDerivationBase extends SharedDerivationFields {
-  /**
-   * Optional source discriminant. Set `source: 'value'` to opt into
-   * IDE-guided mode selection. When absent, the mode is inferred from the
-   * presence of the `value` property (backwards compatible).
-   */
-  source?: 'value';
+  source?: never;
   /**
    * Static value to set on this field.
    *
@@ -563,7 +552,7 @@ interface ValueDerivationBase extends SharedDerivationFields {
    * Provide `dependsOn` to conditionally re-evaluate when specific fields change.
    */
   dependsOn?: string[];
-  // Mutual exclusivity: other sources are not allowed when source is specified
+  // Mutual exclusivity: other sources are not allowed
   expression?: never;
   functionName?: never;
   http?: never;
@@ -577,12 +566,7 @@ interface ValueDerivationBase extends SharedDerivationFields {
  * @internal
  */
 interface FunctionDerivationBase extends SharedDerivationFields {
-  /**
-   * Optional source discriminant. Set `source: 'function'` to opt into
-   * IDE-guided mode selection. When absent, the mode is inferred from the
-   * presence of the `functionName` property (backwards compatible).
-   */
-  source?: 'function';
+  source?: never;
   /**
    * Name of a registered custom derivation function.
    *
@@ -611,7 +595,6 @@ interface FunctionDerivationBase extends SharedDerivationFields {
    *   key: 'currency',
    *   logic: [{
    *     type: 'derivation',
-   *     source: 'function',
    *     functionName: 'getCurrencyForCountry',
    *     dependsOn: ['country']
    *   }]
@@ -619,7 +602,7 @@ interface FunctionDerivationBase extends SharedDerivationFields {
    * ```
    */
   dependsOn?: string[];
-  // Mutual exclusivity: other sources are not allowed when source is specified
+  // Mutual exclusivity: other sources are not allowed
   value?: never;
   expression?: never;
   http?: never;

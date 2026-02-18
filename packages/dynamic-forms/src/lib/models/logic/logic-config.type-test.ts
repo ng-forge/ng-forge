@@ -280,38 +280,6 @@ describe('DerivationLogicConfig - sync sources (backwards compatible)', () => {
 
     expectTypeOf(logic.type).toEqualTypeOf<'derivation'>();
   });
-
-  it('should accept expression derivation with source: expression', () => {
-    const logic = {
-      type: 'derivation',
-      source: 'expression',
-      expression: 'formValue.firstName + " " + formValue.lastName',
-    } as const satisfies DerivationLogicConfig;
-
-    expectTypeOf(logic.source).toEqualTypeOf<'expression'>();
-  });
-
-  it('should accept value derivation with source: value', () => {
-    const logic = {
-      type: 'derivation',
-      source: 'value',
-      value: '+1',
-      condition: { type: 'fieldValue', fieldPath: 'country', operator: 'equals', value: 'USA' },
-    } as const satisfies DerivationLogicConfig;
-
-    expectTypeOf(logic.source).toEqualTypeOf<'value'>();
-  });
-
-  it('should accept function derivation with source: function', () => {
-    const logic = {
-      type: 'derivation',
-      source: 'function',
-      functionName: 'getCurrencyForCountry',
-      dependsOn: ['country'],
-    } as const satisfies DerivationLogicConfig;
-
-    expectTypeOf(logic.source).toEqualTypeOf<'function'>();
-  });
 });
 
 // ============================================================================

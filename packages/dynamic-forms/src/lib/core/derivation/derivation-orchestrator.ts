@@ -116,7 +116,6 @@ export class DerivationOrchestrator {
       validateNoCycles(collection, this.logger);
       this.warnAboutWildcardDependencies(collection.entries, fields.length);
       this.warnAboutMisconfiguredReEngagement(collection.entries);
-      this.warnAboutMissingSource(collection.entries);
 
       return collection;
     });
@@ -525,34 +524,6 @@ export class DerivationOrchestrator {
         derivationDescs,
       );
     }
-  }
-
-  /** Tracks whether the missing-source warning has been emitted for this form instance. */
-  private hasWarnedAboutMissingSource = false;
-
-  /**
-   * Warns when sync derivations are missing the `source` discriminant.
-   *
-   * The `source` field was added as an IDE-guided entry point for derivation mode selection.
-   * Sync derivations without `source` continue to work (backwards compatible), but users
-   * are encouraged to add `source: 'expression'`, `source: 'value'`, or `source: 'function'`
-   * to opt into better autocomplete and compile-time enforcement.
-   *
-   * Only emits once per form instance to avoid log spam during transitions.
-   */
-  private warnAboutMissingSource(entries: DerivationEntry[]): void {
-    if (!isDevMode() || this.hasWarnedAboutMissingSource) return;
-
-    const sourceless = entries.filter((entry) => entry.originalConfig && entry.originalConfig.source === undefined);
-    if (sourceless.length === 0) return;
-
-    this.hasWarnedAboutMissingSource = true;
-    const fieldKeys = sourceless.map((e) => e.debugName ?? e.fieldKey);
-    this.logger.warn(
-      "[Derivation] Some derivations are missing a 'source' discriminant. " +
-        "Add source: 'expression', 'value', or 'function' to opt into IDE-guided mode selection.",
-      fieldKeys,
-    );
   }
 
   /**
