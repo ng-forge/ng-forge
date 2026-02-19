@@ -182,6 +182,10 @@ jobs:
         if: ${{ inputs.mode == 'dry-run' }}
         run: pnpm nx release publish --access public --dry-run
 
+      - name: Upgrade npm for OIDC Trusted Publisher support
+        if: ${{ inputs.mode == 'publish' }}
+        run: npm install -g npm@latest
+
       - name: Publish to npm
         if: ${{ inputs.mode == 'publish' }}
         run: |
