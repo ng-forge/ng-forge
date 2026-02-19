@@ -1,7 +1,7 @@
 {
   "name": "@ng-forge/source",
   "type": "module",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "license": "MIT",
   "scripts": {
     "preinstall": "npx only-allow pnpm",

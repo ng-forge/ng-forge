@@ -65,14 +65,23 @@ This command automatically:
 - Updates `version` in all package.json files
 - Updates `peerDependencies` referencing `@ng-forge/dynamic-forms`
 
-### 4. Commit version bump
+### 4. Update root package.json version
+
+The root `package.json` (`@ng-forge/source`) is **not** updated by `nx release version` — update it manually:
 
 ```bash
-git add packages/*/package.json
+# Set version in root package.json
+npm pkg set version={VERSION}
+```
+
+### 5. Commit version bump
+
+```bash
+git add package.json packages/*/package.json
 git commit -m "chore(release): bump version to {VERSION}"
 ```
 
-### 5. Generate changelog
+### 6. Generate changelog
 
 Find the previous version tag first:
 
@@ -91,7 +100,7 @@ This command automatically:
 - Updates CHANGELOG.md with entries since the previous release
 - Commits the changelog
 
-### 6. Review and clean up changelog
+### 7. Review and clean up changelog
 
 After generating, review `CHANGELOG.md` and ensure:
 
@@ -124,13 +133,13 @@ git commit --amend --no-edit
 
 **Note:** Tags and GitHub releases are created automatically by the Release GitHub Action after the PR is merged and manually triggered.
 
-### 7. Push the branch
+### 8. Push the branch
 
 ```bash
 git push -u origin release-{VERSION}
 ```
 
-### 8. Create the PR
+### 9. Create the PR
 
 ```bash
 gh pr create --title "chore(release): bump version to {VERSION}" --body "## Summary
