@@ -128,6 +128,13 @@ jobs:
         with:
           cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
+      - name: Restore Nx computation cache
+        uses: actions/cache@v5
+        with:
+          path: .nx/cache
+          key: nx-${{ runner.os }}-${{ github.sha }}
+          restore-keys: nx-${{ runner.os }}-
+
       - name: Build affected libraries
         run: pnpm nx affected -t build --base=origin/main
 
@@ -210,6 +217,13 @@ jobs:
             dist/packages/dynamic-form-mcp
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
+      - name: Restore Nx computation cache
+        uses: actions/cache@v5
+        with:
+          path: .nx/cache
+          key: nx-${{ runner.os }}-${{ github.sha }}
+          restore-keys: nx-${{ runner.os }}-
+
       - name: Lint affected projects
         run: pnpm nx affected -t lint --base=origin/main
 
@@ -291,13 +305,26 @@ jobs:
           for APP in core-examples bootstrap-examples material-examples primeng-examples ionic-examples; do
             if echo "$AFFECTED" | grep -q "$APP"; then
               SHORT=$(echo "$APP" | sed 's/-examples//')
-              if [ "$FIRST" = true ]; then
-                FIRST=false
-              else
-                MATRIX+=','
-              fi
-              MATRIX+="{\"app\":\"$APP\",\"short\":\"$SHORT\"}"
               echo "  - $APP (affected)"
+              if [ "$APP" = "core-examples" ]; then
+                # core-examples runs natively (no Docker) with 3 shards — no screenshot tests
+                for SHARD in "1/3" "2/3" "3/3"; do
+                  SHARD_ID=$(echo "$SHARD" | sed 's|/|of|')
+                  if [ "$FIRST" = true ]; then
+                    FIRST=false
+                  else
+                    MATRIX+=','
+                  fi
+                  MATRIX+="{\"app\":\"$APP\",\"short\":\"$SHORT\",\"docker\":false,\"shard\":\"$SHARD\",\"shardId\":\"$SHARD_ID\"}"
+                done
+              else
+                if [ "$FIRST" = true ]; then
+                  FIRST=false
+                else
+                  MATRIX+=','
+                fi
+                MATRIX+="{\"app\":\"$APP\",\"short\":\"$SHORT\",\"docker\":true,\"shard\":\"\",\"shardId\":\"\"}"
+              fi
             else
               echo "  - $APP (not affected, skipping)"
             fi
@@ -352,7 +379,7 @@ jobs:
           fi
 
   e2e:
-    name: E2E Tests (${{ matrix.app }})
+    name: E2E Tests (${{ matrix.app }}${{ matrix.shard && format(' [{0}]', matrix.shard) || '' }})
     needs: [lint-and-test, build-apps]
     if: needs.build-apps.outputs.has-e2e == 'true'
     runs-on: ubuntu-latest
@@ -365,10 +392,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      # Docker handles everything - no need for pnpm/node setup on host
-      - name: Run E2E tests in Docker
+      # Native setup — only needed for core-examples (non-Docker)
+      - name: Setup Node and restore cache
+        if: ${{ !matrix.docker }}
+        uses: ./.github/actions/setup-node-restore
+        with:
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+      - name: Restore Playwright browsers
+        if: ${{ !matrix.docker }}
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
+          fail-on-cache-miss: true
+
+      - name: Run E2E tests
         id: e2e
-        run: ./scripts/playwright-docker.sh ${{ matrix.app }}
+        run: |
+          if [[ "${{ matrix.docker }}" == "true" ]]; then
+            ./scripts/playwright-docker.sh ${{ matrix.app }}
+          else
+            pnpm nx run ${{ matrix.app }}:e2e --shard=${{ matrix.shard }}
+          fi
 
       - name: Generate job summary
         if: always() && steps.e2e.outcome != 'skipped'
@@ -378,7 +424,7 @@ jobs:
         uses: actions/upload-artifact@v6
         if: failure()
         with:
-          name: playwright-results-${{ matrix.app }}
+          name: playwright-results-${{ matrix.app }}${{ matrix.shardId && format('-{0}', matrix.shardId) || '' }}
           path: |
             apps/examples/${{ matrix.short }}/test-results/
             apps/examples/${{ matrix.short }}/playwright-report/
