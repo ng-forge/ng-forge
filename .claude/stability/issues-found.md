@@ -450,3 +450,307 @@ Severity scale: **critical** | **high** | **medium** | **low**
 ## Accessibility
 
 - **No focus management anywhere in the library.** Page navigation, first-invalid-field surfacing on submit, array item add/remove — all produce zero focus moves. No `aria-live` regions, no programmatic `focus()` calls. Fully delegated to consuming applications with no guidance.
+
+---
+
+## Session 3: 2026-02-19 (UI adapters, path utils, helpers, MCP server)
+
+### Area 17 — Path Utilities: CLEAN
+
+Confirmed: `path-utils.ts:340,351` plain `Error` throws are intentional framework-level index-mismatch errors, not config-level errors. No new bugs found.
+
+---
+
+### B42 — `DynamicTextPipe` silently coerces any falsy value to empty string
+
+- **Severity:** low
+- **File:** `packages/dynamic-forms/src/lib/pipes/dynamic-text/dynamic-text.pipe.ts:51`
+- **Description:** The static-value fallback `value || ''` converts `null`, `false`, `0`, and `''` all silently to empty string. A label containing `0` (e.g., a count) renders blank with no warning. The type signature accepts `DynamicText | undefined`, so `false` and `0` are not reachable today — but the guard is fragile as the type evolves.
+- **Fix:** Replace `value || ''` with `value ?? ''`.
+
+---
+
+### B43 — Bootstrap checkbox uses `effect()` instead of `explicitEffect()`
+
+- **Severity:** low
+- **File:** `packages/dynamic-forms-bootstrap/src/lib/fields/checkbox/bs-checkbox.component.ts:91`
+- **Description:** The indeterminate state sync effect uses implicit dependency tracking via Angular's `effect()`. The codebase standard is `explicitEffect([this.props], ([props]) => ...)` from ngxtension. Not a runtime failure, but violates the established pattern and risks silent dependency drift.
+- **Fix:** Convert to `explicitEffect([this.props], ([props]) => { ... })`.
+
+---
+
+### B44 — Material slider missing `aria-required` binding
+
+- **Severity:** high
+- **File:** `packages/dynamic-forms-material/src/lib/fields/slider/mat-slider.component.ts:30–38`
+- **Description:** The `<input matSliderThumb>` element binds `aria-invalid` and `aria-describedby` but omits `[attr.aria-required]="ariaRequired()"`. Every other Material value field (input, textarea, checkbox, radio, toggle, select) includes this binding. Screen readers cannot announce a required slider.
+- **Fix:** Add `[attr.aria-required]="ariaRequired()"` to the `<input matSliderThumb>` element.
+
+---
+
+### B45 — Bootstrap textarea missing readonly DOM sync
+
+- **Severity:** high
+- **File:** `packages/dynamic-forms-bootstrap/src/lib/fields/textarea/bs-textarea.component.ts`
+- **Description:** `BsInput` works around Angular Signal Forms not syncing the `readonly` attribute by using a `viewChild` ref + `afterRenderEffect` that imperatively sets/removes the native `readonly` attribute. `BsTextarea` has no equivalent: no `viewChild`, no `isReadonly` computed, no effect. Setting a Bootstrap textarea as readonly leaves the native element fully interactive.
+- **Fix:** Port the `isReadonly` + `syncReadonlyToDom` afterRenderEffect pattern from `BsInput` to `BsTextarea`.
+
+---
+
+### B46 — Material slider `FieldTree<string>` type mismatch
+
+- **Severity:** medium
+- **File:** `packages/dynamic-forms-material/src/lib/fields/slider/mat-slider.component.ts:66`
+- **Description:** `readonly field = input.required<FieldTree<string>>()` — slider values are numbers. Bootstrap and Ionic slider components correctly use `FieldTree<number>`. Type-safe consumers of the Material slider receive `string` instead of `number`, and Angular Signal Forms equality checks behave incorrectly for numeric comparisons.
+- **Fix:** Change to `input.required<FieldTree<number>>()`.
+
+---
+
+### B47 — Bootstrap textarea floating label variant silently drops hint text
+
+- **Severity:** low
+- **File:** `packages/dynamic-forms-bootstrap/src/lib/fields/textarea/bs-textarea.component.ts`
+- **Description:** The floating-label template branch renders no hint element. The standard variant shows hint text. Config with both `floatingLabel: true` and `hint: 'Some help text'` silently discards the hint — no error, no warning.
+- **Fix:** Add hint display to the floating-label template branch.
+
+---
+
+### B48 — Ionic input shadow DOM aria-describedby sync is fragile
+
+- **Severity:** medium
+- **File:** `packages/dynamic-forms-ionic/src/lib/fields/input/ionic-input.component.ts:93–107`
+- **Description:** `ion-input` encapsulates its native `<input>` in shadow DOM. The component uses `explicitEffect` + `queueMicrotask` + `getInputElement()` to manually set `aria-describedby` on the shadow-DOM input. This assumes Ionic's async API resolves before the next render cycle. If Ionic changes the internal API or resolution timing, `aria-describedby` stops working silently with no observable error.
+- **Fix:** Investigate whether setting `aria-describedby` on the wrapper element is sufficient for assistive tech, eliminating the shadow DOM dependency.
+
+---
+
+### B49 — Ionic textarea shadow DOM aria-describedby sync is fragile
+
+- **Severity:** medium
+- **File:** `packages/dynamic-forms-ionic/src/lib/fields/textarea/ionic-textarea.component.ts:86–101`
+- **Description:** Same pattern as B48. `ion-textarea` uses the same `queueMicrotask` + `getInputElement()` workaround with the same fragility.
+- **Fix:** Same as B48.
+
+---
+
+### B50 — Ionic toggle readonly→disabled merge sets no `aria-readonly` attribute
+
+- **Severity:** low
+- **File:** `packages/dynamic-forms-ionic/src/lib/fields/toggle/ionic-toggle-control.component.ts:114–116`
+- **Description:** Extends the known toggle limitation: `ion-toggle` has no `readonly` attribute so `disabled` is set instead. No `aria-readonly` attribute is added in this path, so assistive tech receives `aria-disabled` with no way to distinguish readonly from disabled. A user in a read-only review form hears "toggle, dimmed" not "toggle, read-only".
+- **Fix:** Add `[attr.aria-readonly]="field()().readonly() || null"` independently of the disabled binding.
+
+---
+
+### B51 — PrimeNG radio group implements custom `FormValueControl` interface not in Angular Signal Forms
+
+- **Severity:** medium
+- **File:** `packages/dynamic-forms-primeng/src/lib/fields/radio/prime-radio-group.component.ts`
+- **Description:** The radio group implements `FormValueControl<ValueType | undefined>` — a custom interface not defined in Angular Signal Forms. Duck-typing makes it work today, but it is not aligned with the Signal Forms API contract and is fragile against Angular updates. Other adapters' radio groups follow the standard `[formField]` binding pattern.
+- **Fix:** Verify the intended integration surface; if `FormValueControl` is a project-local interface, document why it deviates from Angular's API.
+
+---
+
+### B52 — Ionic datepicker implicit Date ↔ ISO string conversion undocumented
+
+- **Severity:** low
+- **File:** `packages/dynamic-forms-ionic/src/lib/fields/datepicker/ionic-datepicker.component.ts:117`
+- **Description:** The field is typed as `FieldTree<Date | null>` but `ion-datetime` yields ISO strings internally. The component converts via `new Date(value)`. The form value contains `Date` objects while the underlying control stores strings — a type contract mismatch with no comment explaining the conversion.
+- **Fix:** Add a clarifying comment, or align the type annotation to reflect the conversion explicitly.
+
+---
+
+### B53 — PrimeNG textarea manually applies `p-invalid` class, redundant with PrimeNG's `[invalid]` input
+
+- **Severity:** low
+- **File:** `packages/dynamic-forms-primeng/src/lib/fields/textarea/prime-textarea.component.ts:90–92`
+- **Description:** The template conditionally adds `p-invalid` via the `[class]` binding when errors are shown. PrimeNG's `<p-textarea [invalid]="...">` already applies `p-invalid` internally. The manual addition creates a double-class application and will break if PrimeNG renames its internal class.
+- **Fix:** Remove the manual `p-invalid` from `[class]`; rely solely on `[invalid]`.
+
+---
+
+---
+
+### B59 — `arrayEvent()` factory returns instances; `EventBus.dispatch()` expects constructors — APIs are incompatible
+
+- **Severity:** high
+- **File:** `packages/dynamic-forms/src/lib/events/array-event.ts:68,92,117,130,143,157` + `packages/dynamic-forms/src/lib/events/event.bus.ts:105`
+- **Description:** `arrayEvent('contacts').append([...])` returns `new AppendArrayItemEvent(arrayKey, template)` — a class **instance**. `EventBus.dispatch()` has signature `dispatch(eventConstructor: FormEventConstructor, ...args)` and internally calls `new eventConstructor(...args)`. Passing an instance to `dispatch` passes it as the "constructor," and `new instance()` at runtime would throw `TypeError: instance is not a constructor`. Every JSDoc example in `array-event.ts` demonstrates this broken usage pattern. TypeScript's structural typing may not catch this since `FormEventConstructor` uses `any[]` in its constructor signature.
+- **Fix:** Add a `dispatch(event: FormEvent)` overload to `EventBus` that calls `pipeline$.next(event)` directly (no `new`). This makes the factory API and the button constructor API both work via separate dispatch overloads.
+
+---
+
+## Session 4: 2026-02-19 (exhaustive deep-check of all remaining partially-checked areas)
+
+_Note: Several agent findings were duplicates of already-documented bugs (B1, B2, B11, B15, B16, B20, B22, B24, B26, B37, B41) and are omitted below._
+
+### B60 — Sync field resolution missing `destroyRef.destroyed` check that async path has
+
+- **Severity:** medium
+- **File:** `packages/dynamic-forms/src/lib/utils/resolve-field/resolve-field.ts:115` + `packages/dynamic-forms/src/lib/state/form-state-manager.ts:639`
+- **Description:** The async `resolveField()` path checks `context.destroyRef.destroyed` before and after the async import. `resolveFieldSync()` has no `DestroyRef` parameter and no destruction check. If the form component is destroyed between the hybrid resolution loop checking `isCached` and calling `resolveFieldSync()`, the sync path produces a stale `ResolvedField` with invalidated context references. The subscriber's `takeUntilDestroyed` eventually cleans it up, but there's a window where a partially-resolved field can escape the pipeline.
+- **Fix:** Pass `DestroyRef` into `resolveFieldSync()` and check it before calling `mapFieldToInputs()`.
+
+---
+
+### B61 — HTTP/async derivation `switchMap` cancellation doesn't abort in-flight network requests
+
+- **Severity:** medium
+- **File:** `packages/dynamic-forms/src/lib/core/derivation/http-derivation-stream.ts` + `packages/dynamic-forms/src/lib/core/derivation/async-derivation-stream.ts`
+- **Description:** When a new form value emission triggers `switchMap`, the previous derivation Observable subscription is unsubscribed — but the underlying HTTP request (in-flight fetch) or async function Promise cannot be cancelled. Both continue executing in the background. On a form with 5 HTTP derivations and a user typing quickly, 50+ stale in-flight requests can accumulate per minute. The final response still arrives and is discarded (correctly), but the network waste can be significant. No `AbortController` or `AbortSignal` integration exists.
+- **Fix:** Thread an `AbortController` through the `switchMap` teardown and pass its `AbortSignal` to `HttpClient` requests and async functions that support cancellation.
+
+---
+
+### B62 — Expression tokenizer accepts `1.2.3` as a valid number token → silent `NaN`
+
+- **Severity:** high
+- **File:** `packages/dynamic-forms/src/lib/core/expressions/parser/tokenizer.ts:113`
+- **Description:** The `readNumber()` function uses the regex `/[0-9.]/` to collect digits, which allows multiple decimal points. `"1.2.3"` is tokenized as a single number token and then parsed with `parseFloat("1.2.3")` → `1.2` (not `NaN`). More dangerously, `"1..3"` → `parseFloat("1..3")` → `1` silently, dropping the `.3` part. No error is thrown at parse time. Derivation expressions with accidental double-dot (typo, copy-paste) produce wrong numeric results silently.
+- **Fix:** Use a proper number regex that enforces at most one decimal point, e.g. `/^[0-9]+(\.[0-9]+)?$/`.
+
+---
+
+### B63 — `validWhen` expression result uses truthiness; `0` and `''` incorrectly treated as validation failure
+
+- **Severity:** medium
+- **File:** `packages/dynamic-forms/src/lib/core/http/http-response-evaluator.ts:25`
+- **Description:** `!!result` is used to convert the `validWhen` expression result to boolean. If the expression evaluates to `0` (e.g., the response contains a count of `0`) or `''` (empty string), the coercion treats these as `false` — validation failure — even when the developer's intent is that a zero count or empty string means valid. Strict boolean check (`result === true`) or explicit documentation of the truthiness contract is needed.
+- **Fix:** Replace `!!result` with `result === true` OR document that `validWhen` must explicitly return boolean `true`/`false`.
+
+---
+
+### B64 — cross-field-collector builds `RegExp` directly from expression string; invalid patterns throw uncaught `SyntaxError`
+
+- **Severity:** medium
+- **File:** `packages/dynamic-forms/src/lib/core/cross-field/cross-field-collector.ts:214`
+- **Description:** `new RegExp(JSON.stringify(expression).slice(1,-1))` constructs a RegExp directly from a developer-supplied pattern string. An invalid pattern (e.g., `"[unclosed"`, `"(?invalid)"`) throws a `SyntaxError` at form initialization time that is not caught. There is no try-catch or validation at config-parse time. The error message won't mention the field key or config location, making it difficult to diagnose.
+- **Fix:** Wrap in try/catch and throw a `DynamicFormError` with the field key and pattern for context.
+
+---
+
+### B65 — Async condition function lookup deferred to evaluation time; removed function silently returns pending state forever
+
+- **Severity:** medium
+- **File:** `packages/dynamic-forms/src/lib/core/expressions/async-condition-logic-function.ts:61–70`
+- **Description:** The async custom function is looked up inside the `switchMap` project function at evaluation time, not cached when the logic function is created. If the function is unregistered between form initialization and condition evaluation, the lookup returns `undefined`. The implementation returns `pendingValue` without logging a warning, leaving the field's logic condition permanently in a pending state with no error surfaced to the developer.
+- **Fix:** Validate the function exists at logic-function creation time and throw a `DynamicFormError` immediately if it's missing.
+
+---
+
+### B66 — `apply-property-overrides` dev-mode warning fires false positives for dynamically-added properties
+
+- **Severity:** low
+- **File:** `packages/dynamic-forms/src/lib/core/property-derivation/apply-property-overrides.ts:44–52`
+- **Description:** The warning fires whenever an override key doesn't exist in the current component inputs snapshot. Properties added by derivations that weren't present in the initial mapper output (e.g., a custom `aria-label` property derivation) will always trigger the warning, even though the addition is intentional. Produces persistent console noise for valid configurations.
+- **Fix:** Only warn for keys that look like known field properties, or add an explicit allowlist for known extension points.
+
+---
+
+### B67 — Value derivation + property derivation execution order not guaranteed when codependent
+
+- **Severity:** medium
+- **File:** `packages/dynamic-forms/src/lib/core/derivation/derivation-orchestrator.ts` + `packages/dynamic-forms/src/lib/core/property-derivation/property-derivation-orchestrator.ts`
+- **Description:** Value derivations (via `DerivationOrchestrator`) and property derivations (via `PropertyDerivationOrchestrator`) run in separate `auditTime(0)`-buffered streams with independent scheduling. If a field has both a value derivation and a property derivation that both depend on the same source field, the order in which they execute in the same change cycle is non-deterministic. A property derivation that should fire AFTER the value settles may fire on the pre-derivation value.
+- **Fix:** Document the ordering limitation. For deterministic behaviour, recommend wrapping codependent configurations in explicit dependency chains.
+
+---
+
+### B68 — Expression parser silently ignores trailing unparsed tokens
+
+- **Severity:** low
+- **File:** `packages/dynamic-forms/src/lib/core/expressions/parser/parser.ts:29`
+- **Description:** The parser throws on empty input but does not verify that all tokens were consumed after parsing the primary expression. `"1 2 3"` parses as `1` successfully, with `2 3` silently discarded. A typo like `formValue.x +* 5` could parse the `formValue.x` part only, discarding `+* 5`. No error, wrong result.
+- **Fix:** After parsing the root expression, assert that the token position is at end-of-input; throw if trailing tokens remain.
+
+---
+
+### B69 — `trigger: 'debounced'` parameter ignored for async conditions in logic applicator
+
+- **Severity:** low
+- **File:** `packages/dynamic-forms/src/lib/core/logic/logic-applicator.ts:57–71`
+- **Description:** When `trigger: 'debounced'` is configured alongside an async condition, the logic applicator extracts `debounceMs` but passes it only to `createDebouncedLogicSignal`. `createAsyncConditionLogicFunction` (called separately) has its own `debounceMs` reading from `condition.debounceMs`, not from the trigger config. A mismatch where `trigger.debounceMs` differs from `condition.debounceMs` produces no warning.
+- **Fix:** Use a single debounce source, or warn when both are set with different values.
+
+---
+
+### B70 — `removeArrayItem()` with negative index is a silent no-op instead of pop semantics
+
+- **Severity:** low
+- **File:** `packages/dynamic-forms/src/lib/fields/array/array-field.component.ts:603–609`
+- **Description:** `removeItem(undefined)` is documented as pop (remove last). `removeItem(-1)` hits the `if (removeIndex < 0 || removeIndex >= length) return;` guard and is silently ignored — despite `-1` conventionally meaning "last item" in many array APIs. `removeItem(99)` on a 3-item array also silently no-ops. The inconsistency means an `arrayEvent('x').removeAt(-1)` call does nothing without any error.
+- **Fix:** Either treat `-1` as pop (remove last), or throw a `DynamicFormError` for out-of-bounds indices rather than silently no-oping.
+
+---
+
+### B71 — No detection of circular HTTP request cycles between conditions and derivations
+
+- **Severity:** medium
+- **File:** `packages/dynamic-forms/src/lib/core/expressions/http-condition-logic-function.ts:47–146` + `packages/dynamic-forms/src/lib/core/derivation/http-derivation-stream.ts`
+- **Description:** A configuration cycle is possible: an HTTP condition evaluates form value → triggers HTTP request → response updates a derived field value → form value changes → condition re-evaluates → same HTTP request fires again. The `debounceMs` and cache help but do not break the cycle if the response changes the triggering field's value. No cycle detection exists between the condition and derivation pipelines.
+- **Fix:** Add a cycle-detection mechanism (e.g., generation counter) between the condition and derivation pipelines, or document that HTTP condition targets must not be fields used as HTTP derivation sources.
+
+---
+
+### B72 — Group field emits spurious console warning on initial render before `nestedFieldTree` is populated
+
+- **Severity:** low
+- **File:** `packages/dynamic-forms/src/lib/fields/group/group-field.component.ts:236`
+- **Description:** Related to B36. The `explicitEffect([this.nestedFieldTree], ...)` fires on first render when `nestedFieldTree` is still `undefined` (the group hasn't received its form structure yet). The effect logs a warning: `Group field "X" not found in parent form`. This is a transient condition that resolves within the same render cycle, but the warning appears in production console logs for every group field on first render.
+- **Fix:** Add an early return for `undefined` before logging, or use a separate effect that only fires after the first non-undefined value.
+
+---
+
+### P7 — `reconcileFields()` allocates a new `Map` on every reconciliation
+
+- **Severity:** low
+- **File:** `packages/dynamic-forms/src/lib/utils/resolve-field/resolve-field.ts:138`
+- **Description:** `const prevMap = new Map(prev.map((f) => [f.key, f]))` creates a fresh Map on every `resolvedFields` update. For a 50-field form this is ~50 object allocations per any form change. The Map is not cached or reused. Relatively minor individually, but this runs on every form value change that triggers re-resolution.
+- **Fix:** Maintain a persistent `Map` that is incrementally updated rather than rebuilt from scratch.
+
+---
+
+## Session 3 — MCP Server Issues
+
+### B54 — MCP instructions document wrong comparison operator names
+
+- **Severity:** high
+- **File:** `packages/dynamic-form-mcp/src/registry/instructions.ts:245–247`
+- **Description:** Instructions list: `greaterThan`, `lessThan`, `greaterThanOrEquals`, `lessThanOrEquals`, `notContains`, `empty`, `notEmpty`. Actual library `ConditionalOperator` type defines: `greater`, `less`, `greaterOrEqual`, `lessOrEqual`, `contains`, `startsWith`, `endsWith`, `matches`. All seven documented names are wrong or non-existent. Three actual operators (`startsWith`, `endsWith`, `matches`) are entirely absent. AI assistants using this MCP server to generate forms will produce invalid configs that fail TypeScript compilation.
+- **Fix:** Replace the operator list in instructions.ts with the actual `ConditionalOperator` union members from `packages/dynamic-forms/src/lib/models/expressions/conditional-expression.ts`.
+
+---
+
+### B55 — MCP instructions entirely missing HTTP conditions documentation
+
+- **Severity:** high
+- **File:** `packages/dynamic-form-mcp/src/registry/instructions.ts`
+- **Description:** The library supports `HttpCondition` as a first-class `ConditionalExpression` union member, enabling fields to be shown/hidden/disabled based on HTTP responses. The MCP instructions document `javascript`, `custom`, and field-value conditions but HTTP conditions are entirely absent. AI assistants cannot generate forms with HTTP-based conditional logic.
+- **Fix:** Add `HttpCondition` documentation to the conditions section of instructions.ts.
+
+---
+
+### B56 — MCP instructions missing async custom condition functions
+
+- **Severity:** medium
+- **File:** `packages/dynamic-form-mcp/src/registry/instructions.ts`
+- **Description:** Library supports `AsyncConditionFunction` type for async function-based conditional logic. Not mentioned anywhere in instructions. AI assistants cannot generate forms that use registered async functions as condition predicates.
+- **Fix:** Add async custom condition function documentation alongside the custom condition section.
+
+---
+
+### B57 — MCP validate tool fix suggestions missing for HTTP validators and newer derivation options
+
+- **Severity:** medium
+- **File:** `packages/dynamic-form-mcp/src/tools/validate.tool.ts:35–85`
+- **Description:** `FIX_SUGGESTIONS` covers classic config mistakes but has no entries for: HTTP validator `responseMapping`/`validWhen`/`errorKind` structure, `stopOnUserOverride` + `reEngageOnDependencyChange` derivation options, HTTP condition type structure, async custom function registration. Validation failures for these newer APIs surface raw errors with no actionable guidance.
+- **Fix:** Add `FIX_SUGGESTIONS` entries for HTTP validators, HTTP conditions, and async derivation/condition options.
+
+---
+
+### B58 — MCP instructions missing `startsWith`, `endsWith`, `matches` operators cause silent config failures
+
+- **Severity:** medium
+- **File:** `packages/dynamic-form-mcp/src/registry/instructions.ts:245–247`
+- **Description:** (Companion to B54.) Three operators that exist in the library (`startsWith`, `endsWith`, `matches`) have zero documentation in MCP. Users asking the AI to filter on string patterns cannot be told about these operators, forcing manual workarounds.
+- **Note:** This is the "missing half" of B54; B54 covers wrong names, B58 covers missing names.
