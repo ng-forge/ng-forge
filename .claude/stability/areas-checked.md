@@ -1,116 +1,60 @@
-# Stability Assessment — Areas Checked
+# Stability Assessment — Area Index
 
-Legend: ✅ clean | 🐛 bug(s) found | ⚠️ design footgun | ❓ not yet investigated
+Bug registry: [issues-found.md](./issues-found.md)
 
----
+## Core Library
 
-## State & Lifecycle
+| #   | Area                       | File                                                                     | Known Bugs                              | Status            |
+| --- | -------------------------- | ------------------------------------------------------------------------ | --------------------------------------- | ----------------- |
+| 01  | State & Lifecycle          | [01-state-lifecycle.md](./areas/01-state-lifecycle.md)                   | B7, B10, B28, B29, B30                  | Partially checked |
+| 02  | Field Resolution           | [02-field-resolution.md](./areas/02-field-resolution.md)                 | B12                                     | Partially checked |
+| 03  | Registry                   | [03-registry.md](./areas/03-registry.md)                                 | B22                                     | Partially checked |
+| 04  | Schema Building            | [04-schema-building.md](./areas/04-schema-building.md)                   | B8/B38                                  | Partially checked |
+| 05  | Derivations                | [05-derivations.md](./areas/05-derivations.md)                           | B1, B4, B5/B17, B11, B20, B21, B33, B36 | Partially checked |
+| 06  | Property Derivations       | [06-property-derivations.md](./areas/06-property-derivations.md)         | B26                                     | Partially checked |
+| 07  | Conditions & Expressions   | [07-conditions-expressions.md](./areas/07-conditions-expressions.md)     | B18, B32, B41, P3, P5                   | Partially checked |
+| 08  | Logic Applicator           | [08-logic.md](./areas/08-logic.md)                                       | B3 ext                                  | Partially checked |
+| 09  | Validation                 | [09-validation.md](./areas/09-validation.md)                             | B6, B9, B39                             | Partially checked |
+| 10  | Schema Validation (Zod)    | [10-schema-validation.md](./areas/10-schema-validation.md)               | B31, B40                                | Partially checked |
+| 11  | Containers: Array          | [11-containers-array.md](./areas/11-containers-array.md)                 | B5/B17, B6, B27, B37                    | Partially checked |
+| 12  | Containers: Page           | [12-containers-page.md](./areas/12-containers-page.md)                   | B2, B3, B15, B24                        | Partially checked |
+| 13  | Containers: Group & Row    | [13-containers-group-row.md](./areas/13-containers-group-row.md)         | B36                                     | Partially checked |
+| 14  | Events & Event Bus         | [14-events.md](./areas/14-events.md)                                     | B16, B25                                | Partially checked |
+| 15  | HTTP Support               | [15-http.md](./areas/15-http.md)                                         | B4, B13, B14, B19, B41, P5              | Partially checked |
+| 16  | Value Output & Filtering   | [16-value-output.md](./areas/16-value-output.md)                         | B28, P1, P2                             | Partially checked |
+| 17  | Path Utilities             | [17-path-utils.md](./areas/17-path-utils.md)                             | Minor (Error type)                      | Not yet checked   |
+| 18  | Initialization Tracking    | [18-initialization.md](./areas/18-initialization.md)                     | B33, B35, B37                           | Partially checked |
+| 19  | DI & Providers             | [19-di-providers.md](./areas/19-di-providers.md)                         | —                                       | Partially checked |
+| 20  | Defaults, Mappers, Helpers | [20-defaults-mappers-helpers.md](./areas/20-defaults-mappers-helpers.md) | Minor (Error type)                      | Not yet checked   |
 
-- ✅ `ngOnDestroy` / teardown completeness — comprehensive, no leaks
-- ❓ State machine transitions (uninitialized → initializing → ready → transitioning)
-- ❓ `submitting` signal — concurrent submit, error during submit, re-submit while pending
-- ❓ Form reset (`FORM_RESET`) — state after reset, validators re-run, dirty/touched cleared
-- ❓ Form clear (`FORM_CLEAR`) — vs. reset, empty vs. initial values
-- ❓ Dirty/touched propagation — parent reflects children accurately
+## Cross-Cutting
 
-## Field Resolution
+| #   | Area          | File                                               | Known Bugs        | Status            |
+| --- | ------------- | -------------------------------------------------- | ----------------- | ----------------- |
+| 21  | SSR Safety    | [21-ssr.md](./areas/21-ssr.md)                     | B18               | Partially checked |
+| 22  | Performance   | [22-performance.md](./areas/22-performance.md)     | P1–P6             | Partially checked |
+| 23  | Accessibility | [23-accessibility.md](./areas/23-accessibility.md) | — (gap confirmed) | Checked           |
 
-- ❓ `resolveField` async pipeline — component lazy-load failure behavior
-- ❓ `reconcileFields` identity preservation — spurious re-renders if keys shuffle
-- ❓ `COMPONENT_CACHE` scoping — shared across form instances on same page?
+## UI Adapters
 
-## Derivations
-
-- 🐛 `explicitEffect` dependency arrays — **see issues-found.md**
-- 🐛 `totalComponentsCount` for nested arrays — **see issues-found.md**
-- 🐛 Cross-field validators read pre-derivation values — **see issues-found.md**
-- ❓ Derivation cycle detection — max iteration truncation, warning quality
-- ❓ HTTP derivation — cancellation on rapid signal changes (debounce/switchMap)
-- ❓ Async derivation race conditions — two in-flight streams, which wins?
-- ❓ Derivation dependency sort — diamond dependency graphs
-- ❓ `derivedFrom` deferred teardown timing — destroy before first emission
-
-## Conditions & Expressions
-
-- ❓ Expression sandbox security — `security.spec.ts` exists, scope to confirm
-- 🐛 `provideHttpClient` missing for HTTP conditions — **see issues-found.md**
-- ❓ Async condition functions — race conditions, cancellation
-- ❓ Condition evaluated against stale field state
-- ❓ Logic function cache — keyed correctly, no cross-form pollution
-
-## Validators
-
-- 🐛 Async Zod refinements — **see issues-found.md**
-- ❓ Async HTTP validators — cancellation, race conditions, `provideHttpClient` missing
-- ❓ Built-in validators — edge case inputs (null, undefined, empty string, 0)
-- ❓ Validator ordering — async vs. sync execution order guarantees
-- 🐛 Cross-field validators timing — **see issues-found.md** (same as derivation staleness)
-
-## Array / Group / Row / Page Fields
-
-- 🐛 Nested arrays / `totalComponentsCount` — **see issues-found.md**
-- ⚠️ `addItem`/`removeItem` boundary conditions — reactive enforcement (design, not bug)
-- ❓ Array insert at index — bounds check, negative index
-- ❓ `minLength`/`maxLength` on array — error message routing, `valid()` signal
-- 🐛 Group field `explicitEffect` — **see issues-found.md**
-- ❓ Row field grid class derivations — dynamic class binding correctness
-- ❓ Page field navigation — validation gate before page advance, back-nav preserves values
-- ❓ Multi-page dirty/valid state — page 1 signal independent of page 2?
-
-## Schema / Zod / Standard Schema
-
-- 🐛 `formLevelSchema` async refinements — **see issues-found.md**
-- ❓ `formLevelSchema` with field-level schema — merge conflict behavior
-- ❓ Valibot / ArkType schemas — same async issues?
-- ❓ Schema registry — multiple schemas for same path, which wins?
-
-## Field Keys & Config
-
-- 🐛 Duplicate field keys — **see issues-found.md**
-- ⚠️ Dynamic field config patch — no patch API, full replacement only (design)
-- ❓ Key with dots/slashes — path resolution ambiguity
-- ❓ Empty key string — behavior at path resolution
-
-## HTTP Support
-
-- 🐛 `provideHttpClient` missing — **see issues-found.md**
-- ❓ HTTP response caching — invalidation strategy, stale responses
-- ❓ HTTP request parameter interpolation — missing param behavior
-- ❓ HTTP error responses — network error vs. 4xx/5xx, retry behavior
-
-## Disabled Fields
-
-- ❓ Disabled field value — included or excluded from `form.value()`?
-- ❓ Dynamically re-enabling — validators re-run? dirty state preserved?
-- ❓ Disabled array item vs. disabled array field — different behavior?
-
-## SSR
-
-- ❓ No module-scope singletons — confirm `COMPONENT_CACHE` not global
-- ❓ Deferred observables on SSR — `derivedFromDeferred` with no browser APIs
-- ❓ `SideEffectScheduler` using `requestAnimationFrame` — SSR-safe guard?
-
-## DI / Providers
-
-- ❓ Missing `provideDynamicForm()` entirely — error quality
-- ❓ Two `provideDynamicForm()` calls on same page — isolation or conflict?
-- ❓ Feature token ordering — `withFeature` registration order matters?
-
-## Type System
-
-- ❓ `InferFormValue` with deeply nested arrays — type inference correctness
-- ❓ `createField()` helper — type safety of `value` vs. inferred field type
-
-## Error Display
-
-- ❓ `shouldShowErrors` — correct gating on touched/dirty/submitted
-- ❓ Error message customization — adapter override vs. core default priority
-
-## Events & Event Bus
-
-- ❓ `FORM_SUBMIT` with validation failure — event fired or swallowed?
-- ❓ Array events on destroyed component — event bus leak after teardown?
+| #   | Area      | File                                             | Known Bugs      | Status            |
+| --- | --------- | ------------------------------------------------ | --------------- | ----------------- |
+| 24  | Material  | [24-ui-material.md](./areas/24-ui-material.md)   | —               | Not yet checked   |
+| 25  | Bootstrap | [25-ui-bootstrap.md](./areas/25-ui-bootstrap.md) | —               | Not yet checked   |
+| 26  | PrimeNG   | [26-ui-primeng.md](./areas/26-ui-primeng.md)     | —               | Not yet checked   |
+| 27  | Ionic     | [27-ui-ionic.md](./areas/27-ui-ionic.md)         | toggle/readonly | Partially checked |
 
 ## MCP Server
 
-- ❓ Registry sync with actual library APIs — spot-check field types and validators
+| #   | Area       | File                                         | Known Bugs | Status          |
+| --- | ---------- | -------------------------------------------- | ---------- | --------------- |
+| 28  | MCP Server | [28-mcp-server.md](./areas/28-mcp-server.md) | —          | Not yet checked |
+
+---
+
+## Summary
+
+- **Total areas:** 28
+- **Total confirmed bugs:** B1–B35 (35 bugs, plus B36–B41 from session 1 = 41 total)
+- **Performance bottlenecks:** P1–P6
+- **Confirmed clean:** Memory/cleanup, concurrent forms, expression sandbox security, `excludeValueIfReadonly`, `[(value)]` two-way binding
