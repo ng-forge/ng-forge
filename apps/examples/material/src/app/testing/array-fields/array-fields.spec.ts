@@ -1259,4 +1259,36 @@ test.describe('Array Fields E2E Tests', () => {
       });
     });
   });
+
+  test.describe('EventDispatcher injectable', () => {
+    test('should append array items when multi-checkbox selections change', async ({ page }) => {
+      await page.goto('/#/test/array-fields/array-event-dispatcher');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = page.locator('[data-testid="array-event-dispatcher"]');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Array starts empty
+      const taskInputs = scenario.locator('#tasks input');
+      await expect(taskInputs).toHaveCount(0, { timeout: 5000 });
+
+      // Check "Bug" — one task appended with value "bug"
+      await scenario.locator('mat-checkbox').filter({ hasText: 'Bug' }).click();
+      await expect(taskInputs).toHaveCount(1, { timeout: 5000 });
+      await expect(taskInputs.first()).toHaveValue('bug', { timeout: 5000 });
+
+      // Check "Feature" — second task appended
+      await scenario.locator('mat-checkbox').filter({ hasText: 'Feature' }).click();
+      await expect(taskInputs).toHaveCount(2, { timeout: 5000 });
+      await expect(taskInputs.nth(1)).toHaveValue('feature', { timeout: 5000 });
+
+      // Uncheck "Bug" — count stays at 2 (only appends wired, not removals)
+      await scenario.locator('mat-checkbox').filter({ hasText: 'Bug' }).click();
+      await expect(taskInputs).toHaveCount(2, { timeout: 5000 });
+
+      // Re-check "Bug" — third task appended
+      await scenario.locator('mat-checkbox').filter({ hasText: 'Bug' }).click();
+      await expect(taskInputs).toHaveCount(3, { timeout: 5000 });
+    });
+  });
 });

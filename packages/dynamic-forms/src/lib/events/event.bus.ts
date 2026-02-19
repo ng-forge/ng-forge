@@ -119,6 +119,22 @@ export class EventBus {
   }
 
   /**
+   * Dispatches a pre-created event instance directly.
+   * Used internally by DynamicFormDispatcher to forward events into the bus.
+   * @internal
+   */
+  emitInstance(event: FormEvent): void {
+    if (this.shouldEmitFormValue()) {
+      const formValue = this.rootFormRegistry?.formValue();
+      if (formValue && Object.keys(formValue).length > 0) {
+        this.pipeline$.next(attachFormValue(event, formValue));
+        return;
+      }
+    }
+    this.pipeline$.next(event);
+  }
+
+  /**
    * Determines whether form value should be attached to events.
    *
    * Precedence rules:

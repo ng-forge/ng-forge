@@ -24,6 +24,9 @@
 // Core Component
 export { DynamicForm } from './dynamic-form.component';
 
+// External event dispatcher
+export { EventDispatcher } from './dispatching/event-dispatcher';
+
 // Provider System
 export { provideDynamicForm } from './providers';
 export type { ExtractFieldDefs, ExtractFormValue } from './providers';
