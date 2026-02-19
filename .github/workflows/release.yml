@@ -184,7 +184,10 @@ jobs:
 
       - name: Publish to npm
         if: ${{ inputs.mode == 'publish' }}
-        run: pnpm nx release publish --access public --provenance
+        run: |
+          for pkg in ${{ env.LIBRARY_PACKAGES }}; do
+            npm publish dist/packages/$pkg --access public --provenance
+          done
 
       - name: Summary
         run: |
