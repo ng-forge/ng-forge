@@ -34,6 +34,7 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
 import { DynamicFormLogger } from './providers/features/logger/logger.token';
 import { FormStateManager, FORM_STATE_DEPS } from './state/form-state-manager';
 import { provideDynamicFormDI } from './providers/dynamic-form-di';
+import { EventDispatcher } from './events/event-dispatcher';
 
 /**
  * Dynamic form component — renders a form based on configuration.
@@ -96,6 +97,7 @@ export class DynamicForm<
   private injector = inject(Injector);
   private eventBus = inject(EventBus);
   private logger = inject(DynamicFormLogger);
+  private dispatcher = inject(EventDispatcher, { optional: true });
 
   /**
    * Connect input signals to the shared deps holder BEFORE injecting FormStateManager.
@@ -247,6 +249,9 @@ export class DynamicForm<
   // ─────────────────────────────────────────────────────────────────────────────
 
   constructor() {
+    this.dispatcher?.connect(this.eventBus);
+    this.destroyRef.onDestroy(() => this.dispatcher?.disconnect());
+
     this.setupEffects();
     this.setupEventHandlers();
 

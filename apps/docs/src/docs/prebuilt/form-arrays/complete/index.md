@@ -268,56 +268,79 @@ const contactTemplate = [
 
 ### Programmatic Approach
 
-For more control, use the event bus with the `arrayEvent` builder. **Note:** When using the programmatic approach, you must provide a template:
+For more control, use the `arrayEvent` builder to dispatch array operations directly. **Note:** When using the programmatic approach, you must provide a template.
+
+**Which API to use depends on where your code lives:**
+
+- **Inside a custom field component** → inject `EventBus` (it is scoped to the form's DI tree)
+- **From a host/parent component** → provide and inject `EventDispatcher` (see [Events](/advanced/events))
+
+**From a host component (most common case):**
 
 ```typescript
+import { Component, inject, signal } from '@angular/core';
+import { DynamicForm, EventDispatcher, arrayEvent } from '@ng-forge/dynamic-forms';
+
+@Component({
+  providers: [EventDispatcher],
+  imports: [DynamicForm],
+  template: `<form [dynamic-form]="config" [(value)]="formValue"></form>`,
+})
+export class MyFormComponent {
+  readonly formValue = signal<Record<string, unknown>>({});
+  private readonly dispatcher = inject(EventDispatcher);
+
+  // Template for PRIMITIVE items (single field, not wrapped)
+  tagTemplate = { key: 'tag', type: 'input', label: 'Tag', value: '' };
+
+  // Template for OBJECT items (array of fields)
+  contactTemplate = [
+    { key: 'name', type: 'input', label: 'Name', value: '' },
+    { key: 'phone', type: 'input', label: 'Phone', value: '' },
+  ];
+
+  addTag() {
+    this.dispatcher.dispatch(arrayEvent('tags').append(this.tagTemplate));
+  }
+
+  addContact() {
+    this.dispatcher.dispatch(arrayEvent('contacts').append(this.contactTemplate));
+  }
+
+  prependItem() {
+    this.dispatcher.dispatch(arrayEvent('contacts').prepend(this.contactTemplate));
+  }
+
+  addItemAt(index: number) {
+    this.dispatcher.dispatch(arrayEvent('contacts').insertAt(index, this.contactTemplate));
+  }
+
+  removeLastItem() {
+    this.dispatcher.dispatch(arrayEvent('contacts').pop());
+  }
+
+  removeFirstItem() {
+    this.dispatcher.dispatch(arrayEvent('contacts').shift());
+  }
+
+  removeItemAt(index: number) {
+    this.dispatcher.dispatch(arrayEvent('contacts').removeAt(index));
+  }
+}
+```
+
+**From inside a custom field component:**
+
+```typescript
+import { inject } from '@angular/core';
 import { EventBus, arrayEvent } from '@ng-forge/dynamic-forms';
 
-// Inject the event bus
-eventBus = inject(EventBus);
+export class MyFieldComponent {
+  private readonly eventBus = inject(EventBus);
 
-// Template for PRIMITIVE items (single field, not wrapped)
-tagTemplate = { key: 'tag', type: 'input', label: 'Tag', value: '' };
-
-// Template for OBJECT items (array of fields)
-contactTemplate = [
-  { key: 'name', type: 'input', label: 'Name', value: '' },
-  { key: 'phone', type: 'input', label: 'Phone', value: '' }
-];
-
-// Add PRIMITIVE item to end of array
-addTag() {
-  this.eventBus.dispatch(arrayEvent('tags').append(this.tagTemplate));
-}
-
-// Add OBJECT item to end of array
-addContact() {
-  this.eventBus.dispatch(arrayEvent('contacts').append(this.contactTemplate));
-}
-
-// Add item to beginning of array
-prependItem() {
-  this.eventBus.dispatch(arrayEvent('contacts').prepend(this.contactTemplate));
-}
-
-// Add item at specific index
-addItemAt(index: number) {
-  this.eventBus.dispatch(arrayEvent('contacts').insertAt(index, this.contactTemplate));
-}
-
-// Remove last item (no template needed)
-removeLastItem() {
-  this.eventBus.dispatch(arrayEvent('contacts').pop());
-}
-
-// Remove first item (no template needed)
-removeFirstItem() {
-  this.eventBus.dispatch(arrayEvent('contacts').shift());
-}
-
-// Remove item at specific index (no template needed)
-removeItemAt(index: number) {
-  this.eventBus.dispatch(arrayEvent('contacts').removeAt(index));
+  addItem() {
+    this.eventBus.dispatch(arrayEvent('contacts').append(this.contactTemplate));
+  }
 }
 ```
 

@@ -40,36 +40,31 @@ function attachFormValue<T extends FormEvent>(event: T, formValue: Record<string
 }
 
 /**
- * Event bus service for form-wide event communication.
+ * Event bus for form-wide event communication between field components.
  *
- * Provides type-safe event dispatching and subscription for form components
- * to communicate without direct coupling. Uses RxJS observables for reactive
- * event handling and supports both single event type and multiple event type subscriptions.
+ * **Intended for use inside DynamicForm** — i.e. within custom field components,
+ * field mappers, or other services that live inside the form's component injector.
+ * Inject it directly to dispatch or observe events from within a field:
  *
- * @example
  * ```typescript
- * @Component({
- *   providers: [EventBus]
- * })
- * export class MyFormComponent {
- *   constructor(private eventBus: EventBus) {
- *     // Subscribe to form submission events
- *     this.eventBus.on<SubmitEvent>('submit').subscribe(() => {
- *       console.log('Form was submitted');
- *     });
+ * // Inside a custom field component
+ * export class MyFieldComponent {
+ *   private readonly eventBus = inject(EventBus);
  *
- *     // Subscribe to multiple event types
- *     this.eventBus.on<SubmitEvent | FormResetEvent>(['submit', 'form-reset']).subscribe(event => {
- *       console.log('Form event:', event.type);
- *     });
- *   }
- *
- *   onSubmit() {
- *     // Dispatch a submit event
- *     this.eventBus.dispatch(SubmitEvent);
+ *   onAction() {
+ *     this.eventBus.dispatch(arrayEvent('items').append(template));
  *   }
  * }
  * ```
+ *
+ * **If you are outside DynamicForm** (e.g. in a host component or a service that wraps
+ * the form), use {@link EventDispatcher} instead. Injecting `EventBus` in a parent
+ * component gives you a *different instance* that the form knows nothing about.
+ *
+ * `EventBus` is scoped to each `DynamicForm` instance via `provideDynamicFormDI()`.
+ * It provides type-safe dispatching and RxJS-based subscription for all form events.
+ *
+ * @see EventDispatcher — for dispatching events from outside the form
  */
 @Injectable()
 export class EventBus {
@@ -103,8 +98,23 @@ export class EventBus {
    */
   // TypeScript limitation: Must use ConstructorParameters which relies on `any` in FormEventConstructor
   dispatch<T extends FormEventConstructor>(eventConstructor: T, ...args: ConstructorParameters<T>): void {
-    const event = new eventConstructor(...args);
+    this.emit(new eventConstructor(...args));
+  }
 
+  /**
+   * Dispatches a pre-created event instance directly.
+   * Used internally by EventDispatcher to forward events into the bus.
+   * @internal
+   */
+  emitInstance(event: FormEvent): void {
+    this.emit(event);
+  }
+
+  /**
+   * Shared emit path for both dispatch() and emitInstance().
+   * Attaches form value if configured, then pushes to the pipeline.
+   */
+  private emit(event: FormEvent): void {
     if (this.shouldEmitFormValue()) {
       const formValue = this.rootFormRegistry?.formValue();
       // Only attach if form value exists and has at least one field.
@@ -114,7 +124,6 @@ export class EventBus {
         return;
       }
     }
-
     this.pipeline$.next(event);
   }
 

@@ -184,6 +184,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getArrayFieldsScenario('simplified-array-max-length') },
   },
+  // EventDispatcher injectable
+  {
+    path: 'array-event-dispatcher',
+    loadComponent: () => import('./array-event-dispatcher.component').then((m) => m.ArrayEventDispatcherComponent),
+  },
 ];
 
 export default routes;
