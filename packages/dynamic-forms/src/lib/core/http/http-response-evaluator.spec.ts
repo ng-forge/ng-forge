@@ -13,7 +13,7 @@ describe('evaluateHttpValidationResponse', () => {
     };
   }
 
-  it('should return null when validWhen evaluates to truthy', () => {
+  it('should return null when validWhen evaluates to true', () => {
     const mapping: HttpValidationResponseMapping = {
       validWhen: 'response.available',
       errorKind: 'taken',
@@ -23,7 +23,7 @@ describe('evaluateHttpValidationResponse', () => {
     expect(result).toBeNull();
   });
 
-  it('should return error with kind when validWhen evaluates to falsy', () => {
+  it('should return error with kind when validWhen evaluates to false', () => {
     const mapping: HttpValidationResponseMapping = {
       validWhen: 'response.available',
       errorKind: 'taken',
@@ -92,19 +92,31 @@ describe('evaluateHttpValidationResponse', () => {
     expect(logger.warn).toHaveBeenCalled();
   });
 
-  it('should handle truthy non-boolean validWhen values', () => {
+  it('should use strict boolean check — non-boolean values are treated as invalid', () => {
     const mapping: HttpValidationResponseMapping = {
       validWhen: 'response.status',
       errorKind: 'error',
     };
 
-    // Non-empty string is truthy
-    expect(evaluateHttpValidationResponse({ status: 'ok' }, mapping, createLogger())).toBeNull();
-    // Number 1 is truthy
-    expect(evaluateHttpValidationResponse({ status: 1 }, mapping, createLogger())).toBeNull();
-    // 0 is falsy
-    expect(evaluateHttpValidationResponse({ status: 0 }, mapping, createLogger())).toEqual({ kind: 'error' });
-    // Empty string is falsy
-    expect(evaluateHttpValidationResponse({ status: '' }, mapping, createLogger())).toEqual({ kind: 'error' });
+    // Non-boolean truthy values should NOT pass (strict boolean check)
+    const logger1 = createLogger();
+    expect(evaluateHttpValidationResponse({ status: 'ok' }, mapping, logger1)).toEqual({ kind: 'error' });
+    expect(logger1.warn).toHaveBeenCalled();
+
+    const logger2 = createLogger();
+    expect(evaluateHttpValidationResponse({ status: 1 }, mapping, logger2)).toEqual({ kind: 'error' });
+    expect(logger2.warn).toHaveBeenCalled();
+
+    // Non-boolean falsy values should also warn
+    const logger3 = createLogger();
+    expect(evaluateHttpValidationResponse({ status: 0 }, mapping, logger3)).toEqual({ kind: 'error' });
+    expect(logger3.warn).toHaveBeenCalled();
+
+    const logger4 = createLogger();
+    expect(evaluateHttpValidationResponse({ status: '' }, mapping, logger4)).toEqual({ kind: 'error' });
+    expect(logger4.warn).toHaveBeenCalled();
+
+    // Only explicit true passes
+    expect(evaluateHttpValidationResponse({ status: true }, mapping, createLogger())).toBeNull();
   });
 });
