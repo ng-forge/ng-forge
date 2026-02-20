@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
@@ -16,6 +16,7 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
         <textarea
+          #textareaRef
           [formField]="f"
           [id]="textareaId"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -40,6 +41,8 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
         }
         @if (errorsToDisplay()[0]; as error) {
           <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
+        } @else if (p?.hint) {
+          <div class="form-text" [id]="hintId()">{{ p?.hint | dynamicText | async }}</div>
         }
       </div>
     } @else {
@@ -50,6 +53,7 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
         }
 
         <textarea
+          #textareaRef
           [formField]="f"
           [id]="textareaId"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -106,6 +110,37 @@ export default class BsTextareaFieldComponent implements BsTextareaComponent {
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
   readonly meta = input<TextareaMeta>();
+
+  /**
+   * Reference to the native textarea element.
+   * Used to imperatively sync the readonly attribute since Angular Signal Forms'
+   * [field] directive doesn't sync FieldState.readonly() to the DOM.
+   */
+  private readonly textareaRef = viewChild<ElementRef<HTMLTextAreaElement>>('textareaRef');
+
+  /**
+   * Computed signal that extracts the readonly state from the field.
+   */
+  private readonly isReadonly = computed(() => this.field()().readonly());
+
+  /**
+   * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly
+   * attribute to the DOM. This effect imperatively sets/removes the readonly attribute
+   * on the native textarea element whenever the readonly state changes.
+   */
+  private readonly syncReadonlyToDom = afterRenderEffect({
+    write: () => {
+      const textareaRef = this.textareaRef();
+      const isReadonly = this.isReadonly();
+      if (textareaRef?.nativeElement) {
+        if (isReadonly) {
+          textareaRef.nativeElement.setAttribute('readonly', '');
+        } else {
+          textareaRef.nativeElement.removeAttribute('readonly');
+        }
+      }
+    },
+  });
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
