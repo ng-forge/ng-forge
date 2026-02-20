@@ -4,10 +4,12 @@ import {
   Component,
   computed,
   DestroyRef,
+  ElementRef,
   inject,
   Injector,
   input,
   model,
+  NgZone,
   Signal,
   WritableSignal,
 } from '@angular/core';
@@ -53,7 +55,11 @@ import { provideDynamicFormDI } from './providers/dynamic-form-di';
         <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="form()" [fieldSignalContext]="fieldSignalContext()"></div>
       } @else {
         @for (field of resolvedFields(); track field.key) {
-          <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+          <ng-template
+            [ngComponentOutlet]="field.component"
+            [ngComponentOutletInjector]="field.injector"
+            [ngComponentOutletInputs]="field.inputs()"
+          />
         }
       }
     }
@@ -67,7 +73,6 @@ import { provideDynamicFormDI } from './providers/dynamic-form-di';
     '[class.df-form-paged]': 'formModeDetection().mode === "paged"',
     '[class.df-form-non-paged]': 'formModeDetection().mode === "non-paged"',
     '[attr.data-form-mode]': 'formModeDetection().mode',
-    '(submit)': 'onNativeSubmit($event)',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -256,6 +261,16 @@ export class DynamicForm<
       this.injector.get(DERIVATION_ORCHESTRATOR);
       this.injector.get(PROPERTY_DERIVATION_ORCHESTRATOR);
     });
+
+    const { nativeElement } = inject<ElementRef<HTMLElement>>(ElementRef);
+    // `host: { '(submit)': ... }` goes through Angular's event binding machinery
+    // which triggers change detection redundantly.
+    inject(NgZone).runOutsideAngular(() => {
+      nativeElement.addEventListener('submit', this.onNativeSubmit);
+    });
+    this.destroyRef.onDestroy(() => {
+      nativeElement.removeEventListener('submit', this.onNativeSubmit);
+    });
   }
 
   /**
@@ -269,10 +284,10 @@ export class DynamicForm<
    *
    * @param event - The native submit event from the form element
    */
-  protected onNativeSubmit(event: Event): void {
+  protected onNativeSubmit = (event: Event): void => {
     event.preventDefault();
     this.eventBus.dispatch(SubmitEvent);
-  }
+  };
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Private Methods
