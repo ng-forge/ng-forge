@@ -24,7 +24,9 @@
 // Core Component
 export { DynamicForm } from './dynamic-form.component';
 
-// External event dispatcher
+// External event dispatcher — use this to dispatch events FROM OUTSIDE DynamicForm
+// (host components, parent services). For dispatching from inside a field component,
+// inject EventBus directly (it is scoped to the form's DI tree).
 export { EventDispatcher } from './dispatching/event-dispatcher';
 
 // Provider System
@@ -222,7 +224,8 @@ export type { HttpResourceRequest } from './core/validation';
 export { getArrayLength } from './core/field-tree-utils';
 export type { ArrayFieldTree } from './core/field-tree-utils';
 
-// Event utilities
+// EventBus — inject inside field components (scoped to the form's DI tree).
+// To dispatch from outside DynamicForm, use EventDispatcher instead.
 export { EventBus, resolveTokens } from './events';
 
 // Registry Utilities
