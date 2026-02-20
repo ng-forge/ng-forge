@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, EventDispatcher, FormConfig, arrayEvent } from '@ng-forge/dynamic-forms';
 
@@ -50,19 +50,20 @@ export class ArrayEventDispatcherComponent {
   readonly formValue = signal<Record<string, unknown>>({});
 
   private readonly dispatcher = inject(EventDispatcher);
-  private prevCategories: string[] = [];
+  private readonly prevCategories = signal<string[]>([]);
 
   constructor() {
     effect(() => {
       const raw = this.formValue()?.['categories'];
       const categories = Array.isArray(raw) ? (raw as string[]) : [];
-      const added = categories.filter((c) => !this.prevCategories.includes(c));
+      const prev = untracked(this.prevCategories);
+      const added = categories.filter((c) => !prev.includes(c));
 
       for (const category of added) {
         this.dispatcher.dispatch(arrayEvent('tasks').append([{ key: 'name', type: 'input', label: 'Task Name', value: category }]));
       }
 
-      this.prevCategories = [...categories];
+      this.prevCategories.set([...categories]);
     });
   }
 }

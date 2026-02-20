@@ -98,29 +98,27 @@ export class EventBus {
    */
   // TypeScript limitation: Must use ConstructorParameters which relies on `any` in FormEventConstructor
   dispatch<T extends FormEventConstructor>(eventConstructor: T, ...args: ConstructorParameters<T>): void {
-    const event = new eventConstructor(...args);
-
-    if (this.shouldEmitFormValue()) {
-      const formValue = this.rootFormRegistry?.formValue();
-      // Only attach if form value exists and has at least one field.
-      // Empty objects {} are not attached - use hasFormValue() to check.
-      if (formValue && Object.keys(formValue).length > 0) {
-        this.pipeline$.next(attachFormValue(event, formValue));
-        return;
-      }
-    }
-
-    this.pipeline$.next(event);
+    this.emit(new eventConstructor(...args));
   }
 
   /**
    * Dispatches a pre-created event instance directly.
-   * Used internally by DynamicFormDispatcher to forward events into the bus.
+   * Used internally by EventDispatcher to forward events into the bus.
    * @internal
    */
   emitInstance(event: FormEvent): void {
+    this.emit(event);
+  }
+
+  /**
+   * Shared emit path for both dispatch() and emitInstance().
+   * Attaches form value if configured, then pushes to the pipeline.
+   */
+  private emit(event: FormEvent): void {
     if (this.shouldEmitFormValue()) {
       const formValue = this.rootFormRegistry?.formValue();
+      // Only attach if form value exists and has at least one field.
+      // Empty objects {} are not attached - use hasFormValue() to check.
       if (formValue && Object.keys(formValue).length > 0) {
         this.pipeline$.next(attachFormValue(event, formValue));
         return;
