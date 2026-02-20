@@ -59,7 +59,7 @@ import { FormEvent } from '../events/interfaces/form-event';
  */
 @Injectable()
 export class EventDispatcher {
-  private bus: EventBus | null = null;
+  private bus: EventBus | undefined;
 
   /**
    * Dispatches a form event into the connected DynamicForm's event bus.
@@ -78,6 +78,6 @@ export class EventDispatcher {
 
   /** @internal - Called by DynamicForm on destroy */
   disconnect(): void {
-    this.bus = null;
+    this.bus = undefined;
   }
 }
