@@ -73,6 +73,70 @@ If multiple `DynamicForm` instances exist under the same provider scope, **all f
 
 ---
 
+## Listening to events from outside DynamicForm
+
+For observing events from a host component, use the output bindings exposed directly on the `dynamic-form` element. This avoids any DI scoping concerns and works with standard Angular event binding syntax.
+
+### Output bindings
+
+| Output                          | Emits                                                     |
+| ------------------------------- | --------------------------------------------------------- |
+| `(events)`                      | Every form event (full stream)                            |
+| `(submitted)`                   | Form value when submitted **and valid** (SubmitEvent)     |
+| `(reset)`                       | When the form is reset to default values                  |
+| `(cleared)`                     | When the form is cleared to empty state                   |
+| `(onPageChange)`                | PageChangeEvent on each wizard page navigation            |
+| `(onPageNavigationStateChange)` | Navigation state changes (canGoNext, canGoPrevious, etc.) |
+| `(validityChange)`              | Boolean — whenever form validity changes                  |
+| `(dirtyChange)`                 | Boolean — whenever form dirty state changes               |
+| `(initialized)`                 | Once all field components are rendered and ready          |
+
+### Examples
+
+**React to specific well-known events via dedicated outputs:**
+
+```typescript
+@Component({
+  imports: [DynamicForm],
+  template: `
+    <form [dynamic-form]="config" (submitted)="onSubmit($event)" (reset)="onReset()" (onPageChange)="onPageChange($event)"></form>
+  `,
+})
+export class MyFormComponent {
+  onSubmit(value: Record<string, unknown>) {
+    console.log('Valid submission:', value);
+  }
+
+  onReset() {
+    console.log('Form reset to defaults');
+  }
+
+  onPageChange(event: PageChangeEvent) {
+    console.log(`Now on page ${event.currentPageIndex + 1} of ${event.totalPages}`);
+  }
+}
+```
+
+**React to custom or less common events via `(events)`:**
+
+```typescript
+@Component({
+  imports: [DynamicForm],
+  template: `<form [dynamic-form]="config" (events)="onEvent($event)"></form>`,
+})
+export class MyFormComponent {
+  onEvent(event: FormEvent) {
+    if (event.type === 'save-draft') {
+      this.saveDraft();
+    }
+  }
+}
+```
+
+> **Note:** `(submitted)` only fires when the form is valid. To handle submit events regardless of validity, use `(events)` and filter for `event.type === 'submit'`.
+
+---
+
 ## EventBus — dispatching from inside DynamicForm
 
 `EventBus` is the internal event bus scoped to each `DynamicForm` instance. Inject it inside **custom field components** to communicate with the parent form or other fields within the same form.
