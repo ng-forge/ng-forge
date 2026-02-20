@@ -34,6 +34,7 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
         [formField]="f"
         [attr.tabindex]="tabIndex()"
         [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
         [attr.aria-describedby]="ariaDescribedBy()"
       />
     </mat-slider>
@@ -63,7 +64,7 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
 export default class MatSliderFieldComponent implements MatSliderComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<string>>();
+  readonly field = input.required<FieldTree<number>>();
   readonly key = input.required<string>();
 
   constructor() {
@@ -95,6 +96,11 @@ export default class MatSliderFieldComponent implements MatSliderComponent {
 
   /** Base ID for error elements, used for aria-describedby */
   protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** aria-required: true when field has required validation, null otherwise */
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
+  });
 
   /** aria-invalid: true when field is invalid AND touched, false otherwise */
   protected readonly ariaInvalid = computed(() => {
