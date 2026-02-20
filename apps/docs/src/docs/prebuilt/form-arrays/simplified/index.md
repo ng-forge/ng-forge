@@ -310,7 +310,7 @@ Simplified arrays support `logic` for conditional visibility, just like the comp
 | Static list (no add/remove buttons)             | **Simplified**  |
 | Heterogeneous items (different fields per item) | Complete        |
 | Custom button placement (buttons outside array) | Complete        |
-| Programmatic control via EventBus               | Complete        |
+| Programmatic control via EventDispatcher        | Complete        |
 | Multiple add buttons (append, prepend, insert)  | Complete        |
 | Nested arrays inside item templates             | Complete        |
 

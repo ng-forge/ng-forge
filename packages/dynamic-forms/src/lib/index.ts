@@ -27,7 +27,7 @@ export { DynamicForm } from './dynamic-form.component';
 // External event dispatcher — use this to dispatch events FROM OUTSIDE DynamicForm
 // (host components, parent services). For dispatching from inside a field component,
 // inject EventBus directly (it is scoped to the form's DI tree).
-export { EventDispatcher } from './dispatching/event-dispatcher';
+export { EventDispatcher } from './events/event-dispatcher';
 
 // Provider System
 export { provideDynamicForm } from './providers';

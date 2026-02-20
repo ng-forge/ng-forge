@@ -712,22 +712,27 @@ const config = {
 } as const satisfies FormConfig;
 ```
 
-Then listen for the event in your component:
+Then listen for the event in your component via the `(events)` output:
 
 ```typescript
-import { EventBus } from '@ng-forge/dynamic-forms';
+import { Component } from '@angular/core';
+import { DynamicForm, FormEvent } from '@ng-forge/dynamic-forms';
 
+@Component({
+  imports: [DynamicForm],
+  template: `<form [dynamic-form]="config" (events)="onEvent($event)"></form>`,
+})
 class MyComponent {
-  private eventBus = inject(EventBus);
-
-  ngOnInit() {
-    this.eventBus.on<SaveDraftEvent>('SaveDraft').subscribe(() => {
-      console.log('Save draft clicked', this.form.value);
+  onEvent(event: FormEvent) {
+    if (event.type === 'SaveDraft') {
+      console.log('Save draft clicked');
       // Handle draft saving logic
-    });
+    }
   }
 }
 ```
+
+> **Note:** Do not inject `EventBus` in a host component — it is scoped to the form's DI tree and injecting it outside gives a disconnected instance. Use the `(events)` output to observe events, or `EventDispatcher` to dispatch events into the form.
 
 ---
 

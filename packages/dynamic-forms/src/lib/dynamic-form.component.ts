@@ -34,7 +34,7 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
 import { DynamicFormLogger } from './providers/features/logger/logger.token';
 import { FormStateManager, FORM_STATE_DEPS } from './state/form-state-manager';
 import { provideDynamicFormDI } from './providers/dynamic-form-di';
-import { EventDispatcher } from './dispatching/event-dispatcher';
+import { EventDispatcher } from './events/event-dispatcher';
 
 /**
  * Dynamic form component — renders a form based on configuration.
