@@ -27,7 +27,7 @@ const config = {
  * is checked — without viewChild or accessing form internals.
  */
 @Component({
-  selector: 'array-event-dispatcher',
+  selector: 'example-array-event-dispatcher',
   imports: [DynamicForm, JsonPipe],
   providers: [EventDispatcher],
   changeDetection: ChangeDetectionStrategy.OnPush,
