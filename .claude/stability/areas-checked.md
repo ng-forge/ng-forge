@@ -56,17 +56,30 @@ Bug registry: [issues-found.md](./issues-found.md)
 
 - **Total areas:** 28 — all deep-checked (4 sessions)
 - **Total confirmed bugs:** B1–B72 + P1–P7 (72 bugs, 7 performance issues)
+- **Fixed (PR open):** 24 bugs across 5 PRs — see Fix Status below
 - **Confirmed clean:** DI & Providers (area 19), Path Utilities (area 17), Schema Building beyond B8/B38, Registry beyond B22, SSR beyond B18, most UI adapter field components
 - **User-reported:** B59 (`arrayEvent()` factory/`EventBus.dispatch()` API mismatch)
 
+## Fix Status
+
+| PR                                                    | Branch                                   | Status | Bugs                                             |
+| ----------------------------------------------------- | ---------------------------------------- | ------ | ------------------------------------------------ |
+| [#268](https://github.com/ng-forge/ng-forge/pull/268) | `fix/expression-parser-http-correctness` | Open   | B36, B41, B43, B44, B46, B62, B63, B66, B68, B72 |
+| [#269](https://github.com/ng-forge/ng-forge/pull/269) | `fix/mcp-conditions-operators`           | Open   | B54, B55, B56, B57                               |
+| [#270](https://github.com/ng-forge/ng-forge/pull/270) | `fix/bootstrap-textarea-readonly-hint`   | Open   | B45, B47                                         |
+| [#271](https://github.com/ng-forge/ng-forge/pull/271) | `fix/page-navigation-validation`         | Open   | B2, B3, B15, B24                                 |
+| [#272](https://github.com/ng-forge/ng-forge/pull/272) | `fix/event-bus-error-isolation`          | Open   | B16, B25                                         |
+
 ## Bug Severity Breakdown (all sessions)
 
-| Severity | Bugs                                                                                                                                                  |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Critical | B4                                                                                                                                                    |
-| High     | B2, B3, B5/B17, B6, B7, B10, B11, B15, B16, B24, B25, B26, B28, B29, B35, B39, B41, B44, B45, B54, B55, B59, B62                                      |
-| Medium   | B1, B8/B38, B9, B12, B13, B14, B18, B20, B21, B22, B27, B30, B31, B33, B37, B40, B46, B48, B49, B51, B56, B57, B58, B60, B61, B63, B64, B65, B67, B71 |
-| Low      | B19, B23, B32, B36, B42, B43, B47, B50, B52, B53, B66, B68, B69, B70, B72, P7 + plain-Error minor items                                               |
+`~~strikethrough~~` = fix PR open
+
+| Severity | Bugs                                                                                                                                                                  |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Critical | B4                                                                                                                                                                    |
+| High     | ~~B2~~, ~~B3~~, B5/B17, B6, B7, B10, B11, ~~B15~~, ~~B16~~, ~~B24~~, ~~B25~~, B26, B28, B29, B35, B39, ~~B41~~, ~~B44~~, ~~B45~~, ~~B54~~, ~~B55~~, B59, ~~B62~~      |
+| Medium   | B1, B8/B38, B9, B12, B13, B14, B18, B20, B21, B22, B27, B30, B31, B33, B37, B40, ~~B46~~, B48, B49, B51, ~~B56~~, ~~B57~~, B58, B60, B61, ~~B63~~, B64, B65, B67, B71 |
+| Low      | B19, B23, B32, ~~B36~~, ~~B42~~, ~~B43~~, ~~B47~~, B50, B52, B53, ~~B66~~, ~~B68~~, B69, B70, ~~B72~~, P7 + plain-Error minor items                                   |
 
 ## Notable Confirmed-Clean Areas
 
