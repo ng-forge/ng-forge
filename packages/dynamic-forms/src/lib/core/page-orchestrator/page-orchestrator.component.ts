@@ -15,6 +15,10 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { evaluateCondition } from '../expressions/condition-evaluator';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
+import { FieldDef } from '../../definitions/base/field-def';
+import { isGroupField } from '../../definitions/default/group-field';
+import { isRowField } from '../../definitions/default/row-field';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -192,13 +196,12 @@ export class PageOrchestratorComponent {
     const currentPage = pages[currentIndex];
     const pageFields = currentPage.fields || [];
 
-    // Check validity of each field on the current page
-    // Fields are stored at root level in the form (pages don't add nesting)
-    for (const fieldDef of pageFields) {
-      const fieldKey = fieldDef.key;
-      if (!fieldKey) continue;
+    // Collect all leaf field keys, recursively traversing group/row containers
+    const leafKeys = collectLeafFieldKeys(pageFields);
 
-      // Access the field from the form using bracket notation
+    // Check validity of each leaf field on the current page
+    // Fields are stored at root level in the form (pages don't add nesting)
+    for (const fieldKey of leafKeys) {
       const field = (form as Record<string, unknown>)[fieldKey];
       if (field && typeof field === 'function') {
         const fieldState = (field as () => { valid: () => boolean })();
@@ -226,6 +229,18 @@ export class PageOrchestratorComponent {
   constructor() {
     // Setup event listeners for navigation
     this.setupEventListeners();
+
+    // B15: Auto-navigate away when current page becomes hidden
+    explicitEffect([this.state, this.visiblePageIndices], ([state, visibleIndices]) => {
+      const currentVisiblePosition = visibleIndices.indexOf(state.currentPageIndex);
+      if (currentVisiblePosition === -1 && visibleIndices.length > 0) {
+        // Current page is hidden — navigate to the nearest visible page
+        const nearest = this.findNearestVisiblePage(state.currentPageIndex, visibleIndices);
+        if (nearest !== -1) {
+          this.navigateToPage(nearest);
+        }
+      }
+    });
   }
 
   /**
@@ -233,6 +248,15 @@ export class PageOrchestratorComponent {
    * @returns Navigation result
    */
   navigateToNextPage(): NavigationResult {
+    // Guard: do not advance if current page has invalid fields
+    if (!this.currentPageValid()) {
+      return {
+        success: false,
+        newPageIndex: this.state().currentPageIndex,
+        error: 'Current page has invalid fields',
+      };
+    }
+
     const currentState = this.state();
     const visibleIndices = this.visiblePageIndices();
 
@@ -313,13 +337,19 @@ export class PageOrchestratorComponent {
     const currentState = this.state();
     const totalPages = currentState.totalPages;
 
-    // Validate page index
+    // Validate page index bounds
     if (pageIndex < 0 || pageIndex >= totalPages) {
       return {
         success: false,
         newPageIndex: currentState.currentPageIndex,
         error: `Invalid page index: ${pageIndex}. Valid range is 0 to ${totalPages - 1}`,
       };
+    }
+
+    // Validate target page is visible
+    const visibleIndices = this.visiblePageIndices();
+    if (!visibleIndices.includes(pageIndex)) {
+      throw new DynamicFormError(`Cannot navigate to hidden page at index ${pageIndex}. Visible pages: [${visibleIndices.join(', ')}]`);
     }
 
     // Check if already on target page
@@ -341,6 +371,26 @@ export class PageOrchestratorComponent {
       success: true,
       newPageIndex: pageIndex,
     };
+  }
+
+  /**
+   * Finds the nearest visible page index to the given index.
+   * Prefers the next visible page, falls back to the previous one.
+   */
+  private findNearestVisiblePage(currentIndex: number, visibleIndices: number[]): number {
+    let nearest = -1;
+    let minDistance = Infinity;
+
+    for (const idx of visibleIndices) {
+      const distance = Math.abs(idx - currentIndex);
+      // Prefer forward (higher index) when tied
+      if (distance < minDistance || (distance === minDistance && idx > nearest)) {
+        minDistance = distance;
+        nearest = idx;
+      }
+    }
+
+    return nearest;
   }
 
   /**
@@ -408,4 +458,23 @@ export class PageOrchestratorComponent {
 
     return false;
   }
+}
+
+/**
+ * Recursively collects all leaf field keys from a list of field definitions,
+ * traversing into group and row containers.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- accepts any field shape for recursive traversal
+function collectLeafFieldKeys(fields: readonly FieldDef<any>[]): string[] {
+  const keys: string[] = [];
+
+  for (const field of fields) {
+    if (isGroupField(field) || isRowField(field)) {
+      keys.push(...collectLeafFieldKeys(field.fields));
+    } else if (field.key) {
+      keys.push(field.key);
+    }
+  }
+
+  return keys;
 }
