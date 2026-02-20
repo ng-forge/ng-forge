@@ -1,38 +1,118 @@
-The event bus enables communication between the `dynamic-form` component and custom field components within it. Each form instance has its own isolated event bus.
+The events API provides two complementary services for working with form events. Which one you use depends on **where your code lives** relative to the `dynamic-form` element.
 
-## Overview
+## Choosing the right API
 
-The event bus provides:
+|                   | `EventBus`                            | `EventDispatcher`                                          |
+| ----------------- | ------------------------------------- | ---------------------------------------------------------- |
+| **Where to use**  | Inside DynamicForm (field components) | Outside DynamicForm (host components)                      |
+| **How to get it** | `inject(EventBus)`                    | `providers: [EventDispatcher]` + `inject(EventDispatcher)` |
+| **Dispatches**    | Constructor + args                    | Pre-built event instances                                  |
+| **Subscribes**    | Yes — `.on()` method                  | No                                                         |
 
-- Communication between field components within a single form
-- Type-safe event subscriptions
-- Reactive event handling with RxJS
-- Wizard page navigation coordination
-- Custom field component workflows
+> **Important:** `EventBus` is scoped to the `DynamicForm` component's injector tree. It is **only available to components rendered inside DynamicForm** (i.e. custom field components). If you inject `EventBus` in a parent or host component, you get a completely separate, disconnected instance that the form knows nothing about. Use `EventDispatcher` instead.
 
-**Note**: The event bus is scoped to each `dynamic-form` instance - events don't cross form boundaries.
+---
 
-## Usage in Custom Field Components
+## EventDispatcher — dispatching from outside DynamicForm
 
-When building custom field types, inject the event bus to communicate with the parent form or other fields:
+Use `EventDispatcher` when you need to drive form behaviour **from the host component** — for example, appending array items in response to a field value change, triggering a form reset from a toolbar button, or reacting to external application state.
+
+### Setup
+
+Provide `EventDispatcher` at the **host component** level (not root). `DynamicForm` automatically detects it and connects its internal event bus.
+
+```typescript
+import { Component, effect, inject, signal } from '@angular/core';
+import { DynamicForm, EventDispatcher, FormConfig, arrayEvent } from '@ng-forge/dynamic-forms';
+
+@Component({
+  providers: [EventDispatcher], // Provide at host component level
+  imports: [DynamicForm],
+  template: `<form [dynamic-form]="config" [(value)]="formValue"></form>`,
+})
+export class MyFormComponent {
+  protected readonly config: FormConfig = { fields: [...] };
+  readonly formValue = signal<Record<string, unknown>>({});
+
+  private readonly dispatcher = inject(EventDispatcher);
+
+  constructor() {
+    effect(() => {
+      const category = this.formValue()?.['category'] as string | undefined;
+      if (category) {
+        this.dispatcher.dispatch(
+          arrayEvent('tasks').append([{ key: 'name', type: 'input', label: 'Task', value: category }])
+        );
+      }
+    });
+  }
+}
+```
+
+### Dispatching events
+
+`EventDispatcher.dispatch()` accepts any `FormEvent` instance. Use the `arrayEvent()` builder for array operations:
+
+```typescript
+// Array manipulation
+this.dispatcher.dispatch(arrayEvent('contacts').append(contactTemplate));
+this.dispatcher.dispatch(arrayEvent('contacts').removeAt(0));
+this.dispatcher.dispatch(arrayEvent('contacts').pop());
+
+// Form lifecycle
+this.dispatcher.dispatch(new FormResetEvent());
+this.dispatcher.dispatch(new FormClearEvent());
+
+// Custom events
+this.dispatcher.dispatch(new MyCustomEvent());
+```
+
+### Multi-form note
+
+If multiple `DynamicForm` instances exist under the same provider scope, **all forms** receive dispatched events. To target a specific form, scope the `EventDispatcher` provider to a wrapper component that contains only that form.
+
+---
+
+## EventBus — dispatching from inside DynamicForm
+
+`EventBus` is the internal event bus scoped to each `DynamicForm` instance. Inject it inside **custom field components** to communicate with the parent form or other fields within the same form.
+
+> **Scoping reminder:** `EventBus` is provided by `DynamicForm` via its component injector. It is only resolvable from within field components rendered by that form. Do not inject it in host or parent components — you will get a disconnected, standalone instance.
+
+### Usage in custom field components
 
 ```typescript
 import { Component, inject } from '@angular/core';
-import { EventBus } from '@ng-forge/dynamic-forms';
+import { EventBus, SubmitEvent } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-custom-submit-button',
   template: `<button (click)="submit()">Submit Form</button>`,
 })
 export class CustomSubmitButton {
-  eventBus = inject(EventBus);
+  private readonly eventBus = inject(EventBus);
 
   submit() {
-    // Dispatch submit event to the parent dynamic-forms
     this.eventBus.dispatch(SubmitEvent);
   }
 }
 ```
+
+### Subscribing to events
+
+```typescript
+export class CustomFieldComponent {
+  private readonly eventBus = inject(EventBus);
+
+  ngOnInit() {
+    this.eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
+      console.log(`Navigated to page ${event.currentPageIndex + 1}`);
+    });
+  }
+}
+```
+
+---
 
 ## Built-in Events
 
@@ -42,7 +122,6 @@ Fired when form is submitted.
 
 ```typescript
 eventBus.on<SubmitEvent>('submit').subscribe(() => {
-  // Handle form submission
   console.log('Form submitted');
 });
 ```
@@ -133,8 +212,8 @@ const contactTemplate = [
 ];
 
 // Append item at end (most common)
-eventBus.dispatch(arrayEvent('tags').append(tagTemplate)); // Primitive: adds a string value
-eventBus.dispatch(arrayEvent('contacts').append(contactTemplate)); // Object: adds { name, email }
+eventBus.dispatch(arrayEvent('tags').append(tagTemplate));
+eventBus.dispatch(arrayEvent('contacts').append(contactTemplate));
 
 // Prepend item at beginning
 eventBus.dispatch(arrayEvent('contacts').prepend(contactTemplate));
@@ -170,7 +249,7 @@ import {
   RemoveAtIndexEvent,
 } from '@ng-forge/dynamic-forms';
 
-// Example: extend for custom template
+// Example: extend for a pre-filled template
 export class AddContactEvent extends AppendArrayItemEvent {
   constructor() {
     super('contacts', [
@@ -180,8 +259,11 @@ export class AddContactEvent extends AppendArrayItemEvent {
   }
 }
 
-// Usage
-eventBus.dispatch(new AddContactEvent());
+// Usage with EventDispatcher (from outside)
+dispatcher.dispatch(new AddContactEvent());
+
+// Usage with EventBus (from inside a field component)
+eventBus.dispatch(AddContactEvent);
 ```
 
 **Event types:**
@@ -194,6 +276,8 @@ eventBus.dispatch(new AddContactEvent());
 | `PopArrayItemEvent`     | Remove last item               |
 | `ShiftArrayItemEvent`   | Remove first item              |
 | `RemoveAtIndexEvent`    | Remove item at specific index  |
+
+---
 
 ## Multiple Event Subscriptions
 
@@ -214,6 +298,8 @@ eventBus.on<SubmitEvent | PageChangeEvent | NextPageEvent>(['submit', 'page-chan
   }
 });
 ```
+
+---
 
 ## Custom Events
 
@@ -238,140 +324,29 @@ export class ValidationErrorEvent implements FormEvent {
 }
 ```
 
-Usage:
+Usage inside a field component (via `EventBus`):
 
 ```typescript
-// Dispatch simple event
+// Dispatch
 eventBus.dispatch(SaveDraftEvent);
-
-// Dispatch event with payload
 eventBus.dispatch(ValidationErrorEvent, 'email', 'Invalid email format');
 
-// Subscribe to custom event
-eventBus.on<SaveDraftEvent>('save-draft').subscribe(() => {
-  saveDraft();
-});
-
+// Subscribe
+eventBus.on<SaveDraftEvent>('save-draft').subscribe(() => saveDraft());
 eventBus.on<ValidationErrorEvent>('validation-error').subscribe((event) => {
   showError(event.fieldKey, event.errorMessage);
 });
 ```
 
-## Practical Examples
-
-### Form Auto-save
+Usage from a host component (via `EventDispatcher`):
 
 ```typescript
-@Component({...})
-export class AutoSaveFormComponent {
-  eventBus = inject(EventBus);
-
-  ngOnInit() {
-    // Auto-save on page change
-    this.eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
-      this.saveDraft();
-    });
-  }
-
-  saveDraft() {
-    // Save form data
-  }
-}
+// Dispatch a pre-built instance
+dispatcher.dispatch(new SaveDraftEvent());
+dispatcher.dispatch(new ValidationErrorEvent('email', 'Invalid email format'));
 ```
 
-### Multi-step Form Navigation
-
-```typescript
-@Component({
-  template: `
-    <button (click)="previous()">Previous</button>
-    <button (click)="next()">Next</button>
-    <button (click)="submit()">Submit</button>
-  `,
-})
-export class WizardNavigationComponent {
-  eventBus = inject(EventBus);
-
-  previous() {
-    this.eventBus.dispatch(PreviousPageEvent);
-  }
-
-  next() {
-    this.eventBus.dispatch(NextPageEvent);
-  }
-
-  submit() {
-    this.eventBus.dispatch(SubmitEvent);
-  }
-}
-```
-
-### Progress Tracking
-
-```typescript
-@Component({...})
-export class ProgressTrackerComponent {
-  eventBus = inject(EventBus);
-  progress = signal(0);
-
-  ngOnInit() {
-    this.eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
-      const percentage = ((event.currentPageIndex + 1) / event.totalPages) * 100;
-      this.progress.set(percentage);
-    });
-  }
-}
-```
-
-### Form Reset and Clear
-
-```typescript
-@Component({...})
-export class FormActionsComponent {
-  eventBus = inject(EventBus);
-
-  resetForm() {
-    // Reset form to default values
-    this.eventBus.dispatch(FormResetEvent);
-  }
-
-  clearForm() {
-    // Clear all form values
-    this.eventBus.dispatch(FormClearEvent);
-  }
-}
-```
-
-## Best Practices
-
-**Use built-in events:**
-
-- Leverage existing events for common scenarios
-- Consistent behavior across forms
-
-**Create custom events for domain logic:**
-
-- Keep event names descriptive
-- Include necessary payload data
-- Use readonly properties
-
-**Type safety:**
-
-```typescript
-// ✓ Type-safe event subscription
-class UserUpdatedEvent implements FormEvent {
-  readonly type = 'user-updated' as const;
-  constructor(public readonly userId: string) {}
-}
-
-// ✓ Use generic parameter for type inference
-eventBus.on<UserUpdatedEvent>('user-updated').subscribe((event) => {
-  console.log(event.userId); // TypeScript knows event has userId
-});
-
-// ✗ Avoid subscriptions without generic type parameter
-eventBus.on('some-random-event'); // No type checking on event properties
-```
+---
 
 ## Attaching Form Values to Events
 
@@ -424,42 +399,3 @@ This is useful when you need the complete form state at the time an event occurr
 - Logging form values on submission
 - Auto-saving on page changes
 - Analytics tracking
-
-## Event Flow
-
-1. Component dispatches event via `eventBus.dispatch()`
-2. Event bus broadcasts to all subscribers
-3. Subscribers receive event and execute handlers
-4. Type filtering ensures only relevant handlers execute
-
-## Integration with Forms
-
-The event bus is automatically provided by the `DynamicForm` component to all child field components. You don't need to manually provide it:
-
-```typescript
-// The DynamicForm component internally provides EventBus
-// All child field components can inject and use it
-import { DynamicForm } from '@ng-forge/dynamic-forms';
-
-@Component({
-  selector: 'app-my-form',
-  imports: [DynamicForm],
-  template: `<form [dynamic-form]="config"></form>`,
-})
-export class MyFormComponent {
-  // EventBus is available to all field components rendered by DynamicForm
-}
-```
-
-Field components can inject and use the event bus:
-
-```typescript
-export class CustomFieldComponent extends BaseFieldComponent {
-  eventBus = inject(EventBus);
-
-  onSubmit() {
-    // Trigger form submission from custom component
-    this.eventBus.dispatch(SubmitEvent);
-  }
-}
-```
