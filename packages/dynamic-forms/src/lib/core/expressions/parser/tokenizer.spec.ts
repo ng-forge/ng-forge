@@ -56,6 +56,18 @@ describe('Tokenizer', () => {
 
       expect(tokens[0]).toEqual({ type: TokenType.NUMBER, value: '0.5', position: 0 });
     });
+
+    it('should throw on malformed number with multiple dots', () => {
+      const tokenizer = new Tokenizer('1.2.3');
+
+      expect(() => tokenizer.tokenize()).toThrow('Invalid number: 1.2.3');
+    });
+
+    it('should throw on number with trailing dot', () => {
+      const tokenizer = new Tokenizer('42.');
+
+      expect(() => tokenizer.tokenize()).toThrow('Invalid number: 42.');
+    });
   });
 
   describe('strings', () => {

@@ -115,6 +115,10 @@ export class Tokenizer {
       this.position++;
     }
 
+    if (!/^\d+(\.\d+)?$/.test(value)) {
+      throw new ExpressionParserError(`Invalid number: ${value}`, start, this.expression);
+    }
+
     return { type: TokenType.NUMBER, value, position: start };
   }
 
