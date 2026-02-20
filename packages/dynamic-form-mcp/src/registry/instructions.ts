@@ -239,12 +239,103 @@ Use \`logic\` array for conditional behavior:
 - \`disabled\` - Enable/disable field
 - \`required\` - Conditional requirement
 
-### Condition Operators
+### Condition Types
+
+#### Field Value Condition
+
+Compares a specific field's value:
+
+\`\`\`typescript
+{
+  type: 'fieldValue',
+  fieldPath: 'accountType',
+  operator: 'equals',
+  value: 'business'
+}
+\`\`\`
+
+#### Comparison Operators
 
 - \`equals\`, \`notEquals\`
-- \`greaterThan\`, \`lessThan\`, \`greaterThanOrEquals\`, \`lessThanOrEquals\`
-- \`contains\`, \`notContains\`
-- \`empty\`, \`notEmpty\`
+- \`greater\`, \`less\`, \`greaterOrEqual\`, \`lessOrEqual\`
+- \`contains\`, \`startsWith\`, \`endsWith\`, \`matches\`
+
+#### JavaScript Condition
+
+Evaluates a JavaScript expression with access to \`formValue\`, \`fieldValue\`, \`externalData\`:
+
+\`\`\`typescript
+{
+  type: 'javascript',
+  expression: 'formValue.items.length > 0'
+}
+\`\`\`
+
+#### Custom Condition
+
+Invokes a registered custom function by name:
+
+\`\`\`typescript
+{
+  type: 'custom',
+  functionName: 'myCustomCheck'
+}
+\`\`\`
+
+Register functions via \`customFnConfig.customFunctions\`.
+
+#### Async Custom Condition
+
+Invokes a registered async function that returns \`Promise<boolean>\` or \`Observable<boolean>\`:
+
+\`\`\`typescript
+{
+  type: 'async',
+  asyncFunctionName: 'checkPermission',
+  pendingValue: false,   // value while async resolution is pending (default: false)
+  debounceMs: 300        // debounce for re-evaluation (default: 300)
+}
+\`\`\`
+
+Register functions via \`customFnConfig.asyncConditions\`. The function receives an \`EvaluationContext\` with access to \`formValue\`, \`fieldValue\`, and \`externalData\`.
+
+#### HTTP Condition
+
+Evaluates based on an HTTP response from a remote server. Fully declarative and JSON-serializable:
+
+\`\`\`typescript
+{
+  type: 'http',
+  http: {
+    url: '/api/permissions',
+    method: 'GET',
+    queryParams: {
+      userId: 'formValue.userId',
+      role: 'formValue.role'
+    }
+  },
+  responseExpression: 'response.canEdit',  // extract boolean from response (default: !!response)
+  pendingValue: false,    // value while HTTP request is in-flight (default: false)
+  cacheDurationMs: 30000, // cache duration in ms (default: 30000)
+  debounceMs: 300         // debounce for re-evaluation (default: 300)
+}
+\`\`\`
+
+Use HTTP conditions when visibility, disabled state, or required state depends on server-side data (e.g., permissions, feature flags, inventory checks). The request re-evaluates reactively when dependent form values change.
+
+#### Logical Combinators
+
+Combine conditions with \`and\` (all must be true) or \`or\` (at least one must be true):
+
+\`\`\`typescript
+{
+  type: 'and',
+  conditions: [
+    { type: 'fieldValue', fieldPath: 'country', operator: 'equals', value: 'US' },
+    { type: 'fieldValue', fieldPath: 'age', operator: 'greaterOrEqual', value: 18 }
+  ]
+}
+\`\`\`
 
 ## UI Library Integration
 

@@ -60,6 +60,18 @@ const FIX_SUGGESTIONS: Record<string, string> = {
   col: 'Hidden fields do NOT support `col`. Remove it (no layout needed).',
   props: 'Hidden fields do NOT support `props`. Remove it.',
   arrayKey: 'arrayKey should be at FIELD level, not inside props.',
+  responseMapping:
+    'Declarative HTTP validators require `responseMapping: { validWhen: "response.isValid", errorKind: "serverError" }`. `validWhen` is an expression evaluated with `{ response }` scope — truthy means valid. `errorKind` maps to `validationMessages`.',
+  validWhen:
+    '`validWhen` is a property of `responseMapping`, not a top-level validator property. Use: `responseMapping: { validWhen: "response.ok", errorKind: "..." }`.',
+  errorKind:
+    '`errorKind` is a property of `responseMapping`, not a top-level validator property. Use: `responseMapping: { validWhen: "...", errorKind: "myError" }`.',
+  stopOnUserOverride:
+    '`stopOnUserOverride` is a derivation option. When true, the derivation stops running after the user manually edits the field. Pair with `reEngageOnDependencyChange: true` to re-derive when dependencies change.',
+  reEngageOnDependencyChange:
+    '`reEngageOnDependencyChange` requires `stopOnUserOverride: true`. Clears the user-override flag when dependencies change, allowing the derivation to run again.',
+  httpCondition:
+    'HTTP conditions use `type: "http"` with `http: { url, method?, queryParams? }` and optional `responseExpression` to extract boolean from response. Set `pendingValue` for in-flight behavior.',
 };
 
 /**
