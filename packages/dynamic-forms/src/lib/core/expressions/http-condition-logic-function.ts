@@ -9,6 +9,7 @@ import { HttpResourceRequest } from '../validation/validator-types';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { HTTP_CONDITION_CACHE } from '../http/http-condition-cache';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { resolveHttpRequest } from '../http/http-request-resolver';
@@ -45,7 +46,10 @@ function extractBoolean(response: unknown, responseExpression: string | undefine
  * Must be called in injection context (same as `createLogicFunction`).
  */
 export function createHttpConditionLogicFunction<TValue>(condition: HttpCondition): LogicFn<TValue, boolean> {
-  const httpClient = inject(HttpClient);
+  const httpClient = inject(HttpClient, { optional: true });
+  if (!httpClient) {
+    throw new DynamicFormError('[Dynamic Forms] HttpClient is required for HTTP conditions. Add provideHttpClient() to your providers.');
+  }
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
   const injector = inject(Injector);
