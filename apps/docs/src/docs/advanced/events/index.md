@@ -31,7 +31,7 @@ import { DynamicForm, EventDispatcher, FormConfig, arrayEvent } from '@ng-forge/
   template: `<form [dynamic-form]="config" [(value)]="formValue"></form>`,
 })
 export class MyFormComponent {
-  protected readonly config: FormConfig = { fields: [...] };
+  protected readonly config = { fields: [...] } as const satisfies FormConfig;
   readonly formValue = signal<Record<string, unknown>>({});
 
   private readonly dispatcher = inject(EventDispatcher);
@@ -367,15 +367,15 @@ provideDynamicForm(...withMaterialFields(), withEventFormValue());
 Override the global setting for specific forms:
 
 ```typescript
-const config: FormConfig = {
+const config = {
   fields: [...],
   options: {
     // Enable for this form (even if globally disabled)
     emitFormValueOnEvents: true,
     // Or disable for this form (even if globally enabled)
     // emitFormValueOnEvents: false,
-  }
-};
+  },
+} as const satisfies FormConfig;
 ```
 
 ### Accessing the Form Value
