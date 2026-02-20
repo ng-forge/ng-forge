@@ -2,6 +2,38 @@ import { isDevMode } from '@angular/core';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 
 /**
+ * Known standard field properties where a missing key likely indicates a typo.
+ * Override keys not in this set are assumed to be intentional dynamic properties
+ * and will not trigger dev-mode warnings.
+ */
+const KNOWN_FIELD_PROPERTIES = new Set([
+  'label',
+  'placeholder',
+  'disabled',
+  'readonly',
+  'required',
+  'className',
+  'tabIndex',
+  'validationMessages',
+  'options',
+  'props',
+  'hint',
+  'tooltip',
+  'prefix',
+  'suffix',
+  'min',
+  'max',
+  'minLength',
+  'maxLength',
+  'step',
+  'pattern',
+  'rows',
+  'cols',
+  'multiple',
+  'appearance',
+]);
+
+/**
  * Applies property overrides to a field's input record.
  *
  * Supports dot-notation for nested properties (max 2 levels):
@@ -17,8 +49,9 @@ import { DynamicFormError } from '../../errors/dynamic-form-error';
  * Array-valued overrides replace wholesale (no merging).
  * Returns `inputs` unchanged if overrides is empty (no clone).
  *
- * In dev mode, warns when an override key doesn't match any existing input property,
- * which may indicate a typo in the `targetProperty` configuration.
+ * In dev mode, warns when a known standard field property override key doesn't match
+ * any existing input property, which may indicate a typo in the `targetProperty`
+ * configuration. Dynamic/custom property keys are silently accepted.
  *
  * @param inputs - The current field inputs record
  * @param overrides - Record of property names to override values
@@ -38,12 +71,12 @@ export function applyPropertyOverrides(inputs: Record<string, unknown>, override
     const value = overrides[key];
     const dotIndex = key.indexOf('.');
 
-    // Dev-mode check: warn if the override key doesn't match any existing input property.
-    // This catches typos like 'mindata' instead of 'minDate'. False positives are possible
-    // for properties intentionally added by derivations that aren't in the initial config.
+    // Dev-mode check: warn only when a known standard field property is missing from inputs,
+    // which likely indicates a typo. Dynamic/custom keys are intentionally skipped to avoid
+    // false positives for properties added by derivations that aren't in the initial config.
     if (isDevMode()) {
       const topLevelKey = dotIndex === -1 ? key : key.substring(0, dotIndex);
-      if (!(topLevelKey in inputs)) {
+      if (KNOWN_FIELD_PROPERTIES.has(topLevelKey) && !(topLevelKey in inputs)) {
         console.warn(
           `[Dynamic Forms] Property override '${key}' does not match any existing input property. ` +
             'This may indicate a typo in the targetProperty configuration. ' +
