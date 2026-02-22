@@ -285,7 +285,7 @@ describe('createHttpConditionLogicFunction', () => {
     });
   });
 
-  describe('extractBoolean — strict boolean check', () => {
+  describe('extractBoolean — truthy coercion with non-boolean warning', () => {
     beforeEach(() => vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] }));
     afterEach(() => vi.useRealTimers());
 
@@ -294,7 +294,7 @@ describe('createHttpConditionLogicFunction', () => {
 
       const condition: HttpCondition = {
         type: 'http',
-        http: { url: '/api/strict-check' },
+        http: { url: '/api/truthy-check' },
         responseExpression: 'response.status',
         debounceMs: 0,
         pendingValue: false,
@@ -314,8 +314,39 @@ describe('createHttpConditionLogicFunction', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('responseExpression'),
         expect.anything(),
-        expect.stringContaining('Expected true or false'),
+        expect.stringContaining('Consider returning a boolean explicitly'),
       );
+    });
+
+    it('should treat a non-boolean truthy responseExpression result as true (!!coercion)', () => {
+      httpClient.request.mockReturnValue(of({ status: 'ok' }));
+
+      const condition: HttpCondition = {
+        type: 'http',
+        http: { url: '/api/truthy-check-result' },
+        responseExpression: 'response.status',
+        debounceMs: 0,
+        pendingValue: false,
+      };
+
+      let fn!: ReturnType<typeof createHttpConditionLogicFunction>;
+      let ctx!: FieldContext<string>;
+
+      runInInjectionContext(injector, () => {
+        fn = createHttpConditionLogicFunction(condition);
+        ctx = createMockFieldContext('test');
+        fn(ctx); // triggers pipeline setup
+      });
+
+      // Flush toObservable effect → advance debounceTime(0) → flush toSignal effect
+      TestBed.flushEffects();
+      vi.advanceTimersByTime(0);
+      TestBed.flushEffects();
+
+      // After pipeline settles, result is cached — second call returns resolved value
+      const result = runInInjectionContext(injector, () => fn(ctx));
+      // 'ok' is truthy → !!result = true (not result === true which would be false)
+      expect(result).toBe(true);
     });
 
     it('should not warn when responseExpression returns strict true', () => {
@@ -323,7 +354,7 @@ describe('createHttpConditionLogicFunction', () => {
 
       const condition: HttpCondition = {
         type: 'http',
-        http: { url: '/api/strict-check-ok' },
+        http: { url: '/api/truthy-check-ok' },
         responseExpression: 'response.allowed',
         debounceMs: 0,
         pendingValue: false,
@@ -342,12 +373,12 @@ describe('createHttpConditionLogicFunction', () => {
       expect(mockLogger.warn).not.toHaveBeenCalledWith(expect.stringContaining('responseExpression'), expect.anything(), expect.anything());
     });
 
-    it('should warn when no responseExpression and raw response is not a boolean', () => {
-      httpClient.request.mockReturnValue(of('ok'));
+    it('should coerce a truthy raw response (no responseExpression) to true without warning', () => {
+      httpClient.request.mockReturnValue(of({ someData: 'value' }));
 
       const condition: HttpCondition = {
         type: 'http',
-        http: { url: '/api/strict-check-raw' },
+        http: { url: '/api/truthy-raw' },
         debounceMs: 0,
         pendingValue: false,
       };
@@ -362,11 +393,31 @@ describe('createHttpConditionLogicFunction', () => {
       vi.advanceTimersByTime(0);
       TestBed.flushEffects();
 
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('not a boolean'),
-        expect.anything(),
-        expect.stringContaining('Expected true or false'),
-      );
+      // No warning — truthy coercion is the expected path for raw responses
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('should coerce a null raw response (no responseExpression) to false without warning', () => {
+      httpClient.request.mockReturnValue(of(null));
+
+      const condition: HttpCondition = {
+        type: 'http',
+        http: { url: '/api/falsy-raw' },
+        debounceMs: 0,
+        pendingValue: false,
+      };
+
+      runInInjectionContext(injector, () => {
+        const fn = createHttpConditionLogicFunction(condition);
+        const ctx = createMockFieldContext('test');
+        fn(ctx);
+      });
+
+      TestBed.flushEffects();
+      vi.advanceTimersByTime(0);
+      TestBed.flushEffects();
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
   });
 

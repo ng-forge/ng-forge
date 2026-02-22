@@ -20,30 +20,27 @@ import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
 /**
  * Extracts a boolean from an HTTP response using an optional expression.
  * When `responseExpression` is provided, evaluates it with `{ response }` scope.
- * Must evaluate to `true` (strict boolean) — non-boolean results are treated as `false` and trigger a warning.
- * Otherwise, checks whether the response itself is strictly `true`.
+ * Truthy values are treated as `true` — non-boolean results trigger a warning to encourage explicit boolean expressions.
+ * Otherwise, coerces the response to boolean.
  */
 function extractBoolean(response: unknown, responseExpression: string | undefined, pendingValue: boolean, logger: Logger): boolean {
   if (responseExpression) {
     try {
       const result = ExpressionParser.evaluate(responseExpression, { response });
       if (typeof result !== 'boolean') {
-        logger.warn(`responseExpression "${responseExpression}" returned non-boolean value:`, result, 'Expected true or false.');
+        logger.warn(
+          `responseExpression "${responseExpression}" returned non-boolean value:`,
+          result,
+          'Consider returning a boolean explicitly.',
+        );
       }
-      return result === true;
+      return !!result;
     } catch (error) {
       logger.warn(`Failed to evaluate responseExpression '${responseExpression}':`, error);
       return pendingValue;
     }
   }
-  if (typeof response !== 'boolean') {
-    logger.warn(
-      'HTTP condition response is not a boolean value:',
-      response,
-      'Expected true or false. Use responseExpression to extract a boolean from the response.',
-    );
-  }
-  return response === true;
+  return !!response;
 }
 
 /**

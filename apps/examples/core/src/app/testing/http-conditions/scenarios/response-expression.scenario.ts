@@ -49,7 +49,6 @@ const config = {
                 code: 'formValue.code',
               },
             },
-            responseExpression: 'response.someData',
             pendingValue: false,
           },
         },
@@ -68,6 +67,6 @@ const config = {
 export const responseExpressionScenario: TestScenario = {
   testId: 'response-expression-test',
   title: 'Response Expression Patterns',
-  description: 'Tests nested responseExpression paths and strict boolean extraction',
+  description: 'Tests nested responseExpression paths and implicit !!response coercion',
   config,
 };

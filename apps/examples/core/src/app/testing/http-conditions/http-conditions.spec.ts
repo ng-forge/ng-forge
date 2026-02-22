@@ -203,12 +203,20 @@ test.describe('HTTP Conditions Tests', () => {
         const url = route.request().url();
         const code = new URL(url).searchParams.get('code');
 
-        // Return object with boolean someData; responseExpression extracts it
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ someData: code === 'hide' }),
-        });
+        // Return truthy object for "hide", null for "show" — tests implicit !!response coercion
+        if (code === 'hide') {
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ someData: true }),
+          });
+        } else {
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: 'null',
+          });
+        }
       });
 
       await page.goto('/#/test/http-conditions/response-expression');
@@ -235,14 +243,14 @@ test.describe('HTTP Conditions Tests', () => {
       await responseNested2;
       await expect(nestedField).toBeVisible({ timeout: 5000 });
 
-      // Test coerced: code "hide" → response.someData = true → hidden
+      // Test coerced: code "hide" → !!{someData: true} = true → hidden
       const responseCoerced1 = page.waitForResponse((r) => r.url().includes('/api/status/coerced'));
       await codeInput.fill('hide');
       await codeInput.blur();
       await responseCoerced1;
       await expect(coercedField).toBeHidden({ timeout: 5000 });
 
-      // Test coerced: code "show" → response.someData = false → visible
+      // Test coerced: code "show" → !!null = false → visible
       const responseCoerced2 = page.waitForResponse((r) => r.url().includes('/api/status/coerced'));
       await codeInput.fill('show');
       await codeInput.blur();
