@@ -16,7 +16,6 @@ import { evaluateCondition } from '../expressions/condition-evaluator';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { FieldDef } from '../../definitions/base/field-def';
-import { isGroupField } from '../../definitions/default/group-field';
 import { isRowField } from '../../definitions/default/row-field';
 
 /**
@@ -467,15 +466,25 @@ export class PageOrchestratorComponent {
 }
 
 /**
- * Recursively collects all leaf field keys from a list of field definitions,
- * traversing into group and row containers.
+ * Recursively collects form-tree keys for all value-bearing nodes on a page.
+ *
+ * Row fields are layout-only containers whose children are flattened to the
+ * parent level in the form tree, so we recurse through them transparently.
+ *
+ * Group fields create a nested sub-tree in the form (form['address']['street']).
+ * Their group-level FieldTree node aggregates child validity, so we use the
+ * group's own key — not the individual child keys — to check validity.
+ *
+ * Array fields are also accessed by their own key; the ArrayFieldTree node
+ * covers minLength/maxLength and any item-level validators.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- accepts any field shape for recursive traversal
 function collectLeafFieldKeys(fields: readonly FieldDef<any>[]): string[] {
   const keys: string[] = [];
 
   for (const field of fields) {
-    if (isGroupField(field) || isRowField(field)) {
+    if (isRowField(field)) {
+      // Row children are at the same form-tree level as the row itself
       keys.push(...collectLeafFieldKeys(field.fields));
     } else if (field.key) {
       keys.push(field.key);
