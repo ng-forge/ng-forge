@@ -48,7 +48,7 @@ function extractBoolean(response: unknown, responseExpression: string | undefine
 export function createHttpConditionLogicFunction<TValue>(condition: HttpCondition): LogicFn<TValue, boolean> {
   const httpClient = inject(HttpClient, { optional: true });
   if (!httpClient) {
-    throw new DynamicFormError('[Dynamic Forms] HttpClient is required for HTTP conditions. Add provideHttpClient() to your providers.');
+    throw new DynamicFormError('HttpClient is required for HTTP conditions. Add provideHttpClient() to your providers.');
   }
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
