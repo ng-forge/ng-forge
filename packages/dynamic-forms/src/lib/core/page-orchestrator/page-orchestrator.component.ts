@@ -10,7 +10,7 @@ import PageFieldComponent from '../../fields/page/page-field.component';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
 import { FieldTree } from '@angular/forms/signals';
-import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { evaluateCondition } from '../expressions/condition-evaluator';
 import { FunctionRegistryService } from '../registry/function-registry.service';
@@ -93,6 +93,7 @@ export class PageOrchestratorComponent {
   private readonly eventBus = inject(EventBus);
   private readonly fieldContextRegistry = inject(FieldContextRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
+  private readonly formOptions = inject(FORM_OPTIONS, { optional: true });
 
   /**
    * Array of page field definitions to render
@@ -247,8 +248,10 @@ export class PageOrchestratorComponent {
    * @returns Navigation result
    */
   navigateToNextPage(): NavigationResult {
-    // Guard: do not advance if current page has invalid fields
-    if (!this.currentPageValid()) {
+    // Guard: do not advance if current page has invalid fields.
+    // Respects disableWhenPageInvalid option (defaults to true).
+    const disableWhenPageInvalid = this.formOptions?.()?.nextButton?.disableWhenPageInvalid ?? true;
+    if (disableWhenPageInvalid && !this.currentPageValid()) {
       return {
         success: false,
         newPageIndex: this.state().currentPageIndex,
