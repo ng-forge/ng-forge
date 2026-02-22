@@ -6,8 +6,8 @@ import { ExpressionParser } from '../expressions/parser/expression-parser';
 /**
  * Evaluates an HTTP response against a `HttpValidationResponseMapping` to produce a validation result.
  *
- * - `validWhen` truthy → `null` (valid, no error)
- * - `validWhen` falsy → `{ kind: errorKind, ...evaluatedErrorParams }`
+ * - `validWhen` === `true` → `null` (valid, no error)
+ * - `validWhen` !== `true` → `{ kind: errorKind, ...evaluatedErrorParams }`
  * - Expression error → logs warning, returns `{ kind: errorKind }` (fail-closed)
  *
  * Expressions are evaluated with scope `{ response }` only.
@@ -20,9 +20,13 @@ export function evaluateHttpValidationResponse(
   const scope = { response };
 
   try {
-    const isValid = ExpressionParser.evaluate(mapping.validWhen, scope);
+    const result = ExpressionParser.evaluate(mapping.validWhen, scope);
 
-    if (isValid) {
+    if (typeof result !== 'boolean') {
+      logger.warn(`validWhen expression "${mapping.validWhen}" returned non-boolean value:`, result, 'Expected true or false.');
+    }
+
+    if (result === true) {
       return null;
     }
 

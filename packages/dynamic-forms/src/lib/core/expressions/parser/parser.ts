@@ -26,7 +26,18 @@ export class Parser {
       throw new ExpressionParserError('Empty expression', 0, this.expression);
     }
 
-    return this.parseExpression();
+    const result = this.parseExpression();
+
+    if (!this.isAtEnd()) {
+      const token = this.peek();
+      throw new ExpressionParserError(
+        `Unexpected token '${token.value}' at position ${token.position} — expression has trailing content`,
+        token.position,
+        this.expression,
+      );
+    }
+
+    return result;
   }
 
   private parseExpression(): ASTNode {

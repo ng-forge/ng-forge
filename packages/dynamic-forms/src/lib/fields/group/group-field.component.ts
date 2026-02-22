@@ -233,14 +233,17 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   private setupEffects(): void {
     setupContainerInitEffect(this.resolvedFields, this.eventBus, 'group', () => this.field().key, this.injector);
 
-    explicitEffect([this.nestedFieldTree], ([tree]) => {
-      if (!tree) {
-        const groupKey = this.field().key;
-        this.logger.warn(
-          `Group field "${groupKey}" not found in parent form. ` + `Ensure the parent form schema includes this group field.`,
-        );
-      }
-    });
+    explicitEffect(
+      [this.nestedFieldTree, this.field],
+      ([tree, field]) => {
+        if (!tree) {
+          this.logger.warn(
+            `Group field "${field.key}" not found in parent form. ` + `Ensure the parent form schema includes this group field.`,
+          );
+        }
+      },
+      { defer: true },
+    );
   }
 }
 

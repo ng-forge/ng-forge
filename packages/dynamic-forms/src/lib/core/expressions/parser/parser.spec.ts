@@ -704,5 +704,19 @@ describe('Parser', () => {
 
       expect(() => parser.parse()).toThrow(ExpressionParserError);
     });
+
+    it('should throw on trailing tokens', () => {
+      const parser = new Parser('1 2 3');
+
+      expect(() => parser.parse()).toThrow(ExpressionParserError);
+      expect(() => parser.parse()).toThrow('expression has trailing content');
+    });
+
+    it('should throw on trailing content after valid member access', () => {
+      const parser = new Parser('formValue.x 5');
+
+      expect(() => parser.parse()).toThrow(ExpressionParserError);
+      expect(() => parser.parse()).toThrow('expression has trailing content');
+    });
   });
 });
