@@ -285,6 +285,91 @@ describe('createHttpConditionLogicFunction', () => {
     });
   });
 
+  describe('extractBoolean — strict boolean check', () => {
+    beforeEach(() => vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] }));
+    afterEach(() => vi.useRealTimers());
+
+    it('should warn when responseExpression returns a non-boolean truthy value', () => {
+      httpClient.request.mockReturnValue(of({ status: 'ok' }));
+
+      const condition: HttpCondition = {
+        type: 'http',
+        http: { url: '/api/strict-check' },
+        responseExpression: 'response.status',
+        debounceMs: 0,
+        pendingValue: false,
+      };
+
+      runInInjectionContext(injector, () => {
+        const fn = createHttpConditionLogicFunction(condition);
+        const ctx = createMockFieldContext('test');
+        fn(ctx);
+      });
+
+      // Flush toObservable effect → advance debounceTime(0) → flush toSignal effect
+      TestBed.flushEffects();
+      vi.advanceTimersByTime(0);
+      TestBed.flushEffects();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('responseExpression'),
+        expect.anything(),
+        expect.stringContaining('Expected true or false'),
+      );
+    });
+
+    it('should not warn when responseExpression returns strict true', () => {
+      httpClient.request.mockReturnValue(of({ allowed: true }));
+
+      const condition: HttpCondition = {
+        type: 'http',
+        http: { url: '/api/strict-check-ok' },
+        responseExpression: 'response.allowed',
+        debounceMs: 0,
+        pendingValue: false,
+      };
+
+      runInInjectionContext(injector, () => {
+        const fn = createHttpConditionLogicFunction(condition);
+        const ctx = createMockFieldContext('test');
+        fn(ctx);
+      });
+
+      TestBed.flushEffects();
+      vi.advanceTimersByTime(0);
+      TestBed.flushEffects();
+
+      expect(mockLogger.warn).not.toHaveBeenCalledWith(expect.stringContaining('responseExpression'), expect.anything(), expect.anything());
+    });
+
+    it('should warn when no responseExpression and raw response is not a boolean', () => {
+      httpClient.request.mockReturnValue(of('ok'));
+
+      const condition: HttpCondition = {
+        type: 'http',
+        http: { url: '/api/strict-check-raw' },
+        debounceMs: 0,
+        pendingValue: false,
+      };
+
+      runInInjectionContext(injector, () => {
+        const fn = createHttpConditionLogicFunction(condition);
+        const ctx = createMockFieldContext('test');
+        fn(ctx);
+      });
+
+      TestBed.flushEffects();
+      vi.advanceTimersByTime(0);
+      TestBed.flushEffects();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('not a boolean'),
+        expect.anything(),
+        expect.stringContaining('Expected true or false'),
+      );
+    });
+  });
+
   it('should handle cacheDurationMs of 0 (effectively disables cache)', () => {
     vi.useFakeTimers();
     try {

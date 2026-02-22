@@ -7,11 +7,11 @@
  */
 export interface HttpValidationResponseMapping {
   /**
-   * Expression evaluated with scope `{ response }`. Truthy = valid (no error).
+   * Expression evaluated with scope `{ response }`. Must evaluate to `true` (strict boolean) to be valid.
    *
    * NOTE: This is the OPPOSITE of the function-based HttpCustomValidator.onSuccess
    * convention, which maps successful HTTP responses to validation errors.
-   * Here, truthy means "validation passed".
+   * Here, `=== true` means "validation passed". Non-boolean results are treated as invalid and trigger a warning.
    */
   validWhen: string;
 
