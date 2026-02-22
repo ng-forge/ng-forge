@@ -10,11 +10,13 @@ import PageFieldComponent from '../../fields/page/page-field.component';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
 import { FieldTree } from '@angular/forms/signals';
-import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { evaluateCondition } from '../expressions/condition-evaluator';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
+import { FieldDef } from '../../definitions/base/field-def';
+import { isRowField } from '../../definitions/default/row-field';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -90,6 +92,7 @@ export class PageOrchestratorComponent {
   private readonly eventBus = inject(EventBus);
   private readonly fieldContextRegistry = inject(FieldContextRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
+  private readonly formOptions = inject(FORM_OPTIONS, { optional: true });
 
   /**
    * Array of page field definitions to render
@@ -192,13 +195,12 @@ export class PageOrchestratorComponent {
     const currentPage = pages[currentIndex];
     const pageFields = currentPage.fields || [];
 
-    // Check validity of each field on the current page
-    // Fields are stored at root level in the form (pages don't add nesting)
-    for (const fieldDef of pageFields) {
-      const fieldKey = fieldDef.key;
-      if (!fieldKey) continue;
+    // Collect all leaf field keys, recursively traversing group/row containers
+    const leafKeys = collectLeafFieldKeys(pageFields);
 
-      // Access the field from the form using bracket notation
+    // Check validity of each leaf field on the current page
+    // Fields are stored at root level in the form (pages don't add nesting)
+    for (const fieldKey of leafKeys) {
       const field = (form as Record<string, unknown>)[fieldKey];
       if (field && typeof field === 'function') {
         const fieldState = (field as () => { valid: () => boolean })();
@@ -226,6 +228,18 @@ export class PageOrchestratorComponent {
   constructor() {
     // Setup event listeners for navigation
     this.setupEventListeners();
+
+    // B15: Auto-navigate away when current page becomes hidden
+    explicitEffect([this.state, this.visiblePageIndices], ([state, visibleIndices]) => {
+      const currentVisiblePosition = visibleIndices.indexOf(state.currentPageIndex);
+      if (currentVisiblePosition === -1 && visibleIndices.length > 0) {
+        // Current page is hidden — navigate to the nearest visible page
+        const nearest = this.findNearestVisiblePage(state.currentPageIndex, visibleIndices);
+        if (nearest !== -1) {
+          this.navigateToPage(nearest);
+        }
+      }
+    });
   }
 
   /**
@@ -233,6 +247,17 @@ export class PageOrchestratorComponent {
    * @returns Navigation result
    */
   navigateToNextPage(): NavigationResult {
+    // Guard: do not advance if current page has invalid fields.
+    // Respects disableWhenPageInvalid option (defaults to true).
+    const disableWhenPageInvalid = this.formOptions?.()?.nextButton?.disableWhenPageInvalid ?? true;
+    if (disableWhenPageInvalid && !this.currentPageValid()) {
+      return {
+        success: false,
+        newPageIndex: this.state().currentPageIndex,
+        error: 'Current page has invalid fields',
+      };
+    }
+
     const currentState = this.state();
     const visibleIndices = this.visiblePageIndices();
 
@@ -313,12 +338,22 @@ export class PageOrchestratorComponent {
     const currentState = this.state();
     const totalPages = currentState.totalPages;
 
-    // Validate page index
+    // Validate page index bounds
     if (pageIndex < 0 || pageIndex >= totalPages) {
       return {
         success: false,
         newPageIndex: currentState.currentPageIndex,
         error: `Invalid page index: ${pageIndex}. Valid range is 0 to ${totalPages - 1}`,
+      };
+    }
+
+    // Validate target page is visible
+    const visibleIndices = this.visiblePageIndices();
+    if (!visibleIndices.includes(pageIndex)) {
+      return {
+        success: false,
+        newPageIndex: currentState.currentPageIndex,
+        error: `Cannot navigate to hidden page at index ${pageIndex}. Visible pages: [${visibleIndices.join(', ')}]`,
       };
     }
 
@@ -341,6 +376,26 @@ export class PageOrchestratorComponent {
       success: true,
       newPageIndex: pageIndex,
     };
+  }
+
+  /**
+   * Finds the nearest visible page index to the given index.
+   * Prefers the forward (higher index) page when equidistant.
+   */
+  private findNearestVisiblePage(currentIndex: number, visibleIndices: number[]): number {
+    let nearest = -1;
+    let minDistance = Infinity;
+
+    for (const idx of visibleIndices) {
+      const distance = Math.abs(idx - currentIndex);
+      // Prefer forward (higher index) when tied
+      if (distance < minDistance || (distance === minDistance && idx > nearest)) {
+        minDistance = distance;
+        nearest = idx;
+      }
+    }
+
+    return nearest;
   }
 
   /**
@@ -408,4 +463,33 @@ export class PageOrchestratorComponent {
 
     return false;
   }
+}
+
+/**
+ * Recursively collects form-tree keys for all value-bearing nodes on a page.
+ *
+ * Row fields are layout-only containers whose children are flattened to the
+ * parent level in the form tree, so we recurse through them transparently.
+ *
+ * Group fields create a nested sub-tree in the form (form['address']['street']).
+ * Their group-level FieldTree node aggregates child validity, so we use the
+ * group's own key — not the individual child keys — to check validity.
+ *
+ * Array fields are also accessed by their own key; the ArrayFieldTree node
+ * covers minLength/maxLength and any item-level validators.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- accepts any field shape for recursive traversal
+function collectLeafFieldKeys(fields: readonly FieldDef<any>[]): string[] {
+  const keys: string[] = [];
+
+  for (const field of fields) {
+    if (isRowField(field)) {
+      // Row children are at the same form-tree level as the row itself
+      keys.push(...collectLeafFieldKeys(field.fields));
+    } else if (field.key) {
+      keys.push(field.key);
+    }
+  }
+
+  return keys;
 }
