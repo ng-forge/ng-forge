@@ -62,6 +62,21 @@ src/generated/
 └── index.ts                # Barrel exports
 ```
 
+## UI Integration - Field Scopes
+
+UI integration packages will declare a `scope` on field definitions to indicate interchangeable alternatives:
+
+```typescript
+// e.g., in dynamic-forms-material
+{ type: 'checkbox', scope: 'boolean', ... }
+{ type: 'toggle', scope: 'boolean', ... }
+{ type: 'radio', scope: 'single-select', ... }
+{ type: 'select', scope: 'single-select', ... }
+{ type: 'multi-checkbox', scope: 'multi-select', ... }
+```
+
+The codegen reads the installed UI package's field definitions, groups by scope, and shows UI-specific alternatives in the prompts. This way Material users see `radio` vs `button-toggle`, PrimeNG users see `radioButton` vs `selectButton`, etc.
+
 ## Rough Task Breakdown
 
 1. **Scaffolding** - Nx project, package.json, tsconfig
@@ -72,3 +87,4 @@ src/generated/
 6. **CLI** - Commands, interactive prompts
 7. **Watch mode** - File watching + regeneration
 8. **Tests** - Unit tests with fixture specs
+9. **UI Integration** - Add `scope` property to field definitions in all UI packages
