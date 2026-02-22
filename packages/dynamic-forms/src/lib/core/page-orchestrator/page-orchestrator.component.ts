@@ -18,7 +18,6 @@ import { FieldContextRegistryService } from '../registry/field-context-registry.
 import { FieldDef } from '../../definitions/base/field-def';
 import { isGroupField } from '../../definitions/default/group-field';
 import { isRowField } from '../../definitions/default/row-field';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -349,7 +348,11 @@ export class PageOrchestratorComponent {
     // Validate target page is visible
     const visibleIndices = this.visiblePageIndices();
     if (!visibleIndices.includes(pageIndex)) {
-      throw new DynamicFormError(`Cannot navigate to hidden page at index ${pageIndex}. Visible pages: [${visibleIndices.join(', ')}]`);
+      return {
+        success: false,
+        newPageIndex: currentState.currentPageIndex,
+        error: `Cannot navigate to hidden page at index ${pageIndex}. Visible pages: [${visibleIndices.join(', ')}]`,
+      };
     }
 
     // Check if already on target page
@@ -375,7 +378,7 @@ export class PageOrchestratorComponent {
 
   /**
    * Finds the nearest visible page index to the given index.
-   * Prefers the next visible page, falls back to the previous one.
+   * Prefers the forward (higher index) page when equidistant.
    */
   private findNearestVisiblePage(currentIndex: number, visibleIndices: number[]): number {
     let nearest = -1;
