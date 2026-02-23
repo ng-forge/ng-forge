@@ -6,6 +6,7 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
 import { hasChildFields, isGroupField } from '../../models/types/type-guards';
 import { normalizeFieldsArray } from '../../utils/object-utils';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 import {
   isCrossFieldValidator,
   isCrossFieldBuiltInValidator,
@@ -187,7 +188,7 @@ function tryCreateSchemaEntry(fieldKey: string, config: SchemaApplicationConfig)
 function convertBuiltInToCustomValidator(config: BuiltInValidatorConfig): CustomValidatorConfig {
   const expression = config.expression;
   if (!expression) {
-    throw new Error(`Built-in validator ${config.type} missing required expression for cross-field conversion`);
+    throw new DynamicFormError(`Built-in validator ${config.type} missing required expression for cross-field conversion`);
   }
   let validationExpression: string;
 
@@ -208,13 +209,15 @@ function convertBuiltInToCustomValidator(config: BuiltInValidatorConfig): Custom
       // Validate regex pattern before injection to prevent runtime errors
       try {
         new RegExp(expression);
-      } catch {
-        throw new Error(`Invalid regex pattern in cross-field validator: ${expression}`);
+      } catch (e) {
+        throw new DynamicFormError(
+          `Invalid regex pattern in cross-field validator: '${expression}' — ${e instanceof Error ? e.message : String(e)}`,
+        );
       }
       validationExpression = `fieldValue == null || new RegExp(${JSON.stringify(expression)}).test(fieldValue)`;
       break;
     default:
-      throw new Error(`Cannot convert ${config.type} validator to custom validator`);
+      throw new DynamicFormError(`Cannot convert ${config.type} validator to custom validator`);
   }
 
   return {

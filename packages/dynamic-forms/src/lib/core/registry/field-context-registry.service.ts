@@ -2,6 +2,7 @@ import { inject, Injectable, isSignal, Signal, untracked } from '@angular/core';
 import { ChildFieldContext, FieldContext, FieldState, FieldTree } from '@angular/forms/signals';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { RootFormRegistryService } from './root-form-registry.service';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
@@ -241,6 +242,9 @@ export class FieldContextRegistryService {
 
     const resolved: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(externalDataRecord)) {
+      if (!isSignal(value)) {
+        throw new DynamicFormError(`externalData["${key}"] must be a Signal. Got: ${typeof value}. Wrap it with signal(yourValue).`);
+      }
       resolved[key] = reactive ? (value as Signal<unknown>)() : untracked(() => (value as Signal<unknown>)());
     }
 
