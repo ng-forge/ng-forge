@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { config as rxjsConfig } from 'rxjs';
 import { EventBus } from './event.bus';
 import { FormEvent, hasFormValue } from './interfaces/form-event';
 import { take, toArray, skip } from 'rxjs/operators';
@@ -8,6 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import { EMIT_FORM_VALUE_ON_EVENTS } from '../providers/features/event-form-value/emit-form-value.token';
 import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
 import { FORM_OPTIONS } from '../models/field-signal-context.token';
+import { delay } from '@ng-forge/utils';
 
 // Test event classes
 class TestEvent implements FormEvent {
@@ -894,6 +896,66 @@ describe('EventBus Form Value Emission', () => {
 
       const event = await eventPromise;
       expect(hasFormValue(event)).toBe(false);
+    });
+  });
+
+  describe('Error isolation (safeEmit)', () => {
+    let eventBus: EventBus;
+    // Captures errors that RxJS defers via reportUnhandledError, preventing them from
+    // escaping into the test runner as uncaught exceptions.
+    const capturedErrors: unknown[] = [];
+
+    beforeEach(() => {
+      capturedErrors.length = 0;
+      rxjsConfig.onUnhandledError = (err) => capturedErrors.push(err);
+
+      TestBed.configureTestingModule({ providers: [EventBus] });
+      eventBus = TestBed.inject(EventBus);
+    });
+
+    afterEach(() => {
+      rxjsConfig.onUnhandledError = null;
+    });
+
+    it('should not propagate a throwing subscriber exception to the dispatch caller', async () => {
+      eventBus.on<TestEvent>('test-event').subscribe(() => {
+        throw new Error('subscriber error');
+      });
+
+      expect(() => eventBus.dispatch(TestEvent)).not.toThrow();
+
+      // Flush the RxJS-deferred macrotask before afterEach resets onUnhandledError
+      await delay();
+    });
+
+    it('should report subscriber exceptions via RxJS unhandled error mechanism', async () => {
+      const error = new Error('subscriber error');
+      eventBus.on<TestEvent>('test-event').subscribe(() => {
+        throw error;
+      });
+
+      eventBus.dispatch(TestEvent);
+
+      // RxJS defers the re-throw to a macrotask; wait one tick
+      await delay();
+      expect(capturedErrors).toContain(error);
+    });
+
+    it('should not affect other subscribers when one throws', async () => {
+      eventBus.on<TestEvent>('test-event').subscribe(() => {
+        throw new Error('subscriber error');
+      });
+
+      const eventPromise = firstValueFrom(eventBus.on<AnotherTestEvent>('another-test-event').pipe(take(1)));
+
+      eventBus.dispatch(TestEvent);
+      eventBus.dispatch(AnotherTestEvent);
+
+      const event = await eventPromise;
+      expect(event.type).toBe('another-test-event');
+
+      // Flush the RxJS-deferred macrotask before afterEach resets onUnhandledError
+      await delay();
     });
   });
 

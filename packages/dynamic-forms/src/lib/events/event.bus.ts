@@ -5,6 +5,9 @@ import { EMIT_FORM_VALUE_ON_EVENTS } from '../providers/features/event-form-valu
 import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
 import { FORM_OPTIONS } from '../models/field-signal-context.token';
 import { FormOptions } from '../models/form-config';
+import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import type { Logger } from '../providers/features/logger/logger.interface';
+import { NoopLogger } from '../providers/features/logger/noop-logger';
 
 /**
  * Safely attempts to inject a dependency using an InjectionToken.
@@ -66,12 +69,16 @@ function attachFormValue<T extends FormEvent>(event: T, formValue: Record<string
  *
  * @see EventDispatcher — for dispatching events from outside the form
  */
+
+const FALLBACK_LOGGER = new NoopLogger();
+
 @Injectable()
 export class EventBus {
   private readonly pipeline$ = new Subject<FormEvent>();
   private readonly globalEmitFormValue = safeInjectToken(EMIT_FORM_VALUE_ON_EVENTS, false);
   private readonly rootFormRegistry = safeInjectClass(RootFormRegistryService, null);
   private readonly formOptions = safeInjectToken<Signal<FormOptions | undefined> | null>(FORM_OPTIONS, null);
+  private readonly logger = safeInjectToken<Logger>(DynamicFormLogger, FALLBACK_LOGGER);
 
   events$ = this.pipeline$.asObservable();
 
@@ -120,11 +127,24 @@ export class EventBus {
       // Only attach if form value exists and has at least one field.
       // Empty objects {} are not attached - use hasFormValue() to check.
       if (formValue && Object.keys(formValue).length > 0) {
-        this.pipeline$.next(attachFormValue(event, formValue));
+        this.safeEmit(attachFormValue(event, formValue));
         return;
       }
     }
-    this.pipeline$.next(event);
+
+    this.safeEmit(event);
+  }
+
+  /**
+   * Emits an event through the pipeline. Catches any synchronous exception that escapes
+   * RxJS's own error handling so dispatch() callers are never disrupted by a failing subscriber.
+   */
+  private safeEmit(event: FormEvent): void {
+    try {
+      this.pipeline$.next(event);
+    } catch (err: unknown) {
+      this.logger.error('[Dynamic Forms] Exception in EventBus subscriber during dispatch', err);
+    }
   }
 
   /**
