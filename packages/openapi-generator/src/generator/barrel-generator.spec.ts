@@ -1,0 +1,29 @@
+import { generateBarrel } from './barrel-generator';
+
+describe('generateBarrel', () => {
+  it('should generate barrel with multiple files', () => {
+    const result = generateBarrel(['create-pet.form.ts', 'update-pet.form.ts']);
+
+    expect(result).toContain("export * from './create-pet.form.js';");
+    expect(result).toContain("export * from './update-pet.form.js';");
+  });
+
+  it('should replace .ts extension with .js', () => {
+    const result = generateBarrel(['my-form.ts']);
+
+    expect(result).toContain("export * from './my-form.js';");
+    expect(result).not.toContain('.ts');
+  });
+
+  it('should end with a trailing newline', () => {
+    const result = generateBarrel(['a.ts']);
+
+    expect(result).toMatch(/\n$/);
+  });
+
+  it('should handle empty array', () => {
+    const result = generateBarrel([]);
+
+    expect(result).toBe('');
+  });
+});

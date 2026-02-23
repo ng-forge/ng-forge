@@ -23,6 +23,7 @@
       "@ng-forge/dynamic-forms-material": ["packages/dynamic-forms-material/src/index.ts"],
       "@ng-forge/dynamic-forms-primeng": ["packages/dynamic-forms-primeng/src/index.ts"],
       "@ng-forge/dynamic-form-mcp": ["packages/dynamic-form-mcp/src/index.ts"],
+      "@ng-forge/openapi-generator": ["packages/openapi-generator/src/index.ts"],
       "@ng-forge/examples-material": ["internal/examples-material/src/index.ts"],
       "@ng-forge/examples-bootstrap": ["internal/examples-bootstrap/src/index.ts"],
       "@ng-forge/examples-primeng": ["internal/examples-primeng/src/index.ts"],
