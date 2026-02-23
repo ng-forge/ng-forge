@@ -80,20 +80,19 @@ export default class IonicTextareaFieldComponent implements IonicTextareaCompone
       selector: 'ion-textarea',
     });
 
-    // Workaround: Ionic's ion-textarea does NOT automatically propagate aria-describedby changes
-    // to the native textarea element inside its shadow DOM. This effect imperatively syncs the attribute
-    // after a microtask to ensure Ionic has processed the attribute change.
+    // ion-textarea encapsulates a native <textarea> in shadow DOM and does not automatically
+    // propagate aria-describedby to it. This effect imperatively syncs the attribute
+    // after a microtask to ensure Ionic has resolved the internal element.
     explicitEffect([this.ariaDescribedBy], ([describedBy]) => {
       queueMicrotask(() => {
         const ionTextarea = this.elementRef.nativeElement.querySelector('ion-textarea') as HTMLIonTextareaElement | null;
         if (ionTextarea?.getInputElement) {
           ionTextarea.getInputElement().then((textareaEl) => {
-            if (textareaEl) {
-              if (describedBy) {
-                textareaEl.setAttribute('aria-describedby', describedBy);
-              } else {
-                textareaEl.removeAttribute('aria-describedby');
-              }
+            if (!textareaEl) return;
+            if (describedBy) {
+              textareaEl.setAttribute('aria-describedby', describedBy);
+            } else {
+              textareaEl.removeAttribute('aria-describedby');
             }
           });
         }

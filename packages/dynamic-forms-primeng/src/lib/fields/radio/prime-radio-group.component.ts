@@ -60,6 +60,9 @@ export interface PrimeRadioGroupProps {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
+// Note: FormValueControl is from @angular/forms/signals and provides the contract for
+// components that expose a `value` model for use with [formField]. This is the same
+// pattern used by the Bootstrap radio group adapter (BsRadioGroupComponent).
 export class PrimeRadioGroupComponent implements FormValueControl<ValueType | undefined> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
