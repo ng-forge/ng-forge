@@ -1,5 +1,5 @@
 import { inject, Injectable, InjectionToken, Signal, Type } from '@angular/core';
-import { filter, Observable, Subject, tap } from 'rxjs';
+import { filter, Observable, Subject } from 'rxjs';
 import { FormEvent, FormEventConstructor } from './interfaces/form-event';
 import { EMIT_FORM_VALUE_ON_EVENTS } from '../providers/features/event-form-value/emit-form-value.token';
 import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
@@ -80,13 +80,7 @@ export class EventBus {
   private readonly formOptions = safeInjectToken<Signal<FormOptions | undefined> | null>(FORM_OPTIONS, null);
   private readonly logger = safeInjectToken<Logger>(DynamicFormLogger, FALLBACK_LOGGER);
 
-  events$ = this.pipeline$.asObservable().pipe(
-    tap({
-      error: (err: unknown) => {
-        this.logger.error('[Dynamic Forms] EventBus pipeline encountered an error', err);
-      },
-    }),
-  );
+  events$ = this.pipeline$.asObservable();
 
   /**
    * Dispatches an event to all subscribers.
@@ -142,8 +136,8 @@ export class EventBus {
   }
 
   /**
-   * Emits an event through the pipeline, catching synchronous subscriber exceptions
-   * so that one failing handler does not crash the entire dispatch chain.
+   * Emits an event through the pipeline. Catches any synchronous exception that escapes
+   * RxJS's own error handling so dispatch() callers are never disrupted by a failing subscriber.
    */
   private safeEmit(event: FormEvent): void {
     try {
