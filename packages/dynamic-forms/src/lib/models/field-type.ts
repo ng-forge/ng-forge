@@ -12,6 +12,15 @@ import { MapperFn } from '../mappers/types';
 export type ValueHandlingMode = 'include' | 'exclude' | 'flatten';
 
 /**
+ * Semantic grouping of interchangeable field UI alternatives.
+ *
+ * Used by tooling (e.g., openapi-generator) to discover which field types
+ * can substitute for each other. A field with scope 'boolean' means it's
+ * one of several ways to render a boolean value (checkbox, toggle, etc.).
+ */
+export type FieldScope = 'boolean' | 'single-select' | 'multi-select' | 'text-input' | 'numeric' | 'date';
+
+/**
  * Configuration interface for registering custom field types.
  *
  * Defines how a field type should be handled by the dynamic form system,
@@ -78,6 +87,8 @@ export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
    * ```
    */
   propsToMeta?: string[];
+  /** Semantic scope for tooling to discover interchangeable field alternatives */
+  scope?: FieldScope | FieldScope[];
 }
 
 /**

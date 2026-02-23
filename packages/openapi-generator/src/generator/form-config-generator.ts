@@ -1,0 +1,92 @@
+import type { FieldConfig } from '../mapper/schema-to-fields.js';
+import { toFormConfigName } from '../utils/naming.js';
+
+export interface FormConfigGeneratorOptions {
+  method: string;
+  path: string;
+  operationId?: string;
+  interfaceName: string;
+}
+
+export function generateFormConfig(fields: FieldConfig[], options: FormConfigGeneratorOptions): string {
+  const configName = toFormConfigName(options.method, options.path, options.operationId);
+  const indent = '  ';
+
+  const lines: string[] = [
+    `import type { FormConfig } from '@ng-forge/dynamic-forms';`,
+    ``,
+    `export const ${configName} = {`,
+    `${indent}fields: [`,
+  ];
+
+  for (const field of fields) {
+    lines.push(...generateFieldLines(field, indent + indent));
+  }
+
+  lines.push(`${indent}],`);
+  lines.push(`} as const satisfies FormConfig;`);
+  lines.push(``);
+
+  return lines.join('\n');
+}
+
+function generateFieldLines(field: FieldConfig, indent: string): string[] {
+  const lines: string[] = [];
+  lines.push(`${indent}{`);
+  lines.push(`${indent}  key: '${escapeString(field.key)}',`);
+  lines.push(`${indent}  type: '${escapeString(field.type)}',`);
+  lines.push(`${indent}  label: '${escapeString(field.label)}',`);
+
+  if (field.props && Object.keys(field.props).length > 0) {
+    lines.push(`${indent}  props: ${formatObject(field.props, indent + '  ')},`);
+  }
+
+  if (field.options && field.options.length > 0) {
+    lines.push(`${indent}  options: [`);
+    for (const opt of field.options) {
+      lines.push(`${indent}    { label: '${escapeString(opt.label)}', value: '${escapeString(opt.value)}' },`);
+    }
+    lines.push(`${indent}  ],`);
+  }
+
+  if (field.validation && field.validation.length > 0) {
+    lines.push(`${indent}  validation: [`);
+    for (const v of field.validation) {
+      if (v.value !== undefined) {
+        lines.push(`${indent}    { type: '${escapeString(v.type)}', value: ${JSON.stringify(v.value)} },`);
+      } else {
+        lines.push(`${indent}    { type: '${escapeString(v.type)}' },`);
+      }
+    }
+    lines.push(`${indent}  ],`);
+  }
+
+  if (field.disabled) {
+    lines.push(`${indent}  disabled: true,`);
+  }
+
+  if (field.fields && field.fields.length > 0) {
+    lines.push(`${indent}  fields: [`);
+    for (const child of field.fields) {
+      lines.push(...generateFieldLines(child, indent + '    '));
+    }
+    lines.push(`${indent}  ],`);
+  }
+
+  lines.push(`${indent}},`);
+  return lines;
+}
+
+function escapeString(str: string): string {
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function formatObject(obj: Record<string, unknown>, indent: string): string {
+  const entries = Object.entries(obj);
+  if (entries.length === 1) {
+    const [key, value] = entries[0];
+    return `{ ${key}: ${JSON.stringify(value)} }`;
+  }
+  const lines = entries.map(([key, value]) => `${indent}  ${key}: ${JSON.stringify(value)},`);
+  return `{\n${lines.join('\n')}\n${indent}}`;
+}

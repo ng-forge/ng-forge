@@ -203,7 +203,7 @@ export { arrayFieldMapper, groupFieldMapper, pageFieldMapper, rowFieldMapper, te
 export type { ArrayContext, FieldSignalContext, MapperFn } from './mappers';
 
 // Field Type Definition - for registering custom field types
-export type { FieldTypeDefinition, ValueHandlingMode } from './models';
+export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from './models';
 export { FIELD_REGISTRY } from './models';
 
 // Signal Context - injection tokens for field components

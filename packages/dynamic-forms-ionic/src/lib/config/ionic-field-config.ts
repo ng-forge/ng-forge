@@ -25,16 +25,19 @@ export const IONIC_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/input/ionic-input.component'),
     mapper: valueFieldMapper,
     propsToMeta: ['type'],
+    scope: ['text-input', 'numeric'],
   },
   {
     name: IonicField.Select,
     loadComponent: () => import('../fields/select/ionic-select.component'),
     mapper: optionsFieldMapper,
+    scope: 'single-select',
   },
   {
     name: IonicField.Checkbox,
     loadComponent: () => import('../fields/checkbox/ionic-checkbox.component'),
     mapper: checkboxFieldMapper,
+    scope: 'boolean',
   },
   {
     name: IonicField.Button,
@@ -101,30 +104,36 @@ export const IONIC_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/textarea/ionic-textarea.component'),
     mapper: valueFieldMapper,
     propsToMeta: ['rows'],
+    scope: 'text-input',
   },
   {
     name: IonicField.Radio,
     loadComponent: () => import('../fields/radio/ionic-radio.component'),
     mapper: optionsFieldMapper,
+    scope: 'single-select',
   },
   {
     name: IonicField.MultiCheckbox,
     loadComponent: () => import('../fields/multi-checkbox/ionic-multi-checkbox.component'),
     mapper: optionsFieldMapper,
+    scope: 'multi-select',
   },
   {
     name: IonicField.Datepicker,
     loadComponent: () => import('../fields/datepicker/ionic-datepicker.component'),
     mapper: datepickerFieldMapper,
+    scope: 'date',
   },
   {
     name: IonicField.Slider,
     loadComponent: () => import('../fields/slider/ionic-slider.component'),
     mapper: valueFieldMapper,
+    scope: 'numeric',
   },
   {
     name: IonicField.Toggle,
     loadComponent: () => import('../fields/toggle/ionic-toggle.component'),
     mapper: checkboxFieldMapper,
+    scope: 'boolean',
   },
 ];
