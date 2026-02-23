@@ -53,7 +53,7 @@ export function toFormConfigName(method: string, path: string, operationId?: str
   if (operationId) {
     return toCamelCase(operationId) + 'FormConfig';
   }
-  const cleaned = path.replace(/\{([^}]+)\}/g, 'By $1');
+  const cleaned = path.replace(/\{(\w+)\}/g, 'By $1');
   return toCamelCase(`${method} ${cleaned}`) + 'FormConfig';
 }
 
@@ -65,7 +65,7 @@ export function toFormFileName(method: string, path: string, operationId?: strin
   if (operationId) {
     return toKebabCase(operationId) + '.form.ts';
   }
-  const cleaned = path.replace(/\{([^}]+)\}/g, 'by-$1');
+  const cleaned = path.replace(/\{(\w+)\}/g, 'by-$1');
   return toKebabCase(`${method} ${cleaned}`) + '.form.ts';
 }
 
@@ -77,6 +77,6 @@ export function toInterfaceName(method: string, path: string, operationId?: stri
   if (operationId) {
     return toPascalCase(operationId) + 'FormValue';
   }
-  const cleaned = path.replace(/\{([^}]+)\}/g, 'By $1');
+  const cleaned = path.replace(/\{(\w+)\}/g, 'By $1');
   return toPascalCase(`${method} ${cleaned}`) + 'FormValue';
 }
