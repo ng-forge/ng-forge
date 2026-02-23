@@ -1,12 +1,10 @@
 import { InjectionToken, Injector, Signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, TimeoutError } from 'rxjs';
+import { Observable, of, throwError, TimeoutError } from 'rxjs';
 import { catchError, filter, map, scan, shareReplay, switchMap, take, timeout } from 'rxjs/operators';
 import { EventBus } from '../../events/event.bus';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import type { Logger } from '../../providers/features/logger/logger.interface';
-import { NoopLogger } from '../../providers/features/logger/noop-logger';
 
 /**
  * Injection token for configuring the initialization timeout in milliseconds.
@@ -126,19 +124,8 @@ export interface InitializationTrackingOptions {
 export function setupInitializationTracking(options: InitializationTrackingOptions): Observable<boolean> {
   const { eventBus, totalComponentsCount, injector, componentId } = options;
 
-  let timeoutMs: number;
-  try {
-    timeoutMs = injector.get(INITIALIZATION_TIMEOUT_MS);
-  } catch {
-    timeoutMs = 10_000;
-  }
-
-  let logger: Logger;
-  try {
-    logger = injector.get(DynamicFormLogger);
-  } catch {
-    logger = new NoopLogger();
-  }
+  const timeoutMs = injector.get(INITIALIZATION_TIMEOUT_MS);
+  const logger = injector.get(DynamicFormLogger);
 
   return toObservable(totalComponentsCount, { injector }).pipe(
     take(1),
@@ -162,15 +149,15 @@ export function setupInitializationTracking(options: InitializationTrackingOptio
         catchError((error: unknown) => {
           if (error instanceof TimeoutError) {
             logger.warn(
-              `[Dynamic Forms] Initialization timed out after ${timeoutMs}ms. ` +
+              `Initialization timed out after ${timeoutMs}ms. ` +
                 `Expected ${count} component(s) to initialize but not all reported in time. ` +
                 'This may indicate a container component threw during initialization. ' +
                 'Emitting (initialized) as best-effort.',
             );
             // Emit true as best-effort so consumers are not stuck waiting forever
-            return [true] as Iterable<boolean>;
+            return of(true);
           }
-          throw error;
+          return throwError(() => error);
         }),
       );
     }),

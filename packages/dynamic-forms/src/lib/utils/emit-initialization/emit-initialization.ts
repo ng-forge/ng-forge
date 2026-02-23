@@ -2,8 +2,6 @@ import { afterNextRender, Injector } from '@angular/core';
 import { EventBus } from '../../events/event.bus';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import type { Logger } from '../../providers/features/logger/logger.interface';
-import { NoopLogger } from '../../providers/features/logger/noop-logger';
 
 /**
  * Component type for initialization events.
@@ -31,20 +29,14 @@ export function emitComponentInitialized(
   componentKey: string,
   injector: Injector,
 ): void {
-  // Try to get logger from the injector; fall back to noop if unavailable
-  let logger: Logger;
-  try {
-    logger = injector.get(DynamicFormLogger);
-  } catch {
-    logger = new NoopLogger();
-  }
+  const logger = injector.get(DynamicFormLogger);
 
   afterNextRender(
     () => {
       try {
         eventBus.dispatch(ComponentInitializedEvent, componentType, componentKey);
       } catch (error: unknown) {
-        logger.error(`[Dynamic Forms] Failed to emit initialization event for ${componentType} '${componentKey}'`, error);
+        logger.error(`Failed to emit initialization event for ${componentType} '${componentKey}'`, error);
       }
     },
     { injector },

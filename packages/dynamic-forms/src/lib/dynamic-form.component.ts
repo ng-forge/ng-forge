@@ -23,7 +23,7 @@ import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
 import { setupInitializationTracking } from './utils/initialization-tracker/initialization-tracker';
 import { InferFormValue } from './models/types/form-value-inference';
-import { isContainerField } from './models/types/type-guards';
+import { hasChildFields, isContainerField } from './models/types/type-guards';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { DERIVATION_ORCHESTRATOR } from './core/derivation/derivation-orchestrator';
 import { PROPERTY_DERIVATION_ORCHESTRATOR } from './core/property-derivation/property-derivation-orchestrator';
@@ -335,17 +335,14 @@ function countContainersRecursive(fields: FieldDef<unknown>[]): number {
   for (const field of fields) {
     if (isContainerField(field)) {
       count += 1;
-      // Recurse into children if they exist
-      if ('fields' in field && field.fields != null) {
+      if (hasChildFields(field)) {
         const children = field.fields;
         if (Array.isArray(children)) {
-          // For arrays, each item definition can be a FieldDef or FieldDef[]
-          // Page, row, group have FieldDef[] children
           for (const child of children) {
             if (Array.isArray(child)) {
               // Array item template: FieldDef[] (object items)
               count += countContainersRecursive(child as FieldDef<unknown>[]);
-            } else if (child && typeof child === 'object' && 'type' in child) {
+            } else if (child != null && isContainerField(child as FieldDef<unknown>)) {
               count += countContainersRecursive([child as FieldDef<unknown>]);
             }
           }
