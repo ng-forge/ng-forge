@@ -1,23 +1,3 @@
-# {{ NgDocPage.title }}
-
-<div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
-  <svg width="48" height="48" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="256" cy="256" r="240" fill="#6BA539"/>
-    <path d="M160 160 L256 120 L352 160 L352 352 L256 392 L160 352Z" fill="white" opacity="0.95"/>
-    <path d="M256 120 L256 392" stroke="#6BA539" stroke-width="8"/>
-    <path d="M160 160 L352 160" stroke="#6BA539" stroke-width="6"/>
-    <path d="M160 240 L352 240" stroke="#6BA539" stroke-width="6"/>
-    <path d="M160 320 L352 320" stroke="#6BA539" stroke-width="6"/>
-    <circle cx="256" cy="160" r="12" fill="#6BA539"/>
-    <circle cx="256" cy="240" r="12" fill="#6BA539"/>
-    <circle cx="256" cy="320" r="12" fill="#6BA539"/>
-  </svg>
-  <div>
-    <strong style="font-size: 1.1em;">@ng-forge/openapi-generator</strong><br/>
-    <span style="opacity: 0.7;">Generate type-safe <code>@ng-forge/dynamic-forms</code> configurations from OpenAPI 3.x specifications.</span>
-  </div>
-</div>
-
 ## Overview
 
 The OpenAPI Generator reads your OpenAPI 3.x spec and produces ready-to-use `FormConfig` objects and TypeScript interfaces. No manual field wiring — your API contract drives your forms.
@@ -40,8 +20,16 @@ npx @ng-forge/openapi-generator generate --spec ./openapi.yaml --output ./src/fo
 
 Or install it as a dev dependency:
 
-```bash
+```bash group="install" name="npm"
 npm install -D @ng-forge/openapi-generator
+```
+
+```bash group="install" name="yarn"
+yarn add -D @ng-forge/openapi-generator
+```
+
+```bash group="install" name="pnpm"
+pnpm add -D @ng-forge/openapi-generator
 ```
 
 ## Quick Start
