@@ -92,11 +92,11 @@ export class DerivationOrchestrator {
   private lastAsyncEntryKeys: Set<string> | null = null;
 
   /**
-   * Generation counter incremented on every HTTP/async stream teardown.
-   * Used to discard stale responses from in-flight requests that complete
-   * after a config change has already created new streams.
+   * Token used to detect stale HTTP responses. Replaced with a new object on every
+   * stream teardown. Closures that captured the previous token reference will return
+   * false from `isGenerationCurrent`, discarding responses from in-flight requests.
    */
-  private _configGeneration = 0;
+  private generationToken: object = {};
 
   /**
    * Computed signal containing the collected and validated derivations.
@@ -356,7 +356,8 @@ export class DerivationOrchestrator {
         this.lastHttpEntryKeys = newKeys;
 
         const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
-        const capturedGeneration = this._configGeneration;
+        const token = this.generationToken;
+        const isGenerationCurrent = () => this.generationToken === token;
 
         for (const entry of httpEntries) {
           const context: HttpDerivationStreamContext = {
@@ -368,8 +369,7 @@ export class DerivationOrchestrator {
             customFunctions: () => this.functionRegistry.getCustomFunctions(),
             externalData: () => this.resolveExternalData(),
             warningTracker: this.warningTracker,
-            configGeneration: capturedGeneration,
-            isGenerationCurrent: () => this._configGeneration === capturedGeneration,
+            isGenerationCurrent,
           };
 
           const stream = createHttpDerivationStream(entry, formValue$, context).pipe(takeUntilDestroyed(this.destroyRef));
@@ -384,11 +384,11 @@ export class DerivationOrchestrator {
   }
 
   /**
-   * Tears down all active HTTP derivation streams and increments the generation counter
-   * to invalidate any in-flight responses from the previous generation.
+   * Tears down all active HTTP derivation streams. Replacing the generation token
+   * invalidates any in-flight responses from the old generation.
    */
   private teardownHttpStreams(): void {
-    this._configGeneration++;
+    this.generationToken = {};
     for (const sub of this.httpSubscriptions) {
       sub.unsubscribe();
     }

@@ -21,7 +21,7 @@ export function resolveHttpRequest(config: HttpRequestConfig, context: Evaluatio
       const value = ExpressionParser.evaluate(expression, context);
       if (value == null) {
         context.logger.debug(
-          `[Dynamic Forms] HTTP request suppressed: path param '${key}' resolved to ${String(value)} ` +
+          `HTTP request suppressed: path param '${key}' resolved to ${String(value)} ` +
             `(expression: '${expression}'). The request will not be sent.`,
         );
         return null;

@@ -49,10 +49,7 @@ export interface HttpDerivationStreamContext {
   /** Warning tracker to suppress duplicate missing-field warnings */
   warningTracker?: DerivationWarningTracker;
 
-  /** Generation counter captured when the stream was created */
-  configGeneration: number;
-
-  /** Returns true if the captured generation is still current */
+  /** Returns true if this stream is still the active generation (no teardown since creation) */
   isGenerationCurrent: () => boolean;
 }
 
@@ -205,9 +202,6 @@ export function createHttpDerivationStream(
           return;
         }
 
-        // Capture generation at request dispatch time to detect stale responses
-        const requestGeneration = context.configGeneration;
-
         // Make the HTTP request
         const method = (resolvedRequest.method ?? 'GET').toUpperCase();
         const httpSub = context.httpClient
@@ -218,11 +212,11 @@ export function createHttpDerivationStream(
           .subscribe({
             next: (response) => {
               try {
-                // Discard stale response if config generation has changed
+                // Discard stale response if config has changed since this request was dispatched
                 if (!context.isGenerationCurrent()) {
                   context.logger.debug(
-                    `${LOG_PREFIX} Discarding stale response for '${entry.fieldKey}' ` +
-                      `(generation ${requestGeneration} !== current). Config has changed since request was dispatched.`,
+                    `${LOG_PREFIX} Discarding stale response for '${entry.fieldKey}': ` +
+                      'config has changed since the request was dispatched.',
                   );
                   subscriber.complete();
                   return;
