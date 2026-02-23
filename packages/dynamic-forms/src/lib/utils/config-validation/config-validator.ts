@@ -42,7 +42,15 @@ function collectFieldData(fields: FieldDef<unknown>[], data: ConfigTraversalData
     }
 
     if (hasChildFields(field)) {
-      collectFieldData(normalizeFieldsArray(field.fields) as FieldDef<unknown>[], data);
+      const children = normalizeFieldsArray(field.fields) as (FieldDef<unknown> | FieldDef<unknown>[])[];
+      for (const child of children) {
+        if (Array.isArray(child)) {
+          // Object array item: each element is a FieldDef[] (e.g., [nameField, emailField])
+          collectFieldData(child as FieldDef<unknown>[], data);
+        } else {
+          collectFieldData([child], data);
+        }
+      }
     }
   }
 }

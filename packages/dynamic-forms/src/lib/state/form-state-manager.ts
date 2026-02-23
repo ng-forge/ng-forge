@@ -897,8 +897,10 @@ export class FormStateManager<
   }
 
   private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: FormMode, registry: Map<string, FieldTypeDefinition>): FormSetup {
-    validateFormConfig(fields, registry, this.logger);
     const normalizedFields = normalizeSimplifiedArrays(fields);
+    // Validate after normalization so simplified array templates are already expanded
+    // into full ArrayField.fields and are reachable during traversal.
+    validateFormConfig(normalizedFields, registry, this.logger);
     const flattenedFields = this.fieldProcessors.memoizedFlattenFields(normalizedFields, registry);
     const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(normalizedFields, registry);
     const fieldsById = this.fieldProcessors.memoizedKeyBy(flattenedFields);
