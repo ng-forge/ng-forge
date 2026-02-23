@@ -309,6 +309,8 @@ export class DynamicForm<
       eventBus: this.eventBus,
       configSignal: this.config,
       formSignal: this.form as Signal<FieldTree<TModel>>,
+      validSignal: this.valid,
+      logger: this.logger,
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

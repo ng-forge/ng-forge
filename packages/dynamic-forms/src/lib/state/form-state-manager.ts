@@ -730,6 +730,7 @@ export class FormStateManager<
         );
       },
       captureValue: () => this.formValue() as Record<string, unknown>,
+      isSubmitting: this.submitting,
       isFieldPipelineSettled: () => this.isFieldPipelineSettled(),
       restoreValue: (values, validKeys) => {
         const filtered: Record<string, unknown> = {};
