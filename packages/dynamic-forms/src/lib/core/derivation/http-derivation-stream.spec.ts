@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { computed, signal, WritableSignal } from '@angular/core';
-import { of, Subject, throwError } from 'rxjs';
+import { NEVER, of, Subject, throwError } from 'rxjs';
 import { createHttpDerivationStream, HttpDerivationStreamContext } from './http-derivation-stream';
 import { DerivationEntry } from './derivation-types';
 import { Logger } from '../../providers/features/logger/logger.interface';
@@ -123,7 +123,7 @@ describe('createHttpDerivationStream', () => {
       httpClient: mockHttpClient as unknown as HttpDerivationStreamContext['httpClient'],
       logger,
       derivationLogger: signal(derivationLogger) as HttpDerivationStreamContext['derivationLogger'],
-      isGenerationCurrent: () => true,
+      guard$: NEVER,
       ...overrides,
     };
   }

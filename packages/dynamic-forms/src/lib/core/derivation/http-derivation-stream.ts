@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Signal, untracked } from '@angular/core';
 import type { FieldTree } from '@angular/forms/signals';
-import { EMPTY, Observable, debounceTime, filter, map, pairwise, startWith, switchMap } from 'rxjs';
+import { EMPTY, Observable, Subject, debounceTime, filter, map, pairwise, startWith, switchMap, take, takeUntil } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { getChangedKeys, isEqual } from '../../utils/object-utils';
@@ -49,8 +49,27 @@ export interface HttpDerivationStreamContext {
   /** Warning tracker to suppress duplicate missing-field warnings */
   warningTracker?: DerivationWarningTracker;
 
-  /** Returns true if this stream is still the active generation (no teardown since creation) */
-  isGenerationCurrent: () => boolean;
+  /**
+   * Observable that emits when the current generation of streams should be torn down.
+   * Pipe HTTP requests through `takeUntil(context.guard$)` to automatically discard
+   * in-flight responses when the config changes.
+   */
+  guard$: Observable<void>;
+}
+
+/**
+ * Creates a staleness guard for HTTP/async derivation streams.
+ *
+ * - Call `invalidate()` when tearing down the current generation of streams.
+ * - Pipe HTTP requests through `takeUntil(guard$)` to automatically discard
+ *   in-flight responses that arrive after the generation has been invalidated.
+ */
+export function createStreamGuard(): { invalidate: () => void; guard$: Observable<void> } {
+  const subject = new Subject<void>();
+  return {
+    invalidate: () => subject.next(),
+    guard$: subject.asObservable().pipe(take(1)),
+  };
 }
 
 const LOG_PREFIX = 'HTTP Derivation -';
@@ -202,26 +221,18 @@ export function createHttpDerivationStream(
           return;
         }
 
-        // Make the HTTP request
+        // Make the HTTP request. takeUntil(guard$) automatically discards responses
+        // that arrive after the config has changed and the guard has been invalidated.
         const method = (resolvedRequest.method ?? 'GET').toUpperCase();
         const httpSub = context.httpClient
           .request(method, resolvedRequest.url, {
             body: resolvedRequest.body,
             headers: resolvedRequest.headers as Record<string, string>,
           })
+          .pipe(takeUntil(context.guard$))
           .subscribe({
             next: (response) => {
               try {
-                // Discard stale response if config has changed since this request was dispatched
-                if (!context.isGenerationCurrent()) {
-                  context.logger.debug(
-                    `${LOG_PREFIX} Discarding stale response for '${entry.fieldKey}': ` +
-                      'config has changed since the request was dispatched.',
-                  );
-                  subscriber.complete();
-                  return;
-                }
-
                 // Extract value from response using responseExpression
                 const newValue = ExpressionParser.evaluate(responseExpression, { response });
 

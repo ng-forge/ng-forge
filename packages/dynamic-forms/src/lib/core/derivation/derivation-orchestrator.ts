@@ -31,7 +31,7 @@ import { validateNoCycles } from './cycle-detector';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
 import { DERIVATION_WARNING_TRACKER } from './derivation-warning-tracker';
-import { createHttpDerivationStream, HttpDerivationStreamContext } from './http-derivation-stream';
+import { createHttpDerivationStream, createStreamGuard, HttpDerivationStreamContext } from './http-derivation-stream';
 import { createAsyncDerivationStream } from './async-derivation-stream';
 
 /**
@@ -92,11 +92,11 @@ export class DerivationOrchestrator {
   private lastAsyncEntryKeys: Set<string> | null = null;
 
   /**
-   * Token used to detect stale HTTP responses. Replaced with a new object on every
-   * stream teardown. Closures that captured the previous token reference will return
-   * false from `isGenerationCurrent`, discarding responses from in-flight requests.
+   * Guard for detecting stale HTTP responses. Call `invalidate()` on teardown to cancel
+   * in-flight requests from the previous generation. Each HTTP stream subscribes via
+   * `takeUntil(guard$)` — when `invalidate()` fires, all in-flight requests are discarded.
    */
-  private generationToken: object = {};
+  private readonly streamGuard = createStreamGuard();
 
   /**
    * Computed signal containing the collected and validated derivations.
@@ -356,8 +356,6 @@ export class DerivationOrchestrator {
         this.lastHttpEntryKeys = newKeys;
 
         const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
-        const token = this.generationToken;
-        const isGenerationCurrent = () => this.generationToken === token;
 
         for (const entry of httpEntries) {
           const context: HttpDerivationStreamContext = {
@@ -369,7 +367,7 @@ export class DerivationOrchestrator {
             customFunctions: () => this.functionRegistry.getCustomFunctions(),
             externalData: () => this.resolveExternalData(),
             warningTracker: this.warningTracker,
-            isGenerationCurrent,
+            guard$: this.streamGuard.guard$,
           };
 
           const stream = createHttpDerivationStream(entry, formValue$, context).pipe(takeUntilDestroyed(this.destroyRef));
@@ -384,11 +382,11 @@ export class DerivationOrchestrator {
   }
 
   /**
-   * Tears down all active HTTP derivation streams. Replacing the generation token
-   * invalidates any in-flight responses from the old generation.
+   * Tears down all active HTTP derivation streams. Invalidating the stream guard
+   * cancels any in-flight HTTP responses from the old generation via `takeUntil`.
    */
   private teardownHttpStreams(): void {
-    this.generationToken = {};
+    this.streamGuard.invalidate();
     for (const sub of this.httpSubscriptions) {
       sub.unsubscribe();
     }
