@@ -1,6 +1,6 @@
 import { Signal } from '@angular/core';
 import { FieldTree, submit } from '@angular/forms/signals';
-import { EMPTY, exhaustMap, firstValueFrom, from, isObservable, Observable } from 'rxjs';
+import { catchError, EMPTY, exhaustMap, firstValueFrom, from, isObservable, Observable } from 'rxjs';
 import { EventBus } from '../../events/event.bus';
 import { SubmitEvent } from '../../events/constants/submit.event';
 import { FormConfig } from '../../models/form-config';
@@ -33,32 +33,24 @@ export interface SubmissionHandlerOptions<
 /**
  * Wraps a submission action to handle both Promise and Observable returns.
  * Converts Observables to Promises for compatibility with Angular Signal Forms' submit().
- * Catches errors to prevent unhandled Promise rejections.
  *
- * The return type uses `void` to match Angular Signal Forms' expected action signature.
- * The actual result from the action is preserved but typed as void since Angular's
- * submit() function handles the result internally.
+ * Errors are NOT caught here — they propagate so that submit() can reject its Promise,
+ * allowing the caller's catchError to log and keep the submission stream alive.
  *
  * @param action - The submission action function
- * @param logger - Logger for consistent error reporting
- * @returns A wrapped function that always returns a Promise
+ * @returns A wrapped function that returns a Promise
  */
 function wrapSubmissionAction<TModel extends Record<string, unknown>>(
   action: (formTree: FieldTree<TModel>) => unknown,
-  logger: Logger,
 ): (formTree: FieldTree<TModel>) => Promise<void> {
   return async (formTree: FieldTree<TModel>): Promise<void> => {
-    try {
-      const result = action(formTree);
-      // If the action returns an Observable, convert it to a Promise
-      if (isObservable(result)) {
-        await firstValueFrom(result);
-        return;
-      }
-      await Promise.resolve(result);
-    } catch (error) {
-      logger.error('Submission action failed:', error);
+    const result = action(formTree);
+    // If the action returns an Observable, convert it to a Promise
+    if (isObservable(result)) {
+      await firstValueFrom(result);
+      return;
     }
+    await Promise.resolve(result);
   };
 }
 
@@ -117,14 +109,21 @@ export function createSubmissionHandler<
 
       // Type assertion needed: submission.action accepts the form tree but its signature
       // is defined broadly in FormConfig. The actual runtime type is FieldTree<TModel>.
-      const wrappedAction = wrapSubmissionAction<TModel>(submissionConfig.action as (formTree: FieldTree<TModel>) => unknown, logger);
+      const wrappedAction = wrapSubmissionAction<TModel>(submissionConfig.action as (formTree: FieldTree<TModel>) => unknown);
 
       // Use Angular Signal Forms' native submit() function
       // This automatically:
       // - Sets form.submitting() to true during execution
       // - Applies server errors to form fields on completion
       // - Sets form.submitting() to false when done
-      return from(submit(formSignal(), wrappedAction));
+      // catchError keeps the exhaustMap stream alive after action failure —
+      // without it, an unhandled error would terminate all future submissions.
+      return from(submit(formSignal(), wrappedAction)).pipe(
+        catchError((error: unknown) => {
+          logger.error('Submission action failed:', error);
+          return EMPTY;
+        }),
+      );
     }),
   );
 }
