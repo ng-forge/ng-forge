@@ -184,7 +184,9 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
 
   onDateChange(event: CustomEvent) {
     const value = event.detail.value;
-    if (value) {
+    // ion-datetime emits ISO 8601 strings internally; we convert to Date objects
+    // to match the FieldTree<Date | null> type contract.
+    if (value && typeof value === 'string' && value.length > 0) {
       const date = new Date(value);
       this.field()().value.set(date);
     } else {

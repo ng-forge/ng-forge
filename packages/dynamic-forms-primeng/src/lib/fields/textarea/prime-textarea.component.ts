@@ -79,21 +79,9 @@ export default class PrimeTextareaFieldComponent implements PrimeTextareaCompone
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
-  readonly textareaClasses = computed(() => {
-    const classes: string[] = [];
-
-    const styleClass = this.props()?.styleClass;
-    if (styleClass) {
-      classes.push(styleClass);
-    }
-
-    // Add p-invalid class when there are errors to display
-    if (this.errorsToDisplay().length > 0) {
-      classes.push('p-invalid');
-    }
-
-    return classes.join(' ');
-  });
+  // PrimeNG's [invalid] binding on the control component already manages the p-invalid
+  // class internally, so we only pass through user-specified styleClass here.
+  readonly textareaClasses = computed(() => this.props()?.styleClass ?? '');
 
   readonly inputId = computed(() => `${this.key()}-textarea`);
 

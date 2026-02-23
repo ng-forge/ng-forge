@@ -87,20 +87,19 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
       selector: 'ion-input',
     });
 
-    // Workaround: Ionic's ion-input does NOT automatically propagate aria-describedby changes
-    // to the native input element inside its shadow DOM. This effect imperatively syncs the attribute
-    // after a microtask to ensure Ionic has processed the attribute change.
+    // ion-input encapsulates a native <input> in shadow DOM and does not automatically
+    // propagate aria-describedby to it. This effect imperatively syncs the attribute
+    // after a microtask to ensure Ionic has resolved the internal element.
     explicitEffect([this.ariaDescribedBy], ([describedBy]) => {
       queueMicrotask(() => {
         const ionInput = this.elementRef.nativeElement.querySelector('ion-input') as HTMLIonInputElement | null;
         if (ionInput?.getInputElement) {
           ionInput.getInputElement().then((inputEl) => {
-            if (inputEl) {
-              if (describedBy) {
-                inputEl.setAttribute('aria-describedby', describedBy);
-              } else {
-                inputEl.removeAttribute('aria-describedby');
-              }
+            if (!inputEl) return;
+            if (describedBy) {
+              inputEl.setAttribute('aria-describedby', describedBy);
+            } else {
+              inputEl.removeAttribute('aria-describedby');
             }
           });
         }
