@@ -1,9 +1,22 @@
-import { Injector, Signal } from '@angular/core';
+import { InjectionToken, Injector, Signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
-import { filter, map, scan, shareReplay, switchMap, take } from 'rxjs/operators';
+import { Observable, TimeoutError } from 'rxjs';
+import { catchError, filter, map, scan, shareReplay, switchMap, take, timeout } from 'rxjs/operators';
 import { EventBus } from '../../events/event.bus';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import type { Logger } from '../../providers/features/logger/logger.interface';
+import { NoopLogger } from '../../providers/features/logger/noop-logger';
+
+/**
+ * Injection token for configuring the initialization timeout in milliseconds.
+ * Defaults to 10 seconds. When the timeout is reached, a warning is logged
+ * and (initialized) emits true as a best-effort fallback.
+ */
+export const INITIALIZATION_TIMEOUT_MS = new InjectionToken<number>('INITIALIZATION_TIMEOUT_MS', {
+  providedIn: 'root',
+  factory: () => 10_000,
+});
 
 /**
  * Creates an observable that tracks component initialization progress.
@@ -89,8 +102,10 @@ export interface InitializationTrackingOptions {
  * Uses shareReplay({ bufferSize: 1, refCount: false }) to ensure exactly one emission
  * that can be received by late subscribers and keeps the subscription alive.
  *
- * This utility function replaces the manual ReplaySubject pattern for tracking initialization.
- * The count includes container components (dynamic-form, pages, rows, groups).
+ * Includes a configurable timeout (default 10s via INITIALIZATION_TIMEOUT_MS)
+ * so that (initialized) does not hang forever if a container component throws
+ * before emitting its initialization event. On timeout, a warning is logged
+ * and true is emitted as a best-effort fallback.
  *
  * @param options - Configuration options for initialization tracking
  * @returns Observable<boolean> that emits true when all components are initialized
@@ -111,19 +126,53 @@ export interface InitializationTrackingOptions {
 export function setupInitializationTracking(options: InitializationTrackingOptions): Observable<boolean> {
   const { eventBus, totalComponentsCount, injector, componentId } = options;
 
+  let timeoutMs: number;
+  try {
+    timeoutMs = injector.get(INITIALIZATION_TIMEOUT_MS);
+  } catch {
+    timeoutMs = 10_000;
+  }
+
+  let logger: Logger;
+  try {
+    logger = injector.get(DynamicFormLogger);
+  } catch {
+    logger = new NoopLogger();
+  }
+
   return toObservable(totalComponentsCount, { injector }).pipe(
     take(1),
     switchMap((count) => {
+      let tracking$: Observable<boolean>;
+
       if (count === 1) {
         // Only dynamic-form component, emit immediately when it initializes
-        return eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
+        tracking$ = eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
           filter((event) => event.componentType === 'dynamic-form' && event.componentId === componentId),
           map(() => true),
           take(1),
         );
+      } else {
+        tracking$ = createInitializationTracker(eventBus, count);
       }
 
-      return createInitializationTracker(eventBus, count);
+      // Timeout guard: emit best-effort true if a container throws before initializing
+      return tracking$.pipe(
+        timeout(timeoutMs),
+        catchError((error: unknown) => {
+          if (error instanceof TimeoutError) {
+            logger.warn(
+              `[Dynamic Forms] Initialization timed out after ${timeoutMs}ms. ` +
+                `Expected ${count} component(s) to initialize but not all reported in time. ` +
+                'This may indicate a container component threw during initialization. ' +
+                'Emitting (initialized) as best-effort.',
+            );
+            // Emit true as best-effort so consumers are not stuck waiting forever
+            return [true] as Iterable<boolean>;
+          }
+          throw error;
+        }),
+      );
     }),
     shareReplay({ bufferSize: 1, refCount: false }),
   );
