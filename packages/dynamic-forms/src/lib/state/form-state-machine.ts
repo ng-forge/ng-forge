@@ -46,6 +46,8 @@ export interface FormStateMachineConfig<TFields extends RegisteredFieldTypes[] =
   readonly restoreValue: (values: Record<string, unknown>, validKeys: Set<string>) => void;
   /** Predicate returning true when the field pipeline has already settled (all components cached) */
   readonly isFieldPipelineSettled?: () => boolean;
+  /** Signal indicating whether the form is currently submitting */
+  readonly isSubmitting?: Signal<boolean>;
   /** Callback when form is created (for registration) */
   readonly onFormCreated?: (formSetup: FormSetup) => void;
   /** Logger instance for error reporting */
@@ -204,6 +206,13 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
         state: createInitializingState(config),
         sideEffects: [{ type: Effect.CreateForm }],
       };
+    }
+
+    // Guard: reject config changes during active submission to prevent races
+    // between the in-flight action Promise and form teardown/rebuild.
+    if (this.config.isSubmitting?.()) {
+      this.config.logger.warn('Config changed during active submission; ignoring. Apply config changes after submission completes.');
+      return { state, sideEffects: [] };
     }
 
     if (isReadyState(state)) {
