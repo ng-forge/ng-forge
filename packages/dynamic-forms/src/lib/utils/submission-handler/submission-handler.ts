@@ -103,7 +103,7 @@ export function createSubmissionHandler<
       // Guard: match the (submitted) output's safety contract — reject submission
       // when the form is invalid or has pending async validators.
       if (!validSignal()) {
-        logger.debug('Submission action skipped: form is invalid or has pending validators');
+        logger.debug('Submission action skipped: form is not valid (invalid or pending async validators)');
         return EMPTY;
       }
 

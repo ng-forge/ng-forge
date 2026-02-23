@@ -687,6 +687,8 @@ export class FormStateManager<
         }
         return true;
       }),
+      // switchMap is intentional here: mapping is synchronous (reads signals, no async Promise).
+      // The exhaustMap concern in createSubmissionHandler does not apply to this path.
       switchMap(() => {
         const config = this.activeConfig();
         const submissionConfig = config?.submission;
