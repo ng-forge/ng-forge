@@ -20,12 +20,20 @@ import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
 /**
  * Extracts a boolean from an HTTP response using an optional expression.
  * When `responseExpression` is provided, evaluates it with `{ response }` scope.
+ * Truthy values are treated as `true` — non-boolean results trigger a warning to encourage explicit boolean expressions.
  * Otherwise, coerces the response to boolean.
  */
 function extractBoolean(response: unknown, responseExpression: string | undefined, pendingValue: boolean, logger: Logger): boolean {
   if (responseExpression) {
     try {
       const result = ExpressionParser.evaluate(responseExpression, { response });
+      if (typeof result !== 'boolean') {
+        logger.warn(
+          `responseExpression "${responseExpression}" returned non-boolean value:`,
+          result,
+          'Consider returning a boolean explicitly.',
+        );
+      }
       return !!result;
     } catch (error) {
       logger.warn(`Failed to evaluate responseExpression '${responseExpression}':`, error);

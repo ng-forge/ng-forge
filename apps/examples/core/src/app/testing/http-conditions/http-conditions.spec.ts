@@ -203,7 +203,7 @@ test.describe('HTTP Conditions Tests', () => {
         const url = route.request().url();
         const code = new URL(url).searchParams.get('code');
 
-        // Return truthy object for "hide", null for "show"
+        // Return truthy object for "hide", null for "show" — tests implicit !!response coercion
         if (code === 'hide') {
           route.fulfill({
             status: 200,
