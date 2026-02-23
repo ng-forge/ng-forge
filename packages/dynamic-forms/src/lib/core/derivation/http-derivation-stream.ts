@@ -48,6 +48,12 @@ export interface HttpDerivationStreamContext {
 
   /** Warning tracker to suppress duplicate missing-field warnings */
   warningTracker?: DerivationWarningTracker;
+
+  /** Generation counter captured when the stream was created */
+  configGeneration: number;
+
+  /** Returns true if the captured generation is still current */
+  isGenerationCurrent: () => boolean;
 }
 
 const LOG_PREFIX = 'HTTP Derivation -';
@@ -184,7 +190,26 @@ export function createHttpDerivationStream(
         }
 
         // Resolve the HTTP request (evaluates expressions in queryParams/body)
+        // Returns null when a path param is undefined — suppress the request
         const resolvedRequest = resolveHttpRequest(entry.http!, evalContext);
+
+        if (!resolvedRequest) {
+          const derivationLogger = untracked(() => context.derivationLogger());
+          derivationLogger.evaluation({
+            debugName: entry.debugName,
+            fieldKey: entry.fieldKey,
+            result: 'skipped',
+            skipReason: 'condition-false',
+          });
+          subscriber.complete();
+          return;
+        }
+
+        // Capture generation at request dispatch time to detect stale responses
+        const requestGeneration = context.configGeneration;
+
+        // Create AbortController to cancel in-flight HTTP requests on switchMap teardown
+        const abortController = new AbortController();
 
         // Make the HTTP request
         const method = (resolvedRequest.method ?? 'GET').toUpperCase();
@@ -196,6 +221,16 @@ export function createHttpDerivationStream(
           .subscribe({
             next: (response) => {
               try {
+                // Discard stale response if config generation has changed
+                if (!context.isGenerationCurrent()) {
+                  context.logger.debug(
+                    `${LOG_PREFIX} Discarding stale response for '${entry.fieldKey}' ` +
+                      `(generation ${requestGeneration} !== current). Config has changed since request was dispatched.`,
+                  );
+                  subscriber.complete();
+                  return;
+                }
+
                 // Extract value from response using responseExpression
                 const newValue = ExpressionParser.evaluate(responseExpression, { response });
 
@@ -235,14 +270,20 @@ export function createHttpDerivationStream(
               }
             },
             error: (error) => {
+              // Ignore abort errors — these are expected when switchMap cancels
+              if (abortController.signal.aborted) {
+                subscriber.complete();
+                return;
+              }
               const message = error instanceof Error ? error.message : String(error);
               context.logger.warn(`${LOG_PREFIX} HTTP request failed for '${entry.fieldKey}': ${message}`);
               subscriber.complete();
             },
           });
 
-        // Cleanup subscription on unsubscribe (switchMap cancellation)
+        // Cleanup: unsubscribe from HTTP request AND abort the underlying fetch
         return () => {
+          abortController.abort();
           httpSub.unsubscribe();
         };
       });

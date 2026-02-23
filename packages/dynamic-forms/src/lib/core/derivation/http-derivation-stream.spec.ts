@@ -123,6 +123,8 @@ describe('createHttpDerivationStream', () => {
       httpClient: mockHttpClient as unknown as HttpDerivationStreamContext['httpClient'],
       logger,
       derivationLogger: signal(derivationLogger) as HttpDerivationStreamContext['derivationLogger'],
+      configGeneration: 0,
+      isGenerationCurrent: () => true,
       ...overrides,
     };
   }

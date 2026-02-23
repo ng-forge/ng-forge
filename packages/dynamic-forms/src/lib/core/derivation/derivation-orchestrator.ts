@@ -31,7 +31,7 @@ import { validateNoCycles } from './cycle-detector';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
 import { DERIVATION_WARNING_TRACKER } from './derivation-warning-tracker';
-import { createHttpDerivationStream } from './http-derivation-stream';
+import { createHttpDerivationStream, HttpDerivationStreamContext } from './http-derivation-stream';
 import { createAsyncDerivationStream } from './async-derivation-stream';
 
 /**
@@ -90,6 +90,13 @@ export class DerivationOrchestrator {
 
   /** Identity keys of current async entries for smart teardown comparison */
   private lastAsyncEntryKeys: Set<string> | null = null;
+
+  /**
+   * Generation counter incremented on every HTTP/async stream teardown.
+   * Used to discard stale responses from in-flight requests that complete
+   * after a config change has already created new streams.
+   */
+  private _configGeneration = 0;
 
   /**
    * Computed signal containing the collected and validated derivations.
@@ -349,9 +356,10 @@ export class DerivationOrchestrator {
         this.lastHttpEntryKeys = newKeys;
 
         const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
+        const capturedGeneration = this._configGeneration;
 
         for (const entry of httpEntries) {
-          const context = {
+          const context: HttpDerivationStreamContext = {
             formValue: this.config.formValue,
             form: this.config.form,
             httpClient: this.httpClient,
@@ -360,6 +368,8 @@ export class DerivationOrchestrator {
             customFunctions: () => this.functionRegistry.getCustomFunctions(),
             externalData: () => this.resolveExternalData(),
             warningTracker: this.warningTracker,
+            configGeneration: capturedGeneration,
+            isGenerationCurrent: () => this._configGeneration === capturedGeneration,
           };
 
           const stream = createHttpDerivationStream(entry, formValue$, context).pipe(takeUntilDestroyed(this.destroyRef));
@@ -374,9 +384,11 @@ export class DerivationOrchestrator {
   }
 
   /**
-   * Tears down all active HTTP derivation streams.
+   * Tears down all active HTTP derivation streams and increments the generation counter
+   * to invalidate any in-flight responses from the previous generation.
    */
   private teardownHttpStreams(): void {
+    this._configGeneration++;
     for (const sub of this.httpSubscriptions) {
       sub.unsubscribe();
     }
