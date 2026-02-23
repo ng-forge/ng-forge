@@ -16,10 +16,15 @@ interface ConfigTraversalData {
 /**
  * Collects all field keys, types, and validates regex patterns from a field tree
  * by recursively traversing containers (page, row, group, array).
+ *
+ * @param collectKeys - Whether to add field keys to data.keys for duplicate detection.
+ *   Set to false when inside an array container: array item fields share template keys
+ *   across items by design (e.g. every item has 'name', 'email'), so they must not
+ *   participate in global duplicate-key checking.
  */
-function collectFieldData(fields: FieldDef<unknown>[], data: ConfigTraversalData): void {
+function collectFieldData(fields: FieldDef<unknown>[], data: ConfigTraversalData, collectKeys = true): void {
   for (const field of fields) {
-    if (field.key) {
+    if (collectKeys && field.key) {
       data.keys.push(field.key);
     }
     if (field.type) {
@@ -42,13 +47,15 @@ function collectFieldData(fields: FieldDef<unknown>[], data: ConfigTraversalData
     }
 
     if (hasChildFields(field)) {
+      // Array item fields share template keys across items by design — stop collecting keys
+      // once inside an array. Types and regex patterns are still validated.
+      const childCollectKeys = collectKeys && field.type !== 'array';
       const children = normalizeFieldsArray(field.fields) as (FieldDef<unknown> | FieldDef<unknown>[])[];
       for (const child of children) {
         if (Array.isArray(child)) {
-          // Object array item: each element is a FieldDef[] (e.g., [nameField, emailField])
-          collectFieldData(child as FieldDef<unknown>[], data);
+          collectFieldData(child as FieldDef<unknown>[], data, childCollectKeys);
         } else {
-          collectFieldData([child], data);
+          collectFieldData([child], data, childCollectKeys);
         }
       }
     }
