@@ -208,9 +208,6 @@ export function createHttpDerivationStream(
         // Capture generation at request dispatch time to detect stale responses
         const requestGeneration = context.configGeneration;
 
-        // Create AbortController to cancel in-flight HTTP requests on switchMap teardown
-        const abortController = new AbortController();
-
         // Make the HTTP request
         const method = (resolvedRequest.method ?? 'GET').toUpperCase();
         const httpSub = context.httpClient
@@ -270,20 +267,16 @@ export function createHttpDerivationStream(
               }
             },
             error: (error) => {
-              // Ignore abort errors — these are expected when switchMap cancels
-              if (abortController.signal.aborted) {
-                subscriber.complete();
-                return;
-              }
               const message = error instanceof Error ? error.message : String(error);
               context.logger.warn(`${LOG_PREFIX} HTTP request failed for '${entry.fieldKey}': ${message}`);
               subscriber.complete();
             },
           });
 
-        // Cleanup: unsubscribe from HTTP request AND abort the underlying fetch
+        // Cleanup: RxJS unsubscription cancels the in-flight HTTP request.
+        // Angular's HttpClient uses an internal AbortController when operating with
+        // the fetch backend, so unsubscribing is sufficient for network cancellation.
         return () => {
-          abortController.abort();
           httpSub.unsubscribe();
         };
       });
