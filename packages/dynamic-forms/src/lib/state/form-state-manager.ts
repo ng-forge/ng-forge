@@ -897,7 +897,7 @@ export class FormStateManager<
   }
 
   private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: FormMode, registry: Map<string, FieldTypeDefinition>): FormSetup {
-    validateFormConfig(fields, registry);
+    validateFormConfig(fields, registry, this.logger);
     const normalizedFields = normalizeSimplifiedArrays(fields);
     const flattenedFields = this.fieldProcessors.memoizedFlattenFields(normalizedFields, registry);
     const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(normalizedFields, registry);

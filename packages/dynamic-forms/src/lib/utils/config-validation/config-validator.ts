@@ -4,6 +4,7 @@ import { FieldTypeDefinition } from '../../models/field-type';
 import { hasChildFields } from '../../models/types/type-guards';
 import { normalizeFieldsArray } from '../object-utils';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
+import { Logger } from '../../providers/features/logger/logger.interface';
 
 /** Data collected during a single config traversal. */
 interface ConfigTraversalData {
@@ -84,14 +85,13 @@ function validateNoDuplicateKeys(allKeys: string[]): void {
 
 /**
  * Validates that every field type referenced in the config exists in the registry.
- * Throws a DynamicFormError listing all unregistered types if any are found.
+ * Logs a warning for unregistered types — unknown fields are skipped during rendering
+ * rather than blocking the whole form (graceful degradation).
  *
  * Skips validation when the registry is empty (no UI adapter has been registered),
  * since the core library tests operate without a field registry.
- *
- * @throws {DynamicFormError} When unregistered field types are detected
  */
-function validateFieldTypesRegistered(allTypes: Set<string>, registry: Map<string, FieldTypeDefinition>): void {
+function validateFieldTypesRegistered(allTypes: Set<string>, registry: Map<string, FieldTypeDefinition>, logger: Logger): void {
   if (registry.size === 0) return;
 
   const unregistered: string[] = [];
@@ -104,23 +104,23 @@ function validateFieldTypesRegistered(allTypes: Set<string>, registry: Map<strin
 
   if (unregistered.length > 0) {
     const typeList = unregistered.map((t) => `'${t}'`).join(', ');
-    throw new DynamicFormError(
-      `Unknown field type(s): ${typeList}. Register them via provideDynamicForm(...withXxxFields()) or a custom registry entry.`,
+    logger.warn(
+      `[Dynamic Forms] Unknown field type(s): ${typeList}. Register them via provideDynamicForm(...withXxxFields()) or a custom registry entry. These fields will be skipped during rendering.`,
     );
   }
 }
 
 /**
  * Validates a form config at bootstrap time, checking for:
- * - Duplicate field keys
- * - Unregistered field types
- * - Invalid regex patterns in validators
+ * - Duplicate field keys (throws — this is always a developer error)
+ * - Unregistered field types (warns — form degrades gracefully, skipping unknown fields)
+ * - Invalid regex patterns in validators (throws — invalid regex will cause runtime errors)
  *
  * Should be called once during form setup, before fields are processed.
  *
- * @throws {DynamicFormError} When validation errors are detected
+ * @throws {DynamicFormError} When duplicate keys or invalid regex patterns are detected
  */
-export function validateFormConfig(fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>): void {
+export function validateFormConfig(fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>, logger: Logger): void {
   const data: ConfigTraversalData = {
     keys: [],
     types: new Set<string>(),
@@ -130,7 +130,7 @@ export function validateFormConfig(fields: FieldDef<unknown>[], registry: Map<st
   collectFieldData(fields, data);
 
   validateNoDuplicateKeys(data.keys);
-  validateFieldTypesRegistered(data.types, registry);
+  validateFieldTypesRegistered(data.types, registry, logger);
 
   if (data.regexErrors.length > 0) {
     throw new DynamicFormError(data.regexErrors[0]);
