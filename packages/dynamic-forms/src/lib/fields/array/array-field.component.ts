@@ -34,7 +34,6 @@ import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 import { observeArrayActions } from '../../utils/array-field/array-event-handler';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { ArrayFieldTree } from '../../core/field-tree-utils';
 import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-array-metadata';
 
@@ -641,14 +640,11 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     let removeIndex: number;
     if (index === undefined || index === -1) {
       removeIndex = currentArray.length - 1;
-    } else if (index < -1) {
-      throw new DynamicFormError(
-        `removeArrayItem index ${index} is out of bounds for array '${arrayKey}' with length ${currentArray.length}.`,
+    } else if (index < -1 || index >= currentArray.length) {
+      this.logger.warn(
+        `[Dynamic Forms] removeArrayItem index ${index} is out of bounds for array '${arrayKey}' with length ${currentArray.length}. Operation skipped.`,
       );
-    } else if (index >= currentArray.length) {
-      throw new DynamicFormError(
-        `removeArrayItem index ${index} is out of bounds for array '${arrayKey}' with length ${currentArray.length}.`,
-      );
+      return;
     } else {
       removeIndex = index;
     }
