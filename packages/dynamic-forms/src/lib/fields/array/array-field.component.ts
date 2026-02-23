@@ -298,17 +298,6 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * Supports both primitive (single FieldDef) and object (FieldDef[]) templates.
    */
   private async handleAddFromEvent(template: FieldDef<unknown> | readonly FieldDef<unknown>[], index?: number): Promise<void> {
-    // Enforce maxLength — skip append if the array is already at capacity
-    const maxLength = this.field().maxLength;
-    if (maxLength !== undefined) {
-      const arrayKey = this.field().key;
-      const currentArray = getArrayValue(this.parentFieldSignalContext.value(), arrayKey);
-      if (currentArray.length >= maxLength) {
-        this.logger.warn(`Cannot append to array '${arrayKey}': maxLength of ${maxLength} has been reached.`);
-        return;
-      }
-    }
-
     // Normalize template to mutable array for consistent handling
     const templates: FieldDef<unknown>[] = Array.isArray(template) ? [...template] : [template];
     const isPrimitiveItem = !Array.isArray(template);
