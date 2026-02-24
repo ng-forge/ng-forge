@@ -121,7 +121,6 @@ export class EventBus {
   // TypeScript limitation: Must use ConstructorParameters which relies on `any` in FormEventConstructor
   dispatch<T extends FormEventConstructor>(eventConstructor: T, ...args: ConstructorParameters<T>): void;
   dispatch<T extends FormEventConstructor>(eventOrConstructor: FormEvent | T, ...args: ConstructorParameters<T>): void {
-    // Type guard: if it has a 'type' property and is NOT a function, it's an instance
     if (typeof eventOrConstructor !== 'function' && 'type' in eventOrConstructor) {
       this.emit(eventOrConstructor);
     } else {

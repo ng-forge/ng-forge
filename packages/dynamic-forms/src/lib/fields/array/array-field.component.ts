@@ -631,7 +631,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       removeIndex = currentArray.length - 1;
     } else if (index < -1 || index >= currentArray.length) {
       this.logger.warn(
-        `[Dynamic Forms] removeArrayItem index ${index} is out of bounds for array '${arrayKey}' with length ${currentArray.length}. Operation skipped.`,
+        `removeArrayItem index ${index} is out of bounds for array '${arrayKey}' with length ${currentArray.length}. Operation skipped.`,
       );
       return;
     } else {
