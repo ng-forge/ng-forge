@@ -36,9 +36,7 @@ describe('validateFormConfig', () => {
         { key: 'name', type: 'input' },
         { key: 'name', type: 'input' },
       ];
-      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(
-        DynamicFormError,
-      );
+      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(DynamicFormError);
       expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow("'name'");
     });
 
@@ -49,9 +47,7 @@ describe('validateFormConfig', () => {
         { key: 'a', type: 'input' },
         { key: 'b', type: 'input' },
       ];
-      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(
-        /Duplicate field keys detected.*'a'.*'b'/s,
-      );
+      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(/Duplicate field keys detected.*'a'.*'b'/s);
     });
 
     it('should detect duplicates in nested containers', () => {
@@ -63,9 +59,7 @@ describe('validateFormConfig', () => {
           fields: [{ key: 'name', type: 'input' }],
         },
       ];
-      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(
-        DynamicFormError,
-      );
+      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(DynamicFormError);
     });
 
     it('should not flag array item template keys as duplicates', () => {
@@ -74,8 +68,14 @@ describe('validateFormConfig', () => {
           key: 'contacts',
           type: 'array',
           fields: [
-            [{ key: 'name', type: 'input' }, { key: 'email', type: 'input' }],
-            [{ key: 'name', type: 'input' }, { key: 'email', type: 'input' }],
+            [
+              { key: 'name', type: 'input' },
+              { key: 'email', type: 'input' },
+            ],
+            [
+              { key: 'name', type: 'input' },
+              { key: 'email', type: 'input' },
+            ],
           ],
         },
       ];
@@ -101,9 +101,7 @@ describe('validateFormConfig', () => {
         { key: 'address', type: 'input' },
         { key: 'address', type: 'group', fields: [{ key: 'city', type: 'input' }] },
       ];
-      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(
-        DynamicFormError,
-      );
+      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(DynamicFormError);
     });
   });
 
@@ -144,19 +142,13 @@ describe('validateFormConfig', () => {
 
   describe('invalid regex pattern detection', () => {
     it('should not throw for valid regex in shorthand pattern', () => {
-      const fields: FieldDef<unknown>[] = [
-        { key: 'phone', type: 'input', pattern: '^[0-9]+$' } as FieldDef<unknown>,
-      ];
+      const fields: FieldDef<unknown>[] = [{ key: 'phone', type: 'input', pattern: '^[0-9]+$' } as FieldDef<unknown>];
       expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).not.toThrow();
     });
 
     it('should throw for invalid regex in shorthand pattern', () => {
-      const fields: FieldDef<unknown>[] = [
-        { key: 'phone', type: 'input', pattern: '[invalid' } as FieldDef<unknown>,
-      ];
-      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(
-        DynamicFormError,
-      );
+      const fields: FieldDef<unknown>[] = [{ key: 'phone', type: 'input', pattern: '[invalid' } as FieldDef<unknown>];
+      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(DynamicFormError);
       expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow("'phone'");
     });
 
@@ -168,9 +160,7 @@ describe('validateFormConfig', () => {
           validators: [{ type: 'pattern', value: '[bad' }],
         } as FieldDef<unknown>,
       ];
-      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(
-        DynamicFormError,
-      );
+      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(DynamicFormError);
     });
 
     it('should report all invalid patterns when multiple exist', () => {
@@ -189,9 +179,7 @@ describe('validateFormConfig', () => {
     });
 
     it('should not throw when pattern is a RegExp object (not a string)', () => {
-      const fields: FieldDef<unknown>[] = [
-        { key: 'phone', type: 'input', pattern: /^[0-9]+$/ } as FieldDef<unknown>,
-      ];
+      const fields: FieldDef<unknown>[] = [{ key: 'phone', type: 'input', pattern: /^[0-9]+$/ } as FieldDef<unknown>];
       expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).not.toThrow();
     });
   });
