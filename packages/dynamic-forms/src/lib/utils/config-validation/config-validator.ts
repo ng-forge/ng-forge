@@ -31,13 +31,11 @@ function collectFieldData(fields: FieldDef<unknown>[], data: ConfigTraversalData
       data.types.add(field.type);
     }
 
-    // Validate regex patterns in shorthand `pattern` property
     const validationField = field as FieldDef<unknown> & FieldWithValidation;
     if (typeof validationField.pattern === 'string') {
       validateRegexPattern(validationField.pattern, field.key || '<unknown>', data.regexErrors);
     }
 
-    // Validate regex patterns in `validators` array
     if (validationField.validators) {
       for (const validator of validationField.validators) {
         if (validator.type === 'pattern' && 'value' in validator && typeof validator.value === 'string') {
@@ -120,7 +118,7 @@ function validateFieldTypesRegistered(allTypes: Set<string>, registry: Map<strin
   if (unregistered.length > 0) {
     const typeList = unregistered.map((t) => `'${t}'`).join(', ');
     logger.warn(
-      `[Dynamic Forms] Unknown field type(s): ${typeList}. Register them via provideDynamicForm(...withXxxFields()) or a custom registry entry. These fields will be skipped during rendering.`,
+      `Unknown field type(s): ${typeList}. Register them via provideDynamicForm(...withXxxFields()) or a custom registry entry. These fields will be skipped during rendering.`,
     );
   }
 }
