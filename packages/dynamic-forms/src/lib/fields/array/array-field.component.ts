@@ -624,8 +624,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
     if (currentArray.length === 0) return;
 
-    // When index is undefined, remove the last item (pop behavior).
-    // When index is -1, treat as "last item" (convention matching Array.at(-1)).
+    // When index is undefined or -1, remove the last item.
     let removeIndex: number;
     if (index === undefined || index === -1) {
       removeIndex = currentArray.length - 1;

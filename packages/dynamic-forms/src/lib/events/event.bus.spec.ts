@@ -995,4 +995,49 @@ describe('EventBus Form Value Emission', () => {
       expect(hasFormValue(event)).toBe(true);
     });
   });
+
+  describe('dispatch() instance overload', () => {
+    it('should dispatch a pre-created FormEvent instance', async () => {
+      const eventPromise = firstValueFrom(eventBus.events$.pipe(take(1)));
+      const instance = new TestEvent();
+      eventBus.dispatch(instance);
+
+      const event = await eventPromise;
+      expect(event).toBe(instance);
+      expect(event.type).toBe('test-event');
+    });
+
+    it('should dispatch a pre-created event with args', async () => {
+      const eventPromise = firstValueFrom(eventBus.events$.pipe(take(1)));
+      const instance = new TestEventWithArgs('hello', 42);
+      eventBus.dispatch(instance);
+
+      const event = await eventPromise;
+      expect(event).toBe(instance);
+      expect((event as TestEventWithArgs).payload).toBe('hello');
+    });
+
+    it('should apply form value attachment to instance overload the same as constructor overload', async () => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          EventBus,
+          { provide: EMIT_FORM_VALUE_ON_EVENTS, useValue: true },
+          {
+            provide: RootFormRegistryService,
+            useValue: {
+              formValue: signal({ field: 'value' }),
+            },
+          },
+        ],
+      });
+      const bus = TestBed.inject(EventBus);
+
+      const eventPromise = firstValueFrom(bus.events$.pipe(take(1)));
+      bus.dispatch(new TestEvent());
+
+      const event = await eventPromise;
+      expect(hasFormValue(event)).toBe(true);
+    });
+  });
 });
