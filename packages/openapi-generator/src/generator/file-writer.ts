@@ -7,7 +7,11 @@ export interface GeneratedFile {
   subdirectory?: string;
 }
 
-export async function writeGeneratedFiles(outputDir: string, files: GeneratedFile[]): Promise<string[]> {
+export interface WriteOptions {
+  skipExisting?: boolean;
+}
+
+export async function writeGeneratedFiles(outputDir: string, files: GeneratedFile[], options?: WriteOptions): Promise<string[]> {
   const writtenPaths: string[] = [];
 
   for (const file of files) {
@@ -15,6 +19,14 @@ export async function writeGeneratedFiles(outputDir: string, files: GeneratedFil
     await mkdir(dir, { recursive: true });
 
     const filePath = join(dir, file.fileName);
+
+    // Skip existing files when option is set
+    if (options?.skipExisting) {
+      const exists = await readFileSafe(filePath);
+      if (exists !== null) {
+        continue;
+      }
+    }
 
     // Only write if content changed
     const existing = await readFileSafe(filePath);

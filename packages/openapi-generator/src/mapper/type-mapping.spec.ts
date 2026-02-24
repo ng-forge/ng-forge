@@ -65,6 +65,32 @@ describe('mapSchemaToFieldType', () => {
       expect(result.isAmbiguous).toBe(true);
       expect(result.ambiguousScope).toBe('text-input');
     });
+
+    it('should map string with maxLength<=100 to non-ambiguous input', () => {
+      const result = mapSchemaToFieldType({ type: 'string', maxLength: 50 } as SchemaObject);
+      expect(result.fieldType).toBe('input');
+      expect(result.props).toEqual({ type: 'text' });
+      expect(result.isAmbiguous).toBe(false);
+    });
+
+    it('should map string with maxLength=100 to non-ambiguous input', () => {
+      const result = mapSchemaToFieldType({ type: 'string', maxLength: 100 } as SchemaObject);
+      expect(result.fieldType).toBe('input');
+      expect(result.isAmbiguous).toBe(false);
+    });
+
+    it('should map string with maxLength>200 to non-ambiguous textarea', () => {
+      const result = mapSchemaToFieldType({ type: 'string', maxLength: 500 } as SchemaObject);
+      expect(result.fieldType).toBe('textarea');
+      expect(result.isAmbiguous).toBe(false);
+    });
+
+    it('should keep string with maxLength 101-200 as ambiguous', () => {
+      const result = mapSchemaToFieldType({ type: 'string', maxLength: 150 } as SchemaObject);
+      expect(result.fieldType).toBe('input');
+      expect(result.isAmbiguous).toBe(true);
+      expect(result.ambiguousScope).toBe('text-input');
+    });
   });
 
   describe('numeric types', () => {

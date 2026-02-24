@@ -26,7 +26,7 @@ export type { InterfaceGeneratorOptions } from './generator/interface-generator.
 export { generateBarrel } from './generator/barrel-generator.js';
 
 export { writeGeneratedFiles } from './generator/file-writer.js';
-export type { GeneratedFile } from './generator/file-writer.js';
+export type { GeneratedFile, WriteOptions } from './generator/file-writer.js';
 
 export { loadConfig, saveConfig } from './config/generator-config.js';
 export type { GeneratorConfig } from './config/generator-config.js';

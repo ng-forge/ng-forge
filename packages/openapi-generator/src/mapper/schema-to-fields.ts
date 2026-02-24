@@ -10,6 +10,8 @@ export interface FieldConfig {
   key: string;
   type: string;
   label: string;
+  value?: unknown;
+  placeholder?: string;
   props?: Record<string, unknown>;
   options?: Array<{ label: string; value: string }>;
   validation?: ValidatorConfig[];
@@ -67,7 +69,7 @@ export function mapSchemaToFields(schema: SchemaObject, requiredFields: string[]
   const fields: FieldConfig[] = [];
 
   for (const prop of walked.properties) {
-    const field = mapPropertyToField(prop, options, ambiguousFields);
+    const field = mapPropertyToField(prop, options, ambiguousFields, warnings);
     if (field) {
       fields.push(field);
     }
@@ -76,24 +78,44 @@ export function mapSchemaToFields(schema: SchemaObject, requiredFields: string[]
   return { fields, ambiguousFields, warnings };
 }
 
-function mapPropertyToField(prop: WalkedProperty, options: MappingOptions, ambiguousFields: AmbiguousField[]): FieldConfig | undefined {
+function mapPropertyToField(
+  prop: WalkedProperty,
+  options: MappingOptions,
+  ambiguousFields: AmbiguousField[],
+  warnings: string[],
+): FieldConfig | undefined {
+  // Skip deprecated properties
+  if ((prop.schema as Record<string, unknown>)['deprecated']) {
+    warnings.push(`Property '${prop.name}' is deprecated and was skipped`);
+    return undefined;
+  }
+
+  // x-ng-forge-type: bypass type mapping entirely
+  const ngForgeType = (prop.schema as Record<string, unknown>)['x-ng-forge-type'] as string | undefined;
+
   const typeResult = mapSchemaToFieldType(prop.schema);
   const schemaPrefix = options.schemaName ?? '';
   const fieldPath = schemaPrefix ? `${schemaPrefix}.${prop.name}` : prop.name;
 
-  // Check if there's a pre-made decision for this field
-  const decision = options.decisions?.[fieldPath];
-  const finalType = decision ?? typeResult.fieldType;
+  let finalType: string;
 
-  // Track ambiguous fields (only if no decision made)
-  if (typeResult.isAmbiguous && !decision) {
-    ambiguousFields.push({
-      key: prop.name,
-      fieldPath,
-      currentType: typeResult.fieldType,
-      scope: typeResult.ambiguousScope!,
-      alternative: typeResult.defaultAlternative!,
-    });
+  if (ngForgeType) {
+    finalType = ngForgeType;
+  } else {
+    // Check if there's a pre-made decision for this field
+    const decision = options.decisions?.[fieldPath];
+    finalType = decision ?? typeResult.fieldType;
+
+    // Track ambiguous fields (only if no decision made)
+    if (typeResult.isAmbiguous && !decision) {
+      ambiguousFields.push({
+        key: prop.name,
+        fieldPath,
+        currentType: typeResult.fieldType,
+        scope: typeResult.ambiguousScope!,
+        alternative: typeResult.defaultAlternative!,
+      });
+    }
   }
 
   const validators = mapSchemaToValidators(prop.schema, prop.required);
@@ -101,11 +123,26 @@ function mapPropertyToField(prop: WalkedProperty, options: MappingOptions, ambig
   const field: FieldConfig = {
     key: prop.name,
     type: finalType,
-    label: toLabel(prop.name),
+    label: ((prop.schema as Record<string, unknown>)['title'] as string) ?? toLabel(prop.name),
   };
 
-  // Add props if present (only when the type wasn't overridden by a decision)
-  if (finalType === typeResult.fieldType && typeResult.props && Object.keys(typeResult.props).length > 0) {
+  // readOnly → disabled
+  if ((prop.schema as Record<string, unknown>)['readOnly']) {
+    field.disabled = true;
+  }
+
+  // default → value
+  if (prop.schema.default !== undefined) {
+    field.value = prop.schema.default;
+  }
+
+  // description → placeholder
+  if (prop.schema.description) {
+    field.placeholder = prop.schema.description;
+  }
+
+  // Add props if present (only when not using x-ng-forge-type and type wasn't overridden by a decision)
+  if (!ngForgeType && finalType === typeResult.fieldType && typeResult.props && Object.keys(typeResult.props).length > 0) {
     field.props = typeResult.props;
   }
 
@@ -125,6 +162,20 @@ function mapPropertyToField(prop: WalkedProperty, options: MappingOptions, ambig
   // Disable for non-editable GET responses
   if (options.editable === false) {
     field.disabled = true;
+  }
+
+  // Name-based textarea heuristic: resolve ambiguous text-input by property name
+  if (!ngForgeType && typeResult.isAmbiguous && typeResult.ambiguousScope === 'text-input' && finalType === typeResult.fieldType) {
+    if (/(?:description|notes|comment|bio|body|content|summary|message|text)$/i.test(prop.name)) {
+      field.type = 'textarea';
+      // Remove the props that were for input type=text
+      delete field.props;
+      // Remove from ambiguous list since we resolved it
+      const idx = ambiguousFields.findIndex((f) => f.fieldPath === fieldPath);
+      if (idx !== -1) {
+        ambiguousFields.splice(idx, 1);
+      }
+    }
   }
 
   // Handle container types recursively

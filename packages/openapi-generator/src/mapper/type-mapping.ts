@@ -43,7 +43,14 @@ export function mapSchemaToFieldType(schema: SchemaObject): FieldTypeResult {
         return { fieldType: 'datepicker', isContainer: false, isAmbiguous: false };
       case 'password':
         return { fieldType: 'input', props: { type: 'password' }, isContainer: false, isAmbiguous: false };
-      default:
+      default: {
+        const maxLength = schema.maxLength as number | undefined;
+        if (maxLength !== undefined && maxLength <= 100) {
+          return { fieldType: 'input', props: { type: 'text' }, isContainer: false, isAmbiguous: false };
+        }
+        if (maxLength !== undefined && maxLength > 200) {
+          return { fieldType: 'textarea', isContainer: false, isAmbiguous: false };
+        }
         return {
           fieldType: 'input',
           props: { type: 'text' },
@@ -52,6 +59,7 @@ export function mapSchemaToFieldType(schema: SchemaObject): FieldTypeResult {
           ambiguousScope: 'text-input',
           defaultAlternative: 'textarea',
         };
+      }
     }
   }
 
