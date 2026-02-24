@@ -221,7 +221,7 @@ describe('resolveHttpRequest', () => {
       expect(result.url).toBe('/api/users');
     });
 
-    it('should return null when expression evaluates to null/undefined (suppresses request)', () => {
+    it('should return null when expression evaluates to null/undefined (suppresses malformed request)', () => {
       const config: HttpRequestConfig = {
         url: '/api/users/:userId',
         params: { userId: 'formValue.nonExistent' },

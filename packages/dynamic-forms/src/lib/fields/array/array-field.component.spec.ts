@@ -979,4 +979,106 @@ describe('ArrayFieldComponent', () => {
       expect(element.getAttribute('aria-hidden')).toBe('true');
     });
   });
+
+  describe('atMaxLength', () => {
+    it('should be false when maxLength is not set', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'first')]],
+      };
+      const { component, fixture } = setupArrayTest(field);
+      await waitForItems(component, fixture, (n) => n >= 1);
+      expect(component.atMaxLength()).toBe(false);
+    });
+
+    it('should be false when array length is below maxLength', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        maxLength: 3,
+        fields: [[createSimpleTestField('item', 'Item', 'first')]],
+      };
+      const { component, fixture } = setupArrayTest(field);
+      await waitForItems(component, fixture, (n) => n >= 1);
+      expect(component.atMaxLength()).toBe(false);
+    });
+
+    it('should be true when array length equals maxLength', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        maxLength: 2,
+        fields: [[createSimpleTestField('item', 'Item', 'first')], [createSimpleTestField('item', 'Item', 'second')]],
+      };
+      const { component, fixture } = setupArrayTest(field);
+      await waitForItems(component, fixture, (n) => n >= 2);
+      expect(component.atMaxLength()).toBe(true);
+    });
+
+    it('should update when items are added or removed', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        maxLength: 2,
+        fields: [[createSimpleTestField('item', 'Item', 'first')]],
+      };
+      const { component, fixture } = setupArrayTest(field);
+      const eventBus = TestBed.inject(EventBus);
+
+      await waitForItems(component, fixture, (n) => n >= 1);
+      expect(component.atMaxLength()).toBe(false);
+
+      eventBus.dispatch(AppendArrayItemEvent, 'items', [createSimpleTestField('item', 'Item', 'new')]);
+      await waitForItems(component, fixture, (n) => n >= 2);
+      expect(component.atMaxLength()).toBe(true);
+
+      eventBus.dispatch(PopArrayItemEvent, 'items');
+      await waitForItems(component, fixture, (n) => n <= 1);
+      expect(component.atMaxLength()).toBe(false);
+    });
+  });
+
+  describe('removeItem with -1 index', () => {
+    it('should remove the last item when index is -1', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'first')], [createSimpleTestField('item', 'Item', 'second')]],
+      };
+      const { component, fixture } = setupArrayTest(field);
+      const eventBus = TestBed.inject(EventBus);
+
+      await waitForItems(component, fixture, (n) => n >= 2);
+
+      eventBus.dispatch(RemoveAtIndexEvent, 'items', -1);
+      await waitForItems(component, fixture, (n) => n <= 1);
+
+      expect(component.resolvedItems()).toHaveLength(1);
+    });
+
+    it('should warn and skip when index is out of bounds', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'first')]],
+      };
+      const { component, fixture } = setupArrayTest(field, { items: ['a'] });
+      const eventBus = TestBed.inject(EventBus);
+
+      await waitForItems(component, fixture, (n) => n >= 1);
+
+      eventBus.dispatch(RemoveAtIndexEvent, 'items', 99);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component.resolvedItems()).toHaveLength(1);
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[Dynamic Forms]'), expect.stringContaining('out of bounds'));
+
+      consoleSpy.mockRestore();
+    });
+  });
 });

@@ -83,7 +83,21 @@ export class EventBus {
   events$ = this.pipeline$.asObservable();
 
   /**
-   * Dispatches an event to all subscribers.
+   * Dispatches a pre-created event instance directly.
+   *
+   * Use this overload with the `arrayEvent()` factory or any other code that
+   * produces a `FormEvent` instance rather than a constructor:
+   *
+   * ```typescript
+   * eventBus.dispatch(arrayEvent('contacts').append(template));
+   * eventBus.dispatch(arrayEvent('contacts').pop());
+   * ```
+   *
+   * @param event - A FormEvent instance to dispatch
+   */
+  dispatch(event: FormEvent): void;
+  /**
+   * Dispatches an event to all subscribers by instantiating the provided constructor.
    *
    * Creates an instance of the provided event constructor and broadcasts it
    * through the event pipeline to all active subscribers.
@@ -93,19 +107,25 @@ export class EventBus {
    * to the event's `formValue` property.
    *
    * @param eventConstructor - Constructor function for the event to dispatch
+   * @param args - Arguments to pass to the event constructor
    *
    * @example
    * ```typescript
    * // Dispatch a submit event
    * eventBus.dispatch(SubmitEvent);
    *
-   * // Dispatch a custom event
-   * eventBus.dispatch(CustomFormEvent);
+   * // Dispatch a custom event with args
+   * eventBus.dispatch(CustomFormEvent, 'arg1', 42);
    * ```
    */
   // TypeScript limitation: Must use ConstructorParameters which relies on `any` in FormEventConstructor
-  dispatch<T extends FormEventConstructor>(eventConstructor: T, ...args: ConstructorParameters<T>): void {
-    this.emit(new eventConstructor(...args));
+  dispatch<T extends FormEventConstructor>(eventConstructor: T, ...args: ConstructorParameters<T>): void;
+  dispatch<T extends FormEventConstructor>(eventOrConstructor: FormEvent | T, ...args: ConstructorParameters<T>): void {
+    if (typeof eventOrConstructor !== 'function' && 'type' in eventOrConstructor) {
+      this.emit(eventOrConstructor);
+    } else {
+      this.emit(new (eventOrConstructor as T)(...args));
+    }
   }
 
   /**

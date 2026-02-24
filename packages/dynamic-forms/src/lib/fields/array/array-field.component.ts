@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input, linkedSignal, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  Injector,
+  input,
+  linkedSignal,
+  Signal,
+  signal,
+} from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of } from 'rxjs';
@@ -210,6 +221,18 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   /** Read-only view of resolved items for template consumption. */
   readonly resolvedItems = computed(() => this.resolvedItemsSignal());
+
+  /**
+   * Whether the array has reached its configured maxLength.
+   * Exposed as a public signal so add-button components can bind [disabled]="atMaxLength()".
+   */
+  readonly atMaxLength: Signal<boolean> = computed(() => {
+    const maxLength = this.field().maxLength;
+    if (maxLength === undefined) return false;
+    const arrayKey = this.field().key;
+    const currentArray = getArrayValue(this.parentFieldSignalContext.value(), arrayKey);
+    return currentArray.length >= maxLength;
+  });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Auto-remove Cache
@@ -601,16 +624,28 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
     if (currentArray.length === 0) return;
 
-    // When index is provided, validate it's within bounds. Out-of-bounds is a no-op.
-    // When index is undefined, remove the last item (pop behavior).
-    const removeIndex = index !== undefined ? index : currentArray.length - 1;
-
-    // Ignore out-of-bounds indices - they should be a no-op, not remove the last item
-    if (removeIndex < 0 || removeIndex >= currentArray.length) return;
+    // When index is undefined or -1, remove the last item.
+    let removeIndex: number;
+    if (index === undefined || index === -1) {
+      removeIndex = currentArray.length - 1;
+    } else if (index < -1 || index >= currentArray.length) {
+      this.logger.warn(
+        `removeArrayItem index ${index} is out of bounds for array '${arrayKey}' with length ${currentArray.length}. Operation skipped.`,
+      );
+      return;
+    } else {
+      removeIndex = index;
+    }
 
     // Update resolvedItems FIRST - remove the item at the specified index.
     // This ensures differential update sees "none" (lengths already match).
     // Remaining items' linkedSignal indices auto-update via itemPositionMap.
+    //
+    // When the item is removed from resolvedItemsSignal, the @for loop removes the DOM element
+    // and NgComponentOutlet destroys the component view, triggering DestroyRef callbacks.
+    // Async validators use Angular's resource API tied to the form-level schema path — when the
+    // array value is updated below, the resource's params re-evaluate. If the removed item's path
+    // no longer exists, params returns undefined, cancelling the pending validation automatically.
     const removedItem = this.resolvedItemsSignal()[removeIndex];
     if (removedItem) {
       this.templateRegistry.delete(removedItem.id);
