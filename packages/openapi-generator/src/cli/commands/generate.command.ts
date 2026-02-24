@@ -9,13 +9,14 @@ import { generateInterface } from '../../generator/interface-generator.js';
 import { generateBarrel } from '../../generator/barrel-generator.js';
 import { writeGeneratedFiles } from '../../generator/file-writer.js';
 import type { GeneratedFile } from '../../generator/file-writer.js';
-import { toFormFileName, toInterfaceName } from '../../utils/naming.js';
+import { toFormFileName } from '../../utils/naming.js';
 import { logger } from '../../utils/logger.js';
 import { loadConfig, saveConfig } from '../../config/generator-config.js';
 import type { GeneratorConfig } from '../../config/generator-config.js';
 import { promptEndpointSelection } from '../prompts/endpoint-prompt.js';
 import { promptFieldTypeChoices } from '../prompts/field-type-prompt.js';
 import { startWatcher } from '../../watcher/file-watcher.js';
+import { DEFAULT_FIELD_CHOICES } from '../../config/defaults.js';
 
 interface GenerateOptions {
   spec: string;
@@ -108,14 +109,29 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
       });
     }
 
+    // In non-interactive mode, apply default field choices for any remaining ambiguous fields
+    if (result.ambiguousFields.length > 0 && options.interactive === 'none') {
+      for (const ambiguous of result.ambiguousFields) {
+        if (!updatedDecisions[ambiguous.fieldPath]) {
+          const defaultChoice = DEFAULT_FIELD_CHOICES[ambiguous.scope];
+          if (defaultChoice) {
+            updatedDecisions[ambiguous.fieldPath] = defaultChoice;
+          }
+        }
+      }
+
+      result = mapSchemaToFields(schema, endpoint.requiredFields, {
+        ...mappingOptions,
+        decisions: updatedDecisions,
+      });
+    }
+
     const formFileName = toFormFileName(endpoint.method, endpoint.path, endpoint.operationId);
-    const interfaceName = toInterfaceName(endpoint.method, endpoint.path, endpoint.operationId);
 
     const formContent = generateFormConfig(result.fields, {
       method: endpoint.method,
       path: endpoint.path,
       operationId: endpoint.operationId,
-      interfaceName,
     });
 
     allFiles.push({
@@ -164,11 +180,16 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
   await saveConfig(configDir, config);
 
   if (options.watch) {
-    startWatcher({
+    const watcher = startWatcher({
       specPath: options.spec,
       onChange: async () => {
         await runGenerate({ ...options, watch: false, interactive: 'none' });
       },
+    });
+
+    process.on('SIGINT', () => {
+      logger.info('\nStopping watcher...');
+      watcher.close().then(() => process.exit(0));
     });
 
     logger.info('Press Ctrl+C to stop watching');

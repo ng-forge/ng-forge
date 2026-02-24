@@ -57,6 +57,14 @@ describe('mapSchemaToFieldType', () => {
       expect(result.props).toEqual({ type: 'password' });
       expect(result.isAmbiguous).toBe(false);
     });
+
+    it('should handle OpenAPI 3.1 type array ["string", "null"]', () => {
+      const result = mapSchemaToFieldType({ type: ['string', 'null'] } as unknown as SchemaObject);
+      expect(result.fieldType).toBe('input');
+      expect(result.props).toEqual({ type: 'text' });
+      expect(result.isAmbiguous).toBe(true);
+      expect(result.ambiguousScope).toBe('text-input');
+    });
   });
 
   describe('numeric types', () => {
@@ -74,6 +82,14 @@ describe('mapSchemaToFieldType', () => {
       expect(result.fieldType).toBe('input');
       expect(result.props).toEqual({ type: 'number' });
       expect(result.isAmbiguous).toBe(true);
+    });
+
+    it('should handle OpenAPI 3.1 type array ["integer", "null"]', () => {
+      const result = mapSchemaToFieldType({ type: ['integer', 'null'] } as unknown as SchemaObject);
+      expect(result.fieldType).toBe('input');
+      expect(result.props).toEqual({ type: 'number' });
+      expect(result.isAmbiguous).toBe(true);
+      expect(result.ambiguousScope).toBe('numeric');
     });
   });
 

@@ -1,3 +1,5 @@
+# OpenAPI Generator
+
 ## Overview
 
 The OpenAPI Generator reads your OpenAPI 3.x spec and produces ready-to-use `FormConfig` objects and TypeScript interfaces. No manual field wiring — your API contract drives your forms.

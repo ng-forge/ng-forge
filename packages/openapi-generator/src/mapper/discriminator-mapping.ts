@@ -1,4 +1,5 @@
 import type { WalkedSchema } from '../parser/schema-walker.js';
+import type { FieldConfig } from './schema-to-fields.js';
 
 export interface DiscriminatorFieldConfig {
   discriminatorField: {
@@ -10,7 +11,7 @@ export interface DiscriminatorFieldConfig {
   };
   conditionalGroups: Array<{
     discriminatorValue: string;
-    fields: Array<unknown>;
+    fields: FieldConfig[];
   }>;
 }
 

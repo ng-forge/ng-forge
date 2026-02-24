@@ -37,10 +37,27 @@ describe('loadConfig', () => {
   });
 
   it('should return null when file does not exist', async () => {
-    vi.mocked(readFile).mockRejectedValue(new Error('ENOENT'));
+    const enoentError = new Error('ENOENT: no such file or directory') as NodeJS.ErrnoException;
+    enoentError.code = 'ENOENT';
+    vi.mocked(readFile).mockRejectedValue(enoentError);
 
     const result = await loadConfig('/missing/dir');
     expect(result).toBeNull();
+  });
+
+  it('should return null and warn when config file contains invalid JSON', async () => {
+    vi.mocked(readFile).mockResolvedValue('{ invalid json }');
+
+    const result = await loadConfig('/some/dir');
+    expect(result).toBeNull();
+  });
+
+  it('should throw on non-ENOENT errors (e.g. permission denied)', async () => {
+    const permError = new Error('EACCES: permission denied') as NodeJS.ErrnoException;
+    permError.code = 'EACCES';
+    vi.mocked(readFile).mockRejectedValue(permError);
+
+    await expect(loadConfig('/some/dir')).rejects.toThrow('EACCES');
   });
 });
 

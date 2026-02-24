@@ -104,8 +104,8 @@ function mapPropertyToField(prop: WalkedProperty, options: MappingOptions, ambig
     label: toLabel(prop.name),
   };
 
-  // Add props if present
-  if (typeResult.props && Object.keys(typeResult.props).length > 0) {
+  // Add props if present (only when the type wasn't overridden by a decision)
+  if (finalType === typeResult.fieldType && typeResult.props && Object.keys(typeResult.props).length > 0) {
     field.props = typeResult.props;
   }
 
@@ -129,15 +129,17 @@ function mapPropertyToField(prop: WalkedProperty, options: MappingOptions, ambig
 
   // Handle container types recursively
   if (typeResult.isContainer) {
+    const nestedSchemaName = schemaPrefix ? `${schemaPrefix}.${prop.name}` : prop.name;
+    const nestedOptions: MappingOptions = { ...options, schemaName: nestedSchemaName };
     if (typeResult.fieldType === 'group' && prop.schema.properties) {
-      const innerResult = mapSchemaToFields(prop.schema, prop.schema.required ?? [], options);
+      const innerResult = mapSchemaToFields(prop.schema, prop.schema.required ?? [], nestedOptions);
       field.fields = innerResult.fields;
       ambiguousFields.push(...innerResult.ambiguousFields);
       // SchemaObject is a union; use bracket access for `items` on array schemas
     } else if (typeResult.fieldType === 'array' && (prop.schema as Record<string, unknown>)['items']) {
       const items = (prop.schema as Record<string, unknown>)['items'] as SchemaObject;
       if (items.type === 'object' || items.properties) {
-        const innerResult = mapSchemaToFields(items, items.required ?? [], options);
+        const innerResult = mapSchemaToFields(items, items.required ?? [], nestedOptions);
         field.fields = innerResult.fields;
         ambiguousFields.push(...innerResult.ambiguousFields);
       }

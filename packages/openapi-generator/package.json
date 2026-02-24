@@ -40,7 +40,7 @@
     "README.md"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22.0.0"
   },
   "sideEffects": false,
   "dependencies": {

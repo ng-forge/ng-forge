@@ -31,4 +31,6 @@ export type { GeneratedFile } from './generator/file-writer.js';
 export { loadConfig, saveConfig } from './config/generator-config.js';
 export type { GeneratorConfig } from './config/generator-config.js';
 
+export { isReferenceObject } from './utils/openapi-utils.js';
+
 export { run } from './cli/cli.js';

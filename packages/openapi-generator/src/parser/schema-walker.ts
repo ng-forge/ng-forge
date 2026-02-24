@@ -1,4 +1,5 @@
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import { isReferenceObject } from '../utils/openapi-utils.js';
 
 export type SchemaObject = OpenAPIV3.SchemaObject | OpenAPIV3_1.SchemaObject;
 
@@ -122,7 +123,8 @@ function walkOneOfWithDiscriminator(
     for (const [key, ref] of Object.entries(discriminator.mapping)) {
       const matchingSchema = schemas.find((s) => {
         if (isReferenceObject(s)) return false;
-        return (s as SchemaObject).title === key || (s as SchemaObject).title === ref;
+        const schemaName = ref.split('/').pop();
+        return (s as SchemaObject).title === key || (s as SchemaObject).title === ref || (s as SchemaObject).title === schemaName;
       });
       if (matchingSchema && !isReferenceObject(matchingSchema)) {
         mapping[key] = matchingSchema;
@@ -138,8 +140,4 @@ function walkOneOfWithDiscriminator(
     },
     warnings,
   };
-}
-
-function isReferenceObject(obj: unknown): obj is OpenAPIV3.ReferenceObject {
-  return typeof obj === 'object' && obj !== null && '$ref' in obj;
 }

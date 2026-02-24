@@ -202,4 +202,42 @@ describe('walkSchema', () => {
     expect(result.properties).toEqual([]);
     expect(result.warnings).toEqual([]);
   });
+
+  it('should resolve explicit discriminator.mapping with $ref-based paths', () => {
+    const schema: SchemaObject = {
+      discriminator: {
+        propertyName: 'petType',
+        mapping: {
+          dog: '#/components/schemas/Dog',
+          cat: '#/components/schemas/Cat',
+        },
+      } as OpenAPIV3.DiscriminatorObject,
+      oneOf: [
+        {
+          type: 'object',
+          title: 'Dog',
+          properties: {
+            petType: { type: 'string', enum: ['dog'] },
+            breed: { type: 'string' },
+          },
+        } as SchemaObject,
+        {
+          type: 'object',
+          title: 'Cat',
+          properties: {
+            petType: { type: 'string', enum: ['cat'] },
+            indoor: { type: 'boolean' },
+          },
+        } as SchemaObject,
+      ],
+    };
+
+    const result = walkSchema(schema);
+
+    expect(result.discriminator).toBeDefined();
+    expect(result.discriminator?.mapping).toHaveProperty('dog');
+    expect(result.discriminator?.mapping).toHaveProperty('cat');
+    expect(result.discriminator?.mapping['dog']).toHaveProperty('title', 'Dog');
+    expect(result.discriminator?.mapping['cat']).toHaveProperty('title', 'Cat');
+  });
 });

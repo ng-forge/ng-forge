@@ -1,5 +1,6 @@
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import { toInterfaceName, toPascalCase } from '../utils/naming.js';
+import { isReferenceObject } from '../utils/openapi-utils.js';
 
 type SchemaObject = OpenAPIV3.SchemaObject | OpenAPIV3_1.SchemaObject;
 
@@ -40,7 +41,31 @@ function schemaToTsType(propertyName: string, schema: SchemaObject, parentName: 
   const type = schema.type as string | undefined;
 
   if (schema.enum) {
-    return schema.enum.map((v: unknown) => `'${String(v)}'`).join(' | ');
+    return schema.enum.map((v: unknown) => (typeof v === 'string' ? `'${v}'` : String(v))).join(' | ');
+  }
+
+  // Handle nullable (OpenAPI 3.0)
+  if ((schema as Record<string, unknown>)['nullable']) {
+    const baseSchema = { ...schema, nullable: undefined } as SchemaObject;
+    const baseType = schemaToTsType(propertyName, baseSchema, parentName, nestedInterfaces);
+    return `${baseType} | null`;
+  }
+
+  // Handle oneOf / anyOf → union
+  const unionSchemas = (schema.oneOf ?? schema.anyOf) as SchemaObject[] | undefined;
+  if (unionSchemas) {
+    const types = unionSchemas
+      .filter((s) => !isReferenceObject(s))
+      .map((s) => schemaToTsType(propertyName, s, parentName, nestedInterfaces));
+    return types.join(' | ');
+  }
+
+  // Handle allOf → intersection
+  if (schema.allOf) {
+    const types = (schema.allOf as SchemaObject[])
+      .filter((s) => !isReferenceObject(s))
+      .map((s) => schemaToTsType(propertyName, s, parentName, nestedInterfaces));
+    return types.join(' & ');
   }
 
   if (type === 'string') return 'string';
@@ -58,7 +83,7 @@ function schemaToTsType(propertyName: string, schema: SchemaObject, parentName: 
       return `${nestedName}[]`;
     }
     if (items.enum) {
-      return `(${items.enum.map((v: unknown) => `'${String(v)}'`).join(' | ')})[]`;
+      return `(${items.enum.map((v: unknown) => (typeof v === 'string' ? `'${v}'` : String(v))).join(' | ')})[]`;
     }
     return `${schemaToTsType(propertyName, items, parentName, nestedInterfaces)}[]`;
   }
@@ -94,8 +119,4 @@ function generateNestedInterface(name: string, schema: SchemaObject): string {
   }
 
   return lines.join('\n');
-}
-
-function isReferenceObject(obj: unknown): obj is OpenAPIV3.ReferenceObject {
-  return typeof obj === 'object' && obj !== null && '$ref' in obj;
 }

@@ -5,7 +5,6 @@ export interface FormConfigGeneratorOptions {
   method: string;
   path: string;
   operationId?: string;
-  interfaceName: string;
 }
 
 export function generateFormConfig(fields: FieldConfig[], options: FormConfigGeneratorOptions): string {
@@ -85,8 +84,8 @@ function formatObject(obj: Record<string, unknown>, indent: string): string {
   const entries = Object.entries(obj);
   if (entries.length === 1) {
     const [key, value] = entries[0];
-    return `{ ${key}: ${JSON.stringify(value)} }`;
+    return `{ '${escapeString(key)}': ${JSON.stringify(value)} }`;
   }
-  const lines = entries.map(([key, value]) => `${indent}  ${key}: ${JSON.stringify(value)},`);
+  const lines = entries.map(([key, value]) => `${indent}  '${escapeString(key)}': ${JSON.stringify(value)},`);
   return `{\n${lines.join('\n')}\n${indent}}`;
 }

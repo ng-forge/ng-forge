@@ -6,7 +6,6 @@ const defaultOptions: FormConfigGeneratorOptions = {
   method: 'POST',
   path: '/pets',
   operationId: 'createPet',
-  interfaceName: 'CreatePetFormValue',
 };
 
 describe('generateFormConfig', () => {
@@ -42,7 +41,7 @@ describe('generateFormConfig', () => {
 
     const result = generateFormConfig(fields, defaultOptions);
 
-    expect(result).toContain('props: { rows: 5 }');
+    expect(result).toContain("props: { 'rows': 5 }");
   });
 
   it('should generate fields with multi-value props', () => {
@@ -50,8 +49,8 @@ describe('generateFormConfig', () => {
 
     const result = generateFormConfig(fields, defaultOptions);
 
-    expect(result).toContain('rows: 5,');
-    expect(result).toContain('cols: 40,');
+    expect(result).toContain("'rows': 5,");
+    expect(result).toContain("'cols': 40,");
   });
 
   it('should generate fields with options', () => {
@@ -131,11 +130,18 @@ describe('generateFormConfig', () => {
     const options: FormConfigGeneratorOptions = {
       method: 'POST',
       path: '/pets',
-      interfaceName: 'PostPetsFormValue',
     };
 
     const result = generateFormConfig([], options);
 
     expect(result).toContain('export const postPetsFormConfig = {');
+  });
+
+  it('should quote non-identifier keys in props', () => {
+    const fields: FieldConfig[] = [{ key: 'field', type: 'input', label: 'Field', props: { 'aria-label': 'test' } }];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain('\'aria-label\': "test"');
   });
 });
