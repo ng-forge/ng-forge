@@ -31,13 +31,13 @@ function collectFieldData(fields: FieldDef<unknown>[], data: ConfigTraversalData
       data.types.add(field.type);
     }
 
-    const validationField = field as FieldDef<unknown> & FieldWithValidation;
-    if (typeof validationField.pattern === 'string') {
-      validateRegexPattern(validationField.pattern, field.key || '<unknown>', data.regexErrors);
+    const fieldWithValidation = field as FieldWithValidation;
+    if ('pattern' in field && typeof fieldWithValidation.pattern === 'string') {
+      validateRegexPattern(fieldWithValidation.pattern, field.key || '<unknown>', data.regexErrors);
     }
 
-    if (validationField.validators) {
-      for (const validator of validationField.validators) {
+    if ('validators' in field && fieldWithValidation.validators) {
+      for (const validator of fieldWithValidation.validators) {
         if (validator.type === 'pattern' && 'value' in validator && typeof validator.value === 'string') {
           validateRegexPattern(validator.value, field.key || '<unknown>', data.regexErrors);
         }
@@ -146,6 +146,10 @@ export function validateFormConfig(fields: FieldDef<unknown>[], registry: Map<st
   validateFieldTypesRegistered(data.types, registry, logger);
 
   if (data.regexErrors.length > 0) {
-    throw new DynamicFormError(data.regexErrors[0]);
+    throw new DynamicFormError(
+      data.regexErrors.length === 1
+        ? data.regexErrors[0]
+        : `Invalid regex pattern(s) found:\n${data.regexErrors.map((e) => `  - ${e}`).join('\n')}`,
+    );
   }
 }
