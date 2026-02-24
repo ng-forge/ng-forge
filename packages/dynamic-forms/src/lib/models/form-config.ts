@@ -139,7 +139,7 @@ export interface FormConfig<
   /**
    * Signal forms adapter configuration.
    */
-  customFnConfig?: CustomFnConfig;
+  customFnConfig?: CustomFnConfig<TValue extends Record<string, unknown> ? TValue : Record<string, unknown>>;
 
   /**
    * Form submission configuration.
@@ -298,7 +298,7 @@ export interface FormConfig<
  *
  * @public
  */
-export interface CustomFnConfig {
+export interface CustomFnConfig<TFormValue extends Record<string, unknown> = Record<string, unknown>> {
   /**
    * Custom evaluation functions for conditional expressions.
    *
@@ -316,7 +316,7 @@ export interface CustomFnConfig {
    * }
    * ```
    */
-  customFunctions?: Record<string, CustomFunction>;
+  customFunctions?: Record<string, CustomFunction<TFormValue>>;
 
   /**
    * Custom derivation functions for value derivation logic.
@@ -385,7 +385,7 @@ export interface CustomFnConfig {
    * }
    * ```
    */
-  derivations?: Record<string, CustomFunction>;
+  derivations?: Record<string, CustomFunction<TFormValue>>;
 
   // TODO(@ng-forge): remove deprecated code in next minor
   /**
@@ -430,7 +430,7 @@ export interface CustomFnConfig {
    * }
    * ```
    */
-  propertyDerivations?: Record<string, CustomFunction>;
+  propertyDerivations?: Record<string, CustomFunction<TFormValue>>;
 
   /**
    * Async derivation functions for asynchronous value derivation logic.
@@ -461,7 +461,7 @@ export interface CustomFnConfig {
    * }
    * ```
    */
-  asyncDerivations?: Record<string, AsyncDerivationFunction>;
+  asyncDerivations?: Record<string, AsyncDerivationFunction<TFormValue>>;
 
   /**
    * Async condition functions for asynchronous field state logic.
@@ -486,7 +486,7 @@ export interface CustomFnConfig {
    * }
    * ```
    */
-  asyncConditions?: Record<string, AsyncConditionFunction>;
+  asyncConditions?: Record<string, AsyncConditionFunction<TFormValue>>;
 
   /**
    * Custom validators using Angular's public FieldContext API

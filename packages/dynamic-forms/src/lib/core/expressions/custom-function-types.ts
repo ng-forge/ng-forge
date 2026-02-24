@@ -78,4 +78,5 @@ export interface CustomFunctionOptions {
  * };
  * ```
  */
-export type CustomFunction = (context: EvaluationContext) => unknown;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- default `any` allows CustomFunction to accept any TFormValue without explicit generic
+export type CustomFunction<TFormValue extends Record<string, unknown> = any> = (context: EvaluationContext<unknown, TFormValue>) => unknown;

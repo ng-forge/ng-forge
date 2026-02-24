@@ -756,7 +756,7 @@ describe('InferFormValue type inference', () => {
     expect(config.fields[0].type).toBe('array');
   });
 
-  it('should infer simplified array with template only (no value) as unknown[]', () => {
+  it('should infer simplified array with single-field template (no value) as primitive[]', () => {
     const config = {
       fields: [
         {
@@ -769,7 +769,7 @@ describe('InferFormValue type inference', () => {
 
     type Value = InferFormValue<typeof config>;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
-    type _Test = Expect<Equal<Value['tags'], unknown[]>>;
+    type _Test = Expect<Equal<Value['tags'], string[]>>;
 
     expect(config.fields[0].type).toBe('array');
   });
@@ -796,6 +796,101 @@ describe('InferFormValue type inference', () => {
     expect(config.fields[0].type).toBe('array');
   });
 
+  it('should infer simplified array with object template (no value) from template fields', () => {
+    const config = {
+      fields: [
+        {
+          key: 'contacts',
+          type: 'array',
+          template: [
+            { key: 'name', type: 'input', label: 'Name' },
+            { key: 'phone', type: 'input', label: 'Phone' },
+          ],
+        },
+      ],
+    } as const satisfies FormConfig;
+
+    type Value = InferFormValue<typeof config>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
+    type _Test = Expect<Equal<Value['contacts'], { name: string | undefined; phone: string | undefined }[]>>;
+
+    expect(config.fields[0].type).toBe('array');
+  });
+
+  it('should infer number[] for slider template array without value', () => {
+    const config = {
+      fields: [
+        {
+          key: 'ratings',
+          type: 'array',
+          template: { key: 'rating', type: 'slider', label: 'Rating' },
+        },
+      ],
+    } as const satisfies FormConfig;
+
+    type Value = InferFormValue<typeof config>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
+    type _Test = Expect<Equal<Value['ratings'], number[]>>;
+
+    expect(config.fields[0].type).toBe('array');
+  });
+
+  it('should infer array in group correctly', () => {
+    const config = {
+      fields: [
+        {
+          key: 'company',
+          type: 'group',
+          fields: [
+            { key: 'name', type: 'input', value: '', required: true },
+            {
+              key: 'employees',
+              type: 'array',
+              template: [
+                { key: 'firstName', type: 'input', label: 'First' },
+                { key: 'lastName', type: 'input', label: 'Last' },
+              ],
+            },
+          ],
+        },
+      ],
+    } as const satisfies FormConfig;
+
+    type Value = InferFormValue<typeof config>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
+    type _Tests = [
+      Expect<Equal<Value['company']['name'], string>>,
+      Expect<Equal<Value['company']['employees'], { firstName: string | undefined; lastName: string | undefined }[]>>,
+    ];
+
+    expect(config.fields[0].type).toBe('group');
+  });
+
+  it('should infer InferFormValue from FormConfig with template arrays', () => {
+    const config = {
+      fields: [
+        { key: 'title', type: 'input', value: '', required: true },
+        {
+          key: 'items',
+          type: 'array',
+          template: [
+            { key: 'description', type: 'input', label: 'Description' },
+            { key: 'quantity', type: 'input', label: 'Qty', props: { type: 'number' } },
+          ],
+        },
+      ],
+    } as const satisfies FormConfig;
+
+    type Value = InferFormValue<typeof config>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
+    type _Tests = [
+      Expect<Equal<Value['title'], string>>,
+      Expect<Equal<Value['items'], { description: string | undefined; quantity: number | undefined }[]>>,
+    ];
+
+    expect(config.fields.length).toBe(2);
+  });
+
   it('should still infer full-API array correctly', () => {
     const config = {
       fields: [
@@ -817,5 +912,29 @@ describe('InferFormValue type inference', () => {
     type _Tests = [Expect<Equal<Value['emails'], { address: string | undefined; primary: boolean | undefined }[]>>];
 
     expect(config.fields[0].type).toBe('array');
+  });
+
+  it('should provide typed formValue in customFnConfig derivation functions', () => {
+    const config = {
+      fields: [
+        { key: 'country', type: 'select', value: 'US', options: [], required: true },
+        { key: 'currency', type: 'input', value: '', required: true },
+      ],
+      customFnConfig: {
+        derivations: {
+          getCurrency: (ctx) => {
+            // ctx.formValue should be typed as { country: string; currency: string }
+            const country: string = ctx.formValue.country;
+            return country === 'US' ? 'USD' : 'EUR';
+          },
+        },
+      },
+    } as const satisfies FormConfig;
+
+    type Value = InferFormValue<typeof config>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
+    type _Tests = [Expect<Equal<Value['country'], string>>, Expect<Equal<Value['currency'], string>>];
+
+    expect(config.customFnConfig?.derivations?.getCurrency).toBeDefined();
   });
 });

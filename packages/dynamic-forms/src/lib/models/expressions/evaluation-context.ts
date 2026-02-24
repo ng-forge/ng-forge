@@ -2,7 +2,8 @@ import type { Logger } from '../../providers/features/logger/logger.interface';
 import type { DeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
 import type { FieldStateContext, FormFieldStateMap } from './field-state-context';
 
-export interface EvaluationContext<TValue = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- default `any` for TFormValue ensures backward compatibility at registry boundaries
+export interface EvaluationContext<TValue = unknown, TFormValue extends Record<string, unknown> = any> {
   /** Current field value */
   fieldValue: TValue;
 
@@ -13,7 +14,7 @@ export interface EvaluationContext<TValue = unknown> {
    * For array item derivations, this is scoped to the current array item.
    * Use `rootFormValue` to access the complete form when inside an array context.
    */
-  formValue: Record<string, unknown>;
+  formValue: TFormValue;
 
   /** Field path for relative references */
   fieldPath: string;
