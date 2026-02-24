@@ -13,7 +13,10 @@ export interface FieldTypeResult {
  * Maps an OpenAPI schema to a dynamic form field type.
  */
 export function mapSchemaToFieldType(schema: SchemaObject): FieldTypeResult {
-  const type = schema.type as string | undefined;
+  const rawType = schema.type;
+  const type: string | undefined = Array.isArray(rawType)
+    ? ((rawType as string[]).find((t) => t !== 'null') ?? (rawType as string[])[0])
+    : (rawType as string | undefined);
   const format = schema.format;
 
   // string + enum → select (ambiguous with radio)

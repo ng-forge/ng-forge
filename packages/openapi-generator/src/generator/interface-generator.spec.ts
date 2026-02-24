@@ -177,6 +177,81 @@ describe('generateInterface', () => {
     expect(result).toContain('  data?: unknown;');
   });
 
+  it('should handle numeric enums without quoting', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      properties: {
+        priority: { type: 'integer', enum: [1, 2, 3] },
+      },
+    };
+
+    const result = generateInterface(schema, defaultOptions);
+
+    expect(result).toContain('  priority?: 1 | 2 | 3;');
+  });
+
+  it('should handle nullable types', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      properties: {
+        name: { type: 'string', nullable: true } as OpenAPIV3.SchemaObject,
+      },
+    };
+
+    const result = generateInterface(schema, defaultOptions);
+
+    expect(result).toContain('  name?: string | null;');
+  });
+
+  it('should handle oneOf as union type', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      properties: {
+        value: {
+          oneOf: [{ type: 'string' }, { type: 'number' }],
+        } as unknown as OpenAPIV3.SchemaObject,
+      },
+    };
+
+    const result = generateInterface(schema, defaultOptions);
+
+    expect(result).toContain('  value?: string | number;');
+  });
+
+  it('should handle anyOf as union type', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      properties: {
+        value: {
+          anyOf: [{ type: 'string' }, { type: 'boolean' }],
+        } as unknown as OpenAPIV3.SchemaObject,
+      },
+    };
+
+    const result = generateInterface(schema, defaultOptions);
+
+    expect(result).toContain('  value?: string | boolean;');
+  });
+
+  it('should handle allOf as intersection type', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      properties: {
+        data: {
+          allOf: [
+            { type: 'object', properties: { id: { type: 'integer' } } },
+            { type: 'object', properties: { name: { type: 'string' } } },
+          ],
+        } as unknown as OpenAPIV3.SchemaObject,
+      },
+    };
+
+    const result = generateInterface(schema, defaultOptions);
+
+    // allOf should produce an intersection
+    expect(result).toMatch(/data\?:.*&/);
+  });
+
   it('should skip $ref properties', () => {
     const schema: OpenAPIV3.SchemaObject = {
       type: 'object',

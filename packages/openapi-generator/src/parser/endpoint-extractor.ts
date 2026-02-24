@@ -1,5 +1,6 @@
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import type { OpenAPISpec } from './openapi-parser.js';
+import { isReferenceObject } from '../utils/openapi-utils.js';
 
 export interface EndpointInfo {
   method: string;
@@ -60,10 +61,6 @@ export function extractEndpoints(spec: OpenAPISpec): EndpointInfo[] {
   }
 
   return endpoints;
-}
-
-function isReferenceObject(obj: unknown): obj is OpenAPIV3.ReferenceObject {
-  return typeof obj === 'object' && obj !== null && '$ref' in obj;
 }
 
 export function formatEndpointLabel(endpoint: EndpointInfo): string {

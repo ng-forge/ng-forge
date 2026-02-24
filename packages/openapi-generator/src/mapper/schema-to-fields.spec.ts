@@ -197,6 +197,43 @@ describe('mapSchemaToFields', () => {
     expect(countField.validation).toContainEqual({ type: 'max', value: 10 });
   });
 
+  it('should propagate schemaName into nested group ambiguous fields', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        address: {
+          type: 'object',
+          properties: {
+            city: { type: 'string' },
+          },
+        },
+      },
+    };
+
+    const result = mapSchemaToFields(schema, [], { schemaName: 'createPet' });
+    // The nested field 'city' should have fieldPath 'createPet.address.city'
+    const cityAmbiguous = result.ambiguousFields.find((f) => f.key === 'city');
+    expect(cityAmbiguous).toBeDefined();
+    expect(cityAmbiguous!.fieldPath).toBe('createPet.address.city');
+  });
+
+  it('should not leak original props when decision overrides the field type', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        bio: { type: 'string' },
+      },
+    };
+
+    const result = mapSchemaToFields(schema, [], {
+      decisions: { bio: 'textarea' },
+    });
+
+    // textarea was chosen via decision, so the original input props { type: 'text' } should NOT be present
+    expect(result.fields[0].type).toBe('textarea');
+    expect(result.fields[0].props).toBeUndefined();
+  });
+
   it('should propagate warnings from the walker', () => {
     const schema: SchemaObject = {
       type: 'object',

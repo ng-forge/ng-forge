@@ -13,10 +13,20 @@ export interface GeneratorConfig {
 const CONFIG_FILENAME = '.ng-forge-generator.json';
 
 export async function loadConfig(dir: string): Promise<GeneratorConfig | null> {
+  let content: string;
   try {
-    const content = await readFile(join(dir, CONFIG_FILENAME), 'utf-8');
+    content = await readFile(join(dir, CONFIG_FILENAME), 'utf-8');
+  } catch (error: unknown) {
+    if (error instanceof Error && 'code' in error && (error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return null;
+    }
+    throw error;
+  }
+
+  try {
     return JSON.parse(content) as GeneratorConfig;
   } catch {
+    logger.warn(`Failed to parse config file at ${join(dir, CONFIG_FILENAME)}, ignoring`);
     return null;
   }
 }

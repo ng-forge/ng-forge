@@ -31,7 +31,10 @@ export async function writeGeneratedFiles(outputDir: string, files: GeneratedFil
 async function readFileSafe(path: string): Promise<string | null> {
   try {
     return await readFile(path, 'utf-8');
-  } catch {
-    return null;
+  } catch (error: unknown) {
+    if (error instanceof Error && 'code' in error && (error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return null;
+    }
+    throw error;
   }
 }
