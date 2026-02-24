@@ -134,7 +134,7 @@ export class EventBus {
    * @internal
    */
   emitInstance(event: FormEvent): void {
-    this.dispatch(event);
+    this.emit(event);
   }
 
   /**

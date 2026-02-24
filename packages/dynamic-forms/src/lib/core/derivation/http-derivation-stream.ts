@@ -205,7 +205,6 @@ export function createHttpDerivationStream(
           }
         }
 
-        // Resolve the HTTP request (evaluates expressions in queryParams/body)
         // Returns null when a path param is undefined — suppress the request
         const resolvedRequest = resolveHttpRequest(entry.http!, evalContext);
 
