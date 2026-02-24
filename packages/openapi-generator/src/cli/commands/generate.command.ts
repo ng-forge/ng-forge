@@ -26,6 +26,8 @@ interface GenerateOptions {
   editable?: boolean;
   watch?: boolean;
   config?: string;
+  dryRun?: boolean;
+  skipExisting?: boolean;
 }
 
 export function registerGenerateCommand(program: Command): void {
@@ -39,6 +41,8 @@ export function registerGenerateCommand(program: Command): void {
     .option('--editable', 'Generate editable forms for GET endpoints')
     .option('--watch', 'Watch spec file for changes and regenerate')
     .option('--config <path>', 'Path to config file directory')
+    .option('--dry-run', 'List files that would be generated without writing them')
+    .option('--skip-existing', 'Skip files that already exist on disk')
     .action(async (options: GenerateOptions) => {
       await runGenerate(options);
     });
@@ -167,7 +171,16 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
     subdirectory: 'types',
   });
 
-  const writtenPaths = await writeGeneratedFiles(options.output, allFiles);
+  if (options.dryRun) {
+    logger.info('Dry run — files that would be generated:');
+    for (const file of allFiles) {
+      const dir = file.subdirectory ? `${file.subdirectory}/` : '';
+      logger.info(`  ${dir}${file.fileName}`);
+    }
+    return;
+  }
+
+  const writtenPaths = await writeGeneratedFiles(options.output, allFiles, { skipExisting: options.skipExisting });
   logger.success(`Generated ${writtenPaths.length} files in ${options.output}`);
 
   const config: GeneratorConfig = {

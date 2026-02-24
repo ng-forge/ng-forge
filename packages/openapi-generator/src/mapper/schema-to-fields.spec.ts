@@ -246,4 +246,103 @@ describe('mapSchemaToFields', () => {
     const result = mapSchemaToFields(schema, []);
     expect(result.warnings).toContain('additionalProperties are not supported and were skipped');
   });
+
+  it('should set disabled when readOnly is true', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        id: { type: 'integer', readOnly: true } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].disabled).toBe(true);
+  });
+
+  it('should map default to value', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        status: { type: 'string', enum: ['active', 'inactive'], default: 'active' } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].value).toBe('active');
+  });
+
+  it('should map description to placeholder', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: 'Enter your full name' } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].placeholder).toBe('Enter your full name');
+  });
+
+  it('should use title as label when present', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        firstName: { type: 'string', title: 'Your First Name' } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].label).toBe('Your First Name');
+  });
+
+  it('should use x-ng-forge-type to bypass type mapping', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        color: { type: 'string', 'x-ng-forge-type': 'color-picker' } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].type).toBe('color-picker');
+    expect(result.ambiguousFields).toHaveLength(0);
+  });
+
+  it('should skip deprecated properties and add warning', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        oldField: { type: 'string', deprecated: true } as unknown as SchemaObject,
+        newField: { type: 'string' },
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields).toHaveLength(1);
+    expect(result.fields[0].key).toBe('newField');
+    expect(result.warnings).toContain("Property 'oldField' is deprecated and was skipped");
+  });
+
+  it('should resolve ambiguous text-input to textarea based on property name', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        description: { type: 'string' },
+        notes: { type: 'string' },
+        name: { type: 'string' },
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].type).toBe('textarea');
+    expect(result.fields[0].key).toBe('description');
+    expect(result.fields[1].type).toBe('textarea');
+    expect(result.fields[1].key).toBe('notes');
+    // 'name' should remain ambiguous input
+    expect(result.fields[2].type).toBe('input');
+
+    // Only 'name' should be in ambiguous fields
+    expect(result.ambiguousFields).toHaveLength(1);
+    expect(result.ambiguousFields[0].key).toBe('name');
+  });
 });

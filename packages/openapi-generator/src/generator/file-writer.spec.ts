@@ -81,4 +81,27 @@ describe('writeGeneratedFiles', () => {
       expect(content).toBe(files[i].content);
     }
   });
+
+  it('should skip existing files when skipExisting is true', async () => {
+    const filePath = join(tempDir, 'form.ts');
+    await writeFile(filePath, 'original content', 'utf-8');
+
+    const files: GeneratedFile[] = [{ fileName: 'form.ts', content: 'new content' }];
+
+    const paths = await writeGeneratedFiles(tempDir, files, { skipExisting: true });
+
+    expect(paths).toHaveLength(0);
+    const content = await readFile(filePath, 'utf-8');
+    expect(content).toBe('original content');
+  });
+
+  it('should write new files even when skipExisting is true', async () => {
+    const files: GeneratedFile[] = [{ fileName: 'new-form.ts', content: 'new content' }];
+
+    const paths = await writeGeneratedFiles(tempDir, files, { skipExisting: true });
+
+    expect(paths).toHaveLength(1);
+    const content = await readFile(paths[0], 'utf-8');
+    expect(content).toBe('new content');
+  });
 });

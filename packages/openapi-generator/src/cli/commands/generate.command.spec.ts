@@ -12,6 +12,24 @@ describe('registerGenerateCommand', () => {
     expect(generateCmd).toBeDefined();
     expect(generateCmd!.description()).toBe('Generate dynamic form configurations from an OpenAPI spec');
   });
+
+  it('should register --dry-run option', () => {
+    const program = new Command();
+    registerGenerateCommand(program);
+
+    const generateCmd = program.commands.find((cmd) => cmd.name() === 'generate');
+    const dryRunOption = generateCmd!.options.find((opt) => opt.long === '--dry-run');
+    expect(dryRunOption).toBeDefined();
+  });
+
+  it('should register --skip-existing option', () => {
+    const program = new Command();
+    registerGenerateCommand(program);
+
+    const generateCmd = program.commands.find((cmd) => cmd.name() === 'generate');
+    const skipExistingOption = generateCmd!.options.find((opt) => opt.long === '--skip-existing');
+    expect(skipExistingOption).toBeDefined();
+  });
 });
 
 describe('filterEndpoints', () => {
