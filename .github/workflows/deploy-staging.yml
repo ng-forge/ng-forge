@@ -1,0 +1,84 @@
+name: Deploy to Staging
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: 'vercel-staging'
+  cancel-in-progress: true
+
+jobs:
+  deploy-staging:
+    name: Build and Deploy to Staging
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: staging
+      url: https://staging.ng-forge.com
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Vercel CLI
+        run: pnpm add -g vercel@latest
+
+      - name: Pull Vercel Environment
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "Deployed to: $URL"
+
+      - name: Alias to staging.ng-forge.com
+        run: vercel alias ${{ steps.deploy.outputs.url }} staging.ng-forge.com --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Smoke test staging
+        run: |
+          echo "Verifying staging deployment is accessible..."
+          curl --fail --retry 5 --retry-delay 10 "https://staging.ng-forge.com/dynamic-forms/" > /dev/null
+          echo "Staging deployment verified successfully"
+
+      - name: Output Deployment URL
+        run: |
+          echo "## Staging Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.event.workflow_run.head_sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** https://staging.ng-forge.com" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Application URLs" >> $GITHUB_STEP_SUMMARY
+          echo "- **Docs:** https://staging.ng-forge.com/dynamic-forms/" >> $GITHUB_STEP_SUMMARY
+          echo "- **Material Examples:** https://staging.ng-forge.com/dynamic-forms/examples/material/" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bootstrap Examples:** https://staging.ng-forge.com/dynamic-forms/examples/bootstrap/" >> $GITHUB_STEP_SUMMARY
+          echo "- **PrimeNG Examples:** https://staging.ng-forge.com/dynamic-forms/examples/primeng/" >> $GITHUB_STEP_SUMMARY
+          echo "- **Ionic Examples:** https://staging.ng-forge.com/dynamic-forms/examples/ionic/" >> $GITHUB_STEP_SUMMARY
