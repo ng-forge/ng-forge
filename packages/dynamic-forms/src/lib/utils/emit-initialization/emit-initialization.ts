@@ -1,6 +1,7 @@
 import { afterNextRender, Injector } from '@angular/core';
 import { EventBus } from '../../events/event.bus';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 
 /**
  * Component type for initialization events.
@@ -25,12 +26,14 @@ export function emitComponentInitialized(
   componentKey: string,
   injector: Injector,
 ): void {
+  const logger = injector.get(DynamicFormLogger);
+
   afterNextRender(
     () => {
       try {
         eventBus.dispatch(ComponentInitializedEvent, componentType, componentKey);
-      } catch {
-        // Input not available - component may have been destroyed
+      } catch (error: unknown) {
+        logger.error(`Failed to emit initialization event for ${componentType} '${componentKey}'`, error);
       }
     },
     { injector },

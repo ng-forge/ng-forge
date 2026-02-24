@@ -245,3 +245,6 @@ export { RootFormRegistryService } from './core/registry/root-form-registry.serv
 
 // Field State types (for consumers writing custom expressions)
 export type { FieldStateInfo, FieldStateContext, FormFieldStateMap } from './models/expressions/field-state-context';
+
+// Configuration tokens — override defaults via provideDynamicForm() or Angular DI
+export { INITIALIZATION_TIMEOUT_MS } from './utils/initialization-tracker/initialization-tracker';

@@ -11,6 +11,7 @@ import {
   Signal,
   WritableSignal,
 } from '@angular/core';
+import { FieldDef } from './definitions/base/field-def';
 import { NgComponentOutlet } from '@angular/common';
 import { FieldTree } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
@@ -22,7 +23,7 @@ import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
 import { setupInitializationTracking } from './utils/initialization-tracker/initialization-tracker';
 import { InferFormValue } from './models/types/form-value-inference';
-import { isContainerField } from './models/types/type-guards';
+import { hasChildFields, isContainerField } from './models/types/type-guards';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { DERIVATION_ORCHESTRATOR } from './core/derivation/derivation-orchestrator';
 import { PROPERTY_DERIVATION_ORCHESTRATOR } from './core/property-derivation/property-derivation-orchestrator';
@@ -186,9 +187,16 @@ export class DynamicForm<
   // Computed Signals - Internal
   // ─────────────────────────────────────────────────────────────────────────────
 
+  /**
+   * Recursively counts container components that will emit ComponentInitializedEvent.
+   * Includes the dynamic-form component itself (+1).
+   *
+   * Recurses into all container children, including those nested inside array
+   * item templates, to avoid a premature (initialized) emission.
+   */
   private totalComponentsCount = computed(() => {
     const fields = this.stateManager.formSetup()?.fields ?? [];
-    return fields.filter(isContainerField).length + 1;
+    return countContainersRecursive(fields) + 1;
   });
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -252,15 +260,15 @@ export class DynamicForm<
     this.dispatcher?.connect(this.eventBus);
     this.destroyRef.onDestroy(() => this.dispatcher?.disconnect());
 
+    // Inject orchestrators eagerly so derivation streams are set up before the first
+    // render cycle. Previously afterNextRender() deferred injection, causing
+    // (initialized) to fire before derivations ran. The circular dependency that
+    // originally motivated the deferral is resolved via dynamic-form-di.ts.
+    this.injector.get(DERIVATION_ORCHESTRATOR);
+    this.injector.get(PROPERTY_DERIVATION_ORCHESTRATOR);
+
     this.setupEffects();
     this.setupEventHandlers();
-
-    // Lazily inject orchestrators to avoid circular dependency.
-    // The orchestrators' constructors set up RxJS subscriptions that process derivations.
-    afterNextRender(() => {
-      this.injector.get(DERIVATION_ORCHESTRATOR);
-      this.injector.get(PROPERTY_DERIVATION_ORCHESTRATOR);
-    });
   }
 
   /**
@@ -317,4 +325,32 @@ export class DynamicForm<
         error: (err) => this.logger.error('Submission handler error', err),
       });
   }
+}
+
+/**
+ * Recursively counts container fields (page, row, group, array) in a field tree.
+ * Descends into container children including array item templates to ensure
+ * nested containers are counted for accurate initialization tracking.
+ */
+function countContainersRecursive(fields: FieldDef<unknown>[]): number {
+  let count = 0;
+  for (const field of fields) {
+    if (isContainerField(field)) {
+      count += 1;
+      if (hasChildFields(field)) {
+        const children = field.fields;
+        if (Array.isArray(children)) {
+          for (const child of children) {
+            if (Array.isArray(child)) {
+              // Array item template: FieldDef[] (object items)
+              count += countContainersRecursive(child as FieldDef<unknown>[]);
+            } else if (child != null && isContainerField(child as FieldDef<unknown>)) {
+              count += countContainersRecursive([child as FieldDef<unknown>]);
+            }
+          }
+        }
+      }
+    }
+  }
+  return count;
 }
