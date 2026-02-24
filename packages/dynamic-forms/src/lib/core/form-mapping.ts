@@ -22,6 +22,7 @@ import { isGroupField } from '../definitions/default/group-field';
 import { isArrayField } from '../definitions/default/array-field';
 import { isPageField } from '../definitions/default/page-field';
 import { isRowField } from '../definitions/default/row-field';
+import { DynamicFormError } from '../errors/dynamic-form-error';
 
 // Type alias for schema path parameters
 type AnySchemaPath = SchemaPath<unknown> | SchemaPathTree<unknown>;
@@ -57,7 +58,16 @@ function applyStringValidators(path: SchemaPath<string>, config: StringValidatio
     maxLength(path, config.maxLength);
   }
   if (config.pattern) {
-    const regex = typeof config.pattern === 'string' ? new RegExp(config.pattern) : config.pattern;
+    let regex: RegExp;
+    if (typeof config.pattern === 'string') {
+      try {
+        regex = new RegExp(config.pattern);
+      } catch (e) {
+        throw new DynamicFormError(`Invalid regex pattern: '${config.pattern}' — ${e instanceof Error ? e.message : String(e)}`);
+      }
+    } else {
+      regex = config.pattern;
+    }
     pattern(path, regex);
   }
 }

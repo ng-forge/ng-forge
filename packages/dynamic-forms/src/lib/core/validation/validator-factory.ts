@@ -134,7 +134,18 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       break;
     case 'pattern':
       if (config.value instanceof RegExp || typeof config.value === 'string') {
-        const regexPattern = typeof config.value === 'string' ? new RegExp(config.value) : config.value;
+        let regexPattern: RegExp;
+        if (typeof config.value === 'string') {
+          try {
+            regexPattern = new RegExp(config.value);
+          } catch (e) {
+            throw new DynamicFormError(
+              `Invalid regex pattern in validator: '${config.value}' — ${e instanceof Error ? e.message : String(e)}`,
+            );
+          }
+        } else {
+          regexPattern = config.value;
+        }
         applyPatternValidator(fieldPath as SchemaPath<string>, regexPattern, config.expression);
       }
       break;

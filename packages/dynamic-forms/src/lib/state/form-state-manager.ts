@@ -48,6 +48,7 @@ import { derivedFromDeferred } from '../utils/derived-from-deferred/derived-from
 import { reconcileFields, ResolvedField, resolveField, resolveFieldSync } from '../utils/resolve-field/resolve-field';
 import { FormModeValidator } from '../utils/form-validation/form-mode-validator';
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
+import { validateFormConfig } from '../utils/config-validation/config-validator';
 import { VALUE_EXCLUSION_DEFAULTS } from '../providers/features/value-exclusion/value-exclusion.token';
 import { filterFormValue } from '../utils/value-filter/value-filter';
 import { ValueExclusionConfig } from '../models/value-exclusion-config';
@@ -900,6 +901,9 @@ export class FormStateManager<
 
   private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: FormMode, registry: Map<string, FieldTypeDefinition>): FormSetup {
     const normalizedFields = normalizeSimplifiedArrays(fields);
+    // Validate after normalization so simplified array templates are already expanded
+    // into full ArrayField.fields and are reachable during traversal.
+    validateFormConfig(normalizedFields, registry, this.logger);
     const flattenedFields = this.fieldProcessors.memoizedFlattenFields(normalizedFields, registry);
     const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(normalizedFields, registry);
     const fieldsById = this.fieldProcessors.memoizedKeyBy(flattenedFields);
