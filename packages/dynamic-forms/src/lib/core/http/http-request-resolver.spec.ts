@@ -221,7 +221,7 @@ describe('resolveHttpRequest', () => {
       expect(result.url).toBe('/api/users');
     });
 
-    it('should replace with empty string when expression evaluates to null/undefined', () => {
+    it('should return null when expression evaluates to null/undefined (suppresses request)', () => {
       const config: HttpRequestConfig = {
         url: '/api/users/:userId',
         params: { userId: 'formValue.nonExistent' },
@@ -229,7 +229,7 @@ describe('resolveHttpRequest', () => {
       const ctx = createContext({ formValue: {} });
       const result = resolveHttpRequest(config, ctx);
 
-      expect(result.url).toBe('/api/users/');
+      expect(result).toBeNull();
     });
   });
 

@@ -31,7 +31,7 @@ import { validateNoCycles } from './cycle-detector';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
 import { DERIVATION_WARNING_TRACKER } from './derivation-warning-tracker';
-import { createHttpDerivationStream } from './http-derivation-stream';
+import { createHttpDerivationStream, createStreamGuard, HttpDerivationStreamContext } from './http-derivation-stream';
 import { createAsyncDerivationStream } from './async-derivation-stream';
 
 /**
@@ -90,6 +90,13 @@ export class DerivationOrchestrator {
 
   /** Identity keys of current async entries for smart teardown comparison */
   private lastAsyncEntryKeys: Set<string> | null = null;
+
+  /**
+   * Guard for detecting stale HTTP responses. Call `invalidate()` on teardown to cancel
+   * in-flight requests from the previous generation. Each HTTP stream subscribes via
+   * `takeUntil(guard$)` — when `invalidate()` fires, all in-flight requests are discarded.
+   */
+  private readonly streamGuard = createStreamGuard();
 
   /**
    * Computed signal containing the collected and validated derivations.
@@ -351,7 +358,7 @@ export class DerivationOrchestrator {
         const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
 
         for (const entry of httpEntries) {
-          const context = {
+          const context: HttpDerivationStreamContext = {
             formValue: this.config.formValue,
             form: this.config.form,
             httpClient: this.httpClient,
@@ -360,6 +367,7 @@ export class DerivationOrchestrator {
             customFunctions: () => this.functionRegistry.getCustomFunctions(),
             externalData: () => this.resolveExternalData(),
             warningTracker: this.warningTracker,
+            guard$: this.streamGuard.guard$,
           };
 
           const stream = createHttpDerivationStream(entry, formValue$, context).pipe(takeUntilDestroyed(this.destroyRef));
@@ -374,9 +382,11 @@ export class DerivationOrchestrator {
   }
 
   /**
-   * Tears down all active HTTP derivation streams.
+   * Tears down all active HTTP derivation streams. Invalidating the stream guard
+   * cancels any in-flight HTTP responses from the old generation via `takeUntil`.
    */
   private teardownHttpStreams(): void {
+    this.streamGuard.invalidate();
     for (const sub of this.httpSubscriptions) {
       sub.unsubscribe();
     }

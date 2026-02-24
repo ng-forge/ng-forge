@@ -354,7 +354,8 @@ function applyDeclarativeHttpValidator(config: DeclarativeHttpValidatorConfig, f
       // validateHttp's request runs inside Angular's resource API — it NEEDS reactive
       // dependencies to re-trigger when the field value changes.
       const evalCtx = fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions());
-      return resolveHttpRequest(config.http, evalCtx);
+      // resolveHttpRequest returns null when a path param is undefined — convert to undefined to skip validation
+      return resolveHttpRequest(config.http, evalCtx) ?? undefined;
     },
     onSuccess: (response: unknown) => {
       return evaluateHttpValidationResponse(response, config.responseMapping, logger);

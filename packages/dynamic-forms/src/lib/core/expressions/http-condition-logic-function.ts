@@ -132,7 +132,11 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
     const evaluationContext = fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions());
 
     // Resolve the HTTP request config into a concrete request
+    // Returns null when a path param is undefined — skip the request and return pending value
     const resolved = resolveHttpRequest(condition.http, evaluationContext);
+    if (!resolved) {
+      return signalPair.resultValue();
+    }
     const requestKey = stableStringify(resolved);
 
     // Check response cache first

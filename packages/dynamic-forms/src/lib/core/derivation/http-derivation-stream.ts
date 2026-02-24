@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Signal, untracked } from '@angular/core';
 import type { FieldTree } from '@angular/forms/signals';
-import { EMPTY, Observable, debounceTime, filter, map, pairwise, startWith, switchMap } from 'rxjs';
+import { EMPTY, Observable, Subject, debounceTime, filter, map, pairwise, startWith, switchMap, take, takeUntil } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { getChangedKeys, isEqual } from '../../utils/object-utils';
@@ -48,6 +48,28 @@ export interface HttpDerivationStreamContext {
 
   /** Warning tracker to suppress duplicate missing-field warnings */
   warningTracker?: DerivationWarningTracker;
+
+  /**
+   * Observable that emits when the current generation of streams should be torn down.
+   * Pipe HTTP requests through `takeUntil(context.guard$)` to automatically discard
+   * in-flight responses when the config changes.
+   */
+  guard$: Observable<void>;
+}
+
+/**
+ * Creates a staleness guard for HTTP/async derivation streams.
+ *
+ * - Call `invalidate()` when tearing down the current generation of streams.
+ * - Pipe HTTP requests through `takeUntil(guard$)` to automatically discard
+ *   in-flight responses that arrive after the generation has been invalidated.
+ */
+export function createStreamGuard(): { invalidate: () => void; guard$: Observable<void> } {
+  const subject = new Subject<void>();
+  return {
+    invalidate: () => subject.next(),
+    guard$: subject.asObservable().pipe(take(1)),
+  };
 }
 
 const LOG_PREFIX = 'HTTP Derivation -';
@@ -184,15 +206,30 @@ export function createHttpDerivationStream(
         }
 
         // Resolve the HTTP request (evaluates expressions in queryParams/body)
+        // Returns null when a path param is undefined — suppress the request
         const resolvedRequest = resolveHttpRequest(entry.http!, evalContext);
 
-        // Make the HTTP request
+        if (!resolvedRequest) {
+          const derivationLogger = untracked(() => context.derivationLogger());
+          derivationLogger.evaluation({
+            debugName: entry.debugName,
+            fieldKey: entry.fieldKey,
+            result: 'skipped',
+            skipReason: 'condition-false',
+          });
+          subscriber.complete();
+          return;
+        }
+
+        // Make the HTTP request. takeUntil(guard$) automatically discards responses
+        // that arrive after the config has changed and the guard has been invalidated.
         const method = (resolvedRequest.method ?? 'GET').toUpperCase();
         const httpSub = context.httpClient
           .request(method, resolvedRequest.url, {
             body: resolvedRequest.body,
             headers: resolvedRequest.headers as Record<string, string>,
           })
+          .pipe(takeUntil(context.guard$))
           .subscribe({
             next: (response) => {
               try {
@@ -241,7 +278,9 @@ export function createHttpDerivationStream(
             },
           });
 
-        // Cleanup subscription on unsubscribe (switchMap cancellation)
+        // Cleanup: RxJS unsubscription cancels the in-flight HTTP request.
+        // Angular's HttpClient uses an internal AbortController when operating with
+        // the fetch backend, so unsubscribing is sufficient for network cancellation.
         return () => {
           httpSub.unsubscribe();
         };
