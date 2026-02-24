@@ -223,10 +223,18 @@ export class FunctionRegistryService {
   }
 
   /**
-   * Get all property derivation functions as an object
+   * Get all property derivation functions as an object.
+   *
+   * Merges both `derivationFunctions` and `propertyDerivationFunctions` maps,
+   * with `propertyDerivationFunctions` taking precedence. This allows users
+   * to migrate functions from `propertyDerivations` to `derivations` without
+   * breaking property derivation lookups.
    */
   getPropertyDerivationFunctions(): Record<string, CustomFunction> {
-    return Object.fromEntries(this.propertyDerivationFunctions);
+    return {
+      ...Object.fromEntries(this.derivationFunctions),
+      ...Object.fromEntries(this.propertyDerivationFunctions),
+    };
   }
 
   /**

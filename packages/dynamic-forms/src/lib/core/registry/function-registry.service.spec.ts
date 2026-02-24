@@ -629,6 +629,53 @@ describe('FunctionRegistryService', () => {
     });
   });
 
+  describe('getPropertyDerivationFunctions (merged lookup)', () => {
+    it('should return derivation functions when no property derivation functions exist', () => {
+      const fn = vi.fn().mockReturnValue('derived');
+      service.registerDerivationFunction('getCurrency', fn);
+
+      const result = service.getPropertyDerivationFunctions();
+      expect(result).toHaveProperty('getCurrency');
+      expect(result.getCurrency).toBe(fn);
+    });
+
+    it('should merge derivation and property derivation functions', () => {
+      const derivationFn = vi.fn().mockReturnValue('from-derivations');
+      const propertyFn = vi.fn().mockReturnValue('from-property');
+
+      service.registerDerivationFunction('sharedFn', derivationFn);
+      service.registerPropertyDerivationFunction('uniquePropFn', propertyFn);
+
+      const result = service.getPropertyDerivationFunctions();
+      expect(result).toHaveProperty('sharedFn');
+      expect(result).toHaveProperty('uniquePropFn');
+    });
+
+    it('should give propertyDerivationFunctions precedence over derivationFunctions', () => {
+      const derivationFn = vi.fn().mockReturnValue('from-derivations');
+      const propertyFn = vi.fn().mockReturnValue('from-property');
+
+      service.registerDerivationFunction('sameName', derivationFn);
+      service.registerPropertyDerivationFunction('sameName', propertyFn);
+
+      const result = service.getPropertyDerivationFunctions();
+      expect(result.sameName).toBe(propertyFn);
+    });
+
+    it('should allow migrating function from propertyDerivations to derivations', () => {
+      // Simulate user moving function from propertyDerivations to derivations
+      const fn = vi.fn().mockReturnValue('migrated');
+      service.registerDerivationFunction('getCities', fn);
+
+      // getPropertyDerivationFunctions should still find it via fallback
+      const result = service.getPropertyDerivationFunctions();
+      expect(result.getCities).toBe(fn);
+
+      // getPropertyDerivationFunction (singular) should also find it
+      expect(service.getPropertyDerivationFunction('getCities')).toBe(fn);
+    });
+  });
+
   describe('validator isolation', () => {
     it('should maintain separate registries for functions and validators', () => {
       const fn = vi.fn();

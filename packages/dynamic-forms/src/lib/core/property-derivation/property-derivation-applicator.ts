@@ -301,7 +301,9 @@ function computePropertyValue(
   if (entry.functionName) {
     const fn = applicatorContext.propertyDerivationFunctions?.[entry.functionName];
     if (!fn) {
-      throw new DynamicFormError(`Property derivation function '${entry.functionName}' not found in customFnConfig.propertyDerivations`);
+      throw new DynamicFormError(
+        `Property derivation function '${entry.functionName}' not found in customFnConfig.derivations or customFnConfig.propertyDerivations`,
+      );
     }
     return fn(evalContext);
   }

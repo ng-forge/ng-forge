@@ -64,16 +64,33 @@ type InferValueType<T, V> = T extends { type: 'slider' }
 type MaybeOptional<T, V> = T extends { type: 'hidden' } ? V : T extends { required: true } ? V : V | undefined;
 
 /**
+ * Infers the value type from a single template field (for primitive arrays).
+ * Mirrors InferValueType logic: slider → number, input[number] → number, else string.
+ */
+type InferSingleTemplateValue<T, D extends number> = T extends { type: 'slider' }
+  ? number
+  : T extends { type: 'input'; props: { type: 'number' } }
+    ? number
+    : T extends { type: 'checkbox' | 'toggle' }
+      ? boolean
+      : T extends { value: infer V }
+        ? Widen<V, Depth[D]>
+        : string;
+
+/**
  * Infers the value type for an array field.
- * Handles three cases:
+ * Handles four cases:
  * 1. Simplified array with template + value → infer item type from value
- * 2. Simplified array with template only → unknown[]
- * 3. Full-API array with fields → infer from children
+ * 2. Simplified array with array template (no value) → infer object type from template fields
+ * 3. Simplified array with single-field template (no value) → infer primitive type from template field
+ * 4. Full-API array with fields → infer from children
  */
 type InferArrayValue<T, D extends number> = T extends { template: unknown; value: readonly (infer Item)[] }
   ? Widen<Item>[]
-  : T extends { template: unknown }
-    ? unknown[]
+  : T extends { template: infer TArr }
+    ? TArr extends readonly RegisteredFieldTypes[]
+      ? InferFormValueWithDepth<[...TArr], Depth[D]>[]
+      : InferSingleTemplateValue<TArr, D>[]
     : T extends { fields: infer F }
       ? F extends RegisteredFieldTypes[]
         ? InferFormValueWithDepth<F, Depth[D]>[]

@@ -18,7 +18,10 @@ import { EvaluationContext } from '../../models/expressions/evaluation-context';
  *
  * @public
  */
-export type AsyncDerivationFunction = (context: EvaluationContext) => Promise<unknown> | Observable<unknown>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- default `any` allows AsyncDerivationFunction to accept any TFormValue without explicit generic
+export type AsyncDerivationFunction<TFormValue extends Record<string, unknown> = any> = (
+  context: EvaluationContext<unknown, TFormValue>,
+) => Promise<unknown> | Observable<unknown>;
 
 /**
  * Async function for conditions — returns boolean.
@@ -37,4 +40,7 @@ export type AsyncDerivationFunction = (context: EvaluationContext) => Promise<un
  *
  * @public
  */
-export type AsyncConditionFunction = (context: EvaluationContext) => Promise<boolean> | Observable<boolean>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- default `any` allows AsyncConditionFunction to accept any TFormValue without explicit generic
+export type AsyncConditionFunction<TFormValue extends Record<string, unknown> = any> = (
+  context: EvaluationContext<unknown, TFormValue>,
+) => Promise<boolean> | Observable<boolean>;
