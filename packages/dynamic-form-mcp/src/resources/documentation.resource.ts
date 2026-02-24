@@ -1,16 +1,16 @@
 /**
  * Documentation Resource
  *
- * Exposes ng-forge library documentation from generated docs.json.
+ * Exposes ng-forge documentation as links to the online docs site.
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { getDocs, getDoc, getDocsByCategory } from '../registry/index.js';
+import { getDocPages, getDocPage, getDocPagesByCategory } from '../registry/index.js';
 
 export function registerDocumentationResource(server: McpServer): void {
-  // List all documentation topics
+  // List all documentation topics with their online URLs
   server.resource('ng-forge Documentation', 'ng-forge://docs', async () => {
-    const docs = getDocs();
+    const docs = getDocPages();
     const categories = [...new Set(docs.map((d) => d.category))];
 
     return {
@@ -20,7 +20,9 @@ export function registerDocumentationResource(server: McpServer): void {
           mimeType: 'application/json',
           text: JSON.stringify(
             {
-              description: 'ng-forge dynamic forms documentation',
+              description: 'ng-forge dynamic forms documentation — links to online docs at ng-forge.com',
+              docsHome: 'https://ng-forge.com/dynamic-forms/',
+              llmsTxt: 'https://ng-forge.com/dynamic-forms/llms.txt',
               totalTopics: docs.length,
               categories: categories.map((cat) => ({
                 name: cat,
@@ -29,10 +31,9 @@ export function registerDocumentationResource(server: McpServer): void {
                   .map((d) => ({
                     id: d.id,
                     title: d.title,
-                    uri: `ng-forge://docs/${d.id}`,
+                    url: d.url,
                   })),
               })),
-              usage: 'Access specific topics via ng-forge://docs/{topic-id}',
             },
             null,
             2,
@@ -42,49 +43,53 @@ export function registerDocumentationResource(server: McpServer): void {
     };
   });
 
-  // Get specific documentation topic
+  // Get specific documentation topic URL
   server.resource('Documentation Topic', 'ng-forge://docs/{topic}', async (uri: URL) => {
     const match = uri.href.match(/ng-forge:\/\/docs\/(.+)/);
     const topicId = match?.[1];
 
     if (!topicId) {
-      const docs = getDocs();
       return {
         contents: [
           {
             uri: uri.href,
             mimeType: 'text/plain',
-            text: 'Topic not specified. Available topics: ' + docs.map((d) => d.id).join(', '),
+            text:
+              'Topic not specified. Available topics: ' +
+              getDocPages()
+                .map((d) => d.id)
+                .join(', '),
           },
         ],
       };
     }
 
     // Check if it's a category request
-    const categoryDocs = getDocsByCategory(topicId);
-    if (categoryDocs.length > 0 && !getDoc(topicId)) {
-      // Return all docs in this category
+    const categoryDocs = getDocPagesByCategory(topicId);
+    if (categoryDocs.length > 0 && !getDocPage(topicId)) {
+      const lines = categoryDocs.map((d) => `- [${d.title}](${d.url})`);
       return {
         contents: [
           {
             uri: uri.href,
             mimeType: 'text/markdown',
-            text: categoryDocs.map((d) => `# ${d.title}\n\n${d.content}`).join('\n\n---\n\n'),
+            text: `# ${topicId}\n\n${lines.join('\n')}`,
           },
         ],
       };
     }
 
-    const doc = getDoc(topicId);
+    const doc = getDocPage(topicId);
 
     if (!doc) {
-      const docs = getDocs();
       return {
         contents: [
           {
             uri: uri.href,
             mimeType: 'text/plain',
-            text: `Topic '${topicId}' not found. Available topics: ${docs.map((d) => d.id).join(', ')}`,
+            text: `Topic '${topicId}' not found. Available topics: ${getDocPages()
+              .map((d) => d.id)
+              .join(', ')}`,
           },
         ],
       };
@@ -95,7 +100,7 @@ export function registerDocumentationResource(server: McpServer): void {
         {
           uri: uri.href,
           mimeType: 'text/markdown',
-          text: `# ${doc.title}\n\n${doc.content}`,
+          text: `# ${doc.title}\n\nDocumentation: ${doc.url}`,
         },
       ],
     };

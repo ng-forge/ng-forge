@@ -13,14 +13,8 @@
   },
   "tags": ["scope:mcp", "type:server"],
   "targets": {
-    "generate-registry": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "npx tsx packages/dynamic-form-mcp/scripts/generate-registry.ts && pnpm exec prettier --write packages/dynamic-form-mcp/src/registry/*.json"
-      }
-    },
     "build": {
-      "dependsOn": ["^build", "generate-registry"],
+      "dependsOn": ["^build"],
       "executor": "@nx/esbuild:esbuild",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -34,7 +28,7 @@
         "assets": [
           "packages/dynamic-form-mcp/README.md",
           "packages/dynamic-form-mcp/package.json",
-          "packages/dynamic-form-mcp/src/registry/*.json"
+          "packages/dynamic-form-mcp/src/registry/examples.json"
         ]
       }
     },

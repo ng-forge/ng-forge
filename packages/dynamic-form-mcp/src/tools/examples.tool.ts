@@ -10,7 +10,6 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { getDoc, type DocTopic } from '../registry/index.js';
 
 /**
  * Pattern definitions with minimal, brief, full, and explained content.
@@ -2379,30 +2378,6 @@ Use depth="minimal" for code-only output (no markdown).`,
         return {
           content: [{ type: 'text' as const, text: content }],
         };
-      }
-
-      // Pattern not found - check docs registry as fallback
-      const docPatterns: Record<string, string[]> = {
-        'dynamic-options': ['contact-dynamic-fields'],
-        'nested-groups': ['shipping-billing-address'],
-        i18n: ['dynamic-behavior-i18n'],
-        submission: ['dynamic-behavior-submission'],
-      };
-
-      const docIds = docPatterns[normalizedPattern];
-      if (docIds) {
-        const docs: DocTopic[] = [];
-        for (const id of docIds) {
-          const doc = getDoc(id);
-          if (doc) docs.push(doc);
-        }
-
-        if (docs.length > 0) {
-          const content = docs.map((d) => `# ${d.title}\n\n${d.content}`).join('\n\n---\n\n');
-          return {
-            content: [{ type: 'text' as const, text: content }],
-          };
-        }
       }
 
       // Not found
