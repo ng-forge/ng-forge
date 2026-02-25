@@ -1240,13 +1240,13 @@ ng-doc-sidebar a[href*='ai-integration'],
 ng-doc-sidebar a[href*='openapi-generator'] ng-doc-tag,
 .ng-doc-side-bar-wrapper a[href*='openapi-generator'] ng-doc-tag {
   position: relative;
-  // 5px text-to-icon gap + 14px icon + 4px icon-to-badge gap
-  margin-left: 23px !important;
+  // 5px text-to-icon gap + 14px icon + 5px icon-to-badge gap
+  margin-left: 24px !important;
 
   &::before {
     content: '';
     position: absolute;
-    right: calc(100% + 4px);
+    right: calc(100% + 5px);
     top: 50%;
     transform: translateY(-50%);
     width: 14px;
