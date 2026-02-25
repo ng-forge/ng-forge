@@ -3,7 +3,7 @@ import { FieldContext, LogicFn } from '@angular/forms/signals';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { ExpressionParser } from '../expressions/parser/expression-parser';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { DynamicValueFunctionCacheService } from './dynamic-value-function-cache.service';
+import { ExpressionCacheContext } from '../../providers/expression-cache-context';
 
 /**
  * Create a dynamic value function from an expression string.
@@ -17,10 +17,10 @@ export function createDynamicValueFunction<TValue, TReturn>(expression: string):
   // This captures the service instance in the closure
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const logger = inject(DynamicFormLogger);
-  const cacheService = inject(DynamicValueFunctionCacheService);
+  const cacheCtx = inject(ExpressionCacheContext);
 
   // Check cache first
-  const cached = cacheService.dynamicValueFunctionCache.get(expression);
+  const cached = cacheCtx.dynamicValueFunctionCache.get(expression);
   if (cached) {
     return cached as LogicFn<TValue, TReturn>;
   }
@@ -39,6 +39,6 @@ export function createDynamicValueFunction<TValue, TReturn>(expression: string):
   };
 
   // Cache the function
-  cacheService.dynamicValueFunctionCache.set(expression, fn as LogicFn<unknown, unknown>);
+  cacheCtx.dynamicValueFunctionCache.set(expression, fn as LogicFn<unknown, unknown>);
   return fn;
 }

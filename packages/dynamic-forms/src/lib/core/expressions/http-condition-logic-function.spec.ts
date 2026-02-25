@@ -9,14 +9,13 @@ import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { RootFormRegistryService } from '../registry/root-form-registry.service';
 import { FormStateManager } from '../../state/form-state-manager';
-import { HTTP_CONDITION_CACHE, HttpConditionCache } from '../http/http-condition-cache';
+import { HttpConditionCache } from '../http/http-condition-cache';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
 import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { createHttpConditionLogicFunction } from './http-condition-logic-function';
-import { HttpConditionFunctionCacheService } from './http-condition-function-cache.service';
-import { LogicFunctionCacheService } from './logic-function-cache.service';
-import { DynamicValueFunctionCacheService } from '../values/dynamic-value-function-cache.service';
+import { ExpressionCacheContext } from '../../providers/expression-cache-context';
+import { FormDerivedState } from '../../providers/form-derived-state';
 import { stableStringify } from '../../utils/stable-stringify';
 
 describe('createHttpConditionLogicFunction', () => {
@@ -26,12 +25,12 @@ describe('createHttpConditionLogicFunction', () => {
   let injector: Injector;
   let mockLogger: MockLogger;
   let httpClient: { request: ReturnType<typeof vi.fn> };
-  let conditionCache: HttpConditionCache;
+  let expressionCache: ExpressionCacheContext;
 
   beforeEach(() => {
     mockLogger = createMockLogger();
     httpClient = { request: vi.fn().mockReturnValue(of({ allowed: true })) };
-    conditionCache = new HttpConditionCache();
+    expressionCache = new ExpressionCacheContext();
 
     TestBed.configureTestingModule({
       providers: [
@@ -42,10 +41,8 @@ describe('createHttpConditionLogicFunction', () => {
         { provide: DynamicFormLogger, useValue: mockLogger },
         { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
         { provide: HttpClient, useValue: httpClient },
-        { provide: HTTP_CONDITION_CACHE, useValue: conditionCache },
-        HttpConditionFunctionCacheService,
-        LogicFunctionCacheService,
-        DynamicValueFunctionCacheService,
+        { provide: ExpressionCacheContext, useValue: expressionCache },
+        { provide: FormDerivedState, useValue: { externalData: signal(undefined) } },
       ],
     });
 
@@ -139,7 +136,7 @@ describe('createHttpConditionLogicFunction', () => {
     // Pre-populate cache with the expected cache key using the same serialization
     // as the production code: resolveHttpRequest → stableStringify
     const expectedKey = stableStringify({ url: '/api/check', method: undefined });
-    conditionCache.set(expectedKey, true, 30000);
+    expressionCache.httpConditionCache.set(expectedKey, true, 30000);
 
     const result = runInInjectionContext(injector, () => {
       const fn = createHttpConditionLogicFunction(condition);
@@ -228,7 +225,7 @@ describe('createHttpConditionLogicFunction', () => {
   it('should use responseExpression to extract boolean from response', () => {
     // Pre-populate the cache to test responseExpression without async
     const expectedKey = stableStringify({ url: '/api/check', method: undefined });
-    conditionCache.set(expectedKey, true, 30000);
+    expressionCache.httpConditionCache.set(expectedKey, true, 30000);
 
     const condition: HttpCondition = {
       type: 'http',
@@ -432,7 +429,7 @@ describe('createHttpConditionLogicFunction', () => {
 
       // Pre-populate cache with TTL of 0
       const expectedKey = stableStringify({ url: '/api/check', method: undefined });
-      conditionCache.set(expectedKey, true, 0);
+      expressionCache.httpConditionCache.set(expectedKey, true, 0);
 
       // Advance time by 1ms to ensure the entry expires immediately
       vi.advanceTimersByTime(1);

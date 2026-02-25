@@ -12,9 +12,8 @@ import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { ConsoleLogger } from '../providers/features/logger/console-logger';
 
 import { applySchema, createSchemaFunction } from './schema-application';
-import { LogicFunctionCacheService } from './expressions/logic-function-cache.service';
-import { HttpConditionFunctionCacheService } from './expressions/http-condition-function-cache.service';
-import { DynamicValueFunctionCacheService } from './values/dynamic-value-function-cache.service';
+import { ExpressionCacheContext } from '../providers/expression-cache-context';
+import { FormDerivedState } from '../providers/form-derived-state';
 
 /**
  * Integration tests for schema-application.
@@ -42,9 +41,8 @@ describe('schema-application', () => {
         FieldContextRegistryService,
         // Provide ConsoleLogger to enable logging in tests
         { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
-        LogicFunctionCacheService,
-        HttpConditionFunctionCacheService,
-        DynamicValueFunctionCacheService,
+        { provide: ExpressionCacheContext, useValue: new ExpressionCacheContext() },
+        { provide: FormDerivedState, useValue: { externalData: signal(undefined) } },
       ],
     });
 

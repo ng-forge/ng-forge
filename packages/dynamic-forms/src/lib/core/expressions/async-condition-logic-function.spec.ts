@@ -12,9 +12,8 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
 import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { createAsyncConditionLogicFunction } from './async-condition-logic-function';
-import { AsyncConditionFunctionCacheService } from './async-condition-function-cache.service';
-import { LogicFunctionCacheService } from './logic-function-cache.service';
-import { DynamicValueFunctionCacheService } from '../values/dynamic-value-function-cache.service';
+import { ExpressionCacheContext } from '../../providers/expression-cache-context';
+import { FormDerivedState } from '../../providers/form-derived-state';
 import { stableStringify } from '../../utils/stable-stringify';
 
 describe('createAsyncConditionLogicFunction', () => {
@@ -36,9 +35,8 @@ describe('createAsyncConditionLogicFunction', () => {
         { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         { provide: DynamicFormLogger, useValue: mockLogger },
         { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
-        AsyncConditionFunctionCacheService,
-        LogicFunctionCacheService,
-        DynamicValueFunctionCacheService,
+        { provide: ExpressionCacheContext, useValue: new ExpressionCacheContext() },
+        { provide: FormDerivedState, useValue: { externalData: signal(undefined) } },
       ],
     });
 
