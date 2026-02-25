@@ -1232,20 +1232,20 @@ ng-doc-sidebar a[href*='ai-integration'],
 // ============================================
 // OPENAPI GENERATOR SIDEBAR ICON
 // ============================================
-// Simplified OpenAPI logo (interlocking braces) — static, no animation
+// Simplified OpenAPI logo (interlocking braces) — placed before the NEW badge
+// DOM: <a> > <span ng-doc-text> > "OpenAPI Generator" + <ng-doc-tag>NEW</ng-doc-tag>
+// Using ::before on ng-doc-tag to insert the icon right before the badge text
 
-ng-doc-sidebar a[href*='openapi-generator'],
-.ng-doc-side-bar-wrapper a[href*='openapi-generator'] {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-
-  &::after {
+ng-doc-sidebar a[href*='openapi-generator'] ng-doc-tag,
+.ng-doc-side-bar-wrapper a[href*='openapi-generator'] ng-doc-tag {
+  &::before {
     content: '';
     display: inline-block;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     flex-shrink: 0;
+    vertical-align: middle;
+    margin-right: 3px;
     background-color: #6ba539;
     mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 4C5.343 4 4 5.343 4 7v3c0 .552-.448 1-1 1v2c.552 0 1 .448 1 1v3c0 1.657 1.343 3 3 3h2v-2H7c-.552 0-1-.448-1-1v-3c0-1.105-.895-2-2-2 1.105 0 2-.895 2-2V7c0-.552.448-1 1-1h2V4H7z' fill='currentColor'/%3E%3Cpath d='M17 4c1.657 0 3 1.343 3 3v3c0 .552.448 1 1 1v2c-.552 0-1 .448-1 1v3c0 1.657-1.343 3-3 3h-2v-2h2c.552 0 1-.448 1-1v-3c0-1.105.895-2 2-2-1.105 0-2-.895-2-2V7c0-.552-.448-1-1-1h-2V4h2z' fill='currentColor'/%3E%3C/svg%3E");
     mask-size: contain;
@@ -1257,11 +1257,12 @@ ng-doc-sidebar a[href*='openapi-generator'],
     -webkit-mask-position: center;
     filter: drop-shadow(0 0 2px #6ba539);
   }
+}
 
-  &:hover::after {
-    background-color: #85c940;
-    filter: drop-shadow(0 0 4px #6ba539);
-  }
+ng-doc-sidebar a[href*='openapi-generator']:hover ng-doc-tag::before,
+.ng-doc-side-bar-wrapper a[href*='openapi-generator']:hover ng-doc-tag::before {
+  background-color: #85c940;
+  filter: drop-shadow(0 0 4px #6ba539);
 }
 
 // ============================================
