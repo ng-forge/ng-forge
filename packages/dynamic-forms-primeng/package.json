@@ -28,9 +28,9 @@
     "node": ">=20"
   },
   "peerDependencies": {
-    "@angular/common": "~21.1.0",
-    "@angular/core": "~21.1.0",
-    "@angular/forms": "~21.1.0",
+    "@angular/common": "~21.2.0",
+    "@angular/core": "~21.2.0",
+    "@angular/forms": "~21.2.0",
     "@ng-forge/dynamic-forms": "~0.6.0",
     "primeng": ">=17.0.0",
     "rxjs": ">=7.0.0"
