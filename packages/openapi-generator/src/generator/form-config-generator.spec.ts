@@ -1,0 +1,177 @@
+import type { FieldConfig } from '../mapper/schema-to-fields';
+import { generateFormConfig } from './form-config-generator';
+import type { FormConfigGeneratorOptions } from './form-config-generator';
+
+const defaultOptions: FormConfigGeneratorOptions = {
+  method: 'POST',
+  path: '/pets',
+  operationId: 'createPet',
+};
+
+describe('generateFormConfig', () => {
+  it('should generate a simple form config with basic fields', () => {
+    const fields: FieldConfig[] = [
+      { key: 'name', type: 'text', label: 'Name' },
+      { key: 'age', type: 'number', label: 'Age' },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain('export const createPetFormConfig = {');
+    expect(result).toContain("key: 'name'");
+    expect(result).toContain("type: 'text'");
+    expect(result).toContain("key: 'age'");
+    expect(result).toContain("type: 'number'");
+  });
+
+  it('should include as const satisfies FormConfig', () => {
+    const result = generateFormConfig([], defaultOptions);
+
+    expect(result).toContain('} as const satisfies FormConfig;');
+  });
+
+  it('should include correct import statement', () => {
+    const result = generateFormConfig([], defaultOptions);
+
+    expect(result).toContain("import type { FormConfig } from '@ng-forge/dynamic-forms';");
+  });
+
+  it('should generate fields with props', () => {
+    const fields: FieldConfig[] = [{ key: 'bio', type: 'textarea', label: 'Bio', props: { rows: 5 } }];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain("props: { 'rows': 5 }");
+  });
+
+  it('should generate fields with multi-value props', () => {
+    const fields: FieldConfig[] = [{ key: 'bio', type: 'textarea', label: 'Bio', props: { rows: 5, cols: 40 } }];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain("'rows': 5,");
+    expect(result).toContain("'cols': 40,");
+  });
+
+  it('should generate fields with options', () => {
+    const fields: FieldConfig[] = [
+      {
+        key: 'status',
+        type: 'select',
+        label: 'Status',
+        options: [
+          { label: 'Active', value: 'active' },
+          { label: 'Inactive', value: 'inactive' },
+        ],
+      },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain("{ label: 'Active', value: 'active' }");
+    expect(result).toContain("{ label: 'Inactive', value: 'inactive' }");
+  });
+
+  it('should generate fields with validation', () => {
+    const fields: FieldConfig[] = [
+      {
+        key: 'email',
+        type: 'text',
+        label: 'Email',
+        validation: [{ type: 'required' }, { type: 'maxLength', value: 100 }],
+      },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain("{ type: 'required' }");
+    expect(result).toContain("{ type: 'maxLength', value: 100 }");
+  });
+
+  it('should generate disabled fields', () => {
+    const fields: FieldConfig[] = [{ key: 'id', type: 'number', label: 'Id', disabled: true }];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain('disabled: true');
+  });
+
+  it('should generate nested fields for groups', () => {
+    const fields: FieldConfig[] = [
+      {
+        key: 'address',
+        type: 'group',
+        label: 'Address',
+        fields: [
+          { key: 'street', type: 'text', label: 'Street' },
+          { key: 'city', type: 'text', label: 'City' },
+        ],
+      },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain("key: 'address'");
+    expect(result).toContain("type: 'group'");
+    expect(result).toContain("key: 'street'");
+    expect(result).toContain("key: 'city'");
+    expect(result).toContain('fields: [');
+  });
+
+  it('should escape single quotes in labels', () => {
+    const fields: FieldConfig[] = [{ key: 'name', type: 'text', label: "Pet's Name" }];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain("label: 'Pet\\'s Name'");
+  });
+
+  it('should use path-based name when operationId is not provided', () => {
+    const options: FormConfigGeneratorOptions = {
+      method: 'POST',
+      path: '/pets',
+    };
+
+    const result = generateFormConfig([], options);
+
+    expect(result).toContain('export const postPetsFormConfig = {');
+  });
+
+  it('should quote non-identifier keys in props', () => {
+    const fields: FieldConfig[] = [{ key: 'field', type: 'input', label: 'Field', props: { 'aria-label': 'test' } }];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain('\'aria-label\': "test"');
+  });
+
+  it('should include @generated header', () => {
+    const result = generateFormConfig([], defaultOptions);
+
+    expect(result).toMatch(/^\/\/ @generated by @ng-forge\/openapi-generator — DO NOT EDIT\n/);
+  });
+
+  it('should render value property when present', () => {
+    const fields: FieldConfig[] = [{ key: 'name', type: 'text', label: 'Name', value: 'default-name' }];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain('value: "default-name"');
+  });
+
+  it('should render numeric value', () => {
+    const fields: FieldConfig[] = [{ key: 'count', type: 'number', label: 'Count', value: 42 }];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain('value: 42');
+  });
+
+  it('should render placeholder when present', () => {
+    const fields: FieldConfig[] = [{ key: 'bio', type: 'textarea', label: 'Bio', placeholder: 'Enter your bio' }];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain("placeholder: 'Enter your bio'");
+  });
+});

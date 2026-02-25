@@ -21,16 +21,19 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/input/bs-input.component'),
     mapper: valueFieldMapper,
     propsToMeta: ['type'],
+    scope: ['text-input', 'numeric'],
   },
   {
     name: BsField.Select,
     loadComponent: () => import('../fields/select/bs-select.component'),
     mapper: optionsFieldMapper,
+    scope: 'single-select',
   },
   {
     name: BsField.Checkbox,
     loadComponent: () => import('../fields/checkbox/bs-checkbox.component'),
     mapper: checkboxFieldMapper,
+    scope: 'boolean',
   },
   {
     name: BsField.Button,
@@ -97,30 +100,36 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/textarea/bs-textarea.component'),
     mapper: valueFieldMapper,
     propsToMeta: ['rows'],
+    scope: 'text-input',
   },
   {
     name: BsField.Radio,
     loadComponent: () => import('../fields/radio/bs-radio.component'),
     mapper: optionsFieldMapper,
+    scope: 'single-select',
   },
   {
     name: BsField.MultiCheckbox,
     loadComponent: () => import('../fields/multi-checkbox/bs-multi-checkbox.component'),
     mapper: optionsFieldMapper,
+    scope: 'multi-select',
   },
   {
     name: BsField.Datepicker,
     loadComponent: () => import('../fields/datepicker/bs-datepicker.component'),
     mapper: datepickerFieldMapper,
+    scope: 'date',
   },
   {
     name: BsField.Slider,
     loadComponent: () => import('../fields/slider/bs-slider.component'),
     mapper: valueFieldMapper,
+    scope: 'numeric',
   },
   {
     name: BsField.Toggle,
     loadComponent: () => import('../fields/toggle/bs-toggle.component'),
     mapper: checkboxFieldMapper,
+    scope: 'boolean',
   },
 ];

@@ -25,16 +25,19 @@ export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/input/prime-input.component'),
     mapper: valueFieldMapper,
     propsToMeta: ['type'],
+    scope: ['text-input', 'numeric'],
   },
   {
     name: PrimeField.Select,
     loadComponent: () => import('../fields/select/prime-select.component'),
     mapper: optionsFieldMapper,
+    scope: 'single-select',
   },
   {
     name: PrimeField.Checkbox,
     loadComponent: () => import('../fields/checkbox/prime-checkbox.component'),
     mapper: checkboxFieldMapper,
+    scope: 'boolean',
   },
   {
     name: PrimeField.Button,
@@ -101,30 +104,36 @@ export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/textarea/prime-textarea.component'),
     mapper: valueFieldMapper,
     propsToMeta: ['rows', 'cols'],
+    scope: 'text-input',
   },
   {
     name: PrimeField.Radio,
     loadComponent: () => import('../fields/radio/prime-radio.component'),
     mapper: optionsFieldMapper,
+    scope: 'single-select',
   },
   {
     name: PrimeField.MultiCheckbox,
     loadComponent: () => import('../fields/multi-checkbox/prime-multi-checkbox.component'),
     mapper: optionsFieldMapper,
+    scope: 'multi-select',
   },
   {
     name: PrimeField.Datepicker,
     loadComponent: () => import('../fields/datepicker/prime-datepicker.component'),
     mapper: datepickerFieldMapper,
+    scope: 'date',
   },
   {
     name: PrimeField.Slider,
     loadComponent: () => import('../fields/slider/prime-slider.component'),
     mapper: valueFieldMapper,
+    scope: 'numeric',
   },
   {
     name: PrimeField.Toggle,
     loadComponent: () => import('../fields/toggle/prime-toggle.component'),
     mapper: checkboxFieldMapper,
+    scope: 'boolean',
   },
 ];

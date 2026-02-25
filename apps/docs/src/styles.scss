@@ -1230,6 +1230,47 @@ ng-doc-sidebar a[href*='ai-integration'],
 }
 
 // ============================================
+// OPENAPI GENERATOR SIDEBAR ICON
+// ============================================
+// Curly braces icon between title text and the NEW badge
+// DOM: <a> > <span ng-doc-text> > "OpenAPI Generator" (text) + <ng-doc-tag>NEW</ng-doc-tag>
+// Strategy: absolutely position ::before on ng-doc-tag to the LEFT of the badge,
+// outside its bounds, with extra margin-left on the tag to create space
+
+ng-doc-sidebar a[href*='openapi-generator'] ng-doc-tag,
+.ng-doc-side-bar-wrapper a[href*='openapi-generator'] ng-doc-tag {
+  position: relative;
+  // 5px text-to-icon gap + 14px icon + 5px icon-to-badge gap
+  margin-left: 24px !important;
+
+  &::before {
+    content: '';
+    position: absolute;
+    right: calc(100% + 5px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    background-color: #6ba539;
+    mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 4C5.343 4 4 5.343 4 7v3c0 .552-.448 1-1 1v2c.552 0 1 .448 1 1v3c0 1.657 1.343 3 3 3h2v-2H7c-.552 0-1-.448-1-1v-3c0-1.105-.895-2-2-2 1.105 0 2-.895 2-2V7c0-.552.448-1 1-1h2V4H7z' fill='currentColor'/%3E%3Cpath d='M17 4c1.657 0 3 1.343 3 3v3c0 .552.448 1 1 1v2c-.552 0-1 .448-1 1v3c0 1.657-1.343 3-3 3h-2v-2h2c.552 0 1-.448 1-1v-3c0-1.105.895-2 2-2-1.105 0-2-.895-2-2V7c0-.552-.448-1-1-1h-2V4h2z' fill='currentColor'/%3E%3C/svg%3E");
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 4C5.343 4 4 5.343 4 7v3c0 .552-.448 1-1 1v2c.552 0 1 .448 1 1v3c0 1.657 1.343 3 3 3h2v-2H7c-.552 0-1-.448-1-1v-3c0-1.105-.895-2-2-2 1.105 0 2-.895 2-2V7c0-.552.448-1 1-1h2V4H7z' fill='currentColor'/%3E%3Cpath d='M17 4c1.657 0 3 1.343 3 3v3c0 .552.448 1 1 1v2c-.552 0-1 .448-1 1v3c0 1.657-1.343 3-3 3h-2v-2h2c.552 0 1-.448 1-1v-3c0-1.105.895-2 2-2-1.105 0-2-.895-2-2V7c0-.552-.448-1-1-1h-2V4h2z' fill='currentColor'/%3E%3C/svg%3E");
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    filter: drop-shadow(0 0 2px #6ba539);
+  }
+}
+
+ng-doc-sidebar a[href*='openapi-generator']:hover ng-doc-tag::before,
+.ng-doc-side-bar-wrapper a[href*='openapi-generator']:hover ng-doc-tag::before {
+  background-color: #85c940;
+  filter: drop-shadow(0 0 4px #6ba539);
+}
+
+// ============================================
 // PAGE DESCRIPTION HORIZONTAL RULE
 // ============================================
 // Add a subtle separator line under page descriptions across all docs

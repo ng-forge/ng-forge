@@ -1,0 +1,45 @@
+{
+  "name": "openapi-generator",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/openapi-generator/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "manifestRootsToUpdate": ["{projectRoot}", "dist/{projectRoot}"],
+      "currentVersionResolver": "git-tag",
+      "fallbackCurrentVersionResolver": "disk"
+    }
+  },
+  "tags": ["scope:generator", "type:cli"],
+  "targets": {
+    "build": {
+      "dependsOn": ["^build"],
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/openapi-generator",
+        "main": "packages/openapi-generator/src/index.ts",
+        "tsConfig": "packages/openapi-generator/tsconfig.lib.json",
+        "format": ["esm"],
+        "platform": "node",
+        "bundle": true,
+        "additionalEntryPoints": ["packages/openapi-generator/bin/ng-forge-generator.ts"],
+        "assets": ["packages/openapi-generator/README.md", "packages/openapi-generator/package.json"]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "packages/openapi-generator/vite.config.ts"
+      }
+    }
+  }
+}
