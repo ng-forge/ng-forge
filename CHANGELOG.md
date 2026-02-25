@@ -1,3 +1,28 @@
+## [0.6.1](https://github.com/ng-forge/ng-forge/compare/v0.6.0...v0.6.1) (2026-02-25)
+
+### 🚀 Features
+
+- **dynamic-forms:** add EventDispatcher injectable for external event dispatch ([#267](https://github.com/ng-forge/ng-forge/pull/267))
+
+### 🐛 Bug Fixes
+
+- **bootstrap:** add readonly DOM sync and floating label hint to textarea ([#270](https://github.com/ng-forge/ng-forge/pull/270))
+- **dynamic-forms:** expression parser correctness and HTTP injection fixes ([#268](https://github.com/ng-forge/ng-forge/pull/268))
+- **dynamic-forms:** fix page navigation validation and hidden page handling ([#271](https://github.com/ng-forge/ng-forge/pull/271))
+- **dynamic-forms:** align HTTP condition boolean semantics with validWhen strict check ([#274](https://github.com/ng-forge/ng-forge/pull/274))
+- **dynamic-forms:** isolate event bus subscriber exceptions from pipeline ([#272](https://github.com/ng-forge/ng-forge/pull/272))
+- **dynamic-forms:** fix submission safety — pending guard, config hot-swap, double-submit ([#278](https://github.com/ng-forge/ng-forge/pull/278))
+- **dynamic-forms:** fix HTTP lifecycle safety bugs ([#281](https://github.com/ng-forge/ng-forge/pull/281))
+- **dynamic-forms:** fix initialization timing, hang, and nested count ([#280](https://github.com/ng-forge/ng-forge/pull/280))
+- **dynamic-forms:** validate config at bootstrap for common misconfigurations ([#283](https://github.com/ng-forge/ng-forge/pull/283))
+- **dynamic-forms:** fix array field event API, maxLength, bounds, cleanup ([#282](https://github.com/ng-forge/ng-forge/pull/282))
+- **ionic,primeng:** improve a11y and correctness across adapters ([#279](https://github.com/ng-forge/ng-forge/pull/279))
+- **mcp:** correct operator names, document HTTP conditions and async custom functions ([#269](https://github.com/ng-forge/ng-forge/pull/269))
+
+### ✅ Tests
+
+- **dynamic-forms:** add type tests for public exported types ([#285](https://github.com/ng-forge/ng-forge/pull/285))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
