@@ -1,6 +1,6 @@
 {
   "name": "@ng-forge/dynamic-form-mcp",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "MCP server for ng-forge dynamic forms - AI-assisted form schema generation",
   "type": "module",
   "license": "MIT",
