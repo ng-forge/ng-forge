@@ -6,8 +6,13 @@
 echo "🚀 Running postinstall setup..."
 
 # Install Playwright browsers for browser mode testing
-echo "🎭 Installing Playwright browsers..."
-pnpm exec playwright install chromium --with-deps
+# Skip on Vercel — no E2E tests run there and apt-get is unavailable
+if [ -z "$VERCEL" ]; then
+  echo "🎭 Installing Playwright browsers..."
+  pnpm exec playwright install chromium --with-deps
+else
+  echo "⏭️  Skipping Playwright install (Vercel environment)"
+fi
 
 # Install git hooks
 echo "🪝 Installing git hooks..."
