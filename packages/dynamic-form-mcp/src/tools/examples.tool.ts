@@ -14,7 +14,7 @@ import { z } from 'zod';
 /**
  * Pattern definitions with minimal, brief, full, and explained content.
  */
-const PATTERNS: Record<
+export const PATTERNS: Record<
   string,
   {
     description: string;
@@ -1893,7 +1893,7 @@ PATTERNS.validation.explained = PATTERNS['minimal-validation'].explained;
 /**
  * Complete multi-page form example.
  */
-const COMPLETE_EXAMPLE = `# Complete Multi-Page Form Example
+export const COMPLETE_EXAMPLE = `# Complete Multi-Page Form Example
 
 This is a **complete, copy-pasteable** form configuration that demonstrates:
 - Multi-page navigation
@@ -2038,7 +2038,7 @@ const formConfig = {
 /**
  * Mega kitchen sink example (abbreviated - full version exists in get-example.tool.ts).
  */
-const MEGA_EXAMPLE = `# Kitchen Sink Mega Example
+export const MEGA_EXAMPLE = `# Kitchen Sink Mega Example
 
 This example demonstrates **EVERY feature** of ng-forge dynamic forms.
 

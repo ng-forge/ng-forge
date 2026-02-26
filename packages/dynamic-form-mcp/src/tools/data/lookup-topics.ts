@@ -2447,6 +2447,55 @@ Catches errors with specific fix suggestions.
 };
 
 /**
+ * One-liner descriptions for each topic key.
+ * Used by the enhanced `list` output and the search tool.
+ */
+export const TOPIC_DESCRIPTIONS: Record<string, string> = {
+  // Field types
+  input: 'Text input field (text, email, password, number, tel, url)',
+  select: 'Dropdown select with options at field level',
+  slider: 'Numeric range slider (minValue/maxValue/step at field level)',
+  radio: 'Radio button group with options at field level',
+  checkbox: 'Single boolean checkbox or multi-checkbox for multiple selections',
+  textarea: 'Multi-line text area with rows and maxLength',
+  datepicker: 'Date picker with startView, min/max date support',
+  toggle: 'Boolean on/off toggle switch',
+  text: 'Display-only text/heading (content in label, element in props.elementType)',
+  hidden: 'Hidden field included in form value (value is REQUIRED, no UI)',
+  // Containers
+  group: 'Nested object container — creates { key: { ...children } }',
+  row: 'Horizontal layout container with col-based grid (1-12)',
+  array: 'Dynamic list with add/remove — simplified (template) or full (fields) API',
+  'simplified-array': 'Simplified array API using template + value for common patterns',
+  page: 'Multi-page wizard step with next/previous/submit navigation',
+  // Concepts
+  validation: 'Built-in validators and shorthand properties (required, email, min, max, pattern)',
+  'validation-messages': 'Custom error messages for validators via validationMessages',
+  conditional: 'Show/hide/disable fields based on conditions (logic array)',
+  derivation: 'Computed field values from expressions or functions',
+  'property-derivation': 'Derive field properties (options, label, minDate) from form values',
+  'options-format': 'Option format for select/radio/multi-checkbox ({ label, value } at field level)',
+  'expression-variables': 'Variables available in expressions: formValue, fieldValue, externalData',
+  'async-validators': 'HTTP-based async validators with responseMapping and validWhen',
+  buttons: 'Button types: submit, next, previous, button, add-array-item, remove-array-item',
+  'external-data': 'Injecting application state (roles, permissions, feature flags) into forms',
+  // Patterns & Rules
+  'golden-path': 'Recommended form structures and best practices',
+  'multi-page-gotchas': 'Common pitfalls with multi-page wizard forms',
+  pitfalls: 'Top mistakes: options in props, label on containers, hidden without value',
+  'field-placement': 'Which fields can go where — nesting and placement rules',
+  'logic-matrix': 'Which logic types are supported on which field types',
+  'context-api': 'FieldContext API — valueOf(), formValue, parent, arrayIndex',
+  containers: 'Overview of all container types (group, row, array, page)',
+  'array-buttons': 'Add/remove array item button configuration',
+  'custom-validators': 'Custom validator functions via validators array',
+  conditions: 'Condition operators and types for logic rules',
+  'common-expressions': 'Frequently used derivation expressions (age, math, concatenation)',
+  'type-narrowing': 'TypeScript type safety with as const satisfies FormConfig',
+  workflow: 'Recommended tool usage guide — start here',
+};
+
+/**
  * Topic aliases for flexible lookup.
  */
 export const TOPIC_ALIASES: Record<string, string> = {
