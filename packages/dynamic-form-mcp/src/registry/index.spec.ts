@@ -105,4 +105,87 @@ describe('Registry', () => {
       expect(unknown).toBeUndefined();
     });
   });
+
+  describe('Staleness Guard', () => {
+    describe('Field type completeness', () => {
+      it('every field type entry has required properties', () => {
+        const fieldTypes = getFieldTypes();
+
+        for (const ft of fieldTypes) {
+          expect(ft.type, `field type missing 'type'`).toBeTruthy();
+          expect(ft.category, `${ft.type} missing 'category'`).toBeTruthy();
+          expect(ft.description, `${ft.type} missing 'description'`).toBeTruthy();
+          expect(ft.example, `${ft.type} missing 'example'`).toBeTruthy();
+          expect(['value', 'container', 'button', 'display']).toContain(ft.category);
+        }
+      });
+
+      it('no duplicate field type entries', () => {
+        const fieldTypes = getFieldTypes();
+        const types = fieldTypes.map((ft) => ft.type);
+        const unique = new Set(types);
+
+        expect(types.length).toBe(unique.size);
+      });
+
+      it('registry covers all Zod-schema-supported field types', () => {
+        const schemaSupportedTypes = [
+          'input',
+          'textarea',
+          'select',
+          'checkbox',
+          'radio',
+          'multi-checkbox',
+          'toggle',
+          'slider',
+          'datepicker',
+          'button',
+          'submit',
+          'next',
+          'previous',
+        ];
+
+        const registryTypes = new Set(getFieldTypes().map((ft) => ft.type));
+
+        for (const schemaType of schemaSupportedTypes) {
+          expect(registryTypes.has(schemaType), `registry missing Zod-supported type '${schemaType}'`).toBe(true);
+        }
+      });
+    });
+
+    describe('Validator completeness', () => {
+      it('every validator entry has required properties', () => {
+        const validators = getValidators();
+
+        for (const v of validators) {
+          expect(v.type, `validator missing 'type'`).toBeTruthy();
+          expect(v.category, `${v.type} missing 'category'`).toBeTruthy();
+          expect(v.description, `${v.type} missing 'description'`).toBeTruthy();
+          expect(v.example, `${v.type} missing 'example'`).toBeTruthy();
+          expect(['built-in', 'custom', 'async', 'http']).toContain(v.category);
+        }
+      });
+
+      it('no duplicate validator entries', () => {
+        const validators = getValidators();
+        const types = validators.map((v) => v.type);
+        const unique = new Set(types);
+
+        expect(types.length).toBe(unique.size);
+      });
+    });
+
+    describe('UI adapter consistency', () => {
+      it('each UI adapter references only valid field types from registry', () => {
+        const registryTypes = new Set(getFieldTypes().map((ft) => ft.type));
+        const adapters = getUIAdapters();
+
+        for (const adapter of adapters) {
+          for (const ft of adapter.fieldTypes) {
+            expect(registryTypes.has(ft.type), `${adapter.library} adapter references unknown type '${ft.type}'`).toBe(true);
+          }
+        }
+      });
+    });
+  });
 });
