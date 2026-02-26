@@ -10,7 +10,7 @@
     "build:docs": "node scripts/update-iframe-urls.cjs production && nx build docs",
     "docs:urls:dev": "node scripts/update-iframe-urls.cjs development",
     "docs:urls:prod": "node scripts/update-iframe-urls.cjs production",
-    "build:examples": "nx run-many -t build -p material-examples,bootstrap-examples,primeng-examples,ionic-examples --configuration=production",
+    "build:examples": "nx run-many -t build -p material-examples,bootstrap-examples,primeng-examples,ionic-examples --configuration=production --parallel=1",
     "build:all:prod": "pnpm run build:libs && pnpm run build:docs && pnpm run build:examples",
     "prepare:deploy": "node scripts/prepare-deploy.js",
     "deploy:prep": "pnpm run build:all:prod && pnpm run prepare:deploy",
