@@ -342,6 +342,37 @@ jobs:
             echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           fi
 
+  docs-freshness:
+    name: Docs Freshness Check
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
+        with:
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+      - name: Check llms-full.txt is up to date
+        run: |
+          pnpm nx run docs:generate-llms-full
+
+          if git diff --quiet apps/docs/public/llms-full.txt; then
+            echo "✅ llms-full.txt is up to date"
+          else
+            echo "❌ llms-full.txt is out of date!"
+            echo ""
+            echo "Run 'pnpm nx run docs:generate-llms-full' and commit the changes."
+            echo ""
+            echo "Diff:"
+            git diff --stat apps/docs/public/llms-full.txt
+            exit 1
+          fi
+
   e2e:
     name: E2E Tests (${{ matrix.app }}${{ matrix.shard && format(' [{0}]', matrix.shard) || '' }})
     needs: [lint-and-test, build-apps]
@@ -398,7 +429,7 @@ jobs:
   ci-success:
     name: PR Check Complete
     if: always()
-    needs: [should-run, setup, build, lint-and-test, build-apps, e2e]
+    needs: [should-run, setup, build, lint-and-test, docs-freshness, build-apps, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -406,5 +437,5 @@ jobs:
         uses: re-actors/alls-green@release/v1
         with:
           # e2e may be skipped if no E2E apps are affected
-          allowed-skips: setup, build, lint-and-test, build-apps, e2e
+          allowed-skips: setup, build, lint-and-test, docs-freshness, build-apps, e2e
           jobs: ${{ toJSON(needs) }}
