@@ -29,6 +29,12 @@ describe('Topic Mapper', () => {
       expect(result).toEqual(['prebuilt/form-arrays/simplified', 'prebuilt/form-arrays/complete']);
     });
 
+    it('returns simplified-array section path', () => {
+      const result = getTopicSections('simplified-array');
+
+      expect(result).toEqual(['prebuilt/form-arrays/simplified']);
+    });
+
     it('returns section paths for concept topics', () => {
       const result = getTopicSections('validation');
 

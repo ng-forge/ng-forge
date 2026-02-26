@@ -152,7 +152,7 @@ function findSectionByPartialMatch(sections: Map<string, string>, query: string)
   const normalizedQuery = query.toLowerCase();
 
   for (const [path, content] of sections) {
-    if (path.toLowerCase().includes(normalizedQuery) || normalizedQuery.includes(path.toLowerCase())) {
+    if (path.toLowerCase().includes(normalizedQuery)) {
       matches.push(content);
     }
   }

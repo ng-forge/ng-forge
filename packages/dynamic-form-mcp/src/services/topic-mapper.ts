@@ -27,6 +27,7 @@ const TOPIC_SECTION_MAP: Record<string, string[]> = {
   group: ['prebuilt/form-groups'],
   row: ['prebuilt/form-rows'],
   array: ['prebuilt/form-arrays/simplified', 'prebuilt/form-arrays/complete'],
+  'simplified-array': ['prebuilt/form-arrays/simplified'],
   page: ['prebuilt/form-pages'],
 
   // Concepts

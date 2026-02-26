@@ -12,7 +12,7 @@
 const BASE_URL = 'https://ng-forge.com/dynamic-forms';
 const LLMS_TXT_URL = `${BASE_URL}/llms.txt`;
 const LLMS_FULL_TXT_URL = `${BASE_URL}/llms-full.txt`;
-const FETCH_TIMEOUT_MS = 10_000;
+const FETCH_TIMEOUT_MS = 5_000;
 
 /** Default cache TTL: 10 minutes */
 const DEFAULT_TTL_MS = 10 * 60 * 1000;
