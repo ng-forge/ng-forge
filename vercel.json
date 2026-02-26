@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm run deploy:prep",
+  "buildCommand": "NX_DAEMON=false pnpm run deploy:prep",
   "outputDirectory": "dist/deploy",
   "git": {
     "deploymentEnabled": true
