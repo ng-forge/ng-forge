@@ -1,7 +1,7 @@
 # Review: PR #290 — `refactor(mcp): remove offline docs generation and CI registry checks`
 
 **Branch:** `refactor/remove-mcp-offline-docs` → `main`
-**Head SHA:** `15394fb`
+**Head SHA:** `43c5e36`
 **Verdict:** ✅ Approved
 
 ---
@@ -14,7 +14,7 @@ Solid refactor. The move from a 1,461-line codegen script + JSON files to hand-m
 
 ## Issues Found
 
-All three issues below were identified during review and **fixed by the author in the final commit** (`15394fb: fix(mcp): add simplified-array mapping, remove false-positive partial match, reduce fetch timeout`).
+Three issues were identified during review and fixed across two commits.
 
 ### 1. `simplified-array` missing from `TOPIC_SECTION_MAP` — Fixed
 
@@ -40,31 +40,15 @@ The second branch checked if the section _path_ was a substring of the _query_ �
 
 `FETCH_TIMEOUT_MS` reduced from `10_000` to `5_000`. More appropriate for an MCP tool where hanging for 10 seconds before graceful fallback degrades the AI assistant experience.
 
+### 4. No CI freshness check for `llms-full.txt` — Fixed
+
+`43c5e36` adds a `docs-freshness` CI job to both `ci.yml` and `pr-check.yml` that regenerates `llms-full.txt` and fails if the committed version is stale — closing the same gap the removed `mcp-registry` job covered for the JSON registry.
+
 ---
 
-## One Remaining Observation
+## No Remaining Issues
 
-**`llms-full.txt` (16,910 lines) has no CI freshness check.**
-
-The committed file is the artifact served from ng-forge.com that powers `doc-fetcher.ts`. The workflow is: update docs → run `generate-llms-full` → commit → deploy → MCP fetches live content. This is the right architecture.
-
-However, unlike the removed `mcp-registry` CI job, there is no equivalent check that `llms-full.txt` is regenerated when doc markdown files change. If docs are updated without regenerating the file, the MCP will serve stale content.
-
-A CI step modeled on the removed check would close this gap:
-
-```yaml
-- name: Check llms-full.txt is up to date
-  run: |
-    nx run docs:generate-llms-full
-    if git diff --quiet apps/docs/public/llms-full.txt; then
-      echo "✅ llms-full.txt is up to date"
-    else
-      echo "❌ llms-full.txt is out of date — run 'nx run docs:generate-llms-full' and commit"
-      exit 1
-    fi
-```
-
-Not a blocker for this PR — worth a follow-up issue.
+All items raised during review were addressed by the author:
 
 ---
 
