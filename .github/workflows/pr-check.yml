@@ -342,8 +342,8 @@ jobs:
             echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           fi
 
-  mcp-registry:
-    name: MCP Registry Check
+  docs-freshness:
+    name: Docs Freshness Check
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -357,24 +357,19 @@ jobs:
         with:
           cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
 
-      - name: Check MCP registry is up to date
+      - name: Check llms-full.txt is up to date
         run: |
-          # Run generate-registry to regenerate files
-          pnpm nx run dynamic-form-mcp:generate-registry
+          pnpm nx run docs:generate-llms-full
 
-          # Check for uncommitted changes in registry files
-          if git diff --quiet packages/dynamic-form-mcp/src/registry/*.json; then
-            echo "✅ MCP registry files are up to date"
+          if git diff --quiet apps/docs/public/llms-full.txt; then
+            echo "✅ llms-full.txt is up to date"
           else
-            echo "❌ MCP registry files are out of date!"
+            echo "❌ llms-full.txt is out of date!"
             echo ""
-            echo "Changed files:"
-            git diff --name-only packages/dynamic-form-mcp/src/registry/*.json
-            echo ""
-            echo "Run 'pnpm nx run dynamic-form-mcp:generate-registry' and commit the changes."
+            echo "Run 'pnpm nx run docs:generate-llms-full' and commit the changes."
             echo ""
             echo "Diff:"
-            git diff packages/dynamic-form-mcp/src/registry/*.json
+            git diff --stat apps/docs/public/llms-full.txt
             exit 1
           fi
 
@@ -434,7 +429,7 @@ jobs:
   ci-success:
     name: PR Check Complete
     if: always()
-    needs: [should-run, setup, build, lint-and-test, mcp-registry, build-apps, e2e]
+    needs: [should-run, setup, build, lint-and-test, docs-freshness, build-apps, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -442,5 +437,5 @@ jobs:
         uses: re-actors/alls-green@release/v1
         with:
           # e2e may be skipped if no E2E apps are affected
-          allowed-skips: setup, build, lint-and-test, mcp-registry, build-apps, e2e
+          allowed-skips: setup, build, lint-and-test, docs-freshness, build-apps, e2e
           jobs: ${{ toJSON(needs) }}

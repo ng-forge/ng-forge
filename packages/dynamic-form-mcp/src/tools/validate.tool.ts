@@ -75,6 +75,42 @@ const FIX_SUGGESTIONS: Record<string, string> = {
 };
 
 /**
+ * Error-to-topic hints for contextual documentation references.
+ * Maps error text patterns to relevant lookup tool calls.
+ */
+const ERROR_TOPIC_HINTS: Array<{ pattern: RegExp; hint: string }> = [
+  { pattern: /options/i, hint: '`ngforge_lookup topic="options-format"` — correct options syntax' },
+  { pattern: /hidden/i, hint: '`ngforge_lookup topic="hidden"` — hidden field rules' },
+  { pattern: /container|group|row|page/i, hint: '`ngforge_lookup topic="containers"` — container field rules' },
+  { pattern: /logic|conditional/i, hint: '`ngforge_lookup topic="conditional"` — logic/conditional syntax' },
+  { pattern: /validator|required|pattern|email/i, hint: '`ngforge_lookup topic="validation"` — validation rules' },
+  { pattern: /derivation|expression/i, hint: '`ngforge_lookup topic="derivation"` — derivation syntax' },
+  { pattern: /template|simplified/i, hint: '`ngforge_lookup topic="simplified-array"` — simplified array API' },
+  { pattern: /responseMapping|validWhen/i, hint: '`ngforge_lookup topic="async-validators"` — async validator config' },
+  { pattern: /array/i, hint: '`ngforge_lookup topic="array"` — array field configuration' },
+];
+
+/**
+ * Collect unique topic hints based on validation errors.
+ */
+function collectErrorTopicHints(errors: FormattedValidationError[]): string[] {
+  const seenHints = new Set<string>();
+  const hints: string[] = [];
+
+  for (const error of errors) {
+    const textToSearch = `${error.path} ${error.message}`;
+    for (const { pattern, hint } of ERROR_TOPIC_HINTS) {
+      if (pattern.test(textToSearch) && !seenHints.has(hint)) {
+        seenHints.add(hint);
+        hints.push(hint);
+      }
+    }
+  }
+
+  return hints;
+}
+
+/**
  * Get fix suggestion for an error.
  */
 function getFixSuggestion(error: FormattedValidationError): string | undefined {
@@ -172,6 +208,8 @@ function formatFileReport(
     lines.push(`### ❌ ${totalErrors} Error(s) Found`);
     lines.push('');
 
+    const allErrors: FormattedValidationError[] = [];
+
     for (const result of results) {
       if (result.validation.valid) {
         lines.push(`#### ${result.name} (line ${result.line}): ✅ Valid`);
@@ -187,7 +225,18 @@ function formatFileReport(
               lines.push(`  - **Fix:** ${fix}`);
             }
           }
+          allErrors.push(...result.validation.errors);
         }
+      }
+      lines.push('');
+    }
+
+    // Append contextual documentation hints based on errors
+    const hints = collectErrorTopicHints(allErrors);
+    if (hints.length > 0) {
+      lines.push('### 📚 Related Documentation');
+      for (const hint of hints) {
+        lines.push(`- ${hint}`);
       }
       lines.push('');
     }
@@ -224,10 +273,19 @@ function formatJsonReport(uiIntegration: string, result: ValidationResult): stri
           lines.push(`  - **Fix:** ${fix}`);
         }
       }
-    }
 
-    lines.push('');
-    lines.push('**Tip:** Use `ngforge_lookup topic="pitfalls"` for common mistakes and solutions.');
+      // Append contextual documentation hints based on errors
+      lines.push('');
+      const hints = collectErrorTopicHints(result.errors);
+      if (hints.length > 0) {
+        lines.push('### 📚 Related Documentation');
+        for (const hint of hints) {
+          lines.push(`- ${hint}`);
+        }
+      }
+      lines.push('');
+      lines.push('**Tip:** Use `ngforge_lookup topic="pitfalls"` for common mistakes and solutions.');
+    }
   }
 
   return lines.join('\n');

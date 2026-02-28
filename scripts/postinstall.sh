@@ -14,16 +14,25 @@ else
   echo "⏭️  Skipping Playwright install (Vercel environment)"
 fi
 
-# Install git hooks
-echo "🪝 Installing git hooks..."
-lefthook install
+# Install git hooks (skip on Vercel — no git operations run there)
+if [ -z "$VERCEL" ]; then
+  echo "🪝 Installing git hooks..."
+  lefthook install
+else
+  echo "⏭️  Skipping git hooks install (Vercel environment)"
+fi
 
 # Build dynamic-form-mcp for local Claude Code usage
-echo "🔧 Building dynamic-form-mcp for local development..."
-if command -v nx &> /dev/null; then
-  nx build dynamic-form-mcp --skip-nx-cache 2>/dev/null || echo "⚠️  MCP build skipped (nx not ready yet)"
+# Skip on Vercel — build:libs handles this with proper caching
+if [ -z "$VERCEL" ]; then
+  echo "🔧 Building dynamic-form-mcp for local development..."
+  if command -v nx &> /dev/null; then
+    nx build dynamic-form-mcp --skip-nx-cache 2>/dev/null || echo "⚠️  MCP build skipped (nx not ready yet)"
+  else
+    pnpm exec nx build dynamic-form-mcp --skip-nx-cache 2>/dev/null || echo "⚠️  MCP build skipped (nx not ready yet)"
+  fi
 else
-  pnpm exec nx build dynamic-form-mcp --skip-nx-cache 2>/dev/null || echo "⚠️  MCP build skipped (nx not ready yet)"
+  echo "⏭️  Skipping MCP build (Vercel environment — build:libs will handle this)"
 fi
 
 echo "✅ Postinstall setup completed successfully!"

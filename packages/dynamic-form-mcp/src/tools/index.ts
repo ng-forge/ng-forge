@@ -3,7 +3,7 @@
  *
  * Registers all available tools with the MCP server.
  *
- * 4 tools with zero overlap, each serving a single clear purpose:
+ * 5 tools with zero overlap, each serving a single clear purpose:
  *
  * | Tool              | Purpose        | One-liner               |
  * |-------------------|----------------|-------------------------|
@@ -11,12 +11,14 @@
  * | ngforge_examples  | Working code   | "Show me how to do X"   |
  * | ngforge_validate  | Verification   | "Is my config correct?" |
  * | ngforge_scaffold  | Generation     | "Generate a skeleton"   |
+ * | ngforge_search    | Discovery      | "Find topics about X"   |
  *
  * RECOMMENDED WORKFLOW:
- * 1. ngforge_lookup topic="workflow" - See tool usage guide
- * 2. ngforge_lookup topic="golden-path" - Get form structure templates
- * 3. ngforge_lookup topic="<field-type>" - Get syntax for specific fields
- * 4. ngforge_validate - Validate your config (catches all errors)
+ * 1. ngforge_lookup topic="workflow" - START HERE: tool usage guide
+ * 2. ngforge_search query="your question" - Find relevant topics by keyword
+ * 3. ngforge_lookup topic="golden-path" - Get form structure templates
+ * 4. ngforge_lookup topic="<field-type>" - Get syntax for specific fields
+ * 5. ngforge_validate - Validate your config (catches all errors)
  *
  * For working code examples:
  * - ngforge_examples pattern="complete" - Full multi-page form
@@ -31,9 +33,10 @@ import { registerLookupTool } from './lookup.tool.js';
 import { registerExamplesTool } from './examples.tool.js';
 import { registerValidateTool } from './validate.tool.js';
 import { registerScaffoldTool } from './scaffold.tool.js';
+import { registerSearchTool } from './search.tool.js';
 
 /**
- * Register all MCP tools (4 total)
+ * Register all MCP tools (5 total)
  */
 export function registerTools(server: McpServer): void {
   // 1. Lookup - unified documentation ("Tell me about X")
@@ -47,4 +50,7 @@ export function registerTools(server: McpServer): void {
 
   // 4. Scaffold - skeleton generator ("Generate a skeleton for X")
   registerScaffoldTool(server);
+
+  // 5. Search - keyword discovery ("Find topics about X")
+  registerSearchTool(server);
 }

@@ -26,21 +26,20 @@
 
 ## Quick Reference
 
-| Command                                     | Description                                 |
-| ------------------------------------------- | ------------------------------------------- |
-| `pnpm install`                              | Install dependencies                        |
-| `nx test <project>`                         | Unit tests (Vitest)                         |
-| `nx build <project>`                        | Build library                               |
-| `nx lint <project>`                         | ESLint                                      |
-| `nx e2e <project>`                          | E2E tests locally (screenshots will differ) |
-| `nx serve <project>`                        | Serve app for dev                           |
-| `pnpm e2e:material`                         | E2E in Docker (screenshots match CI)        |
-| `pnpm e2e:material:update`                  | Update screenshots in Docker                |
-| `pnpm e2e:clean`                            | Clean Docker E2E cache                      |
-| `nx run dynamic-form-mcp:generate-registry` | Regenerate MCP metadata                     |
-| `pnpm build:libs`                           | Build all 6 library packages                |
-| `pnpm test:ci`                              | Run all tests with coverage                 |
-| `pnpm lint`                                 | Lint all projects                           |
+| Command                    | Description                                 |
+| -------------------------- | ------------------------------------------- |
+| `pnpm install`             | Install dependencies                        |
+| `nx test <project>`        | Unit tests (Vitest)                         |
+| `nx build <project>`       | Build library                               |
+| `nx lint <project>`        | ESLint                                      |
+| `nx e2e <project>`         | E2E tests locally (screenshots will differ) |
+| `nx serve <project>`       | Serve app for dev                           |
+| `pnpm e2e:material`        | E2E in Docker (screenshots match CI)        |
+| `pnpm e2e:material:update` | Update screenshots in Docker                |
+| `pnpm e2e:clean`           | Clean Docker E2E cache                      |
+| `pnpm build:libs`          | Build all 6 library packages                |
+| `pnpm test:ci`             | Run all tests with coverage                 |
+| `pnpm lint`                | Lint all projects                           |
 
 ## Architecture
 
@@ -81,9 +80,7 @@ ng-forge/
 
 The `@ng-forge/dynamic-form-mcp` package provides an MCP server for AI-assisted form schema generation. **When making changes to the dynamic-forms library that affect behavior, configuration, or APIs, you MUST also update the MCP server accordingly.**
 
-Update `packages/dynamic-form-mcp/` when adding/modifying field types, validators, field configuration options, UI adapter features, form configuration schema, or API surface/behavior.
-
-After making changes, regenerate the registry: `nx run dynamic-form-mcp:generate-registry`
+Update `packages/dynamic-form-mcp/` when adding/modifying field types, validators, field configuration options, UI adapter features, form configuration schema, or API surface/behavior. Registry data lives directly in TypeScript source files under `packages/dynamic-form-mcp/src/registry/`.
 
 ## Code Style
 

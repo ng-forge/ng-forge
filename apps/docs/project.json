@@ -6,10 +6,18 @@
   "sourceRoot": "apps/docs/src",
   "tags": [],
   "targets": {
+    "generate-llms-full": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsx apps/docs/scripts/generate-llms-full.ts",
+        "cwd": "{workspaceRoot}"
+      },
+      "outputs": ["{projectRoot}/public/llms-full.txt"]
+    },
     "build": {
       "executor": "@ng-doc/builder:application",
       "outputs": ["{options.outputPath}"],
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "generate-llms-full"],
       "options": {
         "outputPath": "dist/apps/docs",
         "browser": "apps/docs/src/main.ts",
