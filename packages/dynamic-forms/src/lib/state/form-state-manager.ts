@@ -366,40 +366,42 @@ export class FormStateManager<
   );
 
   /**
-   * The Angular Signal Form instance.
+   * Schema derived from the current form config and field setup.
+   * Separated from `form` so schema construction is memoized independently
+   * of the injection-context machinery required to call `form()`.
    */
-  readonly form = computed(() => {
-    return runInInjectionContext(this.injector, () => {
+  private readonly formSchema = computed((): Schema<TModel> | undefined =>
+    runInInjectionContext(this.injector, () => {
       const setup = this.formSetup();
       const config = this.activeConfig();
 
-      let formInstance: ReturnType<typeof form<TModel>>;
+      if (!config) return undefined;
 
-      if (!config) {
-        formInstance = untracked(() => form(this.entity));
-      } else {
-        const hasFields = setup.schemaFields && setup.schemaFields.length > 0;
-        const hasFormSchema = config.schema !== undefined;
-
-        if (hasFields) {
-          const crossFieldCollection = collectCrossFieldEntries(setup.schemaFields as FieldDef<unknown>[]);
-          const combinedSchema = createSchemaFromFields(setup.schemaFields, setup.registry, {
-            crossFieldValidators: crossFieldCollection.validators,
-            formLevelSchema: config.schema,
-          }) as Schema<TModel>;
-
-          formInstance = untracked(() => form(this.entity, combinedSchema));
-        } else if (hasFormSchema) {
-          const formSchema = createFormLevelSchema(config.schema!) as Schema<TModel>;
-          formInstance = untracked(() => form(this.entity, formSchema));
-        } else {
-          formInstance = untracked(() => form(this.entity));
-        }
+      if (setup.schemaFields?.length) {
+        const crossFieldCollection = collectCrossFieldEntries(setup.schemaFields as FieldDef<unknown>[]);
+        return createSchemaFromFields(setup.schemaFields, setup.registry, {
+          crossFieldValidators: crossFieldCollection.validators,
+          formLevelSchema: config.schema,
+        }) as Schema<TModel>;
       }
 
-      return formInstance;
-    });
-  });
+      if (config.schema) {
+        return createFormLevelSchema(config.schema) as Schema<TModel>;
+      }
+
+      return undefined;
+    }),
+  );
+
+  /**
+   * The Angular Signal Form instance.
+   */
+  readonly form = computed(() =>
+    runInInjectionContext(this.injector, () => {
+      const schema = this.formSchema();
+      return untracked(() => (schema ? form(this.entity, schema) : form(this.entity)));
+    }),
+  );
 
   /** Whether resolvedFields has caught up with fieldsSource (set in constructor). */
   private isFieldPipelineSettled: Signal<boolean>;
