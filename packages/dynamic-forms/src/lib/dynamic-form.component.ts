@@ -100,21 +100,9 @@ export class DynamicForm<
   private logger = inject(DynamicFormLogger);
   private dispatcher = inject(EventDispatcher, { optional: true });
 
-  /**
-   * Connect input signals to the shared deps holder BEFORE injecting FormStateManager.
-   * Field initializers run in declaration order, so this runs after inputs are created
-   * but before stateManager is injected. FormStateManager reads from these signals
-   * in computeds/effects, which are all lazy and evaluated after construction.
-   */
-  private readonly _connectStateDeps = (() => {
-    const deps = inject(FORM_STATE_DEPS);
-    deps.config = this.config as Signal<FormConfig<RegisteredFieldTypes[]>>;
-    deps.formOptions = this.formOptions;
-    deps.value = this.value as WritableSignal<Partial<unknown> | undefined>;
-  })();
-
-  /** State manager that owns all form state. */
-  private stateManager = inject(FormStateManager<TFields, TModel>);
+  /** State manager that owns all form state. Initialized via connectDeps() to guarantee
+   * FORM_STATE_DEPS is populated before FormStateManager is injected. */
+  private readonly stateManager = this.connectDeps();
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Private State
@@ -310,6 +298,20 @@ export class DynamicForm<
         );
       }
     });
+  }
+
+  /**
+   * Populates FORM_STATE_DEPS with this component's input signals, then injects
+   * FormStateManager. Must be called as a field initializer (after the input signals
+   * are declared) so that FormStateManager reads populated deps when it is constructed.
+   * inject() is valid here because field initializers run inside the injection context.
+   */
+  private connectDeps(): FormStateManager<TFields, TModel> {
+    const deps = inject(FORM_STATE_DEPS);
+    deps.config = this.config as Signal<FormConfig<RegisteredFieldTypes[]>>;
+    deps.formOptions = this.formOptions;
+    deps.value = this.value as WritableSignal<Partial<unknown> | undefined>;
+    return inject(FormStateManager<TFields, TModel>);
   }
 
   private setupEventHandlers(): void {
