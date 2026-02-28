@@ -367,8 +367,8 @@ export class FormStateManager<
 
   /**
    * Schema derived from the current form config and field setup.
-   * Separated from `form` so schema construction is memoized independently
-   * of the injection-context machinery required to call `form()`.
+   * Separated from `form` so schema construction is memoized independently.
+   * Requires `runInInjectionContext` because `createSchemaFromFields` calls `inject()` internally.
    */
   private readonly formSchema = computed((): Schema<TModel> | undefined =>
     runInInjectionContext(this.injector, () => {
@@ -396,12 +396,11 @@ export class FormStateManager<
   /**
    * The Angular Signal Form instance.
    */
-  readonly form = computed(() =>
-    runInInjectionContext(this.injector, () => {
-      const schema = this.formSchema();
-      return untracked(() => (schema ? form(this.entity, schema) : form(this.entity)));
-    }),
-  );
+  readonly form = computed(() => {
+    const schema = this.formSchema();
+    const injector = this.injector;
+    return untracked(() => (schema ? form(this.entity, schema, { injector }) : form(this.entity, { injector })));
+  });
 
   /** Whether resolvedFields has caught up with fieldsSource (set in constructor). */
   private isFieldPipelineSettled: Signal<boolean>;
