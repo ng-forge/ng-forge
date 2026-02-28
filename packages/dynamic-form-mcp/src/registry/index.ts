@@ -1,15 +1,9 @@
 /**
- * Registry module for loading generated JSON metadata
+ * Registry module for field type, validator, and UI adapter metadata
  *
  * This module provides access to field types, validators, and UI adapters
- * that are generated at build time from the ng-forge packages.
- *
- * JSON data is imported directly to work correctly with esbuild bundling.
+ * defined as TypeScript data in the registry source files.
  */
-
-import fieldTypesData from './field-types.json' with { type: 'json' };
-import validatorsData from './validators.json' with { type: 'json' };
-import uiAdaptersData from './ui-adapters.json' with { type: 'json' };
 
 export interface PropertyInfo {
   name: string;
@@ -63,75 +57,67 @@ export interface UIAdapterInfo {
   providerFunction: string;
 }
 
-export interface DocTopic {
-  id: string;
-  title: string;
-  category: string;
-  content: string;
-}
+import { FIELD_TYPES } from './field-types.js';
+import { VALIDATORS } from './validators.js';
+import { UI_ADAPTERS } from './ui-adapters.js';
+import { DOCUMENTATION, type DocPage } from './documentation.js';
 
-// Type the imported JSON data
-const fieldTypes = fieldTypesData as FieldTypeInfo[];
-const validators = validatorsData as ValidatorInfo[];
-const uiAdapters = uiAdaptersData as UIAdapterInfo[];
-
-// Docs are loaded dynamically since they may not exist
-let docsCache: DocTopic[] | null = null;
+export type { DocPage };
 
 /**
  * Get all available field types
  */
 export function getFieldTypes(): FieldTypeInfo[] {
-  return fieldTypes;
+  return FIELD_TYPES;
 }
 
 /**
  * Get a specific field type by name
  */
 export function getFieldType(type: string): FieldTypeInfo | undefined {
-  return fieldTypes.find((ft) => ft.type === type);
+  return FIELD_TYPES.find((ft) => ft.type === type);
 }
 
 /**
  * Get field types by category
  */
 export function getFieldTypesByCategory(category: 'value' | 'container' | 'button' | 'display'): FieldTypeInfo[] {
-  return fieldTypes.filter((ft) => ft.category === category);
+  return FIELD_TYPES.filter((ft) => ft.category === category);
 }
 
 /**
  * Get all available validators
  */
 export function getValidators(): ValidatorInfo[] {
-  return validators;
+  return VALIDATORS;
 }
 
 /**
  * Get a specific validator by type
  */
 export function getValidator(type: string): ValidatorInfo | undefined {
-  return validators.find((v) => v.type === type);
+  return VALIDATORS.find((v) => v.type === type);
 }
 
 /**
  * Get validators by category
  */
 export function getValidatorsByCategory(category: 'built-in' | 'custom' | 'async' | 'http'): ValidatorInfo[] {
-  return validators.filter((v) => v.category === category);
+  return VALIDATORS.filter((v) => v.category === category);
 }
 
 /**
  * Get all UI adapters
  */
 export function getUIAdapters(): UIAdapterInfo[] {
-  return uiAdapters;
+  return UI_ADAPTERS;
 }
 
 /**
  * Get a specific UI adapter by library name
  */
 export function getUIAdapter(library: 'material' | 'bootstrap' | 'primeng' | 'ionic'): UIAdapterInfo | undefined {
-  return uiAdapters.find((a) => a.library === library);
+  return UI_ADAPTERS.find((a) => a.library === library);
 }
 
 /**
@@ -146,38 +132,22 @@ export function getUIAdapterFieldType(
 }
 
 /**
- * Get all documentation topics
+ * Get all documentation pages
  */
-export function getDocs(): DocTopic[] {
-  if (!docsCache) {
-    try {
-      // Docs are optional and loaded dynamically
-      docsCache = require('./docs.json') as DocTopic[];
-    } catch (error) {
-      // docs.json may not exist if docs weren't generated
-      // Log unexpected errors (not file-not-found) in development
-      if (process.env.NODE_ENV !== 'production') {
-        const isModuleNotFound = error instanceof Error && 'code' in error && error.code === 'MODULE_NOT_FOUND';
-        if (!isModuleNotFound) {
-          console.warn('[ng-forge-mcp] Failed to load docs.json:', error instanceof Error ? error.message : error);
-        }
-      }
-      docsCache = [];
-    }
-  }
-  return docsCache;
+export function getDocPages(): DocPage[] {
+  return DOCUMENTATION;
 }
 
 /**
- * Get a specific documentation topic by ID
+ * Get a specific documentation page by ID
  */
-export function getDoc(id: string): DocTopic | undefined {
-  return getDocs().find((d) => d.id === id);
+export function getDocPage(id: string): DocPage | undefined {
+  return DOCUMENTATION.find((d) => d.id === id);
 }
 
 /**
- * Get documentation topics by category
+ * Get documentation pages by category
  */
-export function getDocsByCategory(category: string): DocTopic[] {
-  return getDocs().filter((d) => d.category === category);
+export function getDocPagesByCategory(category: string): DocPage[] {
+  return DOCUMENTATION.filter((d) => d.category === category);
 }
