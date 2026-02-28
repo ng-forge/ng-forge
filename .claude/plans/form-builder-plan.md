@@ -302,38 +302,32 @@ Self-hosted is the primary enterprise focus. Source code delivery = simpler for 
 ### The Constraint
 
 `provideDynamicForm()` returns `EnvironmentProviders` (via `makeEnvironmentProviders()`).
-This means it **cannot** be swapped at the component level — only at:
-- `bootstrapApplication()`
-- Route-level `providers` (lazy-loaded routes)
+These providers are resolved at **bootstrap time** and cached in the root environment injector.
+Even route-level providers won't help — components that already injected `FIELD_REGISTRY`
+keep their reference to the old registry.
 
-### Solution: Route-Based Lazy Loading + Dynamic Styles + Extensible Theming
+**The only way to swap integrations is to re-bootstrap the entire application.**
 
-One preview app. Each integration is a **lazy-loaded route** that provides its own
-`provideDynamicForm(...)` at the route level. Styles and themes load dynamically.
+### Solution: Single App, Query-Param Bootstrap
+
+One preview app. The **integration is selected at bootstrap time** via query parameter.
+Switching integrations = **full iframe reload** with a different query param.
 
 ```
 apps/
 ├── builder/                       # Main builder app (iframe embeds preview)
 └── preview/                       # Single preview shell
     └── src/
+        ├── main.ts                # Reads ?integration= and bootstraps accordingly
         ├── app/
-        │   ├── app.routes.ts      # Route per integration
-        │   └── app.config.ts      # Minimal — no provideDynamicForm here
+        │   ├── app.component.ts   # Preview shell
+        │   └── app.config.ts      # Base config (router, animations, etc.)
         ├── integrations/
-        │   ├── material/
-        │   │   ├── material.routes.ts   # provideDynamicForm(...withMaterialFields())
-        │   │   └── material.styles.ts   # Dynamic CSS loader
-        │   ├── bootstrap/
-        │   │   ├── bootstrap.routes.ts
-        │   │   └── bootstrap.styles.ts
-        │   ├── primeng/
-        │   │   ├── primeng.routes.ts
-        │   │   └── primeng.styles.ts
-        │   └── ionic/
-        │       ├── ionic.routes.ts
-        │       └── ionic.styles.ts
+        │   ├── material.providers.ts   # () => provideDynamicForm(...withMaterialFields())
+        │   ├── bootstrap.providers.ts
+        │   ├── primeng.providers.ts
+        │   └── ionic.providers.ts
         ├── shared/
-        │   ├── preview-shell.component.ts   # Shared preview container
         │   ├── style-loader.service.ts      # Dynamic CSS injection
         │   ├── theme-manager.service.ts     # Customer theming engine
         │   └── preview-bridge.service.ts    # postMessage communication
@@ -341,111 +335,139 @@ apps/
             └── preview-reset.css            # Minimal base styles only
 ```
 
-### Route-Level Providers (solves EnvironmentProviders constraint)
+### Bootstrap-Time Integration Selection
 
 ```typescript
-// preview/src/app/app.routes.ts
-export const appRoutes: Routes = [
-  {
-    path: 'material',
-    loadChildren: () => import('./integrations/material/material.routes')
-  },
-  {
-    path: 'bootstrap',
-    loadChildren: () => import('./integrations/bootstrap/bootstrap.routes')
-  },
-  {
-    path: 'primeng',
-    loadChildren: () => import('./integrations/primeng/primeng.routes')
-  },
-  {
-    path: 'ionic',
-    loadChildren: () => import('./integrations/ionic/ionic.routes')
-  },
-];
-```
+// preview/src/main.ts
+import { bootstrapApplication } from '@angular/platform-browser';
+import { AppComponent } from './app/app.component';
+import { appConfig } from './app/app.config';
 
-```typescript
-// preview/src/integrations/material/material.routes.ts
-export default [
-  {
-    path: '',
-    component: PreviewShellComponent,
+const integrationProviders = {
+  material: () => import('./integrations/material.providers').then(m => m.materialProviders()),
+  bootstrap: () => import('./integrations/bootstrap.providers').then(m => m.bootstrapProviders()),
+  primeng: () => import('./integrations/primeng.providers').then(m => m.primengProviders()),
+  ionic: () => import('./integrations/ionic.providers').then(m => m.ionicProviders()),
+} as const;
+
+type IntegrationId = keyof typeof integrationProviders;
+
+async function bootstrap() {
+  const params = new URLSearchParams(location.search);
+  const integration = (params.get('integration') as IntegrationId) || 'material';
+
+  // Dynamically import only the selected integration (code splitting)
+  const integrationProvider = await integrationProviders[integration]();
+
+  // Also load integration-specific styles
+  await loadIntegrationStyles(integration);
+
+  await bootstrapApplication(AppComponent, {
     providers: [
-      // ✅ EnvironmentProviders are valid at the route level
-      provideDynamicForm(...withMaterialFields()),
+      ...appConfig.providers,
+      integrationProvider,
     ],
-  },
-] as const satisfies Routes;
+  });
+}
+
+bootstrap();
 ```
 
-Switching integration = **navigate the iframe** to a different route (`/material` → `/bootstrap`).
-This tears down the old environment injector and creates a new one with the correct providers.
+```typescript
+// preview/src/integrations/material.providers.ts
+import { provideDynamicForm, withMaterialFields } from '@ng-forge/dynamic-forms-material';
 
-### Dynamic Style Loading
+export function materialProviders() {
+  return provideDynamicForm(...withMaterialFields());
+}
+```
 
-Each integration needs its own CSS (Material Design styles, Bootstrap CSS, PrimeNG theme, Ionic CSS).
-These are loaded/unloaded dynamically when the route activates.
+### Switching Integrations
+
+When the builder wants to switch integrations, it **reloads the iframe** with a different URL:
 
 ```typescript
-// preview/src/shared/style-loader.service.ts
+// builder/src/preview-manager.service.ts
+switchIntegration(integration: IntegrationId) {
+  const currentUrl = new URL(this.iframe.src);
+  currentUrl.searchParams.set('integration', integration);
+
+  // Full reload — triggers re-bootstrap with new providers
+  this.iframe.src = currentUrl.toString();
+}
+```
+
+**Trade-off:** Switching integrations is not instant (full page load). But:
+- This is an infrequent operation (users don't constantly switch integrations)
+- It's the only correct way given the `EnvironmentProviders` constraint
+- Each integration bundle is code-split, so initial load is fast
+
+### Alternative: Pre-loaded Hidden Iframes
+
+For instant switching at the cost of memory, keep 4 iframes:
+
+```typescript
+// builder/src/preview-manager.service.ts
 @Injectable({ providedIn: 'root' })
-export class StyleLoaderService {
-  private activeStyles = new Map<string, HTMLLinkElement>();
+export class PreviewManagerService {
+  private iframes = new Map<IntegrationId, HTMLIFrameElement>();
+  private activeIntegration = signal<IntegrationId>('material');
 
-  /**
-   * Load a CSS file dynamically. Returns a promise that resolves when loaded.
-   * Handles deduplication — same URL won't be loaded twice.
-   */
-  load(id: string, href: string): Promise<void> {
-    if (this.activeStyles.has(id)) return Promise.resolve();
-
-    return new Promise((resolve, reject) => {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = href;
-      link.id = `style-${id}`;
-      link.onload = () => resolve();
-      link.onerror = () => reject(new Error(`Failed to load style: ${href}`));
-      document.head.appendChild(link);
-      this.activeStyles.set(id, link);
-    });
-  }
-
-  /** Unload a previously loaded stylesheet */
-  unload(id: string): void {
-    const link = this.activeStyles.get(id);
-    if (link) {
-      link.remove();
-      this.activeStyles.delete(id);
+  constructor() {
+    // Pre-load all integrations
+    for (const id of ['material', 'bootstrap', 'primeng', 'ionic'] as const) {
+      const iframe = document.createElement('iframe');
+      iframe.src = `/preview/?integration=${id}`;
+      iframe.style.display = 'none';
+      this.iframes.set(id, iframe);
     }
   }
 
-  /** Unload all styles except the specified ones */
-  unloadAllExcept(...keepIds: string[]): void {
-    for (const [id] of this.activeStyles) {
-      if (!keepIds.includes(id)) this.unload(id);
-    }
+  switchIntegration(integration: IntegrationId) {
+    // Hide current, show new — instant switch
+    this.iframes.get(this.activeIntegration())!.style.display = 'none';
+    this.iframes.get(integration)!.style.display = 'block';
+    this.activeIntegration.set(integration);
   }
 }
 ```
 
+**Recommendation:** Start with the reload approach (simpler). Add pre-loading as an optimization later if users complain about switch latency.
+
+### Dynamic Style Loading
+
+Same as before — load integration-specific CSS at bootstrap time:
+
 ```typescript
-// preview/src/integrations/material/material.styles.ts
-// Called from a route guard or component init
-export function loadMaterialStyles(styleLoader: StyleLoaderService) {
-  styleLoader.unloadAllExcept('base');
-  return Promise.all([
-    styleLoader.load('material-theme', '/assets/styles/material-theme.css'),
-    // Angular Material prebuilt theme or custom-built theme
-  ]);
+// preview/src/main.ts
+async function loadIntegrationStyles(integration: IntegrationId) {
+  const styleUrls: Record<IntegrationId, string[]> = {
+    material: ['/assets/styles/material-indigo-pink.css'],
+    bootstrap: ['https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css'],
+    primeng: ['/assets/styles/primeng-lara-light.css'],
+    ionic: ['/assets/styles/ionic.bundle.css'],
+  };
+
+  await Promise.all(
+    styleUrls[integration].map(url => loadStylesheet(url))
+  );
+}
+
+function loadStylesheet(href: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.onload = () => resolve();
+    link.onerror = () => reject(new Error(`Failed to load: ${href}`));
+    document.head.appendChild(link);
+  });
 }
 ```
 
 ### Customer Theming (Extensible)
 
-Customer theming uses **CSS custom properties** as the extension point. This works across
-ALL integrations because every modern UI framework supports CSS variable overrides.
+Same approach — CSS custom properties work regardless of when they're applied:
 
 ```typescript
 // preview/src/shared/theme-manager.service.ts
@@ -453,10 +475,6 @@ ALL integrations because every modern UI framework supports CSS variable overrid
 export class ThemeManagerService {
   private themeStyleEl: HTMLStyleElement | null = null;
 
-  /**
-   * Apply a customer theme. Accepts a map of CSS custom property overrides.
-   * Works with any integration since CSS vars cascade through all children.
-   */
   applyTheme(theme: CustomerTheme): void {
     this.removeTheme();
 
@@ -468,7 +486,6 @@ export class ThemeManagerService {
     style.id = 'customer-theme';
     style.textContent = `:root {\n  ${vars}\n}`;
 
-    // Optional: additional raw CSS for advanced customization
     if (theme.customCss) {
       style.textContent += `\n${theme.customCss}`;
     }
@@ -484,35 +501,10 @@ export class ThemeManagerService {
 }
 
 interface CustomerTheme {
-  /** CSS custom property overrides: { '--primary-color': '#1976d2' } */
   variables: Record<string, string>;
-  /** Optional raw CSS for advanced customization (enterprise only) */
   customCss?: string;
 }
 ```
-
-**How the builder sends theme to preview:**
-
-```typescript
-// Builder → Preview postMessage
-preview.postMessage({
-  type: 'APPLY_THEME',
-  theme: {
-    variables: {
-      '--primary-color': '#1976d2',
-      '--border-radius': '8px',
-      '--font-family': '"Inter", sans-serif',
-    },
-    customCss: '.mat-mdc-card { box-shadow: none; }',  // enterprise only
-  }
-});
-```
-
-**Enterprise self-hosted customers** can:
-1. Override CSS variables for branding (colors, fonts, spacing)
-2. Inject raw CSS for deeper customization
-3. Provide a full theme CSS file URL that gets loaded via `StyleLoaderService`
-4. Register custom theme presets that appear in the builder UI
 
 ### Builder ↔ Preview Communication (postMessage Bridge)
 
@@ -520,37 +512,130 @@ preview.postMessage({
 // preview/src/shared/preview-bridge.service.ts
 type BuilderMessage =
   | { type: 'CONFIG_UPDATE'; config: FormSchema }
-  | { type: 'SWITCH_INTEGRATION'; integration: IntegrationId }
   | { type: 'APPLY_THEME'; theme: CustomerTheme }
   | { type: 'SELECT_FIELD'; fieldKey: string }
   | { type: 'RESPONSIVE_MODE'; width: number; height: number };
 
+// Note: SWITCH_INTEGRATION is NOT a postMessage — it's a full iframe reload
+
 type PreviewMessage =
   | { type: 'FIELD_CLICKED'; fieldKey: string }
   | { type: 'FORM_VALUE_CHANGE'; value: Record<string, unknown> }
-  | { type: 'PREVIEW_READY' }
+  | { type: 'PREVIEW_READY'; integration: IntegrationId }
   | { type: 'VALIDATION_ERRORS'; errors: Record<string, string[]> };
 ```
-
-When `SWITCH_INTEGRATION` is received, the preview **navigates** to the new route
-(e.g., `/material` → `/bootstrap`). This:
-1. Destroys the old route's environment injector (old `provideDynamicForm`)
-2. Creates a new environment injector (new `provideDynamicForm`)
-3. Unloads old integration styles, loads new ones
-4. Re-applies customer theme (CSS vars work across all integrations)
-5. Sends `PREVIEW_READY` back to builder
 
 ### Why This Works
 
 | Concern | Solution |
 |---------|----------|
-| `EnvironmentProviders` can't be component-level | Route-level providers via `loadChildren` |
-| Integration styles conflict | Dynamic load/unload via `StyleLoaderService` |
-| Customer branding | CSS custom properties (universal across integrations) |
-| Deep enterprise customization | Raw CSS injection + custom theme file URLs |
-| Code splitting | Each integration is a lazy-loaded route chunk |
-| Integration switching | Navigate iframe to different route, full teardown/rebuild |
-| Single deploy | One app, one Docker image, one URL |
+| `EnvironmentProviders` need root bootstrap | Query param selects integration at bootstrap time |
+| Integration switching | Full iframe reload (or pre-loaded hidden iframes) |
+| Code splitting | Dynamic import per integration in `main.ts` |
+| Integration styles | Loaded at bootstrap time before app renders |
+| Customer branding | CSS custom properties (applied any time) |
+| Single codebase | One app, one build, query param determines behavior |
+
+---
+
+## Alternative: Iframe-less Preview with `createApplication()`
+
+Angular's [`createApplication()`](https://angular.dev/api/platform-browser/createApplication) creates an
+Angular application **without bootstrapping any components**. This enables embedding multiple isolated
+Angular apps in the same page, each with its own environment injector.
+
+### How It Works
+
+```typescript
+// builder/src/preview-manager.service.ts
+import { createApplication, ApplicationRef } from '@angular/platform-browser';
+import { provideZonelessChangeDetection } from '@angular/core';
+
+@Injectable({ providedIn: 'root' })
+export class PreviewManagerService {
+  private activeApp: ApplicationRef | null = null;
+  private previewContainer: HTMLElement;
+
+  async switchIntegration(integration: IntegrationId) {
+    // Destroy previous app if exists
+    this.activeApp?.destroy();
+
+    // Dynamically import integration providers
+    const integrationProvider = await this.loadIntegrationProvider(integration);
+
+    // Create new Angular app with its own injector
+    this.activeApp = await createApplication({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        integrationProvider,  // provideDynamicForm(...) for this integration
+      ],
+    });
+
+    // Bootstrap preview component into the container
+    const previewComponent = await import('./preview.component').then(m => m.PreviewComponent);
+    this.activeApp.bootstrap(previewComponent, this.previewContainer);
+  }
+
+  private async loadIntegrationProvider(integration: IntegrationId) {
+    const loaders = {
+      material: () => import('@ng-forge/dynamic-forms-material').then(m =>
+        provideDynamicForm(...m.withMaterialFields())),
+      bootstrap: () => import('@ng-forge/dynamic-forms-bootstrap').then(m =>
+        provideDynamicForm(...m.withBootstrapFields())),
+      // ...
+    };
+    return loaders[integration]();
+  }
+}
+```
+
+### Pros vs Iframe Approach
+
+| Aspect | `createApplication()` | Iframe + Query Param |
+|--------|----------------------|----------------------|
+| **Integration switching** | Instant (destroy + create) | Page reload (~500ms) |
+| **Style isolation** | Needs Shadow DOM or scoping | Natural (iframe) |
+| **Bundle size** | Single bundle, code-split | Same |
+| **Complexity** | Higher (manage lifecycle) | Lower (just reload) |
+| **DevTools** | Single context | Separate context per iframe |
+| **postMessage** | Not needed (same window) | Required |
+
+### When to Use Which
+
+- **Use iframe + reload** (recommended starting point):
+  - Simpler implementation
+  - Perfect style isolation
+  - Familiar mental model (iframe = isolated browser context)
+
+- **Use `createApplication()`** when:
+  - Instant integration switching is critical UX
+  - You need deep integration between builder and preview (shared services, direct method calls)
+  - You're building a single-page experience without iframes
+
+### Style Isolation with `createApplication()`
+
+Since both apps share the same DOM, you need explicit style isolation:
+
+```typescript
+// Option 1: Shadow DOM
+@Component({
+  selector: 'preview-root',
+  encapsulation: ViewEncapsulation.ShadowDom,  // Isolates styles
+  template: `<ng-forge-form [config]="config()" />`
+})
+export class PreviewComponent {}
+
+// Option 2: CSS scoping via container
+// Load integration styles scoped to .preview-container
+.preview-container.material { /* material styles */ }
+.preview-container.bootstrap { /* bootstrap styles */ }
+```
+
+### Recommendation
+
+**Start with the iframe approach** — it's simpler and handles style isolation naturally.
+Consider `createApplication()` as a future optimization if users need instant switching.
 
 ---
 
