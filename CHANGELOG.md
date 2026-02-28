@@ -4,6 +4,42 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.6.1](https://github.com/ng-forge/ng-forge/compare/v0.6.0...v0.6.1) (2026-02-28)
+
+### 🚀 Features
+
+- **dynamic-forms:** add EventDispatcher injectable for external event dispatch ([#267](https://github.com/ng-forge/ng-forge/pull/267))
+
+### 🐛 Bug Fixes
+
+- **bootstrap:** add readonly DOM sync and floating label hint to textarea ([#270](https://github.com/ng-forge/ng-forge/pull/270))
+- **config:** skip playwright browser install on vercel ([3c2dff785](https://github.com/ng-forge/ng-forge/commit/3c2dff785))
+- **config:** optimize vercel build to prevent oom and reduce cold build time ([#289](https://github.com/ng-forge/ng-forge/pull/289))
+- **dynamic-forms:** expression parser correctness and HTTP injection fixes ([#268](https://github.com/ng-forge/ng-forge/pull/268))
+- **dynamic-forms:** fix page navigation validation and hidden page handling ([#271](https://github.com/ng-forge/ng-forge/pull/271))
+- **dynamic-forms:** align HTTP condition boolean semantics with validWhen strict check ([#274](https://github.com/ng-forge/ng-forge/pull/274))
+- **dynamic-forms:** isolate event bus subscriber exceptions from pipeline ([#272](https://github.com/ng-forge/ng-forge/pull/272))
+- **dynamic-forms:** fix submission safety — pending guard, config hot-swap, double-submit ([#278](https://github.com/ng-forge/ng-forge/pull/278))
+- **dynamic-forms:** fix HTTP lifecycle safety bugs ([#281](https://github.com/ng-forge/ng-forge/pull/281))
+- **dynamic-forms:** fix initialization timing, hang, and nested count ([#280](https://github.com/ng-forge/ng-forge/pull/280))
+- **dynamic-forms:** validate config at bootstrap for common misconfigurations ([#283](https://github.com/ng-forge/ng-forge/pull/283))
+- **dynamic-forms:** fix array field event API, maxLength, bounds, cleanup ([#282](https://github.com/ng-forge/ng-forge/pull/282))
+- **ionic,primeng:** improve a11y and correctness across adapters ([#279](https://github.com/ng-forge/ng-forge/pull/279))
+- **mcp:** correct operator names, document HTTP conditions and async custom functions ([#269](https://github.com/ng-forge/ng-forge/pull/269))
+
+### ♻️ Code Refactoring
+
+- **dynamic-forms:** replace \_connectStateDeps IIFE with connectDeps() method ([#291](https://github.com/ng-forge/ng-forge/pull/291))
+- **mcp:** remove offline docs generation and CI registry checks ([#290](https://github.com/ng-forge/ng-forge/pull/290))
+
+### 📦 Build System
+
+- **deps:** update angular framework packages to 21.2.0 ([#288](https://github.com/ng-forge/ng-forge/pull/288))
+
+### ✅ Tests
+
+- **dynamic-forms:** add type tests for public exported types ([#285](https://github.com/ng-forge/ng-forge/pull/285))
+
 ## [0.6.0](https://github.com/ng-forge/ng-forge/compare/v0.5.2...v0.6.0) (2026-02-19)
 
 ### 🚀 Features
@@ -80,150 +116,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - **dynamic-forms:** implement direct root form binding with UUID keys for array items ([#219](https://github.com/ng-forge/ng-forge/pull/219), [#218](https://github.com/ng-forge/ng-forge/issues/218))
   ArrayField.fields is now `FieldDef[][]` instead of `FieldDef[]`
-  The outer array defines initial items (each element = one array item).
-  The inner arrays define the field structure for each item.
-  Values are now embedded in field definitions via the `value` property.
-  Before:
-
-  ```typescript
-  {
-    key: 'contacts',
-    type: 'array',
-    fields: [{ key: 'name', type: 'input' }]
-  }
-  // + initialValue: { contacts: [{name: 'Alice'}] }
-  ```
-
-  After:
-
-  ```typescript
-  {
-    key: 'contacts',
-    type: 'array',
-    fields: [
-      [{ key: 'name', type: 'input', value: 'Alice' }]
-    ]
-  }
-  // No separate initialValue needed
-  ```
-
-  - Update ArrayField type with ArrayItemTemplate type alias
-  - Update isArrayField type guard to validate nested structure
-  - Update ArrayFieldComponent to resolve items from fields[][]
-  - Update form schema mapping to handle heterogeneous items
-  - Update default value computation for new structure
-  - Update field flattener and form mode validator
-  - Update all example scenarios across all UI libraries
-  - Update unit tests for new structure
-  * refactor(dynamic-forms): improve row layout and array example styling
-  - Add df-col-auto class for natural content width in rows
-  - Add df-row-mobile-keep-cols class to maintain horizontal layout on mobile
-  - Use baseline alignment for better button/input vertical alignment
-  - Set consistent 156px min-width for form buttons
-  - Add gap between array items for visual separation
-  - Update array example with side-by-side Add First/Add Contact buttons
-  - Add ARRAY_TEMPLATE_REGISTRY token for tracking item templates
-  * fix(dynamic-forms): update type tests for ArrayItemTemplate[] structure
-    Update type tests in array-field.type-test.ts to use ArrayItemTemplate[]
-    instead of ArrayAllowedChildren[] to match the new nested array structure
-    (FieldDef[][]) introduced in the array field refactoring.
-  * chore(mcp): regenerate registry with updated array docs
-  * revert(dynamic-forms): restore original row and grid styling
-    Revert library styling changes made in e5bb3f250 that should have been
-    in docs-specific styles, not core library files.
-  - Restore row-field.component.scss to use flex-start alignment and
-    natural content sizing (flex: 0 0 auto) for items without col classes
-  - Restore 576px mobile breakpoint instead of 768px
-  - Remove df-col-auto from array example (not needed with original styling)
-  * refactor(examples): move row styling overrides to example-specific styles
-    Add row layout overrides to \_examples.scss instead of modifying library:
-  - Baseline alignment for better button/input vertical alignment
-  - Equal space distribution for children (flex: 1 1 0)
-  - df-col-auto class for natural content width
-  - 768px responsive breakpoint for example container width
-  - df-row-mobile-keep-cols opt-in for horizontal mobile layout
-    Restore df-col-auto classes on array example buttons.
-  * fix(examples): correct row field selector to [row-field]
-  * fix(dynamic-forms): address array field review concerns
-  - Add fallback for crypto.randomUUID() for older browsers/non-HTTPS contexts
-  - Fix formValue snapshot issue by using getter for reactive access
-  * refactor(dynamic-forms): simplify array item ID generation to counter
-  * refactor(dynamic-forms): remove dead key-suffix code
-  * perf(dynamic-forms): optimize array remove operations to avoid recreates
-    Update resolvedItems BEFORE form value for all remove operations (pop,
-    shift, removeAt). This ensures differential update sees "none" (lengths
-    already match) and avoids unnecessary component recreates. Remaining
-    items' linkedSignal indices auto-update via itemOrderSignal.
-    Also removes unused 'pop' type variant from DifferentialUpdateOperation
-    since all removes now use the same optimized path.
-  * chore(dynamic-forms): remove unused ArrayTemplateRegistry type import
-  * refactor(dynamic-forms): remove unused fieldTree and explicitDefaultValue parameters
-    These parameters were passed through the array item resolution chain but
-    never actually used:
-  - createArrayItemInjectorAndInputs now gets form from RootFormRegistryService
-  - explicitDefaultValue was never read by any function
-    Removed from:
-  - CreateArrayItemInjectorOptions interface
-  - ResolveArrayItemOptions interface
-  - All callers in array-field.component.ts
-  * perf(dynamic-forms): optimize array item index lookup from O(n) to O(1)
-    Replace itemOrderSignal (string[]) with itemPositionMap (Map<string, number>)
-    for position lookup. Each array item's linkedSignal was doing indexOf() which
-    is O(n) per item, resulting in O(n²) total on every array mutation.
-    Now uses Map.get() for O(1) per item, O(n) total.
-    Also:
-  - Replace redundant linkedSignal wrapper with computed for resolvedItems
-  - Remove unused linkedSignal import from array-field.component
-  * fix(dynamic-forms): scope array item ID generator to component for SSR compatibility
-    Replace module-level counter with DI-based ID generator per array instance.
-    Each ArrayFieldComponent now provides its own ARRAY_ITEM_ID_GENERATOR via
-    createArrayItemIdGenerator factory, ensuring:
-  - SSR hydration compatibility (server and client generate same IDs)
-  - No global state pollution between form instances
-  - Deterministic IDs within each array's lifecycle
-  * feat(dynamic-forms): support primitive arrays alongside object arrays
-    Add ArrayItemDefinition type to support both primitive and object array items:
-  - Single FieldDef (not wrapped) creates primitive item (extracts value directly)
-  - Array of FieldDefs creates object item (merges fields into object)
-    This enables three array patterns:
-  - Primitive arrays: ['tag1', 'tag2']
-  - Object arrays: [{ name: 'Alice', email: '...' }]
-  - Heterogeneous arrays: [{ value: 'x' }, 'y']
-    Updated components:
-  - ArrayField interface and isArrayField type guard
-  - Default value computation for primitive items
-  - Form schema mapping for primitive/mixed arrays
-  - Array component to normalize and handle both formats
-  - Event types to accept single field or array templates
-  - Button types for all UI libraries
-  * docs(dynamic-forms): update array documentation for primitive array support
-  - Fix programmatic approach section to use correct API syntax
-  - Update "Complete Example: Flat Array" to use primitive array syntax
-  - Add form value comments to show expected output
-  - Document both primitive and object template formats
-  * docs(dynamic-forms): update events documentation for required array templates
-  - Update array events section to show required template parameter
-  - Add examples for both primitive and object item templates
-  - Regenerate MCP registry with updated documentation
-  * fix(dynamic-forms): use core package field types in array type tests
-    Change type tests to use 'hidden' instead of 'input' since 'input' is
-    only available in UI library packages, not in the core dynamic-forms
-    package. The 'hidden' type is a value field in the core registry.
-  * fix(dynamic-forms): correct array derivation traversal for primitive/object items
-  - Fix derivation collector to properly handle (FieldDef | FieldDef[])[] format
-  - Add scoped styling for array docs example via formClassName property
-  - Add formClassName to ExampleScenario interface for custom form classes
-
-### ❤️ Thank You
-
-- Antim Prisacaru @antimprisacaru
-- Artur @arturovt
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/).
 
 ## [0.5.1](https://github.com/ng-forge/ng-forge/compare/v0.5.0...v0.5.1) (2026-02-01)
 
@@ -255,42 +147,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### ⚠️ Breaking Changes
 
 - **dynamic-forms:** remove targetField from derivation API ([#202](https://github.com/ng-forge/ng-forge/pull/202))
-  The targetField property has been removed from DerivationLogicConfig.
-  All derivations now target the field they are defined on (self-targeting).
-
-  Migration:
-  - Move derivation logic from source fields to target fields
-  - Remove targetField property from logic configs
-  - Use shorthand 'derivation' property when possible
-
-  Before:
-
-  ```typescript
-  {
-    key: 'quantity',
-    logic: [{
-      type: 'derivation',
-      targetField: 'total',
-      expression: 'formValue.quantity * formValue.unitPrice'
-    }]
-  }
-  ```
-
-  After:
-
-  ```typescript
-  {
-    key: 'total',
-    derivation: 'formValue.quantity * formValue.unitPrice'
-  }
-  ```
-
 - **mcp:** add dynamic-form-mcp package ([#126](https://github.com/ng-forge/ng-forge/pull/126))
-  New MCP server for AI-assisted form schema generation with 4 focused tools:
-  - `ngforge_lookup`: unified documentation
-  - `ngforge_examples`: working code patterns
-  - `ngforge_validate`: config verification
-  - `ngforge_scaffold`: skeleton generator
 
 ## [0.5.0](https://github.com/ng-forge/ng-forge/compare/v0.4.0...v0.5.0) (2026-01-25)
 

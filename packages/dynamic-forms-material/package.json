@@ -1,6 +1,6 @@
 {
   "name": "@ng-forge/dynamic-forms-material",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Angular Material integration for @ng-forge/dynamic-forms. Pre-built Material Design form components.",
   "type": "module",
   "license": "MIT",
