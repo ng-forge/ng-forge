@@ -6,9 +6,8 @@ import { LogicConfig } from '../../models/logic';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { FormStateManager } from '../../state/form-state-manager';
 import { applyLogic, applyMultipleLogic } from './logic-applicator';
-import { LogicFunctionCacheService } from '../expressions/logic-function-cache.service';
-import { HttpConditionFunctionCacheService } from '../expressions/http-condition-function-cache.service';
-import { DynamicValueFunctionCacheService } from '../values/dynamic-value-function-cache.service';
+import { ExpressionCacheContext } from '../../providers/expression-cache-context';
+import { FormDerivedState } from '../../providers/form-derived-state';
 
 describe('logic-applicator', () => {
   let injector: Injector;
@@ -22,9 +21,8 @@ describe('logic-applicator', () => {
         { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         FunctionRegistryService,
         FieldContextRegistryService,
-        LogicFunctionCacheService,
-        HttpConditionFunctionCacheService,
-        DynamicValueFunctionCacheService,
+        { provide: ExpressionCacheContext, useValue: new ExpressionCacheContext() },
+        { provide: FormDerivedState, useValue: { externalData: signal(undefined) } },
       ],
     });
 

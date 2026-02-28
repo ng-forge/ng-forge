@@ -10,7 +10,7 @@ import { FunctionRegistryService } from '../registry/function-registry.service';
 import { evaluateCondition } from './condition-evaluator';
 import { createHttpConditionLogicFunction } from './http-condition-logic-function';
 import { createAsyncConditionLogicFunction } from './async-condition-logic-function';
-import { LogicFunctionCacheService } from './logic-function-cache.service';
+import { ExpressionCacheContext } from '../../providers/expression-cache-context';
 import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
 
 /**
@@ -67,13 +67,13 @@ export function createLogicFunction<TValue>(expression: ConditionalExpression): 
   // Inject services during factory creation, not during execution
   const functionRegistry = inject(FunctionRegistryService);
   const fieldContextRegistry = inject(FieldContextRegistryService);
-  const cacheService = inject(LogicFunctionCacheService);
+  const cacheCtx = inject(ExpressionCacheContext);
 
   // Generate cache key from serialized expression
   const cacheKey = stableStringify(expression);
 
   // Check cache first
-  const cached = cacheService.logicFunctionCache.get(cacheKey);
+  const cached = cacheCtx.logicFunctionCache.get(cacheKey);
   if (cached) {
     return cached as LogicFn<TValue, boolean>;
   }
@@ -87,7 +87,7 @@ export function createLogicFunction<TValue>(expression: ConditionalExpression): 
   };
 
   // Cache the function
-  cacheService.logicFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
+  cacheCtx.logicFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
   return fn;
 }
 
@@ -122,20 +122,20 @@ export function createDebouncedLogicFunction<TValue>(expression: ConditionalExpr
   const functionRegistry = inject(FunctionRegistryService);
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const injector = inject(Injector);
-  const cacheService = inject(LogicFunctionCacheService);
+  const cacheCtx = inject(ExpressionCacheContext);
 
   // Generate cache key including debounceMs
   const cacheKey = `${stableStringify(expression)}:${debounceMs}`;
 
   // Check cache first
-  const cached = cacheService.debouncedLogicFunctionCache.get(cacheKey);
+  const cached = cacheCtx.debouncedLogicFunctionCache.get(cacheKey);
   if (cached) {
     return cached as LogicFn<TValue, boolean>;
   }
 
   const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
     const contextKey = safeReadPathKeys(ctx as FieldContext<unknown>).join('.');
-    let signalPair = cacheService.debouncedSignalStore.get(contextKey);
+    let signalPair = cacheCtx.debouncedSignalStore.get(contextKey);
 
     if (!signalPair) {
       // Create a signal to hold the immediate evaluation result
@@ -155,7 +155,7 @@ export function createDebouncedLogicFunction<TValue>(expression: ConditionalExpr
       });
 
       signalPair = { immediateValue, debouncedValue };
-      cacheService.debouncedSignalStore.set(contextKey, signalPair);
+      cacheCtx.debouncedSignalStore.set(contextKey, signalPair);
     }
 
     // Create REACTIVE evaluation context for logic functions
@@ -178,6 +178,6 @@ export function createDebouncedLogicFunction<TValue>(expression: ConditionalExpr
   };
 
   // Cache the function
-  cacheService.debouncedLogicFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
+  cacheCtx.debouncedLogicFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
   return fn;
 }

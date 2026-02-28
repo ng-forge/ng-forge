@@ -20,7 +20,7 @@ import {
   timer,
 } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
-import { FORM_OPTIONS } from '../../models/field-signal-context.token';
+import { FormDerivedState } from '../../providers/form-derived-state';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { getChangedKeys } from '../../utils/object-utils';
@@ -76,7 +76,7 @@ export class DerivationOrchestrator {
   private readonly logger = inject(DynamicFormLogger);
   private readonly warningTracker = inject(DERIVATION_WARNING_TRACKER);
   private readonly functionRegistry = inject(FunctionRegistryService);
-  private readonly formOptions = inject(FORM_OPTIONS);
+  private readonly formOptions = inject(FormDerivedState).formOptions;
   private readonly httpClient = inject(HttpClient, { optional: true });
 
   /** Active HTTP derivation stream subscriptions */

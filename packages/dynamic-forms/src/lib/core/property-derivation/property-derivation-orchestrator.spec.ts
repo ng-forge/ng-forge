@@ -11,6 +11,7 @@ import { FunctionRegistryService } from '../registry/function-registry.service';
 import { createDerivationWarningTracker, DERIVATION_WARNING_TRACKER } from '../derivation/derivation-warning-tracker';
 import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { createPropertyOverrideStore, PropertyOverrideStore } from './property-override-store';
+import { FormDerivedState } from '../../providers/form-derived-state';
 import { PropertyDerivationOrchestrator, PropertyDerivationOrchestratorConfig } from './property-derivation-orchestrator';
 
 /**
@@ -102,6 +103,7 @@ describe('PropertyDerivationOrchestrator', () => {
           useFactory: createDeprecationWarningTracker,
         },
         { provide: FORM_OPTIONS, useValue: signal(undefined) },
+        { provide: FormDerivedState, useValue: { externalData: signal(undefined), formOptions: signal(undefined) } },
       ],
     });
 

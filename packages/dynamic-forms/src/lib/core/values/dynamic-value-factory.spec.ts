@@ -7,7 +7,8 @@ import { RootFormRegistryService, FieldContextRegistryService } from '../registr
 import { FormStateManager } from '../../state/form-state-manager';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { ConsoleLogger } from '../../providers/features/logger/console-logger';
-import { DynamicValueFunctionCacheService } from './dynamic-value-function-cache.service';
+import { ExpressionCacheContext } from '../../providers/expression-cache-context';
+import { FormDerivedState } from '../../providers/form-derived-state';
 
 describe('dynamic-value-factory', () => {
   let injector: Injector;
@@ -22,7 +23,8 @@ describe('dynamic-value-factory', () => {
         FieldContextRegistryService,
         // Provide ConsoleLogger to enable logging in tests
         { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
-        DynamicValueFunctionCacheService,
+        { provide: ExpressionCacheContext, useValue: new ExpressionCacheContext() },
+        { provide: FormDerivedState, useValue: { externalData: signal(undefined) } },
       ],
     });
 

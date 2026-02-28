@@ -8,13 +8,12 @@ import { stableStringify } from '../../utils/stable-stringify';
 import { HttpResourceRequest } from '../validation/validator-types';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { FunctionRegistryService } from '../registry/function-registry.service';
-import { HTTP_CONDITION_CACHE } from '../http/http-condition-cache';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { resolveHttpRequest } from '../http/http-request-resolver';
 import { ExpressionParser } from './parser/expression-parser';
-import { HttpConditionFunctionCacheService } from './http-condition-function-cache.service';
+import { ExpressionCacheContext } from '../../providers/expression-cache-context';
 import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
 
 /**
@@ -61,9 +60,8 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
   const injector = inject(Injector);
-  const cache = inject(HTTP_CONDITION_CACHE);
+  const cacheCtx = inject(ExpressionCacheContext);
   const logger = inject(DynamicFormLogger) as Logger;
-  const cacheService = inject(HttpConditionFunctionCacheService);
 
   const pendingValue = condition.pendingValue ?? false;
   const cacheDurationMs = condition.cacheDurationMs ?? 30000;
@@ -72,7 +70,7 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
   // Check function cache
   const cacheKey = stableStringify(condition);
 
-  const cached = cacheService.httpConditionFunctionCache.get(cacheKey);
+  const cached = cacheCtx.httpConditionFunctionCache.get(cacheKey);
   if (cached) {
     return cached as LogicFn<TValue, boolean>;
   }
@@ -110,7 +108,7 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
               map((response) => extractBoolean(response, condition.responseExpression, pendingValue, logger)),
               tap((value) => {
                 const requestKey = stableStringify(request);
-                cache.set(requestKey, value, cacheDurationMs);
+                cacheCtx.httpConditionCache.set(requestKey, value, cacheDurationMs);
               }),
               catchError((error) => {
                 logger.warn('HTTP condition request failed:', error);
@@ -139,7 +137,7 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
     const requestKey = stableStringify(resolved);
 
     // Check response cache first
-    const cachedResult = cache.get(requestKey);
+    const cachedResult = cacheCtx.httpConditionCache.get(requestKey);
     if (cachedResult !== undefined) {
       return cachedResult;
     }
@@ -156,6 +154,6 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
     return resultValue();
   };
 
-  cacheService.httpConditionFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
+  cacheCtx.httpConditionFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
   return fn;
 }
