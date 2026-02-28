@@ -11,6 +11,19 @@ export function toLabel(name: string): string {
 }
 
 /**
+ * Convert an enum value to a human-readable label.
+ * Handles SCREAMING_SNAKE_CASE, snake_case, kebab-case, and camelCase.
+ * Examples: "in_progress" → "In Progress", "PENDING_REVIEW" → "Pending Review", "myVariant" → "My Variant"
+ */
+export function toEnumLabel(value: string): string {
+  // Handle SCREAMING_SNAKE_CASE: lowercase before processing
+  if (/^[A-Z][A-Z0-9_-]*$/.test(value)) {
+    value = value.toLowerCase();
+  }
+  return toLabel(value);
+}
+
+/**
  * Convert a string to PascalCase.
  * Examples: "create pet" → "CreatePet", "POST:/pets" → "PostPets"
  */

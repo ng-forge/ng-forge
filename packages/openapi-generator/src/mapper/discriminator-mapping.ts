@@ -1,5 +1,6 @@
 import type { WalkedSchema } from '../parser/schema-walker.js';
 import type { FieldConfig } from './schema-to-fields.js';
+import { toLabel, toEnumLabel } from '../utils/naming.js';
 
 export interface DiscriminatorFieldConfig {
   discriminatorField: {
@@ -7,7 +8,7 @@ export interface DiscriminatorFieldConfig {
     type: 'radio';
     label: string;
     options: Array<{ label: string; value: string }>;
-    validation: Array<{ type: string }>;
+    validators: Array<{ type: string }>;
   };
   conditionalGroups: Array<{
     discriminatorValue: string;
@@ -17,7 +18,7 @@ export interface DiscriminatorFieldConfig {
 
 export function mapDiscriminator(discriminator: NonNullable<WalkedSchema['discriminator']>): DiscriminatorFieldConfig {
   const options = Object.keys(discriminator.mapping).map((value) => ({
-    label: value.charAt(0).toUpperCase() + value.slice(1),
+    label: toEnumLabel(value),
     value,
   }));
 
@@ -25,9 +26,9 @@ export function mapDiscriminator(discriminator: NonNullable<WalkedSchema['discri
     discriminatorField: {
       key: discriminator.propertyName,
       type: 'radio',
-      label: discriminator.propertyName.charAt(0).toUpperCase() + discriminator.propertyName.slice(1),
+      label: toLabel(discriminator.propertyName),
       options,
-      validation: [{ type: 'required' }],
+      validators: [{ type: 'required' }],
     },
     conditionalGroups: Object.entries(discriminator.mapping).map(([value]) => ({
       discriminatorValue: value,

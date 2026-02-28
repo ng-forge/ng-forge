@@ -72,7 +72,7 @@ describe('mapDiscriminator', () => {
 
       const result = mapDiscriminator(discriminator);
 
-      expect(result.discriminatorField.label).toBe('PetType');
+      expect(result.discriminatorField.label).toBe('Pet Type');
     });
 
     it('should capitalize a single-character propertyName label', () => {
@@ -98,7 +98,7 @@ describe('mapDiscriminator', () => {
 
       const result = mapDiscriminator(discriminator);
 
-      expect(result.discriminatorField.validation).toEqual([{ type: 'required' }]);
+      expect(result.discriminatorField.validators).toEqual([{ type: 'required' }]);
     });
   });
 
@@ -120,20 +120,20 @@ describe('mapDiscriminator', () => {
       ]);
     });
 
-    it('should capitalize option labels', () => {
+    it('should humanize option labels using toEnumLabel', () => {
       const discriminator: NonNullable<WalkedSchema['discriminator']> = {
         propertyName: 'status',
         mapping: {
           active: { type: 'object' },
-          inactive: { type: 'object' },
-          pending: { type: 'object' },
+          in_progress: { type: 'object' },
+          PENDING_REVIEW: { type: 'object' },
         },
       };
 
       const result = mapDiscriminator(discriminator);
 
       const labels = result.discriminatorField.options.map((o) => o.label);
-      expect(labels).toEqual(['Active', 'Inactive', 'Pending']);
+      expect(labels).toEqual(['Active', 'In Progress', 'Pending Review']);
     });
 
     it('should preserve the original value in options without modification', () => {
@@ -147,6 +147,7 @@ describe('mapDiscriminator', () => {
       const result = mapDiscriminator(discriminator);
 
       expect(result.discriminatorField.options[0].value).toBe('myVariant');
+      expect(result.discriminatorField.options[0].label).toBe('My Variant');
     });
   });
 

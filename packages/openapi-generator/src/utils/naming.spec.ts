@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { toLabel, toPascalCase, toCamelCase, toKebabCase, toFormConfigName, toFormFileName, toInterfaceName } from './naming.js';
+import {
+  toLabel,
+  toEnumLabel,
+  toPascalCase,
+  toCamelCase,
+  toKebabCase,
+  toFormConfigName,
+  toFormFileName,
+  toInterfaceName,
+} from './naming.js';
 
 describe('toLabel', () => {
   it('should convert camelCase to label', () => {
@@ -16,6 +25,32 @@ describe('toLabel', () => {
 
   it('should handle single word', () => {
     expect(toLabel('name')).toBe('Name');
+  });
+});
+
+describe('toEnumLabel', () => {
+  it('should convert snake_case to label', () => {
+    expect(toEnumLabel('in_progress')).toBe('In Progress');
+  });
+
+  it('should convert SCREAMING_SNAKE_CASE to label', () => {
+    expect(toEnumLabel('PENDING_REVIEW')).toBe('Pending Review');
+  });
+
+  it('should convert camelCase to label', () => {
+    expect(toEnumLabel('myVariant')).toBe('My Variant');
+  });
+
+  it('should handle simple lowercase word', () => {
+    expect(toEnumLabel('active')).toBe('Active');
+  });
+
+  it('should handle single uppercase word', () => {
+    expect(toEnumLabel('ACTIVE')).toBe('Active');
+  });
+
+  it('should handle kebab-case', () => {
+    expect(toEnumLabel('not-started')).toBe('Not Started');
   });
 });
 

@@ -19,7 +19,7 @@ describe('mapSchemaToFields', () => {
     expect(result.fields[1]).toMatchObject({ key: 'age', type: 'input', label: 'Age' });
 
     // name should be required
-    expect(result.fields[0].validation).toContainEqual({ type: 'required' });
+    expect(result.fields[0].validators).toContainEqual({ type: 'required' });
   });
 
   it('should map nested object to group with child fields', () => {
@@ -187,14 +187,14 @@ describe('mapSchemaToFields', () => {
 
     const result = mapSchemaToFields(schema, ['email']);
     const emailField = result.fields[0];
-    expect(emailField.validation).toContainEqual({ type: 'required' });
-    expect(emailField.validation).toContainEqual({ type: 'minLength', value: 5 });
-    expect(emailField.validation).toContainEqual({ type: 'maxLength', value: 100 });
-    expect(emailField.validation).toContainEqual({ type: 'email' });
+    expect(emailField.validators).toContainEqual({ type: 'required' });
+    expect(emailField.validators).toContainEqual({ type: 'minLength', value: 5 });
+    expect(emailField.validators).toContainEqual({ type: 'maxLength', value: 100 });
+    expect(emailField.validators).toContainEqual({ type: 'email' });
 
     const countField = result.fields[1];
-    expect(countField.validation).toContainEqual({ type: 'min', value: 0 });
-    expect(countField.validation).toContainEqual({ type: 'max', value: 10 });
+    expect(countField.validators).toContainEqual({ type: 'min', value: 0 });
+    expect(countField.validators).toContainEqual({ type: 'max', value: 10 });
   });
 
   it('should propagate schemaName into nested group ambiguous fields', () => {
@@ -271,7 +271,7 @@ describe('mapSchemaToFields', () => {
     expect(result.fields[0].value).toBe('active');
   });
 
-  it('should map description to placeholder', () => {
+  it('should map description to props.hint', () => {
     const schema: SchemaObject = {
       type: 'object',
       properties: {
@@ -280,7 +280,7 @@ describe('mapSchemaToFields', () => {
     };
 
     const result = mapSchemaToFields(schema, []);
-    expect(result.fields[0].placeholder).toBe('Enter your full name');
+    expect(result.fields[0].props?.['hint']).toBe('Enter your full name');
   });
 
   it('should use title as label when present', () => {
@@ -323,6 +323,36 @@ describe('mapSchemaToFields', () => {
     expect(result.warnings).toContain("Property 'oldField' is deprecated and was skipped");
   });
 
+  it('should humanize enum labels with toEnumLabel', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        status: { type: 'string', enum: ['in_progress', 'PENDING_REVIEW', 'active'] },
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].options).toEqual([
+      { label: 'In Progress', value: 'in_progress' },
+      { label: 'Pending Review', value: 'PENDING_REVIEW' },
+      { label: 'Active', value: 'active' },
+    ]);
+  });
+
+  it('should map description to props.hint and merge with existing props', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        email: { type: 'string', format: 'email', description: 'Your email address' } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].props?.['hint']).toBe('Your email address');
+    expect(result.fields[0].props?.['type']).toBe('email');
+    expect(result.fields[0].placeholder).toBeUndefined();
+  });
+
   it('should resolve ambiguous text-input to textarea based on property name', () => {
     const schema: SchemaObject = {
       type: 'object',
@@ -344,5 +374,74 @@ describe('mapSchemaToFields', () => {
     // Only 'name' should be in ambiguous fields
     expect(result.ambiguousFields).toHaveLength(1);
     expect(result.ambiguousFields[0].key).toBe('name');
+  });
+
+  it('should produce variant group fields with logic blocks for discriminator schemas', () => {
+    const schema: SchemaObject = {
+      discriminator: {
+        propertyName: 'petType',
+      },
+      oneOf: [
+        {
+          type: 'object',
+          properties: {
+            petType: { type: 'string', enum: ['dog'] },
+            breed: { type: 'string' },
+          },
+        } as SchemaObject,
+        {
+          type: 'object',
+          properties: {
+            petType: { type: 'string', enum: ['cat'] },
+            indoor: { type: 'boolean' },
+          },
+        } as SchemaObject,
+      ],
+    };
+
+    const result = mapSchemaToFields(schema, []);
+
+    // First field: discriminator radio
+    expect(result.fields[0]).toMatchObject({ key: 'petType', type: 'radio' });
+
+    // Second field: dog variant group with logic
+    expect(result.fields[1]).toMatchObject({
+      key: 'dogVariant',
+      type: 'group',
+      label: 'Dog',
+    });
+    expect(result.fields[1].logic).toEqual([
+      {
+        type: 'hidden',
+        condition: {
+          type: 'fieldValue',
+          fieldPath: 'petType',
+          operator: 'notEquals',
+          value: 'dog',
+        },
+      },
+    ]);
+    expect(result.fields[1].fields).toHaveLength(1);
+    expect(result.fields[1].fields![0].key).toBe('breed');
+
+    // Third field: cat variant group with logic
+    expect(result.fields[2]).toMatchObject({
+      key: 'catVariant',
+      type: 'group',
+      label: 'Cat',
+    });
+    expect(result.fields[2].logic).toEqual([
+      {
+        type: 'hidden',
+        condition: {
+          type: 'fieldValue',
+          fieldPath: 'petType',
+          operator: 'notEquals',
+          value: 'cat',
+        },
+      },
+    ]);
+    expect(result.fields[2].fields).toHaveLength(1);
+    expect(result.fields[2].fields![0].key).toBe('indoor');
   });
 });

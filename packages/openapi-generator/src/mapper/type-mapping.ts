@@ -41,6 +41,8 @@ export function mapSchemaToFieldType(schema: SchemaObject): FieldTypeResult {
       case 'date':
       case 'date-time':
         return { fieldType: 'datepicker', isContainer: false, isAmbiguous: false };
+      case 'time':
+        return { fieldType: 'input', props: { type: 'time' }, isContainer: false, isAmbiguous: false };
       case 'password':
         return { fieldType: 'input', props: { type: 'password' }, isContainer: false, isAmbiguous: false };
       default: {

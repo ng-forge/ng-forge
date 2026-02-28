@@ -52,6 +52,24 @@ describe('mapSchemaToValidators', () => {
     expect(result.map((v) => v.type)).toEqual(['required', 'minLength', 'maxLength', 'pattern', 'email']);
   });
 
+  it('should map exclusiveMinimum (adjusted by +1 for inclusive min)', () => {
+    const result = mapSchemaToValidators({ type: 'integer', exclusiveMinimum: 0 } as unknown as SchemaObject, false);
+    expect(result).toContainEqual({ type: 'min', value: 1 });
+  });
+
+  it('should map exclusiveMaximum (adjusted by -1 for inclusive max)', () => {
+    const result = mapSchemaToValidators({ type: 'integer', exclusiveMaximum: 100 } as unknown as SchemaObject, false);
+    expect(result).toContainEqual({ type: 'max', value: 99 });
+  });
+
+  it('should add UUID pattern validator for uuid format', () => {
+    const result = mapSchemaToValidators({ type: 'string', format: 'uuid' } as SchemaObject, false);
+    expect(result).toContainEqual({
+      type: 'pattern',
+      value: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+    });
+  });
+
   it('should return empty array when no constraints', () => {
     const result = mapSchemaToValidators({ type: 'string' } as SchemaObject, false);
     expect(result).toEqual([]);

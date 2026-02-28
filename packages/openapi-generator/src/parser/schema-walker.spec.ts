@@ -203,6 +203,19 @@ describe('walkSchema', () => {
     expect(result.warnings).toEqual([]);
   });
 
+  it('should warn for oneOf without discriminator', () => {
+    const schema: SchemaObject = {
+      oneOf: [{ type: 'string' } as SchemaObject, { type: 'integer' } as SchemaObject],
+    };
+
+    const result = walkSchema(schema);
+
+    expect(result.properties).toEqual([]);
+    expect(result.warnings).toContain(
+      'oneOf without discriminator is not supported — add a discriminator to generate conditional form groups',
+    );
+  });
+
   it('should resolve explicit discriminator.mapping with $ref-based paths', () => {
     const schema: SchemaObject = {
       discriminator: {

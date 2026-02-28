@@ -51,6 +51,13 @@ describe('mapSchemaToFieldType', () => {
       expect(result.fieldType).toBe('datepicker');
     });
 
+    it('should map string+time to input(time)', () => {
+      const result = mapSchemaToFieldType({ type: 'string', format: 'time' } as SchemaObject);
+      expect(result.fieldType).toBe('input');
+      expect(result.props).toEqual({ type: 'time' });
+      expect(result.isAmbiguous).toBe(false);
+    });
+
     it('should map string+password to input(password)', () => {
       const result = mapSchemaToFieldType({ type: 'string', format: 'password' } as SchemaObject);
       expect(result.fieldType).toBe('input');

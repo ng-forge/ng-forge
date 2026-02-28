@@ -41,7 +41,7 @@ describe('generateFormConfig', () => {
 
     const result = generateFormConfig(fields, defaultOptions);
 
-    expect(result).toContain("props: { 'rows': 5 }");
+    expect(result).toContain('props: { rows: 5 }');
   });
 
   it('should generate fields with multi-value props', () => {
@@ -49,8 +49,8 @@ describe('generateFormConfig', () => {
 
     const result = generateFormConfig(fields, defaultOptions);
 
-    expect(result).toContain("'rows': 5,");
-    expect(result).toContain("'cols': 40,");
+    expect(result).toContain('rows: 5,');
+    expect(result).toContain('cols: 40,');
   });
 
   it('should generate fields with options', () => {
@@ -72,18 +72,19 @@ describe('generateFormConfig', () => {
     expect(result).toContain("{ label: 'Inactive', value: 'inactive' }");
   });
 
-  it('should generate fields with validation', () => {
+  it('should generate fields with validators', () => {
     const fields: FieldConfig[] = [
       {
         key: 'email',
         type: 'text',
         label: 'Email',
-        validation: [{ type: 'required' }, { type: 'maxLength', value: 100 }],
+        validators: [{ type: 'required' }, { type: 'maxLength', value: 100 }],
       },
     ];
 
     const result = generateFormConfig(fields, defaultOptions);
 
+    expect(result).toContain('validators: [');
     expect(result).toContain("{ type: 'required' }");
     expect(result).toContain("{ type: 'maxLength', value: 100 }");
   });
@@ -173,5 +174,46 @@ describe('generateFormConfig', () => {
     const result = generateFormConfig(fields, defaultOptions);
 
     expect(result).toContain("placeholder: 'Enter your bio'");
+  });
+
+  it('should render logic blocks when present', () => {
+    const fields: FieldConfig[] = [
+      {
+        key: 'dogVariant',
+        type: 'group',
+        label: 'Dog',
+        fields: [{ key: 'breed', type: 'input', label: 'Breed' }],
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'petType',
+              operator: 'notEquals',
+              value: 'dog',
+            },
+          },
+        ],
+      },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain("type: 'hidden'");
+    expect(result).toContain('condition: {');
+    expect(result).toContain('type: "fieldValue"');
+    expect(result).toContain('fieldPath: "petType"');
+    expect(result).toContain('operator: "notEquals"');
+    expect(result).toContain('value: "dog"');
+    expect(result).toContain('logic: [');
+  });
+
+  it('should not quote valid identifier keys in props', () => {
+    const fields: FieldConfig[] = [{ key: 'field', type: 'input', label: 'Field', props: { rows: 5 } }];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain('rows: 5');
+    expect(result).not.toContain("'rows'");
   });
 });

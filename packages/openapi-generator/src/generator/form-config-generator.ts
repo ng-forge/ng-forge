@@ -57,9 +57,9 @@ function generateFieldLines(field: FieldConfig, indent: string): string[] {
     lines.push(`${indent}  ],`);
   }
 
-  if (field.validation && field.validation.length > 0) {
-    lines.push(`${indent}  validation: [`);
-    for (const v of field.validation) {
+  if (field.validators && field.validators.length > 0) {
+    lines.push(`${indent}  validators: [`);
+    for (const v of field.validators) {
       if (v.value !== undefined) {
         lines.push(`${indent}    { type: '${escapeString(v.type)}', value: ${JSON.stringify(v.value)} },`);
       } else {
@@ -81,6 +81,17 @@ function generateFieldLines(field: FieldConfig, indent: string): string[] {
     lines.push(`${indent}  ],`);
   }
 
+  if (field.logic && field.logic.length > 0) {
+    lines.push(`${indent}  logic: [`);
+    for (const logic of field.logic) {
+      lines.push(`${indent}    {`);
+      lines.push(`${indent}      type: '${escapeString(logic.type)}',`);
+      lines.push(`${indent}      condition: ${formatObject(logic.condition as Record<string, unknown>, indent + '      ')},`);
+      lines.push(`${indent}    },`);
+    }
+    lines.push(`${indent}  ],`);
+  }
+
   lines.push(`${indent}},`);
   return lines;
 }
@@ -89,12 +100,20 @@ function escapeString(str: string): string {
   return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
+function isValidIdentifier(key: string): boolean {
+  return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key);
+}
+
+function formatKey(key: string): string {
+  return isValidIdentifier(key) ? key : `'${escapeString(key)}'`;
+}
+
 function formatObject(obj: Record<string, unknown>, indent: string): string {
   const entries = Object.entries(obj);
   if (entries.length === 1) {
     const [key, value] = entries[0];
-    return `{ '${escapeString(key)}': ${JSON.stringify(value)} }`;
+    return `{ ${formatKey(key)}: ${JSON.stringify(value)} }`;
   }
-  const lines = entries.map(([key, value]) => `${indent}  '${escapeString(key)}': ${JSON.stringify(value)},`);
+  const lines = entries.map(([key, value]) => `${indent}  ${formatKey(key)}: ${JSON.stringify(value)},`);
   return `{\n${lines.join('\n')}\n${indent}}`;
 }

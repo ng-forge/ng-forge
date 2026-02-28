@@ -36,6 +36,12 @@ export function walkSchema(schema: SchemaObject, requiredFields: string[] = []):
     );
   }
 
+  // oneOf without discriminator — cannot generate conditional form groups
+  if (schema.oneOf && !schema.discriminator) {
+    warnings.push('oneOf without discriminator is not supported — add a discriminator to generate conditional form groups');
+    return { properties: [], warnings };
+  }
+
   // Handle anyOf — skip with warning
   if (schema.anyOf) {
     warnings.push('anyOf schemas are not supported and were skipped');
