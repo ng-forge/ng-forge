@@ -1,0 +1,45 @@
+// ============================================
+// BOOTSTRAP ADAPTER STYLES (for unified app)
+// ============================================
+
+@use 'ember-bs' as ember-bs;
+@use 'tokens' as *;
+
+// Import Bootstrap with our color overrides
+@use 'bootstrap/scss/bootstrap' with (
+  $primary: ember-bs.$bs-primary,
+  $secondary: ember-bs.$bs-secondary,
+  $success: ember-bs.$bs-success,
+  $info: ember-bs.$bs-info,
+  $warning: ember-bs.$bs-warning,
+  $danger: ember-bs.$bs-danger,
+  $link-color: ember-bs.$bs-link-color,
+  $link-hover-color: ember-bs.$bs-link-hover-color
+);
+
+// Light theme (default)
+:root {
+  @include ember-bs.bootstrap-theme-light();
+}
+
+body {
+  font-family: $font-primary;
+}
+
+// Auto mode
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]),
+  :root:not([data-theme]) {
+    @include ember-bs.bootstrap-theme-dark();
+  }
+}
+
+html[data-theme='light'],
+:root[data-theme='light'] {
+  @include ember-bs.bootstrap-theme-light();
+}
+
+html[data-theme='dark'],
+:root[data-theme='dark'] {
+  @include ember-bs.bootstrap-theme-dark();
+}

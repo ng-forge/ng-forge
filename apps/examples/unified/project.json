@@ -1,0 +1,130 @@
+{
+  "name": "unified-examples",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "unified",
+  "sourceRoot": "apps/examples/unified/src",
+  "tags": ["examples", "e2e"],
+  "implicitDependencies": [
+    "dynamic-forms",
+    "dynamic-forms-material",
+    "dynamic-forms-bootstrap",
+    "dynamic-forms-primeng",
+    "dynamic-forms-ionic"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "dependsOn": ["^build"],
+      "options": {
+        "outputPath": "dist/apps/examples/unified",
+        "browser": "apps/examples/unified/src/main.ts",
+        "tsConfig": "apps/examples/unified/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "stylePreprocessorOptions": {
+          "includePaths": ["internal/styling/src"]
+        },
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/examples/unified/public"
+          }
+        ],
+        "styles": [
+          "apps/examples/unified/src/styles.scss",
+          {
+            "input": "apps/examples/unified/src/styles/adapter-material.scss",
+            "bundleName": "material",
+            "inject": false
+          },
+          {
+            "input": "apps/examples/unified/src/styles/adapter-bootstrap.scss",
+            "bundleName": "bootstrap",
+            "inject": false
+          },
+          {
+            "input": "apps/examples/unified/src/styles/adapter-primeng.scss",
+            "bundleName": "primeng",
+            "inject": false
+          },
+          {
+            "input": "apps/examples/unified/src/styles/adapter-ionic.scss",
+            "bundleName": "ionic",
+            "inject": false
+          }
+        ]
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "1.5mb",
+              "maximumError": "2mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "8kb",
+              "maximumError": "16kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "unified-examples:build:production"
+        },
+        "development": {
+          "buildTarget": "unified-examples:build:development"
+        }
+      },
+      "defaultConfiguration": "development",
+      "options": {
+        "port": 4210
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "e2e-material": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/unified/material"],
+      "options": {
+        "config": "apps/examples/unified/playwright.material.config.ts"
+      }
+    },
+    "e2e-bootstrap": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/unified/bootstrap"],
+      "options": {
+        "config": "apps/examples/unified/playwright.bootstrap.config.ts"
+      }
+    },
+    "e2e-primeng": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/unified/primeng"],
+      "options": {
+        "config": "apps/examples/unified/playwright.primeng.config.ts"
+      }
+    },
+    "e2e-ionic": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/unified/ionic"],
+      "options": {
+        "config": "apps/examples/unified/playwright.ionic.config.ts"
+      }
+    }
+  }
+}

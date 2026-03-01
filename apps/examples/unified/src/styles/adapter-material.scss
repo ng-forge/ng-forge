@@ -1,0 +1,106 @@
+// ============================================
+// MATERIAL ADAPTER STYLES (for unified app)
+// ============================================
+
+@use '@angular/material' as mat;
+@use 'material' as ember-mat;
+@use 'tokens' as *;
+
+@include mat.core();
+
+// Apply ember-themed Material (light default)
+@include ember-mat.material-theme-light();
+
+// Auto mode - use system preference when no data-theme is set
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]),
+  :root:not([data-theme]) {
+    @include ember-mat.material-theme-dark();
+  }
+}
+
+[data-theme='light'] {
+  @include ember-mat.material-theme-light();
+}
+
+[data-theme='dark'] {
+  @include ember-mat.material-theme-dark();
+}
+
+// Material-specific body font
+body {
+  font-family: $font-primary;
+}
+
+// Material input overrides
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-container-color: #ffffff;
+  --mdc-filled-text-field-container-color: #ffffff;
+}
+
+.mdc-text-field--outlined {
+  background-color: #ffffff !important;
+}
+
+.mdc-text-field--filled {
+  background-color: #ffffff !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .mat-mdc-form-field {
+    --mat-form-field-outlined-input-text-color: #dee2e6;
+    --mat-form-field-filled-input-text-color: #dee2e6;
+    --mdc-outlined-text-field-container-color: #000000;
+    --mdc-filled-text-field-container-color: #000000;
+  }
+
+  html:not([data-theme]) .mdc-text-field--outlined,
+  html:not([data-theme]) .mdc-text-field--filled {
+    background-color: #000000 !important;
+  }
+}
+
+[data-theme='dark'] .mat-mdc-form-field {
+  --mat-form-field-outlined-input-text-color: #dee2e6;
+  --mat-form-field-filled-input-text-color: #dee2e6;
+  --mdc-outlined-text-field-container-color: #000000;
+  --mdc-filled-text-field-container-color: #000000;
+}
+
+[data-theme='dark'] .mdc-text-field--outlined,
+[data-theme='dark'] .mdc-text-field--filled {
+  background-color: #000000 !important;
+}
+
+// Datepicker overrides
+.mat-datepicker-content {
+  --mat-datepicker-calendar-container-background-color: #ffffff !important;
+  --mat-datepicker-calendar-date-selected-state-background-color: #{$ember-core} !important;
+  --mat-datepicker-calendar-date-today-selected-state-outline-color: #{$ember-core} !important;
+}
+
+.mat-datepicker-toggle {
+  --mat-datepicker-toggle-icon-color: #{$ember-core};
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .mat-datepicker-content {
+    --mat-datepicker-calendar-container-background-color: #000000 !important;
+    --mat-datepicker-calendar-date-selected-state-background-color: #{$ember-glow} !important;
+    --mat-datepicker-calendar-date-today-selected-state-outline-color: #{$ember-glow} !important;
+  }
+
+  html:not([data-theme]) .mat-datepicker-toggle {
+    --mat-datepicker-toggle-icon-color: #{$ember-glow};
+  }
+}
+
+[data-theme='dark'] .mat-datepicker-content {
+  --mat-datepicker-calendar-container-background-color: #000000 !important;
+  --mat-datepicker-calendar-date-selected-state-background-color: #{$ember-glow} !important;
+  --mat-datepicker-calendar-date-today-selected-state-outline-color: #{$ember-glow} !important;
+}
+
+[data-theme='dark'] .mat-datepicker-toggle {
+  --mat-datepicker-toggle-icon-color: #{$ember-glow};
+}
