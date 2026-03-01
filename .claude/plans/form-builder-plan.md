@@ -525,6 +525,35 @@ type PreviewMessage =
   | { type: 'VALIDATION_ERRORS'; errors: Record<string, string[]> };
 ```
 
+### Module Augmentation Isolation
+
+Each integration package uses TypeScript module augmentation to extend `DynamicFormFieldRegistry`.
+To prevent conflicts, integration files must **only be dynamically imported**:
+
+```typescript
+// ✅ CORRECT — dynamic import, augmentation stays in chunk
+const integrationProviders = {
+  material: () => import('./integrations/material.providers'),
+  // ...
+};
+
+// ❌ WRONG — static import, augmentation merges into main bundle
+import { materialProviders } from './integrations/material.providers';
+```
+
+The preview app doesn't need strong typing for form configs anyway — it receives JSON via postMessage
+and passes it to `<ng-forge-form>`. The `FIELD_REGISTRY` lookup is runtime-based.
+
+### Theme vs Integration Switching
+
+| Operation | Method | Latency |
+|-----------|--------|---------|
+| **Theme switch** | postMessage → CSS vars | Instant |
+| **Integration switch** | Iframe reload | ~500ms |
+
+Users pick ONE integration (Material, Bootstrap, etc.) and rarely switch. But they tweak themes
+constantly during design. This architecture optimizes for the common case.
+
 ### Why This Works
 
 | Concern | Solution |
