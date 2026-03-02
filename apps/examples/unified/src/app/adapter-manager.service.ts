@@ -5,11 +5,47 @@ import { AdapterConfig, AdapterName, ADAPTERS } from './adapters/adapter-config'
 
 const STYLESHEET_ID_PREFIX = 'unified-adapter-style-';
 
-/** Placeholder routes used until real scenarios are migrated. */
-const PLACEHOLDER_ROUTES: Route[] = [
-  { path: 'examples', loadComponent: () => import('./demo/demo-form.component').then((m) => m.DemoFormComponent) },
-  { path: 'test', loadComponent: () => import('./demo/demo-form.component').then((m) => m.DemoFormComponent) },
-];
+/**
+ * Eagerly loads routes for a given adapter from the pre-built example libraries.
+ * Routes are loaded before the sub-app is created so they're available
+ * synchronously to the router (as `children` rather than `loadChildren`).
+ */
+async function loadAdapterRoutes(adapter: AdapterName): Promise<Route[]> {
+  switch (adapter) {
+    case 'material': {
+      const lib = await import('@ng-forge/examples-material');
+      return [
+        { path: 'examples', children: lib.EXAMPLES_ROUTES },
+        { path: 'test', children: lib.TESTING_ROUTES },
+      ];
+    }
+    case 'bootstrap': {
+      const lib = await import('@ng-forge/examples-bootstrap');
+      return [
+        { path: 'examples', children: lib.EXAMPLES_ROUTES },
+        { path: 'test', children: lib.TESTING_ROUTES },
+      ];
+    }
+    case 'primeng': {
+      const lib = await import('@ng-forge/examples-primeng');
+      return [
+        { path: 'examples', children: lib.EXAMPLES_ROUTES },
+        { path: 'test', children: lib.TESTING_ROUTES },
+      ];
+    }
+    case 'ionic': {
+      const lib = await import('@ng-forge/examples-ionic');
+      return [
+        { path: 'examples', children: lib.EXAMPLES_ROUTES },
+        { path: 'test', children: lib.TESTING_ROUTES },
+      ];
+    }
+    case 'core': {
+      const lib = await import('@ng-forge/examples-core');
+      return [{ path: 'test', children: lib.TESTING_ROUTES }];
+    }
+  }
+}
 
 /**
  * Load the adapter module and create the sub-app configuration.
@@ -27,6 +63,8 @@ function loadAdapterModule(adapter: AdapterName, routes: Route[]): Promise<{ con
       return import('./adapters/primeng-adapter').then((m) => m.createPrimeNGApp(routes));
     case 'ionic':
       return import('./adapters/ionic-adapter').then((m) => m.createIonicApp(routes));
+    case 'core':
+      return import('./adapters/core-adapter').then((m) => m.createCoreApp(routes));
   }
 }
 
@@ -44,10 +82,16 @@ export class AdapterManagerService {
   }
 
   private async mount(adapterName: AdapterName, container: HTMLElement): Promise<void> {
+    // Set early to prevent re-entrant mounts from hashchange events
+    this.activeAdapter = adapterName;
+
     const adapter = ADAPTERS[adapterName];
 
-    // Load adapter module (code-split) with placeholder routes
-    const { config, rootComponent } = await loadAdapterModule(adapterName, PLACEHOLDER_ROUTES);
+    // Load routes eagerly so they're available synchronously to the router
+    const routes = await loadAdapterRoutes(adapterName);
+
+    // Load adapter module (code-split) with routes
+    const { config, rootComponent } = await loadAdapterModule(adapterName, routes);
 
     // Swap stylesheet
     this.swapStylesheet(adapter);
@@ -70,12 +114,12 @@ export class AdapterManagerService {
     // Trigger navigation after the router-outlet is in the DOM.
     // createApplication() runs APP_INITIALIZERs (including router init)
     // before the component with <router-outlet> is attached, so we
-    // must manually re-trigger navigation.
+    // must manually re-trigger navigation using the actual hash URL.
     const router = appRef.injector.get(Router);
-    await router.navigateByUrl(router.url);
+    const hashUrl = window.location.hash.replace(/^#/, '') || '/';
+    await router.navigateByUrl(hashUrl);
 
     this.activeApp = appRef;
-    this.activeAdapter = adapterName;
   }
 
   destroy(container?: HTMLElement): void {

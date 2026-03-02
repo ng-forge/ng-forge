@@ -10,7 +10,14 @@
     "dynamic-forms-material",
     "dynamic-forms-bootstrap",
     "dynamic-forms-primeng",
-    "dynamic-forms-ionic"
+    "dynamic-forms-ionic",
+    "examples-material",
+    "examples-bootstrap",
+    "examples-primeng",
+    "examples-ionic",
+    "examples-core",
+    "examples-shared-ui",
+    "examples-shared-testing"
   ],
   "targets": {
     "build": {

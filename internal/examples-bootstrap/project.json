@@ -1,0 +1,19 @@
+{
+  "name": "examples-bootstrap",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "internal/examples-bootstrap/src",
+  "prefix": "example",
+  "projectType": "library",
+  "tags": ["examples", "internal"],
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:package",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "dependsOn": ["^build"],
+      "options": {
+        "project": "internal/examples-bootstrap/ng-package.json",
+        "tsConfig": "internal/examples-bootstrap/tsconfig.lib.json"
+      }
+    }
+  }
+}

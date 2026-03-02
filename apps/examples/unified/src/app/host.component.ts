@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, signal, viewChild, afterNextRender } from '@angular/core';
 import { AdapterManagerService } from './adapter-manager.service';
-import { AdapterName, isAdapterName } from './adapters/adapter-config';
+import { AdapterName, ADAPTERS, isAdapterName } from './adapters/adapter-config';
 
 /**
  * Extracts the adapter name from the hash URL.
@@ -23,6 +23,7 @@ function getAdapterFromHash(): AdapterName | null {
         <button class="adapter-btn" [class.active]="activeAdapter() === 'bootstrap'" (click)="navigateTo('bootstrap')">Bootstrap</button>
         <button class="adapter-btn" [class.active]="activeAdapter() === 'primeng'" (click)="navigateTo('primeng')">PrimeNG</button>
         <button class="adapter-btn" [class.active]="activeAdapter() === 'ionic'" (click)="navigateTo('ionic')">Ionic</button>
+        <button class="adapter-btn" [class.active]="activeAdapter() === 'core'" (click)="navigateTo('core')">Core</button>
       </nav>
 
       @if (loading()) {
@@ -45,7 +46,7 @@ export class HostComponent {
       // On initial load, read adapter from hash or default to material
       const adapter = getAdapterFromHash() ?? 'material';
       if (!getAdapterFromHash()) {
-        window.location.hash = '#/material/examples';
+        window.location.hash = `#/material/${ADAPTERS.material.defaultRoute}`;
       }
       this.switchTo(adapter);
 
@@ -64,7 +65,8 @@ export class HostComponent {
 
   navigateTo(adapter: AdapterName): void {
     if (this.activeAdapter() === adapter) return;
-    window.location.hash = `#/${adapter}/examples`;
+    const defaultRoute = ADAPTERS[adapter].defaultRoute;
+    window.location.hash = `#/${adapter}/${defaultRoute}`;
   }
 
   private async switchTo(adapter: AdapterName): Promise<void> {

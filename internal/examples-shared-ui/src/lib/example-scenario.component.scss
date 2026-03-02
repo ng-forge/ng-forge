@@ -2,8 +2,8 @@
 // EXAMPLE SCENARIO COMPONENT STYLES
 // ============================================
 // Uses Forge design tokens from internal/styling
-@use 'tokens' as *;
-@use 'themes' as *;
+@use '../../../styling/src/tokens' as *;
+@use '../../../styling/src/themes' as *;
 
 // ============================================
 // HOST ELEMENTmake

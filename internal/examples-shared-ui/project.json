@@ -4,6 +4,14 @@
   "sourceRoot": "internal/examples-shared-ui/src",
   "projectType": "library",
   "tags": ["scope:examples", "type:ui"],
-  "// targets": "to see all targets run: nx show project examples-shared-ui --web",
-  "targets": {}
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:package",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "options": {
+        "project": "internal/examples-shared-ui/ng-package.json",
+        "tsConfig": "internal/examples-shared-ui/tsconfig.lib.json"
+      }
+    }
+  }
 }
