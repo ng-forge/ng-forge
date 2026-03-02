@@ -22,6 +22,7 @@
       "@ng-forge/dynamic-forms-primeng": ["dist/packages/dynamic-forms-primeng"],
       "@ng-forge/dynamic-forms-ionic": ["dist/packages/dynamic-forms-ionic"],
       "@ng-forge/examples-shared-ui": ["internal/examples-shared-ui/src/index.ts"],
+      "@ng-forge/sandbox-harness": ["dist/internal/sandbox-harness"],
       "@ng-forge/examples-material": ["dist/internal/examples-material"],
       "@ng-forge/examples-bootstrap": ["dist/internal/examples-bootstrap"],
       "@ng-forge/examples-primeng": ["dist/internal/examples-primeng"],

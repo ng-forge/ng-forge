@@ -4,7 +4,7 @@ Dynamic arrays using the simplified API with auto-generated add/remove buttons, 
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/simplified-array" class="example-frame" title="Simplified Array Demo"></iframe>
+<docs-live-example scenario="examples/simplified-array"></docs-live-example>
 
 ## Overview
 

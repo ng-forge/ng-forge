@@ -15,7 +15,7 @@ ng-forge supports four types of custom validators:
 
 Try the interactive example below to see both expression-based and function-based validators in action:
 
-<iframe src="http://localhost:4201/#/examples/expression-validators-demo" class="example-frame" title="Expression Validators Demo"></iframe>
+<docs-live-example scenario="examples/expression-validators-demo"></docs-live-example>
 
 ## Message Resolution (STRICT)
 

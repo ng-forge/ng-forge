@@ -1,0 +1,65 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+@use 'mixins' as mix;
+
+.adapter-picker {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 1.5rem 0 2rem;
+}
+
+.adapter-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 2rem;
+  background: var(--ng-doc-base-2);
+  border: 1px solid var(--ng-doc-border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: $font-primary;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ng-doc-text-muted);
+  opacity: 0.85;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    color 0.3s ease;
+
+  img {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    opacity: 1;
+    transform: translateY(-4px);
+    border-color: rgba($ember-glow, 0.4);
+    box-shadow:
+      0 8px 30px rgba($ember-core, 0.15),
+      0 0 0 1px rgba($ember-glow, 0.1);
+    color: var(--ng-doc-text);
+
+    img {
+      transform: scale(1.1);
+    }
+  }
+
+  &.active {
+    opacity: 1;
+    border-color: $ember-core;
+    box-shadow:
+      0 0 0 1px $ember-core,
+      0 8px 30px rgba($ember-core, 0.2);
+    color: $ember-core;
+    background: rgba($ember-core, 0.05);
+  }
+}

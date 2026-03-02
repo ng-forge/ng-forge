@@ -1,0 +1,341 @@
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
+setupConsoleCheck();
+
+test.describe('Comprehensive Material Field Tests', () => {
+  test.beforeEach(async ({ helpers }) => {
+    await helpers.navigateToScenario('/test/comprehensive-field-tests');
+  });
+
+  test.describe('Comprehensive Fields Test', () => {
+    test('should test all basic field types', async ({ page, helpers }) => {
+      // Navigate to the comprehensive fields component
+      await page.goto('/#/test/comprehensive-field-tests/comprehensive-fields');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the specific test scenario
+      const scenario = helpers.getScenario('comprehensive-fields-test');
+      await expect(scenario).toBeVisible();
+
+      // Visual regression: empty form state
+      await helpers.expectScreenshotMatch(scenario, 'material-comprehensive-fields-empty');
+
+      // Test Text Input
+      await expect(scenario.locator('#textInput input')).toBeVisible();
+      await scenario.locator('#textInput input').fill('Test text value');
+
+      // Test Email Input
+      await expect(scenario.locator('#emailInput input')).toBeVisible();
+      await scenario.locator('#emailInput input').fill('test@example.com');
+
+      // Test Password Input
+      await expect(scenario.locator('#passwordInput input')).toBeVisible();
+      await scenario.locator('#passwordInput input').fill('password123');
+
+      // Test Number Input
+      await expect(scenario.locator('#numberInput input')).toBeVisible();
+      await scenario.locator('#numberInput input').fill('42');
+
+      // Test Textarea
+      await expect(scenario.locator('#textareaField textarea')).toBeVisible();
+      await scenario
+        .locator('#textareaField textarea')
+        .fill('This is a long text that spans multiple lines and tests the textarea field functionality.');
+
+      // Test Select Field (Material overlays render at root, not as children)
+      await expect(scenario.locator('#selectField mat-select')).toBeVisible();
+      await scenario.locator('#selectField mat-select').click();
+      // Wait for overlay to appear and click option
+      await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'Option 2' }).click();
+
+      // Test Radio Field
+      await expect(scenario.locator('#radioField mat-radio-group')).toBeVisible();
+      await scenario.locator('#radioField mat-radio-button:has-text("Radio Option 2")').click();
+
+      // Test Checkbox Field
+      await expect(scenario.locator('#checkboxField mat-checkbox')).toBeVisible();
+      await scenario.locator('#checkboxField mat-checkbox').click();
+
+      // Test Toggle Field
+      await expect(scenario.locator('#toggleField mat-slide-toggle')).toBeVisible();
+      await scenario.locator('#toggleField mat-slide-toggle').click();
+
+      // Test Multi-Checkbox Field
+      await expect(scenario.locator('#multiCheckboxField')).toBeVisible();
+      await scenario.locator('#multiCheckboxField mat-checkbox:has-text("Checkbox 1")').click();
+      await scenario.locator('#multiCheckboxField mat-checkbox:has-text("Checkbox 3")').click();
+
+      // Test Datepicker Field (Material overlays render at root)
+      await expect(scenario.locator('#datepickerField mat-datepicker-toggle')).toBeVisible();
+      await scenario.locator('#datepickerField mat-datepicker-toggle').click();
+      // Wait for calendar overlay and select today's date
+      await page.locator('.cdk-overlay-pane mat-calendar .mat-calendar-body-today').click();
+
+      // Test Slider Field
+      await expect(scenario.locator('#sliderField mat-slider')).toBeVisible();
+      // Move slider using keyboard (Material slider responds to arrow keys)
+      const slider = scenario.locator('#sliderField mat-slider');
+      await slider.click();
+      // Press arrow keys to move slider value
+      for (let i = 0; i < 7; i++) {
+        await page.keyboard.press('ArrowRight');
+      }
+
+      // Visual regression: filled form state
+      await helpers.expectScreenshotMatch(scenario, 'material-comprehensive-fields-filled');
+
+      // Set up event listener BEFORE clicking submit
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      // Submit form
+      await scenario.locator('#submit button').click();
+
+      // Wait for formSubmitted event
+      const submittedData = (await submittedDataPromise) as Record<string, unknown>;
+
+      // Verify submission contains expected field values
+      expect(submittedData['textInput']).toBe('Test text value');
+      expect(submittedData['emailInput']).toBe('test@example.com');
+      expect(submittedData['selectField']).toBe('option2');
+      expect(submittedData['radioField']).toBe('radio2');
+      expect(submittedData['checkboxField']).toBe(true);
+      expect(submittedData['toggleField']).toBe(true);
+    });
+  });
+
+  test.describe('Validation Test', () => {
+    test('should handle field validation errors', async ({ page, helpers }) => {
+      // Navigate to the validation test component
+      await page.goto('/#/test/comprehensive-field-tests/validation');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the specific test scenario
+      const scenario = helpers.getScenario('validation-test');
+      await expect(scenario).toBeVisible();
+
+      const submitButton = scenario.locator('#submitValidation button');
+
+      // Verify submit button is disabled when form is empty (validation working)
+      await expect(submitButton).toBeDisabled();
+
+      // Test invalid inputs - button should remain disabled
+      await scenario.locator('#requiredText input').fill('Hi'); // Only 2 characters (too short)
+      await scenario.locator('#emailValidation input').fill('invalid-email'); // Invalid format
+      await scenario.locator('#numberRange input').fill('150'); // Above max
+      await scenario.locator('#patternValidation input').fill('Hello123!'); // Contains numbers and special chars
+
+      // Button should still be disabled due to validation errors
+      await expect(submitButton).toBeDisabled();
+
+      // Visual regression: validation errors state
+      await helpers.expectScreenshotMatch(scenario, 'material-validation-with-errors');
+
+      // Now fill with valid data
+      await scenario.locator('#requiredText input').fill('Valid text input');
+      await scenario.locator('#emailValidation input').fill('valid@example.com');
+      await scenario.locator('#numberRange input').fill('50');
+      await scenario.locator('#patternValidation input').fill('Valid Name');
+
+      await page.waitForTimeout(200);
+
+      // Button should now be enabled
+      await expect(submitButton).toBeEnabled();
+
+      // Visual regression: valid form state
+      await helpers.expectScreenshotMatch(scenario, 'material-validation-valid');
+
+      // Set up event listener BEFORE clicking submit
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      // Submit should now work
+      await submitButton.click();
+
+      // Wait for formSubmitted event
+      const submittedData = (await submittedDataPromise) as Record<string, unknown>;
+
+      // Verify successful submission
+      expect(submittedData['requiredText']).toBe('Valid text input');
+      expect(submittedData['emailValidation']).toBe('valid@example.com');
+      expect(submittedData['numberRange']).toBe(50);
+      expect(submittedData['patternValidation']).toBe('Valid Name');
+    });
+  });
+
+  test.describe('Grid Layout Test', () => {
+    test('should test responsive grid layout', async ({ page, helpers }) => {
+      // Navigate to the grid layout test component
+      await page.goto('/#/test/comprehensive-field-tests/grid-layout');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the specific test scenario
+      const scenario = helpers.getScenario('grid-layout-test');
+      await expect(scenario).toBeVisible();
+
+      // Test desktop layout (default)
+      await expect(scenario.locator('#fullWidth')).toBeVisible();
+      await expect(scenario.locator('#halfWidth1')).toBeVisible();
+      await expect(scenario.locator('#halfWidth2')).toBeVisible();
+      await expect(scenario.locator('#thirdWidth1')).toBeVisible();
+      await expect(scenario.locator('#thirdWidth2')).toBeVisible();
+      await expect(scenario.locator('#thirdWidth3')).toBeVisible();
+
+      // Fill some fields to test interaction
+      await scenario.locator('#fullWidth input').fill('Full width content');
+      await scenario.locator('#halfWidth1 input').fill('Half 1');
+      await scenario.locator('#halfWidth2 input').fill('Half 2');
+      await scenario.locator('#thirdWidth1 input').fill('Third 1');
+      await scenario.locator('#thirdWidth2 input').fill('Third 2');
+      await scenario.locator('#thirdWidth3 input').fill('Third 3');
+
+      // Visual regression: grid layout desktop
+      await helpers.expectScreenshotMatch(scenario, 'material-grid-layout-desktop');
+
+      // Test mobile layout
+      await page.setViewportSize({ width: 375, height: 667 }); // iPhone 6/7/8 size
+
+      // Visual regression: grid layout mobile
+      await helpers.expectScreenshotMatch(scenario, 'material-grid-layout-mobile');
+
+      // Fields should still be visible and functional on mobile
+      await expect(scenario.locator('#fullWidth')).toBeVisible();
+      await expect(scenario.locator('#halfWidth1')).toBeVisible();
+      await expect(scenario.locator('#halfWidth2')).toBeVisible();
+
+      // Fill quarter width fields on mobile
+      await scenario.locator('#quarterWidth1 input').fill('Q1');
+      await scenario.locator('#quarterWidth2 input').fill('Q2');
+      await scenario.locator('#quarterWidth3 input').fill('Q3');
+      await scenario.locator('#quarterWidth4 input').fill('Q4');
+
+      // Set up event listener BEFORE clicking submit
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      // Submit form
+      await scenario.locator('#submitGrid button').click();
+
+      // Wait for formSubmitted event
+      const submittedData = (await submittedDataPromise) as Record<string, unknown>;
+
+      // Verify submission contains all grid field values
+      expect(submittedData['fullWidth']).toBe('Full width content');
+      expect(submittedData['halfWidth1']).toBe('Half 1');
+      expect(submittedData['halfWidth2']).toBe('Half 2');
+      expect(submittedData['thirdWidth1']).toBe('Third 1');
+      expect(submittedData['quarterWidth1']).toBe('Q1');
+
+      // Reset viewport back to desktop
+      await page.setViewportSize({ width: 1280, height: 720 });
+    });
+  });
+
+  test.describe('State Management Test', () => {
+    test('should test form state management', async ({ page, helpers }) => {
+      // Navigate to the state management test component
+      await page.goto('/#/test/comprehensive-field-tests/state-management');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the specific test scenario
+      const scenario = helpers.getScenario('state-management-test');
+      await expect(scenario).toBeVisible();
+
+      // Wait for first input field to be visible
+      await scenario.locator('#stateInput1 input').waitFor({ state: 'visible', timeout: 5000 });
+
+      // Open debug output to see form value
+      await scenario.locator('.debug-output summary').click();
+      const initialFormValue = await scenario.locator('[data-testid="form-value-state-management-test"]').textContent();
+      // Checkbox fields start with false, so we just verify it's not fully populated yet
+      expect(initialFormValue).toBeDefined();
+
+      // Fill first input and check state update
+      await scenario.locator('#stateInput1 input').fill('First value');
+
+      // Wait for form value to update (Angular needs time to update the model)
+      await page.waitForFunction(
+        () => {
+          const element = document.querySelector('[data-testid="form-value-state-management-test"]');
+          return element?.textContent?.includes('First value') || false;
+        },
+        { timeout: 5000 },
+      );
+
+      // Check that form state reflects the change
+      const updatedFormValue = await scenario.locator('[data-testid="form-value-state-management-test"]').textContent();
+      expect(updatedFormValue).toContain('First value');
+
+      // Fill second input
+      await scenario.locator('#stateInput2 input').fill('Second value');
+
+      // Toggle checkbox
+      await scenario.locator('#stateCheckbox mat-checkbox').click();
+
+      // Wait for checkbox value to update in the form
+      await page.waitForTimeout(100);
+
+      // Check final form state
+      const finalFormValue = await scenario.locator('[data-testid="form-value-state-management-test"]').textContent();
+      expect(finalFormValue).toContain('First value');
+      expect(finalFormValue).toContain('Second value');
+      expect(finalFormValue).toContain('true'); // checkbox should be true
+
+      // Set up event listener BEFORE clicking submit
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      // Submit form
+      await scenario.locator('#submitState button').click();
+
+      // Wait for formSubmitted event
+      const submittedData = (await submittedDataPromise) as Record<string, unknown>;
+
+      // Verify submitted data
+      expect(submittedData['stateInput1']).toBe('First value');
+      expect(submittedData['stateInput2']).toBe('Second value');
+      expect(submittedData['stateCheckbox']).toBe(true);
+    });
+  });
+});

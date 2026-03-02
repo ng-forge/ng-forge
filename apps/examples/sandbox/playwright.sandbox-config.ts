@@ -4,7 +4,7 @@ import { workspaceRoot } from '@nx/devkit';
 import { fileURLToPath } from 'node:url';
 import { APP_PORTS } from '@ng-forge/examples-shared-testing/playwright-config';
 
-type SandboxAdapter = 'material' | 'bootstrap' | 'primeng' | 'ionic';
+type SandboxAdapter = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'core';
 
 const PORT = APP_PORTS['sandbox-examples'];
 

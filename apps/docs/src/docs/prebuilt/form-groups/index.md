@@ -2,7 +2,7 @@ Groups nest form fields under a single key in the form value. This creates logic
 
 ## Interactive Demo
 
-<iframe src="http://localhost:4201/#/examples/group" class="example-frame" title="Group Field Demo"></iframe>
+<docs-live-example scenario="examples/group"></docs-live-example>
 
 ## Basic Group
 

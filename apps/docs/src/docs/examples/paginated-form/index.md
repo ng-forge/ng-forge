@@ -4,7 +4,7 @@ A comprehensive multi-step registration form demonstrating the `page` field type
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/paginated-form" class="example-frame" title="Paginated Form Demo"></iframe>
+<docs-live-example scenario="examples/paginated-form"></docs-live-example>
 
 ## Overview
 

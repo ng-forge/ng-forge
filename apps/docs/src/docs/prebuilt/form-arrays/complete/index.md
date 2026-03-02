@@ -4,7 +4,7 @@ Arrays create dynamic collections of field values. Each item in the `fields` arr
 
 ## Interactive Demo
 
-<iframe src="http://localhost:4201/#/examples/array" class="example-frame" title="Array Field Demo"></iframe>
+<docs-live-example scenario="examples/array"></docs-live-example>
 
 ## Structure Overview
 

@@ -6,6 +6,7 @@
   "sourceRoot": "apps/examples/sandbox/src",
   "tags": ["examples", "e2e"],
   "implicitDependencies": [
+    "sandbox-harness",
     "dynamic-forms",
     "dynamic-forms-material",
     "dynamic-forms-bootstrap",
@@ -131,6 +132,13 @@
       "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/sandbox/ionic"],
       "options": {
         "config": "apps/examples/sandbox/playwright.ionic.config.ts"
+      }
+    },
+    "e2e-core": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/sandbox/core"],
+      "options": {
+        "config": "apps/examples/sandbox/playwright.core.config.ts"
       }
     }
   }

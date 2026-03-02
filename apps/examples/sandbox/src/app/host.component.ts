@@ -1,6 +1,14 @@
-import { ChangeDetectionStrategy, Component, ElementRef, signal, viewChild, afterNextRender } from '@angular/core';
-import { AdapterManagerService } from './adapter-manager.service';
-import { AdapterName, ADAPTERS, isAdapterName } from './adapters/adapter-config';
+import { ChangeDetectionStrategy, Component, ElementRef, signal, viewChild, afterNextRender, inject } from '@angular/core';
+import { SandboxHarness, SandboxRef, isAdapterName, AdapterName } from '@ng-forge/sandbox-harness';
+
+const DEFAULT_ADAPTER: AdapterName = 'material';
+const DEFAULT_ROUTES: Record<AdapterName, string> = {
+  material: 'examples',
+  bootstrap: 'examples',
+  primeng: 'examples',
+  ionic: 'examples',
+  core: 'test',
+};
 
 /**
  * Extracts the adapter name from the hash URL.
@@ -35,49 +43,51 @@ function getAdapterFromHash(): AdapterName | null {
   `,
 })
 export class HostComponent {
-  private readonly adapterManager = new AdapterManagerService();
+  private readonly harness = inject(SandboxHarness);
   private readonly containerRef = viewChild.required<ElementRef<HTMLElement>>('adapterContainer');
 
   readonly activeAdapter = signal<AdapterName | null>(null);
   readonly loading = signal(false);
 
+  private currentRef: SandboxRef | null = null;
+
   constructor() {
     afterNextRender(() => {
-      // On initial load, read adapter from hash or default to material
-      const adapter = getAdapterFromHash() ?? 'material';
+      const adapter = getAdapterFromHash() ?? DEFAULT_ADAPTER;
       if (!getAdapterFromHash()) {
-        window.location.hash = `#/material/${ADAPTERS.material.defaultRoute}`;
+        window.location.hash = `#/${DEFAULT_ADAPTER}/${DEFAULT_ROUTES[DEFAULT_ADAPTER]}`;
       }
       this.switchTo(adapter);
 
-      // Listen for hash changes to detect adapter switches
       window.addEventListener('hashchange', () => {
         const newAdapter = getAdapterFromHash();
-        if (newAdapter && newAdapter !== this.adapterManager.activeAdapterName) {
+        if (newAdapter && newAdapter !== this.activeAdapter()) {
           this.switchTo(newAdapter);
         }
       });
 
-      // Iframe height broadcasting
       this.setupHeightBroadcasting();
     });
   }
 
   navigateTo(adapter: AdapterName): void {
     if (this.activeAdapter() === adapter) return;
-    const defaultRoute = ADAPTERS[adapter].defaultRoute;
-    window.location.hash = `#/${adapter}/${defaultRoute}`;
+    window.location.hash = `#/${adapter}/${DEFAULT_ROUTES[adapter]}`;
   }
 
   private async switchTo(adapter: AdapterName): Promise<void> {
     this.loading.set(true);
     this.activeAdapter.set(adapter);
 
+    this.currentRef?.destroy();
+    this.currentRef = null;
+
     const container = this.containerRef().nativeElement;
     container.innerHTML = '';
 
     try {
-      await this.adapterManager.switchTo(adapter, container);
+      const hashUrl = window.location.hash.replace(/^#/, '') || '/';
+      this.currentRef = await this.harness.bootstrap(adapter, container, { route: hashUrl });
     } finally {
       this.loading.set(false);
     }
