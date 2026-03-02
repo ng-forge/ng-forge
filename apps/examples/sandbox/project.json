@@ -6,6 +6,7 @@
   "sourceRoot": "apps/examples/sandbox/src",
   "tags": ["examples", "e2e"],
   "implicitDependencies": [
+    "sandbox-harness",
     "dynamic-forms",
     "dynamic-forms-material",
     "dynamic-forms-bootstrap",

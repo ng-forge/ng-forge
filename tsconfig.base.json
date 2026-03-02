@@ -30,6 +30,7 @@
       "@ng-forge/dynamic-form-mcp": ["packages/dynamic-form-mcp/src/index.ts"],
       "@ng-forge/examples-shared-testing": ["internal/examples-shared-testing/src/index.ts"],
       "@ng-forge/examples-shared-ui": ["internal/examples-shared-ui/src/index.ts"],
+      "@ng-forge/sandbox-harness": ["internal/sandbox-harness/src/index.ts"],
       "@ng-forge/examples-shared-testing/playwright-config": ["internal/examples-shared-testing/src/lib/playwright-config.ts"],
       "@ng-forge/styling": ["internal/styling/src/index.ts"],
       "@ng-forge/dynamic-forms/testing": ["packages/dynamic-forms/testing/src/public_api.ts"],
