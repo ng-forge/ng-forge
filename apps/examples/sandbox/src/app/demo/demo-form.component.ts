@@ -40,7 +40,7 @@ const DEMO_CONFIG = {
 } as const satisfies FormConfig;
 
 @Component({
-  selector: 'unified-demo-form',
+  selector: 'sandbox-demo-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DynamicForm, JsonPipe],
   template: `

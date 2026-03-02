@@ -1,9 +1,9 @@
 {
-  "name": "unified-examples",
+  "name": "sandbox-examples",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "prefix": "unified",
-  "sourceRoot": "apps/examples/unified/src",
+  "prefix": "sandbox",
+  "sourceRoot": "apps/examples/sandbox/src",
   "tags": ["examples", "e2e"],
   "implicitDependencies": [
     "dynamic-forms",
@@ -25,9 +25,9 @@
       "outputs": ["{options.outputPath}"],
       "dependsOn": ["^build"],
       "options": {
-        "outputPath": "dist/apps/examples/unified",
-        "browser": "apps/examples/unified/src/main.ts",
-        "tsConfig": "apps/examples/unified/tsconfig.app.json",
+        "outputPath": "dist/apps/examples/sandbox",
+        "browser": "apps/examples/sandbox/src/main.ts",
+        "tsConfig": "apps/examples/sandbox/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "stylePreprocessorOptions": {
           "includePaths": ["internal/styling/src"]
@@ -35,28 +35,28 @@
         "assets": [
           {
             "glob": "**/*",
-            "input": "apps/examples/unified/public"
+            "input": "apps/examples/sandbox/public"
           }
         ],
         "styles": [
-          "apps/examples/unified/src/styles.scss",
+          "apps/examples/sandbox/src/styles.scss",
           {
-            "input": "apps/examples/unified/src/styles/adapter-material.scss",
+            "input": "apps/examples/sandbox/src/styles/adapter-material.scss",
             "bundleName": "material",
             "inject": false
           },
           {
-            "input": "apps/examples/unified/src/styles/adapter-bootstrap.scss",
+            "input": "apps/examples/sandbox/src/styles/adapter-bootstrap.scss",
             "bundleName": "bootstrap",
             "inject": false
           },
           {
-            "input": "apps/examples/unified/src/styles/adapter-primeng.scss",
+            "input": "apps/examples/sandbox/src/styles/adapter-primeng.scss",
             "bundleName": "primeng",
             "inject": false
           },
           {
-            "input": "apps/examples/unified/src/styles/adapter-ionic.scss",
+            "input": "apps/examples/sandbox/src/styles/adapter-ionic.scss",
             "bundleName": "ionic",
             "inject": false
           }
@@ -91,10 +91,10 @@
       "executor": "@angular/build:dev-server",
       "configurations": {
         "production": {
-          "buildTarget": "unified-examples:build:production"
+          "buildTarget": "sandbox-examples:build:production"
         },
         "development": {
-          "buildTarget": "unified-examples:build:development"
+          "buildTarget": "sandbox-examples:build:development"
         }
       },
       "defaultConfiguration": "development",
@@ -107,30 +107,30 @@
     },
     "e2e-material": {
       "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/unified/material"],
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/sandbox/material"],
       "options": {
-        "config": "apps/examples/unified/playwright.material.config.ts"
+        "config": "apps/examples/sandbox/playwright.material.config.ts"
       }
     },
     "e2e-bootstrap": {
       "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/unified/bootstrap"],
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/sandbox/bootstrap"],
       "options": {
-        "config": "apps/examples/unified/playwright.bootstrap.config.ts"
+        "config": "apps/examples/sandbox/playwright.bootstrap.config.ts"
       }
     },
     "e2e-primeng": {
       "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/unified/primeng"],
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/sandbox/primeng"],
       "options": {
-        "config": "apps/examples/unified/playwright.primeng.config.ts"
+        "config": "apps/examples/sandbox/playwright.primeng.config.ts"
       }
     },
     "e2e-ionic": {
       "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/unified/ionic"],
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/sandbox/ionic"],
       "options": {
-        "config": "apps/examples/unified/playwright.ionic.config.ts"
+        "config": "apps/examples/sandbox/playwright.ionic.config.ts"
       }
     }
   }

@@ -4,9 +4,9 @@ import { workspaceRoot } from '@nx/devkit';
 import { fileURLToPath } from 'node:url';
 import { APP_PORTS } from '@ng-forge/examples-shared-testing/playwright-config';
 
-type UnifiedAdapter = 'material' | 'bootstrap' | 'primeng' | 'ionic';
+type SandboxAdapter = 'material' | 'bootstrap' | 'primeng' | 'ionic';
 
-const PORT = APP_PORTS['unified-examples'];
+const PORT = APP_PORTS['sandbox-examples'];
 
 /**
  * Returns the reporter configuration based on CI environment.
@@ -57,13 +57,13 @@ const getProjects = () => {
 };
 
 /**
- * Creates a Playwright configuration for a specific adapter in the unified example app.
+ * Creates a Playwright configuration for a specific adapter in the sandbox example app.
  *
  * @param configFileUrl - Pass `import.meta.url` from the config file
  * @param adapterName - The adapter to test (e.g., 'material', 'bootstrap')
  * @returns Complete Playwright configuration
  */
-export function createUnifiedPlaywrightConfig(configFileUrl: string, adapterName: UnifiedAdapter): PlaywrightTestConfig {
+export function createSandboxPlaywrightConfig(configFileUrl: string, adapterName: SandboxAdapter): PlaywrightTestConfig {
   const baseURL = process.env['BASE_URL'] || `http://localhost:${PORT}`;
   const testDir = `./src/app/testing/${adapterName}`;
 
@@ -91,7 +91,7 @@ export function createUnifiedPlaywrightConfig(configFileUrl: string, adapterName
     snapshotDir: `./src/app/testing/__snapshots__`,
     snapshotPathTemplate: '{snapshotDir}/{testFileDir}/{testFileName}-snapshots/{arg}{ext}',
     webServer: {
-      command: `pnpm exec nx run unified-examples:serve --port ${PORT}`,
+      command: `pnpm exec nx run sandbox-examples:serve --port ${PORT}`,
       url: `http://localhost:${PORT}`,
       reuseExistingServer: true,
       cwd: workspaceRoot,

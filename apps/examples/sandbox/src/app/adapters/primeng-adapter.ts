@@ -3,29 +3,32 @@ import { provideRouter, RouterOutlet, withHashLocation } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { Route } from '@angular/router';
+import { providePrimeNG } from 'primeng/config';
+import { PRIMENG_EMBER_THEME } from '@ng-forge/styling';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
+import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 import { wrapRoutesWithAdapter } from './adapter-routes';
 
 @Component({
-  selector: 'unified-core-root',
+  selector: 'sandbox-primeng-root',
   imports: [RouterOutlet],
   template: `<router-outlet />`,
 })
-class CoreRootComponent {}
+class PrimeNGRootComponent {}
 
-export function createCoreApp(routes: Route[]): { config: ApplicationConfig; rootComponent: Type<unknown> } {
+export function createPrimeNGApp(routes: Route[]): { config: ApplicationConfig; rootComponent: Type<unknown> } {
   return {
     config: {
       providers: [
         provideZonelessChangeDetection(),
         provideAnimations(),
         provideHttpClient(),
-        provideRouter(wrapRoutesWithAdapter('core', routes, 'test'), withHashLocation()),
-        provideDynamicForm(...withMaterialFields()),
-        { provide: APP_ID, useValue: 'unified-core' },
+        provideRouter(wrapRoutesWithAdapter('primeng', routes), withHashLocation()),
+        providePrimeNG({ theme: PRIMENG_EMBER_THEME }),
+        provideDynamicForm(...withPrimeNGFields()),
+        { provide: APP_ID, useValue: 'sandbox-primeng' },
       ],
     },
-    rootComponent: CoreRootComponent,
+    rootComponent: PrimeNGRootComponent,
   };
 }

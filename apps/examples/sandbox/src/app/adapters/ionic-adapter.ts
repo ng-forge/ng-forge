@@ -9,7 +9,7 @@ import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
 import { wrapRoutesWithAdapter } from './adapter-routes';
 
 @Component({
-  selector: 'unified-ionic-root',
+  selector: 'sandbox-ionic-root',
   imports: [IonApp, IonRouterOutlet],
   template: `<ion-app><ion-router-outlet /></ion-app>`,
 })
@@ -25,7 +25,7 @@ export function createIonicApp(routes: Route[]): { config: ApplicationConfig; ro
         provideRouter(wrapRoutesWithAdapter('ionic', routes), withHashLocation()),
         provideIonicAngular({ mode: 'md' }),
         provideDynamicForm(...withIonicFields()),
-        { provide: APP_ID, useValue: 'unified-ionic' },
+        { provide: APP_ID, useValue: 'sandbox-ionic' },
       ],
     },
     rootComponent: IonicRootComponent,
