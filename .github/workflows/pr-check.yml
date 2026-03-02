@@ -416,7 +416,7 @@ jobs:
         run: node scripts/playwright-job-summary.mjs ${{ matrix.app }} apps/examples/${{ matrix.short }}/test-results
 
       - name: Upload test artifacts on failure
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-results-${{ matrix.app }}${{ matrix.shardId && format('-{0}', matrix.shardId) || '' }}
