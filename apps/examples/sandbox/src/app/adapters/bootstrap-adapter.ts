@@ -4,28 +4,28 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { Route } from '@angular/router';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
+import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
 import { wrapRoutesWithAdapter } from './adapter-routes';
 
 @Component({
-  selector: 'unified-material-root',
+  selector: 'sandbox-bootstrap-root',
   imports: [RouterOutlet],
   template: `<router-outlet />`,
 })
-class MaterialRootComponent {}
+class BootstrapRootComponent {}
 
-export function createMaterialApp(routes: Route[]): { config: ApplicationConfig; rootComponent: Type<unknown> } {
+export function createBootstrapApp(routes: Route[]): { config: ApplicationConfig; rootComponent: Type<unknown> } {
   return {
     config: {
       providers: [
         provideZonelessChangeDetection(),
         provideAnimations(),
         provideHttpClient(),
-        provideRouter(wrapRoutesWithAdapter('material', routes), withHashLocation()),
-        provideDynamicForm(...withMaterialFields()),
-        { provide: APP_ID, useValue: 'unified-material' },
+        provideRouter(wrapRoutesWithAdapter('bootstrap', routes), withHashLocation()),
+        provideDynamicForm(...withBootstrapFields()),
+        { provide: APP_ID, useValue: 'sandbox-bootstrap' },
       ],
     },
-    rootComponent: MaterialRootComponent,
+    rootComponent: BootstrapRootComponent,
   };
 }

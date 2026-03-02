@@ -1,5 +1,5 @@
 // ============================================
-// UNIFIED EXAMPLE APP - HOST STYLES
+// SANDBOX EXAMPLE APP - HOST STYLES
 // ============================================
 // Only host shell styling. Adapter styles are loaded dynamically.
 
@@ -18,13 +18,13 @@ body {
   color: #333;
 }
 
-.unified-host {
+.sandbox-host {
   max-width: 960px;
   margin: 0 auto;
   padding: 24px;
 }
 
-.unified-nav {
+.sandbox-nav {
   display: flex;
   align-items: center;
   gap: 16px;

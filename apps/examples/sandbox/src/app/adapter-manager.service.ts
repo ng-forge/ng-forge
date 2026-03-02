@@ -3,7 +3,7 @@ import { createApplication } from '@angular/platform-browser';
 import { Route, Router } from '@angular/router';
 import { AdapterConfig, AdapterName, ADAPTERS } from './adapters/adapter-config';
 
-const STYLESHEET_ID_PREFIX = 'unified-adapter-style-';
+const STYLESHEET_ID_PREFIX = 'sandbox-adapter-style-';
 
 /**
  * Eagerly loads routes for a given adapter from the pre-built example libraries.

@@ -13,12 +13,12 @@ function getAdapterFromHash(): AdapterName | null {
 }
 
 @Component({
-  selector: 'unified-host',
+  selector: 'sandbox-host',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="unified-host">
-      <nav class="unified-nav">
-        <h1>Unified Examples</h1>
+    <div class="sandbox-host">
+      <nav class="sandbox-nav">
+        <h1>Sandbox Examples</h1>
         <button class="adapter-btn" [class.active]="activeAdapter() === 'material'" (click)="navigateTo('material')">Material</button>
         <button class="adapter-btn" [class.active]="activeAdapter() === 'bootstrap'" (click)="navigateTo('bootstrap')">Bootstrap</button>
         <button class="adapter-btn" [class.active]="activeAdapter() === 'primeng'" (click)="navigateTo('primeng')">PrimeNG</button>

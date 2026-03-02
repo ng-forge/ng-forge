@@ -8,7 +8,7 @@ export const APP_PORTS = {
   'ionic-examples': 4203,
   'bootstrap-examples': 4204,
   'core-examples': 4205,
-  'unified-examples': 4210,
+  'sandbox-examples': 4210,
 } as const;
 
 export type ExampleApp = keyof typeof APP_PORTS;
