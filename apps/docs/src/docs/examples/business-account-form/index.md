@@ -4,7 +4,7 @@ Account registration form that shows different fields based on whether the user 
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/business-account-form" class="example-frame" title="Business Account Form Demo"></iframe>
+<docs-live-example scenario="examples/business-account-form"></docs-live-example>
 
 ## Overview
 

@@ -38,7 +38,7 @@ The `standardSchema()` wrapper tells Dynamic Forms to use Zod for validation. Er
 
 Try the password confirmation form with Zod validation:
 
-<iframe src="http://localhost:4201/#/examples/zod-schema-validation" class="example-frame" title="Zod Validation Demo"></iframe>
+<docs-live-example scenario="examples/zod-schema-validation"></docs-live-example>
 
 ## Cross-Field Validation
 

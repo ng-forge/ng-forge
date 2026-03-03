@@ -4,7 +4,7 @@ Complex configuration form demonstrating AND/OR logic for enterprise feature gat
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/enterprise-features" class="example-frame" title="Enterprise Features Demo"></iframe>
+<docs-live-example scenario="examples/enterprise-features"></docs-live-example>
 
 ## Overview
 

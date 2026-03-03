@@ -4,7 +4,7 @@ Simple login form demonstrating authentication UI with email and password fields
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/login" class="example-frame" title="Login Form Demo"></iframe>
+<docs-live-example scenario="examples/login"></docs-live-example>
 
 ## Overview
 

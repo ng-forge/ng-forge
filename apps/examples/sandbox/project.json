@@ -133,6 +133,13 @@
       "options": {
         "config": "apps/examples/sandbox/playwright.ionic.config.ts"
       }
+    },
+    "e2e-core": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/sandbox/core"],
+      "options": {
+        "config": "apps/examples/sandbox/playwright.core.config.ts"
+      }
     }
   }
 }

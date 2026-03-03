@@ -161,4 +161,8 @@ export default [
     loadComponent: () => import('./shared/example-scenario.component'),
     data: { scenario: getScenarioById('simplified-array') },
   },
+  {
+    path: 'demo',
+    loadComponent: () => import('./shared/demo-scenario.component'),
+  },
 ] satisfies Route[];

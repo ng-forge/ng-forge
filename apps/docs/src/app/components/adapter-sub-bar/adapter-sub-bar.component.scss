@@ -1,0 +1,258 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+
+:host {
+  display: contents;
+}
+
+.adapter-sub-bar {
+  display: flex;
+  align-items: center;
+}
+
+.adapter-dropdown {
+  position: relative;
+}
+
+.adapter-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 40px;
+  padding: 0 0.625rem 0 0.5rem;
+  background: transparent;
+  border: 1px solid var(--ng-doc-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--ng-doc-text-muted);
+  font-family: $font-primary;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    color: $ember-glow;
+    border-color: $ember-glow;
+    background: var(--ng-doc-base-1);
+  }
+
+  .adapter-dropdown.open & {
+    color: $ember-core;
+    border-color: rgba($ember-core, 0.5);
+    background: rgba($ember-core, 0.06);
+  }
+
+  // On small screens, collapse to icon-only to match navbar's circular icon buttons
+  @media (max-width: 600px) {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    border: 1px solid var(--ng-doc-border-color);
+    border-radius: 50%;
+    background: var(--ng-doc-base-2);
+    gap: 0;
+
+    &:hover {
+      background: var(--ng-doc-base-3);
+      border-color: var(--ng-doc-base-4);
+    }
+
+    .adapter-dropdown.open & {
+      background: var(--ng-doc-base-2);
+      border-color: var(--ng-doc-border-color);
+    }
+  }
+
+  // ng-doc reduces all navbar controls to 34px at ≤400px — match that
+  @media (max-width: 400px) {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+.trigger-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--ng-doc-base-5);
+  text-transform: uppercase;
+
+  .adapter-dropdown.open .adapter-trigger & {
+    color: rgba($ember-core, 0.7);
+  }
+
+  @media (max-width: 600px) {
+    display: none;
+  }
+}
+
+.trigger-divider {
+  width: 1px;
+  height: 14px;
+  background: var(--ng-doc-base-3);
+  border-radius: 1px;
+
+  .adapter-dropdown.open .adapter-trigger & {
+    background: rgba($ember-core, 0.25);
+  }
+
+  @media (max-width: 600px) {
+    display: none;
+  }
+}
+
+.trigger-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  opacity: 0.75;
+
+  @media (max-width: 600px) {
+    width: 20px;
+    height: 20px;
+    opacity: 0.85;
+  }
+
+  @media (max-width: 400px) {
+    width: 17px;
+    height: 17px;
+  }
+
+  .adapter-dropdown.open .adapter-trigger & {
+    opacity: 1;
+  }
+}
+
+.trigger-name {
+  color: var(--ng-doc-text);
+
+  .adapter-dropdown.open .adapter-trigger & {
+    color: $ember-core;
+  }
+
+  @media (max-width: 600px) {
+    display: none;
+  }
+}
+
+.trigger-chevron {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background-color: var(--ng-doc-base-5);
+  mask-image: url('/assets/icons/chevron-down.svg');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  transition:
+    transform 0.2s ease,
+    background-color 0.15s ease;
+
+  .adapter-dropdown.open & {
+    transform: rotate(180deg);
+    background-color: $ember-core;
+  }
+
+  @media (max-width: 600px) {
+    display: none;
+  }
+}
+
+.adapter-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 240px;
+  background: var(--ng-doc-background);
+  border: 1px solid var(--ng-doc-border-color);
+  border-radius: 8px;
+  padding: 0.375rem;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+  animation: menu-appear 0.12s ease;
+  z-index: 100;
+}
+
+@keyframes menu-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.adapter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ng-doc-text-muted);
+  font-family: $font-primary;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease;
+
+  &:hover {
+    color: var(--ng-doc-text);
+    background: var(--ng-doc-base-2);
+  }
+
+  &.selected {
+    color: $ember-core;
+  }
+}
+
+.option-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  opacity: 0.8;
+  flex-shrink: 0;
+
+  .adapter-option:hover &,
+  .adapter-option.selected & {
+    opacity: 1;
+  }
+}
+
+.option-name {
+  flex: 1;
+}
+
+.option-preview {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ng-doc-base-5);
+  background: var(--ng-doc-base-2);
+  padding: 0.1rem 0.25rem;
+  border-radius: 3px;
+}
+
+.option-check {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  background-color: $ember-core;
+  mask-image: url('/assets/icons/check.svg');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  flex-shrink: 0;
+}

@@ -1,14 +1,17 @@
-import { Component, inject, OnInit, PLATFORM_ID, afterNextRender, DestroyRef, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, PLATFORM_ID, computed } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { Router, RouterModule, NavigationEnd, NavigationStart } from '@angular/router';
 import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocThemeToggleComponent } from '@ng-doc/app';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
-import { fromEvent, map, startWith, of, skip, filter } from 'rxjs';
+import { map, startWith, of, skip, filter } from 'rxjs';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgDocButtonIconComponent, NgDocIconComponent, NgDocTooltipDirective } from '@ng-doc/ui-kit';
 
 import { Logo } from './components/logo';
 import { SidebarAccordionDirective } from './directives/sidebar-accordion.directive';
+import { AdapterSubBarComponent } from './components/adapter-sub-bar/adapter-sub-bar.component';
+import { ActiveAdapterService } from './services/active-adapter.service';
+import { isAdapterName } from '@ng-forge/sandbox-harness';
 
 const THEME_STORAGE_KEY = 'ng-forge-docs-theme';
 type ThemeType = 'auto' | 'light' | 'dark';
@@ -38,19 +41,21 @@ function storageValueToTheme(value: string | null): string | undefined {
     NgDocTooltipDirective,
     Logo,
     SidebarAccordionDirective,
+    AdapterSubBarComponent,
   ],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    'class.dark': 'isDark()',
+    '[class.dark]': 'isDark()',
   },
 })
 export class App implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly activeAdapter = inject(ActiveAdapterService);
   readonly themeService = inject(NgDocThemeService);
 
   private readonly currentUrl = toSignal(
@@ -64,15 +69,12 @@ export class App implements OnInit {
 
   readonly isLandingPage = computed(() => {
     const url = this.currentUrl();
-    // Handle hash-based URLs like /#features, /#validation, etc.
-    return url === '/' || url === '' || url.startsWith('/#');
+    return url === '/' || url === '';
   });
 
   theme = toSignal(
     this.isBrowser ? this.themeService.themeChanges().pipe(startWith(this.themeService.currentTheme)) : of('auto' as const),
-    {
-      requireSync: true,
-    },
+    { requireSync: true },
   );
 
   isDark = toSignal(
@@ -86,53 +88,26 @@ export class App implements OnInit {
   );
 
   constructor() {
-    // Only run browser-specific code in the browser
-    if (this.isBrowser) {
-      // Send theme changes to all iframes after first render
-      afterNextRender(() => {
-        // Subscribe to theme changes and broadcast to iframes
-        this.themeService
-          .themeChanges()
-          .pipe(startWith(this.themeService.currentTheme), takeUntilDestroyed(this.destroyRef))
-          .subscribe((theme) => {
-            const iframes = document.querySelectorAll<HTMLIFrameElement>('iframe');
-            iframes.forEach((iframe) => {
-              iframe.contentWindow?.postMessage({ type: 'theme-change', theme }, '*');
-            });
-          });
-
-        // Listen for theme requests from iframes
-        fromEvent<MessageEvent>(window, 'message')
-          .pipe(
-            filter((event) => event.data?.type === 'request-theme'),
-            takeUntilDestroyed(this.destroyRef),
-          )
-          .subscribe((event) => {
-            (event.source as Window)?.postMessage({ type: 'theme-change', theme: this.theme() }, '*');
-          });
-
-        // Listen for iframe height updates and resize accordingly
-        // Uses route path for deterministic matching between iframe src and child route
-        fromEvent<MessageEvent>(window, 'message')
-          .pipe(
-            filter(
-              (event) =>
-                event.data?.type === 'iframe-height' && typeof event.data.height === 'number' && typeof event.data.route === 'string',
-            ),
-            takeUntilDestroyed(this.destroyRef),
-          )
-          .subscribe((event) => {
-            const { height, route } = event.data;
-            const iframes = document.querySelectorAll<HTMLIFrameElement>('iframe');
-            iframes.forEach((iframe) => {
-              // Match iframe by checking if its src contains the route path
-              if (iframe.src.includes(`#${route}`) || iframe.src.includes(`#${route}?`)) {
-                iframe.style.height = `${height}px`;
-              }
-            });
-          });
+    // Intercept ng-doc absolute sidebar links and prepend the active adapter prefix.
+    // ng-doc generates absolute routes like '/getting-started'; with /:adapter routing
+    // these need to become '/material/getting-started' etc.
+    this.router.events
+      .pipe(
+        filter((e): e is NavigationStart => e instanceof NavigationStart),
+        takeUntilDestroyed(),
+      )
+      .subscribe((e) => {
+        const url = e.url;
+        // Skip landing page and hash anchors (e.g. /#features)
+        if (url === '/' || url === '' || url.startsWith('/#')) return;
+        const firstSegment = url.split('/')[1];
+        // Only intercept if the first segment isn't a known docs adapter
+        if (!isAdapterName(firstSegment) || firstSegment === 'core') {
+          void this.router.navigateByUrl(`/${this.activeAdapter.adapter()}${url}`, { replaceUrl: true });
+        }
       });
 
+    if (this.isBrowser) {
       // Save theme changes to localStorage (skip initial emission)
       this.themeService
         .themeChanges()

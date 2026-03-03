@@ -9,7 +9,7 @@ export class SandboxRefImpl implements SandboxRef {
     readonly adapterName: AdapterName,
     private readonly appRef: ApplicationRef,
     private readonly router: Router,
-    private readonly container: HTMLElement,
+    readonly hostElement: HTMLElement,
     private readonly onDestroy: () => void,
   ) {}
 
@@ -24,7 +24,7 @@ export class SandboxRefImpl implements SandboxRef {
     if (this.destroyed) return;
     this.destroyed = true;
     this.appRef.destroy();
-    this.container.innerHTML = '';
+    this.hostElement.remove();
     this.onDestroy();
   }
 }

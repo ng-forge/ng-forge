@@ -9,7 +9,7 @@ This example demonstrates automatic value derivation using expressions. Watch ho
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/value-derivation" class="example-frame" title="Value Derivation Demo"></iframe>
+<docs-live-example scenario="examples/value-derivation"></docs-live-example>
 
 ## How It Works
 

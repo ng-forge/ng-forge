@@ -1,0 +1,21 @@
+{
+  "name": "sandbox-adapter-material",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "internal/sandbox-adapter-material/src",
+  "projectType": "library",
+  "tags": ["scope:examples", "type:adapter"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "build": {
+      "executor": "@nx/angular:package",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "dependsOn": ["^build"],
+      "options": {
+        "project": "internal/sandbox-adapter-material/ng-package.json",
+        "tsConfig": "internal/sandbox-adapter-material/tsconfig.lib.json"
+      }
+    }
+  }
+}

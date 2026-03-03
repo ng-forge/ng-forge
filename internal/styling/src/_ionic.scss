@@ -197,6 +197,13 @@
 // ============================================
 // Override Ionic's fixed positioning for iframe embedding
 @mixin ionic-iframe-fixes {
+  // Ionic's core.css has `body { position: fixed }`, which transforms to
+  // `:host { position: fixed }` inside shadow DOM — override it here.
+  :host {
+    position: relative !important;
+    height: auto !important;
+  }
+
   ion-app {
     position: relative !important;
     height: auto !important;
