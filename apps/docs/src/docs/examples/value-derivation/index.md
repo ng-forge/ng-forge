@@ -73,4 +73,4 @@ taxRate ───────────────────┴────
 
 ## Related
 
-- **[Value Derivation](../../dynamic-behavior/value-derivation/basics/)** - Core concepts, syntax, array derivations, debugging, and bidirectional patterns
+- **[Value Derivation](../../dynamic-behavior/value-derivation/basics)** - Core concepts, syntax, array derivations, debugging, and bidirectional patterns

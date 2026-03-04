@@ -218,6 +218,6 @@ The section title is also hidden along with the group:
 
 ## Related Documentation
 
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
 - **[Form Groups](../../prebuilt/form-groups/)** - Working with groups
-- **[Checkbox Fields](../../schema-fields/field-types/)** - Field types reference
+- **[Checkbox Fields](/field-types/text-inputs)** - Field types reference

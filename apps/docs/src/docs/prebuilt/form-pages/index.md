@@ -183,7 +183,7 @@ Pages support the `logic` property to conditionally skip a page (hide it from th
 
 When a page is hidden, it is excluded from the multi-step navigation — users skip directly past it. Only `'hidden'` is supported as a logic type on containers.
 
-For all available condition types and operators, see [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/).
+For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).
 
 ## CSS Classes
 

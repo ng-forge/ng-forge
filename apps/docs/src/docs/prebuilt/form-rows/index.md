@@ -208,4 +208,4 @@ Row containers support the `logic` property to conditionally show or hide the en
 }
 ```
 
-Only `'hidden'` is supported as a logic type on containers. For all available condition types and operators, see [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/).
+Only `'hidden'` is supported as a logic type on containers. For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).

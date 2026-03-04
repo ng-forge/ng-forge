@@ -1,98 +1,40 @@
-Non-input fields for display, form submission, and hidden data.
+Non-input fields for displaying content and passing hidden data.
 
 ## text
 
-Display-only content — renders as an HTML element, not a form control.
+Renders static text content inside the form layout. Useful for instructions, section headings, or inline notes.
 
 ```typescript
 {
-  key: 'instructions',
+  key: 'notice',
   type: 'text',
-  label: 'Please fill out all required fields',
   props: {
-    elementType: 'p',  // 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'span'
-  },
+    content: 'Your data is encrypted and never shared.',
+    tag: 'p',          // HTML tag: 'p' | 'span' | 'h1'–'h6' (default: 'p')
+    className: 'hint', // optional CSS class
+  }
 }
 ```
 
 **Core Props:**
 
-- `elementType`: HTML element to render (`'p'` | `'h1'` – `'h6'` | `'span'`)
-
-**Note:** Text fields display the `label` content and have no `value`.
+- `content`: The text string to display
+- `tag`: HTML element to render (`'p'` | `'span'` | `'h1'`–`'h6'`)
 
 ## hidden
 
-Hidden field — carries a value through the form without rendering any UI.
+Carries a fixed value through the form without rendering any UI. Useful for metadata like user IDs or source identifiers.
 
 ```typescript
 {
   key: 'userId',
   type: 'hidden',
-  value: '123',
+  value: '42',
 }
 ```
 
-The `value` property is **required** for hidden fields. The field does not render any visible element.
+**Core Properties:**
 
-## submit
+- `value`: The value to include in the form result (required)
 
-Form submission button.
-
-```typescript
-{
-  key: 'submit',
-  type: 'submit',
-  label: 'Save Changes',
-  props: {
-    color: 'primary',  // UI-integration specific
-  },
-}
-```
-
-## Props vs Meta
-
-When configuring fields there are two distinct ways to customize behavior.
-
-### Props (Component Properties)
-
-`props` are **UI library-specific configuration** passed to the field component.
-
-```typescript
-{
-  key: 'country',
-  type: 'select',
-  label: 'Country',
-  props: {
-    appearance: 'outline',  // Material-specific
-    filter: true,           // PrimeNG-specific
-    showClear: true,
-  },
-}
-```
-
-### Meta (Native Element Attributes)
-
-`meta` contains **native HTML attributes** applied to the underlying DOM element.
-
-```typescript
-{
-  key: 'email',
-  type: 'input',
-  label: 'Email',
-  meta: {
-    autocomplete: 'email',
-    inputmode: 'email',
-    'data-testid': 'registration-email',
-    'aria-describedby': 'email-help',
-  },
-}
-```
-
-| Use Case                              | `props` | `meta` |
-| ------------------------------------- | ------- | ------ |
-| UI appearance (size, variant)         | ✅      | ❌     |
-| Component behavior (multiple, filter) | ✅      | ❌     |
-| Browser autofill (`autocomplete`)     | ❌      | ✅     |
-| Testing IDs (`data-testid`)           | ❌      | ✅     |
-| Accessibility (`aria-*`)              | ❌      | ✅     |
+> Hidden fields always appear in the submitted form value regardless of visibility or conditional logic.

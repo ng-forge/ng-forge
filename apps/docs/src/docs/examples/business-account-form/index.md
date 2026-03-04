@@ -214,6 +214,6 @@ Business fields are hidden when personal is selected:
 
 ## Related Documentation
 
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
 - **[User Registration](../user-registration/)** - Basic registration example
-- **[Radio Buttons](../../schema-fields/field-types/)** - Field types reference
+- **[Radio Buttons](/field-types/text-inputs)** - Field types reference
