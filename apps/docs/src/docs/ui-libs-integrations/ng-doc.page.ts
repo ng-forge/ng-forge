@@ -1,12 +1,12 @@
 import { NgDocPage } from '@ng-doc/core';
-import { LiveExampleComponent } from '../../app/components/live-example/live-example.component';
+import { DocsConfigurationViewComponent } from '../../app/components/configuration-view/configuration-view.component';
 
 const IntegrationsPage: NgDocPage = {
-  title: 'UI Library Integrations',
-  route: 'ui-libs-integrations',
+  title: 'Configuration',
+  route: 'configuration',
   mdFile: './index.md',
-  order: 3,
-  imports: [LiveExampleComponent],
+  order: 2,
+  imports: [DocsConfigurationViewComponent],
 };
 
 export default IntegrationsPage;
