@@ -1,9 +1,16 @@
 import { NgDocPage } from '@ng-doc/core';
+import { DocsInstallCommandComponent } from '../../app/components/install-command/install-command.component';
+import { AdapterPickerComponent } from '../../app/components/adapter-picker/adapter-picker.component';
+import { DocsIntegrationViewComponent } from '../../app/components/integration-view/integration-view.component';
+import ExamplesIndexPage from '../examples/index/ng-doc.page';
 
 const InstallationPage: NgDocPage = {
-  title: 'Installation',
+  title: 'Getting Started',
+  route: 'getting-started',
   mdFile: './index.md',
   order: 1,
+  imports: [DocsInstallCommandComponent, AdapterPickerComponent, DocsIntegrationViewComponent],
+  related: [ExamplesIndexPage],
 };
 
 export default InstallationPage;

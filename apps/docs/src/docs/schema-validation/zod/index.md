@@ -7,9 +7,7 @@ Use [Zod](https://zod.dev) schemas to validate your dynamic forms. This lets you
 
 ## Installation
 
-```bash
-npm install zod
-```
+<docs-install-command packages="zod"></docs-install-command>
 
 ## Basic Usage
 

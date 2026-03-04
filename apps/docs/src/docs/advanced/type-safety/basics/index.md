@@ -872,5 +872,5 @@ const config = {
 ## Related
 
 - **[Validation](../../validation/basics/)** - How validators affect inferred types
-- **[Field Types](../../schema-fields/field-types/)** - Understanding available field types
+- **[Field Types](/field-types/text-inputs)** - Understanding available field types
 - **[Form Layout](../../prebuilt/form-groups/)** - Visual guide to container fields

@@ -251,6 +251,6 @@ This example uses numeric comparison operators:
 
 ## Related Documentation
 
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
 - **[Validation](../../validation/basics/)** - Min/max validation
 - **[User Registration](../user-registration/)** - Basic registration example

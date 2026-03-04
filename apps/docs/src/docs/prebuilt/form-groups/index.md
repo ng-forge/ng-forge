@@ -129,7 +129,7 @@ Groups can contain:
 - Leaf fields (input, select, checkbox, etc.)
 - Row fields (for horizontal layouts within the group)
 
-See [Type Safety & Inference](../advanced/type-safety/basics) for details on how groups affect type inference.
+See [Type Safety & Inference](/advanced/basics) for details on how groups affect type inference.
 
 ## Conditional Visibility
 
@@ -158,4 +158,4 @@ Group containers support the `logic` property to conditionally show or hide the 
 
 When the group is hidden, all its nested fields are hidden with it. Only `'hidden'` is supported as a logic type on containers (not `required`, `readonly`, or `disabled`).
 
-For all available condition types and operators, see [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/).
+For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).

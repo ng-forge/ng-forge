@@ -488,5 +488,5 @@ External data values are reactively tracked - when signals change, property deri
 ## Related
 
 - **Value Derivation** (see tab above) - Compute field form values
-- **[Conditional Logic](../conditional-logic/overview/)** - Control field visibility and state
+- **[Conditional Logic](/dynamic-behavior/overview)** - Control field visibility and state
 - **[Array Fields](../../prebuilt/form-arrays/simplified/)** - Working with array fields

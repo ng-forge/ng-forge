@@ -181,4 +181,4 @@ Dropdown allows users to categorize their inquiry:
 ## Related Documentation
 
 - **[Validation](../../validation/basics/)** - Form validation guide
-- **[Material Integration](../../ui-libs-integrations/material/)** - Material Design styling
+- **[Material Integration](/ui-libs-integrations)** - Material Design styling
