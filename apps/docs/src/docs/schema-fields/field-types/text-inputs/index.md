@@ -24,9 +24,11 @@ Text-based input with HTML5 type support.
 - `type`: HTML input type (`'text'` | `'email'` | `'password'` | `'number'` | `'tel'` | `'url'`)
 - `placeholder`: Input placeholder text
 
-**Note:** UI integrations may extend props with additional features like `hint`, `appearance`, etc.
+### Adapter Props
 
-<docs-live-example scenario="examples/input"></docs-live-example>
+<docs-adapter-props field="input"></docs-adapter-props>
+
+<docs-live-example scenario="examples/input" hideForCustom="true"></docs-live-example>
 
 ## textarea
 
@@ -51,4 +53,8 @@ Multi-line text input.
 - `placeholder`: Placeholder text
 - `rows`: Number of visible text rows
 
-<docs-live-example scenario="examples/textarea"></docs-live-example>
+### Adapter Props
+
+<docs-adapter-props field="textarea"></docs-adapter-props>
+
+<docs-live-example scenario="examples/textarea" hideForCustom="true"></docs-live-example>

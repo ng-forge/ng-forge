@@ -1,0 +1,40 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+
+.integration-view {
+  display: flex;
+  flex-direction: column;
+  gap: $space-8;
+
+  &__heading {
+    font-size: $text-base;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 $space-4;
+  }
+
+  &__features-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: $space-2 $space-4;
+    align-items: baseline;
+  }
+
+  &__feature {
+    display: contents;
+  }
+
+  &__feature-name {
+    font-family: $font-mono;
+    font-size: $text-sm;
+    color: $ember-glow;
+  }
+
+  &__feature-desc {
+    font-size: $text-sm;
+    color: var(--text-secondary);
+  }
+}

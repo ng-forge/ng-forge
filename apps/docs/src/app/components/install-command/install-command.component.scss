@@ -1,0 +1,50 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+
+.install-command {
+  border-radius: $radius-md;
+  border: 1px solid var(--border);
+  overflow: clip;
+  background: var(--bg-elevated);
+
+  &__tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-surface);
+  }
+
+  &__tab {
+    padding: $space-2 $space-4;
+    font-size: $text-xs;
+    font-family: $font-mono;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: var(--text-primary);
+    }
+
+    &.active {
+      color: $ember-glow;
+      border-bottom: 2px solid $ember-glow;
+    }
+  }
+
+  &__body {
+    padding: $space-4;
+    overflow-x: auto;
+    white-space: nowrap;
+    mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent 100%);
+
+    // Shiki wraps output in a <pre>, flatten it to fit our container
+    ::ng-deep pre {
+      margin: 0;
+      padding: 0;
+      background: transparent !important;
+      min-width: max-content;
+    }
+  }
+}

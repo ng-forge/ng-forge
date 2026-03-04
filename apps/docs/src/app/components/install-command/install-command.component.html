@@ -1,0 +1,16 @@
+<div class="install-command">
+  <div class="install-command__tabs" role="tablist" aria-label="Package manager">
+    @for (pm of managers; track pm) {
+      <button
+        role="tab"
+        class="install-command__tab"
+        [class.active]="pmService.pm() === pm"
+        [attr.aria-selected]="pmService.pm() === pm"
+        (click)="select(pm)"
+      >
+        {{ pm }}
+      </button>
+    }
+  </div>
+  <div class="install-command__body" [codeHighlight]="command()" lang="bash"></div>
+</div>

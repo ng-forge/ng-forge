@@ -22,7 +22,11 @@ Numeric range selection.
 - `maxValue`: Maximum slider value
 - `step`: Step increment value
 
-<docs-live-example scenario="examples/slider"></docs-live-example>
+### Adapter Props
+
+<docs-adapter-props field="slider"></docs-adapter-props>
+
+<docs-live-example scenario="examples/slider" hideForCustom="true"></docs-live-example>
 
 ## datepicker
 
@@ -54,4 +58,8 @@ Date selection control.
 - `placeholder`: Placeholder text
 - `format`: Date format string (UI-integration specific)
 
-<docs-live-example scenario="examples/datepicker"></docs-live-example>
+### Adapter Props
+
+<docs-adapter-props field="datepicker"></docs-adapter-props>
+
+<docs-live-example scenario="examples/datepicker" hideForCustom="true"></docs-live-example>

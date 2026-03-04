@@ -9,6 +9,7 @@
 @use '@angular/material' as mat;
 @use 'material' as ember-mat;
 @use 'tokens' as *;
+@use 'themes' as forge-themes;
 
 // Initialize Material core
 @include mat.core();
@@ -74,6 +75,9 @@ $steel-dark: #2a2824;
 
 // Light theme - ember colors with light backgrounds
 :root {
+  // Forge component CSS custom properties (light mode default)
+  @include forge-themes.apply-theme(forge-themes.$theme-light);
+
   // Shiki syntax highlighting CSS variables (used by ng-doc dual-theme Shiki)
   // These must be defined for code to be visible in both light and dark modes
   --shiki-light: #1a1a1a;
@@ -115,6 +119,9 @@ $steel-dark: #2a2824;
 // NgDoc uses: no data-theme = light, data-theme='dark' = dark, data-theme='auto' = system
 @media (prefers-color-scheme: dark) {
   html[data-theme='auto'] {
+    // Forge component CSS custom properties (dark mode)
+    @include forge-themes.apply-theme(forge-themes.$theme-dark);
+
     // Ember accent colors
     --ng-doc-primary: #{$ember-glow};
     --ng-doc-primary-rgb: 255, 140, 66;
@@ -151,6 +158,9 @@ $steel-dark: #2a2824;
 
 // Explicit dark theme - match landing page exactly
 html[data-theme='dark'] {
+  // Forge component CSS custom properties (dark mode)
+  @include forge-themes.apply-theme(forge-themes.$theme-dark);
+
   // Ember accent colors
   --ng-doc-primary: #{$ember-glow};
   --ng-doc-primary-rgb: 255, 140, 66;
@@ -1169,12 +1179,31 @@ html[data-theme='dark'] {
   }
 }
 
-// Landing page always uses dark mode
+// Landing page Shiki: default to light theme colors (no data-theme = light mode)
 html:has(app-landing) {
   .shiki,
   .shiki span {
+    color: var(--shiki-light) !important;
+    background-color: transparent !important;
+  }
+}
+
+// Landing page in dark mode
+html[data-theme='dark']:has(app-landing) {
+  .shiki,
+  .shiki span {
     color: var(--shiki-dark) !important;
-    background-color: var(--shiki-dark-bg) !important;
+    background-color: transparent !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme='auto']:has(app-landing) {
+    .shiki,
+    .shiki span {
+      color: var(--shiki-dark) !important;
+      background-color: transparent !important;
+    }
   }
 }
 
@@ -1277,5 +1306,40 @@ ng-doc-sidebar a[href*='ai-integration'],
   > p + p + h2:first-of-type,
   > hr + h2 {
     margin-top: 0;
+  }
+}
+
+// ============================================
+// SHIKI DUAL-THEME (landing page CodeHighlightDirective)
+// ============================================
+// CodeHighlightDirective uses defaultColor: false — spans carry both
+// --shiki-light and --shiki-dark as CSS custom properties with no
+// hardcoded color. These rules wire them to the active theme.
+// ng-doc code blocks are unaffected (their inline color: #hex wins).
+
+pre.shiki span {
+  color: var(--shiki-light);
+  font-style: var(--shiki-light-font-style, normal);
+  font-weight: var(--shiki-light-font-weight, normal);
+}
+
+// ============================================
+// CUSTOM ADAPTER NAV VISIBILITY
+// ============================================
+app-root:not([data-adapter='custom']) .ng-doc-sidebar-link[href='/building-an-adapter'] {
+  display: none;
+}
+
+html[data-theme='dark'] pre.shiki span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style, normal);
+  font-weight: var(--shiki-dark-font-weight, normal);
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme='auto'] pre.shiki span {
+    color: var(--shiki-dark);
+    font-style: var(--shiki-dark-font-style, normal);
+    font-weight: var(--shiki-dark-font-weight, normal);
   }
 }

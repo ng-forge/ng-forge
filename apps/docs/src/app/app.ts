@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, PLATFORM_ID, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Injector, OnInit, PLATFORM_ID, afterNextRender, computed } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule, NavigationEnd, NavigationStart } from '@angular/router';
 import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocThemeToggleComponent } from '@ng-doc/app';
@@ -49,13 +49,15 @@ function storageValueToTheme(value: string | null): string | undefined {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.dark]': 'isDark()',
+    '[attr.data-adapter]': 'activeAdapter.adapter()',
   },
 })
 export class App implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly router = inject(Router);
-  private readonly activeAdapter = inject(ActiveAdapterService);
+  protected readonly activeAdapter = inject(ActiveAdapterService);
+  private readonly injector = inject(Injector);
   readonly themeService = inject(NgDocThemeService);
 
   private readonly currentUrl = toSignal(
@@ -107,6 +109,15 @@ export class App implements OnInit {
         }
       });
 
+    this.router.events
+      .pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => {
+        afterNextRender(() => this.fixSidebarActiveLinks(), { injector: this.injector });
+      });
+
     if (this.isBrowser) {
       // Save theme changes to localStorage (skip initial emission)
       this.themeService
@@ -116,6 +127,17 @@ export class App implements OnInit {
           localStorage.setItem(THEME_STORAGE_KEY, themeToStorageValue(theme));
         });
     }
+  }
+
+  private fixSidebarActiveLinks(): void {
+    const bare = '/' + this.router.url.split('/').slice(2).join('/').split(/[?#]/)[0];
+    document.querySelectorAll<HTMLAnchorElement>('.ng-doc-sidebar-link').forEach((el) => {
+      const href = el.getAttribute('href') ?? '';
+      if (href === bare || bare.startsWith(href + '/')) el.classList.add('active');
+    });
+    document.querySelectorAll<HTMLElement>('.ng-doc-sidebar-category').forEach((el) => {
+      if (el.querySelector('.ng-doc-sidebar-link.active')) el.classList.add('active');
+    });
   }
 
   ngOnInit(): void {

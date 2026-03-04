@@ -1,0 +1,43 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+
+.adapter-props-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $text-sm;
+
+  th,
+  td {
+    padding: $space-2 $space-3;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: $text-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    color: var(--text-primary);
+
+    code {
+      font-family: $font-mono;
+      color: $ember-glow;
+      font-size: 0.8125rem;
+    }
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.adapter-props-empty {
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: $text-sm;
+}
