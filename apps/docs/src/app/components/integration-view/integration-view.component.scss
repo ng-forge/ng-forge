@@ -1,5 +1,6 @@
 @use 'tokens' as *;
 @use 'themes' as *;
+@use 'mixins' as mix;
 
 .integration-view {
   display: flex;
@@ -36,5 +37,10 @@
   &__feature-desc {
     font-size: $text-sm;
     color: var(--text-secondary);
+  }
+
+  &__code {
+    @include mix.code-block;
+    padding: $space-4;
   }
 }

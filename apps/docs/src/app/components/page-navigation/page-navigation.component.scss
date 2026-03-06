@@ -1,0 +1,53 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+
+.docs-page-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: $space-4;
+  padding: $space-6 0;
+  border-top: 1px solid $steel-dark;
+  margin-top: $space-8;
+}
+
+.docs-page-nav__link {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  text-decoration: none;
+  padding: $space-3 $space-4;
+  border: 1px solid $steel-dark;
+  border-radius: 6px;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+  max-width: 45%;
+
+  &:hover {
+    border-color: $ember-glow;
+    color: $ember-glow;
+
+    .docs-page-nav__title {
+      color: $ember-glow;
+    }
+  }
+
+  &--next {
+    align-items: flex-end;
+    margin-left: auto;
+  }
+}
+
+.docs-page-nav__dir {
+  font-size: 0.75rem;
+  color: $steel-mid;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.docs-page-nav__title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $steel;
+  transition: color 0.2s;
+}

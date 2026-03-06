@@ -7,280 +7,225 @@
     <priority>1.0</priority>
   </url>
 
-  <!-- Installation -->
+  <!-- Getting Started (was: Installation) -->
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/installation</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/getting-started</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
-  <!-- UI Library Integrations -->
+  <!-- Configuration (was: UI Library Integrations) -->
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/ui-libs-integrations</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/configuration</loc>
     <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Examples (was: Quick Start) -->
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/examples</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/examples/login-form</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/ui-libs-integrations/material</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://ng-forge.com/dynamic-forms/material/examples/contact-form</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/ui-libs-integrations/primeng</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://ng-forge.com/dynamic-forms/material/examples/user-registration</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/ui-libs-integrations/ionic</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://ng-forge.com/dynamic-forms/material/examples/paginated-form</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/ui-libs-integrations/bootstrap</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://ng-forge.com/dynamic-forms/material/examples/value-derivation</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/examples/contact-dynamic-fields</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/examples/business-account-form</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/examples/shipping-billing-address</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/examples/age-conditional-form</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/examples/enterprise-features</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/examples/simplified-array-form</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/examples/array-form</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
 
   <!-- Field Types -->
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/field-types</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/schema-fields/field-types/text-inputs</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/schema-fields/field-types/selection</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/schema-fields/field-types/advanced-controls</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/schema-fields/field-types/buttons</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/schema-fields/field-types/utility</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
 
   <!-- Validation -->
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/validation</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/validation/basics</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/validation/basics</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/validation/advanced</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/validation/advanced</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/validation/custom-validators</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/validation/custom-validators</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/validation/reference</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/validation/reference</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <!-- Dynamic Behavior -->
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/dynamic-behavior</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/dynamic-behavior/overview</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/dynamic-behavior/overview</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/dynamic-behavior/derivation</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/dynamic-behavior/derivation</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/dynamic-behavior/derivation/property</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/dynamic-behavior/i18n</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/dynamic-behavior/submission</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <!-- Schema Validation -->
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/schema-validation</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/schema-validation/overview</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/schema-validation/angular-schema</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/schema-validation/zod</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/dynamic-behavior/derivation/property</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <!-- Layout Components -->
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/prebuilt</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/form-pages</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/prebuilt/form-pages</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/form-groups</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/prebuilt/form-groups</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/form-rows</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/prebuilt/form-rows</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/form-arrays/simplified</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/prebuilt/form-arrays/simplified</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/prebuilt/form-arrays/complete</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/prebuilt/text-components</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/prebuilt/hidden-fields</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/form-arrays/complete</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
-  <!-- Examples -->
+  <!-- Schema Validation -->
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/examples</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/examples/login-form</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/examples/contact-form</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/examples/user-registration</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/examples/paginated-form</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/examples/value-derivation</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/examples/contact-dynamic-fields</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/examples/business-account-form</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/examples/shipping-billing-address</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/examples/age-conditional-form</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/examples/enterprise-features</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/examples/simplified-array-form</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/examples/array-form</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/schema-validation/zod</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
-  <!-- Advanced -->
+  <!-- Recipes -->
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/advanced</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://ng-forge.com/dynamic-forms/material/advanced/type-safety</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/advanced/events</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/advanced/expression-parser</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/advanced/value-exclusion</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/advanced/custom-fields</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Custom Integrations (standalone root page) -->
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/custom-integrations</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/advanced/basics</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/advanced/events</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/advanced/expression-parser</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/advanced/custom-integrations</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/advanced/value-exclusion</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
   </url>
 
   <!-- AI Integration -->
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/ai-integration</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/ai-integration</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <!-- API Reference -->
-  <url>
-    <loc>https://ng-forge.com/dynamic-forms/api</loc>
-    <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 </urlset>

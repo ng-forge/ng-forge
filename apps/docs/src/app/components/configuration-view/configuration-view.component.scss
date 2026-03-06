@@ -30,6 +30,11 @@
     }
   }
 
+  &__code {
+    @include mix.code-block;
+    padding: $space-4;
+  }
+
   &__table {
     width: 100%;
     border-collapse: collapse;

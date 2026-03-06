@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { NgDocCodeComponent } from '@ng-doc/app/components/code';
+import { NgDocCopyButtonComponent } from '@ng-doc/app/components/copy-button';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 
@@ -285,7 +285,7 @@ const CUSTOM_FIELD_GUIDES: Partial<Record<string, CustomFieldGuide>> = {
   selector: 'docs-adapter-props',
   templateUrl: './adapter-props.component.html',
   styleUrl: './adapter-props.component.scss',
-  imports: [CodeHighlightDirective, NgDocCodeComponent],
+  imports: [CodeHighlightDirective, NgDocCopyButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DocsAdapterPropsComponent {

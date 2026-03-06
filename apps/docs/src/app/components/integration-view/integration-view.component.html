@@ -7,17 +7,17 @@
   @if (data().stylesCode) {
     <section class="integration-view__setup">
       <h2 class="integration-view__heading">Styles</h2>
-      <ng-doc-code [copyButton]="true">
+      <div class="integration-view__code">
         <div [codeHighlight]="data().stylesCode!" lang="scss"></div>
-      </ng-doc-code>
+      </div>
     </section>
   }
 
   <section class="integration-view__setup">
     <h2 class="integration-view__heading">Setup</h2>
-    <ng-doc-code [copyButton]="true">
+    <div class="integration-view__code">
       <div [codeHighlight]="data().setupCode"></div>
-    </ng-doc-code>
+    </div>
   </section>
 
   <section class="integration-view__features">
