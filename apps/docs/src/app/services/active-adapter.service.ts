@@ -1,7 +1,6 @@
-import { Injectable, inject, Signal } from '@angular/core';
+import { Injectable, inject, computed } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, map, startWith, take } from 'rxjs';
+import { filter, take } from 'rxjs';
 import { AdapterName, isAdapterName } from '@ng-forge/sandbox-harness';
 
 const DOCS_ADAPTERS: AdapterName[] = ['material', 'bootstrap', 'primeng', 'ionic', 'custom'];
@@ -10,17 +9,12 @@ const DOCS_ADAPTERS: AdapterName[] = ['material', 'bootstrap', 'primeng', 'ionic
 export class ActiveAdapterService {
   private readonly router = inject(Router);
 
-  readonly adapter: Signal<AdapterName> = toSignal(
-    this.router.events.pipe(
-      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-      startWith(null),
-      map(() => {
-        const seg = this.router.url.split('/')[1];
-        return isAdapterName(seg) && seg !== 'core' ? seg : 'material';
-      }),
-    ),
-    { initialValue: 'material' },
-  );
+  readonly adapter = computed<AdapterName>(() => {
+    const nav = this.router.lastSuccessfulNavigation();
+    const url = nav ? this.router.serializeUrl(nav.finalUrl ?? nav.extractedUrl) : this.router.url;
+    const seg = url.split('/')[1];
+    return isAdapterName(seg) && seg !== 'core' ? seg : 'material';
+  });
 
   readonly adapters: { name: AdapterName; label: string; icon: string }[] = [
     { name: 'material', label: 'Material', icon: 'assets/icons/material.svg' },

@@ -1,7 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, Input } from '@angular/core';
-import { Router, NavigationEnd, RouterLink } from '@angular/router';
-import { filter, map, startWith } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Router, RouterLink } from '@angular/router';
 import { NG_DOC_CONTEXT } from '@ng-doc/app/tokens';
 import type { NgDocNavigation } from '@ng-doc/app/interfaces';
 
@@ -37,21 +35,16 @@ export class DocsPageNavigationComponent {
   private readonly router = inject(Router);
   private readonly context = inject(NG_DOC_CONTEXT);
 
-  private readonly routerState = toSignal(
-    this.router.events.pipe(
-      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-      startWith(null),
-      map(() => {
-        const url = this.router.url.split(/[?#]/)[0];
-        const segments = url.replace(/^\//, '').split('/');
-        return {
-          adapter: segments[0] ?? 'material',
-          path: segments.slice(1).join('/'),
-        };
-      }),
-    ),
-    { requireSync: true },
-  );
+  private readonly routerState = computed(() => {
+    const nav = this.router.lastSuccessfulNavigation();
+    const rawUrl = nav ? this.router.serializeUrl(nav.finalUrl ?? nav.extractedUrl) : this.router.url;
+    const url = rawUrl.split(/[?#]/)[0];
+    const segments = url.replace(/^\//, '').split('/');
+    return {
+      adapter: segments[0] ?? 'material',
+      path: segments.slice(1).join('/'),
+    };
+  });
 
   private readonly flatPages = computed(() => {
     const flatten = (items: NgDocNavigation[]): NgDocNavigation[] =>
