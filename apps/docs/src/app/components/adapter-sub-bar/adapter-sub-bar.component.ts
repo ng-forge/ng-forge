@@ -8,7 +8,7 @@ import { AdapterName } from '@ng-forge/sandbox-harness';
     <div class="adapter-sub-bar">
       <div class="adapter-dropdown" [class.open]="isOpen()">
         <button class="adapter-trigger" (click)="toggle($event)" [attr.aria-expanded]="isOpen()">
-          <span class="trigger-label">UI</span>
+          <span class="trigger-label">Adapter</span>
           <span class="trigger-divider"></span>
           <img [src]="currentAdapter().icon" [alt]="currentAdapter().label" class="trigger-icon" />
           <span class="trigger-name">{{ currentAdapter().label }}</span>
