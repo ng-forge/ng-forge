@@ -8988,7 +8988,7 @@ Select the UI library you're using — the setup guide below will update to matc
 
 All adapters share the same `FormConfig` schema. Here's a login form that works regardless of which adapter you chose above:
 
-<docs-live-example scenario="examples/login"></docs-live-example>
+<docs-live-example scenario="examples/login" hideForCustom></docs-live-example>
 
 ```typescript name="login.component.ts"
 import { Component } from '@angular/core';
@@ -9039,9 +9039,10 @@ export class LoginComponent {
 
 ## Next Steps
 
-- **[Configuration →](/configuration)** — Set global defaults with `withMaterialFields({ ... })` and per-form `defaultProps`
+- **[Configuration →](/configuration)** — Set global defaults with `withXxxFields({ ... })` and per-form `defaultProps`
 - **[Examples →](/examples)** — Browse complete form examples
 - **[Field Types →](/schema-fields/field-types/text-inputs)** — All available field types and their props
+- **[Building an Adapter →](/building-an-adapter)** — Create your own adapter for any UI library
 
 --- prebuilt/form-arrays/complete ---
 
@@ -11877,7 +11878,7 @@ ng-forge applies props in priority order — more specific always wins:
 Library-level → Form-level → Field-level
 ```
 
-- **Library-level**: `withMaterialFields({ appearance: 'outline' })` — applies to every form in your app
+- **Library-level**: `withXxxFields({ appearance: 'outline' })` — applies to every form in your app
 - **Form-level**: `defaultProps: { appearance: 'fill' }` — overrides library defaults for one form
 - **Field-level**: `props: { appearance: 'outline' }` — overrides everything for one field
 
@@ -11895,7 +11896,7 @@ Each field type also accepts its own adapter-specific `props`. See [Field Types 
 
 - **[Examples →](/examples)** — Browse complete form examples
 - **[Field Types →](/schema-fields/field-types/text-inputs)** — Per-field adapter props reference
-- **[Custom Integrations →](/custom-integrations)** — Build your own adapter
+- **[Building an Adapter →](/building-an-adapter)** — Build your own adapter
 
 --- validation/advanced ---
 
