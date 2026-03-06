@@ -4,7 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 import { AdapterName, isAdapterName } from '@ng-forge/sandbox-harness';
 
-const DOCS_ADAPTERS: AdapterName[] = ['material', 'bootstrap', 'primeng', 'ionic'];
+const DOCS_ADAPTERS: AdapterName[] = ['material', 'bootstrap', 'primeng', 'ionic', 'custom'];
 
 @Injectable({ providedIn: 'root' })
 export class ActiveAdapterService {
@@ -27,12 +27,13 @@ export class ActiveAdapterService {
     { name: 'bootstrap', label: 'Bootstrap', icon: 'assets/icons/bootstrap.svg' },
     { name: 'primeng', label: 'PrimeNG', icon: 'assets/icons/primeng.webp' },
     { name: 'ionic', label: 'Ionic', icon: 'assets/icons/ionic.svg' },
+    { name: 'custom', label: 'Custom', icon: 'assets/icons/custom.svg' },
   ];
 
   switchTo(name: AdapterName): void {
     if (!DOCS_ADAPTERS.includes(name)) return;
     const segments = this.router.url.split('/');
-    segments[1] = name;
-    void this.router.navigateByUrl(segments.join('/'));
+    const path = segments.slice(2).join('/') || 'getting-started';
+    void this.router.navigateByUrl(`/${name}/${path}`);
   }
 }
