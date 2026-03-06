@@ -1,7 +1,7 @@
 import { Injectable, inject, Signal } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, map, startWith } from 'rxjs';
+import { filter, map, startWith, take } from 'rxjs';
 import { AdapterName, isAdapterName } from '@ng-forge/sandbox-harness';
 
 const DOCS_ADAPTERS: AdapterName[] = ['material', 'bootstrap', 'primeng', 'ionic', 'custom'];
@@ -32,8 +32,17 @@ export class ActiveAdapterService {
 
   switchTo(name: AdapterName): void {
     if (!DOCS_ADAPTERS.includes(name)) return;
+    const scrollY = window.scrollY;
     const segments = this.router.url.split('/');
     const path = segments.slice(2).join('/') || 'getting-started';
     void this.router.navigateByUrl(`/${name}/${path}`);
+    this.router.events
+      .pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        take(1),
+      )
+      .subscribe(() => {
+        requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: 'instant' }));
+      });
   }
 }
