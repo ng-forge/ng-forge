@@ -22,6 +22,8 @@ import { provideAdapterRegistry, SandboxHarness } from '@ng-forge/sandbox-harnes
 import { DOCS_ADAPTERS } from './adapters/adapter-registrations';
 import { LiveExampleComponent } from './components/live-example/live-example.component';
 import { AdapterPickerComponent } from './components/adapter-picker/adapter-picker.component';
+import { DocsIntegrationViewComponent } from './components/integration-view/integration-view.component';
+import { DocsConfigurationViewComponent } from './components/configuration-view/configuration-view.component';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -69,6 +71,16 @@ export const appConfig: ApplicationConfig = {
     providePageProcessor({
       component: AdapterPickerComponent,
       selector: 'docs-adapter-picker',
+      extractOptions: () => ({ inputs: {} }),
+    }),
+    providePageProcessor({
+      component: DocsIntegrationViewComponent,
+      selector: 'docs-integration-view',
+      extractOptions: () => ({ inputs: {} }),
+    }),
+    providePageProcessor({
+      component: DocsConfigurationViewComponent,
+      selector: 'docs-configuration-view',
       extractOptions: () => ({ inputs: {} }),
     }),
   ],
