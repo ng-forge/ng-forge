@@ -41,6 +41,8 @@ export const appRoutes: Route[] = [
     path: ':adapter',
     canActivate: [adapterGuard],
     children: [
+      // Redirect adapter root to Getting Started
+      { path: '', redirectTo: 'getting-started', pathMatch: 'full' },
       // Route renames within adapter scope
       { path: 'installation', redirectTo: 'getting-started', pathMatch: 'full' },
       { path: 'ui-libs-integrations', redirectTo: 'configuration', pathMatch: 'full' },

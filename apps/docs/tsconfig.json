@@ -22,7 +22,7 @@
       "@ng-forge/dynamic-forms-material": ["packages/dynamic-forms-material/src/index.ts"],
       "@ng-forge/dynamic-forms-primeng": ["dist/packages/dynamic-forms-primeng"],
       "@ng-forge/sandbox-harness": ["internal/sandbox-harness/src/index.ts"],
-      "@ng-forge/styling": ["internal/styling/src/index.ts"],
+      "@ng-forge/styling": ["dist/internal/styling"],
       "@ng-forge/examples-shared-ui": ["internal/examples-shared-ui/src/index.ts"],
       "@ng-forge/examples-material": ["dist/internal/examples-material"],
       "@ng-forge/examples-bootstrap": ["dist/internal/examples-bootstrap"],
@@ -30,7 +30,7 @@
       "@ng-forge/examples-ionic": ["dist/internal/examples-ionic"],
       "@ng-forge/sandbox-adapter-material": ["dist/internal/sandbox-adapter-material"],
       "@ng-forge/sandbox-adapter-bootstrap": ["dist/internal/sandbox-adapter-bootstrap"],
-      "@ng-forge/sandbox-adapter-primeng": ["internal/sandbox-adapter-primeng/src/index.ts"],
+      "@ng-forge/sandbox-adapter-primeng": ["dist/internal/sandbox-adapter-primeng"],
       "@ng-forge/sandbox-adapter-ionic": ["dist/internal/sandbox-adapter-ionic"]
     }
   },

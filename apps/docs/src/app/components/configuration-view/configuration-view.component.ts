@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { NgDocCodeComponent } from '@ng-doc/app/components/code';
+import { NgDocCopyButtonComponent } from '@ng-doc/app/components/copy-button';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 
@@ -255,7 +255,7 @@ const config = {
 
 @Component({
   selector: 'docs-configuration-view',
-  imports: [NgDocCodeComponent, CodeHighlightDirective],
+  imports: [CodeHighlightDirective, NgDocCopyButtonComponent],
   template: `
     <div class="config-view">
       @if (data().options.length > 0) {
@@ -306,9 +306,9 @@ const config = {
 
       <section class="config-view__section">
         <h3 class="config-view__heading">Library-level (provider)</h3>
-        <ng-doc-code [copyButton]="true">
+        <div class="config-view__code">
           <div [codeHighlight]="data().providerExample"></div>
-        </ng-doc-code>
+        </div>
       </section>
 
       <section class="config-view__section">
@@ -317,9 +317,9 @@ const config = {
           Use <code>{{ data().typeAlias }}</code> from <code>{{ data().typeAliasImport }}</code> for type-safe
           <code>defaultProps</code> with autocomplete.
         </p>
-        <ng-doc-code [copyButton]="true">
+        <div class="config-view__code">
           <div [codeHighlight]="data().formLevelExample"></div>
-        </ng-doc-code>
+        </div>
       </section>
     </div>
   `,

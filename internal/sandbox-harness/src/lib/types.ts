@@ -15,7 +15,7 @@ export const SANDBOX_FORM_CONFIG = new InjectionToken<FormConfig>('SANDBOX_FORM_
  */
 export type SandboxAppFactory = (routes: Route[]) => { config: ApplicationConfig; rootComponent: Type<unknown> };
 
-export type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'core';
+export type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'core' | 'custom';
 
 /**
  * Registration for a UI adapter in the sandbox harness.

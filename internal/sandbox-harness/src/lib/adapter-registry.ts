@@ -11,6 +11,6 @@ export function provideAdapterRegistry(adapters: AdapterRegistration[]): Provide
 }
 
 export function isAdapterName(value: string): value is AdapterName {
-  const names: AdapterName[] = ['material', 'bootstrap', 'primeng', 'ionic', 'core'];
+  const names: AdapterName[] = ['material', 'bootstrap', 'primeng', 'ionic', 'core', 'custom'];
   return (names as string[]).includes(value);
 }

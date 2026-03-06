@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { NgDocCodeComponent } from '@ng-doc/app/components/code';
+import { NgDocCopyButtonComponent } from '@ng-doc/app/components/copy-button';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import { DocsInstallCommandComponent } from '../install-command/install-command.component';
@@ -128,7 +128,7 @@ export const appConfig: ApplicationConfig = {
 
 @Component({
   selector: 'docs-integration-view',
-  imports: [DocsInstallCommandComponent, NgDocCodeComponent, CodeHighlightDirective],
+  imports: [DocsInstallCommandComponent, NgDocCopyButtonComponent, CodeHighlightDirective],
   templateUrl: './integration-view.component.html',
   styleUrl: './integration-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
