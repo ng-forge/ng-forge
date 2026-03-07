@@ -1,13 +1,11 @@
-import { APP_ID, ApplicationConfig, Component, provideZonelessChangeDetection, Type } from '@angular/core';
-import { provideRouter, withHashLocation } from '@angular/router';
-import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideHttpClient } from '@angular/common/http';
-import { Route } from '@angular/router';
+import { Component } from '@angular/core';
 import { IonApp, IonRouterOutlet, provideIonicAngular } from '@ionic/angular/standalone';
+import { Route } from '@angular/router';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
-import { wrapRoutesWithAdapter } from './adapter-routes';
+import { createSandboxApp } from './create-sandbox-app';
 
+// Ionic requires its own root template with IonApp/IonRouterOutlet
 @Component({
   selector: 'sandbox-ionic-root',
   imports: [IonApp, IonRouterOutlet],
@@ -15,19 +13,12 @@ import { wrapRoutesWithAdapter } from './adapter-routes';
 })
 class IonicRootComponent {}
 
-export function createIonicApp(routes: Route[]): { config: ApplicationConfig; rootComponent: Type<unknown> } {
-  return {
-    config: {
-      providers: [
-        provideZonelessChangeDetection(),
-        provideAnimations(),
-        provideHttpClient(),
-        provideRouter(wrapRoutesWithAdapter('ionic', routes), withHashLocation()),
-        provideIonicAngular({ mode: 'md' }),
-        provideDynamicForm(...withIonicFields()),
-        { provide: APP_ID, useValue: 'sandbox-ionic' },
-      ],
-    },
-    rootComponent: IonicRootComponent,
-  };
+export function createIonicApp(routes: Route[]) {
+  return createSandboxApp(
+    'ionic',
+    routes,
+    [provideIonicAngular({ mode: 'md' }), provideDynamicForm(...withIonicFields())],
+    IonicRootComponent,
+    'sandbox-ionic',
+  );
 }

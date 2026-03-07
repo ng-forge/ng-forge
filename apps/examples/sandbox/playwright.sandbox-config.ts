@@ -3,27 +3,13 @@ import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
 import { fileURLToPath } from 'node:url';
 import { APP_PORTS } from '@ng-forge/examples-shared-testing/playwright-config';
+import type { AdapterName } from '@ng-forge/sandbox-harness';
 
-type SandboxAdapter = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'core';
+// 'custom' is a virtual adapter name in the harness; it has no dedicated E2E test suite
+type SandboxAdapter = Exclude<AdapterName, 'custom'>;
 
 const PORT = APP_PORTS['sandbox-examples'];
 
-/**
- * Returns the reporter configuration based on CI environment.
- */
-const getReporters = (): ReporterDescription[] => {
-  const reporters: ReporterDescription[] = [['list'], ['html', { outputFolder: './playwright-report', open: 'never' }]];
-
-  if (process.env['CI']) {
-    reporters.push(['json', { outputFile: './test-results/results.json' }]);
-  }
-
-  return reporters;
-};
-
-/**
- * Browser project configurations with Firefox-specific timeouts.
- */
 const allProjects = [
   {
     name: 'chromium',
@@ -45,18 +31,6 @@ const allProjects = [
 ];
 
 /**
- * Returns browser projects based on E2E_BROWSERS environment variable.
- */
-const getProjects = () => {
-  const browserSelection = process.env['E2E_BROWSERS'] || 'all';
-  if (browserSelection === 'all') {
-    return allProjects;
-  }
-  const selectedBrowsers = browserSelection.split(',').map((b: string) => b.trim());
-  return allProjects.filter((p) => selectedBrowsers.includes(p.name));
-};
-
-/**
  * Creates a Playwright configuration for a specific adapter in the sandbox example app.
  *
  * @param configFileUrl - Pass `import.meta.url` from the config file
@@ -67,14 +41,31 @@ export function createSandboxPlaywrightConfig(configFileUrl: string, adapterName
   const baseURL = process.env['BASE_URL'] || `http://localhost:${PORT}`;
   const testDir = `./src/app/testing/${adapterName}`;
 
+  const browserSelection = process.env['E2E_BROWSERS'] || 'all';
+  const projects =
+    browserSelection === 'all'
+      ? allProjects
+      : allProjects.filter((p) =>
+          browserSelection
+            .split(',')
+            .map((b) => b.trim())
+            .includes(p.name),
+        );
+
+  const reporters: ReporterDescription[] = [['list'], ['html', { outputFolder: './playwright-report', open: 'never' }]];
+  if (process.env['CI']) {
+    reporters.push(['json', { outputFile: './test-results/results.json' }]);
+  }
+
   return defineConfig({
     ...nxE2EPreset(fileURLToPath(configFileUrl), { testDir }),
-    reporter: getReporters(),
+    reporter: reporters,
     timeout: 10000,
     retries: 1,
     expect: {
       timeout: 5000,
       toHaveScreenshot: {
+        // 1% pixel diff covers anti-aliasing; 0.2 colour distance covers subpixel rendering
         maxDiffPixelRatio: 0.01,
         threshold: 0.2,
         animations: 'disabled',
@@ -97,6 +88,6 @@ export function createSandboxPlaywrightConfig(configFileUrl: string, adapterName
       cwd: workspaceRoot,
       timeout: 180000,
     },
-    projects: getProjects(),
+    projects,
   });
 }

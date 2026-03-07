@@ -16,7 +16,6 @@ const DEMO_CONFIG = {
       type: 'input',
       label: 'Email Address',
       required: true,
-      email: true,
       props: { placeholder: 'Enter your email' },
     },
     {
@@ -43,14 +42,34 @@ const DEMO_CONFIG = {
   selector: 'sandbox-demo-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DynamicForm, JsonPipe],
+  styles: [
+    `
+      details {
+        margin-top: 16px;
+      }
+
+      summary {
+        cursor: pointer;
+        font-weight: 500;
+        color: #666;
+      }
+
+      pre {
+        margin-top: 8px;
+        padding: 12px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        font-size: 0.8125rem;
+        overflow-x: auto;
+      }
+    `,
+  ],
   template: `
     <form [dynamic-form]="config" [(value)]="formValue"></form>
 
-    <details style="margin-top: 16px">
-      <summary style="cursor: pointer; font-weight: 500; color: #666">Form Value</summary>
-      <pre style="margin-top: 8px; padding: 12px; background: #f5f5f5; border-radius: 8px; font-size: 0.8125rem; overflow-x: auto">{{
-        formValue() | json
-      }}</pre>
+    <details>
+      <summary>Form Value</summary>
+      <pre>{{ formValue() | json }}</pre>
     </details>
   `,
 })
