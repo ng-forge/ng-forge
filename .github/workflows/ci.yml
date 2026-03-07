@@ -325,6 +325,19 @@ jobs:
         if: ${{ !matrix.docker }}
         run: pnpm exec playwright install-deps
 
+      - name: Restore build artifacts
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            dist/packages/dynamic-forms
+            dist/packages/dynamic-forms-material
+            dist/packages/dynamic-forms-bootstrap
+            dist/packages/dynamic-forms-ionic
+            dist/packages/dynamic-forms-primeng
+            dist/packages/dynamic-form-mcp
+          key: build-${{ github.sha }}
+          fail-on-cache-miss: true
+
       - name: Restore internal dist artifacts
         uses: actions/cache/restore@v5
         with:
