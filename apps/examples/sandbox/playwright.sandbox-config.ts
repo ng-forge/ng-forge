@@ -2,13 +2,12 @@ import { defineConfig, devices, PlaywrightTestConfig, ReporterDescription } from
 import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
 import { fileURLToPath } from 'node:url';
-import { APP_PORTS } from '@ng-forge/examples-shared-testing/playwright-config';
-import type { AdapterName } from '@ng-forge/sandbox-harness';
 
 // 'custom' is a virtual adapter name in the harness; it has no dedicated E2E test suite
-type SandboxAdapter = Exclude<AdapterName, 'custom'>;
+type SandboxAdapter = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'core';
 
-const PORT = APP_PORTS['sandbox-examples'];
+// Keep in sync with APP_PORTS in internal/examples-shared-testing/src/lib/app-config.ts
+const PORT = 4210;
 
 const allProjects = [
   {
