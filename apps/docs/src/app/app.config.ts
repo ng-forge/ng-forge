@@ -1,5 +1,6 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter, withInMemoryScrolling } from '@angular/router';
+import { provideRouter, withInMemoryScrolling, UrlSerializer } from '@angular/router';
+import { AdapterAwareUrlSerializer } from './serializers/adapter-url-serializer';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import {
   NG_DOC_DEFAULT_PAGE_PROCESSORS,
@@ -52,6 +53,7 @@ export const appConfig: ApplicationConfig = {
     providePageSkeleton(NG_DOC_DEFAULT_PAGE_SKELETON),
     provideMainPageProcessor(NG_DOC_DEFAULT_PAGE_PROCESSORS),
     provideClientHydration(withEventReplay()),
+    { provide: UrlSerializer, useClass: AdapterAwareUrlSerializer },
     // Dynamic forms for landing page demos (Material is always used on landing page)
     provideDynamicForm(...withMaterialFields()),
     // SandboxHarness for live adapter examples in docs pages
