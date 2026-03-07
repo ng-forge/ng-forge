@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, Injector, OnInit, PLATFORM_ID, afterNextRender, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Router, RouterModule, NavigationEnd, NavigationStart } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocThemeToggleComponent } from '@ng-doc/app';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
 import { map, startWith, of, skip, filter } from 'rxjs';
@@ -11,7 +11,6 @@ import { Logo } from './components/logo';
 import { SidebarAccordionDirective } from './directives/sidebar-accordion.directive';
 import { AdapterSubBarComponent } from './components/adapter-sub-bar/adapter-sub-bar.component';
 import { ActiveAdapterService } from './services/active-adapter.service';
-import { isAdapterName } from '@ng-forge/sandbox-harness';
 
 const THEME_STORAGE_KEY = 'ng-forge-docs-theme';
 type ThemeType = 'auto' | 'light' | 'dark';
@@ -57,7 +56,6 @@ export class App implements OnInit {
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly router = inject(Router);
   protected readonly activeAdapter = inject(ActiveAdapterService);
-  private readonly injector = inject(Injector);
   readonly themeService = inject(NgDocThemeService);
 
   private readonly currentUrl = toSignal(
@@ -90,39 +88,6 @@ export class App implements OnInit {
   );
 
   constructor() {
-    // Intercept ng-doc absolute sidebar links and prepend the active adapter prefix.
-    // ng-doc generates absolute routes like '/getting-started'; with /:adapter routing
-    // these need to become '/material/getting-started' etc.
-    this.router.events
-      .pipe(
-        filter((e): e is NavigationStart => e instanceof NavigationStart),
-        takeUntilDestroyed(),
-      )
-      .subscribe((e) => {
-        const url = e.url;
-        // Skip landing page and hash anchors (e.g. /#features)
-        if (url === '/' || url === '' || url.startsWith('/#')) return;
-        const firstSegment = url.split('/')[1];
-        // Only intercept if the first segment isn't a known docs adapter
-        if (!isAdapterName(firstSegment) || firstSegment === 'core') {
-          void this.router.navigateByUrl(`/${this.activeAdapter.adapter()}${url}`, { replaceUrl: true });
-        }
-      });
-
-    // Fix active sidebar links after every navigation
-    this.router.events
-      .pipe(
-        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-        takeUntilDestroyed(),
-      )
-      .subscribe(() => {
-        afterNextRender(() => this.fixSidebarActiveLinks(), { injector: this.injector });
-      });
-
-    // Also fix on initial render: the first navigation completes during bootstrapping,
-    // before the subscription above is set up, so NavigationEnd is missed on direct URL load.
-    afterNextRender(() => this.fixSidebarActiveLinks(), { injector: this.injector });
-
     if (this.isBrowser) {
       // Save theme changes to localStorage (skip initial emission)
       this.themeService
@@ -132,17 +97,6 @@ export class App implements OnInit {
           localStorage.setItem(THEME_STORAGE_KEY, themeToStorageValue(theme));
         });
     }
-  }
-
-  private fixSidebarActiveLinks(): void {
-    const bare = '/' + this.router.url.split('/').slice(2).join('/').split(/[?#]/)[0];
-    document.querySelectorAll<HTMLAnchorElement>('.ng-doc-sidebar-link').forEach((el) => {
-      const href = el.getAttribute('href') ?? '';
-      if (href === bare || bare.startsWith(href + '/')) el.classList.add('active');
-    });
-    document.querySelectorAll<HTMLElement>('.ng-doc-sidebar-category').forEach((el) => {
-      if (el.querySelector('.ng-doc-sidebar-link.active')) el.classList.add('active');
-    });
   }
 
   ngOnInit(): void {
