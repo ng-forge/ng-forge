@@ -4,7 +4,7 @@ A comprehensive multi-step registration form demonstrating the `page` field type
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/paginated-form" class="example-frame" title="Paginated Form Demo"></iframe>
+<docs-live-example scenario="examples/paginated-form"></docs-live-example>
 
 ## Overview
 
@@ -486,6 +486,6 @@ Apply different validation rules per step:
 
 ## Related Documentation
 
-- [Conditional Logic](../../dynamic-behavior/conditional-logic/overview) - Show/hide pages dynamically
+- [Conditional Logic](/dynamic-behavior/overview) - Show/hide pages dynamically
 - [Validation](../../validation/basics) - Per-page and cross-page validation
-- [Material Integration](../../ui-libs-integrations/material/) - Material Design styling
+- [Material Integration](/ui-libs-integrations) - Material Design styling

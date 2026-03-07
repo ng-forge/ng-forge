@@ -1,11 +1,91 @@
 # ng-forge Dynamic Forms — Full Documentation
 
-> Generated from 45 documentation files.
+> Generated from 48 documentation files.
 > Source: https://ng-forge.com/dynamic-forms/
 
---- advanced/custom-integrations ---
+--- advanced/custom-fields ---
 
-> Prerequisites: [Installation](../../installation), [Field Types](../schema-fields/field-types), [Type Safety](../type-safety)
+Add a custom field type to any existing ng-forge adapter — no need to build a full adapter from scratch.
+
+## Scenario
+
+You're using Material, Bootstrap, or another adapter and need a field type that the adapter doesn't provide — for example, a rich text editor, a file uploader, or a custom rating widget.
+
+## 1. Create Your Field Component
+
+Implement `ValueFieldComponent<T>` from the core package:
+
+```typescript name="rich-text-field.component.ts"
+import { ChangeDetectionStrategy, Component, output } from '@angular/core';
+import { ValueFieldComponent } from '@ng-forge/dynamic-forms';
+
+@Component({
+  selector: 'app-rich-text-field',
+  template: `<label [textContent]="field().label"></label>
+    <my-rich-editor [value]="field().value()" (valueChange)="valueChange.emit($event)" />`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class RichTextFieldComponent implements ValueFieldComponent<string> {
+  // Injected by the form engine — contains value, label, props, errors, etc.
+  readonly field = input.required<ResolvedValueField<string>>();
+  readonly valueChange = output<string>();
+}
+```
+
+## 2. Define the Field Type
+
+```typescript name="my-custom-fields.ts"
+import { FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
+import { RichTextFieldComponent } from './rich-text-field.component';
+
+const richTextField: FieldTypeDefinition = {
+  type: 'rich-text',
+  loadComponent: () => RichTextFieldComponent,
+  mapper: valueFieldMapper,
+};
+```
+
+## 3. Provide Alongside Your Adapter
+
+Pass your custom field definition to `provideDynamicForm()` alongside the adapter's fields:
+
+```typescript name="app.config.ts"
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(
+      ...withMaterialFields(), // all Material field types
+      richTextField, // your custom field
+    ),
+  ],
+};
+```
+
+## 4. Use It in a Form
+
+```typescript
+const config = {
+  fields: [
+    { key: 'name', type: 'input', value: '', label: 'Name' },
+    { key: 'body', type: 'rich-text', value: '', label: 'Content' },
+    { key: 'submit', type: 'submit', label: 'Save' },
+  ],
+} as const satisfies FormConfig;
+```
+
+## Key Points
+
+- Custom fields work with all conditional logic, validation, and value derivation — no special handling needed
+- You can add as many custom fields as you need alongside any adapter
+- The `mapper` function translates the resolved field to your component's inputs — use `valueFieldMapper` for standard value-based fields or `checkboxFieldMapper` for boolean fields
+
+## Going Further
+
+If you need a completely custom adapter (no existing adapter as base), or want to implement the config cascade (`defaultProps`) for your custom fields, see the full [Custom Integrations →](/custom-integrations) guide.
+
+--- advanced/custom-integrations ---
 
 Create custom UI integrations for ng-forge dynamic forms using any component library or design system.
 
@@ -122,6 +202,8 @@ export default class CustomInputFieldComponent implements CustomInputComponent {
 }
 ```
 
+> For full TypeScript type safety (autocomplete on `props`, compile-time field validation, etc.), see [Type Safety with Module Augmentation](#type-safety-with-module-augmentation) below.
+
 ### 3. Create Field Type Definition
 
 Define the field type registration:
@@ -197,6 +279,8 @@ The component must implement these inputs:
 - `props?: TProps` - Custom field-specific props
 - `meta?: FieldMeta` - Native HTML attributes (data-_, aria-_, autocomplete, etc.)
 
+> **Important:** The `meta` input, while technically optional in the type signature, should be implemented on all field components. It provides reactive access to native HTML attributes (`data-*`, `aria-*`, `autocomplete`, etc.) that are essential for accessibility, testing, and browser autofill. See [Handling Meta Attributes](#handling-meta-attributes) below for implementation details.
+
 ### CheckedFieldComponent
 
 For checkbox and toggle fields:
@@ -267,7 +351,39 @@ export const CustomCheckboxType: FieldTypeDefinition = {
 };
 ```
 
-### Custom Mappers
+### Writing a Custom Mapper
+
+The built-in `valueFieldMapper` and `checkboxFieldMapper` cover most use cases. You need a custom mapper when your component expects a different set of input bindings than the standard ones — for example, a button that has no `field` input, or a component that reshapes props into a different structure.
+
+A mapper is a function that receives the resolved field definition and returns an array of `Binding` objects. Each binding maps a field property to a component input:
+
+```typescript
+import { Binding, inputBinding } from '@angular/core';
+import type { BaseValueField } from '@ng-forge/dynamic-forms';
+
+export function myCustomMapper(fieldDef: BaseValueField<string, MyProps>): Binding[] {
+  return [
+    inputBinding('key', () => fieldDef.key),
+    inputBinding('label', () => fieldDef.label),
+    inputBinding('value', () => fieldDef.value),
+    inputBinding('customProp', () => fieldDef.props?.myProp ?? 'default'),
+    inputBinding('className', () => fieldDef.className),
+    inputBinding('meta', () => fieldDef.meta),
+  ];
+}
+```
+
+Then reference it in your `FieldTypeDefinition`:
+
+```typescript
+export const MyFieldType: FieldTypeDefinition = {
+  name: 'my-field',
+  loadComponent: () => import('./my-field.component'),
+  mapper: myCustomMapper,
+};
+```
+
+### Custom Mappers (Buttons Example)
 
 For specialized fields (like buttons), create custom mappers:
 
@@ -334,7 +450,7 @@ This enables:
 
 ## Handling Meta Attributes
 
-`meta` attributes are native HTML attributes that should be applied to the underlying form element. They differ from `props` (which control UI library behavior). See [Props vs Meta](../schema-fields/field-types#props-vs-meta) for detailed usage guidance.
+`meta` attributes are native HTML attributes that should be applied to the underlying form element. They differ from `props` (which control UI library behavior). See [Props vs Meta](/field-types/text-inputs#props-vs-meta) for detailed usage guidance.
 
 ### Props vs Meta Summary
 
@@ -352,7 +468,8 @@ ng-forge provides the `setupMetaTracking` utility to apply meta attributes to na
 
 ```typescript
 import { Component, ElementRef, inject, input } from '@angular/core';
-import { FieldMeta, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { FieldMeta } from '@ng-forge/dynamic-forms';
+import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 
 @Component({
   template: ` <input [field]="f" /> `,
@@ -367,6 +484,8 @@ export default class CustomInputComponent {
   }
 }
 ```
+
+> **Note:** `FieldMeta` is a core type exported from `@ng-forge/dynamic-forms`, while `setupMetaTracking` is an integration utility exported from `@ng-forge/dynamic-forms/integration`. Both are also re-exported from the `/integration` entrypoint for convenience, but the canonical import paths are as shown above.
 
 **Parameters:**
 
@@ -477,18 +596,18 @@ export default class IonicCheckboxComponent {
 
 See complete integrations:
 
-- [Material Design](../../ui-libs-integrations/material) - Full Material implementation with 12+ field types
-- [Bootstrap](../../ui-libs-integrations/bootstrap)
-- [PrimeNG](../../ui-libs-integrations/primeng)
-- [Ionic](../../ui-libs-integrations/ionic)
+- [Material Design](/ui-libs-integrations) - Full Material implementation with 12+ field types
+- [Bootstrap](/ui-libs-integrations)
+- [PrimeNG](/ui-libs-integrations)
+- [Ionic](/ui-libs-integrations)
 
 The Material integration source code is the most comprehensive example of implementing custom field types.
 
 ## Related Topics
 
-- **[Material Integration](../../ui-libs-integrations/material)** - Complete reference implementation
-- **[Field Types](../schema-fields/field-types)** - Understanding all available field types
-- **[Type Safety](../type-safety)** - Module augmentation for custom types
+- **[Material Integration](/ui-libs-integrations)** - Complete reference implementation
+- **[Field Types](/field-types/text-inputs)** - Understanding all available field types
+- **[Type Safety](/advanced/basics)** - Module augmentation for custom types
 - **[Validation](../validation/basics)** - Displaying validation errors in custom fields
 
 --- advanced/events ---
@@ -2174,7 +2293,7 @@ const config = {
 ## Related
 
 - **[Validation](../../validation/basics/)** - How validators affect inferred types
-- **[Field Types](../../schema-fields/field-types/)** - Understanding available field types
+- **[Field Types](/field-types/text-inputs)** - Understanding available field types
 - **[Form Layout](../../prebuilt/form-groups/)** - Visual guide to container fields
 
 --- advanced/value-exclusion ---
@@ -3805,11 +3924,11 @@ const config = {
 
 ## Related
 
-- **[Value Derivation](../value-derivation/basics/)** — Computed field values
-- **[Async Derivation](../value-derivation/async/)** — HTTP and async function derivations, stopOnUserOverride
+- **[Value Derivation](/derivation)** — Computed field values
+- **[Async Derivation](/derivation)** — HTTP and async function derivations, stopOnUserOverride
 - **[Validation](../../validation/basics/)** — Conditional validation
 - **[Custom Validators](../../validation/custom-validators/)** — Async and HTTP validators
-- **[Type Safety](../../advanced/type-safety/basics/)** — TypeScript integration
+- **[Type Safety](/advanced/basics)** — TypeScript integration
 - **[Examples](/examples)** — Real-world form patterns
 
 --- dynamic-behavior/i18n ---
@@ -4712,7 +4831,7 @@ When the user changes the country, the phone prefix is auto-filled again — ove
 
 - **[Values](./)** — Expression, static value, and function-based derivations
 - **[Properties](./property-derivation)** — Derive component properties from form values
-- **[HTTP Conditions](../../conditional-logic/overview/)** — HTTP-driven field visibility and state
+- **[HTTP Conditions](/dynamic-behavior/overview)** — HTTP-driven field visibility and state
 - **[Custom Validators](../../../validation/custom-validators/)** — Async and HTTP validation
 
 --- dynamic-behavior/value-derivation/basics ---
@@ -5202,7 +5321,7 @@ External data values are reactively tracked - when signals change, derivations a
 
 - **Property Derivation** (see tab above) — Derive component properties (minDate, options, label) from form values
 - **Async Derivation** (see tab above) — HTTP and async function derivations, stopOnUserOverride
-- **[Conditional Logic](../conditional-logic/overview/)** — Control field visibility and state
+- **[Conditional Logic](/dynamic-behavior/overview)** — Control field visibility and state
 - **[Array Fields](../../prebuilt/form-arrays/simplified/)** — Working with array fields
 - **[Examples](/examples)** — Real-world form patterns
 
@@ -5698,7 +5817,7 @@ External data values are reactively tracked - when signals change, property deri
 ## Related
 
 - **Value Derivation** (see tab above) - Compute field form values
-- **[Conditional Logic](../conditional-logic/overview/)** - Control field visibility and state
+- **[Conditional Logic](/dynamic-behavior/overview)** - Control field visibility and state
 - **[Array Fields](../../prebuilt/form-arrays/simplified/)** - Working with array fields
 
 --- examples/age-conditional-form ---
@@ -5709,7 +5828,7 @@ Registration form demonstrating numeric comparison operators for age-based condi
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/age-conditional-form" class="example-frame" title="Age Conditional Form Demo"></iframe>
+<docs-live-example scenario="examples/age-conditional-form"></docs-live-example>
 
 ## Overview
 
@@ -5956,7 +6075,7 @@ This example uses numeric comparison operators:
 
 ## Related Documentation
 
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
 - **[Validation](../../validation/basics/)** - Min/max validation
 - **[User Registration](../user-registration/)** - Basic registration example
 
@@ -5968,7 +6087,7 @@ Dynamic form arrays using the complete API with declarative add/remove buttons, 
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/array" class="example-frame" title="Array Field Demo"></iframe>
+<docs-live-example scenario="examples/array"></docs-live-example>
 
 ## Overview
 
@@ -6229,7 +6348,7 @@ Account registration form that shows different fields based on whether the user 
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/business-account-form" class="example-frame" title="Business Account Form Demo"></iframe>
+<docs-live-example scenario="examples/business-account-form"></docs-live-example>
 
 ## Overview
 
@@ -6439,9 +6558,9 @@ Business fields are hidden when personal is selected:
 
 ## Related Documentation
 
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
 - **[User Registration](../user-registration/)** - Basic registration example
-- **[Radio Buttons](../../schema-fields/field-types/)** - Field types reference
+- **[Radio Buttons](/field-types/text-inputs)** - Field types reference
 
 --- examples/contact-dynamic-fields ---
 
@@ -6451,7 +6570,7 @@ Contact form demonstrating dynamic field visibility based on preferred contact m
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/contact-dynamic-fields" class="example-frame" title="Contact Dynamic Fields Demo"></iframe>
+<docs-live-example scenario="examples/contact-dynamic-fields"></docs-live-example>
 
 ## Overview
 
@@ -6644,7 +6763,7 @@ This ensures that visible contact fields are required.
 
 ## Related Documentation
 
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
 - **[Validation](../../validation/basics/)** - Form validation
 - **[Contact Form](../contact-form/)** - Basic contact form example
 
@@ -6656,7 +6775,7 @@ Simple contact form demonstrating basic form fields, validation, and user input.
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/contact" class="example-frame" title="Contact Form Demo"></iframe>
+<docs-live-example scenario="examples/contact"></docs-live-example>
 
 ## Overview
 
@@ -6833,7 +6952,7 @@ Dropdown allows users to categorize their inquiry:
 ## Related Documentation
 
 - **[Validation](../../validation/basics/)** - Form validation guide
-- **[Material Integration](../../ui-libs-integrations/material/)** - Material Design styling
+- **[Material Integration](/ui-libs-integrations)** - Material Design styling
 
 --- examples/enterprise-features ---
 
@@ -6843,7 +6962,7 @@ Complex configuration form demonstrating AND/OR logic for enterprise feature gat
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/enterprise-features" class="example-frame" title="Enterprise Features Demo"></iframe>
+<docs-live-example scenario="examples/enterprise-features"></docs-live-example>
 
 ## Overview
 
@@ -7172,13 +7291,21 @@ For features that require ALL conditions to be met, use `type: 'and'`:
 
 ## Related Documentation
 
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Full conditional logic guide
-- **[Combining Conditions](../../dynamic-behavior/conditional-logic/overview/#combining-conditions)** - AND/OR logic
+- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
+- **[Combining Conditions](/dynamic-behavior/overview#combining-conditions)** - AND/OR logic
 - **[Form Groups](../../prebuilt/form-groups/)** - Organizing fields
 
 --- examples/index ---
 
 {{ NgDocActions.demo("ExamplesIndexComponent", { container: false }) }}
+
+---
+
+## Next Steps
+
+- **[Field Types →](/schema-fields/field-types/text-inputs)** — Explore all available field types and their configuration
+- **[Validation →](/validation/basics)** — Add built-in and custom validators
+- **[Dynamic Behavior →](/dynamic-behavior/overview)** — Conditional fields and value derivation
 
 --- examples/login-form ---
 
@@ -7188,7 +7315,7 @@ Simple login form demonstrating authentication UI with email and password fields
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/login" class="example-frame" title="Login Form Demo"></iframe>
+<docs-live-example scenario="examples/login"></docs-live-example>
 
 ## Overview
 
@@ -7371,7 +7498,7 @@ For social login buttons, you can use text fields with links or handle this outs
 ## Related Documentation
 
 - **[Validation](../../validation/basics/)** - Form validation guide
-- **[Material Integration](../../ui-libs-integrations/material/)** - Material Design styling
+- **[Material Integration](/ui-libs-integrations)** - Material Design styling
 
 --- examples/paginated-form ---
 
@@ -7381,7 +7508,7 @@ A comprehensive multi-step registration form demonstrating the `page` field type
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/paginated-form" class="example-frame" title="Paginated Form Demo"></iframe>
+<docs-live-example scenario="examples/paginated-form"></docs-live-example>
 
 ## Overview
 
@@ -7863,9 +7990,9 @@ Apply different validation rules per step:
 
 ## Related Documentation
 
-- [Conditional Logic](../../dynamic-behavior/conditional-logic/overview) - Show/hide pages dynamically
+- [Conditional Logic](/dynamic-behavior/overview) - Show/hide pages dynamically
 - [Validation](../../validation/basics) - Per-page and cross-page validation
-- [Material Integration](../../ui-libs-integrations/material/) - Material Design styling
+- [Material Integration](/ui-libs-integrations) - Material Design styling
 
 --- examples/shipping-billing-address ---
 
@@ -7875,7 +8002,7 @@ Checkout form demonstrating the common "same as billing" pattern for shipping ad
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/shipping-billing-address" class="example-frame" title="Shipping Billing Address Demo"></iframe>
+<docs-live-example scenario="examples/shipping-billing-address"></docs-live-example>
 
 ## Overview
 
@@ -8089,9 +8216,9 @@ The section title is also hidden along with the group:
 
 ## Related Documentation
 
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
 - **[Form Groups](../../prebuilt/form-groups/)** - Working with groups
-- **[Checkbox Fields](../../schema-fields/field-types/)** - Field types reference
+- **[Checkbox Fields](/field-types/text-inputs)** - Field types reference
 
 --- examples/simplified-array-form ---
 
@@ -8101,7 +8228,7 @@ Dynamic arrays using the simplified API with auto-generated add/remove buttons, 
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/simplified-array" class="example-frame" title="Simplified Array Demo"></iframe>
+<docs-live-example scenario="examples/simplified-array"></docs-live-example>
 
 ## Overview
 
@@ -8263,7 +8390,7 @@ Complete example of a user registration form with validation, conditional logic,
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/user-registration" class="example-frame" title="User Registration Demo"></iframe>
+<docs-live-example scenario="examples/user-registration"></docs-live-example>
 
 ## Overview
 
@@ -8761,8 +8888,8 @@ Add social login buttons before the form:
 - **[Login Form](../login-form/)** - Simple authentication form
 - **[Paginated Form](../paginated-form/)** - Page field navigation patterns
 - **[Validation](../../validation/basics/)** - Validation guide
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Dynamic field behavior
-- **[Material Integration](../../ui-libs-integrations/material/)** - Material Design styling
+- **[Conditional Logic](/dynamic-behavior/overview)** - Dynamic field behavior
+- **[Material Integration](/ui-libs-integrations)** - Material Design styling
 
 --- examples/value-derivation ---
 
@@ -8777,7 +8904,7 @@ This example demonstrates automatic value derivation using expressions. Watch ho
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/value-derivation" class="example-frame" title="Value Derivation Demo"></iframe>
+<docs-live-example scenario="examples/value-derivation"></docs-live-example>
 
 ## How It Works
 
@@ -8841,57 +8968,27 @@ taxRate ───────────────────┴────
 
 ## Related
 
-- **[Value Derivation](../../dynamic-behavior/value-derivation/basics/)** - Core concepts, syntax, array derivations, debugging, and bidirectional patterns
+- **[Value Derivation](../../dynamic-behavior/value-derivation/basics)** - Core concepts, syntax, array derivations, debugging, and bidirectional patterns
 
 --- installation ---
 
 Get ng-forge dynamic forms up and running in your Angular project.
 
-## Requirements
+## Choose Your UI Library
 
-- **Angular 21+** - ng-forge dynamic forms requires Angular 21 or higher for signal forms support
-- **TypeScript 5.6+** - For best type inference results
+Select the UI library you're using — the setup guide below will update to match.
 
-## Installation
+<docs-adapter-picker></docs-adapter-picker>
 
-Install the core library and your preferred UI integration:
+<docs-integration-view></docs-integration-view>
 
-```bash group="install" name="npm"
-npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material
-```
+---
 
-```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material
-```
+## Your First Form
 
-```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material
-```
+All adapters share the same `FormConfig` schema. Here's a login form that works regardless of which adapter you chose above:
 
-> This installs the core `@ng-forge/dynamic-forms` package and the Material Design integration. See [UI Framework Options](#ui-framework-options) below for other choices.
-
-## Configure Your App
-
-Add the dynamic form provider to your app configuration:
-
-```typescript name="app.config.ts"
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideDynamicForm(...withMaterialFields()),
-    // ... other providers
-  ],
-};
-```
-
-The `provideDynamicForm()` function registers field types and validators. The `withMaterialFields()` function provides all Material Design field components.
-
-## Create Your First Form
-
-Create a simple login form to verify everything works:
+<docs-live-example scenario="examples/login" hideForCustom></docs-live-example>
 
 ```typescript name="login.component.ts"
 import { Component } from '@angular/core';
@@ -8912,6 +9009,7 @@ export class LoginComponent {
         label: 'Email',
         required: true,
         email: true,
+        props: { type: 'email' },
       },
       {
         key: 'password',
@@ -8923,171 +9021,28 @@ export class LoginComponent {
         props: { type: 'password' },
       },
       {
-        type: 'submit',
         key: 'submit',
+        type: 'submit',
         label: 'Sign In',
-        props: { color: 'primary' },
       },
     ],
   } as const satisfies FormConfig;
 }
 ```
 
-You now have a working form with:
+## Requirements
 
-- ✅ Real-time validation with error messages
-- ✅ TypeScript type inference
-- ✅ Material Design styling
-- ✅ Accessibility support
-- ✅ Submit button auto-disables when invalid
+- **Angular 21+** — required for signal support
+- **TypeScript 5.6+** — for best type inference
 
-## UI Framework Options
-
-ng-forge dynamic forms supports multiple UI frameworks. Install the integration package for your preferred framework:
-
-### Material Design (Preview)
-
-```bash group="install-material" name="npm"
-npm install @ng-forge/dynamic-forms-material
-```
-
-```bash group="install-material" name="yarn"
-yarn add @ng-forge/dynamic-forms-material
-```
-
-```bash group="install-material" name="pnpm"
-pnpm add @ng-forge/dynamic-forms-material
-```
-
-```typescript
-import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withMaterialFields())],
-};
-```
-
-See [Material Integration](../ui-libs-integrations/material) for full documentation.
-
-### PrimeNG (Preview)
-
-```bash group="install-primeng" name="npm"
-npm install @ng-forge/dynamic-forms-primeng
-```
-
-```bash group="install-primeng" name="yarn"
-yarn add @ng-forge/dynamic-forms-primeng
-```
-
-```bash group="install-primeng" name="pnpm"
-pnpm add @ng-forge/dynamic-forms-primeng
-```
-
-```typescript
-import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withPrimeNGFields())],
-};
-```
-
-See [PrimeNG Integration](../ui-libs-integrations/primeng) for full documentation.
-
-### Bootstrap (Preview)
-
-```bash group="install-bootstrap" name="npm"
-npm install @ng-forge/dynamic-forms-bootstrap
-```
-
-```bash group="install-bootstrap" name="yarn"
-yarn add @ng-forge/dynamic-forms-bootstrap
-```
-
-```bash group="install-bootstrap" name="pnpm"
-pnpm add @ng-forge/dynamic-forms-bootstrap
-```
-
-```typescript
-import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withBootstrapFields())],
-};
-```
-
-See [Bootstrap Integration](../ui-libs-integrations/bootstrap) for full documentation.
-
-### Ionic (Preview)
-
-```bash group="install-ionic" name="npm"
-npm install @ng-forge/dynamic-forms-ionic
-```
-
-```bash group="install-ionic" name="yarn"
-yarn add @ng-forge/dynamic-forms-ionic
-```
-
-```bash group="install-ionic" name="pnpm"
-pnpm add @ng-forge/dynamic-forms-ionic
-```
-
-```typescript
-import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withIonicFields())],
-};
-```
-
-See [Ionic Integration](../ui-libs-integrations/ionic) for full documentation.
-
-### Custom UI Components
-
-You can also build your own field components using any UI library or custom styling:
-
-```typescript
-import { MyCustomInputComponent } from './my-custom-input.component';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideDynamicForm([
-      { name: 'input', loadComponent: () => MyCustomInputComponent },
-      // ... more custom field types
-    ]),
-  ],
-};
-```
-
-See [Custom Integration Guide](../advanced/custom-integrations) for building custom field components.
+---
 
 ## Next Steps
 
-Now that you have ng-forge dynamic forms installed, explore the core features:
-
-### Learn Core Concepts
-
-- **[Field Types](../schema-fields/field-types)** - Understand all available field types (input, select, checkbox, group, etc.)
-- **[Validation](../validation/basics)** - Add validation rules with shorthand syntax or conditional validators
-- **[Conditional Logic](../dynamic-behavior/conditional-logic/overview)** - Show/hide fields based on other field values
-- **[Type Safety](../advanced/type-safety/basics)** - TypeScript type inference for forms
-
-### Build Advanced Forms
-
-- **[Multi-Step Forms](../prebuilt/form-pages)** - Create wizard-style forms with page navigation
-- **[Repeatable Sections](../prebuilt/form-arrays/simplified)** - Dynamic form arrays for adding/removing fields
-- **[Conditional Validation](../validation/advanced#conditional-validators)** - Validators that activate based on conditions
-
-### Customize and Extend
-
-- **[i18n Setup](../dynamic-behavior/i18n)** - Add multi-language support to your forms
-- **[Events](../advanced/events)** - Handle custom form events
-- **[Custom Fields](../advanced/custom-integrations)** - Create your own field types
-
-## Get Help
-
-- 💬 **[GitHub Discussions](https://github.com/ng-forge/ng-forge/discussions)** - Ask questions and get help
-- 🐛 **[Issue Tracker](https://github.com/ng-forge/ng-forge/issues)** - Report bugs
-- 📖 **[Documentation](../)** - Browse full documentation
+- **[Configuration →](/configuration)** — Set global defaults with `withXxxFields({ ... })` and per-form `defaultProps`
+- **[Examples →](/examples)** — Browse complete form examples
+- **[Field Types →](/schema-fields/field-types/text-inputs)** — All available field types and their props
+- **[Building an Adapter →](/building-an-adapter)** — Create your own adapter for any UI library
 
 --- prebuilt/form-arrays/complete ---
 
@@ -9097,7 +9052,7 @@ Arrays create dynamic collections of field values. Each item in the `fields` arr
 
 ## Interactive Demo
 
-<iframe src="http://localhost:4201/#/examples/array" class="example-frame" title="Array Field Demo"></iframe>
+<docs-live-example scenario="examples/array"></docs-live-example>
 
 ## Structure Overview
 
@@ -9653,7 +9608,7 @@ Arrays can contain these field types:
 - Row fields -> creates flat object arrays `[{...}, {...}]` (rows don't add nesting)
 - Button fields (for remove operations inside each item)
 
-See [Type Safety & Inference](../advanced/type-safety/basics) for details on how arrays affect type inference.
+See [Type Safety & Inference](/advanced/basics) for details on how arrays affect type inference.
 
 ## Conditional Visibility
 
@@ -9678,7 +9633,7 @@ Array containers support the `logic` property to conditionally show or hide the 
 
 When the array is hidden, all items and add/remove buttons are hidden with it. Only `'hidden'` is supported as a logic type on containers.
 
-For all available condition types and operators, see [Conditional Logic](../../../dynamic-behavior/conditional-logic/overview/).
+For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).
 
 ## When to Use the Complete API
 
@@ -9700,7 +9655,7 @@ The simplified array API provides a concise way to define dynamic arrays. Instea
 
 ## Interactive Demo
 
-<iframe src="http://localhost:4201/#/examples/simplified-array" class="example-frame" title="Simplified Array Demo"></iframe>
+<docs-live-example scenario="examples/simplified-array"></docs-live-example>
 
 ## Overview
 
@@ -10018,7 +9973,7 @@ Groups nest form fields under a single key in the form value. This creates logic
 
 ## Interactive Demo
 
-<iframe src="http://localhost:4201/#/examples/group" class="example-frame" title="Group Field Demo"></iframe>
+<docs-live-example scenario="examples/group"></docs-live-example>
 
 ## Basic Group
 
@@ -10145,7 +10100,7 @@ Groups can contain:
 - Leaf fields (input, select, checkbox, etc.)
 - Row fields (for horizontal layouts within the group)
 
-See [Type Safety & Inference](../advanced/type-safety/basics) for details on how groups affect type inference.
+See [Type Safety & Inference](/advanced/basics) for details on how groups affect type inference.
 
 ## Conditional Visibility
 
@@ -10174,7 +10129,7 @@ Group containers support the `logic` property to conditionally show or hide the 
 
 When the group is hidden, all its nested fields are hidden with it. Only `'hidden'` is supported as a logic type on containers (not `required`, `readonly`, or `disabled`).
 
-For all available condition types and operators, see [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/).
+For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).
 
 --- prebuilt/form-pages ---
 
@@ -10363,7 +10318,7 @@ Pages support the `logic` property to conditionally skip a page (hide it from th
 
 When a page is hidden, it is excluded from the multi-step navigation — users skip directly past it. Only `'hidden'` is supported as a logic type on containers.
 
-For all available condition types and operators, see [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/).
+For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).
 
 ## CSS Classes
 
@@ -10380,7 +10335,7 @@ Organize fields into horizontal rows for compact layouts. Rows display fields si
 
 ## Interactive Demo
 
-<iframe src="http://localhost:4201/#/examples/row" class="example-frame" title="Row Field Demo"></iframe>
+<docs-live-example scenario="examples/row"></docs-live-example>
 
 ## Basic Row
 
@@ -10586,7 +10541,7 @@ Row containers support the `logic` property to conditionally show or hide the en
 }
 ```
 
-Only `'hidden'` is supported as a logic type on containers. For all available condition types and operators, see [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/).
+Only `'hidden'` is supported as a logic type on containers. For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).
 
 --- prebuilt/hidden-fields ---
 
@@ -10904,41 +10859,158 @@ Add custom classes via the `className` property:
 - Status messages
 - Informational content between form fields
 
---- schema-fields/field-types ---
+--- schema-fields/field-types/advanced-controls ---
 
-Field types define form control behavior and rendering. Each UI integration (Material, Bootstrap, PrimeNG, Ionic) provides implementations for these core field types.
+Specialized controls for numeric ranges and date selection.
 
-**Note**: For nested form structures, use [group fields](../field-types#group) instead of dot notation in keys.
+## slider
 
-## Core Field Types
-
-### input
-
-Text-based input with HTML5 type support.
+Numeric range selection.
 
 ```typescript
 {
-  key: 'email',
-  type: 'input',
-  value: '',
-  label: 'Email',
+  key: 'volume',
+  type: 'slider',
+  label: 'Volume',
+  value: 50,
+  minValue: 0,    // optional
+  maxValue: 100,  // optional
+  step: 5,        // optional
+}
+```
+
+**Core Properties (all optional):**
+
+- `minValue`: Minimum slider value
+- `maxValue`: Maximum slider value
+- `step`: Step increment value
+
+### Adapter Props
+
+<docs-adapter-props field="slider"></docs-adapter-props>
+
+<docs-live-example scenario="examples/slider" hideForCustom="true"></docs-live-example>
+
+## datepicker
+
+Date selection control.
+
+```typescript
+{
+  key: 'birthDate',
+  type: 'datepicker',
+  label: 'Birth Date',
+  value: null,
   required: true,
-  email: true,
+  minDate: new Date(1900, 0, 1),  // optional
+  maxDate: new Date(),            // optional
   props: {
-    type: 'email',              // 'text' | 'email' | 'password' | 'number' | 'tel' | 'url'
-    placeholder: 'user@example.com',
+    placeholder: 'Select your birth date',
+  }
+}
+```
+
+**Core Properties (all optional):**
+
+- `minDate`: Minimum selectable date — `Date | string | null`
+- `maxDate`: Maximum selectable date — `Date | string | null`
+- `startAt`: Initial calendar view date — `Date | null`
+
+**Core Props:**
+
+- `placeholder`: Placeholder text
+- `format`: Date format string (UI-integration specific)
+
+### Adapter Props
+
+<docs-adapter-props field="datepicker"></docs-adapter-props>
+
+<docs-live-example scenario="examples/datepicker" hideForCustom="true"></docs-live-example>
+
+--- schema-fields/field-types/buttons ---
+
+Action fields for form submission and multi-step navigation.
+
+## submit
+
+Renders a submit button that triggers form submission.
+
+```typescript
+{
+  key: 'submit',
+  type: 'submit',
+  label: 'Create Account',
+  props: {
+    color: 'primary',     // adapter-specific
+    disabled: false,
   }
 }
 ```
 
 **Core Props:**
 
-- `type`: HTML input type (`'text'` | `'email'` | `'password'` | `'number'` | `'tel'` | `'url'`)
-- `placeholder`: Input placeholder text
+- `label`: Button text (also set via top-level `label`)
+- `disabled`: Whether the button is disabled
 
-**Note:** UI integrations may extend props with additional features like `hint`, `appearance`, etc. See your specific integration's documentation.
+## button
 
-### select
+Generic action button for custom event handling.
+
+```typescript
+{
+  key: 'resetBtn',
+  type: 'button',
+  label: 'Reset',
+  props: {
+    onClick: (context) => context.form.reset(),
+  }
+}
+```
+
+**Core Props:**
+
+- `label`: Button text
+- `onClick`: Callback invoked when the button is clicked, receives the form context
+
+## next
+
+Advances to the next page in a multi-step form. Only valid inside a `page` container.
+
+```typescript
+{
+  key: 'nextBtn',
+  type: 'next',
+  label: 'Continue',
+}
+```
+
+> This field type only makes sense inside a [Form Pages](/prebuilt/form-pages) container. It is ignored at the root level.
+
+## previous
+
+Navigates back to the previous page in a multi-step form. Only valid inside a `page` container.
+
+```typescript
+{
+  key: 'prevBtn',
+  type: 'previous',
+  label: 'Back',
+}
+```
+
+> This field type only makes sense inside a [Form Pages](/prebuilt/form-pages) container. It is ignored at the root level.
+
+--- schema-fields/field-types ---
+
+Choose a field type group to explore available controls and their configuration options.
+
+See [Props vs Meta](./utility#props-vs-meta) for how to configure UI-specific behavior vs native HTML attributes.
+
+--- schema-fields/field-types/selection ---
+
+Fields for selecting one or multiple values from a set of options.
+
+## select
 
 Single or multi-select dropdown.
 
@@ -10967,24 +11039,13 @@ Single or multi-select dropdown.
 
 - `placeholder`: Placeholder text when no value selected
 
-**Note:** UI integrations may extend with additional props like `multiple`, `clearable`, etc. Check your specific integration's documentation.
+### Adapter Props
 
-### checkbox
+<docs-adapter-props field="select"></docs-adapter-props>
 
-Boolean toggle control.
+<docs-live-example scenario="examples/select" hideForCustom="true"></docs-live-example>
 
-```typescript
-{
-  key: 'newsletter',
-  type: 'checkbox',
-  value: false,
-  label: 'Subscribe to newsletter',
-}
-```
-
-**Note:** UI integrations may extend with additional props like `hint`. The core checkbox has no required props.
-
-### radio
+## radio
 
 Single selection from multiple options.
 
@@ -11007,7 +11068,113 @@ Single selection from multiple options.
 
 - `options`: Array of `{ value: string, label: string }` objects (at field level, not in props)
 
-### textarea
+### Adapter Props
+
+<docs-adapter-props field="radio"></docs-adapter-props>
+
+<docs-live-example scenario="examples/radio" hideForCustom="true"></docs-live-example>
+
+## checkbox
+
+Boolean toggle control.
+
+```typescript
+{
+  key: 'newsletter',
+  type: 'checkbox',
+  value: false,
+  label: 'Subscribe to newsletter',
+}
+```
+
+### Adapter Props
+
+<docs-adapter-props field="checkbox"></docs-adapter-props>
+
+<docs-live-example scenario="examples/checkbox" hideForCustom="true"></docs-live-example>
+
+## toggle
+
+Boolean switch control. Similar to checkbox but with a switch UI.
+
+```typescript
+{
+  key: 'darkMode',
+  type: 'toggle',
+  label: 'Enable Dark Mode',
+  value: false,
+}
+```
+
+### Adapter Props
+
+<docs-adapter-props field="toggle"></docs-adapter-props>
+
+<docs-live-example scenario="examples/toggle" hideForCustom="true"></docs-live-example>
+
+## multi-checkbox
+
+Multiple selection from a list of checkboxes. Value is an array of selected values.
+
+```typescript
+{
+  key: 'interests',
+  type: 'multi-checkbox',
+  label: 'Interests',
+  value: [],
+  options: [
+    { value: 'tech', label: 'Technology' },
+    { value: 'sports', label: 'Sports' },
+    { value: 'music', label: 'Music' },
+  ],
+}
+```
+
+**Core Properties:**
+
+- `options`: Array of `{ value: T, label: string }` objects (at field level, not in props)
+
+### Adapter Props
+
+<docs-adapter-props field="multi-checkbox"></docs-adapter-props>
+
+<docs-live-example scenario="examples/multi-checkbox" hideForCustom="true"></docs-live-example>
+
+--- schema-fields/field-types/text-inputs ---
+
+Text-based input fields for collecting typed data from users.
+
+## input
+
+Text-based input with HTML5 type support.
+
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  value: '',
+  label: 'Email',
+  required: true,
+  email: true,
+  props: {
+    type: 'email',              // 'text' | 'email' | 'password' | 'number' | 'tel' | 'url'
+    placeholder: 'user@example.com',
+  }
+}
+```
+
+**Core Props:**
+
+- `type`: HTML input type (`'text'` | `'email'` | `'password'` | `'number'` | `'tel'` | `'url'`)
+- `placeholder`: Input placeholder text
+
+### Adapter Props
+
+<docs-adapter-props field="input"></docs-adapter-props>
+
+<docs-live-example scenario="examples/input" hideForCustom="true"></docs-live-example>
+
+## textarea
 
 Multi-line text input.
 
@@ -11030,238 +11197,54 @@ Multi-line text input.
 - `placeholder`: Placeholder text
 - `rows`: Number of visible text rows
 
-### datepicker
+### Adapter Props
 
-Date selection control (requires UI integration).
+<docs-adapter-props field="textarea"></docs-adapter-props>
+
+<docs-live-example scenario="examples/textarea" hideForCustom="true"></docs-live-example>
+
+--- schema-fields/field-types/utility ---
+
+Non-input fields for displaying content and passing hidden data.
+
+## text
+
+Renders static text content inside the form layout. Useful for instructions, section headings, or inline notes.
 
 ```typescript
 {
-  key: 'birthDate',
-  type: 'datepicker',
-  label: 'Birth Date',
-  value: null,
-  required: true,
-  minDate: new Date(1900, 0, 1),  // optional
-  maxDate: new Date(),            // optional
+  key: 'notice',
+  type: 'text',
   props: {
-    placeholder: 'Select your birth date',
+    content: 'Your data is encrypted and never shared.',
+    tag: 'p',          // HTML tag: 'p' | 'span' | 'h1'–'h6' (default: 'p')
+    className: 'hint', // optional CSS class
   }
 }
 ```
 
-**Core Properties (all optional):**
-
-- `minDate`: Minimum selectable date (at field level) - `Date | string | null`
-- `maxDate`: Maximum selectable date (at field level) - `Date | string | null`
-- `startAt`: Initial calendar view date - `Date | null`
-
 **Core Props:**
 
-- `placeholder`: Placeholder text
-- `format`: Date format string (UI-integration specific)
+- `content`: The text string to display
+- `tag`: HTML element to render (`'p'` | `'span'` | `'h1'`–`'h6'`)
 
-### slider
+## hidden
 
-Numeric range selection (requires UI integration).
-
-```typescript
-{
-  key: 'volume',
-  type: 'slider',
-  label: 'Volume',
-  value: 50,
-  minValue: 0,    // optional
-  maxValue: 100,  // optional
-  step: 5,        // optional
-}
-```
-
-**Core Properties (all optional):**
-
-- `minValue`: Minimum slider value (at field level)
-- `maxValue`: Maximum slider value (at field level)
-- `step`: Step increment value (at field level)
-
-### toggle
-
-Boolean switch control (requires UI integration). Similar to checkbox but with switch UI.
+Carries a fixed value through the form without rendering any UI. Useful for metadata like user IDs or source identifiers.
 
 ```typescript
 {
-  key: 'darkMode',
-  type: 'toggle',
-  label: 'Enable Dark Mode',
-  value: false,
-}
-```
-
-### multi-checkbox
-
-Multiple selection from a list of checkboxes. Value is an array of selected values.
-
-```typescript
-{
-  key: 'interests',
-  type: 'multi-checkbox',
-  label: 'Interests',
-  value: [],  // Array of selected values
-  options: [
-    { value: 'tech', label: 'Technology' },
-    { value: 'sports', label: 'Sports' },
-    { value: 'music', label: 'Music' },
-  ],
+  key: 'userId',
+  type: 'hidden',
+  value: '42',
 }
 ```
 
 **Core Properties:**
 
-- `options`: Array of `{ value: T, label: string }` objects (at field level, not in props)
+- `value`: The value to include in the form result (required)
 
-### text
-
-Display-only text content (not a form control). Useful for instructions, headers, or dynamic content.
-
-```typescript
-{
-  key: 'instructions',
-  type: 'text',
-  label: 'Please fill out all required fields',
-  props: {
-    elementType: 'p',  // 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'span'
-  },
-}
-```
-
-**Core Props:**
-
-- `elementType`: HTML element to render (`'p'` | `'h1'` - `'h6'` | `'span'`)
-
-**Note:** Text fields don't have a `value` - they display the `label` content.
-
-## Validation
-
-Fields integrate with Angular's signal forms validation system. ng-forge provides shorthand syntax for common validators (e.g., `required: true`) with comprehensive customizability via the `validators` property. See [Validation](../validation/basics) for details.
-
-```typescript
-{
-  key: 'username',
-  type: 'input',
-  value: '',
-  label: 'Username',
-  required: true,
-  minLength: 3,
-  maxLength: 20,
-  pattern: '^[a-zA-Z0-9_]+$',
-}
-```
-
-## Props vs Meta
-
-When configuring fields, there are two distinct ways to customize behavior: `props` and `meta`. Understanding the difference is important for proper field configuration.
-
-### Props (Component Properties)
-
-`props` are **UI library-specific configuration** passed to the field component. They control the behavior and appearance of the UI library's widget.
-
-```typescript
-{
-  key: 'country',
-  type: 'select',
-  label: 'Country',
-  props: {
-    // Material-specific: controls form field appearance
-    appearance: 'outline',
-    // PrimeNG-specific: enables filtering
-    filter: true,
-    showClear: true,
-  },
-}
-```
-
-**Characteristics of props:**
-
-- UI library-specific (different props for Material vs PrimeNG)
-- Control component behavior (multiple selection, filtering, etc.)
-- Affect visual appearance (appearance, size, variant)
-- Passed to wrapper components, not native elements
-- Defined by each UI adapter's type definitions
-
-### Meta (Native Element Attributes)
-
-`meta` contains **native HTML attributes** that should be applied to the underlying DOM element. These are framework-agnostic attributes used for accessibility, testing, and browser features.
-
-```typescript
-{
-  key: 'email',
-  type: 'input',
-  label: 'Email',
-  meta: {
-    // HTML autocomplete for browser autofill
-    autocomplete: 'email',
-    // Keyboard input mode hint
-    inputmode: 'email',
-    // Testing attribute
-    'data-testid': 'email-input',
-    // Analytics tracking
-    'data-analytics': 'email-field',
-    // ARIA attributes
-    'aria-describedby': 'email-help',
-  },
-}
-```
-
-**Characteristics of meta:**
-
-- Framework-agnostic (same across all UI libraries)
-- Applied to native DOM elements (input, select, textarea)
-- Used for accessibility (`aria-*`), testing (`data-*`), and browser features (`autocomplete`)
-- Important for screen readers, automated testing, and browser autofill
-- Defined in core library types
-
-### When to Use Each
-
-| Use Case                              | Use `props` | Use `meta` |
-| ------------------------------------- | ----------- | ---------- |
-| UI appearance (size, variant)         | ✅          | ❌         |
-| Component behavior (multiple, filter) | ✅          | ❌         |
-| Browser autofill (`autocomplete`)     | ❌          | ✅         |
-| Testing IDs (`data-testid`)           | ❌          | ✅         |
-| Accessibility (`aria-*`)              | ❌          | ✅         |
-| Analytics tracking (`data-*`)         | ❌          | ✅         |
-| Input mode hints (`inputmode`)        | ❌          | ✅         |
-
-### Complete Example
-
-```typescript
-{
-  key: 'email',
-  type: 'input',
-  label: 'Email Address',
-  required: true,
-  email: true,
-  // UI library-specific configuration
-  props: {
-    type: 'email',
-    appearance: 'outline',  // Material-specific
-    hint: 'We will never share your email',
-  },
-  // Native HTML attributes
-  meta: {
-    autocomplete: 'email',
-    inputmode: 'email',
-    'data-testid': 'registration-email',
-  },
-}
-```
-
-## UI Integrations
-
-UI framework integrations extend field types with framework-specific styling and features while maintaining the same configuration API.
-
-- [Material Design](../ui-libs-integrations/material) - Material Design components
-- [Bootstrap](../ui-libs-integrations/bootstrap) - Bootstrap styling
-- [PrimeNG](../ui-libs-integrations/primeng) - PrimeNG components
-- [Ionic](../ui-libs-integrations/ionic) - Ionic mobile components
+> Hidden fields always appear in the submitted form value regardless of visibility or conditional logic.
 
 --- schema-validation/angular-schema ---
 
@@ -11672,9 +11655,7 @@ Use [Zod](https://zod.dev) schemas to validate your dynamic forms. This lets you
 
 ## Installation
 
-```bash
-npm install zod
-```
+<docs-install-command packages="zod"></docs-install-command>
 
 ## Basic Usage
 
@@ -11703,7 +11684,7 @@ The `standardSchema()` wrapper tells Dynamic Forms to use Zod for validation. Er
 
 Try the password confirmation form with Zod validation:
 
-<iframe src="http://localhost:4201/#/examples/zod-schema-validation" class="example-frame" title="Zod Validation Demo"></iframe>
+<docs-live-example scenario="examples/zod-schema-validation"></docs-live-example>
 
 ## Cross-Field Validation
 
@@ -11885,3060 +11866,37 @@ const config = { schema: standardSchema(schema), fields: [...] };
 - **[Angular Schema](../angular-schema)** - Native Angular approach without dependencies
 - **[Field Validation](../../validation/basics/)** - Individual field validators
 
---- ui-libs-integrations/bootstrap ---
+--- ui-libs-integrations ---
 
-Modern Bootstrap 5 field components for ng-forge dynamic forms, built with native HTML elements and Bootstrap CSS.
+Configure global defaults for all forms at provider level, or per-form via `defaultProps`.
+
+## The Cascade
+
+ng-forge applies props in priority order — more specific always wins:
+
+```
+Library-level → Form-level → Field-level
+```
+
+- **Library-level**: `withXxxFields({ appearance: 'outline' })` — applies to every form in your app
+- **Form-level**: `defaultProps: { appearance: 'fill' }` — overrides library defaults for one form
+- **Field-level**: `props: { appearance: 'outline' }` — overrides everything for one field
 
 ---
 
-## Installation
-
-Install the package and its peer dependencies:
-
-```bash group="install" name="npm"
-npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-bootstrap bootstrap
-```
-
-```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-bootstrap bootstrap
-```
-
-```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-bootstrap bootstrap
-```
-
-Optional: For advanced datepicker features with calendar UI:
-
-```bash group="install-ng-bootstrap" name="npm"
-npm install @ng-bootstrap/ng-bootstrap
-```
-
-```bash group="install-ng-bootstrap" name="yarn"
-yarn add @ng-bootstrap/ng-bootstrap
-```
-
-```bash group="install-ng-bootstrap" name="pnpm"
-pnpm add @ng-bootstrap/ng-bootstrap
-```
-
-## Quick Start
-
-### 1. Configure Providers
-
-Add Bootstrap field types to your application:
-
-```typescript
-// app.config.ts
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withBootstrapFields())],
-};
-```
-
-### 2. Import Bootstrap Styles
-
-Add Bootstrap CSS to your application:
-
-```scss name="styles.scss"
-@import 'bootstrap/dist/css/bootstrap.min.css';
-```
-
-Or include via CDN in your `index.html`:
-
-```html
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-```
-
-### 3. Create Your First Form
-
-```typescript
-import { Component, signal } from '@angular/core';
-import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
-
-@Component({
-  selector: 'app-contact-form',
-  imports: [DynamicForm, JsonPipe],
-  template: `
-    <form [dynamic-form]="config" [(value)]="formValue"></form>
-    @let value = formValue();
-    <pre>{% raw %}{{ value | json }}{% endraw %}</pre>
-  `,
-})
-export class ContactFormComponent {
-  formValue = signal({});
-
-  config = {
-    fields: [
-      {
-        key: 'name',
-        type: 'input',
-        label: 'Full Name',
-        required: true,
-        props: {
-          floatingLabel: true,
-        },
-      },
-      {
-        key: 'email',
-        type: 'input',
-        label: 'Email',
-        required: true,
-        email: true,
-        props: {
-          type: 'email',
-          floatingLabel: true,
-        },
-      },
-      {
-        key: 'message',
-        type: 'textarea',
-        label: 'Message',
-        required: true,
-        minLength: 10,
-        props: {
-          floatingLabel: true,
-          rows: 4,
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submit',
-        label: 'Send Message',
-        props: {
-          variant: 'primary',
-        },
-      },
-    ],
-  } as const satisfies FormConfig;
-}
-```
-
-## Configuration Options
-
-Configure default props at the library, form, or field level.
-
-Use `BsFormConfig` for type-safe form configurations with Bootstrap-specific props.
-
-### Available Options
-
-| Option          | Type           | Default | Description                  |
-| --------------- | -------------- | ------- | ---------------------------- |
-| `size`          | `'sm' \| 'lg'` | -       | Bootstrap size class         |
-| `floatingLabel` | `boolean`      | `false` | Enable floating label design |
+<docs-configuration-view></docs-configuration-view>
 
 ---
 
-## Type Augmentation
+## Field-level Props
 
-Importing this package automatically extends `@ng-forge/dynamic-forms` with Bootstrap-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:
-
-```typescript
-import '@ng-forge/dynamic-forms-bootstrap';
-```
-
----
-
-## Complete Form Example
-
-Here's a full registration form showcasing multiple Bootstrap field types:
-
-<iframe src="http://localhost:4204/#/examples/complete-form" class="example-frame" title="Complete Form Demo"></iframe>
-
-This example demonstrates:
-
-- Text inputs with validation
-- Select dropdowns
-- Checkboxes and switches
-- Radio buttons
-- Date inputs
-- Range sliders
-- Multi-checkbox selections
-- Form submission
-
----
-
-## Field Types Reference
-
-Complete reference for all Bootstrap field types with comprehensive validation, native HTML5 features, and Bootstrap styling.
-
-### Text Input Fields
-
-Text input fields provide user-friendly text entry with Bootstrap form styling.
-
-#### Input
-
-Text input field with HTML5 type support and optional floating labels.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4204/#/examples/input" class="example-frame" title="Input Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'email',
-  type: 'input',
-  label: 'Email Address',
-  value: '',
-  required: true,
-  email: true,
-  props: {
-    type: 'email',
-    floatingLabel: true,
-    placeholder: 'Enter your email',
-    hint: 'We will never share your email',
-  },
-}
-```
-
-**Field Properties:**
-
-| Property      | Type               | Description                        |
-| ------------- | ------------------ | ---------------------------------- |
-| `key`         | `string`           | Unique field identifier (required) |
-| `type`        | `'input'`          | Field type (required)              |
-| `value`       | `string \| number` | Initial value                      |
-| `label`       | `string`           | Field label                        |
-| `placeholder` | `string`           | Placeholder text                   |
-| `required`    | `boolean`          | Mark field as required             |
-| `disabled`    | `boolean`          | Disable the field                  |
-| `readonly`    | `boolean`          | Make field read-only               |
-
-**Validation Properties:**
-
-| Property    | Type               | Description                       |
-| ----------- | ------------------ | --------------------------------- |
-| `email`     | `boolean`          | Email format validation           |
-| `minLength` | `number`           | Minimum character length          |
-| `maxLength` | `number`           | Maximum character length          |
-| `min`       | `number`           | Minimum value (for number inputs) |
-| `max`       | `number`           | Maximum value (for number inputs) |
-| `pattern`   | `string \| RegExp` | RegEx pattern validation          |
-
-**Props (Bootstrap-Specific):**
-
-| Prop              | Type                                                            | Default  | Description                  |
-| ----------------- | --------------------------------------------------------------- | -------- | ---------------------------- |
-| `type`            | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url'` | `'text'` | HTML input type              |
-| `size`            | `'sm' \| 'lg'`                                                  | -        | Bootstrap size class         |
-| `floatingLabel`   | `boolean`                                                       | `false`  | Enable floating label design |
-| `plaintext`       | `boolean`                                                       | `false`  | Render as plaintext          |
-| `hint`            | `string`                                                        | -        | Helper text below input      |
-| `validFeedback`   | `string`                                                        | -        | Success message when valid   |
-| `invalidFeedback` | `string`                                                        | -        | Error message when invalid   |
-
-#### Textarea
-
-Multi-line text input field with Bootstrap form styling.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4204/#/examples/textarea" class="example-frame" title="Textarea Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'bio',
-  type: 'textarea',
-  value: '',
-  label: 'Biography',
-  placeholder: 'Tell us about yourself',
-  required: true,
-  props: {
-    rows: 4,
-    floatingLabel: true,
-  },
-}
-```
-
-**Props (Bootstrap-Specific):**
-
-| Prop            | Type           | Default | Description                  |
-| --------------- | -------------- | ------- | ---------------------------- |
-| `rows`          | `number`       | `3`     | Number of visible rows       |
-| `size`          | `'sm' \| 'lg'` | -       | Bootstrap size class         |
-| `floatingLabel` | `boolean`      | `false` | Enable floating label design |
-| `hint`          | `string`       | -       | Helper text below textarea   |
-
----
-
-### Selection Fields
-
-Selection fields enable users to choose from predefined options.
-
-#### Select
-
-Dropdown selection field with native HTML select element. Supports both single and multi-select modes.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4204/#/examples/select" class="example-frame" title="Select Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'country',
-  type: 'select',
-  value: '',
-  label: 'Country',
-  required: true,
-  options: [
-    { value: 'us', label: 'United States' },
-    { value: 'uk', label: 'United Kingdom' },
-    { value: 'ca', label: 'Canada' },
-  ],
-  props: {
-    floatingLabel: true,
-  },
-}
-```
-
-**Props (Bootstrap-Specific):**
-
-| Prop            | Type           | Default | Description                  |
-| --------------- | -------------- | ------- | ---------------------------- |
-| `multiple`      | `boolean`      | `false` | Enable multi-select          |
-| `size`          | `'sm' \| 'lg'` | -       | Bootstrap size class         |
-| `floatingLabel` | `boolean`      | `false` | Enable floating label design |
-| `hint`          | `string`       | -       | Helper text below select     |
-
-#### Radio
-
-Radio button group for selecting a single option with optional button group styling.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4204/#/examples/radio" class="example-frame" title="Radio Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'size',
-  type: 'radio',
-  value: '',
-  label: 'Select Size',
-  required: true,
-  options: [
-    { value: 'small', label: 'Small' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'large', label: 'Large' },
-  ],
-}
-```
-
-**Props (Bootstrap-Specific):**
-
-| Prop          | Type           | Default | Description                               |
-| ------------- | -------------- | ------- | ----------------------------------------- |
-| `inline`      | `boolean`      | `false` | Display options inline                    |
-| `reverse`     | `boolean`      | `false` | Reverse label and input position          |
-| `buttonGroup` | `boolean`      | `false` | Render as Bootstrap button group          |
-| `buttonSize`  | `'sm' \| 'lg'` | -       | Button size (when buttonGroup is enabled) |
-| `hint`        | `string`       | -       | Helper text below radio group             |
-
-#### Checkbox
-
-Boolean checkbox control for single true/false selections.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4204/#/examples/checkbox" class="example-frame" title="Checkbox Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'terms',
-  type: 'checkbox',
-  value: false,
-  label: 'I accept the terms and conditions',
-  required: true,
-}
-```
-
-**Props (Bootstrap-Specific):**
-
-| Prop      | Type      | Default | Description                      |
-| --------- | --------- | ------- | -------------------------------- |
-| `switch`  | `boolean` | `false` | Render as Bootstrap switch       |
-| `inline`  | `boolean` | `false` | Inline layout                    |
-| `reverse` | `boolean` | `false` | Reverse label and input position |
-
-#### Multi-Checkbox
-
-Multiple checkbox selection field for choosing multiple options.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4204/#/examples/multi-checkbox" class="example-frame" title="Multi-Checkbox Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'interests',
-  type: 'multi-checkbox',
-  value: [],
-  label: 'Select Your Interests',
-  required: true,
-  options: [
-    { value: 'sports', label: 'Sports' },
-    { value: 'music', label: 'Music' },
-    { value: 'reading', label: 'Reading' },
-    { value: 'travel', label: 'Travel' },
-  ],
-}
-```
-
-**Props (Bootstrap-Specific):**
-
-| Prop      | Type      | Default | Description                      |
-| --------- | --------- | ------- | -------------------------------- |
-| `switch`  | `boolean` | `false` | Render checkboxes as switches    |
-| `inline`  | `boolean` | `false` | Display options inline           |
-| `reverse` | `boolean` | `false` | Reverse label and input position |
-| `hint`    | `string`  | -       | Helper text below checkbox group |
-
----
-
-### Interactive Fields
-
-Interactive fields provide advanced user input controls.
-
-#### Toggle
-
-Slide toggle switch for boolean on/off selections (renders as Bootstrap switch).
-
-**Live Demo:**
-
-<iframe src="http://localhost:4204/#/examples/toggle" class="example-frame" title="Toggle Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'notifications',
-  type: 'toggle',
-  value: false,
-  label: 'Enable notifications',
-}
-```
-
-**Props (Bootstrap-Specific):**
-
-| Prop      | Type      | Default | Description                      |
-| --------- | --------- | ------- | -------------------------------- |
-| `inline`  | `boolean` | `false` | Inline layout                    |
-| `reverse` | `boolean` | `false` | Reverse label and input position |
-
-#### Slider
-
-Native HTML5 range input for selecting values from a numeric range.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4204/#/examples/slider" class="example-frame" title="Slider Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'volume',
-  type: 'slider',
-  value: 50,
-  label: 'Volume',
-  minValue: 0,
-  maxValue: 100,
-  step: 1,
-  props: {
-    showValue: true,
-  },
-}
-```
-
-**Props (Bootstrap-Specific):**
-
-| Prop        | Type      | Default | Description              |
-| ----------- | --------- | ------- | ------------------------ |
-| `showValue` | `boolean` | `false` | Display current value    |
-| `hint`      | `string`  | -       | Helper text below slider |
-
-#### Datepicker
-
-Native HTML5 date input with Bootstrap styling.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4204/#/examples/datepicker" class="example-frame" title="Datepicker Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'birthdate',
-  type: 'datepicker',
-  value: null,
-  label: 'Date of Birth',
-  required: true,
-  props: {
-    min: '1900-01-01',
-    max: '2025-12-31',
-  },
-}
-```
-
-**Field Properties:**
-
-| Property  | Type                     | Description             |
-| --------- | ------------------------ | ----------------------- |
-| `minDate` | `Date \| string \| null` | Minimum selectable date |
-| `maxDate` | `Date \| string \| null` | Maximum selectable date |
-
-**Props (Bootstrap-Specific):**
-
-| Prop              | Type                                   | Default | Description                                |
-| ----------------- | -------------------------------------- | ------- | ------------------------------------------ |
-| `size`            | `'sm' \| 'lg'`                         | -       | Bootstrap size class                       |
-| `floatingLabel`   | `boolean`                              | `false` | Enable floating label design               |
-| `hint`            | `string`                               | -       | Helper text below field                    |
-| `validFeedback`   | `string`                               | -       | Success message when valid                 |
-| `invalidFeedback` | `string`                               | -       | Error message when invalid                 |
-| `useNgBootstrap`  | `boolean`                              | -       | Use ng-bootstrap datepicker                |
-| `displayMonths`   | `number`                               | -       | Number of months to display (ng-bootstrap) |
-| `navigation`      | `'select' \| 'arrows' \| 'none'`       | -       | Navigation style (ng-bootstrap)            |
-| `outsideDays`     | `'visible' \| 'collapsed' \| 'hidden'` | -       | How to display outside days (ng-bootstrap) |
-| `showWeekNumbers` | `boolean`                              | -       | Show week numbers (ng-bootstrap)           |
-
----
-
-### Buttons & Actions
-
-Action buttons provide form submission and navigation controls.
-
-#### Submit Button
-
-Form submission button that's automatically disabled when the form is invalid.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4204/#/examples/button" class="example-frame" title="Button Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  type: 'submit',
-  key: 'submit',
-  label: 'Create Account',
-  props: {
-    variant: 'primary',
-    size: 'lg',
-  },
-}
-```
-
-The submit button automatically:
-
-- Disables when the form is invalid
-- Emits a `SubmitEvent` when clicked
-- Validates all fields before submission
-
-**Props:**
-
-| Prop      | Type                                                                                                      | Default     | Description            |
-| --------- | --------------------------------------------------------------------------------------------------------- | ----------- | ---------------------- |
-| `variant` | `'primary' \| 'secondary' \| 'success' \| 'danger' \| 'warning' \| 'info' \| 'light' \| 'dark' \| 'link'` | `'primary'` | Bootstrap button color |
-| `outline` | `boolean`                                                                                                 | `false`     | Use outline variant    |
-| `size`    | `'sm' \| 'lg'`                                                                                            | -           | Button size            |
-| `block`   | `boolean`                                                                                                 | `false`     | Full-width button      |
-| `active`  | `boolean`                                                                                                 | `false`     | Active state styling   |
-| `type`    | `'button' \| 'submit' \| 'reset'`                                                                         | `'submit'`  | HTML button type       |
-
-#### Navigation Buttons
-
-Navigation buttons for multi-step (paged) forms.
-
-**Basic Usage:**
-
-```typescript
-{
-  fields: [
-    {
-      key: 'step1',
-      type: 'page',
-      fields: [
-        { key: 'name', type: 'input', value: '', label: 'Name', required: true },
-        {
-          type: 'next',
-          key: 'next',
-          label: 'Continue',
-          props: { variant: 'primary' },
-        },
-      ],
-    },
-    {
-      key: 'step2',
-      type: 'page',
-      fields: [
-        { key: 'email', type: 'input', value: '', label: 'Email', required: true },
-        { type: 'previous', key: 'back', label: 'Back', props: { variant: 'secondary' } },
-        { type: 'submit', key: 'submit', label: 'Submit', props: { variant: 'primary' } },
-      ],
-    },
-  ],
-}
-```
-
-**Button Types:**
-
-- **Next Button**: Navigates to the next page. Automatically disabled when current page has validation errors.
-- **Previous Button**: Navigates to the previous page. Always enabled to allow users to go back.
-
----
-
-## Theming
-
-Bootstrap components use standard Bootstrap CSS classes. Customize appearance using Bootstrap's CSS variables or custom themes:
-
-```typescript
-// Field with custom variant
-{
-  key: 'submitBtn',
-  type: 'submit',
-  label: 'Save Changes',
-  props: {
-    variant: 'success', // Bootstrap color variant
-    size: 'lg',
-    outline: true,
-  },
-}
-```
-
-### Custom Bootstrap Theme
-
-Customize Bootstrap variables before importing:
-
-```scss name="styles.scss"
-// Override Bootstrap variables
-$primary: #007bff;
-$secondary: #6c757d;
-$success: #28a745;
-$danger: #dc3545;
-
-// Import Bootstrap
-@import 'bootstrap/dist/css/bootstrap.min.css';
-```
-
-### Component CSS Variables
-
-Customize field spacing and styling with CSS variables:
-
-```scss
-:root {
-  --df-bs-field-gap: 0.75rem;
-  --df-bs-label-font-weight: 600;
-  --df-bs-hint-color: #6c757d;
-  --df-bs-error-color: #dc3545;
-}
-```
-
-## Common Props
-
-All Bootstrap fields support these common properties:
-
-| Prop   | Type           | Default | Description                       |
-| ------ | -------------- | ------- | --------------------------------- |
-| `size` | `'sm' \| 'lg'` | -       | Bootstrap size class              |
-| `hint` | `string`       | -       | Helper text displayed below field |
-
-## Bootstrap-Specific Features
-
-### Floating Labels
-
-Enable modern floating label design for input, select, and textarea fields:
-
-```typescript
-{
-  key: 'email',
-  type: 'input',
-  label: 'Email',
-  props: {
-    floatingLabel: true,
-  },
-}
-```
-
-### Grid System Integration
-
-Use the `col` property for responsive grid layouts:
-
-```typescript
-{
-  key: 'nameRow',
-  type: 'row',
-  fields: [
-    {
-      key: 'firstName',
-      type: 'input',
-      label: 'First Name',
-      value: '',
-      col: 6, // 50% width
-    },
-    {
-      key: 'lastName',
-      type: 'input',
-      label: 'Last Name',
-      value: '',
-      col: 6, // 50% width
-    },
-  ],
-}
-```
-
-Or use `className` for custom Bootstrap grid classes:
-
-```typescript
-{
-  key: 'firstName',
-  type: 'input',
-  label: 'First Name',
-  className: 'col-md-6 col-lg-4',
-}
-```
-
-### Validation States
-
-Bootstrap validation classes (`.is-invalid`, `.is-valid`) are automatically applied based on form state:
-
-- Fields show errors only after being touched
-- Valid fields can show success feedback with `validFeedback` prop
-- Error messages automatically display below invalid fields
-
-### Switch Styling
-
-Checkboxes and multi-checkboxes can render as Bootstrap switches:
-
-```typescript
-{
-  key: 'notifications',
-  type: 'checkbox',
-  label: 'Enable notifications',
-  props: {
-    switch: true,
-  },
-}
-```
-
-### Button Groups
-
-Radio buttons can render as Bootstrap button groups:
-
-```typescript
-{
-  key: 'size',
-  type: 'radio',
-  label: 'Size',
-  options: [
-    { value: 's', label: 'S' },
-    { value: 'm', label: 'M' },
-    { value: 'l', label: 'L' },
-  ],
-  props: {
-    buttonGroup: true,
-    buttonSize: 'lg',
-  },
-}
-```
-
-## Accessibility
-
-All Bootstrap components include:
-
-- Proper semantic HTML5 elements
-- ARIA attributes for screen readers
-- Keyboard navigation support
-- Focus management
-- Associated labels and descriptions
-- Error announcements via `aria-describedby`
-
-Bootstrap's native HTML elements provide excellent baseline accessibility that's enhanced by ng-forge's form integration.
+Each field type also accepts its own adapter-specific `props`. See [Field Types →](/schema-fields/field-types/text-inputs) for the full per-field reference.
 
 ## Next Steps
 
-- Check out [Examples & Patterns](../../../examples/) for real-world use cases
-- Learn about [Validation](../../validation/basics/) for form validation
-- See [Type Safety](../../advanced/type-safety/basics/) for TypeScript integration
-- Explore [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/) for dynamic field behavior
-
---- ui-libs-integrations/ionic ---
-
-Mobile-first Ionic field components for ng-forge dynamic forms, optimized for iOS and Android with native platform styling.
-
----
-
-## Installation
-
-Install the package and its peer dependencies:
-
-```bash group="install" name="npm"
-npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-ionic @ionic/angular
-```
-
-```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-ionic @ionic/angular
-```
-
-```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-ionic @ionic/angular
-```
-
-## Quick Start
-
-### 1. Configure Providers
-
-Add Ionic field types to your application:
-
-```typescript
-// app.config.ts
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withIonicFields())],
-};
-```
-
-### 2. Import Ionic Styles
-
-Add Ionic core styles to your application:
-
-```scss name="styles.scss"
-@import '@ionic/angular/css/core.css';
-@import '@ionic/angular/css/normalize.css';
-@import '@ionic/angular/css/structure.css';
-@import '@ionic/angular/css/typography.css';
-
-// Optional: Additional Ionic utility styles
-@import '@ionic/angular/css/padding.css';
-@import '@ionic/angular/css/float-elements.css';
-@import '@ionic/angular/css/text-alignment.css';
-@import '@ionic/angular/css/text-transformation.css';
-@import '@ionic/angular/css/flex-utils.css';
-```
-
-### 3. Create Your First Form
-
-```typescript
-import { Component, signal } from '@angular/core';
-import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
-
-@Component({
-  selector: 'app-contact-form',
-  imports: [DynamicForm, JsonPipe],
-  template: `
-    <form [dynamic-form]="config" [(value)]="formValue"></form>
-    @let value = formValue();
-    <pre>{% raw %}{{ value | json }}{% endraw %}</pre>
-  `,
-})
-export class ContactFormComponent {
-  formValue = signal({});
-
-  config = {
-    fields: [
-      {
-        key: 'name',
-        type: 'input',
-        label: 'Full Name',
-        value: '',
-        required: true,
-        props: {
-          placeholder: 'Enter your name',
-        },
-      },
-      {
-        key: 'email',
-        type: 'input',
-        label: 'Email',
-        value: '',
-        required: true,
-        email: true,
-        props: {
-          type: 'email',
-          placeholder: 'your@email.com',
-        },
-      },
-      {
-        key: 'message',
-        type: 'textarea',
-        label: 'Message',
-        value: '',
-        required: true,
-        minLength: 10,
-        props: {
-          placeholder: 'Your message here...',
-          rows: 4,
-          autoGrow: true,
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submit',
-        label: 'Send Message',
-        props: {
-          color: 'primary',
-          expand: 'block',
-        },
-      },
-    ],
-  } as const satisfies FormConfig;
-}
-```
-
-## Configuration Options
-
-Configure default props at the library, form, or field level.
-
-Use `IonicFormConfig` for type-safe form configurations with Ionic-specific props.
-
-### Available Options
-
-| Option           | Type                                                                                                            | Default     | Description              |
-| ---------------- | --------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------ |
-| `fill`           | `'solid' \| 'outline'`                                                                                          | `'solid'`   | Input fill style         |
-| `shape`          | `'round'`                                                                                                       | -           | Rounded shape for inputs |
-| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked' \| 'floating'`                                                        | `'start'`   | Label position           |
-| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger' \| 'light' \| 'medium' \| 'dark'` | `'primary'` | Ionic color theme        |
-| `size`           | `'small' \| 'default' \| 'large'`                                                                               | `'default'` | Button size              |
-| `expand`         | `'full' \| 'block'`                                                                                             | -           | Button expand behavior   |
-| `buttonFill`     | `'clear' \| 'outline' \| 'solid' \| 'default'`                                                                  | `'solid'`   | Button fill style        |
-| `strong`         | `boolean`                                                                                                       | `false`     | Bold button text         |
-
----
-
-## Type Augmentation
-
-Importing this package automatically extends `@ng-forge/dynamic-forms` with Ionic-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:
-
-```typescript
-import '@ng-forge/dynamic-forms-ionic';
-```
-
----
-
-## Complete Form Example
-
-Here's a full registration form showcasing multiple Ionic field types optimized for mobile:
-
-<iframe src="http://localhost:4203/#/examples/complete-form" class="example-frame" title="Complete Form Demo"></iframe>
-
-This example demonstrates:
-
-- Text inputs with mobile keyboard optimization
-- Select dropdowns with native action sheets
-- Checkboxes and toggles with Ionic styling
-- Radio buttons
-- Date/time pickers with native selectors
-- Range sliders with pin display
-- Multi-checkbox selections
-- Form submission
-
----
-
-## Field Types Reference
-
-Complete reference for all Ionic field types with mobile-first design, native platform styling, and comprehensive validation.
-
-### Text Input Fields
-
-Text input fields provide mobile-optimized text entry with platform-specific keyboards.
-
-#### Input
-
-Text input field with mobile keyboard optimization and platform-adaptive styling.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4203/#/examples/input" class="example-frame" title="Input Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'email',
-  type: 'input',
-  label: 'Email Address',
-  value: '',
-  required: true,
-  email: true,
-  props: {
-    type: 'email',
-    placeholder: 'your@email.com',
-    clearInput: true,
-  },
-}
-```
-
-**Field Properties:**
-
-| Property      | Type               | Description                        |
-| ------------- | ------------------ | ---------------------------------- |
-| `key`         | `string`           | Unique field identifier (required) |
-| `type`        | `'input'`          | Field type (required)              |
-| `value`       | `string \| number` | Initial value                      |
-| `label`       | `string`           | Field label                        |
-| `placeholder` | `string`           | Placeholder text                   |
-| `required`    | `boolean`          | Mark field as required             |
-| `disabled`    | `boolean`          | Disable the field                  |
-| `readonly`    | `boolean`          | Make field read-only               |
-
-**Validation Properties:**
-
-| Property    | Type               | Description                       |
-| ----------- | ------------------ | --------------------------------- |
-| `email`     | `boolean`          | Email format validation           |
-| `minLength` | `number`           | Minimum character length          |
-| `maxLength` | `number`           | Maximum character length          |
-| `min`       | `number`           | Minimum value (for number inputs) |
-| `max`       | `number`           | Maximum value (for number inputs) |
-| `pattern`   | `string \| RegExp` | RegEx pattern validation          |
-
-**Props (Ionic-Specific):**
-
-| Prop             | Type                                                                           | Default   | Description             |
-| ---------------- | ------------------------------------------------------------------------------ | --------- | ----------------------- |
-| `type`           | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url'`                | `'text'`  | HTML input type         |
-| `placeholder`    | `string`                                                                       | -         | Placeholder text        |
-| `clearInput`     | `boolean`                                                                      | `false`   | Show clear button       |
-| `fill`           | `'solid' \| 'outline'`                                                         | `'solid'` | Input fill style        |
-| `shape`          | `'round'`                                                                      | -         | Rounded input shape     |
-| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked' \| 'floating'`                       | `'start'` | Position of the label   |
-| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -         | Ionic theme color       |
-| `helperText`     | `string`                                                                       | -         | Helper text below input |
-| `counter`        | `boolean`                                                                      | `false`   | Show character counter  |
-
-#### Textarea
-
-Multi-line text input field with auto-grow support for mobile devices.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4203/#/examples/textarea" class="example-frame" title="Textarea Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'bio',
-  type: 'textarea',
-  value: '',
-  label: 'Biography',
-  placeholder: 'Tell us about yourself',
-  required: true,
-  maxLength: 500,
-  props: {
-    rows: 4,
-    autoGrow: true,
-  },
-}
-```
-
-**Props (Ionic-Specific):**
-
-| Prop             | Type                                                                           | Default   | Description                  |
-| ---------------- | ------------------------------------------------------------------------------ | --------- | ---------------------------- |
-| `rows`           | `number`                                                                       | `4`       | Number of visible rows       |
-| `autoGrow`       | `boolean`                                                                      | `false`   | Auto-resize based on content |
-| `placeholder`    | `string`                                                                       | -         | Placeholder text             |
-| `fill`           | `'solid' \| 'outline'`                                                         | `'solid'` | Textarea fill style          |
-| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked' \| 'floating'`                       | `'start'` | Position of the label        |
-| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -         | Ionic theme color            |
-| `helperText`     | `string`                                                                       | -         | Helper text below field      |
-| `counter`        | `boolean`                                                                      | `false`   | Show character counter       |
-
----
-
-### Selection Fields
-
-Selection fields enable users to choose from predefined options with mobile-optimized interfaces.
-
-#### Select
-
-Dropdown selection field with native action sheets on mobile devices.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4203/#/examples/select" class="example-frame" title="Select Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'country',
-  type: 'select',
-  value: '',
-  label: 'Country',
-  required: true,
-  options: [
-    { value: 'us', label: 'United States' },
-    { value: 'uk', label: 'United Kingdom' },
-    { value: 'ca', label: 'Canada' },
-  ],
-  props: {
-    interface: 'action-sheet',
-  },
-}
-```
-
-**Props (Ionic-Specific):**
-
-| Prop             | Type                                                                           | Default          | Description           |
-| ---------------- | ------------------------------------------------------------------------------ | ---------------- | --------------------- |
-| `interface`      | `'action-sheet' \| 'alert' \| 'popover'`                                       | `'action-sheet'` | Mobile selection UI   |
-| `multiple`       | `boolean`                                                                      | `false`          | Enable multi-select   |
-| `placeholder`    | `string`                                                                       | -                | Placeholder text      |
-| `cancelText`     | `string`                                                                       | `'Cancel'`       | Cancel button text    |
-| `okText`         | `string`                                                                       | `'OK'`           | OK button text        |
-| `fill`           | `'solid' \| 'outline'`                                                         | `'solid'`        | Select fill style     |
-| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked' \| 'floating'`                       | `'start'`        | Position of the label |
-| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -                | Ionic theme color     |
-
-#### Radio
-
-Radio button group for selecting a single option with mobile-friendly spacing.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4203/#/examples/radio" class="example-frame" title="Radio Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'size',
-  type: 'radio',
-  value: '',
-  label: 'Select Size',
-  required: true,
-  options: [
-    { value: 'small', label: 'Small' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'large', label: 'Large' },
-  ],
-}
-```
-
-**Props (Ionic-Specific):**
-
-| Prop             | Type                                                                           | Default | Description               |
-| ---------------- | ------------------------------------------------------------------------------ | ------- | ------------------------- |
-| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked'`                                     | `'end'` | Position of option labels |
-| `justify`        | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification      |
-| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color         |
-
-#### Checkbox
-
-Boolean checkbox control optimized for touch interaction.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4203/#/examples/checkbox" class="example-frame" title="Checkbox Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'terms',
-  type: 'checkbox',
-  value: false,
-  label: 'I accept the terms and conditions',
-  required: true,
-}
-```
-
-**Props (Ionic-Specific):**
-
-| Prop             | Type                                                                           | Default | Description            |
-| ---------------- | ------------------------------------------------------------------------------ | ------- | ---------------------- |
-| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked'`                                     | `'end'` | Position of label text |
-| `justify`        | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification   |
-| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color      |
-
-#### Multi-Checkbox
-
-Multiple checkbox selection field for choosing multiple options.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4203/#/examples/multi-checkbox" class="example-frame" title="Multi-Checkbox Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'interests',
-  type: 'multi-checkbox',
-  value: [],
-  label: 'Select Your Interests',
-  required: true,
-  options: [
-    { value: 'sports', label: 'Sports' },
-    { value: 'music', label: 'Music' },
-    { value: 'reading', label: 'Reading' },
-    { value: 'travel', label: 'Travel' },
-  ],
-}
-```
-
-**Props (Ionic-Specific):**
-
-| Prop             | Type                                                                           | Default | Description          |
-| ---------------- | ------------------------------------------------------------------------------ | ------- | -------------------- |
-| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked'`                                     | `'end'` | Position of labels   |
-| `justify`        | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification |
-| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color    |
-
----
-
-### Interactive Fields
-
-Interactive fields provide advanced user input controls optimized for mobile interaction.
-
-#### Toggle
-
-Slide toggle switch for boolean on/off selections with smooth animations.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4203/#/examples/toggle" class="example-frame" title="Toggle Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'notifications',
-  type: 'toggle',
-  value: false,
-  label: 'Enable notifications',
-}
-```
-
-**Props (Ionic-Specific):**
-
-| Prop                | Type                                                                           | Default | Description            |
-| ------------------- | ------------------------------------------------------------------------------ | ------- | ---------------------- |
-| `labelPlacement`    | `'start' \| 'end' \| 'fixed' \| 'stacked'`                                     | `'end'` | Position of label text |
-| `justify`           | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification   |
-| `enableOnOffLabels` | `boolean`                                                                      | `false` | Show on/off labels     |
-| `color`             | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color      |
-
-#### Slider
-
-Range slider control with pin display and snap-to-tick support.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4203/#/examples/slider" class="example-frame" title="Slider Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'volume',
-  type: 'slider',
-  value: 50,
-  label: 'Volume',
-  minValue: 0,
-  maxValue: 100,
-  step: 1,
-  props: {
-    pin: true,
-    ticks: true,
-  },
-}
-```
-
-**Field Properties:**
-
-| Property   | Type     | Default | Description          |
-| ---------- | -------- | ------- | -------------------- |
-| `minValue` | `number` | `0`     | Minimum slider value |
-| `maxValue` | `number` | `100`   | Maximum slider value |
-| `step`     | `number` | `1`     | Value increment step |
-
-**Props (Ionic-Specific):**
-
-| Prop             | Type                                                                           | Default   | Description                    |
-| ---------------- | ------------------------------------------------------------------------------ | --------- | ------------------------------ |
-| `pin`            | `boolean`                                                                      | `false`   | Show value pin above knob      |
-| `pinFormatter`   | `(value: number) => string \| number`                                          | -         | Custom formatter for pin value |
-| `ticks`          | `boolean`                                                                      | `false`   | Show tick marks                |
-| `snaps`          | `boolean`                                                                      | `false`   | Snap to tick marks             |
-| `dualKnobs`      | `boolean`                                                                      | `false`   | Enable dual knob mode          |
-| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -         | Ionic theme color              |
-| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked'`                                     | `'start'` | Position of label              |
-
-#### Datepicker
-
-Date and time selection with native mobile pickers for iOS and Android.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4203/#/examples/datepicker" class="example-frame" title="Datepicker Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'birthdate',
-  type: 'datepicker',
-  value: null,
-  label: 'Date of Birth',
-  required: true,
-  props: {
-    presentation: 'date',
-  },
-}
-```
-
-**Field Properties:**
-
-| Property  | Type                     | Description             |
-| --------- | ------------------------ | ----------------------- |
-| `minDate` | `Date \| string \| null` | Minimum selectable date |
-| `maxDate` | `Date \| string \| null` | Maximum selectable date |
-
-**Props (Ionic-Specific):**
-
-| Prop                   | Type                                                                                  | Default    | Description              |
-| ---------------------- | ------------------------------------------------------------------------------------- | ---------- | ------------------------ |
-| `presentation`         | `'date' \| 'time' \| 'date-time' \| 'time-date' \| 'month' \| 'month-year' \| 'year'` | `'date'`   | Picker type              |
-| `showDefaultButtons`   | `boolean`                                                                             | `true`     | Show cancel/done buttons |
-| `showDefaultTitle`     | `boolean`                                                                             | -          | Show default title       |
-| `showDefaultTimeLabel` | `boolean`                                                                             | -          | Show default time label  |
-| `showClearButton`      | `boolean`                                                                             | -          | Show clear button        |
-| `cancelText`           | `string`                                                                              | `'Cancel'` | Cancel button text       |
-| `doneText`             | `string`                                                                              | `'Done'`   | Done button text         |
-| `multiple`             | `boolean`                                                                             | `false`    | Allow multiple selection |
-| `preferWheel`          | `boolean`                                                                             | `false`    | Use wheel picker style   |
-| `size`                 | `'cover' \| 'fixed'`                                                                  | -          | Picker overlay size      |
-| `color`                | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'`        | -          | Ionic theme color        |
-
----
-
-### Buttons & Actions
-
-Action buttons provide form submission and navigation controls with Ionic styling.
-
-#### Submit Button
-
-Form submission button that's automatically disabled when the form is invalid.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4203/#/examples/button" class="example-frame" title="Button Field Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  type: 'submit',
-  key: 'submit',
-  label: 'Create Account',
-  props: {
-    color: 'primary',
-    expand: 'block',
-  },
-}
-```
-
-The submit button automatically:
-
-- Disables when the form is invalid
-- Emits a `SubmitEvent` when clicked
-- Validates all fields before submission
-
-**Props:**
-
-| Prop     | Type                                                                                                            | Default     | Description       |
-| -------- | --------------------------------------------------------------------------------------------------------------- | ----------- | ----------------- |
-| `expand` | `'full' \| 'block'`                                                                                             | -           | Button width      |
-| `fill`   | `'clear' \| 'outline' \| 'solid' \| 'default'`                                                                  | `'solid'`   | Button fill style |
-| `shape`  | `'round'`                                                                                                       | -           | Rounded button    |
-| `size`   | `'small' \| 'default' \| 'large'`                                                                               | -           | Button size       |
-| `color`  | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger' \| 'light' \| 'medium' \| 'dark'` | `'primary'` | Ionic theme color |
-| `strong` | `boolean`                                                                                                       | `false`     | Use strong font   |
-
-#### Navigation Buttons
-
-Navigation buttons for multi-step (paged) forms with platform-adaptive styling.
-
-**Basic Usage:**
-
-```typescript
-{
-  fields: [
-    {
-      key: 'step1',
-      type: 'page',
-      fields: [
-        { key: 'step1Title', type: 'text', label: 'Step 1', props: { elementType: 'h3' } },
-        { key: 'name', type: 'input', value: '', label: 'Name', required: true },
-        {
-          type: 'next',
-          key: 'next',
-          label: 'Continue',
-          props: { color: 'primary', expand: 'block' },
-        },
-      ],
-    },
-    {
-      key: 'step2',
-      type: 'page',
-      fields: [
-        { key: 'step2Title', type: 'text', label: 'Step 2', props: { elementType: 'h3' } },
-        { key: 'email', type: 'input', value: '', label: 'Email', required: true },
-        { type: 'previous', key: 'back', label: 'Back' },
-        { type: 'submit', key: 'submit', label: 'Submit', props: { color: 'primary' } },
-      ],
-    },
-  ],
-}
-```
-
-**Button Types:**
-
-- **Next Button**: Navigates to the next page. Automatically disabled when current page has validation errors.
-- **Previous Button**: Navigates to the previous page. Always enabled to allow users to go back.
-
----
-
-## Theming
-
-Ionic components use CSS variables for theming. Customize colors and styles globally or per-component.
-
-### Color Palette
-
-Ionic provides a comprehensive color system:
-
-```typescript
-// Field with custom color
-{
-  key: 'email',
-  type: 'input',
-  label: 'Email',
-  props: {
-    color: 'success', // Uses your theme's success color
-  },
-}
-```
-
-**Available Colors:**
-
-- `'primary'` - Primary brand color
-- `'secondary'` - Secondary brand color
-- `'tertiary'` - Tertiary brand color
-- `'success'` - Success/positive actions
-- `'warning'` - Warning states
-- `'danger'` - Error/destructive actions
-- `'light'` - Light variant
-- `'medium'` - Medium gray
-- `'dark'` - Dark variant
-
-### Custom Theme Variables
-
-Override Ionic's default colors in your global styles:
-
-```scss name="styles.scss"
-:root {
-  --ion-color-primary: #3880ff;
-  --ion-color-primary-rgb: 56, 128, 255;
-  --ion-color-primary-contrast: #ffffff;
-  --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #3171e0;
-  --ion-color-primary-tint: #4c8dff;
-
-  // Customize other colors...
-}
-```
-
-See [Ionic Theming Guide](https://ionicframework.com/docs/theming/basics) for complete customization options.
-
-## Common Props
-
-All Ionic fields support these common properties:
-
-| Prop    | Type                                                                           | Default     | Description                     |
-| ------- | ------------------------------------------------------------------------------ | ----------- | ------------------------------- |
-| `color` | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | `'primary'` | Ionic theme color               |
-| `mode`  | `'ios' \| 'md'`                                                                | -           | Force platform-specific styling |
-
-## Mobile Optimization
-
-All Ionic components are designed for mobile devices:
-
-### Touch Targets
-
-- **Minimum size**: 44x44px touch areas for accessibility
-- **Spacing**: Adequate padding for comfortable tapping
-- **Visual feedback**: Ripple effects and state changes
-
-### Native Keyboards
-
-Input fields automatically show the appropriate keyboard:
-
-```typescript
-{
-  key: 'email',
-  type: 'input',
-  props: {
-    type: 'email',      // Shows email keyboard
-    inputmode: 'email', // Forces email input mode
-  },
-}
-```
-
-**Inputmode Options:**
-
-- `'text'` - Standard keyboard
-- `'decimal'` - Numeric with decimal
-- `'numeric'` - Numeric only
-- `'tel'` - Telephone keypad
-- `'search'` - Search keyboard
-- `'email'` - Email keyboard
-- `'url'` - URL keyboard
-
-### Platform Styling
-
-Ionic automatically adapts to the platform:
-
-- **iOS**: Native iOS styling with SF Pro font and iOS design patterns
-- **Android**: Material Design with Roboto font and MD patterns
-- **Automatic detection**: Based on device platform
-- **Manual override**: Use `mode` prop to force specific styling
-
-```typescript
-{
-  key: 'name',
-  type: 'input',
-  label: 'Name',
-  props: {
-    mode: 'ios', // Force iOS styling on all platforms
-  },
-}
-```
-
-### Performance
-
-- **Hardware acceleration**: GPU-accelerated animations
-- **Virtual scrolling**: Efficient rendering for long lists
-- **Lazy loading**: Components load on demand
-- **Gesture support**: Native swipe and touch gestures
-
-## Accessibility
-
-All Ionic components include comprehensive accessibility features:
-
-### ARIA Support
-
-- Proper ARIA roles and attributes
-- ARIA labels for screen readers
-- ARIA-describedby for error messages
-- ARIA-invalid for validation states
-
-### Keyboard Navigation
-
-- Full keyboard support for all interactive elements
-- Tab navigation with proper focus order
-- Enter/Space for button activation
-- Arrow keys for option selection
-
-### Screen Readers
-
-- Descriptive labels for all form controls
-- Error message announcements
-- State change notifications
-- Context-aware instructions
-
-### Focus Management
-
-- Visible focus indicators
-- Logical focus order
-- Focus trap for modals
-- Auto-focus on error fields
-
-### High Contrast
-
-- Compatible with high contrast modes
-- Sufficient color contrast ratios (WCAG AA)
-- Clear visual distinctions
-- Icon and text alternatives
-
-## Next Steps
-
-- Check out [Examples & Patterns](../../../examples/) for real-world use cases
-- Learn about [Validation](../../validation/basics/) for form validation
-- See [Type Safety](../../advanced/type-safety/basics/) for TypeScript integration
-- Explore [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/) for dynamic field behavior
-
---- ui-libs-integrations/material ---
-
-Beautiful Material Design field components for ng-forge dynamic forms, built with Angular Material.
-
----
-
-## Installation
-
-Install the package and its peer dependencies:
-
-```bash group="install" name="npm"
-npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material @angular/material @angular/cdk
-```
-
-```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material @angular/material @angular/cdk
-```
-
-```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material @angular/material @angular/cdk
-```
-
-## Quick Start
-
-### 1. Configure Providers
-
-Add Material Design field types to your application:
-
-```typescript
-// app.config.ts
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
-import { provideAnimations } from '@angular/platform-browser/animations';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideAnimations(), provideDynamicForm(...withMaterialFields())],
-};
-```
-
-### 2. Import Material Theme
-
-Add a Material Design theme to your styles:
-
-```scss name="styles.scss"
-@use '@angular/material' as mat;
-
-@include mat.core();
-
-$my-primary: mat.define-palette(mat.$indigo-palette);
-$my-accent: mat.define-palette(mat.$pink-palette);
-$my-warn: mat.define-palette(mat.$red-palette);
-
-$my-theme: mat.define-light-theme(
-  (
-    color: (
-      primary: $my-primary,
-      accent: $my-accent,
-      warn: $my-warn,
-    ),
-  )
-);
-
-@include mat.all-component-themes($my-theme);
-```
-
-### 3. Create Your First Form
-
-```typescript
-import { Component, signal } from '@angular/core';
-import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
-
-@Component({
-  selector: 'app-contact-form',
-  imports: [DynamicForm, JsonPipe],
-  template: `
-    <form [dynamic-form]="config" [(value)]="formValue"></form>
-    @let value = formValue();
-    <pre>{% raw %}{{ value | json }}{% endraw %}</pre>
-  `,
-})
-export class ContactFormComponent {
-  formValue = signal({});
-
-  config = {
-    fields: [
-      {
-        key: 'name',
-        type: 'input',
-        label: 'Full Name',
-        required: true,
-        props: {
-          appearance: 'outline',
-        },
-      },
-      {
-        key: 'email',
-        type: 'input',
-        label: 'Email',
-        required: true,
-        email: true,
-        props: {
-          type: 'email',
-          appearance: 'outline',
-        },
-      },
-      {
-        key: 'message',
-        type: 'textarea',
-        label: 'Message',
-        required: true,
-        minLength: 10,
-        props: {
-          appearance: 'outline',
-          rows: 4,
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submit',
-        label: 'Send Message',
-        props: {
-          color: 'primary',
-        },
-      },
-    ],
-  } as const satisfies FormConfig;
-}
-```
-
-## Configuration Options
-
-Configure default props at the library, form, or field level.
-
-Use `MatFormConfig` for type-safe form configurations with Material-specific props.
-
-### Available Options
-
-| Option            | Type                              | Default     | Description                   |
-| ----------------- | --------------------------------- | ----------- | ----------------------------- |
-| `appearance`      | `'fill' \| 'outline'`             | `'fill'`    | Form field visual style       |
-| `subscriptSizing` | `'fixed' \| 'dynamic'`            | `'fixed'`   | Error/hint spacing behavior   |
-| `color`           | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Theme color for controls      |
-| `labelPosition`   | `'before' \| 'after'`             | `'after'`   | Label position for checkboxes |
-| `disableRipple`   | `boolean`                         | `false`     | Disable ripple effect         |
-
----
-
-## Type Augmentation
-
-Importing this package automatically extends `@ng-forge/dynamic-forms` with Material-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:
-
-```typescript
-import '@ng-forge/dynamic-forms-material';
-```
-
----
-
-## Complete Form Example
-
-Here's a full registration form showcasing multiple Material Design field types:
-
-<iframe src="http://localhost:4201/#/examples/complete-form" class="example-frame" title="Complete Form Demo"></iframe>
-
-This example demonstrates:
-
-- Text inputs with validation
-- Select dropdowns
-- Checkboxes and toggles
-- Radio buttons
-- Date pickers
-- Sliders
-- Multi-checkbox selections
-- Form submission
-
----
-
-## Field Types Reference
-
-Complete reference for all Material Design field types with comprehensive validation, accessibility features, and Material Design styling.
-
-### Text Input Fields
-
-Text input fields provide user-friendly text entry with Material Design styling.
-
-#### Input
-
-Text input field with HTML5 type support.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4201/#/examples/input" class="example-frame" title="Input Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'email',
-  type: 'input',
-  label: 'Email Address',
-  value: '',
-  required: true,
-  email: true,
-  props: {
-    type: 'email',
-    appearance: 'outline',
-    placeholder: 'Enter your email',
-  },
-}
-```
-
-**Field Properties:**
-
-| Property      | Type               | Description                        |
-| ------------- | ------------------ | ---------------------------------- |
-| `key`         | `string`           | Unique field identifier (required) |
-| `type`        | `'input'`          | Field type (required)              |
-| `value`       | `string \| number` | Initial value                      |
-| `label`       | `string`           | Field label                        |
-| `placeholder` | `string`           | Placeholder text                   |
-| `required`    | `boolean`          | Mark field as required             |
-| `disabled`    | `boolean`          | Disable the field                  |
-| `readonly`    | `boolean`          | Make field read-only               |
-
-**Validation Properties:**
-
-| Property    | Type               | Description                       |
-| ----------- | ------------------ | --------------------------------- |
-| `email`     | `boolean`          | Email format validation           |
-| `minLength` | `number`           | Minimum character length          |
-| `maxLength` | `number`           | Maximum character length          |
-| `min`       | `number`           | Minimum value (for number inputs) |
-| `max`       | `number`           | Maximum value (for number inputs) |
-| `pattern`   | `string \| RegExp` | RegEx pattern validation          |
-
-**Props (Material-Specific):**
-
-| Prop              | Type                                                            | Default   | Description               |
-| ----------------- | --------------------------------------------------------------- | --------- | ------------------------- |
-| `type`            | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url'` | `'text'`  | HTML input type           |
-| `appearance`      | `'fill' \| 'outline'`                                           | `'fill'`  | Material form field style |
-| `hint`            | `string`                                                        | -         | Helper text below input   |
-| `subscriptSizing` | `'fixed' \| 'dynamic'`                                          | `'fixed'` | Error/hint spacing        |
-
-#### Textarea
-
-Multi-line text input field with Material Design styling.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4201/#/examples/textarea" class="example-frame" title="Textarea Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'bio',
-  type: 'textarea',
-  value: '',
-  label: 'Biography',
-  placeholder: 'Tell us about yourself',
-  required: true,
-}
-```
-
-**Props (Material-Specific):**
-
-| Prop              | Type                                             | Default      | Description               |
-| ----------------- | ------------------------------------------------ | ------------ | ------------------------- |
-| `appearance`      | `'fill' \| 'outline'`                            | `'outline'`  | Visual style              |
-| `rows`            | `number`                                         | `4`          | Number of visible rows    |
-| `cols`            | `number`                                         | -            | Number of visible columns |
-| `resize`          | `'none' \| 'both' \| 'horizontal' \| 'vertical'` | `'vertical'` | Resize behavior           |
-| `subscriptSizing` | `'fixed' \| 'dynamic'`                           | `'fixed'`    | Error/hint sizing         |
-| `hint`            | `string`                                         | -            | Help text below field     |
-
----
-
-### Selection Fields
-
-Selection fields enable users to choose from predefined options.
-
-#### Select
-
-Dropdown selection field. Supports both single and multi-select modes.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4201/#/examples/select" class="example-frame" title="Select Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'country',
-  type: 'select',
-  value: '',
-  label: 'Country',
-  required: true,
-  options: [
-    { value: 'us', label: 'United States' },
-    { value: 'uk', label: 'United Kingdom' },
-    { value: 'ca', label: 'Canada' },
-  ],
-}
-```
-
-**Props (Material-Specific):**
-
-| Prop              | Type                   | Default     | Description           |
-| ----------------- | ---------------------- | ----------- | --------------------- |
-| `appearance`      | `'fill' \| 'outline'`  | `'outline'` | Visual style          |
-| `multiple`        | `boolean`              | `false`     | Enable multi-select   |
-| `hint`            | `string`               | -           | Help text below field |
-| `subscriptSizing` | `'fixed' \| 'dynamic'` | `'fixed'`   | Error/hint sizing     |
-
-#### Radio
-
-Radio button group for selecting a single option.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4201/#/examples/radio" class="example-frame" title="Radio Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'size',
-  type: 'radio',
-  value: '',
-  label: 'Select Size',
-  required: true,
-  options: [
-    { value: 'small', label: 'Small' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'large', label: 'Large' },
-  ],
-}
-```
-
-**Props (Material-Specific):**
-
-| Prop            | Type                              | Default     | Description               |
-| --------------- | --------------------------------- | ----------- | ------------------------- |
-| `color`         | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color      |
-| `labelPosition` | `'before' \| 'after'`             | `'after'`   | Position of option labels |
-
-#### Checkbox
-
-Boolean checkbox control for single true/false selections.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4201/#/examples/checkbox" class="example-frame" title="Checkbox Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'terms',
-  type: 'checkbox',
-  value: false,
-  label: 'I accept the terms and conditions',
-  required: true,
-}
-```
-
-**Props (Material-Specific):**
-
-| Prop            | Type                              | Default     | Description            |
-| --------------- | --------------------------------- | ----------- | ---------------------- |
-| `color`         | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color   |
-| `labelPosition` | `'before' \| 'after'`             | `'after'`   | Position of label text |
-
-#### Multi-Checkbox
-
-Multiple checkbox selection field for choosing multiple options.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4201/#/examples/multi-checkbox" class="example-frame" title="Multi-Checkbox Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'interests',
-  type: 'multi-checkbox',
-  value: [],
-  label: 'Select Your Interests',
-  required: true,
-  options: [
-    { value: 'sports', label: 'Sports' },
-    { value: 'music', label: 'Music' },
-    { value: 'reading', label: 'Reading' },
-    { value: 'travel', label: 'Travel' },
-  ],
-}
-```
-
----
-
-### Interactive Fields
-
-Interactive fields provide advanced user input controls.
-
-#### Toggle
-
-Slide toggle switch for boolean on/off selections.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4201/#/examples/toggle" class="example-frame" title="Toggle Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'notifications',
-  type: 'toggle',
-  value: false,
-  label: 'Enable notifications',
-}
-```
-
-**Props (Material-Specific):**
-
-| Prop            | Type                              | Default     | Description            |
-| --------------- | --------------------------------- | ----------- | ---------------------- |
-| `color`         | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color   |
-| `labelPosition` | `'before' \| 'after'`             | `'after'`   | Position of label text |
-
-#### Slider
-
-Numeric slider control for selecting values from a range.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4201/#/examples/slider" class="example-frame" title="Slider Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'volume',
-  type: 'slider',
-  value: 50,
-  label: 'Volume',
-  minValue: 0,
-  maxValue: 100,
-  step: 1,
-}
-```
-
-**Props (Material-Specific):**
-
-| Prop                            | Type                              | Default     | Description                  |
-| ------------------------------- | --------------------------------- | ----------- | ---------------------------- |
-| `thumbLabel` / `showThumbLabel` | `boolean`                         | `false`     | Show value tooltip on thumb  |
-| `tickInterval`                  | `number \| 'auto'`                | -           | Show tick marks at intervals |
-| `color`                         | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color         |
-| `hint`                          | `string`                          | -           | Help text below slider       |
-
-#### Datepicker
-
-Date selection field with Material Design calendar popup.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4201/#/examples/datepicker" class="example-frame" title="Datepicker Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'birthdate',
-  type: 'datepicker',
-  value: null,
-  label: 'Date of Birth',
-  required: true,
-}
-```
-
-**Props (Material-Specific):**
-
-| Prop              | Type                                | Default     | Description                 |
-| ----------------- | ----------------------------------- | ----------- | --------------------------- |
-| `appearance`      | `'fill' \| 'outline'`               | `'outline'` | Visual style                |
-| `color`           | `'primary' \| 'accent' \| 'warn'`   | `'primary'` | Material theme color        |
-| `startView`       | `'month' \| 'year' \| 'multi-year'` | `'month'`   | Initial calendar view       |
-| `touchUi`         | `boolean`                           | `false`     | Touch-optimized calendar UI |
-| `subscriptSizing` | `'fixed' \| 'dynamic'`              | `'fixed'`   | Error/hint sizing           |
-| `hint`            | `string`                            | -           | Help text below field       |
-
----
-
-### Buttons & Actions
-
-Action buttons provide form submission and navigation controls.
-
-#### Submit Button
-
-Form submission button that's automatically disabled when the form is invalid.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4201/#/examples/button" class="example-frame" title="Button Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  type: 'submit',
-  key: 'submit',
-  label: 'Create Account',
-  props: {
-    color: 'primary',
-  },
-}
-```
-
-The submit button automatically:
-
-- Disables when the form is invalid
-- Emits a `SubmitEvent` when clicked
-- Validates all fields before submission
-
-**Props:**
-
-| Prop    | Type                              | Default     | Description          |
-| ------- | --------------------------------- | ----------- | -------------------- |
-| `color` | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color |
-
-#### Navigation Buttons
-
-Navigation buttons for multi-step (paged) forms.
-
-**Basic Usage:**
-
-```typescript
-{
-  fields: [
-    {
-      key: 'step1',
-      type: 'page',
-      fields: [
-        { key: 'step1Title', type: 'text', label: 'Step 1', props: { elementType: 'h3' } },
-        { key: 'name', type: 'input', value: '', label: 'Name', required: true },
-        {
-          type: 'next',
-          key: 'next',
-          label: 'Continue',
-          props: { color: 'primary' },
-        },
-      ],
-    },
-    {
-      key: 'step2',
-      type: 'page',
-      fields: [
-        { key: 'step2Title', type: 'text', label: 'Step 2', props: { elementType: 'h3' } },
-        { key: 'email', type: 'input', value: '', label: 'Email', required: true },
-        { type: 'previous', key: 'back', label: 'Back' },
-        { type: 'submit', key: 'submit', label: 'Submit', props: { color: 'primary' } },
-      ],
-    },
-  ],
-}
-```
-
-**Button Types:**
-
-- **Next Button**: Navigates to the next page. Automatically disabled when current page has validation errors.
-- **Previous Button**: Navigates to the previous page. Always enabled to allow users to go back.
-
----
-
-## Theming
-
-Material components automatically inherit your Angular Material theme. Customize colors using Material's theming system:
-
-```typescript
-// Field with custom color
-{
-  key: 'agreeToTerms',
-  type: 'checkbox',
-  label: 'I agree to the terms and conditions',
-  props: {
-    color: 'accent', // 'primary' | 'accent' | 'warn'
-  },
-}
-```
-
-## Common Props
-
-All Material fields support these common properties:
-
-| Prop              | Type                              | Default     | Description                       |
-| ----------------- | --------------------------------- | ----------- | --------------------------------- |
-| `appearance`      | `'fill' \| 'outline'`             | `'fill'`    | Form field appearance style       |
-| `color`           | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Theme color                       |
-| `hint`            | `string`                          | -           | Helper text displayed below field |
-| `subscriptSizing` | `'fixed' \| 'dynamic'`            | `'fixed'`   | Error/hint spacing behavior       |
-
-## Accessibility
-
-All Material Design components include:
-
-- Proper ARIA attributes
-- Keyboard navigation support
-- Screen reader compatibility
-- Focus management
-- Error announcements
-
-## Next Steps
-
-- Check out [Examples & Patterns](../../../examples/) for real-world use cases
-- Learn about [Validation](../../validation/basics/) for form validation
-- See [Type Safety](../../advanced/type-safety/basics/) for TypeScript integration
-- Explore [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/) for dynamic field behavior
-
---- ui-libs-integrations/primeng ---
-
-Beautiful PrimeNG field components for ng-forge dynamic forms, built with the PrimeNG design system.
-
----
-
-## Installation
-
-Install the package and its peer dependencies:
-
-```bash group="install" name="npm"
-npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng primeicons
-```
-
-```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng primeicons
-```
-
-```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng primeicons
-```
-
-## Quick Start
-
-### 1. Configure Providers
-
-Add PrimeNG field types to your application:
-
-```typescript
-// app.config.ts
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
-import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeuix/themes/aura';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideDynamicForm(...withPrimeNGFields()),
-    providePrimeNG({
-      theme: {
-        preset: Aura,
-      },
-    }),
-  ],
-};
-```
-
-### 2. Import Theme & Styles
-
-Add PrimeNG icons to your styles:
-
-```scss name="styles.scss"
-@import 'primeicons/primeicons.css';
-```
-
-PrimeNG theming is now configured via the provider (see step 1). You can customize the theme preset:
-
-```typescript
-import Aura from '@primeuix/themes/aura';
-import Lara from '@primeuix/themes/lara';
-import Nora from '@primeuix/themes/nora';
-
-providePrimeNG({
-  theme: {
-    preset: Aura, // or Lara, Nora, etc.
-  },
-});
-```
-
-### 3. Create Your First Form
-
-```typescript
-import { Component, signal } from '@angular/core';
-import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
-
-@Component({
-  selector: 'app-contact-form',
-  imports: [DynamicForm, JsonPipe],
-  template: `
-    <form [dynamic-form]="config" [(value)]="formValue"></form>
-    @let value = formValue();
-    <pre>{% raw %}{{ value | json }}{% endraw %}</pre>
-  `,
-})
-export class ContactFormComponent {
-  formValue = signal({});
-
-  config = {
-    fields: [
-      {
-        key: 'name',
-        type: 'input',
-        value: '',
-        label: 'Full Name',
-        required: true,
-        props: {
-          variant: 'outlined',
-        },
-      },
-      {
-        key: 'email',
-        type: 'input',
-        value: '',
-        label: 'Email',
-        required: true,
-        email: true,
-        props: {
-          type: 'email',
-          variant: 'outlined',
-        },
-      },
-      {
-        key: 'message',
-        type: 'textarea',
-        value: '',
-        label: 'Message',
-        required: true,
-        minLength: 10,
-        props: {
-          rows: 4,
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submit',
-        label: 'Send Message',
-        props: {
-          severity: 'primary',
-        },
-      },
-    ],
-  } as const satisfies FormConfig;
-}
-```
-
-## Configuration Options
-
-Configure default props at the library, form, or field level.
-
-Use `PrimeFormConfig` for type-safe form configurations with PrimeNG-specific props.
-
-### Available Options
-
-| Option     | Type                                                                                            | Default      | Description            |
-| ---------- | ----------------------------------------------------------------------------------------------- | ------------ | ---------------------- |
-| `size`     | `'small' \| 'large'`                                                                            | -            | Component size         |
-| `variant`  | `'outlined' \| 'filled'`                                                                        | `'outlined'` | Input visual style     |
-| `severity` | `'primary' \| 'secondary' \| 'success' \| 'info' \| 'warn' \| 'danger' \| 'help' \| 'contrast'` | `'primary'`  | Button color           |
-| `text`     | `boolean`                                                                                       | `false`      | Text-only button style |
-| `outlined` | `boolean`                                                                                       | `false`      | Outlined button style  |
-| `raised`   | `boolean`                                                                                       | `false`      | Raised button style    |
-| `rounded`  | `boolean`                                                                                       | `false`      | Rounded button style   |
-
----
-
-## Type Augmentation
-
-Importing this package automatically extends `@ng-forge/dynamic-forms` with PrimeNG-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:
-
-```typescript
-import '@ng-forge/dynamic-forms-primeng';
-```
-
----
-
-## Complete Form Example
-
-Here's a full registration form showcasing multiple PrimeNG field types:
-
-<iframe src="http://localhost:4202/#/examples/complete-form" class="example-frame" title="Complete Form Demo"></iframe>
-
-This example demonstrates:
-
-- Text inputs with validation
-- Select dropdowns with search
-- Checkboxes and toggles
-- Radio buttons
-- Date pickers
-- Sliders
-- Multi-checkbox selections
-- Form submission
-
----
-
-## Field Types Reference
-
-Complete reference for all PrimeNG field types with comprehensive validation, accessibility features, and PrimeNG styling.
-
-### Text Input Fields
-
-Text input fields provide user-friendly text entry with PrimeNG styling.
-
-#### Input
-
-Text input field with HTML5 type support and PrimeNG styling.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4202/#/examples/input" class="example-frame" title="Input Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'email',
-  type: 'input',
-  value: '',
-  label: 'Email Address',
-  required: true,
-  email: true,
-  props: {
-    type: 'email',
-    variant: 'outlined',
-    placeholder: 'Enter your email',
-    hint: 'We will never share your email',
-  },
-}
-```
-
-**Field Properties:**
-
-| Property      | Type               | Description                        |
-| ------------- | ------------------ | ---------------------------------- |
-| `key`         | `string`           | Unique field identifier (required) |
-| `type`        | `'input'`          | Field type (required)              |
-| `value`       | `string \| number` | Initial value                      |
-| `label`       | `string`           | Field label                        |
-| `placeholder` | `string`           | Placeholder text                   |
-| `required`    | `boolean`          | Mark field as required             |
-| `disabled`    | `boolean`          | Disable the field                  |
-| `readonly`    | `boolean`          | Make field read-only               |
-
-**Validation Properties:**
-
-| Property    | Type               | Description                       |
-| ----------- | ------------------ | --------------------------------- |
-| `email`     | `boolean`          | Email format validation           |
-| `minLength` | `number`           | Minimum character length          |
-| `maxLength` | `number`           | Maximum character length          |
-| `min`       | `number`           | Minimum value (for number inputs) |
-| `max`       | `number`           | Maximum value (for number inputs) |
-| `pattern`   | `string \| RegExp` | RegEx pattern validation          |
-
-**Props (PrimeNG-Specific):**
-
-| Prop         | Type                                                            | Default      | Description             |
-| ------------ | --------------------------------------------------------------- | ------------ | ----------------------- |
-| `type`       | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url'` | `'text'`     | HTML input type         |
-| `variant`    | `'outlined' \| 'filled'`                                        | `'outlined'` | Visual style            |
-| `size`       | `'small' \| 'large'`                                            | -            | Input size              |
-| `hint`       | `string`                                                        | -            | Helper text below input |
-| `styleClass` | `string`                                                        | -            | CSS class for input     |
-
-#### Textarea
-
-Multi-line text input field with PrimeNG styling and auto-resize support.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4202/#/examples/textarea" class="example-frame" title="Textarea Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'bio',
-  type: 'textarea',
-  value: '',
-  label: 'Biography',
-  placeholder: 'Tell us about yourself',
-  required: true,
-  minLength: 50,
-  maxLength: 500,
-  props: {
-    rows: 6,
-    autoResize: true,
-    hint: 'Maximum 500 characters',
-  },
-}
-```
-
-**Props (PrimeNG-Specific):**
-
-| Prop         | Type      | Default | Description                  |
-| ------------ | --------- | ------- | ---------------------------- |
-| `rows`       | `number`  | `4`     | Number of visible rows       |
-| `autoResize` | `boolean` | `false` | Auto-resize based on content |
-| `maxlength`  | `number`  | -       | Maximum character limit      |
-| `hint`       | `string`  | -       | Help text below field        |
-| `styleClass` | `string`  | -       | CSS class for textarea       |
-
----
-
-### Selection Fields
-
-Selection fields enable users to choose from predefined options.
-
-#### Select
-
-Dropdown selection field with search capability and virtual scrolling support.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4202/#/examples/select" class="example-frame" title="Select Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'country',
-  type: 'select',
-  value: '',
-  label: 'Country',
-  required: true,
-  options: [
-    { value: 'us', label: 'United States' },
-    { value: 'uk', label: 'United Kingdom' },
-    { value: 'ca', label: 'Canada' },
-    { value: 'au', label: 'Australia' },
-  ],
-  props: {
-    filter: true,
-    showClear: true,
-    placeholder: 'Select a country',
-  },
-}
-```
-
-**Props (PrimeNG-Specific):**
-
-| Prop          | Type      | Default | Description               |
-| ------------- | --------- | ------- | ------------------------- |
-| `filter`      | `boolean` | `false` | Enable search/filter      |
-| `showClear`   | `boolean` | `false` | Show clear button         |
-| `multiple`    | `boolean` | `false` | Enable multiple selection |
-| `placeholder` | `string`  | -       | Dropdown placeholder text |
-| `hint`        | `string`  | -       | Help text below select    |
-| `styleClass`  | `string`  | -       | CSS class for dropdown    |
-
-#### Radio
-
-Radio button group for selecting a single option.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4202/#/examples/radio" class="example-frame" title="Radio Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'size',
-  type: 'radio',
-  value: '',
-  label: 'Select Size',
-  required: true,
-  options: [
-    { value: 'small', label: 'Small' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'large', label: 'Large' },
-  ],
-  props: {
-    hint: 'Choose your preferred size',
-  },
-}
-```
-
-**Props (PrimeNG-Specific):**
-
-| Prop         | Type     | Default | Description                     |
-| ------------ | -------- | ------- | ------------------------------- |
-| `hint`       | `string` | -       | Help text displayed below group |
-| `styleClass` | `string` | -       | CSS class for radio group       |
-
-#### Checkbox
-
-Boolean checkbox control for single true/false selections.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4202/#/examples/checkbox" class="example-frame" title="Checkbox Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'terms',
-  type: 'checkbox',
-  value: false,
-  label: 'I accept the terms and conditions',
-  required: true,
-  props: {
-    binary: true,
-  },
-}
-```
-
-**Props (PrimeNG-Specific):**
-
-| Prop         | Type      | Default | Description                   |
-| ------------ | --------- | ------- | ----------------------------- |
-| `binary`     | `boolean` | `true`  | Treat as boolean (true/false) |
-| `trueValue`  | `any`     | `true`  | Value when checked            |
-| `falseValue` | `any`     | `false` | Value when unchecked          |
-| `styleClass` | `string`  | -       | CSS class for checkbox        |
-
-#### Multi-Checkbox
-
-Multiple checkbox selection field for choosing multiple options.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4202/#/examples/multi-checkbox" class="example-frame" title="Multi-Checkbox Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'interests',
-  type: 'multi-checkbox',
-  value: [],
-  label: 'Select Your Interests',
-  required: true,
-  options: [
-    { value: 'sports', label: 'Sports' },
-    { value: 'music', label: 'Music' },
-    { value: 'reading', label: 'Reading' },
-    { value: 'travel', label: 'Travel' },
-    { value: 'cooking', label: 'Cooking' },
-  ],
-  props: {
-    hint: 'Select all that apply',
-  },
-}
-```
-
-**Props (PrimeNG-Specific):**
-
-| Prop         | Type     | Default | Description                     |
-| ------------ | -------- | ------- | ------------------------------- |
-| `hint`       | `string` | -       | Help text displayed below group |
-| `styleClass` | `string` | -       | CSS class for checkbox group    |
-
----
-
-### Interactive Fields
-
-Interactive fields provide advanced user input controls.
-
-#### Toggle
-
-Slide toggle switch (InputSwitch) for boolean on/off selections.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4202/#/examples/toggle" class="example-frame" title="Toggle Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'notifications',
-  type: 'toggle',
-  value: false,
-  label: 'Enable email notifications',
-  props: {
-    hint: 'Receive updates via email',
-  },
-}
-```
-
-**Props (PrimeNG-Specific):**
-
-| Prop         | Type     | Default | Description            |
-| ------------ | -------- | ------- | ---------------------- |
-| `hint`       | `string` | -       | Help text below toggle |
-| `styleClass` | `string` | -       | CSS class for toggle   |
-
-#### Slider
-
-Numeric slider control for selecting values from a range.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4202/#/examples/slider" class="example-frame" title="Slider Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'volume',
-  type: 'slider',
-  value: 50,
-  label: 'Volume',
-  minValue: 0,
-  maxValue: 100,
-  step: 5,
-  props: {
-    hint: 'Adjust audio volume',
-  },
-}
-```
-
-**Field Properties:**
-
-| Property   | Type     | Default | Description    |
-| ---------- | -------- | ------- | -------------- |
-| `minValue` | `number` | `0`     | Minimum value  |
-| `maxValue` | `number` | `100`   | Maximum value  |
-| `step`     | `number` | `1`     | Increment step |
-
-**Props (PrimeNG-Specific):**
-
-| Prop          | Type                         | Default        | Description                 |
-| ------------- | ---------------------------- | -------------- | --------------------------- |
-| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Slider orientation          |
-| `range`       | `boolean`                    | `false`        | Enable range mode (2 knobs) |
-| `hint`        | `string`                     | -              | Help text below slider      |
-| `styleClass`  | `string`                     | -              | CSS class for slider        |
-
-#### Datepicker
-
-Date selection field with calendar popup (p-calendar).
-
-**Live Demo:**
-
-<iframe src="http://localhost:4202/#/examples/datepicker" class="example-frame" title="Datepicker Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  key: 'birthdate',
-  type: 'datepicker',
-  value: null,
-  label: 'Date of Birth',
-  required: true,
-  minDate: new Date('1900-01-01'),
-  maxDate: new Date(),
-  props: {
-    dateFormat: 'mm/dd/yy',
-    showIcon: true,
-    showButtonBar: true,
-    hint: 'Select your birth date',
-  },
-}
-```
-
-**Field Properties:**
-
-| Property  | Type                     | Description             |
-| --------- | ------------------------ | ----------------------- |
-| `minDate` | `Date \| string \| null` | Minimum selectable date |
-| `maxDate` | `Date \| string \| null` | Maximum selectable date |
-
-**Props (PrimeNG-Specific):**
-
-| Prop            | Type                                | Default      | Description              |
-| --------------- | ----------------------------------- | ------------ | ------------------------ |
-| `dateFormat`    | `string`                            | `'mm/dd/yy'` | Date format string       |
-| `showIcon`      | `boolean`                           | `false`      | Show calendar icon       |
-| `showButtonBar` | `boolean`                           | `false`      | Show today/clear buttons |
-| `inline`        | `boolean`                           | `false`      | Display calendar inline  |
-| `selectionMode` | `'single' \| 'multiple' \| 'range'` | `'single'`   | Date selection mode      |
-| `view`          | `'date' \| 'month' \| 'year'`       | `'date'`     | Initial calendar view    |
-| `touchUI`       | `boolean`                           | `false`      | Touch-optimized UI       |
-| `hint`          | `string`                            | -            | Help text below field    |
-| `styleClass`    | `string`                            | -            | CSS class for datepicker |
-
----
-
-### Buttons & Actions
-
-Action buttons provide form submission and navigation controls.
-
-#### Submit Button
-
-Form submission button that's automatically disabled when the form is invalid.
-
-**Live Demo:**
-
-<iframe src="http://localhost:4202/#/examples/button" class="example-frame" title="Button Demo"></iframe>
-
-**Basic Usage:**
-
-```typescript
-{
-  type: 'submit',
-  key: 'submit',
-  label: 'Create Account',
-  props: {
-    severity: 'primary',
-    icon: 'pi pi-check',
-    iconPos: 'right',
-  },
-}
-```
-
-The submit button automatically:
-
-- Disables when the form is invalid
-- Emits a `SubmitEvent` when clicked
-- Validates all fields before submission
-
-**Props:**
-
-| Prop       | Type                                                                                            | Default     | Description     |
-| ---------- | ----------------------------------------------------------------------------------------------- | ----------- | --------------- |
-| `severity` | `'primary' \| 'secondary' \| 'success' \| 'info' \| 'warn' \| 'help' \| 'danger' \| 'contrast'` | `'primary'` | Button theme    |
-| `outlined` | `boolean`                                                                                       | `false`     | Outlined style  |
-| `text`     | `boolean`                                                                                       | `false`     | Text-only style |
-| `raised`   | `boolean`                                                                                       | `false`     | Raised style    |
-| `rounded`  | `boolean`                                                                                       | `false`     | Rounded style   |
-| `icon`     | `string`                                                                                        | -           | Icon class      |
-| `iconPos`  | `'left' \| 'right' \| 'top' \| 'bottom'`                                                        | `'left'`    | Icon position   |
-
-#### Navigation Buttons
-
-Navigation buttons for multi-step (paged) forms.
-
-**Basic Usage:**
-
-```typescript
-{
-  fields: [
-    {
-      key: 'step1',
-      type: 'page',
-      fields: [
-        { key: 'step1Title', type: 'text', label: 'Personal Information', props: { elementType: 'h3' } },
-        { key: 'step1Desc', type: 'text', label: 'Tell us about yourself' },
-        { key: 'firstName', type: 'input', value: '', label: 'First Name', required: true },
-        { key: 'lastName', type: 'input', value: '', label: 'Last Name', required: true },
-        {
-          type: 'next',
-          key: 'next',
-          label: 'Continue',
-          props: { severity: 'primary', icon: 'pi pi-arrow-right', iconPos: 'right' },
-        },
-      ],
-    },
-    {
-      key: 'step2',
-      type: 'page',
-      fields: [
-        { key: 'step2Title', type: 'text', label: 'Contact Information', props: { elementType: 'h3' } },
-        { key: 'email', type: 'input', value: '', label: 'Email', required: true, email: true },
-        { key: 'phone', type: 'input', value: '', label: 'Phone', props: { type: 'tel' } },
-        {
-          key: 'navigation',
-          type: 'row',
-          fields: [
-            { type: 'previous', key: 'back', label: 'Back', props: { icon: 'pi pi-arrow-left' } },
-            { type: 'submit', key: 'submit', label: 'Complete', props: { severity: 'primary' } },
-          ],
-        },
-      ],
-    },
-  ],
-}
-```
-
-**Button Types:**
-
-- **Next Button**: Navigates to the next page. Automatically disabled when current page has validation errors.
-- **Previous Button**: Navigates to the previous page. Always enabled to allow users to go back.
-
-#### Custom Action Button
-
-Generic button for custom events. Use this for application-specific actions.
-
-**Basic Usage:**
-
-```typescript
-import { FormEvent } from '@ng-forge/dynamic-forms';
-
-// Define your custom event
-class SaveDraftEvent implements FormEvent {
-  readonly type = 'save-draft' as const;
-}
-
-const config = {
-  fields: [
-    { key: 'title', type: 'input', value: '', label: 'Document Title', required: true },
-    { key: 'content', type: 'textarea', value: '', label: 'Content' },
-    {
-      key: 'actions',
-      type: 'row',
-      fields: [
-        {
-          type: 'button',
-          key: 'saveDraft',
-          label: 'Save as Draft',
-          event: SaveDraftEvent,
-          props: {
-            severity: 'secondary',
-            icon: 'pi pi-save',
-          },
-        },
-        {
-          type: 'submit',
-          key: 'publish',
-          label: 'Publish',
-          props: {
-            severity: 'primary',
-            icon: 'pi pi-upload',
-          },
-        },
-      ],
-    },
-  ],
-} as const satisfies FormConfig;
-```
-
-Then listen for the event in your component via the `(events)` output:
-
-```typescript
-import { Component } from '@angular/core';
-import { DynamicForm, FormEvent } from '@ng-forge/dynamic-forms';
-
-@Component({
-  imports: [DynamicForm],
-  template: `<form [dynamic-form]="config" (events)="onEvent($event)"></form>`,
-})
-class MyComponent {
-  onEvent(event: FormEvent) {
-    if (event.type === 'SaveDraft') {
-      console.log('Save draft clicked');
-      // Handle draft saving logic
-    }
-  }
-}
-```
-
-> **Note:** Do not inject `EventBus` in a host component — it is scoped to the form's DI tree and injecting it outside gives a disconnected instance. Use the `(events)` output to observe events, or `EventDispatcher` to dispatch events into the form.
-
----
-
-## Theming
-
-PrimeNG supports extensive theming through CSS variables and theme presets. Customize your theme using the provider:
-
-```typescript
-import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeuix/themes/aura';
-import Lara from '@primeuix/themes/lara';
-import Nora from '@primeuix/themes/nora';
-
-providePrimeNG({
-  theme: {
-    preset: Aura, // or Lara, Nora, etc.
-    options: {
-      darkModeSelector: '.dark-mode',
-    },
-  },
-});
-```
-
-### Severity Colors
-
-Control button and component colors using the `severity` prop:
-
-```typescript
-{
-  type: 'submit',
-  key: 'submit',
-  label: 'Submit',
-  props: {
-    severity: 'primary', // 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger' | 'contrast'
-  },
-}
-```
-
-### Size Variants
-
-Adjust component sizes using the `size` prop:
-
-```typescript
-{
-  key: 'email',
-  type: 'input',
-  label: 'Email',
-  props: {
-    size: 'small', // 'small' | 'large' | undefined (default/medium)
-  },
-}
-```
-
-### Custom Styling
-
-Add custom CSS classes to any component:
-
-```typescript
-{
-  key: 'email',
-  type: 'input',
-  label: 'Email',
-  props: {
-    styleClass: 'my-custom-input',
-  },
-}
-```
-
-For more information, see the [PrimeNG Theming Guide](https://primeng.org/theming).
-
-## Accessibility
-
-All PrimeNG components include:
-
-- Proper ARIA attributes
-- Keyboard navigation support
-- Screen reader compatibility
-- Focus management
-- Error announcements
-
-PrimeNG components are designed with accessibility in mind and follow WAI-ARIA standards.
-
-## Next Steps
-
-- Check out [Examples & Patterns](../../../examples/) for real-world use cases
-- Learn about [Validation](../../validation/basics/) for form validation
-- See [Type Safety](../../advanced/type-safety/basics/) for TypeScript integration
-- Explore [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/) for dynamic field behavior
+- **[Examples →](/examples)** — Browse complete form examples
+- **[Field Types →](/schema-fields/field-types/text-inputs)** — Per-field adapter props reference
+- **[Building an Adapter →](/building-an-adapter)** — Build your own adapter
 
 --- validation/advanced ---
 
@@ -15088,7 +12046,7 @@ For validators that need to compare multiple fields (like password confirmation 
 }
 ```
 
-See **[Custom Validators](../custom-validators)** for complete documentation on:
+See **[Custom Validators](/validation/custom-validators)** for complete documentation on:
 
 - Expression-based validators (simple, inline expressions)
 - Function-based validators (complex, reusable logic)
@@ -15300,9 +12258,9 @@ when: {
 
 ## Related
 
-- **[Validation Basics](../basics/)** - Shorthand validators
-- **[Validation Reference](../reference/)** - Complete API
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Field behavior changes
+- **[Validation Basics](/validation/basics)** - Shorthand validators
+- **[Validation Reference](/validation/reference)** - Complete API
+- **[Conditional Logic](/dynamic-behavior/overview)** - Field behavior changes
 - **[Examples](../../examples/)** - Real-world patterns
 
 --- validation/basics ---
@@ -15407,7 +12365,7 @@ Choose based on your validation complexity:
 
 - Dynamic field behavior
 - Conditional required fields
-- See [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/) for details
+- See [Conditional Logic](/dynamic-behavior/overview) for details
 
 ## Shorthand Validators
 
@@ -15615,9 +12573,9 @@ Invalid fields prevent form submission and display error messages.
 
 ## Next Steps
 
-- **[Validation Advanced](../advanced/)** - Conditional validation, dynamic values
-- **[Validation Reference](../reference/)** - Complete validator API
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Dynamic field behavior
+- **[Validation Advanced](/validation/advanced)** - Conditional validation, dynamic values
+- **[Validation Reference](/validation/reference)** - Complete validator API
+- **[Conditional Logic](/dynamic-behavior/overview)** - Dynamic field behavior
 - **[Examples](../../examples/)** - Real-world validation patterns
 
 --- validation/custom-validators ---
@@ -15639,7 +12597,7 @@ ng-forge supports four types of custom validators:
 
 Try the interactive example below to see both expression-based and function-based validators in action:
 
-<iframe src="http://localhost:4201/#/examples/expression-validators-demo" class="example-frame" title="Expression Validators Demo"></iframe>
+<docs-live-example scenario="examples/expression-validators-demo"></docs-live-example>
 
 ## Message Resolution (STRICT)
 
@@ -16252,7 +13210,7 @@ const config = {
 };
 ```
 
-The validator is only active when the `when` condition evaluates to `true`, allowing dynamic validation based on form state. See [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/) for all expression types and operators.
+The validator is only active when the `when` condition evaluates to `true`, allowing dynamic validation based on form state. See [Conditional Logic](/dynamic-behavior/overview) for all expression types and operators.
 
 ## Common Validation Patterns
 
@@ -16463,9 +13421,9 @@ const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
 
 ## Related Documentation
 
-- [Validation Basics](../basics/) - Core validation concepts
-- [Validation Reference](../reference/) - Standard validation rules
-- [Type Safety](../../advanced/type-safety/basics/) - TypeScript integration
+- [Validation Basics](/validation/basics) - Core validation concepts
+- [Validation Reference](/validation/reference) - Standard validation rules
+- [Type Safety](/advanced/basics) - TypeScript integration
 
 --- validation/reference ---
 
@@ -16592,7 +13550,7 @@ Regular expression validation.
 
 ## Conditional Expressions
 
-Validators support a `when` property for conditional validation. See **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** for the complete reference on:
+Validators support a `when` property for conditional validation. See **[Conditional Logic](/dynamic-behavior/overview)** for the complete reference on:
 
 - All operators (`equals`, `notEquals`, `greater`, `less`, `contains`, `matches`, etc.)
 - Expression types (`fieldValue`, `formValue` (deprecated), `javascript`, `custom`)
@@ -16904,7 +13862,7 @@ type ConditionalExpression = FieldValueCondition | FormValueCondition | CustomCo
 
 ## Related
 
-- **[Validation Basics](../basics/)** - Getting started with validation
-- **[Validation Advanced](../advanced/)** - Conditional validators
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Field behavior changes
-- **[Type Safety](../../advanced/type-safety/basics/)** - TypeScript integration
+- **[Validation Basics](/validation/basics)** - Getting started with validation
+- **[Validation Advanced](/validation/advanced)** - Conditional validators
+- **[Conditional Logic](/dynamic-behavior/overview)** - Field behavior changes
+- **[Type Safety](/advanced/basics)** - TypeScript integration

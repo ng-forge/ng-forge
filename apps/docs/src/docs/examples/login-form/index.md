@@ -4,7 +4,7 @@ Simple login form demonstrating authentication UI with email and password fields
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/login" class="example-frame" title="Login Form Demo"></iframe>
+<docs-live-example scenario="examples/login"></docs-live-example>
 
 ## Overview
 
@@ -187,4 +187,4 @@ For social login buttons, you can use text fields with links or handle this outs
 ## Related Documentation
 
 - **[Validation](../../validation/basics/)** - Form validation guide
-- **[Material Integration](../../ui-libs-integrations/material/)** - Material Design styling
+- **[Material Integration](/ui-libs-integrations)** - Material Design styling

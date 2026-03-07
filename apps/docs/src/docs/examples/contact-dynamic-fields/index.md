@@ -4,7 +4,7 @@ Contact form demonstrating dynamic field visibility based on preferred contact m
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/contact-dynamic-fields" class="example-frame" title="Contact Dynamic Fields Demo"></iframe>
+<docs-live-example scenario="examples/contact-dynamic-fields"></docs-live-example>
 
 ## Overview
 
@@ -197,6 +197,6 @@ This ensures that visible contact fields are required.
 
 ## Related Documentation
 
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
 - **[Validation](../../validation/basics/)** - Form validation
 - **[Contact Form](../contact-form/)** - Basic contact form example

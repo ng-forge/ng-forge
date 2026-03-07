@@ -2,10 +2,10 @@ import { NgDocPage } from '@ng-doc/core';
 import { ExamplesIndexComponent } from '../../../app/pages/examples-index/examples-index.component';
 
 const ExamplesIndexPage: NgDocPage = {
-  title: 'Quick Start',
+  title: 'Examples',
   mdFile: './index.md',
   route: 'examples',
-  order: 2,
+  order: 3,
   demos: {
     ExamplesIndexComponent,
   },

@@ -18,7 +18,7 @@ export class CodeHighlightDirective {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   readonly code = input.required<string>({ alias: 'codeHighlight' });
-  readonly lang = input<'typescript' | 'json'>('typescript');
+  readonly lang = input<'typescript' | 'json' | 'bash' | 'scss'>('typescript');
 
   private readonly highlighted$ = combineLatest([toObservable(this.code), toObservable(this.lang)]).pipe(
     switchMap(([code, lang]) => {

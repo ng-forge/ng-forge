@@ -1,0 +1,38 @@
+@if (isCustomAdapter()) {
+  @if (customGuide(); as guide) {
+    <p class="adapter-props-empty">
+      Implement <code>{{ guide.contract }}&lt;{{ guide.fieldInterface }}&gt;</code>. See
+      <a href="/building-an-adapter">Building an Adapter</a> for the full guide.
+    </p>
+    <div class="adapter-props-code">
+      <div [codeHighlight]="customSnippet()"></div>
+    </div>
+  } @else {
+    <p class="adapter-props-empty">Props are whatever your field component accepts.</p>
+  }
+} @else if (props().length > 0) {
+  <table class="adapter-props-table">
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (prop of props(); track prop.prop) {
+        <tr>
+          <td>
+            <code>{{ prop.prop }}</code>
+          </td>
+          <td>
+            <code>{{ prop.type }}</code>
+          </td>
+          <td>{{ prop.description }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+} @else {
+  <p class="adapter-props-empty">No additional props for this adapter.</p>
+}

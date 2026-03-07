@@ -4,7 +4,7 @@ Complete example of a user registration form with validation, conditional logic,
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/user-registration" class="example-frame" title="User Registration Demo"></iframe>
+<docs-live-example scenario="examples/user-registration"></docs-live-example>
 
 ## Overview
 
@@ -502,5 +502,5 @@ Add social login buttons before the form:
 - **[Login Form](../login-form/)** - Simple authentication form
 - **[Paginated Form](../paginated-form/)** - Page field navigation patterns
 - **[Validation](../../validation/basics/)** - Validation guide
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Dynamic field behavior
-- **[Material Integration](../../ui-libs-integrations/material/)** - Material Design styling
+- **[Conditional Logic](/dynamic-behavior/overview)** - Dynamic field behavior
+- **[Material Integration](/ui-libs-integrations)** - Material Design styling

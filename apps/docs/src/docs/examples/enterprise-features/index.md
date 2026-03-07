@@ -4,7 +4,7 @@ Complex configuration form demonstrating AND/OR logic for enterprise feature gat
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/enterprise-features" class="example-frame" title="Enterprise Features Demo"></iframe>
+<docs-live-example scenario="examples/enterprise-features"></docs-live-example>
 
 ## Overview
 
@@ -333,6 +333,6 @@ For features that require ALL conditions to be met, use `type: 'and'`:
 
 ## Related Documentation
 
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Full conditional logic guide
-- **[Combining Conditions](../../dynamic-behavior/conditional-logic/overview/#combining-conditions)** - AND/OR logic
+- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
+- **[Combining Conditions](/dynamic-behavior/overview#combining-conditions)** - AND/OR logic
 - **[Form Groups](../../prebuilt/form-groups/)** - Organizing fields

@@ -11,7 +11,28 @@
     "isolatedModules": true,
     "emitDecoratorMetadata": false,
     "module": "preserve",
-    "lib": ["dom", "es2022"]
+    "lib": ["dom", "es2022"],
+    "paths": {
+      "@ng-doc/generated": ["dist/ng-doc/docs"],
+      "@ng-forge/dynamic-forms": ["packages/dynamic-forms/src/index.ts"],
+      "@ng-forge/dynamic-forms/integration": ["packages/dynamic-forms/integration/src/public_api.ts"],
+      "@ng-forge/dynamic-forms/schema": ["packages/dynamic-forms/schema/src/public_api.ts"],
+      "@ng-forge/dynamic-forms-bootstrap": ["dist/packages/dynamic-forms-bootstrap"],
+      "@ng-forge/dynamic-forms-ionic": ["dist/packages/dynamic-forms-ionic"],
+      "@ng-forge/dynamic-forms-material": ["packages/dynamic-forms-material/src/index.ts"],
+      "@ng-forge/dynamic-forms-primeng": ["dist/packages/dynamic-forms-primeng"],
+      "@ng-forge/sandbox-harness": ["internal/sandbox-harness/src/index.ts"],
+      "@ng-forge/styling": ["dist/internal/styling"],
+      "@ng-forge/examples-shared-ui": ["internal/examples-shared-ui/src/index.ts"],
+      "@ng-forge/examples-material": ["dist/internal/examples-material"],
+      "@ng-forge/examples-bootstrap": ["dist/internal/examples-bootstrap"],
+      "@ng-forge/examples-primeng": ["dist/internal/examples-primeng"],
+      "@ng-forge/examples-ionic": ["dist/internal/examples-ionic"],
+      "@ng-forge/sandbox-adapter-material": ["dist/internal/sandbox-adapter-material"],
+      "@ng-forge/sandbox-adapter-bootstrap": ["dist/internal/sandbox-adapter-bootstrap"],
+      "@ng-forge/sandbox-adapter-primeng": ["dist/internal/sandbox-adapter-primeng"],
+      "@ng-forge/sandbox-adapter-ionic": ["dist/internal/sandbox-adapter-ionic"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

@@ -1,0 +1,19 @@
+{
+  "name": "examples-primeng",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "internal/examples-primeng/src",
+  "prefix": "example",
+  "projectType": "library",
+  "tags": ["examples", "internal"],
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:package",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "dependsOn": ["^build"],
+      "options": {
+        "project": "internal/examples-primeng/ng-package.json",
+        "tsConfig": "internal/examples-primeng/tsconfig.lib.json"
+      }
+    }
+  }
+}

@@ -33,7 +33,7 @@
 | `nx build <project>`       | Build library                               |
 | `nx lint <project>`        | ESLint                                      |
 | `nx e2e <project>`         | E2E tests locally (screenshots will differ) |
-| `nx serve <project>`       | Serve app for dev                           |
+| `pnpm serve:docs`          | Serve docs app for dev                      |
 | `pnpm e2e:material`        | E2E in Docker (screenshots match CI)        |
 | `pnpm e2e:material:update` | Update screenshots in Docker                |
 | `pnpm e2e:clean`           | Clean Docker E2E cache                      |
@@ -55,11 +55,12 @@ ng-forge/
 ├── apps/
 │   ├── docs/                        # Documentation app (SSR with Analog)
 │   └── examples/
-│       ├── material/                # Material demo/test app
-│       ├── bootstrap/               # Bootstrap demo/test app
-│       ├── primeng/                  # PrimeNG demo/test app
-│       ├── ionic/                   # Ionic demo/test app
-│       └── core/                    # Core (no UI lib) demo/test app
+│       └── sandbox/                 # Unified example app (all 4 adapters + E2E specs)
+├── internal/
+│   ├── sandbox-harness/             # SandboxHarness, SandboxMountDirective, SANDBOX_FORM_CONFIG
+│   ├── sandbox-adapter-{material,bootstrap,primeng,ionic}/ # Adapter factory functions
+│   ├── examples-{material,bootstrap,primeng,ionic}/ # Field-type scenario components
+│   └── examples-shared-ui/          # ExampleScenarioComponent
 ├── .claude/skills/                  # Custom Claude Code skills
 └── scripts/                         # CI/Docker/deployment helpers
 ```
@@ -167,8 +168,9 @@ When implementing a feature across all 4 UI adapter libraries:
 
 ## E2E Testing
 
-- **Playwright-based**, located in `apps/examples/*/src/app/testing/`
-- **Run locally for fast iteration**: `nx e2e material-examples` (screenshots will differ from CI — that's expected)
+- **Playwright-based**, located in `apps/examples/sandbox/src/app/testing/{material,bootstrap,primeng,ionic,core}/`
+- **Sandbox uses hash routing**: `http://localhost:4210/#/{adapter}/test/{suite}/{scenario}`
+- **Run locally for fast iteration**: `nx run sandbox-examples:e2e-material` (screenshots will differ from CI — that's expected)
 - **Use Docker for screenshot updates only**: `pnpm e2e:material:update` (ensures cross-platform consistency)
 - **Never run `--update-snapshots` locally** outside Docker — creates platform-specific screenshots that fail in CI
 - **Clean Docker cache** when upgrading Playwright, seeing cache warnings, or unexpected behavior: `pnpm e2e:clean`

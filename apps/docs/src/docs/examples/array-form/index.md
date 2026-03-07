@@ -4,7 +4,7 @@ Dynamic form arrays using the complete API with declarative add/remove buttons, 
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/array" class="example-frame" title="Array Field Demo"></iframe>
+<docs-live-example scenario="examples/array"></docs-live-example>
 
 ## Overview
 

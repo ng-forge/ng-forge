@@ -1,0 +1,26 @@
+{
+  "redirects": [
+    { "source": "/:adapter/installation", "destination": "/:adapter/getting-started", "permanent": true },
+    { "source": "/:adapter/ui-libs-integrations", "destination": "/:adapter/configuration", "permanent": true },
+
+    { "source": "/installation", "destination": "/material/getting-started", "permanent": true },
+    { "source": "/getting-started", "destination": "/material/getting-started", "permanent": true },
+    { "source": "/ui-libs-integrations", "destination": "/material/configuration", "permanent": true },
+    { "source": "/configuration", "destination": "/material/configuration", "permanent": true },
+    { "source": "/examples", "destination": "/material/examples", "permanent": true },
+    { "source": "/examples/:path*", "destination": "/material/examples/:path*", "permanent": true },
+    { "source": "/schema-fields/:path*", "destination": "/material/schema-fields/:path*", "permanent": true },
+    { "source": "/validation/:path*", "destination": "/material/validation/:path*", "permanent": true },
+    { "source": "/dynamic-behavior/:path*", "destination": "/material/dynamic-behavior/:path*", "permanent": true },
+    { "source": "/prebuilt/:path*", "destination": "/material/prebuilt/:path*", "permanent": true },
+    { "source": "/schema-validation/:path*", "destination": "/material/schema-validation/:path*", "permanent": true },
+    { "source": "/advanced/:path*", "destination": "/material/advanced/:path*", "permanent": true },
+    { "source": "/custom-integrations", "destination": "/material/custom-integrations", "permanent": true },
+    { "source": "/ai-integration", "destination": "/material/ai-integration", "permanent": true },
+
+    { "source": "/ui-libs-integrations/material", "destination": "/material/configuration", "permanent": true },
+    { "source": "/ui-libs-integrations/bootstrap", "destination": "/bootstrap/configuration", "permanent": true },
+    { "source": "/ui-libs-integrations/primeng", "destination": "/primeng/configuration", "permanent": true },
+    { "source": "/ui-libs-integrations/ionic", "destination": "/ionic/configuration", "permanent": true }
+  ]
+}
