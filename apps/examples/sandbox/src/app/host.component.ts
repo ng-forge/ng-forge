@@ -8,6 +8,7 @@ const DEFAULT_ROUTES: Record<AdapterName, string> = {
   primeng: 'examples',
   ionic: 'examples',
   core: 'test',
+  custom: 'examples',
 };
 
 /**

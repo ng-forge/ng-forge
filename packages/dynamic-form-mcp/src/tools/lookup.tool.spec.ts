@@ -8,12 +8,17 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerLookupTool } from './lookup.tool.js';
 import * as registry from '../registry/index.js';
+import { clearCache } from '../services/doc-fetcher.js';
 
 describe('Lookup Tool', () => {
   let server: McpServer;
   let registeredTool: { name: string; handler: (args: Record<string, unknown>) => Promise<unknown> };
 
   beforeEach(() => {
+    // Intercept HTTP requests so tests use hardcoded fallback content, not live ng-forge.com docs
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: false } as Response);
+    clearCache();
+
     server = {
       tool: vi.fn((name, _description, _schema, handler) => {
         registeredTool = { name, handler };
@@ -24,7 +29,7 @@ describe('Lookup Tool', () => {
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('registers tool with correct name', () => {
@@ -497,6 +502,9 @@ describe('Lookup Tool with mocked registry', () => {
   let registeredTool: { name: string; handler: (args: Record<string, unknown>) => Promise<unknown> };
 
   beforeEach(() => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: false } as Response);
+    clearCache();
+
     server = {
       tool: vi.fn((name, _description, _schema, handler) => {
         registeredTool = { name, handler };

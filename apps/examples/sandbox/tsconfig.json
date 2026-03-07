@@ -29,7 +29,8 @@
       "@ng-forge/examples-ionic": ["dist/internal/examples-ionic"],
       "@ng-forge/examples-core": ["dist/internal/examples-core"],
       "@ng-forge/styling": ["internal/styling/src/index.ts"],
-      "@ng-forge/utils": ["internal/utils/src/index.ts"]
+      "@ng-forge/utils": ["internal/utils/src/index.ts"],
+      "@ng-forge/examples-shared-testing": ["internal/examples-shared-testing/src/index.ts"]
     },
     "skipLibCheck": true
   },
