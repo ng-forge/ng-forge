@@ -89,7 +89,6 @@ export class TestScenarioComponent {
   private readonly http = inject(HttpClient);
 
   /** Scenario passed directly as input (for embedding in other components) */
-  // eslint-disable-next-line @angular-eslint/no-input-rename
   scenarioInput = input<TestScenario | undefined>(undefined, { alias: 'scenario' });
 
   /** Scenario loaded from route data */
