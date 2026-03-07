@@ -265,7 +265,7 @@ jobs:
           fi
 
   e2e:
-    name: E2E Tests (${{ matrix.app }}${{ matrix.shard && format(' [{0}]', matrix.shard) || '' }})
+    name: E2E Tests (${{ matrix.target }}${{ matrix.shard && format(' [{0}]', matrix.shard) || '' }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [lint-and-test, build-apps]
@@ -273,41 +273,34 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # core-examples: runs natively (no Docker) with 3 shards — no screenshot tests
-          - app: core-examples
-            short: core
+          # core: runs natively (no Docker) with 3 shards — no screenshot tests
+          - target: e2e-core
             docker: false
             shard: '1/3'
             shardId: '1of3'
-          - app: core-examples
-            short: core
+          - target: e2e-core
             docker: false
             shard: '2/3'
             shardId: '2of3'
-          - app: core-examples
-            short: core
+          - target: e2e-core
             docker: false
             shard: '3/3'
             shardId: '3of3'
-          # UI adapter apps: run in Docker for pixel-perfect screenshot consistency
-          - app: bootstrap-examples
-            short: bootstrap
+          # UI adapters: run in Docker for pixel-perfect screenshot consistency
+          - target: e2e-bootstrap
             docker: true
-          - app: material-examples
-            short: material
+          - target: e2e-material
             docker: true
-          - app: primeng-examples
-            short: primeng
+          - target: e2e-primeng
             docker: true
-          - app: ionic-examples
-            short: ionic
+          - target: e2e-ionic
             docker: true
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      # Native setup — only needed for core-examples (non-Docker)
+      # Native setup — only needed for core (non-Docker)
       - name: Setup Node and restore cache
         if: ${{ !matrix.docker }}
         uses: ./.github/actions/setup-node-restore
@@ -330,23 +323,23 @@ jobs:
         id: e2e
         run: |
           if [[ "${{ matrix.docker }}" == "true" ]]; then
-            ./scripts/playwright-docker.sh ${{ matrix.app }}
+            ./scripts/playwright-docker.sh sandbox-examples ${{ matrix.target }}
           else
-            pnpm nx run ${{ matrix.app }}:e2e --shard=${{ matrix.shard }}
+            pnpm nx run sandbox-examples:${{ matrix.target }} --shard=${{ matrix.shard }}
           fi
 
       - name: Generate job summary
         if: always() && steps.e2e.outcome != 'skipped'
-        run: node scripts/playwright-job-summary.mjs ${{ matrix.app }} apps/e2e/${{ matrix.short }}/test-results
+        run: node scripts/playwright-job-summary.mjs sandbox-examples apps/examples/sandbox/test-results
 
       - name: Upload test artifacts on failure
         uses: actions/upload-artifact@v6
         if: failure()
         with:
-          name: playwright-results-${{ matrix.app }}${{ matrix.shardId && format('-{0}', matrix.shardId) || '' }}
+          name: playwright-results-${{ matrix.target }}${{ matrix.shardId && format('-{0}', matrix.shardId) || '' }}
           path: |
-            apps/e2e/${{ matrix.short }}/test-results/
-            apps/e2e/${{ matrix.short }}/playwright-report/
+            apps/examples/sandbox/test-results/
+            apps/examples/sandbox/playwright-report/
           if-no-files-found: ignore
           retention-days: 7
 
