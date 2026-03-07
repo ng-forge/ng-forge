@@ -226,6 +226,12 @@ jobs:
           echo "Building all example apps..."
           pnpm run build:examples
 
+      - name: Cache internal dist artifacts
+        uses: actions/cache/save@v5
+        with:
+          path: dist/internal
+          key: internal-dist-${{ github.sha }}
+
       - name: Upload docs artifacts
         uses: actions/upload-artifact@v6
         with:
@@ -318,6 +324,13 @@ jobs:
       - name: Install Playwright system dependencies
         if: ${{ !matrix.docker }}
         run: pnpm exec playwright install-deps
+
+      - name: Restore internal dist artifacts
+        uses: actions/cache/restore@v5
+        with:
+          path: dist/internal
+          key: internal-dist-${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Run E2E tests
         id: e2e

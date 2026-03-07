@@ -287,6 +287,12 @@ jobs:
             echo "sandbox-examples not affected, skipping build"
           fi
 
+      - name: Cache internal dist artifacts
+        uses: actions/cache/save@v5
+        with:
+          path: dist/internal
+          key: internal-dist-${{ github.sha }}
+
       - name: Determine E2E matrix
         id: set-matrix
         run: |
@@ -388,6 +394,13 @@ jobs:
       - name: Install Playwright system dependencies
         if: ${{ !matrix.docker }}
         run: pnpm exec playwright install-deps
+
+      - name: Restore internal dist artifacts
+        uses: actions/cache/restore@v5
+        with:
+          path: dist/internal
+          key: internal-dist-${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Run E2E tests
         id: e2e
