@@ -109,6 +109,7 @@ export class App implements OnInit {
         }
       });
 
+    // Fix active sidebar links after every navigation
     this.router.events
       .pipe(
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
@@ -117,6 +118,10 @@ export class App implements OnInit {
       .subscribe(() => {
         afterNextRender(() => this.fixSidebarActiveLinks(), { injector: this.injector });
       });
+
+    // Also fix on initial render: the first navigation completes during bootstrapping,
+    // before the subscription above is set up, so NavigationEnd is missed on direct URL load.
+    afterNextRender(() => this.fixSidebarActiveLinks(), { injector: this.injector });
 
     if (this.isBrowser) {
       // Save theme changes to localStorage (skip initial emission)
