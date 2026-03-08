@@ -167,7 +167,7 @@ When implementing a feature across all 4 UI adapter libraries:
 
 ## E2E Testing
 
-- **Playwright-based**, located in `apps/examples/*/src/app/testing/`
+- **Playwright-based**, located in `apps/e2e/*/src/app/testing/`
 - **Run locally for fast iteration**: `nx e2e material-examples` (screenshots will differ from CI — that's expected)
 - **Use Docker for screenshot updates only**: `pnpm e2e:material:update` (ensures cross-platform consistency)
 - **Never run `--update-snapshots` locally** outside Docker — creates platform-specific screenshots that fail in CI

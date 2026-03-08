@@ -32,8 +32,8 @@ jobs:
               # Test directories
               - '**/testing/**'
               - '**/__tests__/**'
-              # Example apps (demo code, not library source)
-              - 'apps/examples/**'
+              # E2E apps (demo code, not library source)
+              - 'apps/e2e/**'
               # Internal/experimental packages
               - 'internal/**'
 

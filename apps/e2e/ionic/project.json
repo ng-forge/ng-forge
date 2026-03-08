@@ -3,7 +3,7 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "prefix": "example",
-  "sourceRoot": "apps/examples/ionic/src",
+  "sourceRoot": "apps/e2e/ionic/src",
   "tags": ["examples", "e2e"],
   "implicitDependencies": ["dynamic-forms", "dynamic-forms-ionic"],
   "targets": {
@@ -12,17 +12,17 @@
       "outputs": ["{options.outputPath}"],
       "dependsOn": ["^build"],
       "options": {
-        "outputPath": "dist/apps/examples/ionic",
-        "browser": "apps/examples/ionic/src/main.ts",
-        "tsConfig": "apps/examples/ionic/tsconfig.app.json",
+        "outputPath": "dist/apps/e2e/ionic",
+        "browser": "apps/e2e/ionic/src/main.ts",
+        "tsConfig": "apps/e2e/ionic/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
           {
             "glob": "**/*",
-            "input": "apps/examples/ionic/public"
+            "input": "apps/e2e/ionic/public"
           }
         ],
-        "styles": ["apps/examples/ionic/src/styles.scss"],
+        "styles": ["apps/e2e/ionic/src/styles.scss"],
         "stylePreprocessorOptions": {
           "includePaths": ["internal/styling/src", "packages/dynamic-forms-ionic/src/styles"]
         }
@@ -83,15 +83,15 @@
       "options": {
         "buildTarget": "ionic-examples:build",
         "port": 4203,
-        "staticFilePath": "dist/apps/examples/ionic/browser",
+        "staticFilePath": "dist/apps/e2e/ionic/browser",
         "spa": true
       }
     },
     "e2e": {
       "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/ionic"],
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/e2e/ionic"],
       "options": {
-        "config": "apps/examples/ionic/playwright.config.ts"
+        "config": "apps/e2e/ionic/playwright.config.ts"
       }
     }
   }

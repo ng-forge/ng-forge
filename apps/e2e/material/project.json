@@ -1,20 +1,20 @@
 {
-  "name": "core-examples",
+  "name": "material-examples",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "prefix": "example",
-  "sourceRoot": "apps/examples/core/src",
+  "sourceRoot": "apps/e2e/material/src",
   "tags": ["examples", "e2e"],
-  "implicitDependencies": ["dynamic-forms", "dynamic-forms-material", "examples-shared-testing"],
+  "implicitDependencies": ["dynamic-forms", "dynamic-forms-material"],
   "targets": {
     "build": {
       "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
       "dependsOn": ["^build"],
       "options": {
-        "outputPath": "dist/apps/examples/core",
-        "browser": "apps/examples/core/src/main.ts",
-        "tsConfig": "apps/examples/core/tsconfig.app.json",
+        "outputPath": "dist/apps/e2e/material",
+        "browser": "apps/e2e/material/src/main.ts",
+        "tsConfig": "apps/e2e/material/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "stylePreprocessorOptions": {
           "includePaths": ["internal/styling/src"]
@@ -22,10 +22,10 @@
         "assets": [
           {
             "glob": "**/*",
-            "input": "apps/examples/core/public"
+            "input": "apps/e2e/material/public"
           }
         ],
-        "styles": ["apps/examples/core/src/styles.scss"]
+        "styles": ["apps/e2e/material/src/styles.scss"]
       },
       "configurations": {
         "production": {
@@ -41,7 +41,8 @@
               "maximumError": "16kb"
             }
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "baseHref": "/dynamic-forms/examples/material/"
         },
         "development": {
           "optimization": false,
@@ -56,21 +57,21 @@
       "executor": "@angular/build:dev-server",
       "configurations": {
         "production": {
-          "buildTarget": "core-examples:build:production"
+          "buildTarget": "material-examples:build:production"
         },
         "development": {
-          "buildTarget": "core-examples:build:development"
+          "buildTarget": "material-examples:build:development"
         }
       },
       "defaultConfiguration": "development",
       "options": {
-        "port": 4205
+        "port": 4201
       }
     },
     "extract-i18n": {
       "executor": "@angular/build:extract-i18n",
       "options": {
-        "buildTarget": "core-examples:build"
+        "buildTarget": "material-examples:build"
       }
     },
     "lint": {
@@ -80,17 +81,17 @@
       "continuous": true,
       "executor": "@nx/web:file-server",
       "options": {
-        "buildTarget": "core-examples:build",
-        "port": 4205,
-        "staticFilePath": "dist/apps/examples/core/browser",
+        "buildTarget": "material-examples:build",
+        "port": 4201,
+        "staticFilePath": "dist/apps/e2e/material/browser",
         "spa": true
       }
     },
     "e2e": {
       "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/core"],
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/e2e/material"],
       "options": {
-        "config": "apps/examples/core/playwright.config.ts"
+        "config": "apps/e2e/material/playwright.config.ts"
       }
     }
   }
