@@ -80,7 +80,7 @@ const examplesDir = join(deployDir, 'examples');
 mkdirSync(examplesDir, { recursive: true });
 
 // Copy Material examples (required)
-const materialSrc = join(distDir, 'apps', 'examples', 'material', 'browser');
+const materialSrc = join(distDir, 'apps', 'e2e', 'material', 'browser');
 if (!existsSync(materialSrc)) {
   console.error('❌ Error: Material examples build output not found!');
   console.error('   Expected at:', materialSrc);
@@ -97,7 +97,7 @@ try {
 }
 
 // Copy PrimeNG examples (required)
-const primengSrc = join(distDir, 'apps', 'examples', 'primeng', 'browser');
+const primengSrc = join(distDir, 'apps', 'e2e', 'primeng', 'browser');
 if (!existsSync(primengSrc)) {
   console.error('❌ Error: PrimeNG examples build output not found!');
   console.error('   Expected at:', primengSrc);
@@ -114,7 +114,7 @@ try {
 }
 
 // Copy Bootstrap examples (required)
-const bootstrapSrc = join(distDir, 'apps', 'examples', 'bootstrap', 'browser');
+const bootstrapSrc = join(distDir, 'apps', 'e2e', 'bootstrap', 'browser');
 if (!existsSync(bootstrapSrc)) {
   console.error('❌ Error: Bootstrap examples build output not found!');
   console.error('   Expected at:', bootstrapSrc);
@@ -131,7 +131,7 @@ try {
 }
 
 // Copy Ionic examples (required)
-const ionicSrc = join(distDir, 'apps', 'examples', 'ionic', 'browser');
+const ionicSrc = join(distDir, 'apps', 'e2e', 'ionic', 'browser');
 if (!existsSync(ionicSrc)) {
   console.error('❌ Error: Ionic examples build output not found!');
   console.error('   Expected at:', ionicSrc);
