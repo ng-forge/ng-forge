@@ -15,10 +15,6 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@examples/bootstrap/*": ["apps/e2e/bootstrap/src/app/examples/*"],
-      "@examples/ionic/*": ["apps/e2e/ionic/src/app/examples/*"],
-      "@examples/material/*": ["apps/e2e/material/src/app/examples/*"],
-      "@examples/primeng/*": ["apps/e2e/primeng/src/app/examples/*"],
       "@ng-doc/generated": ["dist/ng-doc/docs"],
       "@ng-forge/dynamic-forms": ["packages/dynamic-forms/src/index.ts"],
       "@ng-forge/dynamic-forms/integration": ["packages/dynamic-forms/integration/src/public_api.ts"],
