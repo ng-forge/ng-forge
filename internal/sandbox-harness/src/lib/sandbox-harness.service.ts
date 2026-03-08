@@ -1,4 +1,4 @@
-import { createComponent, inject, Injectable, OnDestroy, signal as reactiveSignal } from '@angular/core';
+import { ApplicationRef, createComponent, inject, Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { DOCUMENT, LocationStrategy } from '@angular/common';
 import { createApplication, ɵSharedStylesHost as SharedStylesHost } from '@angular/platform-browser';
 import { MemoryLocationStrategy } from './memory-location-strategy';
@@ -15,7 +15,9 @@ const STYLESHEET_ID_PREFIX = 'sandbox-harness-style-';
 @Injectable()
 export class SandboxHarness implements OnDestroy {
   private readonly registry = inject<Map<AdapterName, AdapterRegistration>>(ADAPTER_REGISTRY);
+  private readonly document = inject(DOCUMENT);
   private readonly instances = new Map<string, SandboxRefImpl>();
+  private instanceCounter = 0;
   private activeStylesheetAdapter: AdapterName | null = null;
   private readonly cssCache = new Map<string, Promise<string>>();
 
@@ -25,35 +27,37 @@ export class SandboxHarness implements OnDestroy {
    * so switching adapters re-uses already-bootstrapped apps instead of re-creating them.
    */
   createSlot(container: HTMLElement, options?: SandboxBootstrapOptions): SandboxSlot {
-    return new SandboxSlot(container, options ?? {}, (adapter, cont, opts, signal) => this.bootstrap(adapter, cont, opts, signal));
+    return new SandboxSlot(container, options ?? {}, (adapter, cont, opts, abortSignal) =>
+      this.bootstrap(adapter, cont, opts, abortSignal),
+    );
   }
 
   async bootstrap(
     adapterName: AdapterName,
     container: HTMLElement,
     options?: SandboxBootstrapOptions,
-    signal?: AbortSignal,
+    abortSignal?: AbortSignal,
   ): Promise<SandboxRef> {
     const registration = this.registry.get(adapterName);
     if (!registration) {
       throw new Error(`[SandboxHarness] Adapter "${adapterName}" is not registered. Did you call provideAdapterRegistry()?`);
     }
 
-    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+    if (abortSignal?.aborted) throw new DOMException('Aborted', 'AbortError');
 
     // Load routes eagerly so they're available synchronously to the router (as children, not loadChildren).
     // Append a wildcard redirect so unrecognised routes (e.g. a scenario that only exists in one adapter)
     // fall back to the adapter's defaultRoute instead of throwing NG04002.
     const routes = [...(await registration.loadRoutes()), { path: '**', redirectTo: registration.defaultRoute }];
 
-    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+    if (abortSignal?.aborted) throw new DOMException('Aborted', 'AbortError');
 
-    // Load adapter module (code-split) with pre-loaded routes
+    // Load adapter module (code-split) with pre-loaded routes.
     const { config: factoryConfig, rootComponent } = await registration.factory(routes);
 
-    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+    if (abortSignal?.aborted) throw new DOMException('Aborted', 'AbortError');
 
-    // Override location strategy if requested (e.g. memory for docs embedded usage)
+    // Override location strategy if requested (e.g. memory for docs embedded usage).
     let config =
       options?.locationStrategy === 'memory'
         ? {
@@ -62,7 +66,7 @@ export class SandboxHarness implements OnDestroy {
           }
         : factoryConfig;
 
-    // Provide SANDBOX_FORM_CONFIG when a config is passed (used by the docs demo route)
+    // Provide SANDBOX_FORM_CONFIG when a config is passed (used by the docs demo route).
     if (options?.config) {
       config = {
         ...config,
@@ -72,18 +76,20 @@ export class SandboxHarness implements OnDestroy {
 
     const isScoped = options?.styleIsolation === 'scoped';
 
+    // SSR-safe matchMedia: window may be undefined in Node.js environments.
+    const mediaQuery = typeof window !== 'undefined' ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
     // Resolves the effective theme, accounting for "auto" (system preference).
     // NgDoc sets data-theme="dark" | "auto" | null (absent = light).
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const resolveTheme = (): 'dark' | 'light' => {
-      const raw = document.documentElement.getAttribute('data-theme');
-      return raw === 'dark' || (raw === 'auto' && mediaQuery.matches) ? 'dark' : 'light';
+      const raw = this.document.documentElement.getAttribute('data-theme');
+      return raw === 'dark' || (raw === 'auto' && (mediaQuery?.matches ?? false)) ? 'dark' : 'light';
     };
 
     // Reactive theme signal — kept in sync with document.documentElement[data-theme] by the
     // host application. Provided to the sub-app so embedded components (e.g. example-scenario)
     // can react to theme changes without needing their own DOM observation.
-    const themeSignal = reactiveSignal<'dark' | 'light'>(resolveTheme());
+    const themeSignal = signal<'dark' | 'light'>(resolveTheme());
 
     // Inject DOCUMENT proxy to intercept <style> elements added directly to document.head
     // by third-party libs (e.g. PrimeNG's providePrimeNG() injects .p-inputtext{…} and
@@ -93,25 +99,33 @@ export class SandboxHarness implements OnDestroy {
     const addedStyles = new Set<HTMLStyleElement>();
     const shadowRootRef: { current: ShadowRoot | null } = { current: null };
     const styleTransform = isScoped ? (css: string) => this.transformCssForShadowDom(css) : undefined;
-    const documentProxy = createDocumentProxy(document, (el) => addedStyles.add(el), shadowRootRef, styleTransform);
+    const { proxy: documentProxy, cleanup: cleanupDocumentProxy } = createDocumentProxy(
+      this.document,
+      (el) => addedStyles.add(el),
+      shadowRootRef,
+      styleTransform,
+    );
     config = {
       ...config,
       providers: [...config.providers, { provide: DOCUMENT, useValue: documentProxy }, { provide: SANDBOX_THEME, useValue: themeSignal }],
     };
 
-    // Create the isolated sub-application
+    // Create the isolated sub-application.
     const appRef = await createApplication(config);
 
-    if (signal?.aborted) {
+    if (abortSignal?.aborted) {
       appRef.destroy();
       throw new DOMException('Aborted', 'AbortError');
     }
 
-    const hostElement = document.createElement('div');
+    const hostElement = this.document.createElement('div');
     container.appendChild(hostElement);
 
+    const cleanupFns: Array<() => void> = [cleanupDocumentProxy];
+    cleanupFns.push(() => addedStyles.forEach((s) => s.remove()));
+
     if (!isScoped) {
-      // Default: inject stylesheet globally
+      // Default: inject stylesheet globally.
       this.swapStylesheet(registration);
     }
 
@@ -120,96 +134,33 @@ export class SandboxHarness implements OnDestroy {
       hostElement,
     });
 
-    let shadowRoot: ShadowRoot | null = null;
-    const cleanupFns: Array<() => void> = [];
-
-    // Cleanup: remove any <style> elements that were injected into document.head
-    cleanupFns.push(() => addedStyles.forEach((s) => s.remove()));
-
     if (isScoped) {
       // The root component uses ExperimentalIsolatedShadowDom, so Angular attaches
       // the shadow root to hostElement during createComponent().
-      shadowRoot = hostElement.shadowRoot;
-
+      const shadowRoot = hostElement.shadowRoot;
       if (shadowRoot) {
-        // Activate the DOCUMENT proxy redirect: from this point forward, any style
-        // elements that the sub-app injects into document.head (via the proxied DOCUMENT)
-        // will be redirected to the shadow root directly.
         shadowRootRef.current = shadowRoot;
-
-        // Retroactively move styles that were already leaked into document.head before
-        // the shadow root was available (e.g. during createApplication / APP_INITIALIZERs).
-        // DOM's appendChild() performs a move, so each style is automatically removed from
-        // document.head and inserted into the shadow root. Transform CSS selectors first
-        // so global selectors (e.g. [data-theme='dark']) work inside shadow DOM.
-        for (const style of addedStyles) {
-          style.textContent = this.transformCssForShadowDom(style.textContent ?? '');
-          shadowRoot.appendChild(style);
-        }
-
-        // Redirect Angular's SharedStylesHost to inject component styles into the shadow root
-        // instead of document.head. This must be done BEFORE attachView() and navigation,
-        // because that's when Angular first renders components and injects their emulated styles.
-        //
-        // Angular's SharedStylesHost tracks style usage and manages injection via a `hosts` Set.
-        // By default, `document.head` is the only host. We:
-        //   1. Remove document.head from hosts → prevents any future injection into the docs page
-        //   2. Add shadowRoot as a host → all component styles (from child components using
-        //      ViewEncapsulation.Emulated) will be injected into the shadow root
-        //
-        // This is the canonical approach Angular itself uses for ViewEncapsulation.ShadowDom —
-        // it calls sharedStylesHost.addHost(shadowRoot) in ShadowDomRenderer's constructor.
-        const stylesHost = appRef.injector.get(SharedStylesHost);
-        stylesHost.removeHost(document.head);
-        stylesHost.addHost(shadowRoot);
-        cleanupFns.push(() => stylesHost.removeHost(shadowRoot!));
-
-        // Mirror data-theme from document.documentElement → shadow host so that
-        // CSS selectors transformed to :host([data-theme='dark']) work correctly.
-        // "auto" is resolved to the actual system preference so the host always
-        // carries either data-theme="dark" or no attribute (= light).
-        // Also updates the themeSignal provided to the sub-app so injected components
-        // react to theme changes without their own DOM observation.
-        const syncTheme = (): void => {
-          const isDark = resolveTheme() === 'dark';
-          themeSignal.set(isDark ? 'dark' : 'light');
-          if (isDark) {
-            hostElement.setAttribute('data-theme', 'dark');
-          } else {
-            hostElement.removeAttribute('data-theme');
-          }
-        };
-        syncTheme();
-        const themeObserver = new MutationObserver(syncTheme);
-        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-        cleanupFns.push(() => themeObserver.disconnect());
-        // Also react when the system preference changes while the user has "auto" selected.
-        mediaQuery.addEventListener('change', syncTheme);
-        cleanupFns.push(() => mediaQuery.removeEventListener('change', syncTheme));
-
-        // Inject the adapter CSS bundle into the shadow root with selector transformation
-        // so that html/body/:root selectors work inside shadow DOM.
-        await this.injectIntoShadow(registration, shadowRoot, signal);
-
-        if (signal?.aborted) {
+        await this.applyStyleIsolation(
+          appRef,
+          shadowRoot,
+          hostElement,
+          registration,
+          themeSignal,
+          resolveTheme,
+          mediaQuery,
+          addedStyles,
+          cleanupFns,
+          abortSignal,
+        );
+        if (abortSignal?.aborted) {
           appRef.destroy();
           hostElement.remove();
           throw new DOMException('Aborted', 'AbortError');
         }
       }
-    }
-
-    // For non-scoped (global stylesheet) apps, the isScoped block never runs, so set up the
-    // theme signal observer here where cleanupFns is already available.
-    if (!isScoped) {
-      const updateTheme = (): void => {
-        themeSignal.set(resolveTheme());
-      };
-      const nonScopedThemeObserver = new MutationObserver(updateTheme);
-      nonScopedThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-      cleanupFns.push(() => nonScopedThemeObserver.disconnect());
-      mediaQuery.addEventListener('change', updateTheme);
-      cleanupFns.push(() => mediaQuery.removeEventListener('change', updateTheme));
+    } else {
+      // Non-scoped: keep themeSignal in sync without touching hostElement's attributes.
+      this.setupThemeObserver(mediaQuery, () => themeSignal.set(resolveTheme()), cleanupFns);
     }
 
     appRef.attachView(componentRef.hostView);
@@ -221,7 +172,7 @@ export class SandboxHarness implements OnDestroy {
     const initialUrl = options?.route ?? `/${registration.defaultRoute}`;
     await router.navigateByUrl(initialUrl);
 
-    const instanceId = `${adapterName}-${Date.now()}`;
+    const instanceId = `${adapterName}-${++this.instanceCounter}`;
     const ref = new SandboxRefImpl(adapterName, appRef, router, hostElement, () => {
       this.instances.delete(instanceId);
       if (this.activeStylesheetAdapter === adapterName) {
@@ -245,36 +196,96 @@ export class SandboxHarness implements OnDestroy {
     this.destroyAll();
   }
 
+  /**
+   * Sets up shadow DOM style isolation: moves pre-creation styles, redirects Angular's
+   * SharedStylesHost, syncs the data-theme attribute, and injects the adapter CSS bundle.
+   */
+  private async applyStyleIsolation(
+    appRef: ApplicationRef,
+    shadowRoot: ShadowRoot,
+    hostElement: HTMLElement,
+    registration: AdapterRegistration,
+    themeSignal: WritableSignal<'dark' | 'light'>,
+    resolveTheme: () => 'dark' | 'light',
+    mediaQuery: MediaQueryList | null,
+    addedStyles: Set<HTMLStyleElement>,
+    cleanupFns: Array<() => void>,
+    abortSignal?: AbortSignal,
+  ): Promise<void> {
+    // Retroactively move styles that leaked into document.head before the shadow root existed.
+    for (const style of addedStyles) {
+      style.textContent = this.transformCssForShadowDom(style.textContent ?? '');
+      shadowRoot.appendChild(style);
+    }
+
+    // ɵSharedStylesHost is Angular-internal but is the canonical mechanism for redirecting
+    // component emulated styles to a shadow root — the same API used by Angular's own
+    // ShadowDomRenderer. We inject it to prevent sub-app styles from leaking into document.head.
+    // If Angular removes this API, a MutationObserver-based style-mirroring fallback is needed.
+    const stylesHost = appRef.injector.get(SharedStylesHost, null);
+    if (stylesHost) {
+      stylesHost.removeHost(this.document.head);
+      stylesHost.addHost(shadowRoot);
+      cleanupFns.push(() => stylesHost.removeHost(shadowRoot));
+    }
+
+    // Mirror data-theme from document.documentElement → shadow host so that
+    // CSS selectors transformed to :host([data-theme='dark']) work correctly.
+    const syncTheme = (): void => {
+      const isDark = resolveTheme() === 'dark';
+      themeSignal.set(isDark ? 'dark' : 'light');
+      if (isDark) {
+        hostElement.setAttribute('data-theme', 'dark');
+      } else {
+        hostElement.removeAttribute('data-theme');
+      }
+    };
+    syncTheme();
+    this.setupThemeObserver(mediaQuery, syncTheme, cleanupFns);
+
+    // Inject the adapter CSS bundle with selector transformation so html/body/:root work in shadow DOM.
+    await this.injectIntoShadow(registration, shadowRoot, abortSignal);
+  }
+
+  /**
+   * Observes the system colour-scheme media query and document.documentElement's data-theme
+   * attribute, calling `update` whenever the effective theme changes.
+   */
+  private setupThemeObserver(mediaQuery: MediaQueryList | null, update: () => void, cleanupFns: Array<() => void>): void {
+    const observer = new MutationObserver(update);
+    observer.observe(this.document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    cleanupFns.push(() => observer.disconnect());
+    if (mediaQuery) {
+      mediaQuery.addEventListener('change', update);
+      cleanupFns.push(() => mediaQuery.removeEventListener('change', update));
+    }
+  }
+
   private swapStylesheet(registration: AdapterRegistration): void {
     if (this.activeStylesheetAdapter) {
       this.removeStylesheet(this.activeStylesheetAdapter);
     }
 
-    const link = document.createElement('link');
+    const link = this.document.createElement('link');
     link.id = `${STYLESHEET_ID_PREFIX}${registration.name}`;
     link.rel = 'stylesheet';
     link.href = registration.stylesheetUrl;
-    document.head.appendChild(link);
+    this.document.head.appendChild(link);
 
     this.activeStylesheetAdapter = registration.name;
   }
 
-  private async injectIntoShadow(registration: AdapterRegistration, shadowRoot: ShadowRoot, signal?: AbortSignal): Promise<void> {
+  private async injectIntoShadow(registration: AdapterRegistration, shadowRoot: ShadowRoot, abortSignal?: AbortSignal): Promise<void> {
     if (!this.cssCache.has(registration.stylesheetUrl)) {
       this.cssCache.set(
         registration.stylesheetUrl,
-        fetch(registration.stylesheetUrl, { signal }).then((r) => r.text()),
+        fetch(registration.stylesheetUrl, { signal: abortSignal }).then((r) => r.text()),
       );
     }
     const rawCss = await this.cssCache.get(registration.stylesheetUrl)!;
 
-    const style = document.createElement('style');
+    const style = this.document.createElement('style');
     style.id = `${STYLESHEET_ID_PREFIX}${registration.name}`;
-    // Transform global selectors so they work inside the shadow root:
-    // - html/body/:root → :host (the shadow host element)
-    // - html[attr]/:root[attr] → :host([attr])
-    // - html:not(...)/:root:not(...) → :host(:not(...))
-    // This allows theme attributes (data-theme) set on the host to be picked up.
     style.textContent = this.transformCssForShadowDom(rawCss);
     shadowRoot.appendChild(style);
   }
@@ -312,6 +323,6 @@ export class SandboxHarness implements OnDestroy {
   }
 
   private removeStylesheet(adapterName: AdapterName): void {
-    document.getElementById(`${STYLESHEET_ID_PREFIX}${adapterName}`)?.remove();
+    this.document.getElementById(`${STYLESHEET_ID_PREFIX}${adapterName}`)?.remove();
   }
 }

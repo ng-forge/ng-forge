@@ -15,6 +15,11 @@ export const SANDBOX_FORM_CONFIG = new InjectionToken<FormConfig>('SANDBOX_FORM_
  */
 export type SandboxAppFactory = (routes: Route[]) => { config: ApplicationConfig; rootComponent: Type<unknown> };
 
+/**
+ * 'custom' is a virtual adapter name for testing harness scenarios with a caller-supplied
+ * factory. It has no URL-navigable registration and is intentionally excluded from
+ * isAdapterName() — bootstrap('custom') without a registration will throw.
+ */
 export type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'core' | 'custom';
 
 /**
@@ -62,6 +67,8 @@ export interface SandboxBootstrapOptions {
 
 export interface SandboxRef {
   readonly adapterName: AdapterName;
+  /** The host element created for this sub-application inside the container. */
+  readonly hostElement: HTMLElement;
   navigate(url: string): Promise<boolean>;
   destroy(): void;
 }

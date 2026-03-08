@@ -30,14 +30,20 @@ export class SandboxMountDirective {
   readonly route = input<string>('/');
   readonly locationStrategy = input<SandboxBootstrapOptions['locationStrategy']>('memory');
   readonly styleIsolation = input<SandboxBootstrapOptions['styleIsolation']>(undefined);
-  readonly config = input<FormConfig | undefined>(undefined);
+  /**
+   * Optional FormConfig injected via SANDBOX_FORM_CONFIG in the sub-app.
+   * Captured once when the slot is first created — later changes have no effect.
+   */
+  readonly config = input<FormConfig>();
 
   private readonly harness = inject(SandboxHarness);
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
 
   // Created lazily on first loader invocation so that input values (locationStrategy,
-  // styleIsolation) are already set by Angular before the slot options are captured.
+  // styleIsolation, config) are already set by Angular before the slot options are captured.
+  // These options are structural (affect sub-app creation) and cannot change after the slot
+  // is constructed — later input changes are intentionally ignored.
   private slot: SandboxSlot | undefined;
 
   private getSlot(): SandboxSlot {
@@ -55,7 +61,12 @@ export class SandboxMountDirective {
     return this.slot;
   }
 
-  /** Resource wrapping the active mount operation. Cancels in-flight loads on param change. */
+  /**
+   * Resource wrapping the active mount operation. Cancels in-flight loads on param change.
+   *
+   * Note: resource() is currently experimental (Angular 19+) but provides native AbortSignal
+   * integration and status tracking not yet available in stable APIs.
+   */
   readonly mount = resource<SandboxRef, { adapter: AdapterName; route: string }>({
     params: () => ({ adapter: this.adapter(), route: this.route() }),
     loader: ({ params, abortSignal }) => this.getSlot().mount(params.adapter, params.route, abortSignal),

@@ -1,10 +1,30 @@
-import { afterNextRender, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, signal, viewChild } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  Injector,
+  runInInjectionContext,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, distinctUntilChanged, EMPTY, fromEvent, map, merge, Observable, Subject, switchMap } from 'rxjs';
-import { AdapterName, isAdapterName, SandboxHarness, SandboxRef } from '@ng-forge/sandbox-harness';
+import { AdapterName, isAdapterName, SandboxHarness, SandboxSlot } from '@ng-forge/sandbox-harness';
 import { SANDBOX_ADAPTERS } from './adapter-registrations';
 
 const DEFAULT_ADAPTER: AdapterName = 'material';
+
+/** Labels for the nav buttons, in display order. */
+const NAV_ADAPTERS: ReadonlyArray<{ name: AdapterName; label: string }> = [
+  { name: 'material', label: 'Material' },
+  { name: 'bootstrap', label: 'Bootstrap' },
+  { name: 'primeng', label: 'PrimeNG' },
+  { name: 'ionic', label: 'Ionic' },
+  { name: 'core', label: 'Core' },
+];
 
 /**
  * Returns the default route for the given adapter, derived from the registration.
@@ -48,15 +68,18 @@ function fromMutationObserver(target: Node, init: MutationObserverInit): Observa
     <div class="sandbox-host">
       <nav class="sandbox-nav">
         <h1>Sandbox Examples</h1>
-        <button class="adapter-btn" [class.active]="activeAdapter() === 'material'" (click)="navigateTo('material')">Material</button>
-        <button class="adapter-btn" [class.active]="activeAdapter() === 'bootstrap'" (click)="navigateTo('bootstrap')">Bootstrap</button>
-        <button class="adapter-btn" [class.active]="activeAdapter() === 'primeng'" (click)="navigateTo('primeng')">PrimeNG</button>
-        <button class="adapter-btn" [class.active]="activeAdapter() === 'ionic'" (click)="navigateTo('ionic')">Ionic</button>
-        <button class="adapter-btn" [class.active]="activeAdapter() === 'core'" (click)="navigateTo('core')">Core</button>
+        @for (a of navAdapters; track a.name) {
+          <button class="adapter-btn" [class.active]="activeAdapter() === a.name" (click)="navigateTo(a.name)">
+            {{ a.label }}
+          </button>
+        }
       </nav>
 
       @if (loading()) {
         <div class="adapter-loading">Loading adapter...</div>
+      }
+      @if (error()) {
+        <div class="adapter-error">Failed to load adapter: {{ error() }}</div>
       }
 
       <div class="adapter-container" #adapterContainer></div>
@@ -65,14 +88,18 @@ function fromMutationObserver(target: Node, init: MutationObserverInit): Observa
 })
 export class HostComponent {
   private readonly harness = inject(SandboxHarness);
+  private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   private readonly containerRef = viewChild.required<ElementRef<HTMLElement>>('adapterContainer');
 
   // Initialized synchronously from the hash so the correct nav button is active on first render.
   readonly activeAdapter = signal<AdapterName>(getAdapterFromHash() ?? DEFAULT_ADAPTER);
   readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly navAdapters = NAV_ADAPTERS;
 
-  private currentRef: SandboxRef | null = null;
+  // Slot created lazily on first mount — container element only available after view init.
+  private slot: SandboxSlot | null = null;
   private readonly adapterSwitch$ = new Subject<AdapterName>();
 
   constructor() {
@@ -83,7 +110,9 @@ export class HostComponent {
         switchMap((adapter) =>
           this.mountAdapter(adapter).pipe(
             catchError((err) => {
+              const msg = err instanceof Error ? err.message : String(err);
               console.error(`[Sandbox] Failed to mount adapter "${adapter}":`, err);
+              this.error.set(msg);
               this.loading.set(false);
               return EMPTY;
             }),
@@ -100,7 +129,8 @@ export class HostComponent {
       }
       this.adapterSwitch$.next(detectedAdapter ?? DEFAULT_ADAPTER);
 
-      // takeUntilDestroyed with explicit destroyRef works outside injection context
+      // Only handles external URL changes (back/forward, direct URL edits).
+      // Button clicks go through navigateTo() → adapterSwitch$ directly.
       fromEvent(window, 'hashchange')
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
@@ -125,39 +155,44 @@ export class HostComponent {
   navigateTo(adapter: AdapterName): void {
     if (this.activeAdapter() === adapter) return;
     window.location.hash = `#/${adapter}/${getDefaultRoute(adapter)}`;
+    // Emit directly so the mount starts immediately without waiting for the hashchange event.
+    this.adapterSwitch$.next(adapter);
+  }
+
+  private getSlot(): SandboxSlot {
+    if (!this.slot) {
+      const container = this.containerRef().nativeElement;
+      // runInInjectionContext is required because SandboxSlot's constructor calls inject(DestroyRef).
+      this.slot = runInInjectionContext(this.injector, () => this.harness.createSlot(container));
+    }
+    return this.slot;
   }
 
   private mountAdapter(adapter: AdapterName): Observable<void> {
     return new Observable((subscriber) => {
       this.loading.set(true);
+      this.error.set(null);
       this.activeAdapter.set(adapter);
-      this.currentRef?.destroy();
-      this.currentRef = null;
 
-      const container = this.containerRef().nativeElement;
+      const controller = new AbortController();
       const hashUrl = window.location.hash.replace(/^#/, '') || '/';
 
-      this.harness
-        .bootstrap(adapter, container, { route: hashUrl })
-        .then((ref) => {
-          if (subscriber.closed) {
-            // A newer adapter was requested while this one was loading — discard.
-            ref.destroy();
-            return;
-          }
-          this.currentRef = ref;
+      this.getSlot()
+        .mount(adapter, hashUrl, controller.signal)
+        .then(() => {
+          if (subscriber.closed) return;
           this.loading.set(false);
           subscriber.next();
           subscriber.complete();
         })
-        .catch((err) => {
+        .catch((err: unknown) => {
+          if ((err as { name?: string })?.name === 'AbortError') return;
           if (!subscriber.closed) subscriber.error(err);
         });
 
-      // Teardown: called by switchMap when a newer adapter arrives before this one resolves.
+      // Teardown: abort the in-flight bootstrap when switchMap cancels (newer adapter requested).
       return () => {
-        this.currentRef?.destroy();
-        this.currentRef = null;
+        controller.abort();
         this.loading.set(false);
       };
     });

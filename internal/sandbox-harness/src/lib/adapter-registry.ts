@@ -10,7 +10,13 @@ export function provideAdapterRegistry(adapters: AdapterRegistration[]): Provide
   };
 }
 
+/**
+ * URL-navigable adapter names — the single source of truth for isAdapterName().
+ * 'custom' is intentionally excluded: it is a virtual adapter with no registration,
+ * so '#/custom/...' URLs must not be treated as valid navigation targets.
+ */
+const REGISTERED_ADAPTER_NAMES = ['material', 'bootstrap', 'primeng', 'ionic', 'core'] as const;
+
 export function isAdapterName(value: string): value is AdapterName {
-  const names: AdapterName[] = ['material', 'bootstrap', 'primeng', 'ionic', 'core', 'custom'];
-  return (names as string[]).includes(value);
+  return (REGISTERED_ADAPTER_NAMES as readonly string[]).includes(value);
 }

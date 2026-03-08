@@ -1,5 +1,4 @@
 import { DestroyRef, inject } from '@angular/core';
-import { SandboxRefImpl } from './sandbox-ref';
 import { AdapterName, SandboxBootstrapOptions, SandboxRef } from './types';
 
 /**
@@ -20,11 +19,15 @@ export type SandboxBootstrapFn = (
  * per adapter so switching adapters re-uses already-running apps (show/hide) and only
  * navigates to the new route. New adapters are bootstrapped on first access.
  *
+ * Hidden adapters remain running (Angular change detection and subscriptions stay active).
+ * This is an intentional trade-off: instant re-activation with zero re-bootstrap cost,
+ * at the expense of keeping inactive app trees ticking in the background.
+ *
  * Auto-destroys all cached apps when the owning injection context (e.g. a directive)
  * is destroyed.
  */
 export class SandboxSlot {
-  private readonly cache = new Map<AdapterName, SandboxRefImpl>();
+  private readonly cache = new Map<AdapterName, SandboxRef>();
 
   constructor(
     private readonly container: HTMLElement,
@@ -53,16 +56,14 @@ export class SandboxSlot {
     }
 
     const ref = await this.bootstrapFn(adapter, this.container, { ...this.options, route }, signal);
-    // Post-bootstrap abort check: destroy the freshly-created ref if signal fired
+    // Post-bootstrap abort check: destroy the freshly-created ref if signal fired.
     if (signal.aborted) {
       ref.destroy();
       throw new DOMException('Aborted', 'AbortError');
     }
-    // bootstrap() returns SandboxRef (public interface) but always produces SandboxRefImpl
-    const impl = ref as SandboxRefImpl;
-    this.cache.set(adapter, impl);
+    this.cache.set(adapter, ref);
     this.showOnly(adapter);
-    return impl;
+    return ref;
   }
 
   /** Destroys all cached sub-applications and clears the cache. */

@@ -1,7 +1,17 @@
+export interface DocumentProxyResult {
+  proxy: Document;
+  /**
+   * Removes all instance-level `textContent` property interceptors installed by this proxy,
+   * restoring the prototype chain for each intercepted style element.
+   * Call this when the sub-application is destroyed.
+   */
+  cleanup: () => void;
+}
+
 /**
  * Creates a proxy around `document` that intercepts DOM mutation methods on `document.head`
- * (appendChild, insertBefore, prepend) and tracks any injected <style> elements via
- * the provided callback.
+ * (appendChild, insertBefore, prepend, replaceChild) and tracks any injected <style> elements
+ * via the provided callback.
  *
  * When `shadowRootRef.current` is non-null, style elements are **redirected** to the shadow root
  * instead of being inserted into `document.head`. This prevents third-party libraries (e.g.
@@ -20,64 +30,94 @@
  *   afterward via a `textContent` setter interceptor installed on the element instance.
  *   This handles PrimeNG's `UseStyle` pattern where `HEAD.appendChild(el)` is called with an
  *   empty element, and `el.textContent = css` is set only after the append returns.
+ *   Each interceptor is tracked and removed via the returned `cleanup()` function.
  */
 export function createDocumentProxy(
   document: Document,
   onStyleInjected: (el: HTMLStyleElement) => void,
   shadowRootRef?: { current: ShadowRoot | null },
   transformStyle?: (css: string) => string,
-): Document {
+): DocumentProxyResult {
+  // Tracks nodes with an instance-level textContent interceptor so cleanup() can remove them.
+  const interceptedNodes = new Set<HTMLStyleElement>();
+
+  const cleanup = (): void => {
+    for (const node of interceptedNodes) {
+      // Deleting the own property restores the Node.prototype.textContent descriptor.
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete (node as unknown as Record<string, unknown>)['textContent'];
+    }
+    interceptedNodes.clear();
+  };
+
+  /**
+   * Intercepts a single node being inserted into document.head.
+   * Non-style nodes are passed through unchanged via `fallback`.
+   */
+  const interceptNode = (node: Node, fallback: () => Node): Node => {
+    if (!(node instanceof HTMLStyleElement)) return fallback();
+
+    const redirectTarget = shadowRootRef?.current;
+    if (redirectTarget) {
+      // Redirect to shadow root — never touch document.head.
+      if (transformStyle) {
+        // Install a textContent interceptor so the transform fires when content is set,
+        // not just during appendChild. PrimeNG's UseStyle calls HEAD.appendChild(el) with
+        // an empty element and sets el.textContent = css afterward.
+        const originalDescriptor = Object.getOwnPropertyDescriptor(Node.prototype, 'textContent')!;
+        if (node.textContent) {
+          originalDescriptor.set!.call(node, transformStyle(node.textContent));
+        }
+        Object.defineProperty(node, 'textContent', {
+          get() {
+            return originalDescriptor.get!.call(node);
+          },
+          set(value: string) {
+            originalDescriptor.set!.call(node, transformStyle(value ?? ''));
+          },
+          configurable: true,
+        });
+        interceptedNodes.add(node);
+      }
+      redirectTarget.appendChild(node);
+      onStyleInjected(node);
+      return node;
+    }
+
+    const result = fallback();
+    onStyleInjected(node);
+    return result;
+  };
+
   const headProxy = new Proxy(document.head, {
     get(target, prop) {
       const value = Reflect.get(target, prop, target);
-      if ((prop === 'appendChild' || prop === 'insertBefore' || prop === 'prepend') && typeof value === 'function') {
-        return (node: Node, ...args: unknown[]) => {
-          if (node instanceof HTMLStyleElement) {
-            const redirectTarget = shadowRootRef?.current;
-            if (redirectTarget) {
-              // Redirect: append to shadow root, never touch document.head.
-              // appendChild() is used regardless of the original method since insertion
-              // order within the shadow root doesn't need to match document.head order.
-              if (transformStyle) {
-                // Install a textContent interceptor on this element instance so the transform
-                // fires when content is actually set — not just during appendChild.
-                // PrimeNG's UseStyle calls HEAD.appendChild(el) with an empty element, then
-                // sets el.textContent = css afterward, bypassing a naive transformStyle(el) call.
-                const originalDescriptor = Object.getOwnPropertyDescriptor(Node.prototype, 'textContent')!;
-                // Transform any content already present (defensive; usually empty at this point).
-                if (node.textContent) {
-                  originalDescriptor.set!.call(node, transformStyle(node.textContent));
-                }
-                // Shadow the prototype property on this instance so future sets are intercepted.
-                Object.defineProperty(node, 'textContent', {
-                  get() {
-                    return originalDescriptor.get!.call(node);
-                  },
-                  set(value: string) {
-                    originalDescriptor.set!.call(node, transformStyle(value ?? ''));
-                  },
-                  configurable: true,
-                });
-              }
-              redirectTarget.appendChild(node);
-              onStyleInjected(node);
-              return node;
-            }
-          }
-          const result = (value as (...a: unknown[]) => unknown).call(target, node, ...args);
-          if (node instanceof HTMLStyleElement) onStyleInjected(node);
-          return result;
-        };
+      if (typeof value !== 'function') return value;
+
+      if (prop === 'appendChild' || prop === 'prepend') {
+        return (node: Node) => interceptNode(node, () => (value as (n: Node) => Node).call(target, node));
       }
-      return typeof value === 'function' ? value.bind(target) : value;
+      if (prop === 'insertBefore') {
+        return (node: Node, ref: Node | null) =>
+          interceptNode(node, () => (value as (n: Node, r: Node | null) => Node).call(target, node, ref));
+      }
+      if (prop === 'replaceChild') {
+        // replaceChild(newNode, oldNode) — intercept the incoming new node.
+        return (newNode: Node, oldNode: Node) =>
+          interceptNode(newNode, () => (value as (n: Node, o: Node) => Node).call(target, newNode, oldNode));
+      }
+
+      return value.bind(target);
     },
   });
 
-  return new Proxy(document, {
+  const proxy = new Proxy(document, {
     get(target, prop) {
       if (prop === 'head') return headProxy;
       const value = Reflect.get(target, prop, target);
       return typeof value === 'function' ? value.bind(target) : value;
     },
   });
+
+  return { proxy, cleanup };
 }
