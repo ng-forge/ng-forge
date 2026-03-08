@@ -402,6 +402,10 @@ jobs:
           key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
           fail-on-cache-miss: true
 
+      - name: Install Playwright system dependencies
+        if: ${{ !matrix.docker }}
+        run: pnpm exec playwright install-deps
+
       - name: Run E2E tests
         id: e2e
         run: |
@@ -413,7 +417,7 @@ jobs:
 
       - name: Generate job summary
         if: always() && steps.e2e.outcome != 'skipped'
-        run: node scripts/playwright-job-summary.mjs ${{ matrix.app }} apps/examples/${{ matrix.short }}/test-results
+        run: node scripts/playwright-job-summary.mjs ${{ matrix.app }} apps/e2e/${{ matrix.short }}/test-results
 
       - name: Upload test artifacts on failure
         uses: actions/upload-artifact@v6
@@ -421,8 +425,8 @@ jobs:
         with:
           name: playwright-results-${{ matrix.app }}${{ matrix.shardId && format('-{0}', matrix.shardId) || '' }}
           path: |
-            apps/examples/${{ matrix.short }}/test-results/
-            apps/examples/${{ matrix.short }}/playwright-report/
+            apps/e2e/${{ matrix.short }}/test-results/
+            apps/e2e/${{ matrix.short }}/playwright-report/
           if-no-files-found: ignore
           retention-days: 7
 

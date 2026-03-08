@@ -1,20 +1,20 @@
 {
-  "name": "material-examples",
+  "name": "primeng-examples",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "prefix": "example",
-  "sourceRoot": "apps/examples/material/src",
+  "sourceRoot": "apps/e2e/primeng/src",
   "tags": ["examples", "e2e"],
-  "implicitDependencies": ["dynamic-forms", "dynamic-forms-material"],
+  "implicitDependencies": ["dynamic-forms", "dynamic-forms-primeng"],
   "targets": {
     "build": {
       "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
       "dependsOn": ["^build"],
       "options": {
-        "outputPath": "dist/apps/examples/material",
-        "browser": "apps/examples/material/src/main.ts",
-        "tsConfig": "apps/examples/material/tsconfig.app.json",
+        "outputPath": "dist/apps/e2e/primeng",
+        "browser": "apps/e2e/primeng/src/main.ts",
+        "tsConfig": "apps/e2e/primeng/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "stylePreprocessorOptions": {
           "includePaths": ["internal/styling/src"]
@@ -22,18 +22,18 @@
         "assets": [
           {
             "glob": "**/*",
-            "input": "apps/examples/material/public"
+            "input": "apps/e2e/primeng/public"
           }
         ],
-        "styles": ["apps/examples/material/src/styles.scss"]
+        "styles": ["apps/e2e/primeng/src/styles.scss"]
       },
       "configurations": {
         "production": {
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "1.5mb",
-              "maximumError": "2mb"
+              "maximumWarning": "1mb",
+              "maximumError": "1.5mb"
             },
             {
               "type": "anyComponentStyle",
@@ -42,7 +42,7 @@
             }
           ],
           "outputHashing": "all",
-          "baseHref": "/dynamic-forms/examples/material/"
+          "baseHref": "/dynamic-forms/examples/primeng/"
         },
         "development": {
           "optimization": false,
@@ -57,21 +57,21 @@
       "executor": "@angular/build:dev-server",
       "configurations": {
         "production": {
-          "buildTarget": "material-examples:build:production"
+          "buildTarget": "primeng-examples:build:production"
         },
         "development": {
-          "buildTarget": "material-examples:build:development"
+          "buildTarget": "primeng-examples:build:development"
         }
       },
       "defaultConfiguration": "development",
       "options": {
-        "port": 4201
+        "port": 4202
       }
     },
     "extract-i18n": {
       "executor": "@angular/build:extract-i18n",
       "options": {
-        "buildTarget": "material-examples:build"
+        "buildTarget": "primeng-examples:build"
       }
     },
     "lint": {
@@ -81,17 +81,17 @@
       "continuous": true,
       "executor": "@nx/web:file-server",
       "options": {
-        "buildTarget": "material-examples:build",
-        "port": 4201,
-        "staticFilePath": "dist/apps/examples/material/browser",
+        "buildTarget": "primeng-examples:build",
+        "port": 4202,
+        "staticFilePath": "dist/apps/e2e/primeng/browser",
         "spa": true
       }
     },
     "e2e": {
       "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/material"],
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/e2e/primeng"],
       "options": {
-        "config": "apps/examples/material/playwright.config.ts"
+        "config": "apps/e2e/primeng/playwright.config.ts"
       }
     }
   }

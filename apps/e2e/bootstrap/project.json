@@ -3,7 +3,7 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "prefix": "bs-example",
-  "sourceRoot": "apps/examples/bootstrap/src",
+  "sourceRoot": "apps/e2e/bootstrap/src",
   "tags": ["examples", "e2e"],
   "implicitDependencies": ["dynamic-forms", "dynamic-forms-bootstrap"],
   "targets": {
@@ -12,9 +12,9 @@
       "outputs": ["{options.outputPath}"],
       "dependsOn": ["^build"],
       "options": {
-        "outputPath": "dist/apps/examples/bootstrap",
-        "browser": "apps/examples/bootstrap/src/main.ts",
-        "tsConfig": "apps/examples/bootstrap/tsconfig.app.json",
+        "outputPath": "dist/apps/e2e/bootstrap",
+        "browser": "apps/e2e/bootstrap/src/main.ts",
+        "tsConfig": "apps/e2e/bootstrap/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "stylePreprocessorOptions": {
           "includePaths": ["internal/styling/src"]
@@ -22,10 +22,10 @@
         "assets": [
           {
             "glob": "**/*",
-            "input": "apps/examples/bootstrap/public"
+            "input": "apps/e2e/bootstrap/public"
           }
         ],
-        "styles": ["apps/examples/bootstrap/src/styles.scss"]
+        "styles": ["apps/e2e/bootstrap/src/styles.scss"]
       },
       "configurations": {
         "production": {
@@ -83,15 +83,15 @@
       "options": {
         "buildTarget": "bootstrap-examples:build",
         "port": 4204,
-        "staticFilePath": "dist/apps/examples/bootstrap/browser",
+        "staticFilePath": "dist/apps/e2e/bootstrap/browser",
         "spa": true
       }
     },
     "e2e": {
       "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/bootstrap"],
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/e2e/bootstrap"],
       "options": {
-        "config": "apps/examples/bootstrap/playwright.config.ts"
+        "config": "apps/e2e/bootstrap/playwright.config.ts"
       }
     }
   }

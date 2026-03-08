@@ -7,7 +7,7 @@
  * with failed tests, error messages, and embedded screenshots.
  *
  * Usage: node scripts/playwright-job-summary.mjs <app-name> <test-results-dir>
- * Example: node scripts/playwright-job-summary.mjs material-examples apps/examples/material/test-results
+ * Example: node scripts/playwright-job-summary.mjs material-examples apps/e2e/material/test-results
  */
 
 import { readFileSync, existsSync, readdirSync, statSync, appendFileSync } from 'node:fs';
