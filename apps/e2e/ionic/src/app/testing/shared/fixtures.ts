@@ -1,7 +1,6 @@
 import { Locator, test as base } from '@playwright/test';
 import type { BaseTestHelpers, ConsoleCheckOptions, ConsoleTracker, MockApiHelpers } from '@ng-forge/examples-shared-testing';
 import {
-  APP_PORTS,
   createBaseHelpers,
   createConsoleTrackerFixture,
   createErrorHelpers,
@@ -15,7 +14,7 @@ import {
 // Ionic-specific Configuration
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const testUrl = createTestUrl(`http://localhost:${APP_PORTS['ionic-examples']}`);
+export const testUrl = createTestUrl(`http://localhost:4203`);
 
 const IONIC_SELECTORS = {
   errorSelector: 'ion-note[color="danger"]',
