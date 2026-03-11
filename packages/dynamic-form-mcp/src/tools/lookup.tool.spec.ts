@@ -12,9 +12,13 @@ import { clearCache } from '../services/doc-fetcher.js';
 
 // Prevent live network calls — tests assert against hardcoded TOPICS content,
 // not against the fetched live docs which may have different headings.
-vi.mock('../services/doc-fetcher.js', () => ({
-  fetchDocSection: vi.fn().mockResolvedValue(null),
-}));
+vi.mock('../services/doc-fetcher.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../services/doc-fetcher.js')>();
+  return {
+    ...actual,
+    fetchDocSection: vi.fn().mockResolvedValue(null),
+  };
+});
 
 describe('Lookup Tool', () => {
   let server: McpServer;
