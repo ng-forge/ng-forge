@@ -58,6 +58,14 @@ export interface TestHelpers extends BaseTestHelpers {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleTracker; mockApi: MockApiHelpers }>({
+  // Rewrite legacy standalone-app routes (/#/testing/...) to sandbox routes (/#/ionic/test/...)
+  page: async ({ page }, use) => {
+    const originalGoto = page.goto.bind(page);
+    page.goto = (url: string, options?: Parameters<typeof page.goto>[1]) =>
+      originalGoto(url.startsWith('/#/testing/') ? `/#/ionic/test/${url.slice('/#/testing/'.length)}` : url, options);
+    await use(page);
+  },
+
   mockApi: async ({ page }, use) => {
     await use(createMockApiFixture(page));
   },
