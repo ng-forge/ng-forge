@@ -55,7 +55,7 @@ export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleT
   page: async ({ page }, use) => {
     const originalGoto = page.goto.bind(page);
     page.goto = (url: string, options?: Parameters<typeof page.goto>[1]) =>
-      originalGoto(url.startsWith('/#/test/') ? `/#/primeng${url.slice(1)}` : url, options);
+      originalGoto(url.startsWith('/#/test/') ? `/#/primeng${url.slice(2)}` : url, options);
     await use(page);
   },
 
