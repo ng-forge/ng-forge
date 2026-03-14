@@ -6,7 +6,7 @@ setupConsoleCheck();
 test.describe('Accessibility Tests', () => {
   test.describe('All Fields ARIA Attributes', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('/#/test/accessibility/all-fields-aria');
+      await page.goto('/#/bootstrap/test/accessibility/all-fields-aria');
       await page.waitForLoadState('networkidle');
     });
 
@@ -207,7 +207,7 @@ test.describe('Accessibility Tests', () => {
 
   test.describe('ARIA Attributes', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('/#/test/accessibility/aria-attributes');
+      await page.goto('/#/bootstrap/test/accessibility/aria-attributes');
       await page.waitForLoadState('networkidle');
     });
 
@@ -293,7 +293,7 @@ test.describe('Accessibility Tests', () => {
 
   test.describe('Error Announcements', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('/#/test/accessibility/error-announcements');
+      await page.goto('/#/bootstrap/test/accessibility/error-announcements');
       await page.waitForLoadState('networkidle');
     });
 
@@ -349,7 +349,7 @@ test.describe('Accessibility Tests', () => {
 
   test.describe('Keyboard Navigation', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('/#/test/accessibility/keyboard-navigation');
+      await page.goto('/#/bootstrap/test/accessibility/keyboard-navigation');
       await page.waitForLoadState('networkidle');
     });
 
@@ -460,7 +460,7 @@ test.describe('Accessibility Tests', () => {
 
   test.describe('Focus Management', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('/#/test/accessibility/focus-management');
+      await page.goto('/#/bootstrap/test/accessibility/focus-management');
       await page.waitForLoadState('networkidle');
     });
 
@@ -532,7 +532,7 @@ test.describe('Accessibility Tests', () => {
 
   test.describe('Hint and Error Display', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('/#/test/accessibility/aria-attributes');
+      await page.goto('/#/bootstrap/test/accessibility/aria-attributes');
       await page.waitForLoadState('networkidle');
     });
 

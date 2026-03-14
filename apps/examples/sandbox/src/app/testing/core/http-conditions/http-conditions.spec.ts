@@ -33,7 +33,7 @@ test.describe('HTTP Conditions Tests', () => {
         }
       });
 
-      await page.goto('/#/test/http-conditions/hidden-http-get');
+      await page.goto('/#/core/test/http-conditions/hidden-http-get');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('hidden-http-get-test');
@@ -80,7 +80,7 @@ test.describe('HTTP Conditions Tests', () => {
         }
       });
 
-      await page.goto('/#/test/http-conditions/disabled-http-post');
+      await page.goto('/#/core/test/http-conditions/disabled-http-post');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('disabled-http-post-test');
@@ -118,7 +118,7 @@ test.describe('HTTP Conditions Tests', () => {
         });
       });
 
-      await page.goto('/#/test/http-conditions/required-http-condition');
+      await page.goto('/#/core/test/http-conditions/required-http-condition');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('required-http-condition-test');
@@ -159,7 +159,7 @@ test.describe('HTTP Conditions Tests', () => {
         });
       });
 
-      await page.goto('/#/test/http-conditions/readonly-http-condition');
+      await page.goto('/#/core/test/http-conditions/readonly-http-condition');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('readonly-http-condition-test');
@@ -219,7 +219,7 @@ test.describe('HTTP Conditions Tests', () => {
         }
       });
 
-      await page.goto('/#/test/http-conditions/response-expression');
+      await page.goto('/#/core/test/http-conditions/response-expression');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('response-expression-test');
@@ -272,7 +272,7 @@ test.describe('HTTP Conditions Tests', () => {
         });
       });
 
-      await page.goto('/#/test/http-conditions/pending-value');
+      await page.goto('/#/core/test/http-conditions/pending-value');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('pending-value-test');
@@ -298,7 +298,7 @@ test.describe('HTTP Conditions Tests', () => {
         route.abort('failed');
       });
 
-      await page.goto('/#/test/http-conditions/http-error-fallback');
+      await page.goto('/#/core/test/http-conditions/http-error-fallback');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('http-error-fallback-test');
@@ -329,7 +329,7 @@ test.describe('HTTP Conditions Tests', () => {
         });
       });
 
-      await page.goto('/#/test/http-conditions/cache-behavior');
+      await page.goto('/#/core/test/http-conditions/cache-behavior');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('cache-behavior-test');
@@ -380,7 +380,7 @@ test.describe('HTTP Conditions Tests', () => {
         });
       });
 
-      await page.goto('/#/test/http-conditions/debounce-coalescing');
+      await page.goto('/#/core/test/http-conditions/debounce-coalescing');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('debounce-coalescing-test');
@@ -439,7 +439,7 @@ test.describe('HTTP Conditions Tests', () => {
         });
       });
 
-      await page.goto('/#/test/http-conditions/multiple-http-logic');
+      await page.goto('/#/core/test/http-conditions/multiple-http-logic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multiple-http-logic-test');

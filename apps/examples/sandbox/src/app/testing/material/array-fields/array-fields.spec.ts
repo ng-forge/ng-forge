@@ -7,7 +7,7 @@ test.describe('Array Fields E2E Tests', () => {
   test.describe('Basic Array Operations', () => {
     test('should add new array items dynamically', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-add');
-      await page.goto('/#/test/array-fields/array-add');
+      await page.goto('/#/material/test/array-fields/array-add');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -40,7 +40,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should remove array items', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-remove');
-      await page.goto('/#/test/array-fields/array-remove');
+      await page.goto('/#/material/test/array-fields/array-remove');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -59,7 +59,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should maintain input values after add/remove operations', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-values');
-      await page.goto('/#/test/array-fields/array-values');
+      await page.goto('/#/material/test/array-fields/array-values');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -90,7 +90,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should handle array with initial values', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-initial-values');
-      await page.goto('/#/test/array-fields/array-initial-values');
+      await page.goto('/#/material/test/array-fields/array-initial-values');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -111,7 +111,7 @@ test.describe('Array Fields E2E Tests', () => {
   test.describe('Semantic Array Events (PR #218)', () => {
     test('should prepend items at the beginning of the array', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-prepend');
-      await page.goto('/#/test/array-fields/array-prepend');
+      await page.goto('/#/material/test/array-fields/array-prepend');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -141,7 +141,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should shift (remove first) items from array', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-shift');
-      await page.goto('/#/test/array-fields/array-shift');
+      await page.goto('/#/material/test/array-fields/array-shift');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -169,7 +169,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should insert items at specific indices', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-insert-at-index');
-      await page.goto('/#/test/array-fields/array-insert-at-index');
+      await page.goto('/#/material/test/array-fields/array-insert-at-index');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -197,7 +197,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should remove items at specific indices', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-remove-at-index');
-      await page.goto('/#/test/array-fields/array-remove-at-index');
+      await page.goto('/#/material/test/array-fields/array-remove-at-index');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -227,7 +227,7 @@ test.describe('Array Fields E2E Tests', () => {
   test.describe('DOM ID Uniqueness (PR #219)', () => {
     test('should generate unique DOM IDs for each array item', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-dom-id-uniqueness');
-      await page.goto('/#/test/array-fields/array-dom-id-uniqueness');
+      await page.goto('/#/material/test/array-fields/array-dom-id-uniqueness');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -259,7 +259,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should maintain unique IDs after adding and removing items', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-dom-id-uniqueness');
-      await page.goto('/#/test/array-fields/array-dom-id-uniqueness');
+      await page.goto('/#/material/test/array-fields/array-dom-id-uniqueness');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -286,7 +286,7 @@ test.describe('Array Fields E2E Tests', () => {
   test.describe('Array Validation', () => {
     test('should validate individual array items', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-item-validation');
-      await page.goto('/#/test/array-fields/array-item-validation');
+      await page.goto('/#/material/test/array-fields/array-item-validation');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -324,7 +324,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should enforce minimum array length', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-min-length');
-      await page.goto('/#/test/array-fields/array-min-length');
+      await page.goto('/#/material/test/array-fields/array-min-length');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -359,7 +359,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should enforce maximum array length', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-max-length');
-      await page.goto('/#/test/array-fields/array-max-length');
+      await page.goto('/#/material/test/array-fields/array-max-length');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -381,7 +381,7 @@ test.describe('Array Fields E2E Tests', () => {
   test.describe('Complex Array Structures', () => {
     test('should handle nested fields within array items', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-nested');
-      await page.goto('/#/test/array-fields/array-nested');
+      await page.goto('/#/material/test/array-fields/array-nested');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -417,7 +417,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should handle multiple add and remove operations', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-multiple-ops');
-      await page.goto('/#/test/array-fields/array-multiple-ops');
+      await page.goto('/#/material/test/array-fields/array-multiple-ops');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -461,7 +461,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should handle multiple independent arrays', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-multiple-arrays');
-      await page.goto('/#/test/array-fields/array-multiple-arrays');
+      await page.goto('/#/material/test/array-fields/array-multiple-arrays');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -498,7 +498,7 @@ test.describe('Array Fields E2E Tests', () => {
   test.describe('Accessibility', () => {
     test('should support keyboard navigation through array fields', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-keyboard-navigation');
-      await page.goto('/#/test/array-fields/array-keyboard-navigation');
+      await page.goto('/#/material/test/array-fields/array-keyboard-navigation');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -542,7 +542,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should have proper ARIA attributes for screen readers', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-screen-reader-labels');
-      await page.goto('/#/test/array-fields/array-screen-reader-labels');
+      await page.goto('/#/material/test/array-fields/array-screen-reader-labels');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -572,7 +572,7 @@ test.describe('Array Fields E2E Tests', () => {
   test.describe('Focus Management', () => {
     test('should handle focus appropriately when adding items', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-focus-after-add');
-      await page.goto('/#/test/array-fields/array-focus-after-add');
+      await page.goto('/#/material/test/array-fields/array-focus-after-add');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -597,7 +597,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should handle focus appropriately when removing items', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-focus-after-remove');
-      await page.goto('/#/test/array-fields/array-focus-after-remove');
+      await page.goto('/#/material/test/array-fields/array-focus-after-remove');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -622,7 +622,7 @@ test.describe('Array Fields E2E Tests', () => {
   test.describe('Form State Tracking', () => {
     test('should track dirty state through array operations', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-dirty-touched-tracking');
-      await page.goto('/#/test/array-fields/array-dirty-touched-tracking');
+      await page.goto('/#/material/test/array-fields/array-dirty-touched-tracking');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -648,7 +648,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should handle rapid add/remove operations without errors', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-rapid-operations');
-      await page.goto('/#/test/array-fields/array-rapid-operations');
+      await page.goto('/#/material/test/array-fields/array-rapid-operations');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -683,7 +683,7 @@ test.describe('Array Fields E2E Tests', () => {
   test.describe('Button Logic (Hidden/Disabled)', () => {
     test('should hide add button when hidden logic condition is met', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-button-hidden-logic');
-      await page.goto('/#/test/array-fields/array-button-hidden-logic');
+      await page.goto('/#/material/test/array-fields/array-button-hidden-logic');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -705,7 +705,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should disable add button when disabled logic condition is met', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-button-disabled-logic');
-      await page.goto('/#/test/array-fields/array-button-disabled-logic');
+      await page.goto('/#/material/test/array-fields/array-button-disabled-logic');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -728,7 +728,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should disable remove button when items count is 1', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-button-disabled-logic');
-      await page.goto('/#/test/array-fields/array-button-disabled-logic');
+      await page.goto('/#/material/test/array-fields/array-button-disabled-logic');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -758,7 +758,7 @@ test.describe('Array Fields E2E Tests', () => {
   test.describe('Edge Cases', () => {
     test('should handle starting with an empty array', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-empty-state');
-      await page.goto('/#/test/array-fields/array-empty-state');
+      await page.goto('/#/material/test/array-fields/array-empty-state');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -781,7 +781,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should handle boundary index operations gracefully', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-boundary-indices');
-      await page.goto('/#/test/array-fields/array-boundary-indices');
+      await page.goto('/#/material/test/array-fields/array-boundary-indices');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -812,7 +812,7 @@ test.describe('Array Fields E2E Tests', () => {
     test.describe('Primitive Array', () => {
       test('should render initial primitive values with add and remove buttons', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-primitive');
-        await page.goto('/#/test/array-fields/simplified-array-primitive');
+        await page.goto('/#/material/test/array-fields/simplified-array-primitive');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -836,7 +836,7 @@ test.describe('Array Fields E2E Tests', () => {
 
       test('should add and remove primitive items', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-primitive');
-        await page.goto('/#/test/array-fields/simplified-array-primitive');
+        await page.goto('/#/material/test/array-fields/simplified-array-primitive');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -864,7 +864,7 @@ test.describe('Array Fields E2E Tests', () => {
 
       test('should submit primitive array values', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-primitive');
-        await page.goto('/#/test/array-fields/simplified-array-primitive');
+        await page.goto('/#/material/test/array-fields/simplified-array-primitive');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -881,7 +881,7 @@ test.describe('Array Fields E2E Tests', () => {
 
       test('should produce flat primitive values after adding an item', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-primitive');
-        await page.goto('/#/test/array-fields/simplified-array-primitive');
+        await page.goto('/#/material/test/array-fields/simplified-array-primitive');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -908,7 +908,7 @@ test.describe('Array Fields E2E Tests', () => {
 
       test('should remove all items and submit empty array', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-primitive');
-        await page.goto('/#/test/array-fields/simplified-array-primitive');
+        await page.goto('/#/material/test/array-fields/simplified-array-primitive');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -932,7 +932,7 @@ test.describe('Array Fields E2E Tests', () => {
     test.describe('Object Array', () => {
       test('should render initial object values with add and remove buttons', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-object');
-        await page.goto('/#/test/array-fields/simplified-array-object');
+        await page.goto('/#/material/test/array-fields/simplified-array-object');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -959,7 +959,7 @@ test.describe('Array Fields E2E Tests', () => {
 
       test('should add and remove object items', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-object');
-        await page.goto('/#/test/array-fields/simplified-array-object');
+        await page.goto('/#/material/test/array-fields/simplified-array-object');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -983,7 +983,7 @@ test.describe('Array Fields E2E Tests', () => {
 
       test('should submit object array values', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-object');
-        await page.goto('/#/test/array-fields/simplified-array-object');
+        await page.goto('/#/material/test/array-fields/simplified-array-object');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -1004,7 +1004,7 @@ test.describe('Array Fields E2E Tests', () => {
     test.describe('Empty Array', () => {
       test('should start empty and allow adding items', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-empty');
-        await page.goto('/#/test/array-fields/simplified-array-empty');
+        await page.goto('/#/material/test/array-fields/simplified-array-empty');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -1035,7 +1035,7 @@ test.describe('Array Fields E2E Tests', () => {
 
       test('should submit empty array', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-empty');
-        await page.goto('/#/test/array-fields/simplified-array-empty');
+        await page.goto('/#/material/test/array-fields/simplified-array-empty');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -1049,7 +1049,7 @@ test.describe('Array Fields E2E Tests', () => {
     test.describe('Button Customization', () => {
       test('should display custom button labels', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-button-customization');
-        await page.goto('/#/test/array-fields/simplified-array-button-customization');
+        await page.goto('/#/material/test/array-fields/simplified-array-button-customization');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -1077,7 +1077,7 @@ test.describe('Array Fields E2E Tests', () => {
     test.describe('Button Opt-out', () => {
       test('should not show add button when addButton is false', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-button-optout');
-        await page.goto('/#/test/array-fields/simplified-array-button-optout');
+        await page.goto('/#/material/test/array-fields/simplified-array-button-optout');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -1097,7 +1097,7 @@ test.describe('Array Fields E2E Tests', () => {
 
       test('should not show remove buttons when removeButton is false', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-button-optout');
-        await page.goto('/#/test/array-fields/simplified-array-button-optout');
+        await page.goto('/#/material/test/array-fields/simplified-array-button-optout');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -1117,7 +1117,7 @@ test.describe('Array Fields E2E Tests', () => {
 
       test('should not show any buttons when both are false', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-button-optout');
-        await page.goto('/#/test/array-fields/simplified-array-button-optout');
+        await page.goto('/#/material/test/array-fields/simplified-array-button-optout');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -1140,7 +1140,7 @@ test.describe('Array Fields E2E Tests', () => {
     test.describe('Simplified Array Validation', () => {
       test('should enforce minLength on simplified array', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-min-length');
-        await page.goto('/#/test/array-fields/simplified-array-min-length');
+        await page.goto('/#/material/test/array-fields/simplified-array-min-length');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -1174,7 +1174,7 @@ test.describe('Array Fields E2E Tests', () => {
 
       test('should enforce maxLength on simplified array', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-max-length');
-        await page.goto('/#/test/array-fields/simplified-array-max-length');
+        await page.goto('/#/material/test/array-fields/simplified-array-max-length');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -1218,7 +1218,7 @@ test.describe('Array Fields E2E Tests', () => {
     test.describe('Conditional Visibility', () => {
       test('should hide array when condition is met', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-conditional');
-        await page.goto('/#/test/array-fields/simplified-array-conditional');
+        await page.goto('/#/material/test/array-fields/simplified-array-conditional');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -1233,7 +1233,7 @@ test.describe('Array Fields E2E Tests', () => {
 
       test('should toggle array visibility with checkbox', async ({ page, helpers }) => {
         const scenario = helpers.getScenario('simplified-array-conditional');
-        await page.goto('/#/test/array-fields/simplified-array-conditional');
+        await page.goto('/#/material/test/array-fields/simplified-array-conditional');
         await page.waitForLoadState('networkidle');
         await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -1262,7 +1262,7 @@ test.describe('Array Fields E2E Tests', () => {
 
   test.describe('EventDispatcher injectable', () => {
     test('should append array items when multi-checkbox selections change', async ({ page }) => {
-      await page.goto('/#/test/array-fields/array-event-dispatcher');
+      await page.goto('/#/material/test/array-fields/array-event-dispatcher');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="array-event-dispatcher"]');

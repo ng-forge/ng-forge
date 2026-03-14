@@ -11,7 +11,7 @@ test.describe('Field Meta Attribute Tests', () => {
   test.describe('Wrapped Components Meta Test', () => {
     test('should propagate meta attributes to native input elements in wrapped components', async ({ page, helpers }) => {
       // Navigate to the wrapped components test
-      await page.goto('/#/test/field-meta/wrapped-components');
+      await page.goto('/#/material/test/field-meta/wrapped-components');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -96,7 +96,7 @@ test.describe('Field Meta Attribute Tests', () => {
   test.describe('Native Elements Meta Test', () => {
     test('should apply meta attributes to native input and textarea elements', async ({ page, helpers }) => {
       // Navigate to the native elements test
-      await page.goto('/#/test/field-meta/native-elements');
+      await page.goto('/#/material/test/field-meta/native-elements');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -166,7 +166,7 @@ test.describe('Field Meta Attribute Tests', () => {
   test.describe('Meta Attribute Persistence Tests', () => {
     test('should persist meta attributes after form interactions', async ({ page, helpers }) => {
       // Navigate to native elements test
-      await page.goto('/#/test/field-meta/native-elements');
+      await page.goto('/#/material/test/field-meta/native-elements');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('meta-native-elements-test');
@@ -207,7 +207,7 @@ test.describe('Field Meta Attribute Tests', () => {
 
     test('should persist meta attributes on wrapped components after interactions', async ({ page, helpers }) => {
       // Navigate to wrapped components test
-      await page.goto('/#/test/field-meta/wrapped-components');
+      await page.goto('/#/material/test/field-meta/wrapped-components');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('meta-wrapped-components-test');

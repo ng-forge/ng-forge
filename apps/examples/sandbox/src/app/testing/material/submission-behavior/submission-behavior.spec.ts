@@ -483,7 +483,7 @@ test.describe('Submission Behavior Tests', () => {
 
   test.describe('Submit Nested Arrays', () => {
     test('should submit correct JSON shape with array data', async ({ page, helpers }) => {
-      await page.goto('/#/test/submission-behavior/submit-nested-arrays');
+      await page.goto('/#/material/test/submission-behavior/submit-nested-arrays');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('submit-nested-arrays');
       await expect(scenario).toBeVisible({ timeout: 10000 });

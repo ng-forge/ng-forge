@@ -6,7 +6,7 @@ setupConsoleCheck();
 test.describe('Config Change E2E Tests', () => {
   test.describe('Simple Config Swap', () => {
     test('should render initial config fields', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-swap-simple');
+      await page.goto('/#/core/test/config-change/config-swap-simple');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-swap-simple');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -25,7 +25,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should swap entire config and render new fields', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-swap-simple');
+      await page.goto('/#/core/test/config-change/config-swap-simple');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-swap-simple');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -53,7 +53,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should swap back to initial config after switching', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-swap-simple');
+      await page.goto('/#/core/test/config-change/config-swap-simple');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-swap-simple');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -77,7 +77,7 @@ test.describe('Config Change E2E Tests', () => {
 
   test.describe('Config Swap with Value Preservation', () => {
     test('should show shared fields after config swap', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-swap-preserve-values');
+      await page.goto('/#/core/test/config-change/config-swap-preserve-values');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-swap-preserve-values');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -104,7 +104,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should remove non-shared fields and add new ones', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-swap-preserve-values');
+      await page.goto('/#/core/test/config-change/config-swap-preserve-values');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-swap-preserve-values');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -137,7 +137,7 @@ test.describe('Config Change E2E Tests', () => {
 
   test.describe('Add Fields to Config', () => {
     test('should add new fields while keeping existing fields visible', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-add-fields');
+      await page.goto('/#/core/test/config-change/config-add-fields');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-add-fields');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -163,7 +163,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should allow filling new fields after config extension', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-add-fields');
+      await page.goto('/#/core/test/config-change/config-add-fields');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-add-fields');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -184,7 +184,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should switch back to initial config without errors', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-add-fields');
+      await page.goto('/#/core/test/config-change/config-add-fields');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-add-fields');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -207,7 +207,7 @@ test.describe('Config Change E2E Tests', () => {
 
   test.describe('Remove Fields from Config', () => {
     test('should remove fields when switching to reduced config', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-remove-fields');
+      await page.goto('/#/core/test/config-change/config-remove-fields');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-remove-fields');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -235,7 +235,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should restore removed fields when switching back', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-remove-fields');
+      await page.goto('/#/core/test/config-change/config-remove-fields');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-remove-fields');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -258,7 +258,7 @@ test.describe('Config Change E2E Tests', () => {
 
   test.describe('Config Swap with Arrays', () => {
     test('should render initial array fields', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-swap-with-arrays');
+      await page.goto('/#/core/test/config-change/config-swap-with-arrays');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-swap-with-arrays');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -271,7 +271,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should swap to config with different array', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-swap-with-arrays');
+      await page.goto('/#/core/test/config-change/config-swap-with-arrays');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-swap-with-arrays');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -293,7 +293,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should swap back to initial array config', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-swap-with-arrays');
+      await page.goto('/#/core/test/config-change/config-swap-with-arrays');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-swap-with-arrays');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -314,7 +314,7 @@ test.describe('Config Change E2E Tests', () => {
 
   test.describe('Value Two-Way Binding', () => {
     test('should update form fields when value is set programmatically', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/value-binding');
+      await page.goto('/#/core/test/config-change/value-binding');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('value-binding');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -339,7 +339,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should update form fields when value changes to a different preset', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/value-binding');
+      await page.goto('/#/core/test/config-change/value-binding');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('value-binding');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -362,7 +362,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should clear form fields when value is cleared', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/value-binding');
+      await page.goto('/#/core/test/config-change/value-binding');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('value-binding');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -385,7 +385,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should reflect programmatic value in debug output', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/value-binding');
+      await page.goto('/#/core/test/config-change/value-binding');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('value-binding');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -403,7 +403,7 @@ test.describe('Config Change E2E Tests', () => {
 
   test.describe('Config Swap with Pages', () => {
     test('should render initial two-page config', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-swap-pages');
+      await page.goto('/#/core/test/config-change/config-swap-pages');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-swap-pages');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -417,7 +417,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should swap to three-page config', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-swap-pages');
+      await page.goto('/#/core/test/config-change/config-swap-pages');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-swap-pages');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -435,7 +435,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should handle navigation in swapped multi-page config', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-swap-pages');
+      await page.goto('/#/core/test/config-change/config-swap-pages');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-swap-pages');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -463,7 +463,7 @@ test.describe('Config Change E2E Tests', () => {
     });
 
     test('should swap back to initial pages config', async ({ page, helpers }) => {
-      await page.goto('/#/test/config-change/config-swap-pages');
+      await page.goto('/#/core/test/config-change/config-swap-pages');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('config-swap-pages');
       await expect(scenario).toBeVisible({ timeout: 10000 });

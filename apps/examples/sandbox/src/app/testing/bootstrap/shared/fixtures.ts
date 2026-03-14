@@ -47,14 +47,6 @@ export interface TestHelpers extends BaseTestHelpers {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleTracker; mockApi: MockApiHelpers }>({
-  // Rewrite legacy standalone-app routes (/#/test/...) to sandbox routes (/#/bootstrap/test/...)
-  page: async ({ page }, use) => {
-    const originalGoto = page.goto.bind(page);
-    page.goto = (url: string, options?: Parameters<typeof page.goto>[1]) =>
-      originalGoto(url.startsWith('/#/test/') ? `/#/bootstrap${url.slice(2)}` : url, options);
-    await use(page);
-  },
-
   mockApi: async ({ page }, use) => {
     await use(createMockApiFixture(page));
   },

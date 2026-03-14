@@ -21,7 +21,7 @@ test.describe('HTTP Path Params Tests', () => {
         });
       });
 
-      await page.goto('/#/test/http-path-params/condition-path-params');
+      await page.goto('/#/core/test/http-path-params/condition-path-params');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('condition-path-params-test');
@@ -59,7 +59,7 @@ test.describe('HTTP Path Params Tests', () => {
         });
       });
 
-      await page.goto('/#/test/http-path-params/derivation-path-params');
+      await page.goto('/#/core/test/http-path-params/derivation-path-params');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('derivation-path-params-test');
@@ -99,7 +99,7 @@ test.describe('HTTP Path Params Tests', () => {
         });
       });
 
-      await page.goto('/#/test/http-path-params/validator-path-params');
+      await page.goto('/#/core/test/http-path-params/validator-path-params');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('validator-path-params-test');

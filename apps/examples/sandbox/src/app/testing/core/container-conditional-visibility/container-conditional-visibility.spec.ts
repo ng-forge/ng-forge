@@ -15,7 +15,7 @@ test.describe('Container Conditional Visibility Tests', () => {
   test.describe('Group - Child Field Visibility', () => {
     test('should show/hide entire group based on radio selection', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('group-conditional-visibility');
-      await page.goto('/#/test/container-conditional-visibility/group-conditional-visibility');
+      await page.goto('/#/core/test/container-conditional-visibility/group-conditional-visibility');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -63,7 +63,7 @@ test.describe('Container Conditional Visibility Tests', () => {
 
     test('should handle nested conditional fields inside conditional group', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('group-nested-conditional');
-      await page.goto('/#/test/container-conditional-visibility/group-nested-conditional');
+      await page.goto('/#/core/test/container-conditional-visibility/group-nested-conditional');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -123,7 +123,7 @@ test.describe('Container Conditional Visibility Tests', () => {
 
     test('should preserve group values through visibility toggle', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('group-state-preservation');
-      await page.goto('/#/test/container-conditional-visibility/group-state-preservation');
+      await page.goto('/#/core/test/container-conditional-visibility/group-state-preservation');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -185,7 +185,7 @@ test.describe('Container Conditional Visibility Tests', () => {
   test.describe('Row - Child Field Visibility', () => {
     test('should show/hide row based on checkbox', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('row-conditional-visibility');
-      await page.goto('/#/test/container-conditional-visibility/row-conditional-visibility');
+      await page.goto('/#/core/test/container-conditional-visibility/row-conditional-visibility');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -228,7 +228,7 @@ test.describe('Container Conditional Visibility Tests', () => {
 
     test('should handle multiple rows with cascading visibility', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('row-multiple-visibility');
-      await page.goto('/#/test/container-conditional-visibility/row-multiple-visibility');
+      await page.goto('/#/core/test/container-conditional-visibility/row-multiple-visibility');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -288,7 +288,7 @@ test.describe('Container Conditional Visibility Tests', () => {
 
     test('should preserve row field values through visibility toggles', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('row-state-preservation');
-      await page.goto('/#/test/container-conditional-visibility/row-state-preservation');
+      await page.goto('/#/core/test/container-conditional-visibility/row-state-preservation');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -360,7 +360,7 @@ test.describe('Container Conditional Visibility Tests', () => {
 
     test('should handle individual field visibility within a row', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('row-conditional-fields');
-      await page.goto('/#/test/container-conditional-visibility/row-conditional-fields');
+      await page.goto('/#/core/test/container-conditional-visibility/row-conditional-fields');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -419,7 +419,7 @@ test.describe('Container Conditional Visibility Tests', () => {
   test.describe('Array - Child Field Visibility', () => {
     test('should show/hide entire array based on radio selection', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-conditional-visibility');
-      await page.goto('/#/test/container-conditional-visibility/array-conditional-visibility');
+      await page.goto('/#/core/test/container-conditional-visibility/array-conditional-visibility');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -473,7 +473,7 @@ test.describe('Container Conditional Visibility Tests', () => {
 
     test('should preserve array items through visibility toggle', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-state-preservation');
-      await page.goto('/#/test/container-conditional-visibility/array-state-preservation');
+      await page.goto('/#/core/test/container-conditional-visibility/array-state-preservation');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -528,7 +528,7 @@ test.describe('Container Conditional Visibility Tests', () => {
 
     test('should handle conditional fields within array items', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-items-conditional-fields');
-      await page.goto('/#/test/container-conditional-visibility/array-items-conditional-fields');
+      await page.goto('/#/core/test/container-conditional-visibility/array-items-conditional-fields');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -603,7 +603,7 @@ test.describe('Container Conditional Visibility Tests', () => {
 
   test.describe('Submission - Child Field Visibility', () => {
     test('should include visible container fields in submission', async ({ page, helpers }) => {
-      await page.goto('/#/test/container-conditional-visibility/submit-conditional-containers');
+      await page.goto('/#/core/test/container-conditional-visibility/submit-conditional-containers');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('submit-conditional-containers');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -618,7 +618,7 @@ test.describe('Container Conditional Visibility Tests', () => {
     });
 
     test('should handle hidden container fields in submission', async ({ page, helpers }) => {
-      await page.goto('/#/test/container-conditional-visibility/submit-conditional-containers');
+      await page.goto('/#/core/test/container-conditional-visibility/submit-conditional-containers');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('submit-conditional-containers');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -646,7 +646,7 @@ test.describe('Container Conditional Visibility Tests', () => {
   test.describe('Group - Container-Level Logic', () => {
     test('should hide/show entire group via container-level hidden logic', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('group-hidden-logic');
-      await page.goto('/#/test/container-conditional-visibility/group-hidden-logic');
+      await page.goto('/#/core/test/container-conditional-visibility/group-hidden-logic');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -701,7 +701,7 @@ test.describe('Container Conditional Visibility Tests', () => {
   test.describe('Row - Container-Level Logic', () => {
     test('should hide/show entire row via container-level hidden logic', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('row-hidden-logic');
-      await page.goto('/#/test/container-conditional-visibility/row-hidden-logic');
+      await page.goto('/#/core/test/container-conditional-visibility/row-hidden-logic');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -756,7 +756,7 @@ test.describe('Container Conditional Visibility Tests', () => {
   test.describe('Array - Container-Level Logic', () => {
     test('should hide/show entire array via container-level hidden logic', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-hidden-logic');
-      await page.goto('/#/test/container-conditional-visibility/array-hidden-logic');
+      await page.goto('/#/core/test/container-conditional-visibility/array-hidden-logic');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -815,7 +815,7 @@ test.describe('Container Conditional Visibility Tests', () => {
 
   test.describe('Submission - Container-Level Logic', () => {
     test('should include hidden container child values in submission', async ({ page, helpers }) => {
-      await page.goto('/#/test/container-conditional-visibility/container-level-submission');
+      await page.goto('/#/core/test/container-conditional-visibility/container-level-submission');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('container-level-submission');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -837,7 +837,7 @@ test.describe('Container Conditional Visibility Tests', () => {
     });
 
     test('should still include child values when container is hidden via logic', async ({ page, helpers }) => {
-      await page.goto('/#/test/container-conditional-visibility/container-level-submission');
+      await page.goto('/#/core/test/container-conditional-visibility/container-level-submission');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('container-level-submission');
       await expect(scenario).toBeVisible({ timeout: 10000 });

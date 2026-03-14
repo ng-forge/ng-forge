@@ -5,12 +5,12 @@ setupConsoleCheck();
 
 test.describe('Ionic Components Tests', () => {
   test.beforeEach(async ({ helpers }) => {
-    await helpers.navigateToScenario('/testing/ionic-components');
+    await helpers.navigateToScenario('/test/ionic-components');
   });
 
   test.describe('Datetime Component', () => {
     test('should render datepicker trigger input', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/datetime-component');
+      await page.goto('/#/ionic/test/ionic-components/datetime-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('datetime-component');
@@ -29,7 +29,7 @@ test.describe('Ionic Components Tests', () => {
 
   test.describe('Range Component', () => {
     test('should display ion-range slider with initial value', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/range-component');
+      await page.goto('/#/ionic/test/ionic-components/range-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('range-component');
@@ -46,7 +46,7 @@ test.describe('Ionic Components Tests', () => {
     });
 
     test('should update value programmatically', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/range-component');
+      await page.goto('/#/ionic/test/ionic-components/range-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('range-component');
@@ -72,7 +72,7 @@ test.describe('Ionic Components Tests', () => {
     });
 
     test('should respect min and max bounds', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/range-component');
+      await page.goto('/#/ionic/test/ionic-components/range-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('range-component');
@@ -90,7 +90,7 @@ test.describe('Ionic Components Tests', () => {
     });
 
     test('should display pin when configured', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/range-component');
+      await page.goto('/#/ionic/test/ionic-components/range-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('range-component');
@@ -107,7 +107,7 @@ test.describe('Ionic Components Tests', () => {
 
   test.describe('Toggle Component', () => {
     test('should display ion-toggle with initial state', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/toggle-component');
+      await page.goto('/#/ionic/test/ionic-components/toggle-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-component');
@@ -126,7 +126,7 @@ test.describe('Ionic Components Tests', () => {
     });
 
     test('should change state on click', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/toggle-component');
+      await page.goto('/#/ionic/test/ionic-components/toggle-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-component');
@@ -147,7 +147,7 @@ test.describe('Ionic Components Tests', () => {
     });
 
     test('should toggle back to unchecked on second click', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/toggle-component');
+      await page.goto('/#/ionic/test/ionic-components/toggle-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-component');
@@ -168,7 +168,7 @@ test.describe('Ionic Components Tests', () => {
     });
 
     test('should display label correctly', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/toggle-component');
+      await page.goto('/#/ionic/test/ionic-components/toggle-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-component');
@@ -182,7 +182,7 @@ test.describe('Ionic Components Tests', () => {
 
   test.describe('Checkbox Array Component', () => {
     test('should display multiple ion-checkboxes', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/checkbox-array-component');
+      await page.goto('/#/ionic/test/ionic-components/checkbox-array-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('checkbox-array-component');
@@ -200,7 +200,7 @@ test.describe('Ionic Components Tests', () => {
     });
 
     test('should select multiple checkboxes', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/checkbox-array-component');
+      await page.goto('/#/ionic/test/ionic-components/checkbox-array-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('checkbox-array-component');
@@ -236,7 +236,7 @@ test.describe('Ionic Components Tests', () => {
     });
 
     test('should deselect checkbox on second click', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/checkbox-array-component');
+      await page.goto('/#/ionic/test/ionic-components/checkbox-array-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('checkbox-array-component');
@@ -266,7 +266,7 @@ test.describe('Ionic Components Tests', () => {
     });
 
     test('should collect values as array on submit', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/checkbox-array-component');
+      await page.goto('/#/ionic/test/ionic-components/checkbox-array-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('checkbox-array-component');
@@ -311,7 +311,7 @@ test.describe('Ionic Components Tests', () => {
     });
 
     test('should display all option labels', async ({ page, helpers }) => {
-      await page.goto('/#/testing/ionic-components/checkbox-array-component');
+      await page.goto('/#/ionic/test/ionic-components/checkbox-array-component');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('checkbox-array-component');

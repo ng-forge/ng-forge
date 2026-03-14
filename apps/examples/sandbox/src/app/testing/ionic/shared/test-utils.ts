@@ -9,7 +9,7 @@ import { logTestResult } from '@ng-forge/examples-shared-testing';
 /**
  * Base path for testing routes
  */
-export const TESTING_BASE_PATH = '/testing';
+export const TESTING_BASE_PATH = '/test';
 
 /**
  * Creates a URL for a specific test route

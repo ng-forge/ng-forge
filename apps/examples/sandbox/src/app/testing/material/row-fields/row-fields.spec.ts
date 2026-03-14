@@ -11,7 +11,7 @@ test.describe('Row Fields E2E Tests', () => {
   test.describe('Basic Layout', () => {
     test('should render fields horizontally in a row', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('row-basic-layout');
-      await page.goto('/#/test/row-fields/row-basic-layout');
+      await page.goto('/#/material/test/row-fields/row-basic-layout');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -57,7 +57,7 @@ test.describe('Row Fields E2E Tests', () => {
   test.describe('Nested Containers', () => {
     test('should render row containing group containers', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('row-containing-group');
-      await page.goto('/#/test/row-fields/row-containing-group');
+      await page.goto('/#/material/test/row-fields/row-containing-group');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 

@@ -10,7 +10,7 @@ test.describe('Angular Schema Validation E2E Tests', () => {
 
   test.describe('Password Confirmation', () => {
     test('should have submit disabled with empty fields', async ({ page, helpers }) => {
-      await page.goto('/#/test/angular-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/angular-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('angular-password-confirmation-test');
@@ -23,7 +23,7 @@ test.describe('Angular Schema Validation E2E Tests', () => {
     });
 
     test('should have submit disabled with mismatched passwords', async ({ page, helpers }) => {
-      await page.goto('/#/test/angular-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/angular-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('angular-password-confirmation-test');
@@ -43,7 +43,7 @@ test.describe('Angular Schema Validation E2E Tests', () => {
     });
 
     test('should display error message for password mismatch', async ({ page, helpers }) => {
-      await page.goto('/#/test/angular-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/angular-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('angular-password-confirmation-test');
@@ -67,7 +67,7 @@ test.describe('Angular Schema Validation E2E Tests', () => {
     });
 
     test('should have submit enabled with matching valid passwords', async ({ page, helpers }) => {
-      await page.goto('/#/test/angular-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/angular-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('angular-password-confirmation-test');
@@ -87,7 +87,7 @@ test.describe('Angular Schema Validation E2E Tests', () => {
     });
 
     test('should clear error when passwords match', async ({ page, helpers }) => {
-      await page.goto('/#/test/angular-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/angular-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('angular-password-confirmation-test');
@@ -111,7 +111,7 @@ test.describe('Angular Schema Validation E2E Tests', () => {
     });
 
     test('should disable submit when passwords become mismatched', async ({ page, helpers }) => {
-      await page.goto('/#/test/angular-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/angular-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('angular-password-confirmation-test');

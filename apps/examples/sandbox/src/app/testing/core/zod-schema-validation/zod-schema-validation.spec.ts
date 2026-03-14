@@ -10,7 +10,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
 
   test.describe('Password Confirmation', () => {
     test('should have submit disabled with empty fields', async ({ page, helpers }) => {
-      await page.goto('/#/test/zod-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/zod-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('password-confirmation-test');
@@ -23,7 +23,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
     });
 
     test('should have submit disabled when password is too short', async ({ page, helpers }) => {
-      await page.goto('/#/test/zod-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/zod-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('password-confirmation-test');
@@ -43,7 +43,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
     });
 
     test('should display Zod error message for password minLength', async ({ page, helpers }) => {
-      await page.goto('/#/test/zod-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/zod-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('password-confirmation-test');
@@ -59,7 +59,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
     });
 
     test('should have submit disabled with mismatched passwords', async ({ page, helpers }) => {
-      await page.goto('/#/test/zod-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/zod-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('password-confirmation-test');
@@ -79,7 +79,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
     });
 
     test('should display Zod error message for password mismatch', async ({ page, helpers }) => {
-      await page.goto('/#/test/zod-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/zod-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('password-confirmation-test');
@@ -101,7 +101,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
     });
 
     test('should have submit enabled with matching valid passwords', async ({ page, helpers }) => {
-      await page.goto('/#/test/zod-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/zod-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('password-confirmation-test');
@@ -121,7 +121,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
     });
 
     test('should clear error when validation passes', async ({ page, helpers }) => {
-      await page.goto('/#/test/zod-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/zod-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('password-confirmation-test');
@@ -143,7 +143,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
     });
 
     test('should disable submit when passwords become mismatched', async ({ page, helpers }) => {
-      await page.goto('/#/test/zod-schema-validation/password-confirmation');
+      await page.goto('/#/core/test/zod-schema-validation/password-confirmation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('password-confirmation-test');
@@ -177,7 +177,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
 
   test.describe('Comprehensive Validation (Nested Objects & Arrays)', () => {
     test('should have submit disabled with empty form', async ({ page, helpers }) => {
-      await page.goto('/#/test/zod-schema-validation/comprehensive-validation');
+      await page.goto('/#/core/test/zod-schema-validation/comprehensive-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('comprehensive-validation-test');
@@ -188,7 +188,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
     });
 
     test('should display error on nested field path (user.email)', async ({ page, helpers }) => {
-      await page.goto('/#/test/zod-schema-validation/comprehensive-validation');
+      await page.goto('/#/core/test/zod-schema-validation/comprehensive-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('comprehensive-validation-test');
@@ -204,7 +204,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
     });
 
     test('should display error on nested field (user.firstName)', async ({ page, helpers }) => {
-      await page.goto('/#/test/zod-schema-validation/comprehensive-validation');
+      await page.goto('/#/core/test/zod-schema-validation/comprehensive-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('comprehensive-validation-test');
@@ -220,7 +220,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
     });
 
     test('should display error on array item field (addresses[0].zip)', async ({ page, helpers }) => {
-      await page.goto('/#/test/zod-schema-validation/comprehensive-validation');
+      await page.goto('/#/core/test/zod-schema-validation/comprehensive-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('comprehensive-validation-test');
@@ -237,7 +237,7 @@ test.describe('Zod Schema Validation E2E Tests', () => {
     });
 
     test('should validate all fields pass and enable submit', async ({ page, helpers }) => {
-      await page.goto('/#/test/zod-schema-validation/comprehensive-validation');
+      await page.goto('/#/core/test/zod-schema-validation/comprehensive-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('comprehensive-validation-test');

@@ -9,7 +9,7 @@ test.describe('Container Nesting E2E Tests', () => {
   test.describe('Array Inside Group', () => {
     test.skip(true, 'Library limitation: array inside group via row does not render array items');
     test('should render and interact with array fields inside a group', async ({ page, helpers }) => {
-      await page.goto('/#/test/container-nesting/array-inside-group');
+      await page.goto('/#/core/test/container-nesting/array-inside-group');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('array-inside-group');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -35,7 +35,7 @@ test.describe('Container Nesting E2E Tests', () => {
 
   test.describe('Group Inside Array', () => {
     test('should render and interact with group fields inside array items', async ({ page, helpers }) => {
-      await page.goto('/#/test/container-nesting/group-inside-array');
+      await page.goto('/#/core/test/container-nesting/group-inside-array');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('group-inside-array');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -71,7 +71,7 @@ test.describe('Container Nesting E2E Tests', () => {
 
   test.describe('Row Inside Array', () => {
     test('should render row layout within array items', async ({ page, helpers }) => {
-      await page.goto('/#/test/container-nesting/row-inside-array');
+      await page.goto('/#/core/test/container-nesting/row-inside-array');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('row-inside-array');
       await expect(scenario).toBeVisible({ timeout: 10000 });
@@ -112,7 +112,7 @@ test.describe('Container Nesting E2E Tests', () => {
   test.describe('Deeply Nested Containers', () => {
     test.skip(true, 'Library limitation: array inside group via row does not render array items');
     test('should handle group > row > array > group nesting', async ({ page, helpers }) => {
-      await page.goto('/#/test/container-nesting/deeply-nested');
+      await page.goto('/#/core/test/container-nesting/deeply-nested');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('deeply-nested');
       await expect(scenario).toBeVisible({ timeout: 10000 });

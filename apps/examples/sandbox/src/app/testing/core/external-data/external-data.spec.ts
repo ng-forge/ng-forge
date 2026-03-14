@@ -5,7 +5,7 @@ setupConsoleCheck();
 
 test.describe('External Data Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/#/test/external-data');
+    await page.goto('/#/core/test/external-data');
     await page.waitForLoadState('networkidle');
   });
 

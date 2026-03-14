@@ -34,7 +34,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('http-get-validator-test');
-      await page.goto('/#/test/async-validation/http-get-validator');
+      await page.goto('/#/core/test/async-validation/http-get-validator');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -77,7 +77,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('http-post-validator-test');
-      await page.goto('/#/test/async-validation/http-post-validator');
+      await page.goto('/#/core/test/async-validation/http-post-validator');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -103,7 +103,7 @@ test.describe('Async Validation Tests', () => {
     // This is a pre-existing issue unrelated to declarative HTTP validators.
     test('should validate product code using resource-based async validator', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('async-resource-validator-test');
-      await page.goto('/#/test/async-validation/async-resource-validator');
+      await page.goto('/#/core/test/async-validation/async-resource-validator');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -134,7 +134,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('http-error-handling-test');
-      await page.goto('/#/test/async-validation/http-error-handling');
+      await page.goto('/#/core/test/async-validation/http-error-handling');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -171,7 +171,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('declarative-http-get-test');
-      await page.goto('/#/test/async-validation/declarative-http-get');
+      await page.goto('/#/core/test/async-validation/declarative-http-get');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -211,7 +211,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('declarative-http-post-test');
-      await page.goto('/#/test/async-validation/declarative-http-post');
+      await page.goto('/#/core/test/async-validation/declarative-http-post');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -237,7 +237,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('declarative-http-error-handling-test');
-      await page.goto('/#/test/async-validation/declarative-http-error-handling');
+      await page.goto('/#/core/test/async-validation/declarative-http-error-handling');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -266,7 +266,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('declarative-http-conditional-test');
-      await page.goto('/#/test/async-validation/declarative-http-conditional');
+      await page.goto('/#/core/test/async-validation/declarative-http-conditional');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -313,7 +313,7 @@ test.describe('Async Validation Tests', () => {
       });
 
       const scenario = helpers.getScenario('multiple-validators-test');
-      await page.goto('/#/test/async-validation/multiple-validators');
+      await page.goto('/#/core/test/async-validation/multiple-validators');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 

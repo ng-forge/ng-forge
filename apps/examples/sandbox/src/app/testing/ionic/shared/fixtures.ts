@@ -58,16 +58,6 @@ export interface TestHelpers extends BaseTestHelpers {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleTracker; mockApi: MockApiHelpers }>({
-  // Rewrite /testing/ → /test/ in ionic sandbox URLs.
-  // Specs call navigateToScenario('/testing/...') which testUrl turns into
-  // http://localhost:4210/#/ionic/testing/... — but sandbox routes use 'test', not 'testing'.
-  page: async ({ page }, use) => {
-    const originalGoto = page.goto.bind(page);
-    page.goto = (url: string, options?: Parameters<typeof page.goto>[1]) =>
-      originalGoto(url.replace('/#/ionic/testing/', '/#/ionic/test/'), options);
-    await use(page);
-  },
-
   mockApi: async ({ page }, use) => {
     await use(createMockApiFixture(page));
   },

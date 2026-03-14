@@ -10,7 +10,7 @@ test.describe('Performance E2E Tests', () => {
 
   test.describe('Flat Field Rendering', () => {
     test('should render 100 flat input fields within budget', async ({ page, helpers }) => {
-      await page.goto('/#/test/performance/perf-100-flat-fields');
+      await page.goto('/#/core/test/performance/perf-100-flat-fields');
       await page.waitForLoadState('networkidle');
       const startTime = Date.now();
       const scenario = helpers.getScenario('perf-100-flat-fields');
@@ -27,7 +27,7 @@ test.describe('Performance E2E Tests', () => {
     });
 
     test('should render 200 flat input fields within budget', async ({ page, helpers }) => {
-      await page.goto('/#/test/performance/perf-200-flat-fields');
+      await page.goto('/#/core/test/performance/perf-200-flat-fields');
       await page.waitForLoadState('networkidle');
       const startTime = Date.now();
       const scenario = helpers.getScenario('perf-200-flat-fields');
@@ -46,7 +46,7 @@ test.describe('Performance E2E Tests', () => {
 
   test.describe('Mixed Field Rendering', () => {
     test('should render 100 mixed field types within budget', async ({ page, helpers }) => {
-      await page.goto('/#/test/performance/perf-100-mixed-fields');
+      await page.goto('/#/core/test/performance/perf-100-mixed-fields');
       await page.waitForLoadState('networkidle');
       const startTime = Date.now();
       const scenario = helpers.getScenario('perf-100-mixed-fields');
@@ -63,7 +63,7 @@ test.describe('Performance E2E Tests', () => {
 
   test.describe('Conditional Field Rendering', () => {
     test('should render 50 fields with 25 conditionals within budget', async ({ page, helpers }) => {
-      await page.goto('/#/test/performance/perf-50-with-conditionals');
+      await page.goto('/#/core/test/performance/perf-50-with-conditionals');
       await page.waitForLoadState('networkidle');
       const startTime = Date.now();
       const scenario = helpers.getScenario('perf-50-with-conditionals');
@@ -80,7 +80,7 @@ test.describe('Performance E2E Tests', () => {
 
   test.describe('Array Rendering', () => {
     test('should render array with 20 items x 5 fields within budget', async ({ page, helpers }) => {
-      await page.goto('/#/test/performance/perf-array-20-items');
+      await page.goto('/#/core/test/performance/perf-array-20-items');
       await page.waitForLoadState('networkidle');
       const startTime = Date.now();
       const scenario = helpers.getScenario('perf-array-20-items');
@@ -97,7 +97,7 @@ test.describe('Performance E2E Tests', () => {
 
   test.describe('Multi-Page Rendering', () => {
     test('should render 10 pages x 10 fields within budget', async ({ page, helpers }) => {
-      await page.goto('/#/test/performance/perf-10-pages-10-fields');
+      await page.goto('/#/core/test/performance/perf-10-pages-10-fields');
       await page.waitForLoadState('networkidle');
       const startTime = Date.now();
       const scenario = helpers.getScenario('perf-10-pages-10-fields');
@@ -114,7 +114,7 @@ test.describe('Performance E2E Tests', () => {
 
   test.describe('Config Swap with Large Forms', () => {
     test('should swap between two 100-field configs multiple times within budget', async ({ page }) => {
-      await page.goto('/#/test/performance/perf-config-swap');
+      await page.goto('/#/core/test/performance/perf-config-swap');
       await page.waitForLoadState('networkidle');
       const scenario = page.locator('[data-testid="perf-config-swap"]');
       await expect(scenario).toBeVisible({ timeout: 10000 });

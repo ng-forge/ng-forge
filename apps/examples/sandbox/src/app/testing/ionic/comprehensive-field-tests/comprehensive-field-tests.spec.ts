@@ -6,13 +6,13 @@ setupConsoleCheck();
 
 test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.beforeEach(async ({ helpers }) => {
-    await helpers.navigateToScenario('/testing/comprehensive-field-tests');
+    await helpers.navigateToScenario('/test/comprehensive-field-tests');
   });
 
   test.describe('Comprehensive Fields Test', () => {
     test('should test all basic field types', async ({ page, helpers }) => {
       // Navigate to the comprehensive fields component
-      await page.goto('/#/testing/comprehensive-field-tests/comprehensive-fields');
+      await page.goto('/#/ionic/test/comprehensive-field-tests/comprehensive-fields');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -170,7 +170,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Validation Test', () => {
     test('should handle field validation errors', async ({ page, helpers }) => {
       // Navigate to the validation test component
-      await page.goto('/#/testing/comprehensive-field-tests/validation');
+      await page.goto('/#/ionic/test/comprehensive-field-tests/validation');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -273,7 +273,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Grid Layout Test', () => {
     test('should test responsive grid layout', async ({ page, helpers }) => {
       // Navigate to the grid layout test component
-      await page.goto('/#/testing/comprehensive-field-tests/grid-layout');
+      await page.goto('/#/ionic/test/comprehensive-field-tests/grid-layout');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -408,7 +408,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('State Management Test', () => {
     test('should test form state management', async ({ page, helpers }) => {
       // Navigate to the state management test component
-      await page.goto('/#/testing/comprehensive-field-tests/state-management');
+      await page.goto('/#/ionic/test/comprehensive-field-tests/state-management');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario

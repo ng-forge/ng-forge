@@ -10,7 +10,7 @@ test.describe('PrimeNG Components Tests', () => {
 
   test.describe('Calendar Component', () => {
     test('should open calendar and select date', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/calendar-basic');
+      await page.goto('/#/primeng/test/primeng-components/calendar-basic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('calendar-basic');
@@ -41,7 +41,7 @@ test.describe('PrimeNG Components Tests', () => {
     });
 
     test('should respect min/max date constraints', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/calendar-constraints');
+      await page.goto('/#/primeng/test/primeng-components/calendar-constraints');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('calendar-constraints');
@@ -64,7 +64,7 @@ test.describe('PrimeNG Components Tests', () => {
     });
 
     test('should display custom date format', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/calendar-format');
+      await page.goto('/#/primeng/test/primeng-components/calendar-format');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('calendar-format');
@@ -92,7 +92,7 @@ test.describe('PrimeNG Components Tests', () => {
     });
 
     test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/calendar-disabled');
+      await page.goto('/#/primeng/test/primeng-components/calendar-disabled');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('calendar-disabled');
@@ -104,7 +104,7 @@ test.describe('PrimeNG Components Tests', () => {
     });
 
     test('should work with initial value', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/calendar-initial-value');
+      await page.goto('/#/primeng/test/primeng-components/calendar-initial-value');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('calendar-initial-value');
@@ -118,7 +118,7 @@ test.describe('PrimeNG Components Tests', () => {
     });
 
     test('should show button bar with today/clear buttons', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/calendar-button-bar');
+      await page.goto('/#/primeng/test/primeng-components/calendar-button-bar');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('calendar-button-bar');
@@ -143,7 +143,7 @@ test.describe('PrimeNG Components Tests', () => {
     // The disabled state test below is the only one that actually verifies behavior.
 
     test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/slider-disabled');
+      await page.goto('/#/primeng/test/primeng-components/slider-disabled');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('slider-disabled');
@@ -157,7 +157,7 @@ test.describe('PrimeNG Components Tests', () => {
 
   test.describe('Toggle Component', () => {
     test('should change state on click', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/toggle-basic');
+      await page.goto('/#/primeng/test/primeng-components/toggle-basic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-basic');
@@ -178,7 +178,7 @@ test.describe('PrimeNG Components Tests', () => {
     });
 
     test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/toggle-disabled');
+      await page.goto('/#/primeng/test/primeng-components/toggle-disabled');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-disabled');
@@ -193,7 +193,7 @@ test.describe('PrimeNG Components Tests', () => {
     });
 
     test('should display label and hint', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/toggle-label');
+      await page.goto('/#/primeng/test/primeng-components/toggle-label');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-label');
@@ -207,7 +207,7 @@ test.describe('PrimeNG Components Tests', () => {
     });
 
     test('should work with initial value set to true', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/toggle-initial-value');
+      await page.goto('/#/primeng/test/primeng-components/toggle-initial-value');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-initial-value');
@@ -223,7 +223,7 @@ test.describe('PrimeNG Components Tests', () => {
 
   test.describe('Multi-Select Component', () => {
     test('should select multiple options', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/multi-select-basic');
+      await page.goto('/#/primeng/test/primeng-components/multi-select-basic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-select-basic');
@@ -260,7 +260,7 @@ test.describe('PrimeNG Components Tests', () => {
     });
 
     test('should filter options', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/multi-select-filter');
+      await page.goto('/#/primeng/test/primeng-components/multi-select-filter');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-select-filter');
@@ -290,7 +290,7 @@ test.describe('PrimeNG Components Tests', () => {
     });
 
     test('should work with initial values', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/multi-select-initial-value');
+      await page.goto('/#/primeng/test/primeng-components/multi-select-initial-value');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-select-initial-value');
@@ -308,7 +308,7 @@ test.describe('PrimeNG Components Tests', () => {
     });
 
     test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
-      await page.goto('/#/test/primeng-components/multi-select-disabled');
+      await page.goto('/#/primeng/test/primeng-components/multi-select-disabled');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-select-disabled');

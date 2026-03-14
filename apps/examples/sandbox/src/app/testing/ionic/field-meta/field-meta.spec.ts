@@ -6,7 +6,7 @@ setupConsoleCheck();
 
 test.describe('Field Meta Attribute Tests', () => {
   test.beforeEach(async ({ helpers }) => {
-    await helpers.navigateToScenario('/testing/field-meta');
+    await helpers.navigateToScenario('/test/field-meta');
   });
 
   test.describe('Wrapped Components Meta Test', () => {

@@ -12,7 +12,7 @@ test.describe('Submission Behavior Tests', () => {
     test.beforeEach(async ({ helpers, mockApi }) => {
       // Set up mock endpoint before navigating
       await mockApi.mockSuccess('/api/basic-submit', { delay: 1000 });
-      await helpers.navigateToScenario('/testing/submission-behavior/basic-submission');
+      await helpers.navigateToScenario('/test/submission-behavior/basic-submission');
     });
 
     test('should disable submit button while form is submitting', async ({ page, helpers }) => {
@@ -109,7 +109,7 @@ test.describe('Submission Behavior Tests', () => {
 
   test.describe('Button Disabled When Invalid', () => {
     test.beforeEach(async ({ helpers }) => {
-      await helpers.navigateToScenario('/testing/submission-behavior/button-disabled-invalid');
+      await helpers.navigateToScenario('/test/submission-behavior/button-disabled-invalid');
     });
 
     test('should disable submit button when form is invalid', async ({ page, helpers }) => {
@@ -153,7 +153,7 @@ test.describe('Submission Behavior Tests', () => {
     test.beforeEach(async ({ helpers, mockApi }) => {
       // Set up mock endpoint with delay to test disabled state
       await mockApi.mockSuccess('/api/submit-disabled-test', { delay: 1500 });
-      await helpers.navigateToScenario('/testing/submission-behavior/button-disabled-submitting');
+      await helpers.navigateToScenario('/test/submission-behavior/button-disabled-submitting');
     });
 
     test('should disable submit button during submission', async ({ page, helpers }) => {
@@ -186,7 +186,7 @@ test.describe('Submission Behavior Tests', () => {
 
   test.describe('Button Never Disabled', () => {
     test.beforeEach(async ({ helpers }) => {
-      await helpers.navigateToScenario('/testing/submission-behavior/button-never-disabled');
+      await helpers.navigateToScenario('/test/submission-behavior/button-never-disabled');
     });
 
     test('should allow submit button to stay enabled with custom options', async ({ page, helpers }) => {
@@ -211,7 +211,7 @@ test.describe('Submission Behavior Tests', () => {
 
   test.describe('Next Button Page Validation', () => {
     test.beforeEach(async ({ helpers }) => {
-      await helpers.navigateToScenario('/testing/submission-behavior/next-button-page-validation');
+      await helpers.navigateToScenario('/test/submission-behavior/next-button-page-validation');
     });
 
     test('should disable next button when page is invalid', async ({ page, helpers }) => {
@@ -250,7 +250,7 @@ test.describe('Submission Behavior Tests', () => {
 
   test.describe('Next Button Never Disabled', () => {
     test.beforeEach(async ({ helpers }) => {
-      await helpers.navigateToScenario('/testing/submission-behavior/next-button-never-disabled');
+      await helpers.navigateToScenario('/test/submission-behavior/next-button-never-disabled');
     });
 
     test('should allow next button to stay enabled with custom options', async ({ page, helpers }) => {
@@ -283,7 +283,7 @@ test.describe('Submission Behavior Tests', () => {
     test.beforeEach(async ({ helpers, mockApi }) => {
       // Set up mock endpoint with delay to test formSubmitting condition
       await mockApi.mockSuccess('/api/form-state-submit', { delay: 1500 });
-      await helpers.navigateToScenario('/testing/submission-behavior/form-state-condition');
+      await helpers.navigateToScenario('/test/submission-behavior/form-state-condition');
     });
 
     test('should use FormStateCondition for disabled logic', async ({ page, helpers }) => {
@@ -316,7 +316,7 @@ test.describe('Submission Behavior Tests', () => {
 
   test.describe('Conditional Expression Logic', () => {
     test.beforeEach(async ({ helpers }) => {
-      await helpers.navigateToScenario('/testing/submission-behavior/conditional-expression');
+      await helpers.navigateToScenario('/test/submission-behavior/conditional-expression');
     });
 
     test('should use conditional expression for disabled logic', async ({ page, helpers }) => {
@@ -353,7 +353,7 @@ test.describe('Submission Behavior Tests', () => {
 
   test.describe('Explicit Disabled', () => {
     test.beforeEach(async ({ helpers }) => {
-      await helpers.navigateToScenario('/testing/submission-behavior/explicit-disabled');
+      await helpers.navigateToScenario('/test/submission-behavior/explicit-disabled');
     });
 
     test('should always disable button with explicit disabled: true', async ({ page, helpers }) => {
@@ -380,7 +380,7 @@ test.describe('Submission Behavior Tests', () => {
 
   test.describe('HTTP Error Handling', () => {
     test.beforeEach(async ({ helpers }) => {
-      await helpers.navigateToScenario('/testing/submission-behavior/http-error-handling');
+      await helpers.navigateToScenario('/test/submission-behavior/http-error-handling');
     });
 
     test('should submit form via HTTP and show success', async ({ page, helpers, mockApi }) => {
@@ -538,7 +538,7 @@ test.describe('Submission Behavior Tests', () => {
 
   test.describe('Submit Button Inside Group', () => {
     test.beforeEach(async ({ helpers }) => {
-      await helpers.navigateToScenario('/testing/submission-behavior/submit-inside-group');
+      await helpers.navigateToScenario('/test/submission-behavior/submit-inside-group');
     });
 
     test('should disable submit button inside group when form is invalid (issue #157)', async ({ page, helpers }) => {
@@ -589,7 +589,7 @@ test.describe('Submission Behavior Tests', () => {
   test.describe('Hidden Field', () => {
     test.beforeEach(async ({ helpers, mockApi }) => {
       await mockApi.mockSuccess('/api/hidden-field-submit', { delay: 300 });
-      await helpers.navigateToScenario('/testing/submission-behavior/hidden-field');
+      await helpers.navigateToScenario('/test/submission-behavior/hidden-field');
     });
 
     test('should include hidden field values in form submission including inside groups', async ({ page, helpers, mockApi }) => {
