@@ -170,7 +170,7 @@ export class SandboxHarness implements OnDestroy {
     // the root component with <router-outlet> is attached, so we re-trigger here.
     const router = appRef.injector.get(Router);
     const initialUrl = options?.route ?? `/${registration.defaultRoute}`;
-    await router.navigateByUrl(initialUrl);
+    await router.navigateByUrl(initialUrl, { onSameUrlNavigation: 'reload' });
 
     const instanceId = `${adapterName}-${++this.instanceCounter}`;
     const ref = new SandboxRefImpl(adapterName, appRef, router, hostElement, () => {

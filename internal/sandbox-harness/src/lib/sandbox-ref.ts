@@ -17,7 +17,7 @@ export class SandboxRefImpl implements SandboxRef {
     if (this.destroyed) {
       return false;
     }
-    return this.router.navigateByUrl(url);
+    return this.router.navigateByUrl(url, { onSameUrlNavigation: 'reload' });
   }
 
   destroy(): void {

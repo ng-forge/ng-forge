@@ -135,7 +135,9 @@ export class HostComponent {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
           const newAdapter = getAdapterFromHash();
-          if (newAdapter && newAdapter !== this.activeAdapter()) {
+          if (newAdapter) {
+            // Always emit — same adapter with different route needs inner app navigation,
+            // switchMap handles cancellation if adapter changes mid-bootstrap.
             this.adapterSwitch$.next(newAdapter);
           }
         });
