@@ -6,7 +6,7 @@ import { isAdapterName } from '@ng-forge/sandbox-harness';
 
 const adapterGuard: CanActivateFn = (route) => {
   const name = route.paramMap.get('adapter');
-  if (!name || !isAdapterName(name) || name === 'core') {
+  if (!name || !isAdapterName(name)) {
     const router = inject(Router);
     const nav = router.getCurrentNavigation();
     const initialUrl = nav?.initialUrl.toString() ?? `/${name}`;

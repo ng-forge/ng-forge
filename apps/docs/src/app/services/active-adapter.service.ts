@@ -13,7 +13,7 @@ export class ActiveAdapterService {
     const nav = this.router.lastSuccessfulNavigation();
     const url = nav ? this.router.serializeUrl(nav.finalUrl ?? nav.extractedUrl) : this.router.url;
     const seg = url.split('/')[1];
-    return isAdapterName(seg) && seg !== 'core' ? seg : 'material';
+    return isAdapterName(seg) ? seg : 'material';
   });
 
   readonly adapters: { name: AdapterName; label: string; icon: string }[] = [

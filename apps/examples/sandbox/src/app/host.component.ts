@@ -23,7 +23,6 @@ const NAV_ADAPTERS: ReadonlyArray<{ name: AdapterName; label: string }> = [
   { name: 'bootstrap', label: 'Bootstrap' },
   { name: 'primeng', label: 'PrimeNG' },
   { name: 'ionic', label: 'Ionic' },
-  { name: 'core', label: 'Core' },
 ];
 
 /**

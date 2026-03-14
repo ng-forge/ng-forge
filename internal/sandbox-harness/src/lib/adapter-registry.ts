@@ -15,7 +15,7 @@ export function provideAdapterRegistry(adapters: AdapterRegistration[]): Provide
  * 'custom' is intentionally excluded: it is a virtual adapter with no registration,
  * so '#/custom/...' URLs must not be treated as valid navigation targets.
  */
-const REGISTERED_ADAPTER_NAMES = ['material', 'bootstrap', 'primeng', 'ionic', 'core'] as const;
+const REGISTERED_ADAPTER_NAMES = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 
 export function isAdapterName(value: string): value is AdapterName {
   return (REGISTERED_ADAPTER_NAMES as readonly string[]).includes(value);

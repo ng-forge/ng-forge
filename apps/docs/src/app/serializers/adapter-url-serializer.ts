@@ -28,7 +28,7 @@ export class AdapterAwareUrlSerializer extends DefaultUrlSerializer {
     const firstSegment = path.split('/')[1];
 
     // Already has a valid adapter prefix — leave it alone
-    if (firstSegment && isAdapterName(firstSegment) && firstSegment !== 'core') {
+    if (firstSegment && isAdapterName(firstSegment)) {
       return url;
     }
 
@@ -38,6 +38,6 @@ export class AdapterAwareUrlSerializer extends DefaultUrlSerializer {
   private currentAdapter(): string {
     const pathname = this.document.location?.pathname ?? '/';
     const seg = pathname.split('/')[1];
-    return isAdapterName(seg) && seg !== 'core' ? seg : 'material';
+    return isAdapterName(seg) ? seg : 'material';
   }
 }
