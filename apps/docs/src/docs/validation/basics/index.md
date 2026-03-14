@@ -98,7 +98,7 @@ Choose based on your validation complexity:
 
 - Dynamic field behavior
 - Conditional required fields
-- See [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/) for details
+- See [Conditional Logic](/dynamic-behavior/overview) for details
 
 ## Shorthand Validators
 
@@ -306,7 +306,7 @@ Invalid fields prevent form submission and display error messages.
 
 ## Next Steps
 
-- **[Validation Advanced](../advanced/)** - Conditional validation, dynamic values
-- **[Validation Reference](../reference/)** - Complete validator API
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Dynamic field behavior
+- **[Validation Advanced](/validation/advanced)** - Conditional validation, dynamic values
+- **[Validation Reference](/validation/reference)** - Complete validator API
+- **[Conditional Logic](/dynamic-behavior/overview)** - Dynamic field behavior
 - **[Examples](../../examples/)** - Real-world validation patterns

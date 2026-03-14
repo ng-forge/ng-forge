@@ -1,0 +1,34 @@
+<div class="integration-view">
+  <section class="integration-view__install">
+    <h2 class="integration-view__heading">Installation</h2>
+    <docs-install-command [packages]="data().packages" />
+  </section>
+
+  @if (data().stylesCode) {
+    <section class="integration-view__setup">
+      <h2 class="integration-view__heading">Styles</h2>
+      <div class="integration-view__code">
+        <div [codeHighlight]="data().stylesCode!" lang="scss"></div>
+      </div>
+    </section>
+  }
+
+  <section class="integration-view__setup">
+    <h2 class="integration-view__heading">Setup</h2>
+    <div class="integration-view__code">
+      <div [codeHighlight]="data().setupCode"></div>
+    </div>
+  </section>
+
+  <section class="integration-view__features">
+    <h2 class="integration-view__heading">{{ data().featuresTitle }}</h2>
+    <ul class="integration-view__features-list">
+      @for (feature of data().features; track feature.name) {
+        <li class="integration-view__feature">
+          <code class="integration-view__feature-name">{{ feature.name }}</code>
+          <span class="integration-view__feature-desc">{{ feature.description }}</span>
+        </li>
+      }
+    </ul>
+  </section>
+</div>

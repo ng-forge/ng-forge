@@ -1,0 +1,51 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "target": "es2022",
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "emitDecoratorMetadata": false,
+    "module": "preserve",
+    "lib": ["dom", "es2022"],
+    "paths": {
+      "@ng-forge/dynamic-forms": ["packages/dynamic-forms/src/index.ts"],
+      "@ng-forge/dynamic-forms/integration": ["packages/dynamic-forms/integration/src/public_api.ts"],
+      "@ng-forge/dynamic-forms/schema": ["packages/dynamic-forms/schema/src/public_api.ts"],
+      "@ng-forge/dynamic-forms/testing": ["packages/dynamic-forms/testing/src/public_api.ts"],
+      "@ng-forge/dynamic-forms-material": ["dist/packages/dynamic-forms-material"],
+      "@ng-forge/dynamic-forms-bootstrap": ["dist/packages/dynamic-forms-bootstrap"],
+      "@ng-forge/dynamic-forms-primeng": ["dist/packages/dynamic-forms-primeng"],
+      "@ng-forge/dynamic-forms-ionic": ["dist/packages/dynamic-forms-ionic"],
+      "@ng-forge/examples-shared-ui": ["internal/examples-shared-ui/src/index.ts"],
+      "@ng-forge/sandbox-harness": ["dist/internal/sandbox-harness"],
+      "@ng-forge/examples-material": ["dist/internal/examples-material"],
+      "@ng-forge/examples-bootstrap": ["dist/internal/examples-bootstrap"],
+      "@ng-forge/examples-primeng": ["dist/internal/examples-primeng"],
+      "@ng-forge/examples-ionic": ["dist/internal/examples-ionic"],
+      "@ng-forge/examples-core": ["dist/internal/examples-core"],
+      "@ng-forge/styling": ["internal/styling/src/index.ts"],
+      "@ng-forge/utils": ["internal/utils/src/index.ts"],
+      "@ng-forge/examples-shared-testing": ["internal/examples-shared-testing/src/index.ts"]
+    },
+    "skipLibCheck": true
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "typeCheckHostBindings": true,
+    "strictTemplates": true
+  },
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+<nav class="docs-page-nav">
+  @if (prevNav(); as prev) {
+    <a class="docs-page-nav__link" [routerLink]="prevLink()">
+      <span class="docs-page-nav__dir">← Previous</span>
+      <span class="docs-page-nav__title">{{ prev.title }}</span>
+    </a>
+  }
+  @if (nextNav(); as next) {
+    <a class="docs-page-nav__link docs-page-nav__link--next" [routerLink]="nextLink()">
+      <span class="docs-page-nav__dir">Next →</span>
+      <span class="docs-page-nav__title">{{ next.title }}</span>
+    </a>
+  }
+</nav>

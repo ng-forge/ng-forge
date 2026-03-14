@@ -4,7 +4,7 @@ Registration form demonstrating numeric comparison operators for age-based condi
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/age-conditional-form" class="example-frame" title="Age Conditional Form Demo"></iframe>
+<docs-live-example scenario="examples/age-conditional-form"></docs-live-example>
 
 ## Overview
 
@@ -251,6 +251,6 @@ This example uses numeric comparison operators:
 
 ## Related Documentation
 
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
 - **[Validation](../../validation/basics/)** - Min/max validation
 - **[User Registration](../user-registration/)** - Basic registration example

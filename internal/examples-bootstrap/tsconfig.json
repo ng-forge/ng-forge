@@ -1,0 +1,42 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "target": "es2022",
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "emitDecoratorMetadata": false,
+    "module": "preserve",
+    "lib": ["dom", "es2022"],
+    "skipLibCheck": true,
+    "paths": {
+      "@ng-forge/dynamic-forms": ["packages/dynamic-forms/src/index.ts"],
+      "@ng-forge/dynamic-forms/integration": ["packages/dynamic-forms/integration/src/public_api.ts"],
+      "@ng-forge/dynamic-forms/schema": ["packages/dynamic-forms/schema/src/public_api.ts"],
+      "@ng-forge/dynamic-forms/testing": ["packages/dynamic-forms/testing/src/public_api.ts"],
+      "@ng-forge/dynamic-forms-bootstrap": ["packages/dynamic-forms-bootstrap/src/index.ts"],
+      "@ng-forge/examples-shared-ui": ["dist/internal/examples-shared-ui"],
+      "@ng-forge/examples-shared-testing": ["dist/internal/examples-shared-testing"],
+      "@ng-forge/sandbox-harness": ["internal/sandbox-harness/src/index.ts"]
+    }
+  },
+  "angularCompilerOptions": {
+    "compilationMode": "partial",
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "typeCheckHostBindings": true,
+    "strictTemplates": true
+  },
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    }
+  ]
+}

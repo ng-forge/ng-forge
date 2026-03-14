@@ -4,7 +4,7 @@ Account registration form that shows different fields based on whether the user 
 
 ## Live Demo
 
-<iframe src="http://localhost:4201/#/examples/business-account-form" class="example-frame" title="Business Account Form Demo"></iframe>
+<docs-live-example scenario="examples/business-account-form"></docs-live-example>
 
 ## Overview
 
@@ -214,6 +214,6 @@ Business fields are hidden when personal is selected:
 
 ## Related Documentation
 
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
 - **[User Registration](../user-registration/)** - Basic registration example
-- **[Radio Buttons](../../schema-fields/field-types/)** - Field types reference
+- **[Radio Buttons](/field-types/text-inputs)** - Field types reference

@@ -3,20 +3,14 @@
 /**
  * Deployment Preparation Script for Vercel
  *
- * This script prepares the deployment directory structure by:
- * 1. Copying the main docs app to dist/deploy/dynamic-forms
- * 2. Copying example apps to dist/deploy/dynamic-forms/examples subdirectory
+ * Copies the docs app (which now embeds all examples via sandbox harness) to
+ * the deployment directory ready for Vercel.
  *
  * Resulting structure:
  * dist/deploy/
  * └── dynamic-forms/
- *     ├── index.html          (docs app)
- *     ├── assets/             (docs assets)
- *     └── examples/           (example apps)
- *         ├── material/       (Material examples)
- *         ├── bootstrap/      (Bootstrap examples)
- *         ├── primeng/        (PrimeNG examples)
- *         └── ionic/          (Ionic examples)
+ *     ├── index.html   (docs app + embedded examples)
+ *     └── assets/      (docs assets)
  */
 
 import { copyFileSync, cpSync, existsSync, mkdirSync, rmSync } from 'fs';
@@ -58,9 +52,8 @@ try {
   process.exit(1);
 }
 
-// Copy index.csr.html to index.html for SPA fallback on GitHub Pages
+// Copy index.csr.html to index.html for SPA fallback
 // Angular SSR generates index.csr.html as the client-side rendering fallback.
-// GitHub Pages needs this at the root as index.html to handle the SPA routing.
 const indexCsrPath = join(deployDir, 'index.csr.html');
 const indexHtmlPath = join(deployDir, 'index.html');
 if (existsSync(indexCsrPath)) {
@@ -74,94 +67,12 @@ if (existsSync(indexCsrPath)) {
   }
 }
 
-// Create examples directory
-console.log('\n📦 Setting up examples directory...');
-const examplesDir = join(deployDir, 'examples');
-mkdirSync(examplesDir, { recursive: true });
-
-// Copy Material examples (required)
-const materialSrc = join(distDir, 'apps', 'e2e', 'material', 'browser');
-if (!existsSync(materialSrc)) {
-  console.error('❌ Error: Material examples build output not found!');
-  console.error('   Expected at:', materialSrc);
-  console.error('   Please run: pnpm nx build material-examples --configuration=production');
-  process.exit(1);
-}
-console.log('   📦 Copying Material examples...');
-try {
-  cpSync(materialSrc, join(examplesDir, 'material'), { recursive: true });
-  console.log('   ✅ Material examples copied');
-} catch (error) {
-  console.error('   ❌ Failed to copy Material examples:', error.message);
-  process.exit(1);
-}
-
-// Copy PrimeNG examples (required)
-const primengSrc = join(distDir, 'apps', 'e2e', 'primeng', 'browser');
-if (!existsSync(primengSrc)) {
-  console.error('❌ Error: PrimeNG examples build output not found!');
-  console.error('   Expected at:', primengSrc);
-  console.error('   Please run: pnpm nx build primeng-examples --configuration=production');
-  process.exit(1);
-}
-console.log('   📦 Copying PrimeNG examples...');
-try {
-  cpSync(primengSrc, join(examplesDir, 'primeng'), { recursive: true });
-  console.log('   ✅ PrimeNG examples copied');
-} catch (error) {
-  console.error('   ❌ Failed to copy PrimeNG examples:', error.message);
-  process.exit(1);
-}
-
-// Copy Bootstrap examples (required)
-const bootstrapSrc = join(distDir, 'apps', 'e2e', 'bootstrap', 'browser');
-if (!existsSync(bootstrapSrc)) {
-  console.error('❌ Error: Bootstrap examples build output not found!');
-  console.error('   Expected at:', bootstrapSrc);
-  console.error('   Please run: pnpm nx build bootstrap-examples --configuration=production');
-  process.exit(1);
-}
-console.log('   📦 Copying Bootstrap examples...');
-try {
-  cpSync(bootstrapSrc, join(examplesDir, 'bootstrap'), { recursive: true });
-  console.log('   ✅ Bootstrap examples copied');
-} catch (error) {
-  console.error('   ❌ Failed to copy Bootstrap examples:', error.message);
-  process.exit(1);
-}
-
-// Copy Ionic examples (required)
-const ionicSrc = join(distDir, 'apps', 'e2e', 'ionic', 'browser');
-if (!existsSync(ionicSrc)) {
-  console.error('❌ Error: Ionic examples build output not found!');
-  console.error('   Expected at:', ionicSrc);
-  console.error('   Please run: pnpm nx build ionic-examples --configuration=production');
-  process.exit(1);
-}
-console.log('   📦 Copying Ionic examples...');
-try {
-  cpSync(ionicSrc, join(examplesDir, 'ionic'), { recursive: true });
-  console.log('   ✅ Ionic examples copied');
-} catch (error) {
-  console.error('   ❌ Failed to copy Ionic examples:', error.message);
-  process.exit(1);
-}
-
 console.log('\n✅ Deployment directory prepared successfully!\n');
 console.log('📂 Deployment structure:');
 console.log('   dist/deploy/');
 console.log('   └── dynamic-forms/');
-console.log('       ├── index.html       (docs app)');
-console.log('       ├── assets/          (docs assets)');
-console.log('       └── examples/        (example apps)');
-console.log('           ├── material/    (Material examples)');
-console.log('           ├── bootstrap/   (Bootstrap examples)');
-console.log('           ├── primeng/     (PrimeNG examples)');
-console.log('           └── ionic/       (Ionic examples)\n');
+console.log('       ├── index.html   (docs app + embedded examples)');
+console.log('       └── assets/      (docs assets)\n');
 
-console.log('🌐 Production URLs:');
-console.log('   Docs:      https://ng-forge.com/dynamic-forms/');
-console.log('   Material:  https://ng-forge.com/dynamic-forms/examples/material/');
-console.log('   Bootstrap: https://ng-forge.com/dynamic-forms/examples/bootstrap/');
-console.log('   PrimeNG:   https://ng-forge.com/dynamic-forms/examples/primeng/');
-console.log('   Ionic:     https://ng-forge.com/dynamic-forms/examples/ionic/\n');
+console.log('🌐 Production URL:');
+console.log('   https://ng-forge.com/dynamic-forms/\n');

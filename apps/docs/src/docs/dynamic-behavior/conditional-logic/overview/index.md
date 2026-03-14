@@ -1246,9 +1246,9 @@ const config = {
 
 ## Related
 
-- **[Value Derivation](../value-derivation/basics/)** — Computed field values
-- **[Async Derivation](../value-derivation/async/)** — HTTP and async function derivations, stopOnUserOverride
+- **[Value Derivation](/derivation)** — Computed field values
+- **[Async Derivation](/derivation)** — HTTP and async function derivations, stopOnUserOverride
 - **[Validation](../../validation/basics/)** — Conditional validation
 - **[Custom Validators](../../validation/custom-validators/)** — Async and HTTP validators
-- **[Type Safety](../../advanced/type-safety/basics/)** — TypeScript integration
+- **[Type Safety](/advanced/basics)** — TypeScript integration
 - **[Examples](/examples)** — Real-world form patterns

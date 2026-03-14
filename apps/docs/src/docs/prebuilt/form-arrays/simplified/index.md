@@ -4,7 +4,7 @@ The simplified array API provides a concise way to define dynamic arrays. Instea
 
 ## Interactive Demo
 
-<iframe src="http://localhost:4201/#/examples/simplified-array" class="example-frame" title="Simplified Array Demo"></iframe>
+<docs-live-example scenario="examples/simplified-array"></docs-live-example>
 
 ## Overview
 

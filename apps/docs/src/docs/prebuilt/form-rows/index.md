@@ -2,7 +2,7 @@ Organize fields into horizontal rows for compact layouts. Rows display fields si
 
 ## Interactive Demo
 
-<iframe src="http://localhost:4201/#/examples/row" class="example-frame" title="Row Field Demo"></iframe>
+<docs-live-example scenario="examples/row"></docs-live-example>
 
 ## Basic Row
 
@@ -208,4 +208,4 @@ Row containers support the `logic` property to conditionally show or hide the en
 }
 ```
 
-Only `'hidden'` is supported as a logic type on containers. For all available condition types and operators, see [Conditional Logic](../../dynamic-behavior/conditional-logic/overview/).
+Only `'hidden'` is supported as a logic type on containers. For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).
