@@ -1,6 +1,7 @@
 import { Locator, test as base } from '@playwright/test';
 import type { BaseTestHelpers, ConsoleCheckOptions, ConsoleTracker, MockApiHelpers } from '@ng-forge/examples-shared-testing';
 import {
+  APP_PORTS,
   createBaseHelpers,
   createConsoleTrackerFixture,
   createErrorHelpers,
@@ -14,7 +15,7 @@ import {
 // Core-specific Configuration (uses Material UI adapter)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const testUrl = createTestUrl(`http://localhost:4205`);
+export const testUrl = createTestUrl(`http://localhost:${APP_PORTS['core-examples']}`);
 
 const MATERIAL_SELECTORS = {
   errorSelector: 'mat-error',

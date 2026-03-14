@@ -4,7 +4,7 @@
   "projectType": "application",
   "prefix": "sandbox",
   "sourceRoot": "apps/examples/sandbox/src",
-  "tags": ["examples", "e2e"],
+  "tags": ["examples"],
   "implicitDependencies": [
     "sandbox-harness",
     "dynamic-forms",
@@ -105,41 +105,6 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint"
-    },
-    "e2e-material": {
-      "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/sandbox/material"],
-      "options": {
-        "config": "apps/examples/sandbox/playwright.material.config.ts"
-      }
-    },
-    "e2e-bootstrap": {
-      "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/sandbox/bootstrap"],
-      "options": {
-        "config": "apps/examples/sandbox/playwright.bootstrap.config.ts"
-      }
-    },
-    "e2e-primeng": {
-      "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/sandbox/primeng"],
-      "options": {
-        "config": "apps/examples/sandbox/playwright.primeng.config.ts"
-      }
-    },
-    "e2e-ionic": {
-      "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/sandbox/ionic"],
-      "options": {
-        "config": "apps/examples/sandbox/playwright.ionic.config.ts"
-      }
-    },
-    "e2e-core": {
-      "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/sandbox/core"],
-      "options": {
-        "config": "apps/examples/sandbox/playwright.core.config.ts"
-      }
     }
   }
 }

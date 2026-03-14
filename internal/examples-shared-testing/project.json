@@ -4,16 +4,6 @@
   "sourceRoot": "internal/examples-shared-testing/src",
   "projectType": "library",
   "tags": ["scope:examples", "type:testing"],
-  "targets": {
-    "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "dependsOn": ["^build"],
-      "options": {
-        "outputPath": "dist/internal/examples-shared-testing",
-        "main": "internal/examples-shared-testing/src/index.ts",
-        "tsConfig": "internal/examples-shared-testing/tsconfig.lib.json"
-      }
-    }
-  }
+  "// targets": "to see all targets run: nx show project examples-shared-testing --web",
+  "targets": {}
 }
