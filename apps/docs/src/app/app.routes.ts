@@ -2,11 +2,13 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Route, Router } from '@angular/router';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { NG_DOC_ROUTING } from '@ng-doc/generated';
-import { isAdapterName } from '@ng-forge/sandbox-harness';
+
+/** Adapter names valid in the docs app — includes 'custom' (a virtual adapter for docs only). */
+const DOCS_ADAPTER_NAMES = new Set(['material', 'bootstrap', 'primeng', 'ionic', 'custom']);
 
 const adapterGuard: CanActivateFn = (route) => {
   const name = route.paramMap.get('adapter');
-  if (!name || !isAdapterName(name)) {
+  if (!name || !DOCS_ADAPTER_NAMES.has(name)) {
     const router = inject(Router);
     const nav = router.getCurrentNavigation();
     const initialUrl = nav?.initialUrl.toString() ?? `/${name}`;
@@ -37,12 +39,16 @@ export const appRoutes: Route[] = [
   { path: 'custom-integrations', redirectTo: '/custom/building-an-adapter', pathMatch: 'full' },
   { path: 'building-an-adapter', redirectTo: '/custom/building-an-adapter', pathMatch: 'full' },
   { path: 'ai-integration', redirectTo: '/material/ai-integration', pathMatch: 'full' },
+  // Adapter root → Getting Started
+  { path: 'material', redirectTo: '/material/getting-started', pathMatch: 'full' },
+  { path: 'bootstrap', redirectTo: '/bootstrap/getting-started', pathMatch: 'full' },
+  { path: 'primeng', redirectTo: '/primeng/getting-started', pathMatch: 'full' },
+  { path: 'ionic', redirectTo: '/ionic/getting-started', pathMatch: 'full' },
+  { path: 'custom', redirectTo: '/custom/getting-started', pathMatch: 'full' },
   {
     path: ':adapter',
     canActivate: [adapterGuard],
     children: [
-      // Redirect adapter root to Getting Started
-      { path: '', redirectTo: 'getting-started', pathMatch: 'full' },
       // Route renames within adapter scope
       { path: 'installation', redirectTo: 'getting-started', pathMatch: 'full' },
       { path: 'ui-libs-integrations', redirectTo: 'configuration', pathMatch: 'full' },

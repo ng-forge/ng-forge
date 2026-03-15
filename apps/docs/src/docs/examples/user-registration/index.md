@@ -503,4 +503,4 @@ Add social login buttons before the form:
 - **[Paginated Form](../paginated-form/)** - Page field navigation patterns
 - **[Validation](../../validation/basics/)** - Validation guide
 - **[Conditional Logic](/dynamic-behavior/overview)** - Dynamic field behavior
-- **[Material Integration](/ui-libs-integrations)** - Material Design styling
+- **[Material Integration](/configuration)** - Material Design styling

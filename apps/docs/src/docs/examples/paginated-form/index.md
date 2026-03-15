@@ -488,4 +488,4 @@ Apply different validation rules per step:
 
 - [Conditional Logic](/dynamic-behavior/overview) - Show/hide pages dynamically
 - [Validation](../../validation/basics) - Per-page and cross-page validation
-- [Material Integration](/ui-libs-integrations) - Material Design styling
+- [Material Integration](/configuration) - Material Design styling

@@ -596,16 +596,16 @@ export default class IonicCheckboxComponent {
 
 See complete integrations:
 
-- [Material Design](/ui-libs-integrations) - Full Material implementation with 12+ field types
-- [Bootstrap](/ui-libs-integrations)
-- [PrimeNG](/ui-libs-integrations)
-- [Ionic](/ui-libs-integrations)
+- [Material Design](/configuration) - Full Material implementation with 12+ field types
+- [Bootstrap](/configuration)
+- [PrimeNG](/configuration)
+- [Ionic](/configuration)
 
 The Material integration source code is the most comprehensive example of implementing custom field types.
 
 ## Related Topics
 
-- **[Material Integration](/ui-libs-integrations)** - Complete reference implementation
+- **[Material Integration](/configuration)** - Complete reference implementation
 - **[Field Types](/field-types/text-inputs)** - Understanding all available field types
 - **[Type Safety](/advanced/basics)** - Module augmentation for custom types
 - **[Validation](../validation/basics)** - Displaying validation errors in custom fields
@@ -6952,7 +6952,7 @@ Dropdown allows users to categorize their inquiry:
 ## Related Documentation
 
 - **[Validation](../../validation/basics/)** - Form validation guide
-- **[Material Integration](/ui-libs-integrations)** - Material Design styling
+- **[Material Integration](/configuration)** - Material Design styling
 
 --- examples/enterprise-features ---
 
@@ -7303,7 +7303,7 @@ For features that require ALL conditions to be met, use `type: 'and'`:
 
 ## Next Steps
 
-- **[Field Types →](/schema-fields/field-types/text-inputs)** — Explore all available field types and their configuration
+- **[Field Types →](/field-types/text-inputs)** — Explore all available field types and their configuration
 - **[Validation →](/validation/basics)** — Add built-in and custom validators
 - **[Dynamic Behavior →](/dynamic-behavior/overview)** — Conditional fields and value derivation
 
@@ -7498,7 +7498,7 @@ For social login buttons, you can use text fields with links or handle this outs
 ## Related Documentation
 
 - **[Validation](../../validation/basics/)** - Form validation guide
-- **[Material Integration](/ui-libs-integrations)** - Material Design styling
+- **[Material Integration](/configuration)** - Material Design styling
 
 --- examples/paginated-form ---
 
@@ -7992,7 +7992,7 @@ Apply different validation rules per step:
 
 - [Conditional Logic](/dynamic-behavior/overview) - Show/hide pages dynamically
 - [Validation](../../validation/basics) - Per-page and cross-page validation
-- [Material Integration](/ui-libs-integrations) - Material Design styling
+- [Material Integration](/configuration) - Material Design styling
 
 --- examples/shipping-billing-address ---
 
@@ -8889,7 +8889,7 @@ Add social login buttons before the form:
 - **[Paginated Form](../paginated-form/)** - Page field navigation patterns
 - **[Validation](../../validation/basics/)** - Validation guide
 - **[Conditional Logic](/dynamic-behavior/overview)** - Dynamic field behavior
-- **[Material Integration](/ui-libs-integrations)** - Material Design styling
+- **[Material Integration](/configuration)** - Material Design styling
 
 --- examples/value-derivation ---
 
@@ -9041,7 +9041,7 @@ export class LoginComponent {
 
 - **[Configuration →](/configuration)** — Set global defaults with `withXxxFields({ ... })` and per-form `defaultProps`
 - **[Examples →](/examples)** — Browse complete form examples
-- **[Field Types →](/schema-fields/field-types/text-inputs)** — All available field types and their props
+- **[Field Types →](/field-types/text-inputs)** — All available field types and their props
 - **[Building an Adapter →](/building-an-adapter)** — Create your own adapter for any UI library
 
 --- prebuilt/form-arrays/complete ---
@@ -11890,12 +11890,12 @@ Library-level → Form-level → Field-level
 
 ## Field-level Props
 
-Each field type also accepts its own adapter-specific `props`. See [Field Types →](/schema-fields/field-types/text-inputs) for the full per-field reference.
+Each field type also accepts its own adapter-specific `props`. See [Field Types →](/field-types/text-inputs) for the full per-field reference.
 
 ## Next Steps
 
 - **[Examples →](/examples)** — Browse complete form examples
-- **[Field Types →](/schema-fields/field-types/text-inputs)** — Per-field adapter props reference
+- **[Field Types →](/field-types/text-inputs)** — Per-field adapter props reference
 - **[Building an Adapter →](/building-an-adapter)** — Build your own adapter
 
 --- validation/advanced ---

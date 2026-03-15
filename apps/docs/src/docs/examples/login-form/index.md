@@ -187,4 +187,4 @@ For social login buttons, you can use text fields with links or handle this outs
 ## Related Documentation
 
 - **[Validation](../../validation/basics/)** - Form validation guide
-- **[Material Integration](/ui-libs-integrations)** - Material Design styling
+- **[Material Integration](/configuration)** - Material Design styling

@@ -1,7 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { DefaultUrlSerializer, UrlTree } from '@angular/router';
-import { isAdapterName } from '@ng-forge/sandbox-harness';
+import { AdapterName } from '@ng-forge/sandbox-harness';
+
+const DOCS_ADAPTER_NAMES = new Set<string>(['material', 'bootstrap', 'primeng', 'ionic', 'custom']);
+const isDocsAdapter = (v: string): v is AdapterName => DOCS_ADAPTER_NAMES.has(v);
 
 /**
  * URL serializer that transparently prepends the active adapter prefix to bare ng-doc paths.
@@ -28,7 +31,7 @@ export class AdapterAwareUrlSerializer extends DefaultUrlSerializer {
     const firstSegment = path.split('/')[1];
 
     // Already has a valid adapter prefix — leave it alone
-    if (firstSegment && isAdapterName(firstSegment)) {
+    if (firstSegment && isDocsAdapter(firstSegment)) {
       return url;
     }
 
@@ -38,6 +41,6 @@ export class AdapterAwareUrlSerializer extends DefaultUrlSerializer {
   private currentAdapter(): string {
     const pathname = this.document.location?.pathname ?? '/';
     const seg = pathname.split('/')[1];
-    return isAdapterName(seg) ? seg : 'material';
+    return isDocsAdapter(seg) ? seg : 'material';
   }
 }

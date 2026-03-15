@@ -507,16 +507,16 @@ export default class IonicCheckboxComponent {
 
 See complete integrations:
 
-- [Material Design](/ui-libs-integrations) - Full Material implementation with 12+ field types
-- [Bootstrap](/ui-libs-integrations)
-- [PrimeNG](/ui-libs-integrations)
-- [Ionic](/ui-libs-integrations)
+- [Material Design](/configuration) - Full Material implementation with 12+ field types
+- [Bootstrap](/configuration)
+- [PrimeNG](/configuration)
+- [Ionic](/configuration)
 
 The Material integration source code is the most comprehensive example of implementing custom field types.
 
 ## Related Topics
 
-- **[Material Integration](/ui-libs-integrations)** - Complete reference implementation
+- **[Material Integration](/configuration)** - Complete reference implementation
 - **[Field Types](/field-types/text-inputs)** - Understanding all available field types
 - **[Type Safety](/advanced/basics)** - Module augmentation for custom types
 - **[Validation](../validation/basics)** - Displaying validation errors in custom fields

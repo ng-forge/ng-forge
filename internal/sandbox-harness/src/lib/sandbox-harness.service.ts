@@ -223,6 +223,12 @@ export class SandboxHarness implements OnDestroy {
     // ShadowDomRenderer. We inject it to prevent sub-app styles from leaking into document.head.
     // If Angular removes this API, a MutationObserver-based style-mirroring fallback is needed.
     const stylesHost = appRef.injector.get(SharedStylesHost, null);
+    if (!stylesHost) {
+      console.warn(
+        '[SandboxHarness] ɵSharedStylesHost not available — sub-app styles may leak into document.head. ' +
+          'This can happen after an Angular version upgrade that removes the internal API.',
+      );
+    }
     if (stylesHost) {
       stylesHost.removeHost(this.document.head);
       stylesHost.addHost(shadowRoot);
@@ -277,10 +283,13 @@ export class SandboxHarness implements OnDestroy {
 
   private async injectIntoShadow(registration: AdapterRegistration, shadowRoot: ShadowRoot, abortSignal?: AbortSignal): Promise<void> {
     if (!this.cssCache.has(registration.stylesheetUrl)) {
-      this.cssCache.set(
-        registration.stylesheetUrl,
-        fetch(registration.stylesheetUrl, { signal: abortSignal }).then((r) => r.text()),
-      );
+      const load = fetch(registration.stylesheetUrl, { signal: abortSignal })
+        .then((r) => r.text())
+        .catch((err) => {
+          this.cssCache.delete(registration.stylesheetUrl);
+          throw err;
+        });
+      this.cssCache.set(registration.stylesheetUrl, load);
     }
     const rawCss = await this.cssCache.get(registration.stylesheetUrl)!;
 

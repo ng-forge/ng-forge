@@ -20,10 +20,10 @@ Library-level → Form-level → Field-level
 
 ## Field-level Props
 
-Each field type also accepts its own adapter-specific `props`. See [Field Types →](/schema-fields/field-types/text-inputs) for the full per-field reference.
+Each field type also accepts its own adapter-specific `props`. See [Field Types →](/field-types/text-inputs) for the full per-field reference.
 
 ## Next Steps
 
 - **[Examples →](/examples)** — Browse complete form examples
-- **[Field Types →](/schema-fields/field-types/text-inputs)** — Per-field adapter props reference
+- **[Field Types →](/field-types/text-inputs)** — Per-field adapter props reference
 - **[Building an Adapter →](/building-an-adapter)** — Build your own adapter

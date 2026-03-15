@@ -2,8 +2,9 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { NgDocCopyButtonComponent } from '@ng-doc/app/components/copy-button';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
+import type { AdapterName } from '@ng-forge/sandbox-harness';
 
-type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic';
+type UiAdapterName = Exclude<AdapterName, 'custom'>;
 type FieldType = 'input' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'toggle' | 'multi-checkbox' | 'slider' | 'datepicker';
 
 interface AdapterProp {
@@ -12,7 +13,7 @@ interface AdapterProp {
   description: string;
 }
 
-type AdapterPropsData = Record<FieldType, Record<AdapterName, AdapterProp[]>>;
+type AdapterPropsData = Record<FieldType, Record<UiAdapterName, AdapterProp[]>>;
 
 const ADAPTER_PROPS_DATA: AdapterPropsData = {
   input: {
@@ -298,7 +299,7 @@ export class DocsAdapterPropsComponent {
   readonly props = computed(() => {
     if (this.isCustomAdapter()) return [];
     const fieldType = this.field() as FieldType;
-    const adapter = this.activeAdapter.adapter() as AdapterName;
+    const adapter = this.activeAdapter.adapter() as UiAdapterName;
     return ADAPTER_PROPS_DATA[fieldType]?.[adapter] ?? [];
   });
 
