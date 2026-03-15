@@ -212,8 +212,8 @@ const schema = type({ email: 'email' });
 const config = { schema: standardSchema(schema), fields: [...] };
 ```
 
-## Related
+## Next Steps
 
-- **[Schema Validation Overview](../overview)** - When to use form-level validation
-- **[Angular Schema](../angular-schema)** - Native Angular approach without dependencies
-- **[Field Validation](../../validation/basics/)** - Individual field validators
+- **[Angular Schema →](/schema-validation/angular-schema)** — Native Angular approach without additional dependencies
+- **[Field Validation →](/validation/basics)** — Add built-in and custom validators to individual fields
+- **[Schema Validation Overview →](/schema-validation/overview)** — Compare Angular and Standard Schema approaches

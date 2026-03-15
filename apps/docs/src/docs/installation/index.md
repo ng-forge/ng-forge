@@ -1,3 +1,21 @@
+ng-forge turns JSON-like configuration into fully working Angular forms — with validation, conditional logic, and multi-step wizards built in. You write a `FormConfig` object, and ng-forge handles rendering, state management, and reactivity.
+
+Here's the core idea — a single object becomes a complete form:
+
+```typescript
+const config: FormConfig = {
+  fields: [
+    { key: 'name', type: 'input', label: 'Your Name', required: true },
+    { key: 'email', type: 'input', label: 'Email', email: true },
+    { key: 'submit', type: 'submit', label: 'Send' },
+  ],
+};
+```
+
+That's it. No `FormGroup`, no `FormControl`, no template boilerplate. Pick your UI library below to get started.
+
+---
+
 Get ng-forge dynamic forms up and running in your Angular project.
 
 ## Choose Your UI Library

@@ -283,3 +283,9 @@ label: this.myTranslationService.translate('key'); // Observable<string> or Sign
 ```
 
 The key is that your translation method returns `Observable<string>` or `Signal<string>`.
+
+## Next Steps
+
+- **[Form Submission →](/dynamic-behavior/submission)** — Configure async submission with loading states and server error handling
+- **[Conditional Logic →](/dynamic-behavior/overview)** — Show, hide, and disable fields based on form state
+- **[Value Derivation →](/dynamic-behavior/value-derivation/basics)** — Automatically compute field values from other fields

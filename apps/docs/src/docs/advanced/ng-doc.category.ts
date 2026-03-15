@@ -1,7 +1,7 @@
 import { NgDocCategory } from '@ng-doc/core';
 
 const RecipesCategory: NgDocCategory = {
-  title: 'Recipes',
+  title: 'Advanced',
   order: 9,
   expandable: true,
 };

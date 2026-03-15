@@ -334,3 +334,9 @@ The expression parser lets you write flexible conditional logic while preventing
 2. **Methods are restricted** - Only safe, non-mutating methods allowed
 3. **Prototype is protected** - Can't access dangerous properties
 4. **Custom functions supported** - Register pure functions for reusable logic
+
+## Next Steps
+
+- **[Conditional Logic →](/dynamic-behavior/overview)** — Use expressions to control field visibility and state
+- **[Type Safety →](/advanced/basics)** — Leverage TypeScript inference for form values and field types
+- **[Value Derivation →](/dynamic-behavior/value-derivation/basics)** — Use expressions to compute field values dynamically
