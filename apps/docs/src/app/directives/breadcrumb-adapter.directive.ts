@@ -47,13 +47,20 @@ export class BreadcrumbAdapterDirective {
     const breadcrumbs: HTMLElement[] = Array.from(this.el.nativeElement.querySelectorAll(BREADCRUMB_SELECTOR));
 
     for (const bc of breadcrumbs) {
-      // Skip if we already injected
+      // Update if we already injected
       if (bc.querySelector(`.${ADAPTER_CRUMB_CLASS}`)) {
-        // Update text if adapter changed
         const existing = bc.querySelector(`.${ADAPTER_CRUMB_CLASS}`) as HTMLElement;
         const adapterInfo = this.activeAdapter.adapters.find((a) => a.name === this.activeAdapter.adapter());
-        if (existing && adapterInfo && existing.textContent?.trim() !== adapterInfo.label) {
-          existing.textContent = adapterInfo.label;
+        if (existing && adapterInfo) {
+          const icon = existing.querySelector('.adapter-breadcrumb-icon') as HTMLImageElement;
+          const label = existing.querySelector('span') as HTMLElement;
+          if (icon) {
+            icon.src = adapterInfo.icon;
+            icon.alt = adapterInfo.label;
+          }
+          if (label) {
+            label.textContent = adapterInfo.label;
+          }
         }
         continue;
       }
