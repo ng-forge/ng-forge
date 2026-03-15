@@ -239,8 +239,8 @@
   font-size: 0.58rem;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: var(--ng-doc-base-5);
-  background: var(--ng-doc-base-2);
+  color: $bg-deep;
+  background: $ember-glow;
   padding: 0.1rem 0.25rem;
   border-radius: 3px;
 }

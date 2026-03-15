@@ -35,7 +35,9 @@ import { AdapterName } from '@ng-forge/sandbox-harness';
               >
                 <img [src]="adapter.icon" [alt]="adapter.label" class="option-icon" />
                 <span class="option-name">{{ adapter.label }}</span>
-                <span class="option-preview">PREVIEW</span>
+                @if (adapter.name !== 'custom') {
+                  <span class="option-preview">PREVIEW</span>
+                }
                 <span class="option-check" [style.visibility]="activeAdapter.adapter() === adapter.name ? 'visible' : 'hidden'"></span>
               </button>
             }
