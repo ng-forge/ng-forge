@@ -10,20 +10,41 @@
   &__section {
     display: flex;
     flex-direction: column;
-    gap: $space-4;
+    gap: $space-3;
   }
 
   &__heading {
     font-size: $text-base;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--ng-doc-text, #{$steel});
     margin: 0;
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+
+    &::before {
+      content: '';
+      width: 3px;
+      height: 1em;
+      background: $ember-core;
+      border-radius: 2px;
+    }
   }
 
   &__desc {
-    color: var(--text-secondary);
+    color: var(--ng-doc-text-muted, #{$steel-mid});
     margin: 0;
     font-size: $text-sm;
+    line-height: 1.6;
+
+    code {
+      font-family: $font-mono;
+      font-size: 0.8125rem;
+      color: $ember-glow;
+      background: var(--ng-doc-base-1, #{$bg-surface});
+      padding: 0.125rem 0.375rem;
+      border-radius: $radius-sm;
+    }
 
     a {
       @include mix.link-inline;
@@ -44,24 +65,29 @@
 
   &__table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: $text-sm;
+    border: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+    border-radius: $radius-lg;
+    overflow: hidden;
 
     th {
       text-align: left;
       padding: $space-2 $space-3;
-      border-bottom: 1px solid var(--border);
-      color: var(--text-secondary);
+      background: var(--ng-doc-base-1, #{$bg-surface});
+      color: var(--ng-doc-text-muted, #{$steel-mid});
       font-weight: 600;
       font-size: $text-xs;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--ng-doc-border-color, #{$steel-dark});
     }
 
     td {
       padding: $space-2 $space-3;
-      border-bottom: 1px solid var(--border);
-      color: var(--text-primary);
+      border-bottom: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+      color: var(--ng-doc-text, #{$steel});
       vertical-align: top;
 
       code {
@@ -71,8 +97,18 @@
       }
     }
 
+    // First column (option name) — nowrap
+    td:first-child code {
+      white-space: nowrap;
+    }
+
     tr:last-child td {
       border-bottom: none;
+    }
+
+    // Subtle hover on rows
+    tbody tr:hover {
+      background: var(--ng-doc-base-1, rgba($bg-surface, 0.5));
     }
   }
 }
