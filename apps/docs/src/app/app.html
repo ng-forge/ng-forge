@@ -1,7 +1,7 @@
 @if (isLandingPage()) {
 <router-outlet />
 } @else {
-<ng-doc-root class="docs">
+<ng-doc-root class="docs" adapterLinkInterceptor>
   <ng-doc-navbar>
     <a routerLink="/" class="navbar-logo" ngDocNavbarLeft>
       <app-logo size="lg" />

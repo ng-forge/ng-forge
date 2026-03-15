@@ -10,6 +10,7 @@ import { NgDocButtonIconComponent, NgDocIconComponent, NgDocTooltipDirective } f
 import { Logo } from './components/logo';
 import { SidebarAccordionDirective } from './directives/sidebar-accordion.directive';
 import { SidebarActiveLinkDirective } from './directives/sidebar-active-link.directive';
+import { AdapterLinkInterceptorDirective } from './directives/adapter-link-interceptor.directive';
 import { AdapterSubBarComponent } from './components/adapter-sub-bar/adapter-sub-bar.component';
 import { ActiveAdapterService } from './services/active-adapter.service';
 
@@ -42,6 +43,7 @@ function storageValueToTheme(value: string | null): string | undefined {
     Logo,
     SidebarAccordionDirective,
     SidebarActiveLinkDirective,
+    AdapterLinkInterceptorDirective,
     AdapterSubBarComponent,
   ],
   selector: 'app-root',

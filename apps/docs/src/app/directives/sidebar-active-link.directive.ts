@@ -8,20 +8,15 @@ const LINK_SELECTOR = 'a.ng-doc-sidebar-link';
 const ACTIVE_CLASS = 'active';
 
 /**
- * Manages sidebar link navigation and active-state highlighting.
+ * Manages sidebar active-link highlighting.
  *
- * ng-doc sidebar links use bare paths (e.g. `/configuration`) but the app uses
- * adapter-prefixed URLs (`/material/configuration`). After SSR hydration the
- * `RouterLink` directives are not fully initialised, causing two issues:
+ * ng-doc's `routerLinkActive` doesn't work with adapter-prefixed URLs because
+ * sidebar links use bare paths (e.g. `/configuration`) while the browser URL
+ * includes the adapter prefix (`/material/configuration`). After SSR hydration
+ * `RouterLink` directives are also not fully initialised.
  *
- * 1. `routerLinkActive` never highlights the active link
- * 2. Click navigation resolves to wrong routes (e.g. getting-started instead of
- *    the target page) because RouterLink's internal urlTree lacks the adapter prefix
- *
- * This directive fixes both by:
- * - Intercepting clicks on sidebar links and navigating with the correct
- *   adapter-prefixed URL via `router.navigateByUrl()`
- * - Toggling the `active` CSS class based on URL comparison
+ * This directive compares each sidebar link's `href` against the current URL
+ * (stripping the adapter prefix) and toggles the `active` class directly.
  */
 @Directive({
   selector: 'ng-doc-sidebar[sidebarActiveLink]',
@@ -36,16 +31,12 @@ export class SidebarActiveLinkDirective {
     if (!isPlatformBrowser(inject(PLATFORM_ID))) return;
 
     afterNextRender(() => {
-      // Intercept sidebar link clicks to navigate with adapter-prefixed URLs.
-      this.el.nativeElement.addEventListener('click', (e: MouseEvent) => this.handleClick(e));
-
       // ng-doc re-renders sidebar links after navigation, replacing DOM elements.
-      const observer = new MutationObserver(() => this.syncActiveState());
+      const observer = new MutationObserver(() => this.sync());
       observer.observe(this.el.nativeElement, { childList: true, subtree: true });
       this.destroyRef.onDestroy(() => observer.disconnect());
 
-      // Initial sync after hydration.
-      requestAnimationFrame(() => this.syncActiveState());
+      requestAnimationFrame(() => this.sync());
     });
 
     this.router.events
@@ -53,26 +44,10 @@ export class SidebarActiveLinkDirective {
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(() => requestAnimationFrame(() => this.syncActiveState()));
+      .subscribe(() => requestAnimationFrame(() => this.sync()));
   }
 
-  private handleClick(e: MouseEvent): void {
-    const anchor = (e.target as HTMLElement).closest(LINK_SELECTOR) as HTMLAnchorElement | null;
-    if (!anchor) return;
-
-    const href = anchor.getAttribute('href');
-    if (!href || !href.startsWith('/')) return;
-
-    // Prevent the default RouterLink/browser navigation
-    e.preventDefault();
-    e.stopPropagation();
-
-    // Navigate with the adapter-prefixed URL
-    const adapter = this.currentAdapter();
-    void this.router.navigateByUrl(`/${adapter}${href}`);
-  }
-
-  private syncActiveState(): void {
+  private sync(): void {
     const url = this.router.url || this.doc.location?.pathname || '/';
     const currentPath = url.split(/[?#]/)[0];
     const links: HTMLAnchorElement[] = Array.from(this.el.nativeElement.querySelectorAll(LINK_SELECTOR));
@@ -85,11 +60,5 @@ export class SidebarActiveLinkDirective {
       if (!href) continue;
       link.classList.toggle(ACTIVE_CLASS, pathWithoutAdapter === href);
     }
-  }
-
-  private currentAdapter(): string {
-    const pathname = this.doc.location?.pathname ?? '/';
-    const seg = pathname.split('/')[1];
-    return seg || 'material';
   }
 }
