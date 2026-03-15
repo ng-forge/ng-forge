@@ -14,33 +14,48 @@
     margin: 0 0 $space-4;
   }
 
-  &__features-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: max-content 1fr;
-    gap: $space-2 $space-4;
-    align-items: baseline;
-  }
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+    border-radius: $radius-lg;
+    overflow: hidden;
+    font-size: $text-sm;
 
-  &__feature {
-    display: contents;
+    th,
+    td {
+      padding: $space-2 $space-3;
+      text-align: left;
+      border-bottom: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--ng-doc-text, #{$steel});
+      background: var(--ng-doc-base-1, #{$bg-surface});
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
   }
 
   &__feature-name {
     font-family: $font-mono;
     font-size: $text-sm;
     color: $ember-glow;
+    white-space: nowrap;
   }
 
   &__feature-desc {
-    font-size: $text-sm;
-    color: var(--text-secondary);
+    color: var(--ng-doc-text-muted, #{$steel-mid});
   }
 
   &__code {
-    @include mix.code-block;
+    background: var(--ng-doc-code-background, #{$bg-deep});
+    border: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+    border-radius: $radius-lg;
+    overflow: hidden;
     padding: $space-2 $space-4;
 
     // pre is rendered by the codeHighlight directive — pierce encapsulation

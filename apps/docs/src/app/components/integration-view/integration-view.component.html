@@ -22,13 +22,23 @@
 
   <section class="integration-view__features">
     <h2 class="integration-view__heading">{{ data().featuresTitle }}</h2>
-    <ul class="integration-view__features-list">
-      @for (feature of data().features; track feature.name) {
-        <li class="integration-view__feature">
-          <code class="integration-view__feature-name">{{ feature.name }}</code>
-          <span class="integration-view__feature-desc">{{ feature.description }}</span>
-        </li>
-      }
-    </ul>
+    <table class="integration-view__table">
+      <thead>
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (feature of data().features; track feature.name) {
+          <tr>
+            <td>
+              <code class="integration-view__feature-name">{{ feature.name }}</code>
+            </td>
+            <td class="integration-view__feature-desc">{{ feature.description }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
   </section>
 </div>
