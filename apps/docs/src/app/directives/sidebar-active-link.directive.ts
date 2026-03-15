@@ -8,13 +8,16 @@ const LINK_SELECTOR = 'a.ng-doc-sidebar-link';
 const ACTIVE_CLASS = 'active';
 
 /**
- * Fixes sidebar active-link highlighting on initial page load.
+ * Manages sidebar active-link highlighting.
  *
- * ng-doc's sidebar uses `routerLinkActive="active"` on links whose hrefs lack
- * the `/:adapter` prefix (e.g. `/configuration`). After SSR hydration the
- * `RouterLink` directive is not fully initialised, so `routerLinkActive` never
- * fires on the first render. This directive patches the gap by comparing each
- * link's `href` against the current URL and toggling the `active` class.
+ * ng-doc's `routerLinkActive` doesn't work with adapter-prefixed URLs because
+ * sidebar links use bare paths (e.g. `/configuration`) while the browser URL
+ * includes the adapter prefix (`/material/configuration`). After SSR hydration
+ * `RouterLink` directives are also not fully initialised.
+ *
+ * This directive compares each sidebar link's `href` against the current URL
+ * (stripping the adapter prefix) and toggles the `active` class directly.
+ * It handles initial page load, SPA navigation, and ng-doc sidebar re-renders.
  */
 @Directive({
   selector: 'ng-doc-sidebar[sidebarActiveLink]',
@@ -28,36 +31,33 @@ export class SidebarActiveLinkDirective {
   constructor() {
     if (!isPlatformBrowser(inject(PLATFORM_ID))) return;
 
-    // After hydration, sync active state using the browser URL (router.url may
-    // not be resolved yet). We observe childList mutations because ng-doc may
-    // re-render the sidebar after initial hydration.
     afterNextRender(() => {
-      const observer = new MutationObserver(() => this.syncFromLocation());
+      // ng-doc re-renders sidebar links after navigation, replacing DOM elements.
+      // A MutationObserver ensures we re-apply the active class on new elements.
+      const observer = new MutationObserver(() => this.sync());
       observer.observe(this.el.nativeElement, { childList: true, subtree: true });
       this.destroyRef.onDestroy(() => observer.disconnect());
 
-      // Initial sync — use requestAnimationFrame to let the router and
-      // ng-doc change detection settle after hydration.
-      requestAnimationFrame(() => this.syncFromLocation());
+      // Initial sync after hydration — use rAF to let ng-doc settle.
+      requestAnimationFrame(() => this.sync());
     });
 
-    // On SPA navigation, sync using the router URL.
+    // On SPA navigation, wait for ng-doc to finish re-rendering (rAF),
+    // then sync using the now-current router URL.
     this.router.events
       .pipe(
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(() => this.syncLinks(this.router.url));
+      .subscribe(() => requestAnimationFrame(() => this.sync()));
   }
 
-  private syncFromLocation(): boolean {
-    return this.syncLinks(this.doc.location?.pathname ?? '/');
-  }
-
-  private syncLinks(url: string): boolean {
+  private sync(): void {
+    // Prefer router URL (authoritative after SPA navigation), fall back to
+    // browser location (works during initial hydration before router settles).
+    const url = this.router.url || this.doc.location?.pathname || '/';
     const currentPath = url.split(/[?#]/)[0];
     const links: HTMLAnchorElement[] = Array.from(this.el.nativeElement.querySelectorAll(LINK_SELECTOR));
-    if (links.length === 0) return false;
 
     // Sidebar href: "/configuration", browser URL: "/material/configuration".
     const segments = currentPath.split('/');
@@ -68,6 +68,5 @@ export class SidebarActiveLinkDirective {
       if (!href) continue;
       link.classList.toggle(ACTIVE_CLASS, pathWithoutAdapter === href);
     }
-    return true;
   }
 }
