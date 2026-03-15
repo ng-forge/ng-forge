@@ -5,7 +5,7 @@ const ExamplesIndexPage: NgDocPage = {
   title: 'Examples',
   mdFile: './index.md',
   route: 'examples',
-  order: 4,
+  order: 3,
   demos: {
     ExamplesIndexComponent,
   },

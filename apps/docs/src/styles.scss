@@ -1343,3 +1343,27 @@ html[data-theme='dark'] pre.shiki span {
     font-weight: var(--shiki-dark-font-weight, normal);
   }
 }
+
+// ============================================
+// BREADCRUMB ADAPTER CHIP
+// ============================================
+.adapter-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: $ember-core;
+}
+
+.adapter-breadcrumb-icon {
+  vertical-align: middle;
+  border-radius: 2px;
+}
+
+.adapter-breadcrumb-sep {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  color: var(--ng-doc-base-4);
+  margin: 0 2px;
+}

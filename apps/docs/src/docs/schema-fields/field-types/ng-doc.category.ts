@@ -2,7 +2,7 @@ import { NgDocCategory } from '@ng-doc/core';
 
 const FieldTypesCategory: NgDocCategory = {
   title: 'Field Types',
-  order: 3,
+  order: 4,
   expandable: true,
 };
 
