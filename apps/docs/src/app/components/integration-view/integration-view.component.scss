@@ -41,11 +41,12 @@
 
   &__code {
     @include mix.code-block;
-    padding: 0;
+    padding: $space-2 $space-4;
 
-    pre {
+    // pre is rendered by the codeHighlight directive — pierce encapsulation
+    // to override the browser default margin (24px).
+    ::ng-deep pre {
       margin: 0;
-      padding: $space-2 $space-3;
     }
   }
 }
