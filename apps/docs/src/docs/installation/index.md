@@ -12,49 +12,21 @@ Select the UI library you're using — the setup guide below will update to matc
 
 ## Your First Form
 
-All adapters share the same `FormConfig` schema. Here's a login form that works regardless of which adapter you chose above:
+All adapters share the same `FormConfig` schema — just import `DynamicForm` and bind your config:
 
-<docs-live-example scenario="examples/login" hideForCustom></docs-live-example>
-
-```typescript name="login.component.ts"
-import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
-
+```typescript
 @Component({
-  selector: 'app-login',
   imports: [DynamicForm],
   template: `<form [dynamic-form]="config"></form>`,
 })
 export class LoginComponent {
-  config = {
-    fields: [
-      {
-        key: 'email',
-        type: 'input',
-        value: '',
-        label: 'Email',
-        required: true,
-        email: true,
-        props: { type: 'email' },
-      },
-      {
-        key: 'password',
-        type: 'input',
-        value: '',
-        label: 'Password',
-        required: true,
-        minLength: 8,
-        props: { type: 'password' },
-      },
-      {
-        key: 'submit',
-        type: 'submit',
-        label: 'Sign In',
-      },
-    ],
-  } as const satisfies FormConfig;
+  config = { fields: [...] } as const satisfies FormConfig;
 }
 ```
+
+Here's a login form that works with any adapter — switch the "Config" tab to see the full schema:
+
+<docs-live-example scenario="examples/login" hideForCustom></docs-live-example>
 
 ## Requirements
 
