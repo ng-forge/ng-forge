@@ -5,7 +5,7 @@
 .config-view {
   display: flex;
   flex-direction: column;
-  gap: $space-8;
+  gap: $space-6;
 
   &__section {
     display: flex;
@@ -31,8 +31,15 @@
   }
 
   &__code {
-    @include mix.code-block;
-    padding: $space-4;
+    background: var(--ng-doc-code-background, #{$bg-deep});
+    border: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+    border-radius: $radius-lg;
+    overflow: hidden;
+    padding: $space-2 $space-4;
+
+    ::ng-deep pre {
+      margin: 0;
+    }
   }
 
   &__table {
