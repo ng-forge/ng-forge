@@ -64,7 +64,7 @@ pnpm build:libs
 pnpm test
 
 # Start development server
-pnpm serve:all
+pnpm serve:docs
 ```
 
 ### IDE Setup
