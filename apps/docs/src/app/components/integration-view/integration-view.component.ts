@@ -143,7 +143,7 @@ export const appConfig: ApplicationConfig = {
 
 @Component({
   selector: 'docs-integration-view',
-  imports: [DocsInstallCommandComponent, NgDocCopyButtonComponent, CodeHighlightDirective],
+  imports: [DocsInstallCommandComponent, CodeHighlightDirective],
   templateUrl: './integration-view.component.html',
   styleUrl: './integration-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

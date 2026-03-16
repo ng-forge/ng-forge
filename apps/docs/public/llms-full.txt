@@ -85,6 +85,12 @@ const config = {
 
 If you need a completely custom adapter (no existing adapter as base), or want to implement the config cascade (`defaultProps`) for your custom fields, see the full [Custom Integrations →](/custom-integrations) guide.
 
+## Next Steps
+
+- **[Custom Integrations →](/custom-integrations)** — Build a complete adapter for any UI library from scratch
+- **[Type Safety →](/advanced/basics)** — Leverage TypeScript inference for form values and field types
+- **[Events →](/advanced/events)** — Dispatch and subscribe to form events from custom field components
+
 --- advanced/custom-integrations ---
 
 Create custom UI integrations for ng-forge dynamic forms using any component library or design system.
@@ -1078,6 +1084,12 @@ This is useful when you need the complete form state at the time an event occurr
 - Auto-saving on page changes
 - Analytics tracking
 
+## Next Steps
+
+- **[Form Submission →](/dynamic-behavior/submission)** — Configure async submission with loading states and server errors
+- **[Custom Fields →](/advanced/custom-fields)** — Build custom field components that use EventBus
+- **[Form Arrays →](/prebuilt/form-arrays/simplified)** — Use array events to add and remove items programmatically
+
 --- advanced/expression-parser ---
 
 Dynamic forms use expressions for conditional logic and dynamic values. When you use JavaScript expressions with `type: 'javascript'`, the expression parser evaluates them safely, preventing code injection attacks while maintaining the flexibility you need.
@@ -1416,6 +1428,12 @@ The expression parser lets you write flexible conditional logic while preventing
 2. **Methods are restricted** - Only safe, non-mutating methods allowed
 3. **Prototype is protected** - Can't access dangerous properties
 4. **Custom functions supported** - Register pure functions for reusable logic
+
+## Next Steps
+
+- **[Conditional Logic →](/dynamic-behavior/overview)** — Use expressions to control field visibility and state
+- **[Type Safety →](/advanced/basics)** — Leverage TypeScript inference for form values and field types
+- **[Value Derivation →](/dynamic-behavior/value-derivation/basics)** — Use expressions to compute field values dynamically
 
 --- advanced/type-safety/basics ---
 
@@ -2455,6 +2473,12 @@ const config: FormConfig = {
   }
 };
 ```
+
+## Next Steps
+
+- **[Form Submission →](/dynamic-behavior/submission)** — Configure async submission with automatic button disabling
+- **[Events →](/advanced/events)** — Dispatch and subscribe to form events from inside or outside the form
+- **[Conditional Logic →](/dynamic-behavior/overview)** — Control field visibility, required state, and disabled state
 
 --- ai-integration ---
 
@@ -4219,6 +4243,12 @@ label: this.myTranslationService.translate('key'); // Observable<string> or Sign
 
 The key is that your translation method returns `Observable<string>` or `Signal<string>`.
 
+## Next Steps
+
+- **[Form Submission →](/dynamic-behavior/submission)** — Configure async submission with loading states and server error handling
+- **[Conditional Logic →](/dynamic-behavior/overview)** — Show, hide, and disable fields based on form state
+- **[Value Derivation →](/dynamic-behavior/value-derivation/basics)** — Automatically compute field values from other fields
+
 --- dynamic-behavior/submission ---
 
 Form submission in dynamic forms integrates with Angular Signal Forms' native `submit()` function, providing automatic button disabling, loading states, and server error handling.
@@ -4432,6 +4462,12 @@ export class MyFormComponent {
   }
 }
 ```
+
+## Next Steps
+
+- **[Events →](/advanced/events)** — Dispatch and subscribe to form events from inside or outside the form
+- **[Schema Validation →](/schema-validation/overview)** — Add cross-field validation rules with Angular schemas or Zod
+- **[Value Exclusion →](/advanced/value-exclusion)** — Control which field values are included in submission output
 
 --- dynamic-behavior/value-derivation/basics/async-derivation ---
 
@@ -5317,11 +5353,16 @@ const config = {
 
 External data values are reactively tracked - when signals change, derivations are re-evaluated.
 
+## Next Steps
+
+- **[Conditional Logic →](/dynamic-behavior/overview)** — Control field visibility, required state, and disabled state dynamically
+- **[i18n →](/dynamic-behavior/i18n)** — Translate labels and messages with Observables and Signals
+- **[Expression Parser →](/advanced/expression-parser)** — Understand the security model behind derivation expressions
+
 ## Related
 
 - **Property Derivation** (see tab above) — Derive component properties (minDate, options, label) from form values
 - **Async Derivation** (see tab above) — HTTP and async function derivations, stopOnUserOverride
-- **[Conditional Logic](/dynamic-behavior/overview)** — Control field visibility and state
 - **[Array Fields](../../prebuilt/form-arrays/simplified/)** — Working with array fields
 - **[Examples](/examples)** — Real-world form patterns
 
@@ -8972,6 +9013,24 @@ taxRate ───────────────────┴────
 
 --- installation ---
 
+ng-forge turns JSON-like configuration into fully working Angular forms — with validation, conditional logic, and multi-step wizards built in. You write a `FormConfig` object, and ng-forge handles rendering, state management, and reactivity.
+
+Here's the core idea — a single object becomes a complete form:
+
+```typescript
+const config: FormConfig = {
+  fields: [
+    { key: 'name', type: 'input', label: 'Your Name', required: true },
+    { key: 'email', type: 'input', label: 'Email', email: true },
+    { key: 'submit', type: 'submit', label: 'Send' },
+  ],
+};
+```
+
+That's it. No `FormGroup`, no `FormControl`, no template boilerplate. Pick your UI library below to get started.
+
+---
+
 Get ng-forge dynamic forms up and running in your Angular project.
 
 ## Choose Your UI Library
@@ -8986,49 +9045,21 @@ Select the UI library you're using — the setup guide below will update to matc
 
 ## Your First Form
 
-All adapters share the same `FormConfig` schema. Here's a login form that works regardless of which adapter you chose above:
+All adapters share the same `FormConfig` schema — just import `DynamicForm` and bind your config:
 
-<docs-live-example scenario="examples/login" hideForCustom></docs-live-example>
-
-```typescript name="login.component.ts"
-import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
-
+```typescript
 @Component({
-  selector: 'app-login',
   imports: [DynamicForm],
   template: `<form [dynamic-form]="config"></form>`,
 })
 export class LoginComponent {
-  config = {
-    fields: [
-      {
-        key: 'email',
-        type: 'input',
-        value: '',
-        label: 'Email',
-        required: true,
-        email: true,
-        props: { type: 'email' },
-      },
-      {
-        key: 'password',
-        type: 'input',
-        value: '',
-        label: 'Password',
-        required: true,
-        minLength: 8,
-        props: { type: 'password' },
-      },
-      {
-        key: 'submit',
-        type: 'submit',
-        label: 'Sign In',
-      },
-    ],
-  } as const satisfies FormConfig;
+  config = { fields: [...] } as const satisfies FormConfig;
 }
 ```
+
+Here's a login form that works with any adapter — switch the "Config" tab to see the full schema:
+
+<docs-live-example scenario="examples/login" hideForCustom></docs-live-example>
 
 ## Requirements
 
@@ -9039,10 +9070,10 @@ export class LoginComponent {
 
 ## Next Steps
 
-- **[Configuration →](/configuration)** — Set global defaults with `withXxxFields({ ... })` and per-form `defaultProps`
-- **[Examples →](/examples)** — Browse complete form examples
-- **[Field Types →](/field-types/text-inputs)** — All available field types and their props
-- **[Building an Adapter →](/building-an-adapter)** — Create your own adapter for any UI library
+- **[Configuration](/configuration)** — Set global defaults with `withXxxFields({ ... })` and per-form `defaultProps`
+- **[Examples](/examples)** — Browse complete form examples
+- **[Field Types](/field-types/text-inputs)** — All available field types and their props
+- **[Building an Adapter](/building-an-adapter)** — Create your own adapter for any UI library
 
 --- prebuilt/form-arrays/complete ---
 
@@ -10131,6 +10162,12 @@ When the group is hidden, all its nested fields are hidden with it. Only `'hidde
 
 For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).
 
+## Next Steps
+
+- **[Form Rows →](/prebuilt/form-rows)** — Arrange fields side-by-side in horizontal layouts
+- **[Form Pages →](/prebuilt/form-pages)** — Build multi-step wizard forms with page navigation
+- **[Form Arrays →](/prebuilt/form-arrays/simplified)** — Create repeating sections with dynamic add/remove
+
 --- prebuilt/form-pages ---
 
 Create multi-step forms by using page fields. When your form contains page fields, it automatically enters "paged mode" and renders with navigation controls.
@@ -10328,6 +10365,12 @@ Page fields use these classes for styling:
 - `.df-page-visible` - Applied to the currently visible page
 - `.df-page-hidden` - Applied to hidden pages
 - `.df-page-field` - Applied to the page field component
+
+## Next Steps
+
+- **[Form Arrays →](/prebuilt/form-arrays/simplified)** — Create repeating sections with add/remove controls
+- **[Dynamic Behavior →](/dynamic-behavior/overview)** — Conditional logic, value derivation, and form submission
+- **[Form Rows →](/prebuilt/form-rows)** — Arrange fields side-by-side within pages
 
 --- prebuilt/form-rows ---
 
@@ -10543,6 +10586,12 @@ Row containers support the `logic` property to conditionally show or hide the en
 
 Only `'hidden'` is supported as a logic type on containers. For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).
 
+## Next Steps
+
+- **[Form Groups →](/prebuilt/form-groups)** — Nest fields under a single key for structured form data
+- **[Form Arrays →](/prebuilt/form-arrays/simplified)** — Create repeating sections with add/remove controls
+- **[Form Pages →](/prebuilt/form-pages)** — Build multi-step wizard forms with page navigation
+
 --- prebuilt/hidden-fields ---
 
 Hidden fields store values in the form model without rendering any visible UI. They're useful for persisting IDs, metadata, or other non-user-facing data.
@@ -10727,6 +10776,12 @@ See the **Value Exclusion** page under Recipes for full details.
 - **Value handling**: Uses `valueHandling: 'include'`, so values are always included in form submissions
 - **Required value**: The `value` property is required (unlike most field types where it's optional)
 
+## Next Steps
+
+- **[Text Components →](/prebuilt/text-components)** — Display static or dynamic text content in forms
+- **[Value Exclusion →](/advanced/value-exclusion)** — Control which field values are included in submission output
+- **[Field Types →](/field-types/text-inputs)** — Explore all available input field types and their props
+
 --- prebuilt/text-components ---
 
 Display static or dynamic text content in forms. Text fields are **display-only** - they don't collect user input or contribute to form values.
@@ -10858,6 +10913,12 @@ Add custom classes via the `className` property:
 - Legal disclaimers
 - Status messages
 - Informational content between form fields
+
+## Next Steps
+
+- **[Hidden Fields →](/prebuilt/hidden-fields)** — Store metadata and IDs without rendering UI
+- **[Field Types →](/field-types/text-inputs)** — Explore all available input field types and their props
+- **[i18n →](/dynamic-behavior/i18n)** — Translate text labels with Observables and Signals
 
 --- schema-fields/field-types/advanced-controls ---
 
@@ -11532,11 +11593,11 @@ Consider [Standard Schema (Zod)](../zod) if you:
 - Want automatic TypeScript type inference from schemas
 - Are using OpenAPI-generated schemas
 
-## Related
+## Next Steps
 
-- **[Schema Validation Overview](../overview)** - When to use form-level validation
-- **[Standard Schema (Zod)](../zod)** - Alternative using Zod/Valibot
-- **[Field Validation](../../validation/basics/)** - Individual field validators
+- **[Standard Schema (Zod) →](/schema-validation/zod)** — Use Zod, Valibot, or ArkType for cross-platform schema validation
+- **[Field Validation →](/validation/basics)** — Add built-in and custom validators to individual fields
+- **[Schema Validation Overview →](/schema-validation/overview)** — Compare Angular and Standard Schema approaches
 
 --- schema-validation/overview ---
 
@@ -11860,11 +11921,11 @@ const schema = type({ email: 'email' });
 const config = { schema: standardSchema(schema), fields: [...] };
 ```
 
-## Related
+## Next Steps
 
-- **[Schema Validation Overview](../overview)** - When to use form-level validation
-- **[Angular Schema](../angular-schema)** - Native Angular approach without dependencies
-- **[Field Validation](../../validation/basics/)** - Individual field validators
+- **[Angular Schema →](/schema-validation/angular-schema)** — Native Angular approach without additional dependencies
+- **[Field Validation →](/validation/basics)** — Add built-in and custom validators to individual fields
+- **[Schema Validation Overview →](/schema-validation/overview)** — Compare Angular and Standard Schema approaches
 
 --- ui-libs-integrations ---
 
@@ -11874,13 +11935,7 @@ Configure global defaults for all forms at provider level, or per-form via `defa
 
 ng-forge applies props in priority order — more specific always wins:
 
-```
-Library-level → Form-level → Field-level
-```
-
-- **Library-level**: `withXxxFields({ appearance: 'outline' })` — applies to every form in your app
-- **Form-level**: `defaultProps: { appearance: 'fill' }` — overrides library defaults for one form
-- **Field-level**: `props: { appearance: 'outline' }` — overrides everything for one field
+<docs-cascade-visual></docs-cascade-visual>
 
 ---
 
@@ -11890,13 +11945,13 @@ Library-level → Form-level → Field-level
 
 ## Field-level Props
 
-Each field type also accepts its own adapter-specific `props`. See [Field Types →](/field-types/text-inputs) for the full per-field reference.
+Each field type also accepts its own adapter-specific `props`. See [Field Types](/field-types/text-inputs) for the full per-field reference.
 
 ## Next Steps
 
-- **[Examples →](/examples)** — Browse complete form examples
-- **[Field Types →](/field-types/text-inputs)** — Per-field adapter props reference
-- **[Building an Adapter →](/building-an-adapter)** — Build your own adapter
+- **[Examples](/examples)** — Browse complete form examples
+- **[Field Types](/field-types/text-inputs)** — Per-field adapter props reference
+- **[Building an Adapter](/building-an-adapter)** — Build your own adapter
 
 --- validation/advanced ---
 

@@ -286,7 +286,7 @@ const CUSTOM_FIELD_GUIDES: Partial<Record<string, CustomFieldGuide>> = {
   selector: 'docs-adapter-props',
   templateUrl: './adapter-props.component.html',
   styleUrl: './adapter-props.component.scss',
-  imports: [CodeHighlightDirective, NgDocCopyButtonComponent],
+  imports: [CodeHighlightDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DocsAdapterPropsComponent {

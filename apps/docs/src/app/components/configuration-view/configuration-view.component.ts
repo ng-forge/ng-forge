@@ -255,7 +255,7 @@ const config = {
 
 @Component({
   selector: 'docs-configuration-view',
-  imports: [CodeHighlightDirective, NgDocCopyButtonComponent],
+  imports: [CodeHighlightDirective],
   template: `
     <div class="config-view">
       @if (data().options.length > 0) {
