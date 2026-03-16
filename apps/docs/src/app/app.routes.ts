@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Route, Router } from '@angular/router';
+import { CONTENT_ROUTES } from './layout/content-routes';
 
 /** Adapter names valid in the docs app — includes 'custom' (a virtual adapter for docs only). */
 const DOCS_ADAPTER_NAMES = new Set(['material', 'bootstrap', 'primeng', 'ionic', 'custom']);
@@ -50,11 +51,8 @@ export const appRoutes: Route[] = [
       { path: 'installation', redirectTo: 'getting-started', pathMatch: 'full' },
       { path: 'ui-libs-integrations', redirectTo: 'configuration', pathMatch: 'full' },
       { path: 'custom-integrations', redirectTo: 'building-an-adapter', pathMatch: 'full' },
-      // Placeholder: content routes will be added in Phase 4
-      {
-        path: '**',
-        loadComponent: () => import('./pages/placeholder/placeholder.component').then((m) => m.PlaceholderComponent),
-      },
+      // Content routes
+      ...CONTENT_ROUTES,
     ],
   },
   {
