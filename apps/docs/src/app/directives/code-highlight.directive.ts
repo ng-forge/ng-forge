@@ -10,7 +10,7 @@ import { codeToHtml } from 'shiki';
   selector: '[codeHighlight]',
   host: {
     '[innerHTML]': 'html()',
-    '[style.--ng-doc-code-background]': '"transparent"',
+    '[style.--forge-code-bg]': '"transparent"',
   },
 })
 export class CodeHighlightDirective {

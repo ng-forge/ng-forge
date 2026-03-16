@@ -32,12 +32,12 @@
 
 .docs-page-nav__dir {
   font-size: 0.8125rem;
-  color: var(--ng-doc-text-muted, #{$steel-mid});
+  color: var(--forge-text-muted, #{$steel-mid});
 }
 
 .docs-page-nav__title {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--ng-doc-link-color, #{$ember-core});
+  color: var(--forge-link-color, #{$ember-core});
   transition: color 0.2s;
 }

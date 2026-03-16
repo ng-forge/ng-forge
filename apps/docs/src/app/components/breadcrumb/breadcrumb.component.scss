@@ -5,11 +5,11 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--ng-doc-base-gutter);
-  margin-bottom: calc(var(--ng-doc-base-gutter) * 2);
+  gap: var(--forge-gutter);
+  margin-bottom: calc(var(--forge-gutter) * 2);
   opacity: 0.9;
-  font-size: var(--ng-doc-font-size);
-  color: var(--ng-doc-text);
+  font-size: 0.875rem;
+  color: var(--forge-text);
 }
 
 .docs-breadcrumb {
@@ -43,6 +43,6 @@
   }
 
   &__item {
-    color: var(--ng-doc-text);
+    color: var(--forge-text);
   }
 }
