@@ -67,7 +67,7 @@
     }
   }
 
-  // ng-doc reduces all navbar controls to 34px at ≤400px — match that
+  // Navbar controls reduce to 34px at ≤400px
   @media (max-width: 400px) {
     width: 34px;
     height: 34px;

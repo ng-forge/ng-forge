@@ -7,10 +7,10 @@ const DOCS_ADAPTER_NAMES = new Set<string>(['material', 'bootstrap', 'primeng', 
 const isDocsAdapter = (v: string): v is AdapterName => DOCS_ADAPTER_NAMES.has(v);
 
 /**
- * URL serializer that transparently prepends the active adapter prefix to bare ng-doc paths.
+ * URL serializer that transparently prepends the active adapter prefix to bare paths.
  *
- * ng-doc generates absolute routes like `/getting-started` and `/schema-fields/field-types`.
- * With `/:adapter` routing these must become `/material/getting-started` etc. for Angular's
+ * Absolute routes like `/getting-started` and `/schema-fields/field-types`
+ * must become `/material/getting-started` etc. for Angular's
  * router to match them correctly — for navigation AND for `routerLinkActive` active-state detection.
  *
  * Reading the current adapter from `document.location.pathname` avoids a circular dependency:
