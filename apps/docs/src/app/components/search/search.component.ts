@@ -19,8 +19,14 @@ interface SearchResult {
       </button>
 
       @if (isOpen()) {
-        <div class="search-overlay" (click)="close()">
-          <div class="search-dialog" (click)="$event.stopPropagation()" role="dialog" aria-label="Search documentation">
+        <div class="search-overlay" (click)="close()" (keydown.escape)="close()" role="button" tabindex="-1" aria-label="Close search">
+          <div
+            class="search-dialog"
+            (click)="$event.stopPropagation()"
+            (keydown)="$event.stopPropagation()"
+            role="dialog"
+            aria-label="Search documentation"
+          >
             <input
               #searchInput
               type="text"
@@ -112,7 +118,6 @@ export class SearchComponent {
     if (this.pagefind || !this.isBrowser) return;
     try {
       // Pagefind generates its JS in the output directory
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
       this.pagefind = await new Function('return import("/pagefind/pagefind.js")')();
       await (this.pagefind as { init: () => Promise<void> }).init();
     } catch {

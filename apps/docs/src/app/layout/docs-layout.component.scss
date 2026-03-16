@@ -1,6 +1,14 @@
 $ember-glow: #ff8c42;
-$sidebar-width: 280px;
+$sidebar-width: 310px;
 $navbar-height: 72px;
+$app-max-width: 1450px;
+
+// ============================================
+// HOST — max-width centered container
+// ============================================
+:host {
+  display: block;
+}
 
 // ============================================
 // NAVBAR
@@ -12,8 +20,14 @@ $navbar-height: 72px;
   right: 0;
   height: $navbar-height;
   background: var(--forge-navbar-bg);
-  border-bottom: 1px solid var(--forge-border-color);
   z-index: 100;
+  transition: box-shadow 0.2s ease;
+
+  &.scrolled {
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.05),
+      0 1px 3px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .navbar-inner {
@@ -21,8 +35,9 @@ $navbar-height: 72px;
   align-items: center;
   justify-content: space-between;
   height: 100%;
-  max-width: 100%;
-  padding: 0 1.5rem;
+  max-width: $app-max-width;
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
 .navbar-left {
@@ -49,23 +64,9 @@ $navbar-height: 72px;
   }
 }
 
-// Menu button (mobile)
+// Menu button (mobile) — uses .icon-btn base styles
 .menu-btn {
   display: none;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--forge-border-color);
-  border-radius: 50%;
-  background: var(--forge-base-2);
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    border-color: $ember-glow;
-    background: var(--forge-base-1);
-  }
 
   @media (max-width: 1024px) {
     display: flex;
@@ -73,46 +74,26 @@ $navbar-height: 72px;
 }
 
 .menu-icon {
-  width: 18px;
-  height: 2px;
-  background: var(--forge-text);
-  position: relative;
-  transition: background 0.2s ease;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: currentColor;
+  mask-image: url('/assets/icons/menu.svg');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: url('/assets/icons/menu.svg');
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    width: 18px;
-    height: 2px;
-    background: var(--forge-text);
-    transition: transform 0.2s ease;
-  }
-
-  &::before {
-    top: -6px;
-  }
-
-  &::after {
-    top: 6px;
-  }
-
-  &.open {
-    background: transparent;
-
-    &::before {
-      top: 0;
-      transform: rotate(45deg);
-    }
-
-    &::after {
-      top: 0;
-      transform: rotate(-45deg);
-    }
+  &--open {
+    mask-image: url('/assets/icons/close.svg');
+    -webkit-mask-image: url('/assets/icons/close.svg');
   }
 }
 
-// Icon buttons (GitHub, etc.)
+// Icon buttons (GitHub, theme toggle, etc.)
 .icon-btn {
   display: flex;
   align-items: center;
@@ -145,19 +126,70 @@ $navbar-height: 72px;
 }
 
 // ============================================
+// THEME TOGGLE ICON
+// ============================================
+.theme-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: currentColor;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+
+  // Sun icon (light mode)
+  &--light {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cline x1='12' y1='1' x2='12' y2='3'/%3E%3Cline x1='12' y1='21' x2='12' y2='23'/%3E%3Cline x1='4.22' y1='4.22' x2='5.64' y2='5.64'/%3E%3Cline x1='18.36' y1='18.36' x2='19.78' y2='19.78'/%3E%3Cline x1='1' y1='12' x2='3' y2='12'/%3E%3Cline x1='21' y1='12' x2='23' y2='12'/%3E%3Cline x1='4.22' y1='19.78' x2='5.64' y2='18.36'/%3E%3Cline x1='18.36' y1='5.64' x2='19.78' y2='4.22'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cline x1='12' y1='1' x2='12' y2='3'/%3E%3Cline x1='12' y1='21' x2='12' y2='23'/%3E%3Cline x1='4.22' y1='4.22' x2='5.64' y2='5.64'/%3E%3Cline x1='18.36' y1='18.36' x2='19.78' y2='19.78'/%3E%3Cline x1='1' y1='12' x2='3' y2='12'/%3E%3Cline x1='21' y1='12' x2='23' y2='12'/%3E%3Cline x1='4.22' y1='19.78' x2='5.64' y2='18.36'/%3E%3Cline x1='18.36' y1='5.64' x2='19.78' y2='4.22'/%3E%3C/svg%3E");
+  }
+
+  // Moon icon (dark mode)
+  &--dark {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E");
+  }
+
+  // Monitor icon (auto mode)
+  &--auto {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='3' width='20' height='14' rx='2' ry='2'/%3E%3Cline x1='8' y1='21' x2='16' y2='21'/%3E%3Cline x1='12' y1='17' x2='12' y2='21'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='3' width='20' height='14' rx='2' ry='2'/%3E%3Cline x1='8' y1='21' x2='16' y2='21'/%3E%3Cline x1='12' y1='17' x2='12' y2='21'/%3E%3C/svg%3E");
+  }
+}
+
+// ============================================
+// NAV BADGE
+// ============================================
+.nav-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 16px;
+  border-radius: 4px;
+  background: rgba($ember-glow, 0.15);
+  color: $ember-glow;
+  margin-left: auto;
+}
+
+// ============================================
 // SIDEBAR
 // ============================================
 .sidebar {
   position: fixed;
   top: $navbar-height;
-  left: 0;
+  left: max(0px, calc((100vw - #{$app-max-width}) / 2));
   bottom: 0;
   width: $sidebar-width;
   background: var(--forge-sidebar-bg);
-  border-right: 1px solid var(--forge-border-color);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   z-index: 90;
-  padding: 1rem 0;
+  padding: 16px 16px;
 
   @media (max-width: 1024px) {
     transform: translateX(-100%);
@@ -186,84 +218,96 @@ $navbar-height: 72px;
   flex-direction: column;
 }
 
-// Nav links (all depths)
+// Bullet dot (SVG) — same width as chevron so text aligns
+.nav-bullet {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  color: var(--forge-base-4);
+  transition: color 0.15s ease;
+}
+
+.nav-separator {
+  display: none;
+}
+
+// Nav links (all depths) — ng-doc style with bullet dots
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 0.5rem 1.5rem;
-  color: var(--forge-text-muted);
+  gap: 8px;
+  padding: 8px 24px;
+  color: var(--forge-text);
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
   transition:
     color 0.15s ease,
     background 0.15s ease;
-  border-left: 3px solid transparent;
 
   &:hover {
-    color: var(--forge-text);
-    background: var(--forge-base-1);
+    color: var(--forge-primary);
   }
 
   &.active {
     color: var(--forge-primary);
-    border-left-color: var(--forge-primary);
-    font-weight: 600;
+    background: rgba(var(--forge-primary-rgb), 0.08);
+    border-radius: 6px;
+
+    .nav-bullet {
+      color: var(--forge-primary);
+    }
   }
 
   &.depth-1 {
-    padding-left: 2.25rem;
+    padding-left: 48px;
   }
 
   &.depth-2 {
-    padding-left: 3rem;
-    font-size: 0.8125rem;
+    padding-left: 64px;
+    font-size: 15px;
   }
 }
 
-// Category buttons
+// Category buttons — ng-doc uses › chevron, same weight as links
 .nav-category-btn,
 .nav-subcategory-btn {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   width: 100%;
-  padding: 0.5rem 1.5rem;
+  padding: 8px 24px;
   background: none;
   border: none;
-  border-left: 3px solid transparent;
   color: var(--forge-text);
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 400;
   cursor: pointer;
+  line-height: 24px;
   transition:
     color 0.15s ease,
     background 0.15s ease;
 
   &:hover {
-    background: var(--forge-base-1);
+    color: var(--forge-primary);
   }
 }
 
 .nav-subcategory-btn {
-  padding-left: 2.25rem;
-  font-weight: 500;
-  color: var(--forge-text-muted);
+  padding-left: 48px;
+  font-size: 15px;
+  color: var(--forge-text);
 }
 
+// Chevron (inline SVG) — rotates when expanded
 .chevron {
-  display: inline-block;
   width: 12px;
   height: 12px;
   flex-shrink: 0;
-  background: currentColor;
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E");
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E");
-  -webkit-mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
+  opacity: 0.5;
   transition: transform 0.2s ease;
+  order: -1;
 
   .nav-category.expanded > .nav-category-btn &,
   .nav-subcategory.expanded > .nav-subcategory-btn & {
@@ -280,12 +324,14 @@ $navbar-height: 72px;
 // ============================================
 .content {
   margin-top: $navbar-height;
-  margin-left: $sidebar-width;
+  max-width: calc(#{$app-max-width} - #{$sidebar-width});
+  margin-left: max(#{$sidebar-width}, calc((100vw - #{$app-max-width}) / 2 + #{$sidebar-width}));
   min-height: calc(100vh - #{$navbar-height});
-  padding: 2rem 3rem;
+  padding: 24px 24px;
 
   @media (max-width: 1024px) {
     margin-left: 0;
+    max-width: 100%;
     padding: 1.5rem 1rem;
   }
 }

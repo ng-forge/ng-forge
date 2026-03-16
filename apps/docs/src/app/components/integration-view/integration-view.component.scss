@@ -59,9 +59,11 @@
     padding: $space-2 $space-4;
 
     // pre is rendered by the codeHighlight directive — pierce encapsulation
-    // to override the browser default margin (24px).
+    // to strip margin, border, and padding (outer __code wrapper provides them).
     ::ng-deep pre {
       margin: 0;
+      border: none;
+      padding: 0;
     }
   }
 }

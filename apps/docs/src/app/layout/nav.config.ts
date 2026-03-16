@@ -7,6 +7,8 @@ export interface NavItem {
   children?: NavItem[];
   /** CSS class for special decoration (e.g. 'sidebar-link--ai'). */
   cssClass?: string;
+  /** Optional badge text (e.g. 'NEW'). */
+  badge?: string;
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -99,8 +101,20 @@ export const NAV_ITEMS: NavItem[] = [
     cssClass: 'sidebar-link--custom-only',
   },
   {
-    label: 'AI Integration',
+    label: 'AI Integration (MCP)',
     path: 'ai-integration',
     cssClass: 'sidebar-link--ai',
   },
 ];
+
+/** Walk NAV_ITEMS recursively and return the label for a given path, or undefined. */
+export function findNavLabel(targetPath: string, items: NavItem[] = NAV_ITEMS): string | undefined {
+  for (const item of items) {
+    if (item.path === targetPath) return item.label;
+    if (item.children) {
+      const found = findNavLabel(targetPath, item.children);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}

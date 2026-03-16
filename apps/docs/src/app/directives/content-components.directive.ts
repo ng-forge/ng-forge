@@ -1,16 +1,18 @@
 import {
-  AfterViewChecked,
   ApplicationRef,
-  ChangeDetectorRef,
   createComponent,
+  DestroyRef,
   Directive,
   ElementRef,
   EnvironmentInjector,
   inject,
   Injector,
-  OnDestroy,
+  input,
   Type,
 } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { explicitEffect } from 'ngxtension/explicit-effect';
+import { ActiveAdapterService } from '../services/active-adapter.service';
 import { LiveExampleComponent } from '../components/live-example/live-example.component';
 import { AdapterPickerComponent } from '../components/adapter-picker/adapter-picker.component';
 import { DocsIntegrationViewComponent } from '../components/integration-view/integration-view.component';
@@ -48,32 +50,51 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
 ];
 
 /**
- * Scans rendered HTML content for custom element selectors and replaces them
- * with dynamically created Angular component instances.
+ * Reactively scans rendered HTML content for custom element selectors
+ * and replaces them with dynamically created Angular component instances.
  *
- * Usage: `<div contentComponents [innerHTML]="html"></div>`
+ * Stores the original HTML so it can re-apply and reprocess when the
+ * adapter changes (same content, different dynamic component state).
+ *
+ * Usage: `<div contentComponents [contentHtml]="html"></div>`
  */
 @Directive({
   selector: '[contentComponents]',
 })
-export class ContentComponentsDirective implements AfterViewChecked, OnDestroy {
+export class ContentComponentsDirective {
   private readonly el = inject(ElementRef<HTMLElement>);
   private readonly injector = inject(Injector);
   private readonly envInjector = inject(EnvironmentInjector);
   private readonly appRef = inject(ApplicationRef);
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly activeAdapter = inject(ActiveAdapterService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly componentRefs: Array<ReturnType<typeof createComponent>> = [];
-  private lastHtml = '';
+  private originalHtml = '';
 
-  ngAfterViewChecked(): void {
-    const currentHtml = this.el.nativeElement.innerHTML;
-    if (currentHtml === this.lastHtml) return;
-    this.lastHtml = currentHtml;
-    this.processContent();
-  }
+  /** The SafeHtml content — directive applies it to innerHTML and processes dynamic components. */
+  readonly contentHtml = input<SafeHtml | null>(null);
 
-  ngOnDestroy(): void {
-    this.destroyComponents();
+  constructor() {
+    explicitEffect([this.contentHtml, this.activeAdapter.adapter], ([html]) => {
+      if (!html) return;
+      // Store original HTML on first receive (before any DOM mutations)
+      const htmlString = (html as { changingThisBreaksApplicationSecurity?: string }).changingThisBreaksApplicationSecurity as
+        | string
+        | undefined;
+      if (htmlString) {
+        this.originalHtml = htmlString;
+      }
+      // Re-apply original HTML to restore custom element tags, then process
+      requestAnimationFrame(() => {
+        if (this.originalHtml) {
+          this.el.nativeElement.innerHTML = this.originalHtml;
+        }
+        this.processContent();
+      });
+    });
+
+    this.destroyRef.onDestroy(() => this.destroyComponents());
   }
 
   private processContent(): void {
@@ -93,7 +114,6 @@ export class ContentComponentsDirective implements AfterViewChecked, OnDestroy {
           elementInjector: this.injector,
         });
 
-        // Set inputs
         for (const [key, value] of Object.entries(inputs)) {
           componentRef.setInput(key, value);
         }
@@ -101,10 +121,6 @@ export class ContentComponentsDirective implements AfterViewChecked, OnDestroy {
         this.appRef.attachView(componentRef.hostView);
         this.componentRefs.push(componentRef);
       });
-    }
-
-    if (this.componentRefs.length > 0) {
-      this.cdr.markForCheck();
     }
   }
 

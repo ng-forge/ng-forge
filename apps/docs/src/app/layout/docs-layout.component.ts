@@ -1,6 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, PLATFORM_ID, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { EMPTY, fromEvent, iif, map } from 'rxjs';
 import { ActiveAdapterService } from '../services/active-adapter.service';
+import { ThemeService } from '../services/theme.service';
 import { Logo } from '../components/logo/logo.component';
 import { AdapterSubBarComponent } from '../components/adapter-sub-bar/adapter-sub-bar.component';
 import { NAV_ITEMS, type NavItem } from './nav.config';
@@ -18,9 +22,18 @@ import { SearchComponent } from '../components/search/search.component';
 })
 export class DocsLayoutComponent {
   private readonly router = inject(Router);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   protected readonly activeAdapter = inject(ActiveAdapterService);
+  readonly themeService = inject(ThemeService);
   protected readonly sidebarOpen = signal(false);
   protected readonly expandedCategories = signal<Set<string>>(new Set());
+  protected readonly scrolled = signal(false);
+
+  constructor() {
+    iif(() => this.isBrowser, fromEvent(window, 'scroll').pipe(map(() => window.scrollY > 0)), EMPTY)
+      .pipe(takeUntilDestroyed())
+      .subscribe((v) => this.scrolled.set(v));
+  }
 
   protected readonly navItems = computed(() => {
     const adapter = this.activeAdapter.adapter();

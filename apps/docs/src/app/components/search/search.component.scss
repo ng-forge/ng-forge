@@ -12,13 +12,14 @@ $ember-glow: #ff8c42;
   cursor: pointer;
   font-size: 0.875rem;
   transition: border-color 0.2s ease;
-  min-width: 200px;
+  min-width: 240px;
 
   &:hover {
     border-color: $ember-glow;
   }
 
   .icon {
+    flex-shrink: 0;
     width: 16px;
     height: 16px;
     opacity: 0.6;
@@ -26,8 +27,17 @@ $ember-glow: #ff8c42;
 
   @media (max-width: 768px) {
     min-width: unset;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
 
     .search-label {
+      display: none;
+    }
+
+    .search-kbd {
       display: none;
     }
   }

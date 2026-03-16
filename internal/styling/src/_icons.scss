@@ -40,6 +40,10 @@
     @include icon-mask('/assets/icons/book.svg', 20px);
   }
 
+  &--search {
+    @include icon-mask('/assets/icons/search.svg', 16px);
+  }
+
   // Action icons
   &--copy {
     @include icon-mask('/assets/icons/copy.svg', 18px);

@@ -1,10 +1,7 @@
 <!-- Navbar -->
-<header class="navbar">
+<header class="navbar" [class.scrolled]="scrolled()">
   <div class="navbar-inner">
     <div class="navbar-left">
-      <button class="menu-btn" (click)="toggleSidebar()" aria-label="Toggle sidebar">
-        <span class="menu-icon" [class.open]="sidebarOpen()"></span>
-      </button>
       <a routerLink="/" class="navbar-logo">
         <app-logo size="lg" />
       </a>
@@ -12,16 +9,36 @@
     <div class="navbar-right">
       <app-search />
       <app-adapter-sub-bar />
+      <button
+        class="icon-btn theme-toggle"
+        (click)="themeService.toggleTheme()"
+        [attr.aria-label]="
+          'Switch to ' + (themeService.theme() === 'auto' ? 'light' : themeService.theme() === 'light' ? 'dark' : 'auto') + ' theme'
+        "
+        [attr.title]="'Theme: ' + themeService.theme()"
+      >
+        <span class="theme-icon" [class]="'theme-icon--' + themeService.theme()"></span>
+      </button>
       <a href="https://github.com/ng-forge/ng-forge" class="icon-btn" target="_blank" rel="noopener" aria-label="GitHub repository">
         <span class="icon icon--github"></span>
       </a>
+      <button class="icon-btn menu-btn" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+        <span class="menu-icon" [class.menu-icon--open]="sidebarOpen()"></span>
+      </button>
     </div>
   </div>
 </header>
 
 <!-- Sidebar backdrop (mobile) -->
 @if (sidebarOpen()) {
-  <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
+  <div
+    class="sidebar-backdrop"
+    (click)="closeSidebar()"
+    (keydown.escape)="closeSidebar()"
+    role="button"
+    tabindex="-1"
+    aria-label="Close sidebar"
+  ></div>
 }
 
 <!-- Sidebar -->
@@ -32,7 +49,19 @@
         <div class="nav-category" [class.expanded]="isCategoryExpanded(item)">
           <button class="nav-category-btn" (click)="toggleCategory(item.path)" [attr.aria-expanded]="isCategoryExpanded(item)">
             <span>{{ item.label }}</span>
-            <span class="chevron"></span>
+            <svg
+              class="chevron"
+              viewBox="0 0 24 24"
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
           </button>
           @if (isCategoryExpanded(item)) {
             <div class="nav-children">
@@ -45,7 +74,19 @@
                       [attr.aria-expanded]="isCategoryExpanded(child)"
                     >
                       <span>{{ child.label }}</span>
-                      <span class="chevron"></span>
+                      <svg
+                        class="chevron"
+                        viewBox="0 0 24 24"
+                        width="12"
+                        height="12"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
                     </button>
                     @if (isCategoryExpanded(child)) {
                       <div class="nav-children">
@@ -57,6 +98,9 @@
                             [class]="grandchild.cssClass ?? ''"
                             (click)="closeSidebar()"
                           >
+                            <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12">
+                              <circle cx="12" cy="12" r="4.5" fill="currentColor" />
+                            </svg>
                             {{ grandchild.label }}
                           </a>
                         }
@@ -71,6 +115,9 @@
                     [class]="child.cssClass ?? ''"
                     (click)="closeSidebar()"
                   >
+                    <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12">
+                      <circle cx="12" cy="12" r="4.5" fill="currentColor" />
+                    </svg>
                     {{ child.label }}
                   </a>
                 }
@@ -86,7 +133,11 @@
           [class]="item.cssClass ?? ''"
           (click)="closeSidebar()"
         >
+          <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="12" r="4.5" fill="currentColor" /></svg>
           {{ item.label }}
+          @if (item.badge) {
+            <span class="nav-badge">{{ item.badge }}</span>
+          }
         </a>
       }
     }
