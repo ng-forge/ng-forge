@@ -1,0 +1,291 @@
+$ember-glow: #ff8c42;
+$sidebar-width: 280px;
+$navbar-height: 72px;
+
+// ============================================
+// NAVBAR
+// ============================================
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: $navbar-height;
+  background: var(--forge-navbar-bg);
+  border-bottom: 1px solid var(--forge-border-color);
+  z-index: 100;
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  max-width: 100%;
+  padding: 0 1.5rem;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+
+  &:focus-visible {
+    outline: 2px solid $ember-glow;
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+}
+
+// Menu button (mobile)
+.menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--forge-border-color);
+  border-radius: 50%;
+  background: var(--forge-base-2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $ember-glow;
+    background: var(--forge-base-1);
+  }
+
+  @media (max-width: 1024px) {
+    display: flex;
+  }
+}
+
+.menu-icon {
+  width: 18px;
+  height: 2px;
+  background: var(--forge-text);
+  position: relative;
+  transition: background 0.2s ease;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 2px;
+    background: var(--forge-text);
+    transition: transform 0.2s ease;
+  }
+
+  &::before {
+    top: -6px;
+  }
+
+  &::after {
+    top: 6px;
+  }
+
+  &.open {
+    background: transparent;
+
+    &::before {
+      top: 0;
+      transform: rotate(45deg);
+    }
+
+    &::after {
+      top: 0;
+      transform: rotate(-45deg);
+    }
+  }
+}
+
+// Icon buttons (GitHub, etc.)
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--forge-base-2);
+  border: 1px solid var(--forge-border-color);
+  color: var(--forge-text-muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--forge-base-1);
+    border-color: $ember-glow;
+    color: $ember-glow;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// ============================================
+// SIDEBAR
+// ============================================
+.sidebar {
+  position: fixed;
+  top: $navbar-height;
+  left: 0;
+  bottom: 0;
+  width: $sidebar-width;
+  background: var(--forge-sidebar-bg);
+  border-right: 1px solid var(--forge-border-color);
+  overflow-y: auto;
+  z-index: 90;
+  padding: 1rem 0;
+
+  @media (max-width: 1024px) {
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+
+    &.open {
+      transform: translateX(0);
+    }
+  }
+}
+
+.sidebar-backdrop {
+  display: none;
+
+  @media (max-width: 1024px) {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 89;
+  }
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+// Nav links (all depths)
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.5rem 1.5rem;
+  color: var(--forge-text-muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+  border-left: 3px solid transparent;
+
+  &:hover {
+    color: var(--forge-text);
+    background: var(--forge-base-1);
+  }
+
+  &.active {
+    color: var(--forge-primary);
+    border-left-color: var(--forge-primary);
+    font-weight: 600;
+  }
+
+  &.depth-1 {
+    padding-left: 2.25rem;
+  }
+
+  &.depth-2 {
+    padding-left: 3rem;
+    font-size: 0.8125rem;
+  }
+}
+
+// Category buttons
+.nav-category-btn,
+.nav-subcategory-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.5rem 1.5rem;
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  color: var(--forge-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    background: var(--forge-base-1);
+  }
+}
+
+.nav-subcategory-btn {
+  padding-left: 2.25rem;
+  font-weight: 500;
+  color: var(--forge-text-muted);
+}
+
+.chevron {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  background: currentColor;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E");
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  transition: transform 0.2s ease;
+
+  .nav-category.expanded > .nav-category-btn &,
+  .nav-subcategory.expanded > .nav-subcategory-btn & {
+    transform: rotate(90deg);
+  }
+}
+
+.nav-children {
+  overflow: hidden;
+}
+
+// ============================================
+// CONTENT AREA
+// ============================================
+.content {
+  margin-top: $navbar-height;
+  margin-left: $sidebar-width;
+  min-height: calc(100vh - #{$navbar-height});
+  padding: 2rem 3rem;
+
+  @media (max-width: 1024px) {
+    margin-left: 0;
+    padding: 1.5rem 1rem;
+  }
+}

@@ -44,6 +44,7 @@ export const appRoutes: Route[] = [
   {
     path: ':adapter',
     canActivate: [adapterGuard],
+    loadComponent: () => import('./layout/docs-layout.component').then((m) => m.DocsLayoutComponent),
     children: [
       // Route renames within adapter scope
       { path: 'installation', redirectTo: 'getting-started', pathMatch: 'full' },

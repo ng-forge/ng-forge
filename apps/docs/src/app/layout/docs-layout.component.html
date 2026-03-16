@@ -1,0 +1,98 @@
+<!-- Navbar -->
+<header class="navbar">
+  <div class="navbar-inner">
+    <div class="navbar-left">
+      <button class="menu-btn" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+        <span class="menu-icon" [class.open]="sidebarOpen()"></span>
+      </button>
+      <a routerLink="/" class="navbar-logo">
+        <app-logo size="lg" />
+      </a>
+    </div>
+    <div class="navbar-right">
+      <app-adapter-sub-bar />
+      <a href="https://github.com/ng-forge/ng-forge" class="icon-btn" target="_blank" rel="noopener" aria-label="GitHub repository">
+        <span class="icon icon--github"></span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- Sidebar backdrop (mobile) -->
+@if (sidebarOpen()) {
+  <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
+}
+
+<!-- Sidebar -->
+<aside class="sidebar" [class.open]="sidebarOpen()">
+  <nav class="sidebar-nav" aria-label="Documentation">
+    @for (item of navItems(); track item.path) {
+      @if (item.children) {
+        <div class="nav-category" [class.expanded]="isCategoryExpanded(item)">
+          <button class="nav-category-btn" (click)="toggleCategory(item.path)" [attr.aria-expanded]="isCategoryExpanded(item)">
+            <span>{{ item.label }}</span>
+            <span class="chevron"></span>
+          </button>
+          @if (isCategoryExpanded(item)) {
+            <div class="nav-children">
+              @for (child of item.children; track child.path) {
+                @if (child.children) {
+                  <div class="nav-subcategory" [class.expanded]="isCategoryExpanded(child)">
+                    <button
+                      class="nav-subcategory-btn"
+                      (click)="toggleCategory(child.path)"
+                      [attr.aria-expanded]="isCategoryExpanded(child)"
+                    >
+                      <span>{{ child.label }}</span>
+                      <span class="chevron"></span>
+                    </button>
+                    @if (isCategoryExpanded(child)) {
+                      <div class="nav-children">
+                        @for (grandchild of child.children; track grandchild.path) {
+                          <a
+                            class="nav-link depth-2"
+                            [routerLink]="adapterLink(grandchild.path)"
+                            routerLinkActive="active"
+                            [class]="grandchild.cssClass ?? ''"
+                            (click)="closeSidebar()"
+                          >
+                            {{ grandchild.label }}
+                          </a>
+                        }
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <a
+                    class="nav-link depth-1"
+                    [routerLink]="adapterLink(child.path)"
+                    routerLinkActive="active"
+                    [class]="child.cssClass ?? ''"
+                    (click)="closeSidebar()"
+                  >
+                    {{ child.label }}
+                  </a>
+                }
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <a
+          class="nav-link depth-0"
+          [routerLink]="adapterLink(item.path)"
+          routerLinkActive="active"
+          [class]="item.cssClass ?? ''"
+          (click)="closeSidebar()"
+        >
+          {{ item.label }}
+        </a>
+      }
+    }
+  </nav>
+</aside>
+
+<!-- Main content -->
+<main class="content">
+  <router-outlet />
+</main>
