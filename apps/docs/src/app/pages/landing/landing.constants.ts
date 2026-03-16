@@ -303,25 +303,25 @@ export const FIELD_TYPES: FieldType[] = [
 export const INTEGRATIONS: Integration[] = [
   {
     name: 'Material',
-    route: '/configuration',
+    route: '/material',
     icon: 'assets/icons/material.svg',
     title: 'Angular Material integration documentation',
   },
   {
     name: 'PrimeNG',
-    route: '/configuration',
+    route: '/primeng',
     icon: 'assets/icons/primeng.webp',
     title: 'PrimeNG integration documentation',
   },
   {
     name: 'Ionic',
-    route: '/configuration',
+    route: '/ionic',
     icon: 'assets/icons/ionic.svg',
     title: 'Ionic Framework integration documentation',
   },
   {
     name: 'Bootstrap',
-    route: '/configuration',
+    route: '/bootstrap',
     icon: 'assets/icons/bootstrap.svg',
     title: 'Bootstrap integration documentation',
   },
