@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { NgDocCopyButtonComponent } from '@ng-doc/app/components/copy-button';
+
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import type { AdapterName } from '@ng-forge/sandbox-harness';

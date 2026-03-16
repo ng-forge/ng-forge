@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, switchMap } from 'rxjs';
 import { ContentService } from '../../services/content.service';
+import { ContentComponentsDirective } from '../../directives/content-components.directive';
 
 /**
  * Generic documentation page component.
@@ -10,12 +11,13 @@ import { ContentService } from '../../services/content.service';
  */
 @Component({
   selector: 'app-doc-page',
+  imports: [ContentComponentsDirective],
   template: `
     <article class="doc-page">
       @if (content()?.error) {
         <div class="doc-page-error">{{ content()!.error }}</div>
       } @else if (content()?.html) {
-        <div class="doc-page-content" [innerHTML]="content()!.html"></div>
+        <div class="doc-page-content" contentComponents [innerHTML]="content()!.html"></div>
       } @else {
         <div class="doc-page-loading">Loading...</div>
       }

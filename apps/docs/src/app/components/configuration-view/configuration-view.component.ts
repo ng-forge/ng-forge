@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { NgDocCopyButtonComponent } from '@ng-doc/app/components/copy-button';
+
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 
