@@ -1,0 +1,36 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+
+:host {
+  display: block;
+  margin: 1.5rem 0;
+}
+
+.live-example-container {
+  // Default (light mode / no data-theme): use a subtle light border.
+  // The ExampleScenarioComponent fills the container with its own background,
+  // so background: transparent avoids a dark flash before content loads.
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: transparent;
+
+  // Shadow host div — fills the container width, height wraps content
+  > div {
+    width: 100%;
+  }
+}
+
+// Dark mode: switch to dark border and dark backing
+:host-context([data-theme='dark']) .live-example-container {
+  border-color: $steel-dark;
+  background: $bg-elevated;
+}
+
+// Auto mode: follow system preference
+@media (prefers-color-scheme: dark) {
+  :host-context([data-theme='auto']) .live-example-container {
+    border-color: $steel-dark;
+    background: $bg-elevated;
+  }
+}

@@ -7,9 +7,7 @@ Use [Zod](https://zod.dev) schemas to validate your dynamic forms. This lets you
 
 ## Installation
 
-```bash
-npm install zod
-```
+<docs-install-command packages="zod"></docs-install-command>
 
 ## Basic Usage
 
@@ -38,7 +36,7 @@ The `standardSchema()` wrapper tells Dynamic Forms to use Zod for validation. Er
 
 Try the password confirmation form with Zod validation:
 
-<iframe src="http://localhost:4201/#/examples/zod-schema-validation" class="example-frame" title="Zod Validation Demo"></iframe>
+<docs-live-example scenario="examples/zod-schema-validation"></docs-live-example>
 
 ## Cross-Field Validation
 
@@ -214,8 +212,8 @@ const schema = type({ email: 'email' });
 const config = { schema: standardSchema(schema), fields: [...] };
 ```
 
-## Related
+## Next Steps
 
-- **[Schema Validation Overview](../overview)** - When to use form-level validation
-- **[Angular Schema](../angular-schema)** - Native Angular approach without dependencies
-- **[Field Validation](../../validation/basics/)** - Individual field validators
+- **[Angular Schema →](/schema-validation/angular-schema)** — Native Angular approach without additional dependencies
+- **[Field Validation →](/validation/basics)** — Add built-in and custom validators to individual fields
+- **[Schema Validation Overview →](/schema-validation/overview)** — Compare Angular and Standard Schema approaches

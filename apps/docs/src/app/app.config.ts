@@ -1,5 +1,6 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter, withInMemoryScrolling } from '@angular/router';
+import { provideRouter, withInMemoryScrolling, UrlSerializer } from '@angular/router';
+import { AdapterAwareUrlSerializer } from './serializers/adapter-url-serializer';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import {
   NG_DOC_DEFAULT_PAGE_PROCESSORS,
@@ -7,6 +8,7 @@ import {
   NgDocDefaultSearchEngine,
   provideMainPageProcessor,
   provideNgDocApp,
+  providePageProcessor,
   providePageSkeleton,
   provideSearchEngine,
 } from '@ng-doc/app';
@@ -14,10 +16,17 @@ import {
 import { provideNgDocContext } from '@ng-doc/generated';
 import { appRoutes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { ENVIRONMENT, environment } from './config/environment';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
+import { provideAdapterRegistry, SandboxHarness } from '@ng-forge/sandbox-harness';
+import { DOCS_ADAPTERS } from './adapters/adapter-registrations';
+import { LiveExampleComponent } from './components/live-example/live-example.component';
+import { AdapterPickerComponent } from './components/adapter-picker/adapter-picker.component';
+import { DocsIntegrationViewComponent } from './components/integration-view/integration-view.component';
+import { DocsConfigurationViewComponent } from './components/configuration-view/configuration-view.component';
+import { DocsPageNavigationComponent } from './components/page-navigation/page-navigation.component';
+import { CascadeVisualComponent } from './components/cascade-visual/cascade-visual.component';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -43,13 +52,48 @@ export const appConfig: ApplicationConfig = {
       },
     }),
     provideSearchEngine(NgDocDefaultSearchEngine),
-    providePageSkeleton(NG_DOC_DEFAULT_PAGE_SKELETON),
+    providePageSkeleton({
+      ...NG_DOC_DEFAULT_PAGE_SKELETON,
+      navigation: DocsPageNavigationComponent,
+    }),
     provideMainPageProcessor(NG_DOC_DEFAULT_PAGE_PROCESSORS),
-    // Environment configuration for example URLs
-    // Values are injected at build time via --define
-    { provide: ENVIRONMENT, useValue: environment },
     provideClientHydration(withEventReplay()),
-    // Dynamic forms for landing page demos
+    { provide: UrlSerializer, useClass: AdapterAwareUrlSerializer },
+    // Dynamic forms for landing page demos (Material is always used on landing page)
     provideDynamicForm(...withMaterialFields()),
+    // SandboxHarness for live adapter examples in docs pages
+    provideAdapterRegistry(DOCS_ADAPTERS),
+    SandboxHarness,
+    // Register docs-live-example as an ng-doc page processor so it gets bootstrapped
+    // when ng-doc renders page content as innerHTML
+    providePageProcessor({
+      component: LiveExampleComponent,
+      selector: 'docs-live-example',
+      extractOptions: (element) => ({
+        inputs: {
+          scenario: element.getAttribute('scenario') ?? '',
+        },
+      }),
+    }),
+    providePageProcessor({
+      component: AdapterPickerComponent,
+      selector: 'docs-adapter-picker',
+      extractOptions: () => ({ inputs: {} }),
+    }),
+    providePageProcessor({
+      component: DocsIntegrationViewComponent,
+      selector: 'docs-integration-view',
+      extractOptions: () => ({ inputs: {} }),
+    }),
+    providePageProcessor({
+      component: DocsConfigurationViewComponent,
+      selector: 'docs-configuration-view',
+      extractOptions: () => ({ inputs: {} }),
+    }),
+    providePageProcessor({
+      component: CascadeVisualComponent,
+      selector: 'docs-cascade-visual',
+      extractOptions: () => ({ inputs: {} }),
+    }),
   ],
 };

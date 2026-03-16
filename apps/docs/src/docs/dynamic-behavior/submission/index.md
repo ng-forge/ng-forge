@@ -209,3 +209,9 @@ export class MyFormComponent {
   }
 }
 ```
+
+## Next Steps
+
+- **[Events →](/advanced/events)** — Dispatch and subscribe to form events from inside or outside the form
+- **[Schema Validation →](/schema-validation/overview)** — Add cross-field validation rules with Angular schemas or Zod
+- **[Value Exclusion →](/advanced/value-exclusion)** — Control which field values are included in submission output

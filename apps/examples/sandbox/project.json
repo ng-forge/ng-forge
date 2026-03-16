@@ -1,0 +1,109 @@
+{
+  "name": "sandbox-examples",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "sandbox",
+  "sourceRoot": "apps/examples/sandbox/src",
+  "tags": ["examples"],
+  "implicitDependencies": [
+    "sandbox-harness",
+    "dynamic-forms",
+    "dynamic-forms-material",
+    "dynamic-forms-bootstrap",
+    "dynamic-forms-primeng",
+    "dynamic-forms-ionic",
+    "examples-material",
+    "examples-bootstrap",
+    "examples-primeng",
+    "examples-ionic",
+    "examples-shared-ui",
+    "examples-shared-testing"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "dependsOn": ["^build"],
+      "options": {
+        "outputPath": "dist/apps/examples/sandbox",
+        "browser": "apps/examples/sandbox/src/main.ts",
+        "tsConfig": "apps/examples/sandbox/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "stylePreprocessorOptions": {
+          "includePaths": ["internal/styling/src"]
+        },
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/examples/sandbox/public"
+          }
+        ],
+        "styles": [
+          "apps/examples/sandbox/src/styles.scss",
+          {
+            "input": "apps/examples/sandbox/src/styles/adapter-material.scss",
+            "bundleName": "material",
+            "inject": false
+          },
+          {
+            "input": "apps/examples/sandbox/src/styles/adapter-bootstrap.scss",
+            "bundleName": "bootstrap",
+            "inject": false
+          },
+          {
+            "input": "apps/examples/sandbox/src/styles/adapter-primeng.scss",
+            "bundleName": "primeng",
+            "inject": false
+          },
+          {
+            "input": "apps/examples/sandbox/src/styles/adapter-ionic.scss",
+            "bundleName": "ionic",
+            "inject": false
+          }
+        ]
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "1.5mb",
+              "maximumError": "2mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "8kb",
+              "maximumError": "16kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "sandbox-examples:build:production"
+        },
+        "development": {
+          "buildTarget": "sandbox-examples:build:development"
+        }
+      },
+      "defaultConfiguration": "development",
+      "options": {
+        "port": 4210
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

@@ -3,5 +3,15 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "internal/styling/src",
   "projectType": "library",
-  "tags": ["scope:styling", "type:lib"]
+  "tags": ["scope:styling", "type:lib"],
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:package",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "options": {
+        "project": "internal/styling/ng-package.json",
+        "tsConfig": "internal/styling/tsconfig.lib.json"
+      }
+    }
+  }
 }

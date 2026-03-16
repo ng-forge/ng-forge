@@ -282,8 +282,8 @@ Consider [Standard Schema (Zod)](../zod) if you:
 - Want automatic TypeScript type inference from schemas
 - Are using OpenAPI-generated schemas
 
-## Related
+## Next Steps
 
-- **[Schema Validation Overview](../overview)** - When to use form-level validation
-- **[Standard Schema (Zod)](../zod)** - Alternative using Zod/Valibot
-- **[Field Validation](../../validation/basics/)** - Individual field validators
+- **[Standard Schema (Zod) →](/schema-validation/zod)** — Use Zod, Valibot, or ArkType for cross-platform schema validation
+- **[Field Validation →](/validation/basics)** — Add built-in and custom validators to individual fields
+- **[Schema Validation Overview →](/schema-validation/overview)** — Compare Angular and Standard Schema approaches

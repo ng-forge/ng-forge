@@ -1,5 +1,3 @@
-> Prerequisites: [Installation](../../installation), [Field Types](../schema-fields/field-types), [Type Safety](../type-safety)
-
 Create custom UI integrations for ng-forge dynamic forms using any component library or design system.
 
 ## Package Structure
@@ -115,6 +113,8 @@ export default class CustomInputFieldComponent implements CustomInputComponent {
 }
 ```
 
+> For full TypeScript type safety (autocomplete on `props`, compile-time field validation, etc.), see [Type Safety with Module Augmentation](#type-safety-with-module-augmentation) below.
+
 ### 3. Create Field Type Definition
 
 Define the field type registration:
@@ -190,6 +190,8 @@ The component must implement these inputs:
 - `props?: TProps` - Custom field-specific props
 - `meta?: FieldMeta` - Native HTML attributes (data-_, aria-_, autocomplete, etc.)
 
+> **Important:** The `meta` input, while technically optional in the type signature, should be implemented on all field components. It provides reactive access to native HTML attributes (`data-*`, `aria-*`, `autocomplete`, etc.) that are essential for accessibility, testing, and browser autofill. See [Handling Meta Attributes](#handling-meta-attributes) below for implementation details.
+
 ### CheckedFieldComponent
 
 For checkbox and toggle fields:
@@ -260,7 +262,39 @@ export const CustomCheckboxType: FieldTypeDefinition = {
 };
 ```
 
-### Custom Mappers
+### Writing a Custom Mapper
+
+The built-in `valueFieldMapper` and `checkboxFieldMapper` cover most use cases. You need a custom mapper when your component expects a different set of input bindings than the standard ones — for example, a button that has no `field` input, or a component that reshapes props into a different structure.
+
+A mapper is a function that receives the resolved field definition and returns an array of `Binding` objects. Each binding maps a field property to a component input:
+
+```typescript
+import { Binding, inputBinding } from '@angular/core';
+import type { BaseValueField } from '@ng-forge/dynamic-forms';
+
+export function myCustomMapper(fieldDef: BaseValueField<string, MyProps>): Binding[] {
+  return [
+    inputBinding('key', () => fieldDef.key),
+    inputBinding('label', () => fieldDef.label),
+    inputBinding('value', () => fieldDef.value),
+    inputBinding('customProp', () => fieldDef.props?.myProp ?? 'default'),
+    inputBinding('className', () => fieldDef.className),
+    inputBinding('meta', () => fieldDef.meta),
+  ];
+}
+```
+
+Then reference it in your `FieldTypeDefinition`:
+
+```typescript
+export const MyFieldType: FieldTypeDefinition = {
+  name: 'my-field',
+  loadComponent: () => import('./my-field.component'),
+  mapper: myCustomMapper,
+};
+```
+
+### Custom Mappers (Buttons Example)
 
 For specialized fields (like buttons), create custom mappers:
 
@@ -327,7 +361,7 @@ This enables:
 
 ## Handling Meta Attributes
 
-`meta` attributes are native HTML attributes that should be applied to the underlying form element. They differ from `props` (which control UI library behavior). See [Props vs Meta](../schema-fields/field-types#props-vs-meta) for detailed usage guidance.
+`meta` attributes are native HTML attributes that should be applied to the underlying form element. They differ from `props` (which control UI library behavior). See [Props vs Meta](/field-types/text-inputs#props-vs-meta) for detailed usage guidance.
 
 ### Props vs Meta Summary
 
@@ -345,7 +379,8 @@ ng-forge provides the `setupMetaTracking` utility to apply meta attributes to na
 
 ```typescript
 import { Component, ElementRef, inject, input } from '@angular/core';
-import { FieldMeta, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { FieldMeta } from '@ng-forge/dynamic-forms';
+import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 
 @Component({
   template: ` <input [field]="f" /> `,
@@ -360,6 +395,8 @@ export default class CustomInputComponent {
   }
 }
 ```
+
+> **Note:** `FieldMeta` is a core type exported from `@ng-forge/dynamic-forms`, while `setupMetaTracking` is an integration utility exported from `@ng-forge/dynamic-forms/integration`. Both are also re-exported from the `/integration` entrypoint for convenience, but the canonical import paths are as shown above.
 
 **Parameters:**
 
@@ -470,16 +507,16 @@ export default class IonicCheckboxComponent {
 
 See complete integrations:
 
-- [Material Design](../../ui-libs-integrations/material) - Full Material implementation with 12+ field types
-- [Bootstrap](../../ui-libs-integrations/bootstrap)
-- [PrimeNG](../../ui-libs-integrations/primeng)
-- [Ionic](../../ui-libs-integrations/ionic)
+- [Material Design](/configuration) - Full Material implementation with 12+ field types
+- [Bootstrap](/configuration)
+- [PrimeNG](/configuration)
+- [Ionic](/configuration)
 
 The Material integration source code is the most comprehensive example of implementing custom field types.
 
 ## Related Topics
 
-- **[Material Integration](../../ui-libs-integrations/material)** - Complete reference implementation
-- **[Field Types](../schema-fields/field-types)** - Understanding all available field types
-- **[Type Safety](../type-safety)** - Module augmentation for custom types
+- **[Material Integration](/configuration)** - Complete reference implementation
+- **[Field Types](/field-types/text-inputs)** - Understanding all available field types
+- **[Type Safety](/advanced/basics)** - Module augmentation for custom types
 - **[Validation](../validation/basics)** - Displaying validation errors in custom fields

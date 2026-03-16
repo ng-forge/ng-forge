@@ -1,0 +1,67 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+@use 'mixins' as mix;
+
+.integration-view {
+  display: flex;
+  flex-direction: column;
+  gap: $space-6;
+
+  &__heading {
+    font-size: $text-base;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 $space-4;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+    border-radius: $radius-lg;
+    overflow: hidden;
+    font-size: $text-sm;
+
+    th,
+    td {
+      padding: $space-2 $space-3;
+      text-align: left;
+      border-bottom: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--ng-doc-text, #{$steel});
+      background: var(--ng-doc-base-1, #{$bg-surface});
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  &__feature-name {
+    font-family: $font-mono;
+    font-size: $text-sm;
+    color: $ember-glow;
+    white-space: nowrap;
+  }
+
+  &__feature-desc {
+    color: var(--ng-doc-text-muted, #{$steel-mid});
+  }
+
+  &__code {
+    background: var(--ng-doc-code-background, #{$bg-deep});
+    border: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+    border-radius: $radius-lg;
+    overflow: hidden;
+    padding: $space-2 $space-4;
+
+    // pre is rendered by the codeHighlight directive — pierce encapsulation
+    // to override the browser default margin (24px).
+    ::ng-deep pre {
+      margin: 0;
+    }
+  }
+}

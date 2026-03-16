@@ -144,7 +144,7 @@ For validators that need to compare multiple fields (like password confirmation 
 }
 ```
 
-See **[Custom Validators](../custom-validators)** for complete documentation on:
+See **[Custom Validators](/validation/custom-validators)** for complete documentation on:
 
 - Expression-based validators (simple, inline expressions)
 - Function-based validators (complex, reusable logic)
@@ -356,7 +356,7 @@ when: {
 
 ## Related
 
-- **[Validation Basics](../basics/)** - Shorthand validators
-- **[Validation Reference](../reference/)** - Complete API
-- **[Conditional Logic](../../dynamic-behavior/conditional-logic/overview/)** - Field behavior changes
+- **[Validation Basics](/validation/basics)** - Shorthand validators
+- **[Validation Reference](/validation/reference)** - Complete API
+- **[Conditional Logic](/dynamic-behavior/overview)** - Field behavior changes
 - **[Examples](../../examples/)** - Real-world patterns

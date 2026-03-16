@@ -4,7 +4,7 @@ Arrays create dynamic collections of field values. Each item in the `fields` arr
 
 ## Interactive Demo
 
-<iframe src="http://localhost:4201/#/examples/array" class="example-frame" title="Array Field Demo"></iframe>
+<docs-live-example scenario="examples/array"></docs-live-example>
 
 ## Structure Overview
 
@@ -560,7 +560,7 @@ Arrays can contain these field types:
 - Row fields -> creates flat object arrays `[{...}, {...}]` (rows don't add nesting)
 - Button fields (for remove operations inside each item)
 
-See [Type Safety & Inference](../advanced/type-safety/basics) for details on how arrays affect type inference.
+See [Type Safety & Inference](/advanced/basics) for details on how arrays affect type inference.
 
 ## Conditional Visibility
 
@@ -585,7 +585,7 @@ Array containers support the `logic` property to conditionally show or hide the 
 
 When the array is hidden, all items and add/remove buttons are hidden with it. Only `'hidden'` is supported as a logic type on containers.
 
-For all available condition types and operators, see [Conditional Logic](../../../dynamic-behavior/conditional-logic/overview/).
+For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).
 
 ## When to Use the Complete API
 

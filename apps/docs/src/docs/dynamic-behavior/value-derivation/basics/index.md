@@ -479,10 +479,15 @@ const config = {
 
 External data values are reactively tracked - when signals change, derivations are re-evaluated.
 
+## Next Steps
+
+- **[Conditional Logic →](/dynamic-behavior/overview)** — Control field visibility, required state, and disabled state dynamically
+- **[i18n →](/dynamic-behavior/i18n)** — Translate labels and messages with Observables and Signals
+- **[Expression Parser →](/advanced/expression-parser)** — Understand the security model behind derivation expressions
+
 ## Related
 
 - **Property Derivation** (see tab above) — Derive component properties (minDate, options, label) from form values
 - **Async Derivation** (see tab above) — HTTP and async function derivations, stopOnUserOverride
-- **[Conditional Logic](../conditional-logic/overview/)** — Control field visibility and state
 - **[Array Fields](../../prebuilt/form-arrays/simplified/)** — Working with array fields
 - **[Examples](/examples)** — Real-world form patterns

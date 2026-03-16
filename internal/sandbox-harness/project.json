@@ -1,0 +1,20 @@
+{
+  "name": "sandbox-harness",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "internal/sandbox-harness/src",
+  "projectType": "library",
+  "tags": ["scope:examples", "type:harness"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "build": {
+      "executor": "@nx/angular:package",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "options": {
+        "project": "internal/sandbox-harness/ng-package.json",
+        "tsConfig": "internal/sandbox-harness/tsconfig.lib.json"
+      }
+    }
+  }
+}

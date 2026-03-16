@@ -179,3 +179,9 @@ See the **Value Exclusion** page under Recipes for full details.
 - **Componentless**: Hidden fields have no Angular component and render zero DOM elements
 - **Value handling**: Uses `valueHandling: 'include'`, so values are always included in form submissions
 - **Required value**: The `value` property is required (unlike most field types where it's optional)
+
+## Next Steps
+
+- **[Text Components →](/prebuilt/text-components)** — Display static or dynamic text content in forms
+- **[Value Exclusion →](/advanced/value-exclusion)** — Control which field values are included in submission output
+- **[Field Types →](/field-types/text-inputs)** — Explore all available input field types and their props
