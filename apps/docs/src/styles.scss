@@ -17,16 +17,7 @@
 // ============================================
 // CSS LAYER ORDER
 // ============================================
-// Define layer order - later layers have higher priority
-// ng-doc styles are in lowest priority layer so they don't
-// affect landing page or other non-docs pages
-@layer ng-doc, app;
-
-// ============================================
-// NG-DOC STYLES (scoped to ng-doc layer)
-// ============================================
-@import '@ng-doc/app/styles/global.css' layer(ng-doc);
-@import '@ng-doc/app/styles/themes/dark.css' layer(ng-doc);
+@layer base, app;
 
 // ============================================
 // MATERIAL THEME APPLICATION

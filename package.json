@@ -113,6 +113,7 @@
     "wait-on": "^9.0.4"
   },
   "dependencies": {
+    "@analogjs/content": "^2.3.1",
     "@angular/animations": "~21.2.0",
     "@angular/cdk": "~21.2.0",
     "@angular/common": "~21.2.0",
@@ -138,6 +139,7 @@
     "bootstrap": "^5.3.8",
     "date-fns": "^4.1.0",
     "express": "^5.2.1",
+    "marked": "^15.0.12",
     "ngxtension": "^7.1.0",
     "primeicons": "^7.0.0",
     "primeng": "^21.1.1",

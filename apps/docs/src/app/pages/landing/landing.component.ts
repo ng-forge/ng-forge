@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { NgDocSearchComponent } from '@ng-doc/app';
+
 import { catchError, delay, filter, iif, map, merge, of, switchMap, tap } from 'rxjs';
 import { DynamicForm } from '@ng-forge/dynamic-forms';
 
@@ -44,7 +44,7 @@ const CONFETTI_ANIMATION_DURATION_MS = 800;
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, CodeHighlightDirective, NgDocSearchComponent, Logo, DynamicForm],
+  imports: [RouterLink, CodeHighlightDirective, Logo, DynamicForm],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

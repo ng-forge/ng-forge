@@ -26,7 +26,7 @@
       "outputs": ["{projectRoot}/public/llms-full.txt"]
     },
     "build": {
-      "executor": "@ng-doc/builder:application",
+      "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
       "dependsOn": ["^build", "generate-llms-full"],
       "options": {
@@ -40,16 +40,6 @@
           {
             "glob": "**/*",
             "input": "apps/docs/public"
-          },
-          {
-            "glob": "**/*",
-            "input": "dist/ng-doc/docs/assets",
-            "output": "assets/ng-doc"
-          },
-          {
-            "glob": "**/*",
-            "input": "node_modules/@ng-doc/ui-kit/assets",
-            "output": "assets/ng-doc/ui-kit"
           }
         ],
         "styles": [
@@ -78,7 +68,7 @@
         "stylePreprocessorOptions": {
           "includePaths": ["internal/styling/src"]
         },
-        "allowedCommonJsDependencies": ["dayjs", "@braintree/sanitize-url", "dompurify", "cytoscape-cose-bilkent", "elkjs", "@ng-doc/core"]
+        "allowedCommonJsDependencies": ["dayjs", "dompurify"]
       },
       "configurations": {
         "production": {
@@ -95,26 +85,20 @@
             }
           ],
           "outputHashing": "all",
-          "baseHref": "/dynamic-forms/",
-          "ngDoc": {
-            "config": "apps/docs/ng-doc.config.ts"
-          }
+          "baseHref": "/dynamic-forms/"
         },
         "development": {
           "optimization": false,
           "extractLicenses": false,
           "sourceMap": true,
-          "prerender": false,
-          "ngDoc": {
-            "config": "apps/docs/ng-doc.config.ts"
-          }
+          "prerender": false
         }
       },
       "defaultConfiguration": "production"
     },
     "serve": {
       "continuous": true,
-      "executor": "@ng-doc/builder:dev-server",
+      "executor": "@angular/build:dev-server",
       "options": {
         "buildTarget": "docs:build:development"
       },
@@ -136,15 +120,6 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint"
-    },
-    "ng-doc:rebuild": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": ["rm -rf dist/ng-doc", "nx build docs"],
-        "cwd": "{workspaceRoot}",
-        "parallel": false
-      },
-      "outputs": ["{workspaceRoot}/dist/apps/docs"]
     },
     "serve-static": {
       "continuous": true,

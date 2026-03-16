@@ -1,7 +1,5 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Route, Router } from '@angular/router';
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import { NG_DOC_ROUTING } from '@ng-doc/generated';
 
 /** Adapter names valid in the docs app — includes 'custom' (a virtual adapter for docs only). */
 const DOCS_ADAPTER_NAMES = new Set(['material', 'bootstrap', 'primeng', 'ionic', 'custom']);
@@ -12,8 +10,6 @@ const adapterGuard: CanActivateFn = (route) => {
     const router = inject(Router);
     const nav = router.getCurrentNavigation();
     const initialUrl = nav?.initialUrl.toString() ?? `/${name}`;
-    // Prepend /material to the full URL to preserve child segments
-    // e.g. /schema-fields/field-types → /material/schema-fields/field-types
     return router.parseUrl(`/material${initialUrl}`);
   }
   return true;
@@ -53,7 +49,11 @@ export const appRoutes: Route[] = [
       { path: 'installation', redirectTo: 'getting-started', pathMatch: 'full' },
       { path: 'ui-libs-integrations', redirectTo: 'configuration', pathMatch: 'full' },
       { path: 'custom-integrations', redirectTo: 'building-an-adapter', pathMatch: 'full' },
-      ...NG_DOC_ROUTING,
+      // Placeholder: content routes will be added in Phase 4
+      {
+        path: '**',
+        loadComponent: () => import('./pages/placeholder/placeholder.component').then((m) => m.PlaceholderComponent),
+      },
     ],
   },
   {

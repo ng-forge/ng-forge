@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@analogjs/content':
+        specifier: ^2.3.1
+        version: 2.3.1(cd63fe40ecd67bb4fc4b5f5a86691996)
       '@angular/animations':
         specifier: ~21.2.0
         version: 21.2.0(@angular/core@21.2.0(@angular/compiler@21.2.0)(rxjs@7.8.2)(zone.js@0.16.0))
@@ -83,6 +86,9 @@ importers:
       express:
         specifier: ^5.2.1
         version: 5.2.1
+      marked:
+        specifier: ^15.0.12
+        version: 15.0.12
       ngxtension:
         specifier: ^7.1.0
         version: 7.1.0(@angular/common@21.2.0(@angular/core@21.2.0(@angular/compiler@21.2.0)(rxjs@7.8.2)(zone.js@0.16.0))(rxjs@7.8.2))(@angular/core@21.2.0(@angular/compiler@21.2.0)(rxjs@7.8.2)(zone.js@0.16.0))(rxjs@7.8.2)
@@ -107,7 +113,7 @@ importers:
     devDependencies:
       '@analogjs/platform':
         specifier: 2.2.3
-        version: 2.2.3(f7bda8f418f26962b92d023f7f4fa864)
+        version: 2.2.3(564a5332970a22b1c5062cee505b0f4c)
       '@analogjs/vite-plugin-angular':
         specifier: 2.2.3
         version: 2.2.3(@angular-devkit/build-angular@21.1.4(bbccd2d1a72e788e3cc7aa2a02115c7e))(@angular/build@21.1.4(56977f1ec2c703d591d550ebeeacf63e))
@@ -377,6 +383,34 @@ packages:
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
+
+  '@analogjs/content@2.3.1':
+    resolution: {integrity: sha512-3mxusf1H9EMyz3zqGHbZ8WNQFQdNLrYCwiH9itwHnIVPQ2m+ThKEuGULuJyh6wmplRh3xxtDXHpvXfxLW3rIcQ==}
+    peerDependencies:
+      '@angular/common': ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0
+      '@angular/core': ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0
+      '@angular/platform-browser': ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0
+      '@angular/router': ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0
+      '@nx/devkit': ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0 || ^22.0.0 || ^22
+      front-matter: ^4.0.2
+      marked: ^15.0.7
+      marked-gfm-heading-id: ^4.1.1
+      marked-highlight: ^2.2.1
+      marked-mangle: ^1.1.10
+      prismjs: ^1.29.0
+      rxjs: ^6.5.0 || ^7.5.0
+      satori: ^0.10.14
+      satori-html: ^0.3.2
+      sharp: ^0.33.5
+    peerDependenciesMeta:
+      '@nx/devkit':
+        optional: true
+      satori:
+        optional: true
+      satori-html:
+        optional: true
+      sharp:
+        optional: true
 
   '@analogjs/platform@2.2.3':
     resolution: {integrity: sha512-J75CHE2mFuW0xZM+2nUtA7gw8CWPIwuwkcotsWwnSkleQAl5VQkNp3Q7n1OUdzAjj/N/P06l+CVDEr6G+jSuWA==}
@@ -8072,6 +8106,11 @@ packages:
     peerDependencies:
       marked: '>=13 <18'
 
+  marked-highlight@2.2.3:
+    resolution: {integrity: sha512-FCfZRxW/msZAiasCML4isYpxyQWKEEx44vOgdn5Kloae+Qc3q4XR7WjpKKf8oMLk7JP9ZCRd2vhtclJFdwxlWQ==}
+    peerDependencies:
+      marked: '>=4 <18'
+
   marked-mangle@1.1.12:
     resolution: {integrity: sha512-bRrqNcfU9v3iRECb7YPvA+/xKZMjHojd9R92YwHbFjdPQ+Wc7vozkbGKAv4U8AUl798mNUuY3DTBQkedsV3TeQ==}
     peerDependencies:
@@ -8079,6 +8118,11 @@ packages:
 
   marked@12.0.1:
     resolution: {integrity: sha512-Y1/V2yafOcOdWQCX0XpAKXzDakPOpn6U0YLxTJs3cww6VxOzZV1BTOOYWLvH3gX38cq+iLwljHHTnMtlDfg01Q==}
+    engines: {node: '>= 18'}
+    hasBin: true
+
+  marked@15.0.12:
+    resolution: {integrity: sha512-8dD6FusOQSrpv9Z1rdNMdlSgQOIP880DHqnohobOmYLElGEqAL/JvxvuxZO16r4HtjTlfPRDC1hbvxC9dPN2nA==}
     engines: {node: '>= 18'}
     hasBin: true
 
@@ -9287,6 +9331,10 @@ packages:
       '@angular/platform-browser': ^21.0.0
       '@angular/router': ^21.0.0
       rxjs: ^6.0.0 || ^7.8.1
+
+  prismjs@1.30.0:
+    resolution: {integrity: sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==}
+    engines: {node: '>=6'}
 
   proc-log@6.1.0:
     resolution: {integrity: sha512-iG+GYldRf2BQ0UDUAd6JQ/RwzaQy6mXmsk/IzlYyal4A4SNFw54MeH4/tLkF4I5WoWG9SQwuqWzS99jaFQHBuQ==}
@@ -11488,13 +11536,30 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
 
-  '@analogjs/platform@2.2.3(f7bda8f418f26962b92d023f7f4fa864)':
+  '@analogjs/content@2.3.1(cd63fe40ecd67bb4fc4b5f5a86691996)':
+    dependencies:
+      '@angular/common': 21.2.0(@angular/core@21.2.0(@angular/compiler@21.2.0)(rxjs@7.8.2)(zone.js@0.16.0))(rxjs@7.8.2)
+      '@angular/core': 21.2.0(@angular/compiler@21.2.0)(rxjs@7.8.2)(zone.js@0.16.0)
+      '@angular/platform-browser': 21.2.0(@angular/animations@21.2.0(@angular/core@21.2.0(@angular/compiler@21.2.0)(rxjs@7.8.2)(zone.js@0.16.0)))(@angular/common@21.2.0(@angular/core@21.2.0(@angular/compiler@21.2.0)(rxjs@7.8.2)(zone.js@0.16.0))(rxjs@7.8.2))(@angular/core@21.2.0(@angular/compiler@21.2.0)(rxjs@7.8.2)(zone.js@0.16.0))
+      '@angular/router': 21.2.0(@angular/common@21.2.0(@angular/core@21.2.0(@angular/compiler@21.2.0)(rxjs@7.8.2)(zone.js@0.16.0))(rxjs@7.8.2))(@angular/core@21.2.0(@angular/compiler@21.2.0)(rxjs@7.8.2)(zone.js@0.16.0))(@angular/platform-browser@21.2.0(@angular/animations@21.2.0(@angular/core@21.2.0(@angular/compiler@21.2.0)(rxjs@7.8.2)(zone.js@0.16.0)))(@angular/common@21.2.0(@angular/core@21.2.0(@angular/compiler@21.2.0)(rxjs@7.8.2)(zone.js@0.16.0))(rxjs@7.8.2))(@angular/core@21.2.0(@angular/compiler@21.2.0)(rxjs@7.8.2)(zone.js@0.16.0)))(rxjs@7.8.2)
+      front-matter: 4.0.2
+      marked: 15.0.12
+      marked-gfm-heading-id: 4.1.3(marked@15.0.12)
+      marked-highlight: 2.2.3(marked@15.0.12)
+      marked-mangle: 1.1.12(marked@15.0.12)
+      prismjs: 1.30.0
+      rxjs: 7.8.2
+      tslib: 2.8.1
+    optionalDependencies:
+      '@nx/devkit': 22.5.2(nx@22.5.2(@swc-node/register@1.11.1(@swc/core@1.15.11(@swc/helpers@0.5.19))(@swc/types@0.1.25)(typescript@5.9.3))(@swc/core@1.15.11(@swc/helpers@0.5.19)))
+
+  '@analogjs/platform@2.2.3(564a5332970a22b1c5062cee505b0f4c)':
     dependencies:
       '@analogjs/vite-plugin-angular': 2.2.3(@angular-devkit/build-angular@21.1.4(bbccd2d1a72e788e3cc7aa2a02115c7e))(@angular/build@21.1.4(56977f1ec2c703d591d550ebeeacf63e))
       '@analogjs/vite-plugin-nitro': 2.2.3(encoding@0.1.13)(rolldown@1.0.0-beta.58)
-      marked: 12.0.1
-      marked-gfm-heading-id: 4.1.3(marked@12.0.1)
-      marked-mangle: 1.1.12(marked@12.0.1)
+      marked: 15.0.12
+      marked-gfm-heading-id: 4.1.3(marked@15.0.12)
+      marked-mangle: 1.1.12(marked@15.0.12)
       nitropack: 2.13.1(encoding@0.1.13)(rolldown@1.0.0-beta.58)
       vite: 7.3.1(@types/node@25.3.0)(jiti@2.6.1)(less@4.5.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(yaml@2.8.2)
       vitefu: 1.1.1(vite@7.3.1(@types/node@25.3.0)(jiti@2.6.1)(less@4.5.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(yaml@2.8.2))
@@ -11502,6 +11567,8 @@ snapshots:
       '@nx/angular': 22.5.2(fd288666577ee89255937ba3811d6220)
       '@nx/devkit': 22.5.2(nx@22.5.2(@swc-node/register@1.11.1(@swc/core@1.15.11(@swc/helpers@0.5.19))(@swc/types@0.1.25)(typescript@5.9.3))(@swc/core@1.15.11(@swc/helpers@0.5.19)))
       '@nx/vite': 22.5.2(@babel/traverse@7.29.0)(@swc-node/register@1.11.1(@swc/core@1.15.11(@swc/helpers@0.5.19))(@swc/types@0.1.25)(typescript@5.9.3))(@swc/core@1.15.11(@swc/helpers@0.5.19))(nx@22.5.2(@swc-node/register@1.11.1(@swc/core@1.15.11(@swc/helpers@0.5.19))(@swc/types@0.1.25)(typescript@5.9.3))(@swc/core@1.15.11(@swc/helpers@0.5.19)))(typescript@5.9.3)(verdaccio@6.2.4(encoding@0.1.13)(typanion@3.14.0))(vite@7.3.1(@types/node@25.3.0)(jiti@2.6.1)(less@4.5.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(yaml@2.8.2))(vitest@4.0.18)
+      marked-highlight: 2.2.3(marked@15.0.12)
+      prismjs: 1.30.0
       shiki: 1.29.2
     transitivePeerDependencies:
       - '@angular-devkit/build-angular'
@@ -21106,16 +21173,22 @@ snapshots:
 
   make-synchronized@0.2.10: {}
 
-  marked-gfm-heading-id@4.1.3(marked@12.0.1):
+  marked-gfm-heading-id@4.1.3(marked@15.0.12):
     dependencies:
       github-slugger: 2.0.0
-      marked: 12.0.1
+      marked: 15.0.12
 
-  marked-mangle@1.1.12(marked@12.0.1):
+  marked-highlight@2.2.3(marked@15.0.12):
     dependencies:
-      marked: 12.0.1
+      marked: 15.0.12
+
+  marked-mangle@1.1.12(marked@15.0.12):
+    dependencies:
+      marked: 15.0.12
 
   marked@12.0.1: {}
+
+  marked@15.0.12: {}
 
   math-intrinsics@1.1.0: {}
 
@@ -22632,6 +22705,8 @@ snapshots:
       '@primeuix/utils': 0.6.4
       rxjs: 7.8.2
       tslib: 2.8.1
+
+  prismjs@1.30.0: {}
 
   proc-log@6.1.0: {}
 
