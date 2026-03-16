@@ -270,6 +270,9 @@ importers:
       nx:
         specifier: 22.5.2
         version: 22.5.2(@swc-node/register@1.11.1(@swc/core@1.15.11(@swc/helpers@0.5.19))(@swc/types@0.1.25)(typescript@5.9.3))(@swc/core@1.15.11(@swc/helpers@0.5.19))
+      pagefind:
+        specifier: ^1.4.0
+        version: 1.4.0
       patch-package:
         specifier: ^8.0.1
         version: 8.0.1
@@ -3241,6 +3244,36 @@ packages:
 
   '@oxc-resolver/binding-win32-x64-msvc@11.16.3':
     resolution: {integrity: sha512-bFuJRKOscsDAEZ/a8BezcTMAe2BQ/OBRfuMLFUuINfTR5qGVcm4a3xBIrQVepBaPxFj16SJdRjGe05vDiwZmFw==}
+    cpu: [x64]
+    os: [win32]
+
+  '@pagefind/darwin-arm64@1.4.0':
+    resolution: {integrity: sha512-2vMqkbv3lbx1Awea90gTaBsvpzgRs7MuSgKDxW0m9oV1GPZCZbZBJg/qL83GIUEN2BFlY46dtUZi54pwH+/pTQ==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@pagefind/darwin-x64@1.4.0':
+    resolution: {integrity: sha512-e7JPIS6L9/cJfow+/IAqknsGqEPjJnVXGjpGm25bnq+NPdoD3c/7fAwr1OXkG4Ocjx6ZGSCijXEV4ryMcH2E3A==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@pagefind/freebsd-x64@1.4.0':
+    resolution: {integrity: sha512-WcJVypXSZ+9HpiqZjFXMUobfFfZZ6NzIYtkhQ9eOhZrQpeY5uQFqNWLCk7w9RkMUwBv1HAMDW3YJQl/8OqsV0Q==}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@pagefind/linux-arm64@1.4.0':
+    resolution: {integrity: sha512-PIt8dkqt4W06KGmQjONw7EZbhDF+uXI7i0XtRLN1vjCUxM9vGPdtJc2mUyVPevjomrGz5M86M8bqTr6cgDp1Uw==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@pagefind/linux-x64@1.4.0':
+    resolution: {integrity: sha512-z4oddcWwQ0UHrTHR8psLnVlz6USGJ/eOlDPTDYZ4cI8TK8PgwRUPQZp9D2iJPNIPcS6Qx/E4TebjuGJOyK8Mmg==}
+    cpu: [x64]
+    os: [linux]
+
+  '@pagefind/windows-x64@1.4.0':
+    resolution: {integrity: sha512-NkT+YAdgS2FPCn8mIA9bQhiBs+xmniMGq1LFPDhcFn0+2yIUEiIG06t7bsZlhdjknEQRTSdT7YitP6fC5qwP0g==}
     cpu: [x64]
     os: [win32]
 
@@ -8832,6 +8865,10 @@ packages:
   pacote@21.0.4:
     resolution: {integrity: sha512-RplP/pDW0NNNDh3pnaoIWYPvNenS7UqMbXyvMqJczosiFWTeGGwJC2NQBLqKf4rGLFfwCOnntw1aEp9Jiqm1MA==}
     engines: {node: ^20.17.0 || >=22.9.0}
+    hasBin: true
+
+  pagefind@1.4.0:
+    resolution: {integrity: sha512-z2kY1mQlL4J8q5EIsQkLzQjilovKzfNVhX8De6oyE6uHpfFtyBaqUpcl/XzJC/4fjD8vBDyh1zolimIcVrCn9g==}
     hasBin: true
 
   pako@0.2.9:
@@ -15679,6 +15716,24 @@ snapshots:
   '@oxc-resolver/binding-win32-x64-msvc@11.16.3':
     optional: true
 
+  '@pagefind/darwin-arm64@1.4.0':
+    optional: true
+
+  '@pagefind/darwin-x64@1.4.0':
+    optional: true
+
+  '@pagefind/freebsd-x64@1.4.0':
+    optional: true
+
+  '@pagefind/linux-arm64@1.4.0':
+    optional: true
+
+  '@pagefind/linux-x64@1.4.0':
+    optional: true
+
+  '@pagefind/windows-x64@1.4.0':
+    optional: true
+
   '@parcel/watcher-android-arm64@2.4.1':
     optional: true
 
@@ -22213,6 +22268,15 @@ snapshots:
       tar: 7.5.2
     transitivePeerDependencies:
       - supports-color
+
+  pagefind@1.4.0:
+    optionalDependencies:
+      '@pagefind/darwin-arm64': 1.4.0
+      '@pagefind/darwin-x64': 1.4.0
+      '@pagefind/freebsd-x64': 1.4.0
+      '@pagefind/linux-arm64': 1.4.0
+      '@pagefind/linux-x64': 1.4.0
+      '@pagefind/windows-x64': 1.4.0
 
   pako@0.2.9:
     optional: true

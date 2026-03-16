@@ -4,10 +4,11 @@ import { ActiveAdapterService } from '../services/active-adapter.service';
 import { Logo } from '../components/logo/logo.component';
 import { AdapterSubBarComponent } from '../components/adapter-sub-bar/adapter-sub-bar.component';
 import { NAV_ITEMS, type NavItem } from './nav.config';
+import { SearchComponent } from '../components/search/search.component';
 
 @Component({
   selector: 'app-docs-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Logo, AdapterSubBarComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Logo, AdapterSubBarComponent, SearchComponent],
   templateUrl: './docs-layout.component.html',
   styleUrl: './docs-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

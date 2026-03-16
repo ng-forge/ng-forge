@@ -95,6 +95,7 @@
     "lefthook": "^2.1.1",
     "ng-packagr": "~21.2.0",
     "nx": "22.5.2",
+    "pagefind": "^1.4.0",
     "patch-package": "^8.0.1",
     "playwright": "1.58.2",
     "postcss": "^8.4.5",
