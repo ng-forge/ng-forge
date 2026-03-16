@@ -47,7 +47,7 @@ export class AdapterLinkInterceptorDirective {
     if (!anchor) return;
 
     const href = anchor.getAttribute('href');
-    if (!href || !href.startsWith('/') || href.startsWith('//')) return;
+    if (!href || !href.startsWith('/') || href.startsWith('//') || href === '/') return;
 
     // Skip links that already have an adapter prefix
     const firstSegment = href.split('/')[1];

@@ -29,8 +29,8 @@ export class DocsPageNavigationComponent {
   // ng-doc skeleton interface requires these inputs named 'prevPage' / 'nextPage'.
   // Their values are always wrong (artifact of the adapter-prefix bug), so we ignore them
   // and recompute below. Typed as unknown to avoid importing NgDocNavigation in value space.
-  @Input() prevPage: unknown;
-  @Input() nextPage: unknown;
+  @Input() prevPage: NgDocNavigation | undefined;
+  @Input() nextPage: NgDocNavigation | undefined;
 
   private readonly router = inject(Router);
   private readonly context = inject(NG_DOC_CONTEXT);
@@ -49,7 +49,13 @@ export class DocsPageNavigationComponent {
   private readonly flatPages = computed(() => {
     const flatten = (items: NgDocNavigation[]): NgDocNavigation[] =>
       items.flatMap((item) => (item.children?.length ? flatten(item.children) : [item]));
-    return flatten(this.context.navigation);
+    const pages = flatten(this.context.navigation);
+    const { adapter } = this.routerState();
+    // Hide "Building an Adapter" from prev/next for non-custom adapters
+    if (adapter !== 'custom') {
+      return pages.filter((p) => !p.route.includes('building-an-adapter'));
+    }
+    return pages;
   });
 
   private readonly currentIdx = computed(() => {

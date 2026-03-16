@@ -1323,6 +1323,11 @@ pre.shiki span {
   font-weight: var(--shiki-light-font-weight, normal);
 }
 
+// Hide "Building an Adapter" sidebar link for non-custom adapters
+app-root:not([data-adapter='custom']) .ng-doc-sidebar-link[href='/building-an-adapter'] {
+  display: none;
+}
+
 html[data-theme='dark'] pre.shiki span {
   color: var(--shiki-dark);
   font-style: var(--shiki-dark-font-style, normal);

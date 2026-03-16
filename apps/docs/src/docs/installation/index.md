@@ -55,7 +55,7 @@ Here's a login form that works with any adapter — switch the "Config" tab to s
 
 ## Next Steps
 
-- **[Configuration →](/configuration)** — Set global defaults with `withXxxFields({ ... })` and per-form `defaultProps`
-- **[Examples →](/examples)** — Browse complete form examples
-- **[Field Types →](/field-types/text-inputs)** — All available field types and their props
-- **[Building an Adapter →](/building-an-adapter)** — Create your own adapter for any UI library
+- **[Configuration](/configuration)** — Set global defaults with `withXxxFields({ ... })` and per-form `defaultProps`
+- **[Examples](/examples)** — Browse complete form examples
+- **[Field Types](/field-types/text-inputs)** — All available field types and their props
+- **[Building an Adapter](/building-an-adapter)** — Create your own adapter for any UI library

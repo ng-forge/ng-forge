@@ -25,6 +25,8 @@ import { LiveExampleComponent } from './components/live-example/live-example.com
 import { AdapterPickerComponent } from './components/adapter-picker/adapter-picker.component';
 import { DocsIntegrationViewComponent } from './components/integration-view/integration-view.component';
 import { DocsConfigurationViewComponent } from './components/configuration-view/configuration-view.component';
+import { DocsPageNavigationComponent } from './components/page-navigation/page-navigation.component';
+import { CascadeVisualComponent } from './components/cascade-visual/cascade-visual.component';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -50,7 +52,10 @@ export const appConfig: ApplicationConfig = {
       },
     }),
     provideSearchEngine(NgDocDefaultSearchEngine),
-    providePageSkeleton(NG_DOC_DEFAULT_PAGE_SKELETON),
+    providePageSkeleton({
+      ...NG_DOC_DEFAULT_PAGE_SKELETON,
+      navigation: DocsPageNavigationComponent,
+    }),
     provideMainPageProcessor(NG_DOC_DEFAULT_PAGE_PROCESSORS),
     provideClientHydration(withEventReplay()),
     { provide: UrlSerializer, useClass: AdapterAwareUrlSerializer },
@@ -83,6 +88,11 @@ export const appConfig: ApplicationConfig = {
     providePageProcessor({
       component: DocsConfigurationViewComponent,
       selector: 'docs-configuration-view',
+      extractOptions: () => ({ inputs: {} }),
+    }),
+    providePageProcessor({
+      component: CascadeVisualComponent,
+      selector: 'docs-cascade-visual',
       extractOptions: () => ({ inputs: {} }),
     }),
   ],
