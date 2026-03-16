@@ -4,7 +4,7 @@ const BuildingAnAdapterPage: NgDocPage = {
   title: 'Building an Adapter',
   route: 'building-an-adapter',
   mdFile: './index.md',
-  order: 3,
+  order: 2,
 };
 
 export default BuildingAnAdapterPage;

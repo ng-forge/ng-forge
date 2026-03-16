@@ -1323,13 +1323,6 @@ pre.shiki span {
   font-weight: var(--shiki-light-font-weight, normal);
 }
 
-// ============================================
-// CUSTOM ADAPTER NAV VISIBILITY
-// ============================================
-app-root:not([data-adapter='custom']) .ng-doc-sidebar-link[href='/building-an-adapter'] {
-  display: none;
-}
-
 html[data-theme='dark'] pre.shiki span {
   color: var(--shiki-dark);
   font-style: var(--shiki-dark-font-style, normal);
