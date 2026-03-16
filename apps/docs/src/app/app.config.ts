@@ -3,7 +3,6 @@ import { provideRouter, withInMemoryScrolling, UrlSerializer } from '@angular/ro
 import { AdapterAwareUrlSerializer } from './serializers/adapter-url-serializer';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideContent, withMarkdownRenderer } from '@analogjs/content';
-import { withShikiHighlighter } from '@analogjs/content/shiki-highlighter';
 import { appRoutes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
@@ -25,7 +24,7 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(withFetch()),
     provideAnimationsAsync(),
-    provideContent(withMarkdownRenderer(), withShikiHighlighter()),
+    provideContent(withMarkdownRenderer()),
     provideClientHydration(withEventReplay()),
     { provide: UrlSerializer, useClass: AdapterAwareUrlSerializer },
     // Dynamic forms for landing page demos (Material is always used on landing page)
