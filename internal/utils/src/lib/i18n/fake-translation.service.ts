@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 /**
@@ -27,22 +28,22 @@ import { map } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class FakeTranslationService {
-  private readonly translations = new BehaviorSubject<Record<string, string>>({});
+  private readonly translations = signal<Record<string, string>>({});
+  private readonly translations$ = toObservable(this.translations);
   private readonly currentLanguage = signal('en');
 
   /**
    * Set the translation dictionary
    */
   setTranslations(translations: Record<string, string>): void {
-    this.translations.next(translations);
+    this.translations.set(translations);
   }
 
   /**
    * Add translations to the existing dictionary
    */
   addTranslations(translations: Record<string, string>): void {
-    const current = this.translations.value;
-    this.translations.next({ ...current, ...translations });
+    this.translations.update((current) => ({ ...current, ...translations }));
   }
 
   /**
@@ -50,8 +51,8 @@ export class FakeTranslationService {
    */
   setLanguage(language: string): void {
     this.currentLanguage.set(language);
-    // Trigger translation updates by emitting current translations
-    this.translations.next(this.translations.value);
+    // Trigger translation updates by re-setting current translations
+    this.translations.update((current) => ({ ...current }));
   }
 
   /**
@@ -66,7 +67,7 @@ export class FakeTranslationService {
    * Supports parameter interpolation using {{param}} syntax
    */
   translate(key: string, params?: Record<string, unknown>): Observable<string> {
-    return this.translations.pipe(
+    return this.translations$.pipe(
       map((translations) => {
         const translatedValue = translations[key] || key;
         return this.interpolateParams(translatedValue, params);
@@ -79,7 +80,7 @@ export class FakeTranslationService {
    * Supports parameter interpolation using {{param}} syntax
    */
   instant(key: string, params?: Record<string, unknown>): string {
-    const translations = this.translations.value;
+    const translations = this.translations();
     const translatedValue = translations[key] || key;
     return this.interpolateParams(translatedValue, params);
   }
@@ -97,14 +98,14 @@ export class FakeTranslationService {
    * Get all current translations
    */
   getTranslations(): Record<string, string> {
-    return this.translations.value;
+    return this.translations();
   }
 
   /**
    * Clear all translations
    */
   clearTranslations(): void {
-    this.translations.next({});
+    this.translations.set({});
   }
 
   private interpolateParams(template: string, params?: Record<string, unknown>): string {
@@ -112,13 +113,10 @@ export class FakeTranslationService {
       return template;
     }
 
-    let result = template;
-    Object.entries(params).forEach(([key, value]) => {
-      const placeholder = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-      result = result.replace(placeholder, String(value));
-    });
-
-    return result;
+    return Object.entries(params).reduce(
+      (result, [key, value]) => result.replace(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), String(value)),
+      template,
+    );
   }
 }
 

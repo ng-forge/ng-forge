@@ -28,7 +28,6 @@ import { DynamicText } from '../../models/types/dynamic-text';
  */
 @Pipe({
   name: 'dynamicText',
-  standalone: true,
 })
 export class DynamicTextPipe implements PipeTransform {
   private readonly injector = inject(Injector);
