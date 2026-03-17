@@ -84,6 +84,10 @@ export class ApiDetailComponent {
   readonly declaration = computed(() => this.data()?.declaration);
   readonly symbolName = computed(() => this.data()?.symbolName ?? '');
   readonly pkgName = computed(() => this.data()?.pkg?.name ?? '');
+  readonly adapterInfo = computed(() => {
+    const name = this.adapter.adapter();
+    return this.adapter.adapters.find((a) => a.name === name);
+  });
 
   readonly kindMeta = computed(() => {
     const decl = this.declaration();
