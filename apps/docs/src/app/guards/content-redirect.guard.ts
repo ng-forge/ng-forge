@@ -20,9 +20,21 @@ const CATEGORY_REDIRECTS: Record<string, string> = {
 
 /** Legacy route renames — old URLs still work after restructure. */
 const ROUTE_RENAMES: Record<string, string> = {
+  // Top-level renames
   installation: 'getting-started',
   'ui-libs-integrations': 'configuration',
   'custom-integrations': 'building-an-adapter',
+  api: 'api-reference',
+  // Old sub-paths → new locations
+  'ui-libs-integrations/material': 'configuration',
+  'ui-libs-integrations/bootstrap': 'configuration',
+  'ui-libs-integrations/primeng': 'configuration',
+  'ui-libs-integrations/ionic': 'configuration',
+  'field-types': 'schema-fields/field-types/text-inputs',
+  'dynamic-behavior/overview': 'dynamic-behavior/conditional-logic',
+  'dynamic-behavior/derivation/property': 'dynamic-behavior/derivation/values',
+  'advanced/basics': 'advanced/type-safety',
+  'advanced/custom-integrations': 'building-an-adapter',
 };
 
 /**
