@@ -6,6 +6,7 @@ import { defineConfig, type Plugin } from 'vite';
 import analog from '@analogjs/platform';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import * as sass from 'sass';
+import { apiDocsPlugin } from './plugins/vite-plugin-api-docs';
 
 const ADAPTER_NAMES = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 
@@ -105,6 +106,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       adapterCssPlugin(),
+      apiDocsPlugin(),
       analog({
         ssr: false,
         static: true,
