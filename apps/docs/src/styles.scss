@@ -936,4 +936,27 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
   h4:hover .heading-anchor {
     opacity: 1;
   }
+
+  // API cross-reference links ({@link SymbolName})
+  .api-link {
+    color: var(--forge-link-color);
+    text-decoration: none;
+    cursor: pointer;
+
+    code {
+      color: var(--forge-link-color);
+      background: color-mix(in srgb, var(--forge-primary) 8%, transparent);
+      border: 1px solid color-mix(in srgb, var(--forge-primary) 15%, transparent);
+      white-space: nowrap;
+    }
+
+    &:hover {
+      text-decoration: none;
+
+      code {
+        background: color-mix(in srgb, var(--forge-primary) 15%, transparent);
+        border-color: color-mix(in srgb, var(--forge-primary) 30%, transparent);
+      }
+    }
+  }
 }

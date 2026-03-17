@@ -10,6 +10,8 @@ import { DocTabsComponent } from '../../components/doc-tabs/doc-tabs.component';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { LiveExampleComponent } from '../../components/live-example/live-example.component';
 import { ExamplesIndexComponent } from '../examples-index/examples-index.component';
+import { ApiIndexComponent } from '../api-index/api-index.component';
+import { ApiDetailComponent } from '../api-detail/api-detail.component';
 import { EXAMPLES_REGISTRY } from '../examples-index/examples.registry';
 import { findBreadcrumbTrail } from '../../layout/nav.config';
 import { findTabGroup } from '../../layout/tabs.config';
@@ -21,9 +23,22 @@ import { findTabGroup } from '../../layout/tabs.config';
  */
 @Component({
   selector: 'app-doc-page',
-  imports: [ContentComponentsDirective, TocComponent, DocTabsComponent, RouterLink, LiveExampleComponent, ExamplesIndexComponent],
+  imports: [
+    ContentComponentsDirective,
+    TocComponent,
+    DocTabsComponent,
+    RouterLink,
+    LiveExampleComponent,
+    ExamplesIndexComponent,
+    ApiIndexComponent,
+    ApiDetailComponent,
+  ],
   template: `
-    @if (isExamplesIndex()) {
+    @if (isApiIndex()) {
+      <docs-api-index />
+    } @else if (isApiDetail()) {
+      <docs-api-detail />
+    } @else if (isExamplesIndex()) {
       <!-- Examples listing — rendered directly, no doc-layout grid -->
       <docs-examples-index />
     } @else {
@@ -187,13 +202,19 @@ export class DocPageComponent {
   );
 
   private readonly content$ = this.slug$.pipe(
-    filter((slug) => slug !== 'examples' && !slug.startsWith('examples/')),
+    filter((slug) => slug !== 'examples' && !slug.startsWith('examples/') && !slug.startsWith('api-reference')),
     switchMap((slug) => this.contentService.load(slug)),
   );
 
   readonly content = toSignal(this.content$);
 
   private readonly slug = toSignal(this.slug$, { initialValue: '' });
+
+  /** True when slug is exactly 'api-reference' — renders the API index. */
+  readonly isApiIndex = computed(() => this.slug() === 'api-reference');
+
+  /** True when slug starts with 'api-reference/' — renders an API detail page. */
+  readonly isApiDetail = computed(() => this.slug().startsWith('api-reference/'));
 
   /** True when slug is exactly 'examples' — renders the examples listing. */
   readonly isExamplesIndex = computed(() => this.slug() === 'examples');
@@ -237,6 +258,17 @@ export class DocPageComponent {
       textarea.innerHTML = code;
       this.clipboard.copy(textarea.value);
       this.showCopiedState(copyBtn);
+      return;
+    }
+
+    // API symbol link
+    const apiLink = target.closest('.api-link') as HTMLElement | null;
+    if (apiLink) {
+      event.preventDefault();
+      const symbol = apiLink.getAttribute('data-api-symbol');
+      if (symbol) {
+        void this.router.navigateByUrl(`/${this.adapter.adapter()}/api-reference/core/${symbol}`);
+      }
       return;
     }
 

@@ -1,0 +1,367 @@
+@use 'tokens' as *;
+
+:host {
+  --card-bg: #ffffff;
+  --card-border: #e0e0e0;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --table-stripe: rgba(0, 0, 0, 0.02);
+  --table-hover: rgba(0, 0, 0, 0.04);
+  --code-bg: #f5f5f5;
+
+  display: block;
+  font-family: $font-primary;
+  color: var(--text-primary);
+}
+
+:host-context(html[data-theme='dark']) {
+  --card-bg: #0a0908;
+  --card-border: #2a2824;
+  --text-primary: #e8e4de;
+  --text-secondary: #9a958c;
+  --table-stripe: rgba(255, 255, 255, 0.02);
+  --table-hover: rgba(255, 255, 255, 0.04);
+  --code-bg: #1a1916;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context(html[data-theme='auto']) {
+    --card-bg: #0a0908;
+    --card-border: #2a2824;
+    --text-primary: #e8e4de;
+    --text-secondary: #9a958c;
+    --table-stripe: rgba(255, 255, 255, 0.02);
+    --table-hover: rgba(255, 255, 255, 0.04);
+    --code-bg: #1a1916;
+  }
+}
+
+// ─── Kind colors ───
+$kind-colors: (
+  'component': #ff4d00,
+  'directive': #e67e22,
+  'injectable': #9b59b6,
+  'pipe': #1abc9c,
+  'class': #e74c3c,
+  'interface': #3498db,
+  'type': #3e69c5,
+  'function': #28ca42,
+  'const': #ffb627,
+  'enum': #2ecc71,
+);
+
+.kind-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: $text-xs;
+  font-weight: 600;
+  border-radius: $radius-sm;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #fff;
+
+  @each $kind, $color in $kind-colors {
+    &[data-kind='#{$kind}'] {
+      background: $color;
+    }
+  }
+}
+
+// ─── Breadcrumbs ───
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: $space-4;
+  font-size: $text-sm;
+}
+
+.breadcrumb {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color $transition-fast;
+  cursor: pointer;
+
+  &:hover {
+    color: $ember-glow;
+  }
+  &--current {
+    color: var(--text-primary);
+    font-weight: 500;
+    cursor: default;
+  }
+}
+
+.adapter-breadcrumb {
+  font-weight: 600;
+  color: $ember-core;
+}
+
+.breadcrumb-sep {
+  display: inline-flex;
+  align-items: center;
+  color: var(--card-border);
+  margin: 0 2px;
+}
+
+// ─── Header ───
+.detail-header {
+  margin-bottom: $space-6;
+}
+
+.detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  flex-wrap: wrap;
+
+  h1 {
+    font-family: $font-mono;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+  }
+}
+
+.pkg-label {
+  font-family: $font-mono;
+  font-size: $text-sm;
+  color: var(--text-secondary);
+  margin: $space-2 0 0;
+}
+
+.deprecated-badge {
+  font-size: $text-xs;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: $radius-sm;
+  background: rgba($error, 0.12);
+  color: $error;
+  text-transform: uppercase;
+}
+
+// ─── Sections ───
+.section {
+  margin-bottom: $space-8;
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 $space-4;
+    padding-bottom: $space-2;
+    border-bottom: 1px solid var(--card-border);
+  }
+}
+
+.description {
+  font-size: $text-base;
+  line-height: 1.7;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.remarks {
+  font-size: $text-sm;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+// ─── Code blocks ───
+.code-block {
+  border-radius: $radius-md;
+  overflow: hidden;
+  margin-bottom: $space-4;
+  border: 1px solid var(--card-border);
+
+  :global(pre) {
+    margin: 0;
+    padding: $space-4 $space-5;
+    overflow-x: auto;
+    font-family: $font-mono;
+    font-size: $text-sm;
+    line-height: 1.6;
+  }
+}
+
+// ─── Callouts ───
+.callout {
+  padding: $space-4 $space-5;
+  border-radius: $radius-md;
+  margin-bottom: $space-6;
+  font-size: $text-sm;
+  line-height: 1.5;
+
+  &--deprecated {
+    background: rgba($error, 0.08);
+    border: 1px solid rgba($error, 0.2);
+    color: $error;
+  }
+}
+
+// ─── Tables ───
+.members-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--card-border);
+  border-radius: $radius-md;
+}
+
+.members-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $text-sm;
+
+  th {
+    text-align: left;
+    padding: $space-3 $space-4;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--code-bg);
+    border-bottom: 1px solid var(--card-border);
+    white-space: nowrap;
+    text-transform: uppercase;
+    font-size: $text-xs;
+    letter-spacing: 0.04em;
+  }
+
+  td {
+    padding: $space-3 $space-4;
+    border-bottom: 1px solid var(--card-border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: var(--table-hover);
+  }
+
+  tr.deprecated td {
+    opacity: 0.55;
+  }
+}
+
+code.name {
+  font-family: $font-mono;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: $text-sm;
+}
+
+code.type {
+  font-family: $font-mono;
+  font-size: $text-xs;
+  color: $ember-glow;
+  word-break: break-all;
+}
+
+.modifier {
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-right: 4px;
+}
+
+.optional-mark {
+  color: $ember-glow;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+.deprecated-inline {
+  display: inline-block;
+  font-size: $text-xs;
+  font-weight: 600;
+  padding: 0 4px;
+  border-radius: 2px;
+  background: rgba($error, 0.1);
+  color: $error;
+  margin-left: $space-2;
+}
+
+// ─── See also ───
+.see-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    padding: $space-2 0;
+    font-family: $font-mono;
+    font-size: $text-sm;
+    color: $ember-glow;
+    border-bottom: 1px solid var(--card-border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+// ─── Source ───
+.source-section {
+  margin-top: $space-10;
+}
+
+.source-link {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $text-xs;
+  color: var(--text-secondary);
+  margin: 0;
+
+  code {
+    font-family: $font-mono;
+  }
+}
+
+// ─── Not found ───
+.not-found {
+  text-align: center;
+  padding: $space-12 0;
+  color: var(--text-secondary);
+
+  h2 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin: 0 0 $space-4;
+  }
+
+  code {
+    font-family: $font-mono;
+    color: $ember-glow;
+  }
+}
+
+.back-link {
+  display: inline-flex;
+  margin-top: $space-4;
+  color: $ember-glow;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ─── Responsive ───
+@media (max-width: 640px) {
+  .detail-title-row h1 {
+    font-size: 1.5rem;
+  }
+
+  .members-table {
+    font-size: $text-xs;
+  }
+}

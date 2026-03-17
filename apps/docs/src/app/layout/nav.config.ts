@@ -101,6 +101,10 @@ export const NAV_ITEMS: NavItem[] = [
     path: 'ai-integration',
     cssClass: 'sidebar-link--ai',
   },
+  {
+    label: 'API Reference',
+    path: 'api-reference',
+  },
 ];
 
 /** Walk NAV_ITEMS recursively and return the label for a given path, or undefined. */

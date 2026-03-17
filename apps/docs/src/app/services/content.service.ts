@@ -165,7 +165,14 @@ export class ContentService {
     };
 
     const marked = new Marked({ renderer });
-    const html = await marked.parse(markdown);
+    let html = await marked.parse(markdown);
+
+    // Replace {@link SymbolName} with API reference links.
+    // Uses data-api-link attribute so the adapter prefix can be resolved at click time.
+    html = html.replace(
+      /\{@link\s+(\w+)\}/g,
+      (_, symbol: string) => `<a class="api-link" data-api-symbol="${symbol}" href="javascript:void(0)"><code>${symbol}</code></a>`,
+    );
 
     return {
       html: this.sanitizer.bypassSecurityTrustHtml(html),
