@@ -15,6 +15,7 @@ import { ApiDetailComponent } from '../api-detail/api-detail.component';
 import { EXAMPLES_REGISTRY } from '../examples-index/examples.registry';
 import { findBreadcrumbTrail } from '../../layout/nav.config';
 import { findTabGroup } from '../../layout/tabs.config';
+import { NotFoundComponent } from '../../components/not-found/not-found.component';
 
 /**
  * Generic documentation page component.
@@ -32,6 +33,7 @@ import { findTabGroup } from '../../layout/tabs.config';
     ExamplesIndexComponent,
     ApiIndexComponent,
     ApiDetailComponent,
+    NotFoundComponent,
   ],
   template: `
     @if (isApiIndex()) {
@@ -41,13 +43,13 @@ import { findTabGroup } from '../../layout/tabs.config';
     } @else if (isExamplesIndex()) {
       <!-- Examples listing — rendered directly, no doc-layout grid -->
       <docs-examples-index />
+    } @else if (content()?.error) {
+      <docs-not-found />
     } @else {
       <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
       <div class="doc-layout" (click)="onContentClick($event)">
         <article class="doc-page">
-          @if (content()?.error) {
-            <div class="doc-page-error">{{ content()!.error }}</div>
-          } @else if (content()?.html) {
+          @if (content()?.html) {
             <!-- Breadcrumbs -->
             <nav class="breadcrumbs" aria-label="Breadcrumb">
               <a class="breadcrumb adapter-breadcrumb" [routerLink]="'/' + adapter.adapter() + '/getting-started'">
@@ -154,12 +156,6 @@ import { findTabGroup } from '../../layout/tabs.config';
         align-items: center;
         color: var(--forge-base-4);
         margin: 0 2px;
-      }
-
-      .doc-page-error {
-        color: var(--forge-text-muted);
-        font-style: italic;
-        padding: 2rem 0;
       }
 
       .doc-page-loading {

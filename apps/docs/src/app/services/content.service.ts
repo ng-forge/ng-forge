@@ -91,6 +91,11 @@ export class ContentService {
     const base = this.baseHref.endsWith('/') ? this.baseHref : this.baseHref + '/';
     const result$ = this.http.get(`${base}content/${slug}.md`, { responseType: 'text' }).pipe(
       switchMap(async (markdown) => {
+        // Detect SPA fallback: if the response is HTML (not markdown), treat as 404
+        const trimmed = markdown.trimStart();
+        if (trimmed.startsWith('<!') || trimmed.startsWith('<html')) {
+          return { html: '', headings: [], error: `Content not found: ${slug}` } as RenderedContent;
+        }
         // Strip YAML frontmatter (---\n...\n---)
         const stripped = markdown.replace(/^---\n[\s\S]*?\n---\n?/, '');
         return this.renderMarkdown(stripped);

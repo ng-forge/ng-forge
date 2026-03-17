@@ -1,0 +1,209 @@
+<div class="not-found">
+  <div class="illustration">
+    <svg viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Anvil body gradient -->
+        <linearGradient id="nf-anvil-face" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="#4a4540" />
+          <stop offset="100%" stop-color="#2a2622" />
+        </linearGradient>
+        <linearGradient id="nf-anvil-side" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="#3a3530" />
+          <stop offset="100%" stop-color="#1a1815" />
+        </linearGradient>
+        <!-- Hammer gradient -->
+        <linearGradient id="nf-hammer-head" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#5a554e" />
+          <stop offset="100%" stop-color="#3a3530" />
+        </linearGradient>
+        <!-- Ember glow for impact zone -->
+        <radialGradient id="nf-ember-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ff4d00" stop-opacity="0.6" />
+          <stop offset="40%" stop-color="#ff6b2b" stop-opacity="0.3" />
+          <stop offset="100%" stop-color="#ff4d00" stop-opacity="0" />
+        </radialGradient>
+        <!-- Crack glow -->
+        <linearGradient id="nf-crack-glow" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="#ff8c42" />
+          <stop offset="50%" stop-color="#ff4d00" />
+          <stop offset="100%" stop-color="#ffb627" />
+        </linearGradient>
+        <!-- Ground reflection -->
+        <linearGradient id="nf-ground" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="#ff4d00" stop-opacity="0.08" />
+          <stop offset="100%" stop-color="#ff4d00" stop-opacity="0" />
+        </linearGradient>
+        <!-- Spark trail filter -->
+        <filter id="nf-spark-blur">
+          <feGaussianBlur stdDeviation="1.5" />
+        </filter>
+        <filter id="nf-glow-soft">
+          <feGaussianBlur stdDeviation="4" />
+        </filter>
+        <filter id="nf-glow-wide">
+          <feGaussianBlur stdDeviation="8" />
+        </filter>
+      </defs>
+
+      <!-- Ground ember reflection -->
+      <ellipse cx="120" cy="175" rx="80" ry="12" fill="url(#nf-ground)">
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite" />
+      </ellipse>
+
+      <!-- === ANVIL === -->
+      <!-- Base/foot -->
+      <path d="M60 160 L50 175 L190 175 L180 160 Z" fill="url(#nf-anvil-side)" />
+      <!-- Body -->
+      <path d="M70 140 L60 160 L180 160 L170 140 Z" fill="url(#nf-anvil-face)" />
+      <!-- Waist (narrower middle) -->
+      <path d="M75 132 L70 140 L170 140 L165 132 Z" fill="url(#nf-anvil-face)" />
+      <!-- Face (top working surface) -->
+      <path d="M68 120 L68 132 L172 132 L172 120 Z" fill="url(#nf-anvil-face)" stroke="#5a554e" stroke-width="0.5" />
+      <!-- Horn (left taper) -->
+      <path d="M68 122 L32 118 L32 126 L68 130 Z" fill="url(#nf-anvil-face)" stroke="#5a554e" stroke-width="0.5" />
+      <!-- Horn tip highlight -->
+      <ellipse cx="33" cy="122" rx="3" ry="4" fill="#4a4540" />
+      <!-- Step (right side) -->
+      <path d="M172 120 L195 120 L195 128 L172 128 Z" fill="#3a3530" stroke="#5a554e" stroke-width="0.5" />
+      <!-- Top surface highlight -->
+      <path d="M70 120 L170 120" stroke="#6a655e" stroke-width="0.5" opacity="0.6" />
+
+      <!-- === CRACK on anvil face (the 404 damage!) === -->
+      <g class="crack">
+        <!-- Main crack line -->
+        <path d="M120 120 L118 124 L122 126 L116 130 L121 132" stroke="url(#nf-crack-glow)" stroke-width="1.5" stroke-linecap="round" />
+        <!-- Branch cracks -->
+        <path d="M118 124 L114 123" stroke="#ff8c42" stroke-width="0.8" stroke-linecap="round" opacity="0.7" />
+        <path d="M122 126 L126 125" stroke="#ff8c42" stroke-width="0.8" stroke-linecap="round" opacity="0.7" />
+        <path d="M116 130 L112 131" stroke="#ffb627" stroke-width="0.6" stroke-linecap="round" opacity="0.5" />
+        <!-- Crack inner glow -->
+        <path
+          d="M120 120 L118 124 L122 126 L116 130 L121 132"
+          stroke="#ffb627"
+          stroke-width="3"
+          stroke-linecap="round"
+          filter="url(#nf-spark-blur)"
+          opacity="0.3"
+        >
+          <animate attributeName="opacity" values="0.3;0.5;0.3" dur="2s" repeatCount="indefinite" />
+        </path>
+      </g>
+
+      <!-- === HAMMER (static, head down near anvil, handle going up-right) === -->
+      <g transform="rotate(-35 120 95)">
+        <!-- Handle (goes up from head) -->
+        <line x1="130" y1="95" x2="210" y2="95" stroke="#6b5d4e" stroke-width="5" stroke-linecap="round" />
+        <line x1="130" y1="95" x2="210" y2="95" stroke="#7d6e5c" stroke-width="1.5" stroke-linecap="round" opacity="0.5" />
+        <!-- Head (vertical block at left/bottom end) -->
+        <rect x="113" y="79" width="20" height="36" rx="3" fill="url(#nf-hammer-head)" stroke="#6a655e" stroke-width="0.5" />
+        <!-- Head top highlight -->
+        <rect x="114" y="80" width="18" height="2" rx="1" fill="#6a655e" opacity="0.4" />
+        <!-- Striking face (bottom) -->
+        <rect x="114" y="113" width="18" height="2" rx="1" fill="#5a554e" opacity="0.5" />
+      </g>
+
+      <!-- === IMPACT ZONE === -->
+      <!-- Wide ambient glow -->
+      <ellipse cx="120" cy="118" rx="35" ry="15" fill="url(#nf-ember-glow)" filter="url(#nf-glow-wide)">
+        <animate attributeName="opacity" values="0.4;0.7;0.4" dur="2.5s" repeatCount="indefinite" />
+      </ellipse>
+      <!-- Tight hot glow -->
+      <ellipse cx="120" cy="118" rx="15" ry="6" fill="#ff4d00" filter="url(#nf-glow-soft)" opacity="0.3">
+        <animate attributeName="opacity" values="0.2;0.4;0.2" dur="1.8s" repeatCount="indefinite" />
+      </ellipse>
+
+      <!-- === FLYING SPARKS (ember particles from impact) === -->
+      <!-- Spark 1 - arcing right -->
+      <circle cx="0" cy="0" r="2" fill="#ffb627">
+        <animateMotion path="M120,115 Q145,80 160,95" dur="1.2s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="1;0.8;0" dur="1.2s" repeatCount="indefinite" />
+        <animate attributeName="r" values="2;1.2;0.3" dur="1.2s" repeatCount="indefinite" />
+      </circle>
+      <!-- Spark 1 trail -->
+      <circle cx="0" cy="0" r="3" fill="#ff8c42" filter="url(#nf-spark-blur)" opacity="0.4">
+        <animateMotion path="M120,115 Q145,80 160,95" dur="1.2s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.4;0.2;0" dur="1.2s" repeatCount="indefinite" />
+      </circle>
+
+      <!-- Spark 2 - arcing left -->
+      <circle cx="0" cy="0" r="1.8" fill="#ff6b2b">
+        <animateMotion path="M118,116 Q95,75 80,90" dur="1.5s" repeatCount="indefinite" begin="0.3s" />
+        <animate attributeName="opacity" values="1;0.7;0" dur="1.5s" repeatCount="indefinite" begin="0.3s" />
+        <animate attributeName="r" values="1.8;1;0.2" dur="1.5s" repeatCount="indefinite" begin="0.3s" />
+      </circle>
+      <circle cx="0" cy="0" r="3" fill="#ff4d00" filter="url(#nf-spark-blur)" opacity="0.3">
+        <animateMotion path="M118,116 Q95,75 80,90" dur="1.5s" repeatCount="indefinite" begin="0.3s" />
+        <animate attributeName="opacity" values="0.3;0.15;0" dur="1.5s" repeatCount="indefinite" begin="0.3s" />
+      </circle>
+
+      <!-- Spark 3 - shooting up -->
+      <circle cx="0" cy="0" r="1.5" fill="#ffb627">
+        <animateMotion path="M122,114 Q130,70 135,60" dur="1s" repeatCount="indefinite" begin="0.6s" />
+        <animate attributeName="opacity" values="1;0.6;0" dur="1s" repeatCount="indefinite" begin="0.6s" />
+        <animate attributeName="r" values="1.5;0.8;0" dur="1s" repeatCount="indefinite" begin="0.6s" />
+      </circle>
+
+      <!-- Spark 4 - arcing far right, slower -->
+      <circle cx="0" cy="0" r="1.3" fill="#ff8c42">
+        <animateMotion path="M121,115 Q155,70 175,85" dur="1.8s" repeatCount="indefinite" begin="0.9s" />
+        <animate attributeName="opacity" values="0.9;0.5;0" dur="1.8s" repeatCount="indefinite" begin="0.9s" />
+        <animate attributeName="r" values="1.3;0.6;0" dur="1.8s" repeatCount="indefinite" begin="0.9s" />
+      </circle>
+
+      <!-- Spark 5 - small, arcing left-up -->
+      <circle cx="0" cy="0" r="1" fill="#ff4d00">
+        <animateMotion path="M119,115 Q100,85 90,70" dur="1.4s" repeatCount="indefinite" begin="0.2s" />
+        <animate attributeName="opacity" values="0.8;0.4;0" dur="1.4s" repeatCount="indefinite" begin="0.2s" />
+        <animate attributeName="r" values="1;0.5;0" dur="1.4s" repeatCount="indefinite" begin="0.2s" />
+      </circle>
+
+      <!-- Spark 6 - tiny, straight up -->
+      <circle cx="0" cy="0" r="0.8" fill="#ffb627">
+        <animateMotion path="M117,114 Q115,80 118,55" dur="1.6s" repeatCount="indefinite" begin="1.1s" />
+        <animate attributeName="opacity" values="0.7;0.3;0" dur="1.6s" repeatCount="indefinite" begin="1.1s" />
+      </circle>
+
+      <!-- === FLOATING EMBERS (slow ambient particles) === -->
+      <circle cx="95" cy="100" r="1" fill="#ff8c42" opacity="0">
+        <animate attributeName="cy" values="110;70;40" dur="4s" repeatCount="indefinite" />
+        <animate attributeName="cx" values="95;100;92" dur="4s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0;0.6;0" dur="4s" repeatCount="indefinite" />
+        <animate attributeName="r" values="0.5;1;0.3" dur="4s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="150" cy="105" r="0.8" fill="#ffb627" opacity="0">
+        <animate attributeName="cy" values="105;65;35" dur="5s" repeatCount="indefinite" begin="1.5s" />
+        <animate attributeName="cx" values="150;145;152" dur="5s" repeatCount="indefinite" begin="1.5s" />
+        <animate attributeName="opacity" values="0;0.5;0" dur="5s" repeatCount="indefinite" begin="1.5s" />
+      </circle>
+      <circle cx="130" cy="108" r="0.6" fill="#ff6b2b" opacity="0">
+        <animate attributeName="cy" values="108;60;30" dur="4.5s" repeatCount="indefinite" begin="2.5s" />
+        <animate attributeName="cx" values="130;138;135" dur="4.5s" repeatCount="indefinite" begin="2.5s" />
+        <animate attributeName="opacity" values="0;0.4;0" dur="4.5s" repeatCount="indefinite" begin="2.5s" />
+      </circle>
+    </svg>
+  </div>
+
+  <div class="error-code">404</div>
+  <h1>This form field doesn't exist</h1>
+  <p class="description">The page you're looking for wasn't forged yet — or it's been recast under a different name.</p>
+
+  <div class="actions">
+    <a [routerLink]="gettingStartedLink()" class="btn btn-primary">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+      </svg>
+      Back to the Forge
+    </a>
+    <a [routerLink]="examplesLink()" class="btn btn-secondary">Browse Examples</a>
+  </div>
+</div>
