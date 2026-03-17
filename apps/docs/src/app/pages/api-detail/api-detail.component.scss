@@ -212,7 +212,7 @@ $kind-colors: (
 .members-table-wrapper {
   overflow-x: auto;
   border: 1px solid var(--card-border);
-  border-radius: $radius-md;
+  border-radius: $radius-lg;
 }
 
 .members-table {
@@ -222,22 +222,34 @@ $kind-colors: (
 
   th {
     text-align: left;
-    padding: $space-3 $space-4;
+    padding: $space-4 $space-5;
     font-weight: 600;
     color: var(--text-secondary);
     background: var(--code-bg);
-    border-bottom: 1px solid var(--card-border);
+    border-bottom: 2px solid var(--card-border);
     white-space: nowrap;
     text-transform: uppercase;
     font-size: $text-xs;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
   }
 
   td {
-    padding: $space-3 $space-4;
+    padding: $space-4 $space-5;
     border-bottom: 1px solid var(--card-border);
     vertical-align: top;
-    line-height: 1.5;
+    line-height: 1.6;
+  }
+
+  // Name column — compact, no wrap
+  td:first-child {
+    white-space: nowrap;
+  }
+
+  // Description column
+  td:last-child {
+    color: var(--text-secondary);
+    font-size: $text-sm;
+    line-height: 1.6;
   }
 
   tr:last-child td {
@@ -264,7 +276,8 @@ code.type {
   font-family: $font-mono;
   font-size: $text-xs;
   color: $ember-glow;
-  word-break: break-all;
+  overflow-wrap: break-word;
+  word-break: normal;
 
   // Links inside [innerHTML] — needs ::ng-deep
   ::ng-deep .type-link {

@@ -274,28 +274,28 @@ function extractClassMembers(node: Node): ApiMember[] {
 function getClassSignature(node: import('ts-morph').ClassDeclaration): string {
   const name = node.getName() ?? 'Anonymous';
   const tp = node.getTypeParameters();
-  const tpStr = tp.length ? `<${tp.map((t) => t.getText()).join(', ')}>` : '';
+  const tpStr = tp.length ? `<\n${tp.map((t) => `  ${t.getText()}`).join(',\n')}\n>` : '';
   const ext = node.getExtends()?.getText();
   const impl = node.getImplements().map((i) => i.getText());
-  let sig = `class ${name}${tpStr}`;
-  if (ext) sig += ` extends ${ext}`;
-  if (impl.length) sig += ` implements ${impl.join(', ')}`;
-  return sig;
+  const lines = [`class ${name}${tpStr}`];
+  if (ext) lines.push(`  extends ${ext}`);
+  if (impl.length) lines.push(`  implements ${impl.join(', ')}`);
+  return lines.length > 1 ? lines.join('\n') : lines[0];
 }
 
 function getInterfaceSignature(node: import('ts-morph').InterfaceDeclaration): string {
   const tp = node.getTypeParameters();
-  const tpStr = tp.length ? `<${tp.map((t) => t.getText()).join(', ')}>` : '';
+  const tpStr = tp.length ? `<\n${tp.map((t) => `  ${t.getText()}`).join(',\n')}\n>` : '';
   const ext = node.getExtends().map((e) => e.getText());
-  let sig = `interface ${node.getName()}${tpStr}`;
-  if (ext.length) sig += ` extends ${ext.join(', ')}`;
-  return sig;
+  const lines = [`interface ${node.getName()}${tpStr}`];
+  if (ext.length) lines.push(`  extends ${ext.join(', ')}`);
+  return lines.length > 1 ? lines.join('\n') : lines[0];
 }
 
 function getFunctionSignature(node: import('ts-morph').FunctionDeclaration): string {
   const name = node.getName() ?? 'anonymous';
   const tp = node.getTypeParameters();
-  const tpStr = tp.length ? `<${tp.map((t) => t.getText()).join(', ')}>` : '';
+  const tpStr = tp.length ? `<\n${tp.map((t) => `  ${t.getText()}`).join(',\n')}\n>` : '';
   const params = node.getParameters().map((p) => {
     const opt = p.isOptional() ? '?' : '';
     const init = p.getInitializer();
@@ -303,7 +303,8 @@ function getFunctionSignature(node: import('ts-morph').FunctionDeclaration): str
       ? `${p.getName()}${opt}: ${formatType(p.getType())} = ${init.getText()}`
       : `${p.getName()}${opt}: ${formatType(p.getType())}`;
   });
-  return `function ${name}${tpStr}(${params.join(', ')}): ${formatType(node.getReturnType())}`;
+  const paramStr = params.length > 1 ? `(\n${params.map((p) => `  ${p}`).join(',\n')}\n)` : `(${params.join(', ')})`;
+  return `function ${name}${tpStr}${paramStr}: ${formatType(node.getReturnType())}`;
 }
 
 function extractTypeAliasMembers(node: import('ts-morph').TypeAliasDeclaration): ApiMember[] {

@@ -119,10 +119,15 @@ export class ApiDetailComponent {
 
   /**
    * Convert a type string into HTML with known symbols linked to their API pages.
-   * Truncates at 200 chars. Returns SafeHtml.
+   * Simplifies verbose generic types and truncates at 300 chars. Returns SafeHtml.
    */
   linkifyType(type: string): SafeHtml {
-    const truncated = type.length > 200 ? type.substring(0, 200) + '...' : type;
+    // Simplify verbose conditional/mapped types that repeat type parameter constraints
+    let simplified = type
+      .replace(/\bTFields extends readonly RegisteredFieldTypes\[\] \? TFields : RegisteredFieldTypes\[\]/g, 'TFields')
+      .replace(/\bTValue extends Record<string, unknown> \? TValue : Record<string, unknown>/g, 'TValue');
+
+    const truncated = simplified.length > 300 ? simplified.substring(0, 300) + '...' : simplified;
     const escaped = truncated.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     const index = this.symbolIndex();

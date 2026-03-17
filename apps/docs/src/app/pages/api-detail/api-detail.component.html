@@ -154,9 +154,6 @@
                 <tr [class.deprecated]="!!prop.deprecated">
                   <td>
                     <code class="name">
-                      @if (prop.isReadonly) {
-                        <span class="modifier">readonly</span>
-                      }
                       @if (prop.isStatic) {
                         <span class="modifier">static</span>
                       }
