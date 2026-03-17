@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EMPTY, fromEvent, iif, map } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { fromEvent, map } from 'rxjs';
 import { ActiveAdapterService } from '../services/active-adapter.service';
 import { ThemeService } from '../services/theme.service';
 import { Logo } from '../components/logo/logo.component';
@@ -29,13 +29,9 @@ export class DocsLayoutComponent {
   protected readonly expandedCategories = signal<Set<string>>(new Set());
   /** Categories explicitly collapsed by the user — overrides URL-based auto-expand. */
   private readonly collapsedCategories = signal<Set<string>>(new Set());
-  protected readonly scrolled = signal(false);
-
-  constructor() {
-    iif(() => this.isBrowser, fromEvent(window, 'scroll').pipe(map(() => window.scrollY > 0)), EMPTY)
-      .pipe(takeUntilDestroyed())
-      .subscribe((v) => this.scrolled.set(v));
-  }
+  protected readonly scrolled = this.isBrowser
+    ? toSignal(fromEvent(window, 'scroll').pipe(map(() => window.scrollY > 0)), { initialValue: false })
+    : signal(false);
 
   protected readonly navItems = computed(() => {
     const adapter = this.activeAdapter.adapter();

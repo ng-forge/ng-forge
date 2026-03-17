@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
-  effect,
   ElementRef,
   inject,
   input,
@@ -14,8 +13,8 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { DOCUMENT } from '@angular/common';
-import { BehaviorSubject, fromEvent, merge, Subject } from 'rxjs';
-import { debounceTime, delay, filter, map, startWith, switchMap } from 'rxjs/operators';
+import { fromEvent, merge, Subject } from 'rxjs';
+import { debounceTime, filter, map, startWith, switchMap } from 'rxjs/operators';
 import type { HeadingEntry } from '../../services/content.service';
 
 @Component({
@@ -137,7 +136,7 @@ export class TocComponent {
   private readonly tocItems = viewChildren<ElementRef>('tocItem');
   private readonly headings$ = toObservable(this.headings);
   private readonly clickedId$ = new Subject<string>();
-  private readonly scrollLocked$ = new BehaviorSubject(false);
+  private readonly scrollLocked = signal(false);
 
   constructor() {
     afterNextRender({
@@ -145,7 +144,7 @@ export class TocComponent {
         // Click-driven selection: immediately select, lock scroll-spy, unlock after 800ms
         const clickSelection$ = this.clickedId$.pipe(
           switchMap((id) => {
-            this.scrollLocked$.next(true);
+            this.scrollLocked.set(true);
             return merge(
               // Emit the clicked id immediately
               [id],
@@ -153,7 +152,7 @@ export class TocComponent {
               fromEvent(this.document, 'scroll').pipe(
                 debounceTime(300),
                 map(() => {
-                  this.scrollLocked$.next(false);
+                  this.scrollLocked.set(false);
                   return null as string | null;
                 }),
               ),
@@ -170,7 +169,7 @@ export class TocComponent {
             debounceTime(50),
           ),
         ).pipe(
-          filter(() => !this.scrollLocked$.value),
+          filter(() => !this.scrollLocked()),
           debounceTime(10),
           map(() => this.findActiveHeading()),
           filter((id): id is string => id !== null),

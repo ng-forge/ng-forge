@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 const THEME_STORAGE_KEY = 'ng-forge-docs-theme';
 export type ThemeType = 'auto' | 'light' | 'dark';
@@ -10,7 +11,7 @@ export class ThemeService {
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
   /** Current theme: 'auto' | 'light' | 'dark' */
-  readonly theme = signal<ThemeType>('auto');
+  readonly theme = signal<ThemeType>(this.loadSavedTheme());
 
   readonly isDark = computed(() => {
     if (!this.isBrowser) return false;
@@ -20,20 +21,27 @@ export class ThemeService {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
-  /** Call once from AppComponent.ngOnInit() */
-  init(): void {
+  constructor() {
     if (!this.isBrowser) return;
 
-    const saved = localStorage.getItem(THEME_STORAGE_KEY) as ThemeType | null;
-    if (saved === 'light' || saved === 'dark' || saved === 'auto') {
-      this.theme.set(saved);
-    }
-    this.applyThemeAttribute();
+    // DOM attribute IS a reflection of theme
+    explicitEffect([this.theme], ([t]) => {
+      if (t === 'light') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', t);
+      }
+    });
+
+    // localStorage IS persisted theme
+    explicitEffect([this.theme], ([t]) => {
+      localStorage.setItem(THEME_STORAGE_KEY, t);
+    });
 
     // Listen for system theme changes when in auto mode
     const mql = window.matchMedia('(prefers-color-scheme: dark)');
     mql.addEventListener('change', () => {
-      // Force re-evaluation by re-setting the same value
+      // Force re-evaluation of isDark by re-setting the same value
       this.theme.update((t) => t);
     });
   }
@@ -42,16 +50,13 @@ export class ThemeService {
     const current = this.theme();
     const next: ThemeType = current === 'auto' ? 'light' : current === 'light' ? 'dark' : 'auto';
     this.theme.set(next);
-    localStorage.setItem(THEME_STORAGE_KEY, next);
-    this.applyThemeAttribute();
+    // That's it — effects handle localStorage and DOM
   }
 
-  private applyThemeAttribute(): void {
-    const t = this.theme();
-    if (t === 'light') {
-      document.documentElement.removeAttribute('data-theme');
-    } else {
-      document.documentElement.setAttribute('data-theme', t);
-    }
+  private loadSavedTheme(): ThemeType {
+    if (!this.isBrowser) return 'auto';
+    const saved = localStorage.getItem(THEME_STORAGE_KEY) as ThemeType | null;
+    if (saved === 'light' || saved === 'dark' || saved === 'auto') return saved;
+    return 'auto';
   }
 }

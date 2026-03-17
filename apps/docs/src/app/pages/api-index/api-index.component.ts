@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { SlicePipe } from '@angular/common';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { of, switchMap } from 'rxjs';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { ApiService, type ApiDeclaration, type DeclarationKind, getKindMeta, groupByKind } from '../../services/api.service';
 
@@ -23,16 +22,22 @@ export class ApiIndexComponent {
   /** Which packages are visible. Both enabled by default. */
   readonly packageFilter = signal<Set<string>>(new Set(['core', 'adapter']));
 
-  readonly core = toSignal(this.apiService.loadPackage('core'));
+  private readonly coreResource = rxResource({
+    params: () => ({}),
+    stream: () => this.apiService.loadPackage('core'),
+  });
 
-  readonly adapterPkg = toSignal(
-    toObservable(this.adapter.adapter).pipe(
-      switchMap((name) => {
-        const slug = this.apiService.getAdapterPackageSlug(name);
-        return slug ? this.apiService.loadPackage(slug) : of(undefined);
-      }),
-    ),
-  );
+  readonly core = computed(() => this.coreResource.value());
+
+  private readonly adapterPkgResource = rxResource({
+    params: () => {
+      const slug = this.apiService.getAdapterPackageSlug(this.adapter.adapter());
+      return slug ? { slug } : undefined;
+    },
+    stream: ({ params }) => this.apiService.loadPackage(params.slug),
+  });
+
+  readonly adapterPkg = computed(() => this.adapterPkgResource.value());
 
   readonly availableKinds = computed(() => {
     const all = [...this.visibleDeclarations()];

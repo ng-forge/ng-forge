@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { map, startWith, filter } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -17,7 +17,7 @@ import { ThemeService } from './services/theme.service';
     '[attr.data-adapter]': 'activeAdapter.adapter()',
   },
 })
-export class App implements OnInit {
+export class App {
   private readonly router = inject(Router);
   protected readonly activeAdapter = inject(ActiveAdapterService);
   readonly themeService = inject(ThemeService);
@@ -35,8 +35,4 @@ export class App implements OnInit {
     const url = this.currentUrl();
     return url === '/' || url === '';
   });
-
-  ngOnInit(): void {
-    this.themeService.init();
-  }
 }

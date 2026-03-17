@@ -51,7 +51,7 @@
     }
 
     <!-- Signature -->
-    @if (highlightedSignature(); as sig) {
+    @if (highlightedSignature.value(); as sig) {
       <section class="section">
         <h2>Signature</h2>
         <div class="code-block" [innerHTML]="trustHtml(sig)"></div>
@@ -211,10 +211,10 @@
     }
 
     <!-- Examples -->
-    @if (highlightedExamples()?.length) {
+    @if (highlightedExamples.value()?.length) {
       <section class="section">
         <h2>Examples</h2>
-        @for (ex of highlightedExamples()!; track $index) {
+        @for (ex of highlightedExamples.value()!; track $index) {
           <div class="code-block" [innerHTML]="trustHtml(ex)"></div>
         }
       </section>

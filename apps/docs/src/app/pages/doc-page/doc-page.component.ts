@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { ContentService } from '../../services/content.service';
 import { ContentComponentsDirective } from '../../directives/content-components.directive';
 import { TocComponent } from '../../components/toc/toc.component';
@@ -168,35 +167,30 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
 })
 export class DocPageComponent {
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
   private readonly contentService = inject(ContentService);
   private readonly clipboard = inject(Clipboard);
   protected readonly adapter = inject(ActiveAdapterService);
 
   /**
-   * Extract the content slug from the full route path on every navigation.
-   * With file-based routing's [...slug] catch-all, route.url is always empty
-   * and never re-emits — so we listen to Router.events instead.
+   * Extract the content slug from the current URL.
+   * Uses `router.lastSuccessfulNavigation()` signal for reactivity.
    */
-  private readonly slug$ = this.router.events.pipe(
-    filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-    startWith(null),
-    map(() => {
-      const parts = this.route.snapshot.pathFromRoot.flatMap((r) => r.url.map((s) => s.path));
-      // Strip adapter prefix: ['material', 'getting-started'] → 'getting-started'
-      return parts.slice(1).join('/');
-    }),
-    distinctUntilChanged(),
-  );
+  private readonly slug = computed(() => {
+    const nav = this.router.lastSuccessfulNavigation();
+    const url = nav ? this.router.serializeUrl(nav.finalUrl ?? nav.extractedUrl) : this.router.url;
+    const parts = url.split('/').filter(Boolean);
+    return parts.slice(1).join('/');
+  });
 
-  private readonly content$ = this.slug$.pipe(
-    filter((slug) => slug !== 'examples' && !slug.startsWith('api-reference')),
-    switchMap((slug) => this.contentService.load(slug)),
-  );
+  private readonly contentResource = rxResource({
+    params: () => {
+      const s = this.slug();
+      return s && s !== 'examples' && !s.startsWith('api-reference') ? { slug: s } : undefined;
+    },
+    stream: ({ params }) => this.contentService.load(params.slug),
+  });
 
-  readonly content = toSignal(this.content$);
-
-  private readonly slug = toSignal(this.slug$, { initialValue: '' });
+  readonly content = computed(() => this.contentResource.value());
 
   /** True when slug is exactly 'api-reference' — renders the API index. */
   readonly isApiIndex = computed(() => this.slug() === 'api-reference');

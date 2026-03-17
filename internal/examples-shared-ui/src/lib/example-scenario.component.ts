@@ -1,14 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, PLATFORM_ID, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, PLATFORM_ID, resource, signal } from '@angular/core';
 import { isPlatformBrowser, JsonPipe } from '@angular/common';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { ActivatedRoute } from '@angular/router';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { combineLatest, from, map, of, startWith, switchMap, Observable } from 'rxjs';
+import { DomSanitizer } from '@angular/platform-browser';
 import { DynamicForm } from '@ng-forge/dynamic-forms';
 import { SANDBOX_THEME } from '@ng-forge/sandbox-harness';
 import { ExampleScenario } from './types';
 import { injectQueryParams } from 'ngxtension/inject-query-params';
+import { injectRouteData } from 'ngxtension/inject-route-data';
 
 /**
  * Generic component for rendering a single example scenario.
@@ -32,7 +30,6 @@ import { injectQueryParams } from 'ngxtension/inject-query-params';
   },
 })
 export class ExampleScenarioComponent {
-  private readonly route = inject(ActivatedRoute);
   private readonly clipboard = inject(Clipboard);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly platformId = inject(PLATFORM_ID);
@@ -52,7 +49,7 @@ export class ExampleScenarioComponent {
   scenarioInput = input<ExampleScenario | undefined>(undefined, { alias: 'scenario' });
 
   /** Scenario loaded from route data */
-  private readonly routeScenario = toSignal(this.route.data.pipe(map((data) => data['scenario'] as ExampleScenario | undefined)));
+  private readonly routeScenario = injectRouteData<ExampleScenario | undefined>('scenario');
 
   /** Full minimal mode - hide all chrome, show only form (used by landing page) */
   private readonly minimalParam = injectQueryParams('minimal');
@@ -130,8 +127,19 @@ export class ExampleScenarioComponent {
   }
 
   /** Syntax-highlighted config HTML using Shiki */
-  highlightedConfig = toSignal(this.createHighlightedConfig$(), {
-    initialValue: this.sanitizer.bypassSecurityTrustHtml(''),
+  private readonly highlightResource = resource({
+    params: () => (this.isBrowser ? { code: this.configJson(), theme: this.currentTheme() } : undefined),
+    loader: async ({ params }) => {
+      if (!params.code) return '';
+      const { codeToHtml } = await import('shiki');
+      const shikiTheme = params.theme === 'dark' ? 'material-theme-darker' : 'material-theme-lighter';
+      return codeToHtml(params.code, { lang: 'javascript', theme: shikiTheme });
+    },
+  });
+
+  highlightedConfig = computed(() => {
+    const html = this.highlightResource.value() ?? '';
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   });
 
   formValue = linkedSignal<Record<string, unknown>>(() => this.scenario().initialValue ?? {});
@@ -147,26 +155,6 @@ export class ExampleScenarioComponent {
       return 'dark';
     }
     return 'light';
-  }
-
-  /** Creates an observable for syntax-highlighted config */
-  private createHighlightedConfig$(): Observable<SafeHtml> {
-    if (!this.isBrowser) {
-      return of(this.sanitizer.bypassSecurityTrustHtml(''));
-    }
-
-    const config$ = toObservable(this.configJson);
-    const theme$ = toObservable(this.currentTheme);
-
-    return combineLatest([config$, theme$]).pipe(
-      switchMap(([code, theme]) => {
-        if (!code) return of('');
-        const shikiTheme = theme === 'dark' ? 'material-theme-darker' : 'material-theme-lighter';
-        return from(import('shiki').then(({ codeToHtml }) => codeToHtml(code, { lang: 'javascript', theme: shikiTheme })));
-      }),
-      map((html) => this.sanitizer.bypassSecurityTrustHtml(html)),
-      startWith(this.sanitizer.bypassSecurityTrustHtml('')),
-    );
   }
 
   copyConfig(): void {

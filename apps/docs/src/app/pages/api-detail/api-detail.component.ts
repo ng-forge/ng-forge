@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, resource } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import { ActivatedRoute, NavigationEnd, Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { distinctUntilChanged, filter, map, startWith, switchMap, combineLatest, of } from 'rxjs';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { combineLatest, map } from 'rxjs';
 import { codeToHtml } from 'shiki';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { ApiService, type ApiPackage, getKindMeta } from '../../services/api.service';
@@ -20,55 +20,60 @@ import { ApiService, type ApiPackage, getKindMeta } from '../../services/api.ser
 })
 export class ApiDetailComponent {
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
   private readonly apiService = inject(ApiService);
   private readonly sanitizer = inject(DomSanitizer);
   protected readonly adapter = inject(ActiveAdapterService);
 
   /** Extract symbol name from URL: /:adapter/api-reference/:symbol */
-  private readonly symbolName$ = this.router.events.pipe(
-    filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-    startWith(null),
-    map(() => {
-      const parts = this.route.snapshot.pathFromRoot.flatMap((r) => r.url.map((s) => s.path));
-      // parts: [adapter, api-reference, symbolName]
-      return parts[2] ?? '';
-    }),
-    distinctUntilChanged(),
-  );
+  readonly symbolName = computed(() => {
+    const nav = this.router.lastSuccessfulNavigation();
+    const url = nav ? this.router.serializeUrl(nav.finalUrl ?? nav.extractedUrl) : this.router.url;
+    const parts = url.split('/').filter(Boolean);
+    // parts: [adapter, api-reference, symbolName]
+    return parts[2] ?? '';
+  });
 
   /** Load core + adapter, then find which package owns the symbol. */
-  private readonly data$ = this.symbolName$.pipe(
-    switchMap((symbolName) => {
-      const adapterSlug = this.apiService.getAdapterPackageSlug(this.adapter.adapter());
+  private readonly dataResource = rxResource({
+    params: () => {
+      const sym = this.symbolName();
+      return sym ? { symbolName: sym, adapter: this.adapter.adapter() } : undefined;
+    },
+    stream: ({ params }) => {
+      const adapterSlug = this.apiService.getAdapterPackageSlug(params.adapter);
       const packages$ = adapterSlug
         ? combineLatest([this.apiService.loadPackage('core'), this.apiService.loadPackage(adapterSlug)])
         : this.apiService.loadPackage('core').pipe(map((core) => [core] as ApiPackage[]));
-
       return packages$.pipe(
         map((pkgs) => {
           for (const pkg of pkgs) {
-            const declaration = pkg.declarations.find((d) => d.name === symbolName);
-            if (declaration) return { pkg, declaration, symbolName };
+            const declaration = pkg.declarations.find((d) => d.name === params.symbolName);
+            if (declaration) return { pkg, declaration, symbolName: params.symbolName };
           }
-          return { pkg: pkgs[0], declaration: undefined, symbolName };
+          return { pkg: pkgs[0], declaration: undefined, symbolName: params.symbolName };
         }),
       );
-    }),
-  );
+    },
+  });
 
-  private readonly data = toSignal(this.data$);
+  private readonly data = computed(() => this.dataResource.value());
 
-  /** Load core + adapter packages for cross-reference linking. */
-  private readonly corePkg = toSignal(this.apiService.loadPackage('core'));
-  private readonly adapterPkg = toSignal(
-    toObservable(this.adapter.adapter).pipe(
-      switchMap((name) => {
-        const slug = this.apiService.getAdapterPackageSlug(name);
-        return slug ? this.apiService.loadPackage(slug) : of(undefined);
-      }),
-    ),
-  );
+  /** Load core package for cross-reference linking. */
+  private readonly corePkgResource = rxResource({
+    params: () => ({}),
+    stream: () => this.apiService.loadPackage('core'),
+  });
+  private readonly corePkg = computed(() => this.corePkgResource.value());
+
+  /** Load adapter package for cross-reference linking. */
+  private readonly adapterPkgResource = rxResource({
+    params: () => {
+      const slug = this.apiService.getAdapterPackageSlug(this.adapter.adapter());
+      return slug ? { slug } : undefined;
+    },
+    stream: ({ params }) => this.apiService.loadPackage(params.slug),
+  });
+  private readonly adapterPkg = computed(() => this.adapterPkgResource.value());
 
   /** Map of symbol name → { pkgSlug } for all known declarations. */
   private readonly symbolIndex = computed(() => {
@@ -85,7 +90,6 @@ export class ApiDetailComponent {
   });
 
   readonly declaration = computed(() => this.data()?.declaration);
-  readonly symbolName = computed(() => this.data()?.symbolName ?? '');
   readonly pkgName = computed(() => this.data()?.pkg?.name ?? '');
   readonly adapterInfo = computed(() => {
     const name = this.adapter.adapter();
@@ -97,31 +101,31 @@ export class ApiDetailComponent {
     return decl ? getKindMeta(decl.kind) : undefined;
   });
 
-  readonly highlightedSignature = toSignal(
-    this.data$.pipe(
-      switchMap(({ declaration }) => {
-        if (!declaration?.signature) return of('');
-        return highlightCode(declaration.signature, 'typescript');
-      }),
-    ),
-  );
+  readonly highlightedSignature = resource({
+    params: () => {
+      const decl = this.declaration();
+      return decl?.signature ? { signature: decl.signature } : undefined;
+    },
+    loader: ({ params }) => highlightCode(params.signature, 'typescript'),
+  });
 
-  readonly highlightedExamples = toSignal(
-    this.data$.pipe(
-      switchMap(({ declaration }) => {
-        if (!declaration?.examples?.length) return of([]);
-        return combineLatest(
-          declaration.examples.map((ex) => {
-            const codeMatch = ex.match(/```(\w+)?\n([\s\S]*?)```/);
-            if (codeMatch) {
-              return highlightCode(codeMatch[2].trim(), codeMatch[1] ?? 'typescript');
-            }
-            return highlightCode(ex.trim(), 'typescript');
-          }),
-        );
-      }),
-    ),
-  );
+  readonly highlightedExamples = resource({
+    params: () => {
+      const decl = this.declaration();
+      return decl?.examples?.length ? { examples: decl.examples } : undefined;
+    },
+    loader: async ({ params }) => {
+      return Promise.all(
+        params.examples.map((ex) => {
+          const codeMatch = ex.match(/```(\w+)?\n([\s\S]*?)```/);
+          if (codeMatch) {
+            return highlightCode(codeMatch[2].trim(), codeMatch[1] ?? 'typescript');
+          }
+          return highlightCode(ex.trim(), 'typescript');
+        }),
+      );
+    },
+  });
 
   readonly properties = computed(() => this.declaration()?.members.filter((m) => m.kind === 'property' || m.kind === 'accessor') ?? []);
 
@@ -183,7 +187,7 @@ export class ApiDetailComponent {
     });
 
     // 4. Link known PascalCase API symbols (not already inside tags)
-    html = html.replace(/(?<![<\/\w])([A-Z][a-z]\w{2,})(?![^<]*>)/g, (match, name: string) => {
+    html = html.replace(/(?<![<\w/])([A-Z][a-z]\w{2,})(?![^<]*>)/g, (match, name: string) => {
       if (name === currentSymbol) return match;
       if (!index.has(name)) return match;
       return `<a class="type-link" href="/${adapterName}/api-reference/${name}">${match}</a>`;
@@ -221,7 +225,7 @@ export class ApiDetailComponent {
    */
   linkifyType(type: string): SafeHtml {
     // Simplify verbose conditional/mapped types that repeat type parameter constraints
-    let simplified = type
+    const simplified = type
       .replace(/\bTFields extends readonly RegisteredFieldTypes\[\] \? TFields : RegisteredFieldTypes\[\]/g, 'TFields')
       .replace(/\bTValue extends Record<string, unknown> \? TValue : Record<string, unknown>/g, 'TValue');
 

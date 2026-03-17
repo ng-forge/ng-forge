@@ -1,11 +1,21 @@
-import { ChangeDetectionStrategy, Component, inject, PLATFORM_ID, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, PLATFORM_ID, resource, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 interface SearchResult {
   url: string;
   title: string;
   excerpt: string;
+}
+
+interface PagefindResult {
+  data: () => Promise<{ url: string; meta: { title: string }; excerpt: string }>;
+}
+
+interface Pagefind {
+  init: () => Promise<void>;
+  search: (q: string) => Promise<{ results: PagefindResult[] }>;
 }
 
 @Component({
@@ -61,18 +71,48 @@ interface SearchResult {
 export class SearchComponent {
   private readonly router = inject(Router);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-  private pagefind: unknown;
-  private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  private pagefind: Pagefind | null = null;
 
   readonly isOpen = signal(false);
   readonly query = signal('');
-  readonly results = signal<SearchResult[]>([]);
-  readonly loading = signal(false);
+
+  // Debounced query — follows query with 200ms delay
+  private readonly debouncedQuery = signal('');
+
+  constructor() {
+    explicitEffect([this.query], ([q], cleanup) => {
+      const timer = setTimeout(() => this.debouncedQuery.set(q), 200);
+      cleanup(() => clearTimeout(timer));
+    });
+  }
+
+  // Results ARE the search results for the debounced query
+  private readonly searchResource = resource({
+    params: () => {
+      const q = this.debouncedQuery();
+      return this.isOpen() && q.trim() ? { q } : undefined;
+    },
+    loader: async ({ params }) => {
+      if (!this.pagefind) await this.initPagefind();
+      if (!this.pagefind) return [];
+
+      const response = await this.pagefind.search(params.q);
+      const items = await Promise.all(response.results.slice(0, 8).map((r) => r.data()));
+      return items.map((item) => ({
+        url: item.url,
+        title: item.meta?.title ?? 'Untitled',
+        excerpt: item.excerpt ?? '',
+      }));
+    },
+  });
+
+  // Derived views on the resource — no manual coordination
+  readonly results = computed<SearchResult[]>(() => this.searchResource.value() ?? []);
+  readonly loading = this.searchResource.isLoading;
 
   open(): void {
     this.isOpen.set(true);
     this.initPagefind();
-    // Focus input after render
     requestAnimationFrame(() => {
       document.querySelector<HTMLInputElement>('.search-input')?.focus();
     });
@@ -81,20 +121,15 @@ export class SearchComponent {
   close(): void {
     this.isOpen.set(false);
     this.query.set('');
-    this.results.set([]);
   }
 
   onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.query.set(value);
-
-    if (this.debounceTimer) clearTimeout(this.debounceTimer);
-    this.debounceTimer = setTimeout(() => this.search(value), 200);
   }
 
   navigateTo(url: string): void {
     this.close();
-    // Strip base href if present, convert to router-compatible path
     const path = url
       .replace(/^\/dynamic-forms/, '')
       .replace(/\.html$/, '')
@@ -117,40 +152,10 @@ export class SearchComponent {
   private async initPagefind(): Promise<void> {
     if (this.pagefind || !this.isBrowser) return;
     try {
-      // Pagefind generates its JS in the output directory
       this.pagefind = await new Function('return import("/pagefind/pagefind.js")')();
-      await (this.pagefind as { init: () => Promise<void> }).init();
+      await (this.pagefind as Pagefind).init();
     } catch {
       console.warn('[Search] Pagefind not available — run postbuild:search to generate index');
-    }
-  }
-
-  private async search(query: string): Promise<void> {
-    if (!query.trim() || !this.pagefind) {
-      this.results.set([]);
-      return;
-    }
-
-    this.loading.set(true);
-    try {
-      const pf = this.pagefind as {
-        search: (
-          q: string,
-        ) => Promise<{ results: Array<{ data: () => Promise<{ url: string; meta: { title: string }; excerpt: string }> }> }>;
-      };
-      const response = await pf.search(query);
-      const items = await Promise.all(response.results.slice(0, 8).map((r) => r.data()));
-      this.results.set(
-        items.map((item) => ({
-          url: item.url,
-          title: item.meta?.title ?? 'Untitled',
-          excerpt: item.excerpt ?? '',
-        })),
-      );
-    } catch {
-      this.results.set([]);
-    } finally {
-      this.loading.set(false);
     }
   }
 }

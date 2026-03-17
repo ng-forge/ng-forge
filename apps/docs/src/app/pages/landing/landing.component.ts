@@ -1,10 +1,11 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
 import { catchError, delay, filter, iif, map, merge, of, switchMap, tap } from 'rxjs';
+
 import { DynamicForm } from '@ng-forge/dynamic-forms';
 
 import { Logo } from '../../components/logo';
@@ -88,33 +89,27 @@ export class LandingComponent {
   // STATS (fetched dynamically)
   // ============================================
 
-  readonly npmDownloads = toSignal(
-    iif(
-      () => this.isBrowser,
-      of(null).pipe(
-        delay(500), // Delay to not block initial render
-        switchMap(() => this.http.get<{ downloads?: number }>('https://api.npmjs.org/downloads/point/last-month/@ng-forge/dynamic-forms')),
+  private readonly npmResource = rxResource({
+    params: () => (this.isBrowser ? {} : undefined),
+    stream: () =>
+      this.http.get<{ downloads?: number }>('https://api.npmjs.org/downloads/point/last-month/@ng-forge/dynamic-forms').pipe(
         map((data) => this.formatNumber(data?.downloads ?? 0)),
         catchError(() => of('—')),
       ),
-      of('—'),
-    ),
-    { initialValue: '—' },
-  );
+  });
 
-  readonly githubStars = toSignal(
-    iif(
-      () => this.isBrowser,
-      of(null).pipe(
-        delay(600), // Slight stagger from npm fetch
-        switchMap(() => this.http.get<{ stargazers_count?: number }>('https://api.github.com/repos/ng-forge/ng-forge')),
+  readonly npmDownloads = computed(() => this.npmResource.value() ?? '—');
+
+  private readonly githubResource = rxResource({
+    params: () => (this.isBrowser ? {} : undefined),
+    stream: () =>
+      this.http.get<{ stargazers_count?: number }>('https://api.github.com/repos/ng-forge/ng-forge').pipe(
         map((data) => this.formatNumber(data?.stargazers_count ?? 0)),
         catchError(() => of('—')),
       ),
-      of('—'),
-    ),
-    { initialValue: '—' },
-  );
+  });
+
+  readonly githubStars = computed(() => this.githubResource.value() ?? '—');
 
   readonly uiLibraryCount = '4'; // Static: Material, Bootstrap, PrimeNG, Ionic
 
