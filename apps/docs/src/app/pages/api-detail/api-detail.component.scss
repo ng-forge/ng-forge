@@ -265,6 +265,19 @@ code.type {
   font-size: $text-xs;
   color: $ember-glow;
   word-break: break-all;
+
+  // Links inside [innerHTML] — needs ::ng-deep
+  ::ng-deep .type-link {
+    color: $ember-glow;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba($ember-glow, 0.4);
+    transition: border-color $transition-fast;
+
+    &:hover {
+      border-bottom-style: solid;
+      border-bottom-color: $ember-glow;
+    }
+  }
 }
 
 .modifier {

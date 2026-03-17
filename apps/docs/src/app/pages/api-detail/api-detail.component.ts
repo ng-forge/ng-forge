@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink } from '@angular/router';
-import { DomSanitizer } from '@angular/platform-browser';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, filter, map, startWith, switchMap, combineLatest, of } from 'rxjs';
 import { codeToHtml } from 'shiki';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
-import { ApiService, getKindMeta } from '../../services/api.service';
+import { ApiService, type ApiPackage, getKindMeta } from '../../services/api.service';
 
 @Component({
   selector: 'docs-api-detail',
@@ -28,8 +28,6 @@ export class ApiDetailComponent {
     startWith(null),
     map(() => {
       const parts = this.route.snapshot.pathFromRoot.flatMap((r) => r.url.map((s) => s.path));
-      // URL: /:adapter/api-reference/:pkg/:symbol
-      // parts: [adapter, api-reference, pkg, symbol]
       return { pkgSlug: parts[2] ?? 'core', symbolName: parts[3] ?? '' };
     }),
     distinctUntilChanged((a, b) => a.pkgSlug === b.pkgSlug && a.symbolName === b.symbolName),
@@ -48,6 +46,31 @@ export class ApiDetailComponent {
 
   private readonly data = toSignal(this.data$);
 
+  /** Load core + adapter packages for cross-reference linking. */
+  private readonly corePkg = toSignal(this.apiService.loadPackage('core'));
+  private readonly adapterPkg = toSignal(
+    toObservable(this.adapter.adapter).pipe(
+      switchMap((name) => {
+        const slug = this.apiService.getAdapterPackageSlug(name);
+        return slug ? this.apiService.loadPackage(slug) : of(undefined);
+      }),
+    ),
+  );
+
+  /** Map of symbol name → { pkgSlug } for all known declarations. */
+  private readonly symbolIndex = computed(() => {
+    const index = new Map<string, string>();
+    const core = this.corePkg();
+    const adapterPkg = this.adapterPkg();
+    if (core) {
+      for (const d of core.declarations) index.set(d.name, 'core');
+    }
+    if (adapterPkg) {
+      for (const d of adapterPkg.declarations) index.set(d.name, adapterPkg.slug);
+    }
+    return index;
+  });
+
   readonly declaration = computed(() => this.data()?.declaration);
   readonly pkgSlug = computed(() => this.data()?.pkgSlug ?? 'core');
   readonly symbolName = computed(() => this.data()?.symbolName ?? '');
@@ -58,7 +81,6 @@ export class ApiDetailComponent {
     return decl ? getKindMeta(decl.kind) : undefined;
   });
 
-  /** Syntax-highlighted signature. */
   readonly highlightedSignature = toSignal(
     this.data$.pipe(
       switchMap(({ declaration }) => {
@@ -68,14 +90,12 @@ export class ApiDetailComponent {
     ),
   );
 
-  /** Syntax-highlighted examples. */
   readonly highlightedExamples = toSignal(
     this.data$.pipe(
       switchMap(({ declaration }) => {
         if (!declaration?.examples?.length) return of([]);
         return combineLatest(
           declaration.examples.map((ex) => {
-            // Extract code block from markdown-style example
             const codeMatch = ex.match(/```(\w+)?\n([\s\S]*?)```/);
             if (codeMatch) {
               return highlightCode(codeMatch[2].trim(), codeMatch[1] ?? 'typescript');
@@ -97,9 +117,28 @@ export class ApiDetailComponent {
     return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
-  formatType(type: string): string {
-    // Truncate very long types
-    return type.length > 200 ? type.substring(0, 200) + '...' : type;
+  /**
+   * Convert a type string into HTML with known symbols linked to their API pages.
+   * Truncates at 200 chars. Returns SafeHtml.
+   */
+  linkifyType(type: string): SafeHtml {
+    const truncated = type.length > 200 ? type.substring(0, 200) + '...' : type;
+    const escaped = truncated.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    const index = this.symbolIndex();
+    const currentSymbol = this.symbolName();
+    const adapterName = this.adapter.adapter();
+
+    // Match PascalCase identifiers that exist in our symbol index
+    const linked = escaped.replace(/\b([A-Z]\w{2,})\b/g, (match, name: string) => {
+      // Don't self-link
+      if (name === currentSymbol) return match;
+      const pkgSlug = index.get(name);
+      if (!pkgSlug) return match;
+      return `<a class="type-link" href="/${adapterName}/api-reference/${pkgSlug}/${name}">${match}</a>`;
+    });
+
+    return this.sanitizer.bypassSecurityTrustHtml(linked);
   }
 }
 
