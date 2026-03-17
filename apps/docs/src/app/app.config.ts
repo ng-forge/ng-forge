@@ -1,4 +1,5 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationConfig, inject, PLATFORM_ID, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import { DOCUMENT, isPlatformBrowser, APP_BASE_HREF } from '@angular/common';
 import { withInMemoryScrolling, UrlSerializer, withNavigationErrorHandler } from '@angular/router';
 import { provideFileRouter, withExtraRoutes } from '@analogjs/router';
 import { AdapterAwareUrlSerializer } from './serializers/adapter-url-serializer';
@@ -35,6 +36,18 @@ export const appConfig: ApplicationConfig = {
     provideContent(withMarkdownRenderer()),
     provideClientHydration(withEventReplay()),
     { provide: UrlSerializer, useClass: AdapterAwareUrlSerializer },
+    {
+      provide: APP_BASE_HREF,
+      useFactory: () => {
+        const doc = inject(DOCUMENT);
+        const platformId = inject(PLATFORM_ID);
+        if (isPlatformBrowser(platformId)) {
+          const base = doc.querySelector('base')?.getAttribute('href');
+          return base ?? '/';
+        }
+        return '/';
+      },
+    },
     // Dynamic forms for landing page demos (Material is always used on landing page)
     provideDynamicForm(...withMaterialFields()),
     // SandboxHarness for live adapter examples in docs pages
