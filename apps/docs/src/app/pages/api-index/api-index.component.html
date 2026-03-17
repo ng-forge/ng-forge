@@ -23,7 +23,27 @@
       </svg>
       <input type="text" class="search-input" placeholder="Filter declarations..." [value]="query()" (input)="onSearch($event)" />
     </div>
+
+    <!-- Package pills -->
     <div class="filter-bar">
+      <span class="filter-group-label">Package</span>
+      <button type="button" class="filter-tag filter-tag--pkg" [class.active]="showCore()" (click)="togglePackage('core')">
+        <span class="pkg-dot pkg-dot--core"></span>
+        Core
+        <span class="filter-count">{{ coreCount() }}</span>
+      </button>
+      @if (!isCustomAdapter()) {
+        <button type="button" class="filter-tag filter-tag--pkg" [class.active]="showAdapter()" (click)="togglePackage('adapter')">
+          <span class="pkg-dot pkg-dot--adapter"></span>
+          {{ adapterLabel() }}
+          <span class="filter-count">{{ adapterCount() }}</span>
+        </button>
+      }
+    </div>
+
+    <!-- Kind pills -->
+    <div class="filter-bar">
+      <span class="filter-group-label">Type</span>
       <button type="button" class="filter-tag" [class.active]="!kindFilter()" (click)="clearFilters()">All</button>
       @for (k of availableKinds(); track k.kind) {
         <button type="button" class="filter-tag" [class.active]="kindFilter() === k.kind" (click)="toggleKindFilter(k.kind)">
@@ -40,7 +60,7 @@
       <section class="package-section">
         <h2 class="package-title">
           <span class="package-badge">Core</span>
-          @ng-forge/dynamic-forms
+          &#64;ng-forge/dynamic-forms
         </h2>
         @for (group of groups; track group.kind) {
           <div class="kind-group">
@@ -82,7 +102,7 @@
         <section class="package-section">
           <h2 class="package-title">
             <span class="package-badge package-badge--adapter">{{ adapterLabel() }}</span>
-            @ng-forge/dynamic-forms-{{ adapter.adapter() }}
+            &#64;ng-forge/dynamic-forms-{{ adapter.adapter() }}
           </h2>
           @for (group of groups; track group.kind) {
             <div class="kind-group">
@@ -118,10 +138,16 @@
     }
   }
 
-  @if (totalResults() === 0 && (query() || kindFilter())) {
+  @if (totalResults() === 0) {
     <div class="no-results">
-      <p>No declarations match your filters</p>
-      <button type="button" class="clear-btn" (click)="clearFilters()">Clear filters</button>
+      @if (!packageFilter().size) {
+        <p>Select a package above to view its API</p>
+      } @else if (query() || kindFilter()) {
+        <p>No declarations match your filters</p>
+        <button type="button" class="clear-btn" (click)="clearFilters()">Clear filters</button>
+      } @else {
+        <p>Loading API reference...</p>
+      }
     </div>
   }
 </div>

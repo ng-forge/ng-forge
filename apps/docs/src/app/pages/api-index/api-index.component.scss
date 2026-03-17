@@ -159,6 +159,17 @@ $kind-colors: (
   display: flex;
   flex-wrap: wrap;
   gap: $space-2;
+  align-items: center;
+}
+
+.filter-group-label {
+  font-size: $text-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-right: $space-1;
+  user-select: none;
 }
 
 .filter-tag {
@@ -190,6 +201,57 @@ $kind-colors: (
       background: #fff;
     }
   }
+}
+
+.filter-tag--pkg {
+  &.active {
+    background: var(--search-bg);
+    border-color: $ember-glow;
+    color: var(--text-primary);
+    box-shadow: 0 0 0 1px $ember-glow;
+
+    .pkg-dot--core {
+      background: $ember-core;
+    }
+
+    .pkg-dot--adapter {
+      background: #3498db;
+    }
+  }
+
+  &:not(.active) {
+    opacity: 0.55;
+
+    .pkg-dot {
+      background: var(--text-secondary);
+    }
+  }
+}
+
+.pkg-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &--core {
+    background: $ember-core;
+  }
+
+  &--adapter {
+    background: #3498db;
+  }
+}
+
+.filter-count {
+  font-size: $text-xs;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--text-secondary) 12%, transparent);
+  padding: 0 5px;
+  border-radius: $radius-sm;
+  line-height: 1.4;
 }
 
 // ─── Package sections ───

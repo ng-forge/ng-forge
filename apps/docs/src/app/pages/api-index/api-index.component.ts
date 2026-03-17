@@ -20,9 +20,11 @@ export class ApiIndexComponent {
   readonly query = signal('');
   readonly kindFilter = signal<DeclarationKind | null>(null);
 
+  /** Which packages are visible. Both enabled by default. */
+  readonly packageFilter = signal<Set<string>>(new Set(['core', 'adapter']));
+
   readonly core = toSignal(this.apiService.loadPackage('core'));
 
-  /** Reactively load the adapter package based on active adapter. */
   readonly adapterPkg = toSignal(
     toObservable(this.adapter.adapter).pipe(
       switchMap((name) => {
@@ -33,17 +35,30 @@ export class ApiIndexComponent {
   );
 
   readonly availableKinds = computed(() => {
-    const all = [...(this.core()?.declarations ?? []), ...(this.adapterPkg()?.declarations ?? [])];
+    const all = [...this.visibleDeclarations()];
     const kinds = new Set<DeclarationKind>(all.map((d) => d.kind));
     return Array.from(kinds).map((k) => ({ kind: k, meta: getKindMeta(k) }));
   });
 
+  /** All declarations from visible packages, before kind/text filter. */
+  private readonly visibleDeclarations = computed(() => {
+    const filter = this.packageFilter();
+    const core = filter.has('core') ? (this.core()?.declarations ?? []) : [];
+    const adapter = filter.has('adapter') ? (this.adapterPkg()?.declarations ?? []) : [];
+    return [...core, ...adapter];
+  });
+
+  readonly showCore = computed(() => this.packageFilter().has('core'));
+  readonly showAdapter = computed(() => this.packageFilter().has('adapter'));
+
   readonly filteredCoreGroups = computed(() => {
+    if (!this.showCore()) return [];
     const pkg = this.core();
     return pkg ? groupByKind(this.filterDeclarations(pkg.declarations)) : [];
   });
 
   readonly filteredAdapterGroups = computed(() => {
+    if (!this.showAdapter()) return [];
     const pkg = this.adapterPkg();
     return pkg ? groupByKind(this.filterDeclarations(pkg.declarations)) : [];
   });
@@ -62,6 +77,9 @@ export class ApiIndexComponent {
     );
   });
 
+  readonly coreCount = computed(() => this.core()?.declarations.length ?? 0);
+  readonly adapterCount = computed(() => this.adapterPkg()?.declarations.length ?? 0);
+
   onSearch(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
   }
@@ -70,9 +88,22 @@ export class ApiIndexComponent {
     this.kindFilter.update((current) => (current === kind ? null : kind));
   }
 
+  togglePackage(pkg: string): void {
+    this.packageFilter.update((current) => {
+      const next = new Set(current);
+      if (next.has(pkg)) {
+        next.delete(pkg);
+      } else {
+        next.add(pkg);
+      }
+      return next;
+    });
+  }
+
   clearFilters(): void {
     this.query.set('');
     this.kindFilter.set(null);
+    this.packageFilter.set(new Set(['core', 'adapter']));
   }
 
   getKindMeta = getKindMeta;
