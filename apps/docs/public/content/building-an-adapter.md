@@ -1,3 +1,8 @@
+---
+title: Building an Adapter
+slug: building-an-adapter
+---
+
 Create custom UI integrations for ng-forge dynamic forms using any component library or design system.
 
 ## Package Structure

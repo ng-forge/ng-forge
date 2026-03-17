@@ -1,3 +1,8 @@
+---
+title: Buttons
+slug: schema-fields/field-types/buttons
+---
+
 Action fields for form submission and multi-step navigation.
 
 ## submit

@@ -1,3 +1,8 @@
+---
+title: Events
+slug: advanced/events
+---
+
 The events API provides two complementary services for working with form events. Which one you use depends on **where your code lives** relative to the `dynamic-form` element.
 
 ## Choosing the right API

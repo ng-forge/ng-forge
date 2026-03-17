@@ -1,3 +1,8 @@
+---
+title: Expression Parser
+slug: advanced/expression-parser
+---
+
 Dynamic forms use expressions for conditional logic and dynamic values. When you use JavaScript expressions with `type: 'javascript'`, the expression parser evaluates them safely, preventing code injection attacks while maintaining the flexibility you need.
 
 ## How JavaScript Expressions Work

@@ -1,3 +1,8 @@
+---
+title: Selection
+slug: schema-fields/field-types/selection
+---
+
 Fields for selecting one or multiple values from a set of options.
 
 ## select

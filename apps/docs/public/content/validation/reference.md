@@ -1,3 +1,8 @@
+---
+title: Reference
+slug: validation/reference
+---
+
 Complete reference for all validators, conditional expressions, and validation configuration options.
 
 ## All Validator Types

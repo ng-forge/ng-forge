@@ -42,11 +42,15 @@ export { zodSchemaValidationConfig } from './zod-schema-validation.config';
  */
 export const EXAMPLE_CONFIGS: Record<string, FormConfig> = {
   login: loginConfig,
+  'login-form': loginConfig,
   contact: contactConfig,
+  'contact-form': contactConfig,
   'user-registration': userRegistrationConfig,
   'paginated-form': paginatedFormConfig,
   array: arrayConfig,
+  'array-form': arrayConfig,
   'simplified-array': simplifiedArrayConfig,
+  'simplified-array-form': simplifiedArrayConfig,
   'business-account-form': businessAccountFormConfig,
   'age-conditional-form': ageConditionalFormConfig,
   'contact-dynamic-fields': contactDynamicFieldsConfig,

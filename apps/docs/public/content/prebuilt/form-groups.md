@@ -1,3 +1,8 @@
+---
+title: Form Groups
+slug: prebuilt/form-groups
+---
+
 Groups nest form fields under a single key in the form value. This creates logical grouping for form data, not visual grouping.
 
 ## Interactive Demo

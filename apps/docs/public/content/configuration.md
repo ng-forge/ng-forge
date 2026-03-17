@@ -1,3 +1,8 @@
+---
+title: Configuration
+slug: configuration
+---
+
 Configure global defaults for all forms at provider level, or per-form via `defaultProps`.
 
 ## The Cascade

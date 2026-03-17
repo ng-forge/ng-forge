@@ -1,3 +1,8 @@
+---
+title: Form Rows
+slug: prebuilt/form-rows
+---
+
 Organize fields into horizontal rows for compact layouts. Rows display fields side-by-side.
 
 ## Interactive Demo

@@ -15,20 +15,24 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Getting Started', path: 'getting-started' },
   { label: 'Configuration', path: 'configuration' },
   {
-    label: 'Schema Fields',
-    path: 'schema-fields',
+    label: 'Building an Adapter',
+    path: 'building-an-adapter',
+    /** Only visible when adapter === 'custom' — placed before Examples so custom users see it early. */
+    cssClass: 'sidebar-link--custom-only',
+  },
+  {
+    label: 'Examples',
+    path: 'examples',
+  },
+  {
+    label: 'Field Types',
+    path: 'schema-fields/field-types',
     children: [
-      {
-        label: 'Field Types',
-        path: 'schema-fields/field-types',
-        children: [
-          { label: 'Text Inputs', path: 'schema-fields/field-types/text-inputs' },
-          { label: 'Selection', path: 'schema-fields/field-types/selection' },
-          { label: 'Buttons', path: 'schema-fields/field-types/buttons' },
-          { label: 'Utility', path: 'schema-fields/field-types/utility' },
-          { label: 'Advanced Controls', path: 'schema-fields/field-types/advanced-controls' },
-        ],
-      },
+      { label: 'Text Inputs', path: 'schema-fields/field-types/text-inputs' },
+      { label: 'Selection', path: 'schema-fields/field-types/selection' },
+      { label: 'Buttons', path: 'schema-fields/field-types/buttons' },
+      { label: 'Utility', path: 'schema-fields/field-types/utility' },
+      { label: 'Advanced Controls', path: 'schema-fields/field-types/advanced-controls' },
     ],
   },
   {
@@ -80,10 +84,6 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'Examples',
-    path: 'examples',
-  },
-  {
     label: 'Advanced',
     path: 'advanced',
     children: [
@@ -93,12 +93,6 @@ export const NAV_ITEMS: NavItem[] = [
       { label: 'Events', path: 'advanced/events' },
       { label: 'Value Exclusion', path: 'advanced/value-exclusion' },
     ],
-  },
-  {
-    label: 'Building an Adapter',
-    path: 'building-an-adapter',
-    /** Only visible when adapter === 'custom' */
-    cssClass: 'sidebar-link--custom-only',
   },
   {
     label: 'AI Integration (MCP)',
@@ -117,4 +111,25 @@ export function findNavLabel(targetPath: string, items: NavItem[] = NAV_ITEMS): 
     }
   }
   return undefined;
+}
+
+export interface BreadcrumbEntry {
+  label: string;
+  path: string;
+}
+
+/** Build the breadcrumb trail for a given slug by walking NAV_ITEMS ancestors. */
+export function findBreadcrumbTrail(targetPath: string, items: NavItem[] = NAV_ITEMS): BreadcrumbEntry[] {
+  for (const item of items) {
+    if (item.path === targetPath) {
+      return [{ label: item.label, path: item.path }];
+    }
+    if (item.children) {
+      const childTrail = findBreadcrumbTrail(targetPath, item.children);
+      if (childTrail.length > 0) {
+        return [{ label: item.label, path: item.path }, ...childTrail];
+      }
+    }
+  }
+  return [];
 }

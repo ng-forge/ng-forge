@@ -1,3 +1,8 @@
+---
+title: Advanced
+slug: validation/advanced
+---
+
 Advanced validation techniques including conditional validators, dynamic values, and cross-field validation.
 
 ## Validators Array

@@ -1,3 +1,8 @@
+---
+title: Form Pages
+slug: prebuilt/form-pages
+---
+
 Create multi-step forms by using page fields. When your form contains page fields, it automatically enters "paged mode" and renders with navigation controls.
 
 ## Basic Multi-Step Form

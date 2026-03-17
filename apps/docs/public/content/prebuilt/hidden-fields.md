@@ -1,3 +1,8 @@
+---
+title: Hidden Fields
+slug: prebuilt/hidden-fields
+---
+
 Hidden fields store values in the form model without rendering any visible UI. They're useful for persisting IDs, metadata, or other non-user-facing data.
 
 ## Basic Usage

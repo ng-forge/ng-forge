@@ -1,3 +1,8 @@
+---
+title: AI Integration (MCP)
+slug: ai-integration
+---
+
 # AI Integration
 
 The `@ng-forge/dynamic-form-mcp` package provides a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that enables AI assistants to generate, validate, and work with ng-forge dynamic form configurations.

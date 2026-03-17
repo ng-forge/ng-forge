@@ -1,9 +1,9 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter, withInMemoryScrolling, UrlSerializer } from '@angular/router';
+import { withInMemoryScrolling, UrlSerializer, withNavigationErrorHandler } from '@angular/router';
+import { provideFileRouter, withExtraRoutes } from '@analogjs/router';
 import { AdapterAwareUrlSerializer } from './serializers/adapter-url-serializer';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideContent, withMarkdownRenderer } from '@analogjs/content';
-import { appRoutes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
@@ -15,12 +15,20 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
-    provideRouter(
-      appRoutes,
+    provideFileRouter(
       withInMemoryScrolling({
         scrollPositionRestoration: 'enabled',
         anchorScrolling: 'enabled',
       }),
+      withNavigationErrorHandler((err) => console.warn('[Router]', err)),
+      withExtraRoutes([
+        // Adapter root → Getting Started (pathMatch: full prevents child route interference)
+        { path: 'material', redirectTo: '/material/getting-started', pathMatch: 'full' },
+        { path: 'bootstrap', redirectTo: '/bootstrap/getting-started', pathMatch: 'full' },
+        { path: 'primeng', redirectTo: '/primeng/getting-started', pathMatch: 'full' },
+        { path: 'ionic', redirectTo: '/ionic/getting-started', pathMatch: 'full' },
+        { path: 'custom', redirectTo: '/custom/getting-started', pathMatch: 'full' },
+      ]),
     ),
     provideHttpClient(withFetch()),
     provideAnimationsAsync(),

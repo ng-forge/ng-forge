@@ -1,3 +1,8 @@
+---
+title: Custom Validators
+slug: validation/custom-validators
+---
+
 Custom validation functions for complex validation logic that goes beyond built-in validators.
 
 ## Overview

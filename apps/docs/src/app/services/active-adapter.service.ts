@@ -1,7 +1,7 @@
 import { Injectable, inject, computed, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter, take } from 'rxjs';
+import { animationFrameScheduler, delay, filter, take } from 'rxjs';
 import { AdapterName } from '@ng-forge/sandbox-harness';
 
 const DOCS_ADAPTERS = new Set<AdapterName>(['material', 'bootstrap', 'primeng', 'ionic', 'custom']);
@@ -37,13 +37,15 @@ export class ActiveAdapterService {
     const path = segments.slice(2).join('/') || 'getting-started';
     void this.router.navigateByUrl(`/${name}/${path}`);
     if (!this.isBrowser) return;
+    // Restore scroll after Angular's scrollPositionRestoration resets it.
+    // Double rAF ensures we run after the router's own scroll handler.
     this.router.events
       .pipe(
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
         take(1),
+        delay(0, animationFrameScheduler),
+        delay(0, animationFrameScheduler),
       )
-      .subscribe(() => {
-        requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: 'instant' }));
-      });
+      .subscribe(() => window.scrollTo({ top: scrollY, behavior: 'instant' }));
   }
 }

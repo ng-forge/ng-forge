@@ -1,3 +1,8 @@
+---
+title: Simplified
+slug: prebuilt/form-arrays/simplified
+---
+
 The simplified array API provides a concise way to define dynamic arrays. Instead of manually specifying each item in `fields`, you provide a `template` for the item structure and a `value` array with initial data. Add and remove buttons are generated automatically.
 
 > **When should I use this?** For most array use cases -- primitive lists, object lists, and standard add/remove workflows -- the simplified API is the right choice. For advanced scenarios like heterogeneous items or custom button placement, see [Form Arrays (Complete)](/prebuilt/form-arrays/complete).

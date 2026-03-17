@@ -2,16 +2,19 @@ $ember-glow: #ff8c42;
 $sidebar-width: 310px;
 $navbar-height: 72px;
 $app-max-width: 1450px;
+$mobile-bp: 1024px;
 
 // ============================================
-// HOST — max-width centered container
+// HOST
 // ============================================
 :host {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 // ============================================
-// NAVBAR
+// NAVBAR — fixed full-width, centered inner
 // ============================================
 .navbar {
   position: fixed;
@@ -64,11 +67,10 @@ $app-max-width: 1450px;
   }
 }
 
-// Menu button (mobile) — uses .icon-btn base styles
-.menu-btn {
+.menu-btn.icon-btn {
   display: none;
 
-  @media (max-width: 1024px) {
+  @media (max-width: $mobile-bp) {
     display: flex;
   }
 }
@@ -93,7 +95,9 @@ $app-max-width: 1450px;
   }
 }
 
-// Icon buttons (GitHub, theme toggle, etc.)
+// ============================================
+// ICON BUTTONS
+// ============================================
 .icon-btn {
   display: flex;
   align-items: center;
@@ -140,19 +144,16 @@ $app-max-width: 1450px;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center;
 
-  // Sun icon (light mode)
   &--light {
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cline x1='12' y1='1' x2='12' y2='3'/%3E%3Cline x1='12' y1='21' x2='12' y2='23'/%3E%3Cline x1='4.22' y1='4.22' x2='5.64' y2='5.64'/%3E%3Cline x1='18.36' y1='18.36' x2='19.78' y2='19.78'/%3E%3Cline x1='1' y1='12' x2='3' y2='12'/%3E%3Cline x1='21' y1='12' x2='23' y2='12'/%3E%3Cline x1='4.22' y1='19.78' x2='5.64' y2='18.36'/%3E%3Cline x1='18.36' y1='5.64' x2='19.78' y2='4.22'/%3E%3C/svg%3E");
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cline x1='12' y1='1' x2='12' y2='3'/%3E%3Cline x1='12' y1='21' x2='12' y2='23'/%3E%3Cline x1='4.22' y1='4.22' x2='5.64' y2='5.64'/%3E%3Cline x1='18.36' y1='18.36' x2='19.78' y2='19.78'/%3E%3Cline x1='1' y1='12' x2='3' y2='12'/%3E%3Cline x1='21' y1='12' x2='23' y2='12'/%3E%3Cline x1='4.22' y1='19.78' x2='5.64' y2='18.36'/%3E%3Cline x1='18.36' y1='5.64' x2='19.78' y2='4.22'/%3E%3C/svg%3E");
   }
 
-  // Moon icon (dark mode)
   &--dark {
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E");
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E");
   }
 
-  // Monitor icon (auto mode)
   &--auto {
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='3' width='20' height='14' rx='2' ry='2'/%3E%3Cline x1='8' y1='21' x2='16' y2='21'/%3E%3Cline x1='12' y1='17' x2='12' y2='21'/%3E%3C/svg%3E");
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='3' width='20' height='14' rx='2' ry='2'/%3E%3Cline x1='8' y1='21' x2='16' y2='21'/%3E%3Cline x1='12' y1='17' x2='12' y2='21'/%3E%3C/svg%3E");
@@ -177,21 +178,41 @@ $app-max-width: 1450px;
 }
 
 // ============================================
-// SIDEBAR
+// PAGE BODY — centered flex wrapper (ng-doc pattern)
+// ============================================
+.page-body {
+  display: flex;
+  max-width: $app-max-width;
+  width: 100%;
+  margin: $navbar-height auto 0;
+  min-height: calc(100vh - #{$navbar-height});
+
+  @media (max-width: $mobile-bp) {
+    display: block;
+  }
+}
+
+// ============================================
+// SIDEBAR — sticky within the flex wrapper
 // ============================================
 .sidebar {
-  position: fixed;
+  position: sticky;
   top: $navbar-height;
-  left: max(0px, calc((100vw - #{$app-max-width}) / 2));
-  bottom: 0;
   width: $sidebar-width;
-  background: var(--forge-sidebar-bg);
+  min-width: $sidebar-width;
+  height: calc(100vh - #{$navbar-height});
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  flex-shrink: 0;
+  background: var(--forge-sidebar-bg);
+  padding: 16px;
   z-index: 90;
-  padding: 16px 16px;
 
-  @media (max-width: 1024px) {
+  @media (max-width: $mobile-bp) {
+    position: fixed;
+    top: $navbar-height;
+    left: 0;
+    bottom: 0;
     transform: translateX(-100%);
     transition: transform 0.25s ease;
 
@@ -204,7 +225,7 @@ $app-max-width: 1450px;
 .sidebar-backdrop {
   display: none;
 
-  @media (max-width: 1024px) {
+  @media (max-width: $mobile-bp) {
     display: block;
     position: fixed;
     inset: 0;
@@ -218,7 +239,7 @@ $app-max-width: 1450px;
   flex-direction: column;
 }
 
-// Bullet dot (SVG) — same width as chevron so text aligns
+// Bullet dot
 .nav-bullet {
   width: 12px;
   height: 12px;
@@ -231,7 +252,7 @@ $app-max-width: 1450px;
   display: none;
 }
 
-// Nav links (all depths) — ng-doc style with bullet dots
+// Nav links
 .nav-link {
   display: flex;
   align-items: center;
@@ -270,7 +291,17 @@ $app-max-width: 1450px;
   }
 }
 
-// Category buttons — ng-doc uses › chevron, same weight as links
+// Active category indicator — visible even when collapsed
+.nav-category.url-active > .nav-category-btn {
+  color: var(--forge-primary);
+
+  .chevron {
+    opacity: 0.8;
+    color: var(--forge-primary);
+  }
+}
+
+// Category buttons
 .nav-category-btn,
 .nav-subcategory-btn {
   display: flex;
@@ -300,7 +331,7 @@ $app-max-width: 1450px;
   color: var(--forge-text);
 }
 
-// Chevron (inline SVG) — rotates when expanded
+// Chevron
 .chevron {
   width: 12px;
   height: 12px;
@@ -315,23 +346,32 @@ $app-max-width: 1450px;
   }
 }
 
+// Animated expand/collapse using grid-template-rows trick
+.nav-children-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+
+  .nav-category.expanded > &,
+  .nav-subcategory.expanded > & {
+    grid-template-rows: 1fr;
+  }
+}
+
 .nav-children {
   overflow: hidden;
 }
 
 // ============================================
-// CONTENT AREA
+// CONTENT — fills remaining space in flex row
 // ============================================
 .content {
-  margin-top: $navbar-height;
-  max-width: calc(#{$app-max-width} - #{$sidebar-width});
-  margin-left: max(#{$sidebar-width}, calc((100vw - #{$app-max-width}) / 2 + #{$sidebar-width}));
-  min-height: calc(100vh - #{$navbar-height});
+  flex: 1;
+  min-width: 0; // prevent flex overflow
   padding: 24px 24px;
+  min-height: calc(100vh - #{$navbar-height});
 
-  @media (max-width: 1024px) {
-    margin-left: 0;
-    max-width: 100%;
+  @media (max-width: $mobile-bp) {
     padding: 1.5rem 1rem;
   }
 }

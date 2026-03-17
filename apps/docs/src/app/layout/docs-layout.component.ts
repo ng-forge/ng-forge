@@ -27,6 +27,8 @@ export class DocsLayoutComponent {
   readonly themeService = inject(ThemeService);
   protected readonly sidebarOpen = signal(false);
   protected readonly expandedCategories = signal<Set<string>>(new Set());
+  /** Categories explicitly collapsed by the user — overrides URL-based auto-expand. */
+  private readonly collapsedCategories = signal<Set<string>>(new Set());
   protected readonly scrolled = signal(false);
 
   constructor() {
@@ -54,24 +56,43 @@ export class DocsLayoutComponent {
   }
 
   protected toggleCategory(path: string): void {
-    this.expandedCategories.update((set) => {
-      const next = new Set(set);
-      if (next.has(path)) {
+    const wasExpanded = this.isCategoryExpanded({ path, children: [{}] } as NavItem);
+    if (wasExpanded) {
+      // Collapse this one
+      this.expandedCategories.update((set) => {
+        const next = new Set(set);
         next.delete(path);
-      } else {
-        next.add(path);
-      }
-      return next;
-    });
+        return next;
+      });
+      this.collapsedCategories.update((set) => new Set(set).add(path));
+    } else {
+      // Expand only this one — collapse everything else (including URL-active sections)
+      this.expandedCategories.set(new Set([path]));
+      // Mark all OTHER categories as explicitly collapsed so URL-based auto-expand is suppressed
+      const allCategoryPaths = this.navItems()
+        .filter((item) => item.children)
+        .map((item) => item.path);
+      this.collapsedCategories.set(new Set(allCategoryPaths.filter((p) => p !== path)));
+    }
   }
 
   protected isCategoryExpanded(item: NavItem): boolean {
     if (!item.children) return false;
-    // Expand if explicitly toggled or if current URL is within this category
+    // Explicitly collapsed by user — always wins
+    if (this.collapsedCategories().has(item.path)) return false;
+    // Explicitly expanded by user
     if (this.expandedCategories().has(item.path)) return true;
+    // Auto-expand if current URL is within this category
     const adapter = this.activeAdapter.adapter();
     const url = this.router.url;
     return url.startsWith(`/${adapter}/${item.path}`);
+  }
+
+  /** True when the current URL is within this category (regardless of expand state). */
+  protected isActiveCategory(item: NavItem): boolean {
+    if (!item.children) return false;
+    const adapter = this.activeAdapter.adapter();
+    return this.router.url.startsWith(`/${adapter}/${item.path}`);
   }
 
   protected adapterLink(path: string): string {

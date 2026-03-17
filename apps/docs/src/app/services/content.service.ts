@@ -97,12 +97,15 @@ export class ContentService {
     const highlightedMap = new Map<string, string>();
     await Promise.all(
       codeTokens.map(async (token) => {
-        const key = `${token.lang ?? ''}:${token.text}`;
+        // Strip metadata from language tag (e.g. "typescript name="app.config.ts"" → "typescript")
+        const lang = (token.lang ?? '').split(/\s+/)[0] || 'text';
+        const key = `${lang}:${token.text}`;
         if (highlightedMap.has(key)) return;
         try {
           const html = await codeToHtml(token.text, {
-            lang: token.lang || 'text',
-            themes: { light: 'github-light', dark: 'github-dark' },
+            lang,
+            themes: { light: 'material-theme-lighter', dark: 'material-theme-darker' },
+            defaultColor: false,
           });
           highlightedMap.set(key, html);
         } catch {
@@ -130,22 +133,34 @@ export class ContentService {
             : '';
         return `<h${depth} id="${id}">${text}${anchor}</h${depth}>`;
       },
-      code({ text, lang }: Tokens.Code): string {
-        const key = `${lang ?? ''}:${text}`;
+      code({ text, lang: rawLang }: Tokens.Code): string {
+        const lang = (rawLang ?? '').split(/\s+/)[0] || 'text';
+        const key = `${lang}:${text}`;
         const highlighted = highlightedMap.get(key);
-        if (highlighted) return highlighted;
-        const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        return `<pre><code class="language-${lang || 'text'}">${escaped}</code></pre>`;
+        const codeHtml =
+          highlighted ??
+          `<pre><code class="language-${lang || 'text'}">${text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+        const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        return (
+          `<div class="code-block-wrapper">` +
+          `<button class="code-copy-btn" type="button" data-code="${escaped}" aria-label="Copy code">` +
+          `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">` +
+          `<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>` +
+          `</svg></button>` +
+          codeHtml +
+          `</div>`
+        );
       },
-      blockquote({ text }: Tokens.Blockquote): string {
+      blockquote(this: { parser: { parse(tokens: Tokens.Generic[]): string } }, token: Tokens.Blockquote): string {
+        const body = this.parser.parse(token.tokens);
         // Check for GitHub-style callouts
         for (const [prefix, cssClass] of Object.entries(CALLOUT_PREFIXES)) {
-          if (text.includes(prefix)) {
-            const cleaned = text.replace(prefix, '').trim();
+          if (body.includes(prefix)) {
+            const cleaned = body.replace(prefix, '').trim();
             return `<blockquote class="callout--${cssClass}">${cleaned}</blockquote>`;
           }
         }
-        return `<blockquote>${text}</blockquote>`;
+        return `<blockquote>${body}</blockquote>`;
       },
     };
 

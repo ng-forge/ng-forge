@@ -41,110 +41,111 @@
   ></div>
 }
 
-<!-- Sidebar -->
-<aside class="sidebar" [class.open]="sidebarOpen()">
-  <nav class="sidebar-nav" aria-label="Documentation">
-    @for (item of navItems(); track item.path) {
-      @if (item.children) {
-        <div class="nav-category" [class.expanded]="isCategoryExpanded(item)">
-          <button class="nav-category-btn" (click)="toggleCategory(item.path)" [attr.aria-expanded]="isCategoryExpanded(item)">
-            <span>{{ item.label }}</span>
-            <svg
-              class="chevron"
-              viewBox="0 0 24 24"
-              width="12"
-              height="12"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-          @if (isCategoryExpanded(item)) {
-            <div class="nav-children">
-              @for (child of item.children; track child.path) {
-                @if (child.children) {
-                  <div class="nav-subcategory" [class.expanded]="isCategoryExpanded(child)">
-                    <button
-                      class="nav-subcategory-btn"
-                      (click)="toggleCategory(child.path)"
-                      [attr.aria-expanded]="isCategoryExpanded(child)"
-                    >
-                      <span>{{ child.label }}</span>
-                      <svg
-                        class="chevron"
-                        viewBox="0 0 24 24"
-                        width="12"
-                        height="12"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="3"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+<!-- Page body: sidebar + content in a centered wrapper -->
+<div class="page-body">
+  <aside class="sidebar" [class.open]="sidebarOpen()">
+    <nav class="sidebar-nav" aria-label="Documentation">
+      @for (item of navItems(); track item.path) {
+        @if (item.children) {
+          <div class="nav-category" [class.expanded]="isCategoryExpanded(item)" [class.url-active]="isActiveCategory(item)">
+            <button class="nav-category-btn" (click)="toggleCategory(item.path)" [attr.aria-expanded]="isCategoryExpanded(item)">
+              <span>{{ item.label }}</span>
+              <svg
+                class="chevron"
+                viewBox="0 0 24 24"
+                width="12"
+                height="12"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+            <div class="nav-children-wrapper">
+              <div class="nav-children">
+                @for (child of item.children; track child.path) {
+                  @if (child.children) {
+                    <div class="nav-subcategory" [class.expanded]="isCategoryExpanded(child)">
+                      <button
+                        class="nav-subcategory-btn"
+                        (click)="toggleCategory(child.path)"
+                        [attr.aria-expanded]="isCategoryExpanded(child)"
                       >
-                        <polyline points="9 18 15 12 9 6" />
-                      </svg>
-                    </button>
-                    @if (isCategoryExpanded(child)) {
-                      <div class="nav-children">
-                        @for (grandchild of child.children; track grandchild.path) {
-                          <a
-                            class="nav-link depth-2"
-                            [routerLink]="adapterLink(grandchild.path)"
-                            routerLinkActive="active"
-                            [class]="grandchild.cssClass ?? ''"
-                            (click)="closeSidebar()"
-                          >
-                            <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12">
-                              <circle cx="12" cy="12" r="4.5" fill="currentColor" />
-                            </svg>
-                            {{ grandchild.label }}
-                          </a>
-                        }
+                        <span>{{ child.label }}</span>
+                        <svg
+                          class="chevron"
+                          viewBox="0 0 24 24"
+                          width="12"
+                          height="12"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="3"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                      </button>
+                      <div class="nav-children-wrapper">
+                        <div class="nav-children">
+                          @for (grandchild of child.children; track grandchild.path) {
+                            <a
+                              class="nav-link depth-2"
+                              [routerLink]="adapterLink(grandchild.path)"
+                              routerLinkActive="active"
+                              [class]="grandchild.cssClass ?? ''"
+                              (click)="closeSidebar()"
+                            >
+                              <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12">
+                                <circle cx="12" cy="12" r="4.5" fill="currentColor" />
+                              </svg>
+                              {{ grandchild.label }}
+                            </a>
+                          }
+                        </div>
                       </div>
-                    }
-                  </div>
-                } @else {
-                  <a
-                    class="nav-link depth-1"
-                    [routerLink]="adapterLink(child.path)"
-                    routerLinkActive="active"
-                    [class]="child.cssClass ?? ''"
-                    (click)="closeSidebar()"
-                  >
-                    <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12">
-                      <circle cx="12" cy="12" r="4.5" fill="currentColor" />
-                    </svg>
-                    {{ child.label }}
-                  </a>
+                    </div>
+                  } @else {
+                    <a
+                      class="nav-link depth-1"
+                      [routerLink]="adapterLink(child.path)"
+                      routerLinkActive="active"
+                      [class]="child.cssClass ?? ''"
+                      (click)="closeSidebar()"
+                    >
+                      <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12">
+                        <circle cx="12" cy="12" r="4.5" fill="currentColor" />
+                      </svg>
+                      {{ child.label }}
+                    </a>
+                  }
                 }
-              }
+              </div>
             </div>
-          }
-        </div>
-      } @else {
-        <a
-          class="nav-link depth-0"
-          [routerLink]="adapterLink(item.path)"
-          routerLinkActive="active"
-          [class]="item.cssClass ?? ''"
-          (click)="closeSidebar()"
-        >
-          <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="12" r="4.5" fill="currentColor" /></svg>
-          {{ item.label }}
-          @if (item.badge) {
-            <span class="nav-badge">{{ item.badge }}</span>
-          }
-        </a>
+          </div>
+        } @else {
+          <a
+            class="nav-link depth-0"
+            [routerLink]="adapterLink(item.path)"
+            routerLinkActive="active"
+            [class]="item.cssClass ?? ''"
+            (click)="closeSidebar()"
+          >
+            <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="12" r="4.5" fill="currentColor" /></svg>
+            {{ item.label }}
+            @if (item.badge) {
+              <span class="nav-badge">{{ item.badge }}</span>
+            }
+          </a>
+        }
       }
-    }
-  </nav>
-</aside>
+    </nav>
+  </aside>
 
-<!-- Main content -->
-<main class="content">
-  <router-outlet />
-</main>
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>

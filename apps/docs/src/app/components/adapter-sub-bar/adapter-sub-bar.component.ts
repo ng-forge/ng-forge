@@ -67,8 +67,10 @@ export class AdapterSubBarComponent {
   }
 
   protected select(name: AdapterName): void {
-    this.activeAdapter.switchTo(name);
     this.isOpen.set(false);
+    if (name !== this.activeAdapter.adapter()) {
+      this.activeAdapter.switchTo(name);
+    }
   }
 
   protected onTriggerKeydown(event: KeyboardEvent): void {

@@ -592,6 +592,8 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
   line-height: 24px;
   font-weight: 400;
   color: var(--forge-text);
+  min-width: 0; // prevent flex/grid overflow
+  overflow-wrap: break-word;
 
   > :first-child {
     margin-top: 0;
@@ -627,6 +629,25 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
   h3 {
     font-size: 20px;
     line-height: 24px;
+  }
+
+  h2,
+  h3 {
+    position: relative;
+    padding-left: 14px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 60%;
+      min-height: 16px;
+      border-radius: 2px;
+      background: linear-gradient(180deg, #ff6b2b, #ff4d00);
+    }
   }
   h4 {
     font-size: 18px;
@@ -665,7 +686,7 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
     border-radius: 8px;
     overflow-x: auto;
     background: var(--forge-code-bg);
-    border: 1px solid var(--forge-border-color);
+    border: none;
     padding: 16px 24px;
   }
 
@@ -686,6 +707,76 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
     border-radius: 0;
     white-space: pre;
     -webkit-font-smoothing: auto;
+  }
+
+  .code-block-wrapper {
+    position: relative;
+    margin: 24px 0;
+
+    pre {
+      margin: 0;
+    }
+  }
+
+  .code-copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--forge-text-muted);
+    cursor: pointer;
+    opacity: 0;
+    transition:
+      opacity 0.15s ease,
+      color 0.15s ease;
+    z-index: 1;
+
+    &:hover {
+      color: var(--forge-text);
+    }
+
+    &.copied {
+      opacity: 1;
+      color: $ember-glow;
+
+      &::after {
+        content: 'Copied!';
+        position: absolute;
+        bottom: calc(100% + 6px);
+        right: 0;
+        font-size: 11px;
+        font-weight: 600;
+        color: #fff;
+        background: $ember-core;
+        padding: 4px 10px;
+        border-radius: 6px;
+        white-space: nowrap;
+        pointer-events: none;
+        animation: copy-toast-in 0.15s ease;
+      }
+    }
+  }
+
+  @keyframes copy-toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .code-block-wrapper:hover .code-copy-btn {
+    opacity: 1;
   }
 
   blockquote {
@@ -724,6 +815,8 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
     width: 100%;
     border-spacing: 0;
     margin: 24px 0;
+    display: block;
+    overflow-x: auto;
   }
   th {
     padding: 12px;
@@ -780,6 +873,7 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
 
   // Heading anchor link icon — hidden by default, visible on hover
   .heading-anchor {
+    position: relative;
     display: inline-flex;
     align-items: center;
     margin-left: 8px;
@@ -798,6 +892,42 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
 
     &:hover {
       color: var(--forge-primary);
+    }
+
+    // Static tooltip
+    &::before {
+      content: 'Copy link';
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--forge-text);
+      background: var(--forge-base-2);
+      padding: 4px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
+
+    // "Copied!" toast — shown via .copied class
+    &.copied {
+      color: $ember-glow;
+    }
+
+    &.copied::before {
+      content: 'Link copied!';
+      color: #fff;
+      background: $ember-core;
+      opacity: 1;
+      animation: copy-toast-in 0.15s ease;
     }
   }
 

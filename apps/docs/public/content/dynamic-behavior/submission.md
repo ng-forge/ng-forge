@@ -1,3 +1,8 @@
+---
+title: Submission
+slug: dynamic-behavior/submission
+---
+
 Form submission in dynamic forms integrates with Angular Signal Forms' native `submit()` function, providing automatic button disabling, loading states, and server error handling.
 
 ## Overview

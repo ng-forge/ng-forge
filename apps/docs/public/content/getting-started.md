@@ -1,3 +1,8 @@
+---
+title: Getting Started
+slug: getting-started
+---
+
 ng-forge turns JSON-like configuration into fully working Angular forms — with validation, conditional logic, and multi-step wizards built in. You write a `FormConfig` object, and ng-forge handles rendering, state management, and reactivity.
 
 Here's the core idea — a single object becomes a complete form:

@@ -1,3 +1,8 @@
+---
+title: Value Exclusion
+slug: advanced/value-exclusion
+---
+
 Value exclusion controls which field values are included in the form submission output based on the field's reactive state (hidden, disabled, readonly).
 
 ## Overview

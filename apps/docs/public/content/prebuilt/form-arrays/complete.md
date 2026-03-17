@@ -1,3 +1,8 @@
+---
+title: Complete
+slug: prebuilt/form-arrays/complete
+---
+
 Arrays create dynamic collections of field values. Each item in the `fields` array defines **one array item** with its structure and initial values.
 
 > For most use cases, the **simplified array API** is recommended. See [Form Arrays (Simplified)](/prebuilt/form-arrays/simplified) for details. This page documents the complete API for advanced use cases.

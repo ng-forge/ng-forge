@@ -1,3 +1,8 @@
+---
+title: Custom Fields
+slug: advanced/custom-fields
+---
+
 Add a custom field type to any existing ng-forge adapter — no need to build a full adapter from scratch.
 
 ## Scenario

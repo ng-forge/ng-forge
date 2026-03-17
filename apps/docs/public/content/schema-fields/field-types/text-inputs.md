@@ -1,3 +1,8 @@
+---
+title: Text Inputs
+slug: schema-fields/field-types/text-inputs
+---
+
 Text-based input fields for collecting typed data from users.
 
 ## input
