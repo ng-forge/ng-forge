@@ -22,26 +22,36 @@ export class ApiDetailComponent {
   private readonly sanitizer = inject(DomSanitizer);
   protected readonly adapter = inject(ActiveAdapterService);
 
-  /** Extract packageSlug and symbolName from URL. */
-  private readonly routeInfo$ = this.router.events.pipe(
+  /** Extract symbol name from URL: /:adapter/api-reference/:symbol */
+  private readonly symbolName$ = this.router.events.pipe(
     filter((e): e is NavigationEnd => e instanceof NavigationEnd),
     startWith(null),
     map(() => {
       const parts = this.route.snapshot.pathFromRoot.flatMap((r) => r.url.map((s) => s.path));
-      return { pkgSlug: parts[2] ?? 'core', symbolName: parts[3] ?? '' };
+      // parts: [adapter, api-reference, symbolName]
+      return parts[2] ?? '';
     }),
-    distinctUntilChanged((a, b) => a.pkgSlug === b.pkgSlug && a.symbolName === b.symbolName),
+    distinctUntilChanged(),
   );
 
-  private readonly data$ = this.routeInfo$.pipe(
-    switchMap(({ pkgSlug, symbolName }) =>
-      this.apiService.loadPackage(pkgSlug).pipe(
-        map((pkg) => {
-          const declaration = pkg.declarations.find((d) => d.name === symbolName);
-          return { pkg, declaration, symbolName, pkgSlug };
+  /** Load core + adapter, then find which package owns the symbol. */
+  private readonly data$ = this.symbolName$.pipe(
+    switchMap((symbolName) => {
+      const adapterSlug = this.apiService.getAdapterPackageSlug(this.adapter.adapter());
+      const packages$ = adapterSlug
+        ? combineLatest([this.apiService.loadPackage('core'), this.apiService.loadPackage(adapterSlug)])
+        : this.apiService.loadPackage('core').pipe(map((core) => [core] as ApiPackage[]));
+
+      return packages$.pipe(
+        map((pkgs) => {
+          for (const pkg of pkgs) {
+            const declaration = pkg.declarations.find((d) => d.name === symbolName);
+            if (declaration) return { pkg, declaration, symbolName };
+          }
+          return { pkg: pkgs[0], declaration: undefined, symbolName };
         }),
-      ),
-    ),
+      );
+    }),
   );
 
   private readonly data = toSignal(this.data$);
@@ -72,7 +82,6 @@ export class ApiDetailComponent {
   });
 
   readonly declaration = computed(() => this.data()?.declaration);
-  readonly pkgSlug = computed(() => this.data()?.pkgSlug ?? 'core');
   readonly symbolName = computed(() => this.data()?.symbolName ?? '');
   readonly pkgName = computed(() => this.data()?.pkg?.name ?? '');
 
@@ -136,11 +145,9 @@ export class ApiDetailComponent {
 
     // Match PascalCase identifiers that exist in our symbol index
     const linked = escaped.replace(/\b([A-Z]\w{2,})\b/g, (match, name: string) => {
-      // Don't self-link
       if (name === currentSymbol) return match;
-      const pkgSlug = index.get(name);
-      if (!pkgSlug) return match;
-      return `<a class="type-link" href="/${adapterName}/api-reference/${pkgSlug}/${name}">${match}</a>`;
+      if (!index.has(name)) return match;
+      return `<a class="type-link" href="/${adapterName}/api-reference/${name}">${match}</a>`;
     });
 
     return this.sanitizer.bypassSecurityTrustHtml(linked);

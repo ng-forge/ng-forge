@@ -45,46 +45,40 @@ import { findTabGroup } from '../../layout/tabs.config';
       <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
       <div class="doc-layout" (click)="onContentClick($event)">
         <article class="doc-page">
-          @if (exampleId()) {
-            <!-- Example detail page -->
-            <nav class="breadcrumbs" aria-label="Breadcrumb">
-              <a class="breadcrumb adapter-breadcrumb" [routerLink]="'/' + adapter.adapter() + '/getting-started'">
-                <img class="adapter-breadcrumb-icon" [src]="adapterInfo()?.icon" [alt]="adapterInfo()?.label" width="16" height="16" />
-                {{ adapterInfo()?.label }}
-              </a>
-              <span class="breadcrumb-sep" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </span>
-              <a class="breadcrumb" [routerLink]="'/' + adapter.adapter() + '/examples'">Examples</a>
-              <span class="breadcrumb-sep" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </span>
-              <span class="breadcrumb breadcrumb--current" aria-current="page">{{ exampleTitle() }}</span>
-            </nav>
-            <docs-live-example [scenario]="'examples/' + exampleId()" />
-          } @else if (content()?.error) {
+          @if (content()?.error) {
             <div class="doc-page-error">{{ content()!.error }}</div>
           } @else if (content()?.html) {
-            <!-- Doc page -->
+            <!-- Breadcrumbs -->
             <nav class="breadcrumbs" aria-label="Breadcrumb">
               <a class="breadcrumb adapter-breadcrumb" [routerLink]="'/' + adapter.adapter() + '/getting-started'">
                 <img class="adapter-breadcrumb-icon" [src]="adapterInfo()?.icon" [alt]="adapterInfo()?.label" width="16" height="16" />
                 {{ adapterInfo()?.label }}
               </a>
-              @for (crumb of breadcrumbs(); track crumb.path; let last = $last) {
+              @if (exampleId()) {
                 <span class="breadcrumb-sep" aria-hidden="true">
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </span>
-                @if (last) {
-                  <span class="breadcrumb breadcrumb--current" aria-current="page">{{ crumb.label }}</span>
-                } @else {
-                  <a class="breadcrumb" [routerLink]="'/' + adapter.adapter() + '/' + crumb.path">{{ crumb.label }}</a>
+                <a class="breadcrumb" [routerLink]="'/' + adapter.adapter() + '/examples'">Examples</a>
+                <span class="breadcrumb-sep" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </span>
+                <span class="breadcrumb breadcrumb--current" aria-current="page">{{ exampleTitle() }}</span>
+              } @else {
+                @for (crumb of breadcrumbs(); track crumb.path; let last = $last) {
+                  <span class="breadcrumb-sep" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </span>
+                  @if (last) {
+                    <span class="breadcrumb breadcrumb--current" aria-current="page">{{ crumb.label }}</span>
+                  } @else {
+                    <a class="breadcrumb" [routerLink]="'/' + adapter.adapter() + '/' + crumb.path">{{ crumb.label }}</a>
+                  }
                 }
               }
             </nav>
@@ -96,9 +90,7 @@ import { findTabGroup } from '../../layout/tabs.config';
             <div class="doc-page-loading">Loading...</div>
           }
         </article>
-        @if (!exampleId()) {
-          <app-toc [headings]="content()?.headings ?? []" />
-        }
+        <app-toc [headings]="content()?.headings ?? []" />
       </div>
     }
   `,
@@ -202,7 +194,7 @@ export class DocPageComponent {
   );
 
   private readonly content$ = this.slug$.pipe(
-    filter((slug) => slug !== 'examples' && !slug.startsWith('examples/') && !slug.startsWith('api-reference')),
+    filter((slug) => slug !== 'examples' && !slug.startsWith('api-reference')),
     switchMap((slug) => this.contentService.load(slug)),
   );
 
@@ -267,7 +259,7 @@ export class DocPageComponent {
       event.preventDefault();
       const symbol = apiLink.getAttribute('data-api-symbol');
       if (symbol) {
-        void this.router.navigateByUrl(`/${this.adapter.adapter()}/api-reference/core/${symbol}`);
+        void this.router.navigateByUrl(`/${this.adapter.adapter()}/api-reference/${symbol}`);
       }
       return;
     }

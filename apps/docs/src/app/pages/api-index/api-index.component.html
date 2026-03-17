@@ -73,7 +73,7 @@
               @for (decl of group.items; track decl.name) {
                 <a
                   class="decl-card"
-                  [routerLink]="'/' + adapter.adapter() + '/api-reference/core/' + decl.name"
+                  [routerLink]="'/' + adapter.adapter() + '/api-reference/' + decl.name"
                   [class.deprecated]="!!decl.deprecated"
                 >
                   <div class="decl-header">
@@ -115,7 +115,7 @@
                 @for (decl of group.items; track decl.name) {
                   <a
                     class="decl-card"
-                    [routerLink]="'/' + adapter.adapter() + '/api-reference/' + adapter.adapter() + '/' + decl.name"
+                    [routerLink]="'/' + adapter.adapter() + '/api-reference/' + decl.name"
                     [class.deprecated]="!!decl.deprecated"
                   >
                     <div class="decl-header">
