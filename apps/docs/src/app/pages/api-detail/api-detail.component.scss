@@ -145,14 +145,14 @@ $kind-colors: (
 
 // ─── Sections ───
 .section {
-  margin-bottom: $space-8;
+  margin-bottom: $space-10;
 
   h2 {
     font-size: 1.25rem;
     font-weight: 600;
     color: var(--text-primary);
-    margin: 0 0 $space-4;
-    padding-bottom: $space-2;
+    margin: 0 0 $space-5;
+    padding-bottom: $space-3;
     border-bottom: 1px solid var(--card-border);
   }
 }
@@ -161,16 +161,50 @@ $kind-colors: (
   font-size: $text-base;
   line-height: 1.7;
   color: var(--text-primary);
-  margin: 0;
-  white-space: pre-wrap;
+
+  ::ng-deep p {
+    margin: 0 0 $space-4;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 }
 
 .remarks {
   font-size: $text-sm;
   line-height: 1.6;
   color: var(--text-secondary);
-  margin: 0;
-  white-space: pre-wrap;
+
+  ::ng-deep p {
+    margin: 0 0 $space-3;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Inline code & type links in [innerHTML] content (descriptions, tables, remarks)
+:host ::ng-deep .inline-code {
+  font-family: $font-mono;
+  font-size: 0.85em;
+  padding: 1px 6px;
+  border-radius: $radius-sm;
+  background: var(--code-bg);
+  color: $ember-glow;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .type-link {
+  color: $ember-glow;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba($ember-glow, 0.4);
+
+  &:hover {
+    border-bottom-style: solid;
+    border-bottom-color: $ember-glow;
+  }
 }
 
 // ─── Code blocks ───

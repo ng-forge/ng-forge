@@ -16,12 +16,6 @@
           <polyline points="9 18 15 12 9 6" />
         </svg>
       </span>
-      <span class="breadcrumb" [routerLink]="'/' + adapter.adapter() + '/api-reference'">{{ pkgName() }}</span>
-      <span class="breadcrumb-sep" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="9 18 15 12 9 6" />
-        </svg>
-      </span>
       <span class="breadcrumb breadcrumb--current" aria-current="page">{{ decl.name }}</span>
     </nav>
 
@@ -44,16 +38,14 @@
 
     <!-- Description -->
     @if (decl.description) {
-      <section class="section">
-        <p class="description">{{ decl.description }}</p>
-      </section>
+      <section class="section description" [innerHTML]="formatDescription(decl.description)"></section>
     }
 
     <!-- Remarks -->
     @if (decl.remarks) {
       <section class="section">
         <h2>Remarks</h2>
-        <p class="remarks">{{ decl.remarks }}</p>
+        <div class="remarks" [innerHTML]="formatDescription(decl.remarks)"></div>
       </section>
     }
 
@@ -87,7 +79,7 @@
                   </td>
                   <td><code class="type" [innerHTML]="linkifyType(tp.constraint ?? '-')"></code></td>
                   <td><code class="type" [innerHTML]="linkifyType(tp.default ?? '-')"></code></td>
-                  <td>{{ tp.description || '-' }}</td>
+                  <td [innerHTML]="formatDescription(tp.description || '-')"></td>
                 </tr>
               }
             </tbody>
@@ -119,7 +111,7 @@
                     }
                   </td>
                   <td><code class="type" [innerHTML]="linkifyType(param.type)"></code></td>
-                  <td>{{ param.description || '-' }}</td>
+                  <td [innerHTML]="formatDescription(param.description || '-')"></td>
                 </tr>
               }
             </tbody>
@@ -165,7 +157,7 @@
                   </td>
                   <td><code class="type" [innerHTML]="linkifyType(prop.type)"></code></td>
                   <td>
-                    {{ prop.description || '-' }}
+                    <span [innerHTML]="formatDescription(prop.description || '-')"></span>
                     @if (prop.deprecated) {
                       <span class="deprecated-inline">Deprecated</span>
                     }
@@ -204,7 +196,7 @@
                   </td>
                   <td><code class="type" [innerHTML]="linkifyType(method.returnType ?? 'void')"></code></td>
                   <td>
-                    {{ method.description || '-' }}
+                    <span [innerHTML]="formatDescription(method.description || '-')"></span>
                     @if (method.deprecated) {
                       <span class="deprecated-inline">Deprecated</span>
                     }

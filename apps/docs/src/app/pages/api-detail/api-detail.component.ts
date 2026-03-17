@@ -127,6 +127,62 @@ export class ApiDetailComponent {
   }
 
   /**
+   * Format description text with inline code highlighting and API links.
+   * Handles backtick code, camelCase() calls, UPPER_CASE constants, and known symbols.
+   */
+  formatDescription(text: string): SafeHtml {
+    const index = this.symbolIndex();
+    const currentSymbol = this.symbolName();
+    const adapterName = this.adapter.adapter();
+
+    let html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    // 1. Backtick-quoted inline code: `something` — also link if it's a known symbol
+    html = html.replace(/`([^`]+)`/g, (_, content: string) => {
+      const bare = content.replace(/\(\)$/, '');
+      if (bare !== currentSymbol && index.has(bare)) {
+        return `<a class="type-link" href="/${adapterName}/api-reference/${bare}"><code class="inline-code">${content}</code></a>`;
+      }
+      return `<code class="inline-code">${content}</code>`;
+    });
+
+    // 2. UPPER_CASE_CONSTANTS (must have underscore to avoid matching words like "API")
+    html = html.replace(/\b([A-Z][A-Z0-9]*_[A-Z0-9_]+)\b/g, (match) => {
+      if (index.has(match)) {
+        return `<a class="type-link" href="/${adapterName}/api-reference/${match}"><code class="inline-code">${match}</code></a>`;
+      }
+      return `<code class="inline-code">${match}</code>`;
+    });
+
+    // 3. camelCase() function calls — link if known
+    html = html.replace(/(?<![<\w])([a-z]\w+)\(\)(?![^<]*>)/g, (match, name: string) => {
+      if (index.has(name)) {
+        return `<a class="type-link" href="/${adapterName}/api-reference/${name}"><code class="inline-code">${name}()</code></a>`;
+      }
+      return `<code class="inline-code">${name}()</code>`;
+    });
+
+    // 4. Link known PascalCase API symbols (not already inside tags)
+    html = html.replace(/(?<![<\/\w])([A-Z][a-z]\w{2,})(?![^<]*>)/g, (match, name: string) => {
+      if (name === currentSymbol) return match;
+      if (!index.has(name)) return match;
+      return `<a class="type-link" href="/${adapterName}/api-reference/${name}">${match}</a>`;
+    });
+
+    // 5. Convert double newlines to paragraphs
+    html = html
+      .split(/\n{2,}/)
+      .map((p) => `<p>${p.trim()}</p>`)
+      .join('');
+
+    if (!text.includes('\n\n')) {
+      html = html.replace(/^<p>(.*)<\/p>$/, '$1');
+    }
+
+    return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
+  /**
    * Convert a type string into HTML with known symbols linked to their API pages.
    * Simplifies verbose generic types and truncates at 300 chars. Returns SafeHtml.
    */
