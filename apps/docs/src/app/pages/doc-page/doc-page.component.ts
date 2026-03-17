@@ -6,11 +6,13 @@ import { distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs';
 import { ContentService } from '../../services/content.service';
 import { ContentComponentsDirective } from '../../directives/content-components.directive';
 import { TocComponent } from '../../components/toc/toc.component';
+import { DocTabsComponent } from '../../components/doc-tabs/doc-tabs.component';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { LiveExampleComponent } from '../../components/live-example/live-example.component';
 import { ExamplesIndexComponent } from '../examples-index/examples-index.component';
 import { EXAMPLES_REGISTRY } from '../examples-index/examples.registry';
 import { findBreadcrumbTrail } from '../../layout/nav.config';
+import { findTabGroup } from '../../layout/tabs.config';
 
 /**
  * Generic documentation page component.
@@ -19,7 +21,7 @@ import { findBreadcrumbTrail } from '../../layout/nav.config';
  */
 @Component({
   selector: 'app-doc-page',
-  imports: [ContentComponentsDirective, TocComponent, RouterLink, LiveExampleComponent, ExamplesIndexComponent],
+  imports: [ContentComponentsDirective, TocComponent, DocTabsComponent, RouterLink, LiveExampleComponent, ExamplesIndexComponent],
   template: `
     @if (isExamplesIndex()) {
       <!-- Examples listing — rendered directly, no doc-layout grid -->
@@ -71,6 +73,9 @@ import { findBreadcrumbTrail } from '../../layout/nav.config';
                 }
               }
             </nav>
+            @if (tabGroup(); as tabs) {
+              <app-doc-tabs [tabGroup]="tabs" />
+            }
             <div class="doc-page-content" contentComponents [contentHtml]="content()!.html"></div>
           } @else {
             <div class="doc-page-loading">Loading...</div>
@@ -207,6 +212,11 @@ export class DocPageComponent {
   readonly breadcrumbs = computed(() => {
     const s = this.slug();
     return s ? findBreadcrumbTrail(s) : [];
+  });
+
+  readonly tabGroup = computed(() => {
+    const s = this.slug();
+    return s ? findTabGroup(s) : undefined;
   });
 
   readonly adapterInfo = computed(() => {

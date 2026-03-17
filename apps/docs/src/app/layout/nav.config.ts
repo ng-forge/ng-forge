@@ -1,3 +1,5 @@
+import { findTabEntry, findTabGroup } from './tabs.config';
+
 /** Sidebar navigation structure — defines ordering, labels, and grouping. */
 
 export interface NavItem {
@@ -59,7 +61,7 @@ export const NAV_ITEMS: NavItem[] = [
     path: 'dynamic-behavior',
     children: [
       { label: 'Conditional Logic', path: 'dynamic-behavior/conditional-logic' },
-      { label: 'Value Derivation', path: 'dynamic-behavior/value-derivation' },
+      { label: 'Value Derivation', path: 'dynamic-behavior/derivation' },
       { label: 'i18n', path: 'dynamic-behavior/i18n' },
       { label: 'Submission', path: 'dynamic-behavior/submission' },
     ],
@@ -120,12 +122,30 @@ export interface BreadcrumbEntry {
 
 /** Build the breadcrumb trail for a given slug by walking NAV_ITEMS ancestors. */
 export function findBreadcrumbTrail(targetPath: string, items: NavItem[] = NAV_ITEMS): BreadcrumbEntry[] {
+  // Direct match in nav tree
+  const direct = walkNavItems(targetPath, items);
+  if (direct.length > 0) return direct;
+
+  // Tab sub-page: resolve via the tab group's navPath
+  const tabEntry = findTabEntry(targetPath);
+  const tabGroup = findTabGroup(targetPath);
+  if (tabEntry && tabGroup) {
+    const parentTrail = walkNavItems(tabGroup.navPath, items);
+    if (parentTrail.length > 0) {
+      return [...parentTrail, { label: tabEntry.label, path: targetPath }];
+    }
+  }
+
+  return [];
+}
+
+function walkNavItems(targetPath: string, items: NavItem[]): BreadcrumbEntry[] {
   for (const item of items) {
     if (item.path === targetPath) {
       return [{ label: item.label, path: item.path }];
     }
     if (item.children) {
-      const childTrail = findBreadcrumbTrail(targetPath, item.children);
+      const childTrail = walkNavItems(targetPath, item.children);
       if (childTrail.length > 0) {
         return [{ label: item.label, path: item.path }, ...childTrail];
       }

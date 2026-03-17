@@ -11,6 +11,8 @@ const CATEGORY_REDIRECTS: Record<string, string> = {
   validation: 'validation/basics',
   'schema-validation': 'schema-validation/overview',
   'dynamic-behavior': 'dynamic-behavior/conditional-logic',
+  'dynamic-behavior/derivation': 'dynamic-behavior/derivation/values',
+  'dynamic-behavior/value-derivation': 'dynamic-behavior/derivation/values',
   prebuilt: 'prebuilt/form-groups',
   'prebuilt/form-arrays': 'prebuilt/form-arrays/simplified',
   advanced: 'advanced/custom-fields',
