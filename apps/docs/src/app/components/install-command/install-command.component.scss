@@ -34,8 +34,13 @@
   }
 
   &__body {
+    position: relative;
     padding: $space-4;
     overflow-x: auto;
+
+    &:hover docs-copy-button {
+      opacity: 1;
+    }
     white-space: nowrap;
     mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent 100%);
 

@@ -8,6 +8,7 @@
     <section class="integration-view__setup">
       <h2 class="integration-view__heading">Styles</h2>
       <div class="integration-view__code">
+        <docs-copy-button [code]="data().stylesCode!" />
         <div [codeHighlight]="data().stylesCode!" lang="scss"></div>
       </div>
     </section>
@@ -16,6 +17,7 @@
   <section class="integration-view__setup">
     <h2 class="integration-view__heading">Setup</h2>
     <div class="integration-view__code">
+      <docs-copy-button [code]="data().setupCode" />
       <div [codeHighlight]="data().setupCode"></div>
     </div>
   </section>

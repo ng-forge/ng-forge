@@ -22,10 +22,6 @@
   @include ember-bs.bootstrap-theme-light();
 }
 
-body {
-  font-family: $font-primary;
-}
-
 // Auto mode
 @media (prefers-color-scheme: dark) {
   html:not([data-theme]),

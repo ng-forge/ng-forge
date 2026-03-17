@@ -52,11 +52,16 @@
   }
 
   &__code {
+    position: relative;
     background: var(--forge-code-bg, #{$bg-deep});
     border: 1px solid var(--forge-border-color, #{$steel-dark});
     border-radius: $radius-lg;
     overflow: hidden;
     padding: $space-2 $space-4;
+
+    &:hover docs-copy-button {
+      opacity: 1;
+    }
 
     // pre is rendered by the codeHighlight directive — pierce encapsulation
     // to strip margin, border, and padding (outer __code wrapper provides them).

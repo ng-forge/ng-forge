@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
+import { CopyButtonComponent } from '../copy-button/copy-button.component';
 
 type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'custom';
 
@@ -255,7 +256,7 @@ const config = {
 
 @Component({
   selector: 'docs-configuration-view',
-  imports: [CodeHighlightDirective],
+  imports: [CodeHighlightDirective, CopyButtonComponent],
   template: `
     <div class="config-view">
       @if (data().options.length > 0) {
@@ -307,6 +308,7 @@ const config = {
       <section class="config-view__section">
         <h3 class="config-view__heading">Library-level (provider)</h3>
         <div class="config-view__code">
+          <docs-copy-button [code]="data().providerExample" />
           <div [codeHighlight]="data().providerExample"></div>
         </div>
       </section>
@@ -318,6 +320,7 @@ const config = {
           <code>defaultProps</code> with autocomplete.
         </p>
         <div class="config-view__code">
+          <docs-copy-button [code]="data().formLevelExample" />
           <div [codeHighlight]="data().formLevelExample"></div>
         </div>
       </section>

@@ -27,11 +27,6 @@
   @include ember-mat.material-theme-dark();
 }
 
-// Material-specific body font
-body {
-  font-family: $font-primary;
-}
-
 // Material input overrides
 .mat-mdc-form-field {
   --mdc-outlined-text-field-container-color: #ffffff;
