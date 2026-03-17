@@ -28,7 +28,7 @@ const deployDir = join(deployRoot, 'dynamic-forms');
 const distDir = join(rootDir, 'dist');
 
 // Check if build output exists
-if (!existsSync(join(distDir, 'apps', 'docs', 'browser'))) {
+if (!existsSync(join(distDir, 'apps', 'docs', 'client'))) {
   console.error('❌ Error: Docs app build output not found!');
   console.error('   Please run: pnpm nx build docs --configuration=production');
   process.exit(1);
@@ -45,7 +45,7 @@ mkdirSync(deployDir, { recursive: true });
 // Copy docs app to root
 console.log('📄 Copying docs app to deployment root...');
 try {
-  cpSync(join(distDir, 'apps', 'docs', 'browser'), deployDir, { recursive: true });
+  cpSync(join(distDir, 'apps', 'docs', 'client'), deployDir, { recursive: true });
   console.log('   ✅ Docs app copied');
 } catch (error) {
   console.error('   ❌ Failed to copy docs app:', error.message);
