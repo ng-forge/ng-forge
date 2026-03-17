@@ -522,31 +522,7 @@ const config = {
 
 Container fields enforce nesting constraints at compile-time to prevent invalid structures.
 
-**Visual Reference:**
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      NESTING RULES                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  PAGE ──────┬──► ROW ────────┬──► GROUP ──┬──► LEAF FIELD  │
-│             │                │            │                 │
-│             ├──► GROUP ──────┼──► ROW ────┴──► LEAF FIELD  │
-│             │                │                              │
-│             └──► LEAF FIELD  └──► LEAF FIELD               │
-│                                                             │
-├─────────────────────────────────────────────────────────────┤
-│  ✗ PAGE cannot contain PAGE                                 │
-│  ✗ ROW cannot contain ROW or PAGE                          │
-│  ✗ GROUP cannot contain GROUP or PAGE                      │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Valid Nesting:**
-
-- **Pages** can contain: rows, groups, leaf fields (not other pages)
-- **Rows** can contain: groups, leaf fields (not pages or rows)
-- **Groups** can contain: rows, leaf fields (not pages or other groups)
+<docs-nesting-rules></docs-nesting-rules>
 
 **Invalid Nesting:**
 

@@ -52,14 +52,15 @@ const EMOJI_SVG_MAP: Record<string, string> = {
 const EMOJI_PATTERN = new RegExp(`(${Object.keys(EMOJI_SVG_MAP).join('|')})`, 'g');
 
 /**
- * Replace emoji characters with inline SVG icons, but only outside
- * <pre>, <code>, and shiki code block elements.
+ * Replace emoji characters with inline SVG icons, but only in text content —
+ * not inside code blocks, HTML tags, or attribute values.
  */
 function replaceEmojisOutsideCode(html: string): string {
-  // Split on code-related tags to avoid replacing inside them
-  const parts = html.split(/(<(?:pre|code|span class="shiki)[^>]*>[\s\S]*?<\/(?:pre|code|span)>)/gi);
+  // Split into: HTML tags (including attributes) and code blocks vs text content.
+  // Capture groups: code blocks OR any HTML tag — only replace in non-captured segments.
+  const parts = html.split(/(<(?:pre|code)[^>]*>[\s\S]*?<\/(?:pre|code)>|<[^>]+>)/gi);
   for (let i = 0; i < parts.length; i++) {
-    // Even indices are outside code blocks
+    // Only replace in text segments (odd indices are captured tags/code blocks)
     if (i % 2 === 0) {
       parts[i] = parts[i].replace(EMOJI_PATTERN, (match) => EMOJI_SVG_MAP[match] ?? match);
     }

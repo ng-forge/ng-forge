@@ -404,13 +404,7 @@ Bidirectional derivations stabilize when the computed value equals the current v
 
 Derivations are topologically sorted based on dependencies:
 
-```
-quantity  ─┐
-            ├── subtotal ─┐
-unitPrice ─┘              ├── total
-                          │
-             tax ─────────┘
-```
+<docs-derivation-flow></docs-derivation-flow>
 
 This ensures `subtotal` is computed before `total`.
 

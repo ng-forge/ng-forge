@@ -18,6 +18,9 @@ import { AdapterPickerComponent } from '../components/adapter-picker/adapter-pic
 import { DocsIntegrationViewComponent } from '../components/integration-view/integration-view.component';
 import { DocsConfigurationViewComponent } from '../components/configuration-view/configuration-view.component';
 import { CascadeVisualComponent } from '../components/cascade-visual/cascade-visual.component';
+import { NestingRulesComponent } from '../components/nesting-rules/nesting-rules.component';
+import { LogicFlowComponent } from '../components/logic-flow/logic-flow.component';
+import { DerivationFlowComponent } from '../components/derivation-flow/derivation-flow.component';
 
 interface ComponentRegistration {
   selector: string;
@@ -46,6 +49,18 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
   {
     selector: 'docs-cascade-visual',
     component: CascadeVisualComponent,
+  },
+  {
+    selector: 'docs-nesting-rules',
+    component: NestingRulesComponent,
+  },
+  {
+    selector: 'docs-logic-flow',
+    component: LogicFlowComponent,
+  },
+  {
+    selector: 'docs-derivation-flow',
+    component: DerivationFlowComponent,
   },
 ];
 

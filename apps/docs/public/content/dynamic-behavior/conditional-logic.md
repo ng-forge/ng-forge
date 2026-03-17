@@ -254,39 +254,7 @@ Conditional logic is evaluated:
 
 ### Evaluation Flow
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    LOGIC EVALUATION FLOW                    │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  Form Value Changes                                         │
-│         │                                                   │
-│         ▼                                                   │
-│  ┌─────────────────┐                                       │
-│  │ Signal Updates  │◄──── Angular's reactive system        │
-│  └────────┬────────┘                                       │
-│           │                                                 │
-│           ▼                                                 │
-│  ┌─────────────────┐                                       │
-│  │ Evaluate logic  │                                       │
-│  │    conditions   │                                       │
-│  └────────┬────────┘                                       │
-│           │                                                 │
-│     ┌─────┴─────┐                                          │
-│     ▼           ▼                                          │
-│  ┌──────┐   ┌──────┐                                       │
-│  │ true │   │false │                                       │
-│  └──┬───┘   └──┬───┘                                       │
-│     │          │                                            │
-│     ▼          ▼                                            │
-│  Apply      Remove                                          │
-│  effect     effect                                          │
-│  (hide,     (show,                                          │
-│  require,   optional,                                       │
-│  readonly)  editable)                                       │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
+<docs-logic-flow></docs-logic-flow>
 
 ## Expression Types
 

@@ -61,13 +61,7 @@ Derivations can reference other derived values. The system automatically process
 
 ### Derivation Flow
 
-```
-quantity ───┐
-            ├── subtotal ──┬── tax ──┬── total
-unitPrice ──┘              │         │
-                           │         │
-taxRate ───────────────────┴─────────┘
-```
+<docs-derivation-flow></docs-derivation-flow>
 
 ## Related
 

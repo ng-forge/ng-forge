@@ -75,13 +75,24 @@ export class DocsLayoutComponent {
       });
       this.collapsedCategories.update((set) => new Set(set).add(path));
     } else {
-      // Expand only this one — collapse everything else (including URL-active sections)
-      this.expandedCategories.set(new Set([path]));
-      // Mark all OTHER categories as explicitly collapsed so URL-based auto-expand is suppressed
-      const allCategoryPaths = this.navItems()
-        .filter((item) => item.children)
-        .map((item) => item.path);
-      this.collapsedCategories.set(new Set(allCategoryPaths.filter((p) => p !== path)));
+      // Expand this one — collapse siblings at the same level, keep parents open
+      const isTopLevel = this.navItems().some((item) => item.path === path);
+      if (isTopLevel) {
+        // Top-level: collapse other top-level categories
+        const siblingPaths = this.navItems()
+          .filter((item) => item.children && item.path !== path)
+          .map((item) => item.path);
+        this.expandedCategories.set(new Set([path]));
+        this.collapsedCategories.set(new Set(siblingPaths));
+      } else {
+        // Subcategory: just add to expanded set, don't touch parents
+        this.expandedCategories.update((set) => new Set(set).add(path));
+        this.collapsedCategories.update((set) => {
+          const next = new Set(set);
+          next.delete(path);
+          return next;
+        });
+      }
     }
   }
 
