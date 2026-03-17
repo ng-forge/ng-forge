@@ -13,7 +13,7 @@
  *     └── assets/      (docs assets)
  */
 
-import { copyFileSync, cpSync, existsSync, mkdirSync, rmSync } from 'fs';
+import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -52,19 +52,23 @@ try {
   process.exit(1);
 }
 
-// Copy index.csr.html to index.html for SPA fallback
-// Angular SSR generates index.csr.html as the client-side rendering fallback.
-const indexCsrPath = join(deployDir, 'index.csr.html');
+// Rewrite base href for /dynamic-forms/ deployment path
 const indexHtmlPath = join(deployDir, 'index.html');
-if (existsSync(indexCsrPath)) {
-  console.log('📄 Creating index.html from index.csr.html for SPA fallback...');
-  try {
-    copyFileSync(indexCsrPath, indexHtmlPath);
-    console.log('   ✅ index.html created');
-  } catch (error) {
-    console.error('   ❌ Failed to create index.html:', error.message);
-    process.exit(1);
-  }
+if (existsSync(indexHtmlPath)) {
+  console.log('📄 Rewriting base href for /dynamic-forms/ deployment...');
+  const html = readFileSync(indexHtmlPath, 'utf-8');
+  const updated = html.replace('<base href="/" />', '<base href="/dynamic-forms/" />');
+  writeFileSync(indexHtmlPath, updated, 'utf-8');
+  console.log('   ✅ base href updated to /dynamic-forms/');
+}
+
+// Also rewrite 404.html if it exists
+const notFoundPath = join(deployDir, '404.html');
+if (existsSync(notFoundPath)) {
+  const html404 = readFileSync(notFoundPath, 'utf-8');
+  const updated404 = html404.replace('<base href="/" />', '<base href="/dynamic-forms/" />');
+  writeFileSync(notFoundPath, updated404, 'utf-8');
+  console.log('   ✅ 404.html base href updated');
 }
 
 console.log('\n✅ Deployment directory prepared successfully!\n');
