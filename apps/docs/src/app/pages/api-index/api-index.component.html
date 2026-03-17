@@ -140,13 +140,16 @@
 
   @if (totalResults() === 0) {
     <div class="no-results">
-      @if (!packageFilter().size) {
+      @if (!dataLoaded()) {
+        <p>Loading API reference...</p>
+      } @else if (!packageFilter().size) {
         <p>Select a package above to view its API</p>
       } @else if (query() || kindFilter()) {
         <p>No declarations match your filters</p>
         <button type="button" class="clear-btn" (click)="clearFilters()">Clear filters</button>
       } @else {
-        <p>Loading API reference...</p>
+        <p>No API declarations available for this configuration</p>
+        <button type="button" class="clear-btn" (click)="clearFilters()">Reset filters</button>
       }
     </div>
   }

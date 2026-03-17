@@ -80,6 +80,9 @@ export class ApiIndexComponent {
   readonly coreCount = computed(() => this.core()?.declarations.length ?? 0);
   readonly adapterCount = computed(() => this.adapterPkg()?.declarations.length ?? 0);
 
+  /** True once core data has loaded (adapter may be undefined for custom). */
+  readonly dataLoaded = computed(() => !!this.core());
+
   onSearch(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
   }
