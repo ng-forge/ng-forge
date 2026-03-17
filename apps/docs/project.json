@@ -26,6 +26,7 @@
       "outputs": ["{projectRoot}/public/llms-full.txt"]
     },
     "build": {
+      "dependsOn": ["^build"],
       "executor": "@analogjs/platform:vite",
       "options": {
         "configFile": "apps/docs/vite.config.ts",
