@@ -176,17 +176,20 @@ $kind-colors: (
 // ─── Code blocks ───
 .code-block {
   border-radius: $radius-md;
-  overflow: hidden;
   margin-bottom: $space-4;
   border: 1px solid var(--card-border);
+  background: var(--code-bg);
+  overflow-x: auto;
 
-  :global(pre) {
+  // innerHTML content — needs ::ng-deep to pierce encapsulation
+  ::ng-deep pre {
     margin: 0;
     padding: $space-4 $space-5;
-    overflow-x: auto;
     font-family: $font-mono;
     font-size: $text-sm;
     line-height: 1.6;
+    white-space: pre;
+    background: transparent !important;
   }
 }
 
