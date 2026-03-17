@@ -91,6 +91,7 @@ function adapterCssPlugin(): Plugin {
 export default defineConfig(({ mode }) => {
   return {
     root: __dirname,
+    base: mode === 'production' ? '/dynamic-forms/' : '/',
     cacheDir: '../../node_modules/.vite',
     build: {
       outDir: '../../dist/apps/docs/client',
