@@ -14,6 +14,9 @@ import { ApiService, type ApiPackage, getKindMeta } from '../../services/api.ser
   templateUrl: './api-detail.component.html',
   styleUrl: './api-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(click)': 'onHostClick($event)',
+  },
 })
 export class ApiDetailComponent {
   private readonly router = inject(Router);
@@ -128,6 +131,19 @@ export class ApiDetailComponent {
 
   trustHtml(html: string) {
     return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
+  /** Intercept clicks on type-link anchors inside [innerHTML] and route via Angular router. */
+  onHostClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    const link = target.closest('a.type-link') as HTMLAnchorElement | null;
+    if (!link) return;
+
+    event.preventDefault();
+    const href = link.getAttribute('href');
+    if (href) {
+      void this.router.navigateByUrl(href);
+    }
   }
 
   /**
