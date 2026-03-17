@@ -342,6 +342,6 @@ The expression parser lets you write flexible conditional logic while preventing
 
 ## Next Steps
 
-- **[Conditional Logic →](/dynamic-behavior/overview)** — Use expressions to control field visibility and state
-- **[Type Safety →](/advanced/basics)** — Leverage TypeScript inference for form values and field types
-- **[Value Derivation →](/dynamic-behavior/value-derivation/basics)** — Use expressions to compute field values dynamically
+- **[Conditional Logic](/dynamic-behavior/overview)** — Use expressions to control field visibility and state
+- **[Type Safety](/advanced/basics)** — Leverage TypeScript inference for form values and field types
+- **[Value Derivation](/dynamic-behavior/value-derivation/basics)** — Use expressions to compute field values dynamically

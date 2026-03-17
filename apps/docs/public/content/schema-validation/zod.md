@@ -214,6 +214,6 @@ const config = { schema: standardSchema(schema), fields: [...] };
 
 ## Next Steps
 
-- **[Angular Schema →](/schema-validation/angular-schema)** — Native Angular approach without additional dependencies
-- **[Field Validation →](/validation/basics)** — Add built-in and custom validators to individual fields
-- **[Schema Validation Overview →](/schema-validation/overview)** — Compare Angular and Standard Schema approaches
+- **[Angular Schema](/schema-validation/angular-schema)** — Native Angular approach without additional dependencies
+- **[Field Validation](/validation/basics)** — Add built-in and custom validators to individual fields
+- **[Schema Validation Overview](/schema-validation/overview)** — Compare Angular and Standard Schema approaches

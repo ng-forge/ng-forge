@@ -81,10 +81,10 @@ const config = {
 
 ## Going Further
 
-If you need a completely custom adapter (no existing adapter as base), or want to implement the config cascade (`defaultProps`) for your custom fields, see the full [Custom Integrations →](/custom-integrations) guide.
+If you need a completely custom adapter (no existing adapter as base), or want to implement the config cascade (`defaultProps`) for your custom fields, see the full [Custom Integrations](/custom-integrations) guide.
 
 ## Next Steps
 
-- **[Custom Integrations →](/custom-integrations)** — Build a complete adapter for any UI library from scratch
-- **[Type Safety →](/advanced/basics)** — Leverage TypeScript inference for form values and field types
-- **[Events →](/advanced/events)** — Dispatch and subscribe to form events from custom field components
+- **[Custom Integrations](/custom-integrations)** — Build a complete adapter for any UI library from scratch
+- **[Type Safety](/advanced/basics)** — Leverage TypeScript inference for form values and field types
+- **[Events](/advanced/events)** — Dispatch and subscribe to form events from custom field components

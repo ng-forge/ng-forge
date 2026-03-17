@@ -196,6 +196,19 @@ $kind-colors: (
   white-space: nowrap;
 }
 
+:host ::ng-deep .callout--breaking {
+  padding: $space-4 $space-5;
+  border-radius: $radius-md;
+  margin: $space-4 0;
+  font-size: $text-sm;
+  line-height: 1.5;
+  background: rgba($warning, 0.1);
+  border: 1px solid rgba($warning, 0.3);
+  border-left: 3px solid $warning;
+  color: $warning;
+  font-weight: 500;
+}
+
 :host ::ng-deep .type-link {
   color: $ember-glow;
   text-decoration: none;
@@ -239,6 +252,14 @@ $kind-colors: (
     background: rgba($error, 0.08);
     border: 1px solid rgba($error, 0.2);
     color: $error;
+  }
+
+  &--breaking {
+    background: rgba($warning, 0.1);
+    border: 1px solid rgba($warning, 0.3);
+    color: $warning;
+    font-weight: 500;
+    border-left: 3px solid $warning;
   }
 }
 

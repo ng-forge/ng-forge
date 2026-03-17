@@ -471,6 +471,6 @@ This is useful when you need the complete form state at the time an event occurr
 
 ## Next Steps
 
-- **[Form Submission →](/dynamic-behavior/submission)** — Configure async submission with loading states and server errors
-- **[Custom Fields →](/advanced/custom-fields)** — Build custom field components that use EventBus
-- **[Form Arrays →](/prebuilt/form-arrays/simplified)** — Use array events to add and remove items programmatically
+- **[Form Submission](/dynamic-behavior/submission)** — Configure async submission with loading states and server errors
+- **[Custom Fields](/advanced/custom-fields)** — Build custom field components that use EventBus
+- **[Form Arrays](/prebuilt/form-arrays/simplified)** — Use array events to add and remove items programmatically

@@ -55,6 +55,15 @@ export class DocsLayoutComponent {
     this.sidebarOpen.set(false);
   }
 
+  protected expandCategory(path: string): void {
+    this.expandedCategories.update((set) => new Set(set).add(path));
+    this.collapsedCategories.update((set) => {
+      const next = new Set(set);
+      next.delete(path);
+      return next;
+    });
+  }
+
   protected toggleCategory(path: string): void {
     const wasExpanded = this.isCategoryExpanded({ path, children: [{}] } as NavItem);
     if (wasExpanded) {

@@ -169,13 +169,26 @@ export class ApiDetailComponent {
       return `<a class="type-link" href="/${adapterName}/api-reference/${name}">${match}</a>`;
     });
 
-    // 5. Convert double newlines to paragraphs
-    html = html
-      .split(/\n{2,}/)
-      .map((p) => `<p>${p.trim()}</p>`)
+    // 5. Markdown bold: **text**
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+    // 6. Convert double newlines to paragraphs, with special handling for callouts
+    const paragraphs = html.split(/\n{2,}/).filter((p) => p.trim());
+
+    html = paragraphs
+      .map((p) => {
+        const trimmed = p.trim();
+        // Breaking change → styled callout
+        if (trimmed.match(/^<strong>BREAKING CHANGE<\/strong>:\s*/i)) {
+          const content = trimmed.replace(/^<strong>BREAKING CHANGE<\/strong>:\s*/i, '');
+          return `<div class="callout callout--breaking"><strong>Breaking Change:</strong> ${content}</div>`;
+        }
+        return `<p>${trimmed}</p>`;
+      })
       .join('');
 
-    if (!text.includes('\n\n')) {
+    // Single paragraph without callout — unwrap
+    if (paragraphs.length === 1 && !html.includes('callout--breaking')) {
       html = html.replace(/^<p>(.*)<\/p>$/, '$1');
     }
 

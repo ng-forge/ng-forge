@@ -201,6 +201,6 @@ Page fields use these classes for styling:
 
 ## Next Steps
 
-- **[Form Arrays →](/prebuilt/form-arrays/simplified)** — Create repeating sections with add/remove controls
-- **[Dynamic Behavior →](/dynamic-behavior/overview)** — Conditional logic, value derivation, and form submission
-- **[Form Rows →](/prebuilt/form-rows)** — Arrange fields side-by-side within pages
+- **[Form Arrays](/prebuilt/form-arrays/simplified)** — Create repeating sections with add/remove controls
+- **[Dynamic Behavior](/dynamic-behavior/overview)** — Conditional logic, value derivation, and form submission
+- **[Form Rows](/prebuilt/form-rows)** — Arrange fields side-by-side within pages

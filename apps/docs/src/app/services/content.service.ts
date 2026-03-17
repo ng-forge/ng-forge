@@ -38,6 +38,35 @@ const CALLOUT_PREFIXES: Record<string, string> = {
   '[!CAUTION]': 'danger',
 };
 
+const EMOJI_SVG_MAP: Record<string, string> = {
+  '✅': `<span class="icon-indicator icon-indicator--check" aria-label="Yes"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>`,
+  '✓': `<span class="icon-indicator icon-indicator--check" aria-label="Yes"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>`,
+  '✔': `<span class="icon-indicator icon-indicator--check" aria-label="Yes"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>`,
+  '❌': `<span class="icon-indicator icon-indicator--cross" aria-label="No"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>`,
+  '✗': `<span class="icon-indicator icon-indicator--cross" aria-label="No"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>`,
+  '✘': `<span class="icon-indicator icon-indicator--cross" aria-label="No"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>`,
+  '🚀': `<span class="icon-indicator icon-indicator--rocket" aria-label="Rocket"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></span>`,
+  '🎯': `<span class="icon-indicator icon-indicator--target" aria-label="Target"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>`,
+};
+
+const EMOJI_PATTERN = new RegExp(`(${Object.keys(EMOJI_SVG_MAP).join('|')})`, 'g');
+
+/**
+ * Replace emoji characters with inline SVG icons, but only outside
+ * <pre>, <code>, and shiki code block elements.
+ */
+function replaceEmojisOutsideCode(html: string): string {
+  // Split on code-related tags to avoid replacing inside them
+  const parts = html.split(/(<(?:pre|code|span class="shiki)[^>]*>[\s\S]*?<\/(?:pre|code|span)>)/gi);
+  for (let i = 0; i < parts.length; i++) {
+    // Even indices are outside code blocks
+    if (i % 2 === 0) {
+      parts[i] = parts[i].replace(EMOJI_PATTERN, (match) => EMOJI_SVG_MAP[match] ?? match);
+    }
+  }
+  return parts.join('');
+}
+
 /**
  * Fetches markdown files from the /content/ directory and renders them
  * with Shiki syntax highlighting (two-pass: lex → highlight → render).
@@ -173,6 +202,9 @@ export class ContentService {
       /\{@link\s+(\w+)\}/g,
       (_, symbol: string) => `<a class="api-link" data-api-symbol="${symbol}" href="javascript:void(0)"><code>${symbol}</code></a>`,
     );
+
+    // Replace emoji indicators with inline SVGs (outside code blocks only)
+    html = replaceEmojisOutsideCode(html);
 
     return {
       html: this.sanitizer.bypassSecurityTrustHtml(html),

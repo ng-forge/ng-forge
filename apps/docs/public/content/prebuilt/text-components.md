@@ -135,6 +135,6 @@ Add custom classes via the `className` property:
 
 ## Next Steps
 
-- **[Hidden Fields →](/prebuilt/hidden-fields)** — Store metadata and IDs without rendering UI
-- **[Field Types →](/field-types/text-inputs)** — Explore all available input field types and their props
-- **[i18n →](/dynamic-behavior/i18n)** — Translate text labels with Observables and Signals
+- **[Hidden Fields](/prebuilt/hidden-fields)** — Store metadata and IDs without rendering UI
+- **[Field Types](/field-types/text-inputs)** — Explore all available input field types and their props
+- **[i18n](/dynamic-behavior/i18n)** — Translate text labels with Observables and Signals

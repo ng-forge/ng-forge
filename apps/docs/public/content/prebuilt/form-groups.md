@@ -167,6 +167,6 @@ For all available condition types and operators, see [Conditional Logic](/dynami
 
 ## Next Steps
 
-- **[Form Rows →](/prebuilt/form-rows)** — Arrange fields side-by-side in horizontal layouts
-- **[Form Pages →](/prebuilt/form-pages)** — Build multi-step wizard forms with page navigation
-- **[Form Arrays →](/prebuilt/form-arrays/simplified)** — Create repeating sections with dynamic add/remove
+- **[Form Rows](/prebuilt/form-rows)** — Arrange fields side-by-side in horizontal layouts
+- **[Form Pages](/prebuilt/form-pages)** — Build multi-step wizard forms with page navigation
+- **[Form Arrays](/prebuilt/form-arrays/simplified)** — Create repeating sections with dynamic add/remove

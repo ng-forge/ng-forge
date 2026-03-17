@@ -31,9 +31,9 @@ export const NAV_ITEMS: NavItem[] = [
     path: 'schema-fields/field-types',
     children: [
       { label: 'Text Inputs', path: 'schema-fields/field-types/text-inputs' },
-      { label: 'Selection', path: 'schema-fields/field-types/selection' },
-      { label: 'Buttons', path: 'schema-fields/field-types/buttons' },
-      { label: 'Utility', path: 'schema-fields/field-types/utility' },
+      { label: 'Selection Fields', path: 'schema-fields/field-types/selection' },
+      { label: 'Buttons & Actions', path: 'schema-fields/field-types/buttons' },
+      { label: 'Utility Fields', path: 'schema-fields/field-types/utility' },
       { label: 'Advanced Controls', path: 'schema-fields/field-types/advanced-controls' },
     ],
   },
@@ -53,7 +53,7 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       { label: 'Overview', path: 'schema-validation/overview' },
       { label: 'Angular Schema', path: 'schema-validation/angular-schema' },
-      { label: 'Zod', path: 'schema-validation/zod' },
+      { label: 'Zod Validation', path: 'schema-validation/zod' },
     ],
   },
   {
@@ -62,12 +62,12 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       { label: 'Conditional Logic', path: 'dynamic-behavior/conditional-logic' },
       { label: 'Value Derivation', path: 'dynamic-behavior/derivation' },
-      { label: 'i18n', path: 'dynamic-behavior/i18n' },
-      { label: 'Submission', path: 'dynamic-behavior/submission' },
+      { label: 'Internationalization (i18n)', path: 'dynamic-behavior/i18n' },
+      { label: 'Form Submission', path: 'dynamic-behavior/submission' },
     ],
   },
   {
-    label: 'Prebuilt',
+    label: 'Layout Components',
     path: 'prebuilt',
     children: [
       { label: 'Form Groups', path: 'prebuilt/form-groups' },
@@ -77,8 +77,8 @@ export const NAV_ITEMS: NavItem[] = [
         label: 'Form Arrays',
         path: 'prebuilt/form-arrays',
         children: [
-          { label: 'Simplified', path: 'prebuilt/form-arrays/simplified' },
-          { label: 'Complete', path: 'prebuilt/form-arrays/complete' },
+          { label: 'Simplified API', path: 'prebuilt/form-arrays/simplified' },
+          { label: 'Complete API', path: 'prebuilt/form-arrays/complete' },
         ],
       },
       { label: 'Hidden Fields', path: 'prebuilt/hidden-fields' },
@@ -89,8 +89,8 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Advanced',
     path: 'advanced',
     children: [
-      { label: 'Custom Fields', path: 'advanced/custom-fields' },
-      { label: 'Expression Parser', path: 'advanced/expression-parser' },
+      { label: 'Adding Custom Fields', path: 'advanced/custom-fields' },
+      { label: 'Expression Parser Security', path: 'advanced/expression-parser' },
       { label: 'Type Safety', path: 'advanced/type-safety' },
       { label: 'Events', path: 'advanced/events' },
       { label: 'Value Exclusion', path: 'advanced/value-exclusion' },

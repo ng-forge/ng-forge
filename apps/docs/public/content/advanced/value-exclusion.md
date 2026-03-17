@@ -163,6 +163,6 @@ const config: FormConfig = {
 
 ## Next Steps
 
-- **[Form Submission →](/dynamic-behavior/submission)** — Configure async submission with automatic button disabling
-- **[Events →](/advanced/events)** — Dispatch and subscribe to form events from inside or outside the form
-- **[Conditional Logic →](/dynamic-behavior/overview)** — Control field visibility, required state, and disabled state
+- **[Form Submission](/dynamic-behavior/submission)** — Configure async submission with automatic button disabling
+- **[Events](/advanced/events)** — Dispatch and subscribe to form events from inside or outside the form
+- **[Conditional Logic](/dynamic-behavior/overview)** — Control field visibility, required state, and disabled state

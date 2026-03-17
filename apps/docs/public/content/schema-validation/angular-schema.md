@@ -284,6 +284,6 @@ Consider [Standard Schema (Zod)](../zod) if you:
 
 ## Next Steps
 
-- **[Standard Schema (Zod) →](/schema-validation/zod)** — Use Zod, Valibot, or ArkType for cross-platform schema validation
-- **[Field Validation →](/validation/basics)** — Add built-in and custom validators to individual fields
-- **[Schema Validation Overview →](/schema-validation/overview)** — Compare Angular and Standard Schema approaches
+- **[Standard Schema (Zod)](/schema-validation/zod)** — Use Zod, Valibot, or ArkType for cross-platform schema validation
+- **[Field Validation](/validation/basics)** — Add built-in and custom validators to individual fields
+- **[Schema Validation Overview](/schema-validation/overview)** — Compare Angular and Standard Schema approaches
