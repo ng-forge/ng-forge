@@ -37,14 +37,7 @@
 
 <!-- Sidebar backdrop (mobile) -->
 @if (sidebarOpen()) {
-  <div
-    class="sidebar-backdrop"
-    (click)="closeSidebar()"
-    (keydown.escape)="closeSidebar()"
-    role="button"
-    tabindex="-1"
-    aria-label="Close sidebar"
-  ></div>
+  <div class="sidebar-backdrop" (click)="closeSidebar()" role="presentation"></div>
 }
 
 <!-- Page body: sidebar + content in a centered wrapper -->

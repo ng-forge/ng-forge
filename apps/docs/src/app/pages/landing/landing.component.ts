@@ -55,6 +55,8 @@ export class LandingComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly http = inject(HttpClient);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private copyFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
+  private confettiTimer: ReturnType<typeof setTimeout> | null = null;
 
   // ============================================
   // FORM CONFIGS (for landing page demos)
@@ -146,6 +148,11 @@ export class LandingComponent {
     afterNextRender(() => {
       this.initializeBrowserFeatures();
     });
+
+    this.destroyRef.onDestroy(() => {
+      if (this.copyFeedbackTimer) clearTimeout(this.copyFeedbackTimer);
+      if (this.confettiTimer) clearTimeout(this.confettiTimer);
+    });
   }
 
   // ============================================
@@ -227,7 +234,8 @@ export class LandingComponent {
       .then(() => {
         this.copied.set(true);
         this.spawnCopyConfetti();
-        setTimeout(() => this.copied.set(false), COPY_FEEDBACK_DURATION_MS);
+        if (this.copyFeedbackTimer) clearTimeout(this.copyFeedbackTimer);
+        this.copyFeedbackTimer = setTimeout(() => this.copied.set(false), COPY_FEEDBACK_DURATION_MS);
       })
       .catch(() => {
         // Clipboard API may fail in some contexts (e.g., insecure origins)
@@ -247,7 +255,8 @@ export class LandingComponent {
     this.copyConfetti.set(newParticles);
 
     // Clear confetti after animation completes
-    setTimeout(() => this.copyConfetti.set([]), CONFETTI_ANIMATION_DURATION_MS);
+    if (this.confettiTimer) clearTimeout(this.confettiTimer);
+    this.confettiTimer = setTimeout(() => this.copyConfetti.set([]), CONFETTI_ANIMATION_DURATION_MS);
   }
 
   private formatNumber(num: number): string {

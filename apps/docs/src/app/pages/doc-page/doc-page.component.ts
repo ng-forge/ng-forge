@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Clipboard } from '@angular/cdk/clipboard';
@@ -87,7 +87,7 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
             @if (tabGroup(); as tabs) {
               <app-doc-tabs [tabGroup]="tabs" />
             }
-            <div class="doc-page-content" contentComponents [contentHtml]="content()!.html"></div>
+            <div class="doc-page-content" contentComponents [contentHtml]="content()!.rawHtml"></div>
           } @else {
             <div class="doc-page-skeleton" role="status" aria-busy="true">
               <span class="visually-hidden">Loading page content</span>
@@ -376,7 +376,15 @@ export class DocPageComponent {
   private readonly router = inject(Router);
   private readonly contentService = inject(ContentService);
   private readonly clipboard = inject(Clipboard);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly adapter = inject(ActiveAdapterService);
+  private copiedTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.copiedTimer) clearTimeout(this.copiedTimer);
+    });
+  }
 
   /**
    * Extract the content slug from the current URL.
@@ -414,7 +422,6 @@ export class DocPageComponent {
     if (!this.isBrowser) return false;
     // If a navigation is currently in progress (e.g., guard redirect), suppress the 404
     if (this.router.getCurrentNavigation()) return false;
-    console.debug('[DocPage] showNotFound=true, error:', c.error, 'slug:', this.slug());
     return true;
   });
 
@@ -498,6 +505,7 @@ export class DocPageComponent {
       el.removeEventListener('mouseleave', clear);
     };
     el.addEventListener('mouseleave', clear);
-    setTimeout(clear, 2000);
+    if (this.copiedTimer) clearTimeout(this.copiedTimer);
+    this.copiedTimer = setTimeout(clear, 2000);
   }
 }

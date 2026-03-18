@@ -21,7 +21,14 @@
         <circle cx="11" cy="11" r="8" />
         <path d="m21 21-4.3-4.3" />
       </svg>
-      <input type="text" class="search-input" placeholder="Filter declarations..." [value]="query()" (input)="onSearch($event)" />
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Filter declarations..."
+        aria-label="Filter API declarations"
+        [value]="query()"
+        (input)="onSearch($event)"
+      />
     </div>
 
     <!-- Package pills -->

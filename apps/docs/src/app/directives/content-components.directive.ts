@@ -9,11 +9,9 @@ import {
   Injector,
   input,
   PLATFORM_ID,
-  SecurityContext,
   Type,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ActiveAdapterService } from '../services/active-adapter.service';
 import { LiveExampleComponent } from '../components/live-example/live-example.component';
@@ -84,43 +82,46 @@ export class ContentComponentsDirective {
   private readonly injector = inject(Injector);
   private readonly envInjector = inject(EnvironmentInjector);
   private readonly appRef = inject(ApplicationRef);
-  private readonly sanitizer = inject(DomSanitizer);
   private readonly activeAdapter = inject(ActiveAdapterService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly componentRefs: Array<ReturnType<typeof createComponent>> = [];
   private originalHtml = '';
+  private pendingRafId: number | null = null;
 
-  /** The SafeHtml content — directive applies it to innerHTML and processes dynamic components. */
-  readonly contentHtml = input<SafeHtml | null>(null);
+  /** Raw HTML string — avoids re-sanitizing SafeHtml which could strip custom elements. */
+  readonly contentHtml = input<string | null>(null);
 
   constructor() {
     explicitEffect([this.contentHtml, this.activeAdapter.adapter], ([html]) => {
       if (!html) return;
-      // Store original HTML on first receive (before any DOM mutations)
-      const htmlString = this.sanitizer.sanitize(SecurityContext.HTML, html);
-      if (htmlString) {
-        this.originalHtml = htmlString;
-      }
+      this.originalHtml = html;
 
       if (!this.isBrowser) {
         // During SSR, set innerHTML directly for SEO — no dynamic component processing needed
-        if (this.originalHtml) {
-          this.el.nativeElement.innerHTML = this.originalHtml;
-        }
+        this.el.nativeElement.innerHTML = this.originalHtml;
         return;
       }
 
+      // Cancel any pending rAF from a previous effect run to prevent stale DOM overwrites
+      if (this.pendingRafId !== null) {
+        cancelAnimationFrame(this.pendingRafId);
+      }
+
       // Re-apply original HTML to restore custom element tags, then process
-      requestAnimationFrame(() => {
-        if (this.originalHtml) {
-          this.el.nativeElement.innerHTML = this.originalHtml;
-        }
+      this.pendingRafId = requestAnimationFrame(() => {
+        this.pendingRafId = null;
+        this.el.nativeElement.innerHTML = this.originalHtml;
         this.processContent();
       });
     });
 
-    this.destroyRef.onDestroy(() => this.destroyComponents());
+    this.destroyRef.onDestroy(() => {
+      if (this.pendingRafId !== null) {
+        cancelAnimationFrame(this.pendingRafId);
+      }
+      this.destroyComponents();
+    });
   }
 
   private processContent(): void {

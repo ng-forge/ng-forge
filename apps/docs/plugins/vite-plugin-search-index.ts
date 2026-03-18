@@ -143,7 +143,8 @@ export function searchIndexPlugin(): Plugin {
         });
         server.httpServer?.on('close', () => watcher.close());
       } catch {
-        // watch may not be supported on all platforms with recursive option
+        // Recursive fs.watch requires Linux kernel 5.9+ (fanotify). On older Linux,
+        // the search index won't auto-invalidate during dev — restart the dev server instead.
       }
 
       server.middlewares.use((req, res, next) => {

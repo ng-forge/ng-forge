@@ -14,6 +14,8 @@ export interface HeadingEntry {
 
 export interface RenderedContent {
   html: SafeHtml;
+  /** Raw HTML string before trust-wrapping — used by directives that need the string without re-sanitizing. */
+  rawHtml: string;
   headings: HeadingEntry[];
   error?: string;
 }
@@ -94,7 +96,7 @@ export class ContentService {
         // Detect SPA fallback: if the response is HTML (not markdown), treat as 404
         const trimmed = markdown.trimStart();
         if (trimmed.startsWith('<!') || trimmed.startsWith('<html')) {
-          return { html: '', headings: [], error: `Content not found: ${slug}` } as RenderedContent;
+          return { html: '', rawHtml: '', headings: [], error: `Content not found: ${slug}` } as RenderedContent;
         }
         // Strip YAML frontmatter (---\n...\n---)
         const stripped = markdown.replace(/^---\n[\s\S]*?\n---\n?/, '');
@@ -102,7 +104,7 @@ export class ContentService {
       }),
       catchError((err) => {
         console.warn(`[ContentService] Failed to load /content/${slug}.md`, err);
-        return of({ html: '', headings: [], error: `Content not found: ${slug}` } as RenderedContent);
+        return of({ html: '', rawHtml: '', headings: [], error: `Content not found: ${slug}` } as RenderedContent);
       }),
       shareReplay({ bufferSize: 1, refCount: true }),
     );
@@ -204,6 +206,7 @@ export class ContentService {
 
     return {
       html: this.sanitizer.bypassSecurityTrustHtml(html),
+      rawHtml: html,
       headings,
     };
   }

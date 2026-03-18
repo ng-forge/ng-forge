@@ -8,6 +8,17 @@
 
 const IS_SERVER = typeof window === 'undefined';
 
+/** Cached shiki `codeToHtml` function — avoids re-importing on every call. */
+let cachedCodeToHtml: typeof import('shiki').codeToHtml | null = null;
+
+async function getCodeToHtml(): Promise<typeof import('shiki').codeToHtml> {
+  if (!cachedCodeToHtml) {
+    const shiki = await import('shiki');
+    cachedCodeToHtml = shiki.codeToHtml;
+  }
+  return cachedCodeToHtml;
+}
+
 function escapeHtml(code: string): string {
   return code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -25,13 +36,14 @@ export async function highlightCode(code: string, lang: string): Promise<string>
     return plainCodeBlock(code, lang);
   }
   try {
-    const { codeToHtml } = await import('shiki');
+    const codeToHtml = await getCodeToHtml();
     return await codeToHtml(code, {
       lang,
       themes: { light: 'material-theme-lighter', dark: 'material-theme-darker' },
       defaultColor: false,
     });
-  } catch {
+  } catch (err) {
+    console.warn('[Shiki] Failed to highlight code:', err);
     return plainCodeBlock(code, lang);
   }
 }
@@ -45,9 +57,10 @@ export async function highlightCodeSingleTheme(code: string, lang: string, theme
     return plainCodeBlock(code, lang);
   }
   try {
-    const { codeToHtml } = await import('shiki');
+    const codeToHtml = await getCodeToHtml();
     return await codeToHtml(code, { lang, theme });
-  } catch {
+  } catch (err) {
+    console.warn('[Shiki] Failed to highlight code:', err);
     return plainCodeBlock(code, lang);
   }
 }
