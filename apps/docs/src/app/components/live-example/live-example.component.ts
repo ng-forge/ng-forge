@@ -10,20 +10,10 @@ import { EXAMPLES_REGISTRY } from '../../pages/examples-index/examples.registry'
   template: `
     @if (!shouldHide()) {
       <div class="live-example-wrapper">
-        <div class="live-example-header">
-          <div class="header-dots">
-            <span class="dot"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
-          </div>
-          @if (exampleTitle()) {
-            <span class="header-title">{{ exampleTitle() }}</span>
-          }
-          <span class="header-badge">
-            <img [src]="adapterInfo().icon" [alt]="adapterInfo().label" class="header-badge-icon" />
-            {{ adapterInfo().label }}
-          </span>
-        </div>
+        <span class="adapter-badge">
+          <img [src]="adapterInfo().icon" [alt]="adapterInfo().label" class="adapter-badge-icon" />
+          {{ adapterInfo().label }}
+        </span>
         @if (!isLoaded()) {
           <div class="live-example-skeleton" role="status" aria-busy="true">
             <div class="skeleton-form">

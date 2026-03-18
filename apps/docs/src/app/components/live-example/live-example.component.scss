@@ -16,76 +16,43 @@
 }
 
 // ============================================
-// HEADER BAR — dots + title + adapter badge
+// ADAPTER BADGE — floating top-right overlay
 // ============================================
-.live-example-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  background: var(--forge-base-1, #f8f8f8);
-  border-bottom: 1px solid var(--forge-border-color, #e0e0e0);
-}
-
-.header-dots {
-  display: flex;
-  gap: 6px;
-
-  .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--forge-base-4, #ccc);
-    opacity: 0.5;
-  }
-}
-
-.header-title {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--forge-text-muted);
-  letter-spacing: 0.01em;
-}
-
-.header-badge {
+.adapter-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-left: auto;
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 4px;
-  background: var(--forge-base-2, #f0f0f0);
+  background: var(--forge-base-1, #f0f0f0);
+  border: 1px solid var(--forge-border-color, #e0e0e0);
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--forge-text-muted);
   letter-spacing: 0.03em;
+  pointer-events: none;
 }
 
-.header-badge-icon {
+.adapter-badge-icon {
   width: 14px;
   height: 14px;
   object-fit: contain;
   border-radius: 2px;
 }
 
-// Dark mode header
-:host-context([data-theme='dark']) .live-example-header {
+:host-context([data-theme='dark']) .adapter-badge {
   background: $bg-surface;
-  border-bottom-color: $steel-dark;
-}
-
-:host-context([data-theme='dark']) .header-badge {
-  background: $bg-elevated;
+  border-color: $steel-dark;
 }
 
 @media (prefers-color-scheme: dark) {
-  :host-context([data-theme='auto']) .live-example-header {
+  :host-context([data-theme='auto']) .adapter-badge {
     background: $bg-surface;
-    border-bottom-color: $steel-dark;
-  }
-
-  :host-context([data-theme='auto']) .header-badge {
-    background: $bg-elevated;
+    border-color: $steel-dark;
   }
 }
 

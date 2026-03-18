@@ -3,49 +3,9 @@ title: Getting Started
 slug: getting-started
 ---
 
-ng-forge turns JSON-like configuration into fully working Angular forms — with validation, conditional logic, and multi-step wizards built in. You write a `FormConfig` object, and ng-forge handles rendering, state management, and reactivity.
+ng-forge generates fully working Angular forms from a single configuration object — validation, conditional logic, and multi-step wizards included. Here's how to set it up.
 
-Here's the core idea — a single object becomes a complete form. Fields can react to each other: show, hide, and validate based on other values — no imperative code required.
-
-```typescript
-const config: FormConfig = {
-  fields: [
-    { key: 'name', type: 'input', label: 'Full Name', required: true },
-    {
-      key: 'contactMethod',
-      type: 'select',
-      label: 'Preferred Contact',
-      required: true,
-      options: [
-        { value: 'email', label: 'Email' },
-        { value: 'phone', label: 'Phone' },
-      ],
-    },
-    {
-      key: 'email',
-      type: 'input',
-      label: 'Email Address',
-      email: true,
-      logic: [
-        { type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'contactMethod', operator: 'notEquals', value: 'email' } },
-        { type: 'required', condition: { type: 'fieldValue', fieldPath: 'contactMethod', operator: 'equals', value: 'email' } },
-      ],
-    },
-    { key: 'message', type: 'textarea', label: 'Message', required: true, minLength: 10 },
-    { key: 'submit', type: 'submit', label: 'Send Message' },
-  ],
-};
-```
-
-No `FormGroup`, no `FormControl`, no template boilerplate — and fields show/hide reactively. Pick your UI library below to get started.
-
----
-
-Get ng-forge dynamic forms up and running in your Angular project.
-
-## Choose Your UI Library
-
-Select the UI library you're using — the setup guide below will update to match.
+## 1. Choose Your UI Library
 
 <docs-adapter-picker></docs-adapter-picker>
 
@@ -53,9 +13,9 @@ Select the UI library you're using — the setup guide below will update to matc
 
 ---
 
-## Your First Form
+## 2. Your First Form
 
-All adapters share the same `FormConfig` schema — just import `DynamicForm` and bind your config:
+Every adapter uses the same `FormConfig` schema — import `DynamicForm` and bind a config object:
 
 ```typescript
 @Component({
@@ -63,11 +23,15 @@ All adapters share the same `FormConfig` schema — just import `DynamicForm` an
   template: `<form [dynamic-form]="config"></form>`,
 })
 export class ContactComponent {
-  config = { fields: [...] } as const satisfies FormConfig;
+  config: FormConfig = {
+    fields: [
+      /* see Config tab below */
+    ],
+  };
 }
 ```
 
-Try it out — select a contact method and watch fields appear. Switch the "Config" tab to see the full schema:
+Try it out — select a contact method and watch fields appear. Switch to the "Config" tab to see the full schema:
 
 <docs-live-example scenario="examples/contact-dynamic-fields" hideForCustom></docs-live-example>
 
