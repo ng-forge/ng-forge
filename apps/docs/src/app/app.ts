@@ -1,7 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { Router, RouterModule, NavigationEnd } from '@angular/router';
-import { map, startWith, filter } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
 import { ActiveAdapterService } from './services/active-adapter.service';
 import { ThemeService } from './services/theme.service';
@@ -13,26 +11,11 @@ import { ThemeService } from './services/theme.service';
   styleUrl: './app.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class.dark]': 'themeService.isDark()',
     '[attr.data-adapter]': 'activeAdapter.adapter()',
   },
 })
 export class App {
-  private readonly router = inject(Router);
   protected readonly activeAdapter = inject(ActiveAdapterService);
-  readonly themeService = inject(ThemeService);
-
-  private readonly currentUrl = toSignal(
-    this.router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      map((event) => event.urlAfterRedirects),
-      startWith(this.router.url),
-    ),
-    { requireSync: true },
-  );
-
-  readonly isLandingPage = computed(() => {
-    const url = this.currentUrl();
-    return url === '/' || url === '';
-  });
+  // ThemeService must be eagerly injected so it sets data-theme on <html> during bootstrap
+  private readonly _theme = inject(ThemeService);
 }

@@ -6,7 +6,7 @@ import { AdapterAwareUrlSerializer } from './serializers/adapter-url-serializer'
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideContent, withMarkdownRenderer } from '@analogjs/content';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideClientHydration, withIncrementalHydration } from '@angular/platform-browser';
+import { provideClientHydration } from '@angular/platform-browser';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 import { provideAdapterRegistry, SandboxHarness } from '@ng-forge/sandbox-harness';
@@ -34,7 +34,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch()),
     provideAnimationsAsync(),
     provideContent(withMarkdownRenderer()),
-    provideClientHydration(withIncrementalHydration()),
+    provideClientHydration(),
     { provide: UrlSerializer, useClass: AdapterAwareUrlSerializer },
     {
       provide: APP_BASE_HREF,

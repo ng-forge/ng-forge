@@ -1,4 +1,4 @@
-import { computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
+import { afterNextRender, computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 
@@ -10,8 +10,14 @@ export class ThemeService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  /** Current theme: 'auto' | 'light' | 'dark' */
-  readonly theme = signal<ThemeType>(this.loadSavedTheme());
+  /**
+   * Current theme: 'auto' | 'light' | 'dark'.
+   * Always starts as 'auto' to match SSR output and prevent hydration mismatches.
+   * The saved theme from localStorage is applied post-hydration via afterNextRender.
+   * The inline <script> in index.html sets data-theme on <html> before first paint,
+   * so the visual appearance is correct even before this signal updates.
+   */
+  readonly theme = signal<ThemeType>('auto');
 
   readonly isDark = computed(() => {
     if (!this.isBrowser) return false;
@@ -23,6 +29,15 @@ export class ThemeService {
 
   constructor() {
     if (!this.isBrowser) return;
+
+    // Apply saved theme AFTER hydration to avoid SSR/client mismatch.
+    // The inline script in index.html already set data-theme visually.
+    afterNextRender(() => {
+      const saved = this.loadSavedTheme();
+      if (saved !== 'auto') {
+        this.theme.set(saved);
+      }
+    });
 
     // DOM attribute IS a reflection of theme
     explicitEffect([this.theme], ([t]) => {
@@ -41,7 +56,6 @@ export class ThemeService {
     // Listen for system theme changes when in auto mode
     const mql = window.matchMedia('(prefers-color-scheme: dark)');
     mql.addEventListener('change', () => {
-      // Force re-evaluation of isDark by re-setting the same value
       this.theme.update((t) => t);
     });
   }
@@ -50,11 +64,9 @@ export class ThemeService {
     const current = this.theme();
     const next: ThemeType = current === 'auto' ? 'light' : current === 'light' ? 'dark' : 'auto';
     this.theme.set(next);
-    // That's it — effects handle localStorage and DOM
   }
 
   private loadSavedTheme(): ThemeType {
-    if (!this.isBrowser) return 'auto';
     const saved = localStorage.getItem(THEME_STORAGE_KEY) as ThemeType | null;
     if (saved === 'light' || saved === 'dark' || saved === 'auto') return saved;
     return 'auto';

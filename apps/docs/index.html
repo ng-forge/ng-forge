@@ -66,48 +66,48 @@
         margin: 0;
         font-family: sans-serif;
       }
-      /* Dark mode: critical styles to prevent white flash before stylesheets load.
-         Uses $bg-deep (#0a0908), $bg-surface (#131210), $bg-elevated (#1a1916),
-         $steel (#e8e4de), $steel-dark (#2a2824) from the design tokens. */
-      [data-theme='dark'],
+      /* Dark mode: critical CSS custom properties + styles to prevent white flash.
+         These mirror the --forge-* values from styles.scss which loads asynchronously in dev mode.
+         Design tokens: $bg-deep=#0a0908, $bg-surface=#131210, $bg-elevated=#1a1916,
+         $steel=#e8e4de, $steel-mid=#9a958c, $steel-dark=#2a2824, $steel-dim=#5c5850 */
+      [data-theme='dark'] {
+        --forge-base-0: #0a0908;
+        --forge-base-1: #131210;
+        --forge-base-2: #1a1916;
+        --forge-base-3: #2a2824;
+        --forge-base-4: #5c5850;
+        --forge-text: #e8e4de;
+        --forge-text-muted: #9a958c;
+        --forge-border-color: #2a2824;
+        --forge-navbar-bg: #0a0908;
+        --forge-sidebar-bg: #0a0908;
+        --forge-code-bg: #131210;
+        background: #0a0908;
+        color: #e8e4de;
+      }
       [data-theme='dark'] body {
         background: #0a0908;
         color: #e8e4de;
       }
-      /* Skeleton elements rendered by SSR need dark colors before component styles load */
-      [data-theme='dark'] [class*='skeleton-line'],
-      [data-theme='dark'] [class*='skeleton-h'],
-      [data-theme='dark'] [class*='skeleton-breadcrumb'],
-      [data-theme='dark'] [class*='skeleton-code'],
-      [data-theme='dark'] [class*='skeleton-label'],
-      [data-theme='dark'] [class*='skeleton-input'],
-      [data-theme='dark'] [class*='skeleton-button'],
-      [data-theme='dark'] .toc-skeleton-line {
-        background: #1a1916;
-        border-color: #2a2824;
-      }
-      [data-theme='dark'] .navbar {
-        background: #0a0908;
-      }
       @media (prefers-color-scheme: dark) {
-        [data-theme='auto'],
-        [data-theme='auto'] body {
+        [data-theme='auto'] {
+          --forge-base-0: #0a0908;
+          --forge-base-1: #131210;
+          --forge-base-2: #1a1916;
+          --forge-base-3: #2a2824;
+          --forge-base-4: #5c5850;
+          --forge-text: #e8e4de;
+          --forge-text-muted: #9a958c;
+          --forge-border-color: #2a2824;
+          --forge-navbar-bg: #0a0908;
+          --forge-sidebar-bg: #0a0908;
+          --forge-code-bg: #131210;
           background: #0a0908;
           color: #e8e4de;
         }
-        [data-theme='auto'] [class*='skeleton-line'],
-        [data-theme='auto'] [class*='skeleton-h'],
-        [data-theme='auto'] [class*='skeleton-breadcrumb'],
-        [data-theme='auto'] [class*='skeleton-code'],
-        [data-theme='auto'] [class*='skeleton-label'],
-        [data-theme='auto'] [class*='skeleton-input'],
-        [data-theme='auto'] [class*='skeleton-button'],
-        [data-theme='auto'] .toc-skeleton-line {
-          background: #1a1916;
-          border-color: #2a2824;
-        }
-        [data-theme='auto'] .navbar {
+        [data-theme='auto'] body {
           background: #0a0908;
+          color: #e8e4de;
         }
       }
       html:has(app-landing),
