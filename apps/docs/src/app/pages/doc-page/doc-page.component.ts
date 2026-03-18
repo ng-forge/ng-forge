@@ -6,7 +6,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ContentService } from '../../services/content.service';
-import { ContentComponentsDirective } from '../../directives/content-components.directive';
+import { ContentSegmentsComponent } from '../../directives/content-components.directive';
 import { TocComponent } from '../../components/toc/toc.component';
 import { DocTabsComponent } from '../../components/doc-tabs/doc-tabs.component';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
@@ -27,7 +27,7 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
 @Component({
   selector: 'app-doc-page',
   imports: [
-    ContentComponentsDirective,
+    ContentSegmentsComponent,
     TocComponent,
     DocTabsComponent,
     RouterLink,
@@ -89,7 +89,7 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
             @if (tabGroup(); as tabs) {
               <app-doc-tabs [tabGroup]="tabs" />
             }
-            <div class="doc-page-content" contentComponents [contentHtml]="content()!.rawHtml"></div>
+            <app-content-segments class="doc-page-content" [contentHtml]="content()!.rawHtml" />
           } @else {
             <div class="doc-page-skeleton" role="status" aria-busy="true">
               <span class="visually-hidden">Loading page content</span>
@@ -361,51 +361,6 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
         }
       }
 
-      /* ---- Inline skeleton for custom elements that haven't been processed yet ---- */
-      /* These elements exist in the SSR-rendered markdown HTML as empty tags.
-         They show shimmer placeholders until contentComponents replaces them. */
-      :host ::ng-deep {
-        docs-live-example,
-        docs-cascade-visual,
-        docs-configuration-view,
-        docs-integration-view,
-        docs-nesting-rules,
-        docs-logic-flow,
-        docs-derivation-flow,
-        docs-adapter-picker {
-          display: block;
-          min-height: 120px;
-          border-radius: 8px;
-          background: linear-gradient(
-            90deg,
-            var(--forge-base-2, #f0f0f0) 0%,
-            var(--forge-base-3, #e0e0e0) 50%,
-            var(--forge-base-2, #f0f0f0) 100%
-          );
-          background-size: 200% 100%;
-          animation: shimmer 1.5s ease-in-out infinite;
-          margin: 16px 0;
-        }
-
-        docs-live-example {
-          min-height: 300px;
-        }
-
-        docs-configuration-view,
-        docs-integration-view {
-          min-height: 400px;
-        }
-
-        /* Once the component is processed, the host div replaces the custom element.
-           Stop showing skeleton for populated containers. */
-        [data-dynamic-component] {
-          display: contents;
-          min-height: unset;
-          background: none;
-          animation: none;
-        }
-      }
-
       @media (prefers-reduced-motion: reduce) {
         .skeleton-breadcrumb,
         .skeleton-heading,
@@ -413,19 +368,6 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
         .skeleton-code,
         .toc-skeleton-line {
           animation: none;
-        }
-
-        :host ::ng-deep {
-          docs-live-example,
-          docs-cascade-visual,
-          docs-configuration-view,
-          docs-integration-view,
-          docs-nesting-rules,
-          docs-logic-flow,
-          docs-derivation-flow,
-          docs-adapter-picker {
-            animation: none;
-          }
         }
       }
     `,
