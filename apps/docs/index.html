@@ -48,11 +48,67 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
+    <!-- Apply saved theme before first paint to prevent FOUC (white → dark flash) -->
+    <script>
+      (function () {
+        var t = localStorage.getItem('ng-forge-docs-theme');
+        if (t === 'dark' || t === 'auto') {
+          document.documentElement.setAttribute('data-theme', t);
+        } else if (!t) {
+          document.documentElement.setAttribute('data-theme', 'auto');
+        }
+      })();
+    </script>
+
     <!-- Critical inline styles to prevent FOUC -->
     <style>
       body {
         margin: 0;
         font-family: sans-serif;
+      }
+      /* Dark mode: critical styles to prevent white flash before stylesheets load.
+         Uses $bg-deep (#0a0908), $bg-surface (#131210), $bg-elevated (#1a1916),
+         $steel (#e8e4de), $steel-dark (#2a2824) from the design tokens. */
+      [data-theme='dark'],
+      [data-theme='dark'] body {
+        background: #0a0908;
+        color: #e8e4de;
+      }
+      /* Skeleton elements rendered by SSR need dark colors before component styles load */
+      [data-theme='dark'] [class*='skeleton-line'],
+      [data-theme='dark'] [class*='skeleton-h'],
+      [data-theme='dark'] [class*='skeleton-breadcrumb'],
+      [data-theme='dark'] [class*='skeleton-code'],
+      [data-theme='dark'] [class*='skeleton-label'],
+      [data-theme='dark'] [class*='skeleton-input'],
+      [data-theme='dark'] [class*='skeleton-button'],
+      [data-theme='dark'] .toc-skeleton-line {
+        background: #1a1916;
+        border-color: #2a2824;
+      }
+      [data-theme='dark'] .navbar {
+        background: #0a0908;
+      }
+      @media (prefers-color-scheme: dark) {
+        [data-theme='auto'],
+        [data-theme='auto'] body {
+          background: #0a0908;
+          color: #e8e4de;
+        }
+        [data-theme='auto'] [class*='skeleton-line'],
+        [data-theme='auto'] [class*='skeleton-h'],
+        [data-theme='auto'] [class*='skeleton-breadcrumb'],
+        [data-theme='auto'] [class*='skeleton-code'],
+        [data-theme='auto'] [class*='skeleton-label'],
+        [data-theme='auto'] [class*='skeleton-input'],
+        [data-theme='auto'] [class*='skeleton-button'],
+        [data-theme='auto'] .toc-skeleton-line {
+          background: #1a1916;
+          border-color: #2a2824;
+        }
+        [data-theme='auto'] .navbar {
+          background: #0a0908;
+        }
       }
       html:has(app-landing),
       html:has(app-landing) body {
@@ -108,16 +164,6 @@
     </script>
   </head>
   <body>
-    <script>
-      // Check if we were redirected from 404.html
-      (function () {
-        var redirect = sessionStorage.redirect;
-        delete sessionStorage.redirect;
-        if (redirect && redirect != location.href) {
-          history.replaceState(null, null, redirect);
-        }
-      })();
-    </script>
     <app-root></app-root>
     <script type="module" src="/apps/docs/src/main.ts"></script>
   </body>

@@ -6,28 +6,37 @@
   margin: 1.5rem 0;
 }
 
+// Wrapper keeps skeleton + container stacked
+.live-example-wrapper {
+  position: relative;
+  min-height: 300px;
+}
+
 .live-example-container {
-  // Default (light mode / no data-theme): use a subtle light border.
-  // The ExampleScenarioComponent fills the container with its own background,
-  // so background: transparent avoids a dark flash before content loads.
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   overflow: hidden;
   background: transparent;
 
-  // Shadow host div — fills the container width, height wraps content
   > div {
     width: 100%;
   }
+
+  // While sandbox is mounting, hide container so skeleton is visible
+  &.mounting {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 
-// Dark mode: switch to dark border and dark backing
+// Dark mode
 :host-context([data-theme='dark']) .live-example-container {
   border-color: $steel-dark;
   background: $bg-elevated;
 }
 
-// Auto mode: follow system preference
 @media (prefers-color-scheme: dark) {
   :host-context([data-theme='auto']) .live-example-container {
     border-color: $steel-dark;
@@ -35,28 +44,99 @@
   }
 }
 
-// Skeleton loader
+// ============================================
+// SKELETON LOADER — form-like placeholder
+// ============================================
 .live-example-skeleton {
-  height: 300px;
+  min-height: 300px;
   border: 1px solid var(--forge-base-3, #e0e0e0);
   border-radius: 8px;
-  background: linear-gradient(90deg, var(--forge-base-2, #f5f5f5) 0%, var(--forge-base-3, #eee) 50%, var(--forge-base-2, #f5f5f5) 100%);
-  background-size: 200% 100%;
-  animation: example-shimmer 1.5s ease-in-out infinite;
+  overflow: hidden;
+  background: var(--forge-base-0, #fff);
 }
 
 :host-context([data-theme='dark']) .live-example-skeleton {
   border-color: $steel-dark;
-  background: linear-gradient(90deg, $bg-surface 0%, $bg-elevated 50%, $bg-surface 100%);
-  background-size: 200% 100%;
-  animation: example-shimmer 1.5s ease-in-out infinite;
+  background: $bg-elevated;
 }
 
 @media (prefers-color-scheme: dark) {
   :host-context([data-theme='auto']) .live-example-skeleton {
     border-color: $steel-dark;
+    background: $bg-elevated;
+  }
+}
+
+// Form skeleton content
+.skeleton-form {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.skeleton-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-label {
+  width: 120px;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--forge-base-3, #e5e5e5) 0%, var(--forge-base-4, #d4d4d4) 50%, var(--forge-base-3, #e5e5e5) 100%);
+  background-size: 200% 100%;
+  animation: example-shimmer 2.5s ease-in-out infinite;
+
+  &.short {
+    width: 80px;
+  }
+}
+
+.skeleton-input {
+  width: 100%;
+  height: 40px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--forge-base-2, #f0f0f0) 0%, var(--forge-base-3, #e5e5e5) 50%, var(--forge-base-2, #f0f0f0) 100%);
+  background-size: 200% 100%;
+  animation: example-shimmer 2.5s ease-in-out infinite;
+  animation-delay: 0.1s;
+
+  &.tall {
+    height: 80px;
+  }
+}
+
+.skeleton-button {
+  width: 120px;
+  height: 36px;
+  border-radius: 6px;
+  margin-top: 4px;
+  background: linear-gradient(90deg, var(--forge-base-3, #e5e5e5) 0%, var(--forge-base-4, #d4d4d4) 50%, var(--forge-base-3, #e5e5e5) 100%);
+  background-size: 200% 100%;
+  animation: example-shimmer 2.5s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+
+// Dark mode skeleton elements
+:host-context([data-theme='dark']) {
+  .skeleton-label,
+  .skeleton-input,
+  .skeleton-button {
     background: linear-gradient(90deg, $bg-surface 0%, $bg-elevated 50%, $bg-surface 100%);
     background-size: 200% 100%;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context([data-theme='auto']) {
+    .skeleton-label,
+    .skeleton-input,
+    .skeleton-button {
+      background: linear-gradient(90deg, $bg-surface 0%, $bg-elevated 50%, $bg-surface 100%);
+      background-size: 200% 100%;
+    }
   }
 }
 
@@ -82,7 +162,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .live-example-skeleton {
+  .skeleton-label,
+  .skeleton-input,
+  .skeleton-button {
     animation: none;
   }
 }

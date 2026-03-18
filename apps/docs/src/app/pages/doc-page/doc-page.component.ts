@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -42,7 +43,7 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
     } @else if (isExamplesIndex()) {
       <!-- Examples listing — rendered directly, no doc-layout grid -->
       <docs-examples-index />
-    } @else if (content()?.error) {
+    } @else if (showNotFound()) {
       <docs-not-found />
     } @else {
       <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
@@ -397,6 +398,25 @@ export class DocPageComponent {
   });
 
   readonly content = computed(() => this.contentResource.value());
+
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+
+  /**
+   * Only show the 404 page when:
+   * 1. Content definitively has an error
+   * 2. We're in the browser (SSR should show skeleton, not 404 — content loads client-side)
+   * 3. No navigation is in progress (prevents flash during guard redirects)
+   */
+  readonly showNotFound = computed(() => {
+    const c = this.content();
+    if (!c?.error) return false;
+    // During SSR, content fetch fails — show skeleton instead, content loads after hydration
+    if (!this.isBrowser) return false;
+    // If a navigation is currently in progress (e.g., guard redirect), suppress the 404
+    if (this.router.getCurrentNavigation()) return false;
+    console.debug('[DocPage] showNotFound=true, error:', c.error, 'slug:', this.slug());
+    return true;
+  });
 
   /** True when slug is exactly 'api-reference' — renders the API index. */
   readonly isApiIndex = computed(() => this.slug() === 'api-reference');
