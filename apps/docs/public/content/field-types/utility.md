@@ -1,6 +1,7 @@
 ---
 title: Utility
 slug: field-types/utility
+description: 'Text display and hidden field types for ng-forge dynamic forms. Render static content, section headings, and pass hidden values through the form.'
 ---
 
 Non-input fields for displaying content and passing hidden data.

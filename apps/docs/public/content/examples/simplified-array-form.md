@@ -1,3 +1,7 @@
+---
+description: 'Use the simplified array API with auto-generated add/remove buttons, primitive and object arrays, and template-based item definitions.'
+---
+
 Dynamic arrays using the simplified API with auto-generated add/remove buttons, template-based item definitions, and both primitive and object arrays.
 
 ## Live Demo

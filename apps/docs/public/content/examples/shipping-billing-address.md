@@ -1,3 +1,7 @@
+---
+description: "Implement the 'same as billing' checkout pattern by toggling an entire shipping address group with a single checkbox condition."
+---
+
 Checkout form demonstrating the common "same as billing" pattern for shipping addresses.
 
 ## Live Demo

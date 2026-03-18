@@ -1,6 +1,7 @@
 ---
 title: Basics
 slug: validation/basics
+description: 'Learn how to add type-safe validation to dynamic forms using Angular signal forms, shorthand validators, and conditional rules.'
 ---
 
 Dynamic Forms provides powerful, type-safe validation that integrates directly with Angular's signal forms. Start with simple shorthand validators and progress to advanced conditional validation as your needs grow.

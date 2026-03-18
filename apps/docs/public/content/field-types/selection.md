@@ -1,6 +1,7 @@
 ---
 title: Selection
 slug: field-types/selection
+description: 'Select, radio, checkbox, and multi-select field types for ng-forge dynamic forms. Options configuration, value binding, and adapter-specific props.'
 ---
 
 Fields for selecting one or multiple values from a set of options.

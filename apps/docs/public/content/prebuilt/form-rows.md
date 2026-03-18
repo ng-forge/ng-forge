@@ -1,6 +1,7 @@
 ---
 title: Form Rows
 slug: prebuilt/form-rows
+description: 'Organize dynamic form fields into horizontal rows for compact layouts. Control field widths with column sizing and responsive breakpoints.'
 ---
 
 Organize fields into horizontal rows for compact layouts. Rows display fields side-by-side.

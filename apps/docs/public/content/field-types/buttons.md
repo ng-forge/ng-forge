@@ -1,6 +1,7 @@
 ---
 title: Buttons
 slug: field-types/buttons
+description: 'Submit, reset, and custom button field types for ng-forge dynamic forms. Configure form actions, multi-step navigation, and adapter-specific styling.'
 ---
 
 Action fields for form submission and multi-step navigation.

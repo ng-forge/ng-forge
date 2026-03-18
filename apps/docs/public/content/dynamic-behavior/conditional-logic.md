@@ -1,6 +1,7 @@
 ---
 title: Conditional Logic
 slug: dynamic-behavior/conditional-logic
+description: 'Control field visibility, required state, and readonly state dynamically using declarative conditional logic integrated with Angular signal forms.'
 ---
 
 Control field behavior dynamically based on form state. Dynamic forms provides a declarative API for conditional visibility, required state, and readonly state that maps directly to Angular's signal forms.

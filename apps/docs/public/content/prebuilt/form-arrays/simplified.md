@@ -1,6 +1,7 @@
 ---
 title: Simplified
 slug: prebuilt/form-arrays/simplified
+description: 'Use the simplified array API to define dynamic form arrays with a template and initial values. Handles add/remove buttons automatically.'
 ---
 
 The simplified array API provides a concise way to define dynamic arrays. Instead of manually specifying each item in `fields`, you provide a `template` for the item structure and a `value` array with initial data. Add and remove buttons are generated automatically.

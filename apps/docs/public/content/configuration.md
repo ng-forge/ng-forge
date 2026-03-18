@@ -1,6 +1,7 @@
 ---
 title: Configuration
 slug: configuration
+description: 'Configure ng-forge at the provider, form, and field level. Learn the configuration cascade and how to set global defaults and per-field props.'
 ---
 
 Configure global defaults for all forms at provider level, or per-form via `defaultProps`.

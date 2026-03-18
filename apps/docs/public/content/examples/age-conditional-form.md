@@ -1,3 +1,7 @@
+---
+description: 'Use numeric comparison operators to display age-appropriate fields. Minors see parental consent, seniors see discount options.'
+---
+
 Registration form demonstrating numeric comparison operators for age-based conditional logic.
 
 ## Live Demo

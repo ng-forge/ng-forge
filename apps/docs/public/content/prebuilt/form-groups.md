@@ -1,6 +1,7 @@
 ---
 title: Form Groups
 slug: prebuilt/form-groups
+description: 'Learn how to nest form fields under a single key using group fields, creating logical data grouping in your dynamic form configuration.'
 ---
 
 Groups nest form fields under a single key in the form value. This creates logical grouping for form data, not visual grouping.

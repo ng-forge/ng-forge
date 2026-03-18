@@ -1,6 +1,7 @@
 ---
 title: Text Inputs
 slug: field-types/text-inputs
+description: 'Configure input, textarea, and password fields in ng-forge dynamic forms. Covers HTML5 type support, placeholders, validation, and adapter-specific props.'
 ---
 
 Text-based input fields for collecting typed data from users.

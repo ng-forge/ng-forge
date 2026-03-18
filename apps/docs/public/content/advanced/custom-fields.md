@@ -1,6 +1,7 @@
 ---
 title: Custom Fields
 slug: advanced/custom-fields
+description: 'Add custom field types like rich text editors or file uploaders to any ng-forge adapter without building a full integration from scratch.'
 ---
 
 Add a custom field type to any existing ng-forge adapter — no need to build a full adapter from scratch.
@@ -81,10 +82,10 @@ const config = {
 
 ## Going Further
 
-If you need a completely custom adapter (no existing adapter as base), or want to implement the config cascade (`defaultProps`) for your custom fields, see the full [Custom Integrations](/custom-integrations) guide.
+If you need a completely custom adapter (no existing adapter as base), or want to implement the config cascade (`defaultProps`) for your custom fields, see the full [Custom Integrations](/building-an-adapter) guide.
 
 ## Next Steps
 
-- **[Custom Integrations](/custom-integrations)** — Build a complete adapter for any UI library from scratch
+- **[Custom Integrations](/building-an-adapter)** — Build a complete adapter for any UI library from scratch
 - **[Type Safety](/advanced/basics)** — Leverage TypeScript inference for form values and field types
 - **[Events](/advanced/events)** — Dispatch and subscribe to form events from custom field components

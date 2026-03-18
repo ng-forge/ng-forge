@@ -1,6 +1,7 @@
 ---
 title: Zod Validation
 keyword: ZodSchemaPage
+description: 'Validate dynamic forms with Zod schemas using the standardSchema() wrapper for cross-field validation, shared logic, and OpenAPI reuse.'
 ---
 
 Use [Zod](https://zod.dev) schemas to validate your dynamic forms. This lets you reuse existing schemas, share validation logic between frontend and backend, and leverage Zod's powerful cross-field validation like `.refine()`.

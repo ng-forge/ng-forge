@@ -1,6 +1,7 @@
 ---
 title: Events
 slug: advanced/events
+description: 'Dispatch and subscribe to form events using EventBus (inside fields) and EventDispatcher (from host components). Drive array actions, resets, and more.'
 ---
 
 The events API provides two complementary services for working with form events. Which one you use depends on **where your code lives** relative to the `dynamic-form` element.

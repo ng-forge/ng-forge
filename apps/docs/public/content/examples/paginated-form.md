@@ -1,3 +1,7 @@
+---
+description: 'Create a multi-step wizard form with page navigation, per-page validation, and progress tracking using the page field type.'
+---
+
 A comprehensive multi-step registration form demonstrating the `page` field type for creating wizards and stepped workflows.
 
 ## Live Demo

@@ -1,6 +1,7 @@
 ---
 title: Building an Adapter
 slug: building-an-adapter
+description: 'Build a custom UI adapter for ng-forge dynamic forms. Map field types to your own components using the integration entrypoint and field mappers.'
 ---
 
 Create custom UI integrations for ng-forge dynamic forms using any component library or design system.

@@ -1,3 +1,7 @@
+---
+description: 'Create a contact form with text inputs, textarea, date picker, and real-time validation feedback using ng-forge dynamic forms.'
+---
+
 Simple contact form demonstrating basic form fields, validation, and user input.
 
 ## Live Demo

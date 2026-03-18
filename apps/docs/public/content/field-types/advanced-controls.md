@@ -1,6 +1,7 @@
 ---
 title: Advanced Controls
 slug: field-types/advanced-controls
+description: 'Slider and datepicker field types for ng-forge dynamic forms. Configure numeric ranges, date selection, min/max bounds, and adapter-specific props.'
 ---
 
 Specialized controls for numeric ranges and date selection.

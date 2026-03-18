@@ -1,6 +1,7 @@
 ---
 title: Value Derivation
 keyword: ValueDerivationExamplePage
+description: 'Automatically compute derived field values with chained numeric calculations and string concatenation using expression-based derivations.'
 ---
 
 This example demonstrates automatic value derivation using expressions. Watch how changing input values automatically updates calculated fields.

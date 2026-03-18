@@ -1,6 +1,7 @@
 ---
 title: Overview
 keyword: SchemaValidationOverviewPage
+description: 'Understand form-level schema validation for cross-field rules like password matching, date ranges, and complex business logic.'
 ---
 
 Form-level schema validation enables cross-field validation rules that examine the entire form state. While field-level validators check individual fields, schema validators validate relationships between multiple fields.

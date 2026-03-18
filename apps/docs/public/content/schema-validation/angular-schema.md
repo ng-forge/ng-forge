@@ -1,6 +1,7 @@
 ---
 title: Angular Schema
 keyword: AngularSchemaPage
+description: "Use Angular's native signal forms Schema API for form-level validation in dynamic forms with zero extra dependencies."
 ---
 
 Angular's signal forms include a native `Schema<T>` API for form-level validation. This approach requires no additional dependencies and integrates seamlessly with Dynamic Forms.

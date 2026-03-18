@@ -1,6 +1,7 @@
 ---
 title: Complete
 slug: prebuilt/form-arrays/complete
+description: 'Advanced array field API for dynamic form collections. Supports primitive and object items, custom buttons, and heterogeneous arrays.'
 ---
 
 Arrays create dynamic collections of field values. Each item in the `fields` array defines **one array item** with its structure and initial values.

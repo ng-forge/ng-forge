@@ -1,6 +1,7 @@
 ---
 title: Expression Parser
 slug: advanced/expression-parser
+description: 'Learn how ng-forge safely evaluates JavaScript expressions for conditional logic, dynamic values, and validations while preventing code injection.'
 ---
 
 Dynamic forms use expressions for conditional logic and dynamic values. When you use JavaScript expressions with `type: 'javascript'`, the expression parser evaluates them safely, preventing code injection attacks while maintaining the flexibility you need.
@@ -344,4 +345,4 @@ The expression parser lets you write flexible conditional logic while preventing
 
 - **[Conditional Logic](/dynamic-behavior/overview)** — Use expressions to control field visibility and state
 - **[Type Safety](/advanced/basics)** — Leverage TypeScript inference for form values and field types
-- **[Value Derivation](/dynamic-behavior/value-derivation/basics)** — Use expressions to compute field values dynamically
+- **[Value Derivation](/dynamic-behavior/derivation)** — Use expressions to compute field values dynamically

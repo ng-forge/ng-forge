@@ -1,6 +1,7 @@
 ---
 title: Custom Validators
 slug: validation/custom-validators
+description: 'Create custom sync, async, and HTTP validators for ng-forge dynamic forms with full FieldContext access and strict message resolution.'
 ---
 
 Custom validation functions for complex validation logic that goes beyond built-in validators.

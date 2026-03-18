@@ -1,6 +1,7 @@
 ---
 title: Type Safety
 slug: advanced/type-safety
+description: "Get full compile-time type inference for ng-forge form values using TypeScript's const satisfies pattern. Catch configuration errors before runtime."
 ---
 
 Complete type inference for form configurations using TypeScript's type system and Angular signal forms.

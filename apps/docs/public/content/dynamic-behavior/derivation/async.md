@@ -1,6 +1,7 @@
 ---
 title: Async
 route: async
+description: 'Derive field values from HTTP endpoints or custom async functions with automatic debouncing, cancellation, and loading state management.'
 ---
 
 Derive field values from HTTP responses or custom async functions. Async derivations are ideal for server-driven computed values, address/zip lookups, exchange rates, and any value that requires a network call.

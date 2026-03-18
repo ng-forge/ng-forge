@@ -1,6 +1,7 @@
 ---
 title: Getting Started
 slug: getting-started
+description: 'Install ng-forge, pick a UI adapter (Material, Bootstrap, PrimeNG, or Ionic), and render your first dynamic Angular form from a single config object.'
 ---
 
 ng-forge generates fully working Angular forms from a single configuration object — validation, conditional logic, and multi-step wizards included. Here's how to set it up.

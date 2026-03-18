@@ -1,3 +1,7 @@
+---
+description: 'Show or hide form fields dynamically based on user selection. Demonstrates conditional visibility tied to a preferred contact method.'
+---
+
 Contact form demonstrating dynamic field visibility based on preferred contact method selection.
 
 ## Live Demo

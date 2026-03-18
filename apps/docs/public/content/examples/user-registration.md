@@ -1,3 +1,7 @@
+---
+description: 'Build a multi-step registration form with password strength validation, conditional business fields, and type-safe submission.'
+---
+
 Complete example of a user registration form with validation, conditional logic, and proper type safety.
 
 ## Live Demo

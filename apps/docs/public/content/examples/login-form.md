@@ -1,3 +1,7 @@
+---
+description: 'Build a login form with email and password validation, remember-me checkbox, and clean authentication UI using ng-forge dynamic forms.'
+---
+
 Simple login form demonstrating authentication UI with email and password fields.
 
 ## Live Demo

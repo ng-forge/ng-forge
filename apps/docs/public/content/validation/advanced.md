@@ -1,6 +1,7 @@
 ---
 title: Advanced
 slug: validation/advanced
+description: 'Advanced validation techniques including conditional validators, dynamic min/max values, and cross-field validation in ng-forge dynamic forms.'
 ---
 
 Advanced validation techniques including conditional validators, dynamic values, and cross-field validation.

@@ -1,3 +1,7 @@
+---
+description: 'Conditionally display personal or business fields based on account type selection, with visibility-tied required validation.'
+---
+
 Account registration form that shows different fields based on whether the user selects personal or business account type.
 
 ## Live Demo

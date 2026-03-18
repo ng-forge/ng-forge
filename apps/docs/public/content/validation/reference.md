@@ -1,6 +1,7 @@
 ---
 title: Reference
 slug: validation/reference
+description: 'Complete reference for all built-in validators, conditional expressions, and validation configuration options in ng-forge dynamic forms.'
 ---
 
 Complete reference for all validators, conditional expressions, and validation configuration options.

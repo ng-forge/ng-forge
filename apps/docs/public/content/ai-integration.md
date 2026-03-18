@@ -1,6 +1,7 @@
 ---
 title: AI Integration (MCP)
 slug: ai-integration
+description: 'Use the ng-forge MCP server to let AI assistants generate, validate, and scaffold dynamic form configurations in Cursor, VS Code, or any MCP client.'
 ---
 
 # AI Integration

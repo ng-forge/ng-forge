@@ -1,5 +1,6 @@
 ---
 title: Values
+description: 'Automatically compute and set field values based on other form fields using derivation expressions, custom functions, and logic blocks.'
 ---
 
 Automatically compute and set field values based on other form values. Derivations enable calculated fields, auto-fill patterns, and value transformations.

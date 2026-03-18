@@ -1,6 +1,7 @@
 ---
 title: Form Pages
 slug: prebuilt/form-pages
+description: 'Build multi-step wizard forms with page fields. Automatically enables paged mode with navigation controls and per-page validation.'
 ---
 
 Create multi-step forms by using page fields. When your form contains page fields, it automatically enters "paged mode" and renders with navigation controls.

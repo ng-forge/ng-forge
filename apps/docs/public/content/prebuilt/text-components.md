@@ -1,6 +1,7 @@
 ---
 title: Text Components
 slug: prebuilt/text-components
+description: 'Display static or dynamic text content in forms using text fields. Render headings, paragraphs, or spans without collecting user input.'
 ---
 
 Display static or dynamic text content in forms. Text fields are **display-only** - they don't collect user input or contribute to form values.

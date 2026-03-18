@@ -1,3 +1,7 @@
+---
+description: 'Gate enterprise features with combined AND/OR conditional logic based on account type and team size in dynamic forms.'
+---
+
 Complex configuration form demonstrating AND/OR logic for enterprise feature gating.
 
 ## Live Demo

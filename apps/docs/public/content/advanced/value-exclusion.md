@@ -1,6 +1,7 @@
 ---
 title: Value Exclusion
 slug: advanced/value-exclusion
+description: 'Control which field values appear in form submission output based on visibility, disabled, or readonly state. Configure at provider, form, or field level.'
 ---
 
 Value exclusion controls which field values are included in the form submission output based on the field's reactive state (hidden, disabled, readonly).

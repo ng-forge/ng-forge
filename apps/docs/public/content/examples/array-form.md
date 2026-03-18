@@ -1,3 +1,7 @@
+---
+description: 'Build dynamic form arrays with declarative add/remove buttons, custom placement, flat and object arrays, and template-based items.'
+---
+
 Dynamic form arrays using the complete API with declarative add/remove buttons, custom button placement, and full control over item structure.
 
 ## Live Demo
