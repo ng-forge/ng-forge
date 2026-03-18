@@ -32,7 +32,7 @@ $ember-glow: #ff8c42;
     opacity: 0.6;
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 720px) {
     min-width: unset;
     width: 40px;
     height: 40px;
@@ -54,11 +54,6 @@ $ember-glow: #ff8c42;
     .search-kbd {
       display: none;
     }
-  }
-
-  @media (max-width: 400px) {
-    width: 34px;
-    height: 34px;
   }
 }
 

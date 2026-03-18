@@ -46,7 +46,7 @@
   }
 
   // On small screens, collapse to icon-only to match navbar's circular icon buttons
-  @media (max-width: 600px) {
+  @media (max-width: 720px) {
     width: 40px;
     height: 40px;
     padding: 0;
@@ -85,7 +85,7 @@
     color: rgba($ember-core, 0.7);
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 720px) {
     display: none;
   }
 }
@@ -100,7 +100,7 @@
     background: rgba($ember-core, 0.25);
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 720px) {
     display: none;
   }
 }
@@ -111,7 +111,7 @@
   object-fit: contain;
   opacity: 0.75;
 
-  @media (max-width: 600px) {
+  @media (max-width: 720px) {
     width: 20px;
     height: 20px;
     opacity: 0.85;
@@ -134,7 +134,7 @@
     color: $ember-core;
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 720px) {
     display: none;
   }
 }
@@ -157,7 +157,7 @@
     background-color: $ember-core;
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 720px) {
     display: none;
   }
 }

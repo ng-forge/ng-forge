@@ -67,6 +67,21 @@ $mobile-bp: 1024px;
   }
 }
 
+// Visibility helpers tied to sidebar breakpoint
+.desktop-only {
+  @media (max-width: $mobile-bp) {
+    display: none !important;
+  }
+}
+
+.mobile-only {
+  display: none !important;
+
+  @media (max-width: $mobile-bp) {
+    display: flex !important;
+  }
+}
+
 .menu-btn.icon-btn {
   display: none;
 
@@ -207,6 +222,8 @@ $mobile-bp: 1024px;
   background: var(--forge-sidebar-bg);
   padding: 16px;
   z-index: 90;
+  display: flex;
+  flex-direction: column;
 
   @media (max-width: $mobile-bp) {
     position: fixed;
@@ -361,6 +378,48 @@ $mobile-bp: 1024px;
 
 .nav-children {
   overflow: hidden;
+}
+
+// ============================================
+// SIDEBAR FOOTER — theme + GitHub on mobile
+// ============================================
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 16px 24px;
+  border-top: 1px solid var(--forge-border-color);
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-footer-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--forge-text-muted);
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    color: $ember-glow;
+    background: var(--forge-base-2);
+  }
+
+  .icon,
+  .theme-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
 }
 
 // ============================================

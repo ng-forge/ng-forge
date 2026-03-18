@@ -10,7 +10,7 @@
       <app-search />
       <app-adapter-sub-bar />
       <button
-        class="icon-btn theme-toggle"
+        class="icon-btn theme-toggle desktop-only"
         (click)="themeService.toggleTheme()"
         [attr.aria-label]="
           'Switch to ' + (themeService.theme() === 'auto' ? 'light' : themeService.theme() === 'light' ? 'dark' : 'auto') + ' theme'
@@ -19,7 +19,13 @@
       >
         <span class="theme-icon" [class]="'theme-icon--' + themeService.theme()"></span>
       </button>
-      <a href="https://github.com/ng-forge/ng-forge" class="icon-btn" target="_blank" rel="noopener" aria-label="GitHub repository">
+      <a
+        href="https://github.com/ng-forge/ng-forge"
+        class="icon-btn desktop-only"
+        target="_blank"
+        rel="noopener"
+        aria-label="GitHub repository"
+      >
         <span class="icon icon--github"></span>
       </a>
       <button class="icon-btn menu-btn" (click)="toggleSidebar()" aria-label="Toggle sidebar">
@@ -143,6 +149,24 @@
         }
       }
     </nav>
+
+    <!-- Mobile-only: theme toggle + GitHub (moved from navbar) -->
+    <div class="sidebar-footer mobile-only">
+      <button
+        class="sidebar-footer-btn"
+        (click)="themeService.toggleTheme()"
+        [attr.aria-label]="
+          'Switch to ' + (themeService.theme() === 'auto' ? 'light' : themeService.theme() === 'light' ? 'dark' : 'auto') + ' theme'
+        "
+      >
+        <span class="theme-icon" [class]="'theme-icon--' + themeService.theme()"></span>
+        <span>Theme: {{ themeService.theme() }}</span>
+      </button>
+      <a href="https://github.com/ng-forge/ng-forge" class="sidebar-footer-btn" target="_blank" rel="noopener">
+        <span class="icon icon--github"></span>
+        <span>GitHub</span>
+      </a>
+    </div>
   </aside>
 
   <main class="content">
