@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 
 import { resolve } from 'node:path';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { defineConfig, type Plugin } from 'vite';
 import analog from '@analogjs/platform';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
@@ -87,6 +87,47 @@ function adapterCssPlugin(): Plugin {
   };
 }
 
+/**
+ * Recursively collect all .md files in a directory and return their slugs.
+ * e.g., 'getting-started.md' → 'getting-started'
+ *       'validation/basics.md' → 'validation/basics'
+ */
+function collectContentSlugs(dir: string, base: string = dir): string[] {
+  const slugs: string[] = [];
+  try {
+    const entries = readdirSync(dir);
+    for (const entry of entries) {
+      const fullPath = resolve(dir, entry);
+      const stat = statSync(fullPath);
+      if (stat.isDirectory()) {
+        slugs.push(...collectContentSlugs(fullPath, base));
+      } else if (entry.endsWith('.md')) {
+        const rel = fullPath.substring(base.length + 1);
+        slugs.push(rel.replace(/\.md$/, ''));
+      }
+    }
+  } catch {
+    // Content directory may not exist during certain build phases
+  }
+  return slugs;
+}
+
+const PRERENDER_ADAPTERS = ['material', 'bootstrap', 'primeng', 'ionic', 'custom'];
+const contentSlugs = collectContentSlugs(resolve(__dirname, 'public/content'));
+
+function generatePrerenderRoutes(): string[] {
+  const routes: string[] = ['/'];
+  for (const adapter of PRERENDER_ADAPTERS) {
+    routes.push(`/${adapter}/getting-started`);
+    routes.push(`/${adapter}/examples`);
+    routes.push(`/${adapter}/api-reference`);
+    for (const slug of contentSlugs) {
+      routes.push(`/${adapter}/${slug}`);
+    }
+  }
+  return routes;
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   return {
@@ -109,7 +150,7 @@ export default defineConfig(({ mode }) => {
       adapterCssPlugin(),
       apiDocsPlugin(),
       analog({
-        ssr: false,
+        ssr: true,
         static: true,
         content: {
           highlighter: 'shiki',
@@ -120,7 +161,7 @@ export default defineConfig(({ mode }) => {
           },
         },
         prerender: {
-          routes: [],
+          routes: generatePrerenderRoutes(),
         },
         vite: {
           inlineStylesExtension: 'scss',

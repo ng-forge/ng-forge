@@ -4,7 +4,7 @@ import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyR
 import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
-import { catchError, delay, filter, iif, map, merge, of, switchMap, tap } from 'rxjs';
+import { catchError, defer, delay, filter, map, merge, of, switchMap, tap } from 'rxjs';
 
 import { DynamicForm } from '@ng-forge/dynamic-forms';
 
@@ -117,25 +117,17 @@ export class LandingComponent {
   // REACTIVE STATE (RxJS -> Signal)
   // ============================================
 
-  readonly navScrolled = toSignal(
-    iif(() => this.isBrowser, navScrolled$(), of(false)),
-    { requireSync: true },
-  );
+  readonly navScrolled = toSignal(this.isBrowser ? defer(() => navScrolled$()) : of(false), { requireSync: true });
 
-  readonly scrollProgress = toSignal(
-    iif(() => this.isBrowser, scrollProgress$(), of(0)),
-    { requireSync: true },
-  );
+  readonly scrollProgress = toSignal(this.isBrowser ? defer(() => scrollProgress$()) : of(0), { requireSync: true });
 
   private readonly fireflyState = toSignal(
-    iif(
-      () => this.isBrowser,
-      of(null).pipe(
-        delay(1200), // Delay fireflies for better LCP - starts after hero animation
-        switchMap(() => createFireflyAnimation(mousePosition$())),
-      ),
-      of(EMPTY_FIREFLY_STATE),
-    ),
+    this.isBrowser
+      ? of(null).pipe(
+          delay(1200), // Delay fireflies for better LCP - starts after hero animation
+          switchMap(() => createFireflyAnimation(mousePosition$())),
+        )
+      : of(EMPTY_FIREFLY_STATE),
     { initialValue: EMPTY_FIREFLY_STATE },
   );
 

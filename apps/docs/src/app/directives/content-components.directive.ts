@@ -8,8 +8,10 @@ import {
   inject,
   Injector,
   input,
+  PLATFORM_ID,
   Type,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ActiveAdapterService } from '../services/active-adapter.service';
@@ -84,6 +86,7 @@ export class ContentComponentsDirective {
   private readonly sanitizer = inject(DomSanitizer);
   private readonly activeAdapter = inject(ActiveAdapterService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly componentRefs: Array<ReturnType<typeof createComponent>> = [];
   private originalHtml = '';
 
@@ -100,6 +103,15 @@ export class ContentComponentsDirective {
       if (htmlString) {
         this.originalHtml = htmlString;
       }
+
+      if (!this.isBrowser) {
+        // During SSR, set innerHTML directly for SEO — no dynamic component processing needed
+        if (this.originalHtml) {
+          this.el.nativeElement.innerHTML = this.originalHtml;
+        }
+        return;
+      }
+
       // Re-apply original HTML to restore custom element tags, then process
       requestAnimationFrame(() => {
         if (this.originalHtml) {

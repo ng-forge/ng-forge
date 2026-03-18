@@ -74,7 +74,7 @@
       "executor": "nx:run-commands",
       "dependsOn": ["build"],
       "options": {
-        "command": "npx pagefind --site dist/apps/docs/browser --output-subdir pagefind",
+        "command": "npx pagefind --site dist/apps/docs/analog/public --output-subdir pagefind",
         "cwd": "{workspaceRoot}"
       }
     },
@@ -87,7 +87,7 @@
       "options": {
         "buildTarget": "docs:build",
         "port": 4200,
-        "staticFilePath": "dist/apps/docs/browser",
+        "staticFilePath": "dist/apps/docs/analog/public",
         "spa": true
       }
     }
