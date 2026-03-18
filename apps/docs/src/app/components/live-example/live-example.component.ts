@@ -3,12 +3,27 @@ import { FormConfig } from '@ng-forge/dynamic-forms';
 import { SandboxMountDirective } from '@ng-forge/sandbox-harness';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { EXAMPLE_CONFIGS } from '../../example-configs';
+import { EXAMPLES_REGISTRY } from '../../pages/examples-index/examples.registry';
 
 @Component({
   selector: 'docs-live-example',
   template: `
     @if (!shouldHide()) {
       <div class="live-example-wrapper">
+        <div class="live-example-header">
+          <div class="header-dots">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+          @if (exampleTitle()) {
+            <span class="header-title">{{ exampleTitle() }}</span>
+          }
+          <span class="header-badge">
+            <img [src]="adapterInfo().icon" [alt]="adapterInfo().label" class="header-badge-icon" />
+            {{ adapterInfo().label }}
+          </span>
+        </div>
         @if (!isLoaded()) {
           <div class="live-example-skeleton" role="status" aria-busy="true">
             <div class="skeleton-form">
@@ -83,4 +98,14 @@ export class LiveExampleComponent {
   protected readonly resolvedConfig = computed(() => this.scenarioConfig());
 
   protected readonly resolvedRoute = computed(() => (this.scenarioConfig() ? '/examples/demo' : '/' + this.scenario()));
+
+  /** Resolve scenario key to a human-readable title from the examples registry. */
+  protected readonly exampleTitle = computed(() => {
+    const key = this.scenarioKey();
+    return EXAMPLES_REGISTRY.find((e) => e.id === key)?.title ?? '';
+  });
+
+  protected readonly adapterInfo = computed(
+    () => this.activeAdapter.adapters.find((a) => a.name === this.resolvedAdapter()) ?? this.activeAdapter.adapters[0],
+  );
 }

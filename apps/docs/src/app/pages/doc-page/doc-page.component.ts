@@ -390,7 +390,7 @@ export class DocPageComponent {
 
     // Update document title based on current page
     explicitEffect([this.pageTitle], ([title]) => {
-      this.titleService.setTitle(title ? `${title} — ng-forge` : 'ng-forge — Dynamic Forms for Angular');
+      this.titleService.setTitle(title ? `${title} — ng-forge Dynamic Forms` : 'ng-forge — Dynamic Forms for Angular');
     });
   }
 

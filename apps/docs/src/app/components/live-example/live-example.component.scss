@@ -10,11 +10,86 @@
 .live-example-wrapper {
   position: relative;
   min-height: 300px;
+  border: 1px solid var(--forge-border-color, #e0e0e0);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+// ============================================
+// HEADER BAR — dots + title + adapter badge
+// ============================================
+.live-example-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--forge-base-1, #f8f8f8);
+  border-bottom: 1px solid var(--forge-border-color, #e0e0e0);
+}
+
+.header-dots {
+  display: flex;
+  gap: 6px;
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--forge-base-4, #ccc);
+    opacity: 0.5;
+  }
+}
+
+.header-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--forge-text-muted);
+  letter-spacing: 0.01em;
+}
+
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--forge-base-2, #f0f0f0);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--forge-text-muted);
+  letter-spacing: 0.03em;
+}
+
+.header-badge-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  border-radius: 2px;
+}
+
+// Dark mode header
+:host-context([data-theme='dark']) .live-example-header {
+  background: $bg-surface;
+  border-bottom-color: $steel-dark;
+}
+
+:host-context([data-theme='dark']) .header-badge {
+  background: $bg-elevated;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context([data-theme='auto']) .live-example-header {
+    background: $bg-surface;
+    border-bottom-color: $steel-dark;
+  }
+
+  :host-context([data-theme='auto']) .header-badge {
+    background: $bg-elevated;
+  }
 }
 
 .live-example-container {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
   overflow: hidden;
   background: transparent;
 
@@ -31,15 +106,21 @@
   }
 }
 
-// Dark mode
-:host-context([data-theme='dark']) .live-example-container {
+// Dark mode wrapper border
+:host-context([data-theme='dark']) .live-example-wrapper {
   border-color: $steel-dark;
+}
+
+:host-context([data-theme='dark']) .live-example-container {
   background: $bg-elevated;
 }
 
 @media (prefers-color-scheme: dark) {
-  :host-context([data-theme='auto']) .live-example-container {
+  :host-context([data-theme='auto']) .live-example-wrapper {
     border-color: $steel-dark;
+  }
+
+  :host-context([data-theme='auto']) .live-example-container {
     background: $bg-elevated;
   }
 }
@@ -49,20 +130,15 @@
 // ============================================
 .live-example-skeleton {
   min-height: 300px;
-  border: 1px solid var(--forge-base-3, #e0e0e0);
-  border-radius: 8px;
-  overflow: hidden;
   background: var(--forge-base-0, #fff);
 }
 
 :host-context([data-theme='dark']) .live-example-skeleton {
-  border-color: $steel-dark;
   background: $bg-elevated;
 }
 
 @media (prefers-color-scheme: dark) {
   :host-context([data-theme='auto']) .live-example-skeleton {
-    border-color: $steel-dark;
     background: $bg-elevated;
   }
 }
