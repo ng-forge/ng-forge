@@ -12,36 +12,80 @@ import { searchIndexPlugin } from './plugins/vite-plugin-search-index';
 const ADAPTER_NAMES = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 
 /**
+ * Shared SCSS compilation helpers used by both the global styles
+ * plugin and the per-adapter CSS plugin.
+ */
+const stylesDir = resolve(__dirname, 'src/styles');
+const nodeModules = resolve(__dirname, '../../node_modules');
+const scssLoadPaths = [resolve(__dirname, '../../internal/styling/src'), nodeModules];
+
+/**
+ * Sass passes through `@import` of `.css` files as native CSS imports.
+ * The browser can't resolve bare specifiers like `@ionic/angular/css/core.css`,
+ * so we inline them by reading from node_modules.
+ */
+function inlineCssImports(css: string): string {
+  return css.replace(/@import\s*['"]([^'"]+\.css)['"]\s*;/g, (_match, importPath: string) => {
+    try {
+      const fullPath = resolve(nodeModules, importPath);
+      return readFileSync(fullPath, 'utf-8');
+    } catch {
+      console.warn(`[css-plugin] Could not inline @import "${importPath}"`);
+      return _match;
+    }
+  });
+}
+
+/**
+ * Vite plugin that serves the global styles.scss as a proper CSS file
+ * (text/css) so it can be loaded via a render-blocking <link> tag.
+ * In Vite dev mode, SCSS imports are served as JavaScript modules which
+ * makes them non-blocking — this plugin bypasses that behavior.
+ */
+function globalStylesPlugin(): Plugin {
+  const globalStylesPath = resolve(__dirname, 'src/styles.scss');
+
+  function compileGlobalStyles(): string {
+    const result = sass.compile(globalStylesPath, {
+      loadPaths: scssLoadPaths,
+      style: 'compressed',
+    });
+    return inlineCssImports(result.css);
+  }
+
+  return {
+    name: 'vite-plugin-global-styles',
+
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url !== '/__global.css') return next();
+        try {
+          const css = compileGlobalStyles();
+          res.setHeader('Content-Type', 'text/css');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.end(css);
+        } catch (err) {
+          console.error('[global-styles] Failed to compile styles.scss:', err);
+          res.statusCode = 500;
+          res.end('/* Error compiling styles.scss */');
+        }
+      });
+    },
+
+    // Build: Vite already bundles styles.scss via main.ts import, so no generateBundle needed.
+  };
+}
+
+/**
  * Vite plugin that compiles adapter SCSS files to CSS and serves them
  * as standalone files. In dev mode they're served via middleware; in
  * build mode they're emitted as assets in the output directory.
  */
 function adapterCssPlugin(): Plugin {
-  const stylesDir = resolve(__dirname, 'src/styles');
-  const nodeModules = resolve(__dirname, '../../node_modules');
-  const loadPaths = [resolve(__dirname, '../../internal/styling/src'), nodeModules];
-
-  /**
-   * Sass passes through `@import` of `.css` files as native CSS imports.
-   * The browser can't resolve bare specifiers like `@ionic/angular/css/core.css`,
-   * so we inline them by reading from node_modules.
-   */
-  function inlineCssImports(css: string): string {
-    return css.replace(/@import\s*['"]([^'"]+\.css)['"]\s*;/g, (_match, importPath: string) => {
-      try {
-        const fullPath = resolve(nodeModules, importPath);
-        return readFileSync(fullPath, 'utf-8');
-      } catch {
-        console.warn(`[adapter-css] Could not inline @import "${importPath}"`);
-        return _match;
-      }
-    });
-  }
-
   function compileAdapter(name: string): string {
     const filePath = resolve(stylesDir, `adapter-${name}.scss`);
     const result = sass.compile(filePath, {
-      loadPaths,
+      loadPaths: scssLoadPaths,
       style: 'compressed',
     });
     return inlineCssImports(result.css);
@@ -148,6 +192,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
+      globalStylesPlugin(),
       adapterCssPlugin(),
       apiDocsPlugin(),
       searchIndexPlugin(),

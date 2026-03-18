@@ -23,11 +23,11 @@ Every adapter uses the same `FormConfig` schema — import `DynamicForm` and bin
   template: `<form [dynamic-form]="config"></form>`,
 })
 export class ContactComponent {
-  config: FormConfig = {
+  config = {
     fields: [
       /* see Config tab below */
     ],
-  };
+  } as const satisfies FormConfig;
 }
 ```
 
