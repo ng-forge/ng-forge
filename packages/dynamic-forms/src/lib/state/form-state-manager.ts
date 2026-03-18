@@ -41,8 +41,7 @@ import { SchemaRegistryService } from '../core/registry/schema-registry.service'
 import { createSchemaFromFields } from '../core/schema-builder';
 import { createFormLevelSchema } from '../core/form-schema-merger';
 import { collectCrossFieldEntries } from '../core/cross-field/cross-field-collector';
-import { flattenFields } from '../utils/flattener/field-flattener';
-import { memoize, isEqual } from '../utils/object-utils';
+import { isEqual } from '../utils/object-utils';
 import { CONTAINER_FIELD_PROCESSORS } from '../utils/container-utils/container-field-processors';
 import { derivedFromDeferred } from '../utils/derived-from-deferred/derived-from-deferred';
 import { reconcileFields, ResolvedField, resolveField, resolveFieldSync } from '../utils/resolve-field/resolve-field';
@@ -149,23 +148,6 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   private readonly fieldProcessors = inject(CONTAINER_FIELD_PROCESSORS);
-
-  private readonly memoizedFlattenFieldsForRendering = memoize(
-    (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry, { preserveRows: true }),
-    {
-      // registry.size is a valid cache key proxy because the field registry is populated
-      // once at bootstrap and never mutated at runtime. If the registry were mutable,
-      // we would need a content-based hash instead.
-      resolver: (fields, registry) => {
-        let key = '';
-        for (const f of fields) {
-          key += (f.key ?? '') + ':' + (f.type ?? '') + '|';
-        }
-        return key + registry.size;
-      },
-      maxSize: 10,
-    },
-  );
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Internal State Signals
@@ -906,7 +888,7 @@ export class FormStateManager<
     // into full ArrayField.fields and are reachable during traversal.
     validateFormConfig(normalizedFields, registry, this.logger);
     const flattenedFields = this.fieldProcessors.memoizedFlattenFields(normalizedFields, registry);
-    const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(normalizedFields, registry);
+    const flattenedFieldsForRendering = this.fieldProcessors.memoizedFlattenFieldsForRendering(normalizedFields, registry);
     const fieldsById = this.fieldProcessors.memoizedKeyBy(flattenedFields);
     const defaultValues = this.fieldProcessors.memoizedDefaultValues(fieldsById, registry);
     const fieldsToRender = mode === 'paged' ? [] : flattenedFieldsForRendering;

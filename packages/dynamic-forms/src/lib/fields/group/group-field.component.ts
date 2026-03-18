@@ -97,11 +97,13 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
 
     if (groupField.fields && groupField.fields.length > 0) {
       const flattenedFields = this.fieldProcessors.memoizedFlattenFields(groupField.fields, registry);
+      const flattenedFieldsForRendering = this.fieldProcessors.memoizedFlattenFieldsForRendering(groupField.fields, registry);
       const fieldsById = this.fieldProcessors.memoizedKeyBy(flattenedFields);
       const defaultValues = this.fieldProcessors.memoizedDefaultValues(fieldsById, registry);
 
       return {
-        fields: flattenedFields,
+        fields: flattenedFieldsForRendering,
+        schemaFields: flattenedFields,
         originalFields: groupField.fields,
         defaultValues,
         registry,
@@ -110,6 +112,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
 
     return {
       fields: [],
+      schemaFields: [],
       originalFields: [],
       defaultValues: {},
       registry,
@@ -141,8 +144,8 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
     return runInInjectionContext(this.injector, () => {
       const setup = this.formSetup();
 
-      if (setup.fields.length > 0) {
-        const schema = createSchemaFromFields(setup.fields, setup.registry);
+      if (setup.schemaFields.length > 0) {
+        const schema = createSchemaFromFields(setup.schemaFields, setup.registry);
         return untracked(() => form(this.entity, schema));
       }
 

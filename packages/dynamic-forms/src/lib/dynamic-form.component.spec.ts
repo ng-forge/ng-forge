@@ -1956,6 +1956,9 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
 
+      const groupElement = fixture.nativeElement.querySelector('[data-testid="contact"]');
+      const rowElement = fixture.nativeElement.querySelector('[data-testid="name"]');
+
       // Should create nested structure with group containing row-flattened fields
       expect(component.formValue()).toEqual({
         contact: {
@@ -1964,6 +1967,9 @@ describe('DynamicFormComponent', () => {
           email: 'john.doe@example.com',
         },
       });
+      expect(groupElement?.classList.contains('df-group')).toBe(true);
+      expect(rowElement?.classList.contains('df-row')).toBe(true);
+      expect(groupElement?.contains(rowElement)).toBe(true);
     });
 
     it('should handle mixed regular definitions with row and group definitions', async () => {

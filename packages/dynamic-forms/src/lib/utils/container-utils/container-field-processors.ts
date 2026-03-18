@@ -14,19 +14,35 @@ import { keyBy, memoize, mapValues } from '../object-utils';
  * @returns Object containing memoized processing functions
  */
 export function createContainerFieldProcessors() {
+  const createFieldsResolver =
+    (preserveRows = false) =>
+    (fields: readonly FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => {
+      let key = '';
+      for (const f of fields) {
+        key += (f.key ?? '') + ':' + (f.type ?? '') + '|';
+      }
+      return key + registry.size + '|' + preserveRows;
+    };
+
   const memoizedFlattenFields = memoize(
     (fields: readonly FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields([...fields], registry),
     {
       // registry.size is a valid cache key proxy because the field registry is populated
       // once at bootstrap and never mutated at runtime. If the registry were mutable,
       // we would need a content-based hash instead.
-      resolver: (fields, registry) => {
-        let key = '';
-        for (const f of fields) {
-          key += (f.key ?? '') + ':' + (f.type ?? '') + '|';
-        }
-        return key + registry.size;
-      },
+      resolver: createFieldsResolver(),
+      maxSize: 10,
+    },
+  );
+
+  const memoizedFlattenFieldsForRendering = memoize(
+    (fields: readonly FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) =>
+      flattenFields([...fields], registry, { preserveRows: true }),
+    {
+      // registry.size is a valid cache key proxy because the field registry is populated
+      // once at bootstrap and never mutated at runtime. If the registry were mutable,
+      // we would need a content-based hash instead.
+      resolver: createFieldsResolver(true),
       maxSize: 10,
     },
   );
@@ -56,7 +72,7 @@ export function createContainerFieldProcessors() {
     },
   );
 
-  return { memoizedFlattenFields, memoizedKeyBy, memoizedDefaultValues };
+  return { memoizedFlattenFields, memoizedFlattenFieldsForRendering, memoizedKeyBy, memoizedDefaultValues };
 }
 
 /**
