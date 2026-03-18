@@ -88,10 +88,56 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
             }
             <div class="doc-page-content" contentComponents [contentHtml]="content()!.html"></div>
           } @else {
-            <div class="doc-page-loading">Loading...</div>
+            <div class="doc-page-skeleton" role="status" aria-busy="true">
+              <span class="visually-hidden">Loading page content</span>
+              <!-- Breadcrumb -->
+              <div class="skeleton-breadcrumb"></div>
+              <!-- Page title (h1) -->
+              <div class="skeleton-h1"></div>
+              <!-- Intro paragraph -->
+              <div class="skeleton-paragraph">
+                <div class="skeleton-line skeleton-line--long"></div>
+                <div class="skeleton-line skeleton-line--full"></div>
+                <div class="skeleton-line skeleton-line--medium"></div>
+              </div>
+              <!-- Section heading (h2) with ember accent bar -->
+              <div class="skeleton-h2"></div>
+              <!-- Body text -->
+              <div class="skeleton-paragraph">
+                <div class="skeleton-line skeleton-line--full"></div>
+                <div class="skeleton-line skeleton-line--long"></div>
+              </div>
+              <!-- Code block -->
+              <div class="skeleton-code"></div>
+              <!-- Another section -->
+              <div class="skeleton-h2 skeleton-h2--narrow"></div>
+              <div class="skeleton-paragraph">
+                <div class="skeleton-line skeleton-line--long"></div>
+                <div class="skeleton-line skeleton-line--full"></div>
+                <div class="skeleton-line skeleton-line--short"></div>
+              </div>
+              <!-- Inline code snippet -->
+              <div class="skeleton-code skeleton-code--short"></div>
+              <!-- Trailing text -->
+              <div class="skeleton-paragraph">
+                <div class="skeleton-line skeleton-line--medium"></div>
+                <div class="skeleton-line skeleton-line--long"></div>
+              </div>
+            </div>
           }
         </article>
-        <app-toc [headings]="content()?.headings ?? []" />
+        @if (content()?.html) {
+          <app-toc [headings]="content()?.headings ?? []" />
+        } @else {
+          <nav class="toc-skeleton" role="status" aria-busy="true">
+            <span class="visually-hidden">Loading table of contents</span>
+            <div class="toc-skeleton-line toc-skeleton-line--short"></div>
+            <div class="toc-skeleton-line"></div>
+            <div class="toc-skeleton-line toc-skeleton-line--long"></div>
+            <div class="toc-skeleton-line"></div>
+            <div class="toc-skeleton-line toc-skeleton-line--short"></div>
+          </nav>
+        }
       </div>
     }
   `,
@@ -157,9 +203,169 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
         margin: 0 2px;
       }
 
-      .doc-page-loading {
-        color: var(--forge-text-muted);
-        padding: 2rem 0;
+      /* Shimmer base for all skeleton elements */
+      .doc-page-skeleton,
+      .toc-skeleton {
+        --shimmer-from: var(--forge-base-2, #f0f0f0);
+        --shimmer-via: var(--forge-base-3, #e0e0e0);
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: -200% 0;
+        }
+        100% {
+          background-position: 200% 0;
+        }
+      }
+
+      /* ---- Doc page content skeleton ---- */
+      .doc-page-skeleton {
+        padding: 0;
+      }
+
+      /* Shared shimmer for all skeleton blocks */
+      .skeleton-breadcrumb,
+      .skeleton-h1,
+      .skeleton-h2,
+      .skeleton-line,
+      .skeleton-code,
+      .toc-skeleton-line {
+        background: linear-gradient(90deg, var(--shimmer-from) 0%, var(--shimmer-via) 50%, var(--shimmer-from) 100%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s ease-in-out infinite;
+      }
+
+      /* Breadcrumb: matches real breadcrumb (14px text) */
+      .skeleton-breadcrumb {
+        width: 200px;
+        height: 14px;
+        border-radius: 4px;
+        margin-bottom: 16px;
+      }
+
+      /* Page title: matches .doc-page-title (36px / 32px line-height) */
+      .skeleton-h1 {
+        width: 50%;
+        height: 36px;
+        border-radius: 6px;
+        margin-bottom: 24px;
+      }
+
+      /* Section heading: matches h2 (26px) with ember accent bar */
+      .skeleton-h2 {
+        width: 35%;
+        height: 26px;
+        border-radius: 4px;
+        margin-top: 56px;
+        margin-bottom: 16px;
+        margin-left: 14px;
+        position: relative;
+      }
+
+      .skeleton-h2::before {
+        content: '';
+        position: absolute;
+        left: -14px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 60%;
+        min-height: 16px;
+        border-radius: 2px;
+        background: linear-gradient(180deg, var(--forge-primary, #ff6b2b), var(--forge-primary-hover, #ff4d00));
+        opacity: 0.4;
+      }
+
+      .skeleton-h2--narrow {
+        width: 25%;
+      }
+
+      .skeleton-paragraph {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 16px 0;
+      }
+
+      /* Text lines: matches body text (16px / 24px line-height) */
+      .skeleton-line {
+        height: 16px;
+        border-radius: 4px;
+        width: 75%;
+      }
+      .skeleton-line--full {
+        width: 100%;
+      }
+      .skeleton-line--long {
+        width: 88%;
+      }
+      .skeleton-line--medium {
+        width: 65%;
+      }
+      .skeleton-line--short {
+        width: 38%;
+      }
+
+      /* Code block: matches pre (rounded 8px, code-bg color) */
+      .skeleton-code {
+        width: 100%;
+        height: 140px;
+        border-radius: 8px;
+        margin: 24px 0;
+      }
+      .skeleton-code--short {
+        height: 80px;
+      }
+
+      /* ---- TOC skeleton ---- */
+      .toc-skeleton {
+        padding: 1rem 0;
+      }
+
+      .toc-skeleton-line {
+        height: 12px;
+        width: 70%;
+        border-radius: 4px;
+        margin-bottom: 12px;
+        background: linear-gradient(90deg, var(--shimmer-from) 0%, var(--shimmer-via) 50%, var(--shimmer-from) 100%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s ease-in-out infinite;
+
+        &--short {
+          width: 50%;
+        }
+        &--long {
+          width: 90%;
+        }
+      }
+
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media (max-width: 1280px) {
+        .toc-skeleton {
+          display: none;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .skeleton-breadcrumb,
+        .skeleton-heading,
+        .skeleton-line,
+        .skeleton-code,
+        .toc-skeleton-line {
+          animation: none;
+        }
       }
     `,
   ],

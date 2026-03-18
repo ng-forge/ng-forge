@@ -178,8 +178,9 @@ export default defineConfig(({ mode }) => {
       exclude: [],
     },
     ssr: {
-      noExternal: ['front-matter'],
+      noExternal: [],
       external: [
+        'front-matter',
         // Sandbox adapters and examples are client-only (live demos).
         // Excluding from SSR bundle reduces build memory by ~3MB.
         '@ng-forge/examples-material',

@@ -8,15 +8,21 @@ import { EXAMPLE_CONFIGS } from '../../example-configs';
   selector: 'docs-live-example',
   template: `
     @if (!shouldHide()) {
-      <div
-        class="live-example-container"
-        sandboxMount
-        [adapter]="resolvedAdapter()"
-        [route]="resolvedRoute()"
-        [config]="resolvedConfig()"
-        locationStrategy="memory"
-        styleIsolation="scoped"
-      ></div>
+      @defer (on viewport; hydrate on viewport) {
+        <div
+          class="live-example-container"
+          sandboxMount
+          [adapter]="resolvedAdapter()"
+          [route]="resolvedRoute()"
+          [config]="resolvedConfig()"
+          locationStrategy="memory"
+          styleIsolation="scoped"
+        ></div>
+      } @placeholder {
+        <div class="live-example-skeleton" role="status" aria-busy="true">
+          <span class="visually-hidden">Loading live example</span>
+        </div>
+      }
     }
   `,
   styleUrl: './live-example.component.scss',
