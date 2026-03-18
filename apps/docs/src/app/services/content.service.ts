@@ -1,8 +1,8 @@
-import { inject, Injectable } from '@angular/core';
-import { APP_BASE_HREF } from '@angular/common';
+import { inject, Injectable, makeStateKey, PLATFORM_ID, TransferState } from '@angular/core';
+import { APP_BASE_HREF, isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Observable, switchMap, catchError, of, shareReplay } from 'rxjs';
+import { Observable, switchMap, catchError, of, shareReplay, tap } from 'rxjs';
 import { Marked, type Renderer, type Tokens } from 'marked';
 import { highlightCode } from '../utils/shiki';
 
@@ -77,10 +77,20 @@ function replaceEmojisOutsideCode(html: string): string {
  * with Shiki syntax highlighting (two-pass: lex → highlight → render).
  * Returns SafeHtml to bypass Angular's HTML sanitizer.
  */
+/** Serializable subset of RenderedContent for TransferState (SafeHtml is not serializable). */
+interface TransferableContent {
+  rawHtml: string;
+  title: string;
+  headings: HeadingEntry[];
+  error?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ContentService {
   private readonly http = inject(HttpClient);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly transferState = inject(TransferState);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly baseHref = inject(APP_BASE_HREF, { optional: true }) ?? '/';
   private readonly cache = new Map<string, Observable<RenderedContent>>();
 
@@ -91,6 +101,26 @@ export class ContentService {
   load(slug: string): Observable<RenderedContent> {
     const cached = this.cache.get(slug);
     if (cached) return cached;
+
+    // On the client, check TransferState first — allows synchronous emission
+    // so the first CD cycle has content and avoids hydration mismatch.
+    const stateKey = makeStateKey<TransferableContent>(`doc-content-${slug}`);
+    if (this.isBrowser && this.transferState.hasKey(stateKey)) {
+      const transferred = this.transferState.get(stateKey, null);
+      this.transferState.remove(stateKey);
+      if (transferred) {
+        const content: RenderedContent = {
+          html: this.sanitizer.bypassSecurityTrustHtml(transferred.rawHtml),
+          rawHtml: transferred.rawHtml,
+          title: transferred.title,
+          headings: transferred.headings,
+          error: transferred.error,
+        };
+        const result$ = of(content).pipe(shareReplay({ bufferSize: 1, refCount: true }));
+        this.cache.set(slug, result$);
+        return result$;
+      }
+    }
 
     const base = this.baseHref.endsWith('/') ? this.baseHref : this.baseHref + '/';
     const result$ = this.http.get(`${base}content/${slug}.md`, { responseType: 'text' }).pipe(
@@ -106,6 +136,16 @@ export class ContentService {
         const stripped = fmMatch ? markdown.slice(fmMatch[0].length) : markdown;
         const rendered = await this.renderMarkdown(stripped);
         return { ...rendered, title };
+      }),
+      // During SSR, store content in TransferState for the client
+      tap((content) => {
+        if (!this.isBrowser && !content.error) {
+          this.transferState.set(stateKey, {
+            rawHtml: content.rawHtml,
+            title: content.title,
+            headings: content.headings,
+          });
+        }
       }),
       catchError((err) => {
         console.warn(`[ContentService] Failed to load /content/${slug}.md`, err);
