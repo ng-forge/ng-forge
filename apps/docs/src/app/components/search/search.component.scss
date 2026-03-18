@@ -4,18 +4,25 @@ $ember-glow: #ff8c42;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.375rem 0.75rem;
+  height: 40px;
+  padding: 0 0.75rem;
   border: 1px solid var(--forge-border-color);
-  border-radius: 8px;
-  background: var(--forge-base-1);
+  border-radius: 6px;
+  background: transparent;
   color: var(--forge-text-muted);
   cursor: pointer;
-  font-size: 0.875rem;
-  transition: border-color 0.2s ease;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
   min-width: 240px;
 
   &:hover {
+    color: $ember-glow;
     border-color: $ember-glow;
+    background: var(--forge-base-1);
   }
 
   .icon {
@@ -25,13 +32,20 @@ $ember-glow: #ff8c42;
     opacity: 0.6;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 600px) {
     min-width: unset;
     width: 40px;
     height: 40px;
     padding: 0;
     justify-content: center;
     border-radius: 50%;
+    border: 1px solid var(--forge-border-color);
+    background: var(--forge-base-2);
+
+    &:hover {
+      background: var(--forge-base-3);
+      border-color: var(--forge-base-4);
+    }
 
     .search-label {
       display: none;
@@ -40,6 +54,11 @@ $ember-glow: #ff8c42;
     .search-kbd {
       display: none;
     }
+  }
+
+  @media (max-width: 400px) {
+    width: 34px;
+    height: 34px;
   }
 }
 
@@ -57,7 +76,7 @@ $ember-glow: #ff8c42;
 .search-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   z-index: 200;
   display: flex;
   align-items: flex-start;

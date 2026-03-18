@@ -10,6 +10,7 @@ import { DynamicForm } from '@ng-forge/dynamic-forms';
 
 import { Logo } from '../../components/logo';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
+import { SearchComponent } from '../../components/search/search.component';
 
 import {
   CODE_SNIPPETS,
@@ -45,7 +46,7 @@ const CONFETTI_ANIMATION_DURATION_MS = 800;
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, CodeHighlightDirective, Logo, DynamicForm],
+  imports: [RouterLink, CodeHighlightDirective, Logo, DynamicForm, SearchComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

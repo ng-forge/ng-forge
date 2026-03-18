@@ -270,6 +270,65 @@ nav {
     }
   }
 
+  // Force dark-mode values for search trigger (landing is always dark)
+  ::ng-deep app-search {
+    .search-trigger {
+      border-color: $steel-dark;
+      color: $steel-mid;
+      background: transparent;
+
+      &:hover {
+        color: $ember-glow;
+        border-color: $ember-glow;
+        background: $bg-surface;
+      }
+    }
+
+    .search-kbd {
+      border-color: $steel-dark;
+      background: $bg-elevated;
+      color: $steel-mid;
+    }
+
+    .search-overlay {
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    .search-dialog {
+      background: $bg-deep;
+      border-color: $steel-dark;
+    }
+
+    .search-input {
+      color: $steel;
+      border-bottom-color: $steel-dark;
+
+      &::placeholder {
+        color: $steel-mid;
+      }
+    }
+
+    .search-result {
+      color: $steel;
+
+      &:hover {
+        background: $bg-surface;
+      }
+
+      & + & {
+        border-top-color: $steel-dark;
+      }
+    }
+
+    .result-excerpt {
+      color: $steel-mid;
+    }
+
+    .search-empty {
+      color: $steel-mid;
+    }
+  }
+
   // Shared button style for nav buttons (search, github, etc.)
   // Landing page style: no border, transparent bg, simple color change + scale on hover
   .github-link {
