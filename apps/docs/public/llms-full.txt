@@ -10920,7 +10920,7 @@ Add custom classes via the `className` property:
 - **[Field Types →](/field-types/text-inputs)** — Explore all available input field types and their props
 - **[i18n →](/dynamic-behavior/i18n)** — Translate text labels with Observables and Signals
 
---- field-types/advanced-controls ---
+--- schema-fields/field-types/advanced-controls ---
 
 Specialized controls for numeric ranges and date selection.
 
@@ -10988,7 +10988,7 @@ Date selection control.
 
 <docs-live-example scenario="examples/datepicker" hideForCustom="true"></docs-live-example>
 
---- field-types/buttons ---
+--- schema-fields/field-types/buttons ---
 
 Action fields for form submission and multi-step navigation.
 
@@ -11061,13 +11061,13 @@ Navigates back to the previous page in a multi-step form. Only valid inside a `p
 
 > This field type only makes sense inside a [Form Pages](/prebuilt/form-pages) container. It is ignored at the root level.
 
---- field-types ---
+--- schema-fields/field-types ---
 
 Choose a field type group to explore available controls and their configuration options.
 
 See [Props vs Meta](./utility#props-vs-meta) for how to configure UI-specific behavior vs native HTML attributes.
 
---- field-types/selection ---
+--- schema-fields/field-types/selection ---
 
 Fields for selecting one or multiple values from a set of options.
 
@@ -11201,7 +11201,7 @@ Multiple selection from a list of checkboxes. Value is an array of selected valu
 
 <docs-live-example scenario="examples/multi-checkbox" hideForCustom="true"></docs-live-example>
 
---- field-types/text-inputs ---
+--- schema-fields/field-types/text-inputs ---
 
 Text-based input fields for collecting typed data from users.
 
@@ -11264,7 +11264,7 @@ Multi-line text input.
 
 <docs-live-example scenario="examples/textarea" hideForCustom="true"></docs-live-example>
 
---- field-types/utility ---
+--- schema-fields/field-types/utility ---
 
 Non-input fields for displaying content and passing hidden data.
 
