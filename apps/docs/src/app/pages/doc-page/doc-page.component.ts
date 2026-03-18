@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ContentService } from '../../services/content.service';
 import { ContentComponentsDirective } from '../../directives/content-components.directive';
 import { TocComponent } from '../../components/toc/toc.component';
@@ -374,6 +376,7 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
 })
 export class DocPageComponent {
   private readonly router = inject(Router);
+  private readonly titleService = inject(Title);
   private readonly contentService = inject(ContentService);
   private readonly clipboard = inject(Clipboard);
   private readonly destroyRef = inject(DestroyRef);
@@ -383,6 +386,11 @@ export class DocPageComponent {
   constructor() {
     this.destroyRef.onDestroy(() => {
       if (this.copiedTimer) clearTimeout(this.copiedTimer);
+    });
+
+    // Update document title based on current page
+    explicitEffect([this.pageTitle], ([title]) => {
+      this.titleService.setTitle(title ? `${title} — ng-forge` : 'ng-forge — Dynamic Forms for Angular');
     });
   }
 
@@ -458,6 +466,18 @@ export class DocPageComponent {
   readonly adapterInfo = computed(() => {
     const name = this.adapter.adapter();
     return this.adapter.adapters.find((a) => a.name === name);
+  });
+
+  /** Resolved page title for document.title — covers content pages, examples, API, and special pages. */
+  private readonly pageTitle = computed(() => {
+    if (this.isApiIndex()) return 'API Reference';
+    if (this.isApiDetail()) {
+      const symbol = this.slug().slice('api-reference/'.length);
+      return symbol ? `${symbol} — API Reference` : 'API Reference';
+    }
+    if (this.isExamplesIndex()) return 'Examples';
+    if (this.exampleId()) return this.exampleTitle();
+    return this.content()?.title ?? '';
   });
 
   onContentClick(event: MouseEvent): void {

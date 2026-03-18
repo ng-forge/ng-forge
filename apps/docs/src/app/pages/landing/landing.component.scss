@@ -270,24 +270,41 @@ nav {
     }
   }
 
-  // Force dark-mode values for search trigger (landing is always dark)
+  // Force search trigger to match .github-link style (borderless transparent circle)
   ::ng-deep app-search {
     .search-trigger {
-      border-color: $steel-dark;
-      color: $steel-mid;
+      border: none;
       background: transparent;
+      color: $steel-mid;
+      min-width: unset;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s ease;
 
       &:hover {
         color: $ember-glow;
-        border-color: $ember-glow;
-        background: $bg-surface;
+        background: transparent;
+        border: none;
+        transform: scale(1.1);
       }
-    }
 
-    .search-kbd {
-      border-color: $steel-dark;
-      background: $bg-elevated;
-      color: $steel-mid;
+      &:active {
+        transform: scale(0.95);
+      }
+
+      .search-label,
+      .search-kbd {
+        display: none;
+      }
+
+      .icon {
+        width: 22px;
+        height: 22px;
+        opacity: 1;
+      }
     }
 
     .search-overlay {
@@ -365,6 +382,16 @@ nav {
   // Smaller buttons on narrow screens
   @media (max-width: 400px) {
     gap: 0.5rem;
+
+    ::ng-deep app-search .search-trigger {
+      width: 36px;
+      height: 36px;
+
+      .icon {
+        width: 20px;
+        height: 20px;
+      }
+    }
 
     .github-link {
       width: 36px;

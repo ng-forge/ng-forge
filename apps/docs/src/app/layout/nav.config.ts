@@ -28,13 +28,13 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     label: 'Field Types',
-    path: 'schema-fields/field-types',
+    path: 'field-types',
     children: [
-      { label: 'Text Inputs', path: 'schema-fields/field-types/text-inputs' },
-      { label: 'Selection Fields', path: 'schema-fields/field-types/selection' },
-      { label: 'Buttons & Actions', path: 'schema-fields/field-types/buttons' },
-      { label: 'Utility Fields', path: 'schema-fields/field-types/utility' },
-      { label: 'Advanced Controls', path: 'schema-fields/field-types/advanced-controls' },
+      { label: 'Text Inputs', path: 'field-types/text-inputs' },
+      { label: 'Selection Fields', path: 'field-types/selection' },
+      { label: 'Buttons & Actions', path: 'field-types/buttons' },
+      { label: 'Utility Fields', path: 'field-types/utility' },
+      { label: 'Advanced Controls', path: 'field-types/advanced-controls' },
     ],
   },
   {

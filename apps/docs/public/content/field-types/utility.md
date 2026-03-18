@@ -1,6 +1,6 @@
 ---
 title: Utility
-slug: schema-fields/field-types/utility
+slug: field-types/utility
 ---
 
 Non-input fields for displaying content and passing hidden data.

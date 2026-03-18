@@ -1,6 +1,6 @@
 ---
 title: Advanced Controls
-slug: schema-fields/field-types/advanced-controls
+slug: field-types/advanced-controls
 ---
 
 Specialized controls for numeric ranges and date selection.

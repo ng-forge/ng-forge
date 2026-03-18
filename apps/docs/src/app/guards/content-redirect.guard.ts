@@ -6,8 +6,7 @@ import { CanActivateFn, Router } from '@angular/router';
  * Keeps nav consistent: clicking "Validation" goes to "Validation > Basics".
  */
 const CATEGORY_REDIRECTS: Record<string, string> = {
-  'schema-fields': 'schema-fields/field-types/text-inputs',
-  'schema-fields/field-types': 'schema-fields/field-types/text-inputs',
+  'field-types': 'field-types/text-inputs',
   validation: 'validation/basics',
   'schema-validation': 'schema-validation/overview',
   'dynamic-behavior': 'dynamic-behavior/conditional-logic',
@@ -30,7 +29,13 @@ const ROUTE_RENAMES: Record<string, string> = {
   'ui-libs-integrations/bootstrap': 'configuration',
   'ui-libs-integrations/primeng': 'configuration',
   'ui-libs-integrations/ionic': 'configuration',
-  'field-types': 'schema-fields/field-types/text-inputs',
+  'schema-fields': 'field-types/text-inputs',
+  'schema-fields/field-types': 'field-types/text-inputs',
+  'schema-fields/field-types/text-inputs': 'field-types/text-inputs',
+  'schema-fields/field-types/selection': 'field-types/selection',
+  'schema-fields/field-types/buttons': 'field-types/buttons',
+  'schema-fields/field-types/utility': 'field-types/utility',
+  'schema-fields/field-types/advanced-controls': 'field-types/advanced-controls',
   'dynamic-behavior/overview': 'dynamic-behavior/conditional-logic',
   'advanced/basics': 'advanced/type-safety',
   'advanced/custom-integrations': 'building-an-adapter',

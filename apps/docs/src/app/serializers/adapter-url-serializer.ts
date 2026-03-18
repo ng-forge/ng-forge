@@ -9,7 +9,7 @@ const isDocsAdapter = (v: string): v is AdapterName => DOCS_ADAPTER_NAMES.has(v)
 /**
  * URL serializer that transparently prepends the active adapter prefix to bare paths.
  *
- * Absolute routes like `/getting-started` and `/schema-fields/field-types`
+ * Absolute routes like `/getting-started` and `/field-types`
  * must become `/material/getting-started` etc. for Angular's
  * router to match them correctly — for navigation AND for `routerLinkActive` active-state detection.
  *

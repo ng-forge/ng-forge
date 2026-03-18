@@ -57,8 +57,14 @@
     gap: 0;
 
     &:hover {
-      background: var(--forge-base-3);
-      border-color: var(--forge-base-4);
+      background: var(--forge-base-1);
+      border-color: #ff8c42;
+      color: #ff8c42;
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0);
     }
 
     .adapter-dropdown.open & {

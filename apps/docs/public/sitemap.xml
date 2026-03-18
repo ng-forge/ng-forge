@@ -97,27 +97,27 @@
 
   <!-- Field Types -->
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/material/schema-fields/field-types/text-inputs</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/field-types/text-inputs</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/material/schema-fields/field-types/selection</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/field-types/selection</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/material/schema-fields/field-types/buttons</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/field-types/buttons</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/material/schema-fields/field-types/utility</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/field-types/utility</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/material/schema-fields/field-types/advanced-controls</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/field-types/advanced-controls</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

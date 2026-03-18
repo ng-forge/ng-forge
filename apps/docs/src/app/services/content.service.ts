@@ -16,6 +16,8 @@ export interface RenderedContent {
   html: SafeHtml;
   /** Raw HTML string before trust-wrapping — used by directives that need the string without re-sanitizing. */
   rawHtml: string;
+  /** Page title extracted from frontmatter. */
+  title: string;
   headings: HeadingEntry[];
   error?: string;
 }
@@ -96,15 +98,18 @@ export class ContentService {
         // Detect SPA fallback: if the response is HTML (not markdown), treat as 404
         const trimmed = markdown.trimStart();
         if (trimmed.startsWith('<!') || trimmed.startsWith('<html')) {
-          return { html: '', rawHtml: '', headings: [], error: `Content not found: ${slug}` } as RenderedContent;
+          return { html: '', rawHtml: '', title: '', headings: [], error: `Content not found: ${slug}` } as RenderedContent;
         }
-        // Strip YAML frontmatter (---\n...\n---)
-        const stripped = markdown.replace(/^---\n[\s\S]*?\n---\n?/, '');
-        return this.renderMarkdown(stripped);
+        // Extract title from frontmatter before stripping
+        const fmMatch = markdown.match(/^---\n([\s\S]*?)\n---\n?/);
+        const title = fmMatch?.[1]?.match(/^title:\s*(.+)$/m)?.[1]?.trim() ?? '';
+        const stripped = fmMatch ? markdown.slice(fmMatch[0].length) : markdown;
+        const rendered = await this.renderMarkdown(stripped);
+        return { ...rendered, title };
       }),
       catchError((err) => {
         console.warn(`[ContentService] Failed to load /content/${slug}.md`, err);
-        return of({ html: '', rawHtml: '', headings: [], error: `Content not found: ${slug}` } as RenderedContent);
+        return of({ html: '', rawHtml: '', title: '', headings: [], error: `Content not found: ${slug}` } as RenderedContent);
       }),
       shareReplay({ bufferSize: 1, refCount: true }),
     );
@@ -207,6 +212,7 @@ export class ContentService {
     return {
       html: this.sanitizer.bypassSecurityTrustHtml(html),
       rawHtml: html,
+      title: '',
       headings,
     };
   }
