@@ -9,8 +9,10 @@ export const adapterGuard: CanActivateFn = (route) => {
   if (!name || !DOCS_ADAPTER_NAMES.has(name)) {
     const router = inject(Router);
     const nav = router.getCurrentNavigation();
-    const initialUrl = nav?.initialUrl.toString() ?? `/${name}`;
-    return router.parseUrl(`/material${initialUrl}`);
+    const fullUrl = nav?.initialUrl.toString() ?? `/${name}`;
+    // Remove the first path segment (the invalid adapter) and prepend /material
+    const withoutAdapter = fullUrl.replace(/^\/[^/]+/, '');
+    return router.parseUrl(`/material${withoutAdapter}`);
   }
   return true;
 };

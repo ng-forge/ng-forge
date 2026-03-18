@@ -32,7 +32,6 @@ const ROUTE_RENAMES: Record<string, string> = {
   'ui-libs-integrations/ionic': 'configuration',
   'field-types': 'schema-fields/field-types/text-inputs',
   'dynamic-behavior/overview': 'dynamic-behavior/conditional-logic',
-  'dynamic-behavior/derivation/property': 'dynamic-behavior/derivation/values',
   'advanced/basics': 'advanced/type-safety',
   'advanced/custom-integrations': 'building-an-adapter',
 };

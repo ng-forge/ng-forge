@@ -108,6 +108,10 @@ export class ApiIndexComponent {
     });
   }
 
+  clearKindFilter(): void {
+    this.kindFilter.set(null);
+  }
+
   clearFilters(): void {
     this.query.set('');
     this.kindFilter.set(null);

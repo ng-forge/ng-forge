@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, PLATFORM_ID, resource, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, PLATFORM_ID, resource, signal, viewChild } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -72,6 +72,7 @@ export class SearchComponent {
   private readonly router = inject(Router);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private pagefind: Pagefind | null = null;
+  private readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput');
 
   readonly isOpen = signal(false);
   readonly query = signal('');
@@ -114,7 +115,7 @@ export class SearchComponent {
     this.isOpen.set(true);
     this.initPagefind();
     requestAnimationFrame(() => {
-      document.querySelector<HTMLInputElement>('.search-input')?.focus();
+      this.searchInputRef()?.nativeElement.focus();
     });
   }
 

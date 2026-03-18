@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, signal } from '@angular/core';
 import { Clipboard } from '@angular/cdk/clipboard';
 
 @Component({
@@ -84,10 +84,19 @@ export class CopyButtonComponent {
   readonly code = input.required<string>();
   protected readonly copied = signal(false);
   private readonly clipboard = inject(Clipboard);
+  private readonly destroyRef = inject(DestroyRef);
+  private copyTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.copyTimer) clearTimeout(this.copyTimer);
+    });
+  }
 
   copy(): void {
     this.clipboard.copy(this.code());
     this.copied.set(true);
-    setTimeout(() => this.copied.set(false), 2000);
+    if (this.copyTimer) clearTimeout(this.copyTimer);
+    this.copyTimer = setTimeout(() => this.copied.set(false), 2000);
   }
 }

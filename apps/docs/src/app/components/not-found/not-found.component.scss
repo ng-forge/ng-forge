@@ -122,6 +122,14 @@ h1 {
   }
 }
 
+// ── Reduced motion ───────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .illustration svg animate,
+  .illustration svg animateMotion {
+    display: none;
+  }
+}
+
 // ── Responsive ────────────────────────────────
 @media (max-width: $breakpoint-md) {
   .error-code {

@@ -33,6 +33,11 @@ export class DocsLayoutComponent {
     ? toSignal(fromEvent(window, 'scroll').pipe(map(() => window.scrollY > 0)), { initialValue: false })
     : signal(false);
 
+  private readonly currentUrl = computed(() => {
+    const nav = this.router.lastSuccessfulNavigation();
+    return nav ? this.router.serializeUrl(nav.finalUrl ?? nav.extractedUrl) : this.router.url;
+  });
+
   protected readonly navItems = computed(() => {
     const adapter = this.activeAdapter.adapter();
     return NAV_ITEMS.filter((item) => {
@@ -100,15 +105,14 @@ export class DocsLayoutComponent {
     if (this.expandedCategories().has(item.path)) return true;
     // Auto-expand if current URL is within this category
     const adapter = this.activeAdapter.adapter();
-    const url = this.router.url;
-    return url.startsWith(`/${adapter}/${item.path}`);
+    return this.currentUrl().startsWith(`/${adapter}/${item.path}`);
   }
 
   /** True when the current URL is within this category (regardless of expand state). */
   protected isActiveCategory(item: NavItem): boolean {
     if (!item.children) return false;
     const adapter = this.activeAdapter.adapter();
-    return this.router.url.startsWith(`/${adapter}/${item.path}`);
+    return this.currentUrl().startsWith(`/${adapter}/${item.path}`);
   }
 
   protected adapterLink(path: string): string {

@@ -133,8 +133,16 @@ export class ApiDetailComponent {
 
   getKindMeta = getKindMeta;
 
+  private readonly descriptionCache = new Map<string, SafeHtml>();
+  private readonly typeCache = new Map<string, SafeHtml>();
+  private readonly trustHtmlCache = new Map<string, SafeHtml>();
+
   trustHtml(html: string) {
-    return this.sanitizer.bypassSecurityTrustHtml(html);
+    const cached = this.trustHtmlCache.get(html);
+    if (cached) return cached;
+    const result = this.sanitizer.bypassSecurityTrustHtml(html);
+    this.trustHtmlCache.set(html, result);
+    return result;
   }
 
   /** Intercept clicks on type-link anchors inside [innerHTML] and route via Angular router. */
@@ -155,6 +163,10 @@ export class ApiDetailComponent {
    * Handles backtick code, camelCase() calls, UPPER_CASE constants, and known symbols.
    */
   formatDescription(text: string): SafeHtml {
+    const cacheKey = `${text}:${this.symbolName()}:${this.adapter.adapter()}`;
+    const cached = this.descriptionCache.get(cacheKey);
+    if (cached) return cached;
+
     const index = this.symbolIndex();
     const currentSymbol = this.symbolName();
     const adapterName = this.adapter.adapter();
@@ -216,7 +228,9 @@ export class ApiDetailComponent {
       html = html.replace(/^<p>(.*)<\/p>$/, '$1');
     }
 
-    return this.sanitizer.bypassSecurityTrustHtml(html);
+    const result = this.sanitizer.bypassSecurityTrustHtml(html);
+    this.descriptionCache.set(cacheKey, result);
+    return result;
   }
 
   /**
@@ -224,6 +238,10 @@ export class ApiDetailComponent {
    * Simplifies verbose generic types and truncates at 300 chars. Returns SafeHtml.
    */
   linkifyType(type: string): SafeHtml {
+    const cacheKey = `${type}:${this.symbolName()}:${this.adapter.adapter()}`;
+    const cached = this.typeCache.get(cacheKey);
+    if (cached) return cached;
+
     // Simplify verbose conditional/mapped types that repeat type parameter constraints
     const simplified = type
       .replace(/\bTFields extends readonly RegisteredFieldTypes\[\] \? TFields : RegisteredFieldTypes\[\]/g, 'TFields')
@@ -243,6 +261,8 @@ export class ApiDetailComponent {
       return `<a class="type-link" href="/${adapterName}/api-reference/${name}">${match}</a>`;
     });
 
-    return this.sanitizer.bypassSecurityTrustHtml(linked);
+    const result = this.sanitizer.bypassSecurityTrustHtml(linked);
+    this.typeCache.set(cacheKey, result);
+    return result;
   }
 }

@@ -44,7 +44,7 @@
     <!-- Kind pills -->
     <div class="filter-bar">
       <span class="filter-group-label">Type</span>
-      <button type="button" class="filter-tag" [class.active]="!kindFilter()" (click)="clearFilters()">All</button>
+      <button type="button" class="filter-tag" [class.active]="!kindFilter()" (click)="clearKindFilter()">All</button>
       @for (k of availableKinds(); track k.kind) {
         <button type="button" class="filter-tag" [class.active]="kindFilter() === k.kind" (click)="toggleKindFilter(k.kind)">
           <span class="kind-dot" [attr.data-kind]="k.kind"></span>

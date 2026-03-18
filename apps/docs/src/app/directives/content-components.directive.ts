@@ -9,6 +9,7 @@ import {
   Injector,
   input,
   PLATFORM_ID,
+  SecurityContext,
   Type,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
@@ -97,9 +98,7 @@ export class ContentComponentsDirective {
     explicitEffect([this.contentHtml, this.activeAdapter.adapter], ([html]) => {
       if (!html) return;
       // Store original HTML on first receive (before any DOM mutations)
-      const htmlString = (html as { changingThisBreaksApplicationSecurity?: string }).changingThisBreaksApplicationSecurity as
-        | string
-        | undefined;
+      const htmlString = this.sanitizer.sanitize(SecurityContext.HTML, html);
       if (htmlString) {
         this.originalHtml = htmlString;
       }

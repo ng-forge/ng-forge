@@ -19,16 +19,21 @@ export class ThemeService {
    */
   readonly theme = signal<ThemeType>('auto');
 
+  private readonly systemDarkQuery = signal(false);
+
   readonly isDark = computed(() => {
     if (!this.isBrowser) return false;
     const t = this.theme();
     if (t === 'dark') return true;
     if (t === 'light') return false;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return this.systemDarkQuery();
   });
 
   constructor() {
     if (!this.isBrowser) return;
+
+    // Initialize system theme state
+    this.systemDarkQuery.set(window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     // Apply saved theme AFTER hydration to avoid SSR/client mismatch.
     // The inline script in index.html already set data-theme visually.
@@ -55,8 +60,8 @@ export class ThemeService {
 
     // Listen for system theme changes when in auto mode
     const mql = window.matchMedia('(prefers-color-scheme: dark)');
-    mql.addEventListener('change', () => {
-      this.theme.update((t) => t);
+    mql.addEventListener('change', (e) => {
+      this.systemDarkQuery.set(e.matches);
     });
   }
 
