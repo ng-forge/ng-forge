@@ -4,7 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
 import { combineLatest, from, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { codeToHtml } from 'shiki';
+import { highlightCode } from '../utils/shiki';
 
 @Directive({
   selector: '[codeHighlight]',
@@ -25,13 +25,7 @@ export class CodeHighlightDirective {
       if (!this.isBrowser || !code) {
         return of('');
       }
-      return from(
-        codeToHtml(code, {
-          lang,
-          themes: { light: 'material-theme-lighter', dark: 'material-theme-darker' },
-          defaultColor: false,
-        }),
-      );
+      return from(highlightCode(code, lang));
     }),
     map((html) => this.sanitizer.bypassSecurityTrustHtml(html)),
   );

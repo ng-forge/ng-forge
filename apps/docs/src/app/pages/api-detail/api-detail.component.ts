@@ -4,8 +4,8 @@ import { Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { combineLatest, map } from 'rxjs';
-import { codeToHtml } from 'shiki';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
+import { highlightCode } from '../../utils/shiki';
 import { ApiService, type ApiPackage, getKindMeta } from '../../services/api.service';
 
 @Component({
@@ -244,18 +244,5 @@ export class ApiDetailComponent {
     });
 
     return this.sanitizer.bypassSecurityTrustHtml(linked);
-  }
-}
-
-async function highlightCode(code: string, lang: string): Promise<string> {
-  try {
-    return await codeToHtml(code, {
-      lang,
-      themes: { light: 'material-theme-lighter', dark: 'material-theme-darker' },
-      defaultColor: false,
-    });
-  } catch {
-    const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    return `<pre><code>${escaped}</code></pre>`;
   }
 }

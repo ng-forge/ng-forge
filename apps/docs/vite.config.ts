@@ -150,7 +150,7 @@ export default defineConfig(({ mode }) => {
       adapterCssPlugin(),
       apiDocsPlugin(),
       analog({
-        ssr: true,
+        ssr: false,
         static: true,
         content: {
           highlighter: 'shiki',
@@ -161,7 +161,7 @@ export default defineConfig(({ mode }) => {
           },
         },
         prerender: {
-          routes: generatePrerenderRoutes(),
+          routes: [],
         },
         vite: {
           inlineStylesExtension: 'scss',

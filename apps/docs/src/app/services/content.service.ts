@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Observable, switchMap, catchError, of, shareReplay } from 'rxjs';
 import { Marked, type Renderer, type Tokens } from 'marked';
-import { codeToHtml } from 'shiki';
+import { highlightCode } from '../utils/shiki';
 
 export interface HeadingEntry {
   id: string;
@@ -136,18 +136,8 @@ export class ContentService {
         const lang = (token.lang ?? '').split(/\s+/)[0] || 'text';
         const key = `${lang}:${token.text}`;
         if (highlightedMap.has(key)) return;
-        try {
-          const html = await codeToHtml(token.text, {
-            lang,
-            themes: { light: 'material-theme-lighter', dark: 'material-theme-darker' },
-            defaultColor: false,
-          });
-          highlightedMap.set(key, html);
-        } catch {
-          // Fallback: plain code block
-          const escaped = token.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-          highlightedMap.set(key, `<pre><code>${escaped}</code></pre>`);
-        }
+        const html = await highlightCode(token.text, lang);
+        highlightedMap.set(key, html);
       }),
     );
 
