@@ -148,8 +148,7 @@ $ember-glow: #ff8c42;
   color: var(--forge-text-muted);
   line-height: 1.4;
 
-  // Pagefind wraps matches in <mark>
-  ::ng-deep mark {
+  mark {
     background: rgba(255, 140, 66, 0.25);
     color: inherit;
     border-radius: 2px;

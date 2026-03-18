@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, PLATFORM_ID, resource, signal, viewChild } from '@angular/core';
 import { APP_BASE_HREF, isPlatformBrowser } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 
 interface SearchResult {
   url: string;
   title: string;
-  excerpt: string;
+  excerpt: SafeHtml;
 }
 
 interface SearchIndexEntry {
@@ -40,10 +41,15 @@ function scoreEntry(entry: SearchIndexEntry, terms: string[]): number {
   return score;
 }
 
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 /**
  * Generate an excerpt with the matched term highlighted using <mark> tags.
+ * HTML-escapes the excerpt text first, then inserts <mark> — safe for bypassSecurityTrustHtml.
  */
-function generateExcerpt(content: string, terms: string[]): string {
+function generateExcerpt(content: string, terms: string[], sanitizer: DomSanitizer): SafeHtml {
   const lower = content.toLowerCase();
 
   // Find the first matching term's position
@@ -57,7 +63,9 @@ function generateExcerpt(content: string, terms: string[]): string {
     }
   }
 
-  if (bestPos === -1) return content.slice(0, EXCERPT_CONTEXT * 2);
+  if (bestPos === -1) {
+    return sanitizer.bypassSecurityTrustHtml(escapeHtml(content.slice(0, EXCERPT_CONTEXT * 2)));
+  }
 
   const start = Math.max(0, bestPos - EXCERPT_CONTEXT);
   const end = Math.min(content.length, bestPos + bestTerm.length + EXCERPT_CONTEXT);
@@ -66,13 +74,17 @@ function generateExcerpt(content: string, terms: string[]): string {
   if (start > 0) excerpt = `...${excerpt}`;
   if (end < content.length) excerpt = `${excerpt}...`;
 
-  // Highlight all matching terms
+  // Escape HTML entities BEFORE inserting <mark> tags
+  excerpt = escapeHtml(excerpt);
+
+  // Highlight all matching terms (safe — excerpt is already escaped)
   for (const term of terms) {
-    const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const escaped = escapeHtml(term);
+    const regex = new RegExp(`(${escaped.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     excerpt = excerpt.replace(regex, '<mark>$1</mark>');
   }
 
-  return excerpt;
+  return sanitizer.bypassSecurityTrustHtml(excerpt);
 }
 
 @Component({
@@ -127,6 +139,7 @@ function generateExcerpt(content: string, terms: string[]): string {
 })
 export class SearchComponent {
   private readonly router = inject(Router);
+  private readonly sanitizer = inject(DomSanitizer);
   private readonly baseHref = inject(APP_BASE_HREF, { optional: true }) ?? '/';
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private searchIndex: SearchIndexEntry[] | null = null;
@@ -168,7 +181,7 @@ export class SearchComponent {
         .map(({ entry }) => ({
           url: entry.slug,
           title: entry.title,
-          excerpt: generateExcerpt(entry.content, terms),
+          excerpt: generateExcerpt(entry.content, terms, this.sanitizer),
         }));
     },
   });
@@ -197,8 +210,8 @@ export class SearchComponent {
   navigateTo(slug: string): void {
     this.close();
     // Resolve the slug relative to the current adapter route
-    const segments = this.router.url.split('/').filter(Boolean);
-    const adapter = segments[0] ?? 'material';
+    const urlTree = this.router.parseUrl(this.router.url);
+    const adapter = urlTree.root.children['primary']?.segments[0]?.path ?? 'material';
     void this.router.navigateByUrl(`/${adapter}/${slug}`);
   }
 
@@ -210,6 +223,7 @@ export class SearchComponent {
   }
 
   private isInputFocused(): boolean {
+    if (!this.isBrowser) return false;
     const active = document.activeElement;
     return active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || (active as HTMLElement)?.isContentEditable;
   }
@@ -220,7 +234,7 @@ export class SearchComponent {
       const base = this.baseHref.endsWith('/') ? this.baseHref : `${this.baseHref}/`;
       const response = await fetch(`${base}__search-index.json`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      this.searchIndex = await response.json();
+      this.searchIndex = (await response.json()) as SearchIndexEntry[];
     } catch {
       console.warn('[Search] Search index not available');
     }

@@ -124,9 +124,14 @@ h1 {
 
 // ── Reduced motion ───────────────────────────
 @media (prefers-reduced-motion: reduce) {
-  .illustration svg animate,
-  .illustration svg animateMotion {
-    display: none;
+  .illustration svg {
+    /* SMIL <animate>/<animateMotion> don't support display:none reliably.
+       Pause all SVG animations via the SVG DOM attribute instead. */
+    animation-play-state: paused !important;
+
+    * {
+      animation-play-state: paused !important;
+    }
   }
 }
 

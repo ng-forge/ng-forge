@@ -3,6 +3,7 @@ import { TitleCasePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { combineLatest, map } from 'rxjs';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { highlightCode } from '../../utils/shiki';
@@ -23,6 +24,15 @@ export class ApiDetailComponent {
   private readonly apiService = inject(ApiService);
   private readonly sanitizer = inject(DomSanitizer);
   protected readonly adapter = inject(ActiveAdapterService);
+
+  constructor() {
+    // Clear formatting caches when the viewed symbol changes to prevent unbounded growth
+    explicitEffect([this.symbolName], () => {
+      this.descriptionCache.clear();
+      this.typeCache.clear();
+      this.trustHtmlCache.clear();
+    });
+  }
 
   /** Extract symbol name from URL: /:adapter/api-reference/:symbol */
   readonly symbolName = computed(() => {
