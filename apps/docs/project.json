@@ -70,14 +70,6 @@
         "buildTarget": "docs:build"
       }
     },
-    "postbuild:search": {
-      "executor": "nx:run-commands",
-      "dependsOn": ["build"],
-      "options": {
-        "command": "npx pagefind --site dist/apps/docs/analog/public --output-subdir pagefind",
-        "cwd": "{workspaceRoot}"
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint"
     },

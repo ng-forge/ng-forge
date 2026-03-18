@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, PLATFORM_ID, resource, signal, viewChild } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { APP_BASE_HREF, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 
@@ -9,13 +9,70 @@ interface SearchResult {
   excerpt: string;
 }
 
-interface PagefindResult {
-  data: () => Promise<{ url: string; meta: { title: string }; excerpt: string }>;
+interface SearchIndexEntry {
+  slug: string;
+  title: string;
+  content: string;
 }
 
-interface Pagefind {
-  init: () => Promise<void>;
-  search: (q: string) => Promise<{ results: PagefindResult[] }>;
+const MAX_RESULTS = 8;
+const EXCERPT_CONTEXT = 60;
+
+/**
+ * Score a search index entry against a query.
+ * Returns 0 for no match, higher scores for better matches.
+ */
+function scoreEntry(entry: SearchIndexEntry, terms: string[]): number {
+  const titleLower = entry.title.toLowerCase();
+  const contentLower = entry.content.toLowerCase();
+  let score = 0;
+
+  for (const term of terms) {
+    if (titleLower.includes(term)) {
+      // Title matches are weighted heavily
+      score += titleLower === term ? 100 : 50;
+    }
+    if (contentLower.includes(term)) {
+      score += 10;
+    }
+  }
+
+  return score;
+}
+
+/**
+ * Generate an excerpt with the matched term highlighted using <mark> tags.
+ */
+function generateExcerpt(content: string, terms: string[]): string {
+  const lower = content.toLowerCase();
+
+  // Find the first matching term's position
+  let bestPos = -1;
+  let bestTerm = terms[0];
+  for (const term of terms) {
+    const pos = lower.indexOf(term);
+    if (pos !== -1 && (bestPos === -1 || pos < bestPos)) {
+      bestPos = pos;
+      bestTerm = term;
+    }
+  }
+
+  if (bestPos === -1) return content.slice(0, EXCERPT_CONTEXT * 2);
+
+  const start = Math.max(0, bestPos - EXCERPT_CONTEXT);
+  const end = Math.min(content.length, bestPos + bestTerm.length + EXCERPT_CONTEXT);
+  let excerpt = content.slice(start, end).trim();
+
+  if (start > 0) excerpt = `...${excerpt}`;
+  if (end < content.length) excerpt = `${excerpt}...`;
+
+  // Highlight all matching terms
+  for (const term of terms) {
+    const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    excerpt = excerpt.replace(regex, '<mark>$1</mark>');
+  }
+
+  return excerpt;
 }
 
 @Component({
@@ -70,8 +127,9 @@ interface Pagefind {
 })
 export class SearchComponent {
   private readonly router = inject(Router);
+  private readonly baseHref = inject(APP_BASE_HREF, { optional: true }) ?? '/';
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-  private pagefind: Pagefind | null = null;
+  private searchIndex: SearchIndexEntry[] | null = null;
   private readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput');
 
   readonly isOpen = signal(false);
@@ -87,33 +145,40 @@ export class SearchComponent {
     });
   }
 
-  // Results ARE the search results for the debounced query
   private readonly searchResource = resource({
     params: () => {
       const q = this.debouncedQuery();
       return this.isOpen() && q.trim() ? { q } : undefined;
     },
     loader: async ({ params }) => {
-      if (!this.pagefind) await this.initPagefind();
-      if (!this.pagefind) return [];
+      if (!this.searchIndex) await this.loadSearchIndex();
+      if (!this.searchIndex) return [];
 
-      const response = await this.pagefind.search(params.q);
-      const items = await Promise.all(response.results.slice(0, 8).map((r) => r.data()));
-      return items.map((item) => ({
-        url: item.url,
-        title: item.meta?.title ?? 'Untitled',
-        excerpt: item.excerpt ?? '',
-      }));
+      const terms = params.q
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((t) => t.length > 0);
+      if (terms.length === 0) return [];
+
+      return this.searchIndex
+        .map((entry) => ({ entry, score: scoreEntry(entry, terms) }))
+        .filter((r) => r.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, MAX_RESULTS)
+        .map(({ entry }) => ({
+          url: entry.slug,
+          title: entry.title,
+          excerpt: generateExcerpt(entry.content, terms),
+        }));
     },
   });
 
-  // Derived views on the resource — no manual coordination
   readonly results = computed<SearchResult[]>(() => this.searchResource.value() ?? []);
   readonly loading = this.searchResource.isLoading;
 
   open(): void {
     this.isOpen.set(true);
-    this.initPagefind();
+    this.loadSearchIndex();
     requestAnimationFrame(() => {
       this.searchInputRef()?.nativeElement.focus();
     });
@@ -129,13 +194,12 @@ export class SearchComponent {
     this.query.set(value);
   }
 
-  navigateTo(url: string): void {
+  navigateTo(slug: string): void {
     this.close();
-    const path = url
-      .replace(/^\/dynamic-forms/, '')
-      .replace(/\.html$/, '')
-      .replace(/\/index$/, '');
-    void this.router.navigateByUrl(path || '/');
+    // Resolve the slug relative to the current adapter route
+    const segments = this.router.url.split('/').filter(Boolean);
+    const adapter = segments[0] ?? 'material';
+    void this.router.navigateByUrl(`/${adapter}/${slug}`);
   }
 
   onGlobalKeydown(event: KeyboardEvent): void {
@@ -150,13 +214,15 @@ export class SearchComponent {
     return active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || (active as HTMLElement)?.isContentEditable;
   }
 
-  private async initPagefind(): Promise<void> {
-    if (this.pagefind || !this.isBrowser) return;
+  private async loadSearchIndex(): Promise<void> {
+    if (this.searchIndex || !this.isBrowser) return;
     try {
-      this.pagefind = await new Function('return import("/pagefind/pagefind.js")')();
-      await (this.pagefind as Pagefind).init();
+      const base = this.baseHref.endsWith('/') ? this.baseHref : `${this.baseHref}/`;
+      const response = await fetch(`${base}__search-index.json`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      this.searchIndex = await response.json();
     } catch {
-      console.warn('[Search] Pagefind not available — run postbuild:search to generate index');
+      console.warn('[Search] Search index not available');
     }
   }
 }
