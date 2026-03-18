@@ -150,7 +150,7 @@ export default defineConfig(({ mode }) => {
       adapterCssPlugin(),
       apiDocsPlugin(),
       analog({
-        ssr: false,
+        ssr: true,
         static: true,
         content: {
           highlighter: 'shiki',
@@ -161,7 +161,7 @@ export default defineConfig(({ mode }) => {
           },
         },
         prerender: {
-          routes: [],
+          routes: generatePrerenderRoutes(),
         },
         vite: {
           inlineStylesExtension: 'scss',
@@ -179,6 +179,23 @@ export default defineConfig(({ mode }) => {
     },
     ssr: {
       noExternal: ['front-matter'],
+      external: [
+        // Sandbox adapters and examples are client-only (live demos).
+        // Excluding from SSR bundle reduces build memory by ~3MB.
+        '@ng-forge/examples-material',
+        '@ng-forge/examples-bootstrap',
+        '@ng-forge/examples-primeng',
+        '@ng-forge/examples-ionic',
+        '@ng-forge/sandbox-adapter-material',
+        '@ng-forge/sandbox-adapter-bootstrap',
+        '@ng-forge/sandbox-adapter-primeng',
+        '@ng-forge/sandbox-adapter-ionic',
+        '@ng-forge/dynamic-forms-primeng',
+        '@ng-forge/dynamic-forms-ionic',
+        '@ng-forge/dynamic-forms-bootstrap',
+        '@ionic/angular',
+        'primeng',
+      ],
     },
     server: {
       fs: {
