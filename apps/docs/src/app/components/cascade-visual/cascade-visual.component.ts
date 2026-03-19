@@ -122,4 +122,4 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CascadeVisualComponent {}
+export default class CascadeVisualComponent {}

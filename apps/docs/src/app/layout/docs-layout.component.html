@@ -7,7 +7,11 @@
       </a>
     </div>
     <div class="navbar-right">
-      <app-search />
+      @defer (on idle) {
+        <app-search />
+      } @placeholder {
+        <div></div>
+      }
       <app-adapter-sub-bar />
       <button
         class="icon-btn theme-toggle desktop-only"

@@ -356,10 +356,22 @@
 // MINIMAL MODE (for landing page embeds)
 // ============================================
 .minimal-content {
+  box-sizing: border-box;
   padding: $space-4;
   max-width: 100%;
   margin: 0;
   width: 100%;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+    width: 100%;
+  }
+
+  .mat-mdc-form-field {
+    width: 100%;
+  }
 }
 
 // ============================================

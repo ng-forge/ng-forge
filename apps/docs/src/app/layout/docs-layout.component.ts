@@ -7,9 +7,8 @@ import { ActiveAdapterService } from '../services/active-adapter.service';
 import { ThemeService } from '../services/theme.service';
 import { Logo } from '../components/logo/logo.component';
 import { AdapterSubBarComponent } from '../components/adapter-sub-bar/adapter-sub-bar.component';
-import { NAV_ITEMS, type NavItem } from './nav.config';
 import { SearchComponent } from '../components/search/search.component';
-
+import { NAV_ITEMS, type NavItem } from './nav.config';
 @Component({
   selector: 'app-docs-layout',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, Logo, AdapterSubBarComponent, SearchComponent],

@@ -149,7 +149,7 @@ export const appConfig: ApplicationConfig = {
   styleUrl: './integration-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocsIntegrationViewComponent {
+export default class DocsIntegrationViewComponent {
   private readonly activeAdapter = inject(ActiveAdapterService);
 
   readonly data = computed(() => INTEGRATION_DATA[this.activeAdapter.adapter() as AdapterName]);

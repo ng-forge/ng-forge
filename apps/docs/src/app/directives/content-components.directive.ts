@@ -1,15 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, Type } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { LiveExampleComponent } from '../components/live-example/live-example.component';
-import { AdapterPickerComponent } from '../components/adapter-picker/adapter-picker.component';
-import { DocsIntegrationViewComponent } from '../components/integration-view/integration-view.component';
-import { DocsConfigurationViewComponent } from '../components/configuration-view/configuration-view.component';
-import { CascadeVisualComponent } from '../components/cascade-visual/cascade-visual.component';
-import { NestingRulesComponent } from '../components/nesting-rules/nesting-rules.component';
-import { LogicFlowComponent } from '../components/logic-flow/logic-flow.component';
-import { DerivationFlowComponent } from '../components/derivation-flow/derivation-flow.component';
-import { type ComponentRegistration, type ContentSegment, parseContentSegments } from './content-segment-parser';
+import { type ComponentRegistration, type ComponentSegment, type ContentSegment, parseContentSegments } from './content-segment-parser';
 
 const COMPONENT_REGISTRY: ComponentRegistration[] = [
   {
@@ -20,38 +14,38 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
   },
   {
     selector: 'docs-adapter-picker',
-    component: AdapterPickerComponent,
-    defer: false,
+    defer: true,
+    loadComponent: () => import('../components/adapter-picker/adapter-picker.component'),
   },
   {
     selector: 'docs-integration-view',
-    component: DocsIntegrationViewComponent,
-    defer: false,
+    defer: true,
+    loadComponent: () => import('../components/integration-view/integration-view.component'),
   },
   {
     selector: 'docs-configuration-view',
-    component: DocsConfigurationViewComponent,
-    defer: false,
+    defer: true,
+    loadComponent: () => import('../components/configuration-view/configuration-view.component'),
   },
   {
     selector: 'docs-cascade-visual',
-    component: CascadeVisualComponent,
-    defer: false,
+    defer: true,
+    loadComponent: () => import('../components/cascade-visual/cascade-visual.component'),
   },
   {
     selector: 'docs-nesting-rules',
-    component: NestingRulesComponent,
-    defer: false,
+    defer: true,
+    loadComponent: () => import('../components/nesting-rules/nesting-rules.component'),
   },
   {
     selector: 'docs-logic-flow',
-    component: LogicFlowComponent,
-    defer: false,
+    defer: true,
+    loadComponent: () => import('../components/logic-flow/logic-flow.component'),
   },
   {
     selector: 'docs-derivation-flow',
-    component: DerivationFlowComponent,
-    defer: false,
+    defer: true,
+    loadComponent: () => import('../components/derivation-flow/derivation-flow.component'),
   },
 ];
 
@@ -63,6 +57,10 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
  * (like LiveExampleComponent) are deferred with `@defer (on viewport)` so
  * they only bootstrap when scrolled into view.
  *
+ * Visualization components (adapter-picker, integration-view, etc.) are
+ * lazy-loaded via dynamic `import()` — their JS is only fetched when a page
+ * containing them is navigated to.
+ *
  * HTML segments use `bypassSecurityTrustHtml()` since the content already
  * comes from our own trusted ContentService markdown pipeline — this avoids
  * expensive re-sanitization on each `[innerHTML]` binding.
@@ -71,14 +69,13 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
   selector: 'app-content-segments',
   imports: [NgComponentOutlet],
   template: `
-    @for (segment of segments(); track $index) {
+    @for (segment of resolvedSegments(); track $index) {
       @if (segment.type === 'html') {
         <div class="content-html" [innerHTML]="segment.html"></div>
-      } @else if (segment.defer) {
+      } @else if (segment.defer && segment.component) {
         @defer (on viewport; prefetch on idle) {
           <ng-container [ngComponentOutlet]="segment.component" [ngComponentOutletInputs]="segment.inputs" />
         } @placeholder {
-          <!-- Live example skeleton: mimics form with input fields + button -->
           <div class="skeleton-live-example">
             <div class="skel-badge"></div>
             <div class="skel-field">
@@ -96,8 +93,15 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
             <div class="skel-button"></div>
           </div>
         }
+      } @else if (segment.defer && !segment.component) {
+        <!-- Lazy component still loading — show skeleton -->
+        <div class="skeleton-generic">
+          <div class="skel-generic-line skel-generic-line--long"></div>
+          <div class="skel-generic-line"></div>
+          <div class="skel-generic-line skel-generic-line--short"></div>
+        </div>
       } @else {
-        <ng-container [ngComponentOutlet]="segment.component" [ngComponentOutletInputs]="segment.inputs" />
+        <ng-container [ngComponentOutlet]="segment.component!" [ngComponentOutletInputs]="segment.inputs" />
       }
     }
   `,
@@ -189,11 +193,40 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
       @include shimmer-bg;
     }
 
+    /* ---- Generic skeleton (for lazy viz components) ---- */
+    .skeleton-generic {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 24px;
+      margin: 16px 0;
+      border-radius: 12px;
+      border: 1px solid var(--forge-border-color, #2a2824);
+      background: var(--forge-base-1, #131210);
+      min-height: 120px;
+    }
+
+    .skel-generic-line {
+      height: 14px;
+      width: 75%;
+      border-radius: 4px;
+      @include shimmer-bg;
+
+      &--long {
+        width: 90%;
+      }
+
+      &--short {
+        width: 50%;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .skel-badge,
       .skel-label,
       .skel-input,
-      .skel-button {
+      .skel-button,
+      .skel-generic-line {
         animation: none;
       }
     }
@@ -207,9 +240,34 @@ export class ContentSegmentsComponent {
   /** Pre-bind the trust function so it can be passed to the pure parser. */
   private readonly trustHtml = (raw: string) => this.sanitizer.bypassSecurityTrustHtml(raw);
 
-  readonly segments = computed<ContentSegment[]>(() => {
+  private readonly segments = computed<ContentSegment[]>(() => {
     const html = this.contentHtml();
     if (!html) return [];
     return parseContentSegments(html, COMPONENT_REGISTRY, this.trustHtml);
   });
+
+  /**
+   * Mutable copy of parsed segments. Lazy component segments start with
+   * `component: null` and are updated in-place once `loadComponent()` resolves.
+   */
+  readonly resolvedSegments = linkedSignal<ContentSegment[]>(() => this.segments());
+
+  constructor() {
+    explicitEffect([this.segments], ([segments]) => {
+      for (let i = 0; i < segments.length; i++) {
+        const seg = segments[i];
+        if (seg.type === 'component' && !seg.component && seg.loadComponent) {
+          this.loadLazyComponent(seg.loadComponent, i);
+        }
+      }
+    });
+  }
+
+  private loadLazyComponent(loader: () => Promise<{ default: Type<unknown> }>, index: number): void {
+    loader().then((mod) => {
+      this.resolvedSegments.update((segs) =>
+        segs.map((s, j) => (j === index && s.type === 'component' ? { ...s, component: mod.default } : s)),
+      );
+    });
+  }
 }

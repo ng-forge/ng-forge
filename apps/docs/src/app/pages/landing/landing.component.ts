@@ -1,17 +1,26 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  PLATFORM_ID,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
 import { catchError, defer, delay, filter, map, merge, of, switchMap, tap } from 'rxjs';
 
-import { DynamicForm } from '@ng-forge/dynamic-forms';
+import { SandboxMountDirective } from '@ng-forge/sandbox-harness';
 
 import { Logo } from '../../components/logo';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import { SearchComponent } from '../../components/search/search.component';
-
 import {
   CODE_SNIPPETS,
   FEATURES,
@@ -46,7 +55,7 @@ const CONFETTI_ANIMATION_DURATION_MS = 800;
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, CodeHighlightDirective, Logo, DynamicForm, SearchComponent],
+  imports: [RouterLink, CodeHighlightDirective, Logo, SandboxMountDirective, SearchComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,6 +73,32 @@ export class LandingComponent {
 
   readonly heroFormConfig = heroFormConfig;
   readonly validationFormConfig = validationFormConfig;
+
+  // Sandbox mount refs for loading state
+  private readonly heroMount = viewChild<SandboxMountDirective>('heroMount');
+  private readonly validationMount = viewChild<SandboxMountDirective>('validationMount');
+
+  readonly heroLoaded = computed(() => {
+    const mount = this.heroMount();
+    if (!mount) return false;
+    try {
+      const status = mount.mount.status();
+      return status === 'resolved' || status === 'local';
+    } catch {
+      return false;
+    }
+  });
+
+  readonly validationLoaded = computed(() => {
+    const mount = this.validationMount();
+    if (!mount) return false;
+    try {
+      const status = mount.mount.status();
+      return status === 'resolved' || status === 'local';
+    } catch {
+      return false;
+    }
+  });
 
   // ============================================
   // EXPOSED CONSTANTS
@@ -147,6 +182,19 @@ export class LandingComponent {
     // afterNextRender only runs in browser, no platform check needed
     afterNextRender(() => {
       this.initializeBrowserFeatures();
+
+      // Landing page is always dark — set data-theme so sandbox sub-apps
+      // pick up the correct theme via document.documentElement attribute.
+      const docEl = document.documentElement;
+      const previousTheme = docEl.getAttribute('data-theme');
+      docEl.setAttribute('data-theme', 'dark');
+      this.destroyRef.onDestroy(() => {
+        if (previousTheme) {
+          docEl.setAttribute('data-theme', previousTheme);
+        } else {
+          docEl.removeAttribute('data-theme');
+        }
+      });
     });
 
     this.destroyRef.onDestroy(() => {

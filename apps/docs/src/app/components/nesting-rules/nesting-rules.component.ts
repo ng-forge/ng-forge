@@ -290,4 +290,4 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NestingRulesComponent {}
+export default class NestingRulesComponent {}

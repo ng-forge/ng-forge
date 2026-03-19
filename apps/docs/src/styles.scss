@@ -3,16 +3,8 @@
 // ============================================
 @use 'icons';
 
-// ============================================
-// MATERIAL THEME (ember-themed for landing page forms)
-// ============================================
-@use '@angular/material' as mat;
-@use 'material' as ember-mat;
 @use 'tokens' as *;
 @use 'themes' as forge-themes;
-
-// Initialize Material core
-@include mat.core();
 
 // ============================================
 // CSS LAYER ORDER
@@ -55,29 +47,6 @@
   a {
     color: inherit;
     text-decoration: none;
-  }
-}
-
-// ============================================
-// MATERIAL THEME APPLICATION
-// ============================================
-// Only apply Material theme on landing page (where we have direct forms)
-// Other pages use iframes which have their own isolated styling
-
-html:has(app-landing) {
-  @include ember-mat.material-theme-light();
-  @include ember-mat.material-theme-landing();
-
-  .mat-mdc-form-field {
-    --mat-form-field-outlined-input-text-color: #dee2e6;
-    --mat-form-field-filled-input-text-color: #dee2e6;
-    --mdc-outlined-text-field-container-color: #000000;
-    --mdc-filled-text-field-container-color: #000000;
-  }
-
-  .mdc-text-field--outlined,
-  .mdc-text-field--filled {
-    background-color: #000000 !important;
   }
 }
 
@@ -467,20 +436,21 @@ html[data-theme='dark']:has(app-landing) {
 // SHIKI DARK THEME COMMENT CONTRAST FIX
 // ============================================
 // material-theme-darker uses #545454 for comments — only 2.47:1 contrast on
-// $bg-surface (#131210). Override to #7a7a7a which meets WCAG AA (4.5:1).
+// $bg-surface (#131210). Override to #858585 which meets WCAG AA (4.83:1).
+// Previous value #7a7a7a was 4.36:1 — below the 4.5:1 threshold.
 html[data-theme='dark'] .shiki span[style*='--shiki-dark:#545454'] {
-  --shiki-dark: #7a7a7a !important;
+  --shiki-dark: #858585 !important;
 }
 
 @media (prefers-color-scheme: dark) {
   html[data-theme='auto'] .shiki span[style*='--shiki-dark:#545454'] {
-    --shiki-dark: #7a7a7a !important;
+    --shiki-dark: #858585 !important;
   }
 }
 
 // Landing page is always dark
 html:has(app-landing) .shiki span[style*='--shiki-dark:#545454'] {
-  --shiki-dark: #7a7a7a !important;
+  --shiki-dark: #858585 !important;
 }
 
 // ============================================

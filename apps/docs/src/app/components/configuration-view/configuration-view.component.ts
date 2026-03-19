@@ -329,7 +329,7 @@ const config = {
   styleUrl: './configuration-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocsConfigurationViewComponent {
+export default class DocsConfigurationViewComponent {
   private readonly activeAdapter = inject(ActiveAdapterService);
 
   readonly data = computed(() => ADAPTER_CONFIG_DATA[this.activeAdapter.adapter() as AdapterName]);

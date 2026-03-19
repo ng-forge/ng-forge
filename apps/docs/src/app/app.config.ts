@@ -7,10 +7,12 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideContent, withMarkdownRenderer } from '@analogjs/content';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 import { provideAdapterRegistry, SandboxHarness } from '@ng-forge/sandbox-harness';
 import { DOCS_ADAPTERS } from './adapters/adapter-registrations';
+
+// Type-only import: ensures Material's module augmentation of FormConfig is visible
+// to all docs files (e.g. example-configs/) even though the runtime provider is removed.
+import type {} from '@ng-forge/dynamic-forms-material';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -48,8 +50,6 @@ export const appConfig: ApplicationConfig = {
         return '/';
       },
     },
-    // Dynamic forms for landing page demos (Material is always used on landing page)
-    provideDynamicForm(...withMaterialFields()),
     // SandboxHarness for live adapter examples in docs pages
     provideAdapterRegistry(DOCS_ADAPTERS),
     SandboxHarness,

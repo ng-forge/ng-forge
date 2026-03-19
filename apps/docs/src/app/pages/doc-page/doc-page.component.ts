@@ -14,10 +14,10 @@ import { LiveExampleComponent } from '../../components/live-example/live-example
 import { ExamplesIndexComponent } from '../examples-index/examples-index.component';
 import { ApiIndexComponent } from '../api-index/api-index.component';
 import { ApiDetailComponent } from '../api-detail/api-detail.component';
+import { NotFoundComponent } from '../../components/not-found/not-found.component';
 import { EXAMPLES_REGISTRY } from '../examples-index/examples.registry';
 import { findBreadcrumbTrail } from '../../layout/nav.config';
 import { findTabGroup } from '../../layout/tabs.config';
-import { NotFoundComponent } from '../../components/not-found/not-found.component';
 
 /**
  * Generic documentation page component.
@@ -39,14 +39,21 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
   ],
   template: `
     @if (isApiIndex()) {
-      <docs-api-index />
+      @defer (when isApiIndex()) {
+        <docs-api-index />
+      }
     } @else if (isApiDetail()) {
-      <docs-api-detail />
+      @defer (when isApiDetail()) {
+        <docs-api-detail />
+      }
     } @else if (isExamplesIndex()) {
-      <!-- Examples listing — rendered directly, no doc-layout grid -->
-      <docs-examples-index />
+      @defer (when isExamplesIndex()) {
+        <docs-examples-index />
+      }
     } @else if (showNotFound()) {
-      <docs-not-found />
+      @defer (when showNotFound()) {
+        <docs-not-found />
+      }
     } @else {
       <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
       <div class="doc-layout" (click)="onContentClick($event)">

@@ -267,4 +267,4 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LogicFlowComponent {}
+export default class LogicFlowComponent {}

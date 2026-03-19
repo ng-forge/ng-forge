@@ -725,26 +725,113 @@ nav {
   padding: $space-6;
 }
 
-// Landing page form containers - match example app .example-container
+// Landing page sandbox form containers.
+// Production has 24px padding with direct forms. The sandbox adds 16px
+// .minimal-content padding inside the shadow DOM, so we use 8px outer
+// padding to match the same 24px total → 504px field width at 552px max.
 .landing-form,
 .validation-form {
-  // Form fields fill container width
-  // stylelint-disable-next-line selector-pseudo-element-no-unknown
-  ::ng-deep .mat-mdc-form-field {
-    width: 100%;
-  }
-
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: $space-3;
-    width: 100%;
-  }
+  position: relative;
 }
 
 .landing-form {
   max-width: 552px;
   margin: 0 auto;
+  padding: $space-2;
+}
+
+// Sandbox container: the mount creates a child <div> with a shadow root.
+// ::ng-deep needed because the child div is created dynamically by SandboxHarness
+// and won't have Angular's encapsulation attributes.
+.sandbox-container {
+  width: 100%;
+
+  // stylelint-disable-next-line selector-pseudo-element-no-unknown
+  ::ng-deep > div {
+    width: 100%;
+  }
+
+  // While sandbox is bootstrapping, hide it so skeleton shows
+  &.mounting {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+// Skeleton shown while sandbox bootstraps
+.sandbox-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px 0;
+  width: 100%;
+}
+
+@keyframes landing-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@mixin landing-shimmer-bg {
+  background: linear-gradient(90deg, $bg-surface 0%, $bg-elevated 50%, $bg-surface 100%);
+  background-size: 200% 100%;
+  animation: landing-shimmer 2s ease-in-out infinite;
+}
+
+.skel-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skel-label {
+  width: 100px;
+  height: 14px;
+  border-radius: 4px;
+  @include landing-shimmer-bg;
+
+  &--short {
+    width: 70px;
+  }
+}
+
+.skel-input {
+  width: 100%;
+  height: 56px;
+  border-radius: 4px;
+  @include landing-shimmer-bg;
+
+  &--tall {
+    height: 90px;
+  }
+}
+
+.skel-button {
+  width: 130px;
+  height: 36px;
+  border-radius: 4px;
+  margin-top: 4px;
+  @include landing-shimmer-bg;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel-label,
+  .skel-input,
+  .skel-button {
+    animation: none;
+  }
+}
+
+.landing-form,
+.validation-form {
+  // No max-width — sandbox content fills the full demo panel
+  width: 100%;
 }
 
 @media (max-width: 768px) {

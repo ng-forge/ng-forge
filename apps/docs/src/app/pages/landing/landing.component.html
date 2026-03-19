@@ -26,7 +26,11 @@
     <app-logo size="lg" />
   </a>
   <div class="nav-links">
-    <app-search />
+    @defer (on idle) {
+      <app-search />
+    } @placeholder {
+      <div></div>
+    }
     <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="github-link" title="GitHub">
       <span class="icon icon--github"></span>
     </a>
@@ -97,7 +101,34 @@
 
           <div class="hero-demo-body">
             <div id="demo-panel" role="tabpanel" class="demo-content landing-form" [class.hidden]="heroTab() !== 'demo'">
-              <form [dynamic-form]="heroFormConfig"></form>
+              @if (!heroLoaded()) {
+                <div class="sandbox-skeleton">
+                  <div class="skel-field">
+                    <div class="skel-label"></div>
+                    <div class="skel-input"></div>
+                  </div>
+                  <div class="skel-field">
+                    <div class="skel-label"></div>
+                    <div class="skel-input"></div>
+                  </div>
+                  <div class="skel-field">
+                    <div class="skel-label skel-label--short"></div>
+                    <div class="skel-input skel-input--tall"></div>
+                  </div>
+                  <div class="skel-button"></div>
+                </div>
+              }
+              <div
+                class="sandbox-container"
+                [class.mounting]="!heroLoaded()"
+                sandboxMount
+                #heroMount="sandboxMount"
+                adapter="material"
+                route="/examples/demo?minimal=true"
+                [config]="heroFormConfig"
+                locationStrategy="memory"
+                styleIsolation="scoped"
+              ></div>
             </div>
             <div
               id="config-panel"
@@ -220,7 +251,38 @@
             <span>Live Demo</span>
           </div>
           <div class="demo-panel-body validation-form">
-            <form [dynamic-form]="validationFormConfig"></form>
+            @if (!validationLoaded()) {
+              <div class="sandbox-skeleton">
+                <div class="skel-field">
+                  <div class="skel-label"></div>
+                  <div class="skel-input"></div>
+                </div>
+                <div class="skel-field">
+                  <div class="skel-label"></div>
+                  <div class="skel-input"></div>
+                </div>
+                <div class="skel-field">
+                  <div class="skel-label skel-label--short"></div>
+                  <div class="skel-input"></div>
+                </div>
+                <div class="skel-field">
+                  <div class="skel-label"></div>
+                  <div class="skel-input"></div>
+                </div>
+                <div class="skel-button"></div>
+              </div>
+            }
+            <div
+              class="sandbox-container"
+              [class.mounting]="!validationLoaded()"
+              sandboxMount
+              #validationMount="sandboxMount"
+              adapter="material"
+              route="/examples/demo?minimal=true"
+              [config]="validationFormConfig"
+              locationStrategy="memory"
+              styleIsolation="scoped"
+            ></div>
           </div>
         </div>
 

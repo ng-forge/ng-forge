@@ -10,7 +10,8 @@ export interface HtmlSegment {
 export interface ComponentSegment {
   type: 'component';
   selector: string;
-  component: Type<unknown>;
+  component: Type<unknown> | null;
+  loadComponent?: () => Promise<{ default: Type<unknown> }>;
   inputs: Record<string, unknown>;
   defer: boolean;
 }
@@ -19,7 +20,8 @@ export type ContentSegment = HtmlSegment | ComponentSegment;
 
 export interface ComponentRegistration {
   selector: string;
-  component: Type<unknown>;
+  component?: Type<unknown>;
+  loadComponent?: () => Promise<{ default: Type<unknown> }>;
   defer: boolean;
   extractInputs?: (attrs: Record<string, string>) => Record<string, unknown>;
 }
@@ -96,7 +98,8 @@ export function parseContentSegments(
       segments.push({
         type: 'component',
         selector: registration.selector,
-        component: registration.component,
+        component: registration.component ?? null,
+        loadComponent: registration.loadComponent,
         inputs,
         defer: registration.defer,
       });
