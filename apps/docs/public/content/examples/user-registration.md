@@ -501,8 +501,8 @@ Add social login buttons before the form:
 
 ## Related
 
-- **[Login Form](../login-form/)** - Simple authentication form
-- **[Paginated Form](../paginated-form/)** - Page field navigation patterns
-- **[Validation](../../validation/basics/)** - Validation guide
+- **[Login Form](/examples/login-form)** - Simple authentication form
+- **[Paginated Form](/examples/paginated-form)** - Page field navigation patterns
+- **[Validation](/validation/basics)** - Validation guide
 - **[Conditional Logic](/dynamic-behavior/overview)** - Dynamic field behavior
 - **[Material Integration](/configuration)** - Material Design styling

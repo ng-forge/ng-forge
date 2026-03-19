@@ -278,7 +278,7 @@ For more control, use the `arrayEvent` builder to dispatch array operations dire
 **Which API to use depends on where your code lives:**
 
 - **Inside a custom field component** → inject `EventBus` (it is scoped to the form's DI tree)
-- **From a host/parent component** → provide and inject `EventDispatcher` (see [Events](/advanced/events))
+- **From a host/parent component** → provide and inject `EventDispatcher` (see [Events](/recipes/events))
 
 **From a host component (most common case):**
 
@@ -565,7 +565,7 @@ Arrays can contain these field types:
 - Row fields -> creates flat object arrays `[{...}, {...}]` (rows don't add nesting)
 - Button fields (for remove operations inside each item)
 
-See [Type Safety & Inference](/advanced/basics) for details on how arrays affect type inference.
+See [Type Safety & Inference](/recipes/basics) for details on how arrays affect type inference.
 
 ## Conditional Visibility
 

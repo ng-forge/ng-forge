@@ -177,10 +177,10 @@ Dropdown allows users to categorize their inquiry:
 
 ## Related Examples
 
-- **[User Registration](../user-registration/)** - Multi-step form with conditional fields
-- **[Login Form](../login-form/)** - Simple authentication
+- **[User Registration](/examples/user-registration)** - Multi-step form with conditional fields
+- **[Login Form](/examples/login-form)** - Simple authentication
 
 ## Related Documentation
 
-- **[Validation](../../validation/basics/)** - Form validation guide
+- **[Validation](/validation/basics)** - Form validation guide
 - **[Material Integration](/configuration)** - Material Design styling

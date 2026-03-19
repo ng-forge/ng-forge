@@ -249,12 +249,12 @@ const contactTemplate = [
 
 ## Related Examples
 
-- **[Simplified Array Form](../simplified-array-form/)** - Simpler API with auto-generated buttons
-- **[Paginated Form](../paginated-form/)** - Multi-step wizard form
-- **[Contact Form](../contact-form/)** - Basic contact form
+- **[Simplified Array Form](/examples/simplified-array-form)** - Simpler API with auto-generated buttons
+- **[Paginated Form](/examples/paginated-form)** - Multi-step wizard form
+- **[Contact Form](/examples/contact-form)** - Basic contact form
 
 ## Related Documentation
 
-- **[Complete Array API](../../prebuilt/form-arrays/complete/)** - Full API reference
-- **[Simplified Array API](../../prebuilt/form-arrays/simplified/)** - Simpler alternative
-- **[Validation](../../validation/basics/)** - Form validation guide
+- **[Complete Array API](/prebuilt/form-arrays/complete)** - Full API reference
+- **[Simplified Array API](/prebuilt/form-arrays/simplified)** - Simpler alternative
+- **[Validation](/validation/basics)** - Form validation guide

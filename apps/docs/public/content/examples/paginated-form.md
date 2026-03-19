@@ -20,8 +20,6 @@ This example showcases a 4-step registration form with:
 
 ## Implementation
 
-{% raw %}
-
 ```typescript
 import { Component, signal } from '@angular/core';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
@@ -30,9 +28,7 @@ import '@ng-forge/dynamic-forms-material';
 @Component({
   selector: 'app-paginated-form',
   imports: [DynamicForm, JsonPipe],
-  template: `
-    <form [dynamic-form]="config" [(value)]="formValue"></form>
-  `,
+  template: ` <form [dynamic-form]="config" [(value)]="formValue"></form> `,
 })
 export class PaginatedFormComponent {
   formValue = signal({});
@@ -164,7 +160,18 @@ export class PaginatedFormComponent {
             key: 'cityStateRow',
             fields: [
               { key: 'city', type: 'input', label: 'City', value: '', required: true, col: 6 },
-              { key: 'state', type: 'select', label: 'State', required: true, options: [...], col: 6 },
+              {
+                key: 'state',
+                type: 'select',
+                label: 'State',
+                required: true,
+                options: [
+                  { value: 'ny', label: 'New York' },
+                  { value: 'ca', label: 'California' },
+                  { value: 'tx', label: 'Texas' },
+                ],
+                col: 6,
+              },
             ],
           },
           {
@@ -209,7 +216,8 @@ export class PaginatedFormComponent {
             options: [
               { value: 'technology', label: 'Technology' },
               { value: 'sports', label: 'Sports' },
-              // ... more options
+              { value: 'music', label: 'Music' },
+              { value: 'travel', label: 'Travel' },
             ],
           },
           {
@@ -238,8 +246,6 @@ export class PaginatedFormComponent {
   } as const satisfies FormConfig;
 }
 ```
-
-{% endraw %}
 
 ## Form Value Structure
 
@@ -328,18 +334,16 @@ fields: [
 
 Under the hood, the page orchestrator uses a **2-tier loading strategy**:
 
-```typescript
+```html
 @if (i === currentPageIndex || i === currentPageIndex + 1 || i === currentPageIndex - 1) {
-  <!-- Current and adjacent pages: render immediately (but hide adjacent) -->
-  @defer (on immediate) {
-    <page-field [isVisible]="i === currentPageIndex" />
-  }
-} @else {
-  <!-- Distant pages: defer until idle -->
-  @defer (on idle) {
-    <page-field [isVisible]="false" />
-  }
-}
+<!-- Current and adjacent pages: render immediately (but hide adjacent) -->
+@defer (on immediate) {
+<page-field [isVisible]="i === currentPageIndex" />
+} } @else {
+<!-- Distant pages: defer until idle -->
+@defer (on idle) {
+<page-field [isVisible]="false" />
+} }
 ```
 
 This means:
@@ -437,8 +441,6 @@ Show/hide pages based on user choices:
 
 Add a custom progress component:
 
-{% raw %}
-
 ```typescript
 template: `
   <div class="progress-bar">
@@ -447,8 +449,6 @@ template: `
   <form [dynamic-form]="config" [(value)]="formValue" />
 `;
 ```
-
-{% endraw %}
 
 ### Conditional Validation
 
@@ -482,12 +482,12 @@ Apply different validation rules per step:
 
 ## Related Examples
 
-- [User Registration Form](../user-registration) - Single-page registration with validation
-- [Contact Form](../contact-form) - Simple contact form
-- [Login Form](../login-form) - Basic authentication
+- [User Registration Form](/examples/user-registration) - Single-page registration with validation
+- [Contact Form](/examples/contact-form) - Simple contact form
+- [Login Form](/examples/login-form) - Basic authentication
 
 ## Related Documentation
 
 - [Conditional Logic](/dynamic-behavior/overview) - Show/hide pages dynamically
-- [Validation](../../validation/basics) - Per-page and cross-page validation
+- [Validation](/validation/basics) - Per-page and cross-page validation
 - [Material Integration](/configuration) - Material Design styling

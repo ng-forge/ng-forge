@@ -1,7 +1,6 @@
 ---
-title: Events
-slug: advanced/events
-description: 'Dispatch and subscribe to form events using EventBus (inside fields) and EventDispatcher (from host components). Drive array actions, resets, and more.'
+title: Events API
+description: Dispatch and subscribe to form events using EventBus inside field components or EventDispatcher from host components, with support for custom events and array operations.
 ---
 
 The events API provides two complementary services for working with form events. Which one you use depends on **where your code lives** relative to the `dynamic-form` element.
@@ -472,6 +471,6 @@ This is useful when you need the complete form state at the time an event occurr
 
 ## Next Steps
 
-- **[Form Submission](/dynamic-behavior/submission)** — Configure async submission with loading states and server errors
-- **[Custom Fields](/advanced/custom-fields)** — Build custom field components that use EventBus
-- **[Form Arrays](/prebuilt/form-arrays/simplified)** — Use array events to add and remove items programmatically
+- **[Form Submission →](/dynamic-behavior/submission)** — Configure async submission with loading states and server errors
+- **[Custom Fields →](/recipes/custom-fields)** — Build custom field components that use EventBus
+- **[Form Arrays →](/prebuilt/form-arrays/simplified)** — Use array events to add and remove items programmatically

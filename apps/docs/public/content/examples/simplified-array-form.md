@@ -150,12 +150,12 @@ addButton: false,     // No add button
 
 ## Related Examples
 
-- **[Array Form (Complete)](../array-form/)** - Full control with declarative buttons and EventBus
-- **[Paginated Form](../paginated-form/)** - Multi-step wizard form
-- **[Contact Form](../contact-form/)** - Basic contact form
+- **[Array Form (Complete)](/examples/array-form)** - Full control with declarative buttons and EventBus
+- **[Paginated Form](/examples/paginated-form)** - Multi-step wizard form
+- **[Contact Form](/examples/contact-form)** - Basic contact form
 
 ## Related Documentation
 
-- **[Simplified Array API](../../prebuilt/form-arrays/simplified/)** - Full API reference
-- **[Complete Array API](../../prebuilt/form-arrays/complete/)** - Advanced array features
-- **[Validation](../../validation/basics/)** - Form validation guide
+- **[Simplified Array API](/prebuilt/form-arrays/simplified)** - Full API reference
+- **[Complete Array API](/prebuilt/form-arrays/complete)** - Advanced array features
+- **[Validation](/validation/basics)** - Form validation guide

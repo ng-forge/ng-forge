@@ -96,22 +96,53 @@ export class DocsLayoutComponent {
     }
   }
 
-  protected isCategoryExpanded(item: NavItem): boolean {
-    if (!item.children) return false;
-    // Explicitly collapsed by user — always wins
-    if (this.collapsedCategories().has(item.path)) return false;
-    // Explicitly expanded by user
-    if (this.expandedCategories().has(item.path)) return true;
-    // Auto-expand if current URL is within this category
+  /** Pre-computed expanded state per category path — avoids method calls on every CD cycle. */
+  private readonly expandedState = computed(() => {
+    const collapsed = this.collapsedCategories();
+    const expanded = this.expandedCategories();
     const adapter = this.activeAdapter.adapter();
-    return this.currentUrl().startsWith(`/${adapter}/${item.path}`);
+    const url = this.currentUrl();
+    const result = new Map<string, boolean>();
+    const walk = (items: NavItem[]): void => {
+      for (const item of items) {
+        if (!item.children) continue;
+        if (collapsed.has(item.path)) {
+          result.set(item.path, false);
+        } else if (expanded.has(item.path)) {
+          result.set(item.path, true);
+        } else {
+          result.set(item.path, url.startsWith(`/${adapter}/${item.path}`));
+        }
+        walk(item.children);
+      }
+    };
+    walk(this.navItems());
+    return result;
+  });
+
+  /** Pre-computed active category state per path. */
+  private readonly activeCategoryState = computed(() => {
+    const adapter = this.activeAdapter.adapter();
+    const url = this.currentUrl();
+    const result = new Map<string, boolean>();
+    const walk = (items: NavItem[]): void => {
+      for (const item of items) {
+        if (!item.children) continue;
+        result.set(item.path, url.startsWith(`/${adapter}/${item.path}`));
+        walk(item.children);
+      }
+    };
+    walk(this.navItems());
+    return result;
+  });
+
+  protected isCategoryExpanded(item: NavItem): boolean {
+    return this.expandedState().get(item.path) ?? false;
   }
 
   /** True when the current URL is within this category (regardless of expand state). */
   protected isActiveCategory(item: NavItem): boolean {
-    if (!item.children) return false;
-    const adapter = this.activeAdapter.adapter();
-    return this.currentUrl().startsWith(`/${adapter}/${item.path}`);
+    return this.activeCategoryState().get(item.path) ?? false;
   }
 
   protected adapterLink(path: string): string {

@@ -523,5 +523,5 @@ The Material integration source code is the most comprehensive example of implem
 
 - **[Material Integration](/configuration)** - Complete reference implementation
 - **[Field Types](/field-types/text-inputs)** - Understanding all available field types
-- **[Type Safety](/advanced/basics)** - Module augmentation for custom types
+- **[Type Safety](/recipes/basics)** - Module augmentation for custom types
 - **[Validation](../validation/basics)** - Displaying validation errors in custom fields

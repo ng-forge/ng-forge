@@ -337,4 +337,4 @@ For features that require ALL conditions to be met, use `type: 'and'`:
 
 - **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
 - **[Combining Conditions](/dynamic-behavior/overview#combining-conditions)** - AND/OR logic
-- **[Form Groups](../../prebuilt/form-groups/)** - Organizing fields
+- **[Form Groups](/prebuilt/form-groups)** - Organizing fields

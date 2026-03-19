@@ -1,7 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { ALL_TAGS, EXAMPLES_REGISTRY, type ExampleItem } from './examples.registry';
+
+interface ExampleViewModel extends ExampleItem {
+  link: string;
+}
 
 @Component({
   selector: 'docs-examples-index',
@@ -11,21 +16,19 @@ import { ALL_TAGS, EXAMPLES_REGISTRY, type ExampleItem } from './examples.regist
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExamplesIndexComponent {
+  private readonly activeAdapter = inject(ActiveAdapterService);
   readonly allTags = ALL_TAGS;
   readonly selectedTags = signal<Set<string>>(new Set());
 
-  readonly filteredExamples = computed<ExampleItem[]>(() => {
+  readonly filteredExamples = computed<ExampleViewModel[]>(() => {
     const selected = this.selectedTags();
-    if (selected.size === 0) {
-      return EXAMPLES_REGISTRY;
-    }
-    return EXAMPLES_REGISTRY.filter((example) => example.tags.some((tag) => selected.has(tag)));
+    const adapter = this.activeAdapter.adapter();
+    const items = selected.size === 0 ? EXAMPLES_REGISTRY : EXAMPLES_REGISTRY.filter((e) => e.tags.some((t) => selected.has(t)));
+    return items.map((e) => ({ ...e, link: `/${adapter}${e.path}` }));
   });
 
   toggleTag(tag: string): void {
     this.selectedTags.update((tags) => {
-      // Single-select: if already selected, deselect (show all)
-      // If not selected, select only this tag
       if (tags.has(tag)) {
         return new Set();
       }

@@ -200,5 +200,5 @@ This ensures that visible contact fields are required.
 ## Related Documentation
 
 - **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
-- **[Validation](../../validation/basics/)** - Form validation
-- **[Contact Form](../contact-form/)** - Basic contact form example
+- **[Validation](/validation/basics)** - Form validation
+- **[Contact Form](/examples/contact-form)** - Basic contact form example

@@ -27,8 +27,10 @@ export class CodeHighlightDirective {
   /** Plain code block shown immediately while Shiki loads. */
   private readonly plainHtml = computed<SafeHtml>(() => {
     const code = this.code();
+    // Safe: empty string, no content to sanitize.
     if (!code) return this.sanitizer.bypassSecurityTrustHtml('');
     const lang = this.language();
+    // Safe: code is HTML-escaped via escapeHtml() and lang is from a constrained union type.
     return this.sanitizer.bypassSecurityTrustHtml(`<pre><code class="language-${lang}">${escapeHtml(code)}</code></pre>`);
   });
 
@@ -40,6 +42,7 @@ export class CodeHighlightDirective {
       }
       return from(highlightCode(code, lang));
     }),
+    // Safe: html is produced by Shiki's highlightCode() from developer-provided code strings.
     map((html) => (html ? this.sanitizer.bypassSecurityTrustHtml(html) : null)),
   );
 

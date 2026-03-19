@@ -70,6 +70,13 @@
         "buildTarget": "docs:build"
       }
     },
+    "test": {
+      "executor": "@analogjs/vitest-angular:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "configFile": "vite.config.ts"
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint"
     },

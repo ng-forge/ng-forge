@@ -56,7 +56,8 @@
     background: var(--forge-code-bg, #{$bg-deep});
     border: 1px solid var(--forge-border-color, #{$steel-dark});
     border-radius: $radius-lg;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     padding: $space-2 $space-4;
 
     &:hover docs-copy-button {

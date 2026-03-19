@@ -79,22 +79,23 @@ import { AsyncPipe } from '@angular/common';
 
     <div class="custom-field" [class.custom-outline]="props()?.appearance === 'outline'">
       @if (label()) {
-      <label [for]="key() + '-input'">{% raw %}{{ label() | dynamicText | async }}{% endraw %}</label>
+        <label [for]="key() + '-input'">{{ label() | dynamicText | async }}</label>
       }
 
       <input
         [id]="key() + '-input'"
         [field]="f"
         [type]="props()?.type || 'text'"
-        [placeholder]="{% raw %}(placeholder() | dynamicText | async) ?? ''{% endraw %}"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [disabled]="f().disabled()"
         [attr.tabindex]="tabIndex()"
       />
 
       @if (props()?.hint; as hint) {
-      <div class="hint">{% raw %}{{ hint | dynamicText | async }}{% endraw %}</div>
-      } @if (f().touched() && f().invalid()) {
-      <div class="error">{% raw %}{{ f().errors() | json }}{% endraw %}</div>
+        <div class="hint">{{ hint | dynamicText | async }}</div>
+      }
+      @if (f().touched() && f().invalid()) {
+        <div class="error">{{ f().errors() | json }}</div>
       }
     </div>
   `,
@@ -420,7 +421,7 @@ For components with dynamic options (radio groups, multi-checkbox), pass a `depe
     @for (option of options(); track option.value) {
       <label>
         <input type="radio" [value]="option.value" />
-        {% raw %}{{ option.label }}{% endraw %}
+        {{ option.label }}
       </label>
     }
   `,
@@ -446,11 +447,7 @@ For components using Shadow DOM (like Ionic), you cannot access the internal inp
 
 ```typescript
 @Component({
-  template: `
-    <ion-checkbox [checked]="value()">
-      {% raw %}{{ label() }}{% endraw %}
-    </ion-checkbox>
-  `,
+  template: ` <ion-checkbox [checked]="value()"> {{ label() }} </ion-checkbox> `,
 })
 export default class IonicCheckboxComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
@@ -524,5 +521,5 @@ The Material integration source code is the most comprehensive example of implem
 
 - **[Material Integration](/configuration)** - Complete reference implementation
 - **[Field Types](/field-types/text-inputs)** - Understanding all available field types
-- **[Type Safety](/advanced/basics)** - Module augmentation for custom types
+- **[Type Safety](/recipes/basics)** - Module augmentation for custom types
 - **[Validation](../validation/basics)** - Displaying validation errors in custom fields

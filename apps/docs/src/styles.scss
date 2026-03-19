@@ -766,6 +766,7 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
         border-radius: 6px;
         white-space: nowrap;
         pointer-events: none;
+        opacity: 1;
         animation: copy-toast-in 0.15s ease;
       }
     }

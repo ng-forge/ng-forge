@@ -4,7 +4,8 @@
 .install-command {
   border-radius: $radius-md;
   border: 1px solid var(--border);
-  overflow: clip;
+  overflow-x: clip;
+  overflow-y: visible;
   background: var(--bg-elevated);
 
   &__tabs {

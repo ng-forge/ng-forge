@@ -188,5 +188,5 @@ See the **Value Exclusion** page under Recipes for full details.
 ## Next Steps
 
 - **[Text Components →](/prebuilt/text-components)** — Display static or dynamic text content in forms
-- **[Value Exclusion →](/advanced/value-exclusion)** — Control which field values are included in submission output
+- **[Value Exclusion →](/recipes/value-exclusion)** — Control which field values are included in submission output
 - **[Field Types →](/field-types/text-inputs)** — Explore all available input field types and their props

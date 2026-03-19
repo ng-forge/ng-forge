@@ -1255,5 +1255,5 @@ const config = {
 - **[Async Derivation](/derivation)** — HTTP and async function derivations, stopOnUserOverride
 - **[Validation](../../validation/basics/)** — Conditional validation
 - **[Custom Validators](../../validation/custom-validators/)** — Async and HTTP validators
-- **[Type Safety](/advanced/basics)** — TypeScript integration
+- **[Type Safety](/recipes/basics)** — TypeScript integration
 - **[Examples](/examples)** — Real-world form patterns

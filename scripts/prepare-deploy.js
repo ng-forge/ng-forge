@@ -75,10 +75,9 @@ function rewriteBaseHrefInDir(dir) {
       count += rewriteBaseHrefInDir(fullPath);
     } else if (entry.endsWith('.html')) {
       const html = readFileSync(fullPath, 'utf-8');
-      if (html.includes('<base href="/">') || html.includes('<base href="/" />')) {
-        const updated = html
-          .replace('<base href="/">', '<base href="/dynamic-forms/">')
-          .replace('<base href="/" />', '<base href="/dynamic-forms/" />');
+      // Only rewrite the <base> tag — not other href="/" occurrences (e.g. anchor tags).
+      const updated = html.replace(/<base\s+href="\/"\s*\/?>/g, '<base href="/dynamic-forms/">');
+      if (updated !== html) {
         writeFileSync(fullPath, updated, 'utf-8');
         count++;
       }

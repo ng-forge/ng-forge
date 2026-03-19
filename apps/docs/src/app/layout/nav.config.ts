@@ -86,14 +86,14 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'Advanced',
-    path: 'advanced',
+    label: 'Recipes',
+    path: 'recipes',
     children: [
-      { label: 'Adding Custom Fields', path: 'advanced/custom-fields' },
-      { label: 'Expression Parser Security', path: 'advanced/expression-parser' },
-      { label: 'Type Safety', path: 'advanced/type-safety' },
-      { label: 'Events', path: 'advanced/events' },
-      { label: 'Value Exclusion', path: 'advanced/value-exclusion' },
+      { label: 'Adding Custom Fields', path: 'recipes/custom-fields' },
+      { label: 'Expression Parser Security', path: 'recipes/expression-parser' },
+      { label: 'Type Safety', path: 'recipes/type-safety' },
+      { label: 'Events', path: 'recipes/events' },
+      { label: 'Value Exclusion', path: 'recipes/value-exclusion' },
     ],
   },
   {

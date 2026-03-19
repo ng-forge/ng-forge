@@ -484,7 +484,7 @@ External data values are reactively tracked - when signals change, derivations a
 
 - **[Conditional Logic →](/dynamic-behavior/overview)** — Control field visibility, required state, and disabled state dynamically
 - **[i18n →](/dynamic-behavior/i18n)** — Translate labels and messages with Observables and Signals
-- **[Expression Parser →](/advanced/expression-parser)** — Understand the security model behind derivation expressions
+- **[Expression Parser →](/recipes/expression-parser)** — Understand the security model behind derivation expressions
 
 ## Related
 

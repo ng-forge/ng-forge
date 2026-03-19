@@ -22,16 +22,20 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 ## Documentation Structure
 
 ### Getting Started
-- /installation: How to install and set up ng-forge dynamic forms in your project
+- /getting-started: How to install and set up ng-forge dynamic forms in your project
 
-### UI Library Integrations
-- /ui-libs-integrations/material: Angular Material integration
-- /ui-libs-integrations/primeng: PrimeNG integration
-- /ui-libs-integrations/ionic: Ionic integration
-- /ui-libs-integrations/bootstrap: Bootstrap integration
+### Configuration
+- /configuration: Configure your UI library integration (Material, PrimeNG, Ionic, Bootstrap)
+
+### Building an Adapter
+- /building-an-adapter: Creating custom UI library integrations
 
 ### Field Types
-- /field-types: Available field types (input, select, checkbox, radio, toggle, textarea, datepicker, slider, multi-checkbox, button, submit, next, previous)
+- /field-types/text-inputs: Text input fields (input, textarea, datepicker)
+- /field-types/selection: Selection fields (select, checkbox, radio, toggle, multi-checkbox, slider)
+- /field-types/buttons: Button fields (button, submit, next, previous)
+- /field-types/utility: Utility fields
+- /field-types/advanced-controls: Advanced control fields
 
 ### Validation
 - /validation/basics: Validation configuration basics
@@ -40,9 +44,10 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - /validation/reference: Complete validation reference
 
 ### Dynamic Behavior
-- /dynamic-behavior/overview: Conditional logic - show/hide fields based on conditions
-- /dynamic-behavior/derivation: Value derivation - computed field values
-- /dynamic-behavior/derivation/property: Property derivation - dynamic field properties
+- /dynamic-behavior/conditional-logic/overview: Conditional logic - show/hide fields based on conditions
+- /dynamic-behavior/value-derivation/basics: Value derivation - computed field values
+- /dynamic-behavior/value-derivation/basics/property-derivation: Property derivation - dynamic field properties
+- /dynamic-behavior/value-derivation/basics/async-derivation: Async derivation - asynchronous computed values
 - /dynamic-behavior/i18n: Internationalization support
 - /dynamic-behavior/submission: Form submission handling
 
@@ -75,18 +80,18 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - /examples/simplified-array-form: Simplified array API example
 - /examples/array-form: Complete array API example
 
-### Advanced Topics
-- /advanced/basics: TypeScript type safety features
-- /advanced/events: Form and field event handling
-- /advanced/expression-parser: Expression syntax for validators and conditions
-- /advanced/custom-integrations: Creating custom UI library integrations
-- /advanced/value-exclusion: Controlling which fields are included in submitted form values
+### Recipes
+- /recipes/type-safety/basics: TypeScript type safety features
+- /recipes/events: Form and field event handling
+- /recipes/expression-parser: Expression syntax for validators and conditions
+- /recipes/custom-fields: Adding custom field types
+- /recipes/value-exclusion: Controlling which fields are included in submitted form values
 
 ### AI Integration
 - /ai-integration: MCP server for AI-assisted form schema generation
 
 ### API Reference
-- /api: Complete API documentation for all packages
+- /api-reference: Complete API documentation for all packages
 
 ## Installation
 

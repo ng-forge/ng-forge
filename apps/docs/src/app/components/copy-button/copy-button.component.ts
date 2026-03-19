@@ -66,6 +66,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
       border-radius: 6px;
       white-space: nowrap;
       pointer-events: none;
+      opacity: 1;
       animation: copy-toast-in 0.15s ease;
     }
     @keyframes copy-toast-in {

@@ -163,12 +163,12 @@
 
   <!-- Dynamic Behavior -->
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/material/dynamic-behavior/conditional-logic</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/dynamic-behavior/conditional-logic/overview</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/material/dynamic-behavior/derivation</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/dynamic-behavior/value-derivation/basics</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -220,29 +220,29 @@
     <priority>0.6</priority>
   </url>
 
-  <!-- Advanced -->
+  <!-- Recipes -->
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/material/advanced/custom-fields</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/recipes/custom-fields</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/material/advanced/expression-parser</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/recipes/expression-parser</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/material/advanced/type-safety</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/recipes/type-safety/basics</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/material/advanced/events</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/recipes/events</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/material/advanced/value-exclusion</loc>
+    <loc>https://ng-forge.com/dynamic-forms/material/recipes/value-exclusion</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

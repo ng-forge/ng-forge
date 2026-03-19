@@ -2,7 +2,7 @@ import { inject, Injectable, makeStateKey, PLATFORM_ID, TransferState } from '@a
 import { APP_BASE_HREF, isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Observable, switchMap, catchError, of, shareReplay, tap } from 'rxjs';
+import { Observable, switchMap, catchError, of, shareReplay, tap, from, concat } from 'rxjs';
 import { Marked, type Renderer, type Tokens } from 'marked';
 import { highlightCode } from '../utils/shiki';
 
@@ -113,6 +113,8 @@ export class ContentService {
       this.transferState.remove(stateKey);
       if (transferred) {
         const content: RenderedContent = {
+          // Safe: rawHtml was produced by our own Marked renderer + Shiki highlighter during SSR,
+          // then serialized via TransferState. No user-supplied HTML reaches this path.
           html: this.sanitizer.bypassSecurityTrustHtml(transferred.rawHtml),
           rawHtml: transferred.rawHtml,
           title: transferred.title,
@@ -120,7 +122,18 @@ export class ContentService {
           headings: transferred.headings,
           error: transferred.error,
         };
-        const result$ = of(content).pipe(shareReplay({ bufferSize: 1, refCount: false }));
+        // Emit plain content first (hydration match), then re-highlight code blocks with Shiki.
+        const highlighted$ = from(this.reHighlightCodeBlocks(transferred.rawHtml)).pipe(
+          switchMap((highlightedHtml) => {
+            if (highlightedHtml === transferred.rawHtml) return of(content);
+            return of({
+              ...content,
+              html: this.sanitizer.bypassSecurityTrustHtml(highlightedHtml),
+              rawHtml: highlightedHtml,
+            });
+          }),
+        );
+        const result$ = concat(of(content), highlighted$).pipe(shareReplay({ bufferSize: 1, refCount: false }));
         this.cache.set(slug, result$);
         return result$;
       }
@@ -272,11 +285,46 @@ export class ContentService {
     html = replaceEmojisOutsideCode(html);
 
     return {
+      // Safe: html is produced by our own Marked renderer + Shiki highlighter from
+      // trusted markdown content files shipped with the app. No user input reaches this path.
       html: this.sanitizer.bypassSecurityTrustHtml(html),
       rawHtml: html,
       title: '',
       description: '',
       headings,
     };
+  }
+
+  /**
+   * Post-hydration: replace plain <pre><code> blocks (from SSR) with Shiki-highlighted versions.
+   * Finds all code blocks rendered by the Marked code renderer (wrapped in .code-block-wrapper)
+   * and re-highlights them using the client-side Shiki instance.
+   */
+  private async reHighlightCodeBlocks(html: string): Promise<string> {
+    // Match code blocks: <div class="code-block-wrapper">...<pre><code class="language-xxx">CODE</code></pre></div>
+    const codeBlockPattern = /<pre><code class="language-([\w-]+)">([\s\S]*?)<\/code><\/pre>/g;
+    const matches = [...html.matchAll(codeBlockPattern)];
+    if (matches.length === 0) return html;
+
+    let result = html;
+    // Process all code blocks in parallel
+    const replacements = await Promise.all(
+      matches.map(async (match) => {
+        const lang = match[1];
+        // Decode HTML entities back to plain text for Shiki
+        const encoded = match[2];
+        const decoded = encoded
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"');
+        const highlighted = await highlightCode(decoded, lang);
+        return { original: match[0], replacement: highlighted };
+      }),
+    );
+    for (const { original, replacement } of replacements) {
+      result = result.replace(original, replacement);
+    }
+    return result;
   }
 }

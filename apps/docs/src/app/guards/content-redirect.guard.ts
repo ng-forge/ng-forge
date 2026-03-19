@@ -14,7 +14,7 @@ const CATEGORY_REDIRECTS: Record<string, string> = {
   'dynamic-behavior/value-derivation': 'dynamic-behavior/derivation/values',
   prebuilt: 'prebuilt/form-groups',
   'prebuilt/form-arrays': 'prebuilt/form-arrays/simplified',
-  advanced: 'advanced/custom-fields',
+  recipes: 'recipes/custom-fields',
 };
 
 /** Legacy route renames — old URLs still work after restructure. */
@@ -37,8 +37,14 @@ const ROUTE_RENAMES: Record<string, string> = {
   'schema-fields/field-types/utility': 'field-types/utility',
   'schema-fields/field-types/advanced-controls': 'field-types/advanced-controls',
   'dynamic-behavior/overview': 'dynamic-behavior/conditional-logic',
-  'advanced/basics': 'advanced/type-safety',
+  'advanced/basics': 'recipes/type-safety',
   'advanced/custom-integrations': 'building-an-adapter',
+  advanced: 'recipes/custom-fields',
+  'advanced/custom-fields': 'recipes/custom-fields',
+  'advanced/expression-parser': 'recipes/expression-parser',
+  'advanced/type-safety': 'recipes/type-safety',
+  'advanced/events': 'recipes/events',
+  'advanced/value-exclusion': 'recipes/value-exclusion',
 };
 
 /**

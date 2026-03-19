@@ -847,4 +847,4 @@ const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
 
 - [Validation Basics](/validation/basics) - Core validation concepts
 - [Validation Reference](/validation/reference) - Standard validation rules
-- [Type Safety](/advanced/basics) - TypeScript integration
+- [Type Safety](/recipes/basics) - TypeScript integration

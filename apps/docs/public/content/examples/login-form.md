@@ -183,10 +183,10 @@ For social login buttons, you can use text fields with links or handle this outs
 
 ## Related Examples
 
-- **[User Registration](../user-registration/)** - Account creation
-- **[Contact Form](../contact-form/)** - Basic form with validation
+- **[User Registration](/examples/user-registration)** - Account creation
+- **[Contact Form](/examples/contact-form)** - Basic form with validation
 
 ## Related Documentation
 
-- **[Validation](../../validation/basics/)** - Form validation guide
+- **[Validation](/validation/basics)** - Form validation guide
 - **[Material Integration](/configuration)** - Material Design styling
