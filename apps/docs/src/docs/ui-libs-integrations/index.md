@@ -1,3 +1,8 @@
+---
+title: Configuration
+description: Configure ng-forge dynamic forms globally or per-form — set default props, field-level overrides, and UI adapter options for Material, Bootstrap, PrimeNG, and Ionic.
+---
+
 Configure global defaults for all forms at provider level, or per-form via `defaultProps`.
 
 ## The Cascade

@@ -1,3 +1,8 @@
+---
+title: Custom UI Integrations
+description: Build custom UI adapter integrations for ng-forge dynamic forms using FieldTypeDefinition, field mappers, module augmentation, and meta attribute tracking.
+---
+
 Create custom UI integrations for ng-forge dynamic forms using any component library or design system.
 
 ## Package Structure

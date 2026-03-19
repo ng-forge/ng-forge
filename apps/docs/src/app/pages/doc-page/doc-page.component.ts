@@ -1,7 +1,7 @@
 import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { Title } from '@angular/platform-browser';
+import { Meta, Title } from '@angular/platform-browser';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -384,11 +384,15 @@ import { findTabGroup } from '../../layout/tabs.config';
 export class DocPageComponent {
   private readonly router = inject(Router);
   private readonly titleService = inject(Title);
+  private readonly metaService = inject(Meta);
   private readonly contentService = inject(ContentService);
   private readonly clipboard = inject(Clipboard);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly adapter = inject(ActiveAdapterService);
   private copiedTimer: ReturnType<typeof setTimeout> | null = null;
+
+  private static readonly DEFAULT_DESCRIPTION =
+    'ng-forge provides a configuration-driven dynamic forms library for Angular. Build complex, signal forms with minimal code using JSON/TypeScript configurations.';
 
   /**
    * False during SSR to preserve pre-rendered content during hydration.
@@ -405,9 +409,16 @@ export class DocPageComponent {
     // the skeleton is suppressed so Angular can match the pre-rendered content.
     afterNextRender(() => this.showSkeleton.set(true));
 
-    // Update document title based on current page
-    explicitEffect([this.pageTitle], ([title]) => {
-      this.titleService.setTitle(title ? `${title} — ng-forge Dynamic Forms` : 'ng-forge — Dynamic Forms for Angular');
+    // Update document title and meta tags based on current page
+    explicitEffect([this.pageTitle, this.pageDescription], ([title, description]) => {
+      const fullTitle = title ? `${title} — ng-forge Dynamic Forms` : 'ng-forge — Dynamic Forms for Angular';
+      this.titleService.setTitle(fullTitle);
+      const desc = description || DocPageComponent.DEFAULT_DESCRIPTION;
+      this.metaService.updateTag({ name: 'description', content: desc });
+      this.metaService.updateTag({ property: 'og:title', content: fullTitle });
+      this.metaService.updateTag({ property: 'og:description', content: desc });
+      this.metaService.updateTag({ name: 'twitter:title', content: fullTitle });
+      this.metaService.updateTag({ name: 'twitter:description', content: desc });
     });
   }
 
@@ -496,6 +507,9 @@ export class DocPageComponent {
     if (this.exampleId()) return this.exampleTitle();
     return this.content()?.title ?? '';
   });
+
+  /** Resolved page description for meta tags — falls back to default when not in frontmatter. */
+  private readonly pageDescription = computed(() => this.content()?.description ?? '');
 
   onContentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;

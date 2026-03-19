@@ -1,5 +1,6 @@
 ---
 title: Angular Schema
+description: Use Angular's native signal forms Schema API for cross-field validation with validateTree, validate, and required in ng-forge Dynamic Forms.
 keyword: AngularSchemaPage
 ---
 

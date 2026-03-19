@@ -1,3 +1,8 @@
+---
+title: Form Submission
+description: Handle form submission with Angular signal forms integration, automatic loading states, submit button disabling, and server-side validation errors.
+---
+
 Form submission in dynamic forms integrates with Angular Signal Forms' native `submit()` function, providing automatic button disabling, loading states, and server error handling.
 
 ## Overview

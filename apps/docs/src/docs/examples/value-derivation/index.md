@@ -1,6 +1,6 @@
 ---
 title: Value Derivation
-keyword: ValueDerivationExamplePage
+description: Automatic value derivation with chained expressions for calculated fields, numeric formulas, and string concatenation in dynamic forms.
 ---
 
 [← Back to Quick Start](/examples)

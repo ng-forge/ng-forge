@@ -1,3 +1,8 @@
+---
+title: Form Rows
+description: Arrange dynamic form fields side-by-side in horizontal rows using a 12-column grid. Responsive layouts that auto-stack on mobile with conditional visibility support.
+---
+
 Organize fields into horizontal rows for compact layouts. Rows display fields side-by-side.
 
 ## Interactive Demo

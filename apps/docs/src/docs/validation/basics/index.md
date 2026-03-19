@@ -1,3 +1,8 @@
+---
+title: Validation Basics
+description: Learn how to add type-safe form validation with shorthand validators, custom error messages, and Angular signal forms integration in ng-forge Dynamic Forms.
+---
+
 Dynamic Forms provides powerful, type-safe validation that integrates directly with Angular's signal forms. Start with simple shorthand validators and progress to advanced conditional validation as your needs grow.
 
 ## Signal Forms Integration

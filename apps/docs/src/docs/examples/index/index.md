@@ -1,3 +1,8 @@
+---
+title: Examples
+description: Browse interactive dynamic form examples with live demos covering login, registration, arrays, conditional logic, and value derivation.
+---
+
 {{ NgDocActions.demo("ExamplesIndexComponent", { container: false }) }}
 
 ---

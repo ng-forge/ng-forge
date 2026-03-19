@@ -1,3 +1,8 @@
+---
+title: Custom Validators
+description: Build custom sync, async, and HTTP validators with FieldContext API, expression-based rules, and cross-field validation in ng-forge Dynamic Forms.
+---
+
 Custom validation functions for complex validation logic that goes beyond built-in validators.
 
 ## Overview

@@ -1,3 +1,8 @@
+---
+title: Contact Form
+description: Create a contact form with text inputs, textarea, select dropdown, and real-time validation using Angular dynamic forms configuration.
+---
+
 [← Back to Quick Start](/examples)
 
 Simple contact form demonstrating basic form fields, validation, and user input.

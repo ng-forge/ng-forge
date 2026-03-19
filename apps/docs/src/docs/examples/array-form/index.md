@@ -1,3 +1,8 @@
+---
+title: Array Form (Complete API)
+description: Dynamic form arrays with declarative add, prepend, and remove buttons, custom placement, and template-based item creation in Angular.
+---
+
 [← Back to Quick Start](/examples)
 
 Dynamic form arrays using the complete API with declarative add/remove buttons, custom button placement, and full control over item structure.

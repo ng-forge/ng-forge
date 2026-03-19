@@ -18,6 +18,8 @@ export interface RenderedContent {
   rawHtml: string;
   /** Page title extracted from frontmatter. */
   title: string;
+  /** Page description extracted from frontmatter — used for meta tags. */
+  description: string;
   headings: HeadingEntry[];
   error?: string;
 }
@@ -81,6 +83,7 @@ function replaceEmojisOutsideCode(html: string): string {
 interface TransferableContent {
   rawHtml: string;
   title: string;
+  description: string;
   headings: HeadingEntry[];
   error?: string;
 }
@@ -113,6 +116,7 @@ export class ContentService {
           html: this.sanitizer.bypassSecurityTrustHtml(transferred.rawHtml),
           rawHtml: transferred.rawHtml,
           title: transferred.title,
+          description: transferred.description,
           headings: transferred.headings,
           error: transferred.error,
         };
@@ -128,14 +132,24 @@ export class ContentService {
         // Detect SPA fallback: if the response is HTML (not markdown), treat as 404
         const trimmed = markdown.trimStart();
         if (trimmed.startsWith('<!') || trimmed.startsWith('<html')) {
-          return { html: '', rawHtml: '', title: '', headings: [], error: `Content not found: ${slug}` } as RenderedContent;
+          return {
+            html: '',
+            rawHtml: '',
+            title: '',
+            description: '',
+            headings: [],
+            error: `Content not found: ${slug}`,
+          } as RenderedContent;
         }
-        // Extract title from frontmatter before stripping
+        // Extract title and description from frontmatter before stripping
         const fmMatch = markdown.match(/^---\n([\s\S]*?)\n---\n?/);
-        const title = fmMatch?.[1]?.match(/^title:\s*(.+)$/m)?.[1]?.trim() ?? '';
+        const fm = fmMatch?.[1] ?? '';
+        const unquote = (v: string): string => (/^(['"])(.*)\1$/.test(v) ? v.slice(1, -1) : v);
+        const title = unquote(fm.match(/^title:\s*(.+)$/m)?.[1]?.trim() ?? '');
+        const description = unquote(fm.match(/^description:\s*(.+)$/m)?.[1]?.trim() ?? '');
         const stripped = fmMatch ? markdown.slice(fmMatch[0].length) : markdown;
         const rendered = await this.renderMarkdown(stripped);
-        return { ...rendered, title };
+        return { ...rendered, title, description };
       }),
       // During SSR, store content in TransferState for the client
       tap((content) => {
@@ -143,13 +157,21 @@ export class ContentService {
           this.transferState.set(stateKey, {
             rawHtml: content.rawHtml,
             title: content.title,
+            description: content.description,
             headings: content.headings,
           });
         }
       }),
       catchError((err) => {
         console.warn(`[ContentService] Failed to load /content/${slug}.md`, err);
-        return of({ html: '', rawHtml: '', title: '', headings: [], error: `Content not found: ${slug}` } as RenderedContent);
+        return of({
+          html: '',
+          rawHtml: '',
+          title: '',
+          description: '',
+          headings: [],
+          error: `Content not found: ${slug}`,
+        } as RenderedContent);
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
     );
@@ -253,6 +275,7 @@ export class ContentService {
       html: this.sanitizer.bypassSecurityTrustHtml(html),
       rawHtml: html,
       title: '',
+      description: '',
       headings,
     };
   }

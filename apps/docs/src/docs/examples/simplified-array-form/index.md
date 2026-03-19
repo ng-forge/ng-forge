@@ -1,3 +1,8 @@
+---
+title: Simplified Array Form
+description: Simplified dynamic array API with auto-generated add/remove buttons, template-based items, and support for primitive and object arrays.
+---
+
 [← Back to Quick Start](/examples)
 
 Dynamic arrays using the simplified API with auto-generated add/remove buttons, template-based item definitions, and both primitive and object arrays.

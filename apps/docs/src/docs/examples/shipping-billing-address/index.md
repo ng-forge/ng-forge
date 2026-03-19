@@ -1,3 +1,8 @@
+---
+title: Shipping & Billing Address
+description: Checkout form with a same-as-billing toggle that conditionally hides shipping address fields using group visibility logic in Angular.
+---
+
 [← Back to Quick Start](/examples)
 
 Checkout form demonstrating the common "same as billing" pattern for shipping addresses.

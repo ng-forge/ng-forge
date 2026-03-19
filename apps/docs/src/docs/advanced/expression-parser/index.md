@@ -1,3 +1,8 @@
+---
+title: Expression Parser
+description: Write safe JavaScript expressions for conditional logic in dynamic forms with whitelisted methods, prototype protection, and custom function registration.
+---
+
 Dynamic forms use expressions for conditional logic and dynamic values. When you use JavaScript expressions with `type: 'javascript'`, the expression parser evaluates them safely, preventing code injection attacks while maintaining the flexibility you need.
 
 ## How JavaScript Expressions Work

@@ -1,3 +1,8 @@
+---
+title: Text Components
+description: Display static or dynamic text content in dynamic forms. Render headings, paragraphs, and spans with CSS variable theming and i18n support via Observables.
+---
+
 Display static or dynamic text content in forms. Text fields are **display-only** - they don't collect user input or contribute to form values.
 
 ## Basic Text

@@ -1,3 +1,8 @@
+---
+title: Business Account Form
+description: Conditional account registration form toggling between personal and business fields with dynamic required validation in Angular.
+---
+
 [← Back to Quick Start](/examples)
 
 Account registration form that shows different fields based on whether the user selects personal or business account type.

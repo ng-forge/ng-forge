@@ -1,3 +1,8 @@
+---
+title: Value Exclusion
+description: Control which field values are included in form submissions based on hidden, disabled, or readonly state with a 3-tier configuration hierarchy.
+---
+
 Value exclusion controls which field values are included in the form submission output based on the field's reactive state (hidden, disabled, readonly).
 
 ## Overview

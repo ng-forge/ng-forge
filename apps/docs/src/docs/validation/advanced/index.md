@@ -1,3 +1,8 @@
+---
+title: Advanced Validation
+description: Configure conditional validators, dynamic validation values, cross-field rules, and complex AND/OR logic for Angular dynamic forms with ng-forge.
+---
+
 Advanced validation techniques including conditional validators, dynamic values, and cross-field validation.
 
 ## Validators Array

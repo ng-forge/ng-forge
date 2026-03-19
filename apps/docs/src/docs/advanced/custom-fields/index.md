@@ -1,3 +1,8 @@
+---
+title: Custom Field Types
+description: Add custom field types like rich text editors or file uploaders to any ng-forge UI adapter using FieldTypeDefinition and valueFieldMapper.
+---
+
 Add a custom field type to any existing ng-forge adapter — no need to build a full adapter from scratch.
 
 ## Scenario

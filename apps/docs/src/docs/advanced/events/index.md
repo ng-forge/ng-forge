@@ -1,3 +1,8 @@
+---
+title: Events API
+description: Dispatch and subscribe to form events using EventBus inside field components or EventDispatcher from host components, with support for custom events and array operations.
+---
+
 The events API provides two complementary services for working with form events. Which one you use depends on **where your code lives** relative to the `dynamic-form` element.
 
 ## Choosing the right API

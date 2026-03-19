@@ -1,3 +1,8 @@
+---
+title: Utility Fields
+description: Configure text display and hidden fields for static content, section headings, inline notes, and passing metadata through form submissions.
+---
+
 Non-input fields for displaying content and passing hidden data.
 
 ## text

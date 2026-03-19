@@ -1,3 +1,8 @@
+---
+title: Selection Fields
+description: Configure select dropdowns, radio buttons, checkboxes, toggles, and multi-checkbox fields with options arrays and adapter-specific props.
+---
+
 Fields for selecting one or multiple values from a set of options.
 
 ## select

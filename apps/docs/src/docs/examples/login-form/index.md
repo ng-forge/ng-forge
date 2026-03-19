@@ -1,3 +1,8 @@
+---
+title: Login Form
+description: Build a login form with email validation, password masking, and remember-me checkbox using Angular dynamic forms and JSON configuration.
+---
+
 [← Back to Quick Start](/examples)
 
 Simple login form demonstrating authentication UI with email and password fields.

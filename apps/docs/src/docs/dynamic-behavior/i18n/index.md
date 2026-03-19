@@ -1,3 +1,8 @@
+---
+title: Internationalization (i18n)
+description: Add multilingual support to dynamic forms using Angular Observables and Signals with any translation library like ngx-translate or Transloco.
+---
+
 Dynamic Forms supports internationalization through Angular's reactive primitives: **Observables** and **Signals**. It's framework-agnostic - use any translation library that provides these types.
 
 ## How i18n Works

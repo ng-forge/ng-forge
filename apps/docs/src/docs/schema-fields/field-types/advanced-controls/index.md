@@ -1,3 +1,8 @@
+---
+title: Advanced Controls
+description: Configure slider and datepicker fields for numeric ranges and date selection — min/max values, step increments, and date constraints.
+---
+
 Specialized controls for numeric ranges and date selection.
 
 ## slider

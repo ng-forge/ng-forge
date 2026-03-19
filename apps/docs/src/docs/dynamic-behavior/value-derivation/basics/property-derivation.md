@@ -1,6 +1,7 @@
 ---
 title: Properties
 route: property
+description: Reactively derive field component properties like options, labels, and placeholders based on other form values using property derivations.
 ---
 
 Reactively derive field component properties (like `minDate`, `options`, `label`, `placeholder`) based on form values. While value derivations set a field's form value, property derivations set **component input properties**.

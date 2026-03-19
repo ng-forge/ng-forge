@@ -1,3 +1,8 @@
+---
+title: User Registration
+description: Multi-step user registration form with password validation, conditional business fields, age verification, and type-safe form submission.
+---
+
 [← Back to Quick Start](/examples)
 
 Complete example of a user registration form with validation, conditional logic, and proper type safety.

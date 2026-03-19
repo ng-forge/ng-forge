@@ -1,3 +1,8 @@
+---
+title: Text Input Fields
+description: Configure text input and textarea fields in dynamic forms — HTML5 type support, placeholders, validation, and adapter-specific props.
+---
+
 Text-based input fields for collecting typed data from users.
 
 ## input

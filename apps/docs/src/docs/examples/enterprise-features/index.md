@@ -1,3 +1,8 @@
+---
+title: Enterprise Feature Gating
+description: Enterprise feature gating form using AND/OR conditional logic to control tiered access based on account type and team size.
+---
+
 [← Back to Quick Start](/examples)
 
 Complex configuration form demonstrating AND/OR logic for enterprise feature gating.

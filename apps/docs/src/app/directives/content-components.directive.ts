@@ -264,10 +264,15 @@ export class ContentSegmentsComponent {
   }
 
   private loadLazyComponent(loader: () => Promise<{ default: Type<unknown> }>, index: number): void {
-    loader().then((mod) => {
-      this.resolvedSegments.update((segs) =>
-        segs.map((s, j) => (j === index && s.type === 'component' ? { ...s, component: mod.default } : s)),
-      );
-    });
+    loader()
+      .then((mod) => {
+        this.resolvedSegments.update((segs) =>
+          segs.map((s, j) => (j === index && s.type === 'component' ? { ...s, component: mod.default } : s)),
+        );
+      })
+      .catch((err) => {
+        console.error(`[ContentSegments] Failed to load lazy component at index ${index}:`, err);
+        this.resolvedSegments.update((segs) => segs.filter((_, j) => j !== index));
+      });
   }
 }

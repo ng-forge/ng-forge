@@ -1,3 +1,8 @@
+---
+title: Hidden Fields
+description: Store IDs, metadata, and non-user-facing values in dynamic forms without rendering UI. Type-safe hidden fields with scalar and array value support.
+---
+
 Hidden fields store values in the form model without rendering any visible UI. They're useful for persisting IDs, metadata, or other non-user-facing data.
 
 ## Basic Usage

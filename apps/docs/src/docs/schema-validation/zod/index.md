@@ -1,5 +1,6 @@
 ---
 title: Zod Validation
+description: Integrate Zod, Valibot, or ArkType schemas for cross-field form validation using the standardSchema wrapper in ng-forge Dynamic Forms.
 keyword: ZodSchemaPage
 ---
 

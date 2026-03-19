@@ -1,3 +1,8 @@
+---
+title: Paginated Form
+description: Build multi-step wizard forms with page navigation, per-page validation, lazy loading, and progress tracking using Angular dynamic forms.
+---
+
 [← Back to Quick Start](/examples)
 
 A comprehensive multi-step registration form demonstrating the `page` field type for creating wizards and stepped workflows.

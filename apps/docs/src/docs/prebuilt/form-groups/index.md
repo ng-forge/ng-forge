@@ -1,3 +1,8 @@
+---
+title: Form Groups
+description: Nest dynamic form fields under a single key using group fields. Create structured form data with validation, conditional visibility, and type-safe nested objects.
+---
+
 Groups nest form fields under a single key in the form value. This creates logical grouping for form data, not visual grouping.
 
 ## Interactive Demo

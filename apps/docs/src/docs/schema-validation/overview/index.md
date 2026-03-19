@@ -1,5 +1,6 @@
 ---
-title: Overview
+title: Schema Validation Overview
+description: Compare Angular Schema and Standard Schema (Zod, Valibot) approaches for cross-field form validation in ng-forge Dynamic Forms.
 keyword: SchemaValidationOverviewPage
 ---
 

@@ -1,3 +1,8 @@
+---
+title: Age Conditional Form
+description: Age-based conditional form logic with numeric comparison operators for parental consent, senior discounts, and dynamic field visibility.
+---
+
 [← Back to Quick Start](/examples)
 
 Registration form demonstrating numeric comparison operators for age-based conditional logic.

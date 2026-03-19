@@ -1,3 +1,8 @@
+---
+title: Type Safety & Inference
+description: Enable compile-time type inference for dynamic form configurations using TypeScript's as const satisfies pattern, InferFormValue, and container field nesting rules.
+---
+
 Complete type inference for form configurations using TypeScript's type system and Angular signal forms.
 
 ## Overview
