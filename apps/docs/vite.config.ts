@@ -192,6 +192,31 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
+      // Prevent the SSR fallback from serving index.html for non-app requests.
+      // Without this, requests like /.well-known/foo.json or /random/path.xml
+      // get SPA-fallbacked to index.html, which Vite then tries to parse as
+      // the requested content type — crashing the dev server.
+      {
+        name: 'vite-plugin-non-route-guard',
+        configureServer(server) {
+          server.middlewares.use((req, res, next) => {
+            const url = req.url?.split('?')[0] ?? '';
+            // Requests with file extensions are static asset requests, not app routes.
+            // Let Vite's static file serving handle them (returns 404 naturally if missing).
+            // Skip our own virtual endpoints (__global.css, __search-index.json, adapter CSS).
+            if (/\.\w+$/.test(url) && !url.startsWith('/__') && !/^\/(material|bootstrap|primeng|ionic)\.css$/.test(url)) {
+              return next();
+            }
+            // Dot-prefixed paths (/.well-known, /.hidden) are never app routes
+            if (/^\/\./.test(url)) {
+              res.statusCode = 404;
+              res.end();
+              return;
+            }
+            next();
+          });
+        },
+      },
       globalStylesPlugin(),
       adapterCssPlugin(),
       apiDocsPlugin(),
