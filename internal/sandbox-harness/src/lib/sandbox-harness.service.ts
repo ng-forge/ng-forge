@@ -1,6 +1,7 @@
-import { ApplicationRef, createComponent, inject, Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
+import { ApplicationRef, createComponent, inject, Injectable, OnDestroy, Provider, signal, WritableSignal } from '@angular/core';
 import { DOCUMENT, LocationStrategy } from '@angular/common';
 import { createApplication, ɵSharedStylesHost as SharedStylesHost } from '@angular/platform-browser';
+import { OverlayContainer } from '@angular/cdk/overlay';
 import { MemoryLocationStrategy } from './memory-location-strategy';
 import { Router } from '@angular/router';
 import { ADAPTER_REGISTRY } from './adapter-registry';
@@ -9,6 +10,7 @@ import { AdapterName, AdapterRegistration, SANDBOX_FORM_CONFIG, SandboxBootstrap
 import { createDocumentProxy } from './document-proxy';
 import { SandboxSlot } from './sandbox-slot';
 import { SANDBOX_THEME } from './sandbox-theme';
+import { ShadowDomOverlayContainer, SHADOW_ROOT_REF, ShadowRootRef } from './shadow-dom-overlay-container';
 
 const STYLESHEET_ID_PREFIX = 'sandbox-harness-style-';
 
@@ -97,7 +99,7 @@ export class SandboxHarness implements OnDestroy {
     // In scoped mode the proxy redirects these to the shadow root once it exists,
     // transforming global selectors (e.g. [data-theme='dark']) so they work inside shadow DOM.
     const addedStyles = new Set<HTMLStyleElement>();
-    const shadowRootRef: { current: ShadowRoot | null } = { current: null };
+    const shadowRootRef: ShadowRootRef = { current: null };
     const styleTransform = isScoped ? (css: string) => this.transformCssForShadowDom(css) : undefined;
     const { proxy: documentProxy, cleanup: cleanupDocumentProxy } = createDocumentProxy(
       this.document,
@@ -105,9 +107,38 @@ export class SandboxHarness implements OnDestroy {
       shadowRootRef,
       styleTransform,
     );
+
+    const baseProviders: Provider[] = [
+      { provide: DOCUMENT, useValue: documentProxy },
+      { provide: SANDBOX_THEME, useValue: themeSignal },
+    ];
+
+    // In scoped mode, redirect CDK overlays (datepicker, select, menu, etc.) into the
+    // shadow root so they pick up the adapter styles. The shadow root reference is null
+    // during createApplication() but will be set after createComponent() — by the time
+    // a user opens an overlay, the reference is populated.
+    //
+    // Must use useFactory (not `new`) because OverlayContainer's field initializers call
+    // inject(Platform), inject(DOCUMENT), inject(_CdkPrivateStyleLoader) — which require
+    // an active injection context that only exists inside the DI framework.
+    if (isScoped) {
+      const ref = shadowRootRef;
+      baseProviders.push(
+        { provide: SHADOW_ROOT_REF, useValue: ref },
+        {
+          provide: OverlayContainer,
+          useFactory: () => {
+            const container = new ShadowDomOverlayContainer();
+            container.setShadowRootRef(ref);
+            return container;
+          },
+        },
+      );
+    }
+
     config = {
       ...config,
-      providers: [...config.providers, { provide: DOCUMENT, useValue: documentProxy }, { provide: SANDBOX_THEME, useValue: themeSignal }],
+      providers: [...config.providers, ...baseProviders],
     };
 
     // Create the isolated sub-application.
