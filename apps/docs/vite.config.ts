@@ -56,6 +56,18 @@ function globalStylesPlugin(): Plugin {
   return {
     name: 'vite-plugin-global-styles',
 
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html, ctx) {
+        // Inject render-blocking global CSS link only in dev mode.
+        // In production, Vite bundles styles.scss via main.ts import.
+        if (ctx.server) {
+          return html.replace('</head>', '  <link rel="stylesheet" href="/__global.css" />\n  </head>');
+        }
+        return html;
+      },
+    },
+
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         if (req.url !== '/__global.css') return next();

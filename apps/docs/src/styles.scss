@@ -464,6 +464,26 @@ html[data-theme='dark']:has(app-landing) {
 }
 
 // ============================================
+// SHIKI DARK THEME COMMENT CONTRAST FIX
+// ============================================
+// material-theme-darker uses #545454 for comments — only 2.47:1 contrast on
+// $bg-surface (#131210). Override to #7a7a7a which meets WCAG AA (4.5:1).
+html[data-theme='dark'] .shiki span[style*='--shiki-dark:#545454'] {
+  --shiki-dark: #7a7a7a !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme='auto'] .shiki span[style*='--shiki-dark:#545454'] {
+    --shiki-dark: #7a7a7a !important;
+  }
+}
+
+// Landing page is always dark
+html:has(app-landing) .shiki span[style*='--shiki-dark:#545454'] {
+  --shiki-dark: #7a7a7a !important;
+}
+
+// ============================================
 // SHIKI DUAL-THEME (CodeHighlightDirective)
 // ============================================
 pre.shiki span {

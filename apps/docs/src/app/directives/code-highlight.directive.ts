@@ -22,18 +22,18 @@ export class CodeHighlightDirective {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   readonly code = input.required<string>({ alias: 'codeHighlight' });
-  readonly lang = input<'typescript' | 'json' | 'bash' | 'scss'>('typescript');
+  readonly language = input<'typescript' | 'json' | 'bash' | 'scss'>('typescript');
 
   /** Plain code block shown immediately while Shiki loads. */
   private readonly plainHtml = computed<SafeHtml>(() => {
     const code = this.code();
     if (!code) return this.sanitizer.bypassSecurityTrustHtml('');
-    const lang = this.lang();
+    const lang = this.language();
     return this.sanitizer.bypassSecurityTrustHtml(`<pre><code class="language-${lang}">${escapeHtml(code)}</code></pre>`);
   });
 
   /** Syntax-highlighted HTML — resolves asynchronously after Shiki loads. */
-  private readonly highlighted$ = combineLatest([toObservable(this.code), toObservable(this.lang)]).pipe(
+  private readonly highlighted$ = combineLatest([toObservable(this.code), toObservable(this.language)]).pipe(
     switchMap(([code, lang]) => {
       if (!this.isBrowser || !code) {
         return of(null);
