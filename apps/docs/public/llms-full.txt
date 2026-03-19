@@ -5,6 +5,11 @@
 
 --- advanced/custom-fields ---
 
+---
+title: Custom Field Types
+description: Add custom field types like rich text editors or file uploaders to any ng-forge UI adapter using FieldTypeDefinition and valueFieldMapper.
+---
+
 Add a custom field type to any existing ng-forge adapter — no need to build a full adapter from scratch.
 
 ## Scenario
@@ -92,6 +97,11 @@ If you need a completely custom adapter (no existing adapter as base), or want t
 - **[Events →](/advanced/events)** — Dispatch and subscribe to form events from custom field components
 
 --- advanced/custom-integrations ---
+
+---
+title: Custom UI Integrations
+description: Build custom UI adapter integrations for ng-forge dynamic forms using FieldTypeDefinition, field mappers, module augmentation, and meta attribute tracking.
+---
 
 Create custom UI integrations for ng-forge dynamic forms using any component library or design system.
 
@@ -618,6 +628,11 @@ The Material integration source code is the most comprehensive example of implem
 
 --- advanced/events ---
 
+---
+title: Events API
+description: Dispatch and subscribe to form events using EventBus inside field components or EventDispatcher from host components, with support for custom events and array operations.
+---
+
 The events API provides two complementary services for working with form events. Which one you use depends on **where your code lives** relative to the `dynamic-form` element.
 
 ## Choosing the right API
@@ -1092,6 +1107,11 @@ This is useful when you need the complete form state at the time an event occurr
 
 --- advanced/expression-parser ---
 
+---
+title: Expression Parser
+description: Write safe JavaScript expressions for conditional logic in dynamic forms with whitelisted methods, prototype protection, and custom function registration.
+---
+
 Dynamic forms use expressions for conditional logic and dynamic values. When you use JavaScript expressions with `type: 'javascript'`, the expression parser evaluates them safely, preventing code injection attacks while maintaining the flexibility you need.
 
 ## How JavaScript Expressions Work
@@ -1436,6 +1456,11 @@ The expression parser lets you write flexible conditional logic while preventing
 - **[Value Derivation →](/dynamic-behavior/value-derivation/basics)** — Use expressions to compute field values dynamically
 
 --- advanced/type-safety/basics ---
+
+---
+title: Type Safety & Inference
+description: Enable compile-time type inference for dynamic form configurations using TypeScript's as const satisfies pattern, InferFormValue, and container field nesting rules.
+---
 
 Complete type inference for form configurations using TypeScript's type system and Angular signal forms.
 
@@ -2316,6 +2341,11 @@ const config = {
 
 --- advanced/value-exclusion ---
 
+---
+title: Value Exclusion
+description: Control which field values are included in form submissions based on hidden, disabled, or readonly state with a 3-tier configuration hierarchy.
+---
+
 Value exclusion controls which field values are included in the form submission output based on the field's reactive state (hidden, disabled, readonly).
 
 ## Overview
@@ -2481,6 +2511,11 @@ const config: FormConfig = {
 - **[Conditional Logic →](/dynamic-behavior/overview)** — Control field visibility, required state, and disabled state
 
 --- ai-integration ---
+
+---
+title: AI Integration
+description: Use the ng-forge MCP server to let AI assistants generate, validate, and scaffold dynamic form configurations — supports Cursor, VS Code, Claude Desktop, and JetBrains.
+---
 
 # AI Integration
 
@@ -2699,6 +2734,11 @@ In addition to tools, the server exposes resources that AI can read:
 Found an issue or have a suggestion? [Open an issue on GitHub](https://github.com/ng-forge/ng-forge/issues).
 
 --- dynamic-behavior/conditional-logic/overview ---
+
+---
+title: Conditional Logic
+description: Control field visibility, required state, and readonly behavior dynamically using declarative conditions that integrate with Angular signal forms.
+---
 
 Control field behavior dynamically based on form state. Dynamic forms provides a declarative API for conditional visibility, required state, and readonly state that maps directly to Angular's signal forms.
 
@@ -3957,6 +3997,11 @@ const config = {
 
 --- dynamic-behavior/i18n ---
 
+---
+title: Internationalization (i18n)
+description: Add multilingual support to dynamic forms using Angular Observables and Signals with any translation library like ngx-translate or Transloco.
+---
+
 Dynamic Forms supports internationalization through Angular's reactive primitives: **Observables** and **Signals**. It's framework-agnostic - use any translation library that provides these types.
 
 ## How i18n Works
@@ -4251,6 +4296,11 @@ The key is that your translation method returns `Observable<string>` or `Signal<
 
 --- dynamic-behavior/submission ---
 
+---
+title: Form Submission
+description: Handle form submission with Angular signal forms integration, automatic loading states, submit button disabling, and server-side validation errors.
+---
+
 Form submission in dynamic forms integrates with Angular Signal Forms' native `submit()` function, providing automatic button disabling, loading states, and server error handling.
 
 ## Overview
@@ -4474,6 +4524,7 @@ export class MyFormComponent {
 ---
 title: Async
 route: async
+description: Derive field values from HTTP endpoints or custom async functions with automatic debouncing, cancellation, and server-driven computed values.
 ---
 
 Derive field values from HTTP responses or custom async functions. Async derivations are ideal for server-driven computed values, address/zip lookups, exchange rates, and any value that requires a network call.
@@ -4874,6 +4925,7 @@ When the user changes the country, the phone prefix is auto-filled again — ove
 
 ---
 title: Values
+description: Automatically compute and set field values based on other form values using derivations for calculated fields, auto-fill, and value transformations.
 ---
 
 Automatically compute and set field values based on other form values. Derivations enable calculated fields, auto-fill patterns, and value transformations.
@@ -5371,6 +5423,7 @@ External data values are reactively tracked - when signals change, derivations a
 ---
 title: Properties
 route: property
+description: Reactively derive field component properties like options, labels, and placeholders based on other form values using property derivations.
 ---
 
 Reactively derive field component properties (like `minDate`, `options`, `label`, `placeholder`) based on form values. While value derivations set a field's form value, property derivations set **component input properties**.
@@ -5863,6 +5916,11 @@ External data values are reactively tracked - when signals change, property deri
 
 --- examples/age-conditional-form ---
 
+---
+title: Age Conditional Form
+description: Age-based conditional form logic with numeric comparison operators for parental consent, senior discounts, and dynamic field visibility.
+---
+
 [← Back to Quick Start](/examples)
 
 Registration form demonstrating numeric comparison operators for age-based conditional logic.
@@ -6121,6 +6179,11 @@ This example uses numeric comparison operators:
 - **[User Registration](../user-registration/)** - Basic registration example
 
 --- examples/array-form ---
+
+---
+title: Array Form (Complete API)
+description: Dynamic form arrays with declarative add, prepend, and remove buttons, custom placement, and template-based item creation in Angular.
+---
 
 [← Back to Quick Start](/examples)
 
@@ -6383,6 +6446,11 @@ const contactTemplate = [
 
 --- examples/business-account-form ---
 
+---
+title: Business Account Form
+description: Conditional account registration form toggling between personal and business fields with dynamic required validation in Angular.
+---
+
 [← Back to Quick Start](/examples)
 
 Account registration form that shows different fields based on whether the user selects personal or business account type.
@@ -6605,6 +6673,11 @@ Business fields are hidden when personal is selected:
 
 --- examples/contact-dynamic-fields ---
 
+---
+title: Dynamic Contact Fields
+description: Contact form with dynamic field visibility and conditional required validation based on preferred contact method selection in Angular.
+---
+
 [← Back to Quick Start](/examples)
 
 Contact form demonstrating dynamic field visibility based on preferred contact method selection.
@@ -6810,6 +6883,11 @@ This ensures that visible contact fields are required.
 
 --- examples/contact-form ---
 
+---
+title: Contact Form
+description: Create a contact form with text inputs, textarea, select dropdown, and real-time validation using Angular dynamic forms configuration.
+---
+
 [← Back to Quick Start](/examples)
 
 Simple contact form demonstrating basic form fields, validation, and user input.
@@ -6996,6 +7074,11 @@ Dropdown allows users to categorize their inquiry:
 - **[Material Integration](/configuration)** - Material Design styling
 
 --- examples/enterprise-features ---
+
+---
+title: Enterprise Feature Gating
+description: Enterprise feature gating form using AND/OR conditional logic to control tiered access based on account type and team size.
+---
 
 [← Back to Quick Start](/examples)
 
@@ -7338,6 +7421,11 @@ For features that require ALL conditions to be met, use `type: 'and'`:
 
 --- examples/index ---
 
+---
+title: Examples
+description: Browse interactive dynamic form examples with live demos covering login, registration, arrays, conditional logic, and value derivation.
+---
+
 {{ NgDocActions.demo("ExamplesIndexComponent", { container: false }) }}
 
 ---
@@ -7349,6 +7437,11 @@ For features that require ALL conditions to be met, use `type: 'and'`:
 - **[Dynamic Behavior →](/dynamic-behavior/overview)** — Conditional fields and value derivation
 
 --- examples/login-form ---
+
+---
+title: Login Form
+description: Build a login form with email validation, password masking, and remember-me checkbox using Angular dynamic forms and JSON configuration.
+---
 
 [← Back to Quick Start](/examples)
 
@@ -7542,6 +7635,11 @@ For social login buttons, you can use text fields with links or handle this outs
 - **[Material Integration](/configuration)** - Material Design styling
 
 --- examples/paginated-form ---
+
+---
+title: Paginated Form
+description: Build multi-step wizard forms with page navigation, per-page validation, lazy loading, and progress tracking using Angular dynamic forms.
+---
 
 [← Back to Quick Start](/examples)
 
@@ -8037,6 +8135,11 @@ Apply different validation rules per step:
 
 --- examples/shipping-billing-address ---
 
+---
+title: Shipping & Billing Address
+description: Checkout form with a same-as-billing toggle that conditionally hides shipping address fields using group visibility logic in Angular.
+---
+
 [← Back to Quick Start](/examples)
 
 Checkout form demonstrating the common "same as billing" pattern for shipping addresses.
@@ -8263,6 +8366,11 @@ The section title is also hidden along with the group:
 
 --- examples/simplified-array-form ---
 
+---
+title: Simplified Array Form
+description: Simplified dynamic array API with auto-generated add/remove buttons, template-based items, and support for primitive and object arrays.
+---
+
 [← Back to Quick Start](/examples)
 
 Dynamic arrays using the simplified API with auto-generated add/remove buttons, template-based item definitions, and both primitive and object arrays.
@@ -8424,6 +8532,11 @@ addButton: false,     // No add button
 - **[Validation](../../validation/basics/)** - Form validation guide
 
 --- examples/user-registration ---
+
+---
+title: User Registration
+description: Multi-step user registration form with password validation, conditional business fields, age verification, and type-safe form submission.
+---
 
 [← Back to Quick Start](/examples)
 
@@ -8936,7 +9049,7 @@ Add social login buttons before the form:
 
 ---
 title: Value Derivation
-keyword: ValueDerivationExamplePage
+description: Automatic value derivation with chained expressions for calculated fields, numeric formulas, and string concatenation in dynamic forms.
 ---
 
 [← Back to Quick Start](/examples)
@@ -9013,6 +9126,11 @@ taxRate ───────────────────┴────
 
 --- installation ---
 
+---
+title: Installation
+description: Install ng-forge dynamic forms for Angular with Material, Bootstrap, PrimeNG, or Ionic — setup guide, provider configuration, and first form example.
+---
+
 ng-forge turns JSON-like configuration into fully working Angular forms — with validation, conditional logic, and multi-step wizards built in. You write a `FormConfig` object, and ng-forge handles rendering, state management, and reactivity.
 
 Here's the core idea — a single object becomes a complete form:
@@ -9076,6 +9194,11 @@ Here's a login form that works with any adapter — switch the "Config" tab to s
 - **[Building an Adapter](/building-an-adapter)** — Create your own adapter for any UI library
 
 --- prebuilt/form-arrays/complete ---
+
+---
+title: Form Arrays (Complete)
+description: Advanced dynamic form arrays with heterogeneous items, custom button placement, programmatic control via EventDispatcher, and declarative add/remove operations.
+---
 
 Arrays create dynamic collections of field values. Each item in the `fields` array defines **one array item** with its structure and initial values.
 
@@ -9680,6 +9803,11 @@ For all other scenarios, the [simplified array API](/prebuilt/form-arrays/simpli
 
 --- prebuilt/form-arrays/simplified ---
 
+---
+title: Form Arrays (Simplified)
+description: Define dynamic form arrays with a concise template-based API. Auto-generated add/remove buttons, primitive and object arrays, size validation, and button customization.
+---
+
 The simplified array API provides a concise way to define dynamic arrays. Instead of manually specifying each item in `fields`, you provide a `template` for the item structure and a `value` array with initial data. Add and remove buttons are generated automatically.
 
 > **When should I use this?** For most array use cases -- primitive lists, object lists, and standard add/remove workflows -- the simplified API is the right choice. For advanced scenarios like heterogeneous items or custom button placement, see [Form Arrays (Complete)](/prebuilt/form-arrays/complete).
@@ -10000,6 +10128,11 @@ As a rule of thumb: **start with the simplified API**. If you hit a limitation, 
 
 --- prebuilt/form-groups ---
 
+---
+title: Form Groups
+description: Nest dynamic form fields under a single key using group fields. Create structured form data with validation, conditional visibility, and type-safe nested objects.
+---
+
 Groups nest form fields under a single key in the form value. This creates logical grouping for form data, not visual grouping.
 
 ## Interactive Demo
@@ -10169,6 +10302,11 @@ For all available condition types and operators, see [Conditional Logic](/dynami
 - **[Form Arrays →](/prebuilt/form-arrays/simplified)** — Create repeating sections with dynamic add/remove
 
 --- prebuilt/form-pages ---
+
+---
+title: Form Pages
+description: Build multi-step wizard forms with automatic page navigation, per-page validation, and lazy loading. Create paged form flows with conditional page skipping.
+---
 
 Create multi-step forms by using page fields. When your form contains page fields, it automatically enters "paged mode" and renders with navigation controls.
 
@@ -10373,6 +10511,11 @@ Page fields use these classes for styling:
 - **[Form Rows →](/prebuilt/form-rows)** — Arrange fields side-by-side within pages
 
 --- prebuilt/form-rows ---
+
+---
+title: Form Rows
+description: Arrange dynamic form fields side-by-side in horizontal rows using a 12-column grid. Responsive layouts that auto-stack on mobile with conditional visibility support.
+---
 
 Organize fields into horizontal rows for compact layouts. Rows display fields side-by-side.
 
@@ -10594,6 +10737,11 @@ Only `'hidden'` is supported as a logic type on containers. For all available co
 
 --- prebuilt/hidden-fields ---
 
+---
+title: Hidden Fields
+description: Store IDs, metadata, and non-user-facing values in dynamic forms without rendering UI. Type-safe hidden fields with scalar and array value support.
+---
+
 Hidden fields store values in the form model without rendering any visible UI. They're useful for persisting IDs, metadata, or other non-user-facing data.
 
 ## Basic Usage
@@ -10784,6 +10932,11 @@ See the **Value Exclusion** page under Recipes for full details.
 
 --- prebuilt/text-components ---
 
+---
+title: Text Components
+description: Display static or dynamic text content in dynamic forms. Render headings, paragraphs, and spans with CSS variable theming and i18n support via Observables.
+---
+
 Display static or dynamic text content in forms. Text fields are **display-only** - they don't collect user input or contribute to form values.
 
 ## Basic Text
@@ -10922,6 +11075,11 @@ Add custom classes via the `className` property:
 
 --- schema-fields/field-types/advanced-controls ---
 
+---
+title: Advanced Controls
+description: Configure slider and datepicker fields for numeric ranges and date selection — min/max values, step increments, and date constraints.
+---
+
 Specialized controls for numeric ranges and date selection.
 
 ## slider
@@ -10989,6 +11147,11 @@ Date selection control.
 <docs-live-example scenario="examples/datepicker" hideForCustom="true"></docs-live-example>
 
 --- schema-fields/field-types/buttons ---
+
+---
+title: Button Fields
+description: Configure submit, button, next, and previous action fields for form submission, custom click handlers, and multi-step page navigation.
+---
 
 Action fields for form submission and multi-step navigation.
 
@@ -11063,11 +11226,21 @@ Navigates back to the previous page in a multi-step form. Only valid inside a `p
 
 --- schema-fields/field-types ---
 
+---
+title: Field Types Overview
+description: Browse all dynamic form field types organized by category — text inputs, selection controls, advanced widgets, buttons, and utility fields.
+---
+
 Choose a field type group to explore available controls and their configuration options.
 
 See [Props vs Meta](./utility#props-vs-meta) for how to configure UI-specific behavior vs native HTML attributes.
 
 --- schema-fields/field-types/selection ---
+
+---
+title: Selection Fields
+description: Configure select dropdowns, radio buttons, checkboxes, toggles, and multi-checkbox fields with options arrays and adapter-specific props.
+---
 
 Fields for selecting one or multiple values from a set of options.
 
@@ -11203,6 +11376,11 @@ Multiple selection from a list of checkboxes. Value is an array of selected valu
 
 --- schema-fields/field-types/text-inputs ---
 
+---
+title: Text Input Fields
+description: Configure text input and textarea fields in dynamic forms — HTML5 type support, placeholders, validation, and adapter-specific props.
+---
+
 Text-based input fields for collecting typed data from users.
 
 ## input
@@ -11266,6 +11444,11 @@ Multi-line text input.
 
 --- schema-fields/field-types/utility ---
 
+---
+title: Utility Fields
+description: Configure text display and hidden fields for static content, section headings, inline notes, and passing metadata through form submissions.
+---
+
 Non-input fields for displaying content and passing hidden data.
 
 ## text
@@ -11311,6 +11494,7 @@ Carries a fixed value through the form without rendering any UI. Useful for meta
 
 ---
 title: Angular Schema
+description: Use Angular's native signal forms Schema API for cross-field validation with validateTree, validate, and required in ng-forge Dynamic Forms.
 keyword: AngularSchemaPage
 ---
 
@@ -11602,7 +11786,8 @@ Consider [Standard Schema (Zod)](../zod) if you:
 --- schema-validation/overview ---
 
 ---
-title: Overview
+title: Schema Validation Overview
+description: Compare Angular Schema and Standard Schema (Zod, Valibot) approaches for cross-field form validation in ng-forge Dynamic Forms.
 keyword: SchemaValidationOverviewPage
 ---
 
@@ -11709,6 +11894,7 @@ const config = {
 
 ---
 title: Zod Validation
+description: Integrate Zod, Valibot, or ArkType schemas for cross-field form validation using the standardSchema wrapper in ng-forge Dynamic Forms.
 keyword: ZodSchemaPage
 ---
 
@@ -11929,6 +12115,11 @@ const config = { schema: standardSchema(schema), fields: [...] };
 
 --- ui-libs-integrations ---
 
+---
+title: Configuration
+description: Configure ng-forge dynamic forms globally or per-form — set default props, field-level overrides, and UI adapter options for Material, Bootstrap, PrimeNG, and Ionic.
+---
+
 Configure global defaults for all forms at provider level, or per-form via `defaultProps`.
 
 ## The Cascade
@@ -11954,6 +12145,11 @@ Each field type also accepts its own adapter-specific `props`. See [Field Types]
 - **[Building an Adapter](/building-an-adapter)** — Build your own adapter
 
 --- validation/advanced ---
+
+---
+title: Advanced Validation
+description: Configure conditional validators, dynamic validation values, cross-field rules, and complex AND/OR logic for Angular dynamic forms with ng-forge.
+---
 
 Advanced validation techniques including conditional validators, dynamic values, and cross-field validation.
 
@@ -12320,6 +12516,11 @@ when: {
 
 --- validation/basics ---
 
+---
+title: Validation Basics
+description: Learn how to add type-safe form validation with shorthand validators, custom error messages, and Angular signal forms integration in ng-forge Dynamic Forms.
+---
+
 Dynamic Forms provides powerful, type-safe validation that integrates directly with Angular's signal forms. Start with simple shorthand validators and progress to advanced conditional validation as your needs grow.
 
 ## Signal Forms Integration
@@ -12634,6 +12835,11 @@ Invalid fields prevent form submission and display error messages.
 - **[Examples](../../examples/)** - Real-world validation patterns
 
 --- validation/custom-validators ---
+
+---
+title: Custom Validators
+description: Build custom sync, async, and HTTP validators with FieldContext API, expression-based rules, and cross-field validation in ng-forge Dynamic Forms.
+---
 
 Custom validation functions for complex validation logic that goes beyond built-in validators.
 
@@ -13481,6 +13687,11 @@ const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
 - [Type Safety](/advanced/basics) - TypeScript integration
 
 --- validation/reference ---
+
+---
+title: Validator Reference
+description: Complete API reference for all built-in validators, ValidatorConfig types, ConditionalExpression operators, and validation message patterns in ng-forge.
+---
 
 Complete reference for all validators, conditional expressions, and validation configuration options.
 

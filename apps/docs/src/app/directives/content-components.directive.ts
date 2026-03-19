@@ -114,25 +114,29 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
       display: contents;
     }
 
-    /* ---- Shared shimmer ---- */
+    /* ---- Shared shimmer (GPU-composited via transform) ---- */
     @keyframes shimmer {
       0% {
-        background-position: -200% 0;
+        transform: translateX(-100%);
       }
       100% {
-        background-position: 200% 0;
+        transform: translateX(100%);
       }
     }
 
     @mixin shimmer-bg {
-      background: linear-gradient(
-        90deg,
-        var(--forge-base-2, #1a1916) 0%,
-        var(--forge-base-3, #2a2824) 50%,
-        var(--forge-base-2, #1a1916) 100%
-      );
-      background-size: 200% 100%;
-      animation: shimmer 1.5s ease-in-out infinite;
+      position: relative;
+      overflow: hidden;
+      background: var(--forge-base-2, #1a1916);
+
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent 0%, var(--forge-base-3, #2a2824) 50%, transparent 100%);
+        animation: shimmer 1.5s ease-in-out infinite;
+        will-change: transform;
+      }
     }
 
     /* ---- Live example skeleton (form-shaped) ---- */
@@ -222,11 +226,11 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .skel-badge,
-      .skel-label,
-      .skel-input,
-      .skel-button,
-      .skel-generic-line {
+      .skel-badge::after,
+      .skel-label::after,
+      .skel-input::after,
+      .skel-button::after,
+      .skel-generic-line::after {
         animation: none;
       }
     }

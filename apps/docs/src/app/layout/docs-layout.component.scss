@@ -55,6 +55,18 @@ $mobile-bp: 1024px;
   gap: 0.75rem;
 }
 
+// Placeholder that reserves space for the deferred search button to prevent CLS
+.search-placeholder {
+  min-width: 240px;
+  height: 40px;
+
+  @media (max-width: 720px) {
+    min-width: unset;
+    width: 40px;
+    height: 40px;
+  }
+}
+
 .navbar-logo {
   display: flex;
   align-items: center;
