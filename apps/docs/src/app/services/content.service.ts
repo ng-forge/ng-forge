@@ -116,7 +116,7 @@ export class ContentService {
           headings: transferred.headings,
           error: transferred.error,
         };
-        const result$ = of(content).pipe(shareReplay({ bufferSize: 1, refCount: true }));
+        const result$ = of(content).pipe(shareReplay({ bufferSize: 1, refCount: false }));
         this.cache.set(slug, result$);
         return result$;
       }
@@ -151,7 +151,7 @@ export class ContentService {
         console.warn(`[ContentService] Failed to load /content/${slug}.md`, err);
         return of({ html: '', rawHtml: '', title: '', headings: [], error: `Content not found: ${slug}` } as RenderedContent);
       }),
-      shareReplay({ bufferSize: 1, refCount: true }),
+      shareReplay({ bufferSize: 1, refCount: false }),
     );
 
     this.cache.set(slug, result$);

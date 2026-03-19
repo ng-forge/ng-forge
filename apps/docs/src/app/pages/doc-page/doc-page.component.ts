@@ -384,9 +384,8 @@ export class DocPageComponent {
   private copiedTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
-   * Delayed flag to prevent skeleton flash on fast loads.
-   * Stays false during SSR and the first 150ms after hydration.
-   * Only flips to true if content hasn't loaded by then.
+   * False during SSR to preserve pre-rendered content during hydration.
+   * Flips to true after hydration so subsequent navigations show skeleton.
    */
   protected readonly showSkeleton = signal(false);
 
@@ -395,11 +394,9 @@ export class DocPageComponent {
       if (this.copiedTimer) clearTimeout(this.copiedTimer);
     });
 
-    // Show skeleton only after a brief delay — avoids flicker when content loads quickly
-    afterNextRender(() => {
-      const timer = setTimeout(() => this.showSkeleton.set(true), 150);
-      this.destroyRef.onDestroy(() => clearTimeout(timer));
-    });
+    // Enable skeleton rendering after hydration completes — during SSR
+    // the skeleton is suppressed so Angular can match the pre-rendered content.
+    afterNextRender(() => this.showSkeleton.set(true));
 
     // Update document title based on current page
     explicitEffect([this.pageTitle], ([title]) => {
