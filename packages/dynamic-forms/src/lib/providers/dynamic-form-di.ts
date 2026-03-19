@@ -6,49 +6,70 @@ import { FunctionRegistryService } from '../core/registry/function-registry.serv
 import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
 import { FormStateManager, FORM_STATE_DEPS, FormStateDeps } from '../state/form-state-manager';
-import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, EXTERNAL_DATA, FORM_OPTIONS } from '../models/field-signal-context.token';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FORM_OPTIONS } from '../models/field-signal-context.token';
 import { DERIVATION_WARNING_TRACKER, createDerivationWarningTracker } from '../core/derivation/derivation-warning-tracker';
 import { DEPRECATION_WARNING_TRACKER, createDeprecationWarningTracker } from '../utils/deprecation-warning-tracker';
-import {
-  DERIVATION_ORCHESTRATOR,
-  createDerivationOrchestrator,
-  DerivationOrchestratorConfig,
-} from '../core/derivation/derivation-orchestrator';
-import { createDerivationLogger } from '../core/derivation/derivation-logger.service';
+import { DERIVATION_ORCHESTRATOR, createDerivationOrchestrator } from '../core/derivation/derivation-orchestrator';
 import { DynamicFormLogger } from './features/logger/logger.token';
-import { Logger } from './features/logger/logger.interface';
 import { DERIVATION_LOG_CONFIG } from './features/logger/with-logger-config';
-import { DerivationLogConfig } from '../models/logic/logic-config';
-import { FieldDef } from '../definitions/base/field-def';
 import { CONTAINER_FIELD_PROCESSORS, createContainerFieldProcessors } from '../utils/container-utils/container-field-processors';
 import {
-  createPropertyOverrideStore,
-  PROPERTY_OVERRIDE_STORE,
   PropertyOverrideStore,
+  PROPERTY_OVERRIDE_STORE,
+  createPropertyOverrideStore,
 } from '../core/property-derivation/property-override-store';
-import { HTTP_CONDITION_CACHE, HttpConditionCache } from '../core/http/http-condition-cache';
-import { LogicFunctionCacheService } from '../core/expressions/logic-function-cache.service';
-import { HttpConditionFunctionCacheService } from '../core/expressions/http-condition-function-cache.service';
-import { AsyncConditionFunctionCacheService } from '../core/expressions/async-condition-function-cache.service';
-import { DynamicValueFunctionCacheService } from '../core/values/dynamic-value-function-cache.service';
 import {
   createPropertyDerivationOrchestrator,
   PROPERTY_DERIVATION_ORCHESTRATOR,
-  PropertyDerivationOrchestratorConfig,
 } from '../core/property-derivation/property-derivation-orchestrator';
+import { ExpressionCacheContext } from './expression-cache-context';
+import { FormDerivedState } from './form-derived-state';
+import { FieldDef } from '../definitions/base/field-def';
+import { createDerivationLogger } from '../core/derivation/derivation-logger.service';
+import { Logger } from './features/logger/logger.interface';
+import { DerivationLogConfig } from '../models/logic/logic-config';
 
-/** @internal */
+/**
+ * Provides all per-form DI tokens for the `DynamicForm` component.
+ *
+ * Uses two cohesive groups to reduce token count:
+ * - `ExpressionCacheContext` — aggregates all expression/logic caches (5 → 1)
+ * - `FormDerivedState` — aggregates readonly signals from `FormStateManager` (4 → 1, +3 public bridges)
+ *
+ * Services injected **by** `FormStateManager` (SchemaRegistryService,
+ * FunctionRegistryService, DEPRECATION_WARNING_TRACKER, CONTAINER_FIELD_PROCESSORS)
+ * are provided before `FormStateManager` to avoid circular DI.
+ *
+ * Services that use `inject()` internally (EventBus, FormStateManager,
+ * FieldContextRegistryService, orchestrators) remain as regular DI providers.
+ *
+ * @internal
+ */
 export function provideDynamicFormDI(): Provider[] {
   return [
+    // ─── Phase 1: Providers needed by FormStateManager (no circular deps) ──
     EventBus,
     { provide: CONTAINER_FIELD_PROCESSORS, useFactory: createContainerFieldProcessors },
     SchemaRegistryService,
     FunctionRegistryService,
+    { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
     {
       provide: FORM_STATE_DEPS,
       useFactory: (): FormStateDeps => ({ config: null, formOptions: null, value: null }),
     },
+
+    // ─── Phase 2: FormStateManager ─────────────────────────────────────────
     FormStateManager,
+
+    // ─── Phase 3: Cohesive groups ──────────────────────────────────────────
+    ExpressionCacheContext,
+    {
+      provide: FormDerivedState,
+      useFactory: (stateManager: FormStateManager) => new FormDerivedState(stateManager),
+      deps: [FormStateManager],
+    },
+
+    // ─── Phase 4: Services derived from FormStateManager ───────────────────
     {
       provide: RootFormRegistryService,
       useFactory: (stateManager: FormStateManager) =>
@@ -58,73 +79,42 @@ export function provideDynamicFormDI(): Provider[] {
         ),
       deps: [FormStateManager],
     },
-    FieldContextRegistryService,
-    {
-      provide: DEFAULT_PROPS,
-      useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.defaultProps),
-      deps: [FormStateManager],
-    },
+    { provide: DERIVATION_WARNING_TRACKER, useFactory: createDerivationWarningTracker },
+    { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
+
+    // ─── Phase 5: Public API bridge providers (delegate to FormDerivedState) ─
+    { provide: DEFAULT_PROPS, useFactory: (state: FormDerivedState) => state.defaultProps, deps: [FormDerivedState] },
     {
       provide: DEFAULT_VALIDATION_MESSAGES,
-      useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.defaultValidationMessages),
-      deps: [FormStateManager],
+      useFactory: (state: FormDerivedState) => state.defaultValidationMessages,
+      deps: [FormDerivedState],
     },
-    {
-      provide: FORM_OPTIONS,
-      useFactory: (stateManager: FormStateManager) => stateManager.effectiveFormOptions,
-      deps: [FormStateManager],
-    },
-    {
-      provide: EXTERNAL_DATA,
-      useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.externalData),
-      deps: [FormStateManager],
-    },
-    { provide: DERIVATION_WARNING_TRACKER, useFactory: createDerivationWarningTracker },
-    { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
+    { provide: FORM_OPTIONS, useFactory: (state: FormDerivedState) => state.formOptions, deps: [FormDerivedState] },
+
+    // ─── Phase 6: Services with inject() — must stay as DI providers ───────
+    FieldContextRegistryService,
     {
       provide: DERIVATION_ORCHESTRATOR,
-      useFactory: (
-        stateManager: FormStateManager,
-        logger: Logger,
-        logConfig: DerivationLogConfig,
-        externalData: Signal<Record<string, Signal<unknown>> | undefined>,
-      ) => {
-        // FormStateManager is injected without type parameters, so its generic defaults
-        // to Record<string, unknown>. The casts widen the type to match DerivationOrchestratorConfig
-        // which uses unknown — safe because the orchestrator only reads values.
-        const config: DerivationOrchestratorConfig = {
+      useFactory: (stateManager: FormStateManager, derivedState: FormDerivedState, logger: Logger, logConfig: DerivationLogConfig) =>
+        createDerivationOrchestrator({
           schemaFields: computed(() => stateManager.formSetup()?.schemaFields as FieldDef<unknown>[] | undefined),
           formValue: stateManager.formValue as Signal<Record<string, unknown>>,
           form: computed(() => stateManager.form() as unknown as FieldTree<unknown>),
           derivationLogger: computed(() => createDerivationLogger(logConfig, logger)),
-          externalData,
-        };
-        return createDerivationOrchestrator(config);
-      },
-      deps: [FormStateManager, DynamicFormLogger, DERIVATION_LOG_CONFIG, EXTERNAL_DATA],
+          externalData: derivedState.externalData,
+        }),
+      deps: [FormStateManager, FormDerivedState, DynamicFormLogger, DERIVATION_LOG_CONFIG],
     },
-    { provide: HTTP_CONDITION_CACHE, useFactory: () => new HttpConditionCache(100) },
-    LogicFunctionCacheService,
-    HttpConditionFunctionCacheService,
-    AsyncConditionFunctionCacheService,
-    DynamicValueFunctionCacheService,
-    { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
     {
       provide: PROPERTY_DERIVATION_ORCHESTRATOR,
-      useFactory: (
-        stateManager: FormStateManager,
-        externalData: Signal<Record<string, Signal<unknown>> | undefined>,
-        store: PropertyOverrideStore,
-      ) => {
-        const config: PropertyDerivationOrchestratorConfig = {
+      useFactory: (stateManager: FormStateManager, derivedState: FormDerivedState, store: PropertyOverrideStore) =>
+        createPropertyDerivationOrchestrator({
           schemaFields: computed(() => stateManager.formSetup()?.schemaFields as FieldDef<unknown>[] | undefined),
           formValue: stateManager.formValue as Signal<Record<string, unknown>>,
           store,
-          externalData,
-        };
-        return createPropertyDerivationOrchestrator(config);
-      },
-      deps: [FormStateManager, EXTERNAL_DATA, PROPERTY_OVERRIDE_STORE],
+          externalData: derivedState.externalData,
+        }),
+      deps: [FormStateManager, FormDerivedState, PROPERTY_OVERRIDE_STORE],
     },
   ];
 }

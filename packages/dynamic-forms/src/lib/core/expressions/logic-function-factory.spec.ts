@@ -11,10 +11,8 @@ import { createLogicFunction, createDebouncedLogicFunction } from './logic-funct
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
 import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
-import { HTTP_CONDITION_CACHE, HttpConditionCache } from '../http/http-condition-cache';
-import { LogicFunctionCacheService } from './logic-function-cache.service';
-import { HttpConditionFunctionCacheService } from './http-condition-function-cache.service';
-import { DynamicValueFunctionCacheService } from '../values/dynamic-value-function-cache.service';
+import { ExpressionCacheContext } from '../../providers/expression-cache-context';
+import { FormDerivedState } from '../../providers/form-derived-state';
 
 describe('logic-function-factory', () => {
   const mockEntity = signal<Record<string, unknown>>({});
@@ -36,10 +34,8 @@ describe('logic-function-factory', () => {
         { provide: DynamicFormLogger, useValue: mockLogger },
         { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
         { provide: HttpClient, useValue: { request: vi.fn().mockReturnValue(of({ allowed: true })) } },
-        { provide: HTTP_CONDITION_CACHE, useValue: new HttpConditionCache() },
-        LogicFunctionCacheService,
-        HttpConditionFunctionCacheService,
-        DynamicValueFunctionCacheService,
+        { provide: ExpressionCacheContext, useValue: new ExpressionCacheContext() },
+        { provide: FormDerivedState, useValue: { externalData: signal(undefined) } },
       ],
     });
 

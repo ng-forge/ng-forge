@@ -4,7 +4,8 @@ import { type FieldContext, form, schema } from '@angular/forms/signals';
 import { createDynamicValueFunction } from './dynamic-value-factory';
 import { FieldContextRegistryService, RootFormRegistryService } from '../registry';
 import { FormStateManager } from '../../state/form-state-manager';
-import { DynamicValueFunctionCacheService } from './dynamic-value-function-cache.service';
+import { ExpressionCacheContext } from '../../providers/expression-cache-context';
+import { FormDerivedState } from '../../providers/form-derived-state';
 
 describe('dynamic-value-factory (integration)', () => {
   const mockEntity = signal<Record<string, unknown>>({});
@@ -18,7 +19,8 @@ describe('dynamic-value-factory (integration)', () => {
         { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
         { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         FieldContextRegistryService,
-        DynamicValueFunctionCacheService,
+        { provide: ExpressionCacheContext, useValue: new ExpressionCacheContext() },
+        { provide: FormDerivedState, useValue: { externalData: signal(undefined) } },
       ],
     });
 
