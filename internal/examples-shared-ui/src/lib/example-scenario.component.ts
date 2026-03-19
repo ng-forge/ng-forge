@@ -4,9 +4,27 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { DomSanitizer } from '@angular/platform-browser';
 import { DynamicForm } from '@ng-forge/dynamic-forms';
 import { SANDBOX_THEME } from '@ng-forge/sandbox-harness';
+import type { HighlighterCore } from 'shiki/core';
 import { ExampleScenario } from './types';
 import { injectQueryParams } from 'ngxtension/inject-query-params';
 import { injectRouteData } from 'ngxtension/inject-route-data';
+
+/** Lazy-loaded Shiki highlighter with only JS + two themes (avoids bundling 300+ grammars). */
+let _hlPromise: Promise<HighlighterCore> | null = null;
+function getShikiHighlighter(): Promise<HighlighterCore> {
+  if (!_hlPromise) {
+    _hlPromise = (async () => {
+      const { createHighlighterCore } = await import('shiki/core');
+      const { createOnigurumaEngine } = await import('shiki/engine/oniguruma');
+      return createHighlighterCore({
+        engine: createOnigurumaEngine(import('shiki/wasm')),
+        themes: [import('shiki/dist/themes/material-theme-lighter.mjs'), import('shiki/dist/themes/material-theme-darker.mjs')],
+        langs: [import('shiki/dist/langs/javascript.mjs')],
+      });
+    })();
+  }
+  return _hlPromise;
+}
 
 /**
  * Generic component for rendering a single example scenario.
@@ -131,9 +149,9 @@ export class ExampleScenarioComponent {
     params: () => (this.isBrowser ? { code: this.configJson(), theme: this.currentTheme() } : undefined),
     loader: async ({ params }) => {
       if (!params.code) return '';
-      const { codeToHtml } = await import('shiki');
+      const highlighter = await getShikiHighlighter();
       const shikiTheme = params.theme === 'dark' ? 'material-theme-darker' : 'material-theme-lighter';
-      return codeToHtml(params.code, { lang: 'javascript', theme: shikiTheme });
+      return highlighter.codeToHtml(params.code, { lang: 'javascript', theme: shikiTheme });
     },
   });
 

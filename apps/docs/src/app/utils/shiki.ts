@@ -1,22 +1,46 @@
 /**
  * Shared Shiki highlighting utility.
  *
+ * Uses shiki/core with explicit language and theme imports so that only the
+ * grammars actually used by the docs are bundled (~6 languages instead of 300+).
+ *
  * During SSR pre-rendering, Shiki is skipped to avoid OOM — plain <pre><code>
  * blocks are emitted instead. The client hydrates and applies full syntax
  * highlighting with theme support. SEO crawlers still get the code text.
  */
 
+import type { HighlighterCore } from 'shiki/core';
+
 const IS_SERVER = typeof window === 'undefined';
 
-/** Cached shiki `codeToHtml` function — avoids re-importing on every call. */
-let cachedCodeToHtml: typeof import('shiki').codeToHtml | null = null;
+/** Cached highlighter instance — created once, reused for all calls. */
+let highlighterPromise: Promise<HighlighterCore> | null = null;
 
-async function getCodeToHtml(): Promise<typeof import('shiki').codeToHtml> {
-  if (!cachedCodeToHtml) {
-    const shiki = await import('shiki');
-    cachedCodeToHtml = shiki.codeToHtml;
+async function getHighlighter(): Promise<HighlighterCore> {
+  if (!highlighterPromise) {
+    highlighterPromise = (async () => {
+      const { createHighlighterCore } = await import('shiki/core');
+      const { createOnigurumaEngine } = await import('shiki/engine/oniguruma');
+
+      // Import only the languages and themes used in docs.
+      // These resolve to individual chunks instead of the full 300+ grammar bundle.
+      const langTs = await import('shiki/dist/langs/typescript.mjs');
+      const langJson = await import('shiki/dist/langs/json.mjs');
+      const langBash = await import('shiki/dist/langs/bash.mjs');
+      const langScss = await import('shiki/dist/langs/scss.mjs');
+      const langHtml = await import('shiki/dist/langs/html.mjs');
+      const langCss = await import('shiki/dist/langs/css.mjs');
+      const themeLight = await import('shiki/dist/themes/material-theme-lighter.mjs');
+      const themeDark = await import('shiki/dist/themes/material-theme-darker.mjs');
+
+      return createHighlighterCore({
+        engine: createOnigurumaEngine(import('shiki/wasm')),
+        themes: [themeLight.default, themeDark.default],
+        langs: [langTs.default, langJson.default, langBash.default, langScss.default, langHtml.default, langCss.default],
+      });
+    })();
   }
-  return cachedCodeToHtml;
+  return highlighterPromise;
 }
 
 function escapeHtml(code: string): string {
@@ -36,9 +60,10 @@ export async function highlightCode(code: string, lang: string): Promise<string>
     return plainCodeBlock(code, lang);
   }
   try {
-    const codeToHtml = await getCodeToHtml();
-    return await codeToHtml(code, {
-      lang,
+    const highlighter = await getHighlighter();
+    const resolvedLang = highlighter.getLoadedLanguages().includes(lang) ? lang : 'text';
+    return highlighter.codeToHtml(code, {
+      lang: resolvedLang,
       themes: { light: 'material-theme-lighter', dark: 'material-theme-darker' },
       defaultColor: false,
     });
@@ -57,8 +82,9 @@ export async function highlightCodeSingleTheme(code: string, lang: string, theme
     return plainCodeBlock(code, lang);
   }
   try {
-    const codeToHtml = await getCodeToHtml();
-    return await codeToHtml(code, { lang, theme });
+    const highlighter = await getHighlighter();
+    const resolvedLang = highlighter.getLoadedLanguages().includes(lang) ? lang : 'text';
+    return highlighter.codeToHtml(code, { lang: resolvedLang, theme });
   } catch (err) {
     console.warn('[Shiki] Failed to highlight code:', err);
     return plainCodeBlock(code, lang);

@@ -192,21 +192,20 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
-      // Prevent the SSR fallback from serving index.html for non-app requests.
-      // Without this, requests like /.well-known/foo.json or /random/path.xml
-      // get SPA-fallbacked to index.html, which Vite then tries to parse as
-      // the requested content type — crashing the dev server.
+      // When a non-route request (e.g., /.well-known/foo.json from Chrome DevTools)
+      // hits the Analog SSR fallback, Vite serves index.html and extracts inline
+      // <style> tags as proxy modules. The proxy module ID retains the original URL,
+      // so if it contains ".json", vite:json tries to parse the CSS as JSON and crashes.
+      //
+      // Two-layer fix:
+      // 1. Middleware: intercept non-route requests before the SSR fallback
+      // 2. Load hook: if a .json html-proxy module still gets created, feed vite:json
+      //    valid JSON so it doesn't crash parsing CSS
       {
-        name: 'vite-plugin-non-route-guard',
+        name: 'vite-plugin-ssr-fallback-guard',
         configureServer(server) {
           server.middlewares.use((req, res, next) => {
             const url = req.url?.split('?')[0] ?? '';
-            // Requests with file extensions are static asset requests, not app routes.
-            // Let Vite's static file serving handle them (returns 404 naturally if missing).
-            // Skip our own virtual endpoints (__global.css, __search-index.json, adapter CSS).
-            if (/\.\w+$/.test(url) && !url.startsWith('/__') && !/^\/(material|bootstrap|primeng|ionic)\.css$/.test(url)) {
-              return next();
-            }
             // Dot-prefixed paths (/.well-known, /.hidden) are never app routes
             if (/^\/\./.test(url)) {
               res.statusCode = 404;
@@ -215,6 +214,13 @@ export default defineConfig(({ mode }) => {
             }
             next();
           });
+        },
+        load(id: string) {
+          // Fallback: if a .json html-proxy virtual module was created despite
+          // the middleware, return valid JSON so vite:json parses it harmlessly.
+          if (id.includes('html-proxy') && /\.json[?#]/.test(id)) {
+            return '{}';
+          }
         },
       },
       globalStylesPlugin(),
