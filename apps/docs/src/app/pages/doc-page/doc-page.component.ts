@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
@@ -90,7 +90,7 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
               <app-doc-tabs [tabGroup]="tabs" />
             }
             <app-content-segments class="doc-page-content" [contentHtml]="content()!.rawHtml" />
-          } @else {
+          } @else if (showSkeleton()) {
             <div class="doc-page-skeleton" role="status" aria-busy="true">
               <span class="visually-hidden">Loading page content</span>
               <!-- Breadcrumb -->
@@ -131,7 +131,7 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
         </article>
         @if (content()?.html) {
           <app-toc [headings]="content()?.headings ?? []" />
-        } @else {
+        } @else if (showSkeleton()) {
           <nav class="toc-skeleton" role="status" aria-busy="true">
             <span class="visually-hidden">Loading table of contents</span>
             <div class="toc-skeleton-line toc-skeleton-line--short"></div>
@@ -383,9 +383,22 @@ export class DocPageComponent {
   protected readonly adapter = inject(ActiveAdapterService);
   private copiedTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /**
+   * Delayed flag to prevent skeleton flash on fast loads.
+   * Stays false during SSR and the first 150ms after hydration.
+   * Only flips to true if content hasn't loaded by then.
+   */
+  protected readonly showSkeleton = signal(false);
+
   constructor() {
     this.destroyRef.onDestroy(() => {
       if (this.copiedTimer) clearTimeout(this.copiedTimer);
+    });
+
+    // Show skeleton only after a brief delay — avoids flicker when content loads quickly
+    afterNextRender(() => {
+      const timer = setTimeout(() => this.showSkeleton.set(true), 150);
+      this.destroyRef.onDestroy(() => clearTimeout(timer));
     });
 
     // Update document title based on current page
