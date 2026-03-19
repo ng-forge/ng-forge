@@ -41,23 +41,32 @@ function parseFrontmatter(raw: string): { title: string; slug: string; body: str
  * Strip markdown syntax to produce plain text for indexing.
  */
 function stripMarkdown(md: string): string {
+  let result = md
+    // Remove code blocks (fenced)
+    .replace(/```[\s\S]*?```/g, '')
+    // Remove inline code
+    .replace(/`[^`]+`/g, '')
+    // Remove images
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    // Remove links but keep text
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    // Remove headings markers
+    .replace(/^#{1,6}\s+/gm, '')
+    // Remove bold/italic markers
+    .replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
+    .replace(/_{1,3}([^_]+)_{1,3}/g, '$1');
+
+  // Remove HTML tags — loop until stable to handle nested/malformed tags
+  // (e.g., `<scr<script>ipt>` collapses to `<script>` after one pass)
+  const TAG_RE = /<[^>]*>/g;
+  let prev: string;
+  do {
+    prev = result;
+    result = result.replace(TAG_RE, '');
+  } while (result !== prev);
+
   return (
-    md
-      // Remove code blocks (fenced)
-      .replace(/```[\s\S]*?```/g, '')
-      // Remove inline code
-      .replace(/`[^`]+`/g, '')
-      // Remove images
-      .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
-      // Remove links but keep text
-      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-      // Remove headings markers
-      .replace(/^#{1,6}\s+/gm, '')
-      // Remove bold/italic markers
-      .replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
-      .replace(/_{1,3}([^_]+)_{1,3}/g, '$1')
-      // Remove HTML tags
-      .replace(/<[^>]+>/g, '')
+    result
       // Remove horizontal rules
       .replace(/^[-*_]{3,}$/gm, '')
       // Remove blockquote markers
