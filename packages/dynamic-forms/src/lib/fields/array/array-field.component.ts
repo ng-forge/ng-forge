@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  EnvironmentInjector,
   inject,
   Injector,
   input,
@@ -58,7 +59,9 @@ import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-a
         [attr.data-array-item-index]="i"
       >
         @for (field of item.fields; track $index) {
-          <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+          <ng-container
+            *ngComponentOutlet="field.component; injector: field.injector; environmentInjector: environmentInjector; inputs: field.inputs()"
+          />
         }
       </div>
     }
@@ -88,6 +91,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
   private readonly parentInjector = inject(Injector);
+  protected readonly environmentInjector = inject(EnvironmentInjector);
   private readonly eventBus = inject(EventBus);
   private readonly logger = inject(DynamicFormLogger);
   private readonly templateRegistry = inject(ARRAY_TEMPLATE_REGISTRY);

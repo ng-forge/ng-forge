@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  EnvironmentInjector,
   inject,
   Injector,
   input,
@@ -41,7 +42,9 @@ import { SubmitEvent } from '../../events/constants/submit.event';
   imports: [NgComponentOutlet],
   template: `
     @for (field of resolvedFields(); track field.key) {
-      <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+      <ng-container
+        *ngComponentOutlet="field.component; injector: field.injector; environmentInjector: environmentInjector; inputs: field.inputs()"
+      />
     }
   `,
   styleUrl: './group-field.component.scss',
@@ -65,6 +68,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
   private readonly injector = inject(Injector);
+  protected readonly environmentInjector = inject(EnvironmentInjector);
   private readonly eventBus = inject(EventBus);
   private readonly logger = inject(DynamicFormLogger);
 

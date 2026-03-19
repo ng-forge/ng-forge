@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  EnvironmentInjector,
   inject,
   Injector,
   input,
@@ -55,7 +56,9 @@ import { EventDispatcher } from './events/event-dispatcher';
         <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="form()" [fieldSignalContext]="fieldSignalContext()"></div>
       } @else {
         @for (field of resolvedFields(); track field.key) {
-          <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+          <ng-container
+            *ngComponentOutlet="field.component; injector: field.injector; environmentInjector: environmentInjector; inputs: field.inputs()"
+          />
         }
       }
     }
@@ -96,6 +99,7 @@ export class DynamicForm<
 
   private destroyRef = inject(DestroyRef);
   private injector = inject(Injector);
+  protected environmentInjector = inject(EnvironmentInjector);
   private eventBus = inject(EventBus);
   private logger = inject(DynamicFormLogger);
   private dispatcher = inject(EventDispatcher, { optional: true });
