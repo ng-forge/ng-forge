@@ -5,7 +5,7 @@
 .config-view {
   display: flex;
   flex-direction: column;
-  gap: $space-6;
+  gap: $space-8;
 
   &__section {
     display: flex;
@@ -56,8 +56,7 @@
     background: var(--forge-code-bg, #{$bg-deep});
     border: 1px solid var(--forge-border-color, #{$steel-dark});
     border-radius: $radius-lg;
-    overflow-x: hidden;
-    overflow-y: visible;
+    overflow: visible;
     padding: $space-2 $space-4;
 
     &:hover docs-copy-button {
