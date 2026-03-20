@@ -22,6 +22,7 @@ type TestFormConfig = {
     | (BaseCheckedField<any> & { type: 'checkbox' })
     | { type: 'row'; key: string; label: string; fields: any[] }
     | { type: 'group'; key: string; label: string; fields: any[] }
+    | { type: 'page'; key: string; label?: string; fields: any[] }
   >;
 };
 
@@ -1956,6 +1957,9 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
 
+      const groupElement = fixture.nativeElement.querySelector('[data-testid="contact"]');
+      const rowElement = fixture.nativeElement.querySelector('[data-testid="name"]');
+
       // Should create nested structure with group containing row-flattened fields
       expect(component.formValue()).toEqual({
         contact: {
@@ -1964,6 +1968,9 @@ describe('DynamicFormComponent', () => {
           email: 'john.doe@example.com',
         },
       });
+      expect(groupElement?.classList.contains('df-group')).toBe(true);
+      expect(rowElement?.classList.contains('df-row')).toBe(true);
+      expect(groupElement?.contains(rowElement)).toBe(true);
     });
 
     it('should handle mixed regular definitions with row and group definitions', async () => {
@@ -2036,6 +2043,55 @@ describe('DynamicFormComponent', () => {
           city: 'New York',
         },
       });
+    });
+
+    it('should render paged forms with nested group and row containers', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'page1',
+            type: 'page',
+            fields: [
+              {
+                key: 'contact',
+                type: 'group',
+                fields: [
+                  {
+                    key: 'nameRow',
+                    type: 'row',
+                    fields: [
+                      { key: 'first', type: 'input', label: 'First', value: 'John' },
+                      { key: 'last', type: 'input', label: 'Last', value: 'Doe' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            key: 'page2',
+            type: 'page',
+            fields: [{ key: 'notes', type: 'input', label: 'Notes' }],
+          },
+        ],
+      } as unknown as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      const groupElement = fixture.nativeElement.querySelector('[data-testid="contact"]');
+      const rowElement = fixture.nativeElement.querySelector('[data-testid="nameRow"]');
+
+      expect(component.formValue()).toEqual({
+        contact: {
+          first: 'John',
+          last: 'Doe',
+        },
+        notes: '',
+      });
+      expect(groupElement?.classList.contains('df-group')).toBe(true);
+      expect(rowElement?.classList.contains('df-row')).toBe(true);
+      expect(groupElement?.contains(rowElement)).toBe(true);
     });
 
     it('should preserve field validation for nested definitions', async () => {

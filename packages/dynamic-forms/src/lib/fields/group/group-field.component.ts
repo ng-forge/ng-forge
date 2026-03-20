@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  EnvironmentInjector,
   inject,
   Injector,
   input,
@@ -41,7 +42,9 @@ import { SubmitEvent } from '../../events/constants/submit.event';
   imports: [NgComponentOutlet],
   template: `
     @for (field of resolvedFields(); track field.key) {
-      <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+      <ng-container
+        *ngComponentOutlet="field.component; injector: field.injector; environmentInjector: environmentInjector; inputs: field.inputs()"
+      />
     }
   `,
   styleUrl: './group-field.component.scss',
@@ -65,6 +68,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
   private readonly injector = inject(Injector);
+  protected readonly environmentInjector = inject(EnvironmentInjector);
   private readonly eventBus = inject(EventBus);
   private readonly logger = inject(DynamicFormLogger);
 
@@ -97,11 +101,13 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
 
     if (groupField.fields && groupField.fields.length > 0) {
       const flattenedFields = this.fieldProcessors.memoizedFlattenFields(groupField.fields, registry);
+      const flattenedFieldsForRendering = this.fieldProcessors.memoizedFlattenFieldsForRendering(groupField.fields, registry);
       const fieldsById = this.fieldProcessors.memoizedKeyBy(flattenedFields);
       const defaultValues = this.fieldProcessors.memoizedDefaultValues(fieldsById, registry);
 
       return {
-        fields: flattenedFields,
+        fields: flattenedFieldsForRendering,
+        schemaFields: flattenedFields,
         originalFields: groupField.fields,
         defaultValues,
         registry,
@@ -110,6 +116,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
 
     return {
       fields: [],
+      schemaFields: [],
       originalFields: [],
       defaultValues: {},
       registry,
@@ -141,8 +148,8 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
     return runInInjectionContext(this.injector, () => {
       const setup = this.formSetup();
 
-      if (setup.fields.length > 0) {
-        const schema = createSchemaFromFields(setup.fields, setup.registry);
+      if (setup.schemaFields.length > 0) {
+        const schema = createSchemaFromFields(setup.schemaFields, setup.registry);
         return untracked(() => form(this.entity, schema));
       }
 

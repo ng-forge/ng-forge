@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, EnvironmentInjector, inject, Injector, input } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
@@ -21,7 +21,9 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
   imports: [NgComponentOutlet],
   template: `
     @for (field of resolvedFields(); track field.key) {
-      <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+      <ng-container
+        *ngComponentOutlet="field.component; injector: field.injector; environmentInjector: environmentInjector; inputs: field.inputs()"
+      />
     }
   `,
   styleUrl: './row-field.component.scss',
@@ -43,6 +45,7 @@ export default class RowFieldComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly injector = inject(Injector);
+  protected readonly environmentInjector = inject(EnvironmentInjector);
   private readonly eventBus = inject(EventBus);
   private readonly logger = inject(DynamicFormLogger);
 

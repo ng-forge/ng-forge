@@ -190,6 +190,45 @@ describe('PageOrchestratorComponent', () => {
 
       expect(pageChangeCount).toBe(0);
     });
+
+    it('renders a large page > group > many rows shape without standalone injector errors', async () => {
+      const rowCount = 40;
+      const rows = Array.from({ length: rowCount }, (_, i) => ({
+        key: `row${i}`,
+        type: 'row',
+        fields: [{ key: `field${i}`, type: 'input', label: `Field ${i}` }],
+      }));
+
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'page1',
+            type: 'page',
+            fields: [
+              {
+                key: 'section',
+                type: 'group',
+                fields: rows,
+              },
+            ],
+          },
+          {
+            key: 'page2',
+            type: 'page',
+            fields: [{ key: 'confirm', type: 'input', label: 'Confirm' }],
+          },
+        ],
+      } as unknown as FormConfig;
+
+      const fixture = createForm(config, {});
+      await waitForFormInit(fixture, 1500);
+
+      const section = fixture.nativeElement.querySelector('[data-testid="section"]');
+      const renderedRows = fixture.nativeElement.querySelectorAll('[data-testid^="row"]');
+
+      expect(section).toBeTruthy();
+      expect(renderedRows).toHaveLength(rowCount);
+    }, 5000);
   });
 
   // ─── Hidden page auto-redirect (B15) ────────────────────────────────────────
