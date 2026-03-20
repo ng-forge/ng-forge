@@ -5,13 +5,16 @@ import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { of, throwError, firstValueFrom } from 'rxjs';
 import { ContentService, RenderedContent } from './content.service';
+import { ShikiService } from '../utils/shiki';
 
 // Mock the shiki highlighter — returns a plain code block to keep tests fast
 vi.mock('../utils/shiki', () => ({
-  highlightCode: vi.fn(async (code: string, lang: string) => {
-    const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    return `<pre class="shiki"><code class="language-${lang}">${escaped}</code></pre>`;
-  }),
+  ShikiService: class {
+    async highlightCode(code: string, lang: string): Promise<string> {
+      const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `<pre class="shiki"><code class="language-${lang}">${escaped}</code></pre>`;
+    }
+  },
 }));
 
 /** Minimal DomSanitizer that just wraps the string as-is. */
@@ -41,6 +44,7 @@ function createService(httpMock: Partial<HttpClient>, baseHref = '/'): ContentSe
       { provide: TransferState, useValue: createFakeTransferState() },
       { provide: PLATFORM_ID, useValue: 'server' },
       { provide: APP_BASE_HREF, useValue: baseHref },
+      { provide: ShikiService, useClass: ShikiService },
     ],
   });
   return runInInjectionContext(injector, () => new (ContentService as unknown as new () => ContentService)());

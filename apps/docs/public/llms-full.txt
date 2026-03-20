@@ -587,7 +587,7 @@ This enables:
 
 ## Handling Meta Attributes
 
-`meta` attributes are native HTML attributes that should be applied to the underlying form element. They differ from `props` (which control UI library behavior). See [Props vs Meta](/field-types/text-inputs#props-vs-meta) for detailed usage guidance.
+`meta` attributes are native HTML attributes that should be applied to the underlying form element. They differ from `props` (which control UI library behavior). See [Props vs Meta Summary](#props-vs-meta-summary) below for detailed usage guidance.
 
 ### Props vs Meta Summary
 
@@ -740,8 +740,8 @@ The Material integration source code is the most comprehensive example of implem
 
 - **[Material Integration](/configuration)** - Complete reference implementation
 - **[Field Types](/field-types/text-inputs)** - Understanding all available field types
-- **[Type Safety](/recipes/basics)** - Module augmentation for custom types
-- **[Validation](../validation/basics)** - Displaying validation errors in custom fields
+- **[Type Safety](/recipes/type-safety)** - Module augmentation for custom types
+- **[Validation](/validation/basics)** - Displaying validation errors in custom fields
 
 --- configuration ---
 
@@ -1987,11 +1987,11 @@ const config = {
 
 ## Related
 
-- **[Value Derivation](/derivation)** — Computed field values
-- **[Async Derivation](/derivation)** — HTTP and async function derivations, stopOnUserOverride
-- **[Validation](../../validation/basics/)** — Conditional validation
-- **[Custom Validators](../../validation/custom-validators/)** — Async and HTTP validators
-- **[Type Safety](/recipes/basics)** — TypeScript integration
+- **[Value Derivation](/dynamic-behavior/derivation)** — Computed field values
+- **[Async Derivation](/dynamic-behavior/derivation)** — HTTP and async function derivations, stopOnUserOverride
+- **[Validation](../validation/basics)** — Conditional validation
+- **[Custom Validators](../validation/custom-validators)** — Async and HTTP validators
+- **[Type Safety](/recipes/type-safety)** — TypeScript integration
 - **[Examples](/examples)** — Real-world form patterns
 
 --- dynamic-behavior/derivation/async ---
@@ -2386,9 +2386,9 @@ When the user changes the country, the phone prefix is auto-filled again — ove
 ## Related
 
 - **[Values](./)** — Expression, static value, and function-based derivations
-- **[Properties](./property-derivation)** — Derive component properties from form values
+- **[Properties](/dynamic-behavior/derivation/property)** — Derive component properties from form values
 - **[HTTP Conditions](/dynamic-behavior/overview)** — HTTP-driven field visibility and state
-- **[Custom Validators](../../../validation/custom-validators/)** — Async and HTTP validation
+- **[Custom Validators](/validation/custom-validators)** — Async and HTTP validation
 
 --- dynamic-behavior/derivation/property ---
 
@@ -2878,7 +2878,7 @@ External data values are reactively tracked - when signals change, property deri
 
 - **Value Derivation** (see tab above) - Compute field form values
 - **[Conditional Logic](/dynamic-behavior/overview)** - Control field visibility and state
-- **[Array Fields](../../prebuilt/form-arrays/simplified/)** - Working with array fields
+- **[Array Fields](/prebuilt/form-arrays/simplified)** - Working with array fields
 
 --- dynamic-behavior/derivation/values ---
 
@@ -3363,7 +3363,7 @@ External data values are reactively tracked - when signals change, derivations a
 
 - **Property Derivation** (see tab above) — Derive component properties (minDate, options, label) from form values
 - **Async Derivation** (see tab above) — HTTP and async function derivations, stopOnUserOverride
-- **[Array Fields](../../prebuilt/form-arrays/simplified/)** — Working with array fields
+- **[Array Fields](/prebuilt/form-arrays/simplified)** — Working with array fields
 - **[Examples](/examples)** — Real-world form patterns
 
 --- dynamic-behavior/i18n ---
@@ -7976,7 +7976,7 @@ Arrays can contain these field types:
 - Row fields -> creates flat object arrays `[{...}, {...}]` (rows don't add nesting)
 - Button fields (for remove operations inside each item)
 
-See [Type Safety & Inference](/recipes/basics) for details on how arrays affect type inference.
+See [Type Safety & Inference](/recipes/type-safety) for details on how arrays affect type inference.
 
 ## Conditional Visibility
 
@@ -8468,7 +8468,7 @@ Groups can contain:
 - Leaf fields (input, select, checkbox, etc.)
 - Row fields (for horizontal layouts within the group)
 
-See [Type Safety & Inference](/recipes/basics) for details on how groups affect type inference.
+See [Type Safety & Inference](/recipes/type-safety) for details on how groups affect type inference.
 
 ## Conditional Visibility
 
@@ -9342,7 +9342,7 @@ If you need a completely custom adapter (no existing adapter as base), or want t
 ## Next Steps
 
 - **[Custom Integrations](/building-an-adapter)** — Build a complete adapter for any UI library from scratch
-- **[Type Safety](/recipes/basics)** — Leverage TypeScript inference for form values and field types
+- **[Type Safety](/recipes/type-safety)** — Leverage TypeScript inference for form values and field types
 - **[Events](/recipes/events)** — Dispatch and subscribe to form events from custom field components
 
 --- recipes/events ---
@@ -10161,7 +10161,7 @@ The expression parser lets you write flexible conditional logic while preventing
 ## Next Steps
 
 - **[Conditional Logic](/dynamic-behavior/overview)** — Use expressions to control field visibility and state
-- **[Type Safety](/recipes/basics)** — Leverage TypeScript inference for form values and field types
+- **[Type Safety](/recipes/type-safety)** — Leverage TypeScript inference for form values and field types
 - **[Value Derivation](/dynamic-behavior/derivation)** — Use expressions to compute field values dynamically
 
 --- recipes/type-safety ---
@@ -11015,9 +11015,9 @@ const config = {
 
 ## Related
 
-- **[Validation](../../validation/basics/)** - How validators affect inferred types
+- **[Validation](../validation/basics)** - How validators affect inferred types
 - **[Field Types](/field-types/text-inputs)** - Understanding available field types
-- **[Form Layout](../../prebuilt/form-groups/)** - Visual guide to container fields
+- **[Form Layout](../prebuilt/form-groups)** - Visual guide to container fields
 
 --- recipes/value-exclusion ---
 
@@ -11459,7 +11459,7 @@ schema: schema<Form>(({ value }) =>
 
 ## When to Use Standard Schema Instead
 
-Consider [Standard Schema (Zod)](../zod) if you:
+Consider [Standard Schema (Zod)](./zod) if you:
 
 - Already have Zod schemas from an API or shared library
 - Need the same validation in Node.js backend
@@ -11489,10 +11489,10 @@ Schema validation excels at:
 
 Dynamic Forms supports two approaches to form-level validation:
 
-| Approach                            | Best For                               | Wrapper Required         |
-| ----------------------------------- | -------------------------------------- | ------------------------ |
-| [Angular Schema](../angular-schema) | Angular-only projects, full API access | No (raw callback)        |
-| [Standard Schema](../zod)           | Reusing Zod/Valibot schemas, OpenAPI   | Yes (`standardSchema()`) |
+| Approach                           | Best For                               | Wrapper Required         |
+| ---------------------------------- | -------------------------------------- | ------------------------ |
+| [Angular Schema](./angular-schema) | Angular-only projects, full API access | No (raw callback)        |
+| [Standard Schema](./zod)           | Reusing Zod/Valibot schemas, OpenAPI   | Yes (`standardSchema()`) |
 
 ### Angular Schema
 
@@ -11569,9 +11569,9 @@ const config = {
 
 ## Next Steps
 
-- **[Angular Schema](../angular-schema)** - Native Angular approach
-- **[Standard Schema (Zod)](../zod)** - Use Zod, Valibot, or ArkType
-- **[Field Validation](../../validation/basics/)** - Individual field validators
+- **[Angular Schema](./angular-schema)** - Native Angular approach
+- **[Standard Schema (Zod)](./zod)** - Use Zod, Valibot, or ArkType
+- **[Field Validation](../validation/basics)** - Individual field validators
 
 --- schema-validation/zod ---
 
@@ -12153,7 +12153,7 @@ when: {
 - **[Validation Basics](/validation/basics)** - Shorthand validators
 - **[Validation Reference](/validation/reference)** - Complete API
 - **[Conditional Logic](/dynamic-behavior/overview)** - Field behavior changes
-- **[Examples](../../examples/)** - Real-world patterns
+- **[Examples](../examples)** - Real-world patterns
 
 --- validation/basics ---
 
@@ -12468,7 +12468,7 @@ Invalid fields prevent form submission and display error messages.
 - **[Validation Advanced](/validation/advanced)** - Conditional validation, dynamic values
 - **[Validation Reference](/validation/reference)** - Complete validator API
 - **[Conditional Logic](/dynamic-behavior/overview)** - Dynamic field behavior
-- **[Examples](../../examples/)** - Real-world validation patterns
+- **[Examples](../examples)** - Real-world validation patterns
 
 --- validation/custom-validators ---
 
@@ -13315,7 +13315,7 @@ const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
 
 - [Validation Basics](/validation/basics) - Core validation concepts
 - [Validation Reference](/validation/reference) - Standard validation rules
-- [Type Safety](/recipes/basics) - TypeScript integration
+- [Type Safety](/recipes/type-safety) - TypeScript integration
 
 --- validation/reference ---
 
@@ -13757,4 +13757,4 @@ type ConditionalExpression = FieldValueCondition | FormValueCondition | CustomCo
 - **[Validation Basics](/validation/basics)** - Getting started with validation
 - **[Validation Advanced](/validation/advanced)** - Conditional validators
 - **[Conditional Logic](/dynamic-behavior/overview)** - Field behavior changes
-- **[Type Safety](/recipes/basics)** - TypeScript integration
+- **[Type Safety](/recipes/type-safety)** - TypeScript integration
