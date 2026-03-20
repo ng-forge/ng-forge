@@ -519,10 +519,14 @@ export class DocPageComponent {
     if (copyBtn) {
       event.preventDefault();
       const code = copyBtn.getAttribute('data-code') ?? '';
-      // Decode HTML entities back to plain text
-      const textarea = document.createElement('textarea');
-      textarea.innerHTML = code;
-      this.clipboard.copy(textarea.value);
+      // Decode HTML entities back to plain text without innerHTML (CSP-safe)
+      const decoded = code
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+      this.clipboard.copy(decoded);
       this.showCopiedState(copyBtn);
       return;
     }

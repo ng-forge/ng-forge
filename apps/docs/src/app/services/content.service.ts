@@ -25,9 +25,14 @@ export interface RenderedContent {
 }
 
 function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/<[^>]*>/g, '')
+  // Strip HTML tags iteratively to handle any nested/malformed markup
+  let stripped = text.toLowerCase();
+  let prev: string;
+  do {
+    prev = stripped;
+    stripped = stripped.replace(/<[^>]*>/g, '');
+  } while (stripped !== prev);
+  return stripped
     .replace(/[^\w\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
@@ -312,13 +317,10 @@ export class ContentService {
     const replacements = await Promise.all(
       matches.map(async (match) => {
         const lang = match[1];
-        // Decode HTML entities back to plain text for Shiki
+        // Decode HTML entities back to plain text for Shiki (single-pass to avoid double-unescape)
         const encoded = match[2];
-        const decoded = encoded
-          .replace(/&amp;/g, '&')
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-          .replace(/&quot;/g, '"');
+        const ENTITY_MAP: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"' };
+        const decoded = encoded.replace(/&(?:amp|lt|gt|quot);/g, (entity) => ENTITY_MAP[entity] ?? entity);
         const highlighted = await this.shiki.highlightCode(decoded, lang);
         return { original: match[0], replacement: highlighted };
       }),
