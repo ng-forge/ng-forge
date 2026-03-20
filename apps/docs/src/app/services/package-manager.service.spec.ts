@@ -7,7 +7,7 @@ import { PackageManagerService } from './package-manager.service';
  * `explicitEffect` branch is skipped (it requires a fully bootstrapped
  * Angular application with EffectManager). We test the signal logic directly.
  */
-function createService(platformId: string = 'server'): PackageManagerService {
+function createService(platformId = 'server'): PackageManagerService {
   const injector = Injector.create({
     providers: [{ provide: PLATFORM_ID, useValue: platformId }],
   });

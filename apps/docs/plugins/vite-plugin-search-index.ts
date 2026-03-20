@@ -9,7 +9,7 @@
 import { resolve, relative } from 'node:path';
 import { readFileSync, readdirSync, statSync, watch } from 'node:fs';
 import type { Plugin, ViteDevServer } from 'vite';
-import { getApiPackages, invalidateApiCache, type ApiDeclaration, type ApiPackage } from './vite-plugin-api-docs';
+import { getApiPackages, type ApiDeclaration } from './vite-plugin-api-docs';
 
 interface SearchIndexEntry {
   slug: string;

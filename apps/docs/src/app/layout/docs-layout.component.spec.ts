@@ -38,7 +38,7 @@ function setup(opts: { adapter?: string; url?: string } = {}) {
     url,
     lastSuccessfulNavigation: navigationSignal,
     serializeUrl: (tree: any) => urlSerializer.serialize(tree),
-    events: { subscribe: () => ({ unsubscribe: () => {} }) },
+    events: { subscribe: () => ({ unsubscribe: () => void 0 }) },
   } as unknown as Router;
 
   function navigate(newUrl: string): void {

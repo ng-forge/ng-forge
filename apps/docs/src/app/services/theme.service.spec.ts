@@ -7,7 +7,7 @@ import { ThemeService, ThemeType } from './theme.service';
  * browser-only branches (matchMedia, afterNextRender, explicitEffect) are skipped.
  * We test the signal logic and toggleTheme() directly.
  */
-function createService(platformId: string = 'server'): ThemeService {
+function createService(platformId = 'server'): ThemeService {
   const injector = Injector.create({
     providers: [{ provide: PLATFORM_ID, useValue: platformId }],
   });
