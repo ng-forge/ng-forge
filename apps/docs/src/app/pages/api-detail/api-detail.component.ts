@@ -6,7 +6,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { combineLatest, map } from 'rxjs';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
-import { highlightCode } from '../../utils/shiki';
+import { ShikiService } from '../../utils/shiki';
 import { ApiService, type ApiPackage, getKindMeta } from '../../services/api.service';
 
 @Component({
@@ -23,6 +23,7 @@ export class ApiDetailComponent {
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly shiki = inject(ShikiService);
   protected readonly adapter = inject(ActiveAdapterService);
 
   constructor() {
@@ -116,7 +117,7 @@ export class ApiDetailComponent {
       const decl = this.declaration();
       return decl?.signature ? { signature: decl.signature } : undefined;
     },
-    loader: ({ params }) => highlightCode(params.signature, 'typescript'),
+    loader: ({ params }) => this.shiki.highlightCode(params.signature, 'typescript'),
   });
 
   readonly highlightedExamples = resource({
@@ -129,9 +130,9 @@ export class ApiDetailComponent {
         params.examples.map((ex) => {
           const codeMatch = ex.match(/```(\w+)?\n([\s\S]*?)```/);
           if (codeMatch) {
-            return highlightCode(codeMatch[2].trim(), codeMatch[1] ?? 'typescript');
+            return this.shiki.highlightCode(codeMatch[2].trim(), codeMatch[1] ?? 'typescript');
           }
-          return highlightCode(ex.trim(), 'typescript');
+          return this.shiki.highlightCode(ex.trim(), 'typescript');
         }),
       );
     },

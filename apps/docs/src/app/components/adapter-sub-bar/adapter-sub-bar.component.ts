@@ -3,7 +3,7 @@ import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { AdapterName } from '@ng-forge/sandbox-harness';
 
 @Component({
-  selector: 'app-adapter-sub-bar',
+  selector: 'docs-adapter-sub-bar',
   template: `
     <div class="adapter-sub-bar">
       <div class="adapter-dropdown" [class.open]="isOpen()">

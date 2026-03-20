@@ -25,7 +25,7 @@ function registerTabGroup(navPath: string, tabs: TabEntry[]): void {
   }
 }
 
-// Value Derivation tabs (was mdFile array in ng-doc)
+// Value Derivation tabs
 registerTabGroup('dynamic-behavior/derivation', [
   { label: 'Values', slug: 'dynamic-behavior/derivation/values' },
   { label: 'Properties', slug: 'dynamic-behavior/derivation/property' },

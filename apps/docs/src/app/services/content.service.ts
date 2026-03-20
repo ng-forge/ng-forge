@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Observable, switchMap, catchError, of, shareReplay, tap, from, concat } from 'rxjs';
 import { Marked, type Renderer, type Tokens } from 'marked';
-import { highlightCode } from '../utils/shiki';
+import { ShikiService } from '../utils/shiki';
 
 export interface HeadingEntry {
   id: string;
@@ -95,6 +95,7 @@ export class ContentService {
   private readonly transferState = inject(TransferState);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly baseHref = inject(APP_BASE_HREF, { optional: true }) ?? '/';
+  private readonly shiki = inject(ShikiService);
   private readonly cache = new Map<string, Observable<RenderedContent>>();
 
   /**
@@ -218,7 +219,7 @@ export class ContentService {
         const lang = (token.lang ?? '').split(/\s+/)[0] || 'text';
         const key = `${lang}:${token.text}`;
         if (highlightedMap.has(key)) return;
-        const html = await highlightCode(token.text, lang);
+        const html = await this.shiki.highlightCode(token.text, lang);
         highlightedMap.set(key, html);
       }),
     );
@@ -318,7 +319,7 @@ export class ContentService {
           .replace(/&lt;/g, '<')
           .replace(/&gt;/g, '>')
           .replace(/&quot;/g, '"');
-        const highlighted = await highlightCode(decoded, lang);
+        const highlighted = await this.shiki.highlightCode(decoded, lang);
         return { original: match[0], replacement: highlighted };
       }),
     );

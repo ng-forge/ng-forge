@@ -286,8 +286,7 @@ export class LandingComponent {
         this.copyFeedbackTimer = setTimeout(() => this.copied.set(false), COPY_FEEDBACK_DURATION_MS);
       })
       .catch(() => {
-        // Clipboard API may fail in some contexts (e.g., insecure origins)
-        console.warn('Failed to copy to clipboard');
+        // Clipboard API may fail in some contexts (e.g., insecure origins) — silently ignored
       });
   }
 

@@ -15,7 +15,6 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@ng-doc/generated": ["dist/ng-doc/docs"],
       "@ng-forge/dynamic-forms": ["packages/dynamic-forms/src/index.ts"],
       "@ng-forge/dynamic-forms/integration": ["packages/dynamic-forms/integration/src/public_api.ts"],
       "@ng-forge/dynamic-forms/schema": ["packages/dynamic-forms/schema/src/public_api.ts"],

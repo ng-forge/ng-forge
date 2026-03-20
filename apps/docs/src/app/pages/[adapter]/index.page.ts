@@ -11,10 +11,11 @@ import { ActivatedRoute, Router } from '@angular/router';
  */
 @Component({ template: '', changeDetection: ChangeDetectionStrategy.OnPush })
 export default class AdapterIndexPage {
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly adapter = this.route.parent?.snapshot.paramMap.get('adapter') ?? 'material';
+
   constructor() {
-    const router = inject(Router);
-    const route = inject(ActivatedRoute);
-    const adapter = route.parent?.snapshot.paramMap.get('adapter') ?? 'material';
-    void router.navigateByUrl(`/${adapter}/getting-started`, { replaceUrl: true });
+    void this.router.navigateByUrl(`/${this.adapter}/getting-started`, { replaceUrl: true });
   }
 }

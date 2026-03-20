@@ -4,7 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { combineLatest, from, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { highlightCode } from '../utils/shiki';
+import { ShikiService } from '../utils/shiki';
 
 function escapeHtml(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -19,6 +19,7 @@ function escapeHtml(text: string): string {
 })
 export class CodeHighlightDirective {
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly shiki = inject(ShikiService);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   readonly code = input.required<string>({ alias: 'codeHighlight' });
@@ -40,7 +41,7 @@ export class CodeHighlightDirective {
       if (!this.isBrowser || !code) {
         return of(null);
       }
-      return from(highlightCode(code, lang));
+      return from(this.shiki.highlightCode(code, lang));
     }),
     // Safe: html is produced by Shiki's highlightCode() from developer-provided code strings.
     map((html) => (html ? this.sanitizer.bypassSecurityTrustHtml(html) : null)),

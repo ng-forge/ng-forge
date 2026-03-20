@@ -542,10 +542,9 @@ html[data-theme='dark'] pre.shiki span {
 }
 
 // ============================================
-// DOC PAGE CONTENT TYPOGRAPHY (ng-doc-inspired)
+// DOC PAGE CONTENT TYPOGRAPHY
 // ============================================
 // Global because innerHTML content has no Angular encapsulation attributes.
-// Values extracted from ng-doc's global.css to match production (ng-forge.com).
 
 $doc-font:
   ui-sans-serif,

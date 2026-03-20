@@ -271,7 +271,7 @@ nav {
   }
 
   // Force search trigger to match .github-link style (borderless transparent circle)
-  ::ng-deep app-search {
+  ::ng-deep docs-search {
     .search-trigger {
       border: none;
       background: transparent;
@@ -383,7 +383,7 @@ nav {
   @media (max-width: 400px) {
     gap: 0.5rem;
 
-    ::ng-deep app-search .search-trigger {
+    ::ng-deep docs-search .search-trigger {
       width: 36px;
       height: 36px;
 

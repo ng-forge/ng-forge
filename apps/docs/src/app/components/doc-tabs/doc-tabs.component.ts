@@ -4,7 +4,7 @@ import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { TabGroup } from '../../layout/tabs.config';
 
 @Component({
-  selector: 'app-doc-tabs',
+  selector: 'docs-doc-tabs',
   imports: [RouterLink, RouterLinkActive],
   template: `
     <nav class="doc-tabs" role="tablist" aria-label="Page sections">

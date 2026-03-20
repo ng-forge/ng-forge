@@ -1,19 +1,22 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, PLATFORM_ID, resource, signal, viewChild } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { APP_BASE_HREF, isPlatformBrowser } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { explicitEffect } from 'ngxtension/explicit-effect';
+import { debounceTime } from 'rxjs';
 
 interface SearchResult {
   url: string;
   title: string;
   excerpt: SafeHtml;
+  category?: string;
 }
 
 interface SearchIndexEntry {
   slug: string;
   title: string;
   content: string;
+  category?: string;
 }
 
 const MAX_RESULTS = 8;
@@ -88,7 +91,7 @@ function generateExcerpt(content: string, terms: string[], sanitizer: DomSanitiz
 }
 
 @Component({
-  selector: 'app-search',
+  selector: 'docs-search',
   template: `
     <div class="search-wrapper">
       <button class="search-trigger" (click)="open()" aria-label="Search documentation">
@@ -118,7 +121,12 @@ function generateExcerpt(content: string, terms: string[], sanitizer: DomSanitiz
             <div class="search-results">
               @for (result of results(); track result.url) {
                 <button class="search-result" (click)="navigateTo(result.url)">
-                  <span class="result-title">{{ result.title }}</span>
+                  <span class="result-header">
+                    <span class="result-title">{{ result.title }}</span>
+                    @if (result.category) {
+                      <span class="result-category">{{ result.category }}</span>
+                    }
+                  </span>
                   <span class="result-excerpt" [innerHTML]="result.excerpt"></span>
                 </button>
               }
@@ -148,15 +156,8 @@ export class SearchComponent {
   readonly isOpen = signal(false);
   readonly query = signal('');
 
-  // Debounced query — follows query with 200ms delay
-  private readonly debouncedQuery = signal('');
-
-  constructor() {
-    explicitEffect([this.query], ([q], cleanup) => {
-      const timer = setTimeout(() => this.debouncedQuery.set(q), 200);
-      cleanup(() => clearTimeout(timer));
-    });
-  }
+  // Debounced query — follows query with 200ms delay via RxJS
+  private readonly debouncedQuery = toSignal(toObservable(this.query).pipe(debounceTime(200)), { initialValue: '' });
 
   private readonly searchResource = resource({
     params: () => {
@@ -182,6 +183,7 @@ export class SearchComponent {
           url: entry.slug,
           title: entry.title,
           excerpt: generateExcerpt(entry.content, terms, this.sanitizer),
+          category: entry.category,
         }));
     },
   });
@@ -236,7 +238,7 @@ export class SearchComponent {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       this.searchIndex = (await response.json()) as SearchIndexEntry[];
     } catch {
-      console.warn('[Search] Search index not available');
+      // Search index unavailable — search will show no results
     }
   }
 }

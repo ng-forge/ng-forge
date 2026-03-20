@@ -43,7 +43,7 @@ interface ApiTypeParam {
   description: string;
 }
 
-interface ApiDeclaration {
+export interface ApiDeclaration {
   name: string;
   kind: DeclarationKind;
   description: string;
@@ -60,7 +60,7 @@ interface ApiDeclaration {
   sourceLine: number;
 }
 
-interface ApiPackage {
+export interface ApiPackage {
   name: string;
   slug: string;
   declarations: ApiDeclaration[];
@@ -533,25 +533,40 @@ function getSourceFingerprint(root: string): number {
   return maxMtime;
 }
 
+// ─── Shared API data accessor ────────────────────────────────────────────────
+
+const API_ROOT = resolve(__dirname, '..', '..', '..');
+let sharedCache: Map<string, ApiPackage> | null = null;
+let sharedFingerprint = 0;
+
+/**
+ * Get extracted API packages. Shared between apiDocsPlugin and searchIndexPlugin
+ * to avoid duplicate ts-morph extraction.
+ */
+export function getApiPackages(): Map<string, ApiPackage> {
+  const fp = getSourceFingerprint(API_ROOT);
+  if (sharedCache && fp === sharedFingerprint) return sharedCache;
+
+  const start = performance.now();
+  sharedCache = extractAll(API_ROOT);
+  sharedFingerprint = fp;
+  const elapsed = (performance.now() - start).toFixed(0);
+  console.log(`[api-docs] Extracted ${sharedCache.size} packages in ${elapsed}ms`);
+  return sharedCache;
+}
+
+/** Invalidate the shared API cache (called on file change in dev). */
+export function invalidateApiCache(): void {
+  sharedCache = null;
+}
+
 // ─── Vite plugin ─────────────────────────────────────────────────────────────
 
 export function apiDocsPlugin(): Plugin {
-  const root = resolve(__dirname, '..', '..', '..');
-
-  // In-memory cache
-  let cache: Map<string, ApiPackage> | null = null;
-  let cacheFingerprint = 0;
+  const root = API_ROOT;
 
   function getPackages(): Map<string, ApiPackage> {
-    const fp = getSourceFingerprint(root);
-    if (cache && fp === cacheFingerprint) return cache;
-
-    const start = performance.now();
-    cache = extractAll(root);
-    cacheFingerprint = fp;
-    const elapsed = (performance.now() - start).toFixed(0);
-    console.log(`[api-docs] Extracted ${cache.size} packages in ${elapsed}ms`);
-    return cache;
+    return getApiPackages();
   }
 
   return {
@@ -594,7 +609,7 @@ export function apiDocsPlugin(): Plugin {
         const isEntryPoint = PACKAGES.some((pkg) => pkg.entryPoints.some((e) => resolve(root, e) === filePath));
         if (isEntryPoint) {
           console.log('[api-docs] Source changed, invalidating cache...');
-          cache = null;
+          invalidateApiCache();
         }
       });
     },

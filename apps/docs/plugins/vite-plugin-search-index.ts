@@ -1,5 +1,6 @@
 /**
- * Vite plugin that generates a client-side search index from markdown content files.
+ * Vite plugin that generates a client-side search index from markdown content files
+ * and API reference declarations.
  *
  * Dev mode: reads markdown files at startup, serves the index via middleware, watches for changes.
  * Build mode: generates the index once and emits it as a static asset.
@@ -8,11 +9,13 @@
 import { resolve, relative } from 'node:path';
 import { readFileSync, readdirSync, statSync, watch } from 'node:fs';
 import type { Plugin, ViteDevServer } from 'vite';
+import { getApiPackages, invalidateApiCache, type ApiDeclaration, type ApiPackage } from './vite-plugin-api-docs';
 
 interface SearchIndexEntry {
   slug: string;
   title: string;
   content: string;
+  category?: string;
 }
 
 const CONTENT_DIR_NAME = 'public/content';
@@ -99,7 +102,61 @@ function collectMarkdownFiles(dir: string): string[] {
 }
 
 /**
- * Build the search index from all markdown content files.
+ * Build searchable text from an API declaration by combining its
+ * description, signature, and member names.
+ */
+function buildApiContent(decl: ApiDeclaration): string {
+  const parts: string[] = [];
+  if (decl.description) parts.push(decl.description);
+  if (decl.signature) parts.push(decl.signature);
+  if (decl.members.length > 0) {
+    parts.push(decl.members.map((m) => m.name).join(' '));
+  }
+  if (decl.params?.length) {
+    parts.push(decl.params.map((p) => p.name).join(' '));
+  }
+  return parts.join(' ').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Pretty-print the declaration kind for display (e.g., "interface" → "Interface").
+ */
+function formatKind(kind: string): string {
+  return kind.charAt(0).toUpperCase() + kind.slice(1);
+}
+
+/**
+ * Build API reference search entries from all extracted packages.
+ */
+function buildApiSearchEntries(): SearchIndexEntry[] {
+  const entries: SearchIndexEntry[] = [];
+  const seen = new Set<string>();
+
+  try {
+    const packages = getApiPackages();
+    for (const pkg of packages.values()) {
+      for (const decl of pkg.declarations) {
+        // Deduplicate by name — same symbol may appear in multiple packages
+        if (seen.has(decl.name)) continue;
+        seen.add(decl.name);
+
+        entries.push({
+          slug: `api-reference/${decl.name}`,
+          title: decl.name,
+          content: buildApiContent(decl),
+          category: `API ${formatKind(decl.kind)}`,
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('[search-index] Could not extract API entries:', err);
+  }
+
+  return entries;
+}
+
+/**
+ * Build the search index from all markdown content files and API reference data.
  */
 function buildSearchIndex(contentDir: string): SearchIndexEntry[] {
   const files = collectMarkdownFiles(contentDir);
@@ -128,6 +185,9 @@ function buildSearchIndex(contentDir: string): SearchIndexEntry[] {
       content: stripMarkdown(body),
     });
   }
+
+  // Append API reference entries
+  entries.push(...buildApiSearchEntries());
 
   return entries;
 }

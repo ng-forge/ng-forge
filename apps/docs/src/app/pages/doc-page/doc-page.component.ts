@@ -94,7 +94,7 @@ import { findTabGroup } from '../../layout/tabs.config';
               }
             </nav>
             @if (tabGroup(); as tabs) {
-              <app-doc-tabs [tabGroup]="tabs" />
+              <docs-doc-tabs [tabGroup]="tabs" />
             }
             <app-content-segments class="doc-page-content" [contentHtml]="content()!.rawHtml" />
           } @else if (showSkeleton()) {
@@ -137,7 +137,7 @@ import { findTabGroup } from '../../layout/tabs.config';
           }
         </article>
         @if (content()?.html) {
-          <app-toc [headings]="content()?.headings ?? []" />
+          <docs-toc [headings]="content()?.headings ?? []" />
         } @else if (showSkeleton()) {
           <nav class="toc-skeleton" role="status" aria-busy="true">
             <span class="visually-hidden">Loading table of contents</span>

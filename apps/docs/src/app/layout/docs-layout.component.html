@@ -8,11 +8,11 @@
     </div>
     <div class="navbar-right">
       @defer (on idle) {
-        <app-search />
+        <docs-search />
       } @placeholder {
         <div class="search-placeholder"></div>
       }
-      <app-adapter-sub-bar />
+      <docs-adapter-sub-bar />
       <button
         class="icon-btn theme-toggle desktop-only"
         (click)="themeService.toggleTheme()"

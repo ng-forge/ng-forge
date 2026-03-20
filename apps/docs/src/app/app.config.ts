@@ -23,7 +23,7 @@ export const appConfig: ApplicationConfig = {
         scrollPositionRestoration: 'enabled',
         anchorScrolling: 'enabled',
       }),
-      withNavigationErrorHandler((err) => console.warn('[Router]', err)),
+      withNavigationErrorHandler(() => void 0),
       withExtraRoutes([
         // Adapter root → Getting Started (pathMatch: full prevents child route interference)
         { path: 'material', redirectTo: '/material/getting-started', pathMatch: 'full' },

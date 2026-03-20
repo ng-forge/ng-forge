@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, PLATFORM_ID, resource, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  Injectable,
+  input,
+  linkedSignal,
+  PLATFORM_ID,
+  resource,
+  signal,
+} from '@angular/core';
 import { isPlatformBrowser, JsonPipe } from '@angular/common';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -9,21 +20,25 @@ import { ExampleScenario } from './types';
 import { injectQueryParams } from 'ngxtension/inject-query-params';
 import { injectRouteData } from 'ngxtension/inject-route-data';
 
-/** Lazy-loaded Shiki highlighter with only JS + two themes (avoids bundling 300+ grammars). */
-let _hlPromise: Promise<HighlighterCore> | null = null;
-function getShikiHighlighter(): Promise<HighlighterCore> {
-  if (!_hlPromise) {
-    _hlPromise = (async () => {
-      const { createHighlighterCore } = await import('shiki/core');
-      const { createOnigurumaEngine } = await import('shiki/engine/oniguruma');
-      return createHighlighterCore({
-        engine: createOnigurumaEngine(import('shiki/wasm')),
-        themes: [import('shiki/dist/themes/material-theme-lighter.mjs'), import('shiki/dist/themes/material-theme-darker.mjs')],
-        langs: [import('shiki/dist/langs/javascript.mjs')],
-      });
-    })();
+/** Lazy-loaded Shiki highlighter scoped to DI (SSR-safe — no module-level mutable state). */
+@Injectable({ providedIn: 'root' })
+class ExampleShikiService {
+  private hlPromise: Promise<HighlighterCore> | null = null;
+
+  getHighlighter(): Promise<HighlighterCore> {
+    if (!this.hlPromise) {
+      this.hlPromise = (async () => {
+        const { createHighlighterCore } = await import('shiki/core');
+        const { createOnigurumaEngine } = await import('shiki/engine/oniguruma');
+        return createHighlighterCore({
+          engine: createOnigurumaEngine(import('shiki/wasm')),
+          themes: [import('shiki/dist/themes/material-theme-lighter.mjs'), import('shiki/dist/themes/material-theme-darker.mjs')],
+          langs: [import('shiki/dist/langs/javascript.mjs')],
+        });
+      })();
+    }
+    return this.hlPromise;
   }
-  return _hlPromise;
 }
 
 /**
@@ -50,6 +65,7 @@ function getShikiHighlighter(): Promise<HighlighterCore> {
 export class ExampleScenarioComponent {
   private readonly clipboard = inject(Clipboard);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly shiki = inject(ExampleShikiService);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
@@ -149,7 +165,7 @@ export class ExampleScenarioComponent {
     params: () => (this.isBrowser ? { code: this.configJson(), theme: this.currentTheme() } : undefined),
     loader: async ({ params }) => {
       if (!params.code) return '';
-      const highlighter = await getShikiHighlighter();
+      const highlighter = await this.shiki.getHighlighter();
       const shikiTheme = params.theme === 'dark' ? 'material-theme-darker' : 'material-theme-lighter';
       return highlighter.codeToHtml(params.code, { lang: 'javascript', theme: shikiTheme });
     },

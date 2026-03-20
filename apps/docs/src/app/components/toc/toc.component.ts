@@ -18,7 +18,7 @@ import { debounceTime, filter, map, startWith, switchMap } from 'rxjs/operators'
 import type { HeadingEntry } from '../../services/content.service';
 
 @Component({
-  selector: 'app-toc',
+  selector: 'docs-toc',
   template: `
     @if (headings().length > 0) {
       <nav class="toc" aria-label="Table of contents">
