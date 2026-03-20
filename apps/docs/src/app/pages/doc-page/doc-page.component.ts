@@ -519,13 +519,9 @@ export class DocPageComponent {
     if (copyBtn) {
       event.preventDefault();
       const code = copyBtn.getAttribute('data-code') ?? '';
-      // Decode HTML entities back to plain text without innerHTML (CSP-safe)
-      const decoded = code
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'");
+      // Decode HTML entities in a single pass to avoid double-unescaping
+      const ENTITY_MAP: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
+      const decoded = code.replace(/&(?:amp|lt|gt|quot|#39);/g, (e) => ENTITY_MAP[e] ?? e);
       this.clipboard.copy(decoded);
       this.showCopiedState(copyBtn);
       return;
