@@ -15,6 +15,7 @@ const CATEGORY_REDIRECTS: Record<string, string> = {
   prebuilt: 'prebuilt/form-groups',
   'prebuilt/form-arrays': 'prebuilt/form-arrays/simplified',
   recipes: 'recipes/custom-fields',
+  examples: 'examples/contact-form',
 };
 
 /** Legacy route renames — old URLs still work after restructure. */
