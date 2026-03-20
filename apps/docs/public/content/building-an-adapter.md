@@ -368,7 +368,7 @@ This enables:
 
 ## Handling Meta Attributes
 
-`meta` attributes are native HTML attributes that should be applied to the underlying form element. They differ from `props` (which control UI library behavior). See [Props vs Meta](/field-types/text-inputs#props-vs-meta) for detailed usage guidance.
+`meta` attributes are native HTML attributes that should be applied to the underlying form element. They differ from `props` (which control UI library behavior). See [Props vs Meta Summary](#props-vs-meta-summary) below for detailed usage guidance.
 
 ### Props vs Meta Summary
 
@@ -521,5 +521,5 @@ The Material integration source code is the most comprehensive example of implem
 
 - **[Material Integration](/configuration)** - Complete reference implementation
 - **[Field Types](/field-types/text-inputs)** - Understanding all available field types
-- **[Type Safety](/recipes/basics)** - Module augmentation for custom types
-- **[Validation](../validation/basics)** - Displaying validation errors in custom fields
+- **[Type Safety](/recipes/type-safety)** - Module augmentation for custom types
+- **[Validation](/validation/basics)** - Displaying validation errors in custom fields

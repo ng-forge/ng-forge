@@ -442,4 +442,4 @@ type ConditionalExpression = FieldValueCondition | FormValueCondition | CustomCo
 - **[Validation Basics](/validation/basics)** - Getting started with validation
 - **[Validation Advanced](/validation/advanced)** - Conditional validators
 - **[Conditional Logic](/dynamic-behavior/overview)** - Field behavior changes
-- **[Type Safety](/recipes/basics)** - TypeScript integration
+- **[Type Safety](/recipes/type-safety)** - TypeScript integration

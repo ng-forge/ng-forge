@@ -135,7 +135,7 @@ Groups can contain:
 - Leaf fields (input, select, checkbox, etc.)
 - Row fields (for horizontal layouts within the group)
 
-See [Type Safety & Inference](/recipes/basics) for details on how groups affect type inference.
+See [Type Safety & Inference](/recipes/type-safety) for details on how groups affect type inference.
 
 ## Conditional Visibility
 

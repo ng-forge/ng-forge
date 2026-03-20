@@ -484,5 +484,5 @@ External data values are reactively tracked - when signals change, derivations a
 
 - **Property Derivation** (see tab above) — Derive component properties (minDate, options, label) from form values
 - **Async Derivation** (see tab above) — HTTP and async function derivations, stopOnUserOverride
-- **[Array Fields](../../prebuilt/form-arrays/simplified/)** — Working with array fields
+- **[Array Fields](/prebuilt/form-arrays/simplified)** — Working with array fields
 - **[Examples](/examples)** — Real-world form patterns

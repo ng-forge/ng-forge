@@ -394,6 +394,6 @@ When the user changes the country, the phone prefix is auto-filled again — ove
 ## Related
 
 - **[Values](./)** — Expression, static value, and function-based derivations
-- **[Properties](./property-derivation)** — Derive component properties from form values
+- **[Properties](/dynamic-behavior/derivation/property)** — Derive component properties from form values
 - **[HTTP Conditions](/dynamic-behavior/overview)** — HTTP-driven field visibility and state
-- **[Custom Validators](../../../validation/custom-validators/)** — Async and HTTP validation
+- **[Custom Validators](/validation/custom-validators)** — Async and HTTP validation

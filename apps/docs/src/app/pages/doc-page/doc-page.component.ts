@@ -538,6 +538,25 @@ export class DocPageComponent {
       return;
     }
 
+    // Internal doc link — add adapter prefix for SPA navigation
+    const link = target.closest('a[href]') as HTMLAnchorElement | null;
+    if (link) {
+      const href = link.getAttribute('href') ?? '';
+      // Same-page anchor links — scroll to the element directly (avoids <base href> stripping the path)
+      if (href.startsWith('#')) {
+        event.preventDefault();
+        const el = document.getElementById(href.slice(1));
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+      // Root-relative paths — add adapter prefix for SPA navigation
+      if (href.startsWith('/') && !href.startsWith('//')) {
+        event.preventDefault();
+        void this.router.navigateByUrl(`/${this.adapter.adapter()}${href}`);
+        return;
+      }
+    }
+
     // Heading anchor
     const anchor = target.closest('.heading-anchor') as HTMLElement | null;
     if (!anchor) return;

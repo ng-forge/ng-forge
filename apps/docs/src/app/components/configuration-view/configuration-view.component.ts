@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
+import { RouterLink } from '@angular/router';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import { CopyButtonComponent } from '../copy-button/copy-button.component';
@@ -256,7 +257,7 @@ const config = {
 
 @Component({
   selector: 'docs-configuration-view',
-  imports: [CodeHighlightDirective, CopyButtonComponent],
+  imports: [CodeHighlightDirective, CopyButtonComponent, RouterLink],
   template: `
     <div class="config-view">
       @if (data().options.length > 0) {
@@ -299,8 +300,8 @@ const config = {
           <h3 class="config-view__heading">Custom Adapter Config</h3>
           <p class="config-view__desc">
             Custom adapters define their own config interface. The cascade pattern works the same way — implement a config merger in your
-            adapter to support library-level and form-level defaults. See <a href="/building-an-adapter">Building an Adapter</a> for a full
-            guide.
+            adapter to support library-level and form-level defaults. See
+            <a [routerLink]="'/' + activeAdapter.adapter() + '/building-an-adapter'">Building an Adapter</a> for a full guide.
           </p>
         </section>
       }
@@ -330,7 +331,7 @@ const config = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DocsConfigurationViewComponent {
-  private readonly activeAdapter = inject(ActiveAdapterService);
+  readonly activeAdapter = inject(ActiveAdapterService);
 
   readonly data = computed(() => ADAPTER_CONFIG_DATA[this.activeAdapter.adapter() as AdapterName]);
 }

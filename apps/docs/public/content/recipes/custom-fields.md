@@ -87,5 +87,5 @@ If you need a completely custom adapter (no existing adapter as base), or want t
 ## Next Steps
 
 - **[Custom Integrations](/building-an-adapter)** — Build a complete adapter for any UI library from scratch
-- **[Type Safety](/recipes/basics)** — Leverage TypeScript inference for form values and field types
+- **[Type Safety](/recipes/type-safety)** — Leverage TypeScript inference for form values and field types
 - **[Events](/recipes/events)** — Dispatch and subscribe to form events from custom field components

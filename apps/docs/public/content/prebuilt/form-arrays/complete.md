@@ -566,7 +566,7 @@ Arrays can contain these field types:
 - Row fields -> creates flat object arrays `[{...}, {...}]` (rows don't add nesting)
 - Button fields (for remove operations inside each item)
 
-See [Type Safety & Inference](/recipes/basics) for details on how arrays affect type inference.
+See [Type Safety & Inference](/recipes/type-safety) for details on how arrays affect type inference.
 
 ## Conditional Visibility
 

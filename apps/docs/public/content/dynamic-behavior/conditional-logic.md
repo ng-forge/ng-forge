@@ -1220,9 +1220,9 @@ const config = {
 
 ## Related
 
-- **[Value Derivation](/derivation)** — Computed field values
-- **[Async Derivation](/derivation)** — HTTP and async function derivations, stopOnUserOverride
-- **[Validation](../../validation/basics/)** — Conditional validation
-- **[Custom Validators](../../validation/custom-validators/)** — Async and HTTP validators
-- **[Type Safety](/recipes/basics)** — TypeScript integration
+- **[Value Derivation](/dynamic-behavior/derivation)** — Computed field values
+- **[Async Derivation](/dynamic-behavior/derivation)** — HTTP and async function derivations, stopOnUserOverride
+- **[Validation](../validation/basics)** — Conditional validation
+- **[Custom Validators](../validation/custom-validators)** — Async and HTTP validators
+- **[Type Safety](/recipes/type-safety)** — TypeScript integration
 - **[Examples](/examples)** — Real-world form patterns

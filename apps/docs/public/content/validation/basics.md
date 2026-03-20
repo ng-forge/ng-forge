@@ -315,4 +315,4 @@ Invalid fields prevent form submission and display error messages.
 - **[Validation Advanced](/validation/advanced)** - Conditional validation, dynamic values
 - **[Validation Reference](/validation/reference)** - Complete validator API
 - **[Conditional Logic](/dynamic-behavior/overview)** - Dynamic field behavior
-- **[Examples](../../examples/)** - Real-world validation patterns
+- **[Examples](../examples)** - Real-world validation patterns
