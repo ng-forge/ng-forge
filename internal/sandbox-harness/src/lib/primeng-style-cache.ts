@@ -21,17 +21,12 @@ export function clearPrimeNGStyleCaches(): void {
 }
 
 function clearCache(specifier: string, exportName: string): void {
-  try {
-    void import(/* @vite-ignore */ specifier).then(
-      (m) => {
-        const target = m?.[exportName];
-        if (target && typeof target.clearLoadedStyleNames === 'function') {
-          target.clearLoadedStyleNames();
-        }
-      },
-      () => {},
-    );
-  } catch {
-    // Module not available.
-  }
+  void import(/* @vite-ignore */ specifier)
+    .then((m) => {
+      const target = m?.[exportName];
+      if (target && typeof target.clearLoadedStyleNames === 'function') {
+        target.clearLoadedStyleNames();
+      }
+    })
+    .catch(() => {});
 }
