@@ -18,6 +18,7 @@ import { NotFoundComponent } from '../../components/not-found/not-found.componen
 import { EXAMPLES_REGISTRY } from '../examples-index/examples.registry';
 import { findBreadcrumbTrail } from '../../layout/nav.config';
 import { findTabGroup } from '../../layout/tabs.config';
+import { decodeHtmlEntities } from '../../utils/decode-html-entities';
 
 /**
  * Generic documentation page component.
@@ -535,9 +536,7 @@ export class DocPageComponent {
     if (copyBtn) {
       event.preventDefault();
       const code = copyBtn.getAttribute('data-code') ?? '';
-      // Decode HTML entities in a single pass to avoid double-unescaping
-      const ENTITY_MAP: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
-      const decoded = code.replace(/&(?:amp|lt|gt|quot|#39);/g, (e) => ENTITY_MAP[e] ?? e);
+      const decoded = decodeHtmlEntities(code);
       this.clipboard.copy(decoded);
       this.showCopiedState(copyBtn);
       return;

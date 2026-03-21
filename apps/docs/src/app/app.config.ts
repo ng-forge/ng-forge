@@ -1,6 +1,13 @@
-import { ApplicationConfig, inject, PLATFORM_ID, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  inject,
+  isDevMode,
+  PLATFORM_ID,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection,
+} from '@angular/core';
 import { DOCUMENT, isPlatformBrowser, APP_BASE_HREF } from '@angular/common';
-import { withInMemoryScrolling, UrlSerializer, withNavigationErrorHandler } from '@angular/router';
+import { NavigationError, withInMemoryScrolling, UrlSerializer, withNavigationErrorHandler } from '@angular/router';
 import { provideFileRouter, withExtraRoutes } from '@analogjs/router';
 import { AdapterAwareUrlSerializer } from './serializers/adapter-url-serializer';
 import { provideHttpClient, withFetch } from '@angular/common/http';
@@ -23,7 +30,11 @@ export const appConfig: ApplicationConfig = {
         scrollPositionRestoration: 'enabled',
         anchorScrolling: 'enabled',
       }),
-      withNavigationErrorHandler(() => void 0),
+      withNavigationErrorHandler((error: NavigationError) => {
+        if (isDevMode()) {
+          console.warn('[Router] Navigation error:', error.url, error.error);
+        }
+      }),
       withExtraRoutes([
         // Adapter root → Getting Started (pathMatch: full prevents child route interference)
         { path: 'material', redirectTo: '/material/getting-started', pathMatch: 'full' },

@@ -49,6 +49,9 @@ import { heroFormConfig, validationFormConfig } from './landing.forms';
 
 const EMPTY_FIREFLY_STATE = { positions: [] as FireflyPosition[], sparks: [] as Spark[] };
 
+/** Delay cosmetic firefly animation until after hero LCP paint completes. */
+const FIREFLY_LCP_DELAY_MS = 1200;
+
 // Animation timing constants
 const COPY_FEEDBACK_DURATION_MS = 2000;
 const CONFETTI_ANIMATION_DURATION_MS = 800;
@@ -162,7 +165,7 @@ export class LandingComponent {
   private readonly fireflyState = toSignal(
     this.isBrowser
       ? of(null).pipe(
-          delay(1200), // Delay fireflies for better LCP - starts after hero animation
+          delay(FIREFLY_LCP_DELAY_MS),
           switchMap(() => createFireflyAnimation(mousePosition$())),
         )
       : of(EMPTY_FIREFLY_STATE),

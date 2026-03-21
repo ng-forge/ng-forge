@@ -5,6 +5,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Observable, switchMap, catchError, of, shareReplay, tap, from, concat } from 'rxjs';
 import { Marked, type Renderer, type Tokens } from 'marked';
 import { ShikiService } from '../utils/shiki';
+import { decodeHtmlEntities } from '../utils/decode-html-entities';
 
 export interface HeadingEntry {
   id: string;
@@ -321,10 +322,8 @@ export class ContentService {
     const replacements = await Promise.all(
       matches.map(async (match) => {
         const lang = match[1];
-        // Decode HTML entities back to plain text for Shiki (single-pass to avoid double-unescape)
         const encoded = match[2];
-        const ENTITY_MAP: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"' };
-        const decoded = encoded.replace(/&(?:amp|lt|gt|quot);/g, (entity) => ENTITY_MAP[entity] ?? entity);
+        const decoded = decodeHtmlEntities(encoded);
         const highlighted = await this.shiki.highlightCode(decoded, lang);
         return { original: match[0], replacement: highlighted };
       }),
