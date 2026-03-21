@@ -8,6 +8,7 @@ import { SANDBOX_FORM_CONFIG } from '@ng-forge/sandbox-harness';
   template: `<example-scenario [scenario]="scenario" />`,
   imports: [ExampleScenarioComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { 'data-adapter': 'primeng' },
 })
 export default class DemoScenarioComponent {
   readonly scenario = {
