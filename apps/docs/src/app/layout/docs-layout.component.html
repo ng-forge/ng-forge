@@ -1,0 +1,172 @@
+<!-- Navbar -->
+<header class="navbar" [class.scrolled]="scrolled()">
+  <div class="navbar-inner">
+    <div class="navbar-left">
+      <a routerLink="/" class="navbar-logo">
+        <app-logo size="lg" />
+      </a>
+    </div>
+    <div class="navbar-right">
+      @defer (on idle) {
+        <docs-search />
+      } @placeholder {
+        <div class="search-placeholder"></div>
+      }
+      <docs-adapter-sub-bar />
+      <button
+        class="icon-btn theme-toggle desktop-only"
+        (click)="themeService.toggleTheme()"
+        [attr.aria-label]="
+          'Switch to ' + (themeService.theme() === 'auto' ? 'light' : themeService.theme() === 'light' ? 'dark' : 'auto') + ' theme'
+        "
+        [attr.title]="'Theme: ' + themeService.theme()"
+      >
+        <span class="theme-icon" [class]="'theme-icon--' + themeService.theme()"></span>
+      </button>
+      <a
+        href="https://github.com/ng-forge/ng-forge"
+        class="icon-btn desktop-only"
+        target="_blank"
+        rel="noopener"
+        aria-label="GitHub repository"
+      >
+        <span class="icon icon--github"></span>
+      </a>
+      <button class="icon-btn menu-btn" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+        <span class="menu-icon" [class.menu-icon--open]="sidebarOpen()"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Sidebar backdrop (mobile) -->
+@if (sidebarOpen()) {
+  <div class="sidebar-backdrop" (click)="closeSidebar()" role="presentation"></div>
+}
+
+<!-- Page body: sidebar + content in a centered wrapper -->
+<div class="page-body">
+  <aside class="sidebar" [class.open]="sidebarOpen()">
+    <nav class="sidebar-nav" aria-label="Documentation">
+      @for (item of navItems(); track item.path) {
+        @if (item.children) {
+          <div class="nav-category" [class.expanded]="isCategoryExpanded(item)" [class.url-active]="isActiveCategory(item)">
+            <button class="nav-category-btn" (click)="toggleCategory(item.path)" [attr.aria-expanded]="isCategoryExpanded(item)">
+              <span>{{ item.label }}</span>
+              <svg
+                class="chevron"
+                viewBox="0 0 24 24"
+                width="12"
+                height="12"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+            <div class="nav-children-wrapper">
+              <div class="nav-children">
+                @for (child of item.children; track child.path) {
+                  @if (child.children) {
+                    <div class="nav-subcategory" [class.expanded]="isCategoryExpanded(child)">
+                      <button
+                        class="nav-subcategory-btn"
+                        (click)="toggleCategory(child.path)"
+                        [attr.aria-expanded]="isCategoryExpanded(child)"
+                      >
+                        <span>{{ child.label }}</span>
+                        <svg
+                          class="chevron"
+                          viewBox="0 0 24 24"
+                          width="12"
+                          height="12"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="3"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                      </button>
+                      <div class="nav-children-wrapper">
+                        <div class="nav-children">
+                          @for (grandchild of child.children; track grandchild.path) {
+                            <a
+                              class="nav-link depth-2"
+                              [routerLink]="adapterLink(grandchild.path)"
+                              routerLinkActive="active"
+                              [class]="grandchild.cssClass ?? ''"
+                              (click)="closeSidebar()"
+                            >
+                              <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12">
+                                <circle cx="12" cy="12" r="4.5" fill="currentColor" />
+                              </svg>
+                              {{ grandchild.label }}
+                            </a>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  } @else {
+                    <a
+                      class="nav-link depth-1"
+                      [routerLink]="adapterLink(child.path)"
+                      routerLinkActive="active"
+                      [class]="child.cssClass ?? ''"
+                      (click)="closeSidebar()"
+                    >
+                      <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12">
+                        <circle cx="12" cy="12" r="4.5" fill="currentColor" />
+                      </svg>
+                      {{ child.label }}
+                    </a>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+        } @else {
+          <a
+            class="nav-link depth-0"
+            [routerLink]="adapterLink(item.path)"
+            routerLinkActive="active"
+            [class]="item.cssClass ?? ''"
+            (click)="closeSidebar()"
+          >
+            <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="12" r="4.5" fill="currentColor" /></svg>
+            {{ item.label }}
+            @if (item.badge) {
+              <span class="nav-badge">{{ item.badge }}</span>
+            }
+          </a>
+        }
+      }
+    </nav>
+
+    <!-- Mobile-only: theme toggle + GitHub (moved from navbar) -->
+    <div class="sidebar-footer mobile-only">
+      <button
+        class="sidebar-footer-btn"
+        (click)="themeService.toggleTheme()"
+        [attr.aria-label]="
+          'Switch to ' + (themeService.theme() === 'auto' ? 'light' : themeService.theme() === 'light' ? 'dark' : 'auto') + ' theme'
+        "
+      >
+        <span class="theme-icon" [class]="'theme-icon--' + themeService.theme()"></span>
+        <span>Theme: {{ themeService.theme() }}</span>
+      </button>
+      <a href="https://github.com/ng-forge/ng-forge" class="sidebar-footer-btn" target="_blank" rel="noopener">
+        <span class="icon icon--github"></span>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>

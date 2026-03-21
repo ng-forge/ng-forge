@@ -3,7 +3,7 @@ import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { AdapterName } from '@ng-forge/sandbox-harness';
 
 @Component({
-  selector: 'app-adapter-sub-bar',
+  selector: 'docs-adapter-sub-bar',
   template: `
     <div class="adapter-sub-bar">
       <div class="adapter-dropdown" [class.open]="isOpen()">
@@ -67,8 +67,10 @@ export class AdapterSubBarComponent {
   }
 
   protected select(name: AdapterName): void {
-    this.activeAdapter.switchTo(name);
     this.isOpen.set(false);
+    if (name !== this.activeAdapter.adapter()) {
+      this.activeAdapter.switchTo(name);
+    }
   }
 
   protected onTriggerKeydown(event: KeyboardEvent): void {

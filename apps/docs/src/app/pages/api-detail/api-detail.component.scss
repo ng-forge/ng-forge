@@ -1,0 +1,451 @@
+@use 'tokens' as *;
+
+:host {
+  --card-bg: #ffffff;
+  --card-border: #e0e0e0;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --table-stripe: rgba(0, 0, 0, 0.02);
+  --table-hover: rgba(0, 0, 0, 0.04);
+  --code-bg: #f5f5f5;
+
+  display: block;
+  font-family: $font-primary;
+  color: var(--text-primary);
+}
+
+:host-context(html[data-theme='dark']) {
+  --card-bg: #0a0908;
+  --card-border: #2a2824;
+  --text-primary: #e8e4de;
+  --text-secondary: #9a958c;
+  --table-stripe: rgba(255, 255, 255, 0.02);
+  --table-hover: rgba(255, 255, 255, 0.04);
+  --code-bg: #1a1916;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context(html[data-theme='auto']) {
+    --card-bg: #0a0908;
+    --card-border: #2a2824;
+    --text-primary: #e8e4de;
+    --text-secondary: #9a958c;
+    --table-stripe: rgba(255, 255, 255, 0.02);
+    --table-hover: rgba(255, 255, 255, 0.04);
+    --code-bg: #1a1916;
+  }
+}
+
+// ─── Kind colors ───
+$kind-colors: (
+  'component': #ff4d00,
+  'directive': #e67e22,
+  'injectable': #9b59b6,
+  'pipe': #1abc9c,
+  'class': #e74c3c,
+  'interface': #3498db,
+  'type': #3e69c5,
+  'function': #28ca42,
+  'const': #ffb627,
+  'enum': #2ecc71,
+);
+
+.kind-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: $text-xs;
+  font-weight: 600;
+  border-radius: $radius-sm;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #fff;
+
+  @each $kind, $color in $kind-colors {
+    &[data-kind='#{$kind}'] {
+      background: $color;
+    }
+  }
+}
+
+// ─── Breadcrumbs ───
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: $space-4;
+  font-size: $text-sm;
+}
+
+.breadcrumb {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color $transition-fast;
+  cursor: pointer;
+
+  &:hover {
+    color: $ember-glow;
+  }
+  &--current {
+    color: var(--text-primary);
+    font-weight: 500;
+    cursor: default;
+  }
+}
+
+.adapter-breadcrumb {
+  font-weight: 600;
+  color: $ember-core;
+}
+
+.breadcrumb-sep {
+  display: inline-flex;
+  align-items: center;
+  color: var(--card-border);
+  margin: 0 2px;
+}
+
+// ─── Header ───
+.detail-header {
+  margin-bottom: $space-6;
+}
+
+.detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  flex-wrap: wrap;
+
+  h1 {
+    font-family: $font-mono;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+  }
+}
+
+.pkg-label {
+  font-family: $font-mono;
+  font-size: $text-sm;
+  color: var(--text-secondary);
+  margin: $space-2 0 0;
+}
+
+.deprecated-badge {
+  font-size: $text-xs;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: $radius-sm;
+  background: rgba($error, 0.12);
+  color: $error;
+  text-transform: uppercase;
+}
+
+// ─── Sections ───
+.section {
+  margin-bottom: $space-10;
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 $space-5;
+    padding-bottom: $space-3;
+    border-bottom: 1px solid var(--card-border);
+  }
+}
+
+.description {
+  font-size: $text-base;
+  line-height: 1.7;
+  color: var(--text-primary);
+
+  ::ng-deep p {
+    margin: 0 0 $space-4;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.remarks {
+  font-size: $text-sm;
+  line-height: 1.6;
+  color: var(--text-secondary);
+
+  ::ng-deep p {
+    margin: 0 0 $space-3;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Inline code & type links in [innerHTML] content (descriptions, tables, remarks)
+:host ::ng-deep .inline-code {
+  font-family: $font-mono;
+  font-size: 0.85em;
+  padding: 1px 6px;
+  border-radius: $radius-sm;
+  background: var(--code-bg);
+  color: $ember-glow;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .callout--breaking {
+  padding: $space-4 $space-5;
+  border-radius: $radius-md;
+  margin: $space-4 0;
+  font-size: $text-sm;
+  line-height: 1.5;
+  background: rgba($warning, 0.1);
+  border: 1px solid rgba($warning, 0.3);
+  border-left: 3px solid $warning;
+  color: $warning;
+  font-weight: 500;
+}
+
+:host ::ng-deep .type-link {
+  color: $ember-glow;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba($ember-glow, 0.4);
+
+  &:hover {
+    border-bottom-style: solid;
+    border-bottom-color: $ember-glow;
+  }
+}
+
+// ─── Code blocks ───
+.code-block {
+  border-radius: $radius-md;
+  margin-bottom: $space-4;
+  border: 1px solid var(--card-border);
+  background: var(--code-bg);
+  overflow-x: auto;
+
+  // innerHTML content — needs ::ng-deep to pierce encapsulation
+  ::ng-deep pre {
+    margin: 0;
+    padding: $space-4 $space-5;
+    font-family: $font-mono;
+    font-size: $text-sm;
+    line-height: 1.6;
+    white-space: pre;
+    background: transparent !important;
+  }
+}
+
+// ─── Callouts ───
+.callout {
+  padding: $space-4 $space-5;
+  border-radius: $radius-md;
+  margin-bottom: $space-6;
+  font-size: $text-sm;
+  line-height: 1.5;
+
+  &--deprecated {
+    background: rgba($error, 0.08);
+    border: 1px solid rgba($error, 0.2);
+    color: $error;
+  }
+
+  &--breaking {
+    background: rgba($warning, 0.1);
+    border: 1px solid rgba($warning, 0.3);
+    color: $warning;
+    font-weight: 500;
+    border-left: 3px solid $warning;
+  }
+}
+
+// ─── Tables ───
+.members-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--card-border);
+  border-radius: $radius-lg;
+}
+
+.members-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $text-sm;
+
+  th {
+    text-align: left;
+    padding: $space-4 $space-5;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--code-bg);
+    border-bottom: 2px solid var(--card-border);
+    white-space: nowrap;
+    text-transform: uppercase;
+    font-size: $text-xs;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    padding: $space-4 $space-5;
+    border-bottom: 1px solid var(--card-border);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  // Name column — compact, no wrap
+  td:first-child {
+    white-space: nowrap;
+  }
+
+  // Description column
+  td:last-child {
+    color: var(--text-secondary);
+    font-size: $text-sm;
+    line-height: 1.6;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: var(--table-hover);
+  }
+
+  tr.deprecated td {
+    opacity: 0.55;
+  }
+}
+
+code.name {
+  font-family: $font-mono;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: $text-sm;
+}
+
+code.type {
+  font-family: $font-mono;
+  font-size: $text-xs;
+  color: $ember-glow;
+  overflow-wrap: break-word;
+  word-break: normal;
+
+  // Links inside [innerHTML] — needs ::ng-deep
+  ::ng-deep .type-link {
+    color: $ember-glow;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba($ember-glow, 0.4);
+    transition: border-color $transition-fast;
+
+    &:hover {
+      border-bottom-style: solid;
+      border-bottom-color: $ember-glow;
+    }
+  }
+}
+
+.modifier {
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-right: 4px;
+}
+
+.optional-mark {
+  color: $ember-glow;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+.deprecated-inline {
+  display: inline-block;
+  font-size: $text-xs;
+  font-weight: 600;
+  padding: 0 4px;
+  border-radius: 2px;
+  background: rgba($error, 0.1);
+  color: $error;
+  margin-left: $space-2;
+}
+
+// ─── See also ───
+.see-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    padding: $space-2 0;
+    font-family: $font-mono;
+    font-size: $text-sm;
+    color: $ember-glow;
+    border-bottom: 1px solid var(--card-border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+// ─── Source ───
+.source-section {
+  margin-top: $space-10;
+}
+
+.source-link {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $text-xs;
+  color: var(--text-secondary);
+  margin: 0;
+
+  code {
+    font-family: $font-mono;
+  }
+}
+
+// ─── Not found ───
+.not-found {
+  text-align: center;
+  padding: $space-12 0;
+  color: var(--text-secondary);
+
+  h2 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin: 0 0 $space-4;
+  }
+
+  code {
+    font-family: $font-mono;
+    color: $ember-glow;
+  }
+}
+
+.back-link {
+  display: inline-flex;
+  margin-top: $space-4;
+  color: $ember-glow;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ─── Responsive ───
+@media (max-width: 640px) {
+  .detail-title-row h1 {
+    font-size: 1.5rem;
+  }
+
+  .members-table {
+    font-size: $text-xs;
+  }
+}

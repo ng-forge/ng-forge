@@ -5,7 +5,7 @@
 .integration-view {
   display: flex;
   flex-direction: column;
-  gap: $space-6;
+  gap: $space-8;
 
   &__heading {
     font-size: $text-base;
@@ -17,7 +17,7 @@
   &__table {
     width: 100%;
     border-collapse: collapse;
-    border: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+    border: 1px solid var(--forge-border-color, #{$steel-dark});
     border-radius: $radius-lg;
     overflow: hidden;
     font-size: $text-sm;
@@ -26,13 +26,13 @@
     td {
       padding: $space-2 $space-3;
       text-align: left;
-      border-bottom: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+      border-bottom: 1px solid var(--forge-border-color, #{$steel-dark});
     }
 
     th {
       font-weight: 600;
-      color: var(--ng-doc-text, #{$steel});
-      background: var(--ng-doc-base-1, #{$bg-surface});
+      color: var(--forge-text, #{$steel});
+      background: var(--forge-base-1, #{$bg-surface});
     }
 
     tr:last-child td {
@@ -48,20 +48,27 @@
   }
 
   &__feature-desc {
-    color: var(--ng-doc-text-muted, #{$steel-mid});
+    color: var(--forge-text-muted, #{$steel-mid});
   }
 
   &__code {
-    background: var(--ng-doc-code-background, #{$bg-deep});
-    border: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+    position: relative;
+    background: var(--forge-code-bg, #{$bg-deep});
+    border: 1px solid var(--forge-border-color, #{$steel-dark});
     border-radius: $radius-lg;
-    overflow: hidden;
+    overflow: visible;
     padding: $space-2 $space-4;
 
+    &:hover docs-copy-button {
+      opacity: 1;
+    }
+
     // pre is rendered by the codeHighlight directive — pierce encapsulation
-    // to override the browser default margin (24px).
+    // to strip margin, border, and padding (outer __code wrapper provides them).
     ::ng-deep pre {
       margin: 0;
+      border: none;
+      padding: 0;
     }
   }
 }

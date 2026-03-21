@@ -1,6 +1,11 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
 export const contactDynamicFieldsConfig = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    email: 'Please enter a valid email address',
+    minlength: 'Value is too short',
+  },
   fields: [
     {
       key: 'name',

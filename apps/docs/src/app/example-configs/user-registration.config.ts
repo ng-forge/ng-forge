@@ -1,6 +1,10 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
 export const userRegistrationConfig = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    email: 'Please enter a valid email address',
+  },
   fields: [
     {
       type: 'page',

@@ -1,3 +1,4 @@
+@use 'sass:map';
 @use 'tokens' as *;
 
 // ============================================
@@ -68,27 +69,27 @@ $theme-light: (
 // Generates CSS custom properties from a theme map
 @mixin apply-theme($theme) {
   // Backgrounds
-  --bg-void: #{map-get($theme, bg-void)};
-  --bg-deep: #{map-get($theme, bg-deep)};
-  --bg-surface: #{map-get($theme, bg-surface)};
-  --bg-elevated: #{map-get($theme, bg-elevated)};
+  --bg-void: #{map.get($theme, bg-void)};
+  --bg-deep: #{map.get($theme, bg-deep)};
+  --bg-surface: #{map.get($theme, bg-surface)};
+  --bg-elevated: #{map.get($theme, bg-elevated)};
 
   // Text
-  --text-primary: #{map-get($theme, text-primary)};
-  --text-secondary: #{map-get($theme, text-secondary)};
-  --text-muted: #{map-get($theme, text-muted)};
-  --text-max-contrast: #{map-get($theme, text-max-contrast)};
+  --text-primary: #{map.get($theme, text-primary)};
+  --text-secondary: #{map.get($theme, text-secondary)};
+  --text-muted: #{map.get($theme, text-muted)};
+  --text-max-contrast: #{map.get($theme, text-max-contrast)};
 
   // Borders
-  --border: #{map-get($theme, border)};
-  --border-hover: #{map-get($theme, border-hover)};
+  --border: #{map.get($theme, border)};
+  --border-hover: #{map.get($theme, border-hover)};
 
   // Shadows
-  --shadow-subtle: 0 2px 8px #{map-get($theme, shadow-subtle)};
-  --shadow-elevated: 0 8px 32px #{map-get($theme, shadow-elevated)};
-  --shadow-ember-sm: 0 4px 20px #{map-get($theme, shadow-ember-sm)};
-  --shadow-ember-md: 0 4px 30px #{map-get($theme, shadow-ember-md)};
-  --shadow-ember-lg: 0 12px 40px #{map-get($theme, shadow-ember-lg)};
+  --shadow-subtle: 0 2px 8px #{map.get($theme, shadow-subtle)};
+  --shadow-elevated: 0 8px 32px #{map.get($theme, shadow-elevated)};
+  --shadow-ember-sm: 0 4px 20px #{map.get($theme, shadow-ember-sm)};
+  --shadow-ember-md: 0 4px 30px #{map.get($theme, shadow-ember-md)};
+  --shadow-ember-lg: 0 12px 40px #{map.get($theme, shadow-ember-lg)};
 }
 
 // ============================================
@@ -98,14 +99,14 @@ $theme-light: (
 // override by using CSS custom properties instead.
 
 // Dark theme colors (SCSS variables for backward compat)
-$bg-void: map-get($theme-dark, bg-void);
-$bg-deep: map-get($theme-dark, bg-deep);
-$bg-surface: map-get($theme-dark, bg-surface);
-$bg-elevated: map-get($theme-dark, bg-elevated);
+$bg-void: map.get($theme-dark, bg-void);
+$bg-deep: map.get($theme-dark, bg-deep);
+$bg-surface: map.get($theme-dark, bg-surface);
+$bg-elevated: map.get($theme-dark, bg-elevated);
 
-$steel: map-get($theme-dark, text-primary);
-$steel-mid: map-get($theme-dark, text-secondary);
-$steel-dim: map-get($theme-dark, text-muted);
-$white-hot: map-get($theme-dark, text-max-contrast);
+$steel: map.get($theme-dark, text-primary);
+$steel-mid: map.get($theme-dark, text-secondary);
+$steel-dim: map.get($theme-dark, text-muted);
+$white-hot: map.get($theme-dark, text-max-contrast);
 
-$steel-dark: map-get($theme-dark, border);
+$steel-dark: map.get($theme-dark, border);

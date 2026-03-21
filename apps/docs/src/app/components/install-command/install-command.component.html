@@ -12,5 +12,10 @@
       </button>
     }
   </div>
-  <div class="install-command__body" [codeHighlight]="command()" lang="bash"></div>
+  <div class="install-command__body">
+    <docs-copy-button [code]="command()" />
+    <div class="install-command__scroll">
+      <div [codeHighlight]="command()" language="bash"></div>
+    </div>
+  </div>
 </div>

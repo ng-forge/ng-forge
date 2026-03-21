@@ -1,0 +1,264 @@
+@if (declaration(); as decl) {
+  <div class="api-detail">
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a class="breadcrumb adapter-breadcrumb" [routerLink]="'/' + adapter.adapter() + '/getting-started'">
+        <img class="adapter-breadcrumb-icon" [src]="adapterInfo()?.icon" [alt]="adapterInfo()?.label" width="16" height="16" />
+        {{ adapterInfo()?.label }}
+      </a>
+      <span class="breadcrumb-sep" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </span>
+      <a class="breadcrumb" [routerLink]="'/' + adapter.adapter() + '/api-reference'">API Reference</a>
+      <span class="breadcrumb-sep" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </span>
+      <span class="breadcrumb breadcrumb--current" aria-current="page">{{ decl.name }}</span>
+    </nav>
+
+    <!-- Header -->
+    <header class="detail-header">
+      <div class="detail-title-row">
+        <span class="kind-badge" [attr.data-kind]="decl.kind">{{ getKindMeta(decl.kind).label }}</span>
+        <h1>{{ decl.name }}</h1>
+        @if (decl.deprecated) {
+          <span class="deprecated-badge">Deprecated</span>
+        }
+      </div>
+      <p class="pkg-label">{{ pkgName() }}</p>
+    </header>
+
+    <!-- Deprecated notice -->
+    @if (decl.deprecated) {
+      <div class="callout callout--deprecated"><strong>Deprecated:</strong> {{ decl.deprecated }}</div>
+    }
+
+    <!-- Description -->
+    @if (decl.description) {
+      <section class="section description" [innerHTML]="formatDescription(decl.description)"></section>
+    }
+
+    <!-- Remarks -->
+    @if (decl.remarks) {
+      <section class="section">
+        <h2>Remarks</h2>
+        <div class="remarks" [innerHTML]="formatDescription(decl.remarks)"></div>
+      </section>
+    }
+
+    <!-- Signature -->
+    @if (highlightedSignature.value(); as sig) {
+      <section class="section">
+        <h2>Signature</h2>
+        <div class="code-block" [innerHTML]="trustHtml(sig)"></div>
+      </section>
+    }
+
+    <!-- Type Parameters -->
+    @if (decl.typeParams?.length) {
+      <section class="section">
+        <h2>Type Parameters</h2>
+        <div class="members-table-wrapper">
+          <table class="members-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Constraint</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (tp of decl.typeParams; track tp.name) {
+                <tr>
+                  <td>
+                    <code class="name">{{ tp.name }}</code>
+                  </td>
+                  <td><code class="type" [innerHTML]="linkifyType(tp.constraint ?? '-')"></code></td>
+                  <td><code class="type" [innerHTML]="linkifyType(tp.default ?? '-')"></code></td>
+                  <td [innerHTML]="formatDescription(tp.description || '-')"></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+
+    <!-- Parameters (for functions) -->
+    @if (decl.params?.length) {
+      <section class="section">
+        <h2>Parameters</h2>
+        <div class="members-table-wrapper">
+          <table class="members-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (param of decl.params; track param.name) {
+                <tr>
+                  <td>
+                    <code class="name">{{ param.name }}</code>
+                    @if (param.isOptional) {
+                      <span class="optional-mark">?</span>
+                    }
+                  </td>
+                  <td><code class="type" [innerHTML]="linkifyType(param.type)"></code></td>
+                  <td [innerHTML]="formatDescription(param.description || '-')"></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+
+    <!-- Return Type (for functions) -->
+    @if (decl.returnType) {
+      <section class="section">
+        <h2>Returns</h2>
+        <p><code class="type" [innerHTML]="linkifyType(decl.returnType)"></code></p>
+      </section>
+    }
+
+    <!-- Properties -->
+    @if (properties().length) {
+      <section class="section">
+        <h2>Properties</h2>
+        <div class="members-table-wrapper">
+          <table class="members-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (prop of properties(); track prop.name) {
+                <tr [class.deprecated]="!!prop.deprecated">
+                  <td>
+                    <code class="name">
+                      @if (prop.isStatic) {
+                        <span class="modifier">static</span>
+                      }
+                      {{ prop.name }}
+                    </code>
+                    @if (prop.isOptional) {
+                      <span class="optional-mark">?</span>
+                    }
+                  </td>
+                  <td><code class="type" [innerHTML]="linkifyType(prop.type)"></code></td>
+                  <td>
+                    <span [innerHTML]="formatDescription(prop.description || '-')"></span>
+                    @if (prop.deprecated) {
+                      <span class="deprecated-inline">Deprecated</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+
+    <!-- Methods -->
+    @if (methods().length) {
+      <section class="section">
+        <h2>Methods</h2>
+        <div class="members-table-wrapper">
+          <table class="members-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Return Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (method of methods(); track method.name) {
+                <tr [class.deprecated]="!!method.deprecated">
+                  <td>
+                    <code class="name">
+                      @if (method.isStatic) {
+                        <span class="modifier">static</span>
+                      }
+                      {{ method.name }}()
+                    </code>
+                  </td>
+                  <td><code class="type" [innerHTML]="linkifyType(method.returnType ?? 'void')"></code></td>
+                  <td>
+                    <span [innerHTML]="formatDescription(method.description || '-')"></span>
+                    @if (method.deprecated) {
+                      <span class="deprecated-inline">Deprecated</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+
+    <!-- Examples -->
+    @if (highlightedExamples.value()?.length) {
+      <section class="section">
+        <h2>Examples</h2>
+        @for (ex of highlightedExamples.value()!; track $index) {
+          <div class="code-block" [innerHTML]="trustHtml(ex)"></div>
+        }
+      </section>
+    }
+
+    <!-- See Also -->
+    @if (decl.see?.length) {
+      <section class="section">
+        <h2>See Also</h2>
+        <ul class="see-list">
+          @for (ref of decl.see; track ref) {
+            <li [innerHTML]="linkifyType(ref)"></li>
+          }
+        </ul>
+      </section>
+    }
+
+    <!-- Source -->
+    <section class="section source-section">
+      <p class="source-link">
+        <svg
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+          <polyline points="15 3 21 3 21 9" />
+          <line x1="10" y1="14" x2="21" y2="3" />
+        </svg>
+        <code>{{ decl.sourceFile }}:{{ decl.sourceLine }}</code>
+      </p>
+    </section>
+  </div>
+} @else {
+  <div class="not-found">
+    <h2>Symbol not found</h2>
+    <p>
+      The symbol <code>{{ symbolName() }}</code> was not found in the API reference.
+    </p>
+    <a [routerLink]="'/' + adapter.adapter() + '/api-reference'" class="back-link">Back to API Reference</a>
+  </div>
+}

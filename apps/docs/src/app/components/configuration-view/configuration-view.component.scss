@@ -5,7 +5,7 @@
 .config-view {
   display: flex;
   flex-direction: column;
-  gap: $space-6;
+  gap: $space-8;
 
   &__section {
     display: flex;
@@ -16,7 +16,7 @@
   &__heading {
     font-size: $text-base;
     font-weight: 600;
-    color: var(--ng-doc-text, #{$steel});
+    color: var(--forge-text, #{$steel});
     margin: 0;
     display: flex;
     align-items: center;
@@ -32,7 +32,7 @@
   }
 
   &__desc {
-    color: var(--ng-doc-text-muted, #{$steel-mid});
+    color: var(--forge-text-muted, #{$steel-mid});
     margin: 0;
     font-size: $text-sm;
     line-height: 1.6;
@@ -41,7 +41,7 @@
       font-family: $font-mono;
       font-size: 0.8125rem;
       color: $ember-glow;
-      background: var(--ng-doc-base-1, #{$bg-surface});
+      background: var(--forge-base-1, #{$bg-surface});
       padding: 0.125rem 0.375rem;
       border-radius: $radius-sm;
     }
@@ -52,14 +52,21 @@
   }
 
   &__code {
-    background: var(--ng-doc-code-background, #{$bg-deep});
-    border: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+    position: relative;
+    background: var(--forge-code-bg, #{$bg-deep});
+    border: 1px solid var(--forge-border-color, #{$steel-dark});
     border-radius: $radius-lg;
-    overflow: hidden;
+    overflow: visible;
     padding: $space-2 $space-4;
+
+    &:hover docs-copy-button {
+      opacity: 1;
+    }
 
     ::ng-deep pre {
       margin: 0;
+      padding: 0;
+      border: none;
     }
   }
 
@@ -68,26 +75,26 @@
     border-collapse: separate;
     border-spacing: 0;
     font-size: $text-sm;
-    border: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+    border: 1px solid var(--forge-border-color, #{$steel-dark});
     border-radius: $radius-lg;
     overflow: hidden;
 
     th {
       text-align: left;
       padding: $space-2 $space-3;
-      background: var(--ng-doc-base-1, #{$bg-surface});
-      color: var(--ng-doc-text-muted, #{$steel-mid});
+      background: var(--forge-base-1, #{$bg-surface});
+      color: var(--forge-text-muted, #{$steel-mid});
       font-weight: 600;
       font-size: $text-xs;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--ng-doc-border-color, #{$steel-dark});
+      border-bottom: 1px solid var(--forge-border-color, #{$steel-dark});
     }
 
     td {
       padding: $space-2 $space-3;
-      border-bottom: 1px solid var(--ng-doc-border-color, #{$steel-dark});
-      color: var(--ng-doc-text, #{$steel});
+      border-bottom: 1px solid var(--forge-border-color, #{$steel-dark});
+      color: var(--forge-text, #{$steel});
       vertical-align: top;
 
       code {
@@ -108,7 +115,7 @@
 
     // Subtle hover on rows
     tbody tr:hover {
-      background: var(--ng-doc-base-1, rgba($bg-surface, 0.5));
+      background: var(--forge-base-1, rgba($bg-surface, 0.5));
     }
   }
 }

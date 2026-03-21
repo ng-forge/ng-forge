@@ -6,31 +6,211 @@
   margin: 1.5rem 0;
 }
 
-.live-example-container {
-  // Default (light mode / no data-theme): use a subtle light border.
-  // The ExampleScenarioComponent fills the container with its own background,
-  // so background: transparent avoids a dark flash before content loads.
-  border: 1px solid #e0e0e0;
+// Wrapper keeps skeleton + container stacked.
+// overflow:visible is required — overlay panels (CDK datepickers, Ionic modals,
+// PrimeNG date/select overlays) render inside the shadow root and must escape
+// this container. Border-radius rounding is handled by the skeleton + container
+// having their own border-radius instead.
+.live-example-wrapper {
+  position: relative;
+  border: 1px solid var(--forge-border-color, #e0e0e0);
   border-radius: 8px;
-  overflow: hidden;
-  background: transparent;
+  overflow: visible;
+}
 
-  // Shadow host div — fills the container width, height wraps content
-  > div {
-    width: 100%;
+// ============================================
+// ADAPTER BADGE — floating top-right overlay
+// ============================================
+.adapter-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--forge-base-1, #f0f0f0);
+  border: 1px solid var(--forge-border-color, #e0e0e0);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--forge-text-muted);
+  letter-spacing: 0.03em;
+  pointer-events: none;
+}
+
+.adapter-badge-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  border-radius: 2px;
+}
+
+:host-context([data-theme='dark']) .adapter-badge {
+  background: $bg-surface;
+  border-color: $steel-dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context([data-theme='auto']) .adapter-badge {
+    background: $bg-surface;
+    border-color: $steel-dark;
   }
 }
 
-// Dark mode: switch to dark border and dark backing
-:host-context([data-theme='dark']) .live-example-container {
+.live-example-container {
+  overflow: visible;
+  background: transparent;
+
+  > div {
+    width: 100%;
+  }
+
+  // While sandbox is mounting, hide container so skeleton is visible
+  &.mounting {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+// Dark mode wrapper border
+:host-context([data-theme='dark']) .live-example-wrapper {
   border-color: $steel-dark;
+}
+
+:host-context([data-theme='dark']) .live-example-container {
   background: $bg-elevated;
 }
 
-// Auto mode: follow system preference
 @media (prefers-color-scheme: dark) {
-  :host-context([data-theme='auto']) .live-example-container {
+  :host-context([data-theme='auto']) .live-example-wrapper {
     border-color: $steel-dark;
+  }
+
+  :host-context([data-theme='auto']) .live-example-container {
     background: $bg-elevated;
+  }
+}
+
+// ============================================
+// SKELETON LOADER — form-like placeholder
+// ============================================
+.live-example-skeleton {
+  min-height: 300px;
+  background: var(--forge-base-0, #fff);
+}
+
+:host-context([data-theme='dark']) .live-example-skeleton {
+  background: $bg-elevated;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context([data-theme='auto']) .live-example-skeleton {
+    background: $bg-elevated;
+  }
+}
+
+// Form skeleton content
+.skeleton-form {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.skeleton-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-label {
+  width: 120px;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--forge-base-3, #e5e5e5) 0%, var(--forge-base-4, #d4d4d4) 50%, var(--forge-base-3, #e5e5e5) 100%);
+  background-size: 200% 100%;
+  animation: example-shimmer 2.5s ease-in-out infinite;
+
+  &.short {
+    width: 80px;
+  }
+}
+
+.skeleton-input {
+  width: 100%;
+  height: 40px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--forge-base-2, #f0f0f0) 0%, var(--forge-base-3, #e5e5e5) 50%, var(--forge-base-2, #f0f0f0) 100%);
+  background-size: 200% 100%;
+  animation: example-shimmer 2.5s ease-in-out infinite;
+  animation-delay: 0.1s;
+
+  &.tall {
+    height: 80px;
+  }
+}
+
+.skeleton-button {
+  width: 120px;
+  height: 36px;
+  border-radius: 6px;
+  margin-top: 4px;
+  background: linear-gradient(90deg, var(--forge-base-3, #e5e5e5) 0%, var(--forge-base-4, #d4d4d4) 50%, var(--forge-base-3, #e5e5e5) 100%);
+  background-size: 200% 100%;
+  animation: example-shimmer 2.5s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+
+// Dark mode skeleton elements
+:host-context([data-theme='dark']) {
+  .skeleton-label,
+  .skeleton-input,
+  .skeleton-button {
+    background: linear-gradient(90deg, $bg-surface 0%, $bg-elevated 50%, $bg-surface 100%);
+    background-size: 200% 100%;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context([data-theme='auto']) {
+    .skeleton-label,
+    .skeleton-input,
+    .skeleton-button {
+      background: linear-gradient(90deg, $bg-surface 0%, $bg-elevated 50%, $bg-surface 100%);
+      background-size: 200% 100%;
+    }
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes example-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-label,
+  .skeleton-input,
+  .skeleton-button {
+    animation: none;
   }
 }

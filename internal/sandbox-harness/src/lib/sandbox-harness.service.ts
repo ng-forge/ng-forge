@@ -1,6 +1,7 @@
-import { ApplicationRef, createComponent, inject, Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
+import { ApplicationRef, createComponent, inject, Injectable, OnDestroy, Provider, signal, WritableSignal } from '@angular/core';
 import { DOCUMENT, LocationStrategy } from '@angular/common';
 import { createApplication, ɵSharedStylesHost as SharedStylesHost } from '@angular/platform-browser';
+import { OverlayContainer } from '@angular/cdk/overlay';
 import { MemoryLocationStrategy } from './memory-location-strategy';
 import { Router } from '@angular/router';
 import { ADAPTER_REGISTRY } from './adapter-registry';
@@ -9,6 +10,7 @@ import { AdapterName, AdapterRegistration, SANDBOX_FORM_CONFIG, SandboxBootstrap
 import { createDocumentProxy } from './document-proxy';
 import { SandboxSlot } from './sandbox-slot';
 import { SANDBOX_THEME } from './sandbox-theme';
+import { ShadowDomOverlayContainer, SHADOW_ROOT_REF, ShadowRootRef } from './shadow-dom-overlay-container';
 
 const STYLESHEET_ID_PREFIX = 'sandbox-harness-style-';
 
@@ -20,6 +22,14 @@ export class SandboxHarness implements OnDestroy {
   private instanceCounter = 0;
   private activeStylesheetAdapter: AdapterName | null = null;
   private readonly cssCache = new Map<string, Promise<string>>();
+
+  // Tracks all active shadow roots for the global document patches (Ionic overlay fix).
+  // Multiple sandbox instances can coexist (e.g. two live examples on the same doc page).
+  private readonly activeShadowRoots = new Map<ShadowRoot, HTMLElement>();
+  private originalQuerySelector: typeof Document.prototype.querySelector | null = null;
+  private originalClassListAdd: typeof DOMTokenList.prototype.add | null = null;
+  private originalClassListRemove: typeof DOMTokenList.prototype.remove | null = null;
+  private originalGetComputedStyle: typeof window.getComputedStyle | null = null;
 
   /**
    * Creates a {@link SandboxSlot} bound to the given container element.
@@ -97,7 +107,7 @@ export class SandboxHarness implements OnDestroy {
     // In scoped mode the proxy redirects these to the shadow root once it exists,
     // transforming global selectors (e.g. [data-theme='dark']) so they work inside shadow DOM.
     const addedStyles = new Set<HTMLStyleElement>();
-    const shadowRootRef: { current: ShadowRoot | null } = { current: null };
+    const shadowRootRef: ShadowRootRef = { current: null };
     const styleTransform = isScoped ? (css: string) => this.transformCssForShadowDom(css) : undefined;
     const { proxy: documentProxy, cleanup: cleanupDocumentProxy } = createDocumentProxy(
       this.document,
@@ -105,9 +115,38 @@ export class SandboxHarness implements OnDestroy {
       shadowRootRef,
       styleTransform,
     );
+
+    const baseProviders: Provider[] = [
+      { provide: DOCUMENT, useValue: documentProxy },
+      { provide: SANDBOX_THEME, useValue: themeSignal },
+    ];
+
+    // In scoped mode, redirect CDK overlays (datepicker, select, menu, etc.) into the
+    // shadow root so they pick up the adapter styles. The shadow root reference is null
+    // during createApplication() but will be set after createComponent() — by the time
+    // a user opens an overlay, the reference is populated.
+    //
+    // Must use useFactory (not `new`) because OverlayContainer's field initializers call
+    // inject(Platform), inject(DOCUMENT), inject(_CdkPrivateStyleLoader) — which require
+    // an active injection context that only exists inside the DI framework.
+    if (isScoped) {
+      const ref = shadowRootRef;
+      baseProviders.push(
+        { provide: SHADOW_ROOT_REF, useValue: ref },
+        {
+          provide: OverlayContainer,
+          useFactory: () => {
+            const container = new ShadowDomOverlayContainer();
+            container.setShadowRootRef(ref);
+            return container;
+          },
+        },
+      );
+    }
+
     config = {
       ...config,
-      providers: [...config.providers, { provide: DOCUMENT, useValue: documentProxy }, { provide: SANDBOX_THEME, useValue: themeSignal }],
+      providers: [...config.providers, ...baseProviders],
     };
 
     // Create the isolated sub-application.
@@ -137,6 +176,14 @@ export class SandboxHarness implements OnDestroy {
     if (isScoped) {
       // The root component uses ExperimentalIsolatedShadowDom, so Angular attaches
       // the shadow root to hostElement during createComponent().
+      // Ensure the shadow host allows overlays (datepickers, selects, modals) to
+      // visually overflow. Component :host styles may set overflow:auto/hidden,
+      // which clips absolutely-positioned overlay panels.
+      hostElement.style.overflow = 'visible';
+      // Clear any transform on the host — even an identity transform (matrix(1,0,0,1,0,0))
+      // creates a containing block for position:fixed descendants, which traps Ionic modals
+      // inside the host's dimensions instead of letting them cover the viewport.
+      hostElement.style.transform = 'none';
       const shadowRoot = hostElement.shadowRoot;
       if (shadowRoot) {
         shadowRootRef.current = shadowRoot;
@@ -249,6 +296,23 @@ export class SandboxHarness implements OnDestroy {
     syncTheme();
     this.setupThemeObserver(mediaQuery, syncTheme, cleanupFns);
 
+    // PrimeNG's overlay positioning code walks up parentNode looking for scrollable
+    // containers. Inside shadow DOM, the walk hits the ShadowRoot node (nodeType 11)
+    // and passes it to window.getComputedStyle(), which only accepts Element nodes.
+    // Patch getComputedStyle to gracefully handle ShadowRoot by returning the host
+    // element's computed style instead of throwing.
+    this.patchGetComputedStyleForShadowDom(cleanupFns);
+
+    // Ionic's Stencil web components use the global `document` directly (not Angular's DOCUMENT
+    // token), so the document proxy cannot intercept their calls. Ionic's overlay system calls
+    // `document.querySelector('ion-app')` to find where to append overlays (alerts, popovers,
+    // action sheets). Inside shadow DOM, `ion-app` is invisible to `document.querySelector`,
+    // so Ionic falls back to `document.body` — placing overlays outside the shadow boundary,
+    // losing styles, and causing scroll jumps via `document.body.classList.add('backdrop-no-scroll')`.
+    //
+    // Fix: temporarily patch the global document to redirect these operations into the shadow root.
+    this.patchGlobalDocumentForIonicOverlays(shadowRoot, hostElement, cleanupFns);
+
     // Inject the adapter CSS bundle with selector transformation so html/body/:root work in shadow DOM.
     await this.injectIntoShadow(registration, shadowRoot, abortSignal);
   }
@@ -329,6 +393,176 @@ export class SandboxHarness implements OnDestroy {
         //    re-transforming :host([data-theme=...]) or .element[data-theme=...]
         .replace(/(?<![.#\w:\-(])\[data-theme([^\]]*)\]/g, ':host([data-theme$1])')
     );
+  }
+
+  /**
+   * Patches `window.getComputedStyle` to handle `ShadowRoot` nodes gracefully.
+   *
+   * PrimeNG (and potentially other libraries) walk up `parentNode` to find scrollable
+   * containers for overlay positioning. Inside shadow DOM, this walk crosses the shadow
+   * boundary and reaches a `ShadowRoot` node (nodeType 11). When passed to
+   * `window.getComputedStyle()`, it throws because only `Element` nodes are accepted.
+   *
+   * Fix: intercept `ShadowRoot` arguments and return the host element's computed style.
+   */
+  private patchGetComputedStyleForShadowDom(cleanupFns: Array<() => void>): void {
+    if (this.originalGetComputedStyle) return; // Already patched.
+
+    this.originalGetComputedStyle = window.getComputedStyle;
+    const origGCS = this.originalGetComputedStyle;
+
+    window.getComputedStyle = function (elt: Element, pseudoElt?: string | null): CSSStyleDeclaration {
+      // ShadowRoot is not an Element — redirect to its host element.
+      if (elt instanceof ShadowRoot) {
+        return origGCS.call(this, elt.host, pseudoElt);
+      }
+      return origGCS.call(this, elt, pseudoElt);
+    };
+
+    cleanupFns.push(() => {
+      if (this.originalGetComputedStyle) {
+        window.getComputedStyle = this.originalGetComputedStyle;
+        this.originalGetComputedStyle = null;
+      }
+    });
+  }
+
+  /**
+   * Patches the global `document` to redirect Ionic's overlay system into the shadow root.
+   *
+   * Ionic Core (Stencil) uses the global `document` for overlay management:
+   * - `document.querySelector('ion-app')` — finds the container for overlay elements
+   * - `document.body.classList.add('backdrop-no-scroll')` — prevents page scroll during overlays
+   *
+   * Both fail when `ion-app` lives inside a shadow root. This patch:
+   * 1. Overrides `document.querySelector` to search shadow roots when the light DOM has no match.
+   *    When multiple sandboxes coexist, the focused element determines which shadow root to search.
+   * 2. Intercepts `document.body.classList` to redirect `backdrop-no-scroll` to the correct
+   *    shadow host instead of the real body (preventing the docs page from scrolling to top).
+   */
+  private patchGlobalDocumentForIonicOverlays(shadowRoot: ShadowRoot, hostElement: HTMLElement, cleanupFns: Array<() => void>): void {
+    this.activeShadowRoots.set(shadowRoot, hostElement);
+
+    // Only install the global patches once; they reference the registry, not a single shadow root.
+    if (this.activeShadowRoots.size === 1) {
+      this.installGlobalIonicPatches();
+    }
+
+    cleanupFns.push(() => {
+      this.activeShadowRoots.delete(shadowRoot);
+      if (this.activeShadowRoots.size === 0) {
+        this.removeGlobalIonicPatches();
+      }
+    });
+  }
+
+  /**
+   * Finds the shadow root that contains the currently focused element.
+   * When the user interacts with a select inside shadow root A, `document.activeElement`
+   * is the shadow host — we walk up the active element chain to find the matching root.
+   */
+  private findActiveShadowRoot(): ShadowRoot | null {
+    let el = this.document.activeElement;
+    while (el) {
+      if (el.shadowRoot && this.activeShadowRoots.has(el.shadowRoot)) {
+        return el.shadowRoot;
+      }
+      // If the element itself is inside a shadow root, check that root.
+      const rootNode = el.getRootNode();
+      if (rootNode instanceof ShadowRoot) {
+        if (this.activeShadowRoots.has(rootNode)) return rootNode;
+        // Walk up to the shadow host and continue.
+        el = rootNode.host;
+      } else {
+        break;
+      }
+    }
+    return null;
+  }
+
+  private installGlobalIonicPatches(): void {
+    // 1. Patch querySelector to search inside shadow roots as a fallback.
+    this.originalQuerySelector = Document.prototype.querySelector;
+    const origQS = this.originalQuerySelector;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- needed because inner functions rebind `this` to Document
+    const harness = this;
+
+    // Only intercept selectors that Ionic's overlay system uses to find its container.
+    // A blanket fallback would leak shadow DOM elements to unrelated callers (e.g. PrimeNG
+    // calling document.querySelector('.p-component') and getting an element from a different
+    // shadow root, causing "getComputedStyle: parameter 1 is not of type Element" errors).
+    const IONIC_OVERLAY_SELECTORS = new Set(['ion-app', 'ion-overlay-host']);
+
+    Document.prototype.querySelector = function (this: Document, selector: string): Element | null {
+      const result = origQS.call(this, selector);
+      if (result) return result;
+
+      // Only search shadow roots for Ionic overlay selectors.
+      if (!IONIC_OVERLAY_SELECTORS.has(selector)) return null;
+
+      // Prefer the shadow root that owns the currently focused element.
+      const activeSR = harness.findActiveShadowRoot();
+      if (activeSR) {
+        const found = activeSR.querySelector(selector);
+        if (found) return found;
+      }
+
+      // Fallback: search all registered shadow roots (e.g. when no element is focused).
+      for (const sr of harness.activeShadowRoots.keys()) {
+        if (sr === activeSR) continue; // Already searched.
+        const found = sr.querySelector(selector);
+        if (found) return found;
+      }
+      return null;
+    };
+
+    // 2. Intercept body.classList to redirect 'backdrop-no-scroll' to the shadow host.
+    const realBody = this.document.body;
+    this.originalClassListAdd = DOMTokenList.prototype.add;
+    this.originalClassListRemove = DOMTokenList.prototype.remove;
+    const origAdd = this.originalClassListAdd;
+    const origRemove = this.originalClassListRemove;
+
+    DOMTokenList.prototype.add = function (this: DOMTokenList, ...tokens: string[]): void {
+      if (this === realBody.classList && tokens.includes('backdrop-no-scroll')) {
+        const nonBackdrop = tokens.filter((t) => t !== 'backdrop-no-scroll');
+        if (nonBackdrop.length > 0) origAdd.apply(this, nonBackdrop);
+        // Redirect to the correct shadow host.
+        const activeSR = harness.findActiveShadowRoot();
+        const host = activeSR ? harness.activeShadowRoots.get(activeSR) : harness.activeShadowRoots.values().next().value;
+        if (host) origAdd.call(host.classList, 'backdrop-no-scroll');
+        return;
+      }
+      origAdd.apply(this, tokens);
+    };
+
+    DOMTokenList.prototype.remove = function (this: DOMTokenList, ...tokens: string[]): void {
+      if (this === realBody.classList && tokens.includes('backdrop-no-scroll')) {
+        const nonBackdrop = tokens.filter((t) => t !== 'backdrop-no-scroll');
+        if (nonBackdrop.length > 0) origRemove.apply(this, nonBackdrop);
+        // Remove from all shadow hosts (the overlay could have been in any).
+        for (const host of harness.activeShadowRoots.values()) {
+          origRemove.call(host.classList, 'backdrop-no-scroll');
+        }
+        return;
+      }
+      origRemove.apply(this, tokens);
+    };
+  }
+
+  private removeGlobalIonicPatches(): void {
+    if (this.originalQuerySelector) {
+      Document.prototype.querySelector = this.originalQuerySelector;
+      this.originalQuerySelector = null;
+    }
+    if (this.originalClassListAdd) {
+      DOMTokenList.prototype.add = this.originalClassListAdd;
+      this.originalClassListAdd = null;
+    }
+    if (this.originalClassListRemove) {
+      DOMTokenList.prototype.remove = this.originalClassListRemove;
+      this.originalClassListRemove = null;
+    }
   }
 
   private removeStylesheet(adapterName: AdapterName): void {

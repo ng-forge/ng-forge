@@ -13,7 +13,7 @@
  *     └── assets/      (docs assets)
  */
 
-import { copyFileSync, cpSync, existsSync, mkdirSync, rmSync } from 'fs';
+import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -27,11 +27,21 @@ const deployRoot = join(rootDir, 'dist', 'deploy');
 const deployDir = join(deployRoot, 'dynamic-forms');
 const distDir = join(rootDir, 'dist');
 
-// Check if build output exists
-if (!existsSync(join(distDir, 'apps', 'docs', 'browser'))) {
+// Prefer pre-rendered output (SSG via Analog) over client-only SPA shell
+const docsAnalogDir = join(distDir, 'apps', 'docs', 'analog', 'public');
+const docsClientDir = join(distDir, 'apps', 'docs', 'client');
+const docsSourceDir = existsSync(docsAnalogDir) ? docsAnalogDir : docsClientDir;
+
+if (!existsSync(docsSourceDir)) {
   console.error('❌ Error: Docs app build output not found!');
   console.error('   Please run: pnpm nx build docs --configuration=production');
   process.exit(1);
+}
+
+if (docsSourceDir === docsAnalogDir) {
+  console.log('📦 Using pre-rendered (SSG) output from Analog...');
+} else {
+  console.log('📦 Using client-only SPA output (no pre-rendering)...');
 }
 
 // Clean deploy directory
@@ -45,27 +55,39 @@ mkdirSync(deployDir, { recursive: true });
 // Copy docs app to root
 console.log('📄 Copying docs app to deployment root...');
 try {
-  cpSync(join(distDir, 'apps', 'docs', 'browser'), deployDir, { recursive: true });
+  cpSync(docsSourceDir, deployDir, { recursive: true });
   console.log('   ✅ Docs app copied');
 } catch (error) {
   console.error('   ❌ Failed to copy docs app:', error.message);
   process.exit(1);
 }
 
-// Copy index.csr.html to index.html for SPA fallback
-// Angular SSR generates index.csr.html as the client-side rendering fallback.
-const indexCsrPath = join(deployDir, 'index.csr.html');
-const indexHtmlPath = join(deployDir, 'index.html');
-if (existsSync(indexCsrPath)) {
-  console.log('📄 Creating index.html from index.csr.html for SPA fallback...');
-  try {
-    copyFileSync(indexCsrPath, indexHtmlPath);
-    console.log('   ✅ index.html created');
-  } catch (error) {
-    console.error('   ❌ Failed to create index.html:', error.message);
-    process.exit(1);
+// Rewrite base href in all HTML files for /dynamic-forms/ deployment path
+console.log('📄 Rewriting base href for /dynamic-forms/ deployment...');
+
+function rewriteBaseHrefInDir(dir) {
+  let count = 0;
+  const entries = readdirSync(dir);
+  for (const entry of entries) {
+    const fullPath = join(dir, entry);
+    const stat = statSync(fullPath);
+    if (stat.isDirectory()) {
+      count += rewriteBaseHrefInDir(fullPath);
+    } else if (entry.endsWith('.html')) {
+      const html = readFileSync(fullPath, 'utf-8');
+      // Only rewrite the <base> tag — not other href="/" occurrences (e.g. anchor tags).
+      const updated = html.replace(/<base\s+href="\/"\s*\/?>/g, '<base href="/dynamic-forms/">');
+      if (updated !== html) {
+        writeFileSync(fullPath, updated, 'utf-8');
+        count++;
+      }
+    }
   }
+  return count;
 }
+
+const rewrittenCount = rewriteBaseHrefInDir(deployDir);
+console.log(`   ✅ base href updated in ${rewrittenCount} HTML file(s)`);
 
 console.log('\n✅ Deployment directory prepared successfully!\n');
 console.log('📂 Deployment structure:');

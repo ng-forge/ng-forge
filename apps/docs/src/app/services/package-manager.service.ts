@@ -11,7 +11,7 @@ export class PackageManagerService {
   constructor() {
     const isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
     const saved = isBrowser ? (localStorage.getItem(PackageManagerService.STORAGE_KEY) as 'npm' | 'pnpm' | 'yarn' | null) : null;
-    this.pm = signal(saved ?? 'pnpm');
+    this.pm = signal(saved ?? 'npm');
     if (isBrowser) {
       explicitEffect([this.pm], ([value]) => {
         localStorage.setItem(PackageManagerService.STORAGE_KEY, value);

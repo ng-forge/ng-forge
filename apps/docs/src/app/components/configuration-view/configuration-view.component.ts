@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { NgDocCopyButtonComponent } from '@ng-doc/app/components/copy-button';
+
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
+import { CopyButtonComponent } from '../copy-button/copy-button.component';
 
 type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'custom';
 
@@ -255,7 +256,7 @@ const config = {
 
 @Component({
   selector: 'docs-configuration-view',
-  imports: [CodeHighlightDirective],
+  imports: [CodeHighlightDirective, CopyButtonComponent],
   template: `
     <div class="config-view">
       @if (data().options.length > 0) {
@@ -298,8 +299,8 @@ const config = {
           <h3 class="config-view__heading">Custom Adapter Config</h3>
           <p class="config-view__desc">
             Custom adapters define their own config interface. The cascade pattern works the same way — implement a config merger in your
-            adapter to support library-level and form-level defaults. See <a href="/building-an-adapter">Building an Adapter</a> for a full
-            guide.
+            adapter to support library-level and form-level defaults. See
+            <a href="/building-an-adapter">Building an Adapter</a> for a full guide.
           </p>
         </section>
       }
@@ -307,6 +308,7 @@ const config = {
       <section class="config-view__section">
         <h3 class="config-view__heading">Library-level (provider)</h3>
         <div class="config-view__code">
+          <docs-copy-button [code]="data().providerExample" />
           <div [codeHighlight]="data().providerExample"></div>
         </div>
       </section>
@@ -318,6 +320,7 @@ const config = {
           <code>defaultProps</code> with autocomplete.
         </p>
         <div class="config-view__code">
+          <docs-copy-button [code]="data().formLevelExample" />
           <div [codeHighlight]="data().formLevelExample"></div>
         </div>
       </section>
@@ -326,7 +329,7 @@ const config = {
   styleUrl: './configuration-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocsConfigurationViewComponent {
+export default class DocsConfigurationViewComponent {
   private readonly activeAdapter = inject(ActiveAdapterService);
 
   readonly data = computed(() => ADAPTER_CONFIG_DATA[this.activeAdapter.adapter() as AdapterName]);

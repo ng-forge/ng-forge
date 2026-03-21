@@ -1,0 +1,434 @@
+@use 'tokens' as *;
+
+:host {
+  --card-bg: #ffffff;
+  --card-border: #e0e0e0;
+  --card-border-hover: #c0c0c0;
+  --card-shadow-hover: rgba(0, 0, 0, 0.1);
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --search-bg: #f5f5f5;
+  --search-border: #e0e0e0;
+  --glow-color: rgba(255, 140, 66, 0.15);
+
+  display: block;
+  font-family: $font-primary;
+  color: var(--text-primary);
+}
+
+:host-context(html[data-theme='dark']) {
+  --card-bg: #0a0908;
+  --card-border: #2a2824;
+  --card-border-hover: #5c5850;
+  --card-shadow-hover: rgba(0, 0, 0, 0.4);
+  --text-primary: #e8e4de;
+  --text-secondary: #9a958c;
+  --search-bg: #1a1916;
+  --search-border: #2a2824;
+  --glow-color: rgba(255, 140, 66, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context(html[data-theme='auto']) {
+    --card-bg: #0a0908;
+    --card-border: #2a2824;
+    --card-border-hover: #5c5850;
+    --card-shadow-hover: rgba(0, 0, 0, 0.4);
+    --text-primary: #e8e4de;
+    --text-secondary: #9a958c;
+    --search-bg: #1a1916;
+    --search-border: #2a2824;
+    --glow-color: rgba(255, 140, 66, 0.12);
+  }
+}
+
+// ─── Kind colors (ember palette) ───
+$kind-colors: (
+  'component': #ff4d00,
+  'directive': #e67e22,
+  'injectable': #9b59b6,
+  'pipe': #1abc9c,
+  'class': #e74c3c,
+  'interface': #3498db,
+  'type': #3e69c5,
+  'function': #28ca42,
+  'const': #ffb627,
+  'enum': #2ecc71,
+);
+
+.kind-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  @each $kind, $color in $kind-colors {
+    &[data-kind='#{$kind}'] {
+      background: $color;
+    }
+  }
+}
+
+.kind-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: $text-xs;
+  font-weight: 600;
+  border-radius: $radius-sm;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #fff;
+  flex-shrink: 0;
+
+  @each $kind, $color in $kind-colors {
+    &[data-kind='#{$kind}'] {
+      background: $color;
+    }
+  }
+}
+
+// ─── Layout ───
+.api-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.api-header {
+  margin-bottom: $space-8;
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 $space-2;
+    color: var(--text-primary);
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+}
+
+// ─── Toolbar ───
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  margin-bottom: $space-8;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: $space-3 $space-4 $space-3 40px;
+  font-size: $text-base;
+  font-family: inherit;
+  background: var(--search-bg);
+  border: 1px solid var(--search-border);
+  border-radius: $radius-md;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color $transition-fast;
+
+  &:focus {
+    border-color: $ember-glow;
+    box-shadow: 0 0 0 3px rgba($ember-glow, 0.15);
+  }
+
+  &::placeholder {
+    color: var(--text-secondary);
+  }
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  align-items: center;
+}
+
+.filter-group-label {
+  font-size: $text-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-right: $space-1;
+  user-select: none;
+}
+
+.filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: $text-sm;
+  font-weight: 500;
+  font-family: inherit;
+  background: var(--search-bg);
+  border: 1px solid var(--search-border);
+  border-radius: $radius-pill;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover:not(.active) {
+    color: var(--text-primary);
+    border-color: var(--card-border-hover);
+  }
+
+  &.active {
+    background: $ember-core;
+    border-color: $ember-core;
+    color: #fff;
+
+    .kind-dot {
+      background: #fff;
+    }
+  }
+}
+
+.filter-tag--pkg {
+  &.active {
+    background: var(--search-bg);
+    border-color: $ember-glow;
+    color: var(--text-primary);
+    box-shadow: 0 0 0 1px $ember-glow;
+
+    .pkg-dot--core {
+      background: $ember-core;
+    }
+
+    .pkg-dot--adapter {
+      background: #3498db;
+    }
+  }
+
+  &:not(.active) {
+    opacity: 0.55;
+
+    .pkg-dot {
+      background: var(--text-secondary);
+    }
+  }
+}
+
+.pkg-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &--core {
+    background: $ember-core;
+  }
+
+  &--adapter {
+    background: #3498db;
+  }
+}
+
+.filter-count {
+  font-size: $text-xs;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--text-secondary) 12%, transparent);
+  padding: 0 5px;
+  border-radius: $radius-sm;
+  line-height: 1.4;
+}
+
+// ─── Package sections ───
+.package-section {
+  margin-bottom: $space-12;
+}
+
+.package-title {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-family: $font-mono;
+  color: var(--text-primary);
+  margin: 0 0 $space-6;
+  padding-bottom: $space-4;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.package-badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  font-size: $text-xs;
+  font-weight: 700;
+  font-family: $font-primary;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: $radius-sm;
+  background: $ember-core;
+  color: #fff;
+
+  &--adapter {
+    background: #3498db;
+  }
+}
+
+// ─── Kind groups ───
+.kind-group {
+  margin-bottom: $space-8;
+}
+
+.kind-title {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $text-base;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 $space-4;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: $text-sm;
+}
+
+.kind-count {
+  font-size: $text-xs;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--search-bg);
+  padding: 1px 6px;
+  border-radius: $radius-sm;
+}
+
+// ─── Declaration cards ───
+.declarations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--card-border);
+  border-radius: $radius-md;
+  overflow: hidden;
+}
+
+.decl-card {
+  display: block;
+  padding: $space-4 $space-5;
+  background: var(--card-bg);
+  text-decoration: none;
+  color: inherit;
+  transition: all $transition-fast;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--search-bg);
+
+    .decl-name {
+      color: $ember-glow;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid $ember-glow;
+    outline-offset: -2px;
+  }
+
+  &.deprecated {
+    opacity: 0.65;
+  }
+}
+
+.decl-header {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+.decl-name {
+  font-family: $font-mono;
+  font-size: $text-base;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: color $transition-fast;
+}
+
+.deprecated-badge {
+  font-size: $text-xs;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: $radius-sm;
+  background: rgba($error, 0.12);
+  color: $error;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.decl-desc {
+  margin: $space-2 0 0;
+  font-size: $text-sm;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  // Indent to align with name (past the kind badge)
+  padding-left: calc(8px + 8px + #{$space-3} + #{$space-3});
+}
+
+// ─── Empty state ───
+.no-results {
+  text-align: center;
+  padding: $space-12 0;
+  color: var(--text-secondary);
+
+  p {
+    margin: 0 0 $space-4;
+    font-size: $text-base;
+  }
+}
+
+.clear-btn {
+  display: inline-flex;
+  padding: $space-2 $space-5;
+  font-size: $text-sm;
+  font-weight: 600;
+  font-family: inherit;
+  background: $ember-core;
+  border: none;
+  border-radius: $radius-md;
+  color: #fff;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $ember-hot;
+  }
+}
+
+// ─── Responsive ───
+@media (max-width: 640px) {
+  .api-header h1 {
+    font-size: 2rem;
+  }
+
+  .package-title {
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+  }
+
+  .decl-desc {
+    padding-left: 0;
+  }
+}

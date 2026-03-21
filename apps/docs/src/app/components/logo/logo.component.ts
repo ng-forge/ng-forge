@@ -124,8 +124,7 @@ export type LogoSize = 'sm' | 'md' | 'lg';
 
     // Dark mode - subtitle color adjustment
     :host-context([data-theme='dark']),
-    :host-context([data-theme='landing']),
-    :host-context(.ng-doc-dark) {
+    :host-context([data-theme='landing']) {
       .logo-subtitle {
         fill: $steel-dim;
       }

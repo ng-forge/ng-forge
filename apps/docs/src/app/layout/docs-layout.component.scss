@@ -1,0 +1,449 @@
+$ember-glow: #ff8c42;
+$sidebar-width: 310px;
+$navbar-height: 72px;
+$app-max-width: 1600px;
+$mobile-bp: 1024px;
+
+// ============================================
+// HOST
+// ============================================
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+// ============================================
+// NAVBAR — fixed full-width, centered inner
+// ============================================
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: $navbar-height;
+  background: var(--forge-navbar-bg);
+  z-index: 100;
+  transition: box-shadow 0.2s ease;
+
+  &.scrolled {
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.05),
+      0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  max-width: $app-max-width;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+// Placeholder that reserves space for the deferred search button to prevent CLS
+.search-placeholder {
+  min-width: 240px;
+  height: 40px;
+
+  @media (max-width: 720px) {
+    min-width: unset;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+
+  &:focus-visible {
+    outline: 2px solid $ember-glow;
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+}
+
+// Visibility helpers tied to sidebar breakpoint
+.desktop-only {
+  @media (max-width: $mobile-bp) {
+    display: none !important;
+  }
+}
+
+.mobile-only {
+  display: none !important;
+
+  @media (max-width: $mobile-bp) {
+    display: flex !important;
+  }
+}
+
+.menu-btn.icon-btn {
+  display: none;
+
+  @media (max-width: $mobile-bp) {
+    display: flex;
+  }
+}
+
+.menu-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: currentColor;
+  mask-image: url('/assets/icons/menu.svg');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: url('/assets/icons/menu.svg');
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+
+  &--open {
+    mask-image: url('/assets/icons/close.svg');
+    -webkit-mask-image: url('/assets/icons/close.svg');
+  }
+}
+
+// ============================================
+// ICON BUTTONS
+// ============================================
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--forge-base-2);
+  border: 1px solid var(--forge-border-color);
+  color: var(--forge-text-muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--forge-base-1);
+    border-color: $ember-glow;
+    color: $ember-glow;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// ============================================
+// THEME TOGGLE ICON
+// ============================================
+.theme-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: currentColor;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+
+  &--light {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cline x1='12' y1='1' x2='12' y2='3'/%3E%3Cline x1='12' y1='21' x2='12' y2='23'/%3E%3Cline x1='4.22' y1='4.22' x2='5.64' y2='5.64'/%3E%3Cline x1='18.36' y1='18.36' x2='19.78' y2='19.78'/%3E%3Cline x1='1' y1='12' x2='3' y2='12'/%3E%3Cline x1='21' y1='12' x2='23' y2='12'/%3E%3Cline x1='4.22' y1='19.78' x2='5.64' y2='18.36'/%3E%3Cline x1='18.36' y1='5.64' x2='19.78' y2='4.22'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cline x1='12' y1='1' x2='12' y2='3'/%3E%3Cline x1='12' y1='21' x2='12' y2='23'/%3E%3Cline x1='4.22' y1='4.22' x2='5.64' y2='5.64'/%3E%3Cline x1='18.36' y1='18.36' x2='19.78' y2='19.78'/%3E%3Cline x1='1' y1='12' x2='3' y2='12'/%3E%3Cline x1='21' y1='12' x2='23' y2='12'/%3E%3Cline x1='4.22' y1='19.78' x2='5.64' y2='18.36'/%3E%3Cline x1='18.36' y1='5.64' x2='19.78' y2='4.22'/%3E%3C/svg%3E");
+  }
+
+  &--dark {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E");
+  }
+
+  &--auto {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='3' width='20' height='14' rx='2' ry='2'/%3E%3Cline x1='8' y1='21' x2='16' y2='21'/%3E%3Cline x1='12' y1='17' x2='12' y2='21'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='3' width='20' height='14' rx='2' ry='2'/%3E%3Cline x1='8' y1='21' x2='16' y2='21'/%3E%3Cline x1='12' y1='17' x2='12' y2='21'/%3E%3C/svg%3E");
+  }
+}
+
+// ============================================
+// NAV BADGE
+// ============================================
+.nav-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 16px;
+  border-radius: 4px;
+  background: rgba($ember-glow, 0.15);
+  color: $ember-glow;
+  margin-left: auto;
+}
+
+// ============================================
+// PAGE BODY — centered flex wrapper
+// ============================================
+.page-body {
+  display: flex;
+  max-width: $app-max-width;
+  width: 100%;
+  margin: $navbar-height auto 0;
+  min-height: calc(100vh - #{$navbar-height});
+
+  @media (max-width: $mobile-bp) {
+    display: block;
+  }
+}
+
+// ============================================
+// SIDEBAR — sticky within the flex wrapper
+// ============================================
+.sidebar {
+  position: sticky;
+  top: $navbar-height;
+  width: $sidebar-width;
+  min-width: $sidebar-width;
+  height: calc(100vh - #{$navbar-height});
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex-shrink: 0;
+  background: var(--forge-sidebar-bg);
+  padding: 16px;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+
+  @media (max-width: $mobile-bp) {
+    position: fixed;
+    top: $navbar-height;
+    left: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+
+    &.open {
+      transform: translateX(0);
+    }
+  }
+}
+
+.sidebar-backdrop {
+  display: none;
+
+  @media (max-width: $mobile-bp) {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 89;
+  }
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+// Bullet dot
+.nav-bullet {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  color: var(--forge-base-4);
+  transition: color 0.15s ease;
+}
+
+.nav-separator {
+  display: none;
+}
+
+// Nav links
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 24px;
+  color: var(--forge-text);
+  text-decoration: none;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    color: var(--forge-primary);
+  }
+
+  &.active {
+    color: var(--forge-primary);
+    background: rgba(var(--forge-primary-rgb), 0.08);
+    border-radius: 6px;
+
+    .nav-bullet {
+      color: var(--forge-primary);
+    }
+  }
+
+  &.depth-1 {
+    padding-left: 48px;
+  }
+
+  &.depth-2 {
+    padding-left: 64px;
+    font-size: 15px;
+  }
+}
+
+// Active category indicator — visible even when collapsed
+.nav-category.url-active > .nav-category-btn {
+  color: var(--forge-primary);
+
+  .chevron {
+    opacity: 0.8;
+    color: var(--forge-primary);
+  }
+}
+
+// Category buttons
+.nav-category-btn,
+.nav-subcategory-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 24px;
+  background: none;
+  border: none;
+  color: var(--forge-text);
+  font-size: 16px;
+  font-weight: 400;
+  cursor: pointer;
+  line-height: 24px;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    color: var(--forge-primary);
+  }
+}
+
+.nav-subcategory-btn {
+  padding-left: 48px;
+  font-size: 15px;
+  color: var(--forge-text);
+  text-decoration: none;
+}
+
+// Chevron
+.chevron {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: transform 0.2s ease;
+  order: -1;
+
+  .nav-category.expanded > .nav-category-btn &,
+  .nav-subcategory.expanded > .nav-subcategory-btn & {
+    transform: rotate(90deg);
+  }
+}
+
+// Animated expand/collapse using grid-template-rows trick
+.nav-children-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+
+  .nav-category.expanded > &,
+  .nav-subcategory.expanded > & {
+    grid-template-rows: 1fr;
+  }
+}
+
+.nav-children {
+  overflow: hidden;
+}
+
+// ============================================
+// SIDEBAR FOOTER — theme + GitHub on mobile
+// ============================================
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 16px 24px;
+  border-top: 1px solid var(--forge-border-color);
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-footer-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--forge-text-muted);
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    color: $ember-glow;
+    background: var(--forge-base-2);
+  }
+
+  .icon,
+  .theme-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}
+
+// ============================================
+// CONTENT — fills remaining space in flex row
+// ============================================
+.content {
+  flex: 1;
+  min-width: 0; // prevent flex overflow
+  padding: 24px 24px;
+  min-height: calc(100vh - #{$navbar-height});
+
+  @media (max-width: $mobile-bp) {
+    padding: 1.5rem 1rem;
+  }
+}

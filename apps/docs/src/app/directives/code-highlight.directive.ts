@@ -1,40 +1,54 @@
-import { Directive, inject, input, PLATFORM_ID } from '@angular/core';
+import { computed, Directive, inject, input, PLATFORM_ID } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { isPlatformBrowser } from '@angular/common';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { combineLatest, from, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { codeToHtml } from 'shiki';
+import { ShikiService } from '../utils/shiki';
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 @Directive({
   selector: '[codeHighlight]',
   host: {
     '[innerHTML]': 'html()',
-    '[style.--ng-doc-code-background]': '"transparent"',
+    '[style.--forge-code-bg]': '"transparent"',
   },
 })
 export class CodeHighlightDirective {
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly shiki = inject(ShikiService);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   readonly code = input.required<string>({ alias: 'codeHighlight' });
-  readonly lang = input<'typescript' | 'json' | 'bash' | 'scss'>('typescript');
+  readonly language = input<'typescript' | 'json' | 'bash' | 'scss'>('typescript');
 
-  private readonly highlighted$ = combineLatest([toObservable(this.code), toObservable(this.lang)]).pipe(
+  /** Plain code block shown immediately while Shiki loads. */
+  private readonly plainHtml = computed<SafeHtml>(() => {
+    const code = this.code();
+    // Safe: empty string, no content to sanitize.
+    if (!code) return this.sanitizer.bypassSecurityTrustHtml('');
+    const lang = this.language();
+    // Safe: code is HTML-escaped via escapeHtml() and lang is from a constrained union type.
+    return this.sanitizer.bypassSecurityTrustHtml(`<pre><code class="language-${lang}">${escapeHtml(code)}</code></pre>`);
+  });
+
+  /** Syntax-highlighted HTML — resolves asynchronously after Shiki loads. */
+  private readonly highlighted$ = combineLatest([toObservable(this.code), toObservable(this.language)]).pipe(
     switchMap(([code, lang]) => {
       if (!this.isBrowser || !code) {
-        return of('');
+        return of(null);
       }
-      return from(
-        codeToHtml(code, {
-          lang,
-          themes: { light: 'material-theme-lighter', dark: 'material-theme-darker' },
-          defaultColor: false,
-        }),
-      );
+      return from(this.shiki.highlightCode(code, lang));
     }),
-    map((html) => this.sanitizer.bypassSecurityTrustHtml(html)),
+    // Safe: html is produced by Shiki's highlightCode() from developer-provided code strings.
+    map((html) => (html ? this.sanitizer.bypassSecurityTrustHtml(html) : null)),
   );
 
-  readonly html = toSignal(this.highlighted$, { initialValue: this.sanitizer.bypassSecurityTrustHtml('') });
+  private readonly highlighted = toSignal(this.highlighted$, { initialValue: null });
+
+  /** Show highlighted HTML when available, otherwise fall back to plain code. */
+  readonly html = computed<SafeHtml>(() => this.highlighted() ?? this.plainHtml());
 }

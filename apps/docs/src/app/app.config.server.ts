@@ -1,10 +1,12 @@
 import { mergeApplicationConfig, ApplicationConfig } from '@angular/core';
-import { provideServerRendering, withRoutes } from '@angular/ssr';
+import { provideServerRendering } from '@angular/platform-server';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+
 import { appConfig } from './app.config';
-import { serverRoutes } from './app.routes.server';
+import { ssrContentInterceptor } from './interceptors/ssr-content.interceptor';
 
 const serverConfig: ApplicationConfig = {
-  providers: [provideServerRendering(withRoutes(serverRoutes))],
+  providers: [provideServerRendering(), provideHttpClient(withFetch(), withInterceptors([ssrContentInterceptor]))],
 };
 
 export const config = mergeApplicationConfig(appConfig, serverConfig);

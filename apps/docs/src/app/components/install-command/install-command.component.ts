@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { PackageManagerService } from '../../services/package-manager.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
+import { CopyButtonComponent } from '../copy-button/copy-button.component';
 
 type PackageManager = 'npm' | 'pnpm' | 'yarn';
 
@@ -15,7 +16,7 @@ const PM_COMMANDS: Record<PackageManager, { binary: string; subcommand: string }
   templateUrl: './install-command.component.html',
   styleUrl: './install-command.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CodeHighlightDirective],
+  imports: [CodeHighlightDirective, CopyButtonComponent],
 })
 export class DocsInstallCommandComponent {
   readonly packages = input.required<string>();
@@ -33,3 +34,5 @@ export class DocsInstallCommandComponent {
     this.pmService.pm.set(pm);
   }
 }
+
+export default DocsInstallCommandComponent;

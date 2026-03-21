@@ -11,7 +11,6 @@
 // ============================================
 :host {
   display: block;
-  font-family: 'Space Grotesk', sans-serif;
   background: $bg-void;
   color: $steel;
   overflow-x: hidden;
@@ -271,6 +270,82 @@ nav {
     }
   }
 
+  // Force search trigger to match .github-link style (borderless transparent circle)
+  ::ng-deep docs-search {
+    .search-trigger {
+      border: none;
+      background: transparent;
+      color: $steel-mid;
+      min-width: unset;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+
+      &:hover {
+        color: $ember-glow;
+        background: transparent;
+        border: none;
+        transform: scale(1.1);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      .search-label,
+      .search-kbd {
+        display: none;
+      }
+
+      .icon {
+        width: 22px;
+        height: 22px;
+        opacity: 1;
+      }
+    }
+
+    .search-overlay {
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    .search-dialog {
+      background: $bg-deep;
+      border-color: $steel-dark;
+    }
+
+    .search-input {
+      color: $steel;
+      border-bottom-color: $steel-dark;
+
+      &::placeholder {
+        color: $steel-mid;
+      }
+    }
+
+    .search-result {
+      color: $steel;
+
+      &:hover {
+        background: $bg-surface;
+      }
+
+      & + & {
+        border-top-color: $steel-dark;
+      }
+    }
+
+    .result-excerpt {
+      color: $steel-mid;
+    }
+
+    .search-empty {
+      color: $steel-mid;
+    }
+  }
+
   // Shared button style for nav buttons (search, github, etc.)
   // Landing page style: no border, transparent bg, simple color change + scale on hover
   .github-link {
@@ -308,7 +383,7 @@ nav {
   @media (max-width: 400px) {
     gap: 0.5rem;
 
-    .github-link {
+    ::ng-deep docs-search .search-trigger {
       width: 36px;
       height: 36px;
 
@@ -317,108 +392,14 @@ nav {
         height: 20px;
       }
     }
-  }
 
-  // Search component styling
-  // Desktop: show search input (dark themed)
-  // Mobile/tablet: show just the icon (like GitHub)
-  ::ng-deep ng-doc-search {
-    // Desktop (>= 1024px): show search input bar, hide icon button
-    ng-doc-input-wrapper {
-      display: flex !important;
-      background: $bg-surface !important;
-      border: 1px solid $steel-dark !important;
-      border-radius: 8px !important;
-      transition: all 0.2s ease !important;
+    .github-link {
+      width: 36px;
+      height: 36px;
 
-      &:hover,
-      &:focus-within {
-        border-color: $ember-glow !important;
-        box-shadow: 0 0 12px rgba($ember-glow, 0.2) !important;
-      }
-
-      input {
-        color: $steel !important;
-        background: transparent !important;
-
-        &::placeholder {
-          color: $steel-dim !important;
-        }
-      }
-
-      ng-doc-icon,
-      .ng-doc-icon {
-        color: $steel-mid !important;
-      }
-
-      // Keyboard shortcut badge
-      ng-doc-tag {
-        background: $bg-elevated !important;
-        color: $steel-dim !important;
-        border: 1px solid $steel-dark !important;
-      }
-    }
-
-    // Hide icon button on desktop
-    > button[ng-doc-button-icon] {
-      display: none !important;
-    }
-
-    // Mobile/tablet (< 1024px): show icon button, hide input
-    @media (max-width: 1023px) {
-      ng-doc-input-wrapper {
-        display: none !important;
-      }
-
-      // Match GitHub icon style exactly - simple color + scale
-      > button[ng-doc-button-icon] {
-        display: flex !important;
-        background: transparent !important;
-        border: none !important;
-        width: 40px !important;
-        height: 40px !important;
-        padding: 0 !important;
-        transition: all 0.3s ease !important;
-
-        &:hover {
-          background: transparent !important;
-          transform: scale(1.1) !important;
-
-          ng-doc-icon,
-          .ng-doc-icon,
-          svg {
-            color: $ember-glow !important;
-          }
-        }
-
-        &:active {
-          transform: scale(0.95) !important;
-        }
-
-        // Icon color and size to match GitHub
-        ng-doc-icon,
-        .ng-doc-icon,
-        svg {
-          color: $steel-mid !important;
-          width: 22px !important;
-          height: 22px !important;
-          transition: color 0.3s ease !important;
-        }
-      }
-    }
-
-    // Smaller icon on very narrow screens
-    @media (max-width: 400px) {
-      > button[ng-doc-button-icon] {
-        width: 36px !important;
-        height: 36px !important;
-
-        ng-doc-icon,
-        .ng-doc-icon,
-        svg {
-          width: 20px !important;
-          height: 20px !important;
-        }
+      .icon {
+        width: 20px;
+        height: 20px;
       }
     }
   }
@@ -744,26 +725,113 @@ nav {
   padding: $space-6;
 }
 
-// Landing page form containers - match example app .example-container
+// Landing page sandbox form containers.
+// Production has 24px padding with direct forms. The sandbox adds 16px
+// .minimal-content padding inside the shadow DOM, so we use 8px outer
+// padding to match the same 24px total → 504px field width at 552px max.
 .landing-form,
 .validation-form {
-  // Form fields fill container width
-  // stylelint-disable-next-line selector-pseudo-element-no-unknown
-  ::ng-deep .mat-mdc-form-field {
-    width: 100%;
-  }
-
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: $space-3;
-    width: 100%;
-  }
+  position: relative;
 }
 
 .landing-form {
   max-width: 552px;
   margin: 0 auto;
+  padding: $space-2;
+}
+
+// Sandbox container: the mount creates a child <div> with a shadow root.
+// ::ng-deep needed because the child div is created dynamically by SandboxHarness
+// and won't have Angular's encapsulation attributes.
+.sandbox-container {
+  width: 100%;
+
+  // stylelint-disable-next-line selector-pseudo-element-no-unknown
+  ::ng-deep > div {
+    width: 100%;
+  }
+
+  // While sandbox is bootstrapping, hide it so skeleton shows
+  &.mounting {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+// Skeleton shown while sandbox bootstraps
+.sandbox-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px 0;
+  width: 100%;
+}
+
+@keyframes landing-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@mixin landing-shimmer-bg {
+  background: linear-gradient(90deg, $bg-surface 0%, $bg-elevated 50%, $bg-surface 100%);
+  background-size: 200% 100%;
+  animation: landing-shimmer 2s ease-in-out infinite;
+}
+
+.skel-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skel-label {
+  width: 100px;
+  height: 14px;
+  border-radius: 4px;
+  @include landing-shimmer-bg;
+
+  &--short {
+    width: 70px;
+  }
+}
+
+.skel-input {
+  width: 100%;
+  height: 56px;
+  border-radius: 4px;
+  @include landing-shimmer-bg;
+
+  &--tall {
+    height: 90px;
+  }
+}
+
+.skel-button {
+  width: 130px;
+  height: 36px;
+  border-radius: 4px;
+  margin-top: 4px;
+  @include landing-shimmer-bg;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel-label,
+  .skel-input,
+  .skel-button {
+    animation: none;
+  }
+}
+
+.landing-form,
+.validation-form {
+  // No max-width — sandbox content fills the full demo panel
+  width: 100%;
 }
 
 @media (max-width: 768px) {

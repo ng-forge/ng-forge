@@ -250,4 +250,38 @@
       overflow: visible !important;
     }
   }
+
+  // Ionic modals (used by datepicker) use position:absolute to cover ion-app.
+  // In a full-screen app ion-app fills the viewport, but in the sandbox it's
+  // position:relative with height:auto — so the modal only covers the small form.
+  // Switch to position:fixed and present as a centered card instead of full-screen.
+  ion-modal {
+    position: fixed !important;
+    contain: none !important;
+    --width: fit-content;
+    --height: fit-content;
+    --border-radius: 8px;
+    --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+
+    // Reset iframe overrides inside modals and shrink-wrap to content.
+    ion-content {
+      height: auto !important;
+      --padding-start: 0;
+      --padding-end: 0;
+      --padding-top: 0;
+      --padding-bottom: 0;
+
+      &::part(scroll) {
+        overflow: visible !important;
+        position: relative !important;
+      }
+    }
+
+    // The .ion-page inside the modal must also shrink-wrap.
+    .ion-page {
+      height: auto !important;
+      min-height: auto !important;
+      position: relative !important;
+    }
+  }
 }

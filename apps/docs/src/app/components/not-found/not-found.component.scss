@@ -1,0 +1,153 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--forge-base-0);
+}
+
+.not-found {
+  text-align: center;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: $space-8;
+}
+
+// ── Illustration ──────────────────────────────
+.illustration {
+  display: block;
+  width: 280px;
+  height: 240px;
+  margin: 0 auto $space-4;
+
+  svg {
+    display: block;
+    width: 280px;
+    height: 240px;
+  }
+}
+
+// ── Error code ────────────────────────────────
+.error-code {
+  font-size: 6rem;
+  font-weight: 700;
+  line-height: 1;
+  background: linear-gradient(135deg, $ember-core 0%, $ember-glow 50%, $molten 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: $space-2;
+  letter-spacing: -0.03em;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--forge-text);
+  margin-bottom: $space-3;
+}
+
+.description {
+  font-size: $text-base;
+  color: var(--forge-text-muted);
+  line-height: 1.6;
+  margin-bottom: $space-8;
+}
+
+// ── Actions ───────────────────────────────────
+.actions {
+  display: flex;
+  gap: $space-3;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-3 $space-6;
+  border-radius: $radius-lg;
+  font-weight: 600;
+  font-size: $text-sm;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, $ember-hot, $ember-glow);
+  color: $bg-void;
+  box-shadow: 0 4px 30px rgba($ember-hot, 0.3);
+
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 40px rgba($ember-hot, 0.5);
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: 0 4px 20px rgba($ember-hot, 0.4);
+  }
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-3 $space-6;
+  border-radius: $radius-lg;
+  font-weight: 600;
+  font-size: $text-sm;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: $bg-elevated;
+  color: $steel;
+  border: 1px solid $steel-dim;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    transform: translateY(-2px) scale(1.02);
+    background: $bg-surface;
+    border-color: $steel-mid;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+}
+
+// ── Reduced motion ───────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .illustration svg {
+    /* SMIL <animate>/<animateMotion> don't support display:none reliably.
+       Pause all SVG animations via the SVG DOM attribute instead. */
+    animation-play-state: paused !important;
+
+    * {
+      animation-play-state: paused !important;
+    }
+  }
+}
+
+// ── Responsive ────────────────────────────────
+@media (max-width: $breakpoint-md) {
+  .error-code {
+    font-size: 4rem;
+  }
+
+  .illustration {
+    width: 200px;
+    height: 170px;
+
+    svg {
+      width: 200px;
+      height: 170px;
+    }
+  }
+}

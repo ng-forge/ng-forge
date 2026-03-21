@@ -46,11 +46,6 @@
   @include ember-ionic.ionic-theme-light();
 }
 
-html,
-body {
-  font-family: $font-primary;
-}
-
 // Auto mode - use system preference when no data-theme is set
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {

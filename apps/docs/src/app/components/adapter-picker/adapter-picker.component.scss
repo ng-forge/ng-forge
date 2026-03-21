@@ -16,14 +16,14 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1.5rem 2rem;
-  background: var(--ng-doc-base-2);
-  border: 1px solid var(--ng-doc-border-color);
+  background: var(--forge-base-2);
+  border: 1px solid var(--forge-border-color);
   border-radius: 12px;
   cursor: pointer;
-  font-family: $font-primary;
+  font-family: inherit;
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--ng-doc-text-muted);
+  color: var(--forge-text-muted);
   opacity: 0.85;
   transition:
     opacity 0.3s ease,
@@ -46,7 +46,7 @@
     box-shadow:
       0 8px 30px rgba($ember-core, 0.15),
       0 0 0 1px rgba($ember-glow, 0.1);
-    color: var(--ng-doc-text);
+    color: var(--forge-text);
 
     img {
       transform: scale(1.1);

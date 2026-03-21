@@ -1,9 +1,0 @@
-<span class="docs-breadcrumb__adapter">
-  <img [src]="currentAdapter().icon" [alt]="currentAdapter().label" class="docs-breadcrumb__icon" />
-  <span class="docs-breadcrumb__label">{{ currentAdapter().label }}</span>
-</span>
-
-@for (item of breadcrumbs; track item) {
-  <ng-doc-icon icon="chevron-right" class="docs-breadcrumb__chevron"></ng-doc-icon>
-  <span class="docs-breadcrumb__item">{{ item }}</span>
-}

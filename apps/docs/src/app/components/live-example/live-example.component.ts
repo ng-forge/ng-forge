@@ -1,22 +1,51 @@
-import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
 import { FormConfig } from '@ng-forge/dynamic-forms';
 import { SandboxMountDirective } from '@ng-forge/sandbox-harness';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { EXAMPLE_CONFIGS } from '../../example-configs';
+import { EXAMPLES_REGISTRY } from '../../pages/examples-index/examples.registry';
 
 @Component({
   selector: 'docs-live-example',
   template: `
     @if (!shouldHide()) {
-      <div
-        class="live-example-container"
-        sandboxMount
-        [adapter]="resolvedAdapter()"
-        [route]="resolvedRoute()"
-        [config]="resolvedConfig()"
-        locationStrategy="memory"
-        styleIsolation="scoped"
-      ></div>
+      <div class="live-example-wrapper">
+        <span class="adapter-badge">
+          <img [src]="adapterInfo().icon" [alt]="adapterInfo().label" class="adapter-badge-icon" />
+          {{ adapterInfo().label }}
+        </span>
+        @if (!isLoaded()) {
+          <div class="live-example-skeleton" role="status" aria-busy="true">
+            <div class="skeleton-form">
+              <div class="skeleton-field">
+                <div class="skeleton-label"></div>
+                <div class="skeleton-input"></div>
+              </div>
+              <div class="skeleton-field">
+                <div class="skeleton-label"></div>
+                <div class="skeleton-input"></div>
+              </div>
+              <div class="skeleton-field">
+                <div class="skeleton-label short"></div>
+                <div class="skeleton-input tall"></div>
+              </div>
+              <div class="skeleton-button"></div>
+            </div>
+            <span class="visually-hidden">Loading live example</span>
+          </div>
+        }
+        <div
+          class="live-example-container"
+          [class.mounting]="!isLoaded()"
+          sandboxMount
+          #mount="sandboxMount"
+          [adapter]="resolvedAdapter()"
+          [route]="resolvedRoute()"
+          [config]="resolvedConfig()"
+          locationStrategy="memory"
+          styleIsolation="scoped"
+        ></div>
+      </div>
     }
   `,
   styleUrl: './live-example.component.scss',
@@ -28,9 +57,22 @@ export class LiveExampleComponent {
   readonly hideForCustom = input(false, { transform: booleanAttribute });
   protected readonly activeAdapter = inject(ActiveAdapterService);
 
+  private readonly mountDirective = viewChild<SandboxMountDirective>('mount');
+
+  protected readonly isLoaded = computed(() => {
+    const mount = this.mountDirective();
+    if (!mount) return false;
+    try {
+      const status = mount.mount.status();
+      return status === 'resolved' || status === 'local';
+    } catch {
+      // NG0950: required input not yet available — still loading
+      return false;
+    }
+  });
+
   protected readonly shouldHide = computed(() => this.hideForCustom() && this.activeAdapter.adapter() === 'custom');
 
-  // Custom adapter has no sandbox — fall back to Material for live examples
   protected readonly resolvedAdapter = computed(() => {
     const adapter = this.activeAdapter.adapter();
     return adapter === 'custom' ? 'material' : adapter;
@@ -38,7 +80,6 @@ export class LiveExampleComponent {
 
   private readonly scenarioKey = computed(() => {
     const raw = this.scenario();
-    // Strip "examples/" prefix if present to get the config key
     return raw.startsWith('examples/') ? raw.slice('examples/'.length) : raw;
   });
 
@@ -47,4 +88,14 @@ export class LiveExampleComponent {
   protected readonly resolvedConfig = computed(() => this.scenarioConfig());
 
   protected readonly resolvedRoute = computed(() => (this.scenarioConfig() ? '/examples/demo' : '/' + this.scenario()));
+
+  /** Resolve scenario key to a human-readable title from the examples registry. */
+  protected readonly exampleTitle = computed(() => {
+    const key = this.scenarioKey();
+    return EXAMPLES_REGISTRY.find((e) => e.id === key)?.title ?? '';
+  });
+
+  protected readonly adapterInfo = computed(
+    () => this.activeAdapter.adapters.find((a) => a.name === this.resolvedAdapter()) ?? this.activeAdapter.adapters[0],
+  );
 }

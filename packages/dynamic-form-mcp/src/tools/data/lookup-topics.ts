@@ -2139,18 +2139,33 @@ logic: [{ type: 'disabled', condition: 'formSubmitting' }]
 Copy-paste ready expressions for derivations and conditions.
 
 ## Age from Birthdate
+Complex calculations like age should use a custom function, not an expression:
 \`\`\`typescript
-expression: \`(() => {
-  if (!formValue.birthDate) return '';
-  const birth = new Date(formValue.birthDate);
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const monthDiff = today.getMonth() - birth.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    age--;
-  }
-  return age;
-})()\`
+// In your FormConfig:
+{
+  key: 'age',
+  type: 'input',
+  derivation: {
+    type: 'custom',
+    functionName: 'calculateAge',
+  },
+}
+
+// In customFnConfig:
+customFnConfig: {
+  derivations: {
+    calculateAge: (ctx) => {
+      const birthDate = ctx.formValue().birthDate;
+      if (!birthDate) return '';
+      const birth = new Date(birthDate);
+      const today = new Date();
+      let age = today.getFullYear() - birth.getFullYear();
+      const m = today.getMonth() - birth.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+      return age;
+    },
+  },
+}
 \`\`\`
 
 ## Array Count / Length

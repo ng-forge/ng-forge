@@ -6,6 +6,8 @@
 @use 'material' as ember-mat;
 @use 'tokens' as *;
 
+@import '@angular/cdk/overlay-prebuilt.css';
+
 @include mat.core();
 
 // Apply ember-themed Material (light default)
@@ -25,11 +27,6 @@
 
 [data-theme='dark'] {
   @include ember-mat.material-theme-dark();
-}
-
-// Material-specific body font
-body {
-  font-family: $font-primary;
 }
 
 // Material input overrides

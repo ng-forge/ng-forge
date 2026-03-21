@@ -4,13 +4,13 @@
 .install-command {
   border-radius: $radius-md;
   border: 1px solid var(--border);
-  overflow: clip;
   background: var(--bg-elevated);
 
   &__tabs {
     display: flex;
     border-bottom: 1px solid var(--border);
     background: var(--bg-surface);
+    border-radius: $radius-md $radius-md 0 0;
   }
 
   &__tab {
@@ -34,16 +34,26 @@
   }
 
   &__body {
+    position: relative;
+
+    &:hover docs-copy-button {
+      opacity: 1;
+    }
+  }
+
+  &__scroll {
     padding: $space-4;
     overflow-x: auto;
     white-space: nowrap;
     mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent 100%);
+    border-radius: 0 0 $radius-md $radius-md;
 
     // Shiki wraps output in a <pre>, flatten it to fit our container
     ::ng-deep pre {
       margin: 0;
       padding: 0;
       background: transparent !important;
+      border: none;
       min-width: max-content;
     }
   }

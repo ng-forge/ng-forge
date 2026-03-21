@@ -1,0 +1,61 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+@use 'animations' as anim;
+
+// ============================================
+// SKELETON LOADER UTILITIES
+// ============================================
+// Higher-level mixins for skeleton loading states.
+// Built on top of the base `skeleton` mixin in _animations.scss.
+
+/// Visually hidden text for screen readers
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/// Single skeleton text line
+@mixin skeleton-line($width: 100%, $height: 14px) {
+  @include anim.skeleton;
+  width: $width;
+  height: $height;
+  display: block;
+}
+
+/// Skeleton heading placeholder
+@mixin skeleton-heading($width: 60%) {
+  @include skeleton-line($width, 28px);
+}
+
+/// Skeleton card placeholder
+@mixin skeleton-card($height: 180px) {
+  @include anim.skeleton;
+  width: 100%;
+  height: $height;
+  border: 1px solid $steel-dark;
+  border-radius: 16px;
+}
+
+/// Skeleton code block placeholder
+@mixin skeleton-code($height: 200px) {
+  @include anim.skeleton;
+  width: 100%;
+  height: $height;
+  border-radius: $radius-lg;
+}
+
+// ============================================
+// REDUCED MOTION: disable shimmer animation
+// ============================================
+@media (prefers-reduced-motion: reduce) {
+  %skeleton-no-motion {
+    animation: none !important;
+  }
+}

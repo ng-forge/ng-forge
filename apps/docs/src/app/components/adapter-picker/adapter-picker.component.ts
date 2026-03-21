@@ -20,6 +20,6 @@ import { ActiveAdapterService } from '../../services/active-adapter.service';
   styleUrl: './adapter-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdapterPickerComponent {
+export default class AdapterPickerComponent {
   protected readonly activeAdapter = inject(ActiveAdapterService);
 }

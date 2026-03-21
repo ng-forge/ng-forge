@@ -13,7 +13,7 @@
 
   <div class="examples-grid">
     @for (example of filteredExamples(); track example.id) {
-      <a [routerLink]="example.path" class="example-card">
+      <a [routerLink]="example.link" class="example-card">
         <h2>{{ example.title }}</h2>
         <p>{{ example.description }}</p>
         <div class="tags">

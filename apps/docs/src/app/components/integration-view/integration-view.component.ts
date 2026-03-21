@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { NgDocCopyButtonComponent } from '@ng-doc/app/components/copy-button';
+
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import { DocsInstallCommandComponent } from '../install-command/install-command.component';
+import { CopyButtonComponent } from '../copy-button/copy-button.component';
 
 type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'custom';
 
@@ -143,12 +144,12 @@ export const appConfig: ApplicationConfig = {
 
 @Component({
   selector: 'docs-integration-view',
-  imports: [DocsInstallCommandComponent, CodeHighlightDirective],
+  imports: [DocsInstallCommandComponent, CodeHighlightDirective, CopyButtonComponent],
   templateUrl: './integration-view.component.html',
   styleUrl: './integration-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocsIntegrationViewComponent {
+export default class DocsIntegrationViewComponent {
   private readonly activeAdapter = inject(ActiveAdapterService);
 
   readonly data = computed(() => INTEGRATION_DATA[this.activeAdapter.adapter() as AdapterName]);

@@ -2,6 +2,7 @@
 // EXAMPLE SCENARIO COMPONENT STYLES
 // ============================================
 // Uses Forge design tokens from internal/styling
+@use 'sass:map';
 @use '../../../styling/src/tokens' as *;
 @use '../../../styling/src/themes' as *;
 
@@ -13,19 +14,19 @@
   flex-direction: column;
   width: 100%;
   font-family: $font-primary;
-  overflow: auto;
+  overflow: visible;
   position: relative;
   box-sizing: border-box;
 
   // Light mode defaults (CSS custom properties)
-  --bg-deep: #{map-get($theme-light, bg-deep)};
-  --bg-surface: #{map-get($theme-light, bg-surface)};
-  --bg-elevated: #{map-get($theme-light, bg-elevated)};
-  --text-primary: #{map-get($theme-light, text-primary)};
-  --text-secondary: #{map-get($theme-light, text-secondary)};
-  --text-muted: #{map-get($theme-light, text-muted)};
-  --border: #{map-get($theme-light, border)};
-  --border-hover: #{map-get($theme-light, border-hover)};
+  --bg-deep: #{map.get($theme-light, bg-deep)};
+  --bg-surface: #{map.get($theme-light, bg-surface)};
+  --bg-elevated: #{map.get($theme-light, bg-elevated)};
+  --text-primary: #{map.get($theme-light, text-primary)};
+  --text-secondary: #{map.get($theme-light, text-secondary)};
+  --text-muted: #{map.get($theme-light, text-muted)};
+  --border: #{map.get($theme-light, border)};
+  --border-hover: #{map.get($theme-light, border-hover)};
 
   background: var(--bg-deep);
   color: var(--text-primary);
@@ -33,14 +34,14 @@
 
 // Dark mode overrides
 :host([data-theme='dark']) {
-  --bg-deep: #{map-get($theme-dark, bg-deep)};
-  --bg-surface: #{map-get($theme-dark, bg-surface)};
-  --bg-elevated: #{map-get($theme-dark, bg-elevated)};
-  --text-primary: #{map-get($theme-dark, text-primary)};
-  --text-secondary: #{map-get($theme-dark, text-secondary)};
-  --text-muted: #{map-get($theme-dark, text-muted)};
-  --border: #{map-get($theme-dark, border)};
-  --border-hover: #{map-get($theme-dark, border-hover)};
+  --bg-deep: #{map.get($theme-dark, bg-deep)};
+  --bg-surface: #{map.get($theme-dark, bg-surface)};
+  --bg-elevated: #{map.get($theme-dark, bg-elevated)};
+  --text-primary: #{map.get($theme-dark, text-primary)};
+  --text-secondary: #{map.get($theme-dark, text-secondary)};
+  --text-muted: #{map.get($theme-dark, text-muted)};
+  --border: #{map.get($theme-dark, border)};
+  --border-hover: #{map.get($theme-dark, border-hover)};
 }
 
 // Gradient top border (Forge signature)
@@ -355,10 +356,22 @@
 // MINIMAL MODE (for landing page embeds)
 // ============================================
 .minimal-content {
+  box-sizing: border-box;
   padding: $space-4;
   max-width: 100%;
   margin: 0;
   width: 100%;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+    width: 100%;
+  }
+
+  .mat-mdc-form-field {
+    width: 100%;
+  }
 }
 
 // ============================================
@@ -370,7 +383,7 @@
   max-width: none !important;
   margin: 0 !important;
   padding: 0 !important;
-  overflow: hidden;
+  overflow: visible;
 
   // Remove the ember top border in iframe mode
   &::before {

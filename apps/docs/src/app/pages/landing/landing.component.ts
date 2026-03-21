@@ -1,15 +1,26 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  PLATFORM_ID,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { NgDocSearchComponent } from '@ng-doc/app';
-import { catchError, delay, filter, iif, map, merge, of, switchMap, tap } from 'rxjs';
-import { DynamicForm } from '@ng-forge/dynamic-forms';
+
+import { catchError, defer, delay, filter, map, merge, of, switchMap, tap } from 'rxjs';
+
+import { SandboxMountDirective } from '@ng-forge/sandbox-harness';
 
 import { Logo } from '../../components/logo';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
-
+import { SearchComponent } from '../../components/search/search.component';
 import {
   CODE_SNIPPETS,
   FEATURES,
@@ -38,13 +49,16 @@ import { heroFormConfig, validationFormConfig } from './landing.forms';
 
 const EMPTY_FIREFLY_STATE = { positions: [] as FireflyPosition[], sparks: [] as Spark[] };
 
+/** Delay cosmetic firefly animation until after hero LCP paint completes. */
+const FIREFLY_LCP_DELAY_MS = 1200;
+
 // Animation timing constants
 const COPY_FEEDBACK_DURATION_MS = 2000;
 const CONFETTI_ANIMATION_DURATION_MS = 800;
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, CodeHighlightDirective, NgDocSearchComponent, Logo, DynamicForm],
+  imports: [RouterLink, CodeHighlightDirective, Logo, SandboxMountDirective, SearchComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,6 +67,8 @@ export class LandingComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly http = inject(HttpClient);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private copyFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
+  private confettiTimer: ReturnType<typeof setTimeout> | null = null;
 
   // ============================================
   // FORM CONFIGS (for landing page demos)
@@ -60,6 +76,32 @@ export class LandingComponent {
 
   readonly heroFormConfig = heroFormConfig;
   readonly validationFormConfig = validationFormConfig;
+
+  // Sandbox mount refs for loading state
+  private readonly heroMount = viewChild<SandboxMountDirective>('heroMount');
+  private readonly validationMount = viewChild<SandboxMountDirective>('validationMount');
+
+  readonly heroLoaded = computed(() => {
+    const mount = this.heroMount();
+    if (!mount) return false;
+    try {
+      const status = mount.mount.status();
+      return status === 'resolved' || status === 'local';
+    } catch {
+      return false;
+    }
+  });
+
+  readonly validationLoaded = computed(() => {
+    const mount = this.validationMount();
+    if (!mount) return false;
+    try {
+      const status = mount.mount.status();
+      return status === 'resolved' || status === 'local';
+    } catch {
+      return false;
+    }
+  });
 
   // ============================================
   // EXPOSED CONSTANTS
@@ -88,33 +130,27 @@ export class LandingComponent {
   // STATS (fetched dynamically)
   // ============================================
 
-  readonly npmDownloads = toSignal(
-    iif(
-      () => this.isBrowser,
-      of(null).pipe(
-        delay(500), // Delay to not block initial render
-        switchMap(() => this.http.get<{ downloads?: number }>('https://api.npmjs.org/downloads/point/last-month/@ng-forge/dynamic-forms')),
+  private readonly npmResource = rxResource({
+    params: () => (this.isBrowser ? {} : undefined),
+    stream: () =>
+      this.http.get<{ downloads?: number }>('https://api.npmjs.org/downloads/point/last-month/@ng-forge/dynamic-forms').pipe(
         map((data) => this.formatNumber(data?.downloads ?? 0)),
         catchError(() => of('—')),
       ),
-      of('—'),
-    ),
-    { initialValue: '—' },
-  );
+  });
 
-  readonly githubStars = toSignal(
-    iif(
-      () => this.isBrowser,
-      of(null).pipe(
-        delay(600), // Slight stagger from npm fetch
-        switchMap(() => this.http.get<{ stargazers_count?: number }>('https://api.github.com/repos/ng-forge/ng-forge')),
+  readonly npmDownloads = computed(() => this.npmResource.value() ?? '—');
+
+  private readonly githubResource = rxResource({
+    params: () => (this.isBrowser ? {} : undefined),
+    stream: () =>
+      this.http.get<{ stargazers_count?: number }>('https://api.github.com/repos/ng-forge/ng-forge').pipe(
         map((data) => this.formatNumber(data?.stargazers_count ?? 0)),
         catchError(() => of('—')),
       ),
-      of('—'),
-    ),
-    { initialValue: '—' },
-  );
+  });
+
+  readonly githubStars = computed(() => this.githubResource.value() ?? '—');
 
   readonly uiLibraryCount = '4'; // Static: Material, Bootstrap, PrimeNG, Ionic
 
@@ -122,25 +158,17 @@ export class LandingComponent {
   // REACTIVE STATE (RxJS -> Signal)
   // ============================================
 
-  readonly navScrolled = toSignal(
-    iif(() => this.isBrowser, navScrolled$(), of(false)),
-    { requireSync: true },
-  );
+  readonly navScrolled = toSignal(this.isBrowser ? defer(() => navScrolled$()) : of(false), { requireSync: true });
 
-  readonly scrollProgress = toSignal(
-    iif(() => this.isBrowser, scrollProgress$(), of(0)),
-    { requireSync: true },
-  );
+  readonly scrollProgress = toSignal(this.isBrowser ? defer(() => scrollProgress$()) : of(0), { requireSync: true });
 
   private readonly fireflyState = toSignal(
-    iif(
-      () => this.isBrowser,
-      of(null).pipe(
-        delay(1200), // Delay fireflies for better LCP - starts after hero animation
-        switchMap(() => createFireflyAnimation(mousePosition$())),
-      ),
-      of(EMPTY_FIREFLY_STATE),
-    ),
+    this.isBrowser
+      ? of(null).pipe(
+          delay(FIREFLY_LCP_DELAY_MS),
+          switchMap(() => createFireflyAnimation(mousePosition$())),
+        )
+      : of(EMPTY_FIREFLY_STATE),
     { initialValue: EMPTY_FIREFLY_STATE },
   );
 
@@ -157,6 +185,24 @@ export class LandingComponent {
     // afterNextRender only runs in browser, no platform check needed
     afterNextRender(() => {
       this.initializeBrowserFeatures();
+
+      // Landing page is always dark — set data-theme so sandbox sub-apps
+      // pick up the correct theme via document.documentElement attribute.
+      const docEl = document.documentElement;
+      const previousTheme = docEl.getAttribute('data-theme');
+      docEl.setAttribute('data-theme', 'dark');
+      this.destroyRef.onDestroy(() => {
+        if (previousTheme) {
+          docEl.setAttribute('data-theme', previousTheme);
+        } else {
+          docEl.removeAttribute('data-theme');
+        }
+      });
+    });
+
+    this.destroyRef.onDestroy(() => {
+      if (this.copyFeedbackTimer) clearTimeout(this.copyFeedbackTimer);
+      if (this.confettiTimer) clearTimeout(this.confettiTimer);
     });
   }
 
@@ -239,11 +285,11 @@ export class LandingComponent {
       .then(() => {
         this.copied.set(true);
         this.spawnCopyConfetti();
-        setTimeout(() => this.copied.set(false), COPY_FEEDBACK_DURATION_MS);
+        if (this.copyFeedbackTimer) clearTimeout(this.copyFeedbackTimer);
+        this.copyFeedbackTimer = setTimeout(() => this.copied.set(false), COPY_FEEDBACK_DURATION_MS);
       })
       .catch(() => {
-        // Clipboard API may fail in some contexts (e.g., insecure origins)
-        console.warn('Failed to copy to clipboard');
+        // Clipboard API may fail in some contexts (e.g., insecure origins) — silently ignored
       });
   }
 
@@ -259,7 +305,8 @@ export class LandingComponent {
     this.copyConfetti.set(newParticles);
 
     // Clear confetti after animation completes
-    setTimeout(() => this.copyConfetti.set([]), CONFETTI_ANIMATION_DURATION_MS);
+    if (this.confettiTimer) clearTimeout(this.confettiTimer);
+    this.confettiTimer = setTimeout(() => this.copyConfetti.set([]), CONFETTI_ANIMATION_DURATION_MS);
   }
 
   private formatNumber(num: number): string {

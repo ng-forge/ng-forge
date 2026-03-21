@@ -1,6 +1,6 @@
 import { Injectable, inject, computed, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, Scroll } from '@angular/router';
 import { filter, take } from 'rxjs';
 import { AdapterName } from '@ng-forge/sandbox-harness';
 
@@ -32,18 +32,28 @@ export class ActiveAdapterService {
 
   switchTo(name: AdapterName): void {
     if (!DOCS_ADAPTERS.has(name)) return;
-    const scrollY = this.isBrowser ? window.scrollY : 0;
     const segments = this.router.url.split('/');
     const path = segments.slice(2).join('/') || 'getting-started';
-    void this.router.navigateByUrl(`/${name}/${path}`);
-    if (!this.isBrowser) return;
+
+    if (!this.isBrowser) {
+      void this.router.navigateByUrl(`/${name}/${path}`);
+      return;
+    }
+
+    // Preserve scroll position during adapter switch.
+    // The router's scrollPositionRestoration fires via the Scroll event, so we wait
+    // for it to complete, then restore our saved position in the next animation frame.
+    const scrollY = window.scrollY;
+
     this.router.events
       .pipe(
-        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        filter((e): e is Scroll => e instanceof Scroll),
         take(1),
       )
       .subscribe(() => {
         requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: 'instant' }));
       });
+
+    void this.router.navigateByUrl(`/${name}/${path}`);
   }
 }

@@ -1,11 +1,30 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { NgDocCopyButtonComponent } from '@ng-doc/app/components/copy-button';
+
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import type { AdapterName } from '@ng-forge/sandbox-harness';
 
 type UiAdapterName = Exclude<AdapterName, 'custom'>;
-type FieldType = 'input' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'toggle' | 'multi-checkbox' | 'slider' | 'datepicker';
+type FieldType =
+  | 'input'
+  | 'textarea'
+  | 'select'
+  | 'radio'
+  | 'checkbox'
+  | 'toggle'
+  | 'multi-checkbox'
+  | 'slider'
+  | 'datepicker'
+  | 'submit'
+  | 'button'
+  | 'next'
+  | 'previous'
+  | 'addArrayItem'
+  | 'prependArrayItem'
+  | 'insertArrayItem'
+  | 'removeArrayItem'
+  | 'popArrayItem'
+  | 'shiftArrayItem';
 
 interface AdapterProp {
   prop: string;
@@ -15,7 +34,42 @@ interface AdapterProp {
 
 type AdapterPropsData = Record<FieldType, Record<UiAdapterName, AdapterProp[]>>;
 
-const ADAPTER_PROPS_DATA: AdapterPropsData = {
+const BUTTON_PROPS: Record<UiAdapterName, AdapterProp[]> = {
+  material: [{ prop: 'color', type: "'primary' | 'accent' | 'warn'", description: 'Material theme color' }],
+  bootstrap: [
+    {
+      prop: 'variant',
+      type: "'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | 'link'",
+      description: 'Bootstrap button color variant',
+    },
+    { prop: 'outline', type: 'boolean', description: 'Use outline button style' },
+    { prop: 'size', type: "'sm' | 'lg'", description: 'Button size' },
+    { prop: 'block', type: 'boolean', description: 'Full-width block button' },
+  ],
+  primeng: [
+    {
+      prop: 'severity',
+      type: "'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast'",
+      description: 'PrimeNG button severity',
+    },
+    { prop: 'text', type: 'boolean', description: 'Text-only button style' },
+    { prop: 'outlined', type: 'boolean', description: 'Outlined button style' },
+    { prop: 'raised', type: 'boolean', description: 'Raised button with shadow' },
+    { prop: 'rounded', type: 'boolean', description: 'Rounded button corners' },
+    { prop: 'icon', type: 'string', description: 'PrimeNG icon class' },
+    { prop: 'iconPos', type: "'left' | 'right' | 'top' | 'bottom'", description: 'Icon position relative to label' },
+  ],
+  ionic: [
+    { prop: 'expand', type: "'full' | 'block'", description: 'Button expand mode' },
+    { prop: 'fill', type: "'clear' | 'outline' | 'solid' | 'default'", description: 'Ionic button fill style' },
+    { prop: 'shape', type: "'round'", description: 'Rounded button shape' },
+    { prop: 'size', type: "'small' | 'default' | 'large'", description: 'Button size' },
+    { prop: 'color', type: 'string', description: 'Ionic color palette name' },
+    { prop: 'strong', type: 'boolean', description: 'Use stronger font weight' },
+  ],
+};
+
+const ADAPTER_PROPS_DATA = {
   input: {
     material: [
       { prop: 'appearance', type: "'fill' | 'outline'", description: 'Material form field appearance variant' },
@@ -263,7 +317,17 @@ const ADAPTER_PROPS_DATA: AdapterPropsData = {
       { prop: 'hint', type: 'string', description: 'Helper text below the field' },
     ],
   },
-};
+  submit: BUTTON_PROPS,
+  button: BUTTON_PROPS,
+  next: BUTTON_PROPS,
+  previous: BUTTON_PROPS,
+  addArrayItem: BUTTON_PROPS,
+  prependArrayItem: BUTTON_PROPS,
+  insertArrayItem: BUTTON_PROPS,
+  removeArrayItem: BUTTON_PROPS,
+  popArrayItem: BUTTON_PROPS,
+  shiftArrayItem: BUTTON_PROPS,
+} satisfies AdapterPropsData;
 
 interface CustomFieldGuide {
   contract: 'ValueFieldComponent' | 'CheckedFieldComponent';

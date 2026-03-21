@@ -104,22 +104,22 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     .cascade__code {
       font-family: $font-mono;
       font-size: 0.75rem;
-      color: var(--ng-doc-text-muted, #{$steel-mid});
+      color: var(--forge-text-muted, #{$steel-mid});
     }
 
     .cascade__scope {
       font-size: 0.6875rem;
-      color: var(--ng-doc-text-muted, #{$steel-mid});
+      color: var(--forge-text-muted, #{$steel-mid});
       font-style: italic;
     }
 
     .cascade__arrow {
       display: flex;
       align-items: center;
-      color: var(--ng-doc-base-4, #{$steel-dim});
+      color: var(--forge-base-4, #{$steel-dim});
       margin-top: 0.5rem;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CascadeVisualComponent {}
+export default class CascadeVisualComponent {}

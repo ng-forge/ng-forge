@@ -1,11 +1,11 @@
 /**
  * Generate llms-full.txt from documentation markdown sources.
  *
- * Reads all .md files from apps/docs/src/docs/, concatenates them with
- * section separators, and outputs to apps/docs/public/llms-full.txt.
+ * Reads all .md files from apps/docs/public/content/, strips frontmatter,
+ * concatenates them with section separators, and outputs to apps/docs/public/llms-full.txt.
  *
- * Section paths are derived from the file path relative to the docs directory,
- * e.g., "validation/basics" for "apps/docs/src/docs/validation/basics/index.md".
+ * Section paths are derived from the file path relative to the content directory,
+ * e.g., "validation/basics" for "apps/docs/public/content/validation/basics.md".
  *
  * Usage: npx tsx apps/docs/scripts/generate-llms-full.ts
  */
@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const DOCS_DIR = join(__dirname, '..', 'src', 'docs');
+const CONTENT_DIR = join(__dirname, '..', 'public', 'content');
 const OUTPUT_FILE = join(__dirname, '..', 'public', 'llms-full.txt');
 
 function collectMarkdownFiles(dir: string): string[] {
@@ -38,12 +38,17 @@ function collectMarkdownFiles(dir: string): string[] {
 }
 
 function getSectionPath(filePath: string): string {
-  const rel = relative(DOCS_DIR, filePath);
-  // Remove trailing /index.md or .md
-  return rel.replace(/\/index\.md$/, '').replace(/\.md$/, '');
+  const rel = relative(CONTENT_DIR, filePath);
+  return rel.replace(/\.md$/, '');
 }
 
-const mdFiles = collectMarkdownFiles(DOCS_DIR).sort();
+/** Strip YAML frontmatter (--- ... ---) from markdown content. */
+function stripFrontmatter(content: string): string {
+  const match = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/);
+  return match ? content.slice(match[0].length).trim() : content.trim();
+}
+
+const mdFiles = collectMarkdownFiles(CONTENT_DIR).sort();
 
 const sections: string[] = [
   '# ng-forge Dynamic Forms — Full Documentation',
@@ -55,7 +60,8 @@ const sections: string[] = [
 
 for (const filePath of mdFiles) {
   const sectionPath = getSectionPath(filePath);
-  const content = readFileSync(filePath, 'utf-8').trim();
+  const raw = readFileSync(filePath, 'utf-8');
+  const content = stripFrontmatter(raw);
 
   sections.push(`--- ${sectionPath} ---`);
   sections.push('');

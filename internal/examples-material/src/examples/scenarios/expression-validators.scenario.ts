@@ -65,8 +65,7 @@ export const expressionValidatorsScenario: ExampleScenario = {
             validators: [
               {
                 type: 'custom',
-                expression:
-                  '!fieldValue || !formValue.expressionExamples.startDate || new Date(fieldValue) > new Date(formValue.expressionExamples.startDate)',
+                expression: '!fieldValue || !formValue.expressionExamples.startDate || fieldValue > formValue.expressionExamples.startDate',
                 kind: 'endDateBeforeStart',
               },
             ],

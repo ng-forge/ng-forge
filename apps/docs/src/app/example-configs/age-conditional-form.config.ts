@@ -1,6 +1,10 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
 export const ageConditionalFormConfig = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    email: 'Please enter a valid email address',
+  },
   fields: [
     {
       key: 'name',
@@ -27,6 +31,10 @@ export const ageConditionalFormConfig = {
       required: true,
       min: 0,
       max: 120,
+      validationMessages: {
+        min: 'Age must be at least 0',
+        max: 'Age must be at most 120',
+      },
       props: {
         type: 'number',
         hint: 'Enter your age to see relevant options',

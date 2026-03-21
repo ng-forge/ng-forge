@@ -14,6 +14,9 @@ export const valueDerivationConfig = {
       label: 'Quantity',
       value: 1,
       min: 1,
+      validationMessages: {
+        min: 'Quantity must be at least 1',
+      },
       props: { type: 'number' },
       col: 4,
     },
