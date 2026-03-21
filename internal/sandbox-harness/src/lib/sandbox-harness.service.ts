@@ -155,7 +155,7 @@ export class SandboxHarness implements OnDestroy {
     // instances because they live at the ES module level, not in Angular's DI. When a sandbox
     // is destroyed, the style elements are removed but the caches still say "loaded", so the
     // next sandbox skips style injection entirely. Clear them before each bootstrap.
-    clearPrimeNGStyleCaches();
+    await clearPrimeNGStyleCaches();
 
     // Create the isolated sub-application.
     const appRef = await createApplication(config);

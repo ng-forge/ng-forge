@@ -13,20 +13,23 @@
  * This function is intentionally resilient: if PrimeNG is not installed or the internal
  * API changes, it silently does nothing.
  */
-export function clearPrimeNGStyleCaches(): void {
+export async function clearPrimeNGStyleCaches(): Promise<void> {
   // Dynamic import() expressions — sandbox-harness has no compile-time dependency on PrimeNG.
   // These resolve instantly since the modules are already loaded by the adapter factory.
-  clearCache('@primeuix/styled', 'Theme');
-  clearCache('primeng/base', 'Base');
+  // Must be awaited so the caches are cleared BEFORE createApplication() runs —
+  // otherwise PrimeNG's module-scoped singletons still report styles as "loaded"
+  // and skip injection into the new shadow root.
+  await Promise.all([clearCache('@primeuix/styled', 'Theme'), clearCache('primeng/base', 'Base')]);
 }
 
-function clearCache(specifier: string, exportName: string): void {
-  void import(/* @vite-ignore */ specifier)
-    .then((m) => {
-      const target = m?.[exportName];
-      if (target && typeof target.clearLoadedStyleNames === 'function') {
-        target.clearLoadedStyleNames();
-      }
-    })
-    .catch(() => {});
+async function clearCache(specifier: string, exportName: string): Promise<void> {
+  try {
+    const m = await import(/* @vite-ignore */ specifier);
+    const target = m?.[exportName];
+    if (target && typeof target.clearLoadedStyleNames === 'function') {
+      target.clearLoadedStyleNames();
+    }
+  } catch {
+    // PrimeNG not installed or API changed — silently skip.
+  }
 }
