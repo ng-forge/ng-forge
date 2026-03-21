@@ -48,7 +48,7 @@ export const ssrContentInterceptor: HttpInterceptorFn = (req, next) => {
   }
 };
 
-/** Cached content directory path — resolved once per process. */
+/** Cached content directory path — resolved once per build-time pre-render process (not shared across SSR requests). */
 let resolvedContentDir: string | null | undefined;
 
 function resolveContentDir(): string | null {

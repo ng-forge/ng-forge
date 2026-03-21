@@ -288,7 +288,7 @@ export class ContentService {
     // Uses data-api-link attribute so the adapter prefix can be resolved at click time.
     html = html.replace(
       /\{@link\s+(\w+)\}/g,
-      (_, symbol: string) => `<a class="api-link" data-api-symbol="${symbol}" href="javascript:void(0)"><code>${symbol}</code></a>`,
+      (_, symbol: string) => `<button type="button" class="api-link" data-api-symbol="${symbol}"><code>${symbol}</code></button>`,
     );
 
     // Replace emoji indicators with inline SVGs (outside code blocks only)

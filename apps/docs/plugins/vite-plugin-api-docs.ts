@@ -479,8 +479,8 @@ function processPackage(project: Project, pkgDef: PackageDef, root: string): Api
       try {
         const decl = extractDeclaration(sym, root);
         if (decl) declarations.push(decl);
-      } catch {
-        /* skip broken declarations */
+      } catch (e) {
+        console.warn(`[api-docs] Failed to extract declaration for "${name}":`, e);
       }
     }
   }

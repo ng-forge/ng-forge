@@ -945,9 +945,10 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
   }
 
   // API cross-reference links ({@link SymbolName})
-  .api-link {
+  button.api-link {
+    all: unset;
+    display: inline;
     color: var(--forge-link-color);
-    text-decoration: none;
     cursor: pointer;
 
     code {

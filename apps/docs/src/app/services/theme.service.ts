@@ -58,7 +58,8 @@ export class ThemeService {
       localStorage.setItem(THEME_STORAGE_KEY, t);
     });
 
-    // Listen for system theme changes when in auto mode
+    // Listen for system theme changes when in auto mode.
+    // No cleanup needed — ThemeService is a root singleton that lives for the app lifetime.
     const mql = window.matchMedia('(prefers-color-scheme: dark)');
     mql.addEventListener('change', (e) => {
       this.systemDarkQuery.set(e.matches);
@@ -72,7 +73,7 @@ export class ThemeService {
   }
 
   private loadSavedTheme(): ThemeType {
-    const saved = localStorage.getItem(THEME_STORAGE_KEY) as ThemeType | null;
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
     if (saved === 'light' || saved === 'dark' || saved === 'auto') return saved;
     return 'auto';
   }

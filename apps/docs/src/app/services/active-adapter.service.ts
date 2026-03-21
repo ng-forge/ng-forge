@@ -39,6 +39,7 @@ export class ActiveAdapterService {
     if (!this.isBrowser) return;
     // Restore scroll after Angular's scrollPositionRestoration resets it.
     // Double rAF ensures we run after the router's own scroll handler.
+    // Subscription self-cleans via take(1).
     this.router.events
       .pipe(
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
