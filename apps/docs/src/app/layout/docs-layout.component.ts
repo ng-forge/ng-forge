@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject, PLATFORM_ID, signal } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, computed, inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { fromEvent, map } from 'rxjs';
+import { SandboxHarness } from '@ng-forge/sandbox-harness';
 import { ActiveAdapterService } from '../services/active-adapter.service';
 import { ThemeService } from '../services/theme.service';
 import { Logo } from '../components/logo/logo.component';
@@ -22,9 +23,18 @@ import { NAV_ITEMS, type NavItem } from './nav.config';
 export class DocsLayoutComponent {
   private readonly router = inject(Router);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly harness = inject(SandboxHarness);
   protected readonly activeAdapter = inject(ActiveAdapterService);
   readonly themeService = inject(ThemeService);
   protected readonly sidebarOpen = signal(false);
+
+  constructor() {
+    // After hydration, preload the current adapter's JS on idle so live examples
+    // are instant when the user scrolls to them.
+    afterNextRender(() => {
+      requestIdleCallback(() => this.harness.preload(this.activeAdapter.adapter()));
+    });
+  }
   protected readonly expandedCategories = signal<Set<string>>(new Set());
   /** Categories explicitly collapsed by the user — overrides URL-based auto-expand. */
   private readonly collapsedCategories = signal<Set<string>>(new Set());
