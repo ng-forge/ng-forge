@@ -568,8 +568,9 @@ export class DocPageComponent {
         if (el) el.scrollIntoView({ behavior: 'smooth' });
         return;
       }
-      // Root-relative paths — add adapter prefix for SPA navigation
-      if (href.startsWith('/') && !href.startsWith('//')) {
+      // Root-relative paths — add adapter prefix for SPA navigation,
+      // but skip if the href already contains the adapter prefix (e.g. routerLink-generated hrefs)
+      if (href.startsWith('/') && !href.startsWith('//') && !href.startsWith(`/${this.adapter.adapter()}/`)) {
         event.preventDefault();
         void this.router.navigateByUrl(`/${this.adapter.adapter()}${href}`);
         return;
