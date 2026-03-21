@@ -11,6 +11,7 @@ import { createDocumentProxy } from './document-proxy';
 import { SandboxSlot } from './sandbox-slot';
 import { SANDBOX_THEME } from './sandbox-theme';
 import { ShadowDomOverlayContainer, SHADOW_ROOT_REF, ShadowRootRef } from './shadow-dom-overlay-container';
+import { clearPrimeNGStyleCaches } from './primeng-style-cache';
 
 const STYLESHEET_ID_PREFIX = 'sandbox-harness-style-';
 
@@ -148,6 +149,13 @@ export class SandboxHarness implements OnDestroy {
       ...config,
       providers: [...config.providers, ...baseProviders],
     };
+
+    // PrimeNG uses module-scoped caches (Base._loadedStyleNames, Theme._loadedStyleNames)
+    // to track which component styles have been injected. These caches persist across sandbox
+    // instances because they live at the ES module level, not in Angular's DI. When a sandbox
+    // is destroyed, the style elements are removed but the caches still say "loaded", so the
+    // next sandbox skips style injection entirely. Clear them before each bootstrap.
+    clearPrimeNGStyleCaches();
 
     // Create the isolated sub-application.
     const appRef = await createApplication(config);

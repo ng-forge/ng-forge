@@ -7,6 +7,11 @@
   border-collapse: collapse;
   font-size: $text-sm;
 
+  @include mix.mobile {
+    display: block;
+    overflow-x: auto;
+  }
+
   th,
   td {
     padding: $space-2 $space-3;
@@ -29,6 +34,8 @@
       font-family: $font-mono;
       color: $ember-glow;
       font-size: 0.8125rem;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
   }
 

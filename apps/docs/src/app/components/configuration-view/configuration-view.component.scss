@@ -101,12 +101,18 @@
         font-family: $font-mono;
         color: $ember-glow;
         font-size: 0.8125rem;
+        overflow-wrap: break-word;
+        word-break: break-word;
       }
     }
 
-    // First column (option name) — nowrap
+    // First column (option name) — nowrap on desktop
     td:first-child code {
       white-space: nowrap;
+
+      @include mix.mobile {
+        white-space: normal;
+      }
     }
 
     tr:last-child td {

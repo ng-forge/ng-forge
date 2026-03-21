@@ -90,9 +90,55 @@ function getJsDocs(node: Node) {
   return Node.isJSDocable(node) ? node.getJsDocs() : [];
 }
 
+/** JSDoc tags that should be stripped from the description body. */
+const JSDOC_TAG_NAMES = new Set([
+  'param',
+  'returns',
+  'return',
+  'example',
+  'see',
+  'remarks',
+  'deprecated',
+  'group',
+  'typeParam',
+  'template',
+  'internal',
+  'type',
+  'typedef',
+  'throws',
+  'since',
+  'default',
+  'defaultValue',
+  'usageNotes',
+]);
+
 function getJsDocDescription(node: Node): string {
   return getJsDocs(node)
-    .map((d) => d.getDescription().trim())
+    .map((doc) => {
+      const fullText = doc.getText();
+      // Strip /** and */ wrapper
+      const inner = fullText.replace(/^\/\*\*\s*/, '').replace(/\s*\*\/$/, '');
+      // Remove leading ` * ` from each line
+      const lines = inner.split('\n').map((line) => line.replace(/^\s*\*\s?/, ''));
+
+      // Walk lines, collecting description until we hit a real JSDoc tag (not inside a code block)
+      const descLines: string[] = [];
+      let inCodeBlock = false;
+      for (const line of lines) {
+        if (line.trimStart().startsWith('```')) inCodeBlock = !inCodeBlock;
+
+        if (!inCodeBlock) {
+          const tagMatch = line.match(/^\s*@(\w+)/);
+          if (tagMatch && JSDOC_TAG_NAMES.has(tagMatch[1])) break;
+        }
+
+        descLines.push(line);
+      }
+
+      // Trim trailing empty lines
+      while (descLines.length && !descLines[descLines.length - 1].trim()) descLines.pop();
+      return descLines.join('\n').trim();
+    })
     .filter(Boolean)
     .join('\n\n');
 }

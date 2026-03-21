@@ -45,6 +45,12 @@
     font-size: $text-sm;
     color: $ember-glow;
     white-space: nowrap;
+
+    @include mix.mobile {
+      white-space: normal;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
   }
 
   &__feature-desc {

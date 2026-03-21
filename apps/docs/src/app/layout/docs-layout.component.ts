@@ -39,10 +39,10 @@ export class DocsLayoutComponent {
 
   protected readonly navItems = computed(() => {
     const adapter = this.activeAdapter.adapter();
+    const isCustom = adapter === 'custom';
     return NAV_ITEMS.filter((item) => {
-      if (item.cssClass === 'sidebar-link--custom-only') {
-        return adapter === 'custom';
-      }
+      if (item.cssClass === 'sidebar-link--custom-only') return isCustom;
+      if (item.cssClass === 'sidebar-link--not-custom') return !isCustom;
       return true;
     });
   });

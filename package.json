@@ -8,6 +8,7 @@
     "postinstall": "bash scripts/postinstall.sh",
     "build:libs": "nx run-many -t build -p dynamic-forms,dynamic-forms-material,dynamic-forms-bootstrap,dynamic-forms-primeng,dynamic-forms-ionic,dynamic-form-mcp",
     "build:docs": "nx build docs",
+    "build:examples": "nx build sandbox-examples",
     "build:all:prod": "pnpm run build:libs && pnpm run build:docs",
     "prepare:deploy": "node scripts/prepare-deploy.js",
     "deploy:prep": "pnpm run build:all:prod && pnpm run prepare:deploy",

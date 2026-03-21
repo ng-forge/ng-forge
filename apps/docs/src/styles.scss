@@ -690,6 +690,14 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
     white-space: nowrap;
   }
 
+  // Allow inline code to wrap inside table cells on narrow screens
+  td > code,
+  td *:not(pre) > code {
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
   pre {
     margin: 24px 0;
     border-radius: 8px;
