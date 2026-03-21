@@ -6,12 +6,16 @@
   margin: 1.5rem 0;
 }
 
-// Wrapper keeps skeleton + container stacked
+// Wrapper keeps skeleton + container stacked.
+// overflow:visible is required — overlay panels (CDK datepickers, Ionic modals,
+// PrimeNG date/select overlays) render inside the shadow root and must escape
+// this container. Border-radius rounding is handled by the skeleton + container
+// having their own border-radius instead.
 .live-example-wrapper {
   position: relative;
   border: 1px solid var(--forge-border-color, #e0e0e0);
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 // ============================================
@@ -56,7 +60,7 @@
 }
 
 .live-example-container {
-  overflow: hidden;
+  overflow: visible;
   background: transparent;
 
   > div {

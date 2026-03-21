@@ -6,6 +6,7 @@ import { businessAccountFormConfig } from './business-account-form.config';
 import { completeFormConfig } from './complete-form.config';
 import { contactConfig } from './contact.config';
 import { contactDynamicFieldsConfig } from './contact-dynamic-fields.config';
+import { datepickerConfig } from './datepicker.config';
 import { enterpriseFeaturesConfig } from './enterprise-features.config';
 import { expressionValidatorsConfig } from './expression-validators.config';
 import { groupConfig } from './group.config';
@@ -14,6 +15,7 @@ import { paginatedFormConfig } from './paginated-form.config';
 import { rowConfig } from './row.config';
 import { shippingBillingAddressConfig } from './shipping-billing-address.config';
 import { simplifiedArrayConfig } from './simplified-array.config';
+import { sliderConfig } from './slider.config';
 import { userRegistrationConfig } from './user-registration.config';
 import { valueDerivationConfig } from './value-derivation.config';
 import { zodSchemaValidationConfig } from './zod-schema-validation.config';
@@ -24,6 +26,7 @@ export { businessAccountFormConfig } from './business-account-form.config';
 export { completeFormConfig } from './complete-form.config';
 export { contactConfig } from './contact.config';
 export { contactDynamicFieldsConfig } from './contact-dynamic-fields.config';
+export { datepickerConfig } from './datepicker.config';
 export { enterpriseFeaturesConfig } from './enterprise-features.config';
 export { expressionValidatorsConfig } from './expression-validators.config';
 export { groupConfig } from './group.config';
@@ -32,6 +35,7 @@ export { paginatedFormConfig } from './paginated-form.config';
 export { rowConfig } from './row.config';
 export { shippingBillingAddressConfig } from './shipping-billing-address.config';
 export { simplifiedArrayConfig } from './simplified-array.config';
+export { sliderConfig } from './slider.config';
 export { userRegistrationConfig } from './user-registration.config';
 export { valueDerivationConfig } from './value-derivation.config';
 export { zodSchemaValidationConfig } from './zod-schema-validation.config';
@@ -62,4 +66,6 @@ export const EXAMPLE_CONFIGS: Record<string, FormConfig> = {
   'zod-schema-validation': zodSchemaValidationConfig,
   group: groupConfig,
   row: rowConfig,
+  slider: sliderConfig,
+  datepicker: datepickerConfig,
 };

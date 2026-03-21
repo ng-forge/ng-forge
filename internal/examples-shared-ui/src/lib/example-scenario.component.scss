@@ -14,7 +14,7 @@
   flex-direction: column;
   width: 100%;
   font-family: $font-primary;
-  overflow: auto;
+  overflow: visible;
   position: relative;
   box-sizing: border-box;
 
@@ -383,7 +383,7 @@
   max-width: none !important;
   margin: 0 !important;
   padding: 0 !important;
-  overflow: hidden;
+  overflow: visible;
 
   // Remove the ember top border in iframe mode
   &::before {
