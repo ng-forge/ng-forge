@@ -484,6 +484,7 @@ export class SandboxHarness implements OnDestroy {
     // 1. Patch querySelector to search inside shadow roots as a fallback.
     this.originalQuerySelector = Document.prototype.querySelector;
     const origQS = this.originalQuerySelector;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- needed because inner functions rebind `this` to Document
     const harness = this;
 
     // Only intercept selectors that Ionic's overlay system uses to find its container.
