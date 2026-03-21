@@ -46,24 +46,29 @@
     padding: $space-3 $space-4;
     overflow-x: auto;
     white-space: nowrap;
+    font-size: $text-sm;
     mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent 100%);
     border-radius: 0 0 $radius-md $radius-md;
 
-    // Shiki wraps output in a <pre>, flatten it to fit our container
+    @include mix.mobile {
+      font-size: $text-xs;
+      padding: $space-2 $space-3;
+    }
+
+    // Shiki wraps output in a <pre>, flatten it to fit our container.
+    // Use !important to override the global .doc-page-content pre.shiki code rule
+    // which has higher specificity than the emulated encapsulation attribute selector.
     ::ng-deep pre {
       margin: 0;
       padding: 0;
       background: transparent !important;
       border: none;
       min-width: max-content;
+      font-size: inherit !important;
     }
 
     ::ng-deep pre code {
-      font-size: $text-sm;
-
-      @include mix.mobile {
-        font-size: $text-xs;
-      }
+      font-size: inherit !important;
     }
   }
 }
