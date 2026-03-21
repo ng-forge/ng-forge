@@ -50,7 +50,7 @@ Import in component SCSS files (`includePaths` is configured in `project.json`):
 
 ## Typography
 
-- **Primary**: `$font-primary` — 'Space Grotesk', sans-serif
+- **Primary**: `$font-primary` — system-ui, -apple-system, sans-serif
 - **Monospace**: `$font-mono` — 'JetBrains Mono', monospace
 
 ## Key Mixins

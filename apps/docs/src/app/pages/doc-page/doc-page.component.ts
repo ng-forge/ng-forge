@@ -1,5 +1,5 @@
 import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 import { Clipboard } from '@angular/cdk/clipboard';
@@ -388,8 +388,11 @@ export class DocPageComponent {
   private readonly contentService = inject(ContentService);
   private readonly clipboard = inject(Clipboard);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
   protected readonly adapter = inject(ActiveAdapterService);
   private copiedTimer: ReturnType<typeof setTimeout> | null = null;
+
+  private static readonly SITE_ORIGIN = 'https://ng-forge.com/dynamic-forms';
 
   private static readonly DEFAULT_DESCRIPTION =
     'ng-forge provides a configuration-driven dynamic forms library for Angular. Build complex, signal forms with minimal code using JSON/TypeScript configurations.';
@@ -409,8 +412,8 @@ export class DocPageComponent {
     // the skeleton is suppressed so Angular can match the pre-rendered content.
     afterNextRender(() => this.showSkeleton.set(true));
 
-    // Update document title and meta tags based on current page
-    explicitEffect([this.pageTitle, this.pageDescription], ([title, description]) => {
+    // Update document title, meta tags, and canonical URL based on current page
+    explicitEffect([this.pageTitle, this.pageDescription, this.slug, this.adapter.adapter], ([title, description, slug, adapter]) => {
       const fullTitle = title ? `${title} — ng-forge Dynamic Forms` : 'ng-forge — Dynamic Forms for Angular';
       this.titleService.setTitle(fullTitle);
       const desc = description || DocPageComponent.DEFAULT_DESCRIPTION;
@@ -419,6 +422,19 @@ export class DocPageComponent {
       this.metaService.updateTag({ property: 'og:description', content: desc });
       this.metaService.updateTag({ name: 'twitter:title', content: fullTitle });
       this.metaService.updateTag({ name: 'twitter:description', content: desc });
+
+      // Canonical URL for the current page
+      const pageUrl = slug ? `${DocPageComponent.SITE_ORIGIN}/${adapter}/${slug}` : DocPageComponent.SITE_ORIGIN + '/';
+      this.metaService.updateTag({ property: 'og:url', content: pageUrl });
+      this.metaService.updateTag({ name: 'twitter:url', content: pageUrl });
+
+      // Update <link rel="canonical"> — points to the material version for duplicate content prevention
+      const canonicalSlug = slug || '';
+      const canonicalUrl = canonicalSlug ? `${DocPageComponent.SITE_ORIGIN}/material/${canonicalSlug}` : DocPageComponent.SITE_ORIGIN + '/';
+      const link = this.document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+      if (link) {
+        link.href = canonicalUrl;
+      }
     });
   }
 
