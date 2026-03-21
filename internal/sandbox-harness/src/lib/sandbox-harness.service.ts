@@ -11,7 +11,6 @@ import { createDocumentProxy } from './document-proxy';
 import { SandboxSlot } from './sandbox-slot';
 import { SANDBOX_THEME } from './sandbox-theme';
 import { ShadowDomOverlayContainer, SHADOW_ROOT_REF, ShadowRootRef } from './shadow-dom-overlay-container';
-import { clearPrimeNGStyleCaches } from './primeng-style-cache';
 
 const STYLESHEET_ID_PREFIX = 'sandbox-harness-style-';
 
@@ -23,6 +22,12 @@ export class SandboxHarness implements OnDestroy {
   private instanceCounter = 0;
   private activeStylesheetAdapter: AdapterName | null = null;
   private readonly cssCache = new Map<string, Promise<string>>();
+
+  // Caches the CSS text of styles injected by third-party libs (e.g. PrimeNG theme variables)
+  // during the first bootstrap of each adapter. Subsequent bootstraps of the same adapter
+  // re-inject these cached styles because the module-scoped singletons may not re-emit
+  // them (the theme:change event fires before the new app's ThemeProvider subscribes).
+  private readonly thirdPartyStyleCache = new Map<AdapterName, string[]>();
 
   // Tracks all active shadow roots for the global document patches (Ionic overlay fix).
   // Multiple sandbox instances can coexist (e.g. two live examples on the same doc page).
@@ -150,12 +155,11 @@ export class SandboxHarness implements OnDestroy {
       providers: [...config.providers, ...baseProviders],
     };
 
-    // PrimeNG uses module-scoped caches (Base._loadedStyleNames, Theme._loadedStyleNames)
-    // to track which component styles have been injected. These caches persist across sandbox
-    // instances because they live at the ES module level, not in Angular's DI. When a sandbox
-    // is destroyed, the style elements are removed but the caches still say "loaded", so the
-    // next sandbox skips style injection entirely. Clear them before each bootstrap.
-    await clearPrimeNGStyleCaches();
+    // Some UI libraries (e.g. PrimeNG) use module-scoped caches to track which component
+    // styles have been injected. These caches persist across sandbox instances because they
+    // live at the ES module level, not in Angular's DI. Clear them before each bootstrap so
+    // styles are re-injected into the new shadow root.
+    registration.clearStyleCaches?.();
 
     // Create the isolated sub-application.
     const appRef = await createApplication(config);
@@ -195,6 +199,20 @@ export class SandboxHarness implements OnDestroy {
       const shadowRoot = hostElement.shadowRoot;
       if (shadowRoot) {
         shadowRootRef.current = shadowRoot;
+
+        // Re-inject cached third-party styles (e.g. PrimeNG theme variables) that were
+        // collected from a previous bootstrap of the same adapter. Module-scoped singletons
+        // (PrimeNG's ThemeProvider) won't re-inject because their theme:change event fires
+        // before the new app subscribes.
+        const cachedThirdPartyCSS = this.thirdPartyStyleCache.get(adapterName);
+        if (cachedThirdPartyCSS) {
+          for (const css of cachedThirdPartyCSS) {
+            const style = this.document.createElement('style');
+            style.textContent = this.transformCssForShadowDom(css);
+            shadowRoot.appendChild(style);
+          }
+        }
+
         await this.applyStyleIsolation(
           appRef,
           shadowRoot,
@@ -211,6 +229,17 @@ export class SandboxHarness implements OnDestroy {
           appRef.destroy();
           hostElement.remove();
           throw new DOMException('Aborted', 'AbortError');
+        }
+
+        // Cache the third-party styles collected during this bootstrap for future reuse.
+        // Only capture on first bootstrap (when no cache exists) to avoid stale duplicates.
+        if (!cachedThirdPartyCSS && addedStyles.size > 0) {
+          this.thirdPartyStyleCache.set(
+            adapterName,
+            Array.from(addedStyles)
+              .map((s) => s.textContent ?? '')
+              .filter(Boolean),
+          );
         }
       }
     } else {
