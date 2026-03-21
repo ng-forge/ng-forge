@@ -365,4 +365,4 @@ when: {
 - **[Validation Basics](/validation/basics)** - Shorthand validators
 - **[Validation Reference](/validation/reference)** - Complete API
 - **[Conditional Logic](/dynamic-behavior/overview)** - Field behavior changes
-- **[Examples](../examples)** - Real-world patterns
+- **[Examples](/examples)** - Real-world patterns

@@ -35,9 +35,11 @@ Single or multi-select dropdown.
 
 - `placeholder`: Placeholder text when no value selected
 
-### Adapter Props
+#### Adapter Props
 
 <docs-adapter-props field="select"></docs-adapter-props>
+
+#### Example
 
 <docs-live-example scenario="examples/select" hideForCustom="true"></docs-live-example>
 
@@ -64,9 +66,11 @@ Single selection from multiple options.
 
 - `options`: Array of `{ value: string, label: string }` objects (at field level, not in props)
 
-### Adapter Props
+#### Adapter Props
 
 <docs-adapter-props field="radio"></docs-adapter-props>
+
+#### Example
 
 <docs-live-example scenario="examples/radio" hideForCustom="true"></docs-live-example>
 
@@ -83,9 +87,11 @@ Boolean toggle control.
 }
 ```
 
-### Adapter Props
+#### Adapter Props
 
 <docs-adapter-props field="checkbox"></docs-adapter-props>
+
+#### Example
 
 <docs-live-example scenario="examples/checkbox" hideForCustom="true"></docs-live-example>
 
@@ -102,9 +108,11 @@ Boolean switch control. Similar to checkbox but with a switch UI.
 }
 ```
 
-### Adapter Props
+#### Adapter Props
 
 <docs-adapter-props field="toggle"></docs-adapter-props>
+
+#### Example
 
 <docs-live-example scenario="examples/toggle" hideForCustom="true"></docs-live-example>
 
@@ -130,8 +138,10 @@ Multiple selection from a list of checkboxes. Value is an array of selected valu
 
 - `options`: Array of `{ value: T, label: string }` objects (at field level, not in props)
 
-### Adapter Props
+#### Adapter Props
 
 <docs-adapter-props field="multi-checkbox"></docs-adapter-props>
+
+#### Example
 
 <docs-live-example scenario="examples/multi-checkbox" hideForCustom="true"></docs-live-example>

@@ -107,7 +107,7 @@ describe('collectCrossFieldEntries()', () => {
                   validators: [
                     {
                       type: 'custom',
-                      expression: 'new Date(fieldValue) > new Date(formValue.outer.inner.startDate)',
+                      expression: 'fieldValue > formValue.outer.inner.startDate',
                       kind: 'endBeforeStart',
                     },
                   ],

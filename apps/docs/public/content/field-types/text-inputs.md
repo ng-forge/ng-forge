@@ -30,9 +30,11 @@ Text-based input with HTML5 type support.
 - `type`: HTML input type (`'text'` | `'email'` | `'password'` | `'number'` | `'tel'` | `'url'`)
 - `placeholder`: Input placeholder text
 
-### Adapter Props
+#### Adapter Props
 
 <docs-adapter-props field="input"></docs-adapter-props>
+
+#### Example
 
 <docs-live-example scenario="examples/input" hideForCustom="true"></docs-live-example>
 
@@ -59,8 +61,10 @@ Multi-line text input.
 - `placeholder`: Placeholder text
 - `rows`: Number of visible text rows
 
-### Adapter Props
+#### Adapter Props
 
 <docs-adapter-props field="textarea"></docs-adapter-props>
+
+#### Example
 
 <docs-live-example scenario="examples/textarea" hideForCustom="true"></docs-live-example>

@@ -1,6 +1,10 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
 export const paginatedFormConfig = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    email: 'Please enter a valid email address',
+  },
   fields: [
     {
       key: 'step1',

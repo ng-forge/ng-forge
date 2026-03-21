@@ -3,14 +3,30 @@ import { NgComponentOutlet } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { LiveExampleComponent } from '../components/live-example/live-example.component';
+import { DocsAdapterPropsComponent } from '../components/adapter-props/adapter-props.component';
 import { type ComponentRegistration, type ComponentSegment, type ContentSegment, parseContentSegments } from './content-segment-parser';
 
 const COMPONENT_REGISTRY: ComponentRegistration[] = [
   {
+    selector: 'docs-adapter-props',
+    component: DocsAdapterPropsComponent,
+    defer: false,
+    extractInputs: (attrs) => ({ field: attrs['field'] ?? '' }),
+  },
+  {
     selector: 'docs-live-example',
     component: LiveExampleComponent,
     defer: true,
-    extractInputs: (attrs) => ({ scenario: attrs['scenario'] ?? '' }),
+    extractInputs: (attrs) => ({
+      scenario: attrs['scenario'] ?? '',
+      hideForCustom: attrs['hideforcustom'] ?? attrs['hideForCustom'] ?? false,
+    }),
+  },
+  {
+    selector: 'docs-install-command',
+    defer: true,
+    loadComponent: () => import('../components/install-command/install-command.component'),
+    extractInputs: (attrs) => ({ packages: attrs['packages'] ?? '' }),
   },
   {
     selector: 'docs-adapter-picker',

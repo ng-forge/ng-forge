@@ -131,7 +131,7 @@ Accessing properties on `null` or `undefined` returns `undefined` instead of thr
 
 ```typescript
 {
-  expression: 'new Date(fieldValue) > new Date(formValue.startDate)',
+  expression: 'fieldValue > formValue.startDate',
   kind: 'endDateBeforeStart',
 }
 ```

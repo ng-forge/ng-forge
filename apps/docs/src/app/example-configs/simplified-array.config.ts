@@ -1,6 +1,10 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
 export const simplifiedArrayConfig = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    minlength: 'Must be at least 2 characters',
+  },
   fields: [
     {
       key: 'sectionTitle1',

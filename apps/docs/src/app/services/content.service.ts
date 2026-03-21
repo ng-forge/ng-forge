@@ -230,9 +230,13 @@ export class ContentService {
     );
 
     // Pass 2: Render with custom renderer
+    const usedIds = new Map<string, number>();
     const renderer: Partial<Renderer> = {
       heading({ text, depth }: Tokens.Heading): string {
-        const id = slugify(text);
+        let id = slugify(text);
+        const count = usedIds.get(id) ?? 0;
+        usedIds.set(id, count + 1);
+        if (count > 0) id = `${id}-${count}`;
         if (depth === 2 || depth === 3) {
           headings.push({ id, text, level: depth });
         }

@@ -222,4 +222,4 @@ The section title is also hidden along with the group:
 
 - **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
 - **[Form Groups](/prebuilt/form-groups)** - Working with groups
-- **[Checkbox Fields](/field-types/text-inputs)** - Field types reference
+- **[Checkbox Fields](/field-types/selection)** - Field types reference

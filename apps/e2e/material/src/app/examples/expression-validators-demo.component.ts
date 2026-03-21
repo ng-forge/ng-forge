@@ -139,7 +139,7 @@ export default class ExpressionValidatorsDemoComponent {
             validators: [
               {
                 type: 'custom',
-                expression: '!fieldValue || !formValue.startDate || new Date(fieldValue) > new Date(formValue.startDate)',
+                expression: '!fieldValue || !formValue.startDate || fieldValue > formValue.startDate',
                 kind: 'endDateBeforeStart',
               },
             ],

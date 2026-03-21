@@ -34,3 +34,5 @@ export class DocsInstallCommandComponent {
     this.pmService.pm.set(pm);
   }
 }
+
+export default DocsInstallCommandComponent;

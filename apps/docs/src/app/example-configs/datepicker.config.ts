@@ -1,6 +1,9 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
 export const datepickerConfig = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+  },
   fields: [
     {
       key: 'birthDate',

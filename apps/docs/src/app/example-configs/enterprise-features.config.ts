@@ -1,6 +1,9 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
 export const enterpriseFeaturesConfig = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+  },
   fields: [
     {
       key: 'accountType',
@@ -21,6 +24,9 @@ export const enterpriseFeaturesConfig = {
       value: undefined,
       label: 'Team Size',
       min: 1,
+      validationMessages: {
+        min: 'Team size must be at least 1',
+      },
       props: {
         type: 'number',
         hint: 'Number of team members',

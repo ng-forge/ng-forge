@@ -316,7 +316,7 @@ JavaScript expressions with access to `fieldValue` (current field) and `formValu
 ```typescript
 {
   type: 'javascript',
-  expression: 'new Date(fieldValue) > new Date()',
+  expression: 'fieldValue > formValue.startDate',
 }
 ```
 
@@ -325,16 +325,16 @@ JavaScript expressions with access to `fieldValue` (current field) and `formValu
 **Examples:**
 
 ```typescript
-// Check current field value
+// Check current field against another field
 {
-  key: 'eventDate',
+  key: 'endDate',
   type: 'datepicker',
   value: null,
   logic: [{
     type: 'readonly',
     condition: {
       type: 'javascript',
-      expression: 'new Date(fieldValue) < new Date()',
+      expression: 'fieldValue < formValue.startDate',
     },
   }],
 }
@@ -1221,8 +1221,8 @@ const config = {
 ## Related
 
 - **[Value Derivation](/dynamic-behavior/derivation)** — Computed field values
-- **[Async Derivation](/dynamic-behavior/derivation)** — HTTP and async function derivations, stopOnUserOverride
-- **[Validation](../validation/basics)** — Conditional validation
-- **[Custom Validators](../validation/custom-validators)** — Async and HTTP validators
+- **[Async Derivation](/dynamic-behavior/derivation/async)** — HTTP and async function derivations, stopOnUserOverride
+- **[Validation](/validation/basics)** — Conditional validation
+- **[Custom Validators](/validation/custom-validators)** — Async and HTTP validators
 - **[Type Safety](/recipes/type-safety)** — TypeScript integration
 - **[Examples](/examples)** — Real-world form patterns

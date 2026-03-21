@@ -853,6 +853,6 @@ const config = {
 
 ## Related
 
-- **[Validation](../validation/basics)** - How validators affect inferred types
+- **[Validation](/validation/basics)** - How validators affect inferred types
 - **[Field Types](/field-types/text-inputs)** - Understanding available field types
-- **[Form Layout](../prebuilt/form-groups)** - Visual guide to container fields
+- **[Form Layout](/prebuilt/form-groups)** - Visual guide to container fields

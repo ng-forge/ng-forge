@@ -19,10 +19,10 @@ Schema validation excels at:
 
 Dynamic Forms supports two approaches to form-level validation:
 
-| Approach                           | Best For                               | Wrapper Required         |
-| ---------------------------------- | -------------------------------------- | ------------------------ |
-| [Angular Schema](./angular-schema) | Angular-only projects, full API access | No (raw callback)        |
-| [Standard Schema](./zod)           | Reusing Zod/Valibot schemas, OpenAPI   | Yes (`standardSchema()`) |
+| Approach                                            | Best For                               | Wrapper Required         |
+| --------------------------------------------------- | -------------------------------------- | ------------------------ |
+| [Angular Schema](/schema-validation/angular-schema) | Angular-only projects, full API access | No (raw callback)        |
+| [Standard Schema](/schema-validation/zod)           | Reusing Zod/Valibot schemas, OpenAPI   | Yes (`standardSchema()`) |
 
 ### Angular Schema
 
@@ -99,6 +99,6 @@ const config = {
 
 ## Next Steps
 
-- **[Angular Schema](./angular-schema)** - Native Angular approach
-- **[Standard Schema (Zod)](./zod)** - Use Zod, Valibot, or ArkType
-- **[Field Validation](../validation/basics)** - Individual field validators
+- **[Angular Schema](/schema-validation/angular-schema)** - Native Angular approach
+- **[Standard Schema (Zod)](/schema-validation/zod)** - Use Zod, Valibot, or ArkType
+- **[Field Validation](/validation/basics)** - Individual field validators

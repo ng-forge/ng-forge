@@ -276,7 +276,7 @@ schema: schema<Form>(({ value }) =>
 
 ## When to Use Standard Schema Instead
 
-Consider [Standard Schema (Zod)](./zod) if you:
+Consider [Standard Schema (Zod)](/schema-validation/zod) if you:
 
 - Already have Zod schemas from an API or shared library
 - Need the same validation in Node.js backend
