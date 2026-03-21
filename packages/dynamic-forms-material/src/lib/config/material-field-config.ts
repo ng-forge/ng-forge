@@ -25,16 +25,19 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/input/mat-input.component'),
     mapper: valueFieldMapper,
     propsToMeta: ['type'],
+    scope: ['text-input', 'numeric'],
   },
   {
     name: MatField.Select,
     loadComponent: () => import('../fields/select/mat-select.component'),
     mapper: optionsFieldMapper,
+    scope: 'single-select',
   },
   {
     name: MatField.Checkbox,
     loadComponent: () => import('../fields/checkbox/mat-checkbox.component'),
     mapper: checkboxFieldMapper,
+    scope: 'boolean',
   },
   {
     name: MatField.Button,
@@ -101,30 +104,36 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/textarea/mat-textarea.component'),
     mapper: valueFieldMapper,
     propsToMeta: ['rows', 'cols'],
+    scope: 'text-input',
   },
   {
     name: MatField.Radio,
     loadComponent: () => import('../fields/radio/mat-radio.component'),
     mapper: optionsFieldMapper,
+    scope: 'single-select',
   },
   {
     name: MatField.MultiCheckbox,
     loadComponent: () => import('../fields/multi-checkbox/mat-multi-checkbox.component'),
     mapper: optionsFieldMapper,
+    scope: 'multi-select',
   },
   {
     name: MatField.Datepicker,
     loadComponent: () => import('../fields/datepicker/mat-datepicker.component'),
     mapper: datepickerFieldMapper,
+    scope: 'date',
   },
   {
     name: MatField.Slider,
     loadComponent: () => import('../fields/slider/mat-slider.component'),
     mapper: valueFieldMapper,
+    scope: 'numeric',
   },
   {
     name: MatField.Toggle,
     loadComponent: () => import('../fields/toggle/mat-toggle.component'),
     mapper: checkboxFieldMapper,
+    scope: 'boolean',
   },
 ];
