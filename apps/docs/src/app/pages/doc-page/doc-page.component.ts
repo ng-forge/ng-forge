@@ -453,9 +453,13 @@ export class DocPageComponent {
   private readonly contentResource = rxResource({
     params: () => {
       const s = this.slug();
-      return s && s !== 'examples' && !s.startsWith('api-reference') ? { slug: s } : undefined;
+      // Return the slug string directly — not an object wrapper.
+      // rxResource compares params with ===; wrapping in { slug: s } creates a new object
+      // reference each evaluation, causing spurious re-fetches on adapter switch (where the
+      // slug stays identical but the :adapter route param changes).
+      return s && s !== 'examples' && !s.startsWith('api-reference') ? s : undefined;
     },
-    stream: ({ params }) => this.contentService.load(params.slug),
+    stream: ({ params }) => this.contentService.load(params),
   });
 
   readonly content = computed(() => this.contentResource.value());
@@ -564,8 +568,9 @@ export class DocPageComponent {
         if (el) el.scrollIntoView({ behavior: 'smooth' });
         return;
       }
-      // Root-relative paths — add adapter prefix for SPA navigation
-      if (href.startsWith('/') && !href.startsWith('//')) {
+      // Root-relative paths — add adapter prefix for SPA navigation,
+      // but skip if the href already contains the adapter prefix (e.g. routerLink-generated hrefs)
+      if (href.startsWith('/') && !href.startsWith('//') && !href.startsWith(`/${this.adapter.adapter()}/`)) {
         event.preventDefault();
         void this.router.navigateByUrl(`/${this.adapter.adapter()}${href}`);
         return;

@@ -104,6 +104,20 @@ describe('DocsLayoutComponent', () => {
       expect(gettingStarted).toBeDefined();
     });
 
+    it('should hide not-custom items (Examples) when adapter is "custom"', () => {
+      const { component } = setup({ adapter: 'custom' });
+      const items = priv(component).navItems();
+      const examples = items.find((i: any) => i.path === 'examples');
+      expect(examples).toBeUndefined();
+    });
+
+    it('should show not-custom items (Examples) for non-custom adapters', () => {
+      const { component } = setup({ adapter: 'primeng' });
+      const items = priv(component).navItems();
+      const examples = items.find((i: any) => i.path === 'examples');
+      expect(examples).toBeDefined();
+    });
+
     it('should reactively update when adapter changes', () => {
       const { component, adapterSignal } = setup({ adapter: 'material' });
       expect(

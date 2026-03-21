@@ -182,9 +182,27 @@ export class ApiDetailComponent {
     const currentSymbol = this.symbolName();
     const adapterName = this.adapter.adapter();
 
-    let html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    // Extract fenced code blocks before escaping so their content stays intact
+    const codeBlocks: string[] = [];
+    let processed = text.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang: string, code: string) => {
+      const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const placeholder = `\x00CODE${codeBlocks.length}\x00`;
+      codeBlocks.push(`<pre class="description-code-block"><code class="language-${lang || 'text'}">${escaped.trimEnd()}</code></pre>`);
+      return placeholder;
+    });
 
-    // 1. Backtick-quoted inline code: `something` — also link if it's a known symbol
+    let html = processed.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    // Restore code blocks (they were already escaped)
+    html = html.replace(/\x00CODE(\d+)\x00/g, (_, i: string) => codeBlocks[Number(i)]);
+
+    // 1. Markdown headers: ## Heading → <h3>, ### Heading → <h4>, etc.
+    html = html.replace(/^(#{2,4})\s+(.+)$/gm, (_, hashes: string, heading: string) => {
+      const level = Math.min(hashes.length + 1, 6); // ## → h3, ### → h4
+      return `<h${level} class="description-heading">${heading.trim()}</h${level}>`;
+    });
+
+    // 2. Backtick-quoted inline code: `something` — also link if it's a known symbol
     html = html.replace(/`([^`]+)`/g, (_, content: string) => {
       const bare = content.replace(/\(\)$/, '');
       if (bare !== currentSymbol && index.has(bare)) {
@@ -193,7 +211,7 @@ export class ApiDetailComponent {
       return `<code class="inline-code">${content}</code>`;
     });
 
-    // 2. UPPER_CASE_CONSTANTS (must have underscore to avoid matching words like "API")
+    // 3. UPPER_CASE_CONSTANTS (must have underscore to avoid matching words like "API")
     html = html.replace(/\b([A-Z][A-Z0-9]*_[A-Z0-9_]+)\b/g, (match) => {
       if (index.has(match)) {
         return `<a class="type-link" href="/${adapterName}/api-reference/${match}"><code class="inline-code">${match}</code></a>`;
@@ -201,7 +219,7 @@ export class ApiDetailComponent {
       return `<code class="inline-code">${match}</code>`;
     });
 
-    // 3. camelCase() function calls — link if known
+    // 4. camelCase() function calls — link if known
     html = html.replace(/(?<![<\w])([a-z]\w+)\(\)(?![^<]*>)/g, (match, name: string) => {
       if (index.has(name)) {
         return `<a class="type-link" href="/${adapterName}/api-reference/${name}"><code class="inline-code">${name}()</code></a>`;
@@ -209,22 +227,25 @@ export class ApiDetailComponent {
       return `<code class="inline-code">${name}()</code>`;
     });
 
-    // 4. Link known PascalCase API symbols (not already inside tags)
+    // 5. Link known PascalCase API symbols (not already inside tags)
     html = html.replace(/(?<![<\w/])([A-Z][a-z]\w{2,})(?![^<]*>)/g, (match, name: string) => {
       if (name === currentSymbol) return match;
       if (!index.has(name)) return match;
       return `<a class="type-link" href="/${adapterName}/api-reference/${name}">${match}</a>`;
     });
 
-    // 5. Markdown bold: **text**
+    // 6. Markdown bold: **text**
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 
-    // 6. Convert double newlines to paragraphs, with special handling for callouts
+    // 7. Convert double newlines to paragraphs, with special handling for callouts and block elements
+    const blockTagPattern = /^<(?:pre|h[1-6]|div)\b/;
     const paragraphs = html.split(/\n{2,}/).filter((p) => p.trim());
 
     html = paragraphs
       .map((p) => {
         const trimmed = p.trim();
+        // Don't wrap block-level elements in <p>
+        if (blockTagPattern.test(trimmed)) return trimmed;
         // Breaking change → styled callout
         if (trimmed.match(/^<strong>BREAKING CHANGE<\/strong>:\s*/i)) {
           const content = trimmed.replace(/^<strong>BREAKING CHANGE<\/strong>:\s*/i, '');
@@ -235,7 +256,7 @@ export class ApiDetailComponent {
       .join('');
 
     // Single paragraph without callout — unwrap
-    if (paragraphs.length === 1 && !html.includes('callout--breaking')) {
+    if (paragraphs.length === 1 && !html.includes('callout--breaking') && !blockTagPattern.test(html.trim())) {
       html = html.replace(/^<p>(.*)<\/p>$/, '$1');
     }
 

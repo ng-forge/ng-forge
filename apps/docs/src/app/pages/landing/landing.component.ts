@@ -16,7 +16,7 @@ import { RouterLink } from '@angular/router';
 
 import { catchError, defer, delay, filter, map, merge, of, switchMap, tap } from 'rxjs';
 
-import { SandboxMountDirective } from '@ng-forge/sandbox-harness';
+import { SandboxHarness, SandboxMountDirective } from '@ng-forge/sandbox-harness';
 
 import { Logo } from '../../components/logo';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
@@ -67,6 +67,8 @@ export class LandingComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly http = inject(HttpClient);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly harness = inject(SandboxHarness);
+
   private copyFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
   private confettiTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -185,6 +187,10 @@ export class LandingComponent {
     // afterNextRender only runs in browser, no platform check needed
     afterNextRender(() => {
       this.initializeBrowserFeatures();
+
+      // Preload Material adapter on idle so sandbox bootstrap is faster.
+      // Runs after render to avoid competing with hydration.
+      requestIdleCallback(() => this.harness.preload('material'));
 
       // Landing page is always dark — set data-theme so sandbox sub-apps
       // pick up the correct theme via document.documentElement attribute.

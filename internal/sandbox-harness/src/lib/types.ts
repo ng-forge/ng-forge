@@ -43,6 +43,13 @@ export interface AdapterRegistration {
    * Receives the pre-loaded routes so they can be passed to provideRouter().
    */
   factory: (routes: Route[]) => Promise<{ config: ApplicationConfig; rootComponent: Type<unknown> }>;
+  /**
+   * Optional callback to clear adapter-specific module-scoped style caches.
+   * Called before each sandbox bootstrap so component styles are re-injected
+   * into the new shadow root. Only needed for adapters whose UI library uses
+   * module-level singletons to track loaded styles (e.g. PrimeNG).
+   */
+  clearStyleCaches?: () => void;
 }
 
 export interface SandboxBootstrapOptions {

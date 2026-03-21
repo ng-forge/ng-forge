@@ -196,6 +196,36 @@ $kind-colors: (
   white-space: nowrap;
 }
 
+:host ::ng-deep .description-code-block {
+  border-radius: $radius-md;
+  border: 1px solid var(--card-border);
+  background: var(--code-bg);
+  overflow-x: auto;
+  margin: $space-4 0;
+  padding: $space-4 $space-5;
+  font-family: $font-mono;
+  font-size: $text-sm;
+  line-height: 1.6;
+  white-space: pre;
+
+  code {
+    background: transparent;
+    padding: 0;
+    font-size: inherit;
+    color: inherit;
+  }
+}
+
+:host ::ng-deep .description-heading {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: $space-6 0 $space-3;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
 :host ::ng-deep .callout--breaking {
   padding: $space-4 $space-5;
   border-radius: $radius-md;

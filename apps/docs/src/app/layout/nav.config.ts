@@ -25,6 +25,8 @@ export const NAV_ITEMS: NavItem[] = [
   {
     label: 'Examples',
     path: 'examples',
+    /** Hidden when adapter === 'custom' — no example components exist for the custom adapter. */
+    cssClass: 'sidebar-link--not-custom',
   },
   {
     label: 'Field Types',
