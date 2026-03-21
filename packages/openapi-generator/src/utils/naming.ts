@@ -59,6 +59,30 @@ export function toKebabCase(str: string): string {
 }
 
 /**
+ * Replace path parameters like `{id}` with a prefix + param name.
+ * Uses indexOf loop instead of regex to avoid polynomial backtracking (CodeQL).
+ */
+function cleanPathParams(path: string, prefix: string): string {
+  let result = '';
+  let i = 0;
+  while (i < path.length) {
+    const openIdx = path.indexOf('{', i);
+    if (openIdx === -1) {
+      result += path.slice(i);
+      break;
+    }
+    const closeIdx = path.indexOf('}', openIdx + 1);
+    if (closeIdx === -1) {
+      result += path.slice(i);
+      break;
+    }
+    result += path.slice(i, openIdx) + prefix + path.slice(openIdx + 1, closeIdx);
+    i = closeIdx + 1;
+  }
+  return result;
+}
+
+/**
  * Generate a form config variable name from endpoint info.
  * Example: "POST /pets" → "createPetFormConfig", "GET /pets/{id}" → "getPetByIdFormConfig"
  */
@@ -66,7 +90,7 @@ export function toFormConfigName(method: string, path: string, operationId?: str
   if (operationId) {
     return toCamelCase(operationId) + 'FormConfig';
   }
-  const cleaned = path.replace(/\{([^}]+)\}/g, 'By $1');
+  const cleaned = cleanPathParams(path, 'By ');
   return toCamelCase(`${method} ${cleaned}`) + 'FormConfig';
 }
 
@@ -78,7 +102,7 @@ export function toFormFileName(method: string, path: string, operationId?: strin
   if (operationId) {
     return toKebabCase(operationId) + '.form.ts';
   }
-  const cleaned = path.replace(/\{([^}]+)\}/g, 'by-$1');
+  const cleaned = cleanPathParams(path, 'by-');
   return toKebabCase(`${method} ${cleaned}`) + '.form.ts';
 }
 
@@ -90,6 +114,6 @@ export function toInterfaceName(method: string, path: string, operationId?: stri
   if (operationId) {
     return toPascalCase(operationId) + 'FormValue';
   }
-  const cleaned = path.replace(/\{([^}]+)\}/g, 'By $1');
+  const cleaned = cleanPathParams(path, 'By ');
   return toPascalCase(`${method} ${cleaned}`) + 'FormValue';
 }
