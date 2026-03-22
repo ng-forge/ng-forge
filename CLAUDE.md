@@ -76,6 +76,7 @@ ng-forge/
 - **Angular**: `~21.1.0`
 - **TypeScript**: `~5.9.2`
 - **Nx**: `22.4.5`
+- **Docs app**: AnalogJS (file-based routing, SSR pre-rendering). Route components use `default` exports. Be aware of Vite/Nx cache issues — suggest cache clearing (`nx reset`) when encountering ghost errors after config changes
 
 ## MCP Server Synchronization
 
@@ -141,6 +142,8 @@ Update `packages/dynamic-form-mcp/` when adding/modifying field types, validator
 
 - **Never use module-scoped mutable state** (Maps, caches, singletons outside DI). These break SSR because they're shared across requests
 - Use Angular's DI system for all caching and state. Injection tokens scoped to the component tree are SSR-safe
+- **When debugging SSR/hydration issues**, expect multi-layered problems. Never dismiss visual artifacts (white flash, FOUC, skeleton issues) as resolved without browser verification. Check hydration mismatch errors, `@defer` interactions with SSR, and inline critical CSS ordering
+- **Verify SSR fixes in both modes**: dev server (`pnpm serve:docs`) AND production build. A fix that works in dev may break in production SSR and vice versa
 
 ## Error Handling
 
@@ -158,6 +161,12 @@ When implementing a feature across all 4 UI adapter libraries:
 3. **Each agent should**: read existing patterns in its library, implement following those conventions, run that library's tests
 4. **After all complete**: review together, run the full build (`pnpm build:libs`), create a single commit
 5. **No agent should modify files outside its library scope**
+
+## Verification
+
+- **Never claim a UI or styling fix is complete without verifying it.** Use Playwright MCP to navigate to the affected page, take a screenshot, and confirm the fix visually. If the dev server isn't running, start it first
+- **After making styling, template, or build-affecting changes, run `nx build <project>`** (or `pnpm build:libs` for cross-library changes) and confirm no errors before reporting success. Silent SCSS failures and build breakage must be caught immediately
+- **For docs site changes**, start the dev server (`pnpm serve:docs`) and verify in the browser — check both light and dark mode if relevant
 
 ## Quality Assurance
 
@@ -180,6 +189,7 @@ When implementing a feature across all 4 UI adapter libraries:
 
 - **Diagnose root causes before proposing fixes.** Don't chase the first symptom; investigate whether the real cause is elsewhere
 - **Share your hypothesis** before implementing a fix. State what you think is wrong and why, so the user can redirect early if needed
+- **When a fix attempt fails twice, stop and reassess** the approach entirely rather than continuing to iterate on the same strategy. Ask the user if they have context on the root cause
 - **Arbitrary delays, `setTimeout` workarounds, and skipped tests are code smells.** If you find yourself reaching for one, stop and investigate the underlying timing or lifecycle issue
 - **For reactive/signal bugs**: check for circular dependencies in computed chains, verify `untracked()` usage, and check `explicitEffect` dependency arrays
 - **For E2E flakiness**: Firefox has pre-existing flakiness across array-fields, row-fields, group-fields, multi-page, and expression-logic suites. Don't spend time debugging Firefox-only failures unless specifically asked
