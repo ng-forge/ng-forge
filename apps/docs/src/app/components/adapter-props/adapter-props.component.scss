@@ -7,11 +7,19 @@
   border-collapse: collapse;
   font-size: $text-sm;
 
+  @include mix.mobile {
+    font-size: $text-xs;
+  }
+
   th,
   td {
     padding: $space-2 $space-3;
     text-align: left;
     border-bottom: 1px solid var(--border);
+
+    @include mix.mobile {
+      padding: $space-1 $space-2;
+    }
   }
 
   th {
@@ -29,6 +37,11 @@
       font-family: $font-mono;
       color: $ember-glow;
       font-size: 0.8125rem;
+      white-space: nowrap;
+
+      @include mix.mobile {
+        font-size: $text-xs;
+      }
     }
   }
 

@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject, PLATFORM_ID, signal } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { fromEvent, map } from 'rxjs';
+import { SandboxHarness } from '@ng-forge/sandbox-harness';
 import { ActiveAdapterService } from '../services/active-adapter.service';
 import { ThemeService } from '../services/theme.service';
 import { Logo } from '../components/logo/logo.component';
@@ -21,10 +22,28 @@ import { NAV_ITEMS, type NavItem } from './nav.config';
 })
 export class DocsLayoutComponent {
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly harness = inject(SandboxHarness);
   protected readonly activeAdapter = inject(ActiveAdapterService);
   readonly themeService = inject(ThemeService);
   protected readonly sidebarOpen = signal(false);
+
+  constructor() {
+    // After hydration, preload the current adapter's JS on idle so live examples
+    // are instant when the user scrolls to them.
+    if (this.isBrowser) {
+      afterNextRender(() => {
+        if (typeof requestIdleCallback === 'function') {
+          const handle = requestIdleCallback(() => this.harness.preload(this.activeAdapter.adapter()));
+          this.destroyRef.onDestroy(() => cancelIdleCallback(handle));
+        } else {
+          const handle = setTimeout(() => this.harness.preload(this.activeAdapter.adapter()), 0);
+          this.destroyRef.onDestroy(() => clearTimeout(handle));
+        }
+      });
+    }
+  }
   protected readonly expandedCategories = signal<Set<string>>(new Set());
   /** Categories explicitly collapsed by the user — overrides URL-based auto-expand. */
   private readonly collapsedCategories = signal<Set<string>>(new Set());
@@ -39,10 +58,10 @@ export class DocsLayoutComponent {
 
   protected readonly navItems = computed(() => {
     const adapter = this.activeAdapter.adapter();
+    const isCustom = adapter === 'custom';
     return NAV_ITEMS.filter((item) => {
-      if (item.cssClass === 'sidebar-link--custom-only') {
-        return adapter === 'custom';
-      }
+      if (item.cssClass === 'sidebar-link--custom-only') return isCustom;
+      if (item.cssClass === 'sidebar-link--not-custom') return !isCustom;
       return true;
     });
   });

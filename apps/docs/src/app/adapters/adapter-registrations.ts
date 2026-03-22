@@ -1,5 +1,9 @@
 import { AdapterRegistration } from '@ng-forge/sandbox-harness';
 
+// Captured on first PrimeNG factory call — must be synchronous so the harness
+// can call it before createApplication().
+let primengClearStyleCaches: (() => void) | undefined;
+
 export const DOCS_ADAPTERS: AdapterRegistration[] = [
   {
     name: 'material',
@@ -37,8 +41,11 @@ export const DOCS_ADAPTERS: AdapterRegistration[] = [
     },
     factory: async (routes) => {
       const lib = await import('@ng-forge/sandbox-adapter-primeng');
+      // Capture the synchronous cache-clear function on first load.
+      primengClearStyleCaches = lib.clearPrimeNGStyleCaches;
       return lib.createPrimeNGSandboxApp(routes);
     },
+    clearStyleCaches: () => primengClearStyleCaches?.(),
   },
   {
     name: 'ionic',

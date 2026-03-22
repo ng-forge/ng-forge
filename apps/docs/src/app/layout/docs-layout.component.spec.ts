@@ -1,6 +1,7 @@
 import '@angular/compiler';
 import { Injector, PLATFORM_ID, runInInjectionContext, signal } from '@angular/core';
 import { Router, UrlSerializer } from '@angular/router';
+import { SandboxHarness } from '@ng-forge/sandbox-harness';
 import { ActiveAdapterService } from '../services/active-adapter.service';
 import { ThemeService, ThemeType } from '../services/theme.service';
 import { DocsLayoutComponent } from './docs-layout.component';
@@ -52,10 +53,13 @@ function setup(opts: { adapter?: string; url?: string } = {}) {
   // Set initial navigation so currentUrl computed picks up the URL.
   navigate(url);
 
+  const mockHarness = { preload: vi.fn() } as unknown as SandboxHarness;
+
   const injector = Injector.create({
     providers: [
-      { provide: PLATFORM_ID, useValue: 'browser' },
+      { provide: PLATFORM_ID, useValue: 'server' },
       { provide: Router, useValue: mockRouter },
+      { provide: SandboxHarness, useValue: mockHarness },
       { provide: ActiveAdapterService, useValue: mockAdapter },
       { provide: ThemeService, useValue: mockTheme },
     ],
@@ -102,6 +106,20 @@ describe('DocsLayoutComponent', () => {
       const items = priv(component).navItems();
       const gettingStarted = items.find((i: any) => i.path === 'getting-started');
       expect(gettingStarted).toBeDefined();
+    });
+
+    it('should hide not-custom items (Examples) when adapter is "custom"', () => {
+      const { component } = setup({ adapter: 'custom' });
+      const items = priv(component).navItems();
+      const examples = items.find((i: any) => i.path === 'examples');
+      expect(examples).toBeUndefined();
+    });
+
+    it('should show not-custom items (Examples) for non-custom adapters', () => {
+      const { component } = setup({ adapter: 'primeng' });
+      const items = priv(component).navItems();
+      const examples = items.find((i: any) => i.path === 'examples');
+      expect(examples).toBeDefined();
     });
 
     it('should reactively update when adapter changes', () => {
