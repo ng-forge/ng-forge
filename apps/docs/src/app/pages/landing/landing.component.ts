@@ -62,11 +62,14 @@ const CONFETTI_ANIMATION_DURATION_MS = 800;
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.browser]': 'isBrowser',
+  },
 })
 export class LandingComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly http = inject(HttpClient);
-  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  protected readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly harness = inject(SandboxHarness);
 
   private copyFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
