@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import TextFieldComponent from './text-field.component';
 import { TextProps } from '../../definitions/default/text-field';
 import { DynamicTextPipe } from '../../pipes';
@@ -7,6 +7,7 @@ import { DynamicTextPipe } from '../../pipes';
 @Component({
   template: ` <df-text [key]="key()" [label]="content()" [className]="className()" [tabIndex]="tabIndex()" [props]="props()" /> `,
   imports: [TextFieldComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestHostComponent {
   key = signal('test');

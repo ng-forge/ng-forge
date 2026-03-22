@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { Component, signal, Type } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, Type } from '@angular/core';
 import { injectFieldRegistry } from './inject-field-registry';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
 
-@Component({ standalone: true, template: '' })
+@Component({ template: '', changeDetection: ChangeDetectionStrategy.OnPush })
 class TestComponent {}
 
-@Component({ standalone: true, template: '' })
+@Component({ template: '', changeDetection: ChangeDetectionStrategy.OnPush })
 class AnotherComponent {}
 
 describe('injectFieldRegistry', () => {

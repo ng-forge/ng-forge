@@ -1,4 +1,4 @@
-import { afterNextRender, Component } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { fromEvent } from 'rxjs';
@@ -10,6 +10,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   imports: [RouterModule, IonApp, IonRouterOutlet],
   selector: 'example-root',
   templateUrl: './app.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
   protected title = 'Ionic Examples';

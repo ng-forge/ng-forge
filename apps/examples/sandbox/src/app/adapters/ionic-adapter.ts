@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { IonApp, IonRouterOutlet, provideIonicAngular } from '@ionic/angular/standalone';
 import { Route } from '@angular/router';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
@@ -10,6 +10,7 @@ import { createSandboxApp } from './create-sandbox-app';
   selector: 'sandbox-ionic-root',
   imports: [IonApp, IonRouterOutlet],
   template: `<ion-app><ion-router-outlet /></ion-app>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class IonicRootComponent {}
 

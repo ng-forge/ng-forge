@@ -1,4 +1,4 @@
-import { afterNextRender, Component } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { fromEvent } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -9,6 +9,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   imports: [RouterModule],
   selector: 'example-root',
   templateUrl: './app.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
   protected title = 'PrimeNG Examples';

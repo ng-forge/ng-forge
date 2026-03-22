@@ -1,4 +1,13 @@
-import { APP_ID, ApplicationConfig, Component, EnvironmentProviders, Provider, provideZonelessChangeDetection, Type } from '@angular/core';
+import {
+  APP_ID,
+  ApplicationConfig,
+  ChangeDetectionStrategy,
+  Component,
+  EnvironmentProviders,
+  Provider,
+  provideZonelessChangeDetection,
+  Type,
+} from '@angular/core';
 import { provideRouter, RouterOutlet, withHashLocation } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
@@ -13,6 +22,7 @@ import { wrapRoutesWithAdapter } from './adapter-routes';
   selector: 'sandbox-root',
   imports: [RouterOutlet],
   template: `<router-outlet />`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SandboxDefaultRootComponent {}
 

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { evaluateCondition } from '../../core/expressions/condition-evaluator';
@@ -25,6 +25,7 @@ import { createMockLogger, MockLogger } from '../mock-logger';
       />
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestFormComponent {
   private formValue = signal({
