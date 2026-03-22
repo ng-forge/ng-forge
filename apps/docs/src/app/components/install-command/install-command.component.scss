@@ -47,6 +47,9 @@
     overflow-x: auto;
     white-space: nowrap;
     font-size: $text-sm;
+    // Prevent iOS Safari text autosizing in this horizontally-scrollable container.
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent 100%);
     border-radius: 0 0 $radius-md $radius-md;
 
