@@ -47,9 +47,6 @@
     overflow-x: auto;
     white-space: nowrap;
     font-size: $text-sm;
-    // Prevent iOS Safari text autosizing in this horizontally-scrollable container.
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
     mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent 100%);
     border-radius: 0 0 $radius-md $radius-md;
 
@@ -68,21 +65,18 @@
       border: none;
       min-width: max-content;
       font-size: $text-sm !important;
-      -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
 
       @include mix.mobile {
         font-size: $text-xs !important;
       }
     }
 
+    // Chrome mobile "font boosting" inflates text in blocks whose containing
+    // block is wider than the viewport (triggered by min-width: max-content above).
+    // A large finite max-height tells Chrome's text autosizer to leave it alone.
     ::ng-deep pre code {
       font-size: $text-sm !important;
-      -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
-      // iOS Safari inflates text in wide scrollable containers.
-      // Setting max-height prevents autosizing since the text fits vertically.
-      max-height: 100%;
+      max-height: 999999px;
 
       @include mix.mobile {
         font-size: $text-xs !important;
