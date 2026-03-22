@@ -284,8 +284,10 @@ export class SandboxHarness implements OnDestroy {
         }
 
         // Cache the third-party styles collected during this bootstrap for future reuse.
-        // Only capture on first bootstrap (when no cache exists) to avoid stale duplicates.
-        if (!cachedThirdPartyCSS && addedStyles.size > 0) {
+        // Only capture on first bootstrap (when no cache exists yet) to avoid stale duplicates.
+        // Check again here (not just cachedThirdPartyCSS from above) because a concurrent
+        // bootstrap may have populated the cache while we were awaiting applyStyleIsolation().
+        if (!this.thirdPartyStyleCache.has(adapterName) && addedStyles.size > 0) {
           this.thirdPartyStyleCache.set(
             adapterName,
             Array.from(addedStyles)

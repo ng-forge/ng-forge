@@ -1,4 +1,4 @@
-import { afterNextRender, ChangeDetectionStrategy, Component, computed, inject, PLATFORM_ID, signal } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -22,6 +22,7 @@ import { NAV_ITEMS, type NavItem } from './nav.config';
 })
 export class DocsLayoutComponent {
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly harness = inject(SandboxHarness);
   protected readonly activeAdapter = inject(ActiveAdapterService);
@@ -33,7 +34,13 @@ export class DocsLayoutComponent {
     // are instant when the user scrolls to them.
     if (this.isBrowser) {
       afterNextRender(() => {
-        requestIdleCallback(() => this.harness.preload(this.activeAdapter.adapter()));
+        if (typeof requestIdleCallback === 'function') {
+          const handle = requestIdleCallback(() => this.harness.preload(this.activeAdapter.adapter()));
+          this.destroyRef.onDestroy(() => cancelIdleCallback(handle));
+        } else {
+          const handle = setTimeout(() => this.harness.preload(this.activeAdapter.adapter()), 0);
+          this.destroyRef.onDestroy(() => clearTimeout(handle));
+        }
       });
     }
   }

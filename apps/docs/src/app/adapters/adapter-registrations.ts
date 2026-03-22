@@ -42,8 +42,7 @@ export const DOCS_ADAPTERS: AdapterRegistration[] = [
     factory: async (routes) => {
       const lib = await import('@ng-forge/sandbox-adapter-primeng');
       // Capture the synchronous cache-clear function on first load.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      primengClearStyleCaches = (lib as any).clearPrimeNGStyleCaches;
+      primengClearStyleCaches = lib.clearPrimeNGStyleCaches;
       return lib.createPrimeNGSandboxApp(routes);
     },
     clearStyleCaches: () => primengClearStyleCaches?.(),

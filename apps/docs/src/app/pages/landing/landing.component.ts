@@ -190,7 +190,13 @@ export class LandingComponent {
 
       // Preload Material adapter on idle so sandbox bootstrap is faster.
       // Runs after render to avoid competing with hydration.
-      requestIdleCallback(() => this.harness.preload('material'));
+      if (typeof requestIdleCallback === 'function') {
+        const idleHandle = requestIdleCallback(() => this.harness.preload('material'));
+        this.destroyRef.onDestroy(() => cancelIdleCallback(idleHandle));
+      } else {
+        const timeoutHandle = setTimeout(() => this.harness.preload('material'), 0);
+        this.destroyRef.onDestroy(() => clearTimeout(timeoutHandle));
+      }
 
       // Landing page is always dark — set data-theme so sandbox sub-apps
       // pick up the correct theme via document.documentElement attribute.
