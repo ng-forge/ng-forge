@@ -574,8 +574,6 @@ nav {
 .hero h1 .line1 {
   display: block;
   color: $steel;
-  opacity: 0;
-  animation: hero-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .hero h1 .line2 {
@@ -584,8 +582,6 @@ nav {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  opacity: 0;
-  animation: hero-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
 }
 
 .hero-tagline {
@@ -594,8 +590,6 @@ nav {
   max-width: 550px;
   margin-bottom: 2.5rem;
   line-height: 1.5;
-  opacity: 0;
-  animation: hero-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
 
   @media (max-width: 768px) {
     font-size: 1.15rem;
@@ -606,11 +600,32 @@ nav {
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
-  opacity: 0;
-  animation: hero-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards;
 
   @media (max-width: 768px) {
     flex-direction: column;
+  }
+}
+
+// Hero reveal animations — only in browser to ensure SSR pre-renders visible text
+:host(.browser) {
+  .hero h1 .line1 {
+    opacity: 0;
+    animation: hero-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .hero h1 .line2 {
+    opacity: 0;
+    animation: hero-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+  }
+
+  .hero-tagline {
+    opacity: 0;
+    animation: hero-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+  }
+
+  .hero-ctas {
+    opacity: 0;
+    animation: hero-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards;
   }
 }
 
