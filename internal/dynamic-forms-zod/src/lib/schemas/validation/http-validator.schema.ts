@@ -24,7 +24,7 @@ export const HttpValidatorConfigSchema = z.object({
 
   /**
    * Name of a registered HTTP validator config function.
-   * The function must be registered in customFnConfig.asyncValidators.
+   * The function must be registered in customFnConfig.httpValidators.
    * Required because HTTP configuration cannot be inline in JSON.
    */
   functionName: z.string(),

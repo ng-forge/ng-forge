@@ -24,7 +24,7 @@ interface CollectionContext {
 /**
  * Collects all property derivation entries from field definitions.
  *
- * Traverses the field definition tree and extracts `type: 'propertyDerivation'`
+ * Traverses the field definition tree and extracts `type: 'derivation'` with `targetProperty`
  * entries from each field's `logic` array.
  *
  * No topological sort is needed because property derivations don't chain —
