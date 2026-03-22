@@ -1,6 +1,7 @@
 import '@angular/compiler';
 import { Injector, PLATFORM_ID, runInInjectionContext, signal } from '@angular/core';
 import { Router, UrlSerializer } from '@angular/router';
+import { SandboxHarness } from '@ng-forge/sandbox-harness';
 import { ActiveAdapterService } from '../services/active-adapter.service';
 import { ThemeService, ThemeType } from '../services/theme.service';
 import { DocsLayoutComponent } from './docs-layout.component';
@@ -52,10 +53,13 @@ function setup(opts: { adapter?: string; url?: string } = {}) {
   // Set initial navigation so currentUrl computed picks up the URL.
   navigate(url);
 
+  const mockHarness = { preload: vi.fn() } as unknown as SandboxHarness;
+
   const injector = Injector.create({
     providers: [
-      { provide: PLATFORM_ID, useValue: 'browser' },
+      { provide: PLATFORM_ID, useValue: 'server' },
       { provide: Router, useValue: mockRouter },
+      { provide: SandboxHarness, useValue: mockHarness },
       { provide: ActiveAdapterService, useValue: mockAdapter },
       { provide: ThemeService, useValue: mockTheme },
     ],

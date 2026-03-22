@@ -31,9 +31,11 @@ export class DocsLayoutComponent {
   constructor() {
     // After hydration, preload the current adapter's JS on idle so live examples
     // are instant when the user scrolls to them.
-    afterNextRender(() => {
-      requestIdleCallback(() => this.harness.preload(this.activeAdapter.adapter()));
-    });
+    if (this.isBrowser) {
+      afterNextRender(() => {
+        requestIdleCallback(() => this.harness.preload(this.activeAdapter.adapter()));
+      });
+    }
   }
   protected readonly expandedCategories = signal<Set<string>>(new Set());
   /** Categories explicitly collapsed by the user — overrides URL-based auto-expand. */
