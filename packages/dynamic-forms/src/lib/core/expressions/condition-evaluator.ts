@@ -87,7 +87,7 @@ function evaluateFormValueCondition(expression: FormValueCondition, context: Eva
 
 function evaluateJavaScriptExpression(expression: JavascriptCondition, context: EvaluationContext): boolean {
   try {
-    // Use secure AST-based expression parser instead of new Function()
+    // Use secure AST-based expression parser instead of dynamic code execution
     const result = ExpressionParser.evaluate(expression.expression, context);
     return !!result;
   } catch (error) {
