@@ -1,4 +1,4 @@
-import { APP_ID, Component, ViewEncapsulation } from '@angular/core';
+import { APP_ID, ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { provideRouter, RouterOutlet, Route } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
@@ -12,6 +12,7 @@ import { SandboxAppFactory } from '@ng-forge/sandbox-harness';
   imports: [RouterOutlet],
   template: `<router-outlet />`,
   encapsulation: ViewEncapsulation.ExperimentalIsolatedShadowDom,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class BootstrapRootComponent {}
 

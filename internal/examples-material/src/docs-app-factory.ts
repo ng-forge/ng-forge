@@ -1,4 +1,12 @@
-import { APP_ID, ApplicationConfig, Component, provideZonelessChangeDetection, Type, ViewEncapsulation } from '@angular/core';
+import {
+  APP_ID,
+  ApplicationConfig,
+  ChangeDetectionStrategy,
+  Component,
+  provideZonelessChangeDetection,
+  Type,
+  ViewEncapsulation,
+} from '@angular/core';
 import { provideRouter, RouterOutlet, Route } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
@@ -10,6 +18,7 @@ import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
   imports: [RouterOutlet],
   template: `<router-outlet />`,
   encapsulation: ViewEncapsulation.ExperimentalIsolatedShadowDom,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class MaterialRootComponent {}
 

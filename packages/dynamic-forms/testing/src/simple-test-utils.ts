@@ -3,7 +3,7 @@ import { DynamicForm } from '../../src/lib/dynamic-form.component';
 import { delay } from '@ng-forge/utils';
 import { FieldDef } from '../../src/lib/definitions/base/field-def';
 import { provideDynamicForm } from '../../src/lib/providers/dynamic-form-providers';
-import { Component, computed, Injector, input, runInInjectionContext, signal, Type } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, Injector, input, runInInjectionContext, signal, Type } from '@angular/core';
 import { FIELD_REGISTRY } from '../../src/lib/models/field-type';
 import { FieldTypeDefinition } from '../../src/lib/models/field-type';
 import { FIELD_SIGNAL_CONTEXT } from '../../src/lib/models/field-signal-context.token';
@@ -173,6 +173,7 @@ export class SimpleTestUtils {
 @Component({
   selector: 'df-test-field',
   template: '<div>Test Field: {{ value() }}</div>',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestFieldComponent {
   // Field tree input
