@@ -64,11 +64,19 @@
       background: transparent !important;
       border: none;
       min-width: max-content;
-      font-size: inherit !important;
+      font-size: $text-sm !important;
+
+      @include mix.mobile {
+        font-size: $text-xs !important;
+      }
     }
 
     ::ng-deep pre code {
-      font-size: inherit !important;
+      font-size: $text-sm !important;
+
+      @include mix.mobile {
+        font-size: $text-xs !important;
+      }
     }
   }
 }
