@@ -61,10 +61,12 @@
     font-family: $font-mono;
     font-size: $text-sm;
     color: $ember-glow;
-    white-space: nowrap;
+    // !important overrides global .doc-page-content td code rules
+    white-space: nowrap !important;
+    word-break: normal !important;
 
     @include mix.mobile {
-      font-size: 0.65rem;
+      font-size: 0.65rem !important;
     }
   }
 
