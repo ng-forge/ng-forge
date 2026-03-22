@@ -68,6 +68,8 @@
       border: none;
       min-width: max-content;
       font-size: $text-sm !important;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
 
       @include mix.mobile {
         font-size: $text-xs !important;
@@ -76,6 +78,11 @@
 
     ::ng-deep pre code {
       font-size: $text-sm !important;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      // iOS Safari inflates text in wide scrollable containers.
+      // Setting max-height prevents autosizing since the text fits vertically.
+      max-height: 100%;
 
       @include mix.mobile {
         font-size: $text-xs !important;
