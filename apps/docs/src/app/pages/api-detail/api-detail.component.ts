@@ -183,11 +183,12 @@ export class ApiDetailComponent {
     const adapterName = this.adapter.adapter();
 
     // Extract fenced code blocks before escaping so their content stays intact.
-    // Use null-byte delimiters that cannot appear in JSDoc source text.
     const codeBlocks: string[] = [];
+    const PLACEHOLDER_PREFIX = '\u200BCODE';
+    const PLACEHOLDER_SUFFIX = '\u200B';
     const processed = text.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang: string, code: string) => {
       const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      const placeholder = `\x00CODE${codeBlocks.length}\x00`;
+      const placeholder = `${PLACEHOLDER_PREFIX}${codeBlocks.length}${PLACEHOLDER_SUFFIX}`;
       codeBlocks.push(`<pre class="description-code-block"><code class="language-${lang || 'text'}">${escaped.trimEnd()}</code></pre>`);
       return placeholder;
     });
@@ -195,7 +196,7 @@ export class ApiDetailComponent {
     let html = processed.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     // Restore code blocks (they were already escaped)
-    html = html.replace(/\x00CODE(\d+)\x00/g, (_, i: string) => codeBlocks[Number(i)]);
+    html = html.replace(/\u200BCODE(\d+)\u200B/g, (_, i: string) => codeBlocks[Number(i)]);
 
     // 1. Markdown headers: ## Heading → <h3>, ### Heading → <h4>, etc.
     html = html.replace(/^(#{2,4})\s+(.+)$/gm, (_, hashes: string, heading: string) => {
