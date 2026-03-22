@@ -11,6 +11,7 @@ import {
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { createLogicFunction, createDebouncedLogicFunction } from '../expressions/logic-function-factory';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 
 type AnyLogicFn<TValue> = LogicFn<TValue, boolean> | (() => boolean);
 
@@ -87,7 +88,7 @@ function applyLogicFn<TValue>(type: StateLogicType, path: SchemaPath<TValue>, lo
       break;
     default: {
       const _exhaustive: never = type;
-      throw new Error(`[Dynamic Forms] Unhandled state logic type: ${_exhaustive}`);
+      throw new DynamicFormError(`Unhandled state logic type: ${_exhaustive}`);
     }
   }
 }
