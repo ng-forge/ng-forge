@@ -26,7 +26,7 @@ function createFieldWithPropertyDerivation(
   // collector uses value or functionName instead.
   const hasExplicitExpression = 'expression' in overrides;
   const logicConfig: Record<string, unknown> = {
-    type: 'propertyDerivation',
+    type: 'derivation',
     targetProperty,
     dependsOn: (overrides['dependsOn'] as string[]) ?? [key],
     trigger: (overrides['trigger'] as 'onChange' | 'debounced') ?? 'onChange',
@@ -380,7 +380,7 @@ describe('PropertyDerivationOrchestrator', () => {
         { label: 'NYC', value: 'nyc' },
         { label: 'LA', value: 'la' },
       ];
-      functionRegistry.registerPropertyDerivationFunction('getCities', () => cities);
+      functionRegistry.registerDerivationFunction('getCities', () => cities);
 
       schemaFields.set([
         createFieldWithPropertyDerivation('city', 'options', {
@@ -473,7 +473,7 @@ describe('PropertyDerivationOrchestrator', () => {
           type: 'input',
           logic: [
             {
-              type: 'propertyDerivation',
+              type: 'derivation',
               targetProperty: 'label',
               value: 'End Date',
               dependsOn: [],
@@ -620,7 +620,7 @@ describe('PropertyDerivationOrchestrator', () => {
 
   describe('wildcard dependency warnings', () => {
     it('should collect entries with implicit wildcard when functionName has no dependsOn', () => {
-      functionRegistry.registerPropertyDerivationFunction('computeLabel', () => 'computed');
+      functionRegistry.registerDerivationFunction('computeLabel', () => 'computed');
 
       // Create a field manually with functionName but no dependsOn.
       // The collector will add '*' as an implicit wildcard dependency.
@@ -629,7 +629,7 @@ describe('PropertyDerivationOrchestrator', () => {
         type: 'input',
         logic: [
           {
-            type: 'propertyDerivation' as const,
+            type: 'derivation' as const,
             targetProperty: 'label',
             functionName: 'computeLabel',
             // No dependsOn -> collector adds '*'

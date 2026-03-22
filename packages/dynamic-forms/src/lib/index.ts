@@ -105,7 +105,6 @@ export type {
   BuiltInValidatorConfig,
   CustomValidatorConfig,
   DeclarativeHttpValidatorConfig,
-  HttpValidatorConfig,
   ValidatorConfig,
 } from './models';
 
@@ -116,19 +115,10 @@ export type { HttpRequestConfig, HttpValidationResponseMapping } from './models'
 export type { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from './core/validation';
 
 // Logic & Expression Types
-export type {
-  ConditionalExpression,
-  HttpCondition,
-  AsyncCondition,
-  EvaluationContext,
-  LogicConfig,
-  StateLogicConfig,
-  PropertyDerivationLogicConfig,
-} from './models';
+export type { ConditionalExpression, HttpCondition, AsyncCondition, EvaluationContext, LogicConfig, StateLogicConfig } from './models';
 
 // Async Custom Function Types
 export type { AsyncDerivationFunction, AsyncConditionFunction } from './core/expressions/async-custom-function-types';
-export { isPropertyDerivationLogicConfig } from './models';
 
 // Schema Types
 export type { SchemaApplicationConfig, SchemaDefinition } from './models';

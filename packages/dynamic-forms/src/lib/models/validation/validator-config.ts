@@ -66,16 +66,10 @@ export interface CustomValidatorConfig extends BaseValidatorConfig {
  * Async custom validator configuration using Angular's validateAsync API.
  * Returns Observable<ValidationError | ValidationError[] | null>.
  *
- * Accepts both `'async'` (preferred) and `'customAsync'` (deprecated) type literals.
  */
 export interface AsyncValidatorConfig extends BaseValidatorConfig {
-  /**
-   * Validator type identifier.
-   *
-   * Use `'async'` for new code. `'customAsync'` is accepted for backward compatibility
-   * but emits a deprecation warning in dev mode.
-   */
-  type: 'async' | 'customAsync'; // TODO(@ng-forge): remove 'customAsync' in next minor
+  /** Validator type identifier. */
+  type: 'async';
 
   /** Name of registered async validator function */
   functionName: string;
@@ -92,19 +86,10 @@ export interface AsyncValidatorConfig extends BaseValidatorConfig {
  *
  * Discriminated from `DeclarativeHttpValidatorConfig` by the presence of `functionName`.
  *
- * Accepts both `'http'` (preferred) and `'customHttp'` (deprecated) type literals.
- *
- * @deprecated Prefer `DeclarativeHttpValidatorConfig` (`type: 'http'` with `http` + `responseMapping`)
- * for fully JSON-serializable validation. Use this form only when function registration is required.
  */
 export interface FunctionHttpValidatorConfig extends BaseValidatorConfig {
-  /**
-   * Validator type identifier.
-   *
-   * Use `'http'` for new code. `'customHttp'` is accepted for backward compatibility
-   * but emits a deprecation warning in dev mode.
-   */
-  type: 'http' | 'customHttp'; // TODO(@ng-forge): remove 'customHttp' in next minor
+  /** Validator type identifier. */
+  type: 'http';
 
   /** Name of registered HTTP validator configuration */
   functionName: string;
@@ -112,11 +97,6 @@ export interface FunctionHttpValidatorConfig extends BaseValidatorConfig {
   /** Optional parameters to pass to HTTP validator */
   params?: Record<string, unknown>;
 }
-
-/**
- * @deprecated Use `FunctionHttpValidatorConfig` instead. Will be removed in a future minor version.
- */
-export type HttpValidatorConfig = FunctionHttpValidatorConfig;
 
 /**
  * Declarative HTTP validator configuration — fully JSON-serializable, no function registration required.

@@ -1,16 +1,9 @@
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
-import {
-  DerivationLogicConfig,
-  isDerivationLogicConfig,
-  isPropertyDerivationLogicConfig,
-  hasTargetProperty,
-  PropertyDerivationLogicConfig,
-} from '../../models/logic/logic-config';
+import { DerivationLogicConfig, isDerivationLogicConfig, hasTargetProperty } from '../../models/logic/logic-config';
 import { hasChildFields } from '../../models/types/type-guards';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { DeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
-import { warnDeprecated } from '../../utils/deprecation-warnings';
 import { normalizeFieldsArray } from '../../utils/object-utils';
 import { extractExpressionDependencies, extractStringDependencies } from '../cross-field/cross-field-detector';
 import { buildPropertyOverrideKey, PLACEHOLDER_INDEX } from './property-override-key';
@@ -31,7 +24,7 @@ interface CollectionContext {
 /**
  * Collects all property derivation entries from field definitions.
  *
- * Traverses the field definition tree and extracts `type: 'propertyDerivation'`
+ * Traverses the field definition tree and extracts `type: 'derivation'` with `targetProperty`
  * entries from each field's `logic` array.
  *
  * No topological sort is needed because property derivations don't chain —
@@ -103,55 +96,12 @@ function collectFromField(field: FieldDef<unknown>, entries: PropertyDerivationE
 
   if (validationField.logic) {
     for (const logicConfig of validationField.logic) {
-      if (isPropertyDerivationLogicConfig(logicConfig)) {
-        // TODO(@ng-forge): remove deprecated code in next minor
-        // Deprecated path — emit warning, then process normally
-        warnDeprecated(
-          context.logger,
-          context.tracker,
-          'type:propertyDerivation',
-          "Logic type 'propertyDerivation' is deprecated. Use type: 'derivation' with targetProperty instead.",
-        );
-        const entry = createPropertyDerivationEntry(fieldKey, logicConfig, context);
-        entries.push(entry);
-      } else if (isDerivationLogicConfig(logicConfig) && hasTargetProperty(logicConfig)) {
-        // New unified path: type: 'derivation' + targetProperty → property derivation pipeline
+      if (isDerivationLogicConfig(logicConfig) && hasTargetProperty(logicConfig)) {
         const entry = createPropertyDerivationEntryFromDerivation(fieldKey, logicConfig, context);
         entries.push(entry);
       }
     }
   }
-}
-
-/**
- * Creates a property derivation entry from a `PropertyDerivationLogicConfig`.
- *
- * @internal
- */
-function createPropertyDerivationEntry(
-  fieldKey: string,
-  config: PropertyDerivationLogicConfig,
-  context: CollectionContext,
-): PropertyDerivationEntry {
-  const effectiveFieldKey = buildPropertyOverrideKey(context.arrayPath, context.arrayPath ? PLACEHOLDER_INDEX : undefined, fieldKey);
-  const dependsOn = extractDependencies(config);
-  const condition = config.condition ?? true;
-  const trigger = config.trigger ?? 'onChange';
-  const debounceMs = trigger === 'debounced' ? (config as { debounceMs?: number }).debounceMs : undefined;
-
-  return {
-    fieldKey: effectiveFieldKey,
-    targetProperty: config.targetProperty,
-    dependsOn,
-    condition,
-    value: config.value,
-    expression: config.expression,
-    functionName: config.functionName,
-    trigger,
-    debounceMs,
-    debugName: config.debugName,
-    originalConfig: config,
-  };
 }
 
 /**
@@ -193,7 +143,7 @@ function createPropertyDerivationEntryFromDerivation(
  *
  * @internal
  */
-function extractDependencies(config: PropertyDerivationLogicConfig | DerivationLogicConfig): string[] {
+function extractDependencies(config: DerivationLogicConfig): string[] {
   const deps = new Set<string>();
 
   if (config.dependsOn && config.dependsOn.length > 0) {

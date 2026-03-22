@@ -181,12 +181,6 @@ export type StateLogicConfig = ImmediateStateLogicConfig | DebouncedStateLogicCo
 export type LogicTrigger = 'onChange' | 'debounced';
 
 /**
- * @deprecated Use `LogicTrigger` instead. Will be removed in a future version.
- * @public
- */
-export type DerivationTrigger = LogicTrigger;
-
-/**
  * Shared fields that appear on all derivation logic config variants.
  *
  * @internal
@@ -728,174 +722,15 @@ export type DerivationLogicConfig =
   | OnChangeFunctionDerivationLogicConfig
   | DebouncedFunctionDerivationLogicConfig;
 
-// TODO(@ng-forge): remove deprecated code in next minor
-/**
- * Base configuration for property derivation logic.
- *
- * Property derivations compute values for field properties (like `minDate`, `options`,
- * `label`, `placeholder`) based on form values and external data. Unlike value derivations
- * which set the field's value, property derivations update component input properties.
- *
- * All property derivations are self-targeting: the logic is placed on the field whose
- * property should be derived.
- *
- * @internal
- */
-interface BasePropertyDerivationLogicConfig {
-  /**
-   * Logic type identifier for property derivation.
-   */
-  type: 'propertyDerivation';
-
-  /**
-   * The target property to set on the field component.
-   *
-   * **Depth limit (max 2 levels):** Only simple and single-dot-nested paths are
-   * supported. Paths with 2+ dots (e.g., `'a.b.c'`) will throw a `DynamicFormError`
-   * at runtime. This is an architectural constraint of the override merging strategy.
-   *
-   * Supported formats:
-   * - Simple: `'minDate'`, `'options'`, `'label'`, `'placeholder'`
-   * - Nested (1 dot): `'props.appearance'`, `'meta.autocomplete'`
-   *
-   * **Note:** There is no compile-time validation that the property name matches
-   * an actual input on the field component. Typos will silently write to the
-   * override store with no visible effect. A dev-mode warning is emitted when
-   * the override key doesn't match any existing input property.
-   *
-   * @example
-   * ```typescript
-   * targetProperty: 'minDate'           // ✅ Simple property
-   * targetProperty: 'options'           // ✅ Simple property
-   * targetProperty: 'props.appearance'  // ✅ Single-nested property
-   * targetProperty: 'a.b.c'            // ❌ Throws DynamicFormError (too deep)
-   * ```
-   */
-  targetProperty: string;
-
-  /**
-   * Optional name for this derivation for debugging purposes.
-   *
-   * When provided, this name appears in property derivation debug logs.
-   */
-  debugName?: string;
-
-  /**
-   * Condition that determines when this property derivation applies.
-   *
-   * Defaults to `true` (always apply).
-   *
-   * Note: FormStateCondition is not supported for property derivations.
-   */
-  condition?: ConditionalExpression | boolean;
-
-  /**
-   * Static value to set on the target property.
-   *
-   * Mutually exclusive with `expression` and `functionName`.
-   */
-  value?: unknown;
-
-  /**
-   * JavaScript expression to evaluate for the derived property value.
-   *
-   * Has access to `formValue` object containing all form values.
-   * For array fields, `formValue` is scoped to the current array item.
-   *
-   * Mutually exclusive with `value` and `functionName`.
-   *
-   * @example
-   * ```typescript
-   * expression: 'formValue.startDate'
-   * expression: 'formValue.quantity > 10 ? "bulk" : "standard"'
-   * ```
-   */
-  expression?: string;
-
-  /**
-   * Name of a registered custom property derivation function.
-   *
-   * Register functions in `customFnConfig.propertyDerivations`.
-   * Mutually exclusive with `value` and `expression`.
-   */
-  functionName?: string;
-
-  /**
-   * Explicit field dependencies for property derivations.
-   *
-   * When using `functionName`, you can optionally specify which fields
-   * the function depends on. If not provided with `functionName`, defaults
-   * to all fields ('*').
-   * For `expression`, dependencies are automatically extracted.
-   * For `value`, no dependencies are needed (static value).
-   */
-  dependsOn?: string[];
-}
-
-/**
- * Property derivation that evaluates immediately on change (default).
- *
- * @internal
- */
-interface OnChangePropertyDerivationLogicConfig extends BasePropertyDerivationLogicConfig {
-  /**
-   * Trigger for immediate evaluation.
-   * @default 'onChange'
-   */
-  trigger?: 'onChange';
-  /** Not allowed for onChange trigger */
-  debounceMs?: never;
-}
-
-/**
- * Property derivation that evaluates after a debounce period.
- *
- * @internal
- */
-interface DebouncedPropertyDerivationLogicConfig extends BasePropertyDerivationLogicConfig {
-  /**
-   * Trigger for debounced evaluation.
-   */
-  trigger: 'debounced';
-  /**
-   * Debounce duration in milliseconds.
-   * @default 500
-   */
-  debounceMs?: number;
-}
-
-// TODO(@ng-forge): remove deprecated code in next minor
-/**
- * Configuration for property derivation logic.
- *
- * @deprecated Use `DerivationLogicConfig` with `targetProperty` instead.
- * The unified `type: 'derivation'` with `targetProperty` provides the same
- * functionality with a simpler API surface.
- *
- * ```typescript
- * // Before (deprecated)
- * { type: 'propertyDerivation', targetProperty: 'minDate', expression: '...' }
- *
- * // After (preferred)
- * { type: 'derivation', targetProperty: 'minDate', expression: '...' }
- * ```
- *
- * Will be removed in a future minor version.
- *
- * @public
- */
-export type PropertyDerivationLogicConfig = OnChangePropertyDerivationLogicConfig | DebouncedPropertyDerivationLogicConfig;
-
 /**
  * Union type for all logic configurations.
  *
  * - `StateLogicConfig`: For field state changes (hidden, readonly, disabled, required)
- * - `DerivationLogicConfig`: For value derivation
- * - `PropertyDerivationLogicConfig`: For property derivation
+ * - `DerivationLogicConfig`: For value derivation (including property derivation via `targetProperty`)
  *
  * @public
  */
-export type LogicConfig = StateLogicConfig | DerivationLogicConfig | PropertyDerivationLogicConfig;
+export type LogicConfig = StateLogicConfig | DerivationLogicConfig;
 
 /**
  * Log level for derivation debug output.
@@ -984,22 +819,6 @@ export function isStateLogicConfig(config: LogicConfig): config is StateLogicCon
  */
 export function isDerivationLogicConfig(config: LogicConfig): config is DerivationLogicConfig {
   return config.type === 'derivation';
-}
-
-// TODO(@ng-forge): remove deprecated code in next minor
-/**
- * Type guard to check if a logic config is a PropertyDerivationLogicConfig.
- *
- * @deprecated Use `isDerivationLogicConfig(config) && hasTargetProperty(config)` instead.
- * Will be removed in a future minor version.
- *
- * @param config - The logic config to check
- * @returns true if the config is for property derivation
- *
- * @public
- */
-export function isPropertyDerivationLogicConfig(config: LogicConfig): config is PropertyDerivationLogicConfig {
-  return config.type === 'propertyDerivation';
 }
 
 /**

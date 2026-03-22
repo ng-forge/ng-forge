@@ -59,7 +59,7 @@ describe('ValidatorConfigSchema', () => {
   describe('async validators', () => {
     it('should validate async validator', () => {
       const config = {
-        type: 'customAsync',
+        type: 'async',
         functionName: 'checkEmailAvailability',
       };
       const result = ValidatorConfigSchema.safeParse(config);
@@ -67,7 +67,7 @@ describe('ValidatorConfigSchema', () => {
     });
 
     it('should reject async validator without functionName', () => {
-      const config = { type: 'customAsync' };
+      const config = { type: 'async' };
       const result = ValidatorConfigSchema.safeParse(config);
       expect(result.success).toBe(false);
     });
@@ -76,7 +76,7 @@ describe('ValidatorConfigSchema', () => {
   describe('HTTP validators', () => {
     it('should validate HTTP validator', () => {
       const config = {
-        type: 'customHttp',
+        type: 'http',
         functionName: 'validateWithApi',
         params: { endpoint: '/api/validate' },
       };

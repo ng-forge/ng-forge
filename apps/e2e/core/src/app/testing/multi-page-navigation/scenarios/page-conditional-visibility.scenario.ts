@@ -3,7 +3,7 @@ import { TestScenario } from '../../shared/types';
 
 /**
  * Test conditional page visibility.
- * Pages support the 'hidden' logic type through PageLogicConfig.
+ * Pages support the 'hidden' logic type through ContainerLogicConfig.
  * This test verifies that entire pages can be skipped based on field values.
  */
 const config = {

@@ -181,7 +181,7 @@ export class PropertyDerivationOrchestrator {
     const applicatorContext = {
       formValue: this.config.formValue,
       store: this.config.store,
-      propertyDerivationFunctions: this.functionRegistry.getPropertyDerivationFunctions(),
+      derivationFunctions: this.functionRegistry.getDerivationFunctions(),
       customFunctions: this.functionRegistry.getCustomFunctions(),
       externalData: this.resolveExternalData(),
       logger: this.logger,
@@ -203,7 +203,7 @@ export class PropertyDerivationOrchestrator {
     const applicatorContext = {
       formValue: this.config.formValue,
       store: this.config.store,
-      propertyDerivationFunctions: this.functionRegistry.getPropertyDerivationFunctions(),
+      derivationFunctions: this.functionRegistry.getDerivationFunctions(),
       customFunctions: this.functionRegistry.getCustomFunctions(),
       externalData: this.resolveExternalData(),
       logger: this.logger,

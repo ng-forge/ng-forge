@@ -3,7 +3,6 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { evaluateCondition } from './condition-evaluator';
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
-import { createDeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
 
 describe('condition-evaluator', () => {
   let mockContext: EvaluationContext;
@@ -122,66 +121,6 @@ describe('condition-evaluator', () => {
           const expression: ConditionalExpression = {
             type: 'fieldValue',
             fieldPath,
-            operator: operator as any,
-            value,
-          };
-
-          const result = evaluateCondition(expression, mockContext);
-          expect(result).toBe(expected);
-        });
-      });
-    });
-
-    describe('formValue type', () => {
-      it('should evaluate formValue conditions correctly', () => {
-        const expression: ConditionalExpression = {
-          type: 'formValue',
-          operator: 'equals',
-          value: mockContext.formValue,
-        };
-
-        const result = evaluateCondition(expression, mockContext);
-        expect(result).toBe(true);
-      });
-
-      it('should return false for missing operator', () => {
-        const expression: ConditionalExpression = {
-          type: 'formValue',
-          value: mockContext.formValue,
-        };
-
-        const result = evaluateCondition(expression, mockContext);
-        expect(result).toBe(false);
-      });
-
-      it('should emit deprecation warning when deprecationTracker is provided', () => {
-        const tracker = createDeprecationWarningTracker();
-        const contextWithTracker: EvaluationContext = {
-          ...mockContext,
-          deprecationTracker: tracker,
-        };
-
-        const expression: ConditionalExpression = {
-          type: 'formValue',
-          operator: 'equals',
-          value: mockContext.formValue,
-        };
-
-        evaluateCondition(expression, contextWithTracker);
-
-        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining("'formValue' is deprecated"));
-        expect(tracker.warnedKeys.has('condition:formValue')).toBe(true);
-      });
-
-      it('should handle different operators with form value', () => {
-        const testCases = [
-          { operator: 'equals', value: mockContext.formValue, expected: true },
-          { operator: 'notEquals', value: { different: 'object' }, expected: true },
-        ];
-
-        testCases.forEach(({ operator, value, expected }) => {
-          const expression: ConditionalExpression = {
-            type: 'formValue',
             operator: operator as any,
             value,
           };
@@ -322,81 +261,6 @@ describe('condition-evaluator', () => {
 
         expect(result).toBe(true);
         expect(mockCustomFunction).toHaveBeenCalledWith(contextWithCustomFn);
-      });
-
-      it('should evaluate custom functions correctly via expression (deprecated API)', () => {
-        const mockCustomFunction = vi.fn().mockReturnValue(true);
-        const contextWithCustomFn: EvaluationContext = {
-          ...mockContext,
-          customFunctions: {
-            testFunction: mockCustomFunction,
-          },
-        };
-
-        const expression: ConditionalExpression = {
-          type: 'custom',
-          expression: 'testFunction',
-        };
-
-        const result = evaluateCondition(expression, contextWithCustomFn);
-
-        expect(result).toBe(true);
-        expect(mockCustomFunction).toHaveBeenCalledWith(contextWithCustomFn);
-      });
-
-      it('should emit deprecation warning when expression field is used', () => {
-        const tracker = createDeprecationWarningTracker();
-        const contextWithTracker: EvaluationContext = {
-          ...mockContext,
-          deprecationTracker: tracker,
-          customFunctions: { myFn: vi.fn().mockReturnValue(true) },
-        };
-
-        const expression: ConditionalExpression = {
-          type: 'custom',
-          expression: 'myFn',
-        };
-
-        evaluateCondition(expression, contextWithTracker);
-
-        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining("'expression' field is deprecated"));
-        expect(tracker.warnedKeys.has('condition:custom:expression')).toBe(true);
-      });
-
-      it('should not emit deprecation warning when functionName field is used', () => {
-        const tracker = createDeprecationWarningTracker();
-        const contextWithTracker: EvaluationContext = {
-          ...mockContext,
-          deprecationTracker: tracker,
-          customFunctions: { myFn: vi.fn().mockReturnValue(true) },
-        };
-
-        const expression: ConditionalExpression = {
-          type: 'custom',
-          functionName: 'myFn',
-        };
-
-        evaluateCondition(expression, contextWithTracker);
-
-        expect(mockLogger.warn).not.toHaveBeenCalled();
-        expect(tracker.warnedKeys.has('condition:custom:expression')).toBe(false);
-      });
-
-      it('should emit deprecation warning only once per tracker', () => {
-        const tracker = createDeprecationWarningTracker();
-        const contextWithTracker: EvaluationContext = {
-          ...mockContext,
-          deprecationTracker: tracker,
-          customFunctions: { myFn: vi.fn().mockReturnValue(true) },
-        };
-
-        const expression: ConditionalExpression = { type: 'custom', expression: 'myFn' };
-
-        evaluateCondition(expression, contextWithTracker);
-        evaluateCondition(expression, contextWithTracker);
-        evaluateCondition(expression, contextWithTracker);
-
-        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       });
 
       it('should convert custom function result to boolean', () => {

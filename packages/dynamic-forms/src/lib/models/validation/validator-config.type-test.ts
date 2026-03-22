@@ -10,7 +10,7 @@ import type {
   CustomValidatorConfig,
   AsyncValidatorConfig,
   DeclarativeHttpValidatorConfig,
-  HttpValidatorConfig,
+  FunctionHttpValidatorConfig,
   ValidatorConfig,
 } from './validator-config';
 import type { HttpRequestConfig } from '../http/http-request-config';
@@ -151,8 +151,8 @@ describe('AsyncValidatorConfig - Exhaustive Whitelist', () => {
   });
 
   describe('property types', () => {
-    it('type should be async or customAsync (deprecated)', () => {
-      expectTypeOf<AsyncValidatorConfig['type']>().toEqualTypeOf<'async' | 'customAsync'>();
+    it('type should be async', () => {
+      expectTypeOf<AsyncValidatorConfig['type']>().toEqualTypeOf<'async'>();
     });
 
     it('functionName should be string', () => {
@@ -170,12 +170,12 @@ describe('AsyncValidatorConfig - Exhaustive Whitelist', () => {
 });
 
 // ============================================================================
-// HttpValidatorConfig - Whitelist Test
+// FunctionHttpValidatorConfig - Whitelist Test
 // ============================================================================
 
-describe('HttpValidatorConfig - Exhaustive Whitelist', () => {
+describe('FunctionHttpValidatorConfig - Exhaustive Whitelist', () => {
   type ExpectedKeys = 'type' | 'functionName' | 'params' | 'when';
-  type ActualKeys = keyof HttpValidatorConfig;
+  type ActualKeys = keyof FunctionHttpValidatorConfig;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
@@ -183,25 +183,25 @@ describe('HttpValidatorConfig - Exhaustive Whitelist', () => {
 
   describe('required keys', () => {
     it('should have type and functionName as required', () => {
-      expectTypeOf<RequiredKeys<HttpValidatorConfig>>().toEqualTypeOf<'type' | 'functionName'>();
+      expectTypeOf<RequiredKeys<FunctionHttpValidatorConfig>>().toEqualTypeOf<'type' | 'functionName'>();
     });
   });
 
   describe('property types', () => {
-    it('type should be http or customHttp (deprecated)', () => {
-      expectTypeOf<HttpValidatorConfig['type']>().toEqualTypeOf<'http' | 'customHttp'>();
+    it('type should be http', () => {
+      expectTypeOf<FunctionHttpValidatorConfig['type']>().toEqualTypeOf<'http'>();
     });
 
     it('functionName should be string', () => {
-      expectTypeOf<HttpValidatorConfig['functionName']>().toEqualTypeOf<string>();
+      expectTypeOf<FunctionHttpValidatorConfig['functionName']>().toEqualTypeOf<string>();
     });
 
     it('params should be Record<string, unknown>', () => {
-      expectTypeOf<HttpValidatorConfig['params']>().toEqualTypeOf<Record<string, unknown> | undefined>();
+      expectTypeOf<FunctionHttpValidatorConfig['params']>().toEqualTypeOf<Record<string, unknown> | undefined>();
     });
 
     it('when should be ConditionalExpression', () => {
-      expectTypeOf<HttpValidatorConfig['when']>().toEqualTypeOf<ConditionalExpression | undefined>();
+      expectTypeOf<FunctionHttpValidatorConfig['when']>().toEqualTypeOf<ConditionalExpression | undefined>();
     });
   });
 });
@@ -311,7 +311,7 @@ describe('ValidatorConfig - Discriminated Union', () => {
       | BuiltInValidatorConfig
       | CustomValidatorConfig
       | AsyncValidatorConfig
-      | HttpValidatorConfig
+      | FunctionHttpValidatorConfig
       | DeclarativeHttpValidatorConfig;
     expectTypeOf<ValidatorConfig>().toEqualTypeOf<ExpectedUnion>();
   });
@@ -328,8 +328,8 @@ describe('ValidatorConfig - Discriminated Union', () => {
     expectTypeOf<AsyncValidatorConfig>().toMatchTypeOf<ValidatorConfig>();
   });
 
-  it('should accept HttpValidatorConfig', () => {
-    expectTypeOf<HttpValidatorConfig>().toMatchTypeOf<ValidatorConfig>();
+  it('should accept FunctionHttpValidatorConfig', () => {
+    expectTypeOf<FunctionHttpValidatorConfig>().toMatchTypeOf<ValidatorConfig>();
   });
 
   it('should accept DeclarativeHttpValidatorConfig', () => {
@@ -510,19 +510,9 @@ describe('AsyncValidatorConfig - Usage Examples', () => {
     expectTypeOf(validator.functionName).toEqualTypeOf<'checkEmailAvailability'>();
   });
 
-  it('should accept async validator with deprecated type', () => {
-    const validator = {
-      type: 'customAsync',
-      functionName: 'checkEmailAvailability',
-    } as const satisfies AsyncValidatorConfig;
-
-    expectTypeOf(validator.type).toEqualTypeOf<'customAsync'>();
-    expectTypeOf(validator.functionName).toEqualTypeOf<'checkEmailAvailability'>();
-  });
-
   it('should accept async validator with params', () => {
     const validator = {
-      type: 'customAsync',
+      type: 'async',
       functionName: 'validateDomain',
       params: {
         allowedDomains: ['example.com', 'test.com'],
@@ -534,7 +524,7 @@ describe('AsyncValidatorConfig - Usage Examples', () => {
 
   it('should accept async validator with when condition', () => {
     const validator = {
-      type: 'customAsync',
+      type: 'async',
       functionName: 'checkInventory',
       when: {
         type: 'fieldValue',
@@ -549,46 +539,36 @@ describe('AsyncValidatorConfig - Usage Examples', () => {
 });
 
 // ============================================================================
-// HttpValidatorConfig - Usage Examples
+// FunctionHttpValidatorConfig - Usage Examples
 // ============================================================================
 
-describe('HttpValidatorConfig - Usage Examples', () => {
-  it('should accept http validator with preferred type', () => {
+describe('FunctionHttpValidatorConfig - Usage Examples', () => {
+  it('should accept http validator', () => {
     const validator = {
       type: 'http',
       functionName: 'validateUsername',
-    } as const satisfies HttpValidatorConfig;
+    } as const satisfies FunctionHttpValidatorConfig;
 
     expectTypeOf(validator.type).toEqualTypeOf<'http'>();
     expectTypeOf(validator.functionName).toEqualTypeOf<'validateUsername'>();
   });
 
-  it('should accept http validator with deprecated type', () => {
-    const validator = {
-      type: 'customHttp',
-      functionName: 'validateUsername',
-    } as const satisfies HttpValidatorConfig;
-
-    expectTypeOf(validator.type).toEqualTypeOf<'customHttp'>();
-    expectTypeOf(validator.functionName).toEqualTypeOf<'validateUsername'>();
-  });
-
   it('should accept http validator with params', () => {
     const validator = {
-      type: 'customHttp',
+      type: 'http',
       functionName: 'checkAvailability',
       params: {
         endpoint: '/api/check',
         timeout: 3000,
       },
-    } as const satisfies HttpValidatorConfig;
+    } as const satisfies FunctionHttpValidatorConfig;
 
     expectTypeOf(validator.params).toMatchTypeOf<Record<string, unknown>>();
   });
 
   it('should accept http validator with when condition', () => {
     const validator = {
-      type: 'customHttp',
+      type: 'http',
       functionName: 'validateCode',
       when: {
         type: 'fieldValue',
@@ -596,7 +576,7 @@ describe('HttpValidatorConfig - Usage Examples', () => {
         operator: 'equals',
         value: true,
       },
-    } as const satisfies HttpValidatorConfig;
+    } as const satisfies FunctionHttpValidatorConfig;
 
     expectTypeOf(validator.when).toMatchTypeOf<ConditionalExpression>();
   });
@@ -613,8 +593,8 @@ describe('ValidatorConfig - Array Usage', () => {
       { type: 'email' },
       { type: 'minLength', value: 5 },
       { type: 'custom', functionName: 'passwordStrength' },
-      { type: 'customAsync', functionName: 'checkEmailAvailability' },
-      { type: 'customHttp', functionName: 'validateDomain' },
+      { type: 'async', functionName: 'checkEmailAvailability' },
+      { type: 'http', functionName: 'validateDomain' },
       {
         type: 'http',
         http: { url: '/api/check', queryParams: { val: 'fieldValue' } },

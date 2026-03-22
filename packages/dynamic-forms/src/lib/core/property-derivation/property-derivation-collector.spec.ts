@@ -32,7 +32,7 @@ describe('property-derivation-collector', () => {
           type: 'datepicker',
           logic: [
             {
-              type: 'propertyDerivation',
+              type: 'derivation',
               targetProperty: 'minDate',
               expression: 'formValue.startDate',
             },
@@ -73,31 +73,6 @@ describe('property-derivation-collector', () => {
       expect(collection.entries[0].expression).toBe('formValue.startDate');
     });
 
-    it('should still accept deprecated type: propertyDerivation (backward compat)', () => {
-      const localTracker = createDeprecationWarningTracker();
-      const fields: FieldDef<unknown>[] = [
-        {
-          key: 'city',
-          type: 'select',
-          logic: [
-            {
-              type: 'propertyDerivation',
-              targetProperty: 'options',
-              functionName: 'getCitiesForCountry',
-              dependsOn: ['country'],
-            },
-          ],
-        } as unknown as FieldDef<unknown>,
-      ];
-
-      const collection = collectPropertyDerivations(fields, logger, localTracker);
-
-      expect(collection.entries).toHaveLength(1);
-      expect(collection.entries[0].fieldKey).toBe('city');
-      expect(collection.entries[0].targetProperty).toBe('options');
-      expect(localTracker.warnedKeys.has('type:propertyDerivation')).toBe(true);
-    });
-
     it('should ignore state logic and value derivation entries (only collects property derivations)', () => {
       const fields: FieldDef<unknown>[] = [
         {
@@ -110,7 +85,7 @@ describe('property-derivation-collector', () => {
             { type: 'required', condition: true },
             { type: 'derivation', expression: 'formValue.other' },
             {
-              type: 'propertyDerivation',
+              type: 'derivation',
               targetProperty: 'label',
               value: 'Dynamic Label',
             },
@@ -133,7 +108,7 @@ describe('property-derivation-collector', () => {
           type: 'datepicker',
           logic: [
             {
-              type: 'propertyDerivation',
+              type: 'derivation',
               targetProperty: 'minDate',
               expression: 'formValue.startDate',
             },
@@ -144,7 +119,7 @@ describe('property-derivation-collector', () => {
           type: 'select',
           logic: [
             {
-              type: 'propertyDerivation',
+              type: 'derivation',
               targetProperty: 'options',
               functionName: 'getCitiesForCountry',
               dependsOn: ['country'],
@@ -156,7 +131,7 @@ describe('property-derivation-collector', () => {
           type: 'input',
           logic: [
             {
-              type: 'propertyDerivation',
+              type: 'derivation',
               targetProperty: 'label',
               value: 'Mobile Phone',
               condition: {
@@ -193,7 +168,7 @@ describe('property-derivation-collector', () => {
                   type: 'input',
                   logic: [
                     {
-                      type: 'propertyDerivation',
+                      type: 'derivation',
                       targetProperty: 'placeholder',
                       expression: 'formValue.country === "US" ? "ZIP Code" : "Postal Code"',
                     },
@@ -210,7 +185,7 @@ describe('property-derivation-collector', () => {
                   type: 'select',
                   logic: [
                     {
-                      type: 'propertyDerivation',
+                      type: 'derivation',
                       targetProperty: 'options',
                       functionName: 'getCities',
                     },
@@ -242,7 +217,7 @@ describe('property-derivation-collector', () => {
               type: 'datepicker',
               logic: [
                 {
-                  type: 'propertyDerivation',
+                  type: 'derivation',
                   targetProperty: 'minDate',
                   expression: 'formValue.startDate',
                 },
@@ -266,7 +241,7 @@ describe('property-derivation-collector', () => {
           type: 'input',
           logic: [
             {
-              type: 'propertyDerivation',
+              type: 'derivation',
               targetProperty: 'label',
               expression: 'formValue.quantity * formValue.unitPrice',
             },
@@ -287,7 +262,7 @@ describe('property-derivation-collector', () => {
           type: 'select',
           logic: [
             {
-              type: 'propertyDerivation',
+              type: 'derivation',
               targetProperty: 'options',
               functionName: 'getCitiesForCountry',
               dependsOn: ['country'],
@@ -309,7 +284,7 @@ describe('property-derivation-collector', () => {
           type: 'select',
           logic: [
             {
-              type: 'propertyDerivation',
+              type: 'derivation',
               targetProperty: 'options',
               functionName: 'getAllCurrencies',
             },
@@ -329,7 +304,7 @@ describe('property-derivation-collector', () => {
           type: 'input',
           logic: [
             {
-              type: 'propertyDerivation',
+              type: 'derivation',
               targetProperty: 'label',
               value: 'Mobile Phone',
               condition: {
@@ -355,7 +330,7 @@ describe('property-derivation-collector', () => {
           type: 'select',
           logic: [
             {
-              type: 'propertyDerivation',
+              type: 'derivation',
               targetProperty: 'options',
               functionName: 'searchOptions',
               trigger: 'debounced',
@@ -369,7 +344,7 @@ describe('property-derivation-collector', () => {
           type: 'input',
           logic: [
             {
-              type: 'propertyDerivation',
+              type: 'derivation',
               targetProperty: 'label',
               expression: 'formValue.name',
             },

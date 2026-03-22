@@ -18,7 +18,7 @@ const config = {
       maxLength: 20,
       validators: [
         {
-          type: 'customHttp',
+          type: 'http',
           functionName: 'checkUsernameAvailability',
         },
       ],

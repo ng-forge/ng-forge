@@ -17,7 +17,7 @@ const config = {
       required: true,
       validators: [
         {
-          type: 'customHttp',
+          type: 'http',
           functionName: 'validateEmail',
         },
       ],

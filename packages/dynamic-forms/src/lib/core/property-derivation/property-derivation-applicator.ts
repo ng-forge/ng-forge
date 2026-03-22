@@ -25,8 +25,8 @@ export interface PropertyDerivationApplicatorContext {
   /** The property override store to write to */
   store: PropertyOverrideStore;
 
-  /** Registered custom property derivation functions */
-  propertyDerivationFunctions?: Record<string, CustomFunction>;
+  /** Registered derivation functions (used for property derivations with `functionName`) */
+  derivationFunctions?: Record<string, CustomFunction>;
 
   /** Custom functions for expression evaluation */
   customFunctions?: Record<string, CustomFunction>;
@@ -299,11 +299,9 @@ function computePropertyValue(
 
   // Custom function
   if (entry.functionName) {
-    const fn = applicatorContext.propertyDerivationFunctions?.[entry.functionName];
+    const fn = applicatorContext.derivationFunctions?.[entry.functionName];
     if (!fn) {
-      throw new DynamicFormError(
-        `Property derivation function '${entry.functionName}' not found in customFnConfig.derivations or customFnConfig.propertyDerivations`,
-      );
+      throw new DynamicFormError(`Property derivation function '${entry.functionName}' not found in customFnConfig.derivations`);
     }
     return fn(evalContext);
   }

@@ -7,7 +7,7 @@ import { ConditionalExpressionSchema } from '../logic/conditional-expression.sch
  * Original interface:
  * ```typescript
  * interface AsyncValidatorConfig extends BaseValidatorConfig {
- *   type: 'customAsync';
+ *   type: 'async';
  *   functionName: string;
  *   params?: Record<string, unknown>;
  * }
@@ -20,7 +20,7 @@ export const AsyncValidatorConfigSchema = z.object({
   /**
    * Discriminant for async validators.
    */
-  type: z.literal('customAsync'),
+  type: z.literal('async'),
 
   /**
    * Name of a registered async validator function.
