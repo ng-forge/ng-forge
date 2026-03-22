@@ -111,9 +111,8 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
         // loading/resolved/error status tracking, and signal-based reactivity.
         const httpResource = resource({
           params: () => debouncedRequest() ?? undefined,
+          // When params() returns undefined, resource() enters idle state and skips the loader.
           loader: ({ params: request, abortSignal }) => {
-            if (!request) return Promise.resolve(pendingValue);
-
             const method = request.method ?? 'GET';
             const options: Record<string, unknown> = {};
             if (request.body) options['body'] = request.body;
@@ -131,6 +130,9 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
                   logger.warn('HTTP condition request failed:', error);
                   resolve(pendingValue);
                 },
+                // Resolve on complete without emission (e.g., empty response body)
+                // to prevent the Promise from hanging indefinitely.
+                complete: () => resolve(pendingValue),
               });
 
               // Cancel the HTTP request when the resource aborts (params changed or destroyed)

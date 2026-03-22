@@ -47,7 +47,11 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
     {
       trigger: WritableSignal<string | undefined>;
       resultResource: Resource<boolean>;
-      ctxRef: { current: FieldContext<TValue> | null };
+      // Captures the FieldContext at the moment each trigger snapshot is produced.
+      // The loader reads from this map using the trigger key, ensuring it always
+      // uses the context that was active when the trigger was set — not a stale ref
+      // that could be overwritten by a later LogicFn call before the loader executes.
+      ctxByTrigger: Map<string, FieldContext<TValue>>;
     }
   >();
 
@@ -57,9 +61,7 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
 
     if (!signalPair) {
       const trigger = signal<string | undefined>(undefined);
-      // Mutable ref to hold the current FieldContext for use in the resource loader.
-      // Updated each time the LogicFn is called (below the initialization block).
-      const ctxRef: { current: FieldContext<TValue> | null } = { current: null };
+      const ctxByTrigger = new Map<string, FieldContext<TValue>>();
 
       // Wrap in untracked() to avoid NG0602: resource() internally creates effects,
       // which cannot be created inside a reactive context (computed). The LogicFn runs
@@ -74,8 +76,6 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
         const asyncResource = resource({
           params: () => debouncedTrigger() ?? undefined,
           loader: async ({ params: triggerKey }) => {
-            if (!triggerKey) return pendingValue;
-
             // Look up the async function at call time (fresh reference)
             const asyncFn = functionRegistry.getAsyncConditionFunction(condition.asyncFunctionName);
             if (!asyncFn) {
@@ -86,12 +86,14 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
               return pendingValue;
             }
 
-            // Build evaluation context from current registry state using the stored FieldContext ref
-            const currentCtx = ctxRef.current;
-            if (!currentCtx) return pendingValue;
+            // Retrieve the FieldContext that was captured when this trigger key was set.
+            // This avoids a race condition where a mutable ref could be overwritten by
+            // a later LogicFn call before the loader finishes executing.
+            const capturedCtx = ctxByTrigger.get(triggerKey);
+            if (!capturedCtx) return pendingValue;
 
             const evaluationContext = untracked(() =>
-              fieldContextRegistry.createReactiveEvaluationContext(currentCtx, functionRegistry.getCustomFunctions()),
+              fieldContextRegistry.createReactiveEvaluationContext(capturedCtx, functionRegistry.getCustomFunctions()),
             );
 
             try {
@@ -112,12 +114,9 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
         return withPreviousValue(asyncResource);
       });
 
-      signalPair = { trigger, resultResource, ctxRef };
+      signalPair = { trigger, resultResource, ctxByTrigger };
       perFunctionSignalStore.set(contextKey, signalPair);
     }
-
-    // Update the context ref so the resource loader uses the latest FieldContext
-    signalPair.ctxRef.current = ctx;
 
     // Build reactive evaluation context (creates signal dependencies on form values)
     const evaluationContext = fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions());
@@ -129,8 +128,12 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
       externalData: evaluationContext.externalData,
     });
 
-    // Update the trigger signal (triggers resource if context changed)
-    const { trigger: triggerSignal, resultResource } = signalPair;
+    // Capture the FieldContext for this trigger key so the loader can retrieve it.
+    // Only keep the latest — previous entries are stale once the trigger changes.
+    const { trigger: triggerSignal, resultResource, ctxByTrigger } = signalPair;
+    ctxByTrigger.clear();
+    ctxByTrigger.set(contextSnapshot, ctx);
+
     untracked(() => {
       const current = triggerSignal();
       if (current !== contextSnapshot) {
