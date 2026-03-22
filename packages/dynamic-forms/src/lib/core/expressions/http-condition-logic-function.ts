@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injector, Signal, WritableSignal, signal, untracked } from '@angular/core';
+import { inject, Injector, Resource, resource, signal, untracked, WritableSignal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { catchError, debounceTime, distinctUntilChanged, filter, map, of, startWith, switchMap, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { HttpCondition } from '../../models/expressions/conditional-expression';
 import { stableStringify } from '../../utils/stable-stringify';
 import { HttpResourceRequest } from '../validation/validator-types';
@@ -16,6 +16,7 @@ import { resolveHttpRequest } from '../http/http-request-resolver';
 import { ExpressionParser } from './parser/expression-parser';
 import { HttpConditionFunctionCacheService } from './http-condition-function-cache.service';
 import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
+import { withPreviousValue } from '../../utils/resource-composition/with-previous-value';
 
 /**
  * Extracts a boolean from an HTTP response using an optional expression.
@@ -46,10 +47,10 @@ function extractBoolean(response: unknown, responseExpression: string | undefine
 /**
  * Creates a logic function for an HTTP condition.
  *
- * Uses a signal-based async resolution pattern: the LogicFn updates a `resolvedRequest` signal,
- * a reactive pipeline fetches the response and updates a `resultValue` signal.
- * The LogicFn returns the current `resultValue()`, which starts as `pendingValue` and
- * transitions to the actual HTTP result.
+ * Uses Angular's `resource()` API with snapshot composition for async resolution:
+ * the LogicFn updates a `resolvedRequest` signal, a debounced version feeds into
+ * a `resource()` that manages the HTTP lifecycle, and `withPreviousValue()` preserves
+ * the last resolved boolean during re-fetching to prevent UI flicker.
  *
  * Must be called in injection context (same as `createLogicFunction`).
  */
@@ -81,7 +82,7 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
   // when multiple HTTP conditions exist on the same field (same FieldContext / path).
   const perFunctionSignalStore = new Map<
     string,
-    { resolvedRequest: WritableSignal<HttpResourceRequest | undefined>; resultValue: Signal<boolean> }
+    { resolvedRequest: WritableSignal<HttpResourceRequest | undefined>; resultResource: Resource<boolean> }
   >();
 
   const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
@@ -91,40 +92,62 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
     if (!signalPair) {
       const resolvedRequest = signal<HttpResourceRequest | undefined>(undefined);
 
-      // Wrap in untracked() to avoid NG0602: toObservable() internally calls effect(),
+      // Wrap in untracked() to avoid NG0602: resource() internally creates effects,
       // which cannot be created inside a reactive context (computed). The LogicFn runs
       // inside Angular Signal Forms' BooleanOrLogic.compute (a computed), so we must
-      // clear the active reactive consumer before creating the observable pipeline.
-      const resultValue = untracked(() => {
-        const pipeline = toObservable(resolvedRequest, { injector }).pipe(
-          debounceTime(debounceMs),
-          distinctUntilChanged((prev, curr) => stableStringify(prev) === stableStringify(curr)),
-          filter((request): request is HttpResourceRequest => request !== undefined),
-          switchMap((request) => {
+      // clear the active reactive consumer before creating the resource pipeline.
+      const resultResource = untracked(() => {
+        // Create a debounced, stabilized version of the request signal.
+        // This prevents rapid re-fetches when form values change quickly.
+        const debouncedRequest = toSignal(
+          toObservable(resolvedRequest, { injector }).pipe(
+            debounceTime(debounceMs),
+            distinctUntilChanged((prev, curr) => stableStringify(prev) === stableStringify(curr)),
+          ),
+          { injector },
+        );
+
+        // resource() manages the HTTP lifecycle: auto-cancellation via AbortSignal,
+        // loading/resolved/error status tracking, and signal-based reactivity.
+        const httpResource = resource({
+          params: () => debouncedRequest() ?? undefined,
+          loader: ({ params: request, abortSignal }) => {
+            if (!request) return Promise.resolve(pendingValue);
+
             const method = request.method ?? 'GET';
             const options: Record<string, unknown> = {};
             if (request.body) options['body'] = request.body;
             if (request.headers) options['headers'] = request.headers;
 
-            return httpClient.request(method, request.url, options).pipe(
-              map((response) => extractBoolean(response, condition.responseExpression, pendingValue, logger)),
-              tap((value) => {
-                const requestKey = stableStringify(request);
-                cache.set(requestKey, value, cacheDurationMs);
-              }),
-              catchError((error) => {
-                logger.warn('HTTP condition request failed:', error);
-                return of(pendingValue);
-              }),
-            );
-          }),
-          startWith(pendingValue),
-        );
+            return new Promise<boolean>((resolve) => {
+              const sub = httpClient.request(method, request.url, options).subscribe({
+                next: (response) => {
+                  const result = extractBoolean(response, condition.responseExpression, pendingValue, logger);
+                  const requestKey = stableStringify(request);
+                  cache.set(requestKey, result, cacheDurationMs);
+                  resolve(result);
+                },
+                error: (error) => {
+                  logger.warn('HTTP condition request failed:', error);
+                  resolve(pendingValue);
+                },
+              });
 
-        return toSignal(pipeline, { injector, initialValue: pendingValue });
+              // Cancel the HTTP request when the resource aborts (params changed or destroyed)
+              abortSignal.addEventListener('abort', () => sub.unsubscribe());
+            });
+          },
+          defaultValue: pendingValue,
+          injector,
+        });
+
+        // Snapshot composition: preserve the previous boolean result during re-fetching.
+        // Without this, the condition would briefly flash to pendingValue when params change,
+        // causing visible UI flicker (e.g., a conditionally visible field briefly disappearing).
+        return withPreviousValue(httpResource);
       });
 
-      signalPair = { resolvedRequest, resultValue };
+      signalPair = { resolvedRequest, resultResource };
       perFunctionSignalStore.set(contextKey, signalPair);
     }
 
@@ -134,7 +157,7 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
     // Returns null when a path param is undefined — skip the request and return pending value
     const resolved = resolveHttpRequest(condition.http, evaluationContext);
     if (!resolved) {
-      return signalPair.resultValue();
+      return signalPair.resultResource.value();
     }
     const requestKey = stableStringify(resolved);
 
@@ -144,8 +167,8 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
       return cachedResult;
     }
 
-    // Update the resolved request signal (triggers pipeline if request changed)
-    const { resolvedRequest, resultValue } = signalPair;
+    // Update the resolved request signal (triggers resource if request changed)
+    const { resolvedRequest, resultResource } = signalPair;
     untracked(() => {
       const current = resolvedRequest();
       if (stableStringify(current) !== requestKey) {
@@ -153,7 +176,7 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
       }
     });
 
-    return resultValue();
+    return resultResource.value();
   };
 
   cacheService.httpConditionFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);

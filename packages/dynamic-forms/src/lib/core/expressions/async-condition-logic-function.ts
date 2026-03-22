@@ -1,7 +1,7 @@
-import { inject, Injector, Signal, WritableSignal, signal, untracked } from '@angular/core';
+import { inject, Injector, Resource, resource, signal, untracked, WritableSignal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { catchError, concat, debounceTime, distinctUntilChanged, filter, from, map, of, switchMap } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { AsyncCondition } from '../../models/expressions/conditional-expression';
 import { stableStringify } from '../../utils/stable-stringify';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
@@ -10,14 +10,16 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { AsyncConditionFunctionCacheService } from './async-condition-function-cache.service';
 import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
+import { withPreviousValue } from '../../utils/resource-composition/with-previous-value';
 
 /**
  * Creates a logic function for an async condition.
  *
- * Uses a signal-based async resolution pattern: the LogicFn updates a `trigger` signal,
- * a reactive pipeline calls the async function and updates a `resultValue` signal.
- * The LogicFn returns the current `resultValue()`, which starts as `pendingValue` and
- * transitions to the actual async result.
+ * Uses Angular's `resource()` API with snapshot composition for async resolution:
+ * the LogicFn updates a `trigger` signal (serialized evaluation context), a debounced
+ * version feeds into a `resource()` that manages the async function lifecycle, and
+ * `withPreviousValue()` preserves the last resolved boolean during re-evaluation
+ * to prevent UI flicker.
  *
  * Must be called in injection context (same as `createLogicFunction`).
  */
@@ -40,7 +42,14 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
   }
 
   // Each condition needs its own per-field signal store.
-  const perFunctionSignalStore = new Map<string, { trigger: WritableSignal<string | undefined>; resultValue: Signal<boolean> }>();
+  const perFunctionSignalStore = new Map<
+    string,
+    {
+      trigger: WritableSignal<string | undefined>;
+      resultResource: Resource<boolean>;
+      ctxRef: { current: FieldContext<TValue> | null };
+    }
+  >();
 
   const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
     const contextKey = safeReadPathKeys(ctx as FieldContext<unknown>).join('.');
@@ -48,17 +57,25 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
 
     if (!signalPair) {
       const trigger = signal<string | undefined>(undefined);
+      // Mutable ref to hold the current FieldContext for use in the resource loader.
+      // Updated each time the LogicFn is called (below the initialization block).
+      const ctxRef: { current: FieldContext<TValue> | null } = { current: null };
 
-      // Wrap in untracked() to avoid NG0602: toObservable() internally calls effect(),
+      // Wrap in untracked() to avoid NG0602: resource() internally creates effects,
       // which cannot be created inside a reactive context (computed). The LogicFn runs
       // inside Angular Signal Forms' BooleanOrLogic.compute (a computed), so we must
-      // clear the active reactive consumer before creating the observable pipeline.
-      const resultValue = untracked(() => {
-        const pipeline = toObservable(trigger, { injector }).pipe(
-          debounceTime(debounceMs),
-          distinctUntilChanged(),
-          filter((value): value is string => value !== undefined),
-          switchMap(() => {
+      // clear the active reactive consumer before creating the resource pipeline.
+      const resultResource = untracked(() => {
+        // Debounce the trigger to batch rapid form value changes.
+        const debouncedTrigger = toSignal(toObservable(trigger, { injector }).pipe(debounceTime(debounceMs), distinctUntilChanged()), {
+          injector,
+        });
+
+        const asyncResource = resource({
+          params: () => debouncedTrigger() ?? undefined,
+          loader: async ({ params: triggerKey }) => {
+            if (!triggerKey) return pendingValue;
+
             // Look up the async function at call time (fresh reference)
             const asyncFn = functionRegistry.getAsyncConditionFunction(condition.asyncFunctionName);
             if (!asyncFn) {
@@ -66,36 +83,41 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
                 `Async Condition - function '${condition.asyncFunctionName}' not found. ` +
                   `Register it in customFnConfig.asyncConditions.`,
               );
-              return of(pendingValue);
+              return pendingValue;
             }
 
-            // Build evaluation context from current registry state
+            // Build evaluation context from current registry state using the stored FieldContext ref
+            const currentCtx = ctxRef.current;
+            if (!currentCtx) return pendingValue;
+
             const evaluationContext = untracked(() =>
-              fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions()),
+              fieldContextRegistry.createReactiveEvaluationContext(currentCtx, functionRegistry.getCustomFunctions()),
             );
 
-            // concat ensures pendingValue is emitted immediately when a new trigger
-            // arrives, before the async call resolves. This prevents the signal from
-            // showing a stale resolved value during re-evaluation.
-            return concat(
-              of(pendingValue),
-              from(asyncFn(evaluationContext)).pipe(
-                map((result) => !!result),
-                catchError((error) => {
-                  logger.warn('Async Condition - function failed:', error);
-                  return of(pendingValue);
-                }),
-              ),
-            );
-          }),
-        );
+            try {
+              const result = await asyncFn(evaluationContext);
+              return !!result;
+            } catch (error) {
+              logger.warn('Async Condition - function failed:', error);
+              return pendingValue;
+            }
+          },
+          defaultValue: pendingValue,
+          injector,
+        });
 
-        return toSignal(pipeline, { injector, initialValue: pendingValue });
+        // Snapshot composition: preserve the previous boolean result during re-evaluation.
+        // Without this, the condition would briefly flash to pendingValue when the async
+        // function is re-invoked, causing visible UI flicker.
+        return withPreviousValue(asyncResource);
       });
 
-      signalPair = { trigger, resultValue };
+      signalPair = { trigger, resultResource, ctxRef };
       perFunctionSignalStore.set(contextKey, signalPair);
     }
+
+    // Update the context ref so the resource loader uses the latest FieldContext
+    signalPair.ctxRef.current = ctx;
 
     // Build reactive evaluation context (creates signal dependencies on form values)
     const evaluationContext = fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions());
@@ -107,8 +129,8 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
       externalData: evaluationContext.externalData,
     });
 
-    // Update the trigger signal (triggers pipeline if context changed)
-    const { trigger: triggerSignal, resultValue } = signalPair;
+    // Update the trigger signal (triggers resource if context changed)
+    const { trigger: triggerSignal, resultResource } = signalPair;
     untracked(() => {
       const current = triggerSignal();
       if (current !== contextSnapshot) {
@@ -116,7 +138,7 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
       }
     });
 
-    return resultValue();
+    return resultResource.value();
   };
 
   cacheService.asyncConditionFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
