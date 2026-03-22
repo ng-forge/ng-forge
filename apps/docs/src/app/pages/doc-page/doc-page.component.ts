@@ -557,8 +557,10 @@ export class DocPageComponent {
       return;
     }
 
-    // Internal doc link — add adapter prefix for SPA navigation
-    const link = target.closest('a[href]') as HTMLAnchorElement | null;
+    // Internal doc link — add adapter prefix for SPA navigation.
+    // Only intercept links inside .doc-page-content (rendered markdown).
+    // Breadcrumb and nav links use routerLink which handles navigation natively.
+    const link = target.closest('.doc-page-content a[href]') as HTMLAnchorElement | null;
     if (link) {
       const href = link.getAttribute('href') ?? '';
       // Same-page anchor links — scroll to the element directly (avoids <base href> stripping the path)
@@ -568,9 +570,8 @@ export class DocPageComponent {
         if (el) el.scrollIntoView({ behavior: 'smooth' });
         return;
       }
-      // Root-relative paths — add adapter prefix for SPA navigation,
-      // but skip if the href already contains the adapter prefix (e.g. routerLink-generated hrefs)
-      if (href.startsWith('/') && !href.startsWith('//') && !href.startsWith(`/${this.adapter.adapter()}/`)) {
+      // Root-relative paths — add adapter prefix for SPA navigation
+      if (href.startsWith('/') && !href.startsWith('//')) {
         event.preventDefault();
         void this.router.navigateByUrl(`/${this.adapter.adapter()}${href}`);
         return;
