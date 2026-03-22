@@ -19,12 +19,12 @@ import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../v
  *    - Example: `noSpaces: (ctx) => ctx.value().includes(' ') ? { kind: 'noSpaces' } : null`
  *
  * 3. **Async Validators** - For asynchronous validation (debouncing, database lookups, etc.)
- *    - Used in: validators array on fields with type 'customAsync'
+ *    - Used in: validators array on fields with type 'async'
  *    - Return type: Observable<ValidationError | ValidationError[] | null>
  *    - Example: `checkUsername: (ctx) => userService.checkAvailability(ctx.value())`
  *
  * 4. **HTTP Validators** - For HTTP-based validation with automatic request cancellation
- *    - Used in: validators array on fields with type 'customHttp'
+ *    - Used in: validators array on fields with type 'http'
  *    - Configuration object with url, method, mapResponse, etc.
  *    - Example: `{ url: '/api/check', method: 'GET', mapResponse: ... }`
  *
@@ -72,8 +72,6 @@ export class FunctionRegistryService {
   private readonly customFunctions = new Map<string, CustomFunction>();
   private readonly customFunctionScopes = new Map<string, CustomFunctionScope>();
   private readonly derivationFunctions = new Map<string, CustomFunction>();
-  // TODO(@ng-forge): remove deprecated code in next minor
-  private readonly propertyDerivationFunctions = new Map<string, CustomFunction>();
   private readonly asyncDerivationFunctions = new Map<string, AsyncDerivationFunction>();
   private readonly asyncConditionFunctions = new Map<string, AsyncConditionFunction>();
   private readonly validators = new Map<string, CustomValidator>();
@@ -194,64 +192,6 @@ export class FunctionRegistryService {
    */
   clearDerivationFunctions(): void {
     this.derivationFunctions.clear();
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Property Derivation Functions
-  // TODO(@ng-forge): remove deprecated code in next minor
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /**
-   * Register a property derivation function.
-   *
-   * Property derivation functions compute derived values for field properties
-   * (like `minDate`, `options`, `label`) and are called when a
-   * `PropertyDerivationLogicConfig` references them by `functionName`.
-   *
-   * @param name - Unique identifier for the function
-   * @param fn - Function that receives EvaluationContext and returns the derived property value
-   */
-  registerPropertyDerivationFunction(name: string, fn: CustomFunction): void {
-    this.propertyDerivationFunctions.set(name, fn);
-  }
-
-  /**
-   * Get a property derivation function by name
-   */
-  getPropertyDerivationFunction(name: string): CustomFunction | undefined {
-    return this.propertyDerivationFunctions.get(name) ?? this.derivationFunctions.get(name);
-  }
-
-  /**
-   * Get all property derivation functions as an object.
-   *
-   * Merges both `derivationFunctions` and `propertyDerivationFunctions` maps,
-   * with `propertyDerivationFunctions` taking precedence. This allows users
-   * to migrate functions from `propertyDerivations` to `derivations` without
-   * breaking property derivation lookups.
-   */
-  getPropertyDerivationFunctions(): Record<string, CustomFunction> {
-    return {
-      ...Object.fromEntries(this.derivationFunctions),
-      ...Object.fromEntries(this.propertyDerivationFunctions),
-    };
-  }
-
-  /**
-   * Set property derivation functions from a config object.
-   * Only updates functions if their references have changed.
-   *
-   * @param functions - Object mapping function names to property derivation functions
-   */
-  setPropertyDerivationFunctions(functions: Record<string, CustomFunction> | undefined): void {
-    this.setRegistryIfChanged(this.propertyDerivationFunctions, functions);
-  }
-
-  /**
-   * Clear all property derivation functions
-   */
-  clearPropertyDerivationFunctions(): void {
-    this.propertyDerivationFunctions.clear();
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -581,7 +521,6 @@ export class FunctionRegistryService {
   clearAll(): void {
     this.clearCustomFunctions();
     this.clearDerivationFunctions();
-    this.clearPropertyDerivationFunctions();
     this.clearAsyncDerivationFunctions();
     this.clearAsyncConditionFunctions();
     this.clearValidators();

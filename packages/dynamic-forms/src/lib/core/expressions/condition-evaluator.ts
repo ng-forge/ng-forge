@@ -1,14 +1,11 @@
 import {
   AndCondition,
   ConditionalExpression,
-  CustomCondition,
   FieldValueCondition,
-  FormValueCondition,
   JavascriptCondition,
   OrCondition,
 } from '../../models/expressions/conditional-expression';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
-import { warnDeprecated } from '../../utils/deprecation-warnings';
 import { compareValues, getNestedValue, hasNestedProperty } from './value-utils';
 import { ExpressionParser } from './parser/expression-parser';
 
@@ -21,23 +18,23 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
     case 'fieldValue':
       return evaluateFieldValueCondition(expression, context);
 
-    case 'formValue':
-      // TODO(@ng-forge): remove deprecated code in next minor
-      if (context.deprecationTracker) {
-        warnDeprecated(
-          context.logger,
-          context.deprecationTracker,
-          'condition:formValue',
-          "Condition type 'formValue' is deprecated. Use 'fieldValue' with a specific fieldPath, or 'javascript' for complex form-level comparisons.",
-        );
-      }
-      return evaluateFormValueCondition(expression, context);
-
     case 'javascript':
       return evaluateJavaScriptExpression(expression, context);
 
-    case 'custom':
-      return evaluateCustomFunction(expression, context);
+    case 'custom': {
+      const customFn = context.customFunctions?.[expression.functionName];
+      if (!customFn) {
+        context.logger.error('Custom function not found:', expression.functionName);
+        return false;
+      }
+
+      try {
+        return !!customFn(context);
+      } catch (error) {
+        context.logger.error('Error executing custom function:', expression.functionName, error);
+        return false;
+      }
+    }
 
     case 'and':
       return evaluateAndCondition(expression, context);
@@ -81,10 +78,6 @@ function evaluateFieldValueCondition(expression: FieldValueCondition, context: E
   return compareValues(fieldValue, expression.value, expression.operator);
 }
 
-function evaluateFormValueCondition(expression: FormValueCondition, context: EvaluationContext): boolean {
-  return compareValues(context.formValue, expression.value, expression.operator);
-}
-
 function evaluateJavaScriptExpression(expression: JavascriptCondition, context: EvaluationContext): boolean {
   try {
     // Use secure AST-based expression parser instead of dynamic code execution
@@ -92,33 +85,6 @@ function evaluateJavaScriptExpression(expression: JavascriptCondition, context: 
     return !!result;
   } catch (error) {
     context.logger.error('Error evaluating JavaScript expression:', expression.expression, error);
-    return false;
-  }
-}
-
-function evaluateCustomFunction(expression: CustomCondition, context: EvaluationContext): boolean {
-  const fnName = 'functionName' in expression ? expression.functionName : expression.expression;
-
-  // TODO(@ng-forge): remove deprecated code in next minor
-  if (!('functionName' in expression) && context.deprecationTracker) {
-    warnDeprecated(
-      context.logger,
-      context.deprecationTracker,
-      'condition:custom:expression',
-      "CustomCondition 'expression' field is deprecated. Use 'functionName' instead.",
-    );
-  }
-
-  const customFn = context.customFunctions?.[fnName];
-  if (!customFn) {
-    context.logger.error('Custom function not found:', fnName);
-    return false;
-  }
-
-  try {
-    return !!customFn(context);
-  } catch (error) {
-    context.logger.error('Error executing custom function:', fnName, error);
     return false;
   }
 }

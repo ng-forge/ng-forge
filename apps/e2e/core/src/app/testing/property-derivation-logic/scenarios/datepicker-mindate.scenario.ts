@@ -16,7 +16,7 @@ const config = {
       col: 6,
       logic: [
         {
-          type: 'propertyDerivation',
+          type: 'derivation',
           targetProperty: 'minDate',
           expression: 'formValue.startDate',
         },

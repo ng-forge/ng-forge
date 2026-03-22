@@ -23,7 +23,7 @@ const config = {
       col: 6,
       logic: [
         {
-          type: 'propertyDerivation',
+          type: 'derivation',
           targetProperty: 'label',
           expression: '"Job Title (" + formValue.department + ")"',
         },

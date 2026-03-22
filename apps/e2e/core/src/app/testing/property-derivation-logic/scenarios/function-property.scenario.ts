@@ -23,7 +23,7 @@ const config = {
       col: 6,
       logic: [
         {
-          type: 'propertyDerivation',
+          type: 'derivation',
           targetProperty: 'options',
           functionName: 'getCitiesForCountry',
           dependsOn: ['country'],
@@ -46,7 +46,7 @@ export const functionPropertyScenario: TestScenario = {
   description: 'Tests deriving select options using a custom function',
   config,
   customFnConfig: {
-    propertyDerivations: {
+    derivations: {
       getCitiesForCountry: (ctx: EvaluationContext) => {
         const cities: Record<string, { label: string; value: string }[]> = {
           US: [

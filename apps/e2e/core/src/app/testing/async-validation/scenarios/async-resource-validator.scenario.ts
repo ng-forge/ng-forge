@@ -14,7 +14,7 @@ const config = {
       required: true,
       validators: [
         {
-          type: 'customAsync',
+          type: 'async',
           functionName: 'checkProductCode',
         },
       ],

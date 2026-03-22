@@ -139,22 +139,6 @@ describe('logic-function-factory', () => {
       });
     });
 
-    describe('formValue expressions', () => {
-      it('should create logic function that evaluates form value conditions', () => {
-        const mockFormValue = { username: 'test', email: 'test@example.com' };
-        const expression: ConditionalExpression = {
-          type: 'formValue',
-          operator: 'equals',
-          value: mockFormValue,
-        };
-
-        const mockValueOf = vi.fn().mockReturnValue(mockFormValue);
-        const result = runLogicFunctionTest(expression, 'value', mockValueOf, mockFormValue);
-        // compareValues uses === which returns true when comparing the same object instance
-        expect(result).toBe(true);
-      });
-    });
-
     describe('javascript expressions', () => {
       it('should create logic function that evaluates JavaScript expressions', () => {
         const expression: ConditionalExpression = {
@@ -196,7 +180,7 @@ describe('logic-function-factory', () => {
 
         const expression: ConditionalExpression = {
           type: 'custom',
-          expression: 'validateField',
+          functionName: 'validateField',
         };
 
         const result = runLogicFunctionTest(expression, 'test');
@@ -216,7 +200,7 @@ describe('logic-function-factory', () => {
       it('should handle missing custom functions', () => {
         const expression: ConditionalExpression = {
           type: 'custom',
-          expression: 'nonExistentFunction',
+          functionName: 'nonExistentFunction',
         };
 
         const result = runLogicFunctionTest(expression, 'test');
@@ -232,7 +216,7 @@ describe('logic-function-factory', () => {
 
         const expression: ConditionalExpression = {
           type: 'custom',
-          expression: 'throwingFn',
+          functionName: 'throwingFn',
         };
 
         const result = runLogicFunctionTest(expression, 'test');
@@ -277,7 +261,7 @@ describe('logic-function-factory', () => {
 
         const expression: ConditionalExpression = {
           type: 'custom',
-          expression: 'contextChecker',
+          functionName: 'contextChecker',
         };
 
         const result = runLogicFunctionTest(expression, 'test value');

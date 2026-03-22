@@ -75,7 +75,7 @@ describe('applyPropertyDerivations', () => {
       { label: 'LA', value: 'la' },
     ];
     const context = createContext({ country: 'USA' });
-    context.propertyDerivationFunctions = {
+    context.derivationFunctions = {
       getCities: () => cities,
     };
 
@@ -147,7 +147,7 @@ describe('applyPropertyDerivations', () => {
     });
     const collection: PropertyDerivationCollection = { entries: [entry] };
     const context = createContext({});
-    context.propertyDerivationFunctions = {
+    context.derivationFunctions = {
       computeLabel: () => 'Computed Label',
     };
 
@@ -217,7 +217,7 @@ describe('applyPropertyDerivations', () => {
           { name: 'Gadget', quantity: 7 },
         ],
       });
-      context.propertyDerivationFunctions = {
+      context.derivationFunctions = {
         computeItemLabel: (evalCtx) => {
           const item = evalCtx.formValue as Record<string, unknown>;
           return `${item['name']} x${item['quantity']}`;
@@ -244,7 +244,7 @@ describe('applyPropertyDerivations', () => {
       const context = createContext({
         items: [{ safe: true }, { safe: false }, { safe: true }],
       });
-      context.propertyDerivationFunctions = {
+      context.derivationFunctions = {
         riskyCompute: (evalCtx) => {
           const item = evalCtx.formValue as Record<string, unknown>;
           if (!item['safe']) {

@@ -32,61 +32,18 @@ export interface FieldValueCondition {
   value?: unknown;
 }
 
-// TODO(@ng-forge): remove deprecated code in next minor
 /**
- * Condition that compares the entire form value against an expected value.
- *
- * @deprecated Use `FieldValueCondition` for specific field checks, or
- * `JavascriptCondition` with an expression for complex form-level comparisons.
- * Will be removed in a future minor version.
- *
- * @public
- */
-export interface FormValueCondition {
-  type: 'formValue';
-  /** Comparison operator */
-  operator: ComparisonOperator;
-  /** Value to compare against */
-  value?: unknown;
-}
-
-/**
- * Condition that invokes a registered custom function by name (new API).
+ * Condition that invokes a registered custom function by name.
  *
  * Register functions via `customFnConfig.customFunctions`.
  *
- * @internal
+ * @public
  */
-interface CustomConditionNew {
+export interface CustomCondition {
   type: 'custom';
   /** Name of the registered custom function to invoke */
   functionName: string;
 }
-
-/**
- * @deprecated Use `CustomCondition` with `functionName` instead.
- * The `expression` field was misnamed — it holds a function registry key, not a JS expression.
- * Will be removed in a future minor version.
- *
- * @internal
- */
-interface CustomConditionDeprecated {
-  type: 'custom';
-  /**
-   * @deprecated Use `functionName` instead. Will be removed in a future minor version.
-   */
-  expression: string;
-}
-
-/**
- * Condition that invokes a registered custom function by name.
- *
- * Use `functionName` (new API). The `expression` field is deprecated.
- * Register functions via `customFnConfig.customFunctions`.
- *
- * @public
- */
-export type CustomCondition = CustomConditionNew | CustomConditionDeprecated;
 
 /**
  * Condition that evaluates a JavaScript expression using the secure AST-based parser.
@@ -209,7 +166,6 @@ export interface OrCondition {
  */
 export type ConditionalExpression =
   | FieldValueCondition
-  | FormValueCondition
   | CustomCondition
   | JavascriptCondition
   | HttpCondition

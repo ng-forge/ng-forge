@@ -25,8 +25,6 @@ import {
   isFunctionHttpValidator,
   ValidatorConfig,
 } from '../../models/validation/validator-config';
-import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
-import { warnDeprecated } from '../../utils/deprecation-warnings';
 import { resolveHttpRequest } from '../http/http-request-resolver';
 import { evaluateHttpValidationResponse } from '../http/http-response-evaluator';
 import { createLogicFunction } from '../expressions/logic-function-factory';
@@ -155,27 +153,6 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
     case 'async':
       applyAsyncValidator(config, path);
       break;
-    case 'customAsync': {
-      // TODO(@ng-forge): remove deprecated code in next minor
-      const logger = inject(DynamicFormLogger);
-      const tracker = inject(DEPRECATION_WARNING_TRACKER);
-      warnDeprecated(logger, tracker, 'type:customAsync', "Validator type 'customAsync' is deprecated. Use type: 'async' instead.");
-      applyAsyncValidator(config, path);
-      break;
-    }
-    case 'customHttp': {
-      // TODO(@ng-forge): remove deprecated code in next minor
-      const logger = inject(DynamicFormLogger);
-      const tracker = inject(DEPRECATION_WARNING_TRACKER);
-      warnDeprecated(
-        logger,
-        tracker,
-        'type:customHttp',
-        "Validator type 'customHttp' is deprecated. Use type: 'http' with functionName instead.",
-      );
-      applyFunctionHttpValidator(config as FunctionHttpValidatorConfig, path);
-      break;
-    }
     case 'http':
       applyUnifiedHttpValidator(config, path);
       break;

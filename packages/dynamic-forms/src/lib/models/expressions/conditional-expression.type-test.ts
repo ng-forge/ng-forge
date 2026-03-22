@@ -105,32 +105,21 @@ const _asyncMissingFn: AsyncCondition = { type: 'async' };
 // CustomCondition tests
 // ============================================================================
 
-// New API: functionName field
+// functionName field (required)
 const _customNew: CustomCondition = {
   type: 'custom',
   functionName: 'myValidator',
 };
 const _customNewAsConditional: ConditionalExpression = _customNew;
 
-// Deprecated API: expression field (still valid, backwards compatible)
-const _customDeprecated: CustomCondition = {
-  type: 'custom',
-  expression: 'myValidator',
-};
-const _customDeprecatedAsConditional: ConditionalExpression = _customDeprecated;
-
 // ConditionalExpression discriminates type: 'custom' correctly
 function handleCustomCondition(expr: ConditionalExpression): void {
   if (expr.type === 'custom') {
     // Inside this block, expr is narrowed to CustomCondition
-    const _hasFunctionName = 'functionName' in expr;
-    const _hasExpression = 'expression' in expr;
-    void [_hasFunctionName, _hasExpression];
+    const _fnName: string = expr.functionName;
+    void _fnName;
   }
 }
-
-// @ts-expect-error — requires either functionName or expression
-const _customMissingBoth: CustomCondition = { type: 'custom' };
 
 void [
   _asConditional,
@@ -147,8 +136,5 @@ void [
   _asyncMissingFn,
   _customNew,
   _customNewAsConditional,
-  _customDeprecated,
-  _customDeprecatedAsConditional,
   handleCustomCondition,
-  _customMissingBoth,
 ];

@@ -130,17 +130,6 @@ describe('Signal Forms Integration Types', () => {
       expect(expression.value).toBe(18);
     });
 
-    it('should create form value expression', () => {
-      const expression: ConditionalExpression = {
-        type: 'formValue',
-        operator: 'contains',
-        value: 'admin',
-      };
-
-      expect(expression.type).toBe('formValue');
-      expect(expression.operator).toBe('contains');
-    });
-
     it('should create JavaScript expression', () => {
       const expression: ConditionalExpression = {
         type: 'javascript',

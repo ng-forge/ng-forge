@@ -12,11 +12,6 @@ export const ContainerLogicConfigSchema = z.object({
 });
 
 /**
- * @deprecated Use `ContainerLogicConfigSchema` instead.
- */
-export const PageLogicConfigSchema = ContainerLogicConfigSchema;
-
-/**
  * Creates a PageField schema with the specified child field schema.
  *
  * Original interface:
@@ -26,7 +21,7 @@ export const PageLogicConfigSchema = ContainerLogicConfigSchema;
  *   readonly fields: TFields;
  *   readonly label?: never;
  *   readonly meta?: never;
- *   readonly logic?: PageLogicConfig[];
+ *   readonly logic?: ContainerLogicConfig[];
  * }
  * ```
  *
@@ -54,7 +49,7 @@ export function createPageFieldSchema<T extends ZodTypeAny>(childFieldSchema: T)
     /**
      * Page-specific logic (only 'hidden' is allowed).
      */
-    logic: z.array(PageLogicConfigSchema).optional(),
+    logic: z.array(ContainerLogicConfigSchema).optional(),
   });
 }
 
@@ -68,7 +63,7 @@ export const BasePageFieldSchema = BaseFieldDefSchema.omit({
 }).extend({
   type: z.literal('page'),
   fields: z.array(z.any()),
-  logic: z.array(PageLogicConfigSchema).optional(),
+  logic: z.array(ContainerLogicConfigSchema).optional(),
 });
 
 export type BasePageFieldSchemaType = z.infer<typeof BasePageFieldSchema>;

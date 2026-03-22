@@ -31,7 +31,7 @@ const config = {
                 col: 6,
                 logic: [
                   {
-                    type: 'propertyDerivation',
+                    type: 'derivation',
                     targetProperty: 'label',
                     functionName: 'deriveContactLabel',
                     dependsOn: ['contactType'],
@@ -73,7 +73,7 @@ const config = {
               col: 6,
               logic: [
                 {
-                  type: 'propertyDerivation',
+                  type: 'derivation',
                   targetProperty: 'label',
                   functionName: 'deriveContactLabel',
                   dependsOn: ['contactType'],
@@ -100,7 +100,7 @@ export const arrayPropertyScenario: TestScenario = {
   description: 'Tests property derivation scoped to individual array items using custom function',
   config,
   customFnConfig: {
-    propertyDerivations: {
+    derivations: {
       deriveContactLabel: (ctx: EvaluationContext) => {
         const contactType = ctx.formValue.contactType as string;
         const labels: Record<string, string> = {
