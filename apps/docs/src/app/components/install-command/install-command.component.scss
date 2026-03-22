@@ -63,7 +63,9 @@
       padding: 0;
       background: transparent !important;
       border: none;
-      min-width: max-content;
+      // Do NOT use min-width: max-content here — it makes the pre wider than
+      // the viewport, which triggers WebKit/iOS text autosizing (font inflation).
+      // white-space: pre (default for pre) already prevents wrapping.
       font-size: $text-sm !important;
 
       @include mix.mobile {
@@ -71,12 +73,8 @@
       }
     }
 
-    // Chrome mobile "font boosting" inflates text in blocks whose containing
-    // block is wider than the viewport (triggered by min-width: max-content above).
-    // A large finite max-height tells Chrome's text autosizer to leave it alone.
     ::ng-deep pre code {
       font-size: $text-sm !important;
-      max-height: 999999px;
 
       @include mix.mobile {
         font-size: $text-xs !important;
