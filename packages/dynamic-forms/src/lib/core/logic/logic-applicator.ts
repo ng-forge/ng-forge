@@ -1,7 +1,13 @@
 import { isDevMode } from '@angular/core';
 import { disabled, hidden, readonly, required, LogicFn } from '@angular/forms/signals';
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
-import { LogicConfig, isStateLogicConfig, isDerivationLogicConfig, LogicTrigger } from '../../models/logic/logic-config';
+import {
+  LogicConfig,
+  isStateLogicConfig,
+  isDerivationLogicConfig,
+  LogicTrigger,
+  type StateLogicType,
+} from '../../models/logic/logic-config';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { createLogicFunction, createDebouncedLogicFunction } from '../expressions/logic-function-factory';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
@@ -65,7 +71,7 @@ export function applyLogic<TValue>(config: LogicConfig, fieldPath: SchemaPath<TV
   applyLogicFn(config.type, path, logicFn);
 }
 
-function applyLogicFn<TValue>(type: LogicConfig['type'], path: SchemaPath<TValue>, logicFn: AnyLogicFn<TValue>): void {
+function applyLogicFn<TValue>(type: StateLogicType, path: SchemaPath<TValue>, logicFn: AnyLogicFn<TValue>): void {
   switch (type) {
     case 'hidden':
       hidden(path, logicFn);
@@ -79,6 +85,10 @@ function applyLogicFn<TValue>(type: LogicConfig['type'], path: SchemaPath<TValue
     case 'required':
       required(path, { when: logicFn });
       break;
+    default: {
+      const _exhaustive: never = type;
+      throw new Error(`[Dynamic Forms] Unhandled state logic type: ${_exhaustive}`);
+    }
   }
 }
 

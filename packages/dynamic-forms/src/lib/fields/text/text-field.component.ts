@@ -48,6 +48,9 @@ import { DynamicText } from '../../models/types/dynamic-text';
           {{ label() | dynamicText | async }}
         </span>
       }
+      @default {
+        never;
+      }
     }
   `,
   styleUrl: './text-field.component.scss',
