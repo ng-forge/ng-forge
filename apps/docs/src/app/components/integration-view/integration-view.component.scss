@@ -64,10 +64,7 @@
     white-space: nowrap;
 
     @include mix.mobile {
-      font-size: $text-xs;
-      white-space: normal;
-      overflow-wrap: break-word;
-      word-break: break-word;
+      font-size: 0.65rem;
     }
   }
 
