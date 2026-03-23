@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injector, Resource, resource, signal, untracked, WritableSignal } from '@angular/core';
+import { inject, Injector, Resource, signal, untracked, WritableSignal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { debounceTime, distinctUntilChanged, pipe } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, map, of, pipe, tap } from 'rxjs';
 import { HttpCondition } from '../../models/expressions/conditional-expression';
 import { stableStringify } from '../../utils/stable-stringify';
 import { HttpResourceRequest } from '../validation/validator-types';
@@ -47,9 +48,9 @@ function extractBoolean(response: unknown, responseExpression: string | undefine
 /**
  * Creates a logic function for an HTTP condition.
  *
- * Uses Angular's `resource()` API with snapshot composition for async resolution:
+ * Uses Angular's `rxResource()` API with snapshot composition for async resolution:
  * the LogicFn updates a `resolvedRequest` signal, a debounced version feeds into
- * a `resource()` that manages the HTTP lifecycle, and `withPreviousValue()` preserves
+ * an `rxResource()` that manages the HTTP lifecycle, and `withPreviousValue()` preserves
  * the last resolved boolean during re-fetching to prevent UI flicker.
  *
  * Must be called in injection context (same as `createLogicFunction`).
@@ -108,37 +109,29 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
           { initialValue: undefined as HttpResourceRequest | undefined, injector },
         );
 
-        // resource() manages the HTTP lifecycle: auto-cancellation via AbortSignal,
-        // loading/resolved/error status tracking, and signal-based reactivity.
-        const httpResource = resource({
+        // rxResource() manages the HTTP lifecycle natively with Observables:
+        // auto-cancellation via unsubscription, loading/resolved/error status tracking,
+        // and signal-based reactivity.
+        const httpResource = rxResource({
           params: () => debouncedRequest() ?? undefined,
-          // When params() returns undefined, resource() enters idle state and skips the loader.
-          loader: ({ params: request, abortSignal }) => {
+          // When params() returns undefined, rxResource() enters idle state and skips the stream.
+          stream: ({ params: request }) => {
             const method = request.method ?? 'GET';
             const options: Record<string, unknown> = {};
             if (request.body) options['body'] = request.body;
             if (request.headers) options['headers'] = request.headers;
 
-            return new Promise<boolean>((resolve) => {
-              const sub = httpClient.request(method, request.url, options).subscribe({
-                next: (response) => {
-                  const result = extractBoolean(response, condition.responseExpression, pendingValue, logger);
-                  const requestKey = stableStringify(request);
-                  cache.set(requestKey, result, cacheDurationMs);
-                  resolve(result);
-                },
-                error: (error) => {
-                  logger.warn('HTTP condition request failed:', error);
-                  resolve(pendingValue);
-                },
-                // Resolve on complete without emission (e.g., empty response body)
-                // to prevent the Promise from hanging indefinitely.
-                complete: () => resolve(pendingValue),
-              });
-
-              // Cancel the HTTP request when the resource aborts (params changed or destroyed)
-              abortSignal.addEventListener('abort', () => sub.unsubscribe());
-            });
+            return httpClient.request(method, request.url, options).pipe(
+              map((response) => extractBoolean(response, condition.responseExpression, pendingValue, logger)),
+              tap((value) => {
+                const requestKey = stableStringify(request);
+                cache.set(requestKey, value, cacheDurationMs);
+              }),
+              catchError((error) => {
+                logger.warn('HTTP condition request failed:', error);
+                return of(pendingValue);
+              }),
+            );
           },
           defaultValue: pendingValue,
           injector,

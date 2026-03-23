@@ -1,6 +1,7 @@
-import { inject, Injector, Resource, resource, signal, untracked, WritableSignal } from '@angular/core';
+import { inject, Injector, Resource, signal, untracked, WritableSignal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { debounceTime, distinctUntilChanged, firstValueFrom, from, isObservable, pipe } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, from, map, of, pipe } from 'rxjs';
 import { AsyncCondition } from '../../models/expressions/conditional-expression';
 import { stableStringify } from '../../utils/stable-stringify';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
@@ -15,9 +16,9 @@ import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-f
 /**
  * Creates a logic function for an async condition.
  *
- * Uses Angular's `resource()` API with snapshot composition for async resolution:
+ * Uses Angular's `rxResource()` API with snapshot composition for async resolution:
  * the LogicFn updates a `trigger` signal (serialized evaluation context), a debounced
- * version feeds into a `resource()` that manages the async function lifecycle, and
+ * version feeds into an `rxResource()` that manages the async function lifecycle, and
  * `withPreviousValue()` preserves the last resolved boolean during re-evaluation
  * to prevent UI flicker.
  *
@@ -74,9 +75,11 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
           injector,
         });
 
-        const asyncResource = resource({
+        // rxResource() manages the async function lifecycle natively with Observables:
+        // auto-cancellation via unsubscription and signal-based reactivity.
+        const asyncResource = rxResource({
           params: () => debouncedTrigger() ?? undefined,
-          loader: async ({ params: triggerKey }) => {
+          stream: ({ params: triggerKey }) => {
             // Look up the async function at call time (fresh reference)
             const asyncFn = functionRegistry.getAsyncConditionFunction(condition.asyncFunctionName);
             if (!asyncFn) {
@@ -84,29 +87,28 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
                 `Async Condition - function '${condition.asyncFunctionName}' not found. ` +
                   `Register it in customFnConfig.asyncConditions.`,
               );
-              return pendingValue;
+              return of(pendingValue);
             }
 
             // Retrieve the FieldContext that was captured when this trigger key was set.
             // This avoids a race condition where a mutable ref could be overwritten by
             // a later LogicFn call before the loader finishes executing.
             const capturedCtx = ctxByTrigger.get(triggerKey);
-            if (!capturedCtx) return pendingValue;
+            if (!capturedCtx) return of(pendingValue);
 
             const evaluationContext = untracked(() =>
               fieldContextRegistry.createReactiveEvaluationContext(capturedCtx, functionRegistry.getCustomFunctions()),
             );
 
-            try {
-              // asyncFn may return Promise<boolean> or Observable<boolean>.
-              // Normalize to Promise so the resource loader can await it.
-              const resultOrObs = asyncFn(evaluationContext);
-              const result = isObservable(resultOrObs) ? await firstValueFrom(from(resultOrObs)) : await resultOrObs;
-              return !!result;
-            } catch (error) {
-              logger.warn('Async Condition - function failed:', error);
-              return pendingValue;
-            }
+            // asyncFn may return Promise<boolean> or Observable<boolean>.
+            // from() normalizes both to Observable.
+            return from(asyncFn(evaluationContext)).pipe(
+              map((result) => !!result),
+              catchError((error) => {
+                logger.warn('Async Condition - function failed:', error);
+                return of(pendingValue);
+              }),
+            );
           },
           defaultValue: pendingValue,
           injector,
