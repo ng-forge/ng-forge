@@ -238,3 +238,6 @@ export type { FieldStateInfo, FieldStateContext, FormFieldStateMap } from './mod
 
 // Configuration tokens — override defaults via provideDynamicForm() or Angular DI
 export { INITIALIZATION_TIMEOUT_MS } from './utils/initialization-tracker/initialization-tracker';
+
+// Resource Composition Utilities (experimental — uses Angular's experimental resource composition APIs)
+export { withPreviousValue } from './utils/resource-composition/with-previous-value';

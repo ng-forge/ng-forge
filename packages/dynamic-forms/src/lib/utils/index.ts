@@ -7,3 +7,4 @@ export { dynamicTextToObservable } from './dynamic-text-to-observable';
 export { getFieldDefaultValue } from './default-value/default-value';
 export { createDebouncedEffect, createDebouncedSignal, DEFAULT_DEBOUNCE_MS } from './debounce/debounce';
 export { applyMetaToElement } from './apply-meta';
+export { withPreviousValue } from './resource-composition/with-previous-value';
