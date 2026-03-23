@@ -1,7 +1,7 @@
 import { inject, Injector, Resource, resource, signal, untracked, WritableSignal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, firstValueFrom, from, isObservable } from 'rxjs';
 import { AsyncCondition } from '../../models/expressions/conditional-expression';
 import { stableStringify } from '../../utils/stable-stringify';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
@@ -97,7 +97,10 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
             );
 
             try {
-              const result = await asyncFn(evaluationContext);
+              // asyncFn may return Promise<boolean> or Observable<boolean>.
+              // Normalize to Promise so the resource loader can await it.
+              const resultOrObs = asyncFn(evaluationContext);
+              const result = isObservable(resultOrObs) ? await firstValueFrom(from(resultOrObs)) : await resultOrObs;
               return !!result;
             } catch (error) {
               logger.warn('Async Condition - function failed:', error);
