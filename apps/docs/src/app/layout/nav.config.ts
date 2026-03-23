@@ -106,7 +106,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     label: 'OpenAPI Generator',
     path: 'openapi-generator',
-    cssClass: 'sidebar-link--ai',
+    cssClass: 'sidebar-link--openapi',
     badge: 'NEW',
   },
   {
