@@ -177,54 +177,6 @@ export const VALIDATORS: ValidatorInfo[] = [
 }`,
   },
   {
-    type: 'customAsync',
-    category: 'async',
-    description: "DEPRECATED — use type: 'async' instead. Async validator using registered async function.",
-    parameters: {
-      functionName: {
-        name: 'functionName',
-        type: 'string',
-        description: 'Name of registered async validator function',
-        required: true,
-      },
-      params: {
-        name: 'params',
-        type: 'Record<string, unknown>',
-        description: 'Parameters to pass to validator function',
-        required: false,
-      },
-    },
-    example: `// DEPRECATED — use type: 'async' instead
-{
-  type: 'customAsync',
-  functionName: 'checkUsernameAvailability'
-}`,
-  },
-  {
-    type: 'customHttp',
-    category: 'http',
-    description: "DEPRECATED — use type: 'http' with functionName instead. HTTP-based validator with automatic request cancellation.",
-    parameters: {
-      functionName: {
-        name: 'functionName',
-        type: 'string',
-        description: 'Name of registered HTTP validator configuration',
-        required: true,
-      },
-      params: {
-        name: 'params',
-        type: 'Record<string, unknown>',
-        description: 'Parameters to pass to HTTP validator',
-        required: false,
-      },
-    },
-    example: `// DEPRECATED — use type: 'http' with functionName instead
-{
-  type: 'customHttp',
-  functionName: 'validateEmailExists'
-}`,
-  },
-  {
     type: 'http',
     category: 'http',
     description:

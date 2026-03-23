@@ -690,6 +690,14 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
     white-space: nowrap;
   }
 
+  // Allow inline code to wrap inside table cells on narrow screens
+  td > code,
+  td *:not(pre) > code {
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
   pre {
     margin: 24px 0;
     border-radius: 8px;
@@ -697,6 +705,11 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
     background: var(--forge-code-bg);
     border: none;
     padding: 16px 24px;
+
+    @media (max-width: 768px) {
+      margin: 16px 0;
+      padding: 12px 16px;
+    }
   }
 
   pre.shiki {
@@ -716,6 +729,11 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
     border-radius: 0;
     white-space: pre;
     -webkit-font-smoothing: auto;
+
+    @media (max-width: 768px) {
+      font-size: 12px;
+      line-height: 18px;
+    }
   }
 
   .code-block-wrapper {

@@ -40,24 +40,15 @@ export const FieldValueConditionSchema = BaseComparisonConditionSchema.extend({
 });
 
 /**
- * Schema for form value conditions.
- * Evaluates against the entire form value.
- */
-export const FormValueConditionSchema = BaseComparisonConditionSchema.extend({
-  type: z.literal('formValue'),
-});
-
-/**
  * Schema for custom function conditions.
  * Uses a registered custom function for evaluation.
  */
 export const CustomConditionSchema = z.object({
   type: z.literal('custom'),
   /**
-   * JavaScript expression to evaluate.
-   * Has access to: fieldValue, formValue, fieldPath
+   * Name of a registered custom function to invoke.
    */
-  expression: z.string(),
+  functionName: z.string(),
 });
 
 /**
@@ -79,11 +70,12 @@ export const JavaScriptConditionSchema = z.object({
  * Original interface:
  * ```typescript
  * interface ConditionalExpression {
- *   type: 'fieldValue' | 'formValue' | 'custom' | 'javascript' | 'and' | 'or';
+ *   type: 'fieldValue' | 'custom' | 'javascript' | 'and' | 'or';
  *   fieldPath?: string;
  *   operator?: ComparisonOperator;
  *   value?: unknown;
  *   expression?: string;
+ *   functionName?: string;
  *   conditions?: ConditionalExpression[];
  * }
  * ```
@@ -93,7 +85,6 @@ export const JavaScriptConditionSchema = z.object({
 export const ConditionalExpressionSchema: z.ZodType<ConditionalExpression> = z.lazy(() =>
   z.discriminatedUnion('type', [
     FieldValueConditionSchema,
-    FormValueConditionSchema,
     CustomConditionSchema,
     JavaScriptConditionSchema,
     AndConditionSchema,
@@ -130,7 +121,6 @@ export const OrConditionSchema = z.object({
  */
 export type ConditionalExpression =
   | z.infer<typeof FieldValueConditionSchema>
-  | z.infer<typeof FormValueConditionSchema>
   | z.infer<typeof CustomConditionSchema>
   | z.infer<typeof JavaScriptConditionSchema>
   | {

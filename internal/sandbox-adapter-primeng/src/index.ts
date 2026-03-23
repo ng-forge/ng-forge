@@ -1,1 +1,1 @@
-export { createPrimeNGSandboxApp } from './lib/factory';
+export { createPrimeNGSandboxApp, clearPrimeNGStyleCaches } from './lib/factory';

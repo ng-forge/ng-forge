@@ -83,6 +83,11 @@ h1 {
   color: $bg-void;
   box-shadow: 0 4px 30px rgba($ember-hot, 0.3);
 
+  svg {
+    flex-shrink: 0;
+    margin-bottom: 2px;
+  }
+
   &:hover {
     transform: translateY(-3px) scale(1.02);
     box-shadow: 0 12px 40px rgba($ember-hot, 0.5);

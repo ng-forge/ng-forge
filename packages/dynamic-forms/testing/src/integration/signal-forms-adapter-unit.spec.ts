@@ -206,19 +206,6 @@ describe('SignalFormsAdapterService Unit Tests', () => {
         expect(mockLogger.error).toHaveBeenCalled();
       });
     });
-
-    describe('Form Value Conditions', () => {
-      it('should evaluate form value conditions', () => {
-        const expression: ConditionalExpression = {
-          type: 'formValue',
-          operator: 'equals',
-          value: context.formValue,
-        };
-
-        const result = evaluateCondition(expression, context);
-        expect(result).toBe(true);
-      });
-    });
   });
 
   describe('Operator Validation', () => {
@@ -307,8 +294,7 @@ describe('SignalFormsAdapterService Unit Tests', () => {
       const invalidExpressions: ConditionalExpression[] = [
         { type: 'fieldValue' } as ConditionalExpression, // Missing fieldPath
         { type: 'javascript' } as ConditionalExpression, // Missing expression
-        { type: 'custom' } as ConditionalExpression, // Missing expression
-        { type: 'formValue' } as ConditionalExpression, // Missing operator
+        { type: 'custom' } as ConditionalExpression, // Missing functionName
       ];
 
       const context: EvaluationContext = {

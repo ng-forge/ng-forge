@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { IonContent, IonHeader, IonItem, IonList, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'example-index',
   imports: [IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ion-header>
       <ion-toolbar>

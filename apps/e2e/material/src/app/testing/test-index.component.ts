@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TEST_SUITE_REGISTRY } from './shared/test-suite.registry';
 
 @Component({
   selector: 'example-test-index',
   imports: [RouterLink],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="test-index-container">
       <h1>E2E Test Scenarios</h1>

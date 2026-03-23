@@ -48,23 +48,11 @@ describe('ConditionalExpressionSchema', () => {
     });
   });
 
-  describe('formValue conditions', () => {
-    it('should validate formValue condition', () => {
-      const config = {
-        type: 'formValue',
-        operator: 'notEquals',
-        value: null,
-      };
-      const result = ConditionalExpressionSchema.safeParse(config);
-      expect(result.success).toBe(true);
-    });
-  });
-
   describe('custom/javascript conditions', () => {
-    it('should validate custom condition with expression', () => {
+    it('should validate custom condition with functionName', () => {
       const config = {
         type: 'custom',
-        expression: 'fieldValue > formValue.minValue',
+        functionName: 'checkMinValue',
       };
       const result = ConditionalExpressionSchema.safeParse(config);
       expect(result.success).toBe(true);

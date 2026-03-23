@@ -3,14 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { ConditionalExpression } from '../expressions/conditional-expression';
-import type {
-  LogicConfig,
-  FormStateCondition,
-  StateLogicConfig,
-  DerivationLogicConfig,
-  DerivationTrigger,
-  PropertyDerivationLogicConfig,
-} from './logic-config';
+import type { LogicConfig, FormStateCondition, StateLogicConfig, DerivationLogicConfig, LogicTrigger } from './logic-config';
 import { isFormStateCondition } from './logic-config';
 import type { RequiredKeys } from '@ng-forge/utils';
 
@@ -167,8 +160,8 @@ describe('DerivationLogicConfig - Property Types', () => {
     expectTypeOf<DerivationLogicConfig['functionName']>().toEqualTypeOf<string | undefined>();
   });
 
-  it('trigger should be DerivationTrigger or undefined', () => {
-    expectTypeOf<DerivationLogicConfig['trigger']>().toEqualTypeOf<DerivationTrigger | undefined>();
+  it('trigger should be LogicTrigger or undefined', () => {
+    expectTypeOf<DerivationLogicConfig['trigger']>().toEqualTypeOf<LogicTrigger | undefined>();
   });
 });
 
@@ -287,16 +280,13 @@ describe('DerivationLogicConfig - sync sources (backwards compatible)', () => {
 // ============================================================================
 
 describe('LogicConfig - Union Type', () => {
-  it('should be union of StateLogicConfig, DerivationLogicConfig and PropertyDerivationLogicConfig', () => {
+  it('should be union of StateLogicConfig and DerivationLogicConfig', () => {
     expectTypeOf<StateLogicConfig>().toMatchTypeOf<LogicConfig>();
     expectTypeOf<DerivationLogicConfig>().toMatchTypeOf<LogicConfig>();
-    expectTypeOf<PropertyDerivationLogicConfig>().toMatchTypeOf<LogicConfig>();
   });
 
   it('type should include all logic types', () => {
-    expectTypeOf<LogicConfig['type']>().toEqualTypeOf<
-      'hidden' | 'readonly' | 'disabled' | 'required' | 'derivation' | 'propertyDerivation'
-    >();
+    expectTypeOf<LogicConfig['type']>().toEqualTypeOf<'hidden' | 'readonly' | 'disabled' | 'required' | 'derivation'>();
   });
 });
 
@@ -396,25 +386,12 @@ describe('LogicConfig - ConditionalExpression Examples', () => {
     expectTypeOf(logic.condition).toMatchTypeOf<ConditionalExpression>();
   });
 
-  it('should accept formValue condition', () => {
-    const logic = {
-      type: 'disabled',
-      condition: {
-        type: 'formValue',
-        operator: 'equals',
-        value: { locked: true },
-      },
-    } as const satisfies LogicConfig;
-
-    expectTypeOf(logic.condition).toMatchTypeOf<ConditionalExpression>();
-  });
-
-  it('should accept custom expression condition', () => {
+  it('should accept custom function condition', () => {
     const logic = {
       type: 'required',
       condition: {
         type: 'custom',
-        expression: 'fieldValue === "other"',
+        functionName: 'isOther',
       },
     } as const satisfies LogicConfig;
 

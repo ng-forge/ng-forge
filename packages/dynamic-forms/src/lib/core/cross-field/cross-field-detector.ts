@@ -1,11 +1,5 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import {
-  FormStateCondition,
-  isFormStateCondition,
-  isStateLogicConfig,
-  LogicConfig,
-  StateLogicConfig,
-} from '../../models/logic/logic-config';
+import { FormStateCondition, isFormStateCondition, StateLogicConfig } from '../../models/logic/logic-config';
 import { CustomValidatorConfig, ValidatorConfig } from '../../models/validation/validator-config';
 import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
 import { CustomFunctionScope } from '../expressions/custom-function-types';
@@ -73,20 +67,14 @@ export function isCrossFieldExpression(
       // fieldPath means it references another field's value
       return !!expr.fieldPath;
 
-    case 'formValue':
-      // formValue type always accesses the form state
-      return true;
-
     case 'javascript':
       // Check for formValue.* patterns in the expression string
       return FORM_VALUE_ACCESS_PATTERN.test(expr.expression || '');
 
     case 'custom': {
       // For custom functions, determine scope from registry or default to cross-field.
-      // Support both new API (functionName) and deprecated API (expression).
-      //
       // Look up function scope from registry if context is provided
-      const functionName = 'functionName' in expr ? expr.functionName : expr.expression;
+      const functionName = expr.functionName;
       if (context?.getFunctionScope && functionName) {
         const scope = context.getFunctionScope(functionName);
         if (scope === 'field') {
@@ -138,11 +126,6 @@ export function extractExpressionDependencies(expr: ConditionalExpression | bool
         // Extract root field name (before any dots for nested paths)
         deps.add(expr.fieldPath.split('.')[0]);
       }
-      break;
-
-    case 'formValue':
-      // Full form access - depends on everything
-      deps.add('*');
       break;
 
     case 'javascript':
@@ -273,7 +256,7 @@ export function isCrossFieldBuiltInValidator(config: ValidatorConfig): boolean {
  * because they require field-level registration.
  */
 export function isResourceBasedValidator(config: ValidatorConfig): boolean {
-  return config.type === 'customAsync' || config.type === 'customHttp' || config.type === 'http';
+  return config.type === 'async' || config.type === 'http';
 }
 
 /**
@@ -305,24 +288,6 @@ export function hasCrossFieldWhenCondition(config: ValidatorConfig, context?: Cr
  * @returns true if the logic condition references other fields
  */
 export function isCrossFieldStateLogic(config: StateLogicConfig, context?: CrossFieldDetectionContext): boolean {
-  return isCrossFieldExpression(config.condition, context);
-}
-
-/**
- * Detects if a LogicConfig has a cross-field condition.
- *
- * @param config The logic configuration to check
- * @param context Optional context providing function scope lookup
- * @returns true if the logic condition references other fields
- *
- * @deprecated Use `isCrossFieldStateLogic` for state logic configs.
- *             Derivation logic is handled by the derivation system.
- */
-export function isCrossFieldLogic(config: LogicConfig, context?: CrossFieldDetectionContext): boolean {
-  // Only check state logic configs
-  if (!isStateLogicConfig(config)) {
-    return false;
-  }
   return isCrossFieldExpression(config.condition, context);
 }
 

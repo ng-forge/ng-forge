@@ -1,4 +1,4 @@
-import { afterNextRender, Component } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { fromEvent } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -10,6 +10,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   selector: 'example-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
   protected title = 'Material Examples';

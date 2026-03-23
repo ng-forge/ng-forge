@@ -71,7 +71,7 @@ Validate against the entire form state:
   validators: [{
     type: 'required',
     when: {
-      type: 'formValue',
+      type: 'javascript',
       expression: 'formValue.hasEndDate === true',
     },
   }],

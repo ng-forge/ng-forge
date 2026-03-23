@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal, ResourceStatus } from '@angular/core';
 import { beforeEach, describe, expect, it, vi, Mock } from 'vitest';
 import { form, schema, FieldContext } from '@angular/forms/signals';
-import { AsyncValidatorConfig, HttpValidatorConfig } from '../../models/validation/validator-config';
+import { AsyncValidatorConfig, FunctionHttpValidatorConfig } from '../../models/validation/validator-config';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { FormStateManager } from '../../state/form-state-manager';
 import { applyValidator } from './validator-factory';
@@ -120,7 +120,7 @@ describe('Async and HTTP Validator Integration', () => {
 
           const formValue = signal({ username: 'testuser' });
           const config: AsyncValidatorConfig = {
-            type: 'customAsync',
+            type: 'async',
             functionName: 'checkUsername',
           };
 
@@ -140,7 +140,7 @@ describe('Async and HTTP Validator Integration', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field: 'value' });
           const config: AsyncValidatorConfig = {
-            type: 'customAsync',
+            type: 'async',
             functionName: 'nonexistent',
           };
 
@@ -177,10 +177,11 @@ describe('Async and HTTP Validator Integration', () => {
 
           const formValue = signal({ field: 'value' });
           const config: AsyncValidatorConfig = {
-            type: 'customAsync',
+            type: 'async',
             functionName: 'conditional',
             params: { minLength: 5 },
             when: {
+              type: 'javascript',
               expression: 'formValue.field !== ""',
             },
           };
@@ -223,7 +224,7 @@ describe('Async and HTTP Validator Integration', () => {
 
           const formValue = signal({ password: 'pass123', email: 'test@example.com' });
           const config: AsyncValidatorConfig = {
-            type: 'customAsync',
+            type: 'async',
             functionName: 'validatePassword',
           };
 
@@ -319,8 +320,8 @@ describe('Async and HTTP Validator Integration', () => {
           functionRegistry.registerHttpValidator('checkUsername', httpValidator);
 
           const formValue = signal({ username: 'testuser' });
-          const config: HttpValidatorConfig = {
-            type: 'customHttp',
+          const config: FunctionHttpValidatorConfig = {
+            type: 'http',
             functionName: 'checkUsername',
           };
 
@@ -339,8 +340,8 @@ describe('Async and HTTP Validator Integration', () => {
       it('should throw error when HTTP validator not found', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field: 'value' });
-          const config: HttpValidatorConfig = {
-            type: 'customHttp',
+          const config: FunctionHttpValidatorConfig = {
+            type: 'http',
             functionName: 'nonexistent',
           };
 
@@ -368,10 +369,11 @@ describe('Async and HTTP Validator Integration', () => {
           functionRegistry.registerHttpValidator('conditional', httpValidator);
 
           const formValue = signal({ field: 'value' });
-          const config: HttpValidatorConfig = {
-            type: 'customHttp',
+          const config: FunctionHttpValidatorConfig = {
+            type: 'http',
             functionName: 'conditional',
             when: {
+              type: 'javascript',
               expression: 'formValue.field.length > 3',
             },
           };
@@ -401,8 +403,8 @@ describe('Async and HTTP Validator Integration', () => {
           functionRegistry.registerHttpValidator('skipEmpty', httpValidator);
 
           const formValue = signal({ field: '' });
-          const config: HttpValidatorConfig = {
-            type: 'customHttp',
+          const config: FunctionHttpValidatorConfig = {
+            type: 'http',
             functionName: 'skipEmpty',
           };
 
@@ -445,8 +447,8 @@ describe('Async and HTTP Validator Integration', () => {
             city: 'Springfield',
             zipCode: '12345',
           });
-          const config: HttpValidatorConfig = {
-            type: 'customHttp',
+          const config: FunctionHttpValidatorConfig = {
+            type: 'http',
             functionName: 'validateAddress',
           };
 
@@ -480,8 +482,8 @@ describe('Async and HTTP Validator Integration', () => {
           functionRegistry.registerHttpValidator('withHeaders', httpValidator);
 
           const formValue = signal({ field: 'value' });
-          const config: HttpValidatorConfig = {
-            type: 'customHttp',
+          const config: FunctionHttpValidatorConfig = {
+            type: 'http',
             functionName: 'withHeaders',
           };
 
@@ -585,7 +587,7 @@ describe('Async and HTTP Validator Integration', () => {
             // Apply both validators
             expect(() => {
               applyValidator({ type: 'custom', functionName: 'minLength' }, path.username);
-              applyValidator({ type: 'customAsync', functionName: 'checkAvailable' }, path.username);
+              applyValidator({ type: 'async', functionName: 'checkAvailable' }, path.username);
             }).not.toThrow();
           }),
         );

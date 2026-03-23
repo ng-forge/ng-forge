@@ -7,11 +7,19 @@
   flex-direction: column;
   gap: $space-8;
 
+  @include mix.mobile {
+    gap: $space-6;
+  }
+
   &__heading {
     font-size: $text-base;
     font-weight: 600;
     color: var(--text-primary);
     margin: 0 0 $space-4;
+
+    @include mix.mobile {
+      margin: 0 0 $space-3;
+    }
   }
 
   &__table {
@@ -38,13 +46,28 @@
     tr:last-child td {
       border-bottom: none;
     }
+
+    @include mix.mobile {
+      font-size: $text-xs;
+
+      th,
+      td {
+        padding: $space-1 $space-2;
+      }
+    }
   }
 
   &__feature-name {
     font-family: $font-mono;
     font-size: $text-sm;
     color: $ember-glow;
-    white-space: nowrap;
+    // !important overrides global .doc-page-content td code rules
+    white-space: nowrap !important;
+    word-break: normal !important;
+
+    @include mix.mobile {
+      font-size: 0.65rem !important;
+    }
   }
 
   &__feature-desc {
@@ -59,6 +82,10 @@
     overflow: visible;
     padding: $space-2 $space-4;
 
+    @include mix.mobile {
+      padding: $space-2 $space-3;
+    }
+
     &:hover docs-copy-button {
       opacity: 1;
     }
@@ -69,6 +96,12 @@
       margin: 0;
       border: none;
       padding: 0;
+    }
+
+    ::ng-deep pre code {
+      @include mix.mobile {
+        font-size: $text-xs;
+      }
     }
   }
 }

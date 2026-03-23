@@ -5,12 +5,13 @@ import {
   LogicConfig,
   isStateLogicConfig,
   isDerivationLogicConfig,
-  isPropertyDerivationLogicConfig,
   LogicTrigger,
+  type StateLogicType,
 } from '../../models/logic/logic-config';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { createLogicFunction, createDebouncedLogicFunction } from '../expressions/logic-function-factory';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 
 type AnyLogicFn<TValue> = LogicFn<TValue, boolean> | (() => boolean);
 
@@ -39,8 +40,8 @@ function getConfigDebounceMs(config: LogicConfig): number | undefined {
 }
 
 export function applyLogic<TValue>(config: LogicConfig, fieldPath: SchemaPath<TValue> | SchemaPathTree<TValue>): void {
-  // Value derivations and property derivations are handled by their respective orchestrators — skip them.
-  if (isDerivationLogicConfig(config) || isPropertyDerivationLogicConfig(config)) return;
+  // Value derivations (including property derivations via targetProperty) are handled by their orchestrators — skip them.
+  if (isDerivationLogicConfig(config)) return;
 
   // Guard against unrecognized logic types that may be added in the future.
   if (!isStateLogicConfig(config)) {
@@ -71,7 +72,7 @@ export function applyLogic<TValue>(config: LogicConfig, fieldPath: SchemaPath<TV
   applyLogicFn(config.type, path, logicFn);
 }
 
-function applyLogicFn<TValue>(type: LogicConfig['type'], path: SchemaPath<TValue>, logicFn: AnyLogicFn<TValue>): void {
+function applyLogicFn<TValue>(type: StateLogicType, path: SchemaPath<TValue>, logicFn: AnyLogicFn<TValue>): void {
   switch (type) {
     case 'hidden':
       hidden(path, logicFn);
@@ -85,6 +86,10 @@ function applyLogicFn<TValue>(type: LogicConfig['type'], path: SchemaPath<TValue
     case 'required':
       required(path, { when: logicFn });
       break;
+    default: {
+      const _exhaustive: never = type;
+      throw new DynamicFormError(`Unhandled state logic type: ${_exhaustive}`);
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-import { APP_ID, Component, ViewEncapsulation } from '@angular/core';
+import { APP_ID, ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { provideRouter, Route } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
@@ -13,6 +13,7 @@ import { SandboxAppFactory } from '@ng-forge/sandbox-harness';
   imports: [IonApp, IonRouterOutlet],
   template: `<ion-app><ion-router-outlet /></ion-app>`,
   encapsulation: ViewEncapsulation.ExperimentalIsolatedShadowDom,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class IonicRootComponent {}
 

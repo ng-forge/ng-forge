@@ -357,7 +357,7 @@ describe('validator-factory', () => {
       });
     });
 
-    describe('deprecated type aliases', () => {
+    describe('async and http validator types', () => {
       it('should accept type: async and apply async validator', () => {
         runInInjectionContext(injector, () => {
           const registry = TestBed.inject(FunctionRegistryService);
@@ -379,53 +379,6 @@ describe('validator-factory', () => {
             }),
           );
           mockFormSignal.set(formInstance);
-        });
-      });
-
-      it('should emit deprecation warning for type: customAsync', () => {
-        runInInjectionContext(injector, () => {
-          const registry = TestBed.inject(FunctionRegistryService);
-          registry.registerAsyncValidator('myAsyncValidator', {
-            params: () => ({}),
-            factory: () => ({ value: signal(null) }) as any,
-            onSuccess: () => null,
-          });
-
-          const formValue = signal({ username: 'test' });
-          const config: ValidatorConfig = { type: 'customAsync', functionName: 'myAsyncValidator' };
-
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>((path) => {
-              applyValidator(config, path.username);
-            }),
-          );
-          mockFormSignal.set(formInstance);
-
-          expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining("'customAsync' is deprecated"));
-        });
-      });
-
-      it('should emit deprecation warning for type: customHttp', () => {
-        runInInjectionContext(injector, () => {
-          const registry = TestBed.inject(FunctionRegistryService);
-          registry.registerHttpValidator('myHttpValidator', {
-            request: () => '/api/check',
-            onSuccess: () => null,
-          });
-
-          const formValue = signal({ username: 'test' });
-          const config: ValidatorConfig = { type: 'customHttp', functionName: 'myHttpValidator' } as any;
-
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>((path) => {
-              applyValidator(config, path.username);
-            }),
-          );
-          mockFormSignal.set(formInstance);
-
-          expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining("'customHttp' is deprecated"));
         });
       });
 

@@ -90,7 +90,7 @@ export const ValidatorConfigSchema = z.discriminatedUnion('type', [
   }),
   // Async validators
   BaseValidatorSchema.extend({
-    type: z.literal('customAsync'),
+    type: z.literal('async'),
     /**
      * Name of a registered async validator function. Required.
      */
@@ -102,7 +102,7 @@ export const ValidatorConfigSchema = z.discriminatedUnion('type', [
   }),
   // HTTP validators
   BaseValidatorSchema.extend({
-    type: z.literal('customHttp'),
+    type: z.literal('http'),
     /**
      * Name of a registered HTTP validator config function. Required.
      */

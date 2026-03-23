@@ -387,51 +387,6 @@ export interface CustomFnConfig<TFormValue extends Record<string, unknown> = Rec
    */
   derivations?: Record<string, CustomFunction<TFormValue>>;
 
-  // TODO(@ng-forge): remove deprecated code in next minor
-  /**
-   * @deprecated Register functions under `derivations` instead. Use `type: 'derivation'`
-   * with `targetProperty` in field logic configs. Will be removed in a future minor version.
-   *
-   * Custom property derivation functions for reactive property updates.
-   *
-   * These functions compute derived values for field properties (like `minDate`,
-   * `options`, `label`, `placeholder`) and are called when a
-   * `PropertyDerivationLogicConfig` references them by `functionName`.
-   *
-   * Property derivation functions:
-   * - Receive an `EvaluationContext` with access to `formValue`
-   * - Return the value to set on the target property
-   * - Are called reactively when dependencies change
-   *
-   * @example
-   * ```typescript
-   * propertyDerivations: {
-   *   getCitiesForCountry: (context) => {
-   *     const countryCities: Record<string, Array<{ label: string; value: string }>> = {
-   *       'USA': [{ label: 'New York', value: 'ny' }, { label: 'LA', value: 'la' }],
-   *       'Germany': [{ label: 'Berlin', value: 'berlin' }, { label: 'Munich', value: 'munich' }],
-   *     };
-   *     return countryCities[context.formValue.country as string] ?? [];
-   *   },
-   * }
-   * ```
-   *
-   * Field configuration using a property derivation function:
-   * ```typescript
-   * {
-   *   key: 'city',
-   *   type: 'select',
-   *   logic: [{
-   *     type: 'propertyDerivation',
-   *     targetProperty: 'options',
-   *     functionName: 'getCitiesForCountry',
-   *     dependsOn: ['country']
-   *   }]
-   * }
-   * ```
-   */
-  propertyDerivations?: Record<string, CustomFunction<TFormValue>>;
-
   /**
    * Async derivation functions for asynchronous value derivation logic.
    *
@@ -606,74 +561,19 @@ export interface CustomFnConfig<TFormValue extends Record<string, unknown> = Rec
    */
   asyncValidators?: Record<string, AsyncCustomValidator>;
 
-  // TODO(@ng-forge): remove deprecated code in next minor
   /**
-   * @deprecated Prefer declarative HTTP validators using `type: 'http'` with `http` + `responseMapping`
-   * in the validators array. Function-based HTTP validators now also use `type: 'http'` with `functionName`.
-   * Will be removed in a future minor version.
+   * HTTP validators using Angular's validateHttp() API.
    *
-   * HTTP validators using Angular's validateHttp() API
+   * For function-based HTTP validation with automatic request cancellation.
+   * Prefer declarative HTTP validators (`type: 'http'` with `http` + `responseMapping`)
+   * for fully JSON-serializable validation when possible.
    *
-   * Angular's validateHttp provides HTTP validation with automatic request
-   * cancellation and integration with the resource API.
-   *
-   * **Structure:**
-   * - `request`: Function that returns URL string or HttpResourceRequest
-   * - `onSuccess`: REQUIRED - Maps HTTP response to validation errors (inverted logic!)
-   * - `onError`: Optional handler for HTTP errors
-   *
-   * **Benefits:**
-   * - Automatic request cancellation when field value changes
-   * - Built-in integration with Angular's resource management
-   * - Simpler than asyncValidators for HTTP use cases
-   *
-   * **Important:** `onSuccess` uses inverted logic - it maps SUCCESSFUL HTTP responses
-   * to validation errors. For example, if the API returns `{ available: false }`,
-   * your `onSuccess` should return `{ kind: 'usernameTaken' }`.
-   *
-   * @example Username Availability Check (GET)
+   * @example
    * ```typescript
    * httpValidators: {
    *   checkUsername: {
-   *     request: (ctx) => {
-   *       const username = ctx.value();
-   *       if (!username) return undefined; // Skip validation if empty
-   *       return `/api/users/check-username?username=${encodeURIComponent(username)}`;
-   *     },
-   *     onSuccess: (response, ctx) => {
-   *       // Inverted logic: successful response may indicate validation failure
-   *       return response.available ? null : { kind: 'usernameTaken' };
-   *     },
-   *     onError: (error, ctx) => {
-   *       console.error('Availability check failed:', error);
-   *       return null; // Don't block form on network errors
-   *     }
-   *   }
-   * }
-   * ```
-   *
-   * @example Address Validation (POST with Body)
-   * ```typescript
-   * httpValidators: {
-   *   validateAddress: {
-   *     request: (ctx) => {
-   *       const zipCode = ctx.value();
-   *       if (!zipCode) return undefined;
-   *
-   *       return {
-   *         url: '/api/validate-address',
-   *         method: 'POST',
-   *         body: {
-   *           street: ctx.valueOf('street' as any),
-   *           city: ctx.valueOf('city' as any),
-   *           zipCode: zipCode
-   *         },
-   *         headers: { 'Content-Type': 'application/json' }
-   *       };
-   *     },
-   *     onSuccess: (response) => {
-   *       return response.valid ? null : { kind: 'invalidAddress' };
-   *     }
+   *     request: (ctx) => `/api/users/check?username=${encodeURIComponent(ctx.value())}`,
+   *     onSuccess: (response) => response.available ? null : { kind: 'usernameTaken' },
    *   }
    * }
    * ```

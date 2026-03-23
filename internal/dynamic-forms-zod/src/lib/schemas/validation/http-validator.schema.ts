@@ -7,7 +7,7 @@ import { ConditionalExpressionSchema } from '../logic/conditional-expression.sch
  * Original interface:
  * ```typescript
  * interface HttpValidatorConfig extends BaseValidatorConfig {
- *   type: 'customHttp';
+ *   type: 'http';
  *   functionName: string;
  *   params?: Record<string, unknown>;
  * }
@@ -20,7 +20,7 @@ export const HttpValidatorConfigSchema = z.object({
   /**
    * Discriminant for HTTP validators.
    */
-  type: z.literal('customHttp'),
+  type: z.literal('http'),
 
   /**
    * Name of a registered HTTP validator config function.

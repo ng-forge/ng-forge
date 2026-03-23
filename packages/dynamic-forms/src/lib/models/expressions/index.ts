@@ -2,7 +2,6 @@ export type {
   ComparisonOperator,
   ConditionalExpression,
   FieldValueCondition,
-  FormValueCondition,
   CustomCondition,
   JavascriptCondition,
   HttpCondition,

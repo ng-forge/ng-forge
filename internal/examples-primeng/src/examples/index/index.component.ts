@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'example-index',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="index-container">
       <h1>PrimeNG Examples</h1>

@@ -1,11 +1,11 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { DerivationLogicConfig, LogicTrigger, PropertyDerivationLogicConfig } from '../../models/logic/logic-config';
+import { DerivationLogicConfig, LogicTrigger } from '../../models/logic/logic-config';
 
 /**
  * Entry representing a collected property derivation from field definitions.
  *
  * Created during form initialization when traversing field definitions
- * to collect all `type: 'propertyDerivation'` logic entries.
+ * to collect all `type: 'derivation'` logic entries with `targetProperty`.
  *
  * All property derivations are self-targeting: the `fieldKey` is both where the
  * derivation is defined AND where the derived property will be set.
@@ -93,7 +93,7 @@ export interface PropertyDerivationEntry {
   /**
    * The original logic config if this entry was created from a full logic config.
    */
-  originalConfig?: PropertyDerivationLogicConfig | DerivationLogicConfig;
+  originalConfig?: DerivationLogicConfig;
 }
 
 /**

@@ -52,13 +52,24 @@ import { EventDispatcher } from './events/event-dispatcher';
   imports: [NgComponentOutlet, PageOrchestratorComponent],
   template: `
     @if (shouldRender()) {
-      @if (formModeDetection().mode === 'paged') {
-        <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="form()" [fieldSignalContext]="fieldSignalContext()"></div>
-      } @else {
-        @for (field of resolvedFields(); track field.key) {
-          <ng-container
-            *ngComponentOutlet="field.component; injector: field.injector; environmentInjector: environmentInjector; inputs: field.inputs()"
-          />
+      @switch (formModeDetection().mode) {
+        @case ('paged') {
+          <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="form()" [fieldSignalContext]="fieldSignalContext()"></div>
+        }
+        @case ('non-paged') {
+          @for (field of resolvedFields(); track field.key) {
+            <ng-container
+              *ngComponentOutlet="
+                field.component;
+                injector: field.injector;
+                environmentInjector: environmentInjector;
+                inputs: field.inputs()
+              "
+            />
+          }
+        }
+        @default {
+          never;
         }
       }
     }

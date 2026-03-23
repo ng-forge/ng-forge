@@ -5,12 +5,6 @@ import { isGroupField } from './group-field';
 import { ContainerLogicConfig } from '../base/container-logic-config';
 
 /**
- * Logic configuration for page fields.
- * @deprecated Use `ContainerLogicConfig` instead. This is a backwards-compatible alias.
- */
-export type PageLogicConfig = ContainerLogicConfig;
-
-/**
  * Page field interface for creating top-level page layouts
  * This is a special field type that contains other field definitions
  * The page itself doesn't have a value - it's a layout container like row

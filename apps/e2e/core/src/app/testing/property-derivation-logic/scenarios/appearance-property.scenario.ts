@@ -22,7 +22,7 @@ const config = {
       col: 6,
       logic: [
         {
-          type: 'propertyDerivation',
+          type: 'derivation',
           targetProperty: 'props.appearance',
           value: 'outline',
           condition: {
@@ -33,7 +33,7 @@ const config = {
           },
         },
         {
-          type: 'propertyDerivation',
+          type: 'derivation',
           targetProperty: 'props.appearance',
           value: 'fill',
           condition: {

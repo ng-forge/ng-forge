@@ -296,8 +296,6 @@ const passwordMatch: CustomValidator = (ctx) => {
 
 ## Async Validators (Resource-based)
 
-> **Deprecation notice:** The old `type: 'customAsync'` still works but is deprecated. Use `type: 'async'` instead.
-
 Async validators use Angular's resource API for database lookups or complex async operations.
 
 ### Basic Example
@@ -491,8 +489,6 @@ interface HttpValidationResponseMapping {
 | Custom error handling (fail-open on error)      | Function-based (`HttpCustomValidator`)           |
 
 ## HTTP Validators (Function-Based)
-
-> **Deprecation notice:** The old `type: 'customHttp'` still works but is deprecated. Use `type: 'http'` with `functionName` instead.
 
 Function-based HTTP validators give you full programmatic control over request construction and response handling.
 

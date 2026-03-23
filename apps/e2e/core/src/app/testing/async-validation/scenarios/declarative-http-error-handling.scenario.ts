@@ -4,7 +4,7 @@ import { TestScenario } from '../../shared/types';
 /**
  * Declarative HTTP error handling scenario — tests fail-closed behavior.
  * When the HTTP request fails, declarative `type: 'http'` validators return
- * `{ kind: errorKind }` (fail-closed), unlike `customHttp` which can return null (permissive).
+ * `{ kind: errorKind }` (fail-closed), unlike function-based `http` validators which can return null (permissive).
  */
 const config = {
   defaultValidationMessages: {

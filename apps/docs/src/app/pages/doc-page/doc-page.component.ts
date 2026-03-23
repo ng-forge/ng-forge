@@ -453,9 +453,13 @@ export class DocPageComponent {
   private readonly contentResource = rxResource({
     params: () => {
       const s = this.slug();
-      return s && s !== 'examples' && !s.startsWith('api-reference') ? { slug: s } : undefined;
+      // Return the slug string directly — not an object wrapper.
+      // rxResource compares params with ===; wrapping in { slug: s } creates a new object
+      // reference each evaluation, causing spurious re-fetches on adapter switch (where the
+      // slug stays identical but the :adapter route param changes).
+      return s && s !== 'examples' && !s.startsWith('api-reference') ? s : undefined;
     },
-    stream: ({ params }) => this.contentService.load(params.slug),
+    stream: ({ params }) => this.contentService.load(params),
   });
 
   readonly content = computed(() => this.contentResource.value());
@@ -553,8 +557,10 @@ export class DocPageComponent {
       return;
     }
 
-    // Internal doc link — add adapter prefix for SPA navigation
-    const link = target.closest('a[href]') as HTMLAnchorElement | null;
+    // Internal doc link — add adapter prefix for SPA navigation.
+    // Only intercept links inside .doc-page-content (rendered markdown).
+    // Breadcrumb and nav links use routerLink which handles navigation natively.
+    const link = target.closest('.doc-page-content a[href]') as HTMLAnchorElement | null;
     if (link) {
       const href = link.getAttribute('href') ?? '';
       // Same-page anchor links — scroll to the element directly (avoids <base href> stripping the path)

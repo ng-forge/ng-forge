@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Component, DestroyRef, Injector } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Injector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import { SideEffectScheduler, createSideEffectScheduler } from './side-effect-scheduler';
@@ -282,7 +282,7 @@ describe('SideEffectScheduler', () => {
      * We create a minimal component and trigger change detection.
      */
 
-    @Component({ template: '' })
+    @Component({ template: '', changeDetection: ChangeDetectionStrategy.OnPush })
     class TestHostComponent {}
 
     it('should emit the effect result after Angular render', async () => {

@@ -5,7 +5,7 @@ import { ExpressionParser } from '../expressions/parser/expression-parser';
  * Create a type predicate function from a predicate string.
  *
  * Uses the secure ExpressionParser with whitelist-based evaluation instead of
- * new Function() / eval. This provides security through:
+ * dynamic code execution. This provides security through:
  * - AST-based parsing (no code execution)
  * - Whitelisted operators only
  * - Whitelisted methods only (Array.isArray, typeof, instanceof, etc.)

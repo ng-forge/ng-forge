@@ -25,10 +25,6 @@ Property derivations use `type: 'derivation'` with `targetProperty` in the `logi
 
 When `startDate` changes, the `minDate` property on `endDate`'s datepicker component is automatically updated.
 
-> **Migration note:** The previous `type: 'propertyDerivation'` syntax is deprecated but still works.
-> Use `type: 'derivation'` with `targetProperty` instead. Similarly, register functions via
-> `customFnConfig.derivations` instead of `customFnConfig.propertyDerivations`.
-
 ## Derivation Sources
 
 Property derivations support three mutually exclusive ways to compute a value.
