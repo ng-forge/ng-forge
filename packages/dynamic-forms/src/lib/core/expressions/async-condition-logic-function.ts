@@ -1,7 +1,6 @@
 import { inject, Injector, Resource, resource, signal, untracked, WritableSignal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { debounceTime, distinctUntilChanged, firstValueFrom, from, isObservable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, firstValueFrom, from, isObservable, pipe } from 'rxjs';
 import { AsyncCondition } from '../../models/expressions/conditional-expression';
 import { stableStringify } from '../../utils/stable-stringify';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
@@ -11,6 +10,7 @@ import { Logger } from '../../providers/features/logger/logger.interface';
 import { AsyncConditionFunctionCacheService } from './async-condition-function-cache.service';
 import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
 import { withPreviousValue } from '../../utils/resource-composition/with-previous-value';
+import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 
 /**
  * Creates a logic function for an async condition.
@@ -69,7 +69,8 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
       // clear the active reactive consumer before creating the resource pipeline.
       const resultResource = untracked(() => {
         // Debounce the trigger to batch rapid form value changes.
-        const debouncedTrigger = toSignal(toObservable(trigger, { injector }).pipe(debounceTime(debounceMs), distinctUntilChanged()), {
+        const debouncedTrigger = derivedFromDeferred(trigger, pipe(debounceTime(debounceMs), distinctUntilChanged()), {
+          initialValue: undefined as string | undefined,
           injector,
         });
 

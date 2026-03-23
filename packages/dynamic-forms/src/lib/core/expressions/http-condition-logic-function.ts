@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injector, Resource, resource, signal, untracked, WritableSignal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, pipe } from 'rxjs';
 import { HttpCondition } from '../../models/expressions/conditional-expression';
 import { stableStringify } from '../../utils/stable-stringify';
 import { HttpResourceRequest } from '../validation/validator-types';
@@ -17,6 +16,7 @@ import { ExpressionParser } from './parser/expression-parser';
 import { HttpConditionFunctionCacheService } from './http-condition-function-cache.service';
 import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
 import { withPreviousValue } from '../../utils/resource-composition/with-previous-value';
+import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 
 /**
  * Extracts a boolean from an HTTP response using an optional expression.
@@ -99,12 +99,13 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
       const resultResource = untracked(() => {
         // Create a debounced, stabilized version of the request signal.
         // This prevents rapid re-fetches when form values change quickly.
-        const debouncedRequest = toSignal(
-          toObservable(resolvedRequest, { injector }).pipe(
+        const debouncedRequest = derivedFromDeferred(
+          resolvedRequest,
+          pipe(
             debounceTime(debounceMs),
             distinctUntilChanged((prev, curr) => stableStringify(prev) === stableStringify(curr)),
           ),
-          { injector },
+          { initialValue: undefined as HttpResourceRequest | undefined, injector },
         );
 
         // resource() manages the HTTP lifecycle: auto-cancellation via AbortSignal,
