@@ -7592,17 +7592,7 @@ npx @ng-forge/openapi-generator generate --spec ./openapi.yaml --output ./src/fo
 
 Or install as a dev dependency:
 
-```bash
-npm install -D @ng-forge/openapi-generator
-```
-
-```bash
-pnpm add -D @ng-forge/openapi-generator
-```
-
-```bash
-yarn add -D @ng-forge/openapi-generator
-```
+<docs-install-command packages="-D @ng-forge/openapi-generator"></docs-install-command>
 
 ## Quick Start
 
