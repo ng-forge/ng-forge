@@ -1,9 +1,11 @@
-import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import { registerGenerateCommand } from './commands/generate.command.js';
 
-const require = createRequire(import.meta.url);
-const { version } = require('../../package.json') as { version: string };
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const { version } = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8')) as { version: string };
 
 export async function run(): Promise<void> {
   const program = new Command();

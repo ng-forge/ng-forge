@@ -23,6 +23,9 @@
         "format": ["esm"],
         "platform": "node",
         "bundle": true,
+        "esbuildOptions": {
+          "external": ["commander", "@inquirer/prompts", "@apidevtools/swagger-parser", "chokidar", "chalk", "openapi-types"]
+        },
         "additionalEntryPoints": ["packages/openapi-generator/bin/ng-forge-generator.ts"],
         "assets": ["packages/openapi-generator/README.md", "packages/openapi-generator/package.json"]
       }
