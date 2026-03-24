@@ -1,7 +1,43 @@
+import type { Locator, Page } from '@playwright/test';
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
 
 setupTestLogging();
 setupConsoleCheck();
+
+const desktopViewport = { width: 1280, height: 720 } as const;
+const mobileViewport = { width: 375, height: 667 } as const;
+
+async function setViewport(page: Page, viewport: { width: number; height: number }) {
+  await page.setViewportSize(viewport);
+  await page.waitForFunction((width: number) => window.innerWidth === width, viewport.width);
+}
+
+async function getRequiredBox(locator: Locator) {
+  const box = await locator.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) {
+    throw new Error('Expected locator to have a bounding box');
+  }
+  return box;
+}
+
+async function expectHorizontalLayout(scenario: Locator, firstId: string, secondId: string) {
+  const first = await getRequiredBox(scenario.locator(`#${firstId}`));
+  const second = await getRequiredBox(scenario.locator(`#${secondId}`));
+
+  expect(Math.abs(first.y - second.y)).toBeLessThan(24);
+  expect(Math.abs(first.x - second.x)).toBeGreaterThan(24);
+}
+
+async function expectVerticalLayout(scenario: Locator, firstId: string, secondId: string) {
+  const first = await getRequiredBox(scenario.locator(`#${firstId}`));
+  const second = await getRequiredBox(scenario.locator(`#${secondId}`));
+
+  expect(Math.abs(first.x - second.x)).toBeLessThan(12);
+  expect(second.y).toBeGreaterThan(first.y + 8);
+  expect(first.x + first.width).toBeLessThanOrEqual(second.x + second.width + 12);
+  expect(second.x + second.width).toBeLessThanOrEqual(first.x + first.width + 12);
+}
 
 test.describe('Row Fields E2E Tests', () => {
   test.beforeEach(async ({ helpers }) => {
@@ -90,6 +126,24 @@ test.describe('Row Fields E2E Tests', () => {
 
       // Screenshot: Filled nested layout
       await helpers.expectScreenshotMatch(scenario, 'material-row-containing-group-filled');
+    });
+
+    test('should stack row-contained groups on mobile without breaking desktop layout', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('row-containing-group');
+      await page.goto('/#/test/row-fields/row-containing-group');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await setViewport(page, desktopViewport);
+      await expectHorizontalLayout(scenario, 'personalInfo', 'contactInfo');
+
+      await setViewport(page, mobileViewport);
+      await expectVerticalLayout(scenario, 'personalInfo', 'contactInfo');
+
+      await expect(scenario.locator('#personalInfo input').first()).toBeVisible({ timeout: 5000 });
+      await expect(scenario.locator('#contactInfo input').first()).toBeVisible({ timeout: 5000 });
+
+      await setViewport(page, desktopViewport);
     });
   });
 });
