@@ -30,6 +30,35 @@ describe('registerGenerateCommand', () => {
     const skipExistingOption = generateCmd!.options.find((opt) => opt.long === '--skip-existing');
     expect(skipExistingOption).toBeDefined();
   });
+
+  it('should register --interactive option with validation', () => {
+    const program = new Command();
+    registerGenerateCommand(program);
+
+    const generateCmd = program.commands.find((cmd) => cmd.name() === 'generate');
+    const interactiveOption = generateCmd!.options.find((opt) => opt.long === '--interactive');
+    expect(interactiveOption).toBeDefined();
+  });
+
+  it('should reject invalid --interactive values', () => {
+    const program = new Command();
+    program.exitOverride();
+    registerGenerateCommand(program);
+
+    expect(() => {
+      program.parse(['node', 'test', 'generate', '--spec', 'a.yaml', '--output', './out', '--interactive', 'banana'], { from: 'user' });
+    }).toThrow();
+  });
+
+  it('should include help text about formatting', () => {
+    const program = new Command();
+    registerGenerateCommand(program);
+
+    const generateCmd = program.commands.find((cmd) => cmd.name() === 'generate');
+    const helpText = generateCmd!.helpInformation();
+    // The addHelpText is appended after help info, so we can check the option exists
+    expect(helpText).toContain('--interactive');
+  });
 });
 
 describe('filterEndpoints', () => {

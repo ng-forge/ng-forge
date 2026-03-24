@@ -7,6 +7,7 @@ export interface FieldTypeResult {
   isAmbiguous: boolean;
   ambiguousScope?: string;
   defaultAlternative?: string;
+  isPrimitiveArray?: boolean;
 }
 
 /**
@@ -101,7 +102,7 @@ export function mapSchemaToFieldType(schema: SchemaObject): FieldTypeResult {
       return { fieldType: 'array', isContainer: true, isAmbiguous: false };
     }
     // array of primitives
-    return { fieldType: 'input', props: { type: 'text' }, isContainer: false, isAmbiguous: false };
+    return { fieldType: 'array', isContainer: true, isAmbiguous: false, isPrimitiveArray: true };
   }
 
   // object → group container

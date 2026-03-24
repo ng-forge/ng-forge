@@ -52,6 +52,29 @@ describe('toEnumLabel', () => {
   it('should handle kebab-case', () => {
     expect(toEnumLabel('not-started')).toBe('Not Started');
   });
+
+  it('should preserve 2-letter ISO codes', () => {
+    expect(toEnumLabel('US')).toBe('US');
+    expect(toEnumLabel('UK')).toBe('UK');
+    expect(toEnumLabel('EU')).toBe('EU');
+  });
+
+  it('should preserve 3-letter ISO codes', () => {
+    expect(toEnumLabel('USA')).toBe('USA');
+    expect(toEnumLabel('GBR')).toBe('GBR');
+  });
+
+  it('should still humanize SCREAMING_SNAKE_CASE with separators', () => {
+    expect(toEnumLabel('PENDING_REVIEW')).toBe('Pending Review');
+  });
+
+  it('should still humanize 4+ char all-caps without separator', () => {
+    expect(toEnumLabel('ACTIVE')).toBe('Active');
+  });
+
+  it('should still humanize 3 chars with separator', () => {
+    expect(toEnumLabel('A_B')).toBe('A B');
+  });
 });
 
 describe('toPascalCase', () => {

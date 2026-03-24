@@ -217,3 +217,159 @@ describe('generateFormConfig', () => {
     expect(result).not.toContain("'rows'");
   });
 });
+
+describe('array template rendering', () => {
+  const defaultOptions: FormConfigGeneratorOptions = { method: 'POST', path: '/items', operationId: 'createItem' };
+
+  it('should render single template for primitive arrays', () => {
+    const fields: FieldConfig[] = [
+      {
+        key: 'tags',
+        type: 'array',
+        label: 'Tags',
+        template: { key: 'value', type: 'input', label: 'Tag', props: { type: 'text' } },
+        addButton: { label: 'Add Tag' },
+        removeButton: { label: 'Remove' },
+      },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain("type: 'array'");
+    expect(result).toContain('template: {');
+    expect(result).toContain("key: 'value'");
+    expect(result).toContain("type: 'input'");
+    expect(result).toContain("label: 'Tag'");
+    expect(result).toContain("addButton: { label: 'Add Tag' }");
+    expect(result).toContain("removeButton: { label: 'Remove' }");
+    // The array field should use 'template: {' (single object), not 'template: ['
+    expect(result).toMatch(/template:\s*\{/);
+    expect(result).not.toMatch(/template:\s*\[/);
+  });
+
+  it('should render array template for object arrays', () => {
+    const fields: FieldConfig[] = [
+      {
+        key: 'contacts',
+        type: 'array',
+        label: 'Contacts',
+        template: [
+          { key: 'name', type: 'input', label: 'Name' },
+          { key: 'phone', type: 'input', label: 'Phone' },
+        ],
+        addButton: { label: 'Add Contact' },
+        removeButton: { label: 'Remove' },
+      },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain('template: [');
+    expect(result).toContain("key: 'name'");
+    expect(result).toContain("key: 'phone'");
+    expect(result).toContain("addButton: { label: 'Add Contact' }");
+  });
+
+  it('should render addButton: false', () => {
+    const fields: FieldConfig[] = [
+      {
+        key: 'items',
+        type: 'array',
+        label: 'Items',
+        template: { key: 'value', type: 'input', label: 'Item' },
+        addButton: false,
+      },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+    expect(result).toContain('addButton: false,');
+  });
+
+  it('should render removeButton: false', () => {
+    const fields: FieldConfig[] = [
+      {
+        key: 'items',
+        type: 'array',
+        label: 'Items',
+        template: { key: 'value', type: 'input', label: 'Item' },
+        removeButton: false,
+      },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+    expect(result).toContain('removeButton: false,');
+  });
+
+  it('should render array-level validators', () => {
+    const fields: FieldConfig[] = [
+      {
+        key: 'tags',
+        type: 'array',
+        label: 'Tags',
+        template: { key: 'value', type: 'input', label: 'Tag' },
+        validators: [
+          { type: 'minLength', value: 1 },
+          { type: 'maxLength', value: 10 },
+        ],
+        addButton: { label: 'Add Tag' },
+      },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+    expect(result).toContain("{ type: 'minLength', value: 1 }");
+    expect(result).toContain("{ type: 'maxLength', value: 10 }");
+  });
+
+  it('should render template with validators', () => {
+    const fields: FieldConfig[] = [
+      {
+        key: 'emails',
+        type: 'array',
+        label: 'Emails',
+        template: {
+          key: 'value',
+          type: 'input',
+          label: 'Email',
+          props: { type: 'email' },
+          validators: [{ type: 'email' }, { type: 'maxLength', value: 100 }],
+        },
+        addButton: { label: 'Add Email' },
+      },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+    expect(result).toContain('template: {');
+    expect(result).toContain("type: 'email'");
+    expect(result).toContain("{ type: 'maxLength', value: 100 }");
+  });
+
+  it('should render addButton with props', () => {
+    const fields: FieldConfig[] = [
+      {
+        key: 'items',
+        type: 'array',
+        label: 'Items',
+        template: { key: 'value', type: 'input', label: 'Item' },
+        addButton: { label: 'Add Item', props: { color: 'primary' } },
+      },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+    expect(result).toContain('addButton: { label: \'Add Item\', props: { color: "primary" } }');
+  });
+
+  it('should not render template or buttons when not present', () => {
+    const fields: FieldConfig[] = [
+      {
+        key: 'name',
+        type: 'input',
+        label: 'Name',
+      },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+    expect(result).not.toContain('template');
+    expect(result).not.toContain('addButton');
+    expect(result).not.toContain('removeButton');
+  });
+});

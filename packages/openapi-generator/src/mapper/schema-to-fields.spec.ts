@@ -63,7 +63,11 @@ describe('mapSchemaToFields', () => {
     const result = mapSchemaToFields(schema, []);
     expect(result.fields).toHaveLength(1);
     expect(result.fields[0].type).toBe('array');
-    expect(result.fields[0].fields).toHaveLength(2);
+    expect(result.fields[0].template).toBeInstanceOf(Array);
+    expect((result.fields[0].template as any[]).length).toBe(2);
+    expect(result.fields[0].addButton).toEqual({ label: 'Add Item' });
+    expect(result.fields[0].removeButton).toEqual({ label: 'Remove' });
+    expect(result.fields[0].fields).toBeUndefined();
   });
 
   it('should map enum to select with options', () => {
@@ -443,5 +447,206 @@ describe('mapSchemaToFields', () => {
     ]);
     expect(result.fields[2].fields).toHaveLength(1);
     expect(result.fields[2].fields![0].key).toBe('indoor');
+  });
+
+  describe('array fields', () => {
+    it('should map primitive string array to array field with single template', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          tags: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+        },
+      } as SchemaObject;
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields).toHaveLength(1);
+      const field = result.fields[0];
+      expect(field.type).toBe('array');
+      expect(field.key).toBe('tags');
+      expect(field.template).toEqual({
+        key: 'value',
+        type: 'input',
+        label: 'Tag',
+        props: { type: 'text' },
+      });
+      expect(field.addButton).toEqual({ label: 'Add Tag' });
+      expect(field.removeButton).toEqual({ label: 'Remove' });
+      expect(field.fields).toBeUndefined();
+    });
+
+    it('should map primitive integer array to array field with number template', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          scores: {
+            type: 'array',
+            items: { type: 'integer' },
+          },
+        },
+      } as SchemaObject;
+
+      const result = mapSchemaToFields(schema, []);
+      const field = result.fields[0];
+      expect(field.type).toBe('array');
+      expect(field.template).toMatchObject({
+        key: 'value',
+        type: 'input',
+        label: 'Score',
+        props: { type: 'number' },
+      });
+    });
+
+    it('should map object array to array field with template array', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          contacts: {
+            type: 'array',
+            items: {
+              type: 'object',
+              required: ['name'],
+              properties: {
+                name: { type: 'string', maxLength: 100 },
+                email: { type: 'string', format: 'email' },
+              },
+            },
+          },
+        },
+      } as SchemaObject;
+
+      const result = mapSchemaToFields(schema, []);
+      const field = result.fields[0];
+      expect(field.type).toBe('array');
+      expect(Array.isArray(field.template)).toBe(true);
+      const template = field.template as any[];
+      expect(template).toHaveLength(2);
+      expect(template[0].key).toBe('name');
+      expect(template[1].key).toBe('email');
+      expect(field.addButton).toEqual({ label: 'Add Contact' });
+      expect(field.removeButton).toEqual({ label: 'Remove' });
+      expect(field.fields).toBeUndefined();
+    });
+
+    it('should include minLength/maxLength validators from minItems/maxItems', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          tags: {
+            type: 'array',
+            items: { type: 'string' },
+            minItems: 1,
+            maxItems: 5,
+          },
+        },
+      } as SchemaObject;
+
+      const result = mapSchemaToFields(schema, []);
+      const field = result.fields[0];
+      expect(field.validators).toContainEqual({ type: 'minLength', value: 1 });
+      expect(field.validators).toContainEqual({ type: 'maxLength', value: 5 });
+    });
+
+    it('should apply item-level validators to primitive array template', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          emails: {
+            type: 'array',
+            items: { type: 'string', format: 'email', maxLength: 100 },
+          },
+        },
+      } as SchemaObject;
+
+      const result = mapSchemaToFields(schema, []);
+      const template = result.fields[0].template as any;
+      expect(template.type).toBe('input');
+      expect(template.props).toEqual({ type: 'email' });
+      expect(template.validators).toContainEqual({ type: 'email' });
+      expect(template.validators).toContainEqual({ type: 'maxLength', value: 100 });
+    });
+
+    it('should handle enum items in primitive array template', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          priorities: {
+            type: 'array',
+            items: { type: 'string', enum: ['low', 'medium', 'high'] },
+          },
+        },
+      } as SchemaObject;
+
+      // Note: array+enum items go to multi-checkbox, not the array template path
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].type).toBe('multi-checkbox');
+    });
+
+    it('should not singularize words ending in ss', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          address: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+        },
+      } as SchemaObject;
+
+      const result = mapSchemaToFields(schema, []);
+      const template = result.fields[0].template as any;
+      expect(template.label).toBe('Address');
+      expect(result.fields[0].addButton).toEqual({ label: 'Add Address' });
+    });
+
+    it('should not singularize short words', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          bus: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+        },
+      } as SchemaObject;
+
+      const result = mapSchemaToFields(schema, []);
+      const template = result.fields[0].template as any;
+      expect(template.label).toBe('Bus');
+    });
+  });
+
+  describe('phone heuristic', () => {
+    it('should resolve phone field name to input type=tel', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          phone: { type: 'string' },
+          mobilePhone: { type: 'string' },
+          homeTel: { type: 'string' },
+        },
+      } as SchemaObject;
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].props?.['type']).toBe('tel');
+      expect(result.fields[1].props?.['type']).toBe('tel');
+      expect(result.fields[2].props?.['type']).toBe('tel');
+    });
+
+    it('should not apply phone heuristic to non-phone fields', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          telephoneDescription: { type: 'string' },
+        },
+      } as SchemaObject;
+
+      const result = mapSchemaToFields(schema, []);
+      // 'name' has no match, 'telephoneDescription' ends in 'Description' not 'telephone'
+      expect(result.fields[0].props?.['type']).toBe('text');
+    });
   });
 });

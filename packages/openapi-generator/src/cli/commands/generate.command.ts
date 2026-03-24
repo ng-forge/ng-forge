@@ -36,13 +36,24 @@ export function registerGenerateCommand(program: Command): void {
     .description('Generate dynamic form configurations from an OpenAPI spec')
     .requiredOption('--spec <path>', 'Path to OpenAPI spec file')
     .requiredOption('--output <path>', 'Output directory for generated files')
-    .option('--interactive <mode>', 'Interactive mode: full or none', 'full')
+    .option(
+      '--interactive <mode>',
+      'Interactive mode: full or none',
+      (value: string) => {
+        if (value !== 'full' && value !== 'none') {
+          throw new Error(`Invalid interactive mode '${value}'. Allowed values: full, none`);
+        }
+        return value as 'full' | 'none';
+      },
+      'full',
+    )
     .option('--endpoints <list>', 'Comma-separated METHOD:/path endpoints (for non-interactive)')
     .option('--editable', 'Generate editable forms for GET endpoints')
     .option('--watch', 'Watch spec file for changes and regenerate')
     .option('--config <path>', 'Path to config file directory')
     .option('--dry-run', 'List files that would be generated without writing them')
     .option('--skip-existing', 'Skip files that already exist on disk')
+    .addHelpText('after', '\nNote: Generated files are not formatted. Run your project formatter (e.g. prettier) after generation.')
     .action(async (options: GenerateOptions) => {
       await runGenerate(options);
     });
@@ -65,6 +76,17 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
   let selectedEndpoints: EndpointInfo[];
   if (options.interactive === 'none' || options.endpoints) {
     selectedEndpoints = filterEndpoints(allEndpoints, options.endpoints);
+
+    // Warn about requested endpoints not found in the spec
+    if (options.endpoints) {
+      const requested = options.endpoints.split(',').map((s) => s.trim());
+      const matched = new Set(selectedEndpoints.map((ep) => `${ep.method}:${ep.path}`));
+      for (const req of requested) {
+        if (!matched.has(req)) {
+          logger.warn(`Requested endpoint '${req}' was not found in the spec`);
+        }
+      }
+    }
   } else {
     selectedEndpoints = await promptEndpointSelection(allEndpoints);
   }
@@ -88,6 +110,13 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
 
     const isGet = endpoint.method === 'GET';
     const editable = options.editable ?? false;
+
+    // Skip GET endpoints whose response is a top-level array (produces empty form)
+    if (isGet && schema.type === 'array') {
+      logger.warn(`${endpoint.method} ${endpoint.path}: Response is a top-level array, skipping (no form fields to generate)`);
+      continue;
+    }
+
     const schemaName = endpoint.operationId ?? `${endpoint.method}${endpoint.path}`;
 
     const mappingOptions: MappingOptions = {
@@ -181,7 +210,19 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
   }
 
   const writtenPaths = await writeGeneratedFiles(options.output, allFiles, { skipExisting: options.skipExisting });
-  logger.success(`Generated ${writtenPaths.length} files in ${options.output}`);
+  const skippedCount = allFiles.length - writtenPaths.length;
+  if (skippedCount > 0) {
+    logger.info(`Skipped ${skippedCount} existing file${skippedCount > 1 ? 's' : ''}`);
+  }
+  logger.success(`Generated ${writtenPaths.length} file${writtenPaths.length !== 1 ? 's' : ''} in ${options.output}`);
+
+  // Summary
+  const formCount = allFormFileNames.length;
+  const interfaceCount = allInterfaceFileNames.length;
+  const barrelCount = 2;
+  logger.info(`  ${formCount} form config${formCount !== 1 ? 's' : ''}`);
+  logger.info(`  ${interfaceCount} interface${interfaceCount !== 1 ? 's' : ''}`);
+  logger.info(`  ${barrelCount} barrel files`);
 
   const config: GeneratorConfig = {
     spec: options.spec,
@@ -205,7 +246,7 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
       watcher.close().then(() => process.exit(0));
     });
 
-    logger.info('Press Ctrl+C to stop watching');
+    logger.info(`Press Ctrl+C to stop watching ${options.spec}`);
     await new Promise(() => {
       // Keep process alive until user terminates
     });

@@ -165,13 +165,44 @@ describe('mapSchemaToFieldType', () => {
       expect(result.isContainer).toBe(true);
     });
 
-    it('should map array of primitives to input', () => {
+    it('should map array of string primitives to array container with isPrimitiveArray', () => {
       const result = mapSchemaToFieldType({
         type: 'array',
         items: { type: 'string' },
       } as SchemaObject);
-      expect(result.fieldType).toBe('input');
-      expect(result.isContainer).toBe(false);
+      expect(result.fieldType).toBe('array');
+      expect(result.isContainer).toBe(true);
+      expect(result.isPrimitiveArray).toBe(true);
+    });
+
+    it('should map array of integer primitives to array container with isPrimitiveArray', () => {
+      const result = mapSchemaToFieldType({
+        type: 'array',
+        items: { type: 'integer' },
+      } as SchemaObject);
+      expect(result.fieldType).toBe('array');
+      expect(result.isContainer).toBe(true);
+      expect(result.isPrimitiveArray).toBe(true);
+    });
+
+    it('should map array of boolean primitives to array container with isPrimitiveArray', () => {
+      const result = mapSchemaToFieldType({
+        type: 'array',
+        items: { type: 'boolean' },
+      } as SchemaObject);
+      expect(result.fieldType).toBe('array');
+      expect(result.isContainer).toBe(true);
+      expect(result.isPrimitiveArray).toBe(true);
+    });
+
+    it('should map array of object items to array container without isPrimitiveArray', () => {
+      const result = mapSchemaToFieldType({
+        type: 'array',
+        items: { type: 'object', properties: { name: { type: 'string' } } },
+      } as SchemaObject);
+      expect(result.fieldType).toBe('array');
+      expect(result.isContainer).toBe(true);
+      expect(result.isPrimitiveArray).toBeFalsy();
     });
   });
 

@@ -2,15 +2,15 @@ import chalk from 'chalk';
 
 export const logger = {
   info(message: string): void {
-    console.log(chalk.blue('i'), message);
+    console.log(chalk.blue('ℹ'), message);
   },
   success(message: string): void {
-    console.log(chalk.green('v'), message);
+    console.log(chalk.green('✓'), message);
   },
   warn(message: string): void {
-    console.log(chalk.yellow('!'), message);
+    console.log(chalk.yellow('⚠'), message);
   },
   error(message: string): void {
-    console.error(chalk.red('x'), message);
+    console.error(chalk.red('✗'), message);
   },
 };

@@ -6,6 +6,14 @@ import { mapSchemaToValidators } from './validator-mapping.js';
 import { mapDiscriminator } from './discriminator-mapping.js';
 import { toLabel, toEnumLabel } from '../utils/naming.js';
 
+function singularize(label: string): string {
+  // Only strip trailing 's' if word is 4+ chars and doesn't end in 'ss'
+  if (label.length >= 4 && label.endsWith('s') && !label.endsWith('ss')) {
+    return label.slice(0, -1);
+  }
+  return label;
+}
+
 export interface LogicConfig {
   type: string;
   condition: Record<string, unknown>;
@@ -22,6 +30,9 @@ export interface FieldConfig {
   validators?: ValidatorConfig[];
   disabled?: boolean;
   fields?: FieldConfig[];
+  template?: FieldConfig | FieldConfig[];
+  addButton?: { label: string; props?: Record<string, unknown> } | false;
+  removeButton?: { label: string; props?: Record<string, unknown> } | false;
   logic?: LogicConfig[];
 }
 
@@ -147,6 +158,17 @@ function mapPropertyToField(
 
   const validators = mapSchemaToValidators(prop.schema, prop.required);
 
+  // Array-level validators: minItems/maxItems → minLength/maxLength
+  const arraySchema = prop.schema as Record<string, unknown>;
+  if (typeResult.fieldType === 'array') {
+    if (arraySchema['minItems'] !== undefined) {
+      validators.push({ type: 'minLength', value: arraySchema['minItems'] as number });
+    }
+    if (arraySchema['maxItems'] !== undefined) {
+      validators.push({ type: 'maxLength', value: arraySchema['maxItems'] as number });
+    }
+  }
+
   const field: FieldConfig = {
     key: prop.name,
     type: finalType,
@@ -205,6 +227,13 @@ function mapPropertyToField(
     }
   }
 
+  // Name-based phone heuristic: resolve to input type=tel for phone/tel field names
+  if (!ngForgeType && finalType === 'input' && field.props?.['type'] === 'text') {
+    if (/(?:phone|tel|telephone|mobile|fax|cell)$/i.test(prop.name)) {
+      field.props = { ...field.props, type: 'tel' };
+    }
+  }
+
   // Handle container types recursively
   if (typeResult.isContainer) {
     const nestedSchemaName = schemaPrefix ? `${schemaPrefix}.${prop.name}` : prop.name;
@@ -216,11 +245,44 @@ function mapPropertyToField(
       // SchemaObject is a union; use bracket access for `items` on array schemas
     } else if (typeResult.fieldType === 'array' && (prop.schema as Record<string, unknown>)['items']) {
       const items = (prop.schema as Record<string, unknown>)['items'] as SchemaObject;
+      const fieldLabel = singularize(toLabel(prop.name));
+
       if (items.type === 'object' || items.properties) {
+        // Object array → template is an array of fields
         const innerResult = mapSchemaToFields(items, items.required ?? [], nestedOptions);
-        field.fields = innerResult.fields;
+        field.template = innerResult.fields;
         ambiguousFields.push(...innerResult.ambiguousFields);
+        warnings.push(...innerResult.warnings);
+      } else {
+        // Primitive array → template is a single field
+        const itemTypeResult = mapSchemaToFieldType(items);
+        const templateField: FieldConfig = {
+          key: 'value',
+          type: itemTypeResult.fieldType,
+          label: fieldLabel,
+        };
+        if (itemTypeResult.props && Object.keys(itemTypeResult.props).length > 0) {
+          templateField.props = itemTypeResult.props;
+        }
+        // Apply item-level validators
+        const itemValidators = mapSchemaToValidators(items, false);
+        if (itemValidators.length > 0) {
+          templateField.validators = itemValidators;
+        }
+        // Enum items on the template
+        if (items.enum) {
+          templateField.type = 'select';
+          templateField.options = items.enum.map((v: unknown) => ({
+            label: toEnumLabel(String(v)),
+            value: String(v),
+          }));
+        }
+        field.template = templateField;
       }
+
+      // Add buttons
+      field.addButton = { label: `Add ${fieldLabel}` };
+      field.removeButton = { label: 'Remove' };
     }
   }
 

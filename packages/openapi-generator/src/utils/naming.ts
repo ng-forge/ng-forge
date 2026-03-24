@@ -18,6 +18,9 @@ export function toLabel(name: string): string {
 export function toEnumLabel(value: string): string {
   // Handle SCREAMING_SNAKE_CASE: lowercase before processing
   if (/^[A-Z][A-Z0-9_-]*$/.test(value)) {
+    if (value.length <= 3 && !/[_-]/.test(value)) {
+      return value;
+    }
     value = value.toLowerCase();
   }
   return toLabel(value);

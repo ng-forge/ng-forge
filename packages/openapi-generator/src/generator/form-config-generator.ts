@@ -81,6 +81,51 @@ function generateFieldLines(field: FieldConfig, indent: string): string[] {
     lines.push(`${indent}  ],`);
   }
 
+  if (field.template !== undefined) {
+    if (Array.isArray(field.template)) {
+      // Object array: template is array of fields
+      lines.push(`${indent}  template: [`);
+      for (const child of field.template) {
+        lines.push(...generateFieldLines(child, indent + '    '));
+      }
+      lines.push(`${indent}  ],`);
+    } else {
+      // Primitive array: template is a single field object
+      // Reuse generateFieldLines and prefix first line with 'template: '
+      const tplLines = generateFieldLines(field.template, indent + '  ');
+      tplLines[0] = `${indent}  template: ${tplLines[0].trimStart()}`;
+      lines.push(...tplLines);
+    }
+  }
+
+  if (field.addButton !== undefined) {
+    if (field.addButton === false) {
+      lines.push(`${indent}  addButton: false,`);
+    } else {
+      if (field.addButton.props && Object.keys(field.addButton.props).length > 0) {
+        lines.push(
+          `${indent}  addButton: { label: '${escapeString(field.addButton.label)}', props: ${formatObject(field.addButton.props, indent + '  ')} },`,
+        );
+      } else {
+        lines.push(`${indent}  addButton: { label: '${escapeString(field.addButton.label)}' },`);
+      }
+    }
+  }
+
+  if (field.removeButton !== undefined) {
+    if (field.removeButton === false) {
+      lines.push(`${indent}  removeButton: false,`);
+    } else {
+      if (field.removeButton.props && Object.keys(field.removeButton.props).length > 0) {
+        lines.push(
+          `${indent}  removeButton: { label: '${escapeString(field.removeButton.label)}', props: ${formatObject(field.removeButton.props, indent + '  ')} },`,
+        );
+      } else {
+        lines.push(`${indent}  removeButton: { label: '${escapeString(field.removeButton.label)}' },`);
+      }
+    }
+  }
+
   if (field.logic && field.logic.length > 0) {
     lines.push(`${indent}  logic: [`);
     for (const logic of field.logic) {
