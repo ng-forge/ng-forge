@@ -233,7 +233,7 @@ describe('generateInterface', () => {
     expect(result).toContain('  value?: string | boolean;');
   });
 
-  it('should handle allOf as intersection type', () => {
+  it('should handle allOf as intersection type for nested properties', () => {
     const schema: OpenAPIV3.SchemaObject = {
       type: 'object',
       properties: {
@@ -248,8 +248,102 @@ describe('generateInterface', () => {
 
     const result = generateInterface(schema, defaultOptions);
 
-    // allOf should produce an intersection
+    // allOf on a nested property still produces an intersection
     expect(result).toMatch(/data\?:.*&/);
+  });
+
+  it('should merge properties from top-level allOf schema', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      allOf: [
+        {
+          type: 'object',
+          required: ['name'],
+          properties: {
+            name: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+          },
+        },
+        {
+          type: 'object',
+          properties: {
+            department: { type: 'string', enum: ['engineering', 'marketing', 'sales'] },
+            salary: { type: 'number' },
+          },
+        },
+      ],
+    } as unknown as OpenAPIV3.SchemaObject;
+
+    const result = generateInterface(schema, defaultOptions);
+
+    expect(result).toContain('export interface CreatePetFormValue {');
+    expect(result).toContain('  name: string;');
+    expect(result).toContain('  email?: string;');
+    expect(result).toContain("  department?: 'engineering' | 'marketing' | 'sales';");
+    expect(result).toContain('  salary?: number;');
+  });
+
+  it('should combine required arrays from all allOf constituents', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      allOf: [
+        {
+          type: 'object',
+          required: ['id'],
+          properties: { id: { type: 'integer' } },
+        },
+        {
+          type: 'object',
+          required: ['name'],
+          properties: { name: { type: 'string' } },
+        },
+      ],
+    } as unknown as OpenAPIV3.SchemaObject;
+
+    const result = generateInterface(schema, defaultOptions);
+
+    expect(result).toContain('  id: number;');
+    expect(result).toContain('  name: string;');
+  });
+
+  it('should include all variant properties for oneOf with discriminator', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      required: ['channel'],
+      properties: {
+        channel: { type: 'string' },
+      },
+      oneOf: [
+        {
+          type: 'object',
+          properties: {
+            channel: { type: 'string', enum: ['email'] },
+            emailAddress: { type: 'string' },
+            subject: { type: 'string' },
+          },
+        },
+        {
+          type: 'object',
+          properties: {
+            channel: { type: 'string', enum: ['sms'] },
+            phoneNumber: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
+      ],
+      discriminator: {
+        propertyName: 'channel',
+      },
+    } as unknown as OpenAPIV3.SchemaObject;
+
+    const result = generateInterface(schema, defaultOptions);
+
+    expect(result).toContain('export interface CreatePetFormValue {');
+    // Discriminator should be required with union type
+    expect(result).toContain("  channel: 'email' | 'sms';");
+    // Variant properties should be optional
+    expect(result).toContain('  emailAddress?: string;');
+    expect(result).toContain('  subject?: string;');
+    expect(result).toContain('  phoneNumber?: string;');
+    expect(result).toContain('  message?: string;');
   });
 
   it('should skip $ref properties', () => {

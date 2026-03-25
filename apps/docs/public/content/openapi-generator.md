@@ -21,7 +21,7 @@ The `@ng-forge/openapi-generator` reads your OpenAPI 3.x spec and produces ready
 Run directly with `npx`:
 
 ```bash
-npx @ng-forge/openapi-generator generate --spec ./openapi.yaml --output ./src/forms
+npx @ng-forge/openapi-generator --spec ./openapi.yaml --output ./src/forms
 ```
 
 Or install as a dev dependency:
@@ -66,7 +66,7 @@ paths:
 Run the generator:
 
 ```bash
-npx @ng-forge/openapi-generator generate --spec ./petstore.yaml --output ./src/forms
+npx @ng-forge/openapi-generator --spec ./petstore.yaml --output ./src/forms
 ```
 
 This produces:
@@ -83,21 +83,21 @@ export const createPetFormConfig = {
       type: 'input',
       label: 'Name',
       props: { type: 'text' },
-      validation: [{ type: 'required' }, { type: 'minLength', value: 1 }, { type: 'maxLength', value: 100 }],
+      validators: [{ type: 'required' }, { type: 'minLength', value: 1 }, { type: 'maxLength', value: 100 }],
     },
     {
       key: 'age',
       type: 'input',
       label: 'Age',
       props: { type: 'number' },
-      validation: [{ type: 'min', value: 0 }],
+      validators: [{ type: 'min', value: 0 }],
     },
     {
       key: 'email',
       type: 'input',
       label: 'Email',
       props: { type: 'email' },
-      validation: [{ type: 'email' }],
+      validators: [{ type: 'email' }],
     },
     {
       key: 'status',
@@ -129,7 +129,7 @@ Both directories include barrel `index.ts` files for convenient imports.
 ## CLI Reference
 
 ```bash
-ng-forge-generator generate [options]
+ng-forge-generator [options]
 ```
 
 | Flag                   | Type                 | Default        | Description                                                   |
@@ -140,7 +140,11 @@ ng-forge-generator generate [options]
 | `--endpoints <list>`   | `string`             | —              | Comma-separated endpoints: `POST:/pets,GET:/pets/{id}`        |
 | `--editable`           | `boolean`            | `false`        | Make GET response fields editable (read-only by default)      |
 | `--watch`              | `boolean`            | `false`        | Watch spec file and regenerate on changes                     |
-| `--config <path>`      | `string`             | `cwd`          | Directory containing `.ng-forge-generator.json`               |
+| `--config <path>`      | `string`             | `<output>`     | Directory containing `.ng-forge-generator.json`               |
+| `--dry-run`            | `boolean`            | `false`        | List files that would be generated without writing them       |
+| `--skip-existing`      | `boolean`            | `false`        | Skip files that already exist on disk                         |
+| `--verbose`            | `boolean`            | `false`        | Show detailed output including field mapping decisions        |
+| `--quiet`              | `boolean`            | `false`        | Suppress all output except warnings and errors                |
 
 ## OpenAPI to Field Type Mapping
 
@@ -235,7 +239,7 @@ On subsequent runs, persisted decisions are reused — so interactive prompts on
 ## Watch Mode
 
 ```bash
-npx @ng-forge/openapi-generator generate \
+npx @ng-forge/openapi-generator \
   --spec ./openapi.yaml \
   --output ./src/forms \
   --watch
@@ -270,7 +274,7 @@ File names are derived from `operationId` if available, otherwise from the HTTP 
 By default, fields generated from GET response schemas are `disabled: true` (read-only display). Use the `--editable` flag to make them editable:
 
 ```bash
-npx @ng-forge/openapi-generator generate \
+npx @ng-forge/openapi-generator \
   --spec ./openapi.yaml \
   --output ./src/forms \
   --editable

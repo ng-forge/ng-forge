@@ -275,13 +275,12 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
   const writtenPaths = await writeGeneratedFiles(options.output, allFiles, { skipExisting: options.skipExisting });
   const skippedCount = allFiles.length - writtenPaths.length;
 
-  if (options.skipExisting && skippedCount > 0 && writtenPaths.length === 0) {
-    logger.info(`Skipped ${skippedCount} existing file${skippedCount > 1 ? 's' : ''} (0 new files written)`);
+  if (skippedCount > 0) {
+    logger.success(
+      `Wrote ${writtenPaths.length} file${writtenPaths.length !== 1 ? 's' : ''} in ${options.output} (${skippedCount} skipped)`,
+    );
   } else {
-    if (skippedCount > 0) {
-      logger.info(`Skipped ${skippedCount} existing file${skippedCount > 1 ? 's' : ''}`);
-    }
-    logger.success(`Generated ${writtenPaths.length} file${writtenPaths.length !== 1 ? 's' : ''} in ${options.output}`);
+    logger.success(`Wrote ${writtenPaths.length} file${writtenPaths.length !== 1 ? 's' : ''} in ${options.output}`);
   }
 
   // Summary: list processed endpoints
@@ -308,6 +307,18 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
     const watcher = startWatcher({
       specPath: options.spec,
       onChange: async () => {
+        // Detect new endpoints not yet in the saved config
+        const currentConfig = await loadConfig(configDir);
+        const savedEndpointKeys = new Set(currentConfig?.endpoints ?? []);
+        const freshSpec = await parseOpenAPISpec(options.spec);
+        const freshEndpoints = extractEndpoints(freshSpec);
+        const newEndpoints = freshEndpoints.filter((ep) => !savedEndpointKeys.has(`${ep.method}:${ep.path}`));
+
+        if (newEndpoints.length > 0) {
+          const newKeys = newEndpoints.map((ep) => `${ep.method}:${ep.path}`).join(', ');
+          logger.info(`New endpoint(s) detected: ${newKeys}. Re-run without --watch to select them.`);
+        }
+
         await runGenerate({ ...options, watch: false, interactive: 'none' });
       },
     });
