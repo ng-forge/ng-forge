@@ -32,8 +32,6 @@
   // Row-specific responsive overrides
   &.df-row-mobile-stack {
     @media (max-width: 576px) {
-      flex-direction: column;
-
       ::ng-deep > * {
         flex: 0 0 100% !important;
         max-width: 100% !important;
@@ -60,8 +58,6 @@
 @media (max-width: 576px) {
   :host {
     // Force single column on mobile for better UX
-    flex-direction: column;
-
     ::ng-deep > * {
       flex: 0 0 100% !important;
       max-width: 100% !important;
