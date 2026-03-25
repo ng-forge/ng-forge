@@ -18,7 +18,7 @@ export const logger = {
     console.log(chalk.blue('ℹ'), message);
   },
   success(message: string): void {
-    if (currentLevel === 'quiet') return;
+    // Success always shows, even in quiet mode (it's the only confirmation something happened)
     console.log(chalk.green('✓'), message);
   },
   warn(message: string): void {

@@ -42,7 +42,7 @@ export function registerGenerateOptions(cmd: Command): void {
     .requiredOption('--output <path>', 'Output directory for generated files')
     .option(
       '--interactive <mode>',
-      'Interactive mode: full or none',
+      'Prompt mode: full (select endpoints + resolve ambiguous types) or none (auto-select, falls back to none in non-TTY)',
       (value: string) => {
         if (value !== 'full' && value !== 'none') {
           throw new Error(`Invalid interactive mode '${value}'. Allowed values: full, none`);
@@ -51,14 +51,14 @@ export function registerGenerateOptions(cmd: Command): void {
       },
       'full',
     )
-    .option('--endpoints <list>', 'Comma-separated METHOD:/path endpoints (for non-interactive)')
+    .option('--endpoints <list>', 'Comma-separated endpoints, e.g. "POST:/users,PUT:/users/{id}"')
     .option('--editable', 'Generate editable forms for GET endpoints')
     .option('--watch', 'Watch spec file for changes and regenerate')
-    .option('--config <path>', 'Path to config file directory')
+    .option('--config <path>', 'Directory for .ng-forge-generator.json config (defaults to --output)')
     .option('--dry-run', 'List files that would be generated without writing them')
     .option('--skip-existing', 'Skip files that already exist on disk')
     .option('--verbose', 'Show detailed output including field mapping decisions')
-    .option('--quiet', 'Suppress all output except warnings and errors')
+    .option('--quiet', 'Suppress info output; still shows success summary, warnings, and errors')
     .addHelpText('after', '\nNote: Generated files are not formatted. Run your project formatter (e.g. prettier) after generation.');
 }
 

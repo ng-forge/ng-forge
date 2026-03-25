@@ -68,11 +68,12 @@ describe('logger', () => {
       expect(spy).not.toHaveBeenCalled();
     });
 
-    it('should suppress success()', () => {
+    it('should still show success()', () => {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       const spy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      logger.success('suppressed');
-      expect(spy).not.toHaveBeenCalled();
+      logger.success('visible');
+      expect(spy).toHaveBeenCalledOnce();
+      expect(spy.mock.calls[0][1]).toBe('visible');
     });
 
     it('should still show warn()', () => {
