@@ -138,7 +138,7 @@ ng-forge-generator [options]
 | `--output <path>`      | `string`             | **(required)** | Output directory for generated files                          |
 | `--interactive <mode>` | `'full'` \| `'none'` | `'full'`       | `'full'` prompts for ambiguous fields; `'none'` uses defaults |
 | `--endpoints <list>`   | `string`             | —              | Comma-separated endpoints: `POST:/pets,GET:/pets/{id}`        |
-| `--editable`           | `boolean`            | `false`        | Make GET response fields editable (read-only by default)      |
+| `--read-only`          | `boolean`            | `false`        | Generate GET endpoint forms with all fields disabled          |
 | `--watch`              | `boolean`            | `false`        | Watch spec file and regenerate on changes                     |
 | `--config <path>`      | `string`             | `<output>`     | Directory containing `.ng-forge-generator.json`               |
 | `--dry-run`            | `boolean`            | `false`        | List files that would be generated without writing them       |
@@ -216,7 +216,7 @@ The generator persists your choices in `.ng-forge-generator.json`:
     "description": "textarea",
     "age": "slider"
   },
-  "editable": false
+  "readOnly": true
 }
 ```
 
@@ -271,14 +271,16 @@ File names are derived from `operationId` if available, otherwise from the HTTP 
 
 ## GET Endpoints
 
-By default, fields generated from GET response schemas are `disabled: true` (read-only display). Use the `--editable` flag to make them editable:
+By default, GET endpoints are included with editable fields, just like POST/PUT/PATCH. Use the `--read-only` flag to generate GET endpoint fields with `disabled: true`:
 
 ```bash
 npx @ng-forge/openapi-generator \
   --spec ./openapi.yaml \
   --output ./src/forms \
-  --editable
+  --read-only
 ```
+
+Top-level array responses are always skipped with a warning.
 
 ## Programmatic API
 

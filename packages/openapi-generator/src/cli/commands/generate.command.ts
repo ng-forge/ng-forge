@@ -139,6 +139,7 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
   const allInterfaceFileNames: string[] = [];
   const updatedDecisions = { ...decisions };
   const processedEndpoints: string[] = [];
+  const configEndpoints: string[] = [];
 
   for (const endpoint of selectedEndpoints) {
     const schema = endpoint.requestBodySchema ?? endpoint.responseSchema;
@@ -251,6 +252,7 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
     });
     allInterfaceFileNames.push(interfaceFileName);
     processedEndpoints.push(`${endpoint.method} ${endpoint.path}`);
+    configEndpoints.push(`${endpoint.method}:${endpoint.path}`);
   }
 
   allFiles.push({
@@ -263,6 +265,11 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
     content: generateBarrel(allInterfaceFileNames),
     subdirectory: 'types',
   });
+
+  if (allFormFileNames.length === 0) {
+    logger.warn('No forms generated — all selected endpoints were skipped (e.g. top-level array responses)');
+    return;
+  }
 
   if (options.dryRun) {
     logger.info('Dry run — files that would be generated:');
@@ -299,7 +306,7 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
   const config: GeneratorConfig = {
     spec: options.spec,
     output: options.output,
-    endpoints: selectedEndpoints.map((e) => `${e.method}:${e.path}`),
+    endpoints: configEndpoints,
     decisions: updatedDecisions,
     readOnly: options.readOnly,
   };

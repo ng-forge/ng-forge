@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { logger } from '../utils/logger.js';
 
@@ -32,6 +32,7 @@ export async function loadConfig(dir: string): Promise<GeneratorConfig | null> {
 }
 
 export async function saveConfig(dir: string, config: GeneratorConfig): Promise<void> {
+  await mkdir(dir, { recursive: true });
   const filePath = join(dir, CONFIG_FILENAME);
   await writeFile(filePath, JSON.stringify(config, null, 2) + '\n', 'utf-8');
   logger.info(`Config saved to ${filePath}`);

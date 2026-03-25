@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { loadConfig, saveConfig } from './generator-config.js';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
 vi.mock('node:fs/promises', () => ({
   readFile: vi.fn(),
   writeFile: vi.fn(),
+  mkdir: vi.fn(),
 }));
 
 vi.mock('../utils/logger.js', () => ({
@@ -67,6 +68,7 @@ describe('saveConfig', () => {
   });
 
   it('should write valid JSON to the config file', async () => {
+    vi.mocked(mkdir).mockResolvedValue(undefined);
     vi.mocked(writeFile).mockResolvedValue();
 
     const config = {
@@ -78,6 +80,7 @@ describe('saveConfig', () => {
 
     await saveConfig('/some/dir', config);
 
+    expect(mkdir).toHaveBeenCalledWith('/some/dir', { recursive: true });
     expect(writeFile).toHaveBeenCalledWith(join('/some/dir', '.ng-forge-generator.json'), JSON.stringify(config, null, 2) + '\n', 'utf-8');
   });
 });
