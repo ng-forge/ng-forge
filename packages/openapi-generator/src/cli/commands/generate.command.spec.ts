@@ -59,6 +59,24 @@ describe('registerGenerateCommand', () => {
     // The addHelpText is appended after help info, so we can check the option exists
     expect(helpText).toContain('--interactive');
   });
+
+  it('should register --verbose option', () => {
+    const program = new Command();
+    registerGenerateCommand(program);
+
+    const generateCmd = program.commands.find((cmd) => cmd.name() === 'generate');
+    const verboseOption = generateCmd!.options.find((opt) => opt.long === '--verbose');
+    expect(verboseOption).toBeDefined();
+  });
+
+  it('should register --quiet option', () => {
+    const program = new Command();
+    registerGenerateCommand(program);
+
+    const generateCmd = program.commands.find((cmd) => cmd.name() === 'generate');
+    const quietOption = generateCmd!.options.find((opt) => opt.long === '--quiet');
+    expect(quietOption).toBeDefined();
+  });
 });
 
 describe('filterEndpoints', () => {

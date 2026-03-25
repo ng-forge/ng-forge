@@ -618,6 +618,153 @@ describe('mapSchemaToFields', () => {
     });
   });
 
+  describe('disabled array fields', () => {
+    it('should NOT have addButton/removeButton when editable is false', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          items: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+              },
+            },
+          },
+        },
+      };
+
+      const result = mapSchemaToFields(schema, [], { editable: false });
+      const field = result.fields[0];
+      expect(field.type).toBe('array');
+      expect(field.disabled).toBe(true);
+      expect(field.addButton).toBeUndefined();
+      expect(field.removeButton).toBeUndefined();
+    });
+
+    it('should have addButton/removeButton when editable is true', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          items: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+              },
+            },
+          },
+        },
+      };
+
+      const result = mapSchemaToFields(schema, [], { editable: true });
+      const field = result.fields[0];
+      expect(field.type).toBe('array');
+      expect(field.addButton).toEqual({ label: 'Add Item' });
+      expect(field.removeButton).toEqual({ label: 'Remove' });
+    });
+
+    it('should have addButton/removeButton by default (no editable option)', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          items: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+              },
+            },
+          },
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      const field = result.fields[0];
+      expect(field.type).toBe('array');
+      expect(field.addButton).toEqual({ label: 'Add Item' });
+      expect(field.removeButton).toEqual({ label: 'Remove' });
+    });
+  });
+
+  describe('textarea heuristic preserves hint', () => {
+    it('should keep hint when textarea heuristic resolves the field type', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          description: { type: 'string', description: 'Some hint' } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].type).toBe('textarea');
+      expect(result.fields[0].props?.['hint']).toBe('Some hint');
+    });
+  });
+
+  describe('x-enum-labels', () => {
+    it('should use array-style x-enum-labels for custom enum labels', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          country: {
+            type: 'string',
+            enum: ['US', 'CA'],
+            'x-enum-labels': ['United States', 'Canada'],
+          } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].options).toEqual([
+        { label: 'United States', value: 'US' },
+        { label: 'Canada', value: 'CA' },
+      ]);
+    });
+
+    it('should use object-style x-enum-labels for custom enum labels', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          country: {
+            type: 'string',
+            enum: ['US', 'CA'],
+            'x-enum-labels': { US: 'United States', CA: 'Canada' },
+          } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].options).toEqual([
+        { label: 'United States', value: 'US' },
+        { label: 'Canada', value: 'CA' },
+      ]);
+    });
+
+    it('should fall back to toEnumLabel when x-enum-labels is missing for a value', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          country: {
+            type: 'string',
+            enum: ['US', 'CA', 'in_progress'],
+            'x-enum-labels': { US: 'United States' },
+          } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].options).toEqual([
+        { label: 'United States', value: 'US' },
+        { label: 'CA', value: 'CA' },
+        { label: 'In Progress', value: 'in_progress' },
+      ]);
+    });
+  });
+
   describe('phone heuristic', () => {
     it('should resolve phone field name to input type=tel', () => {
       const schema = {

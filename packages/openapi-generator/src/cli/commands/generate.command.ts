@@ -11,6 +11,7 @@ import { writeGeneratedFiles } from '../../generator/file-writer.js';
 import type { GeneratedFile } from '../../generator/file-writer.js';
 import { toFormFileName } from '../../utils/naming.js';
 import { logger } from '../../utils/logger.js';
+import { setLogLevel } from '../../utils/logger.js';
 import { loadConfig, saveConfig } from '../../config/generator-config.js';
 import type { GeneratorConfig } from '../../config/generator-config.js';
 import { promptEndpointSelection } from '../prompts/endpoint-prompt.js';
@@ -28,6 +29,8 @@ interface GenerateOptions {
   config?: string;
   dryRun?: boolean;
   skipExisting?: boolean;
+  verbose?: boolean;
+  quiet?: boolean;
 }
 
 export function registerGenerateCommand(program: Command, options?: { isDefault?: boolean }): void {
@@ -53,8 +56,17 @@ export function registerGenerateCommand(program: Command, options?: { isDefault?
     .option('--config <path>', 'Path to config file directory')
     .option('--dry-run', 'List files that would be generated without writing them')
     .option('--skip-existing', 'Skip files that already exist on disk')
+    .option('--verbose', 'Show detailed output including field mapping decisions')
+    .option('--quiet', 'Suppress all output except warnings and errors')
     .addHelpText('after', '\nNote: Generated files are not formatted. Run your project formatter (e.g. prettier) after generation.')
     .action(async (options: GenerateOptions) => {
+      if (options.verbose && options.quiet) {
+        logger.error('Cannot use --verbose and --quiet together');
+        process.exit(1);
+      }
+      if (options.verbose) setLogLevel('verbose');
+      if (options.quiet) setLogLevel('quiet');
+
       await runGenerate(options);
     });
 }
@@ -73,11 +85,22 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
     return;
   }
 
+  logger.verbose(`Found ${allEndpoints.length} endpoint(s): ${allEndpoints.map((ep) => `${ep.method}:${ep.path}`).join(', ')}`);
+
   let selectedEndpoints: EndpointInfo[];
   if (options.interactive === 'none' || options.endpoints) {
     // Use CLI --endpoints if provided, otherwise fall back to saved config endpoints
     const endpointFilter = options.endpoints ?? existingConfig?.endpoints?.join(',');
-    selectedEndpoints = filterEndpoints(allEndpoints, endpointFilter);
+
+    if (endpointFilter) {
+      selectedEndpoints = filterEndpoints(allEndpoints, endpointFilter);
+    } else {
+      // No explicit filter: auto-select POST/PUT/PATCH; only include GET if --editable is set
+      selectedEndpoints = allEndpoints.filter((ep) => {
+        if (ep.method === 'GET') return options.editable === true;
+        return true;
+      });
+    }
 
     // Warn about requested endpoints not found in the spec
     const filterSource = options.endpoints ?? endpointFilter;
@@ -96,13 +119,14 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
 
   if (selectedEndpoints.length === 0) {
     logger.warn('No endpoints selected');
-    return;
+    process.exit(1);
   }
 
   const allFiles: GeneratedFile[] = [];
   const allFormFileNames: string[] = [];
   const allInterfaceFileNames: string[] = [];
   const updatedDecisions = { ...decisions };
+  const processedEndpoints: string[] = [];
 
   for (const endpoint of selectedEndpoints) {
     const schema = endpoint.requestBodySchema ?? endpoint.responseSchema;
@@ -152,6 +176,7 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
           const defaultChoice = DEFAULT_FIELD_CHOICES[ambiguous.scope];
           if (defaultChoice) {
             updatedDecisions[ambiguous.fieldPath] = defaultChoice;
+            logger.verbose(`Field '${ambiguous.fieldPath}': resolved ambiguous ${ambiguous.scope} → '${defaultChoice}' (default)`);
           }
         }
       }
@@ -163,6 +188,12 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
     }
 
     const formFileName = toFormFileName(endpoint.method, endpoint.path, endpoint.operationId);
+
+    logger.verbose(`${endpoint.method} ${endpoint.path} → forms/${formFileName}`);
+
+    for (const field of result.fields) {
+      logFieldDecisions(field, '  ');
+    }
 
     const formContent = generateFormConfig(result.fields, {
       method: endpoint.method,
@@ -190,6 +221,7 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
       subdirectory: 'types',
     });
     allInterfaceFileNames.push(interfaceFileName);
+    processedEndpoints.push(`${endpoint.method} ${endpoint.path}`);
   }
 
   allFiles.push({
@@ -214,18 +246,25 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
 
   const writtenPaths = await writeGeneratedFiles(options.output, allFiles, { skipExisting: options.skipExisting });
   const skippedCount = allFiles.length - writtenPaths.length;
-  if (skippedCount > 0) {
-    logger.info(`Skipped ${skippedCount} existing file${skippedCount > 1 ? 's' : ''}`);
-  }
-  logger.success(`Generated ${writtenPaths.length} file${writtenPaths.length !== 1 ? 's' : ''} in ${options.output}`);
 
-  // Summary
+  if (options.skipExisting && skippedCount > 0 && writtenPaths.length === 0) {
+    logger.info(`Skipped ${skippedCount} existing file${skippedCount > 1 ? 's' : ''} (0 new files written)`);
+  } else {
+    if (skippedCount > 0) {
+      logger.info(`Skipped ${skippedCount} existing file${skippedCount > 1 ? 's' : ''}`);
+    }
+    logger.success(`Generated ${writtenPaths.length} file${writtenPaths.length !== 1 ? 's' : ''} in ${options.output}`);
+  }
+
+  // Summary: list processed endpoints
+  logger.info(`  Endpoints: ${processedEndpoints.join(', ')}`);
+
   const formCount = allFormFileNames.length;
   const interfaceCount = allInterfaceFileNames.length;
   const barrelCount = 2;
-  logger.info(`  ${formCount} form config${formCount !== 1 ? 's' : ''}`);
-  logger.info(`  ${interfaceCount} interface${interfaceCount !== 1 ? 's' : ''}`);
-  logger.info(`  ${barrelCount} barrel files`);
+  logger.info(
+    `  ${formCount} form config${formCount !== 1 ? 's' : ''}, ${interfaceCount} interface${interfaceCount !== 1 ? 's' : ''}, ${barrelCount} barrel files`,
+  );
 
   const config: GeneratorConfig = {
     spec: options.spec,
@@ -253,6 +292,27 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
     await new Promise(() => {
       // Keep process alive until user terminates
     });
+  }
+}
+
+function logFieldDecisions(
+  field: { key: string; type: string; fields?: { key: string; type: string; fields?: unknown[] }[]; template?: unknown },
+  indent: string,
+): void {
+  logger.verbose(`${indent}${field.key} → ${field.type}`);
+  if (field.fields) {
+    for (const child of field.fields) {
+      logFieldDecisions(child as typeof field, indent + '  ');
+    }
+  }
+  if (field.template) {
+    if (Array.isArray(field.template)) {
+      for (const child of field.template) {
+        logFieldDecisions(child as typeof field, indent + '  ');
+      }
+    } else {
+      logFieldDecisions(field.template as typeof field, indent + '  ');
+    }
   }
 }
 

@@ -197,10 +197,20 @@ function mapPropertyToField(
 
   // Add enum options for select/radio/multi-checkbox
   if (prop.schema.enum) {
-    field.options = prop.schema.enum.map((v: unknown) => ({
-      label: toEnumLabel(String(v)),
-      value: String(v),
-    }));
+    // Support x-enum-labels extension for human-readable enum labels
+    const enumLabels = (prop.schema as Record<string, unknown>)['x-enum-labels'] as Record<string, string> | string[] | undefined;
+    field.options = prop.schema.enum.map((v: unknown, i: number) => {
+      const strVal = String(v);
+      let label: string;
+      if (Array.isArray(enumLabels) && enumLabels[i]) {
+        label = enumLabels[i];
+      } else if (enumLabels && !Array.isArray(enumLabels) && enumLabels[strVal]) {
+        label = enumLabels[strVal];
+      } else {
+        label = toEnumLabel(strVal);
+      }
+      return { label, value: strVal };
+    });
   }
 
   // Add validators
@@ -217,8 +227,11 @@ function mapPropertyToField(
   if (!ngForgeType && typeResult.isAmbiguous && typeResult.ambiguousScope === 'text-input' && finalType === typeResult.fieldType) {
     if (/(?:description|notes|comment|bio|body|content|summary|message|text)$/i.test(prop.name)) {
       field.type = 'textarea';
-      // Remove the props that were for input type=text
-      delete field.props;
+      // Remove the input type prop but preserve hint and other props
+      if (field.props) {
+        const { type: _type, ...restProps } = field.props as Record<string, unknown> & { type?: string }; // eslint-disable-line @typescript-eslint/no-unused-vars
+        field.props = Object.keys(restProps).length > 0 ? restProps : undefined;
+      }
       // Remove from ambiguous list since we resolved it
       const idx = ambiguousFields.findIndex((f) => f.fieldPath === fieldPath);
       if (idx !== -1) {
@@ -280,9 +293,11 @@ function mapPropertyToField(
         field.template = templateField;
       }
 
-      // Add buttons
-      field.addButton = { label: `Add ${fieldLabel}` };
-      field.removeButton = { label: 'Remove' };
+      // Add buttons only when the array is editable
+      if (!field.disabled) {
+        field.addButton = { label: `Add ${fieldLabel}` };
+        field.removeButton = { label: 'Remove' };
+      }
     }
   }
 
