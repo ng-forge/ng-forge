@@ -216,7 +216,22 @@ describe('walkSchema', () => {
     );
   });
 
-  it('should resolve explicit discriminator.mapping with $ref-based paths', () => {
+  it('should resolve explicit discriminator.mapping with $ref-based paths (positional)', () => {
+    const dogSchema = {
+      type: 'object',
+      properties: {
+        petType: { type: 'string' },
+        breed: { type: 'string' },
+      },
+    } as SchemaObject;
+    const catSchema = {
+      type: 'object',
+      properties: {
+        petType: { type: 'string' },
+        indoor: { type: 'boolean' },
+      },
+    } as SchemaObject;
+
     const schema: SchemaObject = {
       discriminator: {
         propertyName: 'petType',
@@ -225,24 +240,7 @@ describe('walkSchema', () => {
           cat: '#/components/schemas/Cat',
         },
       } as OpenAPIV3.DiscriminatorObject,
-      oneOf: [
-        {
-          type: 'object',
-          title: 'Dog',
-          properties: {
-            petType: { type: 'string', enum: ['dog'] },
-            breed: { type: 'string' },
-          },
-        } as SchemaObject,
-        {
-          type: 'object',
-          title: 'Cat',
-          properties: {
-            petType: { type: 'string', enum: ['cat'] },
-            indoor: { type: 'boolean' },
-          },
-        } as SchemaObject,
-      ],
+      oneOf: [dogSchema, catSchema],
     };
 
     const result = walkSchema(schema);
@@ -250,7 +248,8 @@ describe('walkSchema', () => {
     expect(result.discriminator).toBeDefined();
     expect(result.discriminator?.mapping).toHaveProperty('dog');
     expect(result.discriminator?.mapping).toHaveProperty('cat');
-    expect(result.discriminator?.mapping['dog']).toHaveProperty('title', 'Dog');
-    expect(result.discriminator?.mapping['cat']).toHaveProperty('title', 'Cat');
+    // After positional matching, dog maps to first schema, cat to second
+    expect(result.discriminator?.mapping['dog']).toBe(dogSchema);
+    expect(result.discriminator?.mapping['cat']).toBe(catSchema);
   });
 });

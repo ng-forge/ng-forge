@@ -346,6 +346,48 @@ describe('generateInterface', () => {
     expect(result).toContain('  message?: string;');
   });
 
+  it('should generate distinct interface names for oneOf discriminator variants on a property', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      required: ['method'],
+      properties: {
+        method: {
+          oneOf: [
+            {
+              type: 'object',
+              properties: {
+                type: { type: 'string' },
+                cardNumber: { type: 'string' },
+              },
+            },
+            {
+              type: 'object',
+              properties: {
+                type: { type: 'string' },
+                iban: { type: 'string' },
+              },
+            },
+          ],
+          discriminator: {
+            propertyName: 'type',
+            mapping: {
+              card: '#/components/schemas/Card',
+              bank: '#/components/schemas/Bank',
+            },
+          },
+        } as unknown as OpenAPIV3.SchemaObject,
+      },
+    };
+
+    const result = generateInterface(schema, defaultOptions);
+
+    // Should have distinct interface names
+    expect(result).toContain('export interface CreatePetFormValueMethodCard {');
+    expect(result).toContain('export interface CreatePetFormValueMethodBank {');
+    // Should produce a union type
+    expect(result).toContain('method: CreatePetFormValueMethodCard | CreatePetFormValueMethodBank;');
+  });
+
   it('should skip $ref properties', () => {
     const schema: OpenAPIV3.SchemaObject = {
       type: 'object',

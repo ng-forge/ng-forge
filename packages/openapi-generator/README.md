@@ -129,7 +129,7 @@ ng-forge-generator --spec openapi.yaml --output src/generated
 | `--output <path>`      | Output directory for generated files (required)                                          |
 | `--interactive <mode>` | `full` (prompt for endpoints + ambiguous types) or `none` (auto-select). Default: `full` |
 | `--endpoints <list>`   | Comma-separated endpoints, e.g. `"POST:/users,PUT:/users/{id}"`                          |
-| `--editable`           | Generate editable forms for GET endpoints                                                |
+| `--read-only`          | Generate GET endpoint forms with all fields disabled                                     |
 | `--watch`              | Watch spec file for changes and regenerate                                               |
 | `--config <path>`      | Directory for `.ng-forge-generator.json` config (defaults to `--output`)                 |
 | `--dry-run`            | List files that would be generated without writing them                                  |
@@ -139,8 +139,8 @@ ng-forge-generator --spec openapi.yaml --output src/generated
 
 ### Interactive Modes
 
-- **`--interactive full`** (default): Prompts the user to select endpoints (POST/PUT/PATCH pre-checked) and resolve ambiguous field types. Automatically falls back to `none` in non-TTY environments (e.g., CI pipelines).
-- **`--interactive none`**: No prompts. Uses `--endpoints` flag, saved config, or auto-selects POST/PUT/PATCH endpoints. GET endpoints require the `--editable` flag.
+- **`--interactive full`** (default): Prompts the user to select endpoints (all pre-checked) and resolve ambiguous field types. Automatically falls back to `none` in non-TTY environments (e.g., CI pipelines).
+- **`--interactive none`**: No prompts. Uses `--endpoints` flag, saved config, or auto-selects all endpoints. GET endpoints with top-level array responses are always skipped.
 
 ### Examples
 
@@ -155,8 +155,8 @@ ng-forge-generator --spec openapi.yaml --output src/generated --interactive none
 ng-forge-generator --spec openapi.yaml --output src/generated \
   --interactive none --endpoints "POST:/users,PUT:/users/{id}"
 
-# Include GET endpoints as editable forms
-ng-forge-generator --spec openapi.yaml --output src/generated --interactive none --editable
+# Generate GET endpoints with disabled (read-only) fields
+ng-forge-generator --spec openapi.yaml --output src/generated --interactive none --read-only
 
 # Preview without writing
 ng-forge-generator --spec openapi.yaml --output src/generated --dry-run
@@ -252,15 +252,16 @@ Payment:
 
 This produces:
 
-- A **radio/select field** for the discriminator property (`paymentMethod`)
+- A **radio field** for the discriminator property (`paymentMethod`)
 - **Conditional field groups** for each variant, shown/hidden via `logic` based on the discriminator value
-- A **union interface** with all variant properties
+- **Distinct variant interfaces** (e.g., `PaymentCreditCard`, `PaymentBankTransfer`) combined as a union type
+
+When a property references a discriminator schema (e.g., `method: { $ref: '#/components/schemas/Payment' }`), the generator wraps the discriminator fields inside a **group field** for that property.
 
 ## GET Endpoint Behavior
 
-- **Without `--editable`**: GET endpoints are excluded in non-interactive mode.
-- **With `--editable`**: GET response schemas generate forms with editable fields.
-- **Without `--editable` + explicit `--endpoints "GET:/path"`**: Fields are generated with `disabled: true`, and array fields have no add/remove buttons.
+- **Default**: GET endpoints are included with editable fields, just like POST/PUT/PATCH.
+- **With `--read-only`**: GET endpoint fields are generated with `disabled: true`, and array fields have no add/remove buttons.
 - Top-level array responses are always skipped with a warning.
 
 ## Watch Mode
@@ -280,7 +281,7 @@ A `.ng-forge-generator.json` config file is saved in the output directory (or th
 
 - **Selected endpoints** — which `METHOD:/path` pairs to generate
 - **Field type decisions** — ambiguous field type choices (e.g., `"registerUser.acceptTerms": "checkbox"`)
-- **Editable flag** — whether GET endpoints are editable
+- **Read-only flag** — whether GET endpoint fields are disabled
 
 This enables reproducible non-interactive re-runs. On subsequent runs, the generator reuses saved decisions without prompting.
 
@@ -349,7 +350,7 @@ generateBarrel(fileNames: string[]): string
 
 ```typescript
 // Write generated files to disk (with change detection and skip-existing support)
-writeGeneratedFiles(outputDir: string, files: GeneratedFile[], options?: WriteOptions): Promise<string[]>
+writeGeneratedFiles(outputDir: string, files: GeneratedFile[], options?: WriteOptions): Promise<WriteResult>
 
 // Load/save the .ng-forge-generator.json config file
 loadConfig(dir: string): Promise<GeneratorConfig | null>
@@ -371,12 +372,9 @@ To force a specific type, use the `x-ng-forge-type` extension on the property in
 
 ### Why are my GET endpoints being skipped?
 
-By default, only POST/PUT/PATCH endpoints are selected (they have request bodies = form inputs). To include GET endpoints:
+GET endpoints with top-level array responses are always skipped since they don't map to a single form. For all other GET endpoints, forms are generated by default with editable fields.
 
-- Use `--editable` to include them with editable fields
-- Use `--endpoints "GET:/path"` to explicitly select them (fields will be `disabled: true`)
-
-GET endpoints with top-level array responses are always skipped since they don't map to a single form.
+To make GET endpoint fields read-only, use `--read-only`.
 
 ### Why does the generator say "Swagger 2.0" is not supported?
 

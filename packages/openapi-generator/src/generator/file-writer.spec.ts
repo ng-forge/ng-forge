@@ -18,26 +18,27 @@ describe('writeGeneratedFiles', () => {
   it('should write files to disk', async () => {
     const files: GeneratedFile[] = [{ fileName: 'form.ts', content: 'export const form = {};' }];
 
-    const paths = await writeGeneratedFiles(tempDir, files);
+    const result = await writeGeneratedFiles(tempDir, files);
 
-    expect(paths).toHaveLength(1);
-    expect(paths[0]).toBe(join(tempDir, 'form.ts'));
+    expect(result.writtenPaths).toHaveLength(1);
+    expect(result.writtenPaths[0]).toBe(join(tempDir, 'form.ts'));
+    expect(result.unchangedCount).toBe(0);
 
-    const content = await readFile(paths[0], 'utf-8');
+    const content = await readFile(result.writtenPaths[0], 'utf-8');
     expect(content).toBe('export const form = {};');
   });
 
   it('should create subdirectories', async () => {
     const files: GeneratedFile[] = [{ fileName: 'form.ts', content: 'content', subdirectory: 'forms/pets' }];
 
-    const paths = await writeGeneratedFiles(tempDir, files);
+    const result = await writeGeneratedFiles(tempDir, files);
 
-    expect(paths[0]).toBe(join(tempDir, 'forms/pets', 'form.ts'));
-    const content = await readFile(paths[0], 'utf-8');
+    expect(result.writtenPaths[0]).toBe(join(tempDir, 'forms/pets', 'form.ts'));
+    const content = await readFile(result.writtenPaths[0], 'utf-8');
     expect(content).toBe('content');
   });
 
-  it('should skip writing unchanged files', async () => {
+  it('should skip writing unchanged files and track them', async () => {
     const existingContent = 'export const form = {};';
     await mkdir(tempDir, { recursive: true });
     const filePath = join(tempDir, 'form.ts');
@@ -45,9 +46,9 @@ describe('writeGeneratedFiles', () => {
 
     const files: GeneratedFile[] = [{ fileName: 'form.ts', content: existingContent }];
 
-    // Should not throw and should return the path
-    const paths = await writeGeneratedFiles(tempDir, files);
-    expect(paths).toHaveLength(1);
+    const result = await writeGeneratedFiles(tempDir, files);
+    expect(result.writtenPaths).toHaveLength(0);
+    expect(result.unchangedCount).toBe(1);
 
     // Content should remain the same
     const content = await readFile(filePath, 'utf-8');
@@ -60,8 +61,10 @@ describe('writeGeneratedFiles', () => {
 
     const files: GeneratedFile[] = [{ fileName: 'form.ts', content: 'new content' }];
 
-    await writeGeneratedFiles(tempDir, files);
+    const result = await writeGeneratedFiles(tempDir, files);
 
+    expect(result.writtenPaths).toHaveLength(1);
+    expect(result.unchangedCount).toBe(0);
     const content = await readFile(filePath, 'utf-8');
     expect(content).toBe('new content');
   });
@@ -73,11 +76,12 @@ describe('writeGeneratedFiles', () => {
       { fileName: 'c.ts', content: 'c' },
     ];
 
-    const paths = await writeGeneratedFiles(tempDir, files);
+    const result = await writeGeneratedFiles(tempDir, files);
 
-    expect(paths).toHaveLength(3);
+    expect(result.writtenPaths).toHaveLength(3);
+    expect(result.unchangedCount).toBe(0);
     for (let i = 0; i < files.length; i++) {
-      const content = await readFile(paths[i], 'utf-8');
+      const content = await readFile(result.writtenPaths[i], 'utf-8');
       expect(content).toBe(files[i].content);
     }
   });
@@ -88,9 +92,10 @@ describe('writeGeneratedFiles', () => {
 
     const files: GeneratedFile[] = [{ fileName: 'form.ts', content: 'new content' }];
 
-    const paths = await writeGeneratedFiles(tempDir, files, { skipExisting: true });
+    const result = await writeGeneratedFiles(tempDir, files, { skipExisting: true });
 
-    expect(paths).toHaveLength(0);
+    expect(result.writtenPaths).toHaveLength(0);
+    expect(result.unchangedCount).toBe(0);
     const content = await readFile(filePath, 'utf-8');
     expect(content).toBe('original content');
   });
@@ -98,10 +103,10 @@ describe('writeGeneratedFiles', () => {
   it('should write new files even when skipExisting is true', async () => {
     const files: GeneratedFile[] = [{ fileName: 'new-form.ts', content: 'new content' }];
 
-    const paths = await writeGeneratedFiles(tempDir, files, { skipExisting: true });
+    const result = await writeGeneratedFiles(tempDir, files, { skipExisting: true });
 
-    expect(paths).toHaveLength(1);
-    const content = await readFile(paths[0], 'utf-8');
+    expect(result.writtenPaths).toHaveLength(1);
+    const content = await readFile(result.writtenPaths[0], 'utf-8');
     expect(content).toBe('new content');
   });
 });

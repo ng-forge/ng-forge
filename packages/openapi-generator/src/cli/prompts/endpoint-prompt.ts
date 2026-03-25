@@ -6,7 +6,7 @@ export async function promptEndpointSelection(endpoints: EndpointInfo[]): Promis
   const choices = endpoints.map((ep) => ({
     name: formatEndpointLabel(ep),
     value: ep,
-    checked: ep.method === 'POST' || ep.method === 'PUT' || ep.method === 'PATCH',
+    checked: true,
   }));
 
   const selected = await checkbox({

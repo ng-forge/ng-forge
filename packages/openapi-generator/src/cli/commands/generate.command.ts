@@ -24,7 +24,7 @@ interface GenerateOptions {
   output: string;
   interactive: 'full' | 'none';
   endpoints?: string;
-  editable?: boolean;
+  readOnly?: boolean;
   watch?: boolean;
   config?: string;
   dryRun?: boolean;
@@ -52,7 +52,7 @@ export function registerGenerateOptions(cmd: Command): void {
       'full',
     )
     .option('--endpoints <list>', 'Comma-separated endpoints, e.g. "POST:/users,PUT:/users/{id}"')
-    .option('--editable', 'Generate editable forms for GET endpoints')
+    .option('--read-only', 'Generate GET endpoint forms with all fields disabled')
     .option('--watch', 'Watch spec file for changes and regenerate')
     .option('--config <path>', 'Directory for .ng-forge-generator.json config (defaults to --output)')
     .option('--dry-run', 'List files that would be generated without writing them')
@@ -110,11 +110,8 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
     if (endpointFilter) {
       selectedEndpoints = filterEndpoints(allEndpoints, endpointFilter);
     } else {
-      // No explicit filter: auto-select POST/PUT/PATCH; only include GET if --editable is set
-      selectedEndpoints = allEndpoints.filter((ep) => {
-        if (ep.method === 'GET') return options.editable === true;
-        return true;
-      });
+      // No explicit filter: auto-select all endpoints
+      selectedEndpoints = allEndpoints;
     }
 
     // Warn about requested endpoints not found in the spec
@@ -151,7 +148,7 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
     }
 
     const isGet = endpoint.method === 'GET';
-    const editable = options.editable ?? false;
+    const editable = isGet ? !(options.readOnly ?? false) : true;
 
     // Skip GET endpoints whose response is a top-level array (produces empty form)
     if (isGet && schema.type === 'array') {
@@ -159,10 +156,14 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
       continue;
     }
 
+    if (isGet && options.readOnly) {
+      logger.verbose(`${endpoint.method} ${endpoint.path}: fields disabled (--read-only mode)`);
+    }
+
     const schemaName = endpoint.operationId ?? `${endpoint.method}${endpoint.path}`;
 
     const mappingOptions: MappingOptions = {
-      editable: isGet ? editable : true,
+      editable,
       decisions: updatedDecisions,
       schemaName,
     };
@@ -272,21 +273,22 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
     return;
   }
 
-  const writtenPaths = await writeGeneratedFiles(options.output, allFiles, { skipExisting: options.skipExisting });
-  const skippedCount = allFiles.length - writtenPaths.length;
+  const { writtenPaths, unchangedCount } = await writeGeneratedFiles(options.output, allFiles, { skipExisting: options.skipExisting });
+  const skippedCount = allFiles.length - writtenPaths.length - unchangedCount;
+  const formCount = allFormFileNames.length;
 
-  if (skippedCount > 0) {
-    logger.success(
-      `Wrote ${writtenPaths.length} file${writtenPaths.length !== 1 ? 's' : ''} in ${options.output} (${skippedCount} skipped)`,
-    );
-  } else {
-    logger.success(`Wrote ${writtenPaths.length} file${writtenPaths.length !== 1 ? 's' : ''} in ${options.output}`);
-  }
+  const suffixParts: string[] = [];
+  if (unchangedCount > 0) suffixParts.push(`${unchangedCount} unchanged`);
+  if (skippedCount > 0) suffixParts.push(`${skippedCount} skipped`);
+  const suffix = suffixParts.length > 0 ? ` (${suffixParts.join(', ')})` : '';
+
+  logger.success(
+    `Wrote ${writtenPaths.length} file${writtenPaths.length !== 1 ? 's' : ''} in ${options.output}${suffix} — ${formCount} form${formCount !== 1 ? 's' : ''}`,
+  );
 
   // Summary: list processed endpoints
   logger.info(`  Endpoints: ${processedEndpoints.join(', ')}`);
 
-  const formCount = allFormFileNames.length;
   const interfaceCount = allInterfaceFileNames.length;
   const barrelCount = 2;
   logger.info(
@@ -299,7 +301,7 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
     output: options.output,
     endpoints: selectedEndpoints.map((e) => `${e.method}:${e.path}`),
     decisions: updatedDecisions,
-    editable: options.editable,
+    readOnly: options.readOnly,
   };
   await saveConfig(configDir, config);
 

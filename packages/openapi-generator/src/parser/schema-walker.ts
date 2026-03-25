@@ -112,28 +112,31 @@ function walkOneOfWithDiscriminator(
   warnings: string[],
 ): WalkedSchema {
   const mapping: Record<string, SchemaObject> = {};
+  const matched = new Set<SchemaObject>();
 
+  // Strategy 1: enum-based detection — each oneOf schema constrains the discriminator with enum: [singleValue]
   for (const schema of schemas) {
     if (isReferenceObject(schema)) continue;
 
-    // Try to find discriminator value from the schema's properties
     const discProp = schema.properties?.[discriminator.propertyName];
     if (discProp && !isReferenceObject(discProp) && discProp.enum?.length === 1) {
       const key = String(discProp.enum[0]);
       mapping[key] = schema;
+      matched.add(schema);
     }
   }
 
-  // Also use explicit discriminator mapping if provided
+  // Strategy 2: when explicit mapping exists and some keys are still unresolved,
+  // match remaining keys to remaining schemas by position in the oneOf array
   if (discriminator.mapping) {
-    for (const [key, ref] of Object.entries(discriminator.mapping)) {
-      const matchingSchema = schemas.find((s) => {
-        if (isReferenceObject(s)) return false;
-        const schemaName = ref.split('/').pop();
-        return (s as SchemaObject).title === key || (s as SchemaObject).title === ref || (s as SchemaObject).title === schemaName;
-      });
-      if (matchingSchema && !isReferenceObject(matchingSchema)) {
-        mapping[key] = matchingSchema;
+    const unmatchedSchemas = schemas.filter((s) => !isReferenceObject(s) && !matched.has(s));
+    let unmatchedIdx = 0;
+
+    for (const key of Object.keys(discriminator.mapping)) {
+      if (!mapping[key] && unmatchedIdx < unmatchedSchemas.length) {
+        mapping[key] = unmatchedSchemas[unmatchedIdx];
+        matched.add(unmatchedSchemas[unmatchedIdx]);
+        unmatchedIdx++;
       }
     }
   }

@@ -11,8 +11,14 @@ export interface WriteOptions {
   skipExisting?: boolean;
 }
 
-export async function writeGeneratedFiles(outputDir: string, files: GeneratedFile[], options?: WriteOptions): Promise<string[]> {
+export interface WriteResult {
+  writtenPaths: string[];
+  unchangedCount: number;
+}
+
+export async function writeGeneratedFiles(outputDir: string, files: GeneratedFile[], options?: WriteOptions): Promise<WriteResult> {
   const writtenPaths: string[] = [];
+  let unchangedCount = 0;
 
   for (const file of files) {
     const dir = file.subdirectory ? join(outputDir, file.subdirectory) : outputDir;
@@ -30,14 +36,16 @@ export async function writeGeneratedFiles(outputDir: string, files: GeneratedFil
 
     // Only write if content changed
     const existing = await readFileSafe(filePath);
-    if (existing !== file.content) {
-      await writeFile(filePath, file.content, 'utf-8');
+    if (existing === file.content) {
+      unchangedCount++;
+      continue;
     }
 
+    await writeFile(filePath, file.content, 'utf-8');
     writtenPaths.push(filePath);
   }
 
-  return writtenPaths;
+  return { writtenPaths, unchangedCount };
 }
 
 async function readFileSafe(path: string): Promise<string | null> {

@@ -74,6 +74,14 @@ describe('registerGenerateOptions', () => {
     const quietOption = program.options.find((opt) => opt.long === '--quiet');
     expect(quietOption).toBeDefined();
   });
+
+  it('should register --read-only option', () => {
+    const program = new Command();
+    registerGenerateOptions(program);
+
+    const readOnlyOption = program.options.find((opt) => opt.long === '--read-only');
+    expect(readOnlyOption).toBeDefined();
+  });
 });
 
 describe('filterEndpoints', () => {

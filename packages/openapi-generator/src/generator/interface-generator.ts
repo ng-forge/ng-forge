@@ -152,9 +152,24 @@ function schemaToTsType(propertyName: string, schema: SchemaObject, parentName: 
   // Handle oneOf / anyOf → union
   const unionSchemas = (schema.oneOf ?? schema.anyOf) as SchemaObject[] | undefined;
   if (unionSchemas) {
+    // Check if this is a discriminator schema — use mapping keys for distinct variant names
+    const disc = (schema as Record<string, unknown>)['discriminator'] as
+      | { propertyName: string; mapping?: Record<string, string> }
+      | undefined;
+    const mappingKeys = disc?.mapping ? Object.keys(disc.mapping) : undefined;
+
     const types = unionSchemas
       .filter((s) => !isReferenceObject(s))
-      .map((s) => schemaToTsType(propertyName, s, parentName, nestedInterfaces));
+      .map((s, i) => {
+        if ((s.type === 'object' || s.properties) && mappingKeys) {
+          const variantName = mappingKeys[i] ? toPascalCase(mappingKeys[i]) : `Variant${i + 1}`;
+          const nestedName = `${parentName}${toPascalCase(propertyName)}${variantName}`;
+          const nestedInterface = generateNestedInterface(nestedName, s);
+          nestedInterfaces.push(nestedInterface);
+          return nestedName;
+        }
+        return schemaToTsType(propertyName, s, parentName, nestedInterfaces);
+      });
     return types.join(' | ');
   }
 

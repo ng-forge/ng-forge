@@ -7,7 +7,7 @@ export interface GeneratorConfig {
   output: string;
   endpoints: string[];
   decisions: Record<string, string>;
-  editable?: boolean;
+  readOnly?: boolean;
 }
 
 const CONFIG_FILENAME = '.ng-forge-generator.json';

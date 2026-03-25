@@ -129,6 +129,25 @@ function mapPropertyToField(
     return undefined;
   }
 
+  // Handle property with oneOf + discriminator (nested polymorphic schema)
+  if (prop.schema.oneOf && (prop.schema as Record<string, unknown>)['discriminator']) {
+    const schemaPrefix = options.schemaName ?? '';
+    const nestedSchemaName = schemaPrefix ? `${schemaPrefix}.${prop.name}` : prop.name;
+    const innerResult = mapSchemaToFields(prop.schema, prop.schema.required ?? [], {
+      ...options,
+      schemaName: nestedSchemaName,
+    });
+    ambiguousFields.push(...innerResult.ambiguousFields);
+    warnings.push(...innerResult.warnings);
+
+    return {
+      key: prop.name,
+      type: 'group',
+      label: ((prop.schema as Record<string, unknown>)['title'] as string) ?? toLabel(prop.name),
+      fields: innerResult.fields,
+    };
+  }
+
   // x-ng-forge-type: bypass type mapping entirely
   const ngForgeType = (prop.schema as Record<string, unknown>)['x-ng-forge-type'] as string | undefined;
 

@@ -765,6 +765,60 @@ describe('mapSchemaToFields', () => {
     });
   });
 
+  it('should handle nested property with oneOf + discriminator', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      required: ['amount', 'method'],
+      properties: {
+        amount: { type: 'number' },
+        method: {
+          oneOf: [
+            {
+              type: 'object',
+              properties: {
+                paymentType: { type: 'string', enum: ['card'] },
+                cardNumber: { type: 'string' },
+              },
+            } as SchemaObject,
+            {
+              type: 'object',
+              properties: {
+                paymentType: { type: 'string', enum: ['bank'] },
+                iban: { type: 'string' },
+              },
+            } as SchemaObject,
+          ],
+          discriminator: {
+            propertyName: 'paymentType',
+          },
+        } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, ['amount', 'method']);
+
+    // amount field
+    expect(result.fields[0]).toMatchObject({ key: 'amount', type: 'input', label: 'Amount' });
+
+    // method should be a group containing discriminator fields
+    const methodField = result.fields[1];
+    expect(methodField.key).toBe('method');
+    expect(methodField.type).toBe('group');
+    expect(methodField.fields).toBeDefined();
+    expect(methodField.fields!.length).toBeGreaterThanOrEqual(2);
+
+    // First child: discriminator radio
+    expect(methodField.fields![0]).toMatchObject({ key: 'paymentType', type: 'radio' });
+
+    // Second child: card variant group
+    expect(methodField.fields![1]).toMatchObject({ key: 'cardVariant', type: 'group' });
+    expect(methodField.fields![1].fields![0].key).toBe('cardNumber');
+
+    // Third child: bank variant group
+    expect(methodField.fields![2]).toMatchObject({ key: 'bankVariant', type: 'group' });
+    expect(methodField.fields![2].fields![0].key).toBe('iban');
+  });
+
   describe('phone heuristic', () => {
     it('should resolve phone field name to input type=tel', () => {
       const schema = {
