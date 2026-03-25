@@ -11,9 +11,58 @@ export function toLabel(name: string): string {
 }
 
 /**
+ * Common acronyms that should be uppercased in labels.
+ */
+const KNOWN_ACRONYMS = new Set([
+  'id',
+  'url',
+  'uri',
+  'api',
+  'http',
+  'https',
+  'html',
+  'css',
+  'js',
+  'ts',
+  'json',
+  'xml',
+  'sql',
+  'ssh',
+  'ssl',
+  'tls',
+  'jwt',
+  'oauth',
+  'sms',
+  'mms',
+  'pdf',
+  'csv',
+  'svg',
+  'png',
+  'gif',
+  'jpg',
+  'jpeg',
+  'ip',
+  'dns',
+  'ftp',
+  'tcp',
+  'udp',
+  'usb',
+  'gps',
+  'cpu',
+  'gpu',
+  'ram',
+  'ios',
+  'ui',
+  'ux',
+  'qa',
+  'ci',
+  'cd',
+]);
+
+/**
  * Convert an enum value to a human-readable label.
  * Handles SCREAMING_SNAKE_CASE, snake_case, kebab-case, and camelCase.
- * Examples: "in_progress" → "In Progress", "PENDING_REVIEW" → "Pending Review", "myVariant" → "My Variant"
+ * Examples: "in_progress" → "In Progress", "PENDING_REVIEW" → "Pending Review", "sms" → "SMS"
  */
 export function toEnumLabel(value: string): string {
   // Handle SCREAMING_SNAKE_CASE: lowercase before processing
@@ -23,7 +72,16 @@ export function toEnumLabel(value: string): string {
     }
     value = value.toLowerCase();
   }
-  return toLabel(value);
+
+  const label = toLabel(value);
+
+  // Replace known acronyms with their uppercase form
+  return label.replace(/\b\w+\b/g, (word) => {
+    if (KNOWN_ACRONYMS.has(word.toLowerCase())) {
+      return word.toUpperCase();
+    }
+    return word;
+  });
 }
 
 /**

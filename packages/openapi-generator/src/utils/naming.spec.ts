@@ -75,6 +75,27 @@ describe('toEnumLabel', () => {
   it('should still humanize 3 chars with separator', () => {
     expect(toEnumLabel('A_B')).toBe('A B');
   });
+
+  it('should uppercase known acronyms like sms, url, api', () => {
+    expect(toEnumLabel('sms')).toBe('SMS');
+    expect(toEnumLabel('url')).toBe('URL');
+    expect(toEnumLabel('api')).toBe('API');
+    expect(toEnumLabel('json')).toBe('JSON');
+    expect(toEnumLabel('html')).toBe('HTML');
+    expect(toEnumLabel('pdf')).toBe('PDF');
+  });
+
+  it('should uppercase acronyms within compound labels', () => {
+    expect(toEnumLabel('api_key')).toBe('API Key');
+    expect(toEnumLabel('json_format')).toBe('JSON Format');
+    expect(toEnumLabel('use_ssl')).toBe('Use SSL');
+  });
+
+  it('should not uppercase non-acronym words', () => {
+    expect(toEnumLabel('email')).toBe('Email');
+    expect(toEnumLabel('phone')).toBe('Phone');
+    expect(toEnumLabel('active')).toBe('Active');
+  });
 });
 
 describe('toPascalCase', () => {

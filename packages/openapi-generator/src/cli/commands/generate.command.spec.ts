@@ -1,80 +1,77 @@
 import { describe, it, expect } from 'vitest';
 import { Command } from 'commander';
-import { registerGenerateCommand, filterEndpoints } from './generate.command.js';
+import { registerGenerateOptions, filterEndpoints } from './generate.command.js';
 import type { EndpointInfo } from '../../parser/endpoint-extractor.js';
 
-describe('registerGenerateCommand', () => {
-  it('should add the generate command to the program', () => {
+describe('registerGenerateOptions', () => {
+  it('should register options directly on the command', () => {
     const program = new Command();
-    registerGenerateCommand(program);
+    registerGenerateOptions(program);
 
-    const generateCmd = program.commands.find((cmd) => cmd.name() === 'generate');
-    expect(generateCmd).toBeDefined();
-    expect(generateCmd!.description()).toBe('Generate dynamic form configurations from an OpenAPI spec');
+    const helpText = program.helpInformation();
+    expect(helpText).toContain('--spec');
+    expect(helpText).toContain('--output');
+    expect(helpText).toContain('--interactive');
   });
 
   it('should register --dry-run option', () => {
     const program = new Command();
-    registerGenerateCommand(program);
+    registerGenerateOptions(program);
 
-    const generateCmd = program.commands.find((cmd) => cmd.name() === 'generate');
-    const dryRunOption = generateCmd!.options.find((opt) => opt.long === '--dry-run');
+    const dryRunOption = program.options.find((opt) => opt.long === '--dry-run');
     expect(dryRunOption).toBeDefined();
   });
 
   it('should register --skip-existing option', () => {
     const program = new Command();
-    registerGenerateCommand(program);
+    registerGenerateOptions(program);
 
-    const generateCmd = program.commands.find((cmd) => cmd.name() === 'generate');
-    const skipExistingOption = generateCmd!.options.find((opt) => opt.long === '--skip-existing');
+    const skipExistingOption = program.options.find((opt) => opt.long === '--skip-existing');
     expect(skipExistingOption).toBeDefined();
   });
 
   it('should register --interactive option with validation', () => {
     const program = new Command();
-    registerGenerateCommand(program);
+    registerGenerateOptions(program);
 
-    const generateCmd = program.commands.find((cmd) => cmd.name() === 'generate');
-    const interactiveOption = generateCmd!.options.find((opt) => opt.long === '--interactive');
+    const interactiveOption = program.options.find((opt) => opt.long === '--interactive');
     expect(interactiveOption).toBeDefined();
   });
 
   it('should reject invalid --interactive values', () => {
     const program = new Command();
     program.exitOverride();
-    registerGenerateCommand(program);
+    registerGenerateOptions(program);
+    program.action(() => {
+      /* noop */
+    });
 
     expect(() => {
-      program.parse(['node', 'test', 'generate', '--spec', 'a.yaml', '--output', './out', '--interactive', 'banana'], { from: 'user' });
+      program.parse(['node', 'test', '--spec', 'a.yaml', '--output', './out', '--interactive', 'banana'], { from: 'user' });
     }).toThrow();
   });
 
   it('should include help text about formatting', () => {
     const program = new Command();
-    registerGenerateCommand(program);
+    registerGenerateOptions(program);
 
-    const generateCmd = program.commands.find((cmd) => cmd.name() === 'generate');
-    const helpText = generateCmd!.helpInformation();
-    // The addHelpText is appended after help info, so we can check the option exists
+    const helpText = program.helpInformation();
     expect(helpText).toContain('--interactive');
   });
 
   it('should register --verbose option', () => {
     const program = new Command();
-    registerGenerateCommand(program);
+    registerGenerateOptions(program);
 
-    const generateCmd = program.commands.find((cmd) => cmd.name() === 'generate');
-    const verboseOption = generateCmd!.options.find((opt) => opt.long === '--verbose');
+    const verboseOption = program.options.find((opt) => opt.long === '--verbose');
     expect(verboseOption).toBeDefined();
   });
 
   it('should register --quiet option', () => {
     const program = new Command();
-    registerGenerateCommand(program);
+    registerGenerateOptions(program);
 
-    const generateCmd = program.commands.find((cmd) => cmd.name() === 'generate');
-    const quietOption = generateCmd!.options.find((opt) => opt.long === '--quiet');
+    const quietOption = program.options.find((opt) => opt.long === '--quiet');
     expect(quietOption).toBeDefined();
   });
 });

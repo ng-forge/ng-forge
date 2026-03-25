@@ -33,10 +33,11 @@ interface GenerateOptions {
   quiet?: boolean;
 }
 
-export function registerGenerateCommand(program: Command, options?: { isDefault?: boolean }): void {
-  program
-    .command('generate', { isDefault: options?.isDefault })
-    .description('Generate dynamic form configurations from an OpenAPI spec')
+/**
+ * Register generate options directly on the given Command (no subcommand).
+ */
+export function registerGenerateOptions(cmd: Command): void {
+  cmd
     .requiredOption('--spec <path>', 'Path to OpenAPI spec file')
     .requiredOption('--output <path>', 'Output directory for generated files')
     .option(
@@ -58,17 +59,27 @@ export function registerGenerateCommand(program: Command, options?: { isDefault?
     .option('--skip-existing', 'Skip files that already exist on disk')
     .option('--verbose', 'Show detailed output including field mapping decisions')
     .option('--quiet', 'Suppress all output except warnings and errors')
-    .addHelpText('after', '\nNote: Generated files are not formatted. Run your project formatter (e.g. prettier) after generation.')
-    .action(async (options: GenerateOptions) => {
-      if (options.verbose && options.quiet) {
-        logger.error('Cannot use --verbose and --quiet together');
-        process.exit(1);
-      }
-      if (options.verbose) setLogLevel('verbose');
-      if (options.quiet) setLogLevel('quiet');
+    .addHelpText('after', '\nNote: Generated files are not formatted. Run your project formatter (e.g. prettier) after generation.');
+}
 
-      await runGenerate(options);
-    });
+/**
+ * Action handler for the generate command.
+ */
+export async function runGenerateAction(options: GenerateOptions): Promise<void> {
+  if (options.verbose && options.quiet) {
+    logger.error('Cannot use --verbose and --quiet together');
+    process.exit(1);
+  }
+  if (options.verbose) setLogLevel('verbose');
+  if (options.quiet) setLogLevel('quiet');
+
+  // Auto-detect non-TTY environments and fall back to non-interactive mode
+  if (options.interactive === 'full' && !process.stdin.isTTY) {
+    logger.warn('Non-interactive terminal detected, falling back to --interactive none');
+    options.interactive = 'none';
+  }
+
+  await runGenerate(options);
 }
 
 async function runGenerate(options: GenerateOptions): Promise<void> {
@@ -76,13 +87,17 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
   const existingConfig = await loadConfig(configDir);
   const decisions = existingConfig?.decisions ?? {};
 
+  if (existingConfig) {
+    logger.info(`Loaded config from ${configDir}/.ng-forge-generator.json (${existingConfig.endpoints.length} saved endpoint(s))`);
+  }
+
   logger.info(`Parsing OpenAPI spec: ${options.spec}`);
   const spec = await parseOpenAPISpec(options.spec);
   const allEndpoints = extractEndpoints(spec);
 
   if (allEndpoints.length === 0) {
     logger.warn('No endpoints found in the spec');
-    return;
+    process.exit(1);
   }
 
   logger.verbose(`Found ${allEndpoints.length} endpoint(s): ${allEndpoints.map((ep) => `${ep.method}:${ep.path}`).join(', ')}`);
@@ -171,13 +186,26 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
 
     // In non-interactive mode, apply default field choices for any remaining ambiguous fields
     if (result.ambiguousFields.length > 0 && options.interactive === 'none') {
+      const defaultsByScope = new Map<string, string[]>();
       for (const ambiguous of result.ambiguousFields) {
         if (!updatedDecisions[ambiguous.fieldPath]) {
           const defaultChoice = DEFAULT_FIELD_CHOICES[ambiguous.scope];
           if (defaultChoice) {
             updatedDecisions[ambiguous.fieldPath] = defaultChoice;
-            logger.verbose(`Field '${ambiguous.fieldPath}': resolved ambiguous ${ambiguous.scope} → '${defaultChoice}' (default)`);
+            const list = defaultsByScope.get(ambiguous.scope) ?? [];
+            list.push(ambiguous.fieldPath);
+            defaultsByScope.set(ambiguous.scope, list);
           }
+        }
+      }
+      for (const [scope, fields] of defaultsByScope) {
+        const choice = DEFAULT_FIELD_CHOICES[scope];
+        if (fields.length <= 2) {
+          for (const fieldPath of fields) {
+            logger.verbose(`Field '${fieldPath}': resolved ambiguous ${scope} → '${choice}' (default)`);
+          }
+        } else {
+          logger.verbose(`${fields.length} ${scope} fields resolved to '${choice}' (default): ${fields.join(', ')}`);
         }
       }
 
@@ -265,6 +293,7 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
   logger.info(
     `  ${formCount} form config${formCount !== 1 ? 's' : ''}, ${interfaceCount} interface${interfaceCount !== 1 ? 's' : ''}, ${barrelCount} barrel files`,
   );
+  logger.info('  Tip: Run your project formatter (e.g. Prettier) on the output directory');
 
   const config: GeneratorConfig = {
     spec: options.spec,

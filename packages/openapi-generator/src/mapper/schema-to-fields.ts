@@ -5,6 +5,7 @@ import type { ValidatorConfig } from './validator-mapping.js';
 import { mapSchemaToValidators } from './validator-mapping.js';
 import { mapDiscriminator } from './discriminator-mapping.js';
 import { toLabel, toEnumLabel } from '../utils/naming.js';
+import { logger } from '../utils/logger.js';
 
 function singularize(label: string): string {
   // Only strip trailing 's' if word is 4+ chars and doesn't end in 'ss'
@@ -178,6 +179,7 @@ function mapPropertyToField(
   // readOnly → disabled
   if ((prop.schema as Record<string, unknown>)['readOnly']) {
     field.disabled = true;
+    logger.verbose(`Field '${fieldPath}': disabled (readOnly in schema)`);
   }
 
   // default → value

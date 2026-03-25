@@ -32,7 +32,7 @@ ng-forge-generator --spec openapi.yaml --output src/generated
 
 ### Interactive Modes
 
-- **`--interactive full`** (default): Prompts the user to select endpoints (POST/PUT/PATCH pre-checked) and resolve ambiguous field types.
+- **`--interactive full`** (default): Prompts the user to select endpoints (POST/PUT/PATCH pre-checked) and resolve ambiguous field types. Automatically falls back to `none` in non-TTY environments (e.g., CI pipelines).
 - **`--interactive none`**: No prompts. Uses `--endpoints` flag, saved config, or auto-selects POST/PUT/PATCH endpoints. GET endpoints require the `--editable` flag.
 
 ### Examples
