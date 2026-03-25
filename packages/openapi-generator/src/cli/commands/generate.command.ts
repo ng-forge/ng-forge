@@ -30,9 +30,9 @@ interface GenerateOptions {
   skipExisting?: boolean;
 }
 
-export function registerGenerateCommand(program: Command): void {
+export function registerGenerateCommand(program: Command, options?: { isDefault?: boolean }): void {
   program
-    .command('generate')
+    .command('generate', { isDefault: options?.isDefault })
     .description('Generate dynamic form configurations from an OpenAPI spec')
     .requiredOption('--spec <path>', 'Path to OpenAPI spec file')
     .requiredOption('--output <path>', 'Output directory for generated files')
@@ -60,7 +60,7 @@ export function registerGenerateCommand(program: Command): void {
 }
 
 async function runGenerate(options: GenerateOptions): Promise<void> {
-  const configDir = options.config ?? process.cwd();
+  const configDir = options.config ?? options.output;
   const existingConfig = await loadConfig(configDir);
   const decisions = existingConfig?.decisions ?? {};
 
@@ -75,11 +75,14 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
 
   let selectedEndpoints: EndpointInfo[];
   if (options.interactive === 'none' || options.endpoints) {
-    selectedEndpoints = filterEndpoints(allEndpoints, options.endpoints);
+    // Use CLI --endpoints if provided, otherwise fall back to saved config endpoints
+    const endpointFilter = options.endpoints ?? existingConfig?.endpoints?.join(',');
+    selectedEndpoints = filterEndpoints(allEndpoints, endpointFilter);
 
     // Warn about requested endpoints not found in the spec
-    if (options.endpoints) {
-      const requested = options.endpoints.split(',').map((s) => s.trim());
+    const filterSource = options.endpoints ?? endpointFilter;
+    if (filterSource) {
+      const requested = filterSource.split(',').map((s) => s.trim());
       const matched = new Set(selectedEndpoints.map((ep) => `${ep.method}:${ep.path}`));
       for (const req of requested) {
         if (!matched.has(req)) {

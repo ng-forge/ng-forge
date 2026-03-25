@@ -12,7 +12,7 @@ export async function run(): Promise<void> {
 
   program.name('ng-forge-generator').description('Generate @ng-forge/dynamic-forms configurations from OpenAPI specs').version(version);
 
-  registerGenerateCommand(program);
+  registerGenerateCommand(program, { isDefault: true });
 
   await program.parseAsync(process.argv);
 }
