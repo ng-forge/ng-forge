@@ -49,11 +49,14 @@ export function createStackBlitzProject(adapter: AdapterName, configJson: string
   const meta = ADAPTER_META[resolved];
 
   const appComponent = `import { Component } from '@angular/core';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
+import { JsonPipe } from '@angular/common';
+import { DynamicForm, FormConfig, InferFormValue } from '@ng-forge/dynamic-forms';
+
+const config = ${configJson} as const satisfies FormConfig;
 
 @Component({
   selector: 'app-root',
-  imports: [DynamicForm],
+  imports: [DynamicForm, JsonPipe],
   template: \`
     <div class="container">
       <form [dynamic-form]="config" [(value)]="formValue"></form>
@@ -64,9 +67,8 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
   styles: \`.container { max-width: 600px; margin: 2rem auto; padding: 0 1rem; }\`,
 })
 export class AppComponent {
-  formValue: Record<string, unknown> = {};
-
-  config: FormConfig = ${configJson};
+  readonly config = config;
+  formValue: InferFormValue<typeof config.fields> = {};
 }
 `;
 
