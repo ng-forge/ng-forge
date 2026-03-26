@@ -44,9 +44,51 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
   },
 };
 
-export function createStackBlitzProject(adapter: AdapterName, configJson: string, title: string): Project {
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** Serializes a value to JS object notation (unquoted keys, single-quoted strings). */
+export function toJsObjectNotation(value: unknown, indent = 0): string {
+  const spaces = '  '.repeat(indent);
+  const nextSpaces = '  '.repeat(indent + 1);
+
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+  if (typeof value === 'string') return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (value instanceof RegExp) return value.toString();
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '[]';
+    const items = value.map((item) => `${nextSpaces}${toJsObjectNotation(item, indent + 1)}`);
+    return `[\n${items.join(',\n')}\n${spaces}]`;
+  }
+
+  if (typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>);
+    if (entries.length === 0) return '{}';
+    const props = entries.map(([key, val]) => {
+      const formattedValue = toJsObjectNotation(val, indent + 1);
+      return `${nextSpaces}${key}: ${formattedValue}`;
+    });
+    return `{\n${props.join(',\n')}\n${spaces}}`;
+  }
+
+  return String(value);
+}
+
+/** Opens a StackBlitz project with the given config. SDK is lazy-loaded on first call. */
+export async function openInStackBlitz(adapter: AdapterName, configJson: string, title: string): Promise<void> {
+  const project = createStackBlitzProject(adapter, configJson, title);
+  const sdk = await import('@stackblitz/sdk');
+  sdk.default.openProject(project, { openFile: 'src/app/app.component.ts' });
+}
+
+function createStackBlitzProject(adapter: AdapterName, configJson: string, title: string): Project {
   const resolved: SupportedAdapter = adapter === 'custom' ? 'material' : adapter;
   const meta = ADAPTER_META[resolved];
+  const safeTitle = escapeHtml(title);
 
   const appComponent = `import { Component } from '@angular/core';
 import { JsonPipe } from '@angular/common';
@@ -94,13 +136,41 @@ bootstrapApplication(AppComponent, appConfig);
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>${title}</title>
+  <title>${safeTitle}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
   <app-root></app-root>
 </body>
 </html>
+`;
+
+  const tsconfig = `{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "outDir": "./dist/out-tsc",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "declaration": false,
+    "experimentalDecorators": true,
+    "moduleResolution": "bundler",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "lib": ["ES2022", "dom"]
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}
 `;
 
   return {
@@ -112,6 +182,7 @@ bootstrapApplication(AppComponent, appConfig);
       'src/app/app.component.ts': appComponent,
       'src/app/app.config.ts': appConfig,
       'src/index.html': indexHtml,
+      'tsconfig.json': tsconfig,
     },
     dependencies: {
       '@angular/core': '^21.0.0',
