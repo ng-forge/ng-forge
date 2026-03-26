@@ -1,0 +1,31 @@
+openapi: '3.0.3'
+info:
+  title: Test
+  version: '1.0.0'
+paths:
+  /employees:
+    post:
+      operationId: createEmployee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  required: [name]
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                - type: object
+                  required: [salary]
+                  properties:
+                    department:
+                      type: string
+                    salary:
+                      type: number
+      responses:
+        '201':
+          description: Created

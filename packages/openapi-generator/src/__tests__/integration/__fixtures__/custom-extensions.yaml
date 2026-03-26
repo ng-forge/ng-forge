@@ -1,0 +1,28 @@
+openapi: '3.0.3'
+info:
+  title: Test
+  version: '1.0.0'
+paths:
+  /custom:
+    post:
+      operationId: createCustom
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: integer
+                  x-ng-forge-type: slider
+                priority:
+                  type: string
+                  enum: [low, medium, high]
+                  x-enum-labels:
+                    low: Low Priority
+                    medium: Medium Priority
+                    high: High Priority
+      responses:
+        '201':
+          description: Created

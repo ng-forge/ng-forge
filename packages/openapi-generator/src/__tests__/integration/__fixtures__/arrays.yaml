@@ -1,0 +1,33 @@
+openapi: '3.0.3'
+info:
+  title: Test
+  version: '1.0.0'
+paths:
+  /teams:
+    post:
+      operationId: createTeam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                members:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                      role:
+                        type: string
+                scores:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '201':
+          description: Created
