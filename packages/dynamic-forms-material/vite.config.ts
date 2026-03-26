@@ -12,7 +12,7 @@ export default defineConfig({
       enabled: true,
       only: true,
       include: ['src/**/*.type-test.ts'],
-      tsconfig: './tsconfig.spec.json',
+      tsconfig: './tsconfig.typecheck.json',
     },
   },
 });
