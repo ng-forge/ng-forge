@@ -14,7 +14,7 @@ import { openInStackBlitz, toJsObjectNotation } from './stackblitz-project';
       <div class="live-example-wrapper">
         <div class="overlay-actions">
           @if (resolvedConfig()) {
-            <button class="stackblitz-btn" type="button" title="Edit in StackBlitz" (click)="openInStackBlitz()">
+            <button class="stackblitz-btn" type="button" (click)="openInStackBlitz()">
               <img src="assets/icons/stackblitz.svg" alt="" class="stackblitz-icon" />
               StackBlitz
             </button>

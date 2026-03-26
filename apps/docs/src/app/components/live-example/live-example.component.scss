@@ -60,6 +60,7 @@
 }
 
 .stackblitz-btn {
+  position: relative;
   cursor: pointer;
   transition:
     color 0.15s,
@@ -68,6 +69,34 @@
   &:hover {
     color: #1389fd;
     border-color: #1389fd;
+  }
+
+  &::after {
+    content: 'Open in StackBlitz';
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: var(--forge-base-0, #333);
+    color: var(--forge-text-muted, #fff);
+    font-size: 0.65rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.15s,
+      transform 0.15s;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  &:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
   }
 }
 
@@ -86,6 +115,13 @@
     background: $bg-surface;
     border-color: $steel-dark;
     color: $steel-mid;
+
+    &::after {
+      background: $bg-surface;
+      color: $steel;
+      border: 1px solid $steel-dark;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
 
     &:hover {
       color: #1389fd;

@@ -735,6 +735,7 @@ nav {
   }
 
   &--icon-only {
+    position: relative;
     padding: 6px;
     border: none;
     background: transparent;
@@ -745,8 +746,40 @@ nav {
       transition: filter 0.25s ease;
     }
 
-    &:hover .stackblitz-icon {
-      filter: drop-shadow(0 0 1px #1389fd) drop-shadow(0 0 3px rgba(#1389fd, 0.5));
+    &::after {
+      content: 'Open in StackBlitz';
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: $bg-surface;
+      color: $steel;
+      border: 1px solid $steel-dark;
+      font-size: 0.65rem;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.15s,
+        transform 0.15s;
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    &:hover {
+      .stackblitz-icon {
+        filter: drop-shadow(0 0 1px #1389fd) drop-shadow(0 0 3px rgba(#1389fd, 0.5));
+      }
+
+      &::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+      }
     }
   }
 }
