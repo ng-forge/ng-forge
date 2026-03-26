@@ -19,16 +19,16 @@
 }
 
 // ============================================
-// HEADER BAR — StackBlitz button + adapter badge
+// OVERLAY ACTIONS — floating top-right
 // ============================================
-.live-example-header {
-  display: flex;
+.overlay-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--forge-border-color, #e0e0e0);
-  background: var(--forge-base-1, #f5f5f5);
-  border-radius: 8px 8px 0 0;
+  gap: 6px;
 }
 
 .adapter-badge {
@@ -37,10 +37,13 @@
   gap: 4px;
   padding: 3px 8px;
   border-radius: 4px;
+  background: var(--forge-base-1, #f0f0f0);
+  border: 1px solid var(--forge-border-color, #e0e0e0);
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--forge-text-muted);
   letter-spacing: 0.03em;
+  pointer-events: none;
 }
 
 .adapter-badge-icon {
@@ -54,10 +57,10 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 10px;
+  padding: 3px 8px;
   border: 1px solid var(--forge-border-color, #e0e0e0);
   border-radius: 4px;
-  background: var(--forge-base-0, #fff);
+  background: var(--forge-base-1, #f0f0f0);
   color: var(--forge-text-muted, #666);
   font-size: 0.7rem;
   font-weight: 500;
@@ -70,7 +73,6 @@
   &:hover {
     color: #1389fd;
     border-color: #1389fd;
-    background: var(--forge-base-0, #fff);
   }
 }
 
@@ -81,17 +83,13 @@
 }
 
 :host-context([data-theme='dark']) {
-  .live-example-header {
-    border-bottom-color: $steel-dark;
-    background: $bg-surface;
-  }
-
   .adapter-badge {
-    color: $steel-mid;
+    background: $bg-surface;
+    border-color: $steel-dark;
   }
 
   .stackblitz-btn {
-    background: $bg-elevated;
+    background: $bg-surface;
     border-color: $steel-dark;
     color: $steel-mid;
 
@@ -104,17 +102,13 @@
 
 @media (prefers-color-scheme: dark) {
   :host-context([data-theme='auto']) {
-    .live-example-header {
-      border-bottom-color: $steel-dark;
-      background: $bg-surface;
-    }
-
     .adapter-badge {
-      color: $steel-mid;
+      background: $bg-surface;
+      border-color: $steel-dark;
     }
 
     .stackblitz-btn {
-      background: $bg-elevated;
+      background: $bg-surface;
       border-color: $steel-dark;
       color: $steel-mid;
 

@@ -12,7 +12,7 @@ import { createStackBlitzProject } from './stackblitz-project';
   template: `
     @if (!shouldHide()) {
       <div class="live-example-wrapper">
-        <div class="live-example-header">
+        <div class="overlay-actions">
           @if (resolvedConfig()) {
             <button class="stackblitz-btn" type="button" title="Edit in StackBlitz" (click)="openInStackBlitz()">
               <svg class="stackblitz-icon" viewBox="0 0 28 28" aria-hidden="true">
