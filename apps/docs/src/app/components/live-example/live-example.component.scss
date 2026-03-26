@@ -56,19 +56,19 @@
 .stackblitz-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   padding: 3px 8px;
   border: 1px solid var(--forge-border-color, #e0e0e0);
   border-radius: 4px;
   background: var(--forge-base-1, #f0f0f0);
-  color: var(--forge-text-muted, #666);
+  color: var(--forge-text-muted);
   font-size: 0.7rem;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.03em;
   cursor: pointer;
   transition:
     color 0.15s,
-    border-color 0.15s,
-    background 0.15s;
+    border-color 0.15s;
 
   &:hover {
     color: #1389fd;
@@ -77,8 +77,8 @@
 }
 
 .stackblitz-icon {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   fill: #1389fd;
 }
 

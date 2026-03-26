@@ -18,7 +18,7 @@ import { createStackBlitzProject } from './stackblitz-project';
               <svg class="stackblitz-icon" viewBox="0 0 28 28" aria-hidden="true">
                 <polygon points="12.5,2 3,18 12,18 10,26 25,11 15,11 19,2" />
               </svg>
-              Edit in StackBlitz
+              StackBlitz
             </button>
           }
           <span class="adapter-badge">
