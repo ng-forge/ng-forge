@@ -19,25 +19,28 @@
 }
 
 // ============================================
-// ADAPTER BADGE — floating top-right overlay
+// HEADER BAR — StackBlitz button + adapter badge
 // ============================================
+.live-example-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--forge-border-color, #e0e0e0);
+  background: var(--forge-base-1, #f5f5f5);
+  border-radius: 8px 8px 0 0;
+}
+
 .adapter-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
   border-radius: 4px;
-  background: var(--forge-base-1, #f0f0f0);
-  border: 1px solid var(--forge-border-color, #e0e0e0);
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--forge-text-muted);
   letter-spacing: 0.03em;
-  pointer-events: none;
 }
 
 .adapter-badge-icon {
@@ -47,86 +50,79 @@
   border-radius: 2px;
 }
 
-// ============================================
-// STACKBLITZ FOOTER — tab-like bar below example
-// ============================================
-.live-example-footer {
-  display: flex;
-  border-top: 1px solid var(--forge-border-color, #e0e0e0);
-  background: var(--forge-base-1, #f5f5f5);
-  border-radius: 0 0 8px 8px;
-}
-
-.stackblitz-tab {
+.stackblitz-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border: none;
-  background: transparent;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid var(--forge-border-color, #e0e0e0);
+  border-radius: 4px;
+  background: var(--forge-base-0, #fff);
   color: var(--forge-text-muted, #666);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 500;
   cursor: pointer;
   transition:
     color 0.15s,
+    border-color 0.15s,
     background 0.15s;
 
   &:hover {
     color: #1389fd;
-    background: var(--forge-base-2, #e8e8e8);
+    border-color: #1389fd;
+    background: var(--forge-base-0, #fff);
   }
 }
 
 .stackblitz-icon {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   fill: #1389fd;
 }
 
 :host-context([data-theme='dark']) {
-  .live-example-footer {
-    border-top-color: $steel-dark;
+  .live-example-header {
+    border-bottom-color: $steel-dark;
     background: $bg-surface;
   }
 
-  .stackblitz-tab {
+  .adapter-badge {
+    color: $steel-mid;
+  }
+
+  .stackblitz-btn {
+    background: $bg-elevated;
+    border-color: $steel-dark;
     color: $steel-mid;
 
     &:hover {
       color: #1389fd;
-      background: $bg-elevated;
+      border-color: #1389fd;
     }
   }
 }
 
 @media (prefers-color-scheme: dark) {
   :host-context([data-theme='auto']) {
-    .live-example-footer {
-      border-top-color: $steel-dark;
+    .live-example-header {
+      border-bottom-color: $steel-dark;
       background: $bg-surface;
     }
 
-    .stackblitz-tab {
+    .adapter-badge {
+      color: $steel-mid;
+    }
+
+    .stackblitz-btn {
+      background: $bg-elevated;
+      border-color: $steel-dark;
       color: $steel-mid;
 
       &:hover {
         color: #1389fd;
-        background: $bg-elevated;
+        border-color: #1389fd;
       }
     }
-  }
-}
-
-:host-context([data-theme='dark']) .adapter-badge {
-  background: $bg-surface;
-  border-color: $steel-dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :host-context([data-theme='auto']) .adapter-badge {
-    background: $bg-surface;
-    border-color: $steel-dark;
   }
 }
 

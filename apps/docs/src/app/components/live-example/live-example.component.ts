@@ -12,10 +12,20 @@ import { createStackBlitzProject } from './stackblitz-project';
   template: `
     @if (!shouldHide()) {
       <div class="live-example-wrapper">
-        <span class="adapter-badge">
-          <img [src]="adapterInfo().icon" [alt]="adapterInfo().label" class="adapter-badge-icon" />
-          {{ adapterInfo().label }}
-        </span>
+        <div class="live-example-header">
+          @if (resolvedConfig()) {
+            <button class="stackblitz-btn" type="button" title="Edit in StackBlitz" (click)="openInStackBlitz()">
+              <svg class="stackblitz-icon" viewBox="0 0 28 28" aria-hidden="true">
+                <polygon points="12.5,2 3,18 12,18 10,26 25,11 15,11 19,2" />
+              </svg>
+              Edit in StackBlitz
+            </button>
+          }
+          <span class="adapter-badge">
+            <img [src]="adapterInfo().icon" [alt]="adapterInfo().label" class="adapter-badge-icon" />
+            {{ adapterInfo().label }}
+          </span>
+        </div>
         @if (!isLoaded()) {
           <div class="live-example-skeleton" role="status" aria-busy="true">
             <div class="skeleton-form">
@@ -47,16 +57,6 @@ import { createStackBlitzProject } from './stackblitz-project';
           locationStrategy="memory"
           styleIsolation="scoped"
         ></div>
-        @if (resolvedConfig()) {
-          <div class="live-example-footer">
-            <button class="stackblitz-tab" type="button" (click)="openInStackBlitz()">
-              <svg class="stackblitz-icon" viewBox="0 0 28 28" aria-hidden="true">
-                <polygon points="12.5,2 3,18 12,18 10,26 25,11 15,11 19,2" />
-              </svg>
-              Edit in StackBlitz
-            </button>
-          </div>
-        }
       </div>
     }
   `,
