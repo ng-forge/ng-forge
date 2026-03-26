@@ -90,27 +90,35 @@ function createStackBlitzProject(adapter: AdapterName, configJson: string, title
   const meta = ADAPTER_META[resolved];
   const safeTitle = escapeHtml(title);
 
-  const appComponent = `import { Component } from '@angular/core';
+  const appComponent = `import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig, InferFormValue } from '@ng-forge/dynamic-forms';
 
 const config = ${configJson} as const satisfies FormConfig;
+
+type FormValue = InferFormValue<typeof config.fields>;
 
 @Component({
   selector: 'app-root',
   imports: [DynamicForm, JsonPipe],
   template: \`
     <div class="container">
-      <form [dynamic-form]="config" [(value)]="formValue"></form>
-      <h3>Form Data</h3>
-      <pre>{{ formValue | json }}</pre>
+      <form [dynamic-form]="config" (submitted)="onSubmit($event)"></form>
+      @if (value()) {
+        <h3>Form Data</h3>
+        <pre>{{ value() | json }}</pre>
+      }
     </div>
   \`,
   styles: \`.container { max-width: 600px; margin: 2rem auto; padding: 0 1rem; }\`,
 })
 export class AppComponent {
   readonly config = config;
-  formValue: Record<string, unknown> = {};
+  readonly value = signal<FormValue | null>(null);
+
+  onSubmit(value: FormValue): void {
+    this.value.set(value);
+  }
 }
 `;
 
