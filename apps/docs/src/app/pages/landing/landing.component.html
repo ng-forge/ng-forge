@@ -97,6 +97,12 @@
                 <span class="icon icon--code" aria-hidden="true"></span> Config
               </button>
             </div>
+            <button class="stackblitz-link" type="button" (click)="openInStackBlitz(heroFormConfig, 'Contact Form')">
+              <svg class="stackblitz-icon" viewBox="0 0 28 28" aria-hidden="true">
+                <polygon points="12.5,2 3,18 12,18 10,26 25,11 15,11 19,2" />
+              </svg>
+              StackBlitz
+            </button>
           </div>
 
           <div class="hero-demo-body">
@@ -249,6 +255,12 @@
           <div class="demo-panel-header">
             <span class="panel-icon icon icon--play"></span>
             <span>Live Demo</span>
+            <button class="stackblitz-link" type="button" (click)="openInStackBlitz(validationFormConfig, 'Validation Demo')">
+              <svg class="stackblitz-icon" viewBox="0 0 28 28" aria-hidden="true">
+                <polygon points="12.5,2 3,18 12,18 10,26 25,11 15,11 19,2" />
+              </svg>
+              StackBlitz
+            </button>
           </div>
           <div class="demo-panel-body validation-form">
             @if (!validationLoaded()) {

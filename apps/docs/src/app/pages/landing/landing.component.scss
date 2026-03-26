@@ -707,6 +707,36 @@ nav {
   }
 }
 
+.stackblitz-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 4px 8px;
+  border: 1px solid $steel-dark;
+  border-radius: 4px;
+  background: $bg-elevated;
+  color: $steel-mid;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+
+  &:hover {
+    color: #1389fd;
+    border-color: #1389fd;
+  }
+
+  .stackblitz-icon {
+    width: 14px;
+    height: 14px;
+    fill: #1389fd;
+  }
+}
+
 .hero-demo-body {
   min-height: 300px;
   position: relative;

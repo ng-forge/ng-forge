@@ -5,6 +5,7 @@ import { SandboxMountDirective } from '@ng-forge/sandbox-harness';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { EXAMPLE_CONFIGS } from '../../example-configs';
 import { EXAMPLES_REGISTRY } from '../../pages/examples-index/examples.registry';
+import sdk from '@stackblitz/sdk';
 import { createStackBlitzProject } from './stackblitz-project';
 
 @Component({
@@ -126,7 +127,7 @@ export class LiveExampleComponent {
     const title = this.exampleTitle() || this.scenarioKey();
     const project = createStackBlitzProject(this.resolvedAdapter(), this.configJson(), title);
 
-    import('@stackblitz/sdk').then((sdk) => sdk.default.openProject(project, { openFile: 'src/app/app.component.ts' }));
+    sdk.openProject(project, { openFile: 'src/app/app.component.ts' });
   }
 
   private toJsObjectNotation(value: unknown, indent: number): string {

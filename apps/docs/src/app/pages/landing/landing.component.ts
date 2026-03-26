@@ -18,9 +18,12 @@ import { catchError, defer, delay, filter, map, merge, of, switchMap, tap } from
 
 import { SandboxHarness, SandboxMountDirective } from '@ng-forge/sandbox-harness';
 
+import { FormConfig } from '@ng-forge/dynamic-forms';
 import { Logo } from '../../components/logo';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import { SearchComponent } from '../../components/search/search.component';
+import sdk from '@stackblitz/sdk';
+import { createStackBlitzProject } from '../../components/live-example/stackblitz-project';
 import {
   CODE_SNIPPETS,
   FEATURES,
@@ -347,5 +350,41 @@ export class LandingComponent {
     const card = event.currentTarget as HTMLElement;
     card.style.removeProperty('--mouse-x');
     card.style.removeProperty('--mouse-y');
+  }
+
+  openInStackBlitz(config: FormConfig, title: string): void {
+    if (!this.isBrowser) return;
+    const configJson = this.toJsObjectNotation(config, 0);
+    const project = createStackBlitzProject('material', configJson, title);
+    sdk.openProject(project, { openFile: 'src/app/app.component.ts' });
+  }
+
+  private toJsObjectNotation(value: unknown, indent: number): string {
+    const spaces = '  '.repeat(indent);
+    const nextSpaces = '  '.repeat(indent + 1);
+
+    if (value === null) return 'null';
+    if (value === undefined) return 'undefined';
+    if (typeof value === 'string') return `'${value.replace(/'/g, "\\'")}'`;
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+    if (value instanceof RegExp) return value.toString();
+
+    if (Array.isArray(value)) {
+      if (value.length === 0) return '[]';
+      const items = value.map((item) => `${nextSpaces}${this.toJsObjectNotation(item, indent + 1)}`);
+      return `[\n${items.join(',\n')}\n${spaces}]`;
+    }
+
+    if (typeof value === 'object') {
+      const entries = Object.entries(value as Record<string, unknown>);
+      if (entries.length === 0) return '{}';
+      const props = entries.map(([key, val]) => {
+        const formattedValue = this.toJsObjectNotation(val, indent + 1);
+        return `${nextSpaces}${key}: ${formattedValue}`;
+      });
+      return `{\n${props.join(',\n')}\n${spaces}}`;
+    }
+
+    return String(value);
   }
 }
