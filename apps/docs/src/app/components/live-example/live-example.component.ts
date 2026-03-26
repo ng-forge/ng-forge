@@ -16,9 +16,7 @@ import { createStackBlitzProject } from './stackblitz-project';
         <div class="overlay-actions">
           @if (resolvedConfig()) {
             <button class="stackblitz-btn" type="button" title="Edit in StackBlitz" (click)="openInStackBlitz()">
-              <svg class="stackblitz-icon" viewBox="0 0 28 28" aria-hidden="true">
-                <polygon points="12.5,2 3,18 12,18 10,26 25,11 15,11 19,2" />
-              </svg>
+              <img src="assets/icons/stackblitz.svg" alt="" class="stackblitz-icon" />
               StackBlitz
             </button>
           }
@@ -136,7 +134,7 @@ export class LiveExampleComponent {
 
     if (value === null) return 'null';
     if (value === undefined) return 'undefined';
-    if (typeof value === 'string') return `'${value.replace(/'/g, "\\'")}'`;
+    if (typeof value === 'string') return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
     if (typeof value === 'number' || typeof value === 'boolean') return String(value);
     if (value instanceof RegExp) return value.toString();
 

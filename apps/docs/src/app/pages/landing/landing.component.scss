@@ -733,7 +733,17 @@ nav {
   .stackblitz-icon {
     width: 14px;
     height: 14px;
-    fill: #1389fd;
+  }
+
+  &--icon-only {
+    padding: 5px;
+    border: none;
+    background: transparent;
+
+    .stackblitz-icon {
+      width: 18px;
+      height: 18px;
+    }
   }
 }
 

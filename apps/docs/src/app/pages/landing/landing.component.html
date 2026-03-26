@@ -97,11 +97,13 @@
                 <span class="icon icon--code" aria-hidden="true"></span> Config
               </button>
             </div>
-            <button class="stackblitz-link" type="button" (click)="openInStackBlitz(heroFormConfig, 'Contact Form')">
-              <svg class="stackblitz-icon" viewBox="0 0 28 28" aria-hidden="true">
-                <polygon points="12.5,2 3,18 12,18 10,26 25,11 15,11 19,2" />
-              </svg>
-              StackBlitz
+            <button
+              class="stackblitz-link stackblitz-link--icon-only"
+              type="button"
+              title="Open in StackBlitz"
+              (click)="openInStackBlitz(heroFormConfig, 'Contact Form')"
+            >
+              <img src="assets/icons/stackblitz.svg" alt="StackBlitz" class="stackblitz-icon" />
             </button>
           </div>
 
@@ -256,9 +258,7 @@
             <span class="panel-icon icon icon--play"></span>
             <span>Live Demo</span>
             <button class="stackblitz-link" type="button" (click)="openInStackBlitz(validationFormConfig, 'Validation Demo')">
-              <svg class="stackblitz-icon" viewBox="0 0 28 28" aria-hidden="true">
-                <polygon points="12.5,2 3,18 12,18 10,26 25,11 15,11 19,2" />
-              </svg>
+              <img src="assets/icons/stackblitz.svg" alt="" class="stackblitz-icon" />
               StackBlitz
             </button>
           </div>

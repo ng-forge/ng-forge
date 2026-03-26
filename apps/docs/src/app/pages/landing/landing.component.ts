@@ -365,7 +365,7 @@ export class LandingComponent {
 
     if (value === null) return 'null';
     if (value === undefined) return 'undefined';
-    if (typeof value === 'string') return `'${value.replace(/'/g, "\\'")}'`;
+    if (typeof value === 'string') return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
     if (typeof value === 'number' || typeof value === 'boolean') return String(value);
     if (value instanceof RegExp) return value.toString();
 
