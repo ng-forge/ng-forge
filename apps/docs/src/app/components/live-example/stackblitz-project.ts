@@ -16,8 +16,8 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
     providerImport: "import { withMaterialFields } from '@ng-forge/dynamic-forms-material';",
     providerCall: 'withMaterialFields()',
     extraDeps: {
-      '@angular/material': '^21.0.0',
-      '@angular/cdk': '^21.0.0',
+      '@angular/material': '~21.2.0',
+      '@angular/cdk': '~21.2.0',
     },
   },
   bootstrap: {
@@ -110,7 +110,7 @@ const config = ${configJson} as const satisfies FormConfig;
 })
 export class AppComponent {
   readonly config = config;
-  formValue: InferFormValue<typeof config.fields> = {};
+  formValue: Record<string, unknown> = {};
 }
 `;
 
@@ -146,13 +146,13 @@ bootstrapApplication(AppComponent, appConfig);
 `;
 
   const deps: Record<string, string> = {
-    '@angular/animations': '^21.0.0',
-    '@angular/common': '^21.0.0',
-    '@angular/compiler': '^21.0.0',
-    '@angular/core': '^21.0.0',
-    '@angular/forms': '^21.0.0',
-    '@angular/platform-browser': '^21.0.0',
-    '@angular/platform-browser-dynamic': '^21.0.0',
+    '@angular/animations': '~21.2.0',
+    '@angular/common': '~21.2.0',
+    '@angular/compiler': '~21.2.0',
+    '@angular/core': '~21.2.0',
+    '@angular/forms': '~21.2.0',
+    '@angular/platform-browser': '~21.2.0',
+    '@angular/platform-browser-dynamic': '~21.2.0',
     '@ng-forge/dynamic-forms': 'latest',
     [meta.pkg]: 'latest',
     ...meta.extraDeps,
@@ -173,10 +173,10 @@ bootstrapApplication(AppComponent, appConfig);
       },
       dependencies: deps,
       devDependencies: {
-        '@angular/cli': '^21.0.0',
-        '@angular/compiler-cli': '^21.0.0',
-        '@angular-devkit/build-angular': '^21.0.0',
-        typescript: '~5.8.0',
+        '@angular/cli': '~21.2.0',
+        '@angular/compiler-cli': '~21.2.0',
+        '@angular-devkit/build-angular': '~21.2.0',
+        typescript: '~5.9.0',
       },
     },
     null,
