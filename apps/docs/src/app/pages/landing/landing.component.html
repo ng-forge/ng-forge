@@ -257,9 +257,13 @@
           <div class="demo-panel-header">
             <span class="panel-icon icon icon--play"></span>
             <span>Live Demo</span>
-            <button class="stackblitz-link" type="button" (click)="openOnStackBlitz(validationFormConfig, 'Validation Demo')">
-              <img src="assets/icons/stackblitz.svg" alt="" class="stackblitz-icon" />
-              StackBlitz
+            <button
+              class="stackblitz-link stackblitz-link--icon-only"
+              type="button"
+              title="Open in StackBlitz"
+              (click)="openOnStackBlitz(validationFormConfig, 'Validation Demo')"
+            >
+              <img src="assets/icons/stackblitz.svg" alt="StackBlitz" class="stackblitz-icon" />
             </button>
           </div>
           <div class="demo-panel-body validation-form">
@@ -296,6 +300,11 @@
               styleIsolation="scoped"
             ></div>
           </div>
+          <button class="stackblitz-try-link" type="button" (click)="openOnStackBlitz(validationFormConfig, 'Validation Demo')">
+            <img src="assets/icons/stackblitz.svg" alt="" class="stackblitz-try-icon" />
+            Try in StackBlitz
+            <span class="stackblitz-try-arrow">→</span>
+          </button>
         </div>
 
         <div class="validation-code-panel">

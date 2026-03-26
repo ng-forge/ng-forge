@@ -8,6 +8,7 @@ interface AdapterMeta {
   providerImport: string;
   providerCall: string;
   extraDeps: Record<string, string>;
+  globalStyles: string;
 }
 
 const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
@@ -19,12 +20,17 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
       '@angular/material': '~21.2.0',
       '@angular/cdk': '~21.2.0',
     },
+    globalStyles:
+      '@use "@angular/material" as mat;\n@include mat.theme((color-scheme: light, typography: Roboto, density: 0));\nbody { font-family: Roboto, sans-serif; margin: 0; }',
   },
   bootstrap: {
     pkg: '@ng-forge/dynamic-forms-bootstrap',
     providerImport: "import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';",
     providerCall: 'withBootstrapFields()',
-    extraDeps: {},
+    extraDeps: {
+      bootstrap: '^5.3.0',
+    },
+    globalStyles: '@import "bootstrap/scss/bootstrap";\nbody { margin: 0; }',
   },
   primeng: {
     pkg: '@ng-forge/dynamic-forms-primeng',
@@ -33,6 +39,7 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
     extraDeps: {
       primeng: '^19.0.0',
     },
+    globalStyles: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }',
   },
   ionic: {
     pkg: '@ng-forge/dynamic-forms-ionic',
@@ -41,6 +48,7 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
     extraDeps: {
       '@ionic/angular': '^8.0.0',
     },
+    globalStyles: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }',
   },
 };
 
@@ -114,9 +122,9 @@ type FormValue = InferFormValue<typeof config.fields>;
 })
 export class AppComponent {
   readonly config = config;
-  readonly value = signal<FormValue | null>(null);
+  readonly value = signal<Partial<FormValue> | null>(null);
 
-  onSubmit(value: FormValue): void {
+  onSubmit(value: Partial<FormValue>): void {
     this.value.set(value);
   }
 }
@@ -128,7 +136,7 @@ ${meta.providerImport}
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideDynamicForm(${meta.providerCall}),
+    provideDynamicForm(...${meta.providerCall}),
   ],
 };
 `;
@@ -209,6 +217,7 @@ bootstrapApplication(AppComponent, appConfig);
                 index: 'src/index.html',
                 browser: 'src/main.ts',
                 tsConfig: 'tsconfig.json',
+                styles: ['src/styles.scss'],
               },
             },
             serve: {
@@ -255,6 +264,7 @@ bootstrapApplication(AppComponent, appConfig);
       'src/main.ts': main,
       'src/app/app.component.ts': appComponent,
       'src/app/app.config.ts': appConfig,
+      'src/styles.scss': meta.globalStyles,
       'src/index.html': indexHtml,
       'package.json': packageJson,
       'angular.json': angularJson,

@@ -735,13 +735,18 @@ nav {
   }
 
   &--icon-only {
-    padding: 5px;
+    padding: 6px;
     border: none;
     background: transparent;
 
     .stackblitz-icon {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
+      transition: filter 0.25s ease;
+    }
+
+    &:hover .stackblitz-icon {
+      filter: drop-shadow(0 0 1px #1389fd) drop-shadow(0 0 3px rgba(#1389fd, 0.5));
     }
   }
 }
@@ -1528,6 +1533,10 @@ section {
   font-size: 0.85rem;
   color: $steel-mid;
   font-weight: 500;
+
+  .stackblitz-link {
+    margin-left: auto;
+  }
 }
 
 .panel-icon {
