@@ -1,0 +1,50 @@
+openapi: '3.0.3'
+info:
+  title: Test
+  version: '1.0.0'
+paths:
+  /payments:
+    post:
+      operationId: createPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
+      responses:
+        '201':
+          description: Created
+components:
+  schemas:
+    Payment:
+      oneOf:
+        - $ref: '#/components/schemas/CreditCardPayment'
+        - $ref: '#/components/schemas/BankTransferPayment'
+      discriminator:
+        propertyName: paymentMethod
+        mapping:
+          credit_card: '#/components/schemas/CreditCardPayment'
+          bank_transfer: '#/components/schemas/BankTransferPayment'
+    CreditCardPayment:
+      type: object
+      required: [paymentMethod, cardNumber]
+      properties:
+        paymentMethod:
+          type: string
+          enum: [credit_card]
+        cardNumber:
+          type: string
+        expiry:
+          type: string
+    BankTransferPayment:
+      type: object
+      required: [paymentMethod, accountNumber]
+      properties:
+        paymentMethod:
+          type: string
+          enum: [bank_transfer]
+        accountNumber:
+          type: string
+        routingNumber:
+          type: string

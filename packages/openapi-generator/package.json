@@ -1,0 +1,54 @@
+{
+  "name": "@ng-forge/openapi-generator",
+  "version": "0.6.0",
+  "description": "Generate @ng-forge/dynamic-forms configurations from OpenAPI specs",
+  "type": "module",
+  "license": "MIT",
+  "author": "ng-forge",
+  "homepage": "https://ng-forge.com/dynamic-forms/openapi-generator",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ng-forge/ng-forge.git",
+    "directory": "packages/openapi-generator"
+  },
+  "bugs": {
+    "url": "https://github.com/ng-forge/ng-forge/issues"
+  },
+  "keywords": [
+    "angular",
+    "forms",
+    "dynamic-forms",
+    "openapi",
+    "swagger",
+    "codegen",
+    "ng-forge"
+  ],
+  "bin": {
+    "ng-forge-generator": "./bin/ng-forge-generator.js"
+  },
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
+    }
+  },
+  "files": [
+    "src",
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "@apidevtools/swagger-parser": "^10.1.1",
+    "commander": "^13.1.0",
+    "@inquirer/prompts": "^8.3.0",
+    "chokidar": "^4.0.3",
+    "chalk": "^5.4.1",
+    "openapi-types": "^12.1.3"
+  }
+}

@@ -138,7 +138,7 @@
             (click)="closeSidebar()"
           >
             <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="12" r="4.5" fill="currentColor" /></svg>
-            {{ item.label }}
+            <span class="nav-label">{{ item.label }}</span>
             @if (item.badge) {
               <span class="nav-badge">{{ item.badge }}</span>
             }

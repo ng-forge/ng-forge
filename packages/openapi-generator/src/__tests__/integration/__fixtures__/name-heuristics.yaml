@@ -1,0 +1,26 @@
+openapi: '3.0.3'
+info:
+  title: Test
+  version: '1.0.0'
+paths:
+  /articles:
+    post:
+      operationId: createArticle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                phone:
+                  type: string
+                body:
+                  type: string
+      responses:
+        '201':
+          description: Created

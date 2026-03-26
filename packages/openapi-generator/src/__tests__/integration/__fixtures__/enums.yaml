@@ -1,0 +1,26 @@
+openapi: '3.0.3'
+info:
+  title: Test
+  version: '1.0.0'
+paths:
+  /orders:
+    post:
+      operationId: createOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [pending, shipped, delivered]
+                tags:
+                  type: array
+                  items:
+                    type: string
+                    enum: [urgent, fragile, oversized]
+      responses:
+        '201':
+          description: Created

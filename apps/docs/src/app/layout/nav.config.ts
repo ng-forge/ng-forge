@@ -104,6 +104,12 @@ export const NAV_ITEMS: NavItem[] = [
     cssClass: 'sidebar-link--ai',
   },
   {
+    label: 'OpenAPI Generator',
+    path: 'openapi-generator',
+    cssClass: 'sidebar-link--openapi',
+    badge: 'NEW',
+  },
+  {
     label: 'API Reference',
     path: 'api-reference',
   },

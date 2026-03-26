@@ -1,0 +1,25 @@
+openapi: '3.0.3'
+info:
+  title: Test
+  version: '1.0.0'
+paths:
+  /users:
+    post:
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                age:
+                  type: integer
+                active:
+                  type: boolean
+      responses:
+        '201':
+          description: Created
