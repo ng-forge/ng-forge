@@ -145,58 +145,112 @@ bootstrapApplication(AppComponent, appConfig);
 </html>
 `;
 
-  const tsconfig = `{
-  "compileOnSave": false,
-  "compilerOptions": {
-    "outDir": "./dist/out-tsc",
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true,
-    "sourceMap": true,
-    "declaration": false,
-    "experimentalDecorators": true,
-    "moduleResolution": "bundler",
-    "importHelpers": true,
-    "target": "ES2022",
-    "module": "ES2022",
-    "lib": ["ES2022", "dom"]
-  },
-  "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
-  }
-}
-`;
+  const deps: Record<string, string> = {
+    '@angular/animations': '^21.0.0',
+    '@angular/common': '^21.0.0',
+    '@angular/compiler': '^21.0.0',
+    '@angular/core': '^21.0.0',
+    '@angular/forms': '^21.0.0',
+    '@angular/platform-browser': '^21.0.0',
+    '@angular/platform-browser-dynamic': '^21.0.0',
+    '@ng-forge/dynamic-forms': 'latest',
+    [meta.pkg]: 'latest',
+    ...meta.extraDeps,
+    rxjs: '^7.8.0',
+    'zone.js': '^0.15.0',
+    tslib: '^2.6.0',
+  };
+
+  const packageJson = JSON.stringify(
+    {
+      name: 'ng-forge-stackblitz-example',
+      version: '0.0.0',
+      private: true,
+      scripts: {
+        ng: 'ng',
+        start: 'ng serve',
+        build: 'ng build',
+      },
+      dependencies: deps,
+      devDependencies: {
+        '@angular/cli': '^21.0.0',
+        '@angular/compiler-cli': '^21.0.0',
+        '@angular-devkit/build-angular': '^21.0.0',
+        typescript: '~5.8.0',
+      },
+    },
+    null,
+    2,
+  );
+
+  const angularJson = JSON.stringify(
+    {
+      $schema: './node_modules/@angular/cli/lib/config/schema.json',
+      version: 1,
+      newProjectRoot: 'projects',
+      projects: {
+        app: {
+          projectType: 'application',
+          root: '',
+          sourceRoot: 'src',
+          architect: {
+            build: {
+              builder: '@angular-devkit/build-angular:application',
+              options: {
+                outputPath: 'dist/app',
+                index: 'src/index.html',
+                browser: 'src/main.ts',
+                tsConfig: 'tsconfig.json',
+              },
+            },
+            serve: {
+              builder: '@angular-devkit/build-angular:dev-server',
+              configurations: {
+                development: { buildTarget: 'app:build' },
+              },
+              defaultConfiguration: 'development',
+            },
+          },
+        },
+      },
+    },
+    null,
+    2,
+  );
+
+  const tsconfig = JSON.stringify(
+    {
+      compileOnSave: false,
+      compilerOptions: {
+        outDir: './dist/out-tsc',
+        strict: true,
+        esModuleInterop: true,
+        sourceMap: true,
+        moduleResolution: 'bundler',
+        target: 'ES2022',
+        module: 'ES2022',
+        lib: ['ES2022', 'dom'],
+      },
+      angularCompilerOptions: {
+        strictTemplates: true,
+      },
+    },
+    null,
+    2,
+  );
 
   return {
     title: `ng-forge – ${title}`,
     description: `Dynamic form example using @ng-forge/dynamic-forms with ${resolved} adapter`,
-    template: 'angular-cli',
+    template: 'node',
     files: {
       'src/main.ts': main,
       'src/app/app.component.ts': appComponent,
       'src/app/app.config.ts': appConfig,
       'src/index.html': indexHtml,
+      'package.json': packageJson,
+      'angular.json': angularJson,
       'tsconfig.json': tsconfig,
-    },
-    dependencies: {
-      '@angular/core': '^21.0.0',
-      '@angular/common': '^21.0.0',
-      '@angular/compiler': '^21.0.0',
-      '@angular/forms': '^21.0.0',
-      '@angular/platform-browser': '^21.0.0',
-      '@angular/platform-browser-dynamic': '^21.0.0',
-      '@ng-forge/dynamic-forms': 'latest',
-      [meta.pkg]: 'latest',
-      ...meta.extraDeps,
-      rxjs: '^7.8.0',
-      'zone.js': '^0.15.0',
-      tslib: '^2.6.0',
     },
   };
 }
