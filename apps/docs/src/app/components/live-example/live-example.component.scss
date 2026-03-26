@@ -31,18 +31,24 @@
   gap: 6px;
 }
 
-.adapter-badge {
+.adapter-badge,
+.stackblitz-btn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
+  border: 1px solid var(--forge-border-color, #e0e0e0);
   border-radius: 4px;
   background: var(--forge-base-1, #f0f0f0);
-  border: 1px solid var(--forge-border-color, #e0e0e0);
+  color: var(--forge-text-muted);
+  font-family: inherit;
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--forge-text-muted);
+  line-height: 1;
   letter-spacing: 0.03em;
+}
+
+.adapter-badge {
   pointer-events: none;
 }
 
@@ -54,17 +60,6 @@
 }
 
 .stackblitz-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border: 1px solid var(--forge-border-color, #e0e0e0);
-  border-radius: 4px;
-  background: var(--forge-base-1, #f0f0f0);
-  color: var(--forge-text-muted);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
   cursor: pointer;
   transition:
     color 0.15s,
