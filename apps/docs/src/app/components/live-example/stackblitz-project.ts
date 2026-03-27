@@ -10,6 +10,8 @@ interface AdapterMeta {
   extraDeps: Record<string, string>;
   globalStyles: string;
   extraStyles?: string[];
+  componentImports?: string;
+  templateWrapper?: { open: string; close: string };
 }
 
 const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
@@ -70,6 +72,8 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
       "import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';",
     ].join('\n'),
     configProviders: "    provideAnimations(),\n    provideIonicAngular({ mode: 'md' }),\n    provideDynamicForm(...withIonicFields()),",
+    componentImports: "import { IonApp, IonContent } from '@ionic/angular/standalone';",
+    templateWrapper: { open: '<ion-app><ion-content class="ion-padding">', close: '</ion-content></ion-app>' },
     extraDeps: {
       '@ionic/angular': '^8.0.0',
     },
@@ -125,9 +129,16 @@ function createStackBlitzProject(adapter: AdapterName, configJson: string, title
   const meta = ADAPTER_META[resolved];
   const safeTitle = escapeHtml(title);
 
+  const extraImports = meta.componentImports ? `\n${meta.componentImports}` : '';
+  const wrapOpen = meta.templateWrapper?.open ?? '<div class="container">';
+  const wrapClose = meta.templateWrapper?.close ?? '</div>';
+  const importsArray = meta.componentImports
+    ? 'DynamicForm, JsonPipe, ' + meta.componentImports.match(/\{([^}]+)\}/)?.[1]?.trim()
+    : 'DynamicForm, JsonPipe';
+
   const appComponent = `import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig, InferFormValue } from '@ng-forge/dynamic-forms';
+import { DynamicForm, FormConfig, InferFormValue } from '@ng-forge/dynamic-forms';${extraImports}
 
 const config = ${configJson} as const satisfies FormConfig;
 
@@ -135,15 +146,15 @@ type FormValue = InferFormValue<typeof config.fields>;
 
 @Component({
   selector: 'app-root',
-  imports: [DynamicForm, JsonPipe],
+  imports: [${importsArray}],
   template: \`
-    <div class="container">
+    ${wrapOpen}
       <form [dynamic-form]="config" (submitted)="onSubmit($event)"></form>
       @if (value()) {
         <h3>Form Data</h3>
         <pre>{{ value() | json }}</pre>
       }
-    </div>
+    ${wrapClose}
   \`,
   styles: \`.container { max-width: 600px; margin: 2rem auto; padding: 0 1rem; }\`,
 })
