@@ -59,7 +59,7 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
     },
     globalStyles:
       'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }\n' +
-      'p-inputtext, p-textarea, p-select, p-datepicker, p-multiselect { width: 100%; }',
+      '.df-prime-field input, .df-prime-field textarea, .df-prime-field p-select, .df-prime-field p-datepicker, .df-prime-field p-multiselect, .df-prime-field df-prime-datepicker-control, .df-prime-field df-prime-select-control { width: 100%; }',
   },
   ionic: {
     pkg: '@ng-forge/dynamic-forms-ionic',
