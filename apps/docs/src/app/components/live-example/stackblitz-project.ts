@@ -47,12 +47,15 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
     configImports: [
       "import { provideAnimations } from '@angular/platform-browser/animations';",
       "import { providePrimeNG } from 'primeng/config';",
+      "import Aura from '@primeuix/themes/aura';",
       "import { provideDynamicForm } from '@ng-forge/dynamic-forms';",
       "import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';",
     ].join('\n'),
-    configProviders: '    provideAnimations(),\n    providePrimeNG(),\n    provideDynamicForm(...withPrimeNGFields()),',
+    configProviders:
+      '    provideAnimations(),\n    providePrimeNG({ theme: { preset: Aura } }),\n    provideDynamicForm(...withPrimeNGFields()),',
     extraDeps: {
       primeng: '^21.0.0',
+      '@primeuix/themes': '^2.0.0',
     },
     globalStyles: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }',
   },
