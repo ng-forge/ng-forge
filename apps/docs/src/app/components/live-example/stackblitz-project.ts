@@ -79,6 +79,7 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
     },
     globalStyles:
       ':root, ion-app { --ion-color-primary: #3880ff; --ion-color-primary-rgb: 56,128,255; --ion-color-primary-contrast: #ffffff; --ion-color-primary-contrast-rgb: 255,255,255; --ion-color-primary-shade: #3171e0; --ion-color-primary-tint: #4c8dff; }\n' +
+      'ion-button.ion-color-primary { --ion-color-base: var(--ion-color-primary, #3880ff) !important; --ion-color-base-rgb: var(--ion-color-primary-rgb, 56,128,255) !important; --ion-color-contrast: var(--ion-color-primary-contrast, #fff) !important; --ion-color-contrast-rgb: var(--ion-color-primary-contrast-rgb, 255,255,255) !important; --ion-color-shade: var(--ion-color-primary-shade, #3171e0) !important; --ion-color-tint: var(--ion-color-primary-tint, #4c8dff) !important; }\n' +
       'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; position: static !important; overflow: auto !important; }',
     extraStyles: ['@ionic/angular/css/global.bundle.css'],
   },
