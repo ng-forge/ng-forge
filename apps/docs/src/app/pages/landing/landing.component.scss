@@ -640,7 +640,7 @@ nav {
   background: $bg-deep;
   border: 1px solid $steel-dark;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
 
   &::before {
