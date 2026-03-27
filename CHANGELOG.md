@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.7.0](https://github.com/ng-forge/ng-forge/compare/v0.6.1...v0.7.0) (2026-03-27)
+
+### 🚀 Features
+
+- **docs:** migrate from ng-doc to Analog with Forge design language ([#295](https://github.com/ng-forge/ng-forge/pull/295))
+- **docs:** add StackBlitz button to live examples ([#310](https://github.com/ng-forge/ng-forge/pull/310))
+- **dynamic-forms:** add exhaustive switch guards for compile-time safety ([#301](https://github.com/ng-forge/ng-forge/pull/301))
+- **dynamic-forms:** adopt resource snapshot composition for async conditions ([#303](https://github.com/ng-forge/ng-forge/pull/303))
+- **dynamic-forms:** add openapi-generator package and field scope metadata ([#284](https://github.com/ng-forge/ng-forge/pull/284))
+- **examples:** unify example apps into sandbox with shared testing infrastructure ([#292](https://github.com/ng-forge/ng-forge/pull/292))
+
+### 🐛 Bug Fixes
+
+- **config:** suppress baseUrl deprecation error in TypeScript 5.9.3 ([#306](https://github.com/ng-forge/ng-forge/pull/306))
+- **config:** decouple type-test tsconfigs from deprecated baseUrl ([#308](https://github.com/ng-forge/ng-forge/pull/308))
+- **docs:** post-migration improvements and PrimeNG style cache fix ([#297](https://github.com/ng-forge/ng-forge/pull/297))
+- **docs:** pre-render landing page content for LLM crawlers ([#299](https://github.com/ng-forge/ng-forge/pull/299))
+- **dynamic-forms:** preserve row containers in side groups ([#296](https://github.com/ng-forge/ng-forge/pull/296))
+- **dynamic-forms:** remove eval/Function literals from comments to avoid false positives ([#298](https://github.com/ng-forge/ng-forge/pull/298))
+- **dynamic-forms:** restore mobile row wrapping ([#305](https://github.com/ng-forge/ng-forge/pull/305))
+
+### ♻️ Code Refactoring
+
+- **examples:** move e2e apps from apps/examples to apps/e2e ([#294](https://github.com/ng-forge/ng-forge/pull/294))
+
+### 📚 Documentation
+
+- **config:** add verification guidelines and /verify skill from usage insights ([ca67f1801](https://github.com/ng-forge/ng-forge/commit/ca67f1801))
+
+### ❤️ Thank You
+
+- Antim Prisacaru @antimprisacaru
+- Francesco Raso @0xfraso
+
 ## [0.6.1](https://github.com/ng-forge/ng-forge/compare/v0.6.0...v0.6.1) (2026-02-28)
 
 ### 🚀 Features
