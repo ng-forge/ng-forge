@@ -120,11 +120,9 @@ function createStackBlitzProject(adapter: AdapterName, configJson: string, title
 
   const appComponent = `import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig, InferFormValue } from '@ng-forge/dynamic-forms';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 
-const config = ${configJson} as const satisfies FormConfig;
-
-type FormValue = InferFormValue<typeof config.fields>;
+const config: FormConfig = ${configJson};
 
 @Component({
   selector: 'app-root',
@@ -142,9 +140,9 @@ type FormValue = InferFormValue<typeof config.fields>;
 })
 export class AppComponent {
   readonly config = config;
-  readonly value = signal<Partial<FormValue> | null>(null);
+  readonly value = signal<Record<string, unknown> | null>(null);
 
-  onSubmit(value: Partial<FormValue>): void {
+  onSubmit(value: Record<string, unknown>): void {
     this.value.set(value);
   }
 }
