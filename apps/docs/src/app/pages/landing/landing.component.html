@@ -97,6 +97,13 @@
                 <span class="icon icon--code" aria-hidden="true"></span> Config
               </button>
             </div>
+            <button
+              class="stackblitz-link stackblitz-link--icon-only"
+              type="button"
+              (click)="openOnStackBlitz(heroFormConfig, 'Contact Form')"
+            >
+              <img src="assets/icons/stackblitz.svg" alt="StackBlitz" class="stackblitz-icon" />
+            </button>
           </div>
 
           <div class="hero-demo-body">
@@ -249,6 +256,13 @@
           <div class="demo-panel-header">
             <span class="panel-icon icon icon--play"></span>
             <span>Live Demo</span>
+            <button
+              class="stackblitz-link stackblitz-link--icon-only"
+              type="button"
+              (click)="openOnStackBlitz(validationFormConfig, 'Validation Demo')"
+            >
+              <img src="assets/icons/stackblitz.svg" alt="StackBlitz" class="stackblitz-icon" />
+            </button>
           </div>
           <div class="demo-panel-body validation-form">
             @if (!validationLoaded()) {

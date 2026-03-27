@@ -89,7 +89,6 @@ export const rowConfig = {
       key: 'submit',
       type: 'submit',
       label: 'Submit',
-      props: { color: 'primary' },
     },
   ],
 } as const satisfies FormConfig;

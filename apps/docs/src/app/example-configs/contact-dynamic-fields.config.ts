@@ -13,7 +13,6 @@ export const contactDynamicFieldsConfig = {
       value: '',
       label: 'Full Name',
       required: true,
-      props: { appearance: 'outline' },
     },
     {
       key: 'contactMethod',
@@ -26,7 +25,6 @@ export const contactDynamicFieldsConfig = {
         { value: 'phone', label: 'Phone' },
         { value: 'mail', label: 'Postal Mail' },
       ],
-      props: { appearance: 'outline' },
     },
     {
       key: 'email',
@@ -34,7 +32,6 @@ export const contactDynamicFieldsConfig = {
       value: '',
       label: 'Email Address',
       email: true,
-      props: { appearance: 'outline' },
       logic: [
         {
           type: 'hidden',
@@ -81,7 +78,7 @@ export const contactDynamicFieldsConfig = {
           },
         },
       ],
-      props: { type: 'tel', appearance: 'outline' },
+      props: { type: 'tel' },
     },
     {
       key: 'address',
@@ -108,7 +105,7 @@ export const contactDynamicFieldsConfig = {
           },
         },
       ],
-      props: { rows: 3, appearance: 'outline' },
+      props: { rows: 3 },
     },
     {
       key: 'message',
@@ -117,13 +114,12 @@ export const contactDynamicFieldsConfig = {
       label: 'Message',
       required: true,
       minLength: 10,
-      props: { rows: 4, appearance: 'outline' },
+      props: { rows: 4 },
     },
     {
       key: 'submit',
       type: 'submit',
       label: 'Send Message',
-      props: { color: 'primary' },
     },
   ],
 } as const satisfies FormConfig;

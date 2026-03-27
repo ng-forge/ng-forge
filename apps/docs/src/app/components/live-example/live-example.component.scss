@@ -19,24 +19,36 @@
 }
 
 // ============================================
-// ADAPTER BADGE — floating top-right overlay
+// OVERLAY ACTIONS — floating top-right
 // ============================================
-.adapter-badge {
+.overlay-actions {
   position: absolute;
   top: 8px;
   right: 8px;
   z-index: 2;
   display: inline-flex;
   align-items: center;
+  gap: 6px;
+}
+
+.adapter-badge,
+.stackblitz-btn {
+  display: inline-flex;
+  align-items: center;
   gap: 4px;
   padding: 3px 8px;
+  border: 1px solid var(--forge-border-color, #e0e0e0);
   border-radius: 4px;
   background: var(--forge-base-1, #f0f0f0);
-  border: 1px solid var(--forge-border-color, #e0e0e0);
+  color: var(--forge-text-muted);
+  font-family: inherit;
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--forge-text-muted);
+  line-height: 1;
   letter-spacing: 0.03em;
+}
+
+.adapter-badge {
   pointer-events: none;
 }
 
@@ -47,15 +59,94 @@
   border-radius: 2px;
 }
 
-:host-context([data-theme='dark']) .adapter-badge {
-  background: $bg-surface;
-  border-color: $steel-dark;
+.stackblitz-btn {
+  position: relative;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+
+  &:hover {
+    color: #1389fd;
+    border-color: #1389fd;
+  }
+
+  &::after {
+    content: 'Open in StackBlitz';
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: var(--forge-base-0, #333);
+    color: var(--forge-text-muted, #fff);
+    font-size: 0.65rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.15s,
+      transform 0.15s;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  &:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.stackblitz-icon {
+  width: 14px;
+  height: 14px;
+}
+
+:host-context([data-theme='dark']) {
+  .adapter-badge {
+    background: $bg-surface;
+    border-color: $steel-dark;
+  }
+
+  .stackblitz-btn {
+    background: $bg-surface;
+    border-color: $steel-dark;
+    color: $steel-mid;
+
+    &::after {
+      background: $bg-surface;
+      color: $steel;
+      border: 1px solid $steel-dark;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    &:hover {
+      color: #1389fd;
+      border-color: #1389fd;
+    }
+  }
 }
 
 @media (prefers-color-scheme: dark) {
-  :host-context([data-theme='auto']) .adapter-badge {
-    background: $bg-surface;
-    border-color: $steel-dark;
+  :host-context([data-theme='auto']) {
+    .adapter-badge {
+      background: $bg-surface;
+      border-color: $steel-dark;
+    }
+
+    .stackblitz-btn {
+      background: $bg-surface;
+      border-color: $steel-dark;
+      color: $steel-mid;
+
+      &:hover {
+        color: #1389fd;
+        border-color: #1389fd;
+      }
+    }
   }
 }
 

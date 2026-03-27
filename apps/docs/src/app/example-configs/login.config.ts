@@ -52,9 +52,6 @@ export const loginConfig = {
       key: 'submit',
       type: 'submit',
       label: 'Sign In',
-      props: {
-        color: 'primary',
-      },
     },
   ],
 } as const satisfies FormConfig;

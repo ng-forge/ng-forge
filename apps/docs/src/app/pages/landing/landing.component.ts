@@ -18,9 +18,11 @@ import { catchError, defer, delay, filter, map, merge, of, switchMap, tap } from
 
 import { SandboxHarness, SandboxMountDirective } from '@ng-forge/sandbox-harness';
 
+import { FormConfig } from '@ng-forge/dynamic-forms';
 import { Logo } from '../../components/logo';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import { SearchComponent } from '../../components/search/search.component';
+import { openInStackBlitz } from '../../components/live-example/stackblitz-project';
 import {
   CODE_SNIPPETS,
   FEATURES,
@@ -347,5 +349,11 @@ export class LandingComponent {
     const card = event.currentTarget as HTMLElement;
     card.style.removeProperty('--mouse-x');
     card.style.removeProperty('--mouse-y');
+  }
+
+  /** Landing page is always Material — it's the primary adapter showcased on the homepage. */
+  openOnStackBlitz(config: FormConfig, title: string): void {
+    if (!this.isBrowser) return;
+    openInStackBlitz('material', config, title);
   }
 }

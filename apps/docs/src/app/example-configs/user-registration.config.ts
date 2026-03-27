@@ -32,7 +32,6 @@ export const userRegistrationConfig = {
             pattern: 'Username can only contain letters, numbers, and underscores',
           },
           props: {
-            appearance: 'outline',
             hint: '3-20 characters, letters, numbers, and underscores only',
           },
         },
@@ -49,7 +48,6 @@ export const userRegistrationConfig = {
           },
           props: {
             type: 'email',
-            appearance: 'outline',
             hint: "We'll send a verification email",
           },
         },
@@ -68,7 +66,6 @@ export const userRegistrationConfig = {
           },
           props: {
             type: 'password',
-            appearance: 'outline',
             hint: 'At least 8 characters with uppercase, lowercase, number, and special character',
           },
         },
@@ -91,14 +88,12 @@ export const userRegistrationConfig = {
           },
           props: {
             type: 'password',
-            appearance: 'outline',
           },
         },
         {
           type: 'next',
           key: 'nextToProfile',
           label: 'Continue to Profile',
-          props: { color: 'primary' },
         },
       ],
     },
@@ -117,7 +112,6 @@ export const userRegistrationConfig = {
               label: 'First Name',
               required: true,
               col: 6,
-              props: { appearance: 'outline' },
             },
             {
               key: 'lastName',
@@ -126,7 +120,6 @@ export const userRegistrationConfig = {
               label: 'Last Name',
               required: true,
               col: 6,
-              props: { appearance: 'outline' },
             },
           ],
         },
@@ -140,7 +133,6 @@ export const userRegistrationConfig = {
             { value: 'personal', label: 'Personal Account' },
             { value: 'business', label: 'Business Account' },
           ],
-          props: { color: 'primary' },
         },
         {
           key: 'companyName',
@@ -167,7 +159,6 @@ export const userRegistrationConfig = {
               },
             },
           ],
-          props: { appearance: 'outline' },
         },
         {
           key: 'industry',
@@ -203,7 +194,6 @@ export const userRegistrationConfig = {
             },
           ],
           props: {
-            appearance: 'outline',
             placeholder: 'Select your industry',
           },
         },
@@ -220,7 +210,6 @@ export const userRegistrationConfig = {
               type: 'next',
               key: 'nextToPreferences',
               label: 'Continue',
-              props: { color: 'primary' },
             },
           ],
         },
@@ -242,21 +231,18 @@ export const userRegistrationConfig = {
             { value: 'marketing', label: 'Marketing & Sales' },
             { value: 'development', label: 'Software Development' },
           ],
-          props: { color: 'primary' },
         },
         {
           key: 'newsletter',
           type: 'checkbox',
           value: false,
           label: 'Subscribe to newsletter',
-          props: { color: 'primary' },
         },
         {
           key: 'notifications',
           type: 'toggle',
           value: true,
           label: 'Enable email notifications',
-          props: { color: 'primary' },
         },
         {
           key: 'terms',
@@ -267,7 +253,6 @@ export const userRegistrationConfig = {
           validationMessages: {
             required: 'You must accept the terms and conditions',
           },
-          props: { color: 'primary' },
         },
         {
           key: 'privacy',
@@ -278,7 +263,6 @@ export const userRegistrationConfig = {
           validationMessages: {
             required: 'You must accept the privacy policy',
           },
-          props: { color: 'primary' },
         },
         {
           type: 'row',
@@ -293,7 +277,6 @@ export const userRegistrationConfig = {
               type: 'submit',
               key: 'submitRegistration',
               label: 'Create Account',
-              props: { color: 'primary' },
             },
           ],
         },

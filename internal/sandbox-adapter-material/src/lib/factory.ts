@@ -23,7 +23,7 @@ export const createMaterialSandboxApp: SandboxAppFactory = (routes: Route[]) => 
       provideAnimations(),
       provideHttpClient(),
       provideRouter(routes),
-      provideDynamicForm(...withMaterialFields()),
+      provideDynamicForm(...withMaterialFields({ appearance: 'outline', color: 'primary' })),
       { provide: APP_ID, useValue: 'sandbox-material' },
     ],
   },

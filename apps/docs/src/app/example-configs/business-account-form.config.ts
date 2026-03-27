@@ -16,7 +16,6 @@ export const businessAccountFormConfig = {
         { value: 'personal', label: 'Personal Account' },
         { value: 'business', label: 'Business Account' },
       ],
-      props: { color: 'primary' },
     },
     {
       key: 'name',
@@ -24,7 +23,6 @@ export const businessAccountFormConfig = {
       value: '',
       label: 'Full Name',
       required: true,
-      props: { appearance: 'outline' },
       logic: [
         {
           type: 'hidden',
@@ -42,7 +40,6 @@ export const businessAccountFormConfig = {
       type: 'input',
       value: '',
       label: 'Company Name',
-      props: { appearance: 'outline' },
       logic: [
         {
           type: 'hidden',
@@ -69,7 +66,6 @@ export const businessAccountFormConfig = {
       type: 'input',
       value: '',
       label: 'Tax ID',
-      props: { appearance: 'outline' },
       logic: [
         {
           type: 'hidden',
@@ -96,7 +92,7 @@ export const businessAccountFormConfig = {
       type: 'input',
       value: undefined,
       label: 'Number of Employees',
-      props: { type: 'number', appearance: 'outline' },
+      props: { type: 'number' },
       logic: [
         {
           type: 'hidden',
@@ -116,13 +112,11 @@ export const businessAccountFormConfig = {
       label: 'Email Address',
       required: true,
       email: true,
-      props: { appearance: 'outline' },
     },
     {
       type: 'submit',
       key: 'submit',
       label: 'Create Account',
-      props: { color: 'primary' },
     },
   ],
 } as const satisfies FormConfig;

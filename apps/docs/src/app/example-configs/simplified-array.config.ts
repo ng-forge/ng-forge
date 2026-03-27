@@ -32,7 +32,7 @@ export const simplifiedArrayConfig = {
         },
       },
       value: ['angular', 'typescript'],
-      addButton: { label: 'Add Tag', props: { color: 'primary' } },
+      addButton: { label: 'Add Tag' },
       removeButton: { label: 'Remove', props: { color: 'warn' } },
     },
     {
@@ -72,7 +72,7 @@ export const simplifiedArrayConfig = {
         { name: 'Jane Smith', phone: '5551234567' },
         { name: 'John Doe', phone: '5559876543' },
       ],
-      addButton: { label: 'Add Contact', props: { color: 'primary' } },
+      addButton: { label: 'Add Contact' },
     },
     {
       key: 'sectionTitle3',
@@ -123,7 +123,6 @@ export const simplifiedArrayConfig = {
       key: 'submit',
       type: 'submit',
       label: 'Save All',
-      props: { color: 'primary' },
     },
   ],
 } as const satisfies FormConfig;

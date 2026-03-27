@@ -640,7 +640,7 @@ nav {
   background: $bg-deep;
   border: 1px solid $steel-dark;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
 
   &::before {
@@ -704,6 +704,83 @@ nav {
     color: $ember-glow;
     background: $bg-deep;
     border-color: $steel-dark;
+  }
+}
+
+.stackblitz-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid $steel-dark;
+  border-radius: 4px;
+  background: $bg-elevated;
+  color: $steel-mid;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+
+  &:hover {
+    color: #1389fd;
+    border-color: #1389fd;
+  }
+
+  .stackblitz-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  &--icon-only {
+    position: relative;
+    padding: 6px;
+    border: none;
+    background: transparent;
+
+    .stackblitz-icon {
+      width: 20px;
+      height: 20px;
+      transition: filter 0.25s ease;
+    }
+
+    &::after {
+      content: 'Open in StackBlitz';
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: $bg-surface;
+      color: $steel;
+      border: 1px solid $steel-dark;
+      font-size: 0.65rem;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.15s,
+        transform 0.15s;
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    &:hover {
+      .stackblitz-icon {
+        filter: drop-shadow(0 0 1px #1389fd) drop-shadow(0 0 3px rgba(#1389fd, 0.5));
+      }
+
+      &::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
   }
 }
 
@@ -1489,6 +1566,10 @@ section {
   font-size: 0.85rem;
   color: $steel-mid;
   font-weight: 500;
+
+  .stackblitz-link {
+    margin-left: auto;
+  }
 }
 
 .panel-icon {

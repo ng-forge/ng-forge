@@ -141,7 +141,6 @@ export const completeFormConfig = {
       type: 'submit',
       key: 'submit',
       label: 'Create Account',
-      props: { color: 'primary' },
     },
   ],
 } as const satisfies FormConfig;

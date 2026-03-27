@@ -1,19 +1,29 @@
-import { booleanAttribute, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject, input, PLATFORM_ID, viewChild } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { FormConfig } from '@ng-forge/dynamic-forms';
 import { SandboxMountDirective } from '@ng-forge/sandbox-harness';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { EXAMPLE_CONFIGS } from '../../example-configs';
 import { EXAMPLES_REGISTRY } from '../../pages/examples-index/examples.registry';
+import { openInStackBlitz } from './stackblitz-project';
 
 @Component({
   selector: 'docs-live-example',
   template: `
     @if (!shouldHide()) {
       <div class="live-example-wrapper">
-        <span class="adapter-badge">
-          <img [src]="adapterInfo().icon" [alt]="adapterInfo().label" class="adapter-badge-icon" />
-          {{ adapterInfo().label }}
-        </span>
+        <div class="overlay-actions">
+          @if (resolvedConfig()) {
+            <button class="stackblitz-btn" type="button" (click)="openInStackBlitz()">
+              <img src="assets/icons/stackblitz.svg" alt="" class="stackblitz-icon" />
+              StackBlitz
+            </button>
+          }
+          <span class="adapter-badge">
+            <img [src]="adapterInfo().icon" [alt]="adapterInfo().label" class="adapter-badge-icon" />
+            {{ adapterInfo().label }}
+          </span>
+        </div>
         @if (!isLoaded()) {
           <div class="live-example-skeleton" role="status" aria-busy="true">
             <div class="skeleton-form">
@@ -56,6 +66,7 @@ export class LiveExampleComponent {
   readonly scenario = input.required<string>();
   readonly hideForCustom = input(false, { transform: booleanAttribute });
   protected readonly activeAdapter = inject(ActiveAdapterService);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   private readonly mountDirective = viewChild<SandboxMountDirective>('mount');
 
@@ -98,4 +109,13 @@ export class LiveExampleComponent {
   protected readonly adapterInfo = computed(
     () => this.activeAdapter.adapters.find((a) => a.name === this.resolvedAdapter()) ?? this.activeAdapter.adapters[0],
   );
+
+  openInStackBlitz(): void {
+    if (!this.isBrowser) return;
+    const config = this.resolvedConfig();
+    if (!config) return;
+
+    const title = this.exampleTitle() || this.scenarioKey();
+    openInStackBlitz(this.resolvedAdapter(), config, title);
+  }
 }

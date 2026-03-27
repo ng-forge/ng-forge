@@ -72,7 +72,6 @@ export const groupConfig = {
       key: 'submit',
       type: 'submit',
       label: 'Save Profile',
-      props: { color: 'primary' },
     },
   ],
 } as const satisfies FormConfig;

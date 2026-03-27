@@ -12,7 +12,6 @@ export const ageConditionalFormConfig = {
       value: '',
       label: 'Full Name',
       required: true,
-      props: { appearance: 'outline' },
     },
     {
       key: 'email',
@@ -21,7 +20,6 @@ export const ageConditionalFormConfig = {
       label: 'Email Address',
       required: true,
       email: true,
-      props: { appearance: 'outline' },
     },
     {
       key: 'age',
@@ -38,7 +36,6 @@ export const ageConditionalFormConfig = {
       props: {
         type: 'number',
         hint: 'Enter your age to see relevant options',
-        appearance: 'outline',
       },
     },
     {
@@ -46,7 +43,7 @@ export const ageConditionalFormConfig = {
       type: 'checkbox',
       value: false,
       label: 'I have parental/guardian consent to register',
-      props: { color: 'primary' },
+
       logic: [
         {
           type: 'hidden',
@@ -76,7 +73,6 @@ export const ageConditionalFormConfig = {
       email: true,
       props: {
         hint: 'We will send a verification email to your parent/guardian',
-        appearance: 'outline',
       },
       logic: [
         {
@@ -104,7 +100,7 @@ export const ageConditionalFormConfig = {
       type: 'checkbox',
       value: false,
       label: 'Apply senior discount (65+)',
-      props: { color: 'primary' },
+
       logic: [
         {
           type: 'hidden',
@@ -122,7 +118,7 @@ export const ageConditionalFormConfig = {
       type: 'checkbox',
       value: false,
       label: 'I am an AARP member (additional 5% discount)',
-      props: { color: 'primary' },
+
       logic: [
         {
           type: 'hidden',
@@ -139,7 +135,6 @@ export const ageConditionalFormConfig = {
       type: 'submit',
       key: 'submit',
       label: 'Register',
-      props: { color: 'primary' },
     },
   ],
 } as const satisfies FormConfig;
