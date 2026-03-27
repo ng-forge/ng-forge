@@ -59,7 +59,7 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
     },
     globalStyles:
       'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }\n' +
-      'dynamic-form .p-inputtext, dynamic-form .p-select { width: 100%; }',
+      'p-inputtext, p-textarea, p-select, p-datepicker, p-multiselect { width: 100%; }',
   },
   ionic: {
     pkg: '@ng-forge/dynamic-forms-ionic',
