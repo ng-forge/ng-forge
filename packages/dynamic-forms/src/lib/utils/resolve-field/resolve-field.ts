@@ -1,4 +1,4 @@
-import { DestroyRef, Injector, runInInjectionContext, Signal, Type } from '@angular/core';
+import { computed, DestroyRef, Injector, runInInjectionContext, Signal, Type } from '@angular/core';
 import { catchError, forkJoin, from, map, Observable, of, OperatorFunction, pipe, scan, switchMap } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldTypeDefinition } from '../../models/field-type';
@@ -12,6 +12,20 @@ export interface ResolvedField {
   component: Type<unknown>;
   injector: Injector;
   inputs: Signal<Record<string, unknown>>;
+  renderReady: Signal<boolean>;
+}
+
+function createRenderReadySignal(inputs: Signal<Record<string, unknown>>, definition: FieldTypeDefinition | undefined): Signal<boolean> {
+  const requiredInputs = definition?.renderReadyWhen ?? [];
+
+  if (requiredInputs.length === 0) {
+    return computed(() => true);
+  }
+
+  return computed(() => {
+    const currentInputs = inputs();
+    return requiredInputs.every((inputName) => currentInputs[inputName] !== undefined);
+  });
 }
 
 /**
@@ -60,6 +74,7 @@ export function resolveField(fieldDef: FieldDef<unknown>, context: ResolveFieldC
 
       // Run mapper in injection context
       const inputs = runInInjectionContext(context.injector, () => mapFieldToInputs(fieldDef, context.registry));
+      const definition = context.registry.get(fieldDef.type);
 
       // Fields with components should always have inputs (componentless fields are handled above)
       if (!inputs) {
@@ -71,6 +86,7 @@ export function resolveField(fieldDef: FieldDef<unknown>, context: ResolveFieldC
         component,
         injector: context.injector,
         inputs,
+        renderReady: createRenderReadySignal(inputs, definition),
       };
     }),
     catchError((error) => {
@@ -113,6 +129,7 @@ export function resolveFieldSync(fieldDef: FieldDef<unknown>, context: SyncResol
   }
 
   const inputs = runInInjectionContext(context.injector, () => mapFieldToInputs(fieldDef, context.registry));
+  const definition = context.registry.get(fieldDef.type);
 
   if (!inputs) {
     return undefined;
@@ -123,6 +140,7 @@ export function resolveFieldSync(fieldDef: FieldDef<unknown>, context: SyncResol
     component,
     injector: context.injector,
     inputs,
+    renderReady: createRenderReadySignal(inputs, definition),
   };
 }
 

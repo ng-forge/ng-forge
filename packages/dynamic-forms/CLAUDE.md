@@ -28,6 +28,7 @@ Side effects are scheduled via `SideEffectScheduler`:
 - `resolveFieldSync()` — sync fast path using cached components
 - `reconcileFields()` — preserves object identity for signal stability (same key + component + injector = unchanged)
 - `createFieldResolutionPipe()` — container component utility (used by page/group/row)
+- `renderReadyWhen` / `renderReady` — field types can declare mapped inputs that must exist before `ngComponentOutlet` instantiates the component (for example `field` for value-bearing adapter fields)
 
 ### Provider Architecture (`providers/dynamic-form-di.ts`)
 
@@ -76,6 +77,23 @@ Fields are wired via `FieldTypeDefinition[]` in each adapter's config:
 ### Reactive cycle trap
 
 Cannot call `mapFieldToInputs` inside a `computed` that IS `resolvedFields`. Mappers eagerly read `context.form` → `isFieldPipelineSettled` → `resolvedFields` → CYCLE. The `derivedFromDeferred` async pipeline avoids this via `toObservable`/`toSignal`.
+
+### Required mapped inputs for adapter fields
+
+If an adapter component declares `field = input.required(...)` or eagerly reads a mapped input during host bindings / computed setup, the matching `FieldTypeDefinition` must declare `renderReadyWhen`.
+
+Example:
+
+```typescript
+{
+  name: 'datepicker',
+  loadComponent: () => import('./my-datepicker.component'),
+  mapper: datepickerFieldMapper,
+  renderReadyWhen: ['field'],
+}
+```
+
+This keeps renderer behavior aligned with integration mappers, which may provide `field` reactively after initial resolution.
 
 ### Teardown timing
 

@@ -34,7 +34,7 @@ import {
 
 ## Integration Overview
 
-UI integrations map field types to your components using `FieldTypeDefinition` objects. Each definition specifies the field type name, component loader, and mapper function.
+UI integrations map field types to your components using `FieldTypeDefinition` objects. Each definition specifies the field type name, component loader, mapper function, and optionally the mapped inputs that must exist before the renderer instantiates the component.
 
 ## Basic Steps
 
@@ -134,8 +134,11 @@ export const CustomInputType: FieldTypeDefinition = {
   name: 'input',
   loadComponent: () => import('./custom-input.component'),
   mapper: valueFieldMapper,
+  renderReadyWhen: ['field'],
 };
 ```
+
+Use `renderReadyWhen` when your component declares required mapped inputs such as `field = input.required(...)` and reads them during host bindings or computed initialization. Built-in value and checkbox mappers may provide `field` reactively after initial resolution, so this metadata tells the renderer to delay `ngComponentOutlet` until those inputs are ready.
 
 ### 4. Create Provider Function
 
@@ -199,6 +202,8 @@ The component must implement these inputs:
 
 > **Important:** The `meta` input, while technically optional in the type signature, should be implemented on all field components. It provides reactive access to native HTML attributes (`data-*`, `aria-*`, `autocomplete`, etc.) that are essential for accessibility, testing, and browser autofill. See [Handling Meta Attributes](#handling-meta-attributes) below for implementation details.
 
+> **Required input timing:** If your component uses `input.required()` for a mapped input like `field`, declare the corresponding readiness contract on the `FieldTypeDefinition` (for example `renderReadyWhen: ['field']`). Otherwise Angular may instantiate the component before the mapper has supplied that input.
+
 ### CheckedFieldComponent
 
 For checkbox and toggle fields:
@@ -251,6 +256,7 @@ export const CustomInputType: FieldTypeDefinition = {
   name: 'input',
   loadComponent: () => import('./custom-input.component'),
   mapper: valueFieldMapper, // Maps value fields
+  renderReadyWhen: ['field'],
 };
 ```
 
@@ -266,6 +272,7 @@ export const CustomCheckboxType: FieldTypeDefinition = {
   name: 'checkbox',
   loadComponent: () => import('./custom-checkbox.component'),
   mapper: checkboxFieldMapper, // Maps checkbox fields
+  renderReadyWhen: ['field'],
 };
 ```
 
@@ -298,6 +305,17 @@ export const MyFieldType: FieldTypeDefinition = {
   name: 'my-field',
   loadComponent: () => import('./my-field.component'),
   mapper: myCustomMapper,
+};
+```
+
+If `myCustomMapper` supplies a required input reactively (for example `field`), add `renderReadyWhen` to keep rendering aligned with your component contract:
+
+```typescript
+export const MyFieldType: FieldTypeDefinition = {
+  name: 'my-field',
+  loadComponent: () => import('./my-field.component'),
+  mapper: myCustomMapper,
+  renderReadyWhen: ['field'],
 };
 ```
 

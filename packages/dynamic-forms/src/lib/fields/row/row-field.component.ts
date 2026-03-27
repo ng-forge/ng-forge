@@ -21,9 +21,11 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
   imports: [NgComponentOutlet],
   template: `
     @for (field of resolvedFields(); track field.key) {
-      <ng-container
-        *ngComponentOutlet="field.component; injector: field.injector; environmentInjector: environmentInjector; inputs: field.inputs()"
-      />
+      @if (field.renderReady()) {
+        <ng-container
+          *ngComponentOutlet="field.component; injector: field.injector; environmentInjector: environmentInjector; inputs: field.inputs()"
+        />
+      }
     }
   `,
   styleUrl: './row-field.component.scss',

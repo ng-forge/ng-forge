@@ -59,9 +59,16 @@ import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-a
         [attr.data-array-item-index]="i"
       >
         @for (field of item.fields; track $index) {
-          <ng-container
-            *ngComponentOutlet="field.component; injector: field.injector; environmentInjector: environmentInjector; inputs: field.inputs()"
-          />
+          @if (field.renderReady()) {
+            <ng-container
+              *ngComponentOutlet="
+                field.component;
+                injector: field.injector;
+                environmentInjector: environmentInjector;
+                inputs: field.inputs()
+              "
+            />
+          }
         }
       </div>
     }

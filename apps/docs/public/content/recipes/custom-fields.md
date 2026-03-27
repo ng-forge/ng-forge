@@ -41,6 +41,7 @@ const richTextField: FieldTypeDefinition = {
   type: 'rich-text',
   loadComponent: () => RichTextFieldComponent,
   mapper: valueFieldMapper,
+  renderReadyWhen: ['field'],
 };
 ```
 
@@ -79,6 +80,7 @@ const config = {
 - Custom fields work with all conditional logic, validation, and value derivation — no special handling needed
 - You can add as many custom fields as you need alongside any adapter
 - The `mapper` function translates the resolved field to your component's inputs — use `valueFieldMapper` for standard value-based fields or `checkboxFieldMapper` for boolean fields
+- If your custom component declares `field = input.required(...)`, add `renderReadyWhen: ['field']` to the field type so rendering waits until the mapper has supplied the field tree
 
 ## Going Further
 
