@@ -52,7 +52,7 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
     ].join('\n'),
     configProviders: '    provideAnimations(),\n    providePrimeNG(),\n    provideDynamicForm(...withPrimeNGFields()),',
     extraDeps: {
-      primeng: '^19.0.0',
+      primeng: '^21.0.0',
     },
     globalStyles: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }',
   },
@@ -190,6 +190,7 @@ bootstrapApplication(AppComponent, appConfig);
     '@angular/forms': '~21.2.0',
     '@angular/platform-browser': '~21.2.0',
     '@angular/platform-browser-dynamic': '~21.2.0',
+    '@angular/router': '~21.2.0',
     '@ng-forge/dynamic-forms': 'latest',
     [meta.pkg]: 'latest',
     ...meta.extraDeps,
@@ -262,6 +263,7 @@ bootstrapApplication(AppComponent, appConfig);
       compilerOptions: {
         outDir: './dist/out-tsc',
         strict: true,
+        skipLibCheck: true,
         esModuleInterop: true,
         sourceMap: true,
         moduleResolution: 'bundler',
