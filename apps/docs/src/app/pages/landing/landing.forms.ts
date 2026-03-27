@@ -54,9 +54,6 @@ export const heroFormConfig = {
       key: 'submit',
       type: 'submit',
       label: 'Send Message',
-      props: {
-        color: 'primary',
-      },
     },
   ],
 } as const satisfies FormConfig;
@@ -129,9 +126,6 @@ export const validationFormConfig = {
       key: 'submit',
       type: 'submit',
       label: 'Submit',
-      props: {
-        color: 'primary',
-      },
     },
   ],
 } as const satisfies FormConfig;

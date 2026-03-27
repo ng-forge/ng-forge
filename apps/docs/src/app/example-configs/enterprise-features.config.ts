@@ -16,7 +16,6 @@ export const enterpriseFeaturesConfig = {
         { value: 'pro', label: 'Pro' },
         { value: 'enterprise', label: 'Enterprise' },
       ],
-      props: { appearance: 'outline' },
     },
     {
       key: 'teamSize',
@@ -30,7 +29,6 @@ export const enterpriseFeaturesConfig = {
       props: {
         type: 'number',
         hint: 'Number of team members',
-        appearance: 'outline',
       },
       logic: [
         {
@@ -55,14 +53,12 @@ export const enterpriseFeaturesConfig = {
       type: 'toggle',
       value: true,
       label: 'Enable Analytics',
-      props: { color: 'primary' },
     },
     {
       key: 'notificationsEnabled',
       type: 'toggle',
       value: true,
       label: 'Enable Notifications',
-      props: { color: 'primary' },
     },
     {
       key: 'proFeaturesTitle',
@@ -86,7 +82,7 @@ export const enterpriseFeaturesConfig = {
       type: 'toggle',
       value: false,
       label: 'Enable API Access',
-      props: { color: 'primary' },
+
       logic: [
         {
           type: 'hidden',
@@ -104,7 +100,7 @@ export const enterpriseFeaturesConfig = {
       type: 'toggle',
       value: false,
       label: 'Enable Advanced Reports',
-      props: { color: 'primary' },
+
       logic: [
         {
           type: 'hidden',
@@ -150,7 +146,7 @@ export const enterpriseFeaturesConfig = {
       type: 'toggle',
       value: false,
       label: 'Enable SSO (Single Sign-On)',
-      props: { color: 'primary' },
+
       logic: [
         {
           type: 'hidden',
@@ -179,7 +175,7 @@ export const enterpriseFeaturesConfig = {
       type: 'toggle',
       value: false,
       label: 'Enable Custom Branding',
-      props: { color: 'primary' },
+
       logic: [
         {
           type: 'hidden',
@@ -208,7 +204,7 @@ export const enterpriseFeaturesConfig = {
       type: 'toggle',
       value: false,
       label: 'Enable Dedicated Support',
-      props: { color: 'primary' },
+
       logic: [
         {
           type: 'hidden',
@@ -236,7 +232,6 @@ export const enterpriseFeaturesConfig = {
       type: 'submit',
       key: 'submit',
       label: 'Save Configuration',
-      props: { color: 'primary' },
     },
   ],
 } as const satisfies FormConfig;

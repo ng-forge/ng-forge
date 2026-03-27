@@ -158,7 +158,6 @@ export const arrayConfig = {
       arrayKey: 'tags',
       template: [tagTemplate],
       className: 'add-tag-button',
-      props: { color: 'primary' },
     },
     {
       key: 'sectionTitle2',
@@ -249,7 +248,6 @@ export const arrayConfig = {
           arrayKey: 'contacts',
           template: contactTemplate,
           className: 'add-contact-button df-col-auto',
-          props: { color: 'primary' },
         },
       ],
     },
@@ -257,7 +255,6 @@ export const arrayConfig = {
       key: 'submit',
       type: 'submit',
       label: 'Save All',
-      props: { color: 'primary' },
     },
   ],
 } as const satisfies FormConfig;

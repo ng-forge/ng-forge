@@ -126,7 +126,6 @@ export const expressionValidatorsConfig = {
       type: 'submit',
       key: 'submit',
       label: 'Submit Form',
-      props: { color: 'primary' },
     },
   ],
   customFnConfig: {

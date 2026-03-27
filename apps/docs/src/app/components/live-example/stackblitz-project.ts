@@ -20,7 +20,8 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
       "import { provideDynamicForm } from '@ng-forge/dynamic-forms';",
       "import { withMaterialFields } from '@ng-forge/dynamic-forms-material';",
     ].join('\n'),
-    configProviders: '    provideAnimations(),\n    provideDynamicForm(...withMaterialFields()),',
+    configProviders:
+      "    provideAnimations(),\n    provideDynamicForm(...withMaterialFields({ appearance: 'outline', color: 'primary' })),",
     extraDeps: {
       '@angular/material': '~21.2.0',
       '@angular/cdk': '~21.2.0',
@@ -106,50 +107,9 @@ export function toJsObjectNotation(value: unknown, indent = 0): string {
   return String(value);
 }
 
-/** Known adapter-specific prop keys that should be stripped for other adapters. */
-const ADAPTER_SPECIFIC_PROPS: Record<SupportedAdapter, Set<string>> = {
-  material: new Set(['appearance', 'subscriptSizing']),
-  bootstrap: new Set(['size', 'floatingLabel', 'plaintext']),
-  primeng: new Set(['variant']),
-  ionic: new Set(['fill', 'labelPlacement', 'interface', 'presentation', 'dualKnobs']),
-};
-
-/** Strips adapter-specific props from a config object so it works across adapters. */
-function stripAdapterProps(config: unknown, adapter: SupportedAdapter): unknown {
-  if (typeof config !== 'object' || config === null) return config;
-  if (Array.isArray(config)) return config.map((item) => stripAdapterProps(item, adapter));
-
-  const obj = config as Record<string, unknown>;
-  const result: Record<string, unknown> = {};
-
-  // Collect all adapter-specific keys EXCEPT the target adapter's
-  const keysToStrip = new Set<string>();
-  for (const [name, keys] of Object.entries(ADAPTER_SPECIFIC_PROPS)) {
-    if (name !== adapter) {
-      keys.forEach((k) => keysToStrip.add(k));
-    }
-  }
-
-  for (const [key, value] of Object.entries(obj)) {
-    if (key === 'props' && typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      const props = value as Record<string, unknown>;
-      const filtered: Record<string, unknown> = {};
-      for (const [pk, pv] of Object.entries(props)) {
-        if (!keysToStrip.has(pk)) filtered[pk] = pv;
-      }
-      if (Object.keys(filtered).length > 0) result[key] = filtered;
-    } else {
-      result[key] = stripAdapterProps(value, adapter);
-    }
-  }
-  return result;
-}
-
 /** Opens a StackBlitz project with the given config. SDK is lazy-loaded on first call. */
 export async function openInStackBlitz(adapter: AdapterName, config: unknown, title: string): Promise<void> {
-  const resolved: SupportedAdapter = adapter === 'custom' ? 'material' : adapter;
-  const cleanConfig = stripAdapterProps(config, resolved);
-  const configJson = toJsObjectNotation(cleanConfig);
+  const configJson = toJsObjectNotation(config);
   const project = createStackBlitzProject(adapter, configJson, title);
   const sdk = await import('@stackblitz/sdk');
   sdk.default.openProject(project, { openFile: 'src/app/app.component.ts' });
@@ -162,9 +122,11 @@ function createStackBlitzProject(adapter: AdapterName, configJson: string, title
 
   const appComponent = `import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
+import { DynamicForm, FormConfig, InferFormValue } from '@ng-forge/dynamic-forms';
 
-const config: FormConfig = ${configJson};
+const config = ${configJson} as const satisfies FormConfig;
+
+type FormValue = InferFormValue<typeof config.fields>;
 
 @Component({
   selector: 'app-root',
@@ -182,9 +144,9 @@ const config: FormConfig = ${configJson};
 })
 export class AppComponent {
   readonly config = config;
-  readonly value = signal<Record<string, unknown> | null>(null);
+  readonly value = signal<Partial<FormValue> | null>(null);
 
-  onSubmit(value: Record<string, unknown>): void {
+  onSubmit(value: Partial<FormValue>): void {
     this.value.set(value);
   }
 }

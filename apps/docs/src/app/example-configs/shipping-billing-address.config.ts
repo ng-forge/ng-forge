@@ -21,7 +21,6 @@ export const shippingBillingAddressConfig = {
           value: '',
           label: 'Street Address',
           required: true,
-          props: { appearance: 'outline' },
         },
         {
           key: 'city',
@@ -29,7 +28,6 @@ export const shippingBillingAddressConfig = {
           value: '',
           label: 'City',
           required: true,
-          props: { appearance: 'outline' },
         },
         {
           key: 'state',
@@ -37,7 +35,6 @@ export const shippingBillingAddressConfig = {
           value: '',
           label: 'State/Province',
           required: true,
-          props: { appearance: 'outline' },
         },
         {
           key: 'zipCode',
@@ -45,7 +42,6 @@ export const shippingBillingAddressConfig = {
           value: '',
           label: 'ZIP/Postal Code',
           required: true,
-          props: { appearance: 'outline' },
         },
       ],
     },
@@ -54,7 +50,6 @@ export const shippingBillingAddressConfig = {
       type: 'checkbox',
       value: false,
       label: 'Shipping address is same as billing address',
-      props: { color: 'primary' },
     },
     {
       key: 'shippingTitle',
@@ -78,7 +73,6 @@ export const shippingBillingAddressConfig = {
       type: 'input',
       value: '',
       label: 'Street Address',
-      props: { appearance: 'outline' },
       logic: [
         {
           type: 'hidden',
@@ -105,7 +99,6 @@ export const shippingBillingAddressConfig = {
       type: 'input',
       value: '',
       label: 'City',
-      props: { appearance: 'outline' },
       logic: [
         {
           type: 'hidden',
@@ -132,7 +125,6 @@ export const shippingBillingAddressConfig = {
       type: 'input',
       value: '',
       label: 'State/Province',
-      props: { appearance: 'outline' },
       logic: [
         {
           type: 'hidden',
@@ -159,7 +151,6 @@ export const shippingBillingAddressConfig = {
       type: 'input',
       value: '',
       label: 'ZIP/Postal Code',
-      props: { appearance: 'outline' },
       logic: [
         {
           type: 'hidden',
@@ -185,7 +176,6 @@ export const shippingBillingAddressConfig = {
       type: 'submit',
       key: 'submit',
       label: 'Continue to Payment',
-      props: { color: 'primary' },
     },
   ],
 } as const satisfies FormConfig;

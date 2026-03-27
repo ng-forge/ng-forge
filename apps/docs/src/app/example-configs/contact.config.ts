@@ -86,7 +86,6 @@ export const contactConfig = {
       type: 'submit',
       key: 'submit',
       label: 'Send Message',
-      props: { color: 'primary' },
     },
   ],
 } as const satisfies FormConfig;

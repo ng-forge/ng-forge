@@ -22,9 +22,6 @@ export const buttonConfig = {
       type: 'submit',
       key: 'submit',
       label: 'Submit Form',
-      props: {
-        color: 'primary',
-      },
     },
   ],
 } as const satisfies FormConfig;
