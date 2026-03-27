@@ -5,7 +5,7 @@ import { SandboxMountDirective } from '@ng-forge/sandbox-harness';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { EXAMPLE_CONFIGS } from '../../example-configs';
 import { EXAMPLES_REGISTRY } from '../../pages/examples-index/examples.registry';
-import { openInStackBlitz, toJsObjectNotation } from './stackblitz-project';
+import { openInStackBlitz } from './stackblitz-project';
 
 @Component({
   selector: 'docs-live-example',
@@ -116,6 +116,6 @@ export class LiveExampleComponent {
     if (!config) return;
 
     const title = this.exampleTitle() || this.scenarioKey();
-    openInStackBlitz(this.resolvedAdapter(), toJsObjectNotation(config), title);
+    openInStackBlitz(this.resolvedAdapter(), config, title);
   }
 }
