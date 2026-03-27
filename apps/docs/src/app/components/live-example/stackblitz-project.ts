@@ -57,7 +57,9 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
       primeng: '^21.0.0',
       '@primeuix/themes': '^2.0.0',
     },
-    globalStyles: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }',
+    globalStyles:
+      'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }\n' +
+      'dynamic-form .p-inputtext, dynamic-form .p-select { width: 100%; }',
   },
   ionic: {
     pkg: '@ng-forge/dynamic-forms-ionic',
