@@ -9,6 +9,7 @@ interface AdapterMeta {
   configProviders: string;
   extraDeps: Record<string, string>;
   globalStyles: string;
+  extraStyles?: string[];
 }
 
 const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
@@ -24,8 +25,8 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
       '@angular/material': '~21.2.0',
       '@angular/cdk': '~21.2.0',
     },
-    globalStyles:
-      '@use "@angular/material" as mat;\n@include mat.theme((color-scheme: light, typography: Roboto, density: 0));\nbody { font-family: Roboto, sans-serif; margin: 0; }',
+    globalStyles: 'body { font-family: Roboto, sans-serif; margin: 0; }',
+    extraStyles: ['@angular/material/prebuilt-themes/azure-blue.css'],
   },
   bootstrap: {
     pkg: '@ng-forge/dynamic-forms-bootstrap',
@@ -37,7 +38,8 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
     extraDeps: {
       bootstrap: '^5.3.0',
     },
-    globalStyles: '@import "bootstrap/scss/bootstrap";\nbody { margin: 0; }',
+    globalStyles: 'body { margin: 0; }',
+    extraStyles: ['bootstrap/dist/css/bootstrap.min.css'],
   },
   primeng: {
     pkg: '@ng-forge/dynamic-forms-primeng',
@@ -233,7 +235,7 @@ bootstrapApplication(AppComponent, appConfig);
                 index: 'src/index.html',
                 browser: 'src/main.ts',
                 tsConfig: 'tsconfig.json',
-                styles: ['src/styles.scss'],
+                styles: [...(meta.extraStyles ?? []), 'src/styles.scss'],
               },
             },
             serve: {
