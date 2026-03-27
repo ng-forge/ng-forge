@@ -16,7 +16,8 @@ export interface ResolvedField {
 }
 
 function createRenderReadySignal(inputs: Signal<Record<string, unknown>>, definition: FieldTypeDefinition | undefined): Signal<boolean> {
-  const requiredInputs = definition?.renderReadyWhen ?? [];
+  const explicitInputs = definition?.renderReadyWhen ?? [];
+  const requiredInputs = definition?.mapper && !explicitInputs.includes('field') ? ['field', ...explicitInputs] : explicitInputs;
 
   if (requiredInputs.length === 0) {
     return computed(() => true);

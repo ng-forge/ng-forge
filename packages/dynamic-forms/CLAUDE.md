@@ -80,20 +80,26 @@ Cannot call `mapFieldToInputs` inside a `computed` that IS `resolvedFields`. Map
 
 ### Required mapped inputs for adapter fields
 
-If an adapter component declares `field = input.required(...)` or eagerly reads a mapped input during host bindings / computed setup, the matching `FieldTypeDefinition` must declare `renderReadyWhen`.
-
-Example:
+When a `FieldTypeDefinition` has a `mapper`, the renderer automatically waits for the `field` input before instantiating the component. This convention eliminates the need to explicitly declare `renderReadyWhen: ['field']` for standard value-bearing fields.
 
 ```typescript
+// Automatic - no renderReadyWhen needed when mapper is present
 {
   name: 'datepicker',
   loadComponent: () => import('./my-datepicker.component'),
   mapper: datepickerFieldMapper,
-  renderReadyWhen: ['field'],
+}
+
+// Opt-out if your component doesn't need 'field'
+{
+  name: 'my-special-field',
+  loadComponent: () => import('./my-special-field.component'),
+  mapper: myCustomMapper,
+  renderReadyWhen: [],  // Render immediately
 }
 ```
 
-This keeps renderer behavior aligned with integration mappers, which may provide `field` reactively after initial resolution.
+Custom mappers that provide other reactive inputs should still use explicit `renderReadyWhen` to declare which inputs the renderer should wait for.
 
 ### Teardown timing
 

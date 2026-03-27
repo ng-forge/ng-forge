@@ -140,6 +140,8 @@ export const CustomInputType: FieldTypeDefinition = {
 
 Use `renderReadyWhen` when your component declares required mapped inputs such as `field = input.required(...)` and reads them during host bindings or computed initialization. Built-in value and checkbox mappers may provide `field` reactively after initial resolution, so this metadata tells the renderer to delay `ngComponentOutlet` until those inputs are ready.
 
+> **Convention:** When using built-in mappers (`valueFieldMapper`, `checkboxFieldMapper`, etc.), `renderReadyWhen: ['field']` is applied automatically if your component needs the `field` input. You only need to declare it explicitly for custom mappers that supply other reactive inputs, or to opt out with `renderReadyWhen: []` if your component doesn't need `field`.
+
 ### 4. Create Provider Function
 
 Export a function that returns all your field type definitions:
