@@ -72,14 +72,14 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
       "import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';",
     ].join('\n'),
     configProviders: "    provideAnimations(),\n    provideIonicAngular({ mode: 'md' }),\n    provideDynamicForm(...withIonicFields()),",
-    componentImports: "import { IonApp, IonContent } from '@ionic/angular/standalone';",
-    templateWrapper: { open: '<ion-app><ion-content class="ion-padding">', close: '</ion-content></ion-app>' },
+    componentImports: "import { IonApp } from '@ionic/angular/standalone';",
+    templateWrapper: { open: '<ion-app><div class="container">', close: '</div></ion-app>' },
     extraDeps: {
       '@ionic/angular': '^8.0.0',
     },
     globalStyles:
-      ':root { --ion-color-primary: #3880ff; --ion-color-primary-contrast: #ffffff; --ion-color-primary-shade: #3171e0; --ion-color-primary-tint: #4c8dff; }\n' +
-      'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }',
+      ':root, ion-app { --ion-color-primary: #3880ff; --ion-color-primary-rgb: 56,128,255; --ion-color-primary-contrast: #ffffff; --ion-color-primary-contrast-rgb: 255,255,255; --ion-color-primary-shade: #3171e0; --ion-color-primary-tint: #4c8dff; }\n' +
+      'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; position: static !important; overflow: auto !important; }',
     extraStyles: ['@ionic/angular/css/global.bundle.css'],
   },
 };
