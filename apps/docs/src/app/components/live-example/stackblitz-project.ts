@@ -77,7 +77,9 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
     extraDeps: {
       '@ionic/angular': '^8.0.0',
     },
-    globalStyles: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }',
+    globalStyles:
+      ':root { --ion-color-primary: #3880ff; --ion-color-primary-contrast: #ffffff; --ion-color-primary-shade: #3171e0; --ion-color-primary-tint: #4c8dff; }\n' +
+      'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }',
     extraStyles: ['@ionic/angular/css/global.bundle.css'],
   },
 };
