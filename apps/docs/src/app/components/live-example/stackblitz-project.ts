@@ -68,6 +68,7 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
       '@ionic/angular': '^8.0.0',
     },
     globalStyles: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }',
+    extraStyles: ['@ionic/angular/css/global.bundle.css'],
   },
 };
 
