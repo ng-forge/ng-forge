@@ -1,6 +1,6 @@
 {
   "name": "@ng-forge/openapi-generator",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Generate @ng-forge/dynamic-forms configurations from OpenAPI specs",
   "type": "module",
   "license": "MIT",
