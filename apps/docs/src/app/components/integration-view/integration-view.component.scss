@@ -23,6 +23,8 @@
   }
 
   &__table {
+    // !important overrides global .doc-page-content table { display: block }
+    display: table !important;
     width: 100%;
     border-collapse: collapse;
     border: 1px solid var(--forge-border-color, #{$steel-dark});
