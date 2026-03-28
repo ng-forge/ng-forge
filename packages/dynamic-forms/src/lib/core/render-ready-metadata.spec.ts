@@ -12,17 +12,14 @@ import { FIELD_SIGNAL_CONTEXT } from '../models';
 @Component({
   selector: 'df-test-required-field',
   standalone: true,
-  template: '',
+  template: '<span>{{ field()().path }}</span>',
   host: {
     '[attr.data-testid]': 'key()',
-    '[attr.hidden]': 'hiddenAttr()',
   },
 })
 class TestRequiredFieldComponent {
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
-
-  readonly hiddenAttr = computed(() => this.field()().hidden() || null);
 }
 
 function delayedFieldMapper(fieldDef: { key: string }) {
@@ -43,6 +40,22 @@ function delayedFieldMapper(fieldDef: { key: string }) {
 }
 
 describe('render-ready metadata', () => {
+  /**
+   * Regression test for auto-wait behavior when mapper is present.
+   *
+   * NOTE: Testing the NG0950 error with renderReadyWhen: [] (opt-out) is not possible
+   * with standard test mechanisms because Angular throws NG0950 asynchronously during
+   * change detection, AFTER the test function returns. All attempts to catch it via
+   * console.error spies, custom ErrorHandler, or expect().toThrow() fail.
+   *
+   * To manually verify the opt-out bug:
+   * 1. Temporarily change createRenderReadySignal to ALWAYS return computed(() => true)
+   * 2. Add a test with renderReadyWhen: [] and see NG0950 thrown
+   * 3. Revert the change
+   *
+   * The fix (auto-add ['field'] when mapper is present without explicit renderReadyWhen)
+   * ensures standard value-bearing fields never hit this error.
+   */
   it('waits for required mapped inputs before instantiating paged field components', async () => {
     const registry: FieldTypeDefinition[] = [
       ...BUILT_IN_FIELDS,

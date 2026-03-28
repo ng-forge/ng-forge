@@ -99,7 +99,17 @@ When a `FieldTypeDefinition` has a `mapper`, the renderer automatically waits fo
 }
 ```
 
-Custom mappers that provide other reactive inputs should still use explicit `renderReadyWhen` to declare which inputs the renderer should wait for.
+Custom mappers that provide other reactive inputs should still use explicit `renderReadyWhen` to declare which inputs the renderer should wait for:
+
+```typescript
+// Wait for custom input from your mapper
+{
+  name: 'my-field',
+  loadComponent: () => import('./my-field.component'),
+  mapper: myCustomMapper,
+  renderReadyWhen: ['title', 'items'],  // Wait for multiple custom inputs
+}
+```
 
 ### Teardown timing
 

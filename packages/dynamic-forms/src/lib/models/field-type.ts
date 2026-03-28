@@ -27,7 +27,7 @@ export type FieldScope = 'boolean' | 'single-select' | 'multi-select' | 'text-in
  * host bindings or computed signals. Renderers should defer component creation until all
  * listed mapped inputs are present.
  */
-export type RenderReadyInput = 'field';
+export type RenderReadyInput = 'field' | string;
 
 /**
  * Configuration interface for registering custom field types.
