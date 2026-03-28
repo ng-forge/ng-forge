@@ -21,6 +21,15 @@ export type ValueHandlingMode = 'include' | 'exclude' | 'flatten';
 export type FieldScope = 'boolean' | 'single-select' | 'multi-select' | 'text-input' | 'numeric' | 'date';
 
 /**
+ * Mapped component inputs that must be available before a field component is instantiated.
+ *
+ * This protects components that declare required Angular inputs and eagerly read them in
+ * host bindings or computed signals. Renderers should defer component creation until all
+ * listed mapped inputs are present.
+ */
+export type RenderReadyInput = 'field' | string;
+
+/**
  * Configuration interface for registering custom field types.
  *
  * Defines how a field type should be handled by the dynamic form system,
@@ -89,6 +98,8 @@ export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
   propsToMeta?: string[];
   /** Semantic scope for tooling to discover interchangeable field alternatives */
   scope?: FieldScope | FieldScope[];
+  /** Mapped component inputs that must exist before the renderer instantiates the component */
+  renderReadyWhen?: RenderReadyInput[];
 }
 
 /**

@@ -10,6 +10,8 @@ export interface ResolvedArrayItemField {
   injector: Injector;
   /** Inputs signal for ngComponentOutlet - evaluated in template for reactivity. */
   inputs: Signal<Record<string, unknown>>;
+  /** Whether required mapped inputs are available for safe component instantiation. */
+  renderReady: Signal<boolean>;
 }
 
 /**

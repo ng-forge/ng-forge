@@ -38,7 +38,7 @@ export function setupContainerInitEffect(
   injector: Injector,
 ): void {
   explicitEffect([resolvedFields], ([fields]) => {
-    if (fields.length > 0) {
+    if (fields.length > 0 && fields.every((field) => field.renderReady())) {
       emitComponentInitialized(eventBus, componentType, fieldKeyFn(), injector);
     }
   });
