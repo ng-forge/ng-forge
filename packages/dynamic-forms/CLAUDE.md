@@ -89,17 +89,39 @@ When a `FieldTypeDefinition` has a `mapper`, the renderer automatically waits fo
   loadComponent: () => import('./my-datepicker.component'),
   mapper: datepickerFieldMapper,
 }
-
-// Opt-out if your component doesn't need 'field'
-{
-  name: 'my-special-field',
-  loadComponent: () => import('./my-special-field.component'),
-  mapper: myCustomMapper,
-  renderReadyWhen: [],  // Render immediately
-}
 ```
 
-Custom mappers that provide other reactive inputs should still use explicit `renderReadyWhen` to declare which inputs the renderer should wait for:
+**Fields that don't use `field` input need `renderReadyWhen: []`:**
+
+Button fields (button, submit, next, previous, addArrayItem, prependArrayItem, insertArrayItem, removeArrayItem, popArrayItem, shiftArrayItem) and display fields (text) don't use the `field` input. Their mappers provide other inputs directly (event, disabled, etc.). Use a shared base constant to apply `renderReadyWhen: []`:
+
+```typescript
+// In adapter config files (e.g., material-field-config.ts)
+const BUTTON_FIELD_TYPES_BASE = {
+  renderReadyWhen: [] as string[],
+};
+
+export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
+  {
+    name: MatField.Button,
+    loadComponent: () => import('../fields/button/mat-button.component'),
+    mapper: buttonFieldMapper,
+    valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
+  },
+  // ... all other button types
+];
+```
+
+Similarly for display-only fields:
+
+```typescript
+const DISPLAY_FIELD_TYPES_BASE = {
+  renderReadyWhen: [] as string[],
+};
+```
+
+Custom mappers that provide other reactive inputs should use explicit `renderReadyWhen` to declare which inputs the renderer should wait for:
 
 ```typescript
 // Wait for custom input from your mapper

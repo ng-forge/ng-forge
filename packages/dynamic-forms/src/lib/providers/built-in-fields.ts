@@ -43,6 +43,15 @@ import { TextField } from '../definitions/default/text-field';
  * ```
  */
 /**
+ * Base field type definitions for fields that don't use the `field` input.
+ * Used by display-only fields like `text` that render immediately without
+ * waiting for form value integration.
+ */
+const DISPLAY_FIELD_TYPES_BASE = {
+  renderReadyWhen: [] as string[],
+};
+
+/**
  * Built-in field types provided by the dynamic form library.
  *
  * Each field type is validated at compile time using satisfies, ensuring
@@ -79,6 +88,7 @@ export const BUILT_IN_FIELDS: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/text/text-field.component'),
     mapper: textFieldMapper,
     valueHandling: 'exclude',
+    ...DISPLAY_FIELD_TYPES_BASE,
   } satisfies FieldTypeDefinition<TextField>,
   {
     name: 'hidden',

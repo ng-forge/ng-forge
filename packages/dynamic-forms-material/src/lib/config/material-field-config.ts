@@ -16,6 +16,14 @@ import { buttonFieldMapper } from '../fields/button/mat-button.mapper';
 import { nextButtonFieldMapper, previousButtonFieldMapper, submitButtonFieldMapper } from '../fields/button/mat-specific-button.mapper';
 
 /**
+ * Base definition for button field types that don't use the `field` input.
+ * Button fields render immediately without waiting for form value integration.
+ */
+const BUTTON_FIELD_TYPES_BASE = {
+  renderReadyWhen: [] as string[],
+};
+
+/**
  * Material Design field type definitions
  * Follows the FieldTypeDefinition interface for proper registry integration
  */
@@ -44,60 +52,70 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: buttonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Submit,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: submitButtonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Next,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: nextButtonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Previous,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: previousButtonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.AddArrayItem,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: addArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.PrependArrayItem,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: prependArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.InsertArrayItem,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: insertArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.RemoveArrayItem,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: removeArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.PopArrayItem,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: popArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.ShiftArrayItem,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: shiftArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Textarea,
