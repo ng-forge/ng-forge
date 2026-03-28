@@ -8,9 +8,8 @@ import { FormStateManager } from '../../state/form-state-manager';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { DEPRECATION_WARNING_TRACKER, createDeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
 import { applyValidator, applyValidators } from './validator-factory';
-import { LogicFunctionCacheService } from '../expressions/logic-function-cache.service';
-import { HttpConditionFunctionCacheService } from '../expressions/http-condition-function-cache.service';
-import { DynamicValueFunctionCacheService } from '../values/dynamic-value-function-cache.service';
+import { ExpressionCacheContext } from '../../providers/expression-cache-context';
+import { FormDerivedState } from '../../providers/form-derived-state';
 
 // Mock only validateHttp to capture callback options passed by applyDeclarativeHttpValidator.
 // All other exports (form, schema, validate, etc.) are preserved from the real module.
@@ -42,9 +41,8 @@ describe('validator-factory', () => {
         { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
         FunctionRegistryService,
         FieldContextRegistryService,
-        LogicFunctionCacheService,
-        HttpConditionFunctionCacheService,
-        DynamicValueFunctionCacheService,
+        { provide: ExpressionCacheContext, useValue: new ExpressionCacheContext() },
+        { provide: FormDerivedState, useValue: { externalData: signal(undefined) } },
       ],
     });
 

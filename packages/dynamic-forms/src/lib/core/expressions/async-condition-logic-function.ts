@@ -8,7 +8,7 @@ import { FieldContextRegistryService } from '../registry/field-context-registry.
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { Logger } from '../../providers/features/logger/logger.interface';
-import { AsyncConditionFunctionCacheService } from './async-condition-function-cache.service';
+import { ExpressionCacheContext } from '../../providers/expression-cache-context';
 import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
 import { withPreviousValue } from '../../utils/resource-composition/with-previous-value';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
@@ -29,7 +29,7 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
   const functionRegistry = inject(FunctionRegistryService);
   const injector = inject(Injector);
   const logger = inject(DynamicFormLogger) as Logger;
-  const cacheService = inject(AsyncConditionFunctionCacheService);
+  const cacheCtx = inject(ExpressionCacheContext);
 
   const pendingValue = condition.pendingValue ?? false;
   const debounceMs = condition.debounceMs ?? 300;
@@ -37,7 +37,7 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
   // Check function cache
   const cacheKey = stableStringify(condition);
 
-  const cached = cacheService.asyncConditionFunctionCache.get(cacheKey);
+  const cached = cacheCtx.asyncConditionFunctionCache.get(cacheKey);
   if (cached) {
     return cached as LogicFn<TValue, boolean>;
   }
@@ -150,6 +150,6 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
     return resultResource.value();
   };
 
-  cacheService.asyncConditionFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
+  cacheCtx.asyncConditionFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
   return fn;
 }
