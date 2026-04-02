@@ -54,7 +54,7 @@ export interface Spark {
 // ============================================
 
 export const FIREFLY_CONFIG = {
-  count: 12,
+  count: 8,
   gridCols: 4,
   mouseRadius: 150,
   returnForce: 0.003,

@@ -7,6 +7,25 @@
 @use 'themes' as forge-themes;
 
 // ============================================
+// SELF-HOSTED FONTS (must come after @use)
+// ============================================
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-v24-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-v24-latin-500.woff2') format('woff2');
+}
+
+// ============================================
 // CSS LAYER ORDER
 // ============================================
 @layer base, app;
