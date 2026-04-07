@@ -8,6 +8,7 @@ import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import * as sass from 'sass';
 import { apiDocsPlugin } from './plugins/vite-plugin-api-docs';
 import { searchIndexPlugin } from './plugins/vite-plugin-search-index';
+import { ogImagePlugin } from './plugins/vite-plugin-og-images';
 
 const ADAPTER_NAMES = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 
@@ -239,6 +240,7 @@ export default defineConfig(({ mode }) => {
       adapterCssPlugin(),
       apiDocsPlugin(),
       searchIndexPlugin(),
+      ogImagePlugin(),
       analog({
         ssr: true,
         static: true,

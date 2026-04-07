@@ -170,7 +170,7 @@ export class LandingComponent {
   readonly scrollProgress = toSignal(this.isBrowser ? defer(() => scrollProgress$()) : of(0), { requireSync: true });
 
   private readonly fireflyState = toSignal(
-    this.isBrowser
+    this.isBrowser && (navigator.hardwareConcurrency ?? 4) > 2
       ? of(null).pipe(
           delay(FIREFLY_LCP_DELAY_MS),
           switchMap(() => createFireflyAnimation(mousePosition$())),

@@ -424,6 +424,14 @@ export class DocPageComponent {
       this.metaService.updateTag({ name: 'twitter:title', content: fullTitle });
       this.metaService.updateTag({ name: 'twitter:description', content: desc });
 
+      // Per-route OG image
+      const ogImageSlug = slug || 'default';
+      const ogImageUrl = `${DocPageComponent.SITE_ORIGIN}/og/${ogImageSlug}.png`;
+      this.metaService.updateTag({ property: 'og:image', content: ogImageUrl });
+      this.metaService.updateTag({ property: 'og:image:width', content: '1200' });
+      this.metaService.updateTag({ property: 'og:image:height', content: '630' });
+      this.metaService.updateTag({ name: 'twitter:image', content: ogImageUrl });
+
       // Canonical URL for the current page
       const pageUrl = slug ? `${DocPageComponent.SITE_ORIGIN}/${adapter}/${slug}` : DocPageComponent.SITE_ORIGIN + '/';
       this.metaService.updateTag({ property: 'og:url', content: pageUrl });

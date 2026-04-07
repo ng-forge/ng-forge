@@ -27,7 +27,7 @@
       content="Forms are boring. Your code shouldn't be. Write the config, we handle the rest. Type-safe, signal-native, zero boilerplate Angular forms."
     />
     <meta property="og:site_name" content="ng-forge" />
-    <meta property="og:image" content="https://ng-forge.com/dynamic-forms/og-image.png" />
+    <meta property="og:image" content="https://ng-forge.com/dynamic-forms/og/default.png" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -38,7 +38,7 @@
       name="twitter:description"
       content="Forms are boring. Your code shouldn't be. Write the config, we handle the rest. Type-safe, signal-native, zero boilerplate Angular forms."
     />
-    <meta name="twitter:image" content="https://ng-forge.com/dynamic-forms/og-image.png" />
+    <meta name="twitter:image" content="https://ng-forge.com/dynamic-forms/og/default.png" />
 
     <!-- Canonical URL (updated per page by DocPageComponent) -->
     <link rel="canonical" href="https://ng-forge.com/dynamic-forms/" />
@@ -47,17 +47,9 @@
     <meta name="theme-color" content="#0a0908" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
 
-    <!-- Google Fonts (non-render-blocking) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-      media="print"
-      onload="this.media = 'all'"
-    />
-    <noscript><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" /></noscript>
+    <!-- Self-hosted JetBrains Mono (eliminates Google Fonts round-trips) -->
+    <link rel="preload" as="font" type="font/woff2" href="fonts/jetbrains-mono-v24-latin-regular.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="fonts/jetbrains-mono-v24-latin-500.woff2" crossorigin />
 
     <!-- Apply saved theme before first paint to prevent FOUC (white → dark flash) -->
     <script>
