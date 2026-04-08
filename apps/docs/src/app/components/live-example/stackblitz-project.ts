@@ -96,6 +96,7 @@ export function toJsObjectNotation(value: unknown, indent = 0): string {
 
   if (value === null) return 'null';
   if (value === undefined) return 'undefined';
+  if (typeof value === 'function') return 'Function';
   if (typeof value === 'string') return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
   if (value instanceof RegExp) return value.toString();
@@ -107,6 +108,11 @@ export function toJsObjectNotation(value: unknown, indent = 0): string {
   }
 
   if (typeof value === 'object') {
+    // StandardSchemaMarker (wraps Zod/Valibot/ArkType schemas) — show placeholder
+    if ('ɵkind' in value && (value as Record<string, unknown>)['ɵkind'] === 'standardSchema') {
+      return 'standardSchema(/* schema */)';
+    }
+
     const entries = Object.entries(value as Record<string, unknown>);
     if (entries.length === 0) return '{}';
     const props = entries.map(([key, val]) => {
