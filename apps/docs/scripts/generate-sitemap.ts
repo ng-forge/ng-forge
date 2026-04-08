@@ -44,6 +44,9 @@ entries.push({
 entries.push({ slug: 'material/getting-started', filePath: contentFile('getting-started') });
 entries.push({ slug: 'material/configuration', filePath: contentFile('configuration') });
 
+// API-Driven Forms
+entries.push({ slug: 'material/api-driven-forms', filePath: contentFile('api-driven-forms') });
+
 // Building an adapter (custom adapter, not material)
 entries.push({ slug: 'custom/building-an-adapter', filePath: contentFile('building-an-adapter') });
 

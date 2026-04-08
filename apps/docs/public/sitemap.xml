@@ -2,194 +2,198 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://ng-forge.com/dynamic-forms</loc>
-    <lastmod>2026-03-19T18:33:06+02:00</lastmod>
+    <lastmod>2026-04-07T09:01:20+03:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/getting-started</loc>
-    <lastmod>2026-03-19T00:17:55+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/configuration</loc>
-    <lastmod>2026-03-19T00:17:55+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/api-driven-forms</loc>
+    <lastmod>2026-04-08</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/custom/building-an-adapter</loc>
-    <lastmod>2026-03-20T15:30:49+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/examples/age-conditional-form</loc>
-    <lastmod>2026-03-19T22:48:11+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/examples/array-form</loc>
-    <lastmod>2026-03-19T22:48:11+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/examples/business-account-form</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/examples/contact-dynamic-fields</loc>
-    <lastmod>2026-03-19T22:48:11+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/examples/contact-form</loc>
-    <lastmod>2026-03-19T22:48:11+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/examples/enterprise-features</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/examples/login-form</loc>
-    <lastmod>2026-03-19T22:48:11+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/examples/paginated-form</loc>
-    <lastmod>2026-03-19T22:48:11+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/examples/shipping-billing-address</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/examples/simplified-array-form</loc>
-    <lastmod>2026-03-19T22:48:11+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/examples/user-registration</loc>
-    <lastmod>2026-03-19T22:48:11+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/examples/value-derivation</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/field-types/text-inputs</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/field-types/selection</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/field-types/buttons</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/field-types/utility</loc>
-    <lastmod>2026-03-19T00:17:55+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/field-types/advanced-controls</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/validation/basics</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/validation/advanced</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-22T21:26:07+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/validation/custom-validators</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-22T21:26:07+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/validation/reference</loc>
-    <lastmod>2026-03-20T15:30:49+02:00</lastmod>
+    <lastmod>2026-03-22T21:26:07+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/schema-validation/overview</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/schema-validation/angular-schema</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/schema-validation/zod</loc>
-    <lastmod>2026-03-19T00:17:55+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/dynamic-behavior/conditional-logic</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/dynamic-behavior/derivation/values</loc>
-    <lastmod>2026-03-20T15:30:49+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/dynamic-behavior/derivation/property</loc>
-    <lastmod>2026-03-20T15:30:49+02:00</lastmod>
+    <lastmod>2026-03-22T21:26:07+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/dynamic-behavior/derivation/async</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/dynamic-behavior/i18n</loc>
-    <lastmod>2026-03-19T00:17:55+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/dynamic-behavior/submission</loc>
-    <lastmod>2026-03-19T22:48:11+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/form-groups</loc>
-    <lastmod>2026-03-20T15:30:49+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/form-pages</loc>
-    <lastmod>2026-03-19T00:17:55+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/form-rows</loc>
-    <lastmod>2026-03-19T00:17:55+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/form-arrays/simplified</loc>
-    <lastmod>2026-03-19T00:17:55+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/form-arrays/complete</loc>
-    <lastmod>2026-03-20T15:30:49+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/hidden-fields</loc>
-    <lastmod>2026-03-19T22:48:11+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/text-components</loc>
-    <lastmod>2026-03-19T00:17:55+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/recipes/custom-fields</loc>
-    <lastmod>2026-03-20T15:30:49+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/recipes/expression-parser</loc>
-    <lastmod>2026-03-20T15:30:49+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/recipes/type-safety</loc>
-    <lastmod>2026-03-21T13:04:36+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/recipes/events</loc>
-    <lastmod>2026-03-19T22:48:11+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/recipes/value-exclusion</loc>
-    <lastmod>2026-03-19T22:48:11+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/ai-integration</loc>
-    <lastmod>2026-03-19T00:17:55+02:00</lastmod>
+    <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/api-reference</loc>
-    <lastmod>2026-03-21</lastmod>
+    <lastmod>2026-04-08</lastmod>
   </url>
 </urlset>

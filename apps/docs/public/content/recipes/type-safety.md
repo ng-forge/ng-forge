@@ -314,24 +314,9 @@ const config = {
 
 ### Dynamic form configs
 
-Type inference only works for **static**, **compile-time constant** configurations:
+Type inference only works for **static**, **compile-time constant** configurations. If your form configuration comes from an API or is built dynamically at runtime, `as const` has no effect — TypeScript can't infer the shape of data it doesn't see at compile time.
 
-```typescript
-// ✗ Dynamic - no inference possible
-const fields = getFieldsFromAPI(); // Returns field array at runtime
-const config = { fields } as const satisfies FormConfig;
-// Can't infer - TypeScript doesn't know what getFieldsFromAPI() returns
-
-// For dynamic forms, manually type your form values:
-interface MyFormValue {
-  name: string;
-  email: string;
-}
-
-const formValue = signal<MyFormValue>({ name: '', email: '' });
-```
-
-If your form configuration is built dynamically (from API data, conditional logic, or runtime calculations), you'll need to manually define the form value type.
+For the complete guide on API-driven forms — including fetching configs, hydrating runtime features, and typing form values — see **[API-Driven Forms](/api-driven-forms)**.
 
 ## Container Fields
 
@@ -853,6 +838,7 @@ const config = {
 
 ## Related
 
+- **[API-Driven Forms](/api-driven-forms)** - Using FormConfig with runtime/API data
 - **[Validation](/validation/basics)** - How validators affect inferred types
 - **[Field Types](/field-types/text-inputs)** - Understanding available field types
 - **[Form Layout](/prebuilt/form-groups)** - Visual guide to container fields
