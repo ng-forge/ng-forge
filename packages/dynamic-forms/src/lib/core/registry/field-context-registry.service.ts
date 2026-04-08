@@ -1,7 +1,7 @@
 import { inject, Injectable, isSignal, Signal, untracked } from '@angular/core';
 import { ChildFieldContext, FieldContext, FieldState, FieldTree } from '@angular/forms/signals';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
-import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
+import { FormDerivedState } from '../../providers/form-derived-state';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { RootFormRegistryService } from './root-form-registry.service';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
@@ -78,7 +78,7 @@ export class FieldContextRegistryService {
   private rootFormRegistry = inject(RootFormRegistryService);
   private logger = inject(DynamicFormLogger);
   private deprecationTracker = inject(DEPRECATION_WARNING_TRACKER, { optional: true });
-  private externalDataSignal = inject(EXTERNAL_DATA, { optional: true });
+  private readonly externalDataSignal = inject(FormDerivedState).externalData;
 
   /**
    * Creates an evaluation context for a field by combining:
@@ -231,10 +231,7 @@ export class FieldContextRegistryService {
    * @returns Record of resolved external data values, or undefined if no external data.
    */
   private resolveExternalData(reactive: boolean): Record<string, unknown> | undefined {
-    const externalDataSignal = this.externalDataSignal;
-    if (!externalDataSignal) return undefined;
-
-    const externalDataRecord = reactive ? externalDataSignal() : untracked(() => externalDataSignal());
+    const externalDataRecord = reactive ? this.externalDataSignal() : untracked(() => this.externalDataSignal());
 
     if (!externalDataRecord) {
       return undefined;
