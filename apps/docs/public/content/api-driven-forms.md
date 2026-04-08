@@ -1,10 +1,12 @@
 ---
 title: API-Driven Forms
 slug: api-driven-forms
-description: 'Build dynamic forms from API responses — fetching configs at runtime, typing form values, and hydrating client-side features.'
+description: 'Render Angular forms from API responses or backend JSON. Fetch form configs at runtime, type form values, and hydrate client-side features like submission handlers and validation.'
 ---
 
-When your form schema lives on a server and is fetched at runtime, you don't need `as const satisfies FormConfig`. The plain `FormConfig` type works out of the box.
+Build dynamic forms from JSON returned by your backend or CMS. When your form configuration is fetched at runtime instead of defined statically, you don't need `as const satisfies FormConfig` — the plain `FormConfig` type works out of the box.
+
+This is the recommended pattern for server-driven forms, JSON-based form builders, and any scenario where the form structure isn't known at compile time.
 
 ## Basic Pattern
 
