@@ -17,8 +17,21 @@ const passwordSchema = z
     path: ['confirmPassword'],
   });
 
+/** Source representation of the Zod schema for display in the config viewer. */
+export const zodSchemaSource = `z.object({
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Must contain uppercase')
+    .regex(/[a-z]/, 'Must contain lowercase')
+    .regex(/[0-9]/, 'Must contain number'),
+  confirmPassword: z.string().min(1, 'Please confirm your password'),
+}).refine(
+  (data) => data.password === data.confirmPassword,
+  { message: 'Passwords do not match', path: ['confirmPassword'] }
+)`;
+
 export const zodSchemaValidationConfig = {
-  schema: standardSchema(passwordSchema),
+  schema: Object.assign(standardSchema(passwordSchema), { __source: zodSchemaSource }),
   fields: [
     {
       key: 'password',

@@ -149,9 +149,10 @@ export class ExampleScenarioComponent {
     }
 
     if (typeof value === 'object') {
-      // StandardSchemaMarker (wraps Zod/Valibot/ArkType schemas) — show placeholder
+      // StandardSchemaMarker (wraps Zod/Valibot/ArkType schemas)
       if ('ɵkind' in value && (value as Record<string, unknown>)['ɵkind'] === 'standardSchema') {
-        return 'standardSchema(/* schema */)';
+        const source = (value as Record<string, unknown>)['__source'];
+        return typeof source === 'string' ? `standardSchema(${source})` : 'standardSchema(/* schema */)';
       }
 
       const entries = Object.entries(value as Record<string, unknown>);
