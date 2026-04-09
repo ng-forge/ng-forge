@@ -15,6 +15,10 @@ import { PrimeField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/prime-button.mapper';
 import { nextButtonFieldMapper, previousButtonFieldMapper, submitButtonFieldMapper } from '../fields/button/prime-specific-button.mapper';
 
+const BUTTON_FIELD_TYPES_BASE = {
+  renderReadyWhen: [] as string[],
+};
+
 /**
  * PrimeNG field type definitions
  * Follows the FieldTypeDefinition interface for proper registry integration
@@ -44,60 +48,70 @@ export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/button/prime-button.component'),
     mapper: buttonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.Submit,
     loadComponent: () => import('../fields/button/prime-button.component'),
     mapper: submitButtonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.Next,
     loadComponent: () => import('../fields/button/prime-button.component'),
     mapper: nextButtonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.Previous,
     loadComponent: () => import('../fields/button/prime-button.component'),
     mapper: previousButtonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.AddArrayItem,
     loadComponent: () => import('../fields/button/prime-button.component'),
     mapper: addArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.PrependArrayItem,
     loadComponent: () => import('../fields/button/prime-button.component'),
     mapper: prependArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.InsertArrayItem,
     loadComponent: () => import('../fields/button/prime-button.component'),
     mapper: insertArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.RemoveArrayItem,
     loadComponent: () => import('../fields/button/prime-button.component'),
     mapper: removeArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.PopArrayItem,
     loadComponent: () => import('../fields/button/prime-button.component'),
     mapper: popArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.ShiftArrayItem,
     loadComponent: () => import('../fields/button/prime-button.component'),
     mapper: shiftArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.Textarea,

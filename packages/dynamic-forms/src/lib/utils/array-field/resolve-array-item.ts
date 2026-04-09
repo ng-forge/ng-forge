@@ -1,4 +1,4 @@
-import { DestroyRef, Injector, linkedSignal, Signal, Type } from '@angular/core';
+import { computed, DestroyRef, Injector, linkedSignal, Signal, Type } from '@angular/core';
 import { catchError, forkJoin, from, map, Observable, of } from 'rxjs';
 import { ArrayField } from '../../definitions/default/array-field';
 import { FieldDef } from '../../definitions/base/field-def';
@@ -114,6 +114,15 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
           component,
           injector,
           inputs,
+          renderReady: computed(() => {
+            const requiredInputs = registry.get(template.type)?.renderReadyWhen ?? [];
+            if (requiredInputs.length === 0) {
+              return true;
+            }
+
+            const currentInputs = inputs();
+            return requiredInputs.every((inputName) => currentInputs[inputName] !== undefined);
+          }),
         };
       }),
       catchError((error) => {

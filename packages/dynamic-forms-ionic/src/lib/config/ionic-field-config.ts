@@ -15,6 +15,10 @@ import { IonicField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/ionic-button.mapper';
 import { nextButtonFieldMapper, previousButtonFieldMapper, submitButtonFieldMapper } from '../fields/button/ionic-specific-button.mapper';
 
+const BUTTON_FIELD_TYPES_BASE = {
+  renderReadyWhen: [] as string[],
+};
+
 /**
  * Ionic field type definitions
  * Follows the FieldTypeDefinition interface for proper registry integration
@@ -44,60 +48,70 @@ export const IONIC_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: buttonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Submit,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: submitButtonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Next,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: nextButtonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Previous,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: previousButtonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.AddArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: addArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.PrependArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: prependArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.InsertArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: insertArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.RemoveArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: removeArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.PopArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: popArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.ShiftArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: shiftArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Textarea,
