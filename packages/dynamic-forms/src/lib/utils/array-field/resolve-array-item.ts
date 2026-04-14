@@ -1,12 +1,13 @@
-import { computed, DestroyRef, Injector, linkedSignal, Signal, Type } from '@angular/core';
+import { DestroyRef, Injector, linkedSignal, Signal, Type } from '@angular/core';
 import { catchError, forkJoin, from, map, Observable, of } from 'rxjs';
 import { ArrayField } from '../../definitions/default/array-field';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldSignalContext } from '../../mappers/types';
-import { FieldTypeDefinition } from '../../models/field-type';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { FieldTypeDefinition } from '../../models/field-type';
 import { ResolvedArrayItem, ResolvedArrayItemField } from './array-field.types';
 import { createArrayItemInjectorAndInputs } from './create-array-item-injector';
+import { createRenderReadySignal } from '../resolve-field/resolve-field';
 
 /**
  * Options for resolving an array item.
@@ -114,15 +115,7 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
           component,
           injector,
           inputs,
-          renderReady: computed(() => {
-            const requiredInputs = registry.get(template.type)?.renderReadyWhen ?? [];
-            if (requiredInputs.length === 0) {
-              return true;
-            }
-
-            const currentInputs = inputs();
-            return requiredInputs.every((inputName) => currentInputs[inputName] !== undefined);
-          }),
+          renderReady: createRenderReadySignal(inputs, registry.get(template.type)),
         };
       }),
       catchError((error) => {
