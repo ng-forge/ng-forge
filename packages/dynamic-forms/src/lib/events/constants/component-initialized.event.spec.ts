@@ -32,6 +32,13 @@ describe('ComponentInitializedEvent', () => {
       expect(event.componentId).toBe('group-1');
     });
 
+    it('should create event with wrapper component type', () => {
+      const event = new ComponentInitializedEvent('wrapper', 'wrapper-1');
+
+      expect(event.componentType).toBe('wrapper');
+      expect(event.componentId).toBe('wrapper-1');
+    });
+
     it('should accept different component IDs', () => {
       const event1 = new ComponentInitializedEvent('page', 'step1');
       const event2 = new ComponentInitializedEvent('page', 'step2');
@@ -86,7 +93,14 @@ describe('ComponentInitializedEvent', () => {
 
   describe('Component type validation', () => {
     it('should handle all valid component types', () => {
-      const types: Array<'dynamic-form' | 'page' | 'row' | 'group'> = ['dynamic-form', 'page', 'row', 'group'];
+      const types: Array<'dynamic-form' | 'page' | 'row' | 'group' | 'array' | 'wrapper'> = [
+        'dynamic-form',
+        'page',
+        'row',
+        'group',
+        'array',
+        'wrapper',
+      ];
 
       types.forEach((type) => {
         const event = new ComponentInitializedEvent(type, `${type}-1`);
@@ -128,11 +142,12 @@ describe('ComponentInitializedEvent', () => {
       const pageEvent = new ComponentInitializedEvent('page', 'step1');
       const rowEvent = new ComponentInitializedEvent('row', 'row1');
       const groupEvent = new ComponentInitializedEvent('group', 'address');
+      const wrapperEvent = new ComponentInitializedEvent('wrapper', 'section1');
 
-      const events = [formEvent, pageEvent, rowEvent, groupEvent];
+      const events = [formEvent, pageEvent, rowEvent, groupEvent, wrapperEvent];
 
-      expect(events).toHaveLength(4);
-      expect(events.map((e) => e.componentType)).toEqual(['dynamic-form', 'page', 'row', 'group']);
+      expect(events).toHaveLength(5);
+      expect(events.map((e) => e.componentType)).toEqual(['dynamic-form', 'page', 'row', 'group', 'wrapper']);
     });
 
     it('should differentiate between same type components by ID', () => {

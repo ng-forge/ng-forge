@@ -1,0 +1,77 @@
+import { InjectionToken, Signal, Type, ViewContainerRef } from '@angular/core';
+
+/**
+ * Configuration interface for registering wrapper types.
+ *
+ * Defines how a wrapper component is loaded and identified. Wrapper components
+ * provide visual decoration around field content (sections, headers, styling)
+ * without affecting the form data structure.
+ *
+ * @example
+ * ```typescript
+ * const SectionWrapper: WrapperTypeDefinition = {
+ *   name: 'section',
+ *   loadComponent: () => import('./section-wrapper.component').then(m => m.SectionWrapperComponent),
+ * };
+ * ```
+ */
+export interface WrapperTypeDefinition {
+  /** Unique identifier for the wrapper type */
+  name: string;
+  /** Function to load the wrapper component (supports lazy loading) */
+  loadComponent: () => Promise<Type<unknown> | { default: Type<unknown> }>;
+}
+
+/**
+ * Contract that wrapper components must satisfy.
+ *
+ * Each wrapper component provides a `#fieldComponent` ViewContainerRef where
+ * inner content (the next wrapper in the chain, or the children) will be
+ * rendered imperatively by `WrapperFieldComponent`.
+ *
+ * The wrapper itself is unaware of what gets rendered inside it — it just
+ * provides the slot and its own UI chrome.
+ *
+ * @example
+ * ```typescript
+ * @Component({
+ *   template: `
+ *     <dbx-section [header]="header()">
+ *       <ng-container #fieldComponent></ng-container>
+ *     </dbx-section>
+ *   `,
+ * })
+ * export class SectionWrapperComponent implements FieldWrapperContract {
+ *   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
+ *   private readonly context = inject(WRAPPER_FIELD_CONTEXT);
+ *   readonly header = computed(() => this.context.config['header'] as string);
+ * }
+ * ```
+ */
+export interface FieldWrapperContract {
+  /** ViewContainerRef slot where inner content is rendered */
+  readonly fieldComponent: Signal<ViewContainerRef>;
+}
+
+/**
+ * Injection token for the wrapper type registry.
+ *
+ * Provides access to the map of registered wrapper types. The registry is
+ * populated via `withWrappers()` and used by `WrapperFieldComponent` to
+ * resolve wrapper types to their component implementations.
+ */
+export const WRAPPER_REGISTRY = new InjectionToken<Map<string, WrapperTypeDefinition>>('WRAPPER_REGISTRY', {
+  providedIn: 'root',
+  factory: () => new Map(),
+});
+
+/**
+ * Component cache for loaded wrapper components.
+ *
+ * Caches resolved wrapper component classes for instant re-resolution.
+ * SSR-safe because it's DI-scoped, not module-scoped.
+ */
+export const WRAPPER_COMPONENT_CACHE = new InjectionToken<Map<string, Type<unknown>>>('WRAPPER_COMPONENT_CACHE', {
+  providedIn: 'root',
+  factory: () => new Map(),
+});

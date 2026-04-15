@@ -3,6 +3,8 @@ export type { CustomFnConfig, FormConfig, FormOptions, SubmitButtonOptions, Next
 export type { SubmissionConfig, SubmissionActionResult } from './submission-config';
 export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from './field-type';
 export { FIELD_REGISTRY, getFieldValueHandling } from './field-type';
+export type { WrapperTypeDefinition, FieldWrapperContract } from './wrapper-type';
+export { WRAPPER_REGISTRY, WRAPPER_COMPONENT_CACHE } from './wrapper-type';
 export type { FieldOption } from './field-option';
 export {
   ARRAY_CONTEXT,
@@ -13,8 +15,9 @@ export {
   DEFAULT_VALIDATION_MESSAGES,
   FIELD_SIGNAL_CONTEXT,
   FORM_OPTIONS,
+  WRAPPER_FIELD_CONTEXT,
 } from './field-signal-context.token';
-export type { ArrayTemplateRegistry } from './field-signal-context.token';
+export type { ArrayTemplateRegistry, WrapperFieldContext } from './field-signal-context.token';
 export type { ValidationError, ValidationMessages } from './validation-types';
 export type { Prettify } from './prettify';
 
@@ -62,6 +65,7 @@ export type {
   ExtractField,
   FieldRegistryContainers,
   FieldRegistryLeaves,
+  FieldRegistryWrappers,
   LeafFieldTypes,
   NarrowField,
   NarrowFields,
@@ -91,6 +95,7 @@ export {
   isPagedForm,
   isPageField,
   isRowField,
+  isWrapperField,
   isValidNonPagedForm,
   isValidPagedForm,
   isValueBearingField,

@@ -3,6 +3,7 @@ import type { RowField } from '../../definitions/default/row-field';
 import type { GroupField } from '../../definitions/default/group-field';
 import type { ArrayField, SimplifiedArrayField } from '../../definitions/default/array-field';
 import type { HiddenField } from '../../definitions/default/hidden-field';
+import type { WrapperField } from '../../definitions/default/wrapper-field';
 
 /**
  * Type constraints for field nesting rules
@@ -15,7 +16,7 @@ import type { HiddenField } from '../../definitions/default/hidden-field';
  * Fields that are allowed as children of Page fields
  * Pages can contain: rows, groups, arrays, and leaf fields (but NOT other pages)
  */
-export type PageAllowedChildren = LeafFieldTypes | RowField | GroupField | ArrayField | SimplifiedArrayField;
+export type PageAllowedChildren = LeafFieldTypes | RowField | GroupField | ArrayField | SimplifiedArrayField | WrapperField;
 
 /**
  * Fields that are allowed as children of Row fields
@@ -28,11 +29,18 @@ export type RowAllowedChildren = Exclude<LeafFieldTypes, HiddenField> | GroupFie
  * Fields that are allowed as children of Group fields
  * Groups can contain: rows and leaf fields (but NOT pages or other groups)
  */
-export type GroupAllowedChildren = LeafFieldTypes | RowField;
+export type GroupAllowedChildren = LeafFieldTypes | RowField | WrapperField;
 
 /**
  * Fields that are allowed as children of Array fields
  * Arrays can contain: rows, groups, and leaf fields (but NOT pages or other arrays)
  * Groups are used for creating object arrays where each array item is an object
  */
-export type ArrayAllowedChildren = LeafFieldTypes | RowField | GroupField;
+export type ArrayAllowedChildren = LeafFieldTypes | RowField | GroupField | WrapperField;
+
+/**
+ * Fields that are allowed as children of Wrapper fields
+ * Wrappers follow the same rules as rows: groups, arrays, and leaf fields
+ * (but NOT pages, rows, or hidden fields)
+ */
+export type WrapperAllowedChildren = Exclude<LeafFieldTypes, HiddenField> | GroupField | ArrayField | SimplifiedArrayField;

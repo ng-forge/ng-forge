@@ -23,6 +23,7 @@ type TestFormConfig = {
     | { type: 'row'; key: string; label: string; fields: any[] }
     | { type: 'group'; key: string; label: string; fields: any[] }
     | { type: 'page'; key: string; label?: string; fields: any[] }
+    | { type: 'wrapper'; key: string; fields: any[]; wrappers: any[] }
   >;
 };
 
@@ -1858,7 +1859,7 @@ describe('DynamicFormComponent', () => {
                 value: 'Doe',
               },
             ],
-          } as any,
+          },
         ],
       };
 
@@ -1899,7 +1900,7 @@ describe('DynamicFormComponent', () => {
                 value: '10001',
               },
             ],
-          } as any,
+          },
         ],
       };
 
@@ -1942,7 +1943,7 @@ describe('DynamicFormComponent', () => {
                     value: 'Doe',
                   },
                 ],
-              } as any,
+              },
               {
                 key: 'email',
                 type: 'input',
@@ -1950,7 +1951,7 @@ describe('DynamicFormComponent', () => {
                 value: 'john.doe@example.com',
               },
             ],
-          } as any,
+          },
         ],
       };
 
@@ -2000,7 +2001,7 @@ describe('DynamicFormComponent', () => {
                 value: 'Doe',
               },
             ],
-          } as any,
+          },
           {
             key: 'address',
             type: 'group',
@@ -2019,7 +2020,7 @@ describe('DynamicFormComponent', () => {
                 value: 'New York',
               },
             ],
-          } as any,
+          },
           {
             key: 'isActive',
             type: 'checkbox',
@@ -2117,7 +2118,7 @@ describe('DynamicFormComponent', () => {
                 value: 'John',
               },
             ],
-          } as any,
+          },
         ],
       };
 
@@ -2142,13 +2143,13 @@ describe('DynamicFormComponent', () => {
             type: 'row',
             label: 'Empty Row',
             fields: [],
-          } as any,
+          },
           {
             key: 'emptyGroup',
             type: 'group',
             label: 'Empty Group',
             fields: [],
-          } as any,
+          },
           {
             key: 'regularField',
             type: 'input',
@@ -2166,6 +2167,156 @@ describe('DynamicFormComponent', () => {
         regularField: 'test',
       });
       expect(component.valid()).toBe(true);
+    });
+  });
+
+  describe('Wrapper Field Support', () => {
+    it('should handle wrapper field with no wrappers (children flattened)', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'nameWrapper',
+            type: 'wrapper',
+            fields: [
+              { key: 'firstName', type: 'input', label: 'First', value: 'John' },
+              { key: 'lastName', type: 'input', label: 'Last', value: 'Doe' },
+            ],
+            wrappers: [],
+          },
+        ],
+      } as any;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // Wrapper fields should flatten their children like rows
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        lastName: 'Doe',
+      });
+    });
+
+    it('should handle wrapper field with wrappers config', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'sectionWrapper',
+            type: 'wrapper',
+            fields: [{ key: 'email', type: 'input', label: 'Email', value: 'test@example.com' }],
+            wrappers: [{ type: 'section', header: 'Contact' }],
+          },
+        ],
+      } as any;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // Values should be flattened regardless of wrappers
+      expect(component.formValue()).toEqual({
+        email: 'test@example.com',
+      });
+    });
+
+    it('should handle wrapper alongside regular and row fields', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'username',
+            type: 'input',
+            label: 'Username',
+            value: 'johndoe',
+          },
+          {
+            key: 'nameWrapper',
+            type: 'wrapper',
+            fields: [
+              { key: 'firstName', type: 'input', label: 'First', value: 'John' },
+              { key: 'lastName', type: 'input', label: 'Last', value: 'Doe' },
+            ],
+            wrappers: [{ type: 'section', header: 'Name' }],
+          },
+          {
+            key: 'addressRow',
+            type: 'row',
+            label: 'Address',
+            fields: [{ key: 'city', type: 'input', label: 'City', value: 'NYC' }],
+          },
+        ],
+      } as any;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // All values flattened: wrapper + row children merged with top-level fields
+      expect(component.formValue()).toEqual({
+        username: 'johndoe',
+        firstName: 'John',
+        lastName: 'Doe',
+        city: 'NYC',
+      });
+    });
+
+    it('should handle empty wrapper field', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'emptyWrapper',
+            type: 'wrapper',
+            fields: [],
+            wrappers: [{ type: 'section', header: 'Empty' }],
+          },
+          {
+            key: 'regularField',
+            type: 'input',
+            label: 'Regular',
+            value: 'test',
+          },
+        ],
+      } as any;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      expect(component.formValue()).toEqual({
+        regularField: 'test',
+      });
+      expect(component.valid()).toBe(true);
+    });
+
+    it('should handle wrapper containing a group with nested wrapper', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'outerWrapper',
+            type: 'wrapper',
+            fields: [
+              {
+                key: 'myGroup',
+                type: 'group',
+                fields: [
+                  {
+                    key: 'innerWrapper',
+                    type: 'wrapper',
+                    fields: [{ key: 'deepField', type: 'input', label: 'Deep', value: 'nested' }],
+                    wrappers: [],
+                  },
+                ],
+              },
+            ],
+            wrappers: [],
+          },
+        ],
+      } as any;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // wrapper flattens, group nests — deepField lives under myGroup
+      expect(component.formValue()).toEqual({
+        myGroup: {
+          deepField: 'nested',
+        },
+      });
     });
   });
 
@@ -2646,7 +2797,7 @@ describe('DynamicFormComponent', () => {
                 value: 'New York',
               },
             ],
-          } as any,
+          },
         ],
       };
 
@@ -2711,7 +2862,7 @@ describe('DynamicFormComponent', () => {
                 value: 'john@example.com',
               },
             ],
-          } as any,
+          },
         ],
       };
 

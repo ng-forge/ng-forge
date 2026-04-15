@@ -3,6 +3,7 @@ import { isPageField } from '../../definitions/default/page-field';
 import { isRowField } from '../../definitions/default/row-field';
 import { isGroupField } from '../../definitions/default/group-field';
 import { isArrayField } from '../../definitions/default/array-field';
+import { isWrapperField } from '../../definitions/default/wrapper-field';
 import { ContainerFieldTypes, LeafFieldTypes, RegisteredFieldTypes } from '../registry/field-registry';
 
 /**
@@ -16,7 +17,7 @@ export function hasChildFields<T>(
 }
 
 /** Container field type names */
-const CONTAINER_TYPES = new Set(['page', 'row', 'group', 'array']);
+const CONTAINER_TYPES = new Set(['page', 'row', 'group', 'array', 'wrapper']);
 
 /**
  * Type guard to check if a field is a container field (page, row, group, or array)
@@ -59,4 +60,4 @@ export function isDisplayOnlyField(field: RegisteredFieldTypes): boolean {
 }
 
 // Re-export the specific type guards for convenience
-export { isPageField, isRowField, isGroupField, isArrayField };
+export { isPageField, isRowField, isGroupField, isArrayField, isWrapperField };

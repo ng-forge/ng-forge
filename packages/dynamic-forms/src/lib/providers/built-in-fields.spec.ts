@@ -18,8 +18,8 @@ describe('BUILT_IN_FIELDS', () => {
       expect(Array.isArray(BUILT_IN_FIELDS)).toBe(true);
     });
 
-    it('should contain 6 field type definitions', () => {
-      expect(BUILT_IN_FIELDS).toHaveLength(6);
+    it('should contain 7 field type definitions', () => {
+      expect(BUILT_IN_FIELDS).toHaveLength(7);
     });
 
     it('should have all required field types', () => {
@@ -31,6 +31,7 @@ describe('BUILT_IN_FIELDS', () => {
       expect(fieldNames).toContain('page');
       expect(fieldNames).toContain('text');
       expect(fieldNames).toContain('hidden');
+      expect(fieldNames).toContain('wrapper');
     });
 
     it('should have unique field names', () => {
@@ -131,7 +132,7 @@ describe('BUILT_IN_FIELDS', () => {
       const loadPromises = fieldsWithComponents.map((field) => field.loadComponent!());
       const modules = await Promise.all(loadPromises);
 
-      expect(modules).toHaveLength(5);
+      expect(modules).toHaveLength(6);
       modules.forEach((module) => {
         expect(module).toBeDefined();
       });

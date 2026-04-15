@@ -4,6 +4,7 @@ import { HiddenField } from '../../definitions/default/hidden-field';
 import { PageField } from '../../definitions/default/page-field';
 import { RowField } from '../../definitions/default/row-field';
 import { TextField } from '../../definitions/default/text-field';
+import { WrapperField } from '../../definitions/default/wrapper-field';
 
 /**
  * Container fields registry - augment this interface to add custom container fields
@@ -22,6 +23,7 @@ export interface FieldRegistryContainers {
   row: RowField;
   group: GroupField;
   array: ArrayField | SimplifiedArrayField;
+  wrapper: WrapperField;
 }
 
 /**
@@ -42,6 +44,23 @@ export interface FieldRegistryLeaves {
 }
 
 /**
+ * Wrapper type registry for module augmentation.
+ *
+ * Augment this interface to add type-safe wrapper type definitions.
+ *
+ * @example
+ * ```typescript
+ * declare module '@ng-forge/dynamic-forms' {
+ *   interface FieldRegistryWrappers {
+ *     'section': MySectionFieldDef
+ *   }
+ * }
+ * ```
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface -- Augmented by consumer packages
+export interface FieldRegistryWrappers {}
+
+/**
  * Global interface for dynamic form field definitions with categorization
  * This interface combines containers and leaves from their respective registries
  *
@@ -60,6 +79,11 @@ export interface DynamicFormFieldRegistry {
    * Leaf fields that have values or display content
    */
   leaves: FieldRegistryLeaves;
+
+  /**
+   * Field wrappers types
+   */
+  wrappers: FieldRegistryWrappers;
 }
 
 /**
@@ -81,6 +105,11 @@ export type RegisteredFieldTypes = ContainerFieldTypes | LeafFieldTypes;
  * Extract field types that are available in the registry
  */
 export type AvailableFieldTypes = keyof DynamicFormFieldRegistry['containers'] | keyof DynamicFormFieldRegistry['leaves'];
+
+/**
+ * Extract wrapper types that are available in the registry
+ */
+export type RegisteredWrapperTypes = keyof DynamicFormFieldRegistry['wrappers'];
 
 /**
  * Combined registry mapping type names to field definitions.

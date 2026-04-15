@@ -17,7 +17,7 @@ export interface DynamicFormFeature<TKind extends string = string> {
 /**
  * Known feature kinds for type safety
  */
-export type DynamicFormFeatureKind = 'logger' | 'event-form-value' | 'value-exclusion';
+export type DynamicFormFeatureKind = 'logger' | 'event-form-value' | 'value-exclusion' | 'wrappers';
 
 /**
  * Type guard to check if a value is a DynamicFormFeature

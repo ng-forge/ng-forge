@@ -2,6 +2,7 @@ import { FieldDef } from '../../definitions/base/field-def';
 import { isRowField } from '../../definitions/default/row-field';
 import { isGroupField } from '../../definitions/default/group-field';
 import { isArrayField } from '../../definitions/default/array-field';
+import { isWrapperField } from '../../definitions/default/wrapper-field';
 import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';
 import { normalizeFieldsArray } from '../object-utils';
 
@@ -95,20 +96,22 @@ export function flattenFields(
     // valueHandling can be: 'include', 'exclude', or 'flatten'
     const valueHandling = getFieldValueHandling(field.type, registry);
 
-    // Step 2: Check if this is a row field that should be preserved for DOM rendering
+    // Step 2: Check if this is a row or wrapper field that should be preserved for DOM rendering
     // Row fields need to render their container element for grid layouts to work
-    if (options.preserveRows && isRowField(field)) {
+    // Wrapper fields need to render their container for the wrapper chain
+    if (options.preserveRows && (isRowField(field) || isWrapperField(field))) {
       if (field.fields) {
         // Recursively flatten children while preserving row structure
         const flattenedChildren = flattenFields(normalizeFieldsArray(field.fields) as FieldDef<unknown>[], registry, options);
 
-        // Keep the row field in the result with its flattened children
-        // This allows the row component to render its container while children are flattened
+        // Keep the row/wrapper field in the result with its flattened children
+        // This allows the container component to render while children are flattened
+        const autoPrefix = isRowField(field) ? 'auto_row' : 'auto_wrapper';
         result.push({
           ...field,
           fields: flattenedChildren,
-          key: field.key || `auto_row_${autoKeyCounter++}`,
-        } as FlattenedField);
+          key: field.key || `${autoPrefix}_${autoKeyCounter++}`,
+        } as unknown as FlattenedField);
       }
     } else if (valueHandling === 'flatten' && 'fields' in field) {
       // Step 3: Handle fields with 'flatten' value handling (typically page/row fields)
