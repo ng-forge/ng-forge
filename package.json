@@ -69,6 +69,7 @@
     "@nx/vitest": "22.5.2",
     "@nx/web": "22.5.2",
     "@nx/workspace": "22.5.2",
+    "@oxc-project/runtime": "^0.125.0",
     "@playwright/test": "1.58.2",
     "@resvg/resvg-js": "^2.6.2",
     "@schematics/angular": "~21.2.5",
