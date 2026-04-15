@@ -15,6 +15,10 @@ import { BsField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/bs-button.mapper';
 import { nextButtonFieldMapper, previousButtonFieldMapper, submitButtonFieldMapper } from '../fields/button/bs-specific-button.mapper';
 
+const BUTTON_FIELD_TYPES_BASE = {
+  renderReadyWhen: [] as string[],
+};
+
 export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: BsField.Input,
@@ -40,60 +44,70 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/button/bs-button.component'),
     mapper: buttonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.Submit,
     loadComponent: () => import('../fields/button/bs-button.component'),
     mapper: submitButtonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.Next,
     loadComponent: () => import('../fields/button/bs-button.component'),
     mapper: nextButtonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.Previous,
     loadComponent: () => import('../fields/button/bs-button.component'),
     mapper: previousButtonFieldMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.AddArrayItem,
     loadComponent: () => import('../fields/button/bs-button.component'),
     mapper: addArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.PrependArrayItem,
     loadComponent: () => import('../fields/button/bs-button.component'),
     mapper: prependArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.InsertArrayItem,
     loadComponent: () => import('../fields/button/bs-button.component'),
     mapper: insertArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.RemoveArrayItem,
     loadComponent: () => import('../fields/button/bs-button.component'),
     mapper: removeArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.PopArrayItem,
     loadComponent: () => import('../fields/button/bs-button.component'),
     mapper: popArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.ShiftArrayItem,
     loadComponent: () => import('../fields/button/bs-button.component'),
     mapper: shiftArrayItemButtonMapper,
     valueHandling: 'exclude',
+    ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.Textarea,

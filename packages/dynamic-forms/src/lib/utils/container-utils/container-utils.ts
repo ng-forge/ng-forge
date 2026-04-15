@@ -1,4 +1,4 @@
-import { Injector, Signal } from '@angular/core';
+import { computed, Injector, Signal } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { EventBus } from '../../events/event.bus';
 import { emitComponentInitialized, InitializationComponentType } from '../emit-initialization/emit-initialization';
@@ -37,8 +37,13 @@ export function setupContainerInitEffect(
   fieldKeyFn: () => string,
   injector: Injector,
 ): void {
-  explicitEffect([resolvedFields], ([fields]) => {
-    if (fields.length > 0) {
+  const allReady = computed(() => {
+    const fields = resolvedFields();
+    return fields.length > 0 && fields.every((field) => field.renderReady());
+  });
+
+  explicitEffect([allReady], ([ready]) => {
+    if (ready) {
       emitComponentInitialized(eventBus, componentType, fieldKeyFn(), injector);
     }
   });

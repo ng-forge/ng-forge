@@ -59,9 +59,16 @@ import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-a
         [attr.data-array-item-index]="i"
       >
         @for (field of item.fields; track $index) {
-          <ng-container
-            *ngComponentOutlet="field.component; injector: field.injector; environmentInjector: environmentInjector; inputs: field.inputs()"
-          />
+          @if (field.renderReady()) {
+            <ng-container
+              *ngComponentOutlet="
+                field.component;
+                injector: field.injector;
+                environmentInjector: environmentInjector;
+                inputs: field.inputs()
+              "
+            />
+          }
         }
       </div>
     }
@@ -213,6 +220,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   private readonly resolvedItemsSignal = signal<ResolvedArrayItem[]>([]);
   private readonly updateVersion = signal(0);
+  private readonly pendingInitializationCycle = signal<number | null>(null);
+  private readonly settledInitializationCycle = signal<number | null>(null);
 
   /**
    * Map of item IDs to their current positions. O(1) lookup vs O(n) indexOf().
@@ -225,6 +234,10 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   /** Read-only view of resolved items for template consumption. */
   readonly resolvedItems = computed(() => this.resolvedItemsSignal());
+
+  private readonly allResolvedFieldsRenderReady = computed(() =>
+    this.resolvedItems().every((item) => item.fields.every((field) => field.renderReady())),
+  );
 
   /**
    * Whether the array has reached its configured maxLength.
@@ -269,6 +282,16 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     explicitEffect([this.arrayFieldTrees], ([fieldTrees]) => {
       this.performDifferentialUpdate(fieldTrees);
     });
+
+    explicitEffect(
+      [this.pendingInitializationCycle, this.settledInitializationCycle, this.allResolvedFieldsRenderReady],
+      ([pending, settled, allReady]) => {
+        if (pending !== null && settled === pending && allReady) {
+          emitComponentInitialized(this.eventBus, 'array', this.field().key, this.parentInjector);
+          this.pendingInitializationCycle.set(null);
+        }
+      },
+    );
   }
 
   private setupEventHandlers(): void {
@@ -424,8 +447,14 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         // Clean up template registry when all items are removed
         this.templateRegistry.clear();
         this.resolvedItemsSignal.set([]);
+        if (resolvedItems.length === 0 && this.pendingInitializationCycle() === null && this.settledInitializationCycle() === null) {
+          this.pendingInitializationCycle.set(currentVersion);
+          this.settledInitializationCycle.set(currentVersion);
+        }
         break;
       case 'initial':
+        this.pendingInitializationCycle.set(currentVersion);
+        this.settledInitializationCycle.set(null);
         void this.resolveAllItems(fieldTrees, currentVersion);
         break;
       case 'append':
@@ -445,6 +474,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         });
 
         this.resolvedItemsSignal.set([]);
+        this.pendingInitializationCycle.set(currentVersion);
+        this.settledInitializationCycle.set(null);
         void this.resolveAllItems(fieldTrees, currentVersion, positionalTemplates);
         break;
       }
@@ -494,7 +525,9 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
           });
         }
         this.resolvedItemsSignal.set(items);
-        emitComponentInitialized(this.eventBus, 'array', this.field().key, this.parentInjector);
+        if (this.pendingInitializationCycle() === updateId) {
+          this.settledInitializationCycle.set(updateId);
+        }
       }
     } catch (err) {
       this.logger.error('Failed to resolve array items:', err);

@@ -45,6 +45,7 @@ describe('ArrayFieldComponent', () => {
       name: 'test',
       loadComponent: async () => TestFieldComponent,
       mapper: baseFieldMapper,
+      renderReadyWhen: [],
     };
 
     const registry = new Map([['test', mockFieldType]]);
@@ -397,6 +398,7 @@ describe('ArrayFieldComponent', () => {
         name: 'test',
         loadComponent: async () => TestFieldComponent,
         mapper: baseFieldMapper,
+        renderReadyWhen: [],
       };
 
       const registry = new Map([
