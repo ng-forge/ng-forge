@@ -2,12 +2,13 @@ import { EnvironmentProviders, inject, makeEnvironmentProviders, Provider } from
 import { provideSignalFormsConfig } from '@angular/forms/signals';
 import { NG_STATUS_CLASSES } from '@angular/forms/signals/compat';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
-import { BUILT_IN_FIELDS } from './built-in-fields';
+import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './built-in-fields';
 import { FieldDef } from '../definitions/base/field-def';
 import { DynamicFormFeature, isDynamicFormFeature } from './features/dynamic-form-feature';
 import { DynamicFormLogger } from './features/logger/logger.token';
 import { ConsoleLogger } from './features/logger/console-logger';
 import type { InferFormValue as RealInferFormValue } from '../models/types/form-value-inference';
+import { isWrapperTypeDefinition, WrapperTypeDefinition, WRAPPER_REGISTRY } from '../models';
 
 // Re-export global types for module augmentation
 export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '../models/registry';
@@ -46,7 +47,7 @@ type ProvideDynamicFormResult<T extends FieldTypeDefinition[]> = EnvironmentProv
 /**
  * Union type for items that can be passed to provideDynamicForm
  */
-type FieldTypeOrFeature = FieldTypeDefinition | DynamicFormFeature;
+type FieldTypeOrFeature = FieldTypeDefinition | WrapperTypeDefinition | DynamicFormFeature;
 
 /**
  * Extract only FieldTypeDefinition items from a tuple type
@@ -110,11 +111,13 @@ type ExtractFieldTypes<T extends FieldTypeOrFeature[]> = {
 export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
   ...items: T
 ): ProvideDynamicFormResult<ExtractFieldTypes<T> extends FieldTypeDefinition[] ? ExtractFieldTypes<T> : FieldTypeDefinition[]> {
-  // Separate field types from features
-  const fieldTypes = items.filter((item): item is FieldTypeDefinition => !isDynamicFormFeature(item));
+  // Separate field types, wrapper types, and features
+  const fieldTypes = items.filter((item): item is FieldTypeDefinition => !isDynamicFormFeature(item) && !isWrapperTypeDefinition(item));
+  const wrapperTypes = items.filter(isWrapperTypeDefinition);
   const features = items.filter(isDynamicFormFeature);
 
   const fields = [...BUILT_IN_FIELDS, ...fieldTypes];
+  const wrappers = [...BUILT_IN_WRAPPERS, ...wrapperTypes];
 
   // Extract config providers from field type arrays
   const configProviders: Provider[] = [];
@@ -150,6 +153,22 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
             logger.warn(`Field type "${fieldType.name}" is already registered. Overwriting.`);
           }
           registry.set(fieldType.name, fieldType);
+        });
+        return registry;
+      },
+    },
+    // Always provide default Wrapper classes
+    {
+      provide: WRAPPER_REGISTRY,
+      useFactory: () => {
+        const logger = inject(DynamicFormLogger);
+        const registry = new Map();
+        // Add custom wrapper types
+        wrappers.forEach((wrapperType) => {
+          if (registry.has(wrapperType.wrapperName)) {
+            logger.warn(`Wrapper type "${wrapperType.wrapperName}" is already registered. Overwriting.`);
+          }
+          registry.set(wrapperType.wrapperName, wrapperType);
         });
         return registry;
       },

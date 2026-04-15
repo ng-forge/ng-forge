@@ -6,3 +6,4 @@ export type { PageField } from './page-field';
 export type { TextField, TextElementType, TextProps } from './text-field';
 export type { HiddenField, HiddenValue, HiddenScalar } from './hidden-field';
 export { type WrapperField, type WrapperConfig, isWrapperField } from './wrapper-field';
+export type { CssWrapper } from '../../wrappers/css/css-wrapper.type';

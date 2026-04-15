@@ -4,6 +4,7 @@ import { HiddenField } from '../../definitions/default/hidden-field';
 import { PageField } from '../../definitions/default/page-field';
 import { RowField } from '../../definitions/default/row-field';
 import { TextField } from '../../definitions/default/text-field';
+import { CssWrapper } from '../../wrappers/css/css-wrapper.type';
 import { WrapperField } from '../../definitions/default/wrapper-field';
 
 /**
@@ -57,8 +58,9 @@ export interface FieldRegistryLeaves {
  * }
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface -- Augmented by consumer packages
-export interface FieldRegistryWrappers {}
+export interface FieldRegistryWrappers {
+  css: CssWrapper;
+}
 
 /**
  * Global interface for dynamic form field definitions with categorization

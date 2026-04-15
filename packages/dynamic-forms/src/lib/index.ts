@@ -48,10 +48,9 @@ export { hasFormValue } from './events/interfaces/form-event';
 export { withValueExclusionDefaults } from './providers/features/value-exclusion';
 export type { ValueExclusionConfig, ResolvedValueExclusionConfig } from './models/value-exclusion-config';
 
-// Wrappers Feature
-export { withWrappers } from './providers/features/wrappers';
+// Wrapper Types
 export type { WrapperTypeDefinition, FieldWrapperContract } from './models/wrapper-type';
-export { WRAPPER_REGISTRY } from './models/wrapper-type';
+export { isWrapperTypeDefinition, WRAPPER_REGISTRY } from './models/wrapper-type';
 
 // Configuration Types
 export type { CustomFnConfig, FormConfig, FormOptions } from './models';
@@ -102,6 +101,7 @@ export type {
   TextProps,
   WrapperField,
   WrapperConfig,
+  CssWrapper,
 } from './definitions/default';
 export { isRowField, isSimplifiedArrayField, isWrapperField } from './definitions/default';
 

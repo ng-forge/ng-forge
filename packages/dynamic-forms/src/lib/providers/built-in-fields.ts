@@ -12,6 +12,8 @@ import { ArrayField } from '../definitions/default/array-field';
 import { PageField } from '../definitions/default/page-field';
 import { TextField } from '../definitions/default/text-field';
 import { WrapperField } from '../definitions/default/wrapper-field';
+import { WrapperTypeDefinition } from '../models';
+import { CssWrapper } from '../definitions/default';
 
 /**
  * Built-in field types provided by the dynamic form library.
@@ -93,4 +95,11 @@ export const BUILT_IN_FIELDS: FieldTypeDefinition[] = [
     mapper: wrapperFieldMapper,
     valueHandling: 'flatten',
   } satisfies FieldTypeDefinition<WrapperField>,
+];
+
+export const BUILT_IN_WRAPPERS: WrapperTypeDefinition[] = [
+  {
+    wrapperName: 'css',
+    loadComponent: () => import('../wrappers/css/css-wrapper.component'),
+  } satisfies WrapperTypeDefinition<CssWrapper>,
 ];

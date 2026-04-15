@@ -258,9 +258,9 @@ export function createArrayItemIdGenerator(): () => string {
  * }
  * ```
  */
-export interface WrapperFieldContext {
+export interface WrapperFieldContext<T extends WrapperConfig<any> = WrapperConfig<any>> {
   /** The WrapperConfig for this specific wrapper in the chain */
-  readonly config: WrapperConfig;
+  readonly config: T;
   /** The full WrapperField definition (all wrappers, children, key, etc.) */
   readonly wrapperField: WrapperField;
   /** The parent field signal context — shared with children since wrapper flattens */

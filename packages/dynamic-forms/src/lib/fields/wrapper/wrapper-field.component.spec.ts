@@ -124,9 +124,9 @@ function setupWrapperTest(field: WrapperField, opts?: SetupWrapperTestOptions | 
   };
 
   const mockWrapperTypes: WrapperTypeDefinition[] = [
-    { name: 'section', loadComponent: async () => TestSectionWrapperComponent },
-    { name: 'style', loadComponent: async () => TestStyleWrapperComponent },
-    { name: 'validation', loadComponent: async () => TestValidationWrapperComponent },
+    { wrapperName: 'section', loadComponent: async () => TestSectionWrapperComponent },
+    { wrapperName: 'style', loadComponent: async () => TestStyleWrapperComponent },
+    { wrapperName: 'validation', loadComponent: async () => TestValidationWrapperComponent },
   ];
 
   const mockFormSignal = signal<unknown>(undefined);
@@ -135,24 +135,13 @@ function setupWrapperTest(field: WrapperField, opts?: SetupWrapperTestOptions | 
   TestBed.configureTestingModule({
     imports: [WrapperFieldComponent],
     providers: [
-      provideDynamicForm(),
+      provideDynamicForm(mockFieldType, ...mockWrapperTypes),
       EventBus,
       FunctionRegistryService,
       FieldContextRegistryService,
       { provide: RootFormRegistryService, useValue: { formValue: entitySignal, rootForm: mockFormSignal } },
       { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
       { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
-      {
-        provide: FIELD_REGISTRY,
-        useValue: new Map<string, FieldTypeDefinition>([
-          ...BUILT_IN_FIELDS.map((f) => [f.name, f] as [string, FieldTypeDefinition]),
-          ['test', mockFieldType],
-        ]),
-      },
-      {
-        provide: WRAPPER_REGISTRY,
-        useValue: new Map<string, WrapperTypeDefinition>(mockWrapperTypes.map((w) => [w.name, w])),
-      },
       {
         provide: FIELD_SIGNAL_CONTEXT,
         useFactory: (injector: Injector) => {

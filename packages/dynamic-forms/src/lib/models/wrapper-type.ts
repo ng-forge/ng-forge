@@ -1,4 +1,5 @@
 import { InjectionToken, Signal, Type, ViewContainerRef } from '@angular/core';
+import { WrapperConfig } from '../definitions/default/wrapper-field';
 
 /**
  * Configuration interface for registering wrapper types.
@@ -15,11 +16,25 @@ import { InjectionToken, Signal, Type, ViewContainerRef } from '@angular/core';
  * };
  * ```
  */
-export interface WrapperTypeDefinition {
-  /** Unique identifier for the wrapper type */
-  name: string;
-  /** Function to load the wrapper component (supports lazy loading) */
+export interface WrapperTypeDefinition<T extends WrapperConfig<any> = WrapperConfig<any>> {
+  /** Unique identifier for the wrapper type (also serves as discriminant from FieldTypeDefinition) */
+  wrapperName: string;
+  /** Wrapper definition type marker (internal use) */
+  _wrapper?: T;
+  /**
+   * Function to load the wrapper component (supports lazy loading).
+   * Returns a Promise that resolves to the component class or module with default export.
+   */
   loadComponent: () => Promise<Type<unknown> | { default: Type<unknown> }>;
+}
+
+/**
+ * Type guard for WrapperTypeDefinition.
+ *
+ * Discriminates via `wrapperName` — field types use `name`, wrapper types use `wrapperName`.
+ */
+export function isWrapperTypeDefinition(value: unknown): value is WrapperTypeDefinition {
+  return typeof value === 'object' && value !== null && 'wrapperName' in value;
 }
 
 /**
@@ -57,7 +72,7 @@ export interface FieldWrapperContract {
  * Injection token for the wrapper type registry.
  *
  * Provides access to the map of registered wrapper types. The registry is
- * populated via `withWrappers()` and used by `WrapperFieldComponent` to
+ * populated via `provideDynamicForm()` and used by `WrapperFieldComponent` to
  * resolve wrapper types to their component implementations.
  */
 export const WRAPPER_REGISTRY = new InjectionToken<Map<string, WrapperTypeDefinition>>('WRAPPER_REGISTRY', {

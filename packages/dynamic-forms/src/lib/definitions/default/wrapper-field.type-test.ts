@@ -3,6 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { WrapperField, WrapperConfig, WrapperComponent } from './wrapper-field';
+import type { CssWrapper } from '../../wrappers/css/css-wrapper.type';
 import type { ContainerLogicConfig } from '../base/container-logic-config';
 import type { WrapperAllowedChildren } from '../../models/types/nesting-constraints';
 import type { RequiredKeys } from '@ng-forge/utils';
@@ -123,17 +124,23 @@ describe('WrapperField - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('WrapperConfig', () => {
-  it('requires a type property', () => {
-    expectTypeOf<WrapperConfig['type']>().toEqualTypeOf<string>();
+  it('type resolves to registered wrapper types', () => {
+    // RegisteredWrapperTypes = keyof FieldRegistryWrappers = 'css' (from CssWrapper)
+    expectTypeOf<WrapperConfig['type']>().toEqualTypeOf<'css'>();
   });
 
-  it('accepts additional props via index signature', () => {
-    const config: WrapperConfig = {
-      type: 'section',
-      header: 'My Section',
-      hint: 'Some hint',
+  it('resolves to CssWrapper for the css type', () => {
+    // WrapperConfig<'css'> resolves to CssWrapper via FieldRegistryWrappers lookup
+    expectTypeOf<WrapperConfig<'css'>>().toEqualTypeOf<CssWrapper>();
+  });
+
+  it('provides type-safe access to wrapper-specific properties', () => {
+    const config = {
+      type: 'css',
+      cssClasses: 'my-class',
     } as const satisfies WrapperConfig;
-    expectTypeOf(config.type).toBeString();
+    expectTypeOf(config.type).toEqualTypeOf<'css'>();
+    expectTypeOf(config.cssClasses).toEqualTypeOf<'my-class'>();
   });
 });
 
@@ -187,7 +194,12 @@ describe('WrapperField - Usage Tests', () => {
       key: 'sectionWrapper',
       type: 'wrapper',
       fields: [],
-      wrappers: [{ type: 'section', header: 'Details' }],
+      wrappers: [
+        {
+          type: 'css',
+          cssClasses: 'details-section',
+        },
+      ],
     } as const satisfies WrapperField;
 
     expectTypeOf(field.wrappers).not.toBeUndefined();
@@ -199,8 +211,8 @@ describe('WrapperField - Usage Tests', () => {
       type: 'wrapper',
       fields: [],
       wrappers: [
-        { type: 'section', header: 'Details' },
-        { type: 'style', class: 'highlight' },
+        { type: 'css', cssClasses: 'section-wrapper' },
+        { type: 'css', cssClasses: 'highlight' },
       ],
     } as const satisfies WrapperField;
 
@@ -248,7 +260,7 @@ describe('WrapperField - Usage Tests', () => {
       key: 'conditionalWrapper',
       type: 'wrapper',
       fields: [],
-      wrappers: [{ type: 'section', header: 'Conditional' }],
+      wrappers: [{ type: 'css', cssClasses: 'conditional-section' }],
       logic: [
         {
           type: 'hidden',

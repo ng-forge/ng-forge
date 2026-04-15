@@ -1,29 +1,30 @@
 import { FieldComponent, FieldDef } from '../base/field-def';
 import { WrapperAllowedChildren } from '../../models/types/nesting-constraints';
 import { ContainerLogicConfig } from '../base/container-logic-config';
-import { RegisteredWrapperTypes } from '../../models/registry/field-registry';
+import { FieldRegistryWrappers, RegisteredWrapperTypes } from '../../models/registry/field-registry';
 
 /**
- * Configuration for a single wrapper applied to a wrapper field.
+ * Resolves a wrapper type name to its registered config interface.
  *
- * Each wrapper config identifies a registered wrapper type and provides
- * any props that wrapper component expects as inputs.
+ * When `TWrappers` is a specific registered key (e.g., `'css'`), resolves to
+ * the full config type from `FieldRegistryWrappers` (e.g., `CssWrapper`),
+ * providing type-safe access to wrapper-specific properties like `cssClasses`.
+ *
+ * When `TWrappers` is the full `RegisteredWrapperTypes` union, distributes
+ * to produce a discriminated union of all registered wrapper configs.
  *
  * @example
  * ```typescript
- * const wrapper: WrapperConfig = {
- *   type: 'section',
- *   header: 'Contact Info',
- *   hint: 'Required fields'
- * };
+ * // Resolves to CssWrapper — cssClasses is typed
+ * type CssConfig = WrapperConfig<'css'>;
+ *
+ * // Union of all registered wrapper configs
+ * type AnyConfig = WrapperConfig;
  * ```
  */
-export interface WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredWrapperTypes> {
-  /** Registered wrapper type name */
-  readonly type: TWrappers;
-  /** Wrapper-specific props (passed as component inputs via setInput) */
-  readonly [key: string]: unknown;
-}
+export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredWrapperTypes> = TWrappers extends keyof FieldRegistryWrappers
+  ? FieldRegistryWrappers[TWrappers]
+  : { readonly type: TWrappers };
 
 /**
  * Wrapper field interface for wrapping child fields with UI chrome.
@@ -77,6 +78,7 @@ export interface WrapperConfig<TWrappers extends RegisteredWrapperTypes = Regist
  */
 export interface WrapperField<
   TFields extends readonly WrapperAllowedChildren[] = readonly WrapperAllowedChildren[],
+  TWrapperConfigs extends readonly WrapperConfig[] = readonly WrapperConfig[],
 > extends FieldDef<never> {
   type: 'wrapper';
 
@@ -89,7 +91,7 @@ export interface WrapperField<
    * Each wrapper component receives the subsequent wrapper (or children) inside
    * its `#fieldComponent` ViewContainerRef slot.
    */
-  readonly wrappers: readonly WrapperConfig[];
+  readonly wrappers: TWrapperConfigs;
 
   /** Wrapper fields do not have a label property */
   readonly label?: never;

@@ -185,8 +185,7 @@ export default class WrapperFieldComponent {
           switchMap((component) => {
             if (!component) {
               this.logger.error(
-                `Wrapper type '${config.type}' could not be loaded. ` +
-                  `Ensure it is registered via withWrappers() in your provideDynamicForm() call.`,
+                `Wrapper type '${config.type}' could not be loaded. ` + `Ensure it is registered via provideDynamicForm().`,
               );
               return of(null);
             }

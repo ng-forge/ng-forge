@@ -4,7 +4,7 @@ export type { SubmissionConfig, SubmissionActionResult } from './submission-conf
 export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from './field-type';
 export { FIELD_REGISTRY, getFieldValueHandling } from './field-type';
 export type { WrapperTypeDefinition, FieldWrapperContract } from './wrapper-type';
-export { WRAPPER_REGISTRY, WRAPPER_COMPONENT_CACHE } from './wrapper-type';
+export { isWrapperTypeDefinition, WRAPPER_REGISTRY, WRAPPER_COMPONENT_CACHE } from './wrapper-type';
 export type { FieldOption } from './field-option';
 export {
   ARRAY_CONTEXT,
