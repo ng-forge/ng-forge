@@ -9,6 +9,7 @@ import { DynamicFormLogger } from './features/logger/logger.token';
 import { ConsoleLogger } from './features/logger/console-logger';
 import type { InferFormValue as RealInferFormValue } from '../models/types/form-value-inference';
 import { isWrapperTypeDefinition, WrapperTypeDefinition, WRAPPER_REGISTRY } from '../models';
+import { isWrappersBundle, WrappersBundle } from '../wrappers/create-wrappers';
 
 // Re-export global types for module augmentation
 export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '../models/registry';
@@ -47,7 +48,7 @@ type ProvideDynamicFormResult<T extends FieldTypeDefinition[]> = EnvironmentProv
 /**
  * Union type for items that can be passed to provideDynamicForm
  */
-type FieldTypeOrFeature = FieldTypeDefinition | WrapperTypeDefinition | DynamicFormFeature;
+type FieldTypeOrFeature = FieldTypeDefinition | WrapperTypeDefinition | WrappersBundle | DynamicFormFeature;
 
 /**
  * Extract only FieldTypeDefinition items from a tuple type
@@ -111,13 +112,16 @@ type ExtractFieldTypes<T extends FieldTypeOrFeature[]> = {
 export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
   ...items: T
 ): ProvideDynamicFormResult<ExtractFieldTypes<T> extends FieldTypeDefinition[] ? ExtractFieldTypes<T> : FieldTypeDefinition[]> {
-  // Separate field types, wrapper types, and features
-  const fieldTypes = items.filter((item): item is FieldTypeDefinition => !isDynamicFormFeature(item) && !isWrapperTypeDefinition(item));
+  // Separate field types, wrapper types, wrapper bundles, and features
+  const fieldTypes = items.filter(
+    (item): item is FieldTypeDefinition => !isDynamicFormFeature(item) && !isWrapperTypeDefinition(item) && !isWrappersBundle(item),
+  );
   const wrapperTypes = items.filter(isWrapperTypeDefinition);
+  const wrapperBundles = items.filter(isWrappersBundle);
   const features = items.filter(isDynamicFormFeature);
 
   const fields = [...BUILT_IN_FIELDS, ...fieldTypes];
-  const wrappers = [...BUILT_IN_WRAPPERS, ...wrapperTypes];
+  const wrappers = [...BUILT_IN_WRAPPERS, ...wrapperTypes, ...wrapperBundles.flatMap((bundle) => bundle.ɵdefinitions)];
 
   // Extract config providers from field type arrays
   const configProviders: Provider[] = [];

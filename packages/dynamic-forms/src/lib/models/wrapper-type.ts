@@ -26,6 +26,15 @@ export interface WrapperTypeDefinition<T extends WrapperConfig<any> = WrapperCon
    * Returns a Promise that resolves to the component class or module with default export.
    */
   loadComponent: () => Promise<Type<unknown> | { default: Type<unknown> }>;
+  /**
+   * Field types this wrapper should auto-apply to.
+   *
+   * When a field's `type` matches any entry, the wrapper is injected into that
+   * field's effective wrapper chain at the lowest priority (can be overridden
+   * by `FormConfig.defaultWrappers` or the field-level `wrappers` array, and
+   * fully cleared with `wrappers: null`).
+   */
+  types?: readonly string[];
 }
 
 /**

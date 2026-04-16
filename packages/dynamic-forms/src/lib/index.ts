@@ -52,6 +52,11 @@ export type { ValueExclusionConfig, ResolvedValueExclusionConfig } from './model
 export type { WrapperTypeDefinition, FieldWrapperContract } from './models/wrapper-type';
 export { isWrapperTypeDefinition, WRAPPER_REGISTRY } from './models/wrapper-type';
 
+// Wrapper Registration DX
+export { wrapperProps } from './wrappers/wrapper-props';
+export { createWrappers, isWrappersBundle } from './wrappers/create-wrappers';
+export type { WrapperRegistration, WrappersBundle, InferWrapperRegistry } from './wrappers/create-wrappers';
+
 // Configuration Types
 export type { CustomFnConfig, FormConfig, FormOptions } from './models';
 export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from './models';
