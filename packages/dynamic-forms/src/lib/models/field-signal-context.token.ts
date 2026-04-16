@@ -6,6 +6,19 @@ import type { FormOptions } from './form-config';
 import { DynamicFormError } from '../errors/dynamic-form-error';
 
 /**
+ * Injection token for form-level default wrappers.
+ *
+ * Provides a Signal of the `defaultWrappers` array from FormConfig. Consumed by
+ * `DfFieldOutlet` / `ContainerFieldComponent` to merge into each field's
+ * effective wrapper chain (lowest priority after auto-associations, higher
+ * than field-level `wrappers`).
+ *
+ * Provided once at the DynamicForm level and inherited via Angular's
+ * hierarchical injector.
+ */
+export const DEFAULT_WRAPPERS = new InjectionToken<Signal<readonly WrapperConfig[] | undefined>>('DEFAULT_WRAPPERS');
+
+/**
  * Injection token for providing field signal context to mappers and components.
  *
  * The field signal context is the "nervous system" of the dynamic form library,

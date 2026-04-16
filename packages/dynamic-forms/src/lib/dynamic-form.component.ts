@@ -13,7 +13,7 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { FieldDef } from './definitions/base/field-def';
-import { NgComponentOutlet } from '@angular/common';
+import { DfFieldOutlet } from './directives/df-field-outlet.directive';
 import { FieldTree } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
@@ -49,7 +49,7 @@ import { EventDispatcher } from './events/event-dispatcher';
  */
 @Component({
   selector: 'form[dynamic-form]',
-  imports: [NgComponentOutlet, PageOrchestratorComponent],
+  imports: [DfFieldOutlet, PageOrchestratorComponent],
   template: `
     @if (shouldRender()) {
       @switch (formModeDetection().mode) {
@@ -58,16 +58,7 @@ import { EventDispatcher } from './events/event-dispatcher';
         }
         @case ('non-paged') {
           @for (field of resolvedFields(); track field.key) {
-            @if (field.renderReady()) {
-              <ng-container
-                *ngComponentOutlet="
-                  field.component;
-                  injector: field.injector;
-                  environmentInjector: environmentInjector;
-                  inputs: field.inputs()
-                "
-              />
-            }
+            <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
           }
         }
         @default {

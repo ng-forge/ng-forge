@@ -112,6 +112,8 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
         }
 
         return {
+          key: template.key,
+          fieldDef: template,
           component,
           injector,
           inputs,
