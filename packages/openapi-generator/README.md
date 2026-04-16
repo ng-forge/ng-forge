@@ -2,6 +2,12 @@
 
 Converts OpenAPI 3.x specifications into `@ng-forge/dynamic-forms` FormConfig objects and TypeScript interfaces.
 
+[![CI](https://img.shields.io/github/actions/workflow/status/ng-forge/ng-forge/ci.yml?branch=main)](https://github.com/ng-forge/ng-forge/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@ng-forge/openapi-generator.svg)](https://www.npmjs.com/package/@ng-forge/openapi-generator)
+[![npm downloads](https://img.shields.io/npm/dm/@ng-forge/openapi-generator.svg)](https://www.npmjs.com/package/@ng-forge/openapi-generator)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Discord](https://img.shields.io/discord/1494269650555371582?color=7289da&label=Discord&logo=discord&logoColor=white)](https://discord.gg/qpzzvFagj3)
+
 ## Quick Start
 
 **1. Write (or already have) an OpenAPI 3.x spec:**

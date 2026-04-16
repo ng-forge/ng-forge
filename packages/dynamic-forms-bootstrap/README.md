@@ -9,7 +9,6 @@ Bootstrap 5 field components for [@ng-forge/dynamic-forms](https://www.npmjs.com
 [![CI](https://img.shields.io/github/actions/workflow/status/ng-forge/ng-forge/ci.yml?branch=main)](https://github.com/ng-forge/ng-forge/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/@ng-forge/dynamic-forms-bootstrap.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms-bootstrap)
 [![npm downloads](https://img.shields.io/npm/dm/@ng-forge/dynamic-forms-bootstrap.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms-bootstrap)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@ng-forge/dynamic-forms-bootstrap)](https://bundlephobia.com/package/@ng-forge/dynamic-forms-bootstrap)
 [![Angular](https://img.shields.io/badge/Angular-21+-DD0031.svg)](https://angular.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Discord](https://img.shields.io/discord/1494269650555371582?color=7289da&label=Discord&logo=discord&logoColor=white)](https://discord.gg/qpzzvFagj3)
