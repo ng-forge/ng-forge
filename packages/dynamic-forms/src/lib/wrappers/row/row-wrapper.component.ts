@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, ViewContainerRef, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild } from '@angular/core';
 import { FieldWrapperContract } from '../../models/wrapper-type';
+import { WrapperFieldInputs } from '../wrapper-field-inputs';
 
 /**
  * Built-in row wrapper component.
@@ -23,6 +24,13 @@ import { FieldWrapperContract } from '../../models/wrapper-type';
 })
 export default class RowWrapperComponent implements FieldWrapperContract {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
+
+  /**
+   * Mapper outputs for the wrapped field.
+   * The row wrapper itself does not consume these — the input is accepted
+   * for contract consistency so the outlet can set it on any wrapper.
+   */
+  readonly fieldInputs = input<WrapperFieldInputs>();
 }
 
 export { RowWrapperComponent };

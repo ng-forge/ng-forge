@@ -25,8 +25,6 @@ import { EventBus } from '../../events/event.bus';
 import { FieldDef } from '../../definitions/base/field-def';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { FieldWrapperContract, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY } from '../../models/wrapper-type';
-import { FIELD_SIGNAL_CONTEXT, WrapperContext, WRAPPER_CONTEXT } from '../../models/field-signal-context.token';
-import { FieldSignalContext } from '../../mappers/types';
 
 interface LoadedWrapper {
   config: WrapperConfig;
@@ -81,7 +79,6 @@ export default class ContainerFieldComponent {
   private readonly logger = inject(DynamicFormLogger);
   private readonly wrapperRegistry = inject(WRAPPER_REGISTRY);
   private readonly wrapperComponentCache = inject(WRAPPER_COMPONENT_CACHE);
-  private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext;
 
   // ─────────────────────────────────────────────────────────────────────────────
   // View Queries
@@ -250,28 +247,28 @@ export default class ContainerFieldComponent {
    * Recursively creates each wrapper in the chain, nesting each inside
    * the previous wrapper's `fieldComponent` slot. The innermost slot
    * receives the children template.
+   *
+   * Each wrapper receives its config as individual Angular inputs (via
+   * `setInput()`, with the `type` discriminant stripped). The container
+   * has no `fieldInputs` to thread here — child fields are rendered inside
+   * the embedded children template where they resolve their own mapper
+   * inputs independently.
    */
   private renderField(containerRef: ViewContainerRef, wrappers: LoadedWrapper[]): void {
     if (wrappers.length > 0) {
       const [wrapper, ...remaining] = wrappers;
 
-      // Create a scoped injector that provides WRAPPER_CONTEXT for this wrapper
-      const containerFieldContext: WrapperContext = {
-        config: wrapper.config,
-        containerField: this.field(),
-        fieldSignalContext: this.parentFieldSignalContext,
-      };
-
-      const wrapperInjector = Injector.create({
-        parent: this.injector,
-        providers: [{ provide: WRAPPER_CONTEXT, useValue: containerFieldContext }],
-      });
-
       const ref = containerRef.createComponent(wrapper.component, {
         environmentInjector: this.environmentInjector,
-        injector: wrapperInjector,
+        injector: this.injector,
       });
       this.wrapperComponentRefs.push(ref);
+
+      // Thread config properties (minus the `type` discriminant) as individual inputs
+      for (const [key, value] of Object.entries(wrapper.config)) {
+        if (key === 'type') continue;
+        ref.setInput(key, value);
+      }
 
       // Trigger change detection so the wrapper's viewChild queries resolve
       ref.changeDetectorRef.detectChanges();
