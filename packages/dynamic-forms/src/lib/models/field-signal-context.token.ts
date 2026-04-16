@@ -1,6 +1,6 @@
 import { InjectionToken, Signal } from '@angular/core';
 import type { FieldSignalContext, ArrayContext } from '../mappers/types';
-import type { WrapperConfig, WrapperField } from '../definitions/default/wrapper-field';
+import type { WrapperConfig, ContainerField } from '../definitions/default/container-field';
 import type { ValidationMessages } from './validation-types';
 import type { FormOptions } from './form-config';
 import { DynamicFormError } from '../errors/dynamic-form-error';
@@ -232,10 +232,10 @@ export function createArrayItemIdGenerator(): () => string {
  *
  * Each wrapper component in a wrapper chain receives its own context with:
  * - Its specific `WrapperConfig` (type + props)
- * - The full `WrapperField` definition (all wrappers, children, etc.)
+ * - The full `ContainerField` definition (all wrappers, children, etc.)
  * - The parent `FieldSignalContext` for accessing form state (value, validity, etc.)
  *
- * Since wrapper fields flatten (like rows), the `fieldSignalContext` is the
+ * Since container fields flatten (like rows), the `fieldSignalContext` is the
  * same as the parent's — there is no nested form tree. Wrapper components
  * can use it to observe field values, validity, dirty state, etc.
  *
@@ -251,19 +251,19 @@ export function createArrayItemIdGenerator(): () => string {
  * export class SectionWrapperComponent implements FieldWrapperContract {
  *   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
  *
- *   private readonly context = inject(WRAPPER_FIELD_CONTEXT);
+ *   private readonly context = inject(WRAPPER_CONTEXT);
  *
  *   readonly header = computed(() => this.context.config.header as string);
  *   readonly formValue = computed(() => this.context.fieldSignalContext.value());
  * }
  * ```
  */
-export interface WrapperFieldContext<T extends WrapperConfig<any> = WrapperConfig<any>> {
+export interface WrapperContext<T extends WrapperConfig<any> = WrapperConfig<any>> {
   /** The WrapperConfig for this specific wrapper in the chain */
   readonly config: T;
-  /** The full WrapperField definition (all wrappers, children, key, etc.) */
-  readonly wrapperField: WrapperField;
-  /** The parent field signal context — shared with children since wrapper flattens */
+  /** The full ContainerField definition (all wrappers, children, key, etc.) */
+  readonly containerField: ContainerField;
+  /** The parent field signal context — shared with children since container flattens */
   readonly fieldSignalContext: FieldSignalContext;
 }
 
@@ -271,7 +271,7 @@ export interface WrapperFieldContext<T extends WrapperConfig<any> = WrapperConfi
  * Injection token for providing wrapper context to wrapper components.
  *
  * Each wrapper component in a chain receives its own context via a scoped injector
- * created by `WrapperFieldComponent`. The context provides the wrapper's config
+ * created by `ContainerFieldComponent`. The context provides the wrapper's config
  * and access to the form state.
  *
  * Wrapper components inject this token to access their configuration and form state
@@ -280,9 +280,9 @@ export interface WrapperFieldContext<T extends WrapperConfig<any> = WrapperConfi
  * @example
  * ```typescript
  * export class SectionWrapperComponent {
- *   private readonly wrapperContext = inject(WRAPPER_FIELD_CONTEXT);
+ *   private readonly wrapperContext = inject(WRAPPER_CONTEXT);
  *   readonly header = computed(() => this.wrapperContext.config.header as string);
  * }
  * ```
  */
-export const WRAPPER_FIELD_CONTEXT = new InjectionToken<WrapperFieldContext>('WRAPPER_FIELD_CONTEXT');
+export const WRAPPER_CONTEXT = new InjectionToken<WrapperContext>('WRAPPER_CONTEXT');

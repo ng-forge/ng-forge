@@ -19,13 +19,13 @@ import { forkJoin, from, of, switchMap } from 'rxjs';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
-import { WrapperConfig, WrapperField } from '../../definitions/default/wrapper-field';
+import { WrapperConfig, ContainerField } from '../../definitions/default/container-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { EventBus } from '../../events/event.bus';
 import { FieldDef } from '../../definitions/base/field-def';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { FieldWrapperContract, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY } from '../../models/wrapper-type';
-import { FIELD_SIGNAL_CONTEXT, WrapperFieldContext, WRAPPER_FIELD_CONTEXT } from '../../models/field-signal-context.token';
+import { FIELD_SIGNAL_CONTEXT, WrapperContext, WRAPPER_CONTEXT } from '../../models/field-signal-context.token';
 import { FieldSignalContext } from '../../mappers/types';
 
 interface LoadedWrapper {
@@ -41,11 +41,11 @@ interface LoadedWrapper {
  * `#fieldComponent` slot hosts the next wrapper or the children template.
  *
  * Does not create a new form context - fields share the parent's context.
- * Field values are flattened into the parent form (no nesting under wrapper key).
+ * Field values are flattened into the parent form (no nesting under container key).
  * Purely a visual/layout container with no impact on form structure.
  */
 @Component({
-  selector: 'div[wrapper-field]',
+  selector: 'div[container-field]',
   imports: [NgComponentOutlet],
   template: `
     <ng-template #childrenTpl>
@@ -57,7 +57,7 @@ interface LoadedWrapper {
     </ng-template>
     <ng-container #wrapperContainer></ng-container>
   `,
-  styleUrl: './wrapper-field.component.scss',
+  styleUrl: './container-field.component.scss',
   host: {
     '[class]': 'hostClasses()',
     '[class.disabled]': 'disabled()',
@@ -68,7 +68,7 @@ interface LoadedWrapper {
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class WrapperFieldComponent {
+export default class ContainerFieldComponent {
   // ─────────────────────────────────────────────────────────────────────────────
   // Dependencies
   // ─────────────────────────────────────────────────────────────────────────────
@@ -94,7 +94,7 @@ export default class WrapperFieldComponent {
   // Inputs
   // ─────────────────────────────────────────────────────────────────────────────
 
-  field = input.required<WrapperField>();
+  field = input.required<ContainerField>();
   key = input.required<string>();
   className = input<string>();
   hidden = input(false);
@@ -103,7 +103,7 @@ export default class WrapperFieldComponent {
   // Computed Signals
   // ─────────────────────────────────────────────────────────────────────────────
 
-  readonly hostClasses = computed(() => computeContainerHostClasses('wrapper', this.className()));
+  readonly hostClasses = computed(() => computeContainerHostClasses('container', this.className()));
 
   readonly disabled = computed(() => this.field().disabled || false);
 
@@ -124,10 +124,10 @@ export default class WrapperFieldComponent {
       destroyRef: this.destroyRef,
       onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
         const fieldKey = fieldDef.key || '<no key>';
-        const wrapperKey = this.field().key || '<no key>';
+        const containerKey = this.field().key || '<no key>';
         this.logger.error(
           `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
-            `within wrapper '${wrapperKey}'. Ensure the field type is registered in your field registry.`,
+            `within container '${containerKey}'. Ensure the field type is registered in your field registry.`,
           error,
         );
       },
@@ -155,7 +155,7 @@ export default class WrapperFieldComponent {
   // ─────────────────────────────────────────────────────────────────────────────
 
   private setupEffects(): void {
-    setupContainerInitEffect(this.resolvedFields, this.eventBus, 'wrapper', () => this.field().key, this.injector);
+    setupContainerInitEffect(this.resolvedFields, this.eventBus, 'container', () => this.field().key, this.injector);
   }
 
   private setupWrapperChain(): void {
@@ -250,16 +250,16 @@ export default class WrapperFieldComponent {
     if (wrappers.length > 0) {
       const [wrapper, ...remaining] = wrappers;
 
-      // Create a scoped injector that provides WRAPPER_FIELD_CONTEXT for this wrapper
-      const wrapperContext: WrapperFieldContext = {
+      // Create a scoped injector that provides WRAPPER_CONTEXT for this wrapper
+      const containerFieldContext: WrapperContext = {
         config: wrapper.config,
-        wrapperField: this.field(),
+        containerField: this.field(),
         fieldSignalContext: this.parentFieldSignalContext,
       };
 
       const wrapperInjector = Injector.create({
         parent: this.injector,
-        providers: [{ provide: WRAPPER_FIELD_CONTEXT, useValue: wrapperContext }],
+        providers: [{ provide: WRAPPER_CONTEXT, useValue: containerFieldContext }],
       });
 
       const ref = containerRef.createComponent(wrapper.component, {
@@ -303,4 +303,4 @@ export default class WrapperFieldComponent {
   }
 }
 
-export { WrapperFieldComponent };
+export { ContainerFieldComponent };

@@ -3,13 +3,13 @@ export type { FormMode, FormModeDetectionResult } from './form-mode';
 export { detectFormMode, isNonPagedForm, isPagedForm, isValidNonPagedForm, isValidPagedForm } from './form-mode';
 export type {
   ArrayAllowedChildren,
+  ContainerAllowedChildren,
   GroupAllowedChildren,
   PageAllowedChildren,
   RowAllowedChildren,
-  WrapperAllowedChildren,
 } from './nesting-constraints';
 export { isContainerField, isDisplayOnlyField, isLeafField, isValueBearingField } from './type-guards';
-export { isArrayField, isGroupField, isPageField, isRowField, isWrapperField } from './type-guards';
+export { isArrayField, isGroupField, isPageField, isRowField, isContainerTypedField } from './type-guards';
 export type { FieldPathAccess } from './field-helpers';
 export type { AvailableFieldTypes, ContainerFieldTypes, LeafFieldTypes, RegisteredFieldTypes } from '../registry';
 export type { DynamicText } from './dynamic-text';

@@ -31,7 +31,7 @@ describe('BUILT_IN_FIELDS', () => {
       expect(fieldNames).toContain('page');
       expect(fieldNames).toContain('text');
       expect(fieldNames).toContain('hidden');
-      expect(fieldNames).toContain('wrapper');
+      expect(fieldNames).toContain('container');
     });
 
     it('should have unique field names', () => {

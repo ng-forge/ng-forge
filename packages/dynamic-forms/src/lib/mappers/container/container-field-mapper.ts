@@ -1,21 +1,21 @@
 import { computed, inject, Signal } from '@angular/core';
-import { WrapperField } from '../../definitions/default/wrapper-field';
+import { ContainerField } from '../../definitions/default/container-field';
 import { buildClassName } from '../../utils/grid-classes/grid-classes';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
 import { applyHiddenLogic } from '../apply-hidden-logic';
 
 /**
- * Maps a wrapper field definition to component inputs.
+ * Maps a container field definition to component inputs.
  *
- * Wrapper components are layout containers that don't change the form shape.
- * The wrapper component will inject FIELD_SIGNAL_CONTEXT directly.
+ * Container components are layout containers that don't change the form shape.
+ * The container component will inject FIELD_SIGNAL_CONTEXT directly.
  *
  * Supports hidden state resolution via `logic` array or static `hidden` property.
  *
- * @param fieldDef The wrapper field definition
+ * @param fieldDef The container field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
-export function wrapperFieldMapper(fieldDef: WrapperField): Signal<Record<string, unknown>> {
+export function containerFieldMapper(fieldDef: ContainerField): Signal<Record<string, unknown>> {
   const rootFormRegistry = inject(RootFormRegistryService);
   const className = buildClassName(fieldDef);
 

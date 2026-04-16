@@ -5,7 +5,7 @@ import { PageField } from '../../definitions/default/page-field';
 import { RowField } from '../../definitions/default/row-field';
 import { TextField } from '../../definitions/default/text-field';
 import { CssWrapper } from '../../wrappers/css/css-wrapper.type';
-import { WrapperField } from '../../definitions/default/wrapper-field';
+import { ContainerField } from '../../definitions/default/container-field';
 
 /**
  * Container fields registry - augment this interface to add custom container fields
@@ -24,7 +24,7 @@ export interface FieldRegistryContainers {
   row: RowField;
   group: GroupField;
   array: ArrayField | SimplifiedArrayField;
-  wrapper: WrapperField;
+  container: ContainerField;
 }
 
 /**

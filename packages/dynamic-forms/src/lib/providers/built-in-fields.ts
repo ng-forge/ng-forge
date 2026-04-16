@@ -4,14 +4,14 @@ import { groupFieldMapper } from '../mappers/group/group-field-mapper';
 import { rowFieldMapper } from '../mappers/row/row-field-mapper';
 import { pageFieldMapper } from '../mappers/page/page-field-mapper';
 import { textFieldMapper } from '../mappers/text/text-field-mapper';
-import { wrapperFieldMapper } from '../mappers/wrapper/wrapper-field-mapper';
+import { containerFieldMapper } from '../mappers/container/container-field-mapper';
 import { RowField } from '../definitions/default/row-field';
 import { GroupField } from '../definitions/default/group-field';
 import { HiddenField } from '../definitions/default/hidden-field';
 import { ArrayField } from '../definitions/default/array-field';
 import { PageField } from '../definitions/default/page-field';
 import { TextField } from '../definitions/default/text-field';
-import { WrapperField } from '../definitions/default/wrapper-field';
+import { ContainerField } from '../definitions/default/container-field';
 import { WrapperTypeDefinition } from '../models';
 import { CssWrapper } from '../definitions/default';
 
@@ -90,11 +90,11 @@ export const BUILT_IN_FIELDS: FieldTypeDefinition[] = [
     valueHandling: 'include',
   } satisfies FieldTypeDefinition<HiddenField>,
   {
-    name: 'wrapper',
-    loadComponent: () => import('../fields/wrapper/wrapper-field.component'),
-    mapper: wrapperFieldMapper,
+    name: 'container',
+    loadComponent: () => import('../fields/container/container-field.component'),
+    mapper: containerFieldMapper,
     valueHandling: 'flatten',
-  } satisfies FieldTypeDefinition<WrapperField>,
+  } satisfies FieldTypeDefinition<ContainerField>,
 ];
 
 export const BUILT_IN_WRAPPERS: WrapperTypeDefinition[] = [

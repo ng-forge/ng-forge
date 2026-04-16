@@ -1,5 +1,5 @@
 import { InjectionToken, Signal, Type, ViewContainerRef } from '@angular/core';
-import { WrapperConfig } from '../definitions/default/wrapper-field';
+import { WrapperConfig } from '../definitions/default/container-field';
 
 /**
  * Configuration interface for registering wrapper types.
@@ -42,7 +42,7 @@ export function isWrapperTypeDefinition(value: unknown): value is WrapperTypeDef
  *
  * Each wrapper component provides a `#fieldComponent` ViewContainerRef where
  * inner content (the next wrapper in the chain, or the children) will be
- * rendered imperatively by `WrapperFieldComponent`.
+ * rendered imperatively by `ContainerFieldComponent`.
  *
  * The wrapper itself is unaware of what gets rendered inside it — it just
  * provides the slot and its own UI chrome.
@@ -58,7 +58,7 @@ export function isWrapperTypeDefinition(value: unknown): value is WrapperTypeDef
  * })
  * export class SectionWrapperComponent implements FieldWrapperContract {
  *   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
- *   private readonly context = inject(WRAPPER_FIELD_CONTEXT);
+ *   private readonly context = inject(WRAPPER_CONTEXT);
  *   readonly header = computed(() => this.context.config['header'] as string);
  * }
  * ```
@@ -72,7 +72,7 @@ export interface FieldWrapperContract {
  * Injection token for the wrapper type registry.
  *
  * Provides access to the map of registered wrapper types. The registry is
- * populated via `provideDynamicForm()` and used by `WrapperFieldComponent` to
+ * populated via `provideDynamicForm()` and used by `ContainerFieldComponent` to
  * resolve wrapper types to their component implementations.
  */
 export const WRAPPER_REGISTRY = new InjectionToken<Map<string, WrapperTypeDefinition>>('WRAPPER_REGISTRY', {

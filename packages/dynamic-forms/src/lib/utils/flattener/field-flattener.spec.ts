@@ -18,7 +18,7 @@ describe('field-flattener', () => {
       ['array', { component: {} as any, valueHandling: 'include' }],
       ['row', { component: {} as any, valueHandling: 'flatten' }],
       ['page', { component: {} as any, valueHandling: 'flatten' }],
-      ['wrapper', { component: {} as any, valueHandling: 'flatten' }],
+      ['container', { component: {} as any, valueHandling: 'flatten' }],
     ]);
   });
 
@@ -180,11 +180,11 @@ describe('field-flattener', () => {
       });
     });
 
-    describe('wrapper field flattening', () => {
-      it('should flatten wrapper field children into parent level', () => {
+    describe('container field flattening', () => {
+      it('should flatten container field children into parent level', () => {
         const fields: FieldDef<any>[] = [
           {
-            type: 'wrapper',
+            type: 'container',
             fields: [
               { type: 'input', key: 'firstName' },
               { type: 'input', key: 'lastName' },
@@ -201,9 +201,9 @@ describe('field-flattener', () => {
         ]);
       });
 
-      it('should handle empty wrapper fields', () => {
+      it('should handle empty container fields', () => {
         const fields: FieldDef<any>[] = [
-          { type: 'wrapper', fields: [], wrappers: [] },
+          { type: 'container', fields: [], wrappers: [] },
           { type: 'input', key: 'test' },
         ];
 
@@ -212,10 +212,10 @@ describe('field-flattener', () => {
         expect(result).toEqual([{ type: 'input', key: 'test' }]);
       });
 
-      it('should flatten wrapper with multiple children', () => {
+      it('should flatten container with multiple children', () => {
         const fields: FieldDef<any>[] = [
           {
-            type: 'wrapper',
+            type: 'container',
             fields: [
               { type: 'input', key: 'email' },
               { type: 'input', key: 'phone' },
@@ -585,10 +585,10 @@ describe('field-flattener', () => {
       expect(result[1].key).toBe('row2');
     });
 
-    it('should preserve wrapper fields for rendering', () => {
+    it('should preserve container fields for rendering', () => {
       const fields: FieldDef<any>[] = [
         {
-          type: 'wrapper',
+          type: 'container',
           key: 'wrapper1',
           fields: [
             { type: 'input', key: 'firstName' },
@@ -601,7 +601,7 @@ describe('field-flattener', () => {
       const result = flattenFields(fields, registry, { preserveRows: true });
 
       expect(result).toHaveLength(1);
-      expect(result[0].type).toBe('wrapper');
+      expect(result[0].type).toBe('container');
       expect(result[0].key).toBe('wrapper1');
       expect(result[0].fields).toEqual([
         { type: 'input', key: 'firstName' },
@@ -609,10 +609,10 @@ describe('field-flattener', () => {
       ]);
     });
 
-    it('should auto-generate key for preserved wrapper without key', () => {
+    it('should auto-generate key for preserved container without key', () => {
       const fields: FieldDef<any>[] = [
         {
-          type: 'wrapper',
+          type: 'container',
           fields: [{ type: 'input', key: 'test' }],
           wrappers: [],
         },
@@ -620,7 +620,7 @@ describe('field-flattener', () => {
 
       const result = flattenFields(fields, registry, { preserveRows: true });
 
-      expect(result[0].key).toBe('auto_wrapper_0');
+      expect(result[0].key).toBe('auto_container_0');
     });
 
     it('should preserve group and array structures', () => {

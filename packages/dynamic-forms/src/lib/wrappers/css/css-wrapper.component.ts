@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, isSignal, Signal,
 import { toSignal } from '@angular/core/rxjs-interop';
 import { isObservable } from 'rxjs';
 import { FieldWrapperContract } from '../../models/wrapper-type';
-import { WRAPPER_FIELD_CONTEXT, WrapperFieldContext } from '../../models/field-signal-context.token';
+import { WRAPPER_CONTEXT, WrapperContext } from '../../models/field-signal-context.token';
 import { DynamicText } from '../../models/types/dynamic-text';
 import { CssWrapper } from './css-wrapper.type';
 
@@ -15,7 +15,7 @@ import { CssWrapper } from './css-wrapper.type';
  * @example
  * ```typescript
  * {
- *   type: 'wrapper',
+ *   type: 'container',
  *   key: 'styled',
  *   wrappers: [{ type: 'css', cssClasses: 'card p-4' }],
  *   fields: [...]
@@ -33,7 +33,7 @@ import { CssWrapper } from './css-wrapper.type';
 export default class CssWrapperComponent implements FieldWrapperContract {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
 
-  private readonly context = inject<WrapperFieldContext<CssWrapper>>(WRAPPER_FIELD_CONTEXT);
+  private readonly context = inject<WrapperContext<CssWrapper>>(WRAPPER_CONTEXT);
 
   readonly resolvedClasses: Signal<string>;
 

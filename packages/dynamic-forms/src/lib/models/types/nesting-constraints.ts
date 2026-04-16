@@ -3,7 +3,7 @@ import type { RowField } from '../../definitions/default/row-field';
 import type { GroupField } from '../../definitions/default/group-field';
 import type { ArrayField, SimplifiedArrayField } from '../../definitions/default/array-field';
 import type { HiddenField } from '../../definitions/default/hidden-field';
-import type { WrapperField } from '../../definitions/default/wrapper-field';
+import type { ContainerField } from '../../definitions/default/container-field';
 
 /**
  * Type constraints for field nesting rules
@@ -16,31 +16,31 @@ import type { WrapperField } from '../../definitions/default/wrapper-field';
  * Fields that are allowed as children of Page fields
  * Pages can contain: rows, groups, arrays, and leaf fields (but NOT other pages)
  */
-export type PageAllowedChildren = LeafFieldTypes | RowField | GroupField | ArrayField | SimplifiedArrayField | WrapperField;
+export type PageAllowedChildren = LeafFieldTypes | RowField | GroupField | ArrayField | SimplifiedArrayField | ContainerField;
 
 /**
  * Fields that are allowed as children of Row fields
  * Rows can contain: groups, arrays, and leaf fields (but NOT pages, other rows, or hidden fields)
  * Hidden fields are excluded because rows are for horizontal layouts and hidden fields don't render
  */
-export type RowAllowedChildren = Exclude<LeafFieldTypes, HiddenField> | GroupField | ArrayField | SimplifiedArrayField | WrapperField;
+export type RowAllowedChildren = Exclude<LeafFieldTypes, HiddenField> | GroupField | ArrayField | SimplifiedArrayField | ContainerField;
 
 /**
  * Fields that are allowed as children of Group fields
  * Groups can contain: rows and leaf fields (but NOT pages or other groups)
  */
-export type GroupAllowedChildren = LeafFieldTypes | RowField | WrapperField;
+export type GroupAllowedChildren = LeafFieldTypes | RowField | ContainerField;
 
 /**
  * Fields that are allowed as children of Array fields
  * Arrays can contain: rows, groups, and leaf fields (but NOT pages or other arrays)
  * Groups are used for creating object arrays where each array item is an object
  */
-export type ArrayAllowedChildren = LeafFieldTypes | RowField | GroupField | WrapperField;
+export type ArrayAllowedChildren = LeafFieldTypes | RowField | GroupField | ContainerField;
 
 /**
- * Fields that are allowed as children of Wrapper fields
- * Wrappers follow the same rules as rows: groups, arrays, and leaf fields
+ * Fields that are allowed as children of Container fields
+ * Containers follow the same rules as rows: groups, arrays, and leaf fields
  * (but NOT pages, rows, or hidden fields)
  */
-export type WrapperAllowedChildren = Exclude<LeafFieldTypes, HiddenField> | RowField | GroupField | ArrayField | SimplifiedArrayField;
+export type ContainerAllowedChildren = Exclude<LeafFieldTypes, HiddenField> | RowField | GroupField | ArrayField | SimplifiedArrayField;

@@ -99,11 +99,11 @@ export type {
   TextField,
   TextElementType,
   TextProps,
-  WrapperField,
+  ContainerField,
   WrapperConfig,
   CssWrapper,
 } from './definitions/default';
-export { isRowField, isSimplifiedArrayField, isWrapperField } from './definitions/default';
+export { isRowField, isSimplifiedArrayField, isContainerTypedField } from './definitions/default';
 
 // Validation Config Types
 export type {
@@ -197,7 +197,7 @@ export { DynamicFormError } from './errors/dynamic-form-error';
 
 // Base mapper utilities
 export { baseFieldMapper, buildBaseInputs } from './mappers';
-export { arrayFieldMapper, groupFieldMapper, pageFieldMapper, rowFieldMapper, textFieldMapper, wrapperFieldMapper } from './mappers';
+export { arrayFieldMapper, groupFieldMapper, pageFieldMapper, rowFieldMapper, textFieldMapper, containerFieldMapper } from './mappers';
 export type { ArrayContext, FieldSignalContext, MapperFn } from './mappers';
 
 // Field Type Definition - for registering custom field types
@@ -205,22 +205,15 @@ export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from './model
 export { FIELD_REGISTRY } from './models';
 
 // Signal Context - injection tokens for field components
-export {
-  ARRAY_CONTEXT,
-  DEFAULT_PROPS,
-  DEFAULT_VALIDATION_MESSAGES,
-  FIELD_SIGNAL_CONTEXT,
-  FORM_OPTIONS,
-  WRAPPER_FIELD_CONTEXT,
-} from './models';
-export type { WrapperFieldContext } from './models';
+export { ARRAY_CONTEXT, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS, WRAPPER_CONTEXT } from './models';
+export type { WrapperContext } from './models';
 
 // Dynamic Text utilities
 export { dynamicTextToObservable } from './utils';
 export { DynamicTextPipe } from './pipes';
 
 // Container Components - for building custom containers
-export { ArrayFieldComponent, GroupFieldComponent, RowFieldComponent, WrapperFieldComponent } from './fields';
+export { ArrayFieldComponent, GroupFieldComponent, RowFieldComponent, ContainerFieldComponent } from './fields';
 
 // Validation utilities
 export { applyValidator, applyValidators } from './core/validation';

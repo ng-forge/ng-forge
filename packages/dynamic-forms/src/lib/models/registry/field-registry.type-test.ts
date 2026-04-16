@@ -22,7 +22,7 @@ import type { GroupField } from '../../definitions/default/group-field';
 import type { ArrayField, SimplifiedArrayField } from '../../definitions/default/array-field';
 import type { TextField } from '../../definitions/default/text-field';
 import type { HiddenField } from '../../definitions/default/hidden-field';
-import type { WrapperField } from '../../definitions/default/wrapper-field';
+import type { ContainerField } from '../../definitions/default/container-field';
 
 // ============================================================================
 // ExtractField
@@ -53,8 +53,8 @@ describe('ExtractField', () => {
     expectTypeOf<ExtractField<'group'>>().toEqualTypeOf<GroupField>();
   });
 
-  it('should extract WrapperField for "wrapper"', () => {
-    expectTypeOf<ExtractField<'wrapper'>>().toEqualTypeOf<WrapperField>();
+  it('should extract ContainerField for "container"', () => {
+    expectTypeOf<ExtractField<'container'>>().toEqualTypeOf<ContainerField>();
   });
 });
 
@@ -91,9 +91,9 @@ describe('NarrowFields', () => {
 // ============================================================================
 
 describe('ContainerFieldTypes', () => {
-  it('should be union of PageField | RowField | GroupField | ArrayField | SimplifiedArrayField | WrapperField', () => {
+  it('should be union of PageField | RowField | GroupField | ArrayField | SimplifiedArrayField | ContainerField', () => {
     expectTypeOf<ContainerFieldTypes>().toEqualTypeOf<
-      PageField | RowField | GroupField | ArrayField | SimplifiedArrayField | WrapperField
+      PageField | RowField | GroupField | ArrayField | SimplifiedArrayField | ContainerField
     >();
   });
 });
@@ -124,7 +124,7 @@ describe('RegisteredFieldTypes', () => {
 
 describe('AvailableFieldTypes', () => {
   it('should include all registered type names', () => {
-    expectTypeOf<AvailableFieldTypes>().toEqualTypeOf<'page' | 'row' | 'group' | 'array' | 'wrapper' | 'text' | 'hidden'>();
+    expectTypeOf<AvailableFieldTypes>().toEqualTypeOf<'page' | 'row' | 'group' | 'array' | 'container' | 'text' | 'hidden'>();
   });
 });
 

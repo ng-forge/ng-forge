@@ -1,5 +1,5 @@
 import { FieldComponent, FieldDef } from '../base/field-def';
-import { WrapperAllowedChildren } from '../../models/types/nesting-constraints';
+import { ContainerAllowedChildren } from '../../models/types/nesting-constraints';
 import { ContainerLogicConfig } from '../base/container-logic-config';
 import { FieldRegistryWrappers, RegisteredWrapperTypes } from '../../models/registry/field-registry';
 
@@ -27,30 +27,30 @@ export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredW
   : { readonly type: TWrappers };
 
 /**
- * Wrapper field interface for wrapping child fields with UI chrome.
+ * Container field interface for wrapping child fields with UI chrome.
  *
- * A wrapper field is a container that renders its children inside a chain
+ * A container field is a container that renders its children inside a chain
  * of wrapper components. Each wrapper provides visual decoration (sections,
  * headers, expand/collapse, styling) without affecting the form data structure.
  *
- * Like a row field, the wrapper field:
+ * Like a row field, the container field:
  * - Does not create a new form context
  * - Flattens child values into the parent form
  * - Is purely a visual/layout container
  *
- * Unlike a row field, the wrapper field:
+ * Unlike a row field, the container field:
  * - Supports a `wrappers` array that chains wrapper components around the children
  * - Uses imperative `ViewContainerRef.createComponent()` for the wrapper chain
  *
  * TypeScript cannot enforce field nesting rules due to circular dependency limitations.
- * For documentation: Wrappers follow the same nesting rules as rows — they should
+ * For documentation: Containers follow the same nesting rules as rows — they should
  * contain groups and leaf fields, but NOT pages, other rows, or hidden fields.
  * Runtime validation enforces these rules.
  *
  * @example
  * ```typescript
- * const field: WrapperField = {
- *   type: 'wrapper',
+ * const field: ContainerField = {
+ *   type: 'container',
  *   key: 'contactSection',
  *   fields: [
  *     { key: 'email', type: 'input', value: '' },
@@ -65,8 +65,8 @@ export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredW
  * @example
  * ```typescript
  * // Multiple wrappers chain from outermost to innermost
- * const field: WrapperField = {
- *   type: 'wrapper',
+ * const field: ContainerField = {
+ *   type: 'container',
  *   key: 'styledSection',
  *   fields: [{ key: 'name', type: 'input', value: '' }],
  *   wrappers: [
@@ -76,13 +76,13 @@ export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredW
  * };
  * ```
  */
-export interface WrapperField<
-  TFields extends readonly WrapperAllowedChildren[] = readonly WrapperAllowedChildren[],
+export interface ContainerField<
+  TFields extends readonly ContainerAllowedChildren[] = readonly ContainerAllowedChildren[],
   TWrapperConfigs extends readonly WrapperConfig[] = readonly WrapperConfig[],
 > extends FieldDef<never> {
-  type: 'wrapper';
+  type: 'container';
 
-  /** Child definitions to render within this wrapper */
+  /** Child definitions to render within this container */
   readonly fields: TFields;
 
   /**
@@ -93,25 +93,25 @@ export interface WrapperField<
    */
   readonly wrappers: TWrapperConfigs;
 
-  /** Wrapper fields do not have a label property */
+  /** Container fields do not have a label property */
   readonly label?: never;
 
-  /** Wrappers do not support meta — they have no native form element */
+  /** Containers do not support meta — they have no native form element */
   readonly meta?: never;
 
   /**
-   * Logic configurations for conditional wrapper visibility.
-   * Only 'hidden' type logic is supported for wrappers.
+   * Logic configurations for conditional container visibility.
+   * Only 'hidden' type logic is supported for containers.
    */
   readonly logic?: ContainerLogicConfig[];
 }
 
 /**
- * Type guard for WrapperField with proper type narrowing
+ * Type guard for ContainerField with proper type narrowing
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Type guard must accept any field type
-export function isWrapperField(field: FieldDef<any>): field is WrapperField {
-  return field.type === 'wrapper' && 'fields' in field && 'wrappers' in field;
+export function isContainerTypedField(field: FieldDef<any>): field is ContainerField {
+  return field.type === 'container' && 'fields' in field && 'wrappers' in field;
 }
 
-export type WrapperComponent = FieldComponent<WrapperField<WrapperAllowedChildren[]>>;
+export type ContainerComponent = FieldComponent<ContainerField<ContainerAllowedChildren[]>>;

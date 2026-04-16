@@ -1,11 +1,11 @@
 import { EnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { wrapperFieldMapper } from './wrapper-field-mapper';
-import { WrapperField } from '../../definitions/default/wrapper-field';
+import { containerFieldMapper } from './container-field-mapper';
+import { ContainerField } from '../../definitions/default/container-field';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
 import { vi } from 'vitest';
 
-describe('wrapperFieldMapper', () => {
+describe('containerFieldMapper', () => {
   let parentInjector: EnvironmentInjector;
   const mockFormValue = signal<Record<string, unknown>>({});
   const mockForm = vi.fn(() => ({
@@ -33,52 +33,52 @@ describe('wrapperFieldMapper', () => {
     parentInjector = TestBed.inject(EnvironmentInjector);
   });
 
-  function testMapper(fieldDef: WrapperField): Record<string, unknown> {
-    const inputsSignal = runInInjectionContext(parentInjector, () => wrapperFieldMapper(fieldDef));
+  function testMapper(fieldDef: ContainerField): Record<string, unknown> {
+    const inputsSignal = runInInjectionContext(parentInjector, () => containerFieldMapper(fieldDef));
     return inputsSignal();
   }
 
-  it('should create inputs object with key and field for minimal wrapper field', () => {
+  it('should create inputs object with key and field for minimal container field', () => {
     const fieldDef = {
-      key: 'testWrapper',
-      type: 'wrapper',
+      key: 'testContainer',
+      type: 'container',
       fields: [],
       wrappers: [],
-    } as unknown as WrapperField;
+    } as unknown as ContainerField;
 
     const inputs = testMapper(fieldDef);
-    expect(inputs).toHaveProperty('key', 'testWrapper');
+    expect(inputs).toHaveProperty('key', 'testContainer');
     expect(inputs).toHaveProperty('field');
   });
 
   it('should create inputs with key, field, and className when className is provided', () => {
     const fieldDef = {
-      key: 'styledWrapper',
-      type: 'wrapper',
-      className: 'wrapper-class',
+      key: 'styledContainer',
+      type: 'container',
+      className: 'container-class',
       fields: [],
       wrappers: [{ type: 'section', header: 'Test' }],
-    } as unknown as WrapperField;
+    } as unknown as ContainerField;
 
     const inputs = testMapper(fieldDef);
     expect(inputs).toHaveProperty('key');
     expect(inputs).toHaveProperty('field');
-    expect(inputs).toHaveProperty('className', 'wrapper-class');
+    expect(inputs).toHaveProperty('className', 'container-class');
   });
 
-  it('should include the field definition with wrappers config', () => {
+  it('should include the field definition with container wrappers config', () => {
     const fieldDef = {
-      key: 'wrappedSection',
-      type: 'wrapper',
+      key: 'containerSection',
+      type: 'container',
       fields: [{ key: 'child', type: 'input' }],
       wrappers: [
         { type: 'section', header: 'Details' },
         { type: 'style', class: 'highlight' },
       ],
-    } as unknown as WrapperField;
+    } as unknown as ContainerField;
 
     const inputs = testMapper(fieldDef);
-    const field = inputs['field'] as WrapperField;
+    const field = inputs['field'] as ContainerField;
     expect(field.wrappers).toHaveLength(2);
     expect(field.wrappers[0].type).toBe('section');
     expect(field.wrappers[1].type).toBe('style');
@@ -87,11 +87,11 @@ describe('wrapperFieldMapper', () => {
   describe('hidden logic', () => {
     it('should NOT include hidden when no logic or hidden property is defined', () => {
       const fieldDef = {
-        key: 'testWrapper',
-        type: 'wrapper',
+        key: 'testContainer',
+        type: 'container',
         fields: [],
         wrappers: [],
-      } as unknown as WrapperField;
+      } as unknown as ContainerField;
 
       const inputs = testMapper(fieldDef);
       expect(inputs).not.toHaveProperty('hidden');
@@ -99,12 +99,12 @@ describe('wrapperFieldMapper', () => {
 
     it('should resolve static hidden: true', () => {
       const fieldDef = {
-        key: 'testWrapper',
-        type: 'wrapper',
+        key: 'testContainer',
+        type: 'container',
         hidden: true,
         fields: [],
         wrappers: [],
-      } as unknown as WrapperField;
+      } as unknown as ContainerField;
 
       const inputs = testMapper(fieldDef);
       expect(inputs['hidden']).toBe(true);
@@ -112,12 +112,12 @@ describe('wrapperFieldMapper', () => {
 
     it('should evaluate hidden logic with boolean condition true', () => {
       const fieldDef = {
-        key: 'testWrapper',
-        type: 'wrapper',
+        key: 'testContainer',
+        type: 'container',
         logic: [{ type: 'hidden', condition: true }],
         fields: [],
         wrappers: [],
-      } as unknown as WrapperField;
+      } as unknown as ContainerField;
 
       const inputs = testMapper(fieldDef);
       expect(inputs['hidden']).toBe(true);
@@ -125,12 +125,12 @@ describe('wrapperFieldMapper', () => {
 
     it('should evaluate hidden logic with boolean condition false', () => {
       const fieldDef = {
-        key: 'testWrapper',
-        type: 'wrapper',
+        key: 'testContainer',
+        type: 'container',
         logic: [{ type: 'hidden', condition: false }],
         fields: [],
         wrappers: [],
-      } as unknown as WrapperField;
+      } as unknown as ContainerField;
 
       const inputs = testMapper(fieldDef);
       expect(inputs['hidden']).toBe(false);
@@ -140,8 +140,8 @@ describe('wrapperFieldMapper', () => {
       mockFormValue.set({ showSection: false });
 
       const fieldDef = {
-        key: 'conditionalWrapper',
-        type: 'wrapper',
+        key: 'conditionalContainer',
+        type: 'container',
         logic: [
           {
             type: 'hidden',
@@ -155,7 +155,7 @@ describe('wrapperFieldMapper', () => {
         ],
         fields: [{ key: 'child', type: 'input' }],
         wrappers: [{ type: 'section', header: 'Conditional' }],
-      } as unknown as WrapperField;
+      } as unknown as ContainerField;
 
       const inputs = testMapper(fieldDef);
       expect(inputs['hidden']).toBe(true);
@@ -165,8 +165,8 @@ describe('wrapperFieldMapper', () => {
       mockFormValue.set({ showSection: true });
 
       const fieldDef = {
-        key: 'conditionalWrapper',
-        type: 'wrapper',
+        key: 'conditionalContainer',
+        type: 'container',
         logic: [
           {
             type: 'hidden',
@@ -180,7 +180,7 @@ describe('wrapperFieldMapper', () => {
         ],
         fields: [{ key: 'child', type: 'input' }],
         wrappers: [{ type: 'section', header: 'Conditional' }],
-      } as unknown as WrapperField;
+      } as unknown as ContainerField;
 
       const inputs = testMapper(fieldDef);
       expect(inputs['hidden']).toBe(false);

@@ -5,4 +5,4 @@ export { groupFieldMapper } from './group/group-field-mapper';
 export { arrayFieldMapper } from './array/array-field-mapper';
 export { pageFieldMapper } from './page/page-field-mapper';
 export { textFieldMapper } from './text/text-field-mapper';
-export { wrapperFieldMapper } from './wrapper/wrapper-field-mapper';
+export { containerFieldMapper } from './container/container-field-mapper';

@@ -6,7 +6,7 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
 /**
  * Component type for initialization events.
  */
-export type InitializationComponentType = 'dynamic-form' | 'group' | 'row' | 'page' | 'array' | 'wrapper';
+export type InitializationComponentType = 'dynamic-form' | 'group' | 'row' | 'page' | 'array' | 'container';
 
 /**
  * Emits a component initialization event after the next render cycle.

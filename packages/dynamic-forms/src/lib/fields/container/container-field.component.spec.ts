@@ -11,14 +11,14 @@ import {
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { form, schema, type SchemaPath } from '@angular/forms/signals';
-import { WrapperFieldComponent } from './wrapper-field.component';
-import { WrapperField } from '../../definitions/default/wrapper-field';
+import { ContainerFieldComponent } from './container-field.component';
+import { ContainerField } from '../../definitions/default/container-field';
 import { FieldDef } from '../../definitions/base/field-def';
 import { createSimpleTestField, TestFieldComponent } from '../../../../testing/src/simple-test-utils';
 import { baseFieldMapper, FieldSignalContext } from '../../mappers';
 import { provideDynamicForm, BUILT_IN_FIELDS } from '../../providers';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
-import { FIELD_SIGNAL_CONTEXT, WRAPPER_FIELD_CONTEXT } from '../../models/field-signal-context.token';
+import { FIELD_SIGNAL_CONTEXT, WRAPPER_CONTEXT } from '../../models/field-signal-context.token';
 import { EventBus } from '../../events';
 import { FieldWrapperContract, WRAPPER_REGISTRY, WrapperTypeDefinition } from '../../models/wrapper-type';
 import { applyValidator } from '../../core/validation/validator-factory';
@@ -34,7 +34,7 @@ import { ConsoleLogger } from '../../providers/features/logger/console-logger';
 /**
  * Mock wrapper component that provides a #fieldComponent slot.
  * Simulates a "section" wrapper with a header.
- * Injects WRAPPER_FIELD_CONTEXT to get its config.
+ * Injects WRAPPER_CONTEXT to get its config.
  */
 @Component({
   selector: 'test-section-wrapper',
@@ -50,14 +50,14 @@ import { ConsoleLogger } from '../../providers/features/logger/console-logger';
 })
 class TestSectionWrapperComponent implements FieldWrapperContract {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
-  private readonly context = inject(WRAPPER_FIELD_CONTEXT);
+  private readonly context = inject(WRAPPER_CONTEXT);
   readonly header = computed(() => (this.context.config['header'] as string) ?? '');
 }
 
 /**
  * Mock wrapper component for chaining tests.
  * Simulates a "style" wrapper with a CSS class.
- * Injects WRAPPER_FIELD_CONTEXT to get its config.
+ * Injects WRAPPER_CONTEXT to get its config.
  */
 @Component({
   selector: 'test-style-wrapper',
@@ -70,12 +70,12 @@ class TestSectionWrapperComponent implements FieldWrapperContract {
 })
 class TestStyleWrapperComponent implements FieldWrapperContract {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
-  private readonly context = inject(WRAPPER_FIELD_CONTEXT);
+  private readonly context = inject(WRAPPER_CONTEXT);
   readonly wrapperClass = computed(() => (this.context.config['wrapperClass'] as string) ?? '');
 }
 
 /**
- * Mock validation-aware wrapper that reads form validity from WRAPPER_FIELD_CONTEXT
+ * Mock validation-aware wrapper that reads form validity from WRAPPER_CONTEXT
  * and applies validClass or invalidClass accordingly.
  */
 @Component({
@@ -89,7 +89,7 @@ class TestStyleWrapperComponent implements FieldWrapperContract {
 })
 class TestValidationWrapperComponent implements FieldWrapperContract {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
-  private readonly context = inject(WRAPPER_FIELD_CONTEXT);
+  private readonly context = inject(WRAPPER_CONTEXT);
 
   private readonly validClass = computed(() => (this.context.config['validClass'] as string) ?? 'is-valid');
   private readonly invalidClass = computed(() => (this.context.config['invalidClass'] as string) ?? 'is-invalid');
@@ -108,7 +108,7 @@ interface SetupWrapperTestOptions {
   requiredFields?: string[];
 }
 
-function setupWrapperTest(field: WrapperField, opts?: SetupWrapperTestOptions | Record<string, unknown>) {
+function setupWrapperTest(field: ContainerField, opts?: SetupWrapperTestOptions | Record<string, unknown>) {
   // Support legacy call signature: setupWrapperTest(field, parentValue)
   const options: SetupWrapperTestOptions =
     opts && ('value' in opts || 'requiredFields' in opts)
@@ -133,7 +133,7 @@ function setupWrapperTest(field: WrapperField, opts?: SetupWrapperTestOptions | 
   const entitySignal = signal<Record<string, unknown>>(parentValue);
 
   TestBed.configureTestingModule({
-    imports: [WrapperFieldComponent],
+    imports: [ContainerFieldComponent],
     providers: [
       provideDynamicForm(mockFieldType, ...mockWrapperTypes),
       EventBus,
@@ -174,7 +174,7 @@ function setupWrapperTest(field: WrapperField, opts?: SetupWrapperTestOptions | 
     ],
   });
 
-  const fixture = TestBed.createComponent(WrapperFieldComponent);
+  const fixture = TestBed.createComponent(ContainerFieldComponent);
   const component = fixture.componentInstance;
 
   fixture.componentRef.setInput('key', field.key);
@@ -202,28 +202,28 @@ async function flushWrapperChain(fixture: { detectChanges: () => void; whenStabl
   fixture.detectChanges();
 }
 
-describe('WrapperFieldComponent', () => {
+describe('ContainerFieldComponent', () => {
   it('should create', () => {
     const field = {
       key: 'testWrapper',
-      type: 'wrapper',
+      type: 'container',
       fields: [],
       wrappers: [],
-    } as unknown as WrapperField;
+    } as unknown as ContainerField;
 
     const { component } = setupWrapperTest(field);
 
     expect(component).toBeDefined();
-    expect(component).toBeInstanceOf(WrapperFieldComponent);
+    expect(component).toBeInstanceOf(ContainerFieldComponent);
   });
 
   it('should have field input property', () => {
     const field = {
       key: 'testWrapper',
-      type: 'wrapper',
+      type: 'container',
       fields: [],
       wrappers: [],
-    } as unknown as WrapperField;
+    } as unknown as ContainerField;
 
     const { component } = setupWrapperTest(field);
 
@@ -233,25 +233,25 @@ describe('WrapperFieldComponent', () => {
   it('should have host classes', () => {
     const field = {
       key: 'testWrapper',
-      type: 'wrapper',
+      type: 'container',
       fields: [],
       wrappers: [],
-    } as unknown as WrapperField;
+    } as unknown as ContainerField;
 
     const { fixture } = setupWrapperTest(field);
 
     const element = fixture.nativeElement;
     expect(element.classList.contains('df-field')).toBe(true);
-    expect(element.classList.contains('df-wrapper')).toBe(true);
+    expect(element.classList.contains('df-container')).toBe(true);
   });
 
   it('should not have df-container-hidden class when hidden is false', () => {
     const field = {
       key: 'testWrapper',
-      type: 'wrapper',
+      type: 'container',
       fields: [],
       wrappers: [],
-    } as unknown as WrapperField;
+    } as unknown as ContainerField;
 
     const { fixture } = setupWrapperTest(field);
     fixture.componentRef.setInput('hidden', false);
@@ -265,10 +265,10 @@ describe('WrapperFieldComponent', () => {
   it('should have df-container-hidden class and aria-hidden when hidden is true', () => {
     const field = {
       key: 'testWrapper',
-      type: 'wrapper',
+      type: 'container',
       fields: [],
       wrappers: [],
-    } as unknown as WrapperField;
+    } as unknown as ContainerField;
 
     const { fixture } = setupWrapperTest(field);
     fixture.componentRef.setInput('hidden', true);
@@ -283,10 +283,10 @@ describe('WrapperFieldComponent', () => {
     it('should render children directly when wrappers array is empty', async () => {
       const field = {
         key: 'noWrappers',
-        type: 'wrapper',
+        type: 'container',
         fields: [createSimpleTestField('child1', 'Child 1')],
         wrappers: [],
-      } as unknown as WrapperField;
+      } as unknown as ContainerField;
 
       const { fixture } = setupWrapperTest(field, { child1: 'value1' });
       await flushWrapperChain(fixture);
@@ -299,10 +299,10 @@ describe('WrapperFieldComponent', () => {
     it('should render a single wrapper around children', async () => {
       const field = {
         key: 'singleWrapper',
-        type: 'wrapper',
+        type: 'container',
         fields: [createSimpleTestField('child1', 'Child 1')],
         wrappers: [{ type: 'section', header: 'Test Section' }],
-      } as unknown as WrapperField;
+      } as unknown as ContainerField;
 
       const { fixture } = setupWrapperTest(field, { child1: 'value1' });
       await flushWrapperChain(fixture);
@@ -315,13 +315,13 @@ describe('WrapperFieldComponent', () => {
     it('should chain multiple wrappers (outermost first)', async () => {
       const field = {
         key: 'chainedWrappers',
-        type: 'wrapper',
+        type: 'container',
         fields: [createSimpleTestField('child1', 'Child 1')],
         wrappers: [
           { type: 'section', header: 'Outer Section' },
           { type: 'style', wrapperClass: 'inner-style' },
         ],
-      } as unknown as WrapperField;
+      } as unknown as ContainerField;
 
       const { fixture } = setupWrapperTest(field, { child1: 'value1' });
       await flushWrapperChain(fixture);
@@ -354,10 +354,10 @@ describe('WrapperFieldComponent', () => {
     it('should apply validClass when all children are valid', async () => {
       const field = {
         key: 'validWrapper',
-        type: 'wrapper',
+        type: 'container',
         fields: [createRequiredTestField('child1', 'Child 1', 'hello')],
         wrappers: [{ type: 'validation', validClass: 'form-valid', invalidClass: 'form-invalid' }],
-      } as unknown as WrapperField;
+      } as unknown as ContainerField;
 
       // child1 has a value so required passes
       const { fixture } = setupWrapperTest(field, {
@@ -375,10 +375,10 @@ describe('WrapperFieldComponent', () => {
     it('should apply invalidClass when a child field fails validation', async () => {
       const field = {
         key: 'invalidWrapper',
-        type: 'wrapper',
+        type: 'container',
         fields: [createRequiredTestField('child1', 'Child 1', '')],
         wrappers: [{ type: 'validation', validClass: 'form-valid', invalidClass: 'form-invalid' }],
-      } as unknown as WrapperField;
+      } as unknown as ContainerField;
 
       // child1 is empty string — required validator will fail
       const { fixture } = setupWrapperTest(field, {
@@ -396,10 +396,10 @@ describe('WrapperFieldComponent', () => {
     it('should switch from valid to invalid when value changes', async () => {
       const field = {
         key: 'reactiveWrapper',
-        type: 'wrapper',
+        type: 'container',
         fields: [createRequiredTestField('child1', 'Child 1', 'valid')],
         wrappers: [{ type: 'validation', validClass: 'form-valid', invalidClass: 'form-invalid' }],
-      } as unknown as WrapperField;
+      } as unknown as ContainerField;
 
       // Start with a valid value, required validator is active
       const { fixture, entity } = setupWrapperTest(field, {

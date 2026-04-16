@@ -32,11 +32,11 @@ describe('ComponentInitializedEvent', () => {
       expect(event.componentId).toBe('group-1');
     });
 
-    it('should create event with wrapper component type', () => {
-      const event = new ComponentInitializedEvent('wrapper', 'wrapper-1');
+    it('should create event with container component type', () => {
+      const event = new ComponentInitializedEvent('container', 'container-1');
 
-      expect(event.componentType).toBe('wrapper');
-      expect(event.componentId).toBe('wrapper-1');
+      expect(event.componentType).toBe('container');
+      expect(event.componentId).toBe('container-1');
     });
 
     it('should accept different component IDs', () => {
@@ -93,13 +93,13 @@ describe('ComponentInitializedEvent', () => {
 
   describe('Component type validation', () => {
     it('should handle all valid component types', () => {
-      const types: Array<'dynamic-form' | 'page' | 'row' | 'group' | 'array' | 'wrapper'> = [
+      const types: Array<'dynamic-form' | 'page' | 'row' | 'group' | 'array' | 'container'> = [
         'dynamic-form',
         'page',
         'row',
         'group',
         'array',
-        'wrapper',
+        'container',
       ];
 
       types.forEach((type) => {
@@ -142,12 +142,12 @@ describe('ComponentInitializedEvent', () => {
       const pageEvent = new ComponentInitializedEvent('page', 'step1');
       const rowEvent = new ComponentInitializedEvent('row', 'row1');
       const groupEvent = new ComponentInitializedEvent('group', 'address');
-      const wrapperEvent = new ComponentInitializedEvent('wrapper', 'section1');
+      const containerEvent = new ComponentInitializedEvent('container', 'section1');
 
-      const events = [formEvent, pageEvent, rowEvent, groupEvent, wrapperEvent];
+      const events = [formEvent, pageEvent, rowEvent, groupEvent, containerEvent];
 
       expect(events).toHaveLength(5);
-      expect(events.map((e) => e.componentType)).toEqual(['dynamic-form', 'page', 'row', 'group', 'wrapper']);
+      expect(events.map((e) => e.componentType)).toEqual(['dynamic-form', 'page', 'row', 'group', 'container']);
     });
 
     it('should differentiate between same type components by ID', () => {

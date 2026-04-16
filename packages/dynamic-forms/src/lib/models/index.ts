@@ -15,9 +15,9 @@ export {
   DEFAULT_VALIDATION_MESSAGES,
   FIELD_SIGNAL_CONTEXT,
   FORM_OPTIONS,
-  WRAPPER_FIELD_CONTEXT,
+  WRAPPER_CONTEXT,
 } from './field-signal-context.token';
-export type { ArrayTemplateRegistry, WrapperFieldContext } from './field-signal-context.token';
+export type { ArrayTemplateRegistry, WrapperContext } from './field-signal-context.token';
 export type { ValidationError, ValidationMessages } from './validation-types';
 export type { Prettify } from './prettify';
 
@@ -95,7 +95,7 @@ export {
   isPagedForm,
   isPageField,
   isRowField,
-  isWrapperField,
+  isContainerTypedField,
   isValidNonPagedForm,
   isValidPagedForm,
   isValueBearingField,
