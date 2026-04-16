@@ -1,0 +1,26 @@
+:host {
+  display: block;
+}
+
+.demo-section {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+  margin-bottom: 0.75rem;
+}
+
+.demo-section__header {
+  padding: 0.6rem 0.9rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #333;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.06));
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.demo-section__body {
+  padding: 0.9rem;
+}

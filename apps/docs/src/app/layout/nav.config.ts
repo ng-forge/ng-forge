@@ -89,6 +89,15 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
+    label: 'Field Wrappers',
+    path: 'wrappers',
+    children: [
+      { label: 'Overview', path: 'wrappers/overview' },
+      { label: 'Writing a Wrapper', path: 'wrappers/writing-a-wrapper' },
+      { label: 'Registering and Applying', path: 'wrappers/registering-and-applying' },
+    ],
+  },
+  {
     label: 'Recipes',
     path: 'recipes',
     children: [
