@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { computed, Signal, signal } from '@angular/core';
 import { FieldContextRegistryService } from './field-context-registry.service';
 import { RootFormRegistryService } from './root-form-registry.service';
-import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
+import { FormDerivedState } from '../../providers/form-derived-state';
 import { FieldContext } from '@angular/forms/signals';
 
 describe('FieldContextRegistryService', () => {
@@ -37,7 +37,7 @@ describe('FieldContextRegistryService', () => {
       providers: [
         FieldContextRegistryService,
         { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
-        { provide: EXTERNAL_DATA, useValue: externalDataSignal },
+        { provide: FormDerivedState, useValue: { externalData: externalDataSignal } },
       ],
     });
 
