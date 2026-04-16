@@ -136,7 +136,7 @@ jobs:
           restore-keys: nx-${{ runner.os }}-
 
       - name: Build affected libraries
-        run: pnpm nx affected -t build --base=origin/main
+        run: pnpm nx affected -t build --base=origin/main --exclude='docs,*-examples'
 
       - name: Verify package integrity
         run: |
@@ -269,6 +269,8 @@ jobs:
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Build docs if affected
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
         run: |
           if pnpm nx show projects --affected --base=origin/main | grep -q docs; then
             echo "Building documentation..."
