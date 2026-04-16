@@ -266,6 +266,7 @@ $mobile-bp: 1024px;
 .sidebar-nav {
   display: flex;
   flex-direction: column;
+  margin-bottom: 24px;
 }
 
 // Bullet dot
@@ -397,7 +398,7 @@ $mobile-bp: 1024px;
 // ============================================
 .sidebar-footer {
   margin-top: auto;
-  padding: 16px 16px 24px;
+  padding: 16px;
   border-top: 1px solid var(--forge-border-color);
   flex-direction: column;
   gap: 4px;
