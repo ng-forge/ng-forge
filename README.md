@@ -10,11 +10,13 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@ng-forge/dynamic-forms"><img src="https://img.shields.io/npm/v/@ng-forge/dynamic-forms.svg" alt="npm version"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://discord.gg/qpzzvFagj3"><img src="https://img.shields.io/discord/1362112291418570803?color=7289da&label=Discord&logo=discord&logoColor=white" alt="Discord"></a>
 </p>
 
 <p align="center">
   <a href="https://ng-forge.com/dynamic-forms/">📚 Documentation</a> •
   <a href="https://ng-forge.com/dynamic-forms/installation">🚀 Getting Started</a> •
+  <a href="https://discord.gg/qpzzvFagj3">💬 Discord</a> •
   <a href="https://github.com/ng-forge/ng-forge/issues">🐛 Issues</a>
 </p>
 
@@ -131,6 +133,6 @@ MIT © ng-forge
 
 <p align="center">
   <a href="https://github.com/ng-forge/ng-forge">⭐ Star us on GitHub</a> •
-  <a href="https://github.com/ng-forge/ng-forge/issues">Report an Issue</a> •
-  <a href="https://github.com/ng-forge/ng-forge/discussions">Join the Discussion</a>
+  <a href="https://discord.gg/qpzzvFagj3">Join our Discord</a> •
+  <a href="https://github.com/ng-forge/ng-forge/issues">Report an Issue</a>
 </p>
