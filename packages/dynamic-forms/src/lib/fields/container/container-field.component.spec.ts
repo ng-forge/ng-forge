@@ -74,10 +74,9 @@ class TestStyleWrapperComponent implements FieldWrapperContract {
 /**
  * Mock validation-aware wrapper.
  *
- * Receives validClass/invalidClass as inputs; reads form validity directly from
- * FIELD_SIGNAL_CONTEXT (still available — that token stays; only WRAPPER_CONTEXT
- * is retired). Container-used wrappers don't get `fieldInputs` since the container
- * wraps a children template, not a single field.
+ * Receives validClass/invalidClass as inputs; reads form validity directly
+ * from FIELD_SIGNAL_CONTEXT. Container-used wrappers don't get `fieldInputs`
+ * since the container wraps a children template, not a single field.
  */
 @Component({
   selector: 'test-validation-wrapper',

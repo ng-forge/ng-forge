@@ -74,25 +74,26 @@ export function isWrapperTypeDefinition(value: unknown): value is WrapperTypeDef
  * Contract that wrapper components must satisfy.
  *
  * Each wrapper component provides a `#fieldComponent` ViewContainerRef where
- * inner content (the next wrapper in the chain, or the children) will be
- * rendered imperatively by `ContainerFieldComponent`.
+ * inner content (the next wrapper in the chain, or the field component) will
+ * be rendered imperatively by `DfFieldOutlet` / `ContainerFieldComponent`.
  *
- * The wrapper itself is unaware of what gets rendered inside it — it just
- * provides the slot and its own UI chrome.
+ * Wrappers receive their config properties (with `type` stripped) as individual
+ * Angular `input()`s, and optionally a single `fieldInputs` input carrying the
+ * field's mapper outputs plus a read-only view of its form state.
  *
  * @example
  * ```typescript
  * @Component({
  *   template: `
- *     <dbx-section [header]="header()">
+ *     <dbx-section [header]="header() ?? ''">
  *       <ng-container #fieldComponent></ng-container>
  *     </dbx-section>
  *   `,
  * })
  * export class SectionWrapperComponent implements FieldWrapperContract {
  *   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
- *   private readonly context = inject(WRAPPER_CONTEXT);
- *   readonly header = computed(() => this.context.config['header'] as string);
+ *   readonly header = input<string>();
+ *   readonly fieldInputs = input<WrapperFieldInputs>();
  * }
  * ```
  */

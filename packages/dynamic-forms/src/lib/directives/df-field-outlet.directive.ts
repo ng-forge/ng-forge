@@ -1,15 +1,4 @@
-import {
-  ComponentRef,
-  DestroyRef,
-  Directive,
-  EnvironmentInjector,
-  inject,
-  Injector,
-  input,
-  Signal,
-  computed,
-  ViewContainerRef,
-} from '@angular/core';
+import { ComponentRef, DestroyRef, Directive, EnvironmentInjector, inject, input, Signal, computed, ViewContainerRef } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, of, switchMap } from 'rxjs';
 import { ResolvedField } from '../utils/resolve-field/resolve-field';
@@ -54,8 +43,10 @@ import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
   selector: '[dfFieldOutlet]',
 })
 export class DfFieldOutlet {
-  readonly field = input.required<ResolvedField>({ alias: 'dfFieldOutlet' });
-  readonly environmentInjectorInput = input<EnvironmentInjector | undefined>(undefined, { alias: 'dfFieldOutletEnvironmentInjector' });
+  // Named to match the structural directive microsyntax directly
+  // (`*dfFieldOutlet="field; environmentInjector: env"`) so no aliasing is needed.
+  readonly dfFieldOutlet = input.required<ResolvedField>();
+  readonly dfFieldOutletEnvironmentInjector = input<EnvironmentInjector | undefined>(undefined);
 
   private readonly vcr = inject(ViewContainerRef);
   private readonly defaultEnvInjector = inject(EnvironmentInjector);
@@ -69,16 +60,16 @@ export class DfFieldOutlet {
   private fieldRef: ComponentRef<unknown> | undefined;
 
   private readonly effectiveWrappers: Signal<readonly WrapperConfig[]> = computed(() => {
-    const field = this.field().fieldDef;
+    const field = this.dfFieldOutlet().fieldDef;
     const defaults = this.defaultWrappersSignal?.();
     return resolveEffectiveWrappers(field, defaults, this.wrapperRegistry);
   });
 
-  private readonly renderReady: Signal<boolean> = computed(() => this.field().renderReady());
+  private readonly renderReady: Signal<boolean> = computed(() => this.dfFieldOutlet().renderReady());
 
   constructor() {
     // Rebuild chain when identity (field), effective wrappers, or renderReady change.
-    combineLatest([toObservable(this.field), toObservable(this.effectiveWrappers), toObservable(this.renderReady)])
+    combineLatest([toObservable(this.dfFieldOutlet), toObservable(this.effectiveWrappers), toObservable(this.renderReady)])
       .pipe(
         switchMap(([, wrappers, ready]) => {
           if (!ready) return of({ loaded: [] as LoadedWrapper[], shouldRender: false });
@@ -95,7 +86,7 @@ export class DfFieldOutlet {
       });
 
     // Stream mapper outputs to created components after the initial render.
-    toObservable(computed(() => this.field().inputs()))
+    toObservable(computed(() => this.dfFieldOutlet().inputs()))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((rawInputs) => {
         if (!this.fieldRef) return;
@@ -106,8 +97,8 @@ export class DfFieldOutlet {
   }
 
   private render(loadedWrappers: readonly LoadedWrapper[]): void {
-    const resolved = this.field();
-    const envInjector = this.environmentInjectorInput() ?? this.defaultEnvInjector;
+    const resolved = this.dfFieldOutlet();
+    const envInjector = this.dfFieldOutletEnvironmentInjector() ?? this.defaultEnvInjector;
     const rawInputs = resolved.inputs();
     const fieldInputs = this.buildFieldInputs(rawInputs);
 

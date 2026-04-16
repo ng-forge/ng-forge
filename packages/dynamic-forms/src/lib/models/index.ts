@@ -13,11 +13,11 @@ export {
   createArrayItemIdGenerator,
   DEFAULT_PROPS,
   DEFAULT_VALIDATION_MESSAGES,
+  DEFAULT_WRAPPERS,
   FIELD_SIGNAL_CONTEXT,
   FORM_OPTIONS,
-  WRAPPER_CONTEXT,
 } from './field-signal-context.token';
-export type { ArrayTemplateRegistry, WrapperContext } from './field-signal-context.token';
+export type { ArrayTemplateRegistry } from './field-signal-context.token';
 export type { ValidationError, ValidationMessages } from './validation-types';
 export type { Prettify } from './prettify';
 
