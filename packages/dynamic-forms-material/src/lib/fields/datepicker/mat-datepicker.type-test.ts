@@ -81,6 +81,7 @@ describe('MatDatepickerField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
     // From FieldWithValidation
     | 'required'
     | 'email'

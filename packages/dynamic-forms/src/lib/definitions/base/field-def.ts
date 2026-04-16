@@ -1,6 +1,7 @@
 import { WithInputSignals } from '../../models/component-type';
 import { Prettify } from '../../models/prettify';
 import { DynamicText } from '../../models/types/dynamic-text';
+import { WrapperConfig } from '../../models/wrapper-type';
 import { FieldMeta } from './field-meta';
 
 /**
@@ -257,6 +258,20 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
    * @value 12
    */
   col?: number;
+
+  /**
+   * Wrapper components to chain around this field.
+   *
+   * Three states:
+   * - `undefined` — inherit from form-level `defaultWrappers` plus any
+   *   wrappers that auto-apply to this field's `type` via their `types` array.
+   * - `null` — explicit opt-out, render the field with no wrappers.
+   * - `readonly WrapperConfig[]` — use exactly these in addition to auto and default
+   *   wrappers. Auto-associations are outermost, defaults next, field-level innermost.
+   *
+   * Container fields (`type: 'container'`) override this to a required array.
+   */
+  wrappers?: readonly WrapperConfig[] | null;
 }
 
 type IncludedKeys = 'label' | 'className' | 'hidden' | 'tabIndex';

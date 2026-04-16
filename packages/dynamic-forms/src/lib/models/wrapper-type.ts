@@ -1,5 +1,29 @@
 import { InjectionToken, Signal, Type, ViewContainerRef } from '@angular/core';
-import { WrapperConfig } from '../definitions/default/container-field';
+import { FieldRegistryWrappers, RegisteredWrapperTypes } from './registry/field-registry';
+
+/**
+ * Resolves a wrapper type name to its registered config interface.
+ *
+ * When `TWrappers` is a specific registered key (e.g., `'css'`), resolves to
+ * the full config type from `FieldRegistryWrappers` (e.g., `CssWrapper`),
+ * providing type-safe access to wrapper-specific properties like `cssClasses`.
+ *
+ * When `TWrappers` is the full `RegisteredWrapperTypes` union, distributes
+ * to produce a discriminated union of all registered wrapper configs.
+ *
+ * @example
+ * ```typescript
+ * // Resolves to CssWrapper — cssClasses is typed
+ * type CssConfig = WrapperConfig<'css'>;
+ *
+ * // Union of all registered wrapper configs
+ * type AnyConfig = WrapperConfig;
+ * ```
+ */
+ 
+export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredWrapperTypes> = TWrappers extends keyof FieldRegistryWrappers
+  ? FieldRegistryWrappers[TWrappers]
+  : { readonly type: TWrappers };
 
 /**
  * Configuration interface for registering wrapper types.
