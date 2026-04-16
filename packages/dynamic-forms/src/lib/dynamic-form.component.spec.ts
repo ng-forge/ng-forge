@@ -2284,6 +2284,43 @@ describe('DynamicFormComponent', () => {
       expect(component.valid()).toBe(true);
     });
 
+    it('should handle container containing a row (children flattened)', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'nameWrapper',
+            type: 'container',
+            fields: [
+              {
+                key: 'nameRow',
+                type: 'row',
+                label: 'Name',
+                fields: [
+                  { key: 'firstName', type: 'input', label: 'First', value: 'John' },
+                  { key: 'lastName', type: 'input', label: 'Last', value: 'Doe' },
+                ],
+              },
+              { key: 'email', type: 'input', label: 'Email', value: 'john@example.com' },
+            ],
+            wrappers: [],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // Both container and row flatten — all children appear at the top level
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+      });
+
+      const rowElement = fixture.nativeElement.querySelector('[data-testid="nameRow"]');
+      expect(rowElement?.classList.contains('df-row')).toBe(true);
+    });
+
     it('should handle container containing a group with nested container', async () => {
       const config = {
         fields: [
