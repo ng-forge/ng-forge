@@ -20,7 +20,7 @@ import { FieldRegistryWrappers, RegisteredWrapperTypes } from './registry/field-
  * type AnyConfig = WrapperConfig;
  * ```
  */
- 
+
 export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredWrapperTypes> = TWrappers extends keyof FieldRegistryWrappers
   ? FieldRegistryWrappers[TWrappers]
   : { readonly type: TWrappers };

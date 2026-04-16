@@ -225,8 +225,9 @@ export { applyValidator, applyValidators } from './core/validation';
 export type { HttpResourceRequest } from './core/validation';
 
 // FieldTree Utilities
-export { getArrayLength } from './core/field-tree-utils';
-export type { ArrayFieldTree } from './core/field-tree-utils';
+export { getArrayLength, toReadonlyFieldTree } from './core/field-tree-utils';
+export type { ArrayFieldTree, ReadonlyFieldTree } from './core/field-tree-utils';
+export type { WrapperFieldInputs } from './wrappers/wrapper-field-inputs';
 
 // EventBus — inject inside field components (scoped to the form's DI tree).
 // To dispatch from outside DynamicForm, use EventDispatcher instead.
