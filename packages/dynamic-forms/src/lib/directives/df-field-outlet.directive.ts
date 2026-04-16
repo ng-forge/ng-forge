@@ -5,7 +5,13 @@ import { ResolvedField } from '../utils/resolve-field/resolve-field';
 import { WrapperConfig, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY } from '../models/wrapper-type';
 import { DEFAULT_WRAPPERS } from '../models/field-signal-context.token';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
-import { destroyWrapperChain, LoadedWrapper, loadWrapperComponents, renderWrapperChain } from '../utils/wrapper-chain/wrapper-chain';
+import {
+  destroyWrapperChain,
+  LoadedWrapper,
+  loadWrapperComponents,
+  renderWrapperChain,
+  setInputIfDeclared,
+} from '../utils/wrapper-chain/wrapper-chain';
 import { resolveEffectiveWrappers } from '../utils/resolve-effective-wrappers/resolve-effective-wrappers';
 import { toReadonlyFieldTree } from '../core/field-tree-utils';
 import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
@@ -122,7 +128,7 @@ export class DfFieldOutlet {
   private pushInputs(rawInputs: Record<string, unknown>): void {
     const fieldInputs = this.buildFieldInputs(rawInputs);
     for (const ref of this.wrapperRefs) {
-      ref.setInput('fieldInputs', fieldInputs);
+      setInputIfDeclared(ref, 'fieldInputs', fieldInputs);
     }
     if (this.fieldRef) {
       this.pushRawInputs(this.fieldRef, rawInputs);
@@ -131,7 +137,7 @@ export class DfFieldOutlet {
 
   private pushRawInputs(ref: ComponentRef<unknown>, rawInputs: Record<string, unknown>): void {
     for (const [key, value] of Object.entries(rawInputs)) {
-      ref.setInput(key, value);
+      setInputIfDeclared(ref, key, value);
     }
   }
 

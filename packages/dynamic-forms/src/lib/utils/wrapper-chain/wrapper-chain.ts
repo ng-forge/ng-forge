@@ -5,6 +5,21 @@ import { Logger } from '../../providers/features/logger/logger.interface';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
 
 /**
+ * Set an input on a ComponentRef only when the target component actually declares it.
+ *
+ * Angular's `ComponentRef.setInput()` throws NG0303 when the input is missing.
+ * For config keys driven by user data (e.g. a wrapper config containing a prop
+ * the wrapper doesn't care about) this would surface as a noisy runtime error.
+ * Reads component input metadata from Ivy's public definition via `ɵcmp`.
+ */
+export function setInputIfDeclared(ref: ComponentRef<unknown>, inputName: string, value: unknown): void {
+  const cmp = (ref.componentType as unknown as { ɵcmp?: { inputs?: Record<string, unknown> } }).ɵcmp;
+  if (cmp?.inputs && inputName in cmp.inputs) {
+    ref.setInput(inputName, value);
+  }
+}
+
+/**
  * A wrapper whose component has been resolved and loaded.
  */
 export interface LoadedWrapper {
@@ -124,11 +139,11 @@ function renderStep(
 
   for (const [key, value] of Object.entries(wrapper.config)) {
     if (key === 'type') continue;
-    ref.setInput(key, value);
+    setInputIfDeclared(ref, key, value);
   }
 
   if (options.fieldInputs !== undefined) {
-    ref.setInput('fieldInputs', options.fieldInputs);
+    setInputIfDeclared(ref, 'fieldInputs', options.fieldInputs);
   }
 
   ref.changeDetectorRef.detectChanges();
