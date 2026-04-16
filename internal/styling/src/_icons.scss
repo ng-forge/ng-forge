@@ -36,6 +36,10 @@
     @include icon-mask('/assets/icons/github.svg', 24px);
   }
 
+  &--discord {
+    @include icon-mask('/assets/icons/discord.svg', 24px);
+  }
+
   &--book {
     @include icon-mask('/assets/icons/book.svg', 20px);
   }

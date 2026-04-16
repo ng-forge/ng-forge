@@ -43,6 +43,14 @@ Try it out — select a contact method and watch fields appear. Switch to the "C
 
 ---
 
+## Community & Support
+
+- **[Discord](https://discord.gg/qpzzvFagj3)** — Ask questions, share what you've built, and chat with the community
+- **[GitHub Issues](https://github.com/ng-forge/ng-forge/issues)** — Report bugs or request features
+- **[Contributing](https://github.com/ng-forge/ng-forge/blob/main/CONTRIBUTING.md)** — Learn how to contribute to ng-forge
+
+---
+
 ## Next Steps
 
 - **[Configuration](/configuration)** — Set global defaults with `withXxxFields({ ... })` and per-form `defaultProps`
