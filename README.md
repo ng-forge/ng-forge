@@ -10,7 +10,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@ng-forge/dynamic-forms"><img src="https://img.shields.io/npm/v/@ng-forge/dynamic-forms.svg" alt="npm version"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
-  <a href="https://discord.gg/qpzzvFagj3"><img src="https://img.shields.io/discord/1362112291418570803?color=7289da&label=Discord&logo=discord&logoColor=white" alt="Discord"></a>
+  <a href="https://discord.gg/qpzzvFagj3"><img src="https://img.shields.io/discord/1494269650555371582?color=7289da&label=Discord&logo=discord&logoColor=white" alt="Discord"></a>
 </p>
 
 <p align="center">
