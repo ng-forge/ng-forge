@@ -7,3 +7,4 @@ export type { TextField, TextElementType, TextProps } from './text-field';
 export type { HiddenField, HiddenValue, HiddenScalar } from './hidden-field';
 export { type ContainerField, type WrapperConfig, isContainerTypedField } from './container-field';
 export type { CssWrapper } from '../../wrappers/css/css-wrapper.type';
+export type { RowWrapper } from '../../wrappers/row/row-wrapper.type';

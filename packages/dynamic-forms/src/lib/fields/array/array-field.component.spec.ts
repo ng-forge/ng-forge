@@ -379,8 +379,9 @@ describe('ArrayFieldComponent', () => {
       // Create registry with row and input field types to properly test nested structures
       const rowFieldType: FieldTypeDefinition = {
         name: 'row',
+        // Row is a virtual field type that resolves to the container component
         loadComponent: async () => {
-          const module = await import('../row/row-field.component');
+          const module = await import('../container/container-field.component');
           return module.default;
         },
         mapper: rowFieldMapper,

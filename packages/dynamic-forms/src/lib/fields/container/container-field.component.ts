@@ -110,7 +110,7 @@ export default class ContainerFieldComponent {
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Child Field Resolution (same as RowFieldComponent)
+  // Child Field Resolution
   // ─────────────────────────────────────────────────────────────────────────────
 
   private readonly fieldsSource = computed(() => (this.field().fields || []) as FieldDef<unknown>[]);

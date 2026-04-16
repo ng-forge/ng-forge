@@ -6,7 +6,8 @@ import TestInputHarnessComponent from '../../testing/src/harnesses/test-input.ha
 import TestCheckboxHarnessComponent from '../../testing/src/harnesses/test-checkbox.harness';
 import { FIELD_REGISTRY, FieldTypeDefinition } from './models/field-type';
 import { checkboxFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
-import { BUILT_IN_FIELDS } from './providers/built-in-fields';
+import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './providers/built-in-fields';
+import { WRAPPER_REGISTRY } from './models/wrapper-type';
 import { BaseCheckedField, BaseValueField } from './definitions';
 import { DebugElement } from '@angular/core';
 import { firstValueFrom, timeout } from 'rxjs';
@@ -78,6 +79,16 @@ describe('DynamicFormComponent', () => {
             // Add test fields
             TEST_FIELD_TYPES.forEach((fieldType) => {
               registry.set(fieldType.name, fieldType);
+            });
+            return registry;
+          },
+        },
+        {
+          provide: WRAPPER_REGISTRY,
+          useFactory: () => {
+            const registry = new Map();
+            BUILT_IN_WRAPPERS.forEach((wrapperType) => {
+              registry.set(wrapperType.wrapperName, wrapperType);
             });
             return registry;
           },
@@ -1960,7 +1971,8 @@ describe('DynamicFormComponent', () => {
       await waitForDynamicComponents(fixture);
 
       const groupElement = fixture.nativeElement.querySelector('[data-testid="contact"]');
-      const rowElement = fixture.nativeElement.querySelector('[data-testid="name"]');
+      const rowContainer = fixture.nativeElement.querySelector('[data-testid="name"]');
+      const rowElement = rowContainer?.querySelector('df-row-wrapper');
 
       // Should create nested structure with group containing row-flattened fields
       expect(component.formValue()).toEqual({
@@ -1972,7 +1984,7 @@ describe('DynamicFormComponent', () => {
       });
       expect(groupElement?.classList.contains('df-group')).toBe(true);
       expect(rowElement?.classList.contains('df-row')).toBe(true);
-      expect(groupElement?.contains(rowElement)).toBe(true);
+      expect(groupElement?.contains(rowContainer)).toBe(true);
     });
 
     it('should handle mixed regular definitions with row and group definitions', async () => {
@@ -2082,7 +2094,8 @@ describe('DynamicFormComponent', () => {
       await waitForDynamicComponents(fixture);
 
       const groupElement = fixture.nativeElement.querySelector('[data-testid="contact"]');
-      const rowElement = fixture.nativeElement.querySelector('[data-testid="nameRow"]');
+      const rowContainer = fixture.nativeElement.querySelector('[data-testid="nameRow"]');
+      const rowElement = rowContainer?.querySelector('df-row-wrapper');
 
       expect(component.formValue()).toEqual({
         contact: {
@@ -2093,7 +2106,7 @@ describe('DynamicFormComponent', () => {
       });
       expect(groupElement?.classList.contains('df-group')).toBe(true);
       expect(rowElement?.classList.contains('df-row')).toBe(true);
-      expect(groupElement?.contains(rowElement)).toBe(true);
+      expect(groupElement?.contains(rowContainer)).toBe(true);
     });
 
     it('should preserve field validation for nested definitions', async () => {
@@ -2317,7 +2330,8 @@ describe('DynamicFormComponent', () => {
         email: 'john@example.com',
       });
 
-      const rowElement = fixture.nativeElement.querySelector('[data-testid="nameRow"]');
+      const rowContainer = fixture.nativeElement.querySelector('[data-testid="nameRow"]');
+      const rowElement = rowContainer?.querySelector('df-row-wrapper');
       expect(rowElement?.classList.contains('df-row')).toBe(true);
     });
 

@@ -213,7 +213,7 @@ export { dynamicTextToObservable } from './utils';
 export { DynamicTextPipe } from './pipes';
 
 // Container Components - for building custom containers
-export { ArrayFieldComponent, GroupFieldComponent, RowFieldComponent, ContainerFieldComponent } from './fields';
+export { ArrayFieldComponent, GroupFieldComponent, ContainerFieldComponent } from './fields';
 
 // Validation utilities
 export { applyValidator, applyValidators } from './core/validation';
