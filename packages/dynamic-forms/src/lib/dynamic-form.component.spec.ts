@@ -14,6 +14,7 @@ import { FormResetEvent } from './events/constants/form-reset.event';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormStateManager } from './state/form-state-manager';
 import { EventBus } from './events/event.bus';
+import { FormConfig } from './models/form-config';
 
 // Test specific form config type
 type TestFormConfig = {
@@ -23,6 +24,7 @@ type TestFormConfig = {
     | { type: 'row'; key: string; label: string; fields: any[] }
     | { type: 'group'; key: string; label: string; fields: any[] }
     | { type: 'page'; key: string; label?: string; fields: any[] }
+    | { type: 'container'; key: string; fields: any[]; wrappers: any[] }
   >;
 };
 
@@ -410,7 +412,7 @@ describe('DynamicFormComponent', () => {
             // Removed props object as test components don't support it
           },
         ],
-      } as any;
+      };
 
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
@@ -1858,7 +1860,7 @@ describe('DynamicFormComponent', () => {
                 value: 'Doe',
               },
             ],
-          } as any,
+          },
         ],
       };
 
@@ -1899,7 +1901,7 @@ describe('DynamicFormComponent', () => {
                 value: '10001',
               },
             ],
-          } as any,
+          },
         ],
       };
 
@@ -1942,7 +1944,7 @@ describe('DynamicFormComponent', () => {
                     value: 'Doe',
                   },
                 ],
-              } as any,
+              },
               {
                 key: 'email',
                 type: 'input',
@@ -1950,7 +1952,7 @@ describe('DynamicFormComponent', () => {
                 value: 'john.doe@example.com',
               },
             ],
-          } as any,
+          },
         ],
       };
 
@@ -2000,7 +2002,7 @@ describe('DynamicFormComponent', () => {
                 value: 'Doe',
               },
             ],
-          } as any,
+          },
           {
             key: 'address',
             type: 'group',
@@ -2019,7 +2021,7 @@ describe('DynamicFormComponent', () => {
                 value: 'New York',
               },
             ],
-          } as any,
+          },
           {
             key: 'isActive',
             type: 'checkbox',
@@ -2117,7 +2119,7 @@ describe('DynamicFormComponent', () => {
                 value: 'John',
               },
             ],
-          } as any,
+          },
         ],
       };
 
@@ -2142,13 +2144,13 @@ describe('DynamicFormComponent', () => {
             type: 'row',
             label: 'Empty Row',
             fields: [],
-          } as any,
+          },
           {
             key: 'emptyGroup',
             type: 'group',
             label: 'Empty Group',
             fields: [],
-          } as any,
+          },
           {
             key: 'regularField',
             type: 'input',
@@ -2156,7 +2158,7 @@ describe('DynamicFormComponent', () => {
             value: 'test',
           },
         ],
-      };
+      } as TestFormConfig;
 
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
@@ -2166,6 +2168,193 @@ describe('DynamicFormComponent', () => {
         regularField: 'test',
       });
       expect(component.valid()).toBe(true);
+    });
+  });
+
+  describe('Container Field Support', () => {
+    it('should handle container field with no wrappers (children flattened)', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'nameWrapper',
+            type: 'container',
+            fields: [
+              { key: 'firstName', type: 'input', label: 'First', value: 'John' },
+              { key: 'lastName', type: 'input', label: 'Last', value: 'Doe' },
+            ],
+            wrappers: [],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // Container fields should flatten their children like rows
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        lastName: 'Doe',
+      });
+    });
+
+    it('should handle container field with wrappers config', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'sectionWrapper',
+            type: 'container',
+            fields: [{ key: 'email', type: 'input', label: 'Email', value: 'test@example.com' }],
+            wrappers: [{ type: 'section', header: 'Contact' }],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // Values should be flattened regardless of wrappers
+      expect(component.formValue()).toEqual({
+        email: 'test@example.com',
+      });
+    });
+
+    it('should handle container alongside regular and row fields', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'username',
+            type: 'input',
+            label: 'Username',
+            value: 'johndoe',
+          },
+          {
+            key: 'nameWrapper',
+            type: 'container',
+            fields: [
+              { key: 'firstName', type: 'input', label: 'First', value: 'John' },
+              { key: 'lastName', type: 'input', label: 'Last', value: 'Doe' },
+            ],
+            wrappers: [{ type: 'section', header: 'Name' }],
+          },
+          {
+            key: 'addressRow',
+            type: 'row',
+            label: 'Address',
+            fields: [{ key: 'city', type: 'input', label: 'City', value: 'NYC' }],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // All values flattened: container + row children merged with top-level fields
+      expect(component.formValue()).toEqual({
+        username: 'johndoe',
+        firstName: 'John',
+        lastName: 'Doe',
+        city: 'NYC',
+      });
+    });
+
+    it('should handle empty container field', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'emptyWrapper',
+            type: 'container',
+            fields: [],
+            wrappers: [{ type: 'section', header: 'Empty' }],
+          },
+          {
+            key: 'regularField',
+            type: 'input',
+            label: 'Regular',
+            value: 'test',
+          },
+        ],
+      } as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      expect(component.formValue()).toEqual({
+        regularField: 'test',
+      });
+      expect(component.valid()).toBe(true);
+    });
+
+    it('should handle container containing a row (children flattened)', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'nameWrapper',
+            type: 'container',
+            fields: [
+              {
+                key: 'nameRow',
+                type: 'row',
+                label: 'Name',
+                fields: [
+                  { key: 'firstName', type: 'input', label: 'First', value: 'John' },
+                  { key: 'lastName', type: 'input', label: 'Last', value: 'Doe' },
+                ],
+              },
+              { key: 'email', type: 'input', label: 'Email', value: 'john@example.com' },
+            ],
+            wrappers: [],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // Both container and row flatten — all children appear at the top level
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+      });
+
+      const rowElement = fixture.nativeElement.querySelector('[data-testid="nameRow"]');
+      expect(rowElement?.classList.contains('df-row')).toBe(true);
+    });
+
+    it('should handle container containing a group with nested container', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'outerWrapper',
+            type: 'container',
+            fields: [
+              {
+                key: 'myGroup',
+                type: 'group',
+                fields: [
+                  {
+                    key: 'innerWrapper',
+                    type: 'container',
+                    fields: [{ key: 'deepField', type: 'input', label: 'Deep', value: 'nested' }],
+                    wrappers: [],
+                  },
+                ],
+              },
+            ],
+            wrappers: [],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // container flattens, group nests — deepField lives under myGroup
+      expect(component.formValue()).toEqual({
+        myGroup: {
+          deepField: 'nested',
+        },
+      });
     });
   });
 
@@ -2482,7 +2671,7 @@ describe('DynamicFormComponent', () => {
             value: 'test@example.com',
           },
         ],
-      };
+      } as TestFormConfig;
 
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
@@ -2646,7 +2835,7 @@ describe('DynamicFormComponent', () => {
                 value: 'New York',
               },
             ],
-          } as any,
+          },
         ],
       };
 
@@ -2711,7 +2900,7 @@ describe('DynamicFormComponent', () => {
                 value: 'john@example.com',
               },
             ],
-          } as any,
+          },
         ],
       };
 

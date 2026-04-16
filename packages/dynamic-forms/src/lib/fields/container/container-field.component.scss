@@ -1,0 +1,8 @@
+:host {
+  display: block;
+  width: 100%;
+
+  &.df-container-hidden {
+    display: none;
+  }
+}

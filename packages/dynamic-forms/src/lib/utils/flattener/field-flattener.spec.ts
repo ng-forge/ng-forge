@@ -18,6 +18,7 @@ describe('field-flattener', () => {
       ['array', { component: {} as any, valueHandling: 'include' }],
       ['row', { component: {} as any, valueHandling: 'flatten' }],
       ['page', { component: {} as any, valueHandling: 'flatten' }],
+      ['container', { component: {} as any, valueHandling: 'flatten' }],
     ]);
   });
 
@@ -176,6 +177,63 @@ describe('field-flattener', () => {
         const result = flattenFields(fields, registry, { preserveRows: true });
 
         expect(result[0].key).toBe('auto_row_0');
+      });
+    });
+
+    describe('container field flattening', () => {
+      it('should flatten container field children into parent level', () => {
+        const fields: FieldDef<any>[] = [
+          {
+            type: 'container',
+            fields: [
+              { type: 'input', key: 'firstName' },
+              { type: 'input', key: 'lastName' },
+            ],
+            wrappers: [{ type: 'section', header: 'Name' }],
+          },
+        ];
+
+        const result = flattenFields(fields, registry);
+
+        expect(result).toEqual([
+          { type: 'input', key: 'firstName' },
+          { type: 'input', key: 'lastName' },
+        ]);
+      });
+
+      it('should handle empty container fields', () => {
+        const fields: FieldDef<any>[] = [
+          { type: 'container', fields: [], wrappers: [] },
+          { type: 'input', key: 'test' },
+        ];
+
+        const result = flattenFields(fields, registry);
+
+        expect(result).toEqual([{ type: 'input', key: 'test' }]);
+      });
+
+      it('should flatten container with multiple children', () => {
+        const fields: FieldDef<any>[] = [
+          {
+            type: 'container',
+            fields: [
+              { type: 'input', key: 'email' },
+              { type: 'input', key: 'phone' },
+              { type: 'checkbox', key: 'subscribe' },
+            ],
+            wrappers: [
+              { type: 'section', header: 'Contact' },
+              { type: 'style', class: 'highlight' },
+            ],
+          },
+        ];
+
+        const result = flattenFields(fields, registry);
+
+        expect(result).toHaveLength(3);
+        expect(result[0].key).toBe('email');
+        expect(result[1].key).toBe('phone');
+        expect(result[2].key).toBe('subscribe');
       });
     });
 
@@ -525,6 +583,44 @@ describe('field-flattener', () => {
       expect(result[0].key).toBe('row1');
       expect(result[1].type).toBe('row');
       expect(result[1].key).toBe('row2');
+    });
+
+    it('should preserve container fields for rendering', () => {
+      const fields: FieldDef<any>[] = [
+        {
+          type: 'container',
+          key: 'wrapper1',
+          fields: [
+            { type: 'input', key: 'firstName' },
+            { type: 'input', key: 'lastName' },
+          ],
+          wrappers: [{ type: 'section', header: 'Name' }],
+        },
+      ];
+
+      const result = flattenFields(fields, registry, { preserveRows: true });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].type).toBe('container');
+      expect(result[0].key).toBe('wrapper1');
+      expect(result[0].fields).toEqual([
+        { type: 'input', key: 'firstName' },
+        { type: 'input', key: 'lastName' },
+      ]);
+    });
+
+    it('should auto-generate key for preserved container without key', () => {
+      const fields: FieldDef<any>[] = [
+        {
+          type: 'container',
+          fields: [{ type: 'input', key: 'test' }],
+          wrappers: [],
+        },
+      ];
+
+      const result = flattenFields(fields, registry, { preserveRows: true });
+
+      expect(result[0].key).toBe('auto_container_0');
     });
 
     it('should preserve group and array structures', () => {

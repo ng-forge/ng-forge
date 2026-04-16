@@ -834,7 +834,7 @@ describe('Evaluator', () => {
     });
 
     it('should call date method', () => {
-      const date = new Date('2024-01-01T00:00:00Z');
+      const date = new Date('2024-01-02T00:00:00Z'); // Use the Jan 2nd 2024 since when run in certain timezones the date is the day prior, and we always want 2024.
       const scope: EvaluationScope = { date };
       const evaluator = new Evaluator(scope, 'date.getFullYear()');
       const ast: ASTNode = {
@@ -848,7 +848,6 @@ describe('Evaluator', () => {
       };
 
       const result = evaluator.evaluate(ast);
-
       expect(result).toBe(2024);
     });
 

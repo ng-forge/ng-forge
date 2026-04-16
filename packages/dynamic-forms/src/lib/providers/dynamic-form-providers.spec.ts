@@ -3,7 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { EnvironmentProviders, Provider } from '@angular/core';
 import { provideDynamicForm } from './dynamic-form-providers';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
-import { BUILT_IN_FIELDS } from './built-in-fields';
+import { WrapperTypeDefinition, WRAPPER_REGISTRY } from '../models/wrapper-type';
+import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './built-in-fields';
 import { withLoggerConfig } from './features/logger/with-logger-config';
 import { DynamicFormLogger } from './features/logger/logger.token';
 import { ConsoleLogger } from './features/logger/console-logger';
@@ -23,6 +24,12 @@ function getProviders(envProviders: EnvironmentProviders): Provider[] {
 function createRegistryWithInjection(envProviders: EnvironmentProviders): Map<string, FieldTypeDefinition> {
   TestBed.configureTestingModule({ providers: [envProviders] });
   return TestBed.inject(FIELD_REGISTRY);
+}
+
+// Helper to create wrapper registry with proper injection context
+function createWrapperRegistryWithInjection(envProviders: EnvironmentProviders): Map<string, WrapperTypeDefinition> {
+  TestBed.configureTestingModule({ providers: [envProviders] });
+  return TestBed.inject(WRAPPER_REGISTRY);
 }
 
 describe('provideDynamicForm', () => {
@@ -49,8 +56,8 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm();
       const providers = getProviders(envProviders);
 
-      // Logger + provideSignalFormsConfig + FIELD_REGISTRY
-      expect(providers).toHaveLength(3);
+      // Logger + provideSignalFormsConfig + FIELD_REGISTRY + WRAPPER_REGISTRY
+      expect(providers).toHaveLength(4);
     });
 
     it('should contain providers for custom fields', () => {
@@ -64,8 +71,8 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm(customField);
       const providers = getProviders(envProviders);
 
-      // Logger + provideSignalFormsConfig + FIELD_REGISTRY
-      expect(providers).toHaveLength(3);
+      // Logger + provideSignalFormsConfig + FIELD_REGISTRY + WRAPPER_REGISTRY
+      expect(providers).toHaveLength(4);
     });
   });
 
@@ -248,8 +255,8 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm(customField, withLoggerConfig());
       const providers = getProviders(envProviders);
 
-      // Should have 3 providers: DynamicFormLogger, provideSignalFormsConfig, and FIELD_REGISTRY
-      expect(providers.length).toBe(3);
+      // Should have 4 providers: DynamicFormLogger, provideSignalFormsConfig, FIELD_REGISTRY, and WRAPPER_REGISTRY
+      expect(providers.length).toBe(4);
     });
 
     it('should include logger provider when withLoggerConfig is used', () => {
@@ -325,6 +332,140 @@ describe('provideDynamicForm', () => {
       const registry = createRegistryWithInjection(envProviders);
 
       expect(registry.has('custom')).toBe(true);
+    });
+  });
+
+  describe('Built-in wrappers registration', () => {
+    it('should register all built-in wrappers', () => {
+      const envProviders = provideDynamicForm();
+      const registry = createWrapperRegistryWithInjection(envProviders);
+
+      expect(registry.size).toBe(BUILT_IN_WRAPPERS.length);
+      BUILT_IN_WRAPPERS.forEach((wrapper) => {
+        expect(registry.has(wrapper.wrapperName)).toBe(true);
+        expect(registry.get(wrapper.wrapperName)).toBe(wrapper);
+      });
+    });
+
+    it('should register the css wrapper by default', () => {
+      const envProviders = provideDynamicForm();
+      const registry = createWrapperRegistryWithInjection(envProviders);
+
+      expect(registry.has('css')).toBe(true);
+    });
+  });
+
+  describe('Custom wrappers registration', () => {
+    it('should register a custom wrapper', () => {
+      const customWrapper: WrapperTypeDefinition = {
+        wrapperName: 'section',
+        loadComponent: () => import('../fields/text/text-field.component'),
+      };
+
+      const envProviders = provideDynamicForm(customWrapper);
+      const registry = createWrapperRegistryWithInjection(envProviders);
+
+      expect(registry.has('section')).toBe(true);
+      expect(registry.get('section')).toBe(customWrapper);
+    });
+
+    it('should register multiple custom wrappers', () => {
+      const wrapper1: WrapperTypeDefinition = {
+        wrapperName: 'section',
+        loadComponent: () => import('../fields/text/text-field.component'),
+      };
+
+      const wrapper2: WrapperTypeDefinition = {
+        wrapperName: 'card',
+        loadComponent: () => import('../fields/text/text-field.component'),
+      };
+
+      const envProviders = provideDynamicForm(wrapper1, wrapper2);
+      const registry = createWrapperRegistryWithInjection(envProviders);
+
+      expect(registry.has('section')).toBe(true);
+      expect(registry.has('card')).toBe(true);
+    });
+
+    it('should include both built-in and custom wrappers', () => {
+      const customWrapper: WrapperTypeDefinition = {
+        wrapperName: 'section',
+        loadComponent: () => import('../fields/text/text-field.component'),
+      };
+
+      const envProviders = provideDynamicForm(customWrapper);
+      const registry = createWrapperRegistryWithInjection(envProviders);
+
+      expect(registry.size).toBe(BUILT_IN_WRAPPERS.length + 1);
+      expect(registry.has('css')).toBe(true);
+      expect(registry.has('section')).toBe(true);
+    });
+
+    it('should warn when overwriting a built-in wrapper', () => {
+      const customCss: WrapperTypeDefinition = {
+        wrapperName: 'css',
+        loadComponent: () => import('../fields/text/text-field.component'),
+      };
+
+      const envProviders = provideDynamicForm(customCss, withLoggerConfig());
+      createWrapperRegistryWithInjection(envProviders);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith('[Dynamic Forms]', 'Wrapper type "css" is already registered. Overwriting.');
+    });
+  });
+
+  describe('Mixed fields and wrappers registration', () => {
+    it('should register fields and wrappers passed together', () => {
+      const customField: FieldTypeDefinition = {
+        name: 'custom-input',
+        loadComponent: () => import('../fields/text/text-field.component'),
+        mapper: vi.fn(),
+        valueHandling: 'include',
+      };
+
+      const customWrapper: WrapperTypeDefinition = {
+        wrapperName: 'section',
+        loadComponent: () => import('../fields/text/text-field.component'),
+      };
+
+      const envProviders = provideDynamicForm(customField, customWrapper);
+
+      const fieldRegistry = createRegistryWithInjection(envProviders);
+      const wrapperRegistry = TestBed.inject(WRAPPER_REGISTRY);
+
+      expect(fieldRegistry.has('custom-input')).toBe(true);
+      expect(wrapperRegistry.has('section')).toBe(true);
+    });
+
+    it('should correctly separate fields, wrappers, and features', () => {
+      const customField: FieldTypeDefinition = {
+        name: 'custom-input',
+        loadComponent: () => import('../fields/text/text-field.component'),
+        mapper: vi.fn(),
+        valueHandling: 'include',
+      };
+
+      const customWrapper: WrapperTypeDefinition = {
+        wrapperName: 'section',
+        loadComponent: () => import('../fields/text/text-field.component'),
+      };
+
+      const envProviders = provideDynamicForm(customField, customWrapper, withLoggerConfig());
+
+      const fieldRegistry = createRegistryWithInjection(envProviders);
+      const wrapperRegistry = TestBed.inject(WRAPPER_REGISTRY);
+      const logger = TestBed.inject(DynamicFormLogger);
+
+      // Fields registered correctly (built-in + custom, no wrappers leaking in)
+      expect(fieldRegistry.has('custom-input')).toBe(true);
+      expect(fieldRegistry.has('section')).toBe(false);
+
+      // Wrappers registered correctly (built-in + custom, no fields leaking in)
+      expect(wrapperRegistry.has('section')).toBe(true);
+      expect(wrapperRegistry.has('custom-input')).toBe(false);
+
+      // Feature applied
+      expect(logger).toBeDefined();
     });
   });
 });

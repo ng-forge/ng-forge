@@ -4,6 +4,8 @@ import { HiddenField } from '../../definitions/default/hidden-field';
 import { PageField } from '../../definitions/default/page-field';
 import { RowField } from '../../definitions/default/row-field';
 import { TextField } from '../../definitions/default/text-field';
+import { CssWrapper } from '../../wrappers/css/css-wrapper.type';
+import { ContainerField } from '../../definitions/default/container-field';
 
 /**
  * Container fields registry - augment this interface to add custom container fields
@@ -22,6 +24,7 @@ export interface FieldRegistryContainers {
   row: RowField;
   group: GroupField;
   array: ArrayField | SimplifiedArrayField;
+  container: ContainerField;
 }
 
 /**
@@ -39,6 +42,24 @@ export interface FieldRegistryContainers {
 export interface FieldRegistryLeaves {
   text: TextField;
   hidden: HiddenField;
+}
+
+/**
+ * Wrapper type registry for module augmentation.
+ *
+ * Augment this interface to add type-safe wrapper type definitions.
+ *
+ * @example
+ * ```typescript
+ * declare module '@ng-forge/dynamic-forms' {
+ *   interface FieldRegistryWrappers {
+ *     'section': MySectionFieldDef
+ *   }
+ * }
+ * ```
+ */
+export interface FieldRegistryWrappers {
+  css: CssWrapper;
 }
 
 /**
@@ -60,6 +81,11 @@ export interface DynamicFormFieldRegistry {
    * Leaf fields that have values or display content
    */
   leaves: FieldRegistryLeaves;
+
+  /**
+   * Field wrappers types
+   */
+  wrappers: FieldRegistryWrappers;
 }
 
 /**
@@ -81,6 +107,11 @@ export type RegisteredFieldTypes = ContainerFieldTypes | LeafFieldTypes;
  * Extract field types that are available in the registry
  */
 export type AvailableFieldTypes = keyof DynamicFormFieldRegistry['containers'] | keyof DynamicFormFieldRegistry['leaves'];
+
+/**
+ * Extract wrapper types that are available in the registry
+ */
+export type RegisteredWrapperTypes = keyof DynamicFormFieldRegistry['wrappers'];
 
 /**
  * Combined registry mapping type names to field definitions.

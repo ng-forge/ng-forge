@@ -347,7 +347,7 @@ export class DynamicForm<
 }
 
 /**
- * Recursively counts container fields (page, row, group, array) in a field tree.
+ * Recursively counts container fields (page, row, group, array, wrapper) in a field tree.
  * Descends into container children including array item templates to ensure
  * nested containers are counted for accurate initialization tracking.
  */

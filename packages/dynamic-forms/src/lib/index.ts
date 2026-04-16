@@ -48,6 +48,10 @@ export { hasFormValue } from './events/interfaces/form-event';
 export { withValueExclusionDefaults } from './providers/features/value-exclusion';
 export type { ValueExclusionConfig, ResolvedValueExclusionConfig } from './models/value-exclusion-config';
 
+// Wrapper Types
+export type { WrapperTypeDefinition, FieldWrapperContract } from './models/wrapper-type';
+export { isWrapperTypeDefinition, WRAPPER_REGISTRY } from './models/wrapper-type';
+
 // Configuration Types
 export type { CustomFnConfig, FormConfig, FormOptions } from './models';
 export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from './models';
@@ -95,8 +99,11 @@ export type {
   TextField,
   TextElementType,
   TextProps,
+  ContainerField,
+  WrapperConfig,
+  CssWrapper,
 } from './definitions/default';
-export { isRowField, isSimplifiedArrayField } from './definitions/default';
+export { isRowField, isSimplifiedArrayField, isContainerTypedField } from './definitions/default';
 
 // Validation Config Types
 export type {
@@ -131,6 +138,7 @@ export type {
   ExtractField,
   FieldRegistryContainers,
   FieldRegistryLeaves,
+  FieldRegistryWrappers,
   LeafFieldTypes,
   NarrowField,
   NarrowFields,
@@ -189,7 +197,7 @@ export { DynamicFormError } from './errors/dynamic-form-error';
 
 // Base mapper utilities
 export { baseFieldMapper, buildBaseInputs } from './mappers';
-export { arrayFieldMapper, groupFieldMapper, pageFieldMapper, rowFieldMapper, textFieldMapper } from './mappers';
+export { arrayFieldMapper, groupFieldMapper, pageFieldMapper, rowFieldMapper, textFieldMapper, containerFieldMapper } from './mappers';
 export type { ArrayContext, FieldSignalContext, MapperFn } from './mappers';
 
 // Field Type Definition - for registering custom field types
@@ -197,14 +205,15 @@ export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from './model
 export { FIELD_REGISTRY } from './models';
 
 // Signal Context - injection tokens for field components
-export { ARRAY_CONTEXT, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from './models';
+export { ARRAY_CONTEXT, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS, WRAPPER_CONTEXT } from './models';
+export type { WrapperContext } from './models';
 
 // Dynamic Text utilities
 export { dynamicTextToObservable } from './utils';
 export { DynamicTextPipe } from './pipes';
 
 // Container Components - for building custom containers
-export { ArrayFieldComponent, GroupFieldComponent, RowFieldComponent } from './fields';
+export { ArrayFieldComponent, GroupFieldComponent, RowFieldComponent, ContainerFieldComponent } from './fields';
 
 // Validation utilities
 export { applyValidator, applyValidators } from './core/validation';
