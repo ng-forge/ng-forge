@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, isSignal, Signal, ViewContainerRef, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { isObservable } from 'rxjs';
 import { FieldWrapperContract } from '../../models/wrapper-type';
 import { WRAPPER_CONTEXT, WrapperContext } from '../../models/field-signal-context.token';
 import { DynamicText } from '../../models/types/dynamic-text';

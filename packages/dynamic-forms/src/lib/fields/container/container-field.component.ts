@@ -15,7 +15,7 @@ import {
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { forkJoin, from, of, switchMap } from 'rxjs';
+import { catchError, forkJoin, from, of, switchMap } from 'rxjs';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
@@ -182,11 +182,13 @@ export default class ContainerFieldComponent {
     return forkJoin(
       wrappers.map((config) => {
         return from(this.loadWrapperComponent(config.type)).pipe(
+          catchError(() => of(null)),
           switchMap((component) => {
             if (!component) {
               this.logger.error(
                 `Wrapper type '${config.type}' could not be loaded. ` + `Ensure it is registered via provideDynamicForm().`,
               );
+
               return of(null);
             }
             return of({ config, component } as LoadedWrapper);
@@ -217,7 +219,10 @@ export default class ContainerFieldComponent {
     // Load and cache
     const result = await definition.loadComponent();
     const moduleResult = result as { default?: Type<unknown> } | Type<unknown>;
-    const component = (typeof moduleResult === 'object' && 'default' in moduleResult && moduleResult.default) || (result as Type<unknown>);
+    const component =
+      typeof moduleResult === 'object' && 'default' in moduleResult && moduleResult.default
+        ? moduleResult.default
+        : (result as Type<unknown>);
 
     if (component) {
       this.wrapperComponentCache.set(type, component);
