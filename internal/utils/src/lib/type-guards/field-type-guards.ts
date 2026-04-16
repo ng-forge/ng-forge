@@ -6,16 +6,16 @@
  */
 
 /** Default container field types used in dynamic forms */
-export const CONTAINER_FIELD_TYPES = ['page', 'row', 'group', 'array'] as const;
+export const CONTAINER_FIELD_TYPES = ['page', 'row', 'group', 'array', 'container'] as const;
 
 /**
- * Checks if a field is a container type (page, row, group, or array).
+ * Checks if a field is a container type (page, row, group, container, or array).
  *
  * Container fields have child fields and don't contribute values directly
  * to the form model.
  *
  * @param field - Any object with a `type` property
- * @param containerTypes - Optional custom list of container types (defaults to page, row, group, array)
+ * @param containerTypes - Optional custom list of container types (defaults to page, row, group, container, array)
  * @returns True if the field's type matches a container type
  *
  * @example

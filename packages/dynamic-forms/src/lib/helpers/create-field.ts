@@ -4,12 +4,12 @@ import { AvailableFieldTypes, ExtractField } from '../models';
 /**
  * Container field types that do NOT support labels
  */
-const CONTAINER_TYPES = ['group', 'row', 'array'] as const;
+const CONTAINER_TYPES = ['group', 'row', 'array', 'wrapper'] as const;
 
 /**
  * Container and page field types that only support 'hidden' logic
  */
-const HIDDEN_ONLY_LOGIC_TYPES = ['group', 'row', 'array', 'page'] as const;
+const HIDDEN_ONLY_LOGIC_TYPES = ['group', 'row', 'array', 'wrapper', 'page'] as const;
 
 /**
  * Field types that support options at the field level

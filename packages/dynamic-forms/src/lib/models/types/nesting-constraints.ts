@@ -23,7 +23,7 @@ export type PageAllowedChildren = LeafFieldTypes | RowField | GroupField | Array
  * Rows can contain: groups, arrays, and leaf fields (but NOT pages, other rows, or hidden fields)
  * Hidden fields are excluded because rows are for horizontal layouts and hidden fields don't render
  */
-export type RowAllowedChildren = Exclude<LeafFieldTypes, HiddenField> | GroupField | ArrayField | SimplifiedArrayField;
+export type RowAllowedChildren = Exclude<LeafFieldTypes, HiddenField> | GroupField | ArrayField | SimplifiedArrayField | WrapperField;
 
 /**
  * Fields that are allowed as children of Group fields
@@ -43,4 +43,4 @@ export type ArrayAllowedChildren = LeafFieldTypes | RowField | GroupField | Wrap
  * Wrappers follow the same rules as rows: groups, arrays, and leaf fields
  * (but NOT pages, rows, or hidden fields)
  */
-export type WrapperAllowedChildren = Exclude<LeafFieldTypes, HiddenField> | GroupField | ArrayField | SimplifiedArrayField;
+export type WrapperAllowedChildren = Exclude<LeafFieldTypes, HiddenField> | RowField | GroupField | ArrayField | SimplifiedArrayField;

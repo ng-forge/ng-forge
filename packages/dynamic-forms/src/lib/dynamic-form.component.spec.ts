@@ -14,6 +14,7 @@ import { FormResetEvent } from './events/constants/form-reset.event';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormStateManager } from './state/form-state-manager';
 import { EventBus } from './events/event.bus';
+import { FormConfig } from './models/form-config';
 
 // Test specific form config type
 type TestFormConfig = {
@@ -411,7 +412,7 @@ describe('DynamicFormComponent', () => {
             // Removed props object as test components don't support it
           },
         ],
-      } as any;
+      };
 
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
@@ -2157,7 +2158,7 @@ describe('DynamicFormComponent', () => {
             value: 'test',
           },
         ],
-      };
+      } as TestFormConfig;
 
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
@@ -2184,7 +2185,7 @@ describe('DynamicFormComponent', () => {
             wrappers: [],
           },
         ],
-      } as any;
+      } as TestFormConfig;
 
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
@@ -2206,7 +2207,7 @@ describe('DynamicFormComponent', () => {
             wrappers: [{ type: 'section', header: 'Contact' }],
           },
         ],
-      } as any;
+      } as TestFormConfig;
 
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
@@ -2242,7 +2243,7 @@ describe('DynamicFormComponent', () => {
             fields: [{ key: 'city', type: 'input', label: 'City', value: 'NYC' }],
           },
         ],
-      } as any;
+      } as TestFormConfig;
 
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
@@ -2272,7 +2273,7 @@ describe('DynamicFormComponent', () => {
             value: 'test',
           },
         ],
-      } as any;
+      } as TestFormConfig;
 
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
@@ -2306,7 +2307,7 @@ describe('DynamicFormComponent', () => {
             wrappers: [],
           },
         ],
-      } as any;
+      } as TestFormConfig;
 
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
@@ -2633,7 +2634,7 @@ describe('DynamicFormComponent', () => {
             value: 'test@example.com',
           },
         ],
-      };
+      } as TestFormConfig;
 
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
