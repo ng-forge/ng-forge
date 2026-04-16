@@ -6,10 +6,13 @@
 
 Core library for building type-safe, dynamic Angular forms with signal forms integration.
 
+[![CI](https://img.shields.io/github/actions/workflow/status/ng-forge/ng-forge/ci.yml?branch=main)](https://github.com/ng-forge/ng-forge/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/@ng-forge/dynamic-forms.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms)
 [![npm downloads](https://img.shields.io/npm/dm/@ng-forge/dynamic-forms.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@ng-forge/dynamic-forms)](https://bundlephobia.com/package/@ng-forge/dynamic-forms)
 [![Angular](https://img.shields.io/badge/Angular-21+-DD0031.svg)](https://angular.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Discord](https://img.shields.io/discord/1494269650555371582?color=7289da&label=Discord&logo=discord&logoColor=white)](https://discord.gg/qpzzvFagj3)
 
 > **Experimental API Notice:** This library uses Angular's experimental Signal Forms API.
 > Angular may introduce breaking changes in patch releases. Check the [compatibility matrix](#compatibility) below.
