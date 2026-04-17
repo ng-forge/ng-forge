@@ -13,7 +13,7 @@ The example here is a `section` wrapper that renders a titled card around any fi
 A wrapper is an Angular component whose template contains a `#fieldComponent` template reference pointing at a `ViewContainerRef`. The outlet creates the wrapper, finds the ref, and renders the next wrapper (or the field component) inside. Everything else — template, styling, DI — is yours.
 
 ```typescript name="section-wrapper.component.ts"
-import { ChangeDetectionStrategy, Component, computed, input, ViewContainerRef, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild } from '@angular/core';
 import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 
 @Component({
@@ -28,7 +28,6 @@ import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic
       </div>
     </div>
   `,
-  styleUrl: './section-wrapper.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class SectionWrapperComponent implements FieldWrapperContract {
@@ -87,6 +86,7 @@ A validation-aware section wrapper reads the field's validity:
 
 ```typescript name="section-wrapper.component.ts"
 import { ChangeDetectionStrategy, Component, computed, input, ViewContainerRef, viewChild } from '@angular/core';
+import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-section-wrapper',
@@ -103,7 +103,6 @@ import { ChangeDetectionStrategy, Component, computed, input, ViewContainerRef, 
       </div>
     </div>
   `,
-  styleUrl: './section-wrapper.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class SectionWrapperComponent implements FieldWrapperContract {
@@ -115,74 +114,19 @@ export default class SectionWrapperComponent implements FieldWrapperContract {
 }
 ```
 
-## Wrappers on container fields
+### Wrappers on container fields
 
-A wrapper around a `type: 'container'` field wraps a **children template**, not a single field. In that position the outlet doesn't know which field to surface through `fieldInputs` — so wrappers on containers don't receive it. If you still need form state there, inject `FIELD_SIGNAL_CONTEXT` directly:
+A wrapper around a `type: 'container'` field wraps a **children template**, not a single field — no single `field` is in scope, so containers don't push a `fieldInputs.field`. If you need to decorate a container based on form state, pass the relevant key(s) through config and look them up from the form tree, or inject `FIELD_SIGNAL_CONTEXT` when you need the broader form root. For most wrappers this isn't necessary — design them to take what they need as props.
 
-```typescript
-import { inject } from '@angular/core';
-import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
+## 4. Style the wrapped field
 
-export default class MyContainerWrapper implements FieldWrapperContract {
-  readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
-  private readonly ctx = inject(FIELD_SIGNAL_CONTEXT);
+Wrappers are ordinary Angular components — view-encapsulated styles, `:host` selectors, and global styles all work as usual. The wrapper-specific concern is **reaching across the encapsulation boundary** to the inner field, since Angular 21 removes `::ng-deep` from new projects. Three patterns cover it:
 
-  readonly formIsValid = computed(() => this.ctx.form().valid());
-}
-```
+- **CSS custom properties** — expose a `--field-spacing` (or similar) on the wrapper host; the field's component consumes it. Variables cross encapsulation boundaries by design, and the field doesn't need to know about the wrapper.
+- **A class on the child** — set the field's own `className` property. The field applies it to its own host; the wrapper never has to cross the boundary.
+- **Global styles** — declare the rules in a global stylesheet and let them match both sides.
 
-### `fieldInputs` vs `FIELD_SIGNAL_CONTEXT`
-
-|                                          | `fieldInputs` input                          | `FIELD_SIGNAL_CONTEXT` (injected)     |
-| ---------------------------------------- | -------------------------------------------- | ------------------------------------- |
-| Wrapper around a single field            | ✅ Use this — `fieldInputs()?.field`         | Works, but coarser (entire form tree) |
-| Wrapper around a container's children    | ❌ Not provided — use `FIELD_SIGNAL_CONTEXT` | ✅ Required                           |
-| Needs other mapper outputs (label, etc.) | ✅ `fieldInputs()?.label`                    | Not exposed here                      |
-| Needs the entire form root               | Not exposed                                  | ✅ `ctx.form().value()`               |
-
-## 4. Style the wrapper
-
-Wrappers are ordinary Angular components. The outlet creates them via `ViewContainerRef.createComponent()`, so every styling option works: Emulated view encapsulation (the default), `:host` selectors, global styles via the app stylesheet, CSS custom properties.
-
-A starting SCSS for the section wrapper:
-
-```scss name="section-wrapper.component.scss"
-:host {
-  display: block;
-}
-
-.section {
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 6px;
-  overflow: hidden;
-  background: #fff;
-
-  &--invalid {
-    border-color: rgb(220, 55, 55);
-  }
-}
-
-.section__header {
-  padding: 0.6rem 0.9rem;
-  font-weight: 600;
-  background: rgba(0, 0, 0, 0.03);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.section__body {
-  padding: 0.9rem;
-}
-```
-
-### Reaching the field inside
-
-With Angular 21, `::ng-deep` is removed from new projects. Three patterns cover almost every "style the wrapped field from the wrapper" need:
-
-- **CSS custom properties** — expose a `--field-spacing` (or similar) variable on the wrapper host; have the field's own component consume it. The field doesn't need to know about the wrapper; custom properties cross encapsulation boundaries by design.
-- **A class on the child** — pass a `className` through the field's own `className` property. The field applies it to its own host; the wrapper never has to cross the boundary.
-- **Global styles** — declare the rules in a global stylesheet and let them match both sides. Works when you don't need scoping.
-
-The library's own `RowWrapperComponent` [uses `:host-context(.modifier)` + global grid classes](https://github.com/ng-forge/ng-forge/blob/main/packages/dynamic-forms/src/lib/wrappers/row/row-wrapper.component.scss) to apply layout modifiers from an ancestor's `className` — a worked example of the first two patterns combined.
+The library's own `RowWrapperComponent` [uses `:host-context(.modifier)` + global grid classes](https://github.com/ng-forge/ng-forge/blob/main/packages/dynamic-forms/src/lib/wrappers/row/row-wrapper.component.scss) for a worked example.
 
 ## 5. Test the wrapper
 
@@ -190,7 +134,7 @@ Wrappers are components — test them with `TestBed` like any other. A minimal s
 
 ```typescript name="section-wrapper.component.spec.ts"
 import { TestBed } from '@angular/core/testing';
-import { Component, EnvironmentInjector, signal, viewChild, ViewContainerRef } from '@angular/core';
+import { Component, viewChild, ViewContainerRef } from '@angular/core';
 import SectionWrapperComponent from './section-wrapper.component';
 import type { WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 

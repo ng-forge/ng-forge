@@ -734,13 +734,13 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
   }
 
   *:not(pre) > code {
-    vertical-align: bottom;
+    vertical-align: baseline;
     border-radius: 4px;
     color: var(--forge-text);
-    padding: 2px 8px;
+    padding: 0.15em 0.45em;
     font-family: $doc-code-font;
-    font-size: 14px;
-    line-height: 20px;
+    font-size: 0.88em;
+    line-height: inherit;
     font-weight: 400;
     background: color-mix(in srgb, var(--forge-base-4) 15%, transparent);
     white-space: nowrap;
