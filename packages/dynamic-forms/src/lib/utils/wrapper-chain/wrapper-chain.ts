@@ -5,16 +5,39 @@ import { Logger } from '../../providers/features/logger/logger.interface';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
 
 /**
+ * Module-level cache keyed by component class. `reflectComponentType` returns
+ * immutable metadata per class, so we probe it once and reuse the resulting
+ * `Set<propName>` for every `setInputIfDeclared` call afterwards.
+ *
+ * SSR-safe: the WeakMap is keyed by the component class object — classes are
+ * created per Angular application bootstrap and GC'd with it, so this does not
+ * leak state between server renders.
+ */
+const inputNamesCache = new WeakMap<Type<unknown>, Set<string>>();
+
+function getDeclaredInputs(componentType: Type<unknown>): Set<string> {
+  let inputs = inputNamesCache.get(componentType);
+  if (!inputs) {
+    const meta = reflectComponentType(componentType);
+    inputs = new Set(meta?.inputs.map((i) => i.propName) ?? []);
+    inputNamesCache.set(componentType, inputs);
+  }
+  return inputs;
+}
+
+/**
  * Set an input on a ComponentRef only when the target component actually declares it.
  *
  * Angular's `ComponentRef.setInput()` throws NG0303 when the input is missing.
  * For config keys driven by user data (e.g. a wrapper config containing a prop
- * the wrapper doesn't care about) that would surface as a noisy runtime error,
- * so we probe the component's metadata via `reflectComponentType` (public API).
+ * the wrapper doesn't care about) that would surface as a noisy runtime error.
+ * We probe the component's metadata via `reflectComponentType` (public API),
+ * cached per component class — called once per input key per emission, so
+ * avoiding the reflection scan on each call is meaningful under heavy typing.
  */
 export function setInputIfDeclared(ref: ComponentRef<unknown>, inputName: string, value: unknown): void {
-  const meta = reflectComponentType(ref.componentType);
-  if (meta?.inputs.some((i) => i.propName === inputName)) {
+  const declared = getDeclaredInputs(ref.componentType);
+  if (declared.has(inputName)) {
     ref.setInput(inputName, value);
   }
 }

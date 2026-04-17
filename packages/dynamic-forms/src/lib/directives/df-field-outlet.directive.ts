@@ -82,6 +82,19 @@ export class DfFieldOutlet {
    * Promise resolves, the stale one bails out without touching the DOM.
    */
   private rebuildVersion = 0;
+  /**
+   * Version at which the current DOM was rendered. The rawInputs effect
+   * checks this before pushing — when render() has just applied the inputs
+   * itself, the effect would otherwise immediately re-push the same values
+   * (double work, signal churn). Set back to `-1` after a skip so the next
+   * rawInputs change pushes normally.
+   */
+  private renderedVersion = -1;
+  /** Last rawInputs reference pushed to the field — drives per-key diffing. */
+  private lastPushedInputs: Record<string, unknown> | undefined;
+  /** Cached fieldInputs view keyed by rawInputs identity. */
+  private cachedFieldInputsKey: Record<string, unknown> | undefined;
+  private cachedFieldInputs: WrapperFieldInputs | undefined;
 
   /**
    * Pre-computed effective wrapper chain. Uses reference-equal-per-element
@@ -118,6 +131,12 @@ export class DfFieldOutlet {
     // rebuild effect so per-keystroke input updates don't thrash the DOM.
     explicitEffect([this.rawInputs], ([rawInputs]) => {
       if (!this.fieldRef) return;
+      // When render() just applied this same rawInputs snapshot, skip the
+      // duplicate push that the sync fast-path would otherwise cause.
+      if (this.renderedVersion === this.rebuildVersion) {
+        this.renderedVersion = -1;
+        return;
+      }
       this.pushInputs(rawInputs);
     });
 
@@ -126,12 +145,20 @@ export class DfFieldOutlet {
 
   private scheduleRebuild(wrappers: readonly WrapperConfig[]): void {
     const version = ++this.rebuildVersion;
-    const load =
-      wrappers.length === 0
-        ? Promise.resolve<LoadedWrapper[]>([])
-        : firstValueFrom(loadWrapperComponents(wrappers, this.wrapperRegistry, this.wrapperComponentCache, this.logger));
 
-    load
+    // Sync fast-path: when every wrapper component is already cached (the
+    // common case after the first render), skip the microtask and render
+    // synchronously. Removes the one-tick delay that a reconciled
+    // ResolvedField — or a wrapper-identity change on already-registered
+    // types — would otherwise cost.
+    if (wrappers.length === 0 || wrappers.every((w) => this.wrapperComponentCache.has(w.type))) {
+      const loaded = wrappers.map((config) => ({ config, component: this.wrapperComponentCache.get(config.type)! }));
+      this.cleanup();
+      this.render(loaded);
+      return;
+    }
+
+    firstValueFrom(loadWrapperComponents(wrappers, this.wrapperRegistry, this.wrapperComponentCache, this.logger))
       .then((loaded) => {
         if (this.rebuildVersion !== version || this.destroyRef.destroyed) return;
         this.cleanup();
@@ -163,6 +190,9 @@ export class DfFieldOutlet {
         this.pushRawInputs(this.fieldRef, rawInputs);
       },
     });
+    // Mark this version as rendered so the rawInputs effect can skip its
+    // duplicate push when it runs next on the same rawInputs reference.
+    this.renderedVersion = this.rebuildVersion;
   }
 
   private pushInputs(rawInputs: Record<string, unknown>): void {
@@ -176,21 +206,38 @@ export class DfFieldOutlet {
   }
 
   private pushRawInputs(ref: ComponentRef<unknown>, rawInputs: Record<string, unknown>): void {
+    // Only push keys whose values actually changed since the previous emission.
+    // The mapper typically mutates one or two keys per tick; a full-sweep
+    // setInput fan-out would otherwise run the component's input signal
+    // pipeline for every unchanged key on every keystroke.
+    const last = this.lastPushedInputs;
     for (const [key, value] of Object.entries(rawInputs)) {
+      if (last && last[key] === value) continue;
       setInputIfDeclared(ref, key, value);
     }
+    this.lastPushedInputs = rawInputs;
   }
 
   private buildFieldInputs(rawInputs: Record<string, unknown>): WrapperFieldInputs {
+    // When the mapper emits the same rawInputs reference twice in a row (common
+    // under renderReady flipping or parent CD with no actual change), returning
+    // the cached view keeps every wrapper's `fieldInputs` input ref-stable and
+    // avoids cascading OnPush re-evaluations across the chain.
+    if (this.cachedFieldInputsKey === rawInputs && this.cachedFieldInputs) {
+      return this.cachedFieldInputs;
+    }
     const fieldTreeCandidate = rawInputs['field'];
     // A FieldTree is a callable (() => FieldState). We expose it to wrappers via a narrow
     // read-only view; raw FieldTree is still pushed to the innermost component for writes.
     const readonlyField =
       fieldTreeCandidate && typeof fieldTreeCandidate === 'function' ? toReadonlyFieldTree(fieldTreeCandidate as never) : undefined;
-    return {
+    const view = {
       ...(rawInputs as Record<string, unknown>),
       field: readonlyField,
     } as WrapperFieldInputs;
+    this.cachedFieldInputsKey = rawInputs;
+    this.cachedFieldInputs = view;
+    return view;
   }
 
   private cleanup(): void {
@@ -200,5 +247,9 @@ export class DfFieldOutlet {
     this.vcr.clear();
     this.wrapperRefs = [];
     this.fieldRef = undefined;
+    // Invalidate per-field caches — a new field instance will push fresh inputs.
+    this.lastPushedInputs = undefined;
+    this.cachedFieldInputsKey = undefined;
+    this.cachedFieldInputs = undefined;
   }
 }
