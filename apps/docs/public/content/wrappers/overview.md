@@ -8,19 +8,9 @@ Wrappers decorate a rendered field with extra UI chrome — a titled section, a 
 
 ## How a wrapper chain looks
 
-With `wrappers: [{ type: 'section' }, { type: 'css', cssClasses: 'highlight' }]` on a field, the outlet renders:
+With `wrappers: [{ type: 'section' }, { type: 'css' }]` on a field, the outlet plugs each wrapper into the previous one's `#fieldComponent` slot — outermost first, field component last:
 
-```
-┌─ <section wrapper>  ────────────────────────┐
-│  ┌─ <css wrapper "highlight">  ──────────┐  │
-│  │  ┌─ <field component>  ───────────┐   │  │
-│  │  │  (the actual input / select)   │   │  │
-│  │  └────────────────────────────────┘   │  │
-│  └───────────────────────────────────────┘  │
-└─────────────────────────────────────────────┘
-```
-
-The first entry is outermost, the last is innermost. Each wrapper's `#fieldComponent` slot hosts whatever comes next.
+<docs-wrapper-chain-visual></docs-wrapper-chain-visual>
 
 ## Quick shape
 

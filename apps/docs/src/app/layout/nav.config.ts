@@ -91,6 +91,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     label: 'Wrappers',
     path: 'wrappers',
+    badge: 'NEW',
     children: [
       { label: 'Overview', path: 'wrappers/overview' },
       { label: 'Registering and Applying', path: 'wrappers/registering-and-applying' },
@@ -117,7 +118,6 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'OpenAPI Generator',
     path: 'openapi-generator',
     cssClass: 'sidebar-link--openapi',
-    badge: 'NEW',
   },
   {
     label: 'API Reference',

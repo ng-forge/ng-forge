@@ -1,12 +1,33 @@
 :host {
   display: block;
+
+  // Theme tokens — consumers can override `--demo-section-*` on the host to
+  // retheme the wrapper without forking the component. Fallbacks cover the
+  // light theme; a `prefers-color-scheme: dark` block swaps them for dark.
+  --demo-section-bg: #fff;
+  --demo-section-border: rgba(0, 0, 0, 0.12);
+  --demo-section-header-text: #333;
+  --demo-section-header-bg-from: rgba(0, 0, 0, 0.03);
+  --demo-section-header-bg-to: rgba(0, 0, 0, 0.06);
+  --demo-section-header-border: rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --demo-section-bg: rgba(255, 255, 255, 0.03);
+    --demo-section-border: rgba(255, 255, 255, 0.12);
+    --demo-section-header-text: rgba(255, 255, 255, 0.88);
+    --demo-section-header-bg-from: rgba(255, 255, 255, 0.04);
+    --demo-section-header-bg-to: rgba(255, 255, 255, 0.07);
+    --demo-section-header-border: rgba(255, 255, 255, 0.08);
+  }
 }
 
 .demo-section {
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--demo-section-border);
   border-radius: 6px;
   overflow: hidden;
-  background: #fff;
+  background: var(--demo-section-bg);
   margin-bottom: 0.75rem;
 }
 
@@ -14,9 +35,9 @@
   padding: 0.6rem 0.9rem;
   font-weight: 600;
   font-size: 0.85rem;
-  color: #333;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.06));
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  color: var(--demo-section-header-text);
+  background: linear-gradient(180deg, var(--demo-section-header-bg-from), var(--demo-section-header-bg-to));
+  border-bottom: 1px solid var(--demo-section-header-border);
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }

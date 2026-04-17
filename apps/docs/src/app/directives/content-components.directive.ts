@@ -49,6 +49,11 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
     loadComponent: () => import('../components/cascade-visual/cascade-visual.component'),
   },
   {
+    selector: 'docs-wrapper-chain-visual',
+    defer: true,
+    loadComponent: () => import('../components/wrapper-chain-visual/wrapper-chain-visual.component'),
+  },
+  {
     selector: 'docs-nesting-rules',
     defer: true,
     loadComponent: () => import('../components/nesting-rules/nesting-rules.component'),
