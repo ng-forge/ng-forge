@@ -487,20 +487,23 @@ html:has(app-landing) .shiki span[style*='--shiki-dark:#545454'] {
 // ============================================
 // SHIKI DUAL-THEME (CodeHighlightDirective)
 // ============================================
-pre.shiki span {
+pre.shiki span,
+code.inline-code span {
   color: var(--shiki-light);
   font-style: var(--shiki-light-font-style, normal);
   font-weight: var(--shiki-light-font-weight, normal);
 }
 
-html[data-theme='dark'] pre.shiki span {
+html[data-theme='dark'] pre.shiki span,
+html[data-theme='dark'] code.inline-code span {
   color: var(--shiki-dark);
   font-style: var(--shiki-dark-font-style, normal);
   font-weight: var(--shiki-dark-font-weight, normal);
 }
 
 @media (prefers-color-scheme: dark) {
-  html[data-theme='auto'] pre.shiki span {
+  html[data-theme='auto'] pre.shiki span,
+  html[data-theme='auto'] code.inline-code span {
     color: var(--shiki-dark);
     font-style: var(--shiki-dark-font-style, normal);
     font-weight: var(--shiki-dark-font-weight, normal);

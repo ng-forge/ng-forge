@@ -22,7 +22,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
           <div class="wv__layer wv__layer--field">
             <div class="wv__row">
               <span class="wv__pill wv__pill--field">Field component</span>
-              <code class="wv__code wv__code--inverse">type: 'input'</code>
+              <code class="wv__code">type: 'input'</code>
             </div>
           </div>
         </div>
@@ -67,9 +67,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 
     .wv__layer--field {
       margin-top: 10px;
-      border-color: rgba(255, 77, 0, 0.55);
-      background: linear-gradient(135deg, rgba(255, 77, 0, 0.16), rgba(255, 107, 43, 0.08));
-      box-shadow: 0 4px 14px -8px rgba(255, 77, 0, 0.45);
+      border-color: rgba(255, 77, 0, 0.45);
+      background: color-mix(in srgb, $ember-glow 9%, transparent);
     }
 
     .wv__row {
@@ -103,20 +102,15 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     }
 
     .wv__pill--field {
-      background: linear-gradient(135deg, $ember-core, $ember-hot);
-      color: #fff;
-      border: 1.5px solid transparent;
-      box-shadow: 0 4px 10px -4px rgba(255, 77, 0, 0.55);
+      background: rgba(255, 77, 0, 0.18);
+      color: $ember-glow;
+      border: 1.5px solid rgba(255, 77, 0, 0.5);
     }
 
     .wv__code {
       font-family: $font-mono;
       font-size: 0.75rem;
       color: var(--forge-text-muted, #{$steel-mid});
-    }
-
-    .wv__code--inverse {
-      color: var(--forge-text, #{$steel});
     }
 
     .wv__caption {

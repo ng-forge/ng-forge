@@ -77,6 +77,31 @@ export class ShikiService {
   }
 
   /**
+   * Highlight inline code — returns just the tokenised inner HTML (without
+   * the `<pre><code>` wrapper) so the caller can slot it into an existing
+   * `<code>` element. Falls back to HTML-escaped plain text during SSR.
+   */
+  async highlightInline(code: string, lang: string): Promise<string> {
+    if (!this.isBrowser) {
+      return escapeHtml(code);
+    }
+    try {
+      const highlighter = await this.getHighlighter();
+      const resolvedLang = highlighter.getLoadedLanguages().includes(lang) ? lang : 'text';
+      const fullHtml = highlighter.codeToHtml(code, {
+        lang: resolvedLang,
+        themes: { light: 'material-theme-lighter', dark: 'material-theme-darker' },
+        defaultColor: false,
+      });
+      const match = fullHtml.match(/<code[^>]*>([\s\S]*?)<\/code>/);
+      return match ? match[1].replace(/^<span[^>]*class="line"[^>]*>([\s\S]*?)<\/span>\s*$/, '$1') : escapeHtml(code);
+    } catch (err) {
+      console.warn('[Shiki] Failed to highlight inline code:', err);
+      return escapeHtml(code);
+    }
+  }
+
+  /**
    * Highlight code with a single theme.
    * Returns plain code blocks during SSR.
    */

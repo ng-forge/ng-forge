@@ -203,16 +203,22 @@ export class ContentService {
   private async renderMarkdown(markdown: string): Promise<RenderedContent> {
     const headings: HeadingEntry[] = [];
 
-    // Pass 1: Lex markdown, extract code tokens, highlight with shiki
+    // Pass 1: Lex markdown, extract code tokens (block + inline), highlight with shiki
     const lexer = new Marked();
     const tokens = lexer.lexer(markdown);
     const codeTokens: Tokens.Code[] = [];
+    const codespanTexts = new Set<string>();
 
     const walkTokens = (tokenList: Tokens.Generic[]): void => {
       for (const token of tokenList) {
         if (token.type === 'code') {
           codeTokens.push(token as Tokens.Code);
+        } else if (token.type === 'codespan') {
+          codespanTexts.add((token as Tokens.Codespan).text);
         }
+        // Recurse into nested tokens (inline tokens inside block tokens)
+        const nested = (token as Tokens.Generic).tokens as Tokens.Generic[] | undefined;
+        if (Array.isArray(nested)) walkTokens(nested);
       }
     };
     walkTokens(tokens as Tokens.Generic[]);
@@ -227,6 +233,26 @@ export class ContentService {
         if (highlightedMap.has(key)) return;
         const html = await this.shiki.highlightCode(token.text, lang);
         highlightedMap.set(key, html);
+      }),
+    );
+
+    // Highlight inline codespans with shiki too, defaulting to TypeScript —
+    // most inline code in the docs is TS identifiers, type names, or short
+    // snippets. The result is the tokenised inner HTML which we splice into
+    // a `<code>` element via the codespan renderer below.
+    const inlineHighlightedMap = new Map<string, string>();
+    await Promise.all(
+      [...codespanTexts].map(async (text) => {
+        // Markdown codespans arrive with HTML entities like `&lt;`; shiki
+        // needs the raw text to tokenise correctly.
+        const decoded = text
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'");
+        const html = await this.shiki.highlightInline(decoded, 'typescript');
+        inlineHighlightedMap.set(text, html);
       }),
     );
 
@@ -257,6 +283,14 @@ export class ContentService {
               `</svg></button>`
             : '';
         return `<h${depth} id="${id}">${innerHtml}${anchor}</h${depth}>`;
+      },
+      codespan({ text }: Tokens.Codespan): string {
+        // Prefer the shiki-tokenised inner HTML so inline `Foo<Bar>` gets
+        // the same syntax colours as a fenced block would. Fall back to
+        // the raw text (already HTML-escaped by marked) when shiki isn't
+        // available (SSR, missing language).
+        const highlighted = inlineHighlightedMap.get(text);
+        return `<code class="inline-code">${highlighted ?? text}</code>`;
       },
       code({ text, lang: rawLang }: Tokens.Code): string {
         const lang = (rawLang ?? '').split(/\s+/)[0] || 'text';
@@ -321,30 +355,52 @@ export class ContentService {
   }
 
   /**
-   * Post-hydration: replace plain <pre><code> blocks (from SSR) with Shiki-highlighted versions.
-   * Finds all code blocks rendered by the Marked code renderer (wrapped in .code-block-wrapper)
-   * and re-highlights them using the client-side Shiki instance.
+   * Post-hydration: replace plain <pre><code> blocks (from SSR) with Shiki-highlighted versions,
+   * and tokenise inline `.inline-code` spans too. Runs once on the client after hydration, so
+   * SSR stays cheap (plain text) while the browser sees full syntax colours.
    */
   private async reHighlightCodeBlocks(html: string): Promise<string> {
-    // Match code blocks: <div class="code-block-wrapper">...<pre><code class="language-xxx">CODE</code></pre></div>
-    const codeBlockPattern = /<pre><code class="language-([\w-]+)">([\s\S]*?)<\/code><\/pre>/g;
-    const matches = [...html.matchAll(codeBlockPattern)];
-    if (matches.length === 0) return html;
-
     let result = html;
-    // Process all code blocks in parallel
-    const replacements = await Promise.all(
-      matches.map(async (match) => {
-        const lang = match[1];
-        const encoded = match[2];
+
+    // Code blocks: <pre><code class="language-xxx">CODE</code></pre>
+    const codeBlockPattern = /<pre><code class="language-([\w-]+)">([\s\S]*?)<\/code><\/pre>/g;
+    const blockMatches = [...result.matchAll(codeBlockPattern)];
+    if (blockMatches.length > 0) {
+      const replacements = await Promise.all(
+        blockMatches.map(async (match) => {
+          const lang = match[1];
+          const decoded = decodeHtmlEntities(match[2]);
+          const highlighted = await this.shiki.highlightCode(decoded, lang);
+          return { original: match[0], replacement: highlighted };
+        }),
+      );
+      for (const { original, replacement } of replacements) {
+        result = result.replace(original, replacement);
+      }
+    }
+
+    // Inline code spans: <code class="inline-code">TEXT</code> — default to
+    // TypeScript so short identifiers, type names and config literals get
+    // the same token colours as the fenced blocks would.
+    const inlinePattern = /<code class="inline-code">([\s\S]*?)<\/code>/g;
+    const inlineMatches = [...result.matchAll(inlinePattern)];
+    if (inlineMatches.length === 0) return result;
+
+    const unique = new Set(inlineMatches.map((m) => m[1]));
+    const highlightedByText = new Map<string, string>();
+    await Promise.all(
+      [...unique].map(async (encoded) => {
         const decoded = decodeHtmlEntities(encoded);
-        const highlighted = await this.shiki.highlightCode(decoded, lang);
-        return { original: match[0], replacement: highlighted };
+        const highlighted = await this.shiki.highlightInline(decoded, 'typescript');
+        highlightedByText.set(encoded, highlighted);
       }),
     );
-    for (const { original, replacement } of replacements) {
-      result = result.replace(original, replacement);
-    }
+
+    result = result.replace(inlinePattern, (_match, text) => {
+      const highlighted = highlightedByText.get(text);
+      return `<code class="inline-code">${highlighted ?? text}</code>`;
+    });
+
     return result;
   }
 }
