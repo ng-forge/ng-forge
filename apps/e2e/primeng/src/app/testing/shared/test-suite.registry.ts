@@ -8,6 +8,7 @@ import { errorHandlingSuite } from '../error-handling/error-handling.suite';
 import { fieldMetaSuite } from '../field-meta/field-meta.suite';
 import { groupFieldsSuite } from '../group-fields/group-fields.suite';
 import { submissionBehaviorSuite } from '../submission-behavior/submission-behavior.suite';
+import { wrapperFieldsSuite } from '../wrapper-fields/wrapper-fields.suite';
 
 /**
  * Registry of all visual/UI test suites in the PrimeNG app.
@@ -21,4 +22,5 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   fieldMetaSuite,
   groupFieldsSuite,
   submissionBehaviorSuite,
+  wrapperFieldsSuite,
 ];
