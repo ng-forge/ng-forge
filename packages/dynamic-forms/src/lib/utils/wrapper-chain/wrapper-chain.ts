@@ -7,7 +7,14 @@ import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
 /**
  * Module-level cache keyed by component class. `reflectComponentType` returns
  * immutable metadata per class, so we probe it once and reuse the resulting
- * `Set<propName>` for every `setInputIfDeclared` call afterwards.
+ * `Set<templateName>` for every `setInputIfDeclared` call afterwards.
+ *
+ * We cache `templateName` (the public input name, aka alias) rather than
+ * `propName` (the class field name) because `ComponentRef.setInput()` keys by
+ * the public name — that's also the name wrapper configs use. An aliased
+ * input declared as `input(..., { alias: 'header' })` with class field
+ * `headerText` must be addressed as `'header'`; caching `propName` would
+ * leave the alias out of the declared set and silently drop config values.
  *
  * SSR-safe: the WeakMap is keyed by the component class object — classes are
  * created per Angular application bootstrap and GC'd with it, so this does not
@@ -19,7 +26,7 @@ function getDeclaredInputs(componentType: Type<unknown>): Set<string> {
   let inputs = inputNamesCache.get(componentType);
   if (!inputs) {
     const meta = reflectComponentType(componentType);
-    inputs = new Set(meta?.inputs.map((i) => i.propName) ?? []);
+    inputs = new Set(meta?.inputs.map((i) => i.templateName) ?? []);
     inputNamesCache.set(componentType, inputs);
   }
   return inputs;

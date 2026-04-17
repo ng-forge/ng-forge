@@ -120,6 +120,10 @@ export class DfFieldOutlet {
     // ResolvedField carries the same component + wrappers as before.
     explicitEffect([this.componentIdentity, this.effectiveWrappers, this.renderReady], ([, wrappers, ready]) => {
       if (!ready) {
+        // Bump the version so any in-flight async wrapper load from a prior
+        // `ready = true` tick fails its staleness guard and does not touch
+        // the DOM after we've torn it down.
+        ++this.rebuildVersion;
         this.cleanup();
         return;
       }
