@@ -2,7 +2,7 @@
  * Exhaustive type tests for MatSelect field.
  */
 import { expectTypeOf } from 'vitest';
-import type { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
+import type { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 import type {
   DynamicText,
   FieldOption,
@@ -21,7 +21,16 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('MatSelectProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'appearance' | 'multiple' | 'panelMaxHeight' | 'subscriptSizing' | 'compareWith' | 'hint' | 'placeholder';
+  type ExpectedKeys =
+    | 'appearance'
+    | 'multiple'
+    | 'panelMaxHeight'
+    | 'subscriptSizing'
+    | 'floatLabel'
+    | 'hideRequiredMarker'
+    | 'compareWith'
+    | 'hint'
+    | 'placeholder';
   type ActualKeys = keyof MatSelectProps;
 
   it('should have exactly the expected keys', () => {
@@ -47,6 +56,14 @@ describe('MatSelectProps - Exhaustive Whitelist', () => {
 
     it('subscriptSizing', () => {
       expectTypeOf<MatSelectProps['subscriptSizing']>().toEqualTypeOf<SubscriptSizing | undefined>();
+    });
+
+    it('floatLabel', () => {
+      expectTypeOf<MatSelectProps['floatLabel']>().toEqualTypeOf<FloatLabelType | undefined>();
+    });
+
+    it('hideRequiredMarker', () => {
+      expectTypeOf<MatSelectProps['hideRequiredMarker']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('compareWith', () => {

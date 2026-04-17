@@ -17,7 +17,12 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
     @let f = field();
     @let selectId = key() + '-select';
 
-    <mat-form-field [appearance]="effectiveAppearance()" [subscriptSizing]="effectiveSubscriptSizing()">
+    <mat-form-field
+      [appearance]="effectiveAppearance()"
+      [subscriptSizing]="effectiveSubscriptSizing()"
+      [floatLabel]="effectiveFloatLabel()"
+      [hideRequiredMarker]="effectiveHideRequiredMarker()"
+    >
       @if (label(); as label) {
         <mat-label>{{ label | dynamicText | async }}</mat-label>
       }
@@ -84,6 +89,12 @@ export default class MatSelectFieldComponent implements MatSelectComponent {
   readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
 
   readonly effectiveSubscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');
+
+  readonly effectiveFloatLabel = computed(() => this.props()?.floatLabel ?? this.materialConfig?.floatLabel ?? 'auto');
+
+  readonly effectiveHideRequiredMarker = computed(
+    () => this.props()?.hideRequiredMarker ?? this.materialConfig?.hideRequiredMarker ?? false,
+  );
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

@@ -2,7 +2,7 @@
  * Exhaustive type tests for MatDatepicker field.
  */
 import { expectTypeOf } from 'vitest';
-import type { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
+import type { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { MatDatepickerProps, MatDatepickerField } from './mat-datepicker.type';
@@ -13,7 +13,17 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('MatDatepickerProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'appearance' | 'color' | 'disableRipple' | 'subscriptSizing' | 'startView' | 'touchUi' | 'hint' | 'placeholder';
+  type ExpectedKeys =
+    | 'appearance'
+    | 'color'
+    | 'disableRipple'
+    | 'subscriptSizing'
+    | 'floatLabel'
+    | 'hideRequiredMarker'
+    | 'startView'
+    | 'touchUi'
+    | 'hint'
+    | 'placeholder';
   type ActualKeys = keyof MatDatepickerProps;
 
   it('should have exactly the expected keys', () => {
@@ -39,6 +49,14 @@ describe('MatDatepickerProps - Exhaustive Whitelist', () => {
 
     it('subscriptSizing', () => {
       expectTypeOf<MatDatepickerProps['subscriptSizing']>().toEqualTypeOf<SubscriptSizing | undefined>();
+    });
+
+    it('floatLabel', () => {
+      expectTypeOf<MatDatepickerProps['floatLabel']>().toEqualTypeOf<FloatLabelType | undefined>();
+    });
+
+    it('hideRequiredMarker', () => {
+      expectTypeOf<MatDatepickerProps['hideRequiredMarker']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('startView', () => {

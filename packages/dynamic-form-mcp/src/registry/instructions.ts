@@ -407,7 +407,8 @@ Different UI libraries support different properties. Always validate against the
 |----------|----------|-----------|---------|-------|
 | \`appearance\` | ✓ (fill, outline) | ✗ | ✗ | ✓ (fill, outline) |
 | \`subscriptSizing\` | ✓ | ✗ | ✗ | ✗ |
-| \`floatLabel\` | ✓ | ✗ | ✓ | ✗ |
+| \`floatLabel\` | ✓ (auto, always, never) | ✗ | ✗ | ✗ |
+| \`hideRequiredMarker\` | ✓ | ✗ | ✗ | ✗ |
 | \`hint\` | ✓ | ✓ (as \`helpText\`) | ✓ | ✓ |
 
 ### Container Fields

@@ -1,11 +1,13 @@
 import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
 import { TextareaField, TextareaProps } from '@ng-forge/dynamic-forms/integration';
-import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
+import { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 
 export interface MatTextareaProps extends TextareaProps {
   hint?: DynamicText;
   appearance?: MatFormFieldAppearance;
   subscriptSizing?: SubscriptSizing;
+  floatLabel?: FloatLabelType;
+  hideRequiredMarker?: boolean;
   rows?: number;
   cols?: number;
   resize?: 'none' | 'both' | 'horizontal' | 'vertical';

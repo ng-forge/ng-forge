@@ -2,7 +2,7 @@
  * Exhaustive type tests for MatTextarea field.
  */
 import { expectTypeOf } from 'vitest';
-import type { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
+import type { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { MatTextareaProps, MatTextareaField } from './mat-textarea.type';
@@ -13,7 +13,17 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('MatTextareaProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'hint' | 'appearance' | 'subscriptSizing' | 'rows' | 'cols' | 'resize' | 'maxLength' | 'placeholder';
+  type ExpectedKeys =
+    | 'hint'
+    | 'appearance'
+    | 'subscriptSizing'
+    | 'floatLabel'
+    | 'hideRequiredMarker'
+    | 'rows'
+    | 'cols'
+    | 'resize'
+    | 'maxLength'
+    | 'placeholder';
   type ActualKeys = keyof MatTextareaProps;
 
   it('should have exactly the expected keys', () => {
@@ -35,6 +45,14 @@ describe('MatTextareaProps - Exhaustive Whitelist', () => {
 
     it('subscriptSizing', () => {
       expectTypeOf<MatTextareaProps['subscriptSizing']>().toEqualTypeOf<SubscriptSizing | undefined>();
+    });
+
+    it('floatLabel', () => {
+      expectTypeOf<MatTextareaProps['floatLabel']>().toEqualTypeOf<FloatLabelType | undefined>();
+    });
+
+    it('hideRequiredMarker', () => {
+      expectTypeOf<MatTextareaProps['hideRequiredMarker']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('rows', () => {
