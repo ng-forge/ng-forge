@@ -13,8 +13,8 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { DfFieldOutlet } from '../../directives/df-field-outlet.directive';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs';
+import { explicitEffect } from 'ngxtension/explicit-effect';
+import { firstValueFrom } from 'rxjs';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
@@ -23,10 +23,11 @@ import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-fi
 import { EventBus } from '../../events/event.bus';
 import { FieldDef } from '../../definitions/base/field-def';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY } from '../../models/wrapper-type';
+import { WrapperConfig, WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY } from '../../models/wrapper-type';
 import { DEFAULT_WRAPPERS } from '../../models/field-signal-context.token';
 import { loadWrapperComponents, LoadedWrapper, renderWrapperChain } from '../../utils/wrapper-chain/wrapper-chain';
 import { resolveEffectiveWrappers } from '../../utils/resolve-effective-wrappers/resolve-effective-wrappers';
+import type { Signal } from '@angular/core';
 
 /**
  * Layout container that wraps child fields with UI chrome.
@@ -134,6 +135,22 @@ export default class ContainerFieldComponent {
   // ─────────────────────────────────────────────────────────────────────────────
 
   private wrapperComponentRefs: ComponentRef<unknown>[] = [];
+  /**
+   * Monotonic rebuild guard — the async wrapper load checks this before
+   * mutating the DOM and bails out if a newer rebuild has since been scheduled.
+   */
+  private rebuildVersion = 0;
+
+  /**
+   * Memoised effective wrapper chain. Element-wise identity comparison keeps
+   * the signal stable across `field()` reference changes that don't actually
+   * change the chain — aligns with DfFieldOutlet so reconciled containers
+   * don't tear down the chain when nothing meaningful changed.
+   */
+  private readonly effectiveWrappers: Signal<readonly WrapperConfig[]> = computed(
+    () => resolveEffectiveWrappers(this.field(), this.defaultWrappersSignal?.(), this.wrapperAutoAssociations),
+    { equal: (a, b) => a.length === b.length && a.every((w, i) => w === b[i]) },
+  );
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Constructor
@@ -154,21 +171,33 @@ export default class ContainerFieldComponent {
 
   private setupWrapperChain(): void {
     // Merge field-level wrappers with form-level defaultWrappers + auto-associations
-    // so containers behave symmetrically with DfFieldOutlet. `wrappers: null` on the
-    // ContainerField would clear the chain, but that shape isn't currently allowed by
-    // the type (container wrappers are required); resolveEffectiveWrappers handles both.
-    const effectiveWrappers$ = toObservable(
-      computed(() => resolveEffectiveWrappers(this.field(), this.defaultWrappersSignal?.(), this.wrapperAutoAssociations)),
-    );
-
-    effectiveWrappers$
-      .pipe(
-        switchMap((configs) => loadWrapperComponents(configs, this.wrapperRegistry, this.wrapperComponentCache, this.logger)),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((loadedWrappers) => this.buildWrapperChain(loadedWrappers));
-
+    // so containers behave symmetrically with DfFieldOutlet. explicitEffect +
+    // memoed effectiveWrappers matches the outlet's convention and skips the
+    // rebuild when effectiveWrappers is structurally the same.
+    explicitEffect([this.effectiveWrappers], ([wrappers]) => this.scheduleRebuild(wrappers));
     this.destroyRef.onDestroy(() => this.cleanupWrapperChain());
+  }
+
+  private scheduleRebuild(wrappers: readonly WrapperConfig[]): void {
+    const version = ++this.rebuildVersion;
+
+    // Sync fast-path: when every wrapper component is already cached (the
+    // common case after the first render), skip the microtask and render
+    // synchronously.
+    if (wrappers.length === 0 || wrappers.every((w) => this.wrapperComponentCache.has(w.type))) {
+      const loaded = wrappers.map((config) => ({ config, component: this.wrapperComponentCache.get(config.type)! }));
+      this.buildWrapperChain(loaded);
+      return;
+    }
+
+    firstValueFrom(loadWrapperComponents(wrappers, this.wrapperRegistry, this.wrapperComponentCache, this.logger))
+      .then((loaded) => {
+        if (this.rebuildVersion !== version || this.destroyRef.destroyed) return;
+        this.buildWrapperChain(loaded);
+      })
+      .catch(() => {
+        /* loadWrapperComponents already logs; skip rebuild silently */
+      });
   }
 
   private buildWrapperChain(wrappers: readonly LoadedWrapper[]): void {
