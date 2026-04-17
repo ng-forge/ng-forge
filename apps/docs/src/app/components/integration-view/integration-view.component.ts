@@ -36,6 +36,8 @@ export const appConfig: ApplicationConfig = {
       { name: 'color', description: "Theme palette ('primary', 'accent', 'warn') for checkbox, toggle, radio, and slider" },
       { name: 'labelPosition', description: "Label placement ('before' | 'after') on checkbox, radio, and multi-checkbox" },
       { name: 'subscriptSizing', description: "'fixed' reserves space for hint/error; 'dynamic' collapses when empty" },
+      { name: 'floatLabel', description: "'auto', 'always', or 'never' label float behavior" },
+      { name: 'hideRequiredMarker', description: 'Hide the required asterisk on form fields' },
       { name: 'hint', description: 'Helper text below any field' },
     ],
   },

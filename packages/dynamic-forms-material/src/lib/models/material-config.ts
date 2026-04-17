@@ -1,4 +1,4 @@
-import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
+import { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 import { ThemePalette } from '@angular/material/core';
 
 /**
@@ -52,4 +52,16 @@ export interface MaterialConfig {
    * @default 'after'
    */
   labelPosition?: 'before' | 'after';
+
+  /**
+   * Default float label behavior for form fields
+   * @default 'auto'
+   */
+  floatLabel?: FloatLabelType;
+
+  /**
+   * Whether to hide the required marker by default
+   * @default false
+   */
+  hideRequiredMarker?: boolean;
 }

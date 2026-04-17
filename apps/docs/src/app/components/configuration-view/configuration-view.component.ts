@@ -72,6 +72,18 @@ const config = {
         default: "'after'",
         description: 'Default label position for checkboxes and radios',
       },
+      {
+        name: 'floatLabel',
+        type: "'auto' | 'always' | 'never'",
+        default: "'auto'",
+        description: "Default float label behavior for Material form fields ('auto', 'always', or 'never')",
+      },
+      {
+        name: 'hideRequiredMarker',
+        type: 'boolean',
+        default: 'false',
+        description: 'Hide the required asterisk on form fields by default',
+      },
     ],
   },
   bootstrap: {
