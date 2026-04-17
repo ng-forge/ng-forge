@@ -14469,19 +14469,9 @@ Wrappers decorate a rendered field with extra UI chrome — a titled section, a 
 
 ## How a wrapper chain looks
 
-With `wrappers: [{ type: 'section' }, { type: 'css', cssClasses: 'highlight' }]` on a field, the outlet renders:
+With `wrappers: [{ type: 'section' }, { type: 'css' }]` on a field, the outlet plugs each wrapper into the previous one's `#fieldComponent` slot — outermost first, field component last:
 
-```
-┌─ <section wrapper>  ────────────────────────┐
-│  ┌─ <css wrapper "highlight">  ──────────┐  │
-│  │  ┌─ <field component>  ───────────┐   │  │
-│  │  │  (the actual input / select)   │   │  │
-│  │  └────────────────────────────────┘   │  │
-│  └───────────────────────────────────────┘  │
-└─────────────────────────────────────────────┘
-```
-
-The first entry is outermost, the last is innermost. Each wrapper's `#fieldComponent` slot hosts whatever comes next.
+<docs-wrapper-chain-visual></docs-wrapper-chain-visual>
 
 ## Quick shape
 
@@ -14534,8 +14524,8 @@ Wrappers are SSR-safe. The component cache (`WRAPPER_COMPONENT_CACHE`) and regis
 
 ## Next
 
-1. **[Registering and applying wrappers](/wrappers/registering-and-applying)** — `createWrappers(…)`, module augmentation, `wrappers` on a field, `defaultWrappers`, auto-associations, opting out.
-2. **Advanced:** **[Writing a wrapper](/wrappers/writing-a-wrapper)** — build your own wrapper component from scratch.
+1. **[Writing a wrapper](/wrappers/writing-a-wrapper)** — build your own wrapper component: the contract, reading field state, styling, testing.
+2. **[Registering and applying wrappers](/wrappers/registering-and-applying)** — `createWrappers(…)`, module augmentation, `wrappers` on a field, `defaultWrappers`, auto-associations, opting out.
 
 --- wrappers/registering-and-applying ---
 
@@ -14679,11 +14669,14 @@ The form below sets `defaultWrappers: [{ type: 'css', cssClasses: 'demo-field' }
 - **Typed config prop is silently ignored.** A typo in a config key (`{ type: 'section', tilte: 'Hi' }`) renders the wrapper with no title and no error — unknown keys are dropped by design to tolerate cross-wrapper config drift. Run `tsc --noEmit` to catch the misspelling statically.
 - **Wrapper re-renders on every keystroke.** Expected when the wrapper reads a mapper-driven input directly — read only the signals you need inside a `computed()` and rely on signal equality to short-circuit downstream reactivity.
 
+## Where to go from here
+
+- Back to **[Writing a wrapper](/wrappers/writing-a-wrapper)** for the component contract and field-state reading patterns.
+- **[Recipes → Adding Custom Fields](/recipes/custom-fields)** when a new wrapper isn't enough — you need a brand-new control.
+
 --- wrappers/writing-a-wrapper ---
 
-Build a custom wrapper component that decorates any dynamic form field. This page walks through the contract, the data that flows in, and the common extensions (validation-aware chrome, styling, tests).
-
-Prerequisite: you've read **[Registering and applying wrappers](/wrappers/registering-and-applying)** — this page assumes you know how to pass a wrapper to `provideDynamicForm(...)`.
+Build a custom wrapper component that decorates any dynamic form field. This page walks through the contract, the data that flows in, and the common extensions (validation-aware chrome, styling, tests). Once the component exists, **[Registering and applying wrappers](/wrappers/registering-and-applying)** covers how to make it available to a form.
 
 The example here is a `section` wrapper that renders a titled card around any field.
 
@@ -14896,12 +14889,8 @@ describe('SectionWrapperComponent', () => {
 
 For integration tests that exercise wrappers inside a live form (mapper + outlet + chain), the library's own [`container-field.component.spec.ts`](https://github.com/ng-forge/ng-forge/blob/main/packages/dynamic-forms/src/lib/fields/container/container-field.component.spec.ts) is a larger example — mock wrapper components, a `flushWrapperChain` helper, and assertions against the rendered chain.
 
-## Merge order reminder
-
-When this wrapper lives on a real field, its position in the rendered chain depends on the merge order — auto-associations outermost, `FormConfig.defaultWrappers` next, field-level `wrappers` innermost. See [Registering and applying → Merge order](/wrappers/registering-and-applying#merge-order) for the full picture.
-
 ## Next
 
 You've built, styled, and tested a custom wrapper — now register it and reach for it in a form:
 
-- **[Registering and applying wrappers](/wrappers/registering-and-applying)**
+- **[Registering and applying wrappers](/wrappers/registering-and-applying)** — wire the wrapper into `provideDynamicForm`, apply it per-field or via form-wide defaults, opt out with `wrappers: null`, and understand the merge order when multiple sources stack.

@@ -63,5 +63,5 @@ Wrappers are SSR-safe. The component cache (`WRAPPER_COMPONENT_CACHE`) and regis
 
 ## Next
 
-1. **[Registering and applying wrappers](/wrappers/registering-and-applying)** — `createWrappers(…)`, module augmentation, `wrappers` on a field, `defaultWrappers`, auto-associations, opting out.
-2. **Advanced:** **[Writing a wrapper](/wrappers/writing-a-wrapper)** — build your own wrapper component from scratch.
+1. **[Writing a wrapper](/wrappers/writing-a-wrapper)** — build your own wrapper component: the contract, reading field state, styling, testing.
+2. **[Registering and applying wrappers](/wrappers/registering-and-applying)** — `createWrappers(…)`, module augmentation, `wrappers` on a field, `defaultWrappers`, auto-associations, opting out.

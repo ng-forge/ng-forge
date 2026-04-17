@@ -4,9 +4,7 @@ slug: wrappers/writing-a-wrapper
 description: 'Build a custom wrapper component that decorates any dynamic form field. Walks through the component contract, config inputs, reading form state, styling, and testing.'
 ---
 
-Build a custom wrapper component that decorates any dynamic form field. This page walks through the contract, the data that flows in, and the common extensions (validation-aware chrome, styling, tests).
-
-Prerequisite: you've read **[Registering and applying wrappers](/wrappers/registering-and-applying)** — this page assumes you know how to pass a wrapper to `provideDynamicForm(...)`.
+Build a custom wrapper component that decorates any dynamic form field. This page walks through the contract, the data that flows in, and the common extensions (validation-aware chrome, styling, tests). Once the component exists, **[Registering and applying wrappers](/wrappers/registering-and-applying)** covers how to make it available to a form.
 
 The example here is a `section` wrapper that renders a titled card around any field.
 
@@ -219,12 +217,8 @@ describe('SectionWrapperComponent', () => {
 
 For integration tests that exercise wrappers inside a live form (mapper + outlet + chain), the library's own [`container-field.component.spec.ts`](https://github.com/ng-forge/ng-forge/blob/main/packages/dynamic-forms/src/lib/fields/container/container-field.component.spec.ts) is a larger example — mock wrapper components, a `flushWrapperChain` helper, and assertions against the rendered chain.
 
-## Merge order reminder
-
-When this wrapper lives on a real field, its position in the rendered chain depends on the merge order — auto-associations outermost, `FormConfig.defaultWrappers` next, field-level `wrappers` innermost. See [Registering and applying → Merge order](/wrappers/registering-and-applying#merge-order) for the full picture.
-
 ## Next
 
 You've built, styled, and tested a custom wrapper — now register it and reach for it in a form:
 
-- **[Registering and applying wrappers](/wrappers/registering-and-applying)**
+- **[Registering and applying wrappers](/wrappers/registering-and-applying)** — wire the wrapper into `provideDynamicForm`, apply it per-field or via form-wide defaults, opt out with `wrappers: null`, and understand the merge order when multiple sources stack.

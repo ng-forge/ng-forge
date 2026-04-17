@@ -143,3 +143,8 @@ The form below sets `defaultWrappers: [{ type: 'css', cssClasses: 'demo-field' }
 - **Wrapper config isn't typed.** Confirm the `declare module` block runs (TypeScript only picks up augmentations from files that are actually imported). Re-exporting `appWrappers` from an entry module is enough.
 - **Typed config prop is silently ignored.** A typo in a config key (`{ type: 'section', tilte: 'Hi' }`) renders the wrapper with no title and no error — unknown keys are dropped by design to tolerate cross-wrapper config drift. Run `tsc --noEmit` to catch the misspelling statically.
 - **Wrapper re-renders on every keystroke.** Expected when the wrapper reads a mapper-driven input directly — read only the signals you need inside a `computed()` and rely on signal equality to short-circuit downstream reactivity.
+
+## Where to go from here
+
+- Back to **[Writing a wrapper](/wrappers/writing-a-wrapper)** for the component contract and field-state reading patterns.
+- **[Recipes → Adding Custom Fields](/recipes/custom-fields)** when a new wrapper isn't enough — you need a brand-new control.

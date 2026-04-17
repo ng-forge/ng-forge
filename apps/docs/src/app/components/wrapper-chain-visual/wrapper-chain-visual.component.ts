@@ -54,8 +54,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 
     .wv {
       display: block;
-      margin: 24px 0;
-      padding: 24px 22px 20px;
+      margin: 32px 0;
+      padding: 32px 28px 28px;
       border-radius: 14px;
       background: var(--forge-base-1, #{$bg-surface});
       border: 1px solid var(--forge-border-color, #{$steel-dark});
@@ -92,9 +92,9 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     .wv__head {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 1rem;
       flex-wrap: wrap;
-      padding: 0.6rem 0.9rem;
+      padding: 0.9rem 1.25rem;
       background: color-mix(in srgb, currentColor 5%, transparent);
       border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent);
     }
@@ -104,25 +104,27 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       border-bottom-color: rgba(255, 77, 0, 0.25);
     }
 
-    // Body hosts the next nested layer (or the field preview).
+    // Body hosts the next nested layer (or the field preview). Generous
+    // padding so the nested layer does not butt up against the card edges
+    // and the slot label has breathing room above the next layer.
     .wv__body {
       position: relative;
-      padding: 0.85rem 1rem 1rem;
+      padding: 1.5rem 1.5rem 1.5rem;
     }
 
     // Inline "slot" label shown above each nested layer — readers see where
     // each wrapper plugs the next one in via its fieldComponent slot.
     .wv__slot {
       display: inline-block;
-      margin-bottom: 0.5rem;
-      padding: 1px 8px;
+      margin-bottom: 1rem;
+      padding: 3px 10px;
       border-radius: 4px;
       font-family: $font-mono;
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       color: var(--forge-text-muted, #{$steel-mid});
-      opacity: 0.75;
-      background: color-mix(in srgb, currentColor 5%, transparent);
-      border: 1px dashed color-mix(in srgb, currentColor 15%, transparent);
+      opacity: 0.85;
+      background: color-mix(in srgb, currentColor 6%, transparent);
+      border: 1px dashed color-mix(in srgb, currentColor 18%, transparent);
     }
 
     .wv__pill {
@@ -167,7 +169,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     .wv__preview {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.6rem;
+      padding: 0.5rem 0;
     }
 
     .wv__preview-label {
@@ -192,7 +195,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     }
 
     .wv__caption {
-      margin: 0.75rem 0 0;
+      margin: 1.25rem 0 0;
       color: var(--forge-text-muted, #{$steel-mid});
       font-size: 0.75rem;
       text-align: center;

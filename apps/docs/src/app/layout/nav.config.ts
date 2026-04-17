@@ -94,8 +94,8 @@ export const NAV_ITEMS: NavItem[] = [
     badge: 'NEW',
     children: [
       { label: 'Overview', path: 'wrappers/overview' },
-      { label: 'Registering and Applying', path: 'wrappers/registering-and-applying' },
       { label: 'Writing a Wrapper', path: 'wrappers/writing-a-wrapper' },
+      { label: 'Registering and Applying', path: 'wrappers/registering-and-applying' },
     ],
   },
   {

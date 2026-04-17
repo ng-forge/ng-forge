@@ -253,6 +253,15 @@ html[data-theme='dark'] .example-frame {
   scrollbar-color: #{$ember-core} #f5f5f5;
 }
 
+html,
+body {
+  // Keep pages from horizontally scrolling. Tables, code blocks and any
+  // deliberately-wide content live inside their own scroll containers
+  // (e.g. `.table-scroll`, `pre`) — the page itself should not scroll
+  // sideways just because a child rounded past the viewport edge.
+  overflow-x: clip;
+}
+
 html {
   &::-webkit-scrollbar {
     width: 10px;
@@ -741,6 +750,28 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
       overflow-wrap: anywhere;
       word-break: break-word;
     }
+  }
+
+  // Code inside headings and table headers should blend with the header's
+  // typography rather than render as a grey chip. Keep the mono font,
+  // match the ember colour as the "this is code" marker, and use a
+  // slightly lighter weight so bold mono doesn't visually dominate.
+  h1 > code,
+  h2 > code,
+  h3 > code,
+  h4 > code,
+  h5 > code,
+  h6 > code,
+  th > code,
+  th *:not(pre) > code {
+    background: transparent;
+    padding: 0;
+    font-size: 0.82em;
+    line-height: 1;
+    font-weight: 500;
+    color: var(--forge-primary);
+    border-radius: 0;
+    vertical-align: baseline;
   }
 
   // Inside table cells, keep short tokens intact (nowrap on the code).
