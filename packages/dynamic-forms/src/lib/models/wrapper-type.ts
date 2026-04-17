@@ -40,7 +40,7 @@ export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredW
  * };
  * ```
  */
-export interface WrapperTypeDefinition<T extends WrapperConfig<any> = WrapperConfig<any>> {
+export interface WrapperTypeDefinition<T extends WrapperConfig = WrapperConfig> {
   /** Unique identifier for the wrapper type (also serves as discriminant from FieldTypeDefinition) */
   wrapperName: string;
   /** Wrapper definition type marker (internal use) */
@@ -119,8 +119,24 @@ export const WRAPPER_REGISTRY = new InjectionToken<Map<string, WrapperTypeDefini
  *
  * Caches resolved wrapper component classes for instant re-resolution.
  * SSR-safe because it's DI-scoped, not module-scoped.
+ *
+ * NOTE: The cache grows across the application lifetime. It's bounded by the
+ * number of wrapper types registered (typically small), so this is not a leak;
+ * the COMPONENT_CACHE for field types has the same shape.
  */
 export const WRAPPER_COMPONENT_CACHE = new InjectionToken<Map<string, Type<unknown>>>('WRAPPER_COMPONENT_CACHE', {
+  providedIn: 'root',
+  factory: () => new Map(),
+});
+
+/**
+ * Pre-computed reverse index: `fieldType → WrapperConfig[]` for every
+ * registered `WrapperTypeDefinition.types` entry. Built once in the
+ * `provideDynamicForm(...)` factory so `resolveEffectiveWrappers` can look
+ * up auto-associations in O(1) per field instead of scanning the full
+ * wrapper registry on every render.
+ */
+export const WRAPPER_AUTO_ASSOCIATIONS = new InjectionToken<ReadonlyMap<string, readonly WrapperConfig[]>>('WRAPPER_AUTO_ASSOCIATIONS', {
   providedIn: 'root',
   factory: () => new Map(),
 });

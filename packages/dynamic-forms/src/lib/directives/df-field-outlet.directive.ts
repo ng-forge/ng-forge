@@ -2,7 +2,7 @@ import { ComponentRef, DestroyRef, Directive, EnvironmentInjector, inject, input
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, of, switchMap } from 'rxjs';
 import { ResolvedField } from '../utils/resolve-field/resolve-field';
-import { WrapperConfig, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY } from '../models/wrapper-type';
+import { WrapperConfig, WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY } from '../models/wrapper-type';
 import { DEFAULT_WRAPPERS } from '../models/field-signal-context.token';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { LoadedWrapper, loadWrapperComponents, renderWrapperChain, setInputIfDeclared } from '../utils/wrapper-chain/wrapper-chain';
@@ -53,6 +53,7 @@ export class DfFieldOutlet {
   private readonly destroyRef = inject(DestroyRef);
   private readonly wrapperRegistry = inject(WRAPPER_REGISTRY);
   private readonly wrapperComponentCache = inject(WRAPPER_COMPONENT_CACHE);
+  private readonly wrapperAutoAssociations = inject(WRAPPER_AUTO_ASSOCIATIONS);
   private readonly defaultWrappersSignal = inject(DEFAULT_WRAPPERS, { optional: true });
   private readonly logger = inject(DynamicFormLogger);
 
@@ -62,7 +63,7 @@ export class DfFieldOutlet {
   private readonly effectiveWrappers: Signal<readonly WrapperConfig[]> = computed(() => {
     const field = this.dfFieldOutlet().fieldDef;
     const defaults = this.defaultWrappersSignal?.();
-    return resolveEffectiveWrappers(field, defaults, this.wrapperRegistry);
+    return resolveEffectiveWrappers(field, defaults, this.wrapperAutoAssociations);
   });
 
   private readonly renderReady: Signal<boolean> = computed(() => this.dfFieldOutlet().renderReady());

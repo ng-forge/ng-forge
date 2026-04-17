@@ -3,8 +3,8 @@ export type { CustomFnConfig, FormConfig, FormOptions, SubmitButtonOptions, Next
 export type { SubmissionConfig, SubmissionActionResult } from './submission-config';
 export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from './field-type';
 export { FIELD_REGISTRY, getFieldValueHandling } from './field-type';
-export type { WrapperTypeDefinition, FieldWrapperContract } from './wrapper-type';
-export { isWrapperTypeDefinition, WRAPPER_REGISTRY, WRAPPER_COMPONENT_CACHE } from './wrapper-type';
+export type { WrapperTypeDefinition, FieldWrapperContract, WrapperConfig } from './wrapper-type';
+export { isWrapperTypeDefinition, WRAPPER_REGISTRY, WRAPPER_COMPONENT_CACHE, WRAPPER_AUTO_ASSOCIATIONS } from './wrapper-type';
 export type { FieldOption } from './field-option';
 export {
   ARRAY_CONTEXT,

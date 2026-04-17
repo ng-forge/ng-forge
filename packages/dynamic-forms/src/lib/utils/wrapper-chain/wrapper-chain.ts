@@ -1,4 +1,4 @@
-import { ComponentRef, EnvironmentInjector, Injector, Type, ViewContainerRef } from '@angular/core';
+import { ComponentRef, EnvironmentInjector, Injector, reflectComponentType, Type, ViewContainerRef } from '@angular/core';
 import { catchError, forkJoin, from, Observable, of, switchMap } from 'rxjs';
 import { FieldWrapperContract, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
 import { Logger } from '../../providers/features/logger/logger.interface';
@@ -9,12 +9,12 @@ import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
  *
  * Angular's `ComponentRef.setInput()` throws NG0303 when the input is missing.
  * For config keys driven by user data (e.g. a wrapper config containing a prop
- * the wrapper doesn't care about) this would surface as a noisy runtime error.
- * Reads component input metadata from Ivy's public definition via `ɵcmp`.
+ * the wrapper doesn't care about) that would surface as a noisy runtime error,
+ * so we probe the component's metadata via `reflectComponentType` (public API).
  */
 export function setInputIfDeclared(ref: ComponentRef<unknown>, inputName: string, value: unknown): void {
-  const cmp = (ref.componentType as unknown as { ɵcmp?: { inputs?: Record<string, unknown> } }).ɵcmp;
-  if (cmp?.inputs && inputName in cmp.inputs) {
+  const meta = reflectComponentType(ref.componentType);
+  if (meta?.inputs.some((i) => i.propName === inputName)) {
     ref.setInput(inputName, value);
   }
 }
@@ -57,6 +57,10 @@ export async function loadWrapperComponent(
  *
  * Emits once, as an array aligned with the input order. Wrappers whose
  * component fails to load are logged and silently dropped from the chain.
+ *
+ * The failure also writes to `console.error` unconditionally — this is an
+ * authoring mistake (an unregistered wrapper type) that must surface even
+ * when `withLoggerConfig(false)` has suppressed the library logger.
  */
 export function loadWrapperComponents(
   configs: readonly WrapperConfig[],
@@ -72,7 +76,10 @@ export function loadWrapperComponents(
         catchError(() => of(undefined)),
         switchMap((component) => {
           if (!component) {
-            logger.error(`Wrapper type '${config.type}' could not be loaded. Ensure it is registered via provideDynamicForm().`);
+            const message = `Wrapper type '${config.type}' could not be loaded. Ensure it is registered via provideDynamicForm().`;
+            logger.error(message);
+             
+            console.error('[Dynamic Forms]', message);
             return of(null);
           }
           return of({ config, component } satisfies LoadedWrapper);
@@ -148,7 +155,16 @@ function renderStep(
 
   ref.changeDetectorRef.detectChanges();
 
-  const inner = (ref.instance as FieldWrapperContract).fieldComponent();
+  // `viewChild.required('fieldComponent', …)` throws NG0951 when the query
+  // resolves to nothing (e.g. wrapper forgot the #fieldComponent ref or put it
+  // inside an @if/@defer). Catch it and funnel into the same actionable log.
+  let inner: ViewContainerRef | undefined;
+  try {
+    inner = (ref.instance as FieldWrapperContract).fieldComponent?.();
+  } catch {
+    inner = undefined;
+  }
+
   if (!inner) {
     options.logger.error(
       `Wrapper component for type '${wrapper.config.type}' does not provide a 'fieldComponent' ViewContainerRef. ` +
