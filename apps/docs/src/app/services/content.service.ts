@@ -292,6 +292,13 @@ export class ContentService {
     const marked = new Marked({ renderer });
     let html = await marked.parse(markdown);
 
+    // Wrap each rendered <table> in a horizontally-scrolling container so
+    // narrow viewports scroll the table rather than cramming every word
+    // onto its own line. Tokens with `white-space: nowrap` inside cells
+    // stay whole and the wrapper's `overflow-x: auto` only shows a scroll
+    // bar when content actually doesn't fit.
+    html = html.replace(/<table\b[^>]*>[\s\S]*?<\/table>/g, (match) => `<div class="table-scroll">${match}</div>`);
+
     // Replace {@link SymbolName} with API reference links.
     // Uses data-api-link attribute so the adapter prefix can be resolved at click time.
     html = html.replace(

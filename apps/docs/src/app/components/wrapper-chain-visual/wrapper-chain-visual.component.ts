@@ -1,60 +1,47 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 /**
- * Horizontal visual of the wrapper chain: outermost wrapper → inner wrapper
- * → field component, with arrows between steps. Matches the cascade-visual
- * style (pills + code + arrow) used on the Configuration page so the docs
- * share a visual language.
+ * Nested visual of the wrapper chain — each wrapper is a card with a header
+ * strip (pill + config) whose body contains the next wrapper, with a mocked
+ * field preview at the innermost layer. The nesting structure is the core
+ * metaphor; the visual design language (pills, ember accents, mono code) is
+ * borrowed from cascade-visual for consistency across docs.
  */
 @Component({
   selector: 'docs-wrapper-chain-visual',
   template: `
-    <div class="chain">
-      <div class="chain__step">
-        <div class="chain__pill chain__pill--outer">Outer wrapper</div>
-        <code class="chain__code">{{ '{' }} type: 'section' {{ '}' }}</code>
-        <span class="chain__scope">Outermost</span>
+    <div class="wv">
+      <div class="wv__layer wv__layer--outer">
+        <div class="wv__head">
+          <span class="wv__pill wv__pill--outer">Outer wrapper</span>
+          <code class="wv__code">&#123; type: 'section' &#125;</code>
+        </div>
+        <div class="wv__body">
+          <span class="wv__slot">slot: fieldComponent</span>
+          <div class="wv__layer wv__layer--inner">
+            <div class="wv__head">
+              <span class="wv__pill wv__pill--inner">Inner wrapper</span>
+              <code class="wv__code">&#123; type: 'css' &#125;</code>
+            </div>
+            <div class="wv__body">
+              <span class="wv__slot">slot: fieldComponent</span>
+              <div class="wv__layer wv__layer--field">
+                <div class="wv__head wv__head--field">
+                  <span class="wv__pill wv__pill--field">Field component</span>
+                  <code class="wv__code">type: 'input'</code>
+                </div>
+                <div class="wv__preview">
+                  <span class="wv__preview-label">Email</span>
+                  <div class="wv__preview-input">
+                    <span class="wv__preview-placeholder">you&#64;example.com</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <span class="chain__arrow" aria-hidden="true">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M5 12h14M13 6l6 6-6 6" />
-        </svg>
-        <span class="chain__arrow-label">#fieldComponent</span>
-      </span>
-      <div class="chain__step">
-        <div class="chain__pill chain__pill--inner">Inner wrapper</div>
-        <code class="chain__code">{{ '{' }} type: 'css' {{ '}' }}</code>
-        <span class="chain__scope">Next in chain</span>
-      </div>
-      <span class="chain__arrow" aria-hidden="true">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M5 12h14M13 6l6 6-6 6" />
-        </svg>
-        <span class="chain__arrow-label">#fieldComponent</span>
-      </span>
-      <div class="chain__step">
-        <div class="chain__pill chain__pill--field">Field component</div>
-        <code class="chain__code">type: 'input'</code>
-        <span class="chain__scope">Innermost</span>
-      </div>
+      <p class="wv__caption">First entry is outermost; last is innermost.</p>
     </div>
   `,
   styles: `
@@ -65,97 +52,174 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       display: block;
     }
 
-    .chain {
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 1rem;
-      padding: 1.5rem 1rem;
-      flex-wrap: wrap;
+    .wv {
+      display: block;
+      margin: 24px 0;
+      padding: 24px 22px 20px;
+      border-radius: 14px;
+      background: var(--forge-base-1, #{$bg-surface});
+      border: 1px solid var(--forge-border-color, #{$steel-dark});
     }
 
-    .chain__step {
+    // Each layer is a rounded card. The border + background tint get
+    // stronger at each level, so the nesting reads visually as "going
+    // deeper". Hover gives the whole chain a subtle lift.
+    .wv__layer {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1.5px solid rgba(255, 77, 0, 0.28);
+      background: color-mix(in srgb, currentColor 3%, transparent);
+    }
+
+    .wv__layer--outer {
+      border-color: rgba(255, 77, 0, 0.32);
+      background: color-mix(in srgb, $ember-core 4%, transparent);
+    }
+
+    .wv__layer--inner {
+      border-color: rgba(255, 107, 43, 0.4);
+      background: color-mix(in srgb, $ember-hot 6%, transparent);
+    }
+
+    .wv__layer--field {
+      border-color: rgba(255, 77, 0, 0.55);
+      background: linear-gradient(180deg, rgba(255, 77, 0, 0.14), rgba(255, 107, 43, 0.06));
+      box-shadow: 0 6px 18px -10px rgba(255, 77, 0, 0.45);
+    }
+
+    // Header strip — pill label + config code, with a subtle divider line
+    // below it. This is the identifying "chrome" of each wrapper.
+    .wv__head {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 0.5rem;
-      flex: 1;
-      max-width: 200px;
-      min-width: 140px;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      padding: 0.6rem 0.9rem;
+      background: color-mix(in srgb, currentColor 5%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent);
     }
 
-    .chain__pill {
-      padding: 0.5rem 1.25rem;
+    .wv__head--field {
+      background: linear-gradient(90deg, rgba(255, 77, 0, 0.18), rgba(255, 107, 43, 0.08));
+      border-bottom-color: rgba(255, 77, 0, 0.25);
+    }
+
+    // Body hosts the next nested layer (or the field preview).
+    .wv__body {
+      position: relative;
+      padding: 0.85rem 1rem 1rem;
+    }
+
+    // Inline "slot" label shown above each nested layer — readers see where
+    // each wrapper plugs the next one in via its fieldComponent slot.
+    .wv__slot {
+      display: inline-block;
+      margin-bottom: 0.5rem;
+      padding: 1px 8px;
+      border-radius: 4px;
+      font-family: $font-mono;
+      font-size: 0.65rem;
+      color: var(--forge-text-muted, #{$steel-mid});
+      opacity: 0.75;
+      background: color-mix(in srgb, currentColor 5%, transparent);
+      border: 1px dashed color-mix(in srgb, currentColor 15%, transparent);
+    }
+
+    .wv__pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.3rem 0.85rem;
       border-radius: 2rem;
       font-weight: 600;
-      font-size: 0.875rem;
+      font-size: 0.78rem;
       white-space: nowrap;
       letter-spacing: -0.01em;
     }
 
-    .chain__pill--outer {
-      background: rgba(255, 77, 0, 0.08);
+    .wv__pill--outer {
+      background: rgba(255, 77, 0, 0.1);
       color: $ember-core;
-      border: 1.5px solid rgba(255, 77, 0, 0.3);
+      border: 1.5px solid rgba(255, 77, 0, 0.35);
     }
 
-    .chain__pill--inner {
-      background: rgba(255, 107, 43, 0.1);
+    .wv__pill--inner {
+      background: rgba(255, 107, 43, 0.12);
       color: $ember-hot;
-      border: 1.5px solid rgba(255, 107, 43, 0.35);
+      border: 1.5px solid rgba(255, 107, 43, 0.4);
     }
 
-    .chain__pill--field {
+    .wv__pill--field {
       background: linear-gradient(135deg, $ember-core, $ember-hot);
       color: #fff;
       border: 1.5px solid transparent;
-      box-shadow: 0 6px 14px -6px rgba(255, 77, 0, 0.55);
+      box-shadow: 0 4px 10px -4px rgba(255, 77, 0, 0.55);
     }
 
-    .chain__code {
+    .wv__code {
       font-family: $font-mono;
       font-size: 0.75rem;
       color: var(--forge-text-muted, #{$steel-mid});
     }
 
-    .chain__scope {
-      font-size: 0.6875rem;
-      color: var(--forge-text-muted, #{$steel-mid});
-      font-style: italic;
-    }
-
-    .chain__arrow {
+    // Field preview — a mocked form field inside the innermost layer so
+    // readers understand the field component is the actual UI, not another
+    // abstraction.
+    .wv__preview {
       display: flex;
       flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .wv__preview-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--forge-text, #{$steel});
+    }
+
+    .wv__preview-input {
+      display: flex;
       align-items: center;
-      gap: 4px;
-      color: var(--forge-base-4, #{$steel-dim});
-      margin-top: 0.5rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: 6px;
+      background: color-mix(in srgb, currentColor 6%, transparent);
+      border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
     }
 
-    .chain__arrow-label {
-      font-family: $font-mono;
-      font-size: 0.6875rem;
+    .wv__preview-placeholder {
+      font-size: 0.85rem;
       color: var(--forge-text-muted, #{$steel-mid});
-      letter-spacing: 0.01em;
+      opacity: 0.7;
     }
 
-    @media (max-width: 720px) {
-      .chain {
-        flex-direction: column;
-        align-items: stretch;
+    .wv__caption {
+      margin: 0.75rem 0 0;
+      color: var(--forge-text-muted, #{$steel-mid});
+      font-size: 0.75rem;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+
+    @media (max-width: 480px) {
+      .wv {
+        padding: 16px 14px 14px;
       }
 
-      .chain__step {
-        max-width: none;
+      .wv__body {
+        padding: 0.75rem 0.75rem 0.75rem;
       }
 
-      .chain__arrow {
-        transform: rotate(90deg);
+      .wv__body::before {
+        position: static;
+        display: inline-block;
+        margin-bottom: 0.5rem;
       }
 
-      .chain__arrow-label {
-        display: none;
+      .wv__code {
+        font-size: 0.7rem;
+      }
+
+      .wv__pill {
+        font-size: 0.72rem;
       }
     }
   `,

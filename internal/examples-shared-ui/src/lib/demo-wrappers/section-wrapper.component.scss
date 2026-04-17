@@ -1,26 +1,16 @@
 :host {
   display: block;
 
-  // Theme tokens — consumers can override `--demo-section-*` on the host to
-  // retheme the wrapper without forking the component. Fallbacks cover the
-  // light theme; a `prefers-color-scheme: dark` block swaps them for dark.
-  --demo-section-bg: #fff;
-  --demo-section-border: rgba(0, 0, 0, 0.12);
-  --demo-section-header-text: #333;
-  --demo-section-header-bg-from: rgba(0, 0, 0, 0.03);
-  --demo-section-header-bg-to: rgba(0, 0, 0, 0.06);
-  --demo-section-header-border: rgba(0, 0, 0, 0.08);
-}
-
-@media (prefers-color-scheme: dark) {
-  :host {
-    --demo-section-bg: rgba(255, 255, 255, 0.03);
-    --demo-section-border: rgba(255, 255, 255, 0.12);
-    --demo-section-header-text: rgba(255, 255, 255, 0.88);
-    --demo-section-header-bg-from: rgba(255, 255, 255, 0.04);
-    --demo-section-header-bg-to: rgba(255, 255, 255, 0.07);
-    --demo-section-header-border: rgba(255, 255, 255, 0.08);
-  }
+  // Use currentColor + semi-transparent tints so the wrapper inherits
+  // contrast from the surrounding page rather than picking a fixed palette.
+  // This makes the demo look consistent in light mode, dark mode, and any
+  // custom theme the host page might be using — no `prefers-color-scheme`
+  // lottery where the wrapper's idea of "dark" disagrees with the host's.
+  --demo-section-border: color-mix(in srgb, currentColor 20%, transparent);
+  --demo-section-bg: color-mix(in srgb, currentColor 4%, transparent);
+  --demo-section-header-text: currentColor;
+  --demo-section-header-bg: color-mix(in srgb, currentColor 7%, transparent);
+  --demo-section-header-border: color-mix(in srgb, currentColor 12%, transparent);
 }
 
 .demo-section {
@@ -36,10 +26,11 @@
   font-weight: 600;
   font-size: 0.85rem;
   color: var(--demo-section-header-text);
-  background: linear-gradient(180deg, var(--demo-section-header-bg-from), var(--demo-section-header-bg-to));
+  background: var(--demo-section-header-bg);
   border-bottom: 1px solid var(--demo-section-header-border);
   letter-spacing: 0.02em;
   text-transform: uppercase;
+  opacity: 0.8;
 }
 
 .demo-section__body {

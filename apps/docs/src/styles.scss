@@ -743,13 +743,34 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
     }
   }
 
-  // Inside table cells, let inline code wrap at any viewport — cells are
-  // narrow by construction.
+  // Inside table cells, keep short tokens intact (nowrap on the code).
+  // `'outline'` stays `'outline'` even in a narrow cell — if the whole row
+  // doesn't fit the viewport, the .table-scroll wrapper below scrolls the
+  // table horizontally instead of breaking tokens mid-character.
   td > code,
   td *:not(pre) > code {
-    white-space: normal;
-    overflow-wrap: break-word;
-    word-break: break-word;
+    white-space: nowrap;
+  }
+
+  // Keep cells readable at narrow viewports — the .table-scroll wrapper
+  // handles horizontal overflow, so we don't need to crush padding.
+  @media (max-width: 768px) {
+    table {
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px !important;
+
+      &:first-child {
+        padding-left: 16px !important;
+      }
+
+      &:last-child {
+        padding-right: 16px !important;
+      }
+    }
   }
 
   pre {
@@ -893,12 +914,37 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
     background: rgba(239, 68, 68, 0.08);
   }
 
+  // The marked renderer wraps each table in `.table-scroll` which handles
+  // horizontal scrolling on narrow viewports. The table itself keeps
+  // native `display: table` semantics so columns size to content. When
+  // content fits the wrapper, the scroll bar doesn't appear (browser's
+  // default `overflow: auto` behaviour). When it doesn't fit, the whole
+  // table scrolls horizontally — tokens stay whole.
+  .table-scroll {
+    margin: 24px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    border: 1px solid var(--forge-base-2);
+  }
+
   table {
     width: 100%;
     border-spacing: 0;
-    margin: 24px 0;
+    // Force the table to claim at least its intrinsic width. Combined with
+    // nowrap on code cells, this means the wrapper scrolls when columns
+    // can't all fit, rather than cramming each word onto its own line.
+    min-width: max-content;
+  }
+
+  // Tables were rendering with a `<div class="table-scroll">` wrapper AND
+  // without one for older cached content. When unwrapped, fall back to
+  // giving the bare table its own scroll.
+  .doc-page-content > table,
+  .content-html > table {
     display: block;
     overflow-x: auto;
+    max-width: 100%;
   }
   th {
     padding: 12px;

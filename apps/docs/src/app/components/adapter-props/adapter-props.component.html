@@ -11,28 +11,30 @@
     <p class="adapter-props-empty">Props are whatever your field component accepts.</p>
   }
 } @else if (props().length > 0) {
-  <table class="adapter-props-table">
-    <thead>
-      <tr>
-        <th>Prop</th>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (prop of props(); track prop.prop) {
+  <div class="table-scroll">
+    <table class="adapter-props-table">
+      <thead>
         <tr>
-          <td>
-            <code>{{ prop.prop }}</code>
-          </td>
-          <td>
-            <code>{{ prop.type }}</code>
-          </td>
-          <td>{{ prop.description }}</td>
+          <th>Prop</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-      }
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        @for (prop of props(); track prop.prop) {
+          <tr>
+            <td>
+              <code>{{ prop.prop }}</code>
+            </td>
+            <td>
+              <code>{{ prop.type }}</code>
+            </td>
+            <td>{{ prop.description }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
 } @else {
   <p class="adapter-props-empty">No additional props for this adapter.</p>
 }
