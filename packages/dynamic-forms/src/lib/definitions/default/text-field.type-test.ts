@@ -103,6 +103,7 @@ describe('TextField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
     | 'logic';
 
   type ActualKeys = keyof TextField;

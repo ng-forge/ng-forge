@@ -56,6 +56,8 @@ describe('InferWrapperRegistry', () => {
 
     type Registry = InferWrapperRegistry<typeof bundle>;
 
-    expectTypeOf<Registry>().toEqualTypeOf<Record<string, never>>();
+    // Mapped type with `never` keys resolves to `{}`.
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- the empty object type is the expected shape
+    expectTypeOf<Registry>().toEqualTypeOf<{}>();
   });
 });
