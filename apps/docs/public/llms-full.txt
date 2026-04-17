@@ -1,6 +1,6 @@
 # ng-forge Dynamic Forms — Full Documentation
 
-> Generated from 51 documentation files.
+> Generated from 52 documentation files.
 > Source: https://ng-forge.com/dynamic-forms/
 
 --- ai-integration ---
@@ -7172,6 +7172,69 @@ Derivations can reference other derived values. The system automatically process
 ## Related
 
 - **[Value Derivation](/dynamic-behavior/derivation)** - Core concepts, syntax, array derivations, debugging, and bidirectional patterns
+
+--- examples/wrapper-array-actions ---
+
+Wrappers are a natural home for the chrome around an array: titles, counts, action toolbars, surrounding cards. Because wrappers attach to any field, you can frame the array itself _and_ the add-button that feeds it without teaching the array (or the button) about presentation.
+
+## Live Demo
+
+<docs-live-example scenario="examples/wrapper-array-actions"></docs-live-example>
+
+## What it shows
+
+- A `section` wrapper around the array gives the whole list a titled frame.
+- A second `section` wrapper around the `addArrayItem` button groups the toolbar visually — the same wrapper infrastructure works on any field, including action buttons.
+- The array config itself stays presentation-free: no card markup, no header styling, no manual spacing.
+
+## Implementation
+
+```typescript
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
+
+const tagItemTemplate = {
+  key: 'tag',
+  type: 'row',
+  fields: [
+    { key: 'value', type: 'input', label: 'Tag', required: true, minLength: 2 },
+    { key: 'removeTag', type: 'removeArrayItem', label: 'Remove', props: { color: 'warn' } },
+  ],
+} as const;
+
+const config = {
+  fields: [
+    {
+      key: 'tags',
+      type: 'array',
+      wrappers: [{ type: 'section', title: 'Tags' }],
+      fields: [
+        // …starting items…
+      ],
+    },
+    {
+      key: 'addTagButton',
+      type: 'addArrayItem',
+      label: 'Add tag',
+      arrayKey: 'tags',
+      template: [tagItemTemplate],
+      wrappers: [{ type: 'section', title: 'Actions' }],
+    },
+    { key: 'submit', type: 'submit', label: 'Save' },
+  ],
+} as const satisfies FormConfig;
+```
+
+## Why use a wrapper here
+
+- **Keeps array config focused** — the array owns data shape; the wrapper owns UI chrome.
+- **Reusable across forms** — register a `section` (or your own `card` / `collapsible`) wrapper once and apply it wherever you need the same framing.
+- **Per-field opt-out still works** — inner items can set `wrappers: null` to skip the frame if needed.
+
+## Related Documentation
+
+- **[Wrappers overview](/wrappers/overview)** — concept and built-ins
+- **[Registering and applying wrappers](/wrappers/registering-and-applying)** — `defaultWrappers`, per-field, auto-associations
+- **[Complete Array API](/prebuilt/form-arrays/complete)** — full array reference
 
 --- field-types/advanced-controls ---
 
@@ -14402,7 +14465,7 @@ type ConditionalExpression = FieldValueCondition | CustomCondition | JavascriptC
 
 --- wrappers/overview ---
 
-Wrappers decorate a rendered field with extra UI chrome — a titled section, a validation indicator, a card, a collapsible panel — without modifying the field component itself. Multiple wrappers stack outermost → innermost, like Formly's wrapper chain.
+Wrappers decorate a rendered field with extra UI chrome — a titled section, a validation indicator, a card, a collapsible panel — without modifying the field component itself. Multiple wrappers stack outermost → innermost.
 
 ## How a wrapper chain looks
 
@@ -14469,16 +14532,6 @@ Wrappers are **read-only** — they observe field state (value, validity, errors
 
 Wrappers are SSR-safe. The component cache (`WRAPPER_COMPONENT_CACHE`) and registry (`WRAPPER_REGISTRY`) are DI-scoped rather than module-scoped, so there's no shared state between server renders.
 
-## Coming from Formly?
-
-| Formly                                 | ng-forge                                              |
-| -------------------------------------- | ----------------------------------------------------- |
-| `wrappers: ['section', 'panel']`       | `wrappers: [{ type: 'section' }, { type: 'panel' }]`  |
-| `FormlyWrapper` abstract class         | `FieldWrapperContract` — just a `#fieldComponent` ref |
-| `field.templateOptions.label` in JSDoc | Config props become Angular `input()`s on the wrapper |
-| `<ng-container #fieldComponent>`       | `<ng-container #fieldComponent>` (same)               |
-| Global `defaultWrapperName`            | `FormConfig.defaultWrappers: [...]`                   |
-
 ## Next
 
 1. **[Registering and applying wrappers](/wrappers/registering-and-applying)** — `createWrappers(…)`, module augmentation, `wrappers` on a field, `defaultWrappers`, auto-associations, opting out.
@@ -14531,8 +14584,8 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-> [!WARNING]
-> Each call to `provideDynamicForm(...)` creates a **new** `WRAPPER_REGISTRY` at that injector level — it does not merge with ancestors. If a lazy-loaded route calls `provideDynamicForm(...)` again with extra wrappers, the route-level registry **replaces** the app-level one for that subtree. Re-declare the full app-level set plus the new ones to avoid losing wrappers under that route. See [Route-level registration](#route-level-registration) below.
+> [!NOTE]
+> `provideDynamicForm(...)` is an application-level provider — call it once in `ApplicationConfig.providers` (or the equivalent `bootstrapApplication` providers). It is not intended for `Route.providers` and the library does not support merging or overriding the wrapper registry per route. Register every field type and wrapper the app needs in that single call.
 
 ## 4. Apply wrappers
 
@@ -14611,10 +14664,6 @@ The effective wrapper chain for one field is merged from three sources, outermos
 
 > [!WARNING]
 > `wrappers: []` (an empty array) is **not** an opt-out. Auto-associations and `defaultWrappers` still apply — the field-level list just adds zero additional wrappers. Use `wrappers: null` to skip them entirely.
-
-## Route-level registration
-
-Each call to `provideDynamicForm(...)` creates a **new** `WRAPPER_REGISTRY` map at that injector level; it does not merge with ancestor registrations. If you register wrappers at the app-config level and then call `provideDynamicForm(...)` again inside a route with additional wrappers, the route-level registry shadows the ancestor — auto-associations declared at the app level will **not** fire for fields rendered beneath that route. To extend the registry for a specific route, re-declare the full set (app wrappers + the new ones) in that route's `provideDynamicForm(...)` call.
 
 ## Interactive example
 

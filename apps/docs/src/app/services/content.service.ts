@@ -233,12 +233,19 @@ export class ContentService {
     // Pass 2: Render with custom renderer
     const usedIds = new Map<string, number>();
     const renderer: Partial<Renderer> = {
-      heading({ text, depth }: Tokens.Heading): string {
+      heading(this: { parser: { parseInline(tokens: Tokens.Generic[]): string } }, token: Tokens.Heading): string {
+        const { text, depth, tokens } = token;
+        // Parse inline markdown (backticks, links, emphasis) into HTML so
+        // headings like `## Register with \`createWrappers\`` render with a
+        // real <code> span instead of literal backticks.
+        const innerHtml = this.parser.parseInline(tokens);
         let id = slugify(text);
         const count = usedIds.get(id) ?? 0;
         usedIds.set(id, count + 1);
         if (count > 0) id = `${id}-${count}`;
         if (depth === 2 || depth === 3) {
+          // TOC entries keep the raw text; renderers consuming `HeadingEntry.text`
+          // can slot backticks into their own <code> element if they need to.
           headings.push({ id, text, level: depth });
         }
         const anchor =
@@ -249,7 +256,7 @@ export class ContentService {
               `<path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>` +
               `</svg></button>`
             : '';
-        return `<h${depth} id="${id}">${text}${anchor}</h${depth}>`;
+        return `<h${depth} id="${id}">${innerHtml}${anchor}</h${depth}>`;
       },
       code({ text, lang: rawLang }: Tokens.Code): string {
         const lang = (rawLang ?? '').split(/\s+/)[0] || 'text';

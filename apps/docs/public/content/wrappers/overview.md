@@ -4,7 +4,7 @@ slug: wrappers/overview
 description: 'Compose chrome around any dynamic form field without touching the field itself. Wrappers are Angular components chained around a field to add labels, cards, validation indicators, or other decoration.'
 ---
 
-Wrappers decorate a rendered field with extra UI chrome — a titled section, a validation indicator, a card, a collapsible panel — without modifying the field component itself. Multiple wrappers stack outermost → innermost, like Formly's wrapper chain.
+Wrappers decorate a rendered field with extra UI chrome — a titled section, a validation indicator, a card, a collapsible panel — without modifying the field component itself. Multiple wrappers stack outermost → innermost.
 
 ## How a wrapper chain looks
 
@@ -70,16 +70,6 @@ Wrappers are **read-only** — they observe field state (value, validity, errors
 ## SSR
 
 Wrappers are SSR-safe. The component cache (`WRAPPER_COMPONENT_CACHE`) and registry (`WRAPPER_REGISTRY`) are DI-scoped rather than module-scoped, so there's no shared state between server renders.
-
-## Coming from Formly?
-
-| Formly                                 | ng-forge                                              |
-| -------------------------------------- | ----------------------------------------------------- |
-| `wrappers: ['section', 'panel']`       | `wrappers: [{ type: 'section' }, { type: 'panel' }]`  |
-| `FormlyWrapper` abstract class         | `FieldWrapperContract` — just a `#fieldComponent` ref |
-| `field.templateOptions.label` in JSDoc | Config props become Angular `input()`s on the wrapper |
-| `<ng-container #fieldComponent>`       | `<ng-container #fieldComponent>` (same)               |
-| Global `defaultWrapperName`            | `FormConfig.defaultWrappers: [...]`                   |
 
 ## Next
 

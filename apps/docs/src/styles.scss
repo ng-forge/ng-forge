@@ -732,9 +732,19 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
     font-weight: 400;
     background: color-mix(in srgb, var(--forge-base-4) 15%, transparent);
     white-space: nowrap;
+
+    // On narrow viewports, long inline symbols (function/type names in
+    // headings and prose) push the page wider than the container. Allow
+    // them to break so the line wraps instead of overflowing horizontally.
+    @media (max-width: 768px) {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
   }
 
-  // Allow inline code to wrap inside table cells on narrow screens
+  // Inside table cells, let inline code wrap at any viewport — cells are
+  // narrow by construction.
   td > code,
   td *:not(pre) > code {
     white-space: normal;

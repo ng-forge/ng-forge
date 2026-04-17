@@ -49,8 +49,8 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-> [!WARNING]
-> Each call to `provideDynamicForm(...)` creates a **new** `WRAPPER_REGISTRY` at that injector level — it does not merge with ancestors. If a lazy-loaded route calls `provideDynamicForm(...)` again with extra wrappers, the route-level registry **replaces** the app-level one for that subtree. Re-declare the full app-level set plus the new ones to avoid losing wrappers under that route. See [Route-level registration](#route-level-registration) below.
+> [!NOTE]
+> `provideDynamicForm(...)` is an application-level provider — call it once in `ApplicationConfig.providers` (or the equivalent `bootstrapApplication` providers). It is not intended for `Route.providers` and the library does not support merging or overriding the wrapper registry per route. Register every field type and wrapper the app needs in that single call.
 
 ## 4. Apply wrappers
 
@@ -129,10 +129,6 @@ The effective wrapper chain for one field is merged from three sources, outermos
 
 > [!WARNING]
 > `wrappers: []` (an empty array) is **not** an opt-out. Auto-associations and `defaultWrappers` still apply — the field-level list just adds zero additional wrappers. Use `wrappers: null` to skip them entirely.
-
-## Route-level registration
-
-Each call to `provideDynamicForm(...)` creates a **new** `WRAPPER_REGISTRY` map at that injector level; it does not merge with ancestor registrations. If you register wrappers at the app-config level and then call `provideDynamicForm(...)` again inside a route with additional wrappers, the route-level registry shadows the ancestor — auto-associations declared at the app level will **not** fire for fields rendered beneath that route. To extend the registry for a specific route, re-declare the full set (app wrappers + the new ones) in that route's `provideDynamicForm(...)` call.
 
 ## Interactive example
 

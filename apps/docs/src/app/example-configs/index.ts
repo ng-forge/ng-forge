@@ -26,6 +26,7 @@ import { textareaConfig } from './textarea.config';
 import { toggleConfig } from './toggle.config';
 import { userRegistrationConfig } from './user-registration.config';
 import { valueDerivationConfig } from './value-derivation.config';
+import { wrapperArrayActionsConfig } from './wrapper-array-actions.config';
 import { wrapperSectionConfig } from './wrapper-section.config';
 import { zodSchemaValidationConfig } from './zod-schema-validation.config';
 
@@ -55,6 +56,7 @@ export { textareaConfig } from './textarea.config';
 export { toggleConfig } from './toggle.config';
 export { userRegistrationConfig } from './user-registration.config';
 export { valueDerivationConfig } from './value-derivation.config';
+export { wrapperArrayActionsConfig } from './wrapper-array-actions.config';
 export { wrapperSectionConfig } from './wrapper-section.config';
 export { zodSchemaValidationConfig } from './zod-schema-validation.config';
 
@@ -95,4 +97,5 @@ export const EXAMPLE_CONFIGS: Record<string, FormConfig> = {
   'multi-checkbox': multiCheckboxConfig,
   button: buttonConfig,
   'wrapper-section': wrapperSectionConfig,
+  'wrapper-array-actions': wrapperArrayActionsConfig,
 };
