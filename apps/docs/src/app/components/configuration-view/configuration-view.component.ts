@@ -267,32 +267,34 @@ const config = {
             <code>{{ data().providerFunction }}(&#123; ... &#125;)</code>
             for library-level defaults, or to <code>defaultProps</code> for form-level defaults.
           </p>
-          <table class="config-view__table">
-            <thead>
-              <tr>
-                <th>Option</th>
-                <th>Type</th>
-                <th>Default</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (opt of data().options; track opt.name) {
+          <div class="table-scroll">
+            <table class="config-view__table">
+              <thead>
                 <tr>
-                  <td>
-                    <code>{{ opt.name }}</code>
-                  </td>
-                  <td>
-                    <code>{{ opt.type }}</code>
-                  </td>
-                  <td>
-                    <code>{{ opt.default }}</code>
-                  </td>
-                  <td>{{ opt.description }}</td>
+                  <th>Option</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
                 </tr>
-              }
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @for (opt of data().options; track opt.name) {
+                  <tr>
+                    <td>
+                      <code>{{ opt.name }}</code>
+                    </td>
+                    <td>
+                      <code>{{ opt.type }}</code>
+                    </td>
+                    <td>
+                      <code>{{ opt.default }}</code>
+                    </td>
+                    <td>{{ opt.description }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </section>
       } @else {
         <section class="config-view__section">
