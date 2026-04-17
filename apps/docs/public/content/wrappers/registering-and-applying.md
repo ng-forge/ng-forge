@@ -49,7 +49,12 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
+> [!WARNING]
+> Each call to `provideDynamicForm(...)` creates a **new** `WRAPPER_REGISTRY` at that injector level — it does not merge with ancestors. If a lazy-loaded route calls `provideDynamicForm(...)` again with extra wrappers, the route-level registry **replaces** the app-level one for that subtree. Re-declare the full app-level set plus the new ones to avoid losing wrappers under that route. See [Route-level registration](#route-level-registration) below.
+
 ## 4. Apply wrappers
+
+Three ways to reach a wrapper, in order of increasing scope:
 
 ### Per-field
 
@@ -64,12 +69,14 @@ Set `wrappers` on any field:
 }
 ```
 
-Multiple wrappers stack outermost → innermost. The first entry is the outermost:
+Multiple wrappers stack outermost → innermost. The first entry is the outermost. Mixing a custom wrapper with the built-in `css`:
 
 ```typescript
+// section wraps css wraps the field. `section` must be registered first
+// (see Writing a Wrapper). `css` is built-in.
 wrappers: [
   { type: 'section', title: 'Card' }, // outer
-  { type: 'css', cssClasses: 'muted' }, // inner — wraps the field directly
+  { type: 'css', cssClasses: 'muted' }, // inner
 ];
 ```
 
@@ -111,7 +118,14 @@ The effective wrapper chain for one field is merged from three sources, outermos
 2. **Form defaults** — `FormConfig.defaultWrappers`
 3. **Field-level** — the field's own `wrappers` array
 
-`wrappers: null` on a field clears the entire chain — no auto-associations, no defaults, no field-level entries. Use it as an escape hatch for fields that need to render bare.
+## `wrappers` state cheatsheet
+
+| `wrappers` value | Effect                                             |
+| ---------------- | -------------------------------------------------- |
+| `undefined`      | Inherit (auto-associations + defaults apply)       |
+| `null`           | **Opt out** — render the field bare                |
+| `[]`             | Inherit (same as `undefined` — **not** an opt-out) |
+| `[{ …wrapper }]` | Append to auto-associations + defaults             |
 
 > [!WARNING]
 > `wrappers: []` (an empty array) is **not** an opt-out. Auto-associations and `defaultWrappers` still apply — the field-level list just adds zero additional wrappers. Use `wrappers: null` to skip them entirely.
@@ -128,6 +142,8 @@ The form below sets `defaultWrappers: [{ type: 'css', cssClasses: 'demo-field' }
 
 ## Troubleshooting
 
-- **Wrapper does not render.** Check that it's passed to `provideDynamicForm(...)` — `WRAPPER_REGISTRY` has no entry otherwise, and the outlet logs an `error`-level message via `DynamicFormLogger`.
+- **Wrapper does not render.** Check that it's passed to `provideDynamicForm(...)` — `WRAPPER_REGISTRY` has no entry otherwise, and the outlet logs an `error`-level message via `DynamicFormLogger` plus a `console.error` with the `[Dynamic Forms]` prefix.
 - **`fieldComponent` is `undefined` in the wrapper's constructor.** Expected — it's a view query. Read it inside a `computed()` / `effect()` / template, never in the constructor.
 - **Wrapper config isn't typed.** Confirm the `declare module` block runs (TypeScript only picks up augmentations from files that are actually imported). Re-exporting `appWrappers` from an entry module is enough.
+- **Typed config prop is silently ignored.** A typo in a config key (`{ type: 'section', tilte: 'Hi' }`) renders the wrapper with no title and no error — unknown keys are dropped by design to tolerate cross-wrapper config drift. Run `tsc --noEmit` to catch the misspelling statically.
+- **Wrapper re-renders on every keystroke.** Expected when the wrapper reads a mapper-driven input directly — read only the signals you need inside a `computed()` and rely on signal equality to short-circuit downstream reactivity.

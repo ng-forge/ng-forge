@@ -14404,6 +14404,22 @@ type ConditionalExpression = FieldValueCondition | CustomCondition | JavascriptC
 
 Wrappers decorate a rendered field with extra UI chrome — a titled section, a validation indicator, a card, a collapsible panel — without modifying the field component itself. Multiple wrappers stack outermost → innermost, like Formly's wrapper chain.
 
+## How a wrapper chain looks
+
+With `wrappers: [{ type: 'section' }, { type: 'css', cssClasses: 'highlight' }]` on a field, the outlet renders:
+
+```
+┌─ <section wrapper>  ────────────────────────┐
+│  ┌─ <css wrapper "highlight">  ──────────┐  │
+│  │  ┌─ <field component>  ───────────┐   │  │
+│  │  │  (the actual input / select)   │   │  │
+│  │  └────────────────────────────────┘   │  │
+│  └───────────────────────────────────────┘  │
+└─────────────────────────────────────────────┘
+```
+
+The first entry is outermost, the last is innermost. Each wrapper's `#fieldComponent` slot hosts whatever comes next.
+
 ## Quick shape
 
 ```typescript
@@ -14415,39 +14431,58 @@ Wrappers decorate a rendered field with extra UI chrome — a titled section, a 
 }
 ```
 
-At runtime, the outlet renders `section → input` — the section wrapper's `#fieldComponent` slot hosts the input.
+## Live example
 
-## When to reach for a wrapper
+The form below layers a custom `section` wrapper on one field, inherits a form-level default wrapper on another, and opts the last field out entirely with `wrappers: null`.
 
-| Goal                                                                       | Use                                         |
-| -------------------------------------------------------------------------- | ------------------------------------------- |
-| Consistent titled section, card, or accordion around groups of fields      | **Wrapper**                                 |
-| Conditional CSS classes on the field's existing host                       | Field `className` or built-in `css` wrapper |
-| A completely new control (rich-text editor, file picker, colour picker, …) | [Custom field](/recipes/custom-fields)      |
-| Repeat the same decoration for every field in a form                       | `FormConfig.defaultWrappers` — one line     |
-| Auto-decorate specific field types across the whole app                    | `WrapperTypeDefinition.types` auto-assoc    |
+<docs-live-example scenario="examples/wrapper-section"></docs-live-example>
 
-Wrappers are read-only: they can observe field state (value, validity, errors, dirty) but never mutate it. Mutation stays in the field component.
+The horizontal layout you see everywhere else in these docs is also a wrapper in action — `{ type: 'row', fields: [...] }` resolves to the container field with an auto-injected `row` wrapper. You never write the wrapper explicitly; it's an implementation detail of the `row` type.
 
 ## Built-in wrappers
 
 Two wrappers ship with the library and are registered automatically:
 
-- **`css`** — adds space-separated classes to a wrapping element, driven by a `cssClasses: DynamicText` input. Accepts a string, Signal, or Observable so classes can react to form state.
-- **`row`** — the flex/grid layout used under the hood when you write `{ type: 'row', fields: [...] }`. This is a runtime detail; keep writing `type: 'row'`.
+- **`css`** — adds space-separated classes to a wrapping element. Accepts a `DynamicText` for `cssClasses` (string, `Signal<string>`, or `Observable<string>`):
 
-Everything else — section cards, validation indicators, feature-flag overlays — is yours to build.
+  ```typescript
+  { type: 'css', cssClasses: 'card p-4' }
+  ```
 
-## Live example
+- **`row`** — the flex/grid layout used under the hood when you write `{ type: 'row', fields: [...] }`. Keep writing `type: 'row'` — the wrapper plumbing is hidden.
 
-The row layout you see everywhere in these docs is a wrapper in action: `type: 'row'` resolves to the container field with an auto-injected `row` wrapper.
+## When to reach for a wrapper
 
-<docs-live-example scenario="examples/row"></docs-live-example>
+Wrappers are one of three extension points. Pick the smallest that solves the problem.
+
+| Problem                                                               | Use                                              | Cost                            |
+| --------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------- |
+| A static CSS class on the field's existing host                       | [`className`](/configuration) on the field       | Free — no wrapper instantiated  |
+| Consistent chrome (card, section header, badge) around many fields    | **Wrapper**                                      | One component per wrapper level |
+| A brand-new control (rich-text editor, file picker, colour picker, …) | [Custom field](/recipes/custom-fields)           | New component + registration    |
+| Same chrome on every field in a form                                  | `FormConfig.defaultWrappers`                     | One line                        |
+| Auto-decorate all fields of a specific type (e.g. every `input`)      | Wrapper with `types: ['input']` auto-association | One line in registration        |
+
+Wrappers are **read-only** — they observe field state (value, validity, errors) but never mutate. Mutation belongs in the field component.
+
+## SSR
+
+Wrappers are SSR-safe. The component cache (`WRAPPER_COMPONENT_CACHE`) and registry (`WRAPPER_REGISTRY`) are DI-scoped rather than module-scoped, so there's no shared state between server renders.
+
+## Coming from Formly?
+
+| Formly                                 | ng-forge                                              |
+| -------------------------------------- | ----------------------------------------------------- |
+| `wrappers: ['section', 'panel']`       | `wrappers: [{ type: 'section' }, { type: 'panel' }]`  |
+| `FormlyWrapper` abstract class         | `FieldWrapperContract` — just a `#fieldComponent` ref |
+| `field.templateOptions.label` in JSDoc | Config props become Angular `input()`s on the wrapper |
+| `<ng-container #fieldComponent>`       | `<ng-container #fieldComponent>` (same)               |
+| Global `defaultWrapperName`            | `FormConfig.defaultWrappers: [...]`                   |
 
 ## Next
 
-- **[Writing a wrapper](/wrappers/writing-a-wrapper)** — the component contract, config inputs, and the `fieldInputs` bag that gives wrappers read-only access to the wrapped field.
-- **[Registering and applying wrappers](/wrappers/registering-and-applying)** — `createWrappers(…)`, `InferWrapperRegistry` module augmentation, the `wrappers` array on a field, `defaultWrappers` on the form, and `wrappers: null` to opt a single field out.
+1. **[Registering and applying wrappers](/wrappers/registering-and-applying)** — `createWrappers(…)`, module augmentation, `wrappers` on a field, `defaultWrappers`, auto-associations, opting out.
+2. **Advanced:** **[Writing a wrapper](/wrappers/writing-a-wrapper)** — build your own wrapper component from scratch.
 
 --- wrappers/registering-and-applying ---
 
@@ -14496,7 +14531,12 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
+> [!WARNING]
+> Each call to `provideDynamicForm(...)` creates a **new** `WRAPPER_REGISTRY` at that injector level — it does not merge with ancestors. If a lazy-loaded route calls `provideDynamicForm(...)` again with extra wrappers, the route-level registry **replaces** the app-level one for that subtree. Re-declare the full app-level set plus the new ones to avoid losing wrappers under that route. See [Route-level registration](#route-level-registration) below.
+
 ## 4. Apply wrappers
+
+Three ways to reach a wrapper, in order of increasing scope:
 
 ### Per-field
 
@@ -14511,12 +14551,14 @@ Set `wrappers` on any field:
 }
 ```
 
-Multiple wrappers stack outermost → innermost. The first entry is the outermost:
+Multiple wrappers stack outermost → innermost. The first entry is the outermost. Mixing a custom wrapper with the built-in `css`:
 
 ```typescript
+// section wraps css wraps the field. `section` must be registered first
+// (see Writing a Wrapper). `css` is built-in.
 wrappers: [
   { type: 'section', title: 'Card' }, // outer
-  { type: 'css', cssClasses: 'muted' }, // inner — wraps the field directly
+  { type: 'css', cssClasses: 'muted' }, // inner
 ];
 ```
 
@@ -14558,7 +14600,14 @@ The effective wrapper chain for one field is merged from three sources, outermos
 2. **Form defaults** — `FormConfig.defaultWrappers`
 3. **Field-level** — the field's own `wrappers` array
 
-`wrappers: null` on a field clears the entire chain — no auto-associations, no defaults, no field-level entries. Use it as an escape hatch for fields that need to render bare.
+## `wrappers` state cheatsheet
+
+| `wrappers` value | Effect                                             |
+| ---------------- | -------------------------------------------------- |
+| `undefined`      | Inherit (auto-associations + defaults apply)       |
+| `null`           | **Opt out** — render the field bare                |
+| `[]`             | Inherit (same as `undefined` — **not** an opt-out) |
+| `[{ …wrapper }]` | Append to auto-associations + defaults             |
 
 > [!WARNING]
 > `wrappers: []` (an empty array) is **not** an opt-out. Auto-associations and `defaultWrappers` still apply — the field-level list just adds zero additional wrappers. Use `wrappers: null` to skip them entirely.
@@ -14575,20 +14624,26 @@ The form below sets `defaultWrappers: [{ type: 'css', cssClasses: 'demo-field' }
 
 ## Troubleshooting
 
-- **Wrapper does not render.** Check that it's passed to `provideDynamicForm(...)` — `WRAPPER_REGISTRY` has no entry otherwise, and the outlet logs an `error`-level message via `DynamicFormLogger`.
+- **Wrapper does not render.** Check that it's passed to `provideDynamicForm(...)` — `WRAPPER_REGISTRY` has no entry otherwise, and the outlet logs an `error`-level message via `DynamicFormLogger` plus a `console.error` with the `[Dynamic Forms]` prefix.
 - **`fieldComponent` is `undefined` in the wrapper's constructor.** Expected — it's a view query. Read it inside a `computed()` / `effect()` / template, never in the constructor.
 - **Wrapper config isn't typed.** Confirm the `declare module` block runs (TypeScript only picks up augmentations from files that are actually imported). Re-exporting `appWrappers` from an entry module is enough.
+- **Typed config prop is silently ignored.** A typo in a config key (`{ type: 'section', tilte: 'Hi' }`) renders the wrapper with no title and no error — unknown keys are dropped by design to tolerate cross-wrapper config drift. Run `tsc --noEmit` to catch the misspelling statically.
+- **Wrapper re-renders on every keystroke.** Expected when the wrapper reads a mapper-driven input directly — read only the signals you need inside a `computed()` and rely on signal equality to short-circuit downstream reactivity.
 
 --- wrappers/writing-a-wrapper ---
 
-A wrapper is an Angular component that implements a single contract: it exposes a `ViewContainerRef` slot named `fieldComponent`. Everything else — template, styling, DI — is yours.
+Build a custom wrapper component that decorates any dynamic form field. This page walks through the contract, the data that flows in, and the common extensions (validation-aware chrome, styling, tests).
 
-This page builds a `section` wrapper that renders a titled card around any field.
+Prerequisite: you've read **[Registering and applying wrappers](/wrappers/registering-and-applying)** — this page assumes you know how to pass a wrapper to `provideDynamicForm(...)`.
 
-## 1. Implement `FieldWrapperContract`
+The example here is a `section` wrapper that renders a titled card around any field.
+
+## 1. Implement the contract
+
+A wrapper is an Angular component whose template contains a `#fieldComponent` template reference pointing at a `ViewContainerRef`. The outlet creates the wrapper, finds the ref, and renders the next wrapper (or the field component) inside. Everything else — template, styling, DI — is yours.
 
 ```typescript name="section-wrapper.component.ts"
-import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, ViewContainerRef, viewChild } from '@angular/core';
 import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 
 @Component({
@@ -14629,9 +14684,16 @@ The outlet strips the `type` discriminant from the wrapper config and pushes eve
 { type: 'section', title: 'Contact details' }
 ```
 
-the component's `title` input becomes `'Contact details'`. Inputs you don't declare are silently ignored, so a typo in config doesn't break rendering — add validation in review.
+the component's `title` input becomes `'Contact details'`.
 
-### `fieldInputs` — the mapper's outputs
+> [!WARNING]
+> Inputs you don't declare are silently ignored — a config typo like `{ type: 'section', tilte: 'Hi' }` renders the wrapper with **no title** and no runtime error. The augmentation from `FieldRegistryWrappers` makes typos a TypeScript error at the config site, so run `tsc --noEmit` (or your editor's type check) to catch them statically.
+
+### Dynamic config
+
+Any config prop can be a signal or observable instead of a literal. Angular's input system doesn't know the difference — pass a `Signal<string>` for `title` if you want the header text to react to form state, or an `Observable<string>` from a translation service. The built-in `css` wrapper uses this (`cssClasses: DynamicText = string | Signal<string> | Observable<string>`); adopt the same pattern in your own wrappers whenever config should flex at runtime.
+
+## 3. Read field state via `fieldInputs`
 
 Alongside config, every wrapper receives a single `fieldInputs` input of type `WrapperFieldInputs`:
 
@@ -14649,12 +14711,15 @@ interface WrapperFieldInputs {
 }
 ```
 
-This is the same set of inputs the mapper would push onto the field component, plus the field's `FieldTree` narrowed into a `ReadonlyFieldTree` — a whitelist of read-only signals (`value`, `valid`, `invalid`, `touched`, `dirty`, `required`, `disabled`, `hidden`, `errors`). Wrappers observe through this surface; they cannot write.
+Same set of inputs the mapper would push onto the field component, plus the field's `FieldTree` narrowed to a `ReadonlyFieldTree` — a whitelist of read-only signals (`value`, `valid`, `invalid`, `touched`, `dirty`, `required`, `disabled`, `hidden`, `errors`). Wrappers observe through this surface; they cannot write.
 
-A validation-aware version of the section wrapper:
+A validation-aware section wrapper reads the field's validity:
 
 ```typescript name="section-wrapper.component.ts"
+import { ChangeDetectionStrategy, Component, computed, input, ViewContainerRef, viewChild } from '@angular/core';
+
 @Component({
+  selector: 'app-section-wrapper',
   template: `
     <div class="section" [class.section--invalid]="isInvalid()">
       <div class="section__header">
@@ -14668,6 +14733,8 @@ A validation-aware version of the section wrapper:
       </div>
     </div>
   `,
+  styleUrl: './section-wrapper.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class SectionWrapperComponent implements FieldWrapperContract {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
@@ -14678,15 +14745,114 @@ export default class SectionWrapperComponent implements FieldWrapperContract {
 }
 ```
 
-`this.fieldInputs()?.field` is a `ReadonlyFieldTree`; calling `.invalid()` reads Angular Signal Forms' invalid signal.
+## Wrappers on container fields
 
-> [!NOTE]
-> Container-type fields (`type: 'container'`) wrap a children template rather than a single field. Wrappers used in that position do not receive `fieldInputs` — inject `FIELD_SIGNAL_CONTEXT` directly if you need form state in that scenario.
+A wrapper around a `type: 'container'` field wraps a **children template**, not a single field. In that position the outlet doesn't know which field to surface through `fieldInputs` — so wrappers on containers don't receive it. If you still need form state there, inject `FIELD_SIGNAL_CONTEXT` directly:
 
-## 3. Style freely
+```typescript
+import { inject } from '@angular/core';
+import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
 
-Wrappers are ordinary Angular components. Use Emulated view encapsulation, `:host` selectors, global styles, adapter-specific classes — whatever fits. The outlet creates the component via `ViewContainerRef.createComponent()`, so scoped styles work like any other component.
+export default class MyContainerWrapper implements FieldWrapperContract {
+  readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
+  private readonly ctx = inject(FIELD_SIGNAL_CONTEXT);
+
+  readonly formIsValid = computed(() => this.ctx.form().valid());
+}
+```
+
+### `fieldInputs` vs `FIELD_SIGNAL_CONTEXT`
+
+|                                          | `fieldInputs` input                          | `FIELD_SIGNAL_CONTEXT` (injected)     |
+| ---------------------------------------- | -------------------------------------------- | ------------------------------------- |
+| Wrapper around a single field            | ✅ Use this — `fieldInputs()?.field`         | Works, but coarser (entire form tree) |
+| Wrapper around a container's children    | ❌ Not provided — use `FIELD_SIGNAL_CONTEXT` | ✅ Required                           |
+| Needs other mapper outputs (label, etc.) | ✅ `fieldInputs()?.label`                    | Not exposed here                      |
+| Needs the entire form root               | Not exposed                                  | ✅ `ctx.form().value()`               |
+
+## 4. Style the wrapper
+
+Wrappers are ordinary Angular components. The outlet creates them via `ViewContainerRef.createComponent()`, so every styling option works: Emulated view encapsulation (the default), `:host` selectors, global styles via the app stylesheet, CSS custom properties.
+
+A starting SCSS for the section wrapper:
+
+```scss name="section-wrapper.component.scss"
+:host {
+  display: block;
+}
+
+.section {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+
+  &--invalid {
+    border-color: rgb(220, 55, 55);
+  }
+}
+
+.section__header {
+  padding: 0.6rem 0.9rem;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.section__body {
+  padding: 0.9rem;
+}
+```
+
+### Reaching the field inside
+
+With Angular 21, `::ng-deep` is removed from new projects. Three patterns cover almost every "style the wrapped field from the wrapper" need:
+
+- **CSS custom properties** — expose a `--field-spacing` (or similar) variable on the wrapper host; have the field's own component consume it. The field doesn't need to know about the wrapper; custom properties cross encapsulation boundaries by design.
+- **A class on the child** — pass a `className` through the field's own `className` property. The field applies it to its own host; the wrapper never has to cross the boundary.
+- **Global styles** — declare the rules in a global stylesheet and let them match both sides. Works when you don't need scoping.
+
+The library's own `RowWrapperComponent` [uses `:host-context(.modifier)` + global grid classes](https://github.com/ng-forge/ng-forge/blob/main/packages/dynamic-forms/src/lib/wrappers/row/row-wrapper.component.scss) to apply layout modifiers from an ancestor's `className` — a worked example of the first two patterns combined.
+
+## 5. Test the wrapper
+
+Wrappers are components — test them with `TestBed` like any other. A minimal spec that mounts the wrapper via `createComponent`, passes a `fieldInputs` signal, and asserts DOM:
+
+```typescript name="section-wrapper.component.spec.ts"
+import { TestBed } from '@angular/core/testing';
+import { Component, EnvironmentInjector, signal, viewChild, ViewContainerRef } from '@angular/core';
+import SectionWrapperComponent from './section-wrapper.component';
+import type { WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+
+@Component({ template: `<ng-container #slot></ng-container>` })
+class TestHost {
+  readonly slot = viewChild.required('slot', { read: ViewContainerRef });
+}
+
+describe('SectionWrapperComponent', () => {
+  it('renders the configured title', () => {
+    const fixture = TestBed.createComponent(TestHost);
+    fixture.detectChanges();
+
+    const ref = fixture.componentInstance.slot().createComponent(SectionWrapperComponent);
+    ref.setInput('title', 'Contact details');
+    ref.setInput('fieldInputs', { key: 'email' } satisfies WrapperFieldInputs);
+    ref.changeDetectorRef.detectChanges();
+
+    const header = ref.location.nativeElement.querySelector('.section__header');
+    expect(header?.textContent.trim()).toBe('Contact details');
+  });
+});
+```
+
+For integration tests that exercise wrappers inside a live form (mapper + outlet + chain), the library's own [`container-field.component.spec.ts`](https://github.com/ng-forge/ng-forge/blob/main/packages/dynamic-forms/src/lib/fields/container/container-field.component.spec.ts) is a larger example — mock wrapper components, a `flushWrapperChain` helper, and assertions against the rendered chain.
+
+## Merge order reminder
+
+When this wrapper lives on a real field, its position in the rendered chain depends on the merge order — auto-associations outermost, `FormConfig.defaultWrappers` next, field-level `wrappers` innermost. See [Registering and applying → Merge order](/wrappers/registering-and-applying#merge-order) for the full picture.
 
 ## Next
 
-With the component done, the next step is registering it so `provideDynamicForm(...)` knows about it and making wrappers fire on real fields: **[Registering and applying wrappers](/wrappers/registering-and-applying)**.
+You've built, styled, and tested a custom wrapper — now register it and reach for it in a form:
+
+- **[Registering and applying wrappers](/wrappers/registering-and-applying)**
