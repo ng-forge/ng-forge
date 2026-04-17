@@ -4,9 +4,9 @@ import { WrapperTypeDefinition } from '../models/wrapper-type';
 /**
  * User-facing wrapper registration shape used with `createWrappers(...)`.
  *
- * Extends {@link WrapperTypeDefinition} with an optional `props` field that
- * carries the wrapper's config type (via {@link wrapperProps}) for later
- * inference by {@link InferWrapperRegistry}.
+ * Extends `WrapperTypeDefinition` with an optional `props` field that
+ * carries the wrapper's config type (via `wrapperProps`) for later
+ * inference by `InferWrapperRegistry`.
  */
 export interface WrapperRegistration<TName extends string = string, TConfig = unknown> {
   /** Unique identifier for the wrapper type */
@@ -77,7 +77,7 @@ export function createWrappers<const T extends readonly WrapperRegistration[]>(.
   };
 }
 
-/** Type guard for a {@link WrappersBundle}. */
+/** Type guard for a `WrappersBundle`. */
 export function isWrappersBundle(value: unknown): value is WrappersBundle {
   return (
     typeof value === 'object' &&

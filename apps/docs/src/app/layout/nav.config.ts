@@ -89,7 +89,7 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'Field Wrappers',
+    label: 'Wrappers',
     path: 'wrappers',
     children: [
       { label: 'Overview', path: 'wrappers/overview' },

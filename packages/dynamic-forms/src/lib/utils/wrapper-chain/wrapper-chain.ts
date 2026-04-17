@@ -78,7 +78,7 @@ export function loadWrapperComponents(
           if (!component) {
             const message = `Wrapper type '${config.type}' could not be loaded. Ensure it is registered via provideDynamicForm().`;
             logger.error(message);
-             
+
             console.error('[Dynamic Forms]', message);
             return of(null);
           }

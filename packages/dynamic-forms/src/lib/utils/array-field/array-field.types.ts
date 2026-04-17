@@ -4,7 +4,7 @@ import type { FieldDef } from '../../definitions/base/field-def';
 /**
  * A single field within a resolved array item.
  *
- * Structurally compatible with {@link ResolvedField} so the same DfFieldOutlet
+ * Structurally compatible with `ResolvedField` so the same DfFieldOutlet
  * directive can render both top-level and array-item fields.
  */
 export interface ResolvedArrayItemField {

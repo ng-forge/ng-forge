@@ -4,7 +4,7 @@ import { ReadonlyFieldTree } from '../core/field-tree-utils';
  * Input shape passed to a wrapper component via the `fieldInputs` input.
  *
  * Carries the wrapped field's mapper outputs plus a `field` read-only view
- * ({@link ReadonlyFieldTree}). A wrapper component can observe field state
+ * (`ReadonlyFieldTree`). A wrapper component can observe field state
  * reactively through `fieldInputs.field.value()`, `fieldInputs.field.valid()`,
  * etc., but cannot mutate the field — writes are the field component's concern.
  *

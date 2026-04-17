@@ -41,11 +41,8 @@ export default class SectionWrapperComponent implements FieldWrapperContract {
 }
 ```
 
-Three rules:
-
-1. **`fieldComponent` must be a plain `viewChild.required('fieldComponent', { read: ViewContainerRef })`.** Do not put `#fieldComponent` inside an `@if`, `@defer`, or any conditional — the outlet needs the slot ready at creation time.
-2. **Use `default class` export for lazy loading.** The wrapper is loaded via dynamic `import()`; the loader picks up either a `default` export or a named export.
-3. **Set `ChangeDetectionStrategy.OnPush`.** Wrappers receive data through signal-based inputs; OnPush is the expected mode.
+> [!NOTE]
+> The `fieldComponent` query must be `viewChild.required('fieldComponent', { read: ViewContainerRef })`, and the `#fieldComponent` template ref cannot live inside an `@if`, `@defer`, or other conditional — the outlet needs the slot ready at creation time, not later.
 
 ## 2. Receive config as inputs
 

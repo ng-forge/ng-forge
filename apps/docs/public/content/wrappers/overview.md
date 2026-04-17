@@ -1,5 +1,5 @@
 ---
-title: Field Wrappers
+title: Wrappers
 slug: wrappers/overview
 description: 'Compose chrome around any dynamic form field without touching the field itself. Wrappers are Angular components chained around a field to add labels, cards, validation indicators, or other decoration.'
 ---

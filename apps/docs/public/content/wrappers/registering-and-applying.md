@@ -113,6 +113,13 @@ The effective wrapper chain for one field is merged from three sources, outermos
 
 `wrappers: null` on a field clears the entire chain — no auto-associations, no defaults, no field-level entries. Use it as an escape hatch for fields that need to render bare.
 
+> [!WARNING]
+> `wrappers: []` (an empty array) is **not** an opt-out. Auto-associations and `defaultWrappers` still apply — the field-level list just adds zero additional wrappers. Use `wrappers: null` to skip them entirely.
+
+## Route-level registration
+
+Each call to `provideDynamicForm(...)` creates a **new** `WRAPPER_REGISTRY` map at that injector level; it does not merge with ancestor registrations. If you register wrappers at the app-config level and then call `provideDynamicForm(...)` again inside a route with additional wrappers, the route-level registry shadows the ancestor — auto-associations declared at the app level will **not** fire for fields rendered beneath that route. To extend the registry for a specific route, re-declare the full set (app wrappers + the new ones) in that route's `provideDynamicForm(...)` call.
+
 ## Interactive example
 
 The form below sets `defaultWrappers: [{ type: 'css', cssClasses: 'demo-field' }]`. The **contact** field layers a `section` wrapper on top of the default, and **notes** opts out entirely with `wrappers: null`.
