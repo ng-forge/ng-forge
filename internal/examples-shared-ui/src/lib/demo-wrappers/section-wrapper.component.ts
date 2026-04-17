@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild } from '@angular/core';
-import type { FieldWrapperContract, WrapperFieldInputs, WrapperTypeDefinition } from '@ng-forge/dynamic-forms';
+import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 
 /**
  * Demo "section" wrapper used by the docs live examples.
@@ -51,12 +51,3 @@ declare module '@ng-forge/dynamic-forms' {
     section: SectionWrapper;
   }
 }
-
-/**
- * WrapperTypeDefinition registration for the demo section wrapper.
- * Passed alongside an adapter's field types to `provideDynamicForm(...)`.
- */
-export const SECTION_WRAPPER: WrapperTypeDefinition = {
-  wrapperName: 'section',
-  loadComponent: () => import('./section-wrapper.component'),
-};

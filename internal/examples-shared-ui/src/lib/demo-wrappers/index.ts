@@ -1,5 +1,6 @@
-export { SECTION_WRAPPER, SectionWrapperComponent, type SectionWrapper } from './section-wrapper.component';
-import { SECTION_WRAPPER } from './section-wrapper.component';
+export { SectionWrapperComponent, type SectionWrapper } from './section-wrapper.component';
+export { SECTION_WRAPPER } from './section-wrapper.registration';
+import { SECTION_WRAPPER } from './section-wrapper.registration';
 import type { WrapperTypeDefinition } from '@ng-forge/dynamic-forms';
 
 /**
