@@ -24,7 +24,9 @@ import { EventBus } from '../../events/event.bus';
 import { FieldDef } from '../../definitions/base/field-def';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY } from '../../models/wrapper-type';
-import { destroyWrapperChain, loadWrapperComponents, LoadedWrapper, renderWrapperChain } from '../../utils/wrapper-chain/wrapper-chain';
+import { DEFAULT_WRAPPERS } from '../../models/field-signal-context.token';
+import { loadWrapperComponents, LoadedWrapper, renderWrapperChain } from '../../utils/wrapper-chain/wrapper-chain';
+import { resolveEffectiveWrappers } from '../../utils/resolve-effective-wrappers/resolve-effective-wrappers';
 
 /**
  * Layout container that wraps child fields with UI chrome.
@@ -72,6 +74,7 @@ export default class ContainerFieldComponent {
   private readonly logger = inject(DynamicFormLogger);
   private readonly wrapperRegistry = inject(WRAPPER_REGISTRY);
   private readonly wrapperComponentCache = inject(WRAPPER_COMPONENT_CACHE);
+  private readonly defaultWrappersSignal = inject(DEFAULT_WRAPPERS, { optional: true });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // View Queries
@@ -149,9 +152,15 @@ export default class ContainerFieldComponent {
   }
 
   private setupWrapperChain(): void {
-    const wrappers$ = toObservable(computed(() => this.field().wrappers ?? []));
+    // Merge field-level wrappers with form-level defaultWrappers + auto-associations
+    // so containers behave symmetrically with DfFieldOutlet. `wrappers: null` on the
+    // ContainerField would clear the chain, but that shape isn't currently allowed by
+    // the type (container wrappers are required); resolveEffectiveWrappers handles both.
+    const effectiveWrappers$ = toObservable(
+      computed(() => resolveEffectiveWrappers(this.field(), this.defaultWrappersSignal?.(), this.wrapperRegistry)),
+    );
 
-    wrappers$
+    effectiveWrappers$
       .pipe(
         switchMap((configs) => loadWrapperComponents(configs, this.wrapperRegistry, this.wrapperComponentCache, this.logger)),
         takeUntilDestroyed(this.destroyRef),
@@ -179,8 +188,12 @@ export default class ContainerFieldComponent {
   }
 
   private cleanupWrapperChain(): void {
+    // Clearing the outer VCR destroys the outermost wrapper; Angular cascades
+    // the destroy to every nested ComponentRef (each wrapper, and the embedded
+    // children view). Explicitly walking `wrapperComponentRefs` to destroy them
+    // afterwards would be redundant work.
     this.wrapperContainer().clear();
-    destroyWrapperChain(this.wrapperComponentRefs);
+    this.wrapperComponentRefs = [];
   }
 }
 

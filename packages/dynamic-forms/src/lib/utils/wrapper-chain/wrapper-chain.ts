@@ -160,13 +160,3 @@ function renderStep(
 
   renderStep(inner, rest, options, refs);
 }
-
-/**
- * Destroy all wrapper component refs in a chain. Safe to call multiple times.
- */
-export function destroyWrapperChain(refs: ComponentRef<unknown>[]): void {
-  for (const ref of refs) {
-    ref.destroy();
-  }
-  refs.length = 0;
-}

@@ -5,13 +5,7 @@ import { ResolvedField } from '../utils/resolve-field/resolve-field';
 import { WrapperConfig, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY } from '../models/wrapper-type';
 import { DEFAULT_WRAPPERS } from '../models/field-signal-context.token';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
-import {
-  destroyWrapperChain,
-  LoadedWrapper,
-  loadWrapperComponents,
-  renderWrapperChain,
-  setInputIfDeclared,
-} from '../utils/wrapper-chain/wrapper-chain';
+import { LoadedWrapper, loadWrapperComponents, renderWrapperChain, setInputIfDeclared } from '../utils/wrapper-chain/wrapper-chain';
 import { resolveEffectiveWrappers } from '../utils/resolve-effective-wrappers/resolve-effective-wrappers';
 import { toReadonlyFieldTree } from '../core/field-tree-utils';
 import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
@@ -154,11 +148,11 @@ export class DfFieldOutlet {
   }
 
   private cleanup(): void {
-    if (this.fieldRef) {
-      this.fieldRef.destroy();
-      this.fieldRef = undefined;
-    }
-    destroyWrapperChain(this.wrapperRefs);
+    // vcr.clear() destroys the outermost component (wrapper or field); Angular
+    // cascades destruction through every nested ComponentRef. Manually walking
+    // wrapperRefs / fieldRef would double the teardown work.
     this.vcr.clear();
+    this.wrapperRefs = [];
+    this.fieldRef = undefined;
   }
 }
