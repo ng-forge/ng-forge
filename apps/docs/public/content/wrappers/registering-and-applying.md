@@ -141,7 +141,7 @@ The form below sets `defaultWrappers: [{ type: 'css', cssClasses: 'demo-field' }
 - **Wrapper does not render.** Check that it's passed to `provideDynamicForm(...)` — `WRAPPER_REGISTRY` has no entry otherwise, and the outlet logs an `error`-level message via `DynamicFormLogger` plus a `console.error` with the `[Dynamic Forms]` prefix.
 - **`fieldComponent` is `undefined` in the wrapper's constructor.** Expected — it's a view query. Read it inside a `computed()` / `effect()` / template, never in the constructor.
 - **Wrapper config isn't typed.** Confirm the `declare module` block runs (TypeScript only picks up augmentations from files that are actually imported). Re-exporting `appWrappers` from an entry module is enough.
-- **Typed config prop is silently ignored.** A typo in a config key (`{ type: 'section', tilte: 'Hi' }`) renders the wrapper with no title and no error — unknown keys are dropped by design to tolerate cross-wrapper config drift. Run `tsc --noEmit` to catch the misspelling statically.
+- **Typed config prop does nothing.** A typo like `tilte` instead of `title` won't throw — the wrapper renders without that prop. Unknown keys are intentionally dropped so wrappers don't fight over unrelated config. Rely on the TypeScript augmentation to catch the typo at the config site.
 - **Wrapper re-renders on every keystroke.** Expected when the wrapper reads a mapper-driven input directly — read only the signals you need inside a `computed()` and rely on signal equality to short-circuit downstream reactivity.
 
 ## Where to go from here

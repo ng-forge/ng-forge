@@ -56,7 +56,7 @@ The outlet strips the `type` discriminant from the wrapper config and pushes eve
 the component's `title` input becomes `'Contact details'`.
 
 > [!WARNING]
-> Inputs you don't declare are silently ignored — a config typo like `{ type: 'section', tilte: 'Hi' }` renders the wrapper with **no title** and no runtime error. The augmentation from `FieldRegistryWrappers` makes typos a TypeScript error at the config site, so run `tsc --noEmit` (or your editor's type check) to catch them statically.
+> A typo like `tilte` won't throw — the wrapper just renders without a title. The `FieldRegistryWrappers` augmentation makes it a TypeScript error where you wrote it, which is why registering the config type matters.
 
 ### Dynamic config
 
@@ -122,7 +122,7 @@ A wrapper around a `type: 'container'` field wraps a **children template**, not 
 
 Wrappers are ordinary Angular components — view-encapsulated styles, `:host` selectors, and global styles all work as usual. The wrapper-specific concern is **reaching across the encapsulation boundary** to the inner field, since Angular 21 removes `::ng-deep` from new projects. Three patterns cover it:
 
-- **CSS custom properties** — expose a `--field-spacing` (or similar) on the wrapper host; the field's component consumes it. Variables cross encapsulation boundaries by design, and the field doesn't need to know about the wrapper.
+- **CSS custom properties** — set something like `--field-spacing` on the wrapper host and read it in the field's stylesheet. Custom properties cross view encapsulation, so the field doesn't need to know a wrapper is even there.
 - **A class on the child** — set the field's own `className` property. The field applies it to its own host; the wrapper never has to cross the boundary.
 - **Global styles** — declare the rules in a global stylesheet and let them match both sides.
 
