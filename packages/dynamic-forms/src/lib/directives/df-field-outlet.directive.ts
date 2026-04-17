@@ -1,6 +1,17 @@
-import { ComponentRef, DestroyRef, Directive, EnvironmentInjector, inject, input, Signal, computed, ViewContainerRef } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, of, switchMap } from 'rxjs';
+import {
+  ComponentRef,
+  DestroyRef,
+  Directive,
+  EnvironmentInjector,
+  inject,
+  input,
+  Signal,
+  Type,
+  computed,
+  ViewContainerRef,
+} from '@angular/core';
+import { explicitEffect } from 'ngxtension/explicit-effect';
+import { firstValueFrom } from 'rxjs';
 import { ResolvedField } from '../utils/resolve-field/resolve-field';
 import { WrapperConfig, WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY } from '../models/wrapper-type';
 import { DEFAULT_WRAPPERS } from '../models/field-signal-context.token';
@@ -22,7 +33,8 @@ import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
  * Effective wrappers are merged from (outermost → innermost):
  * 1. `WrapperTypeDefinition.types` auto-associations for the field's `type`
  * 2. `FormConfig.defaultWrappers`
- * 3. Field-level `FieldDef.wrappers` (null = explicit opt-out)
+ * 3. Field-level `FieldDef.wrappers` (`null` = explicit opt-out; `[]` does not
+ *    opt out — auto + defaults still apply)
  *
  * Wrapper config keys (minus `type`) are pushed as individual Angular inputs;
  * every wrapper also receives `fieldInputs` — a `WrapperFieldInputs` bag that
@@ -32,9 +44,14 @@ import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
  * Rendering is gated by `field.renderReady()` — the directive waits until
  * the mapper produces the required inputs before instantiating the component.
  *
+ * **Known limitation (renderReady flicker):** if `renderReady` goes
+ * `true → false → true` in quick succession (e.g. a mapper transiently
+ * loses its `field` input) the outlet tears down and rebuilds the chain,
+ * discarding input focus / caret position in the field component.
+ *
  * @example
  * ```html
- * @for (field of resolvedFields(); track field.key) {
+ * \@for (field of resolvedFields(); track field.key) {
  *   <ng-container *dfFieldOutlet="field; environmentInjector: envInjector" />
  * }
  * ```
@@ -59,42 +76,70 @@ export class DfFieldOutlet {
 
   private wrapperRefs: ComponentRef<unknown>[] = [];
   private fieldRef: ComponentRef<unknown> | undefined;
+  /**
+   * Monotonic counter guarding async chain builds. Each rebuild request
+   * captures the version; if a newer rebuild has started by the time the
+   * Promise resolves, the stale one bails out without touching the DOM.
+   */
+  private rebuildVersion = 0;
 
-  private readonly effectiveWrappers: Signal<readonly WrapperConfig[]> = computed(() => {
-    const field = this.dfFieldOutlet().fieldDef;
-    const defaults = this.defaultWrappersSignal?.();
-    return resolveEffectiveWrappers(field, defaults, this.wrapperAutoAssociations);
-  });
+  /**
+   * Pre-computed effective wrapper chain. Uses reference-equal-per-element
+   * comparison so that reconcileFields preserving the same fieldDef yields
+   * a stable signal output — no chain rebuild when nothing actually changed.
+   */
+  private readonly effectiveWrappers: Signal<readonly WrapperConfig[]> = computed(
+    () => resolveEffectiveWrappers(this.dfFieldOutlet().fieldDef, this.defaultWrappersSignal?.(), this.wrapperAutoAssociations),
+    { equal: (a, b) => a.length === b.length && a.every((w, i) => w === b[i]) },
+  );
+
+  private readonly componentIdentity: Signal<Type<unknown>> = computed(() => this.dfFieldOutlet().component);
 
   private readonly renderReady: Signal<boolean> = computed(() => this.dfFieldOutlet().renderReady());
 
-  constructor() {
-    // Rebuild chain when identity (field), effective wrappers, or renderReady change.
-    combineLatest([toObservable(this.dfFieldOutlet), toObservable(this.effectiveWrappers), toObservable(this.renderReady)])
-      .pipe(
-        switchMap(([, wrappers, ready]) => {
-          if (!ready) return of({ loaded: [] as LoadedWrapper[], shouldRender: false });
-          if (wrappers.length === 0) return of({ loaded: [] as LoadedWrapper[], shouldRender: true });
-          return loadWrapperComponents(wrappers, this.wrapperRegistry, this.wrapperComponentCache, this.logger).pipe(
-            switchMap((loaded) => of({ loaded, shouldRender: true })),
-          );
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(({ loaded, shouldRender }) => {
-        this.cleanup();
-        if (shouldRender) this.render(loaded);
-      });
+  private readonly rawInputs = computed(() => this.dfFieldOutlet().inputs());
 
-    // Stream mapper outputs to created components after the initial render.
-    toObservable(computed(() => this.dfFieldOutlet().inputs()))
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((rawInputs) => {
-        if (!this.fieldRef) return;
-        this.pushInputs(rawInputs);
-      });
+  constructor() {
+    // Chain-rebuild effect: re-runs only when the component identity, the
+    // memoised effective wrappers, or the renderReady gate changes. Replaces
+    // the prior combineLatest/switchMap pipeline — aligns with the codebase's
+    // explicitEffect convention and skips the rebuild when a reconciled
+    // ResolvedField carries the same component + wrappers as before.
+    explicitEffect([this.componentIdentity, this.effectiveWrappers, this.renderReady], ([, wrappers, ready]) => {
+      if (!ready) {
+        this.cleanup();
+        return;
+      }
+      this.scheduleRebuild(wrappers);
+    });
+
+    // Mapper outputs push-through: updates inputs on already-created refs
+    // without touching the chain structure. Runs independently of the
+    // rebuild effect so per-keystroke input updates don't thrash the DOM.
+    explicitEffect([this.rawInputs], ([rawInputs]) => {
+      if (!this.fieldRef) return;
+      this.pushInputs(rawInputs);
+    });
 
     this.destroyRef.onDestroy(() => this.cleanup());
+  }
+
+  private scheduleRebuild(wrappers: readonly WrapperConfig[]): void {
+    const version = ++this.rebuildVersion;
+    const load =
+      wrappers.length === 0
+        ? Promise.resolve<LoadedWrapper[]>([])
+        : firstValueFrom(loadWrapperComponents(wrappers, this.wrapperRegistry, this.wrapperComponentCache, this.logger));
+
+    load
+      .then((loaded) => {
+        if (this.rebuildVersion !== version || this.destroyRef.destroyed) return;
+        this.cleanup();
+        this.render(loaded);
+      })
+      .catch(() => {
+        /* loadWrapperComponents already logs; skip rebuild silently */
+      });
   }
 
   private render(loadedWrappers: readonly LoadedWrapper[]): void {
