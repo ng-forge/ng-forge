@@ -245,12 +245,7 @@ export class ContentService {
       [...codespanTexts].map(async (text) => {
         // Markdown codespans arrive with HTML entities like `&lt;`; shiki
         // needs the raw text to tokenise correctly.
-        const decoded = text
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-          .replace(/&amp;/g, '&')
-          .replace(/&quot;/g, '"')
-          .replace(/&#39;/g, "'");
+        const decoded = decodeHtmlEntities(text);
         const html = await this.shiki.highlightInline(decoded, 'typescript');
         inlineHighlightedMap.set(text, html);
       }),
