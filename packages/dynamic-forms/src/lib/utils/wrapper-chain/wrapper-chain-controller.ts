@@ -2,7 +2,8 @@ import { ComponentRef, computed, DestroyRef, EnvironmentInjector, inject, Inject
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { map, Observable, of, switchMap } from 'rxjs';
-import { WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY, WrapperConfig } from '../../models/wrapper-type';
+import { WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
+import { Logger } from '../../providers/features/logger/logger.interface';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
 import { isSameWrapperChain } from '../resolve-wrappers/resolve-wrappers';
@@ -10,179 +11,209 @@ import { LoadedWrapper, loadWrapperComponents, renderWrapperChain, setInputIfDec
 
 export interface WrapperChainControllerOptions {
   /**
-   * The outer slot where the wrapper chain is mounted. Accepts a direct VCR
-   * (e.g. `inject(ViewContainerRef)` in a directive) or a viewChild signal
-   * (resolved on first emission, after view init).
+   * The outer slot where the wrapper chain is mounted. Sampled only at render
+   * time — safe to pass a `viewChild.required` signal that resolves post-init.
    */
-  readonly vcr: ViewContainerRef | Signal<ViewContainerRef>;
-  /** Signal of the wrapper chain — ref-stable memoization (e.g. `isSameWrapperChain`) recommended. */
+  readonly vcr: Signal<ViewContainerRef>;
+  /**
+   * Signal of the wrapper chain. Ref-stable memoisation (e.g.
+   * `isSameWrapperChain`) is recommended — `WrapperConfig` entries should be
+   * singletons so the controller can tell a real chain change from ref churn.
+   */
   readonly wrappers: Signal<readonly WrapperConfig[]>;
   /**
-   * Optional gating signal. When `false`, the chain is torn down and nothing is rendered
-   * until it flips back to `true`. Used by `DfFieldOutlet` to defer rendering until
-   * `renderReady`. Containers omit the gate — they always render their children template.
+   * Optional gating signal. When `false`, the chain is not mounted (initial)
+   * or left untouched (post-mount flicker). `DfFieldOutlet` passes
+   * `renderReady`; containers omit the gate.
    */
   readonly gate?: Signal<boolean>;
   /**
-   * Either a concrete injector or a lazy getter — the getter form lets callers
-   * resolve the injector from a required input (which cannot be read in the
-   * constructor) at render time instead.
-   */
-  readonly environmentInjector: EnvironmentInjector | (() => EnvironmentInjector);
-  readonly parentInjector: Injector | (() => Injector);
-  /**
    * Optional mapper-outputs signal. When present, the controller pushes it to each
-   * wrapper's `fieldInputs` input at render time AND on every subsequent change —
-   * containers render a children template, not a field, so they don't need this.
+   * wrapper's `fieldInputs` input at render time AND on every subsequent change.
+   * Containers render a children template, not a field, so they don't need this.
    */
   readonly fieldInputs?: Signal<WrapperFieldInputs | undefined>;
   /**
-   * Optional extra rebuild trigger. Read on every emission and compared by identity.
-   * DfFieldOutlet passes the innermost component class so that a reconciled field
-   * with the same wrapper chain but a different `component` forces a rebuild of
-   * the innermost slot. Omit for callers where the innermost is stable.
+   * Optional extra rebuild trigger. `DfFieldOutlet` passes the innermost
+   * component class so that a reconciled field with the same wrapper chain
+   * but a different `component` forces a rebuild of the innermost slot.
+   * Compared by identity.
    */
   readonly rebuildKey?: Signal<unknown>;
   /**
    * Renders whatever belongs at the innermost slot (a field component, a children
-   * template, …). Called each time the chain rebuilds.
+   * template, …). Called each time the chain mounts or structurally rebuilds.
    */
   readonly renderInnermost: (slot: ViewContainerRef) => void;
   /**
-   * Called immediately before the mounted chain is cleared on a structural
-   * change (wrappers or `rebuildKey` changed). Receives the NEXT state so the
-   * caller can decide what to preserve.
-   *
-   * `DfFieldOutlet` uses this to detach the innermost field's hostView before
-   * `vcr.clear()` cascade-destroys it; if the new `rebuildKey` matches the
-   * current component class, `renderInnermost` re-inserts the preserved
-   * hostView into the new innermost slot so focus / caret / scroll survive.
-   *
-   * Not invoked for pre-first-render gate changes (nothing is mounted yet).
+   * Called right before the mounted chain is cleared on a structural change
+   * (wrappers or `rebuildKey` changed). Receives the NEXT state so the caller
+   * can detach views it wants to preserve — e.g. `DfFieldOutlet` detaches the
+   * innermost field's hostView so that focus / caret / scroll survive when
+   * only the wrapper chain changes. Not invoked on the pre-first-render path.
    */
-  readonly beforeRebuild?: (next: { wrappers: readonly WrapperConfig[]; rebuildKey: unknown }) => void;
+  readonly beforeRebuild?: (next: MountedChain) => void;
 }
 
 /**
- * Owns the wrapper-chain lifecycle for a field or container.
- *
- * Wires together:
- * - Async lazy-loading of registered wrapper components (sync fast-path when all
- *   are cached)
- * - Cancellation of stale in-flight loads via `switchMap` — replaces the hand-rolled
- *   `rebuildVersion` counter that both `DfFieldOutlet` and `ContainerFieldComponent`
- *   previously maintained
- * - Push-through of `fieldInputs` to already-mounted wrappers without rebuilding the
- *   chain
- * - Teardown on destroy via `takeUntilDestroyed` + `onDestroy` on the VCR
- *
- * Must be called from a DI injection context (component/directive constructor).
- * Has no return — the controller lives for the lifetime of the owning injection
- * context, controlled by its `DestroyRef`.
+ * Owns the wrapper-chain lifecycle for a field or container: async component
+ * loading, switchMap-based cancellation of stale loads, flicker-tolerant
+ * rebuilds (only structural changes tear down), and `fieldInputs` push-through.
+ * Must be called from a DI injection context.
  */
 export function createWrapperChainController(opts: WrapperChainControllerOptions): void {
-  const registry = inject(WRAPPER_REGISTRY);
-  const cache = inject(WRAPPER_COMPONENT_CACHE);
-  const logger = inject(DynamicFormLogger);
-  const destroyRef = inject(DestroyRef);
+  const deps = injectChainDeps();
+  const state = createStateSignal(opts);
 
+  const mounted = { value: null as MountedChain | null };
   let refs: ComponentRef<unknown>[] = [];
-  /**
-   * Tracks what was last mounted so we can distinguish a genuine structural
-   * change from a transient `gate` flicker. `null` means "nothing currently
-   * mounted" — either pre-first-render or after a real tear-down.
-   */
-  let lastMountedChain: { wrappers: readonly WrapperConfig[]; rebuildKey: unknown } | null = null;
 
-  const resolveVcr = (): ViewContainerRef => (typeof opts.vcr === 'function' ? opts.vcr() : opts.vcr);
-  const resolveEnvInjector = (): EnvironmentInjector =>
-    typeof opts.environmentInjector === 'function' ? opts.environmentInjector() : opts.environmentInjector;
-  const resolveParentInjector = (): Injector => (typeof opts.parentInjector === 'function' ? opts.parentInjector() : opts.parentInjector);
+  buildEmissionStream(state, deps)
+    .pipe(takeUntilDestroyed(deps.destroyRef))
+    .subscribe((emission) => {
+      refs = applyEmission(emission, { opts, deps, mounted, refs });
+    });
 
-  // Bundle everything that triggers a rebuild into a single signal so toObservable
-  // re-emits whenever ANY of them changes — gate flipping, wrapper chain shape
-  // changing, or (optionally) the innermost component identity changing. Custom
-  // equality keeps the signal ref-stable when nothing actually changed so
-  // reconciled fields with an identical chain don't thrash the DOM.
-  const chainKey = computed(
+  pushFieldInputsOnChange(opts, () => refs);
+  deps.destroyRef.onDestroy(() => opts.vcr().clear());
+}
+
+interface ChainDeps {
+  readonly registry: ReadonlyMap<string, WrapperTypeDefinition>;
+  readonly cache: Map<string, import('@angular/core').Type<unknown>>;
+  readonly logger: Logger;
+  readonly destroyRef: DestroyRef;
+  readonly environmentInjector: EnvironmentInjector;
+  readonly parentInjector: Injector;
+}
+
+interface ChainState {
+  readonly open: boolean;
+  readonly wrappers: readonly WrapperConfig[];
+  readonly rebuildKey: unknown;
+}
+
+interface MountedChain {
+  readonly wrappers: readonly WrapperConfig[];
+  readonly rebuildKey: unknown;
+}
+
+interface ChainEmission {
+  readonly state: ChainState;
+  readonly loaded: readonly LoadedWrapper[] | null;
+}
+
+interface EmissionApplyContext {
+  readonly opts: WrapperChainControllerOptions;
+  readonly deps: ChainDeps;
+  readonly mounted: { value: MountedChain | null };
+  readonly refs: ComponentRef<unknown>[];
+}
+
+function injectChainDeps(): ChainDeps {
+  return {
+    registry: inject(WRAPPER_REGISTRY),
+    cache: inject(WRAPPER_COMPONENT_CACHE),
+    logger: inject(DynamicFormLogger),
+    destroyRef: inject(DestroyRef),
+    environmentInjector: inject(EnvironmentInjector),
+    parentInjector: inject(Injector),
+  };
+}
+
+function createStateSignal(opts: WrapperChainControllerOptions): Signal<ChainState> {
+  return computed(
     () => ({
       open: opts.gate?.() ?? true,
       wrappers: opts.wrappers(),
       rebuildKey: opts.rebuildKey?.(),
     }),
-    {
-      equal: (a, b) => a.open === b.open && a.rebuildKey === b.rebuildKey && isSameWrapperChain(a.wrappers, b.wrappers),
-    },
+    { equal: (a, b) => a.open === b.open && a.rebuildKey === b.rebuildKey && isSameWrapperChain(a.wrappers, b.wrappers) },
   );
+}
 
-  toObservable(chainKey)
-    .pipe(
-      switchMap((state) => {
-        if (!state.open) return of({ state, loaded: null as readonly LoadedWrapper[] | null });
-        if (state.wrappers.every((w) => cache.has(w.type))) {
-          // Sync fast-path — every wrapper already resolved. Avoid the microtask hop.
-          return of({
-            state,
-            loaded: state.wrappers.map(
-              (config) => ({ config, component: cache.get(config.type)! }) satisfies LoadedWrapper,
-            ) as readonly LoadedWrapper[],
-          });
-        }
-        return loadWrapperComponents(state.wrappers, registry, cache, logger).pipe(
-          map((loaded) => ({ state, loaded: loaded as readonly LoadedWrapper[] | null })),
-        ) as Observable<{ state: typeof state; loaded: readonly LoadedWrapper[] | null }>;
-      }),
-      takeUntilDestroyed(destroyRef),
-    )
-    .subscribe(({ state, loaded }) => {
-      const vcr = resolveVcr();
-      const structurallyChanged =
-        lastMountedChain === null ||
-        lastMountedChain.rebuildKey !== state.rebuildKey ||
-        !isSameWrapperChain(lastMountedChain.wrappers, state.wrappers);
+/**
+ * Resolve a `ChainState` into a `ChainEmission`. `switchMap` cancellation
+ * guarantees in-flight async loads are discarded when a newer state arrives.
+ */
+function buildEmissionStream(state: Signal<ChainState>, deps: ChainDeps): Observable<ChainEmission> {
+  return toObservable(state).pipe(switchMap((s) => resolveLoadedWrappers(s, deps)));
+}
 
-      // A gate-only flicker after first mount — keep the chain alive so the
-      // user's focus / caret / scroll state survives. The caller's rawInputs
-      // effect continues pushing live mapper outputs through.
-      if (!structurallyChanged && !state.open) return;
-
-      // Structurally different from what's mounted — tear down first. Angular
-      // cascades destroy through every nested ComponentRef, so walking `refs`
-      // manually would be redundant work. `beforeRebuild` gives the caller a
-      // chance to detach views it wants to preserve (e.g. the innermost field
-      // ref when the component class is unchanged).
-      if (structurallyChanged && lastMountedChain !== null) {
-        opts.beforeRebuild?.({ wrappers: state.wrappers, rebuildKey: state.rebuildKey });
-        vcr.clear();
-        refs = [];
-        lastMountedChain = null;
-      }
-
-      if (!state.open || loaded === null) return;
-
-      // Same structure + already mounted — nothing to do (idempotent re-emission).
-      if (lastMountedChain !== null) return;
-
-      refs = renderWrapperChain({
-        outerContainer: vcr,
-        loadedWrappers: loaded,
-        environmentInjector: resolveEnvInjector(),
-        parentInjector: resolveParentInjector(),
-        logger,
-        fieldInputs: opts.fieldInputs?.(),
-        renderInnermost: opts.renderInnermost,
-      });
-      lastMountedChain = { wrappers: state.wrappers, rebuildKey: state.rebuildKey };
-    });
-
-  // When fieldInputs changes but the chain hasn't rebuilt, push the new bag to each
-  // already-mounted wrapper. If the chain is empty (gated off, or none rendered yet)
-  // the loop is a no-op.
-  if (opts.fieldInputs) {
-    explicitEffect([opts.fieldInputs], ([fi]) => {
-      for (const ref of refs) setInputIfDeclared(ref, 'fieldInputs', fi);
-    });
+function resolveLoadedWrappers(state: ChainState, deps: ChainDeps): Observable<ChainEmission> {
+  if (!state.open) {
+    return of({ state, loaded: null });
   }
 
-  destroyRef.onDestroy(() => resolveVcr().clear());
+  if (state.wrappers.every((w) => deps.cache.has(w.type))) {
+    // Sync fast-path — every wrapper already resolved.
+    const loaded = state.wrappers.map((config) => ({ config, component: deps.cache.get(config.type)! }) satisfies LoadedWrapper);
+    return of({ state, loaded });
+  }
+
+  return loadWrapperComponents(state.wrappers, deps.registry, deps.cache, deps.logger).pipe(map((loaded) => ({ state, loaded })));
+}
+
+/**
+ * Diff what's mounted against the next state and act:
+ *   - Gate-only flicker → no-op (preserve the mounted chain)
+ *   - Structural change → beforeRebuild → vcr.clear → render fresh
+ *   - Idempotent re-emission → no-op
+ *
+ * Returns the (possibly new) wrapper refs so the caller can track them for
+ * `fieldInputs` push-through.
+ */
+function applyEmission({ state, loaded }: ChainEmission, ctx: EmissionApplyContext): ComponentRef<unknown>[] {
+  const { opts, deps, mounted, refs } = ctx;
+  const vcr = opts.vcr();
+  const structurallyChanged = isStructurallyDifferent(mounted.value, state);
+
+  // Gate-only flicker after first mount — keep the chain alive so the user's
+  // focus / caret / scroll survive. The caller's rawInputs effect continues
+  // to push live mapper outputs through the still-mounted innermost.
+  if (!structurallyChanged && !state.open) return refs;
+
+  // Real structural change — tear down. Angular cascades destroy through
+  // every nested ComponentRef, so walking `refs` manually is redundant.
+  // `beforeRebuild` gives the caller a chance to detach views it wants to
+  // preserve (e.g. the innermost field when only wrappers changed).
+  if (structurallyChanged && mounted.value !== null) {
+    opts.beforeRebuild?.({ wrappers: state.wrappers, rebuildKey: state.rebuildKey });
+    vcr.clear();
+    mounted.value = null;
+  }
+
+  if (!state.open || loaded === null) return [];
+  // Same structure + already mounted — idempotent re-emission, nothing to do.
+  if (mounted.value !== null) return refs;
+
+  const newRefs = renderWrapperChain({
+    outerContainer: vcr,
+    loadedWrappers: loaded,
+    environmentInjector: deps.environmentInjector,
+    parentInjector: deps.parentInjector,
+    logger: deps.logger,
+    fieldInputs: opts.fieldInputs?.(),
+    renderInnermost: opts.renderInnermost,
+  });
+  mounted.value = { wrappers: state.wrappers, rebuildKey: state.rebuildKey };
+  return newRefs;
+}
+
+function isStructurallyDifferent(mounted: MountedChain | null, next: ChainState): boolean {
+  if (mounted === null) return true;
+  if (mounted.rebuildKey !== next.rebuildKey) return true;
+  return !isSameWrapperChain(mounted.wrappers, next.wrappers);
+}
+
+/**
+ * Push the latest `fieldInputs` bag to every mounted wrapper whenever it
+ * changes — without rebuilding the chain. No-op when the chain is empty
+ * (gated off, or nothing rendered yet).
+ */
+function pushFieldInputsOnChange(opts: WrapperChainControllerOptions, getRefs: () => readonly ComponentRef<unknown>[]): void {
+  if (!opts.fieldInputs) return;
+  explicitEffect([opts.fieldInputs], ([fi]) => {
+    for (const ref of getRefs()) setInputIfDeclared(ref, 'fieldInputs', fi);
+  });
 }

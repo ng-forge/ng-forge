@@ -7,6 +7,7 @@ import {
   inject,
   input,
   Signal,
+  signal,
   Type,
   ViewContainerRef,
 } from '@angular/core';
@@ -63,8 +64,8 @@ export class DfFieldOutlet {
   readonly dfFieldOutlet = input.required<ResolvedField>();
   readonly dfFieldOutletEnvironmentInjector = input<EnvironmentInjector | undefined>(undefined);
 
-  private readonly vcr = inject(ViewContainerRef);
-  private readonly defaultEnvInjector = inject(EnvironmentInjector);
+  private readonly vcrRef = inject(ViewContainerRef);
+  private readonly vcr: Signal<ViewContainerRef> = signal(this.vcrRef).asReadonly();
   private readonly destroyRef = inject(DestroyRef);
   private readonly wrapperAutoAssociations = inject(WRAPPER_AUTO_ASSOCIATIONS);
   private readonly defaultWrappersSignal = inject(DEFAULT_WRAPPERS, { optional: true });
@@ -107,14 +108,16 @@ export class DfFieldOutlet {
    */
   private readonly fieldInputs = computed<WrapperFieldInputs>(() => this.buildFieldInputs(this.rawInputs()));
 
+  private readonly defaultEnvInjector = inject(EnvironmentInjector);
+  /** Environment injector for the innermost field component — `[environmentInjector]` input takes precedence over the directive's own DI. */
+  private readonly fieldEnvInjector = computed(() => this.dfFieldOutletEnvironmentInjector() ?? this.defaultEnvInjector);
+
   constructor() {
     createWrapperChainController({
       vcr: this.vcr,
       wrappers: this.wrappers,
       gate: this.renderReady,
       rebuildKey: this.componentIdentity,
-      environmentInjector: () => this.resolveEnvInjector(),
-      parentInjector: () => this.dfFieldOutlet().injector,
       fieldInputs: this.fieldInputs,
       beforeRebuild: () => this.detachFieldRef(),
       renderInnermost: (slot) => {
@@ -133,7 +136,7 @@ export class DfFieldOutlet {
         // create a new one in the fresh slot.
         this.fieldRef?.destroy();
         this.fieldRef = slot.createComponent(resolved.component, {
-          environmentInjector: this.resolveEnvInjector(),
+          environmentInjector: this.fieldEnvInjector(),
           injector: resolved.injector,
         });
         this.fieldSlot = slot;
@@ -171,10 +174,6 @@ export class DfFieldOutlet {
     this.fieldSlot = undefined;
   }
 
-  private resolveEnvInjector(): EnvironmentInjector {
-    return this.dfFieldOutletEnvironmentInjector() ?? this.defaultEnvInjector;
-  }
-
   private pushRawInputs(ref: ComponentRef<unknown>, rawInputs: Record<string, unknown>): void {
     // Only push keys whose values actually changed since the previous emission.
     // Mappers typically mutate one or two keys per tick; a full-sweep setInput
@@ -196,6 +195,8 @@ export class DfFieldOutlet {
       fieldTreeCandidate && typeof fieldTreeCandidate === 'function'
         ? toReadonlyFieldTreeCached(this.readonlyFieldCache, fieldTreeCandidate as never)
         : undefined;
+    // Shallow spread — relies on the mapper contract (see WrapperFieldInputs)
+    // that rawInputs are emitted as fresh snapshots, not mutated in place.
     return {
       ...(rawInputs as Record<string, unknown>),
       field: readonlyField,

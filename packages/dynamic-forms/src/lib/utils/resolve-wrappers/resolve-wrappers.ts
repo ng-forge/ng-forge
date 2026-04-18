@@ -8,11 +8,11 @@ import { WrapperAutoAssociations, WrapperConfig } from '../../models/wrapper-typ
 const EMPTY_WRAPPERS: readonly WrapperConfig[] = Object.freeze([]);
 
 /**
- * Element-wise identity comparator for wrapper chains.
- *
- * Used as the `equal` option on signal-level memoization so reconciled
- * `FieldDef` values that produce structurally-identical chains don't
- * churn downstream consumers (e.g. the controller's gate signal).
+ * Element-wise identity (`===`) comparator for wrapper chains. Used as the
+ * `equal` option on signal memoisation so reconciled `FieldDef`s with the
+ * same chain don't churn downstream — relies on `WrapperConfig` objects
+ * being stable across ticks, which holds for configs declared in
+ * `FormConfig` / `createWrappers(...)`.
  */
 export function isSameWrapperChain(a: readonly WrapperConfig[], b: readonly WrapperConfig[]): boolean {
   if (a === b) return true;

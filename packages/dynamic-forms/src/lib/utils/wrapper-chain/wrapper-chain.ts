@@ -93,14 +93,10 @@ export async function loadWrapperComponent(
 }
 
 /**
- * Load all wrapper component classes for the given configs.
- *
- * Emits once, as an array aligned with the input order. Wrappers whose
- * component fails to load are logged and silently dropped from the chain.
- *
- * The failure also writes to `console.error` unconditionally — this is an
- * authoring mistake (an unregistered wrapper type) that must surface even
- * when `withLoggerConfig(false)` has suppressed the library logger.
+ * Load all wrapper component classes for the given configs. Wrappers whose
+ * component fails to load are logged and silently dropped from the chain —
+ * unlike field-type resolution we don't throw, because a missing decoration
+ * is a degraded render, not a broken form.
  */
 export function loadWrapperComponents(
   configs: readonly WrapperConfig[],
@@ -116,9 +112,7 @@ export function loadWrapperComponents(
         catchError(() => of(undefined)),
         map((component) => {
           if (!component) {
-            const message = `Wrapper type '${config.type}' could not be loaded. Ensure it is registered via provideDynamicForm().`;
-            logger.error(message);
-            console.error('[Dynamic Forms]', message);
+            logger.error(`Wrapper type '${config.type}' could not be loaded. Ensure it is registered via provideDynamicForm().`);
             return null;
           }
           return { config, component } satisfies LoadedWrapper;

@@ -151,11 +151,10 @@ describe('wrapper-chain', () => {
       expect(result.map((r) => r.config)).toEqual(configs);
     });
 
-    it('drops unregistered types and logs via both logger and console.error', async () => {
+    it('drops unregistered types and logs via the injected logger', async () => {
       const registry = new Map<string, WrapperTypeDefinition>([['a', def('a', () => TestWrapperA)]]);
       const cache = new Map<string, Type<unknown>>();
       const logger = silentLogger();
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
       const result = await firstValueFrom(
         loadWrapperComponents([{ type: 'a' } as WrapperConfig, { type: 'missing' } as WrapperConfig], registry, cache, logger),
@@ -163,9 +162,7 @@ describe('wrapper-chain', () => {
 
       expect(result.map((r) => r.config.type)).toEqual(['a']);
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining("'missing'"));
-      expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining("'missing'"));
-
-      consoleSpy.mockRestore();
+      expect(logger.error).toHaveBeenCalledTimes(1);
     });
   });
 

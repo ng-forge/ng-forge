@@ -88,13 +88,13 @@ export function isWrapperTypeDefinition(value: unknown): value is WrapperTypeDef
 /**
  * Contract that wrapper components must satisfy.
  *
- * Each wrapper component provides a `#fieldComponent` ViewContainerRef where
- * inner content (the next wrapper in the chain, or the field component) will
- * be rendered imperatively by `DfFieldOutlet` / `ContainerFieldComponent`.
- *
- * Wrappers receive their config properties (with `type` stripped) as individual
- * Angular `input()`s, and optionally a single `fieldInputs` input carrying the
- * field's mapper outputs plus a read-only view of its form state.
+ * Each wrapper exposes a `#fieldComponent` ViewContainerRef where the inner
+ * content (next wrapper, or the field) is rendered imperatively. Config
+ * properties (minus `type`) are set on the component via `setInput`; a
+ * wrapper opts into a key by declaring a matching `input()`, and unknown
+ * keys are silently dropped. Wrappers may additionally declare a
+ * `fieldInputs` input for the wrapped field's mapper outputs (see
+ * `WrapperFieldInputs` for when that's undefined).
  *
  * @example
  * ```typescript

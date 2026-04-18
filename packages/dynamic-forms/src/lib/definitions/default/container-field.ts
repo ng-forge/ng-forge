@@ -3,8 +3,6 @@ import { ContainerAllowedChildren } from '../../models/types/nesting-constraints
 import { ContainerLogicConfig } from '../base/container-logic-config';
 import { WrapperConfig } from '../../models/wrapper-type';
 
-export type { WrapperConfig };
-
 /**
  * Container field interface for wrapping child fields with UI chrome.
  *

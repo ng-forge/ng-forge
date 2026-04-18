@@ -140,6 +140,7 @@ function setupController(
 
   const injector = TestBed.inject(Injector);
   const envInjector = TestBed.inject(EnvironmentInjector);
+  const slotSignal = signal(slot).asReadonly();
   const ref: ControllerFixture = {
     host,
     slot,
@@ -155,12 +156,10 @@ function setupController(
 
   runInInjectionContext(fixture.componentRef.injector, () => {
     createWrapperChainController({
-      vcr: slot,
+      vcr: slotSignal,
       wrappers,
       gate,
       rebuildKey,
-      environmentInjector: envInjector,
-      parentInjector: injector,
       fieldInputs,
       renderInnermost: (s) => {
         ref.innermostCalls++;
@@ -355,14 +354,13 @@ describe('createWrapperChainController', () => {
     const injector = TestBed.inject(Injector);
     const envInjector = TestBed.inject(EnvironmentInjector);
 
+    const slotSignal = signal(slot).asReadonly();
     runInInjectionContext(fixture.componentRef.injector, () => {
       createWrapperChainController({
-        vcr: slot,
+        vcr: slotSignal,
         wrappers,
         gate,
         rebuildKey,
-        environmentInjector: envInjector,
-        parentInjector: injector,
         renderInnermost: (s) => {
           s.createComponent(rebuildKey() as Type<unknown>, { environmentInjector: envInjector, injector });
         },

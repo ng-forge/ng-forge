@@ -91,6 +91,7 @@ export default class ContainerFieldComponent {
       destroyRef: this.destroyRef,
       onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
         const fieldKey = fieldDef.key || '<no key>';
+
         const containerKey = this.field().key || '<no key>';
         this.logger.error(
           `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
@@ -123,8 +124,6 @@ export default class ContainerFieldComponent {
     createWrapperChainController({
       vcr: this.wrapperContainer,
       wrappers: this.wrappers,
-      environmentInjector: this.environmentInjector,
-      parentInjector: this.injector,
       renderInnermost: (slot) => slot.createEmbeddedView(this.childrenTpl()),
     });
   }

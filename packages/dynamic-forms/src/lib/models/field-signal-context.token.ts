@@ -1,6 +1,6 @@
 import { InjectionToken, Signal } from '@angular/core';
 import type { FieldSignalContext, ArrayContext } from '../mappers/types';
-import type { WrapperConfig } from '../definitions/default/container-field';
+import type { WrapperConfig } from './wrapper-type';
 import type { ValidationMessages } from './validation-types';
 import type { FormOptions } from './form-config';
 import { DynamicFormError } from '../errors/dynamic-form-error';
