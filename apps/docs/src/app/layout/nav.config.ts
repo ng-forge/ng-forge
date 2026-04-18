@@ -76,6 +76,7 @@ export const NAV_ITEMS: NavItem[] = [
       { label: 'Form Groups', path: 'prebuilt/form-groups' },
       { label: 'Form Pages', path: 'prebuilt/form-pages' },
       { label: 'Form Rows', path: 'prebuilt/form-rows' },
+      { label: 'Container Fields', path: 'prebuilt/container-field' },
       {
         label: 'Form Arrays',
         path: 'prebuilt/form-arrays',

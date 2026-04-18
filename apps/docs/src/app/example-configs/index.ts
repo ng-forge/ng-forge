@@ -8,6 +8,7 @@ import { checkboxConfig } from './checkbox.config';
 import { completeFormConfig } from './complete-form.config';
 import { contactConfig } from './contact.config';
 import { contactDynamicFieldsConfig } from './contact-dynamic-fields.config';
+import { containerFieldConfig } from './container-field.config';
 import { datepickerConfig } from './datepicker.config';
 import { enterpriseFeaturesConfig } from './enterprise-features.config';
 import { expressionValidatorsConfig } from './expression-validators.config';
@@ -38,6 +39,7 @@ export { checkboxConfig } from './checkbox.config';
 export { completeFormConfig } from './complete-form.config';
 export { contactConfig } from './contact.config';
 export { contactDynamicFieldsConfig } from './contact-dynamic-fields.config';
+export { containerFieldConfig } from './container-field.config';
 export { datepickerConfig } from './datepicker.config';
 export { enterpriseFeaturesConfig } from './enterprise-features.config';
 export { expressionValidatorsConfig } from './expression-validators.config';
@@ -86,6 +88,7 @@ export const EXAMPLE_CONFIGS: Record<string, FormConfig> = {
   'zod-schema-validation': zodSchemaValidationConfig,
   group: groupConfig,
   row: rowConfig,
+  'container-field': containerFieldConfig,
   slider: sliderConfig,
   datepicker: datepickerConfig,
   input: inputConfig,
