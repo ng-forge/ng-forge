@@ -1,29 +1,48 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
 /**
- * Demonstrates the `container` field type — a layout container that chains
- * wrapper components around its children without adding form nesting. Values
- * flatten to the parent form, just like rows and pages.
+ * Demonstrates the `container` field type.
  *
- * Uses the built-in `css` wrapper (registered automatically by
- * `provideDynamicForm`) so the scenario works without custom wrapper
- * registration. Replace the wrapper with a custom `section` wrapper for
- * richer chrome.
+ * Two stacked containers — a Profile section and a Contact section — each
+ * carrying a `section` wrapper that renders a titled card. The `notes` input
+ * sits outside either container so the reader can see that containers are
+ * purely visual: the emitted form value is flat, with `firstName`, `email`,
+ * `notes` etc. all at the top level (no `profileSection` / `contactSection`
+ * keys).
+ *
+ * The `section` wrapper comes from the docs sandbox adapters (see
+ * `internal/examples-shared-ui/src/lib/demo-wrappers/section-wrapper.component.ts`);
+ * the `css` wrapper used in the prebuilt docs would be invisible here and
+ * wouldn't communicate what containers do.
  */
 export const containerFieldConfig = {
   fields: [
     {
-      key: 'contactSection',
+      key: 'profileSection',
       type: 'container',
-      wrappers: [{ type: 'css', cssClasses: 'demo-field' }],
+      wrappers: [{ type: 'section', title: 'Profile' }],
       fields: [
         {
           key: 'firstName',
           type: 'input',
-          label: 'First Name',
+          label: 'First name',
           value: '',
           required: true,
         },
+        {
+          key: 'lastName',
+          type: 'input',
+          label: 'Last name',
+          value: '',
+          required: true,
+        },
+      ],
+    },
+    {
+      key: 'contactSection',
+      type: 'container',
+      wrappers: [{ type: 'section', title: 'Contact' }],
+      fields: [
         {
           key: 'email',
           type: 'input',
@@ -33,19 +52,24 @@ export const containerFieldConfig = {
           email: true,
           props: { type: 'email' },
         },
+        {
+          key: 'phone',
+          type: 'input',
+          label: 'Phone',
+          value: '',
+        },
       ],
     },
     {
       key: 'notes',
       type: 'input',
-      label: 'Notes',
+      label: 'Notes (outside any container)',
       value: '',
-      props: { placeholder: 'Sits outside the container' },
     },
     {
       key: 'submit',
       type: 'submit',
-      label: 'Submit',
+      label: 'Save',
     },
   ],
 } as const satisfies FormConfig;
