@@ -14,7 +14,7 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import { FieldWrapperContract, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
 import { Logger } from '../../providers/features/logger/logger.interface';
-import { loadWrapperComponents, renderWrapperChain, setInputIfDeclared } from './wrapper-chain';
+import { hasDefaultExport, loadWrapperComponents, renderWrapperChain, resolveDefaultExport, setInputIfDeclared } from './wrapper-chain';
 
 /** No-op logger for tests that don't assert on log output. */
 function silentLogger(): Logger {
@@ -82,6 +82,23 @@ function def(name: string, loader: () => Type<unknown>): WrapperTypeDefinition {
 }
 
 describe('wrapper-chain', () => {
+  describe('hasDefaultExport / resolveDefaultExport', () => {
+    it('hasDefaultExport narrows an ES-module result', () => {
+      const mod = { default: TestInputComponent };
+      expect(hasDefaultExport(mod)).toBe(true);
+      expect(hasDefaultExport(TestInputComponent)).toBe(false);
+      expect(hasDefaultExport(null)).toBe(false);
+      expect(hasDefaultExport(undefined)).toBe(false);
+      expect(hasDefaultExport({})).toBe(false);
+      expect(hasDefaultExport({ default: undefined })).toBe(false);
+    });
+
+    it('resolveDefaultExport picks the class from either shape', () => {
+      expect(resolveDefaultExport({ default: TestInputComponent })).toBe(TestInputComponent);
+      expect(resolveDefaultExport(TestInputComponent)).toBe(TestInputComponent);
+    });
+  });
+
   describe('setInputIfDeclared', () => {
     beforeEach(() => {
       TestBed.configureTestingModule({});
