@@ -31,6 +31,7 @@ describe('GroupField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
     | 'fields'
     | 'logic';
 

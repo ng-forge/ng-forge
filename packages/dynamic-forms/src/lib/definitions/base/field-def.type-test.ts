@@ -3,6 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { DynamicText } from '../../models/types/dynamic-text';
+import type { WrapperConfig } from '../../models/wrapper-type';
 import type { FieldDef, FieldComponent } from './field-def';
 import type { RequiredKeys, OptionalKeys } from '@ng-forge/utils';
 
@@ -26,7 +27,8 @@ describe('FieldDef - Exhaustive Whitelist', () => {
     | 'meta'
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
-    | 'excludeValueIfReadonly';
+    | 'excludeValueIfReadonly'
+    | 'wrappers';
   type ActualKeys = keyof FieldDef<TestProps>;
 
   it('should have exactly the expected keys', () => {
@@ -62,6 +64,7 @@ describe('FieldDef - Exhaustive Whitelist', () => {
         | 'excludeValueIfHidden'
         | 'excludeValueIfDisabled'
         | 'excludeValueIfReadonly'
+        | 'wrappers'
       >();
     });
 
@@ -107,6 +110,10 @@ describe('FieldDef - Exhaustive Whitelist', () => {
 
     it('excludeValueIfReadonly', () => {
       expectTypeOf<FieldDef<TestProps>['excludeValueIfReadonly']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('wrappers supports three states: undefined, null, or readonly WrapperConfig[]', () => {
+      expectTypeOf<FieldDef<TestProps>['wrappers']>().toEqualTypeOf<readonly WrapperConfig[] | null | undefined>();
     });
   });
 });

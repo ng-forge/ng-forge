@@ -5,5 +5,7 @@ export { isSimplifiedArrayField } from './array-field';
 export type { PageField } from './page-field';
 export type { TextField, TextElementType, TextProps } from './text-field';
 export type { HiddenField, HiddenValue, HiddenScalar } from './hidden-field';
-export { type ContainerField, type WrapperConfig, isContainerTypedField } from './container-field';
+export { type ContainerField, isContainerTypedField } from './container-field';
+export type { WrapperConfig } from '../../models/wrapper-type';
 export type { CssWrapper } from '../../wrappers/css/css-wrapper.type';
+export type { RowWrapper } from '../../wrappers/row/row-wrapper.type';

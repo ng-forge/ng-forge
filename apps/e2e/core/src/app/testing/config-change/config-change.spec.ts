@@ -481,4 +481,49 @@ test.describe('Config Change E2E Tests', () => {
       await expect(fullNameInput).not.toBeVisible({ timeout: 5000 });
     });
   });
+
+  test.describe('Config Swap — Field Type Change on Shared Key', () => {
+    test('should render the first variant as an input', async ({ page, helpers }) => {
+      await page.goto('/#/test/config-change/config-swap-field-types');
+      await page.waitForLoadState('networkidle');
+      const scenario = helpers.getScenario('config-swap-field-types');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await expect(scenario.locator('df-mat-input')).toHaveCount(1, { timeout: 5000 });
+      await expect(scenario.locator('df-mat-select')).toHaveCount(0);
+    });
+
+    test('should swap the shared key from input to select without console errors', async ({ page, helpers }) => {
+      // setupConsoleCheck() at the top of the file fails the test if any
+      // console.error fires — which is exactly how NG0950 ("Input required…")
+      // would surface if the controller re-created the innermost component
+      // without pushing the required `key` input to it.
+      await page.goto('/#/test/config-change/config-swap-field-types');
+      await page.waitForLoadState('networkidle');
+      const scenario = helpers.getScenario('config-swap-field-types');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await expect(scenario.locator('df-mat-input')).toHaveCount(1, { timeout: 5000 });
+
+      // Swap to the select variant (same key `shared`, different type)
+      await scenario.locator('[data-testid="switch-to-alternate"]').click();
+
+      await expect(scenario.locator('df-mat-select')).toHaveCount(1, { timeout: 5000 });
+      await expect(scenario.locator('df-mat-input')).toHaveCount(0, { timeout: 5000 });
+    });
+
+    test('should swap back to input after switching to select', async ({ page, helpers }) => {
+      await page.goto('/#/test/config-change/config-swap-field-types');
+      await page.waitForLoadState('networkidle');
+      const scenario = helpers.getScenario('config-swap-field-types');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await scenario.locator('[data-testid="switch-to-alternate"]').click();
+      await expect(scenario.locator('df-mat-select')).toHaveCount(1, { timeout: 5000 });
+
+      await scenario.locator('[data-testid="switch-to-initial"]').click();
+      await expect(scenario.locator('df-mat-input')).toHaveCount(1, { timeout: 5000 });
+      await expect(scenario.locator('df-mat-select')).toHaveCount(0, { timeout: 5000 });
+    });
+  });
 });

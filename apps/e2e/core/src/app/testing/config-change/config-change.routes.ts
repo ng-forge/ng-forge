@@ -35,6 +35,10 @@ const routes: Routes = [
     path: 'value-binding',
     loadComponent: () => import('./scenarios/value-binding.component').then((m) => m.ValueBindingComponent),
   },
+  {
+    path: 'config-swap-field-types',
+    loadComponent: () => import('./scenarios/config-swap-field-types.component').then((m) => m.ConfigSwapFieldTypesComponent),
+  },
 ];
 
 export default routes;

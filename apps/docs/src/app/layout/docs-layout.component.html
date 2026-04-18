@@ -53,6 +53,9 @@
           <div class="nav-category" [class.expanded]="isCategoryExpanded(item)" [class.url-active]="isActiveCategory(item)">
             <button class="nav-category-btn" (click)="toggleCategory(item.path)" [attr.aria-expanded]="isCategoryExpanded(item)">
               <span>{{ item.label }}</span>
+              @if (item.badge) {
+                <span class="nav-badge">{{ item.badge }}</span>
+              }
               <svg
                 class="chevron"
                 viewBox="0 0 24 24"

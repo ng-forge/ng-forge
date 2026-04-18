@@ -72,6 +72,7 @@ describe('PrimeInputField (String) - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -220,6 +221,7 @@ describe('PrimeInputField (Number) - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
     | 'required'
     | 'email'
     | 'min'

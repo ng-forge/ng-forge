@@ -52,6 +52,11 @@ export type { ValueExclusionConfig, ResolvedValueExclusionConfig } from './model
 export type { WrapperTypeDefinition, FieldWrapperContract } from './models/wrapper-type';
 export { isWrapperTypeDefinition, WRAPPER_REGISTRY } from './models/wrapper-type';
 
+// Wrapper Registration DX
+export { wrapperProps } from './wrappers/wrapper-props';
+export { createWrappers, isWrappersBundle } from './wrappers/create-wrappers';
+export type { WrapperRegistration, WrappersBundle, InferWrapperRegistry } from './wrappers/create-wrappers';
+
 // Configuration Types
 export type { CustomFnConfig, FormConfig, FormOptions } from './models';
 export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from './models';
@@ -205,23 +210,23 @@ export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from './model
 export { FIELD_REGISTRY } from './models';
 
 // Signal Context - injection tokens for field components
-export { ARRAY_CONTEXT, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS, WRAPPER_CONTEXT } from './models';
-export type { WrapperContext } from './models';
+export { ARRAY_CONTEXT, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, DEFAULT_WRAPPERS, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from './models';
 
 // Dynamic Text utilities
 export { dynamicTextToObservable } from './utils';
 export { DynamicTextPipe } from './pipes';
 
 // Container Components - for building custom containers
-export { ArrayFieldComponent, GroupFieldComponent, RowFieldComponent, ContainerFieldComponent } from './fields';
+export { ArrayFieldComponent, GroupFieldComponent, ContainerFieldComponent } from './fields';
 
 // Validation utilities
 export { applyValidator, applyValidators } from './core/validation';
 export type { HttpResourceRequest } from './core/validation';
 
 // FieldTree Utilities
-export { getArrayLength } from './core/field-tree-utils';
-export type { ArrayFieldTree } from './core/field-tree-utils';
+export { getArrayLength, toReadonlyFieldTree } from './core/field-tree-utils';
+export type { ArrayFieldTree, ReadonlyFieldTree } from './core/field-tree-utils';
+export type { WrapperFieldInputs } from './wrappers/wrapper-field-inputs';
 
 // EventBus — inject inside field components (scoped to the form's DI tree).
 // To dispatch from outside DynamicForm, use EventDispatcher instead.

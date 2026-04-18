@@ -22,6 +22,14 @@ describe('BUILT_IN_FIELDS', () => {
       expect(BUILT_IN_FIELDS).toHaveLength(7);
     });
 
+    it('row field should map to the container component (virtual field type)', async () => {
+      const rowField = BUILT_IN_FIELDS.find((f) => f.name === 'row') as FieldTypeDefinition;
+      const containerField = BUILT_IN_FIELDS.find((f) => f.name === 'container') as FieldTypeDefinition;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- both have loadComponent
+      const [rowModule, containerModule] = await Promise.all([rowField.loadComponent!(), containerField.loadComponent!()]);
+      expect(rowModule.default).toBe(containerModule.default);
+    });
+
     it('should have all required field types', () => {
       const fieldNames = BUILT_IN_FIELDS.map((field) => field.name);
 
@@ -82,7 +90,7 @@ describe('BUILT_IN_FIELDS', () => {
   describe('Individual field configurations', () => {
     // Fields with components
     const fieldsWithComponents = [
-      { name: 'row', mapper: rowFieldMapper, valueHandling: 'flatten', exportName: 'RowFieldComponent' },
+      { name: 'row', mapper: rowFieldMapper, valueHandling: 'flatten', exportName: 'default' },
       { name: 'group', mapper: groupFieldMapper, valueHandling: 'include', exportName: 'GroupFieldComponent' },
       { name: 'array', mapper: arrayFieldMapper, valueHandling: 'include', exportName: 'ArrayFieldComponent' },
       { name: 'page', mapper: pageFieldMapper, valueHandling: 'flatten', exportName: 'default' },

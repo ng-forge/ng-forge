@@ -11,7 +11,7 @@ import {
   Signal,
   signal,
 } from '@angular/core';
-import { NgComponentOutlet } from '@angular/common';
+import { DfFieldOutlet } from '../../directives/df-field-outlet.directive';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -48,7 +48,7 @@ import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-a
  */
 @Component({
   selector: 'array-field',
-  imports: [NgComponentOutlet],
+  imports: [DfFieldOutlet],
   template: `
     @for (item of resolvedItems(); track item.id; let i = $index) {
       <div
@@ -59,16 +59,7 @@ import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-a
         [attr.data-array-item-index]="i"
       >
         @for (field of item.fields; track $index) {
-          @if (field.renderReady()) {
-            <ng-container
-              *ngComponentOutlet="
-                field.component;
-                injector: field.injector;
-                environmentInjector: environmentInjector;
-                inputs: field.inputs()
-              "
-            />
-          }
+          <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
         }
       </div>
     }

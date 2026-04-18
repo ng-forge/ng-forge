@@ -1,30 +1,7 @@
 import { FieldComponent, FieldDef } from '../base/field-def';
 import { ContainerAllowedChildren } from '../../models/types/nesting-constraints';
 import { ContainerLogicConfig } from '../base/container-logic-config';
-import { FieldRegistryWrappers, RegisteredWrapperTypes } from '../../models/registry/field-registry';
-
-/**
- * Resolves a wrapper type name to its registered config interface.
- *
- * When `TWrappers` is a specific registered key (e.g., `'css'`), resolves to
- * the full config type from `FieldRegistryWrappers` (e.g., `CssWrapper`),
- * providing type-safe access to wrapper-specific properties like `cssClasses`.
- *
- * When `TWrappers` is the full `RegisteredWrapperTypes` union, distributes
- * to produce a discriminated union of all registered wrapper configs.
- *
- * @example
- * ```typescript
- * // Resolves to CssWrapper — cssClasses is typed
- * type CssConfig = WrapperConfig<'css'>;
- *
- * // Union of all registered wrapper configs
- * type AnyConfig = WrapperConfig;
- * ```
- */
-export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredWrapperTypes> = TWrappers extends keyof FieldRegistryWrappers
-  ? FieldRegistryWrappers[TWrappers]
-  : { readonly type: TWrappers };
+import { WrapperConfig } from '../../models/wrapper-type';
 
 /**
  * Container field interface for wrapping child fields with UI chrome.

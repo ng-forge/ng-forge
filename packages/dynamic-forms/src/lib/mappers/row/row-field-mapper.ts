@@ -4,25 +4,31 @@ import { buildClassName } from '../../utils/grid-classes/grid-classes';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
 import { applyHiddenLogic } from '../apply-hidden-logic';
 
+const ROW_WRAPPERS = [{ type: 'row' }] as const;
+
 /**
- * Maps a row field definition to component inputs.
+ * Maps a row field definition to container component inputs.
  *
- * Row components are layout containers that don't change the form shape.
- * The row component will inject FIELD_SIGNAL_CONTEXT directly.
+ * `row` is a virtual field type: it resolves to `ContainerFieldComponent` with a
+ * synthesized `{ type: 'row' }` wrapper, so the user-facing config stays
+ * `{ type: 'row', fields: [...] }` while the runtime uses the container +
+ * wrapper pipeline.
  *
  * Supports hidden state resolution via `logic` array or static `hidden` property.
- *
- * @param fieldDef The row field definition
- * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function rowFieldMapper(fieldDef: RowField): Signal<Record<string, unknown>> {
   const rootFormRegistry = inject(RootFormRegistryService);
   const className = buildClassName(fieldDef);
 
   return computed(() => {
+    // Rebuilt each emission so logic-driven updates to fieldDef (e.g. `disabled`)
+    // flow through. Shallow spread is safe while RowField has no nested
+    // mutable props; add a deep-clone if that stops being true.
+    const containerField = { ...fieldDef, wrappers: ROW_WRAPPERS };
+
     const inputs: Record<string, unknown> = {
       key: fieldDef.key,
-      field: fieldDef,
+      field: containerField,
       ...(className !== undefined && { className }),
     };
 

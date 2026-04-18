@@ -59,6 +59,7 @@ describe('PageField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
     | 'fields'
     | 'logic';
 

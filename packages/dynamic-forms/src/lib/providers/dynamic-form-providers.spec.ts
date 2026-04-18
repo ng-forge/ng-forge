@@ -5,6 +5,8 @@ import { provideDynamicForm } from './dynamic-form-providers';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
 import { WrapperTypeDefinition, WRAPPER_REGISTRY } from '../models/wrapper-type';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './built-in-fields';
+import { createWrappers } from '../wrappers/create-wrappers';
+import { wrapperProps } from '../wrappers/wrapper-props';
 import { withLoggerConfig } from './features/logger/with-logger-config';
 import { DynamicFormLogger } from './features/logger/logger.token';
 import { ConsoleLogger } from './features/logger/console-logger';
@@ -56,8 +58,8 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm();
       const providers = getProviders(envProviders);
 
-      // Logger + provideSignalFormsConfig + FIELD_REGISTRY + WRAPPER_REGISTRY
-      expect(providers).toHaveLength(4);
+      // Logger + provideSignalFormsConfig + FIELD_REGISTRY + WRAPPER_REGISTRY + WRAPPER_AUTO_ASSOCIATIONS
+      expect(providers).toHaveLength(5);
     });
 
     it('should contain providers for custom fields', () => {
@@ -71,8 +73,8 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm(customField);
       const providers = getProviders(envProviders);
 
-      // Logger + provideSignalFormsConfig + FIELD_REGISTRY + WRAPPER_REGISTRY
-      expect(providers).toHaveLength(4);
+      // Logger + provideSignalFormsConfig + FIELD_REGISTRY + WRAPPER_REGISTRY + WRAPPER_AUTO_ASSOCIATIONS
+      expect(providers).toHaveLength(5);
     });
   });
 
@@ -255,8 +257,8 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm(customField, withLoggerConfig());
       const providers = getProviders(envProviders);
 
-      // Should have 4 providers: DynamicFormLogger, provideSignalFormsConfig, FIELD_REGISTRY, and WRAPPER_REGISTRY
-      expect(providers.length).toBe(4);
+      // DynamicFormLogger + provideSignalFormsConfig + FIELD_REGISTRY + WRAPPER_REGISTRY + WRAPPER_AUTO_ASSOCIATIONS
+      expect(providers.length).toBe(5);
     });
 
     it('should include logger provider when withLoggerConfig is used', () => {
@@ -411,6 +413,72 @@ describe('provideDynamicForm', () => {
       createWrapperRegistryWithInjection(envProviders);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith('[Dynamic Forms]', 'Wrapper type "css" is already registered. Overwriting.');
+    });
+  });
+
+  describe('createWrappers bundle', () => {
+    it('should register wrappers from a bundle passed to provideDynamicForm', () => {
+      interface SectionWrapperConfig {
+        readonly type: 'section';
+        readonly header?: string;
+      }
+      const bundle = createWrappers(
+        {
+          wrapperName: 'section',
+          loadComponent: () => import('../fields/text/text-field.component'),
+          props: wrapperProps<SectionWrapperConfig>(),
+        },
+        {
+          wrapperName: 'card',
+          loadComponent: () => import('../fields/text/text-field.component'),
+        },
+      );
+
+      const envProviders = provideDynamicForm(bundle);
+      const registry = createWrapperRegistryWithInjection(envProviders);
+
+      expect(registry.size).toBe(BUILT_IN_WRAPPERS.length + 2);
+      expect(registry.has('section')).toBe(true);
+      expect(registry.has('card')).toBe(true);
+    });
+
+    it('should merge a bundle alongside individual wrappers and field types', () => {
+      const customField: FieldTypeDefinition = {
+        name: 'custom-input',
+        loadComponent: () => import('../fields/text/text-field.component'),
+        mapper: vi.fn(),
+        valueHandling: 'include',
+      };
+      const individualWrapper: WrapperTypeDefinition = {
+        wrapperName: 'solo',
+        loadComponent: () => import('../fields/text/text-field.component'),
+      };
+      const bundle = createWrappers({
+        wrapperName: 'bundled',
+        loadComponent: () => import('../fields/text/text-field.component'),
+      });
+
+      const envProviders = provideDynamicForm(customField, individualWrapper, bundle);
+
+      const fieldRegistry = createRegistryWithInjection(envProviders);
+      const wrapperRegistry = TestBed.inject(WRAPPER_REGISTRY);
+
+      expect(fieldRegistry.has('custom-input')).toBe(true);
+      expect(wrapperRegistry.has('solo')).toBe(true);
+      expect(wrapperRegistry.has('bundled')).toBe(true);
+    });
+
+    it('should preserve the types auto-association on the registered definition', () => {
+      const bundle = createWrappers({
+        wrapperName: 'highlight',
+        loadComponent: () => import('../fields/text/text-field.component'),
+        types: ['input', 'select'],
+      });
+
+      const envProviders = provideDynamicForm(bundle);
+      const registry = createWrapperRegistryWithInjection(envProviders);
+
+      expect(registry.get('highlight')?.types).toEqual(['input', 'select']);
     });
   });
 

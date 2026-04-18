@@ -125,8 +125,8 @@ describe('ContainerField - Exhaustive Whitelist', () => {
 
 describe('WrapperConfig', () => {
   it('type resolves to registered wrapper types', () => {
-    // RegisteredWrapperTypes = keyof FieldRegistryWrappers = 'css' (from CssWrapper)
-    expectTypeOf<WrapperConfig['type']>().toEqualTypeOf<'css'>();
+    // FieldRegistryWrappers: 'css' (CssWrapper) + 'row' (RowWrapper)
+    expectTypeOf<WrapperConfig['type']>().toEqualTypeOf<'css' | 'row'>();
   });
 
   it('resolves to CssWrapper for the css type', () => {

@@ -80,6 +80,7 @@ describe('BsTextareaField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
     // From FieldWithValidation
     | 'required'
     | 'email'

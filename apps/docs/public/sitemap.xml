@@ -161,12 +161,28 @@
     <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/container-field</loc>
+    <lastmod>2026-04-18</lastmod>
+  </url>
+  <url>
     <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/hidden-fields</loc>
     <lastmod>2026-03-21T14:56:36+02:00</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/prebuilt/text-components</loc>
     <lastmod>2026-03-21T14:56:36+02:00</lastmod>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/wrappers/overview</loc>
+    <lastmod>2026-04-18</lastmod>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/wrappers/writing-a-wrapper</loc>
+    <lastmod>2026-04-18</lastmod>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/wrappers/registering-and-applying</loc>
+    <lastmod>2026-04-18</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/recipes/custom-fields</loc>
@@ -191,6 +207,10 @@
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/ai-integration</loc>
     <lastmod>2026-03-21T14:56:36+02:00</lastmod>
+  </url>
+  <url>
+    <loc>https://ng-forge.com/dynamic-forms/material/openapi-generator</loc>
+    <lastmod>2026-04-18</lastmod>
   </url>
   <url>
     <loc>https://ng-forge.com/dynamic-forms/material/api-reference</loc>

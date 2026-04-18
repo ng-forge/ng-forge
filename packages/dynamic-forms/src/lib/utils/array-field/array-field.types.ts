@@ -1,14 +1,22 @@
 import { Injector, Signal, type Type } from '@angular/core';
+import type { FieldDef } from '../../definitions/base/field-def';
 
 /**
  * A single field within a resolved array item.
+ *
+ * Structurally compatible with `ResolvedField` so the same DfFieldOutlet
+ * directive can render both top-level and array-item fields.
  */
 export interface ResolvedArrayItemField {
+  /** Field key (used for tracking and test IDs). */
+  key: string;
+  /** Original field definition — used by DfFieldOutlet to resolve wrappers. */
+  fieldDef: FieldDef<unknown>;
   /** The loaded component type. */
   component: Type<unknown>;
   /** Injector providing ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT. */
   injector: Injector;
-  /** Inputs signal for ngComponentOutlet - evaluated in template for reactivity. */
+  /** Inputs signal for DfFieldOutlet — evaluated in template for reactivity. */
   inputs: Signal<Record<string, unknown>>;
   /** Whether required mapped inputs are available for safe component instantiation. */
   renderReady: Signal<boolean>;

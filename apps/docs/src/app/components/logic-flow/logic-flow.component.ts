@@ -1,64 +1,48 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
+/**
+ * Conditional logic evaluation flow diagram.
+ *
+ * Linear stages (value change → signal update → evaluate) followed by a
+ * symmetrical true/false fork. Connectors are drawn with CSS pseudo-elements
+ * anchored to a 2-column grid so the arrows always line up with the pill
+ * centres, regardless of pill content width.
+ */
 @Component({
   selector: 'docs-logic-flow',
   template: `
     <div class="flow">
       <h4 class="flow__title">Conditional Logic Evaluation</h4>
 
-      <!-- Step 1: Form Value Changes -->
-      <div class="flow__node flow__node--trigger">
-        <span class="flow__label">Form Value Changes</span>
+      <div class="flow__stage">
+        <div class="flow__pill flow__pill--trigger">Form value changes</div>
+      </div>
+      <span class="flow__line" aria-hidden="true"></span>
+
+      <div class="flow__stage">
+        <div class="flow__pill flow__pill--signal">
+          Signal updates
+          <span class="flow__pill-hint">Angular's reactive system</span>
+        </div>
+      </div>
+      <span class="flow__line" aria-hidden="true"></span>
+
+      <div class="flow__stage">
+        <div class="flow__pill flow__pill--evaluate">Evaluate logic conditions</div>
       </div>
 
-      <svg class="flow__arrow flow__arrow--down" width="24" height="28" viewBox="0 0 24 28" fill="none">
-        <line x1="12" y1="0" x2="12" y2="22" stroke="currentColor" stroke-width="1.5" />
-        <path d="M6 18l6 8 6-8" fill="currentColor" />
-      </svg>
-
-      <!-- Step 2: Signal Updates -->
-      <div class="flow__node flow__node--signal">
-        <span class="flow__label">Signal Updates</span>
-        <span class="flow__hint">Angular's reactive system</span>
+      <div class="flow__fork" aria-hidden="true">
+        <span class="flow__fork-stem"></span>
+        <span class="flow__fork-cross"></span>
+        <span class="flow__fork-leg flow__fork-leg--true"></span>
+        <span class="flow__fork-leg flow__fork-leg--false"></span>
       </div>
 
-      <svg class="flow__arrow flow__arrow--down" width="24" height="28" viewBox="0 0 24 28" fill="none">
-        <line x1="12" y1="0" x2="12" y2="22" stroke="currentColor" stroke-width="1.5" />
-        <path d="M6 18l6 8 6-8" fill="currentColor" />
-      </svg>
-
-      <!-- Step 3: Evaluate -->
-      <div class="flow__node flow__node--evaluate">
-        <span class="flow__label">Evaluate Logic Conditions</span>
-      </div>
-
-      <!-- Fork arrow -->
-      <svg class="flow__fork" width="200" height="40" viewBox="0 0 200 40" fill="none">
-        <line x1="100" y1="0" x2="100" y2="12" stroke="currentColor" stroke-width="1.5" />
-        <line x1="50" y1="12" x2="150" y2="12" stroke="currentColor" stroke-width="1.5" />
-        <line x1="50" y1="12" x2="50" y2="32" stroke="currentColor" stroke-width="1.5" />
-        <line x1="150" y1="12" x2="150" y2="32" stroke="currentColor" stroke-width="1.5" />
-        <path d="M44 28l6 8 6-8" fill="currentColor" />
-        <path d="M144 28l6 8 6-8" fill="currentColor" />
-      </svg>
-
-      <!-- Branches -->
       <div class="flow__branches">
-        <!-- True branch -->
         <div class="flow__branch flow__branch--true">
-          <div class="flow__node flow__node--true">
-            <span class="flow__label">true</span>
-          </div>
-
-          <svg class="flow__arrow flow__arrow--down flow__arrow--true" width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <line x1="12" y1="0" x2="12" y2="18" stroke="currentColor" stroke-width="1.5" />
-            <path d="M6 14l6 8 6-8" fill="currentColor" />
-          </svg>
-
-          <div class="flow__node flow__node--effect flow__node--effect-true">
-            <span class="flow__label">Apply Effect</span>
-          </div>
-
+          <div class="flow__pill flow__pill--true">true</div>
+          <span class="flow__line flow__line--true" aria-hidden="true"></span>
+          <div class="flow__pill flow__pill--effect flow__pill--effect-true">Apply effect</div>
           <div class="flow__tags">
             <span class="flow__tag flow__tag--true">hide</span>
             <span class="flow__tag flow__tag--true">require</span>
@@ -66,21 +50,10 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
           </div>
         </div>
 
-        <!-- False branch -->
         <div class="flow__branch flow__branch--false">
-          <div class="flow__node flow__node--false">
-            <span class="flow__label">false</span>
-          </div>
-
-          <svg class="flow__arrow flow__arrow--down flow__arrow--false" width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <line x1="12" y1="0" x2="12" y2="18" stroke="currentColor" stroke-width="1.5" />
-            <path d="M6 14l6 8 6-8" fill="currentColor" />
-          </svg>
-
-          <div class="flow__node flow__node--effect flow__node--effect-false">
-            <span class="flow__label">Remove Effect</span>
-          </div>
-
+          <div class="flow__pill flow__pill--false">false</div>
+          <span class="flow__line flow__line--false" aria-hidden="true"></span>
+          <div class="flow__pill flow__pill--effect flow__pill--effect-false">Remove effect</div>
           <div class="flow__tags">
             <span class="flow__tag flow__tag--false">show</span>
             <span class="flow__tag flow__tag--false">optional</span>
@@ -121,106 +94,145 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       color: var(--forge-text-muted);
     }
 
-    .flow__node {
+    .flow__stage {
       display: flex;
+      justify-content: center;
+    }
+
+    // Vertical connector lines with arrowhead at the bottom.
+    .flow__line {
+      display: block;
+      width: 2px;
+      height: 28px;
+      background: var(--forge-base-4);
+      position: relative;
+      margin: 4px 0;
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: -1px;
+        transform: translateX(-50%);
+        width: 8px;
+        height: 8px;
+        border-right: 2px solid var(--forge-base-4);
+        border-bottom: 2px solid var(--forge-base-4);
+        transform-origin: 50% 50%;
+        transform: translateX(-50%) rotate(45deg);
+      }
+    }
+
+    .flow__pill {
+      display: inline-flex;
       flex-direction: column;
       align-items: center;
-      gap: $space-1;
+      gap: 2px;
       padding: $space-2 $space-5;
       border-radius: $radius-pill;
       font-weight: 600;
       font-size: $text-sm;
+      letter-spacing: -0.01em;
+      text-align: center;
       white-space: nowrap;
-      transition: transform $transition-fast;
     }
 
-    .flow__node--trigger {
+    .flow__pill-hint {
+      font-size: $text-xs;
+      font-weight: 400;
+      color: var(--forge-text-muted);
+      font-style: italic;
+      letter-spacing: 0;
+    }
+
+    .flow__pill--trigger {
       background: rgba($ember-core, 0.08);
       color: $ember-core;
       border: 1.5px solid rgba($ember-core, 0.3);
     }
 
-    .flow__node--signal {
+    .flow__pill--signal {
       background: rgba($ember-hot, 0.08);
       color: $ember-hot;
       border: 1.5px solid rgba($ember-hot, 0.3);
     }
 
-    .flow__node--evaluate {
+    .flow__pill--evaluate {
       background: rgba($ember-glow, 0.1);
       color: $ember-glow;
       border: 1.5px solid rgba($ember-glow, 0.35);
     }
 
-    .flow__node--true {
-      background: rgba($branch-true, 0.1);
-      color: $branch-true;
-      border: 1.5px solid rgba($branch-true, 0.35);
-      padding: $space-1 $space-4;
-      font-family: $font-mono;
-      font-size: $text-xs;
-    }
-
-    .flow__node--false {
-      background: rgba($branch-false, 0.1);
-      color: $branch-false;
-      border: 1.5px solid rgba($branch-false, 0.35);
-      padding: $space-1 $space-4;
-      font-family: $font-mono;
-      font-size: $text-xs;
-    }
-
-    .flow__node--effect {
-      padding: $space-2 $space-4;
-      font-size: $text-xs;
-    }
-
-    .flow__node--effect-true {
-      background: rgba($branch-true, 0.06);
-      color: $branch-true;
-      border: 1.5px solid rgba($branch-true, 0.2);
-    }
-
-    .flow__node--effect-false {
-      background: rgba($branch-false, 0.06);
-      color: $branch-false;
-      border: 1.5px solid rgba($branch-false, 0.2);
-    }
-
-    .flow__hint {
-      font-size: $text-xs;
-      font-weight: 400;
-      color: var(--forge-text-muted);
-      font-style: italic;
-    }
-
-    .flow__label {
-      letter-spacing: -0.01em;
-    }
-
-    .flow__arrow {
-      color: var(--forge-text-muted);
-      flex-shrink: 0;
-    }
-
-    .flow__arrow--true {
-      color: rgba($branch-true, 0.5);
-    }
-
-    .flow__arrow--false {
-      color: rgba($branch-false, 0.5);
-    }
-
+    // Fork connecting the evaluate pill to the two branches. Uses a 2-column
+    // grid so stem + legs snap to the same centres as the branches grid
+    // underneath, regardless of branch pill width.
     .flow__fork {
-      color: var(--forge-text-muted);
-      flex-shrink: 0;
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: 100%;
+      max-width: 360px;
+      height: 36px;
+      margin: 4px 0 0;
     }
 
+    .flow__fork-stem {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 14px;
+      background: var(--forge-base-4);
+    }
+
+    .flow__fork-cross {
+      position: absolute;
+      left: 25%;
+      right: 25%;
+      top: 14px;
+      height: 2px;
+      background: var(--forge-base-4);
+    }
+
+    .flow__fork-leg {
+      position: absolute;
+      top: 14px;
+      width: 2px;
+      height: 22px;
+      background: var(--forge-base-4);
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: -1px;
+        width: 8px;
+        height: 8px;
+        border-right: 2px solid var(--forge-base-4);
+        border-bottom: 2px solid var(--forge-base-4);
+        transform: translateX(-50%) rotate(45deg);
+      }
+    }
+
+    .flow__fork-leg--true {
+      left: 25%;
+      transform: translateX(-1px);
+    }
+
+    .flow__fork-leg--false {
+      left: 75%;
+      transform: translateX(-1px);
+    }
+
+    // Two-column branch area. Pill centres land at 25% / 75% of its width,
+    // matching the fork leg positions above.
     .flow__branches {
-      display: flex;
-      gap: $space-8;
-      width: 200px;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: 100%;
+      max-width: 360px;
+      gap: $space-4;
     }
 
     .flow__branch {
@@ -230,12 +242,66 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       gap: 0;
     }
 
+    .flow__pill--true {
+      background: rgba($branch-true, 0.1);
+      color: $branch-true;
+      border: 1.5px solid rgba($branch-true, 0.35);
+      padding: $space-1 $space-4;
+      font-family: $font-mono;
+      font-size: $text-xs;
+      display: inline-block;
+    }
+
+    .flow__pill--false {
+      background: rgba($branch-false, 0.1);
+      color: $branch-false;
+      border: 1.5px solid rgba($branch-false, 0.35);
+      padding: $space-1 $space-4;
+      font-family: $font-mono;
+      font-size: $text-xs;
+      display: inline-block;
+    }
+
+    .flow__pill--effect {
+      padding: $space-2 $space-4;
+      font-size: $text-xs;
+      display: inline-block;
+    }
+
+    .flow__pill--effect-true {
+      background: rgba($branch-true, 0.06);
+      color: $branch-true;
+      border: 1.5px solid rgba($branch-true, 0.2);
+    }
+
+    .flow__pill--effect-false {
+      background: rgba($branch-false, 0.06);
+      color: $branch-false;
+      border: 1.5px solid rgba($branch-false, 0.2);
+    }
+
+    .flow__line--true {
+      background: rgba($branch-true, 0.4);
+
+      &::after {
+        border-color: transparent rgba($branch-true, 0.4) rgba($branch-true, 0.4) transparent;
+      }
+    }
+
+    .flow__line--false {
+      background: rgba($branch-false, 0.4);
+
+      &::after {
+        border-color: transparent rgba($branch-false, 0.4) rgba($branch-false, 0.4) transparent;
+      }
+    }
+
     .flow__tags {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
       gap: $space-1;
-      justify-content: center;
-      margin-top: $space-2;
+      margin-top: $space-3;
     }
 
     .flow__tag {
@@ -259,9 +325,18 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       border: 1px solid rgba($branch-false, 0.2);
     }
 
+    // On narrow viewports, shrink the fork span so legs don't stretch too far
+    // apart for small pills.
     @media (max-width: $breakpoint-sm) {
+      .flow__fork,
       .flow__branches {
-        gap: $space-4;
+        max-width: 280px;
+      }
+
+      .flow__pill--evaluate,
+      .flow__pill--signal,
+      .flow__pill--trigger {
+        white-space: normal;
       }
     }
   `,

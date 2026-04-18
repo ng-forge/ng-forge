@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ComponentRef,
   computed,
   DestroyRef,
   EnvironmentInjector,
@@ -9,29 +8,22 @@ import {
   Injector,
   input,
   TemplateRef,
-  Type,
   viewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { NgComponentOutlet } from '@angular/common';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { catchError, forkJoin, from, of, switchMap } from 'rxjs';
+import { DfFieldOutlet } from '../../directives/df-field-outlet.directive';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
-import { WrapperConfig, ContainerField } from '../../definitions/default/container-field';
+import { ContainerField } from '../../definitions/default/container-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { EventBus } from '../../events/event.bus';
 import { FieldDef } from '../../definitions/base/field-def';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { FieldWrapperContract, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY } from '../../models/wrapper-type';
-import { FIELD_SIGNAL_CONTEXT, WrapperContext, WRAPPER_CONTEXT } from '../../models/field-signal-context.token';
-import { FieldSignalContext } from '../../mappers/types';
-
-interface LoadedWrapper {
-  config: WrapperConfig;
-  component: Type<unknown>;
-}
+import { WRAPPER_AUTO_ASSOCIATIONS } from '../../models/wrapper-type';
+import { DEFAULT_WRAPPERS } from '../../models/field-signal-context.token';
+import { isSameWrapperChain, resolveWrappers } from '../../utils/resolve-wrappers/resolve-wrappers';
+import { createWrapperChainController } from '../../utils/wrapper-chain/wrapper-chain-controller';
 
 /**
  * Layout container that wraps child fields with UI chrome.
@@ -46,13 +38,11 @@ interface LoadedWrapper {
  */
 @Component({
   selector: 'div[container-field]',
-  imports: [NgComponentOutlet],
+  imports: [DfFieldOutlet],
   template: `
     <ng-template #childrenTpl>
       @for (field of resolvedFields(); track field.key) {
-        <ng-container
-          *ngComponentOutlet="field.component; injector: field.injector; environmentInjector: environmentInjector; inputs: field.inputs()"
-        />
+        <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
       }
     </ng-template>
     <ng-container #wrapperContainer></ng-container>
@@ -69,50 +59,27 @@ interface LoadedWrapper {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ContainerFieldComponent {
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Dependencies
-  // ─────────────────────────────────────────────────────────────────────────────
-
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly injector = inject(Injector);
   protected readonly environmentInjector = inject(EnvironmentInjector);
   private readonly eventBus = inject(EventBus);
   private readonly logger = inject(DynamicFormLogger);
-  private readonly wrapperRegistry = inject(WRAPPER_REGISTRY);
-  private readonly wrapperComponentCache = inject(WRAPPER_COMPONENT_CACHE);
-  private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext;
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // View Queries
-  // ─────────────────────────────────────────────────────────────────────────────
+  private readonly wrapperAutoAssociations = inject(WRAPPER_AUTO_ASSOCIATIONS);
+  private readonly defaultWrappersSignal = inject(DEFAULT_WRAPPERS, { optional: true });
 
   private readonly childrenTpl = viewChild.required('childrenTpl', { read: TemplateRef });
   private readonly wrapperContainer = viewChild.required('wrapperContainer', { read: ViewContainerRef });
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Inputs
-  // ─────────────────────────────────────────────────────────────────────────────
 
   field = input.required<ContainerField>();
   key = input.required<string>();
   className = input<string>();
   hidden = input(false);
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Computed Signals
-  // ─────────────────────────────────────────────────────────────────────────────
-
   readonly hostClasses = computed(() => computeContainerHostClasses('container', this.className()));
-
   readonly disabled = computed(() => this.field().disabled || false);
 
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Child Field Resolution (same as RowFieldComponent)
-  // ─────────────────────────────────────────────────────────────────────────────
-
   private readonly fieldsSource = computed(() => (this.field().fields || []) as FieldDef<unknown>[]);
 
   protected readonly resolvedFields = derivedFromDeferred(
@@ -124,6 +91,7 @@ export default class ContainerFieldComponent {
       destroyRef: this.destroyRef,
       onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
         const fieldKey = fieldDef.key || '<no key>';
+
         const containerKey = this.field().key || '<no key>';
         this.logger.error(
           `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
@@ -135,176 +103,29 @@ export default class ContainerFieldComponent {
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Wrapper Chain State
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  private wrapperComponentRefs: ComponentRef<unknown>[] = [];
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Constructor
-  // ─────────────────────────────────────────────────────────────────────────────
+  private readonly wrappers = computed(() => resolveWrappers(this.field(), this.defaultWrappersSignal?.(), this.wrapperAutoAssociations), {
+    equal: isSameWrapperChain,
+  });
 
   constructor() {
-    this.setupEffects();
-    this.setupWrapperChain();
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Private Methods
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  private setupEffects(): void {
-    setupContainerInitEffect(this.resolvedFields, this.eventBus, 'container', () => this.field().key, this.injector);
-  }
-
-  private setupWrapperChain(): void {
-    const wrappers$ = toObservable(computed(() => this.field().wrappers));
-
-    wrappers$
-      .pipe(
-        switchMap((wrappers) => {
-          if (!wrappers || wrappers.length === 0) {
-            return of([] as LoadedWrapper[]);
-          }
-          return this.loadWrapperComponents(wrappers);
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((loadedWrappers) => {
-        this.buildWrapperChain(loadedWrappers);
-      });
-
-    this.destroyRef.onDestroy(() => this.cleanupWrapperChain());
-  }
-
-  private loadWrapperComponents(wrappers: readonly WrapperConfig[]) {
-    return forkJoin(
-      wrappers.map((config) => {
-        return from(this.loadWrapperComponent(config.type)).pipe(
-          catchError(() => of(null)),
-          switchMap((component) => {
-            if (!component) {
-              this.logger.error(
-                `Wrapper type '${config.type}' could not be loaded. ` + `Ensure it is registered via provideDynamicForm().`,
-              );
-
-              return of(null);
-            }
-            return of({ config, component } as LoadedWrapper);
-          }),
-        );
-      }),
-    ).pipe(
-      switchMap((results) => {
-        const loaded = results.filter((r): r is LoadedWrapper => r !== null);
-        return of(loaded);
-      }),
+    // `row` is a virtual field type backed by ContainerFieldComponent — at
+    // runtime the spread in rowFieldMapper preserves `type: 'row'` on the
+    // field input, even though the declared type is `ContainerField`. Widen
+    // here so `(events)` consumers filtering by `componentType === 'row'`
+    // keep receiving emissions.
+    setupContainerInitEffect(
+      this.resolvedFields,
+      this.eventBus,
+      () => ((this.field().type as string) === 'row' ? 'row' : 'container'),
+      () => this.field().key,
+      this.injector,
     );
-  }
 
-  private async loadWrapperComponent(type: string): Promise<Type<unknown> | undefined> {
-    // Check cache first
-    const cached = this.wrapperComponentCache.get(type);
-    if (cached) {
-      return cached;
-    }
-
-    // Look up in registry
-    const definition = this.wrapperRegistry.get(type);
-    if (!definition) {
-      return undefined;
-    }
-
-    // Load and cache
-    const result = await definition.loadComponent();
-    const moduleResult = result as { default?: Type<unknown> } | Type<unknown>;
-    const component =
-      typeof moduleResult === 'object' && 'default' in moduleResult && moduleResult.default
-        ? moduleResult.default
-        : (result as Type<unknown>);
-
-    if (component) {
-      this.wrapperComponentCache.set(type, component);
-    }
-
-    return component;
-  }
-
-  private buildWrapperChain(wrappers: LoadedWrapper[]): void {
-    this.cleanupWrapperChain();
-
-    const container = this.wrapperContainer();
-
-    if (wrappers.length === 0) {
-      // No wrappers — render children directly
-      container.createEmbeddedView(this.childrenTpl());
-      return;
-    }
-
-    // Build wrapper chain recursively (formly pattern)
-    this.renderField(container, wrappers);
-  }
-
-  /**
-   * Recursively creates each wrapper in the chain, nesting each inside
-   * the previous wrapper's `fieldComponent` slot. The innermost slot
-   * receives the children template.
-   */
-  private renderField(containerRef: ViewContainerRef, wrappers: LoadedWrapper[]): void {
-    if (wrappers.length > 0) {
-      const [wrapper, ...remaining] = wrappers;
-
-      // Create a scoped injector that provides WRAPPER_CONTEXT for this wrapper
-      const containerFieldContext: WrapperContext = {
-        config: wrapper.config,
-        containerField: this.field(),
-        fieldSignalContext: this.parentFieldSignalContext,
-      };
-
-      const wrapperInjector = Injector.create({
-        parent: this.injector,
-        providers: [{ provide: WRAPPER_CONTEXT, useValue: containerFieldContext }],
-      });
-
-      const ref = containerRef.createComponent(wrapper.component, {
-        environmentInjector: this.environmentInjector,
-        injector: wrapperInjector,
-      });
-      this.wrapperComponentRefs.push(ref);
-
-      // Trigger change detection so the wrapper's viewChild queries resolve
-      ref.changeDetectorRef.detectChanges();
-
-      // Get the wrapper's inner slot and recurse
-      const instance = ref.instance as FieldWrapperContract;
-      const innerContainer = instance.fieldComponent();
-
-      if (innerContainer) {
-        this.renderField(innerContainer, remaining);
-      } else {
-        this.logger.error(
-          `Wrapper component for type '${wrapper.config.type}' does not provide a 'fieldComponent' ViewContainerRef. ` +
-            `Ensure the wrapper component has a viewChild('fieldComponent', { read: ViewContainerRef }) query ` +
-            `and that #fieldComponent is not inside a conditional (@if, @defer).`,
-        );
-      }
-    } else {
-      // Innermost — embed children template
-      containerRef.createEmbeddedView(this.childrenTpl());
-    }
-  }
-
-  private cleanupWrapperChain(): void {
-    // Clear the main container
-    const container = this.wrapperContainer();
-    container.clear();
-
-    // Destroy wrapper component refs
-    for (const ref of this.wrapperComponentRefs) {
-      ref.destroy();
-    }
-    this.wrapperComponentRefs = [];
+    createWrapperChainController({
+      vcr: this.wrapperContainer,
+      wrappers: this.wrappers,
+      renderInnermost: (slot) => slot.createEmbeddedView(this.childrenTpl()),
+    });
   }
 }
 

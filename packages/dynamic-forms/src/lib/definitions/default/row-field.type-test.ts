@@ -31,6 +31,7 @@ describe('RowField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
     | 'fields'
     | 'logic';
 

@@ -24,16 +24,21 @@ export function computeContainerHostClasses(containerType: string, className: st
  * When resolved fields become non-empty, emits a ComponentInitializedEvent
  * via afterNextRender to signal the container is ready.
  *
+ * `componentType` may be a static value or a lazy getter — the latter lets
+ * virtual field types (e.g. `row`, which renders via ContainerFieldComponent)
+ * preserve their original type on the emitted event instead of collapsing to
+ * the host component's type.
+ *
  * @param resolvedFields - Signal of resolved fields
  * @param eventBus - EventBus for dispatching initialization events
- * @param componentType - The type of container component
+ * @param componentType - Static type, or a getter evaluated at emission time
  * @param fieldKeyFn - Function returning the field's key
  * @param injector - Injector for afterNextRender scheduling
  */
 export function setupContainerInitEffect(
   resolvedFields: Signal<ResolvedField[]>,
   eventBus: EventBus,
-  componentType: InitializationComponentType,
+  componentType: InitializationComponentType | (() => InitializationComponentType),
   fieldKeyFn: () => string,
   injector: Injector,
 ): void {
@@ -44,7 +49,8 @@ export function setupContainerInitEffect(
 
   explicitEffect([allReady], ([ready]) => {
     if (ready) {
-      emitComponentInitialized(eventBus, componentType, fieldKeyFn(), injector);
+      const type = typeof componentType === 'function' ? componentType() : componentType;
+      emitComponentInitialized(eventBus, type, fieldKeyFn(), injector);
     }
   });
 }

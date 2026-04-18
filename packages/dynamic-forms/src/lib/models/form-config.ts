@@ -7,6 +7,7 @@ import { CustomFunction } from '../core/expressions/custom-function-types';
 import type { AsyncConditionFunction, AsyncDerivationFunction } from '../core/expressions/async-custom-function-types';
 import { ValidationMessages } from './validation-types';
 import { SubmissionConfig } from './submission-config';
+import { WrapperConfig } from './wrapper-type';
 import type { FormSchema } from '@ng-forge/dynamic-forms/schema';
 
 /**
@@ -249,6 +250,27 @@ export interface FormConfig<
    * ```
    */
   externalData?: Record<string, Signal<unknown>>;
+
+  /**
+   * Form-wide default wrappers applied to every field that does not explicitly opt out.
+   *
+   * Merged into a field's effective wrapper chain between auto-associated wrappers
+   * (outermost) and field-level `wrappers` (innermost). Fields with `wrappers: null`
+   * opt out entirely — no defaults, no auto-associations.
+   *
+   * @example
+   * ```typescript
+   * const config: FormConfig = {
+   *   defaultWrappers: [{ type: 'css', cssClasses: 'mb-2' }],
+   *   fields: [
+   *     { type: 'input', key: 'name' },                           // gets default wrappers
+   *     { type: 'input', key: 'email', wrappers: null },           // opts out
+   *     { type: 'input', key: 'age', wrappers: [{ type: 'css', cssClasses: 'highlight' }] }, // defaults + field-level
+   *   ],
+   * };
+   * ```
+   */
+  defaultWrappers?: readonly WrapperConfig[];
 }
 
 /**

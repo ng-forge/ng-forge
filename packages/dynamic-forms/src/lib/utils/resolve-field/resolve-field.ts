@@ -5,10 +5,12 @@ import { FieldTypeDefinition } from '../../models/field-type';
 import { mapFieldToInputs } from '../field-mapper/field-mapper';
 
 /**
- * Resolved field ready for rendering with ngComponentOutlet.
+ * Resolved field ready for rendering with ngComponentOutlet / DfFieldOutlet.
  */
 export interface ResolvedField {
   key: string;
+  /** The original field definition (used by DfFieldOutlet to resolve wrappers). */
+  fieldDef: FieldDef<unknown>;
   component: Type<unknown>;
   injector: Injector;
   inputs: Signal<Record<string, unknown>>;
@@ -87,6 +89,7 @@ export function resolveField(fieldDef: FieldDef<unknown>, context: ResolveFieldC
 
       return {
         key: fieldDef.key,
+        fieldDef,
         component,
         injector: context.injector,
         inputs,
@@ -141,6 +144,7 @@ export function resolveFieldSync(fieldDef: FieldDef<unknown>, context: SyncResol
 
   return {
     key: fieldDef.key,
+    fieldDef,
     component,
     injector: context.injector,
     inputs,

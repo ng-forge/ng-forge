@@ -6,7 +6,13 @@ import { FunctionRegistryService } from '../core/registry/function-registry.serv
 import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
 import { FormStateManager, FORM_STATE_DEPS, FormStateDeps } from '../state/form-state-manager';
-import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, EXTERNAL_DATA, FORM_OPTIONS } from '../models/field-signal-context.token';
+import {
+  DEFAULT_PROPS,
+  DEFAULT_VALIDATION_MESSAGES,
+  DEFAULT_WRAPPERS,
+  EXTERNAL_DATA,
+  FORM_OPTIONS,
+} from '../models/field-signal-context.token';
 import { DERIVATION_WARNING_TRACKER, createDerivationWarningTracker } from '../core/derivation/derivation-warning-tracker';
 import { DEPRECATION_WARNING_TRACKER, createDeprecationWarningTracker } from '../utils/deprecation-warning-tracker';
 import {
@@ -62,6 +68,11 @@ export function provideDynamicFormDI(): Provider[] {
     {
       provide: DEFAULT_PROPS,
       useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.defaultProps),
+      deps: [FormStateManager],
+    },
+    {
+      provide: DEFAULT_WRAPPERS,
+      useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.defaultWrappers),
       deps: [FormStateManager],
     },
     {
