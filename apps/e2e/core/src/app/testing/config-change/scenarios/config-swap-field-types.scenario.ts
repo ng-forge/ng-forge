@@ -37,12 +37,10 @@ const configB = {
       type: 'select',
       label: 'Shared field (select)',
       value: '',
-      props: {
-        options: [
-          { value: 'a', label: 'Option A' },
-          { value: 'b', label: 'Option B' },
-        ],
-      },
+      options: [
+        { value: 'a', label: 'Option A' },
+        { value: 'b', label: 'Option B' },
+      ],
     },
     {
       key: 'submit',
