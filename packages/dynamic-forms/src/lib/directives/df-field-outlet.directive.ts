@@ -72,6 +72,13 @@ export class DfFieldOutlet {
 
   private fieldRef: ComponentRef<unknown> | undefined;
   /**
+   * VCR the `fieldRef`'s host view is currently inserted into (either the outer
+   * VCR when there are no wrappers, or the innermost wrapper's `#fieldComponent`
+   * slot). Tracked so `beforeRebuild` can detach the view before the outer VCR
+   * cascade-destroys it.
+   */
+  private fieldSlot: ViewContainerRef | undefined;
+  /**
    * Last rawInputs reference pushed to the innermost field. Used to dedupe the
    * rawInputs effect when the same snapshot was already applied as part of the
    * initial render — keeps per-keystroke input updates O(changed-keys) instead
@@ -109,12 +116,27 @@ export class DfFieldOutlet {
       environmentInjector: () => this.resolveEnvInjector(),
       parentInjector: () => this.dfFieldOutlet().injector,
       fieldInputs: this.fieldInputs,
+      beforeRebuild: () => this.detachFieldRef(),
       renderInnermost: (slot) => {
         const resolved = this.dfFieldOutlet();
+        if (this.fieldRef && this.fieldRef.componentType === resolved.component) {
+          // Same component class as before — re-insert the preserved hostView
+          // instead of creating a new one. Preserves focus / caret / scroll
+          // across wrapper chain rebuilds.
+          slot.insert(this.fieldRef.hostView);
+          this.fieldSlot = slot;
+          // Re-push rawInputs in case they changed between detach and reinsert.
+          this.pushRawInputs(this.fieldRef, this.rawInputs());
+          return;
+        }
+        // Different component class — discard the detached ref (if any) and
+        // create a new one in the fresh slot.
+        this.fieldRef?.destroy();
         this.fieldRef = slot.createComponent(resolved.component, {
           environmentInjector: this.resolveEnvInjector(),
           injector: resolved.injector,
         });
+        this.fieldSlot = slot;
         // Reset the per-field push cache so the new fieldRef receives every input
         // — particularly the required `key`, which would otherwise be skipped by
         // the ref-diff check when the new field shares a key value with the old.
@@ -133,9 +155,20 @@ export class DfFieldOutlet {
     });
 
     this.destroyRef.onDestroy(() => {
+      // Destroy the fieldRef explicitly — if it was detached mid-rebuild when
+      // the outlet got destroyed, the vcr cascade never reaches it.
+      this.fieldRef?.destroy();
       this.fieldRef = undefined;
+      this.fieldSlot = undefined;
       this.lastPushedInputs = undefined;
     });
+  }
+
+  private detachFieldRef(): void {
+    if (!this.fieldRef || !this.fieldSlot) return;
+    const idx = this.fieldSlot.indexOf(this.fieldRef.hostView);
+    if (idx >= 0) this.fieldSlot.detach(idx);
+    this.fieldSlot = undefined;
   }
 
   private resolveEnvInjector(): EnvironmentInjector {

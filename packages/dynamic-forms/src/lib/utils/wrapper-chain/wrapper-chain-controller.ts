@@ -48,6 +48,19 @@ export interface WrapperChainControllerOptions {
    * template, …). Called each time the chain rebuilds.
    */
   readonly renderInnermost: (slot: ViewContainerRef) => void;
+  /**
+   * Called immediately before the mounted chain is cleared on a structural
+   * change (wrappers or `rebuildKey` changed). Receives the NEXT state so the
+   * caller can decide what to preserve.
+   *
+   * `DfFieldOutlet` uses this to detach the innermost field's hostView before
+   * `vcr.clear()` cascade-destroys it; if the new `rebuildKey` matches the
+   * current component class, `renderInnermost` re-inserts the preserved
+   * hostView into the new innermost slot so focus / caret / scroll survive.
+   *
+   * Not invoked for pre-first-render gate changes (nothing is mounted yet).
+   */
+  readonly beforeRebuild?: (next: { wrappers: readonly WrapperConfig[]; rebuildKey: unknown }) => void;
 }
 
 /**
@@ -133,10 +146,13 @@ export function createWrapperChainController(opts: WrapperChainControllerOptions
       // effect continues pushing live mapper outputs through.
       if (!structurallyChanged && !state.open) return;
 
-      // Structurally different from what's mounted (or mounted-but-we're-about-to-
-      // remount) — tear down first. Angular cascades destroy through every nested
-      // ComponentRef, so walking `refs` manually would be redundant work.
+      // Structurally different from what's mounted — tear down first. Angular
+      // cascades destroy through every nested ComponentRef, so walking `refs`
+      // manually would be redundant work. `beforeRebuild` gives the caller a
+      // chance to detach views it wants to preserve (e.g. the innermost field
+      // ref when the component class is unchanged).
       if (structurallyChanged && lastMountedChain !== null) {
+        opts.beforeRebuild?.({ wrappers: state.wrappers, rebuildKey: state.rebuildKey });
         vcr.clear();
         refs = [];
         lastMountedChain = null;
