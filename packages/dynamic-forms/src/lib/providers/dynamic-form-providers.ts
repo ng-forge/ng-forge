@@ -178,8 +178,8 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
       },
     },
     // Pre-computed reverse index for auto-association lookup — built once so
-    // resolveEffectiveWrappers is O(1) per field render instead of scanning
-    // every registered wrapper.
+    // resolveWrappers is O(1) per field render instead of scanning every
+    // registered wrapper.
     {
       provide: WRAPPER_AUTO_ASSOCIATIONS,
       useFactory: () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveEffectiveWrappers } from './resolve-effective-wrappers';
+import { isSameWrapperChain, resolveWrappers } from './resolve-wrappers';
 import { WrapperConfig } from '../../models/wrapper-type';
 import { FieldDef } from '../../definitions/base/field-def';
 
@@ -20,18 +20,18 @@ function autoAssoc(entries: Record<string, readonly string[]>): Map<string, Wrap
   return map;
 }
 
-describe('resolveEffectiveWrappers', () => {
+describe('resolveWrappers', () => {
   it('returns an empty chain for a bare field with no defaults and no auto-associations', () => {
     const field: TestField = { type: 'input' };
 
-    expect(resolveEffectiveWrappers(field, undefined, autoAssoc({}))).toEqual([]);
+    expect(resolveWrappers(field, undefined, autoAssoc({}))).toEqual([]);
   });
 
   it('returns the field-level wrappers unchanged when no defaults and no auto', () => {
     const fieldWrappers: readonly WrapperConfig[] = [{ type: 'css', cssClasses: 'a' } as WrapperConfig];
     const field: TestField = { type: 'input', wrappers: fieldWrappers };
 
-    const result = resolveEffectiveWrappers(field, undefined, autoAssoc({}));
+    const result = resolveWrappers(field, undefined, autoAssoc({}));
 
     expect(result).toEqual(fieldWrappers);
   });
@@ -40,7 +40,7 @@ describe('resolveEffectiveWrappers', () => {
     const field: TestField = { type: 'input', wrappers: null };
     const defaults: readonly WrapperConfig[] = [{ type: 'css', cssClasses: 'should-not-apply' } as WrapperConfig];
 
-    const result = resolveEffectiveWrappers(field, defaults, autoAssoc({ input: ['row'] }));
+    const result = resolveWrappers(field, defaults, autoAssoc({ input: ['row'] }));
 
     expect(result).toEqual([]);
   });
@@ -49,7 +49,7 @@ describe('resolveEffectiveWrappers', () => {
     const field: TestField = { type: 'input', wrappers: [] };
     const defaults: readonly WrapperConfig[] = [{ type: 'css', cssClasses: 'default' } as WrapperConfig];
 
-    const result = resolveEffectiveWrappers(field, defaults, autoAssoc({ input: ['auto-input'] }));
+    const result = resolveWrappers(field, defaults, autoAssoc({ input: ['auto-input'] }));
 
     expect(result).toEqual([{ type: 'auto-input' }, { type: 'css', cssClasses: 'default' }]);
   });
@@ -58,7 +58,7 @@ describe('resolveEffectiveWrappers', () => {
     const defaults: readonly WrapperConfig[] = [{ type: 'css', cssClasses: 'default' } as WrapperConfig];
     const field: TestField = { type: 'input' };
 
-    const result = resolveEffectiveWrappers(field, defaults, autoAssoc({}));
+    const result = resolveWrappers(field, defaults, autoAssoc({}));
 
     expect(result).toEqual(defaults);
   });
@@ -68,7 +68,7 @@ describe('resolveEffectiveWrappers', () => {
     const fieldWrappers: readonly WrapperConfig[] = [{ type: 'css', cssClasses: 'field-specific' } as WrapperConfig];
     const field: TestField = { type: 'input', wrappers: fieldWrappers };
 
-    const result = resolveEffectiveWrappers(field, defaults, autoAssoc({ input: ['auto-input'], select: ['auto-select'] }));
+    const result = resolveWrappers(field, defaults, autoAssoc({ input: ['auto-input'], select: ['auto-select'] }));
 
     expect(result).toEqual([{ type: 'auto-input' }, { type: 'css', cssClasses: 'default' }, { type: 'css', cssClasses: 'field-specific' }]);
   });
@@ -76,19 +76,38 @@ describe('resolveEffectiveWrappers', () => {
   it('skips auto-associations that do not target the field type', () => {
     const field: TestField = { type: 'input' };
 
-    const result = resolveEffectiveWrappers(field, undefined, autoAssoc({ input: ['matches'], checkbox: ['does-not-match'] }));
+    const result = resolveWrappers(field, undefined, autoAssoc({ input: ['matches'], checkbox: ['does-not-match'] }));
 
     expect(result).toEqual([{ type: 'matches' }]);
   });
 
-  it('returns a fresh array each call (callers may rely on identity)', () => {
-    const field: TestField = { type: 'input' };
-    const auto = autoAssoc({ input: ['auto'] });
+  it('returns the same reference for every empty-chain call (for ref-stable memoization)', () => {
+    const first = resolveWrappers({ type: 'input' }, undefined, autoAssoc({}));
+    const second = resolveWrappers({ type: 'input', wrappers: null }, undefined, autoAssoc({ input: ['ignored'] }));
 
-    const first = resolveEffectiveWrappers(field, undefined, auto);
-    const second = resolveEffectiveWrappers(field, undefined, auto);
+    expect(first).toBe(second);
+    expect(first).toEqual([]);
+  });
+});
 
-    expect(first).not.toBe(second);
-    expect(first).toEqual(second);
+describe('isSameWrapperChain', () => {
+  it('is true when both chains are empty', () => {
+    expect(isSameWrapperChain([], [])).toBe(true);
+  });
+
+  it('is true when chains share references element-wise', () => {
+    const w: WrapperConfig = { type: 'css', cssClasses: 'a' } as WrapperConfig;
+    expect(isSameWrapperChain([w], [w])).toBe(true);
+  });
+
+  it('is false when lengths differ', () => {
+    const w: WrapperConfig = { type: 'css' } as WrapperConfig;
+    expect(isSameWrapperChain([w], [w, w])).toBe(false);
+  });
+
+  it('is false when any element differs by reference (even if structurally equal)', () => {
+    const a: WrapperConfig = { type: 'css', cssClasses: 'x' } as WrapperConfig;
+    const b: WrapperConfig = { type: 'css', cssClasses: 'x' } as WrapperConfig;
+    expect(isSameWrapperChain([a], [b])).toBe(false);
   });
 });

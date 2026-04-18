@@ -1,5 +1,4 @@
-import { Type } from '@angular/core';
-import { WrapperTypeDefinition } from '../models/wrapper-type';
+import { LazyComponentLoader, WrapperTypeDefinition } from '../models/wrapper-type';
 
 /**
  * User-facing wrapper registration shape used with `createWrappers(...)`.
@@ -12,7 +11,7 @@ export interface WrapperRegistration<TName extends string = string, TConfig = un
   /** Unique identifier for the wrapper type */
   readonly wrapperName: TName;
   /** Lazy-loader for the wrapper component */
-  readonly loadComponent: () => Promise<Type<unknown> | { default: Type<unknown> }>;
+  readonly loadComponent: LazyComponentLoader;
   /** Field types this wrapper auto-applies to (merged lowest-priority during wrapper resolution) */
   readonly types?: readonly string[];
   /**

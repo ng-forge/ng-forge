@@ -1,5 +1,6 @@
 import {
   ComponentRef,
+  computed,
   DestroyRef,
   Directive,
   EnvironmentInjector,
@@ -7,17 +8,15 @@ import {
   input,
   Signal,
   Type,
-  computed,
   ViewContainerRef,
 } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { firstValueFrom } from 'rxjs';
 import { ResolvedField } from '../utils/resolve-field/resolve-field';
-import { WrapperConfig, WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY } from '../models/wrapper-type';
+import { WRAPPER_AUTO_ASSOCIATIONS } from '../models/wrapper-type';
 import { DEFAULT_WRAPPERS } from '../models/field-signal-context.token';
-import { DynamicFormLogger } from '../providers/features/logger/logger.token';
-import { LoadedWrapper, loadWrapperComponents, renderWrapperChain, setInputIfDeclared } from '../utils/wrapper-chain/wrapper-chain';
-import { resolveEffectiveWrappers } from '../utils/resolve-effective-wrappers/resolve-effective-wrappers';
+import { setInputIfDeclared } from '../utils/wrapper-chain/wrapper-chain';
+import { createWrapperChainController } from '../utils/wrapper-chain/wrapper-chain-controller';
+import { isSameWrapperChain, resolveWrappers } from '../utils/resolve-wrappers/resolve-wrappers';
 import { READONLY_FIELD_TREE_CACHE, toReadonlyFieldTreeCached } from '../core/field-tree-utils';
 import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
@@ -68,153 +67,83 @@ export class DfFieldOutlet {
   private readonly vcr = inject(ViewContainerRef);
   private readonly defaultEnvInjector = inject(EnvironmentInjector);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly wrapperRegistry = inject(WRAPPER_REGISTRY);
-  private readonly wrapperComponentCache = inject(WRAPPER_COMPONENT_CACHE);
   private readonly wrapperAutoAssociations = inject(WRAPPER_AUTO_ASSOCIATIONS);
   private readonly defaultWrappersSignal = inject(DEFAULT_WRAPPERS, { optional: true });
-  private readonly logger = inject(DynamicFormLogger);
   private readonly readonlyFieldCache = inject(READONLY_FIELD_TREE_CACHE);
 
-  private wrapperRefs: ComponentRef<unknown>[] = [];
   private fieldRef: ComponentRef<unknown> | undefined;
   /**
-   * Monotonic counter guarding async chain builds. Each rebuild request
-   * captures the version; if a newer rebuild has started by the time the
-   * Promise resolves, the stale one bails out without touching the DOM.
+   * Last rawInputs reference pushed to the innermost field. Used to dedupe the
+   * rawInputs effect when the same snapshot was already applied as part of the
+   * initial render — keeps per-keystroke input updates O(changed-keys) instead
+   * of re-walking the whole input bag.
    */
-  private rebuildVersion = 0;
-  /**
-   * Version at which the current DOM was rendered. The rawInputs effect
-   * checks this before pushing — when render() has just applied the inputs
-   * itself, the effect would otherwise immediately re-push the same values
-   * (double work, signal churn). Set back to `-1` after a skip so the next
-   * rawInputs change pushes normally.
-   */
-  private renderedVersion = -1;
-  /** Last rawInputs reference pushed to the field — drives per-key diffing. */
   private lastPushedInputs: Record<string, unknown> | undefined;
-  /** Cached fieldInputs view keyed by rawInputs identity. */
-  private cachedFieldInputsKey: Record<string, unknown> | undefined;
-  private cachedFieldInputs: WrapperFieldInputs | undefined;
-
-  /**
-   * Pre-computed effective wrapper chain. Uses reference-equal-per-element
-   * comparison so that reconcileFields preserving the same fieldDef yields
-   * a stable signal output — no chain rebuild when nothing actually changed.
-   */
-  private readonly effectiveWrappers: Signal<readonly WrapperConfig[]> = computed(
-    () => resolveEffectiveWrappers(this.dfFieldOutlet().fieldDef, this.defaultWrappersSignal?.(), this.wrapperAutoAssociations),
-    { equal: (a, b) => a.length === b.length && a.every((w, i) => w === b[i]) },
-  );
 
   private readonly componentIdentity: Signal<Type<unknown>> = computed(() => this.dfFieldOutlet().component);
-
   private readonly renderReady: Signal<boolean> = computed(() => this.dfFieldOutlet().renderReady());
-
   private readonly rawInputs = computed(() => this.dfFieldOutlet().inputs());
 
+  /**
+   * Effective wrapper chain. Element-wise identity comparison keeps the signal
+   * stable across `ResolvedField` reference changes that don't actually change
+   * the chain — avoids rebuilds on reconciled fields.
+   */
+  private readonly wrappers = computed(
+    () => resolveWrappers(this.dfFieldOutlet().fieldDef, this.defaultWrappersSignal?.(), this.wrapperAutoAssociations),
+    { equal: isSameWrapperChain },
+  );
+
+  /**
+   * `fieldInputs` bag handed to every wrapper in the chain. Memoised on
+   * `rawInputs` identity so repeated emissions with the same underlying object
+   * return the same view and don't cascade OnPush re-evaluations.
+   */
+  private readonly fieldInputs = computed<WrapperFieldInputs>(() => this.buildFieldInputs(this.rawInputs()));
+
   constructor() {
-    // Chain-rebuild effect: re-runs only when the component identity, the
-    // memoised effective wrappers, or the renderReady gate changes. Replaces
-    // the prior combineLatest/switchMap pipeline — aligns with the codebase's
-    // explicitEffect convention and skips the rebuild when a reconciled
-    // ResolvedField carries the same component + wrappers as before.
-    explicitEffect([this.componentIdentity, this.effectiveWrappers, this.renderReady], ([, wrappers, ready]) => {
-      if (!ready) {
-        // Bump the version so any in-flight async wrapper load from a prior
-        // `ready = true` tick fails its staleness guard and does not touch
-        // the DOM after we've torn it down.
-        ++this.rebuildVersion;
-        this.cleanup();
-        return;
-      }
-      this.scheduleRebuild(wrappers);
-    });
-
-    // Mapper outputs push-through: updates inputs on already-created refs
-    // without touching the chain structure. Runs independently of the
-    // rebuild effect so per-keystroke input updates don't thrash the DOM.
-    explicitEffect([this.rawInputs], ([rawInputs]) => {
-      if (!this.fieldRef) return;
-      // When render() just applied this same rawInputs snapshot, skip the
-      // duplicate push that the sync fast-path would otherwise cause.
-      if (this.renderedVersion === this.rebuildVersion) {
-        this.renderedVersion = -1;
-        return;
-      }
-      this.pushInputs(rawInputs);
-    });
-
-    this.destroyRef.onDestroy(() => this.cleanup());
-  }
-
-  private scheduleRebuild(wrappers: readonly WrapperConfig[]): void {
-    const version = ++this.rebuildVersion;
-
-    // Sync fast-path: when every wrapper component is already cached (the
-    // common case after the first render), skip the microtask and render
-    // synchronously. Removes the one-tick delay that a reconciled
-    // ResolvedField — or a wrapper-identity change on already-registered
-    // types — would otherwise cost.
-    if (wrappers.length === 0 || wrappers.every((w) => this.wrapperComponentCache.has(w.type))) {
-      const loaded = wrappers.map((config) => ({ config, component: this.wrapperComponentCache.get(config.type)! }));
-      this.cleanup();
-      this.render(loaded);
-      return;
-    }
-
-    firstValueFrom(loadWrapperComponents(wrappers, this.wrapperRegistry, this.wrapperComponentCache, this.logger))
-      .then((loaded) => {
-        if (this.rebuildVersion !== version || this.destroyRef.destroyed) return;
-        this.cleanup();
-        this.render(loaded);
-      })
-      .catch(() => {
-        /* loadWrapperComponents already logs; skip rebuild silently */
-      });
-  }
-
-  private render(loadedWrappers: readonly LoadedWrapper[]): void {
-    const resolved = this.dfFieldOutlet();
-    const envInjector = this.dfFieldOutletEnvironmentInjector() ?? this.defaultEnvInjector;
-    const rawInputs = resolved.inputs();
-    const fieldInputs = this.buildFieldInputs(rawInputs);
-
-    this.wrapperRefs = renderWrapperChain({
-      outerContainer: this.vcr,
-      loadedWrappers,
-      environmentInjector: envInjector,
-      parentInjector: resolved.injector,
-      logger: this.logger,
-      fieldInputs,
+    createWrapperChainController({
+      vcr: this.vcr,
+      wrappers: this.wrappers,
+      gate: this.renderReady,
+      rebuildKey: this.componentIdentity,
+      environmentInjector: () => this.resolveEnvInjector(),
+      parentInjector: () => this.dfFieldOutlet().injector,
+      fieldInputs: this.fieldInputs,
       renderInnermost: (slot) => {
+        const resolved = this.dfFieldOutlet();
         this.fieldRef = slot.createComponent(resolved.component, {
-          environmentInjector: envInjector,
+          environmentInjector: this.resolveEnvInjector(),
           injector: resolved.injector,
         });
-        this.pushRawInputs(this.fieldRef, rawInputs);
+        this.pushRawInputs(this.fieldRef, this.rawInputs());
       },
     });
-    // Mark this version as rendered so the rawInputs effect can skip its
-    // duplicate push when it runs next on the same rawInputs reference.
-    this.renderedVersion = this.rebuildVersion;
+
+    // Mapper outputs push-through: updates inputs on the innermost field without
+    // touching the chain structure. Ref-identity dedupe against `lastPushedInputs`
+    // skips the duplicate push that the controller's own render has already done.
+    explicitEffect([this.rawInputs], ([rawInputs]) => {
+      if (!this.fieldRef) return;
+      if (this.lastPushedInputs === rawInputs) return;
+      this.pushRawInputs(this.fieldRef, rawInputs);
+    });
+
+    this.destroyRef.onDestroy(() => {
+      this.fieldRef = undefined;
+      this.lastPushedInputs = undefined;
+    });
   }
 
-  private pushInputs(rawInputs: Record<string, unknown>): void {
-    const fieldInputs = this.buildFieldInputs(rawInputs);
-    for (const ref of this.wrapperRefs) {
-      setInputIfDeclared(ref, 'fieldInputs', fieldInputs);
-    }
-    if (this.fieldRef) {
-      this.pushRawInputs(this.fieldRef, rawInputs);
-    }
+  private resolveEnvInjector(): EnvironmentInjector {
+    return this.dfFieldOutletEnvironmentInjector() ?? this.defaultEnvInjector;
   }
 
   private pushRawInputs(ref: ComponentRef<unknown>, rawInputs: Record<string, unknown>): void {
     // Only push keys whose values actually changed since the previous emission.
-    // The mapper typically mutates one or two keys per tick; a full-sweep
-    // setInput fan-out would otherwise run the component's input signal
-    // pipeline for every unchanged key on every keystroke.
+    // Mappers typically mutate one or two keys per tick; a full-sweep setInput
+    // would otherwise run the component's input-signal pipeline for every
+    // unchanged key on every keystroke.
     const last = this.lastPushedInputs;
     for (const [key, value] of Object.entries(rawInputs)) {
       if (last && last[key] === value) continue;
@@ -224,13 +153,6 @@ export class DfFieldOutlet {
   }
 
   private buildFieldInputs(rawInputs: Record<string, unknown>): WrapperFieldInputs {
-    // When the mapper emits the same rawInputs reference twice in a row (common
-    // under renderReady flipping or parent CD with no actual change), returning
-    // the cached view keeps every wrapper's `fieldInputs` input ref-stable and
-    // avoids cascading OnPush re-evaluations across the chain.
-    if (this.cachedFieldInputsKey === rawInputs && this.cachedFieldInputs) {
-      return this.cachedFieldInputs;
-    }
     const fieldTreeCandidate = rawInputs['field'];
     // A FieldTree is a callable (() => FieldState). We expose it to wrappers via a narrow
     // read-only view; raw FieldTree is still pushed to the innermost component for writes.
@@ -238,25 +160,9 @@ export class DfFieldOutlet {
       fieldTreeCandidate && typeof fieldTreeCandidate === 'function'
         ? toReadonlyFieldTreeCached(this.readonlyFieldCache, fieldTreeCandidate as never)
         : undefined;
-    const view = {
+    return {
       ...(rawInputs as Record<string, unknown>),
       field: readonlyField,
     } as WrapperFieldInputs;
-    this.cachedFieldInputsKey = rawInputs;
-    this.cachedFieldInputs = view;
-    return view;
-  }
-
-  private cleanup(): void {
-    // vcr.clear() destroys the outermost component (wrapper or field); Angular
-    // cascades destruction through every nested ComponentRef. Manually walking
-    // wrapperRefs / fieldRef would double the teardown work.
-    this.vcr.clear();
-    this.wrapperRefs = [];
-    this.fieldRef = undefined;
-    // Invalidate per-field caches — a new field instance will push fresh inputs.
-    this.lastPushedInputs = undefined;
-    this.cachedFieldInputsKey = undefined;
-    this.cachedFieldInputs = undefined;
   }
 }

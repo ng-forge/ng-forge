@@ -1,5 +1,5 @@
 import { ComponentRef, EnvironmentInjector, Injector, reflectComponentType, Type, ViewContainerRef } from '@angular/core';
-import { catchError, forkJoin, from, Observable, of, switchMap } from 'rxjs';
+import { catchError, forkJoin, from, map, Observable, of } from 'rxjs';
 import { FieldWrapperContract, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
@@ -58,6 +58,22 @@ export interface LoadedWrapper {
 }
 
 /**
+ * Narrows an ES-module-with-default-export from a bare component class.
+ * Lazy component loaders may return either shape depending on how the user
+ * wrote the import expression (`import('./x')` vs `import('./x').then(m => m.Foo)`).
+ */
+export function hasDefaultExport<T>(value: unknown): value is { default: T } {
+  return typeof value === 'object' && value !== null && 'default' in value && !!(value as { default: unknown }).default;
+}
+
+/**
+ * Pick the component class out of whatever a lazy loader returned.
+ */
+export function resolveDefaultExport<T>(result: Type<T> | { default: Type<T> }): Type<T> {
+  return hasDefaultExport<Type<T>>(result) ? result.default : result;
+}
+
+/**
  * Resolve a wrapper type name to its component class, with DI-scoped caching.
  */
 export async function loadWrapperComponent(
@@ -71,13 +87,7 @@ export async function loadWrapperComponent(
   const definition = registry.get(type);
   if (!definition) return undefined;
 
-  const result = await definition.loadComponent();
-  const moduleResult = result as { default?: Type<unknown> } | Type<unknown>;
-  const component =
-    typeof moduleResult === 'object' && 'default' in moduleResult && moduleResult.default
-      ? moduleResult.default
-      : (result as Type<unknown>);
-
+  const component = resolveDefaultExport(await definition.loadComponent());
   if (component) cache.set(type, component);
   return component;
 }
@@ -104,19 +114,23 @@ export function loadWrapperComponents(
     configs.map((config) =>
       from(loadWrapperComponent(config.type, registry, cache)).pipe(
         catchError(() => of(undefined)),
-        switchMap((component) => {
+        map((component) => {
           if (!component) {
             const message = `Wrapper type '${config.type}' could not be loaded. Ensure it is registered via provideDynamicForm().`;
             logger.error(message);
-
             console.error('[Dynamic Forms]', message);
-            return of(null);
+            return null;
           }
-          return of({ config, component } satisfies LoadedWrapper);
+          return { config, component } satisfies LoadedWrapper;
         }),
       ),
     ),
-  ).pipe(switchMap((results) => of(results.filter((r): r is LoadedWrapper => r !== null))));
+  ).pipe(map((results) => results.filter(isLoadedWrapper)));
+}
+
+/** Typeguard for filtering nulls out of the `loadWrapperComponents` forkJoin result. */
+function isLoadedWrapper(value: LoadedWrapper | null): value is LoadedWrapper {
+  return value !== null;
 }
 
 /**

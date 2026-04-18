@@ -26,6 +26,21 @@ export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredW
   : { readonly type: TWrappers };
 
 /**
+ * Signature of a lazy component loader — either a direct component class or
+ * an ES module whose `default` export is the component. Shared by field and
+ * wrapper registrations so the `loadComponent: () => import('./x.component')`
+ * idiom types cleanly in both places.
+ */
+export type LazyComponentLoader<T = unknown> = () => Promise<Type<T> | { default: Type<T> }>;
+
+/**
+ * Pre-computed reverse index used by `resolveWrappers`: field type → the
+ * wrappers that auto-apply to it. Built once in the `provideDynamicForm(...)`
+ * factory from every registered `WrapperTypeDefinition.types` entry.
+ */
+export type WrapperAutoAssociations = ReadonlyMap<string, readonly WrapperConfig[]>;
+
+/**
  * Configuration interface for registering wrapper types.
  *
  * Defines how a wrapper component is loaded and identified. Wrapper components
@@ -49,7 +64,7 @@ export interface WrapperTypeDefinition<T extends WrapperConfig = WrapperConfig> 
    * Function to load the wrapper component (supports lazy loading).
    * Returns a Promise that resolves to the component class or module with default export.
    */
-  loadComponent: () => Promise<Type<unknown> | { default: Type<unknown> }>;
+  loadComponent: LazyComponentLoader;
   /**
    * Field types this wrapper should auto-apply to.
    *
@@ -132,11 +147,11 @@ export const WRAPPER_COMPONENT_CACHE = new InjectionToken<Map<string, Type<unkno
 /**
  * Pre-computed reverse index: `fieldType → WrapperConfig[]` for every
  * registered `WrapperTypeDefinition.types` entry. Built once in the
- * `provideDynamicForm(...)` factory so `resolveEffectiveWrappers` can look
- * up auto-associations in O(1) per field instead of scanning the full
+ * `provideDynamicForm(...)` factory so `resolveWrappers` can look up
+ * auto-associations in O(1) per field instead of scanning the full
  * wrapper registry on every render.
  */
-export const WRAPPER_AUTO_ASSOCIATIONS = new InjectionToken<ReadonlyMap<string, readonly WrapperConfig[]>>('WRAPPER_AUTO_ASSOCIATIONS', {
+export const WRAPPER_AUTO_ASSOCIATIONS = new InjectionToken<WrapperAutoAssociations>('WRAPPER_AUTO_ASSOCIATIONS', {
   providedIn: 'root',
   factory: () => new Map(),
 });

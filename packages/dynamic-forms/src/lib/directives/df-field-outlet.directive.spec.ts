@@ -189,7 +189,7 @@ describe('DfFieldOutlet', () => {
     expect(TestLeafComponent.instances).toBe(1);
 
     // Swap in a new ResolvedField object pointing to the SAME component and
-    // SAME (reference-identical) wrappers. Memoed effectiveWrappers should
+    // SAME (reference-identical) wrappers. Memoed wrappers should
     // suppress the rebuild.
     const sameWrappers = initial.fieldDef.wrappers;
     const swapped: ResolvedField = {
