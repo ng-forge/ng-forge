@@ -116,6 +116,10 @@ export class DfFieldOutlet {
           environmentInjector: this.resolveEnvInjector(),
           injector: resolved.injector,
         });
+        // Reset the per-field push cache so the new fieldRef receives every input
+        // — particularly the required `key`, which would otherwise be skipped by
+        // the ref-diff check when the new field shares a key value with the old.
+        this.lastPushedInputs = undefined;
         this.pushRawInputs(this.fieldRef, this.rawInputs());
       },
     });

@@ -40,6 +40,16 @@ class TestLeafComponent {
   }
 }
 
+/** Component with a REQUIRED `key` input — used to regress NG0950 on re-render. */
+@Component({
+  selector: 'test-required-key',
+  template: `<span class="required-key" [attr.data-key]="key()">{{ key() }}</span>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class TestRequiredKeyComponent {
+  readonly key = input.required<string>();
+}
+
 @Component({
   selector: 'test-section',
   template: `<div class="section" [attr.data-title]="title()"><ng-container #fieldComponent></ng-container></div>`,
@@ -202,6 +212,41 @@ describe('DfFieldOutlet', () => {
     await flush();
 
     expect(TestLeafComponent.instances).toBe(1);
+  });
+
+  it('sets required inputs on the new fieldRef when the component class changes but input values repeat', async () => {
+    // Regresses an NG0950 seen during rapid config swaps: the new fieldRef was
+    // created but its required `key` input was skipped because the ref-identity
+    // cache in the outlet still held the previous rawInputs where `key` had the
+    // same string value. Host bindings then threw before setInput ran.
+    const envInjector = TestBed.inject(EnvironmentInjector);
+    fixture = TestBed.createComponent(OutletHostComponent);
+
+    const sharedKey = 'shared';
+    const initial = buildResolvedField({
+      key: sharedKey,
+      component: TestLeafComponent,
+      inputs: signal({ key: sharedKey, label: 'A' }),
+      injector: envInjector,
+    });
+    fixture.componentRef.setInput('field', initial);
+    fixture.detectChanges();
+    await flush();
+
+    // Swap to a DIFFERENT component class but keep `key` value identical.
+    const swapped: ResolvedField = buildResolvedField({
+      key: sharedKey,
+      component: TestRequiredKeyComponent,
+      inputs: signal({ key: sharedKey, label: 'A' }),
+      injector: envInjector,
+    });
+    fixture.componentRef.setInput('field', swapped);
+    fixture.detectChanges();
+    await flush();
+
+    const requiredKeyEl = fixture.nativeElement.querySelector('.required-key');
+    expect(requiredKeyEl).toBeTruthy();
+    expect(requiredKeyEl.getAttribute('data-key')).toBe(sharedKey);
   });
 
   it('destroys the field + wrappers when the host is destroyed (vcr.clear cascade)', async () => {
