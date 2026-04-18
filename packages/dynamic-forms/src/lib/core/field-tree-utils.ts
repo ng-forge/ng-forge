@@ -1,4 +1,4 @@
-import { Signal } from '@angular/core';
+import { InjectionToken, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 
 /**
@@ -49,24 +49,15 @@ export interface ReadonlyFieldTree<TValue = unknown> {
   readonly errors: Signal<readonly unknown[]>;
 }
 
-// Cache keyed on the FieldTree callable itself — each FieldTree instance is a
-// stable reference for the lifetime of its form, so one ReadonlyFieldTree per
-// FieldTree is enough. `pushInputs` on every mapper emission would otherwise
-// allocate a fresh view object even when the underlying tree is identical.
-const readonlyFieldCache = new WeakMap<FieldTree<unknown>, ReadonlyFieldTree<unknown>>();
-
 /**
  * Build a `ReadonlyFieldTree` by extracting the whitelisted read signals from a
  * Signal Forms `FieldTree`. Returns a fresh plain object — no casting, no proxying,
  * so consumers only see the narrow surface and Angular's `WritableSignal` capability
- * on `value` is hidden. Cached per FieldTree identity.
+ * on `value` is hidden.
  */
 export function toReadonlyFieldTree<TValue>(field: FieldTree<TValue>): ReadonlyFieldTree<TValue> {
-  const cached = readonlyFieldCache.get(field as FieldTree<unknown>);
-  if (cached) return cached as ReadonlyFieldTree<TValue>;
-
   const state = field();
-  const view: ReadonlyFieldTree<TValue> = {
+  return {
     value: state.value,
     valid: state.valid,
     invalid: state.invalid,
@@ -77,6 +68,41 @@ export function toReadonlyFieldTree<TValue>(field: FieldTree<TValue>): ReadonlyF
     hidden: state.hidden,
     errors: state.errors,
   };
-  readonlyFieldCache.set(field as FieldTree<unknown>, view as ReadonlyFieldTree<unknown>);
+}
+
+/**
+ * DI-scoped cache for `ReadonlyFieldTree` views, keyed on the source FieldTree
+ * identity. A fresh WeakMap per root injector keeps renders isolated under SSR —
+ * Angular creates a new root injector per request, so there's no shared state
+ * between server renders (same pattern as `COMPONENT_CACHE`).
+ *
+ * @internal
+ */
+export const READONLY_FIELD_TREE_CACHE = new InjectionToken<WeakMap<FieldTree<unknown>, ReadonlyFieldTree<unknown>>>(
+  'READONLY_FIELD_TREE_CACHE',
+  {
+    providedIn: 'root',
+    factory: () => new WeakMap(),
+  },
+);
+
+/**
+ * Cached variant of {@link toReadonlyFieldTree}. Each FieldTree instance is a
+ * stable reference for the lifetime of its form, so one `ReadonlyFieldTree`
+ * view per tree is enough. Callers on hot paths (`pushInputs` on every mapper
+ * emission) avoid re-allocating the nine-property view object.
+ *
+ * @internal
+ */
+export function toReadonlyFieldTreeCached<TValue>(
+  cache: WeakMap<FieldTree<unknown>, ReadonlyFieldTree<unknown>>,
+  field: FieldTree<TValue>,
+): ReadonlyFieldTree<TValue> {
+  const key = field as FieldTree<unknown>;
+  const cached = cache.get(key);
+  if (cached) return cached as ReadonlyFieldTree<TValue>;
+
+  const view = toReadonlyFieldTree(field);
+  cache.set(key, view as ReadonlyFieldTree<unknown>);
   return view;
 }

@@ -18,7 +18,7 @@ import { DEFAULT_WRAPPERS } from '../models/field-signal-context.token';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { LoadedWrapper, loadWrapperComponents, renderWrapperChain, setInputIfDeclared } from '../utils/wrapper-chain/wrapper-chain';
 import { resolveEffectiveWrappers } from '../utils/resolve-effective-wrappers/resolve-effective-wrappers';
-import { toReadonlyFieldTree } from '../core/field-tree-utils';
+import { READONLY_FIELD_TREE_CACHE, toReadonlyFieldTreeCached } from '../core/field-tree-utils';
 import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
 /**
@@ -73,6 +73,7 @@ export class DfFieldOutlet {
   private readonly wrapperAutoAssociations = inject(WRAPPER_AUTO_ASSOCIATIONS);
   private readonly defaultWrappersSignal = inject(DEFAULT_WRAPPERS, { optional: true });
   private readonly logger = inject(DynamicFormLogger);
+  private readonly readonlyFieldCache = inject(READONLY_FIELD_TREE_CACHE);
 
   private wrapperRefs: ComponentRef<unknown>[] = [];
   private fieldRef: ComponentRef<unknown> | undefined;
@@ -234,7 +235,9 @@ export class DfFieldOutlet {
     // A FieldTree is a callable (() => FieldState). We expose it to wrappers via a narrow
     // read-only view; raw FieldTree is still pushed to the innermost component for writes.
     const readonlyField =
-      fieldTreeCandidate && typeof fieldTreeCandidate === 'function' ? toReadonlyFieldTree(fieldTreeCandidate as never) : undefined;
+      fieldTreeCandidate && typeof fieldTreeCandidate === 'function'
+        ? toReadonlyFieldTreeCached(this.readonlyFieldCache, fieldTreeCandidate as never)
+        : undefined;
     const view = {
       ...(rawInputs as Record<string, unknown>),
       field: readonlyField,
