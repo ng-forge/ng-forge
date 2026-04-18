@@ -158,9 +158,11 @@ export class DfFieldOutlet {
     });
 
     this.destroyRef.onDestroy(() => {
-      // Destroy the fieldRef explicitly — if it was detached mid-rebuild when
-      // the outlet got destroyed, the vcr cascade never reaches it.
-      this.fieldRef?.destroy();
+      // Only destroy explicitly when the fieldRef is detached from any VCR —
+      // the controller's onDestroy calls `vcr.clear()` which cascades through
+      // attached refs. Double-destroy would be benign (Angular is idempotent)
+      // but relying on that is unnecessary when `fieldSlot` tells us plainly.
+      if (this.fieldRef && !this.fieldSlot) this.fieldRef.destroy();
       this.fieldRef = undefined;
       this.fieldSlot = undefined;
       this.lastPushedInputs = undefined;

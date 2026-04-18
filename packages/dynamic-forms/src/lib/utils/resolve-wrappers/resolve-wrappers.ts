@@ -26,19 +26,24 @@ export function isSameWrapperChain(a: readonly WrapperConfig[], b: readonly Wrap
 /**
  * Resolves the wrapper chain for a field.
  *
- * Merge order (outermost → innermost):
- * 1. Auto-associations — wrappers whose `types` array includes this field's type.
- *    Looked up from the pre-computed `WRAPPER_AUTO_ASSOCIATIONS` map that
- *    `provideDynamicForm(...)` builds at registration time.
- * 2. Form-level defaults — `FormConfig.defaultWrappers`
- * 3. Field-level — `FieldDef.wrappers` (if non-null)
+ * Merge order is **outermost → innermost**, most-global to most-specific:
+ *   1. Auto-associations — from `WRAPPER_AUTO_ASSOCIATIONS` (registration-time).
+ *   2. Form-level defaults — `FormConfig.defaultWrappers`.
+ *   3. Field-level — `FieldDef.wrappers` (if non-null).
  *
- * Semantics of `field.wrappers`:
- * - `undefined` — inherit (use auto-associations + defaults)
- * - `null` — explicit opt-out (empty chain; ignore auto and defaults)
- * - `readonly WrapperConfig[]` — **added** to the chain innermost;
- *   `[]` on a field does **not** opt out of defaults or auto-associations.
- *   Use `wrappers: null` to render bare.
+ * Rationale: auto-associations are "the library says this wrapper must be on
+ * every X", so they sit outside everything. Defaults are form-wide chrome.
+ * Field-level wrappers are the field's own concern and render closest to it.
+ *
+ * `field.wrappers`:
+ * - `undefined` — inherit (auto + defaults).
+ * - `null` — skip **all three** layers; render bare. This is blunt — there's
+ *   no per-layer opt-out today (e.g. skip auto but keep defaults). If you
+ *   need that, it's a feature request, not a workaround.
+ * - `[]` — **does not** opt out; auto + defaults still apply.
+ *
+ * A fresh array is allocated per call; downstream memoisation is via
+ * `isSameWrapperChain` on the consuming computed's `equal`, not here.
  */
 export function resolveWrappers(
   field: Pick<FieldDef<unknown>, 'type' | 'wrappers'>,

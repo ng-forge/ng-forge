@@ -93,10 +93,10 @@ export async function loadWrapperComponent(
 }
 
 /**
- * Load all wrapper component classes for the given configs. Wrappers whose
- * component fails to load are logged and silently dropped from the chain —
- * unlike field-type resolution we don't throw, because a missing decoration
- * is a degraded render, not a broken form.
+ * Load every wrapper for a chain, all-or-nothing. A single failed load
+ * aborts the whole chain (emits `[]`) so the field renders bare rather
+ * than in a partially-wrapped, visually-misleading state. Each failure
+ * is logged; field-type resolution still throws — this isn't silent.
  */
 export function loadWrapperComponents(
   configs: readonly WrapperConfig[],
@@ -119,12 +119,7 @@ export function loadWrapperComponents(
         }),
       ),
     ),
-  ).pipe(map((results) => results.filter(isLoadedWrapper)));
-}
-
-/** Typeguard for filtering nulls out of the `loadWrapperComponents` forkJoin result. */
-function isLoadedWrapper(value: LoadedWrapper | null): value is LoadedWrapper {
-  return value !== null;
+  ).pipe(map((results) => (results.some((r) => r === null) ? [] : (results as LoadedWrapper[]))));
 }
 
 /**
@@ -183,7 +178,9 @@ function renderStep(
   refs.push(ref);
 
   for (const [key, value] of Object.entries(wrapper.config)) {
-    if (key === 'type') continue;
+    // `type` is the registry discriminant; `fieldInputs` is set explicitly
+    // below. Don't let a stray config key override either.
+    if (key === 'type' || key === 'fieldInputs') continue;
     setInputIfDeclared(ref, key, value);
   }
 
@@ -193,24 +190,36 @@ function renderStep(
 
   ref.changeDetectorRef.detectChanges();
 
-  // `viewChild.required('fieldComponent', …)` throws NG0951 when the query
-  // resolves to nothing (e.g. wrapper forgot the #fieldComponent ref or put it
-  // inside an @if/@defer). Catch it and funnel into the same actionable log.
-  let inner: ViewContainerRef | undefined;
-  try {
-    inner = (ref.instance as FieldWrapperContract).fieldComponent?.();
-  } catch {
-    inner = undefined;
-  }
-
+  const inner = resolveInnerSlot(ref);
   if (!inner) {
     options.logger.error(
       `Wrapper component for type '${wrapper.config.type}' does not provide a 'fieldComponent' ViewContainerRef. ` +
         `Ensure the wrapper component has a viewChild('fieldComponent', { read: ViewContainerRef }) query ` +
         `and that #fieldComponent is not inside a conditional (@if, @defer).`,
     );
+    // Unwind: destroy every wrapper built so far, including this one, so the
+    // caller doesn't end up with a partial chain left in the DOM.
+    while (refs.length) refs.pop()!.destroy();
     return;
   }
 
   renderStep(inner, rest, options, refs);
+}
+
+/**
+ * Read a wrapper's `#fieldComponent` ViewContainerRef, tolerating the NG0951
+ * thrown by `viewChild.required` when the query is absent or inside a
+ * conditional. Any other error (e.g. an unrelated throw from the wrapper's
+ * signals) propagates up so the subscribe can log it with a full stack.
+ */
+function resolveInnerSlot(ref: ComponentRef<unknown>): ViewContainerRef | undefined {
+  const contract = ref.instance as FieldWrapperContract;
+  try {
+    return contract.fieldComponent?.();
+  } catch (err) {
+    // NG0951 (REQUIRED_QUERY_NO_VALUE) — signal viewChild.required throws when
+    // the query couldn't resolve. Angular uses a negative code here.
+    if ((err as { code?: number }).code === -951) return undefined;
+    throw err;
+  }
 }

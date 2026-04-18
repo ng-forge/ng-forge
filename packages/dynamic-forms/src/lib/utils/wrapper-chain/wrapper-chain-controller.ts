@@ -28,16 +28,16 @@ export interface WrapperChainControllerOptions {
    */
   readonly gate?: Signal<boolean>;
   /**
-   * Optional mapper-outputs signal. When present, the controller pushes it to each
-   * wrapper's `fieldInputs` input at render time AND on every subsequent change.
-   * Containers render a children template, not a field, so they don't need this.
+   * Optional mapper-outputs signal. When present, the controller pushes it to
+   * each wrapper's `fieldInputs` input at render time AND on every subsequent
+   * change. Must always produce a value once subscribed — don't emit undefined.
+   * Containers render a children template (no field), so they omit this.
    */
-  readonly fieldInputs?: Signal<WrapperFieldInputs | undefined>;
+  readonly fieldInputs?: Signal<WrapperFieldInputs>;
   /**
    * Optional extra rebuild trigger. `DfFieldOutlet` passes the innermost
    * component class so that a reconciled field with the same wrapper chain
-   * but a different `component` forces a rebuild of the innermost slot.
-   * Compared by identity.
+   * but a different `component` forces a rebuild. Compared by identity.
    */
   readonly rebuildKey?: Signal<unknown>;
   /**
@@ -46,13 +46,12 @@ export interface WrapperChainControllerOptions {
    */
   readonly renderInnermost: (slot: ViewContainerRef) => void;
   /**
-   * Called right before the mounted chain is cleared on a structural change
-   * (wrappers or `rebuildKey` changed). Receives the NEXT state so the caller
-   * can detach views it wants to preserve — e.g. `DfFieldOutlet` detaches the
-   * innermost field's hostView so that focus / caret / scroll survive when
-   * only the wrapper chain changes. Not invoked on the pre-first-render path.
+   * Called right before the mounted chain is cleared on a structural change.
+   * Lets the caller detach views it wants to preserve — e.g. `DfFieldOutlet`
+   * detaches the innermost field's hostView so focus / caret / scroll survive
+   * when only the wrapper chain changes. Not invoked on the pre-first-render path.
    */
-  readonly beforeRebuild?: (next: MountedChain) => void;
+  readonly beforeRebuild?: () => void;
 }
 
 /**
@@ -71,7 +70,17 @@ export function createWrapperChainController(opts: WrapperChainControllerOptions
   buildEmissionStream(state, deps)
     .pipe(takeUntilDestroyed(deps.destroyRef))
     .subscribe((emission) => {
-      refs = applyEmission(emission, { opts, deps, mounted, refs });
+      // Wrap the whole render path — a throw here (bad wrapper template,
+      // caller's renderInnermost blew up, etc.) would otherwise terminate
+      // the subscription and silently freeze subsequent chain updates.
+      try {
+        refs = applyEmission(emission, { opts, deps, mounted, refs });
+      } catch (err) {
+        deps.logger.error('Wrapper chain render failed; tearing down partial state.', err);
+        opts.vcr().clear();
+        refs = [];
+        mounted.value = null;
+      }
     });
 
   pushFieldInputsOnChange(opts, () => refs);
@@ -146,7 +155,8 @@ function resolveLoadedWrappers(state: ChainState, deps: ChainDeps): Observable<C
   }
 
   if (state.wrappers.every((w) => deps.cache.has(w.type))) {
-    // Sync fast-path — every wrapper already resolved.
+    // Sync fast-path — the cache only holds SUCCESSFUL loads, so "every cached"
+    // means every wrapper was previously resolved cleanly. No need to re-log.
     const loaded = state.wrappers.map((config) => ({ config, component: deps.cache.get(config.type)! }) satisfies LoadedWrapper);
     return of({ state, loaded });
   }
@@ -178,7 +188,7 @@ function applyEmission({ state, loaded }: ChainEmission, ctx: EmissionApplyConte
   // `beforeRebuild` gives the caller a chance to detach views it wants to
   // preserve (e.g. the innermost field when only wrappers changed).
   if (structurallyChanged && mounted.value !== null) {
-    opts.beforeRebuild?.({ wrappers: state.wrappers, rebuildKey: state.rebuildKey });
+    opts.beforeRebuild?.();
     vcr.clear();
     mounted.value = null;
   }

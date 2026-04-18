@@ -330,13 +330,13 @@ describe('createWrapperChainController', () => {
     f.destroy();
   });
 
-  it('calls beforeRebuild with the NEXT state right before clearing', async () => {
+  it('calls beforeRebuild right before clearing on a structural change', async () => {
     const registry = new Map<string, WrapperTypeDefinition>([
       ['x', def('x', () => TestWrapX)],
       ['y', def('y', () => TestWrapY)],
     ]);
     const cache = new Map<string, Type<unknown>>();
-    const beforeRebuildStates: Array<{ rebuildKey: unknown; wrapperTypes: string[] }> = [];
+    let beforeRebuildCount = 0;
     const wrappers = signal<readonly WrapperConfig[]>([{ type: 'x' } as WrapperConfig]);
     const rebuildKey = signal<unknown>(TestLeafA);
     const gate = signal(true);
@@ -364,21 +364,18 @@ describe('createWrapperChainController', () => {
         renderInnermost: (s) => {
           s.createComponent(rebuildKey() as Type<unknown>, { environmentInjector: envInjector, injector });
         },
-        beforeRebuild: (next) => {
-          beforeRebuildStates.push({
-            rebuildKey: next.rebuildKey,
-            wrapperTypes: next.wrappers.map((w) => w.type),
-          });
+        beforeRebuild: () => {
+          beforeRebuildCount++;
         },
       });
     });
     await flush();
-    expect(beforeRebuildStates.length).toBe(0); // first mount doesn't fire beforeRebuild
+    expect(beforeRebuildCount).toBe(0); // first mount doesn't fire beforeRebuild
 
     wrappers.set([{ type: 'y' } as WrapperConfig]);
     await flush();
 
-    expect(beforeRebuildStates).toEqual([{ rebuildKey: TestLeafA, wrapperTypes: ['y'] }]);
+    expect(beforeRebuildCount).toBe(1);
     fixture.destroy();
   });
 

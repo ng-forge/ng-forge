@@ -151,7 +151,7 @@ describe('wrapper-chain', () => {
       expect(result.map((r) => r.config)).toEqual(configs);
     });
 
-    it('drops unregistered types and logs via the injected logger', async () => {
+    it('aborts the whole chain (emits []) when any wrapper fails to load — logs once per failure', async () => {
       const registry = new Map<string, WrapperTypeDefinition>([['a', def('a', () => TestWrapperA)]]);
       const cache = new Map<string, Type<unknown>>();
       const logger = silentLogger();
@@ -160,7 +160,9 @@ describe('wrapper-chain', () => {
         loadWrapperComponents([{ type: 'a' } as WrapperConfig, { type: 'missing' } as WrapperConfig], registry, cache, logger),
       );
 
-      expect(result.map((r) => r.config.type)).toEqual(['a']);
+      // Fail-closed: even the healthy `a` wrapper is dropped so the field
+      // doesn't render in a partially-wrapped, visually-misleading state.
+      expect(result).toEqual([]);
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining("'missing'"));
       expect(logger.error).toHaveBeenCalledTimes(1);
     });
