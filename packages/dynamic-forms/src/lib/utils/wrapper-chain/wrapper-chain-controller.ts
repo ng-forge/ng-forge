@@ -1,7 +1,7 @@
 import { ComponentRef, computed, DestroyRef, EnvironmentInjector, inject, Injector, Signal, ViewContainerRef } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { of, switchMap } from 'rxjs';
+import { map, Observable, of, switchMap } from 'rxjs';
 import { WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY, WrapperConfig } from '../../models/wrapper-type';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
@@ -74,6 +74,13 @@ export function createWrapperChainController(opts: WrapperChainControllerOptions
   const destroyRef = inject(DestroyRef);
 
   let refs: ComponentRef<unknown>[] = [];
+  /**
+   * Tracks what was last mounted so we can distinguish a genuine structural
+   * change from a transient `gate` flicker. `null` means "nothing currently
+   * mounted" — either pre-first-render or after a real tear-down.
+   */
+  let lastMountedChain: { wrappers: readonly WrapperConfig[]; rebuildKey: unknown } | null = null;
+
   const resolveVcr = (): ViewContainerRef => (typeof opts.vcr === 'function' ? opts.vcr() : opts.vcr);
   const resolveEnvInjector = (): EnvironmentInjector =>
     typeof opts.environmentInjector === 'function' ? opts.environmentInjector() : opts.environmentInjector;
@@ -97,23 +104,49 @@ export function createWrapperChainController(opts: WrapperChainControllerOptions
 
   toObservable(chainKey)
     .pipe(
-      switchMap(({ open, wrappers }) => {
-        if (!open) return of<readonly LoadedWrapper[] | null>(null);
-        if (wrappers.every((w) => cache.has(w.type))) {
+      switchMap((state) => {
+        if (!state.open) return of({ state, loaded: null as readonly LoadedWrapper[] | null });
+        if (state.wrappers.every((w) => cache.has(w.type))) {
           // Sync fast-path — every wrapper already resolved. Avoid the microtask hop.
-          return of(wrappers.map((config) => ({ config, component: cache.get(config.type)! }) satisfies LoadedWrapper));
+          return of({
+            state,
+            loaded: state.wrappers.map(
+              (config) => ({ config, component: cache.get(config.type)! }) satisfies LoadedWrapper,
+            ) as readonly LoadedWrapper[],
+          });
         }
-        return loadWrapperComponents(wrappers, registry, cache, logger);
+        return loadWrapperComponents(state.wrappers, registry, cache, logger).pipe(
+          map((loaded) => ({ state, loaded: loaded as readonly LoadedWrapper[] | null })),
+        ) as Observable<{ state: typeof state; loaded: readonly LoadedWrapper[] | null }>;
       }),
       takeUntilDestroyed(destroyRef),
     )
-    .subscribe((loaded) => {
+    .subscribe(({ state, loaded }) => {
       const vcr = resolveVcr();
-      // Clear the previous chain — Angular cascades destroy through every nested
+      const structurallyChanged =
+        lastMountedChain === null ||
+        lastMountedChain.rebuildKey !== state.rebuildKey ||
+        !isSameWrapperChain(lastMountedChain.wrappers, state.wrappers);
+
+      // A gate-only flicker after first mount — keep the chain alive so the
+      // user's focus / caret / scroll state survives. The caller's rawInputs
+      // effect continues pushing live mapper outputs through.
+      if (!structurallyChanged && !state.open) return;
+
+      // Structurally different from what's mounted (or mounted-but-we're-about-to-
+      // remount) — tear down first. Angular cascades destroy through every nested
       // ComponentRef, so walking `refs` manually would be redundant work.
-      vcr.clear();
-      refs = [];
-      if (loaded === null) return;
+      if (structurallyChanged && lastMountedChain !== null) {
+        vcr.clear();
+        refs = [];
+        lastMountedChain = null;
+      }
+
+      if (!state.open || loaded === null) return;
+
+      // Same structure + already mounted — nothing to do (idempotent re-emission).
+      if (lastMountedChain !== null) return;
+
       refs = renderWrapperChain({
         outerContainer: vcr,
         loadedWrappers: loaded,
@@ -123,6 +156,7 @@ export function createWrapperChainController(opts: WrapperChainControllerOptions
         fieldInputs: opts.fieldInputs?.(),
         renderInnermost: opts.renderInnermost,
       });
+      lastMountedChain = { wrappers: state.wrappers, rebuildKey: state.rebuildKey };
     });
 
   // When fieldInputs changes but the chain hasn't rebuilt, push the new bag to each

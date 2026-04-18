@@ -42,11 +42,10 @@ import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
  *
  * Rendering is gated by `field.renderReady()` — the directive waits until
  * the mapper produces the required inputs before instantiating the component.
- *
- * **Known limitation (renderReady flicker):** if `renderReady` goes
- * `true → false → true` in quick succession (e.g. a mapper transiently
- * loses its `field` input) the outlet tears down and rebuilds the chain,
- * discarding input focus / caret position in the field component.
+ * Once rendered, a transient `renderReady → false` does *not* tear the chain
+ * down; the controller keeps the mounted components alive and ignores the
+ * flicker. Only a structural change (wrappers or component class) triggers
+ * a rebuild.
  *
  * @example
  * ```html

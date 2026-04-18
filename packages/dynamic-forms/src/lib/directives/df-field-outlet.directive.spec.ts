@@ -249,6 +249,34 @@ describe('DfFieldOutlet', () => {
     expect(requiredKeyEl.getAttribute('data-key')).toBe(sharedKey);
   });
 
+  it('survives a renderReady flicker without tearing down the mounted component', async () => {
+    // Regresses the "renderReady flicker" limitation: when the mapper
+    // transiently flips renderReady `true → false → true` (e.g. during a
+    // form-level reconfiguration) the outlet used to destroy and recreate
+    // the field component, discarding focus / caret state. The controller
+    // now keeps the mounted chain alive on gate flickers.
+    const envInjector = TestBed.inject(EnvironmentInjector);
+    fixture = TestBed.createComponent(OutletHostComponent);
+    const readySignal = signal(true);
+    fixture.componentRef.setInput('field', buildResolvedField({ renderReady: readySignal, injector: envInjector }));
+    fixture.detectChanges();
+    await flush();
+
+    expect(TestLeafComponent.instances).toBe(1);
+
+    // Flicker: false, then back to true, in quick succession.
+    readySignal.set(false);
+    fixture.detectChanges();
+    await flush();
+    readySignal.set(true);
+    fixture.detectChanges();
+    await flush();
+
+    // No rebuild — same component instance, still mounted.
+    expect(TestLeafComponent.instances).toBe(1);
+    expect(fixture.nativeElement.querySelector('.leaf')).toBeTruthy();
+  });
+
   it('destroys the field + wrappers when the host is destroyed (vcr.clear cascade)', async () => {
     const sectionDef: WrapperTypeDefinition = {
       wrapperName: 'section',
