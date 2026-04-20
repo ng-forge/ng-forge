@@ -28,7 +28,8 @@ type TestFormConfig = {
     | { type: 'group'; key: string; label: string; fields: any[] }
     | { type: 'page'; key: string; label?: string; fields: any[] }
     | { type: 'container'; key: string; fields: any[]; wrappers: any[] }
-    | { type: 'array'; key: string; fields: any[] }
+    | { type: 'array'; key: string; fields: any[]; wrappers?: any[] }
+    | { type: 'array'; key: string; template: any; value?: any[]; wrappers?: any[] }
   >;
 };
 
@@ -2479,6 +2480,77 @@ describe('DynamicFormComponent', () => {
       const wrapperEl = fixture.nativeElement.querySelector('[data-wrapper="array-ctx"]');
       expect(wrapperEl).toBeTruthy();
       expect(wrapperEl.getAttribute('data-array-key')).toBe('items');
+    });
+
+    it('should render parent + child wrappers on array items when an item is added', async () => {
+      const config = {
+        fields: [
+          {
+            type: 'array',
+            key: 'items',
+            wrappers: [{ type: 'test-parent' }],
+            fields: [
+              {
+                key: 'itemContainer',
+                type: 'container',
+                fields: [{ key: 'name', type: 'input', label: 'Name' }],
+                wrappers: [{ type: 'test-child' }],
+              },
+            ],
+          },
+        ],
+      } as TestFormConfig;
+
+      // Start with one item so the array renders
+      const { component, fixture } = createComponent(config, { items: [{ name: 'first' }] });
+      await waitForDynamicComponents(fixture);
+
+      // The parent wrapper wraps the array field itself; the child wrapper
+      // wraps the container inside each array item.
+      const parentEl = fixture.nativeElement.querySelector('[data-wrapper="parent"]');
+      const childEl = fixture.nativeElement.querySelector('[data-wrapper="child"]');
+      expect(parentEl).toBeTruthy();
+      expect(childEl).toBeTruthy();
+      expect(childEl.getAttribute('data-has-parent')).toBe('true');
+      expect(parentEl.contains(childEl)).toBe(true);
+
+      // Add a second item via value update
+      component.value.set({ items: [{ name: 'first' }, { name: 'second' }] } as any);
+      await waitForDynamicComponents(fixture);
+
+      // Both items should have child wrappers, still nested inside the parent
+      const childEls = fixture.nativeElement.querySelectorAll('[data-wrapper="child"]');
+      expect(childEls.length).toBe(2);
+      for (const el of childEls) {
+        expect(el.getAttribute('data-has-parent')).toBe('true');
+        expect(parentEl.contains(el)).toBe(true);
+      }
+    });
+
+    it('should render a css wrapper on a simplified array field (template API)', async () => {
+      const config = {
+        fields: [
+          {
+            type: 'array',
+            key: 'tags',
+            wrappers: [{ type: 'css', cssClasses: 'array-wrapper-css-test' }],
+            template: { key: 'value', type: 'input', label: 'Tag' },
+            value: ['angular'],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // The css wrapper should be present around the array field
+      const cssWrapper = fixture.nativeElement.querySelector('.array-wrapper-css-test');
+      expect(cssWrapper).toBeTruthy();
+
+      // The array field should be inside the css wrapper
+      const arrayEl = fixture.nativeElement.querySelector('[data-testid="tags"]');
+      expect(arrayEl).toBeTruthy();
+      expect(cssWrapper.contains(arrayEl)).toBe(true);
     });
   });
 

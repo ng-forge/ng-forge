@@ -561,6 +561,65 @@ describe('normalizeSimplifiedArrays', () => {
     });
   });
 
+  describe('wrapper preservation', () => {
+    it('should preserve wrappers on the expanded array field', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: primitiveTemplate,
+        wrappers: [{ type: 'css', cssClasses: 'my-class' }],
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.wrappers).toEqual([{ type: 'css', cssClasses: 'my-class' }]);
+    });
+
+    it('should preserve skipAutoWrappers on the expanded array field', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: primitiveTemplate,
+        skipAutoWrappers: true,
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.skipAutoWrappers).toBe(true);
+    });
+
+    it('should preserve skipDefaultWrappers on the expanded array field', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: primitiveTemplate,
+        skipDefaultWrappers: true,
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.skipDefaultWrappers).toBe(true);
+    });
+
+    it('should not include wrapper properties when not specified', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: primitiveTemplate,
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField).not.toHaveProperty('wrappers');
+      expect(arrayField).not.toHaveProperty('skipAutoWrappers');
+      expect(arrayField).not.toHaveProperty('skipDefaultWrappers');
+    });
+  });
+
   describe('idempotency', () => {
     it('should produce the same result when called on already-normalized output', () => {
       const input = fields({
