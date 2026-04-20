@@ -140,15 +140,20 @@ export class DfFieldOutlet {
         // Different component class — discard the old ref and create fresh.
         // Merge field + element injectors so the field can inject ancestor
         // wrappers AND form-context tokens (ARRAY_CONTEXT etc.).
+        // Clear state before createComponent — if it throws (bad provider,
+        // invalid class) we don't want to leak a reference to a destroyed ref
+        // that the same-component branch would later try to re-insert.
         this.focusSnapshot = undefined;
-        this.fieldRef?.destroy();
+        this.lastPushedInputs = undefined;
+        const previousRef = this.fieldRef;
+        this.fieldRef = undefined;
+        this.fieldSlot = undefined;
+        previousRef?.destroy();
         this.fieldRef = slot.createComponent(resolved.component, {
           environmentInjector: this.fieldEnvInjector(),
           injector: createWrapperAwareInjector(resolved.injector, slot.injector),
         });
         this.fieldSlot = slot;
-        // Reset per-field push cache so a shared `key` value is still pushed.
-        this.lastPushedInputs = undefined;
         this.pushRawInputs(this.fieldRef, this.rawInputs());
       },
     });

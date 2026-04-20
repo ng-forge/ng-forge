@@ -232,20 +232,18 @@ function renderStep(
 }
 
 /**
- * Read a wrapper's `#fieldComponent` ViewContainerRef, tolerating the NG0951
- * thrown by `viewChild.required` when the query is absent or inside a
- * conditional. Any other error (e.g. an unrelated throw from the wrapper's
- * signals) propagates up so the subscribe can log it with a full stack.
+ * Read a wrapper's `#fieldComponent` ViewContainerRef. `viewChild.required`
+ * throws when the query can't resolve (missing template ref, or ref sitting
+ * inside `@if` / `@defer` / `@for`); any throw from this pure signal read
+ * means the slot is unusable, so we return undefined and let the caller log
+ * the actionable "wrapper missing fieldComponent" message.
  */
 function resolveInnerSlot(ref: ComponentRef<unknown>): ViewContainerRef | undefined {
   const contract = ref.instance as FieldWrapperContract;
   try {
     return contract.fieldComponent?.();
-  } catch (err) {
-    // NG0951 (REQUIRED_QUERY_NO_VALUE) — signal viewChild.required throws when
-    // the query couldn't resolve. Angular uses a negative code here.
-    if ((err as { code?: number }).code === -951) return undefined;
-    throw err;
+  } catch {
+    return undefined;
   }
 }
 
