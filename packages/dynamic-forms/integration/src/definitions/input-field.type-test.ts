@@ -444,6 +444,17 @@ describe('InputField - Nullable widening', () => {
     // Value may be string | number | undefined depending on discriminated branch,
     // but never null.
     expectTypeOf<ValueType>().not.toEqualTypeOf<string | number | null | undefined>();
+
+    // Literal assignment must be rejected at compile time.
+    // @ts-expect-error - null is not assignable to value when nullable is absent
+    const field: InputField = {
+      type: 'input',
+      key: 'name',
+      props: { type: 'text' },
+      value: null,
+    };
+    // Reference `field` so TS doesn't dead-code the assertion.
+    expectTypeOf(field).not.toBeAny();
   });
 
   it('should keep required orthogonal from nullable', () => {

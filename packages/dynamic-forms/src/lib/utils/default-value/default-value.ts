@@ -91,16 +91,19 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
     return groupDefaults;
   }
 
-  const isNullable = (field as { nullable?: boolean }).nullable === true;
+  // Narrow once: `field` is FieldDef<unknown>, but value/nullable are defined on BaseValueField.
+  // This cast avoids per-access `as` and documents what we're reading.
+  const valueField = field as FieldDef<unknown> & { value?: unknown; nullable?: boolean };
+  const isNullable = valueField.nullable === true;
 
   // Use explicit value if provided (including null when nullable)
   if ('value' in field) {
-    if (field.value !== null && field.value !== undefined) {
-      return field.value;
+    if (valueField.value !== null && valueField.value !== undefined) {
+      return valueField.value;
     }
 
     // Preserve explicit null for nullable fields
-    if (field.value === null && isNullable) {
+    if (valueField.value === null && isNullable) {
       return null;
     }
 

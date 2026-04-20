@@ -41,7 +41,10 @@ export interface BaseValueField<TProps, TValue, TMeta extends FieldMeta = FieldM
 export function isValueField<TProps, TMeta extends FieldMeta = FieldMeta>(
   field: FieldDef<TProps, TMeta>,
 ): field is BaseValueField<TProps, ValueType, TMeta, boolean> {
-  return 'value' in field;
+  // `nullable: true` without an explicit `value` is still a value-bearing declaration:
+  // the field resolves to `null` at runtime. Treating it as a value field keeps
+  // downstream narrowing consistent with getFieldDefaultValue's behavior.
+  return 'value' in field || 'nullable' in field;
 }
 
 type ExcludedKeys =

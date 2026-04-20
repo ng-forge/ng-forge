@@ -297,6 +297,22 @@ describe('mapSchemaToFields', () => {
 
     const result = mapSchemaToFields(schema, []);
     expect(result.fields[0].nullable).toBe(true);
+    // Downstream type mapping must still resolve the non-null type to a real field type
+    expect(result.fields[0].type).toBe('input');
+  });
+
+  it('should map OpenAPI 3.1 type:[number, null] to a numeric input field', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        age: { type: ['integer', 'null'] },
+      },
+    } as unknown as SchemaObject;
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].nullable).toBe(true);
+    expect(result.fields[0].type).toBe('input');
+    expect(result.fields[0].props?.['type']).toBe('number');
   });
 
   it('should preserve null as default value for nullable fields', () => {
