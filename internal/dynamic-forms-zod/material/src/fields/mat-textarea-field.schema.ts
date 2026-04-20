@@ -22,10 +22,11 @@ export const MatTextareaFieldSchema = BaseFieldDefSchema.merge(FieldWithValidati
    */
   type: z.literal('textarea'),
 
+  nullable: z.boolean().optional(),
   /**
    * Initial value for the textarea.
    */
-  value: z.string().optional(),
+  value: z.string().nullable().optional(),
 
   /**
    * Placeholder text (can also be in props).

@@ -378,4 +378,39 @@ describe('MatInputFieldSchema', () => {
     const result = MatInputFieldSchema.safeParse(field);
     expect(result.success).toBe(true);
   });
+
+  it('should accept nullable:true with value:null', () => {
+    const field = {
+      key: 'middleName',
+      type: 'input',
+      label: 'Middle Name',
+      nullable: true,
+      value: null,
+    };
+    const result = MatInputFieldSchema.safeParse(field);
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept nullable:true without an explicit value', () => {
+    const field = {
+      key: 'middleName',
+      type: 'input',
+      label: 'Middle Name',
+      nullable: true,
+    };
+    const result = MatInputFieldSchema.safeParse(field);
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept nullable:true alongside required:true (orthogonal)', () => {
+    const field = {
+      key: 'middleName',
+      type: 'input',
+      label: 'Middle Name',
+      nullable: true,
+      required: true,
+    };
+    const result = MatInputFieldSchema.safeParse(field);
+    expect(result.success).toBe(true);
+  });
 });

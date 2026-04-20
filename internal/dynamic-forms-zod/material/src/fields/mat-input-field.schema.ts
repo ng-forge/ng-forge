@@ -22,10 +22,11 @@ export const MatInputFieldSchema = BaseFieldDefSchema.merge(FieldWithValidationS
    */
   type: z.literal('input'),
 
+  nullable: z.boolean().optional(),
   /**
    * Initial value for the input.
    */
-  value: z.string().optional(),
+  value: z.string().nullable().optional(),
 
   /**
    * Placeholder text (can also be in props).

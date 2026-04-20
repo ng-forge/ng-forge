@@ -22,7 +22,8 @@ const PrimeValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
 // Input field
 export const PrimeInputFieldSchema = PrimeValueFieldBase.extend({
   type: z.literal('input'),
-  value: z.string().optional(),
+  nullable: z.boolean().optional(),
+  value: z.string().nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   props: PrimeInputPropsSchema.optional(),
 });
@@ -38,7 +39,8 @@ export const PrimeCheckboxFieldSchema = PrimeValueFieldBase.extend({
 // Radio field
 export const PrimeRadioFieldSchema = PrimeValueFieldBase.extend({
   type: z.literal('radio'),
-  value: z.unknown().optional(),
+  nullable: z.boolean().optional(),
+  value: z.unknown().nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   options: FieldOptionsSchema,
   props: PrimeRadioPropsSchema.optional(),
@@ -47,7 +49,8 @@ export const PrimeRadioFieldSchema = PrimeValueFieldBase.extend({
 // Select field
 export const PrimeSelectFieldSchema = PrimeValueFieldBase.extend({
   type: z.literal('select'),
-  value: z.unknown().optional(),
+  nullable: z.boolean().optional(),
+  value: z.unknown().nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   options: FieldOptionsSchema,
   props: PrimeSelectPropsSchema.optional(),
@@ -56,7 +59,8 @@ export const PrimeSelectFieldSchema = PrimeValueFieldBase.extend({
 // Multi-checkbox field
 export const PrimeMultiCheckboxFieldSchema = PrimeValueFieldBase.extend({
   type: z.literal('multi-checkbox'),
-  value: z.array(z.unknown()).optional(),
+  nullable: z.boolean().optional(),
+  value: z.array(z.unknown()).nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   options: FieldOptionsSchema,
   props: PrimeMultiCheckboxPropsSchema.optional(),
@@ -65,6 +69,7 @@ export const PrimeMultiCheckboxFieldSchema = PrimeValueFieldBase.extend({
 // Datepicker field
 export const PrimeDatepickerFieldSchema = PrimeValueFieldBase.extend({
   type: z.literal('datepicker'),
+  nullable: z.boolean().optional(),
   value: z.union([z.string(), z.null()]).optional(),
   minDate: z.union([z.string(), z.null()]).optional(),
   maxDate: z.union([z.string(), z.null()]).optional(),
@@ -76,7 +81,8 @@ export const PrimeDatepickerFieldSchema = PrimeValueFieldBase.extend({
 // Textarea field
 export const PrimeTextareaFieldSchema = PrimeValueFieldBase.extend({
   type: z.literal('textarea'),
-  value: z.string().optional(),
+  nullable: z.boolean().optional(),
+  value: z.string().nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   props: PrimeTextareaPropsSchema.optional(),
 });
@@ -84,7 +90,8 @@ export const PrimeTextareaFieldSchema = PrimeValueFieldBase.extend({
 // Slider field
 export const PrimeSliderFieldSchema = PrimeValueFieldBase.extend({
   type: z.literal('slider'),
-  value: z.number().optional(),
+  nullable: z.boolean().optional(),
+  value: z.number().nullable().optional(),
   minValue: z.number().optional(),
   maxValue: z.number().optional(),
   step: z.number().positive().optional(),

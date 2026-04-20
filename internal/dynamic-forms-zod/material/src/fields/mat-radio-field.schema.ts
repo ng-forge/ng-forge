@@ -24,10 +24,11 @@ export const MatRadioFieldSchema = BaseFieldDefSchema.merge(FieldWithValidationS
    */
   type: z.literal('radio'),
 
+  nullable: z.boolean().optional(),
   /**
    * Initial selected value.
    */
-  value: z.unknown().optional(),
+  value: z.unknown().nullable().optional(),
 
   /**
    * Placeholder/helper text.

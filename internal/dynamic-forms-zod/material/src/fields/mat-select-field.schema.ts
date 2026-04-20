@@ -24,11 +24,12 @@ export const MatSelectFieldSchema = BaseFieldDefSchema.merge(FieldWithValidation
    */
   type: z.literal('select'),
 
+  nullable: z.boolean().optional(),
   /**
    * Initial value for the select.
    * Can be single value or array if multiple is enabled.
    */
-  value: z.unknown().optional(),
+  value: z.unknown().nullable().optional(),
 
   /**
    * Placeholder text (can also be in props).

@@ -25,10 +25,11 @@ export const MatSliderFieldSchema = BaseFieldDefSchema.merge(FieldWithValidation
    */
   type: z.literal('slider'),
 
+  nullable: z.boolean().optional(),
   /**
    * Initial slider value.
    */
-  value: z.number().optional(),
+  value: z.number().nullable().optional(),
 
   /**
    * Minimum slider value.

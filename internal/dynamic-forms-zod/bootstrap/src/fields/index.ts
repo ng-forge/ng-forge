@@ -23,7 +23,8 @@ const BsValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
 // Input field
 export const BsInputFieldSchema = BsValueFieldBase.extend({
   type: z.literal('input'),
-  value: z.string().optional(),
+  nullable: z.boolean().optional(),
+  value: z.string().nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   props: BsInputPropsSchema.optional(),
 });
@@ -31,7 +32,8 @@ export const BsInputFieldSchema = BsValueFieldBase.extend({
 // Textarea field
 export const BsTextareaFieldSchema = BsValueFieldBase.extend({
   type: z.literal('textarea'),
-  value: z.string().optional(),
+  nullable: z.boolean().optional(),
+  value: z.string().nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   props: BsTextareaPropsSchema.optional(),
 });
@@ -39,7 +41,8 @@ export const BsTextareaFieldSchema = BsValueFieldBase.extend({
 // Select field
 export const BsSelectFieldSchema = BsValueFieldBase.extend({
   type: z.literal('select'),
-  value: z.string().optional(), // Bootstrap select only supports strings
+  nullable: z.boolean().optional(),
+  value: z.string().nullable().optional(), // Bootstrap select only supports strings
   placeholder: DynamicTextSchema.optional(),
   options: FieldOptionsSchema,
   props: BsSelectPropsSchema.optional(),
@@ -56,7 +59,8 @@ export const BsCheckboxFieldSchema = BsValueFieldBase.extend({
 // Radio field
 export const BsRadioFieldSchema = BsValueFieldBase.extend({
   type: z.literal('radio'),
-  value: z.unknown().optional(),
+  nullable: z.boolean().optional(),
+  value: z.unknown().nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   options: FieldOptionsSchema,
   props: BsRadioPropsSchema.optional(),
@@ -65,7 +69,8 @@ export const BsRadioFieldSchema = BsValueFieldBase.extend({
 // Multi-checkbox field
 export const BsMultiCheckboxFieldSchema = BsValueFieldBase.extend({
   type: z.literal('multi-checkbox'),
-  value: z.array(z.unknown()).optional(),
+  nullable: z.boolean().optional(),
+  value: z.array(z.unknown()).nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   options: FieldOptionsSchema,
   props: BsMultiCheckboxPropsSchema.optional(),
@@ -82,6 +87,7 @@ export const BsToggleFieldSchema = BsValueFieldBase.extend({
 // Datepicker field
 export const BsDatepickerFieldSchema = BsValueFieldBase.extend({
   type: z.literal('datepicker'),
+  nullable: z.boolean().optional(),
   value: z.union([z.string(), z.null()]).optional(),
   minDate: z.union([z.string(), z.null()]).optional(),
   maxDate: z.union([z.string(), z.null()]).optional(),
@@ -93,7 +99,8 @@ export const BsDatepickerFieldSchema = BsValueFieldBase.extend({
 // Slider field
 export const BsSliderFieldSchema = BsValueFieldBase.extend({
   type: z.literal('slider'),
-  value: z.number().optional(),
+  nullable: z.boolean().optional(),
+  value: z.number().nullable().optional(),
   minValue: z.number().optional(),
   maxValue: z.number().optional(),
   step: z.number().positive().optional(),

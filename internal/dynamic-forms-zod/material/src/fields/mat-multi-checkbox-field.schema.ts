@@ -24,10 +24,11 @@ export const MatMultiCheckboxFieldSchema = BaseFieldDefSchema.merge(FieldWithVal
    */
   type: z.literal('multi-checkbox'),
 
+  nullable: z.boolean().optional(),
   /**
    * Initial selected values (array).
    */
-  value: z.array(z.unknown()).optional(),
+  value: z.array(z.unknown()).nullable().optional(),
 
   /**
    * Placeholder/helper text.

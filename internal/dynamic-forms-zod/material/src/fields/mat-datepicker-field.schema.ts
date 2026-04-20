@@ -33,10 +33,11 @@ export const MatDatepickerFieldSchema = BaseFieldDefSchema.merge(FieldWithValida
    */
   type: z.literal('datepicker'),
 
+  nullable: z.boolean().optional(),
   /**
    * Initial date value (ISO string in JSON configs).
    */
-  value: DateValueSchema.optional(),
+  value: DateValueSchema.nullable().optional(),
 
   /**
    * Minimum selectable date.

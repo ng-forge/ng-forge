@@ -22,7 +22,8 @@ const IonicValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
 // Input field
 export const IonicInputFieldSchema = IonicValueFieldBase.extend({
   type: z.literal('input'),
-  value: z.string().optional(),
+  nullable: z.boolean().optional(),
+  value: z.string().nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   props: IonicInputPropsSchema.optional(),
 });
@@ -38,7 +39,8 @@ export const IonicCheckboxFieldSchema = IonicValueFieldBase.extend({
 // Radio field
 export const IonicRadioFieldSchema = IonicValueFieldBase.extend({
   type: z.literal('radio'),
-  value: z.unknown().optional(),
+  nullable: z.boolean().optional(),
+  value: z.unknown().nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   options: FieldOptionsSchema,
   props: IonicRadioPropsSchema.optional(),
@@ -55,7 +57,8 @@ export const IonicToggleFieldSchema = IonicValueFieldBase.extend({
 // Slider field
 export const IonicSliderFieldSchema = IonicValueFieldBase.extend({
   type: z.literal('slider'),
-  value: z.number().optional(),
+  nullable: z.boolean().optional(),
+  value: z.number().nullable().optional(),
   minValue: z.number().optional(),
   maxValue: z.number().optional(),
   step: z.number().positive().optional(),
@@ -66,6 +69,7 @@ export const IonicSliderFieldSchema = IonicValueFieldBase.extend({
 // Datepicker field
 export const IonicDatepickerFieldSchema = IonicValueFieldBase.extend({
   type: z.literal('datepicker'),
+  nullable: z.boolean().optional(),
   value: z.union([z.string(), z.null()]).optional(),
   minDate: z.union([z.string(), z.null()]).optional(),
   maxDate: z.union([z.string(), z.null()]).optional(),
@@ -77,7 +81,8 @@ export const IonicDatepickerFieldSchema = IonicValueFieldBase.extend({
 // Select field
 export const IonicSelectFieldSchema = IonicValueFieldBase.extend({
   type: z.literal('select'),
-  value: z.unknown().optional(),
+  nullable: z.boolean().optional(),
+  value: z.unknown().nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   options: FieldOptionsSchema,
   props: IonicSelectPropsSchema.optional(),
@@ -86,7 +91,8 @@ export const IonicSelectFieldSchema = IonicValueFieldBase.extend({
 // Textarea field
 export const IonicTextareaFieldSchema = IonicValueFieldBase.extend({
   type: z.literal('textarea'),
-  value: z.string().optional(),
+  nullable: z.boolean().optional(),
+  value: z.string().nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   props: IonicTextareaPropsSchema.optional(),
 });
@@ -94,7 +100,8 @@ export const IonicTextareaFieldSchema = IonicValueFieldBase.extend({
 // Multi-checkbox field
 export const IonicMultiCheckboxFieldSchema = IonicValueFieldBase.extend({
   type: z.literal('multi-checkbox'),
-  value: z.array(z.unknown()).optional(),
+  nullable: z.boolean().optional(),
+  value: z.array(z.unknown()).nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   options: FieldOptionsSchema,
   props: IonicMultiCheckboxPropsSchema.optional(),
