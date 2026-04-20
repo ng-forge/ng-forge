@@ -1291,4 +1291,104 @@ test.describe('Array Fields E2E Tests', () => {
       await expect(taskInputs).toHaveCount(3, { timeout: 5000 });
     });
   });
+
+  // Regression for two cherry-picked dereekb fixes:
+  //   1. handleAddFromEvent — bare container FieldDef as the simplified-array
+  //      template was treated as a primitive item, breaking adds.
+  //   2. container-field-mapper / expandSimplifiedArray — wrappers on the
+  //      template were dropped (or double-wrapped) when the row was inserted.
+  // Both regress visibly via this scenario: missing rows, missing section
+  // wrapper, or a non-flat emitted form value.
+  test.describe('Simplified Array - Container + Wrapper Template (regression)', () => {
+    test('adds rows wrapped in section, preserves values, emits flat per-row value', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('simplified-array-container-template');
+      await page.goto('/#/test/array-fields/simplified-array-container-template');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Starts with zero rows (minLength: 0).
+      await expect(scenario.locator('#addresses demo-section-wrapper')).toHaveCount(0, { timeout: 10000 });
+
+      const addButton = scenario.locator('button:has-text("Add address")');
+      await expect(addButton).toBeVisible({ timeout: 5000 });
+
+      // (1) Click "Add address" twice — two section-wrapped rows appear.
+      await addButton.click();
+      await expect(scenario.locator('#addresses demo-section-wrapper')).toHaveCount(1, { timeout: 5000 });
+      await addButton.click();
+      await expect(scenario.locator('#addresses demo-section-wrapper')).toHaveCount(2, { timeout: 5000 });
+
+      // Each row has a section header with the configured title — guards the
+      // container-mapper double-wrap fix (wrapper used to drop on add).
+      const headers = scenario.locator('#addresses demo-section-wrapper .demo-section__header');
+      await expect(headers).toHaveCount(2);
+      await expect(headers.nth(0)).toHaveText(/address/i);
+      await expect(headers.nth(1)).toHaveText(/address/i);
+
+      // Each row owns its own street + city inputs (per-index field IDs).
+      const street0 = scenario.locator('#street_0 input');
+      const city0 = scenario.locator('#city_0 input');
+      const street1 = scenario.locator('#street_1 input');
+      const city1 = scenario.locator('#city_1 input');
+      await expect(street0).toBeVisible({ timeout: 5000 });
+      await expect(city0).toBeVisible({ timeout: 5000 });
+      await expect(street1).toBeVisible({ timeout: 5000 });
+      await expect(city1).toBeVisible({ timeout: 5000 });
+
+      // (2) Type into the first row.
+      await street0.fill('221B Baker St');
+      await city0.fill('London');
+      await expect(street0).toHaveValue('221B Baker St');
+      await expect(city0).toHaveValue('London');
+
+      // (3) Add a third row — row 0 is NOT torn down. Pre-fix, this combo
+      // re-resolved the existing rows and wiped their inputs ("focus
+      // disintegrates"). Post-fix, row 0's typed values stay put and the
+      // input is still focusable + editable in place.
+      await addButton.click();
+      await expect(scenario.locator('#addresses demo-section-wrapper')).toHaveCount(3, { timeout: 5000 });
+      await expect(street0).toHaveValue('221B Baker St');
+      await expect(city0).toHaveValue('London');
+
+      // Row 0 is still a live, editable input — append, not a recreated DOM node.
+      await city0.focus();
+      await city0.press('End');
+      await city0.type(' UK');
+      await expect(city0).toHaveValue('London UK');
+      await expect(await city0.evaluate((el) => document.activeElement === el)).toBe(true);
+      // Reset for the rest of the test.
+      await city0.fill('London');
+
+      // (4) Fill row 2 so we can prove row 0's values survive a middle removal.
+      const street2 = scenario.locator('#street_2 input');
+      const city2 = scenario.locator('#city_2 input');
+      await street2.fill('1600 Pennsylvania Ave');
+      await city2.fill('Washington');
+
+      // Remove the middle row (auto-generated "Remove" button per item).
+      const removeButtons = scenario.locator('#addresses button:has-text("Remove")');
+      await expect(removeButtons).toHaveCount(3, { timeout: 5000 });
+      await removeButtons.nth(1).click();
+
+      await expect(scenario.locator('#addresses demo-section-wrapper')).toHaveCount(2, { timeout: 5000 });
+
+      // Row 0 unchanged; old row 2 has shifted into index 1.
+      await expect(scenario.locator('#street_0 input')).toHaveValue('221B Baker St');
+      await expect(scenario.locator('#city_0 input')).toHaveValue('London');
+      await expect(scenario.locator('#street_1 input')).toHaveValue('1600 Pennsylvania Ave');
+      await expect(scenario.locator('#city_1 input')).toHaveValue('Washington');
+
+      // (5) Submit — emitted value MUST be flat per row (no `entry` wrapper key).
+      const data = await helpers.submitFormAndCapture(scenario);
+      expect(data).toHaveProperty('addresses');
+      const addresses = data['addresses'] as Record<string, unknown>[];
+      expect(addresses).toHaveLength(2);
+      expect(addresses[0]).toEqual({ street: '221B Baker St', city: 'London' });
+      expect(addresses[1]).toEqual({ street: '1600 Pennsylvania Ave', city: 'Washington' });
+      // Guard against the pre-fix shape where the container's own key leaked
+      // into each item: { entry: { street, city } }.
+      expect(addresses[0]).not.toHaveProperty('entry');
+      expect(addresses[1]).not.toHaveProperty('entry');
+    });
+  });
 });

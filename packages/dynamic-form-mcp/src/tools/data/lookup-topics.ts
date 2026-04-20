@@ -2508,6 +2508,12 @@ export const TOPIC_DESCRIPTIONS: Record<string, string> = {
   'common-expressions': 'Frequently used derivation expressions (age, math, concatenation)',
   'type-narrowing': 'TypeScript type safety with as const satisfies FormConfig',
   workflow: 'Recommended tool usage guide — start here',
+  // Wrappers
+  wrappers: 'Overview of the wrapper chain: how to apply, compose, and author wrappers',
+  wrapper: 'Overview of the wrapper chain (alias of `wrappers`)',
+  css: 'Built-in CSS wrapper — applies DynamicText class names to the host element',
+  arraySection: 'Demo wrapper — array card whose header owns the Add button (examples-shared-ui)',
+  section: 'Demo wrapper — titled card around any field or container (examples-shared-ui)',
 };
 
 /**
@@ -2639,4 +2645,18 @@ export const TOPIC_ALIASES: Record<string, string> = {
   'how-to': 'workflow',
   guide: 'workflow',
   'getting-started': 'workflow',
+  // Wrapper aliases
+  wrapper: 'wrappers',
+  'field-wrapper': 'wrappers',
+  'field-wrappers': 'wrappers',
+  decorator: 'wrappers',
+  decorators: 'wrappers',
+  'wrapper-chain': 'wrappers',
+  'css-wrapper': 'css',
+  csswrapper: 'css',
+  cssclasses: 'css',
+  'array-section': 'arraySection',
+  arraysection: 'arraySection',
+  'section-wrapper': 'section',
+  sectionwrapper: 'section',
 };

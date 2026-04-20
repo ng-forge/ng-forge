@@ -180,6 +180,92 @@ describe('Lookup Tool', () => {
     });
   });
 
+  describe('wrapper topics', () => {
+    it('returns the wrapper overview for topic="wrappers"', async () => {
+      const result = await registeredTool.handler({ topic: 'wrappers', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# Wrappers');
+      expect(content).toContain('Registered Wrappers');
+      expect(content).toContain('**css**');
+      expect(content).toContain('Authoring Contract');
+      expect(content).toContain('FieldWrapperContract');
+    });
+
+    it('brief wrappers overview lists registered wrappers', async () => {
+      const result = await registeredTool.handler({ topic: 'wrappers', depth: 'brief' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('**Wrappers**');
+      expect(content).toContain('`css`');
+      expect(content).toContain('decorate');
+    });
+
+    it('returns the css wrapper full entry', async () => {
+      const result = await registeredTool.handler({ topic: 'css', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# css wrapper');
+      expect(content).toContain('**Category:** core');
+      expect(content).toContain('**Availability:** shipping');
+      expect(content).toContain('@ng-forge/dynamic-forms');
+      expect(content).toContain('cssClasses');
+      expect(content).toContain('### Authoring Contract');
+      expect(content).toContain("viewChild.required('fieldComponent'");
+    });
+
+    it('returns the arraySection demo wrapper with demo-only warning', async () => {
+      const result = await registeredTool.handler({ topic: 'arraySection', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# arraySection wrapper');
+      expect(content).toContain('**Category:** demo');
+      expect(content).toContain('**Availability:** demo-only');
+      expect(content).toContain('@internal/examples-shared-ui');
+      expect(content).toContain('itemTemplate');
+      expect(content).toContain('**(required)**');
+      expect(content).toContain('demo wrapper');
+    });
+
+    it('returns the section demo wrapper', async () => {
+      const result = await registeredTool.handler({ topic: 'section', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# section wrapper');
+      expect(content).toContain('title');
+      expect(content).toContain('demo-only');
+    });
+
+    it('brief css wrapper includes minimal example', async () => {
+      const result = await registeredTool.handler({ topic: 'css', depth: 'brief' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# css wrapper');
+      expect(content).toContain('cssClasses');
+    });
+
+    it('resolves the css-wrapper alias to css', async () => {
+      const result = await registeredTool.handler({ topic: 'css-wrapper', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# css wrapper');
+    });
+
+    it('resolves the array-section alias to arraySection', async () => {
+      const result = await registeredTool.handler({ topic: 'array-section', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# arraySection wrapper');
+    });
+
+    it('resolves the decorators alias to the wrappers overview', async () => {
+      const result = await registeredTool.handler({ topic: 'decorators', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('# Wrappers');
+    });
+  });
+
   describe('pattern topics', () => {
     it('returns golden-path documentation', async () => {
       const result = await registeredTool.handler({ topic: 'golden-path', depth: 'full' });

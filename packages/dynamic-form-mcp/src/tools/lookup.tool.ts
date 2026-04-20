@@ -13,7 +13,16 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { getFieldType, getFieldTypes, getUIAdapter, type FieldTypeInfo, type UIAdapterFieldType } from '../registry/index.js';
+import {
+  getFieldType,
+  getFieldTypes,
+  getUIAdapter,
+  getWrapper,
+  getWrappers,
+  type FieldTypeInfo,
+  type UIAdapterFieldType,
+  type WrapperInfo,
+} from '../registry/index.js';
 import { getFieldTypeJsonSchema, type UiIntegration, type FieldType } from '@ng-forge/dynamic-forms-zod/mcp';
 import { TOPICS, TOPIC_ALIASES, TOPIC_DESCRIPTIONS } from './data/lookup-topics.js';
 import { fetchDocSection } from '../services/doc-fetcher.js';
@@ -49,6 +58,7 @@ function formatTopicItem(key: string): string {
 function getTopicList(): string {
   const fieldTypes = ['input', 'select', 'slider', 'radio', 'checkbox', 'textarea', 'datepicker', 'toggle', 'text', 'hidden'];
   const containers = ['group', 'row', 'array', 'simplified-array', 'page'];
+  const wrappers = ['wrappers', ...getWrappers().map((w) => w.type)];
   const concepts = [
     'validation',
     'validation-messages',
@@ -84,6 +94,9 @@ ${fieldTypes.map(formatTopicItem).join('\n')}
 
 ## Containers
 ${containers.map(formatTopicItem).join('\n')}
+
+## Wrappers
+${wrappers.map(formatTopicItem).join('\n')}
 
 ## Concepts
 ${concepts.map(formatTopicItem).join('\n')}
@@ -169,6 +182,129 @@ function formatFieldInfoFull(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldT
 }
 
 /**
+ * Format a single wrapper registry entry.
+ */
+function formatWrapperInfo(wrapper: WrapperInfo): string {
+  const lines: string[] = [];
+  lines.push(`# ${wrapper.type} wrapper`);
+  lines.push('');
+  lines.push(`**Category:** ${wrapper.category}`);
+  lines.push(`**Availability:** ${wrapper.availability}`);
+  lines.push(`**Package:** \`${wrapper.package}\``);
+  lines.push(`**Component:** \`${wrapper.componentName}\``);
+  lines.push(`**Description:** ${wrapper.description}`);
+
+  if (wrapper.availability === 'demo-only') {
+    lines.push('');
+    lines.push(
+      '> **Note:** This is a demo wrapper that ships with the docs sandbox, not a library primitive. Use it as a pattern/template and author your own wrapper (or copy the component out of `internal/examples-shared-ui/src/lib/demo-wrappers/`) when adopting the idea in production.',
+    );
+  }
+
+  if (wrapper.autoAppliesTo.length > 0) {
+    lines.push('');
+    lines.push(`**Auto-applies to:** ${wrapper.autoAppliesTo.join(', ')}`);
+    lines.push(
+      '_(Injected automatically into these field types. Can be overridden via `FormConfig.defaultWrappers` or per-field `wrappers: [...]`; clear entirely with `wrappers: null`.)_',
+    );
+  } else {
+    lines.push('');
+    lines.push("**Auto-applies to:** _(none — opt-in via the field's `wrappers` array)_");
+  }
+
+  if (Object.keys(wrapper.props).length > 0) {
+    lines.push('');
+    lines.push('### Config Props');
+    for (const prop of Object.values(wrapper.props)) {
+      const req = prop.required ? ' **(required)**' : '';
+      const def = prop.default !== undefined ? ` (default: ${JSON.stringify(prop.default)})` : '';
+      lines.push(`- \`${prop.name}\`: ${prop.type}${req}${def} — ${prop.description}`);
+    }
+  } else {
+    lines.push('');
+    lines.push('### Config Props');
+    lines.push('_(none — no configurable inputs on this wrapper)_');
+  }
+
+  if (wrapper.minimalExample) {
+    lines.push('');
+    lines.push('### Minimal Config');
+    lines.push('```typescript');
+    lines.push(wrapper.minimalExample);
+    lines.push('```');
+  }
+
+  lines.push('');
+  lines.push('### Full Example');
+  lines.push('```typescript');
+  lines.push(wrapper.example);
+  lines.push('```');
+
+  lines.push('');
+  lines.push('### Authoring Contract');
+  lines.push(wrapper.contract);
+
+  return lines.join('\n');
+}
+
+/**
+ * Format a combined overview of all registered wrappers.
+ * Used when the lookup topic is "wrappers" (plural / meta-topic).
+ */
+function formatWrappersOverview(): string {
+  const wrappers = getWrappers();
+  const lines: string[] = [];
+
+  lines.push('# Wrappers');
+  lines.push('');
+  lines.push(
+    'Wrappers decorate the rendered output of a field (or container) without changing the form data structure. They are composed as a chain: each wrapper exposes a `#fieldComponent` `ViewContainerRef` slot where the next wrapper — or the field itself — is rendered.',
+  );
+  lines.push('');
+  lines.push('## Applying a wrapper');
+  lines.push('');
+  lines.push('```typescript');
+  lines.push(`// Per-field wrapper chain (outer-most first)
+{
+  key: 'email',
+  type: 'input',
+  label: 'Email',
+  wrappers: [
+    { type: 'section', title: 'Account' }, // outer
+    { type: 'css', cssClasses: 'pad-lg' }   // inner
+  ]
+}
+
+// Form-level defaults applied to every field
+const config = {
+  defaultWrappers: [{ type: 'css', cssClasses: 'field-default' }],
+  fields: [...]
+} as const satisfies FormConfig;
+
+// Clear all wrappers on a specific field (overrides defaults + auto)
+{ key: 'id', type: 'hidden', value: 'abc', wrappers: null }`);
+  lines.push('```');
+  lines.push('');
+  lines.push('## Registered Wrappers');
+  lines.push('');
+
+  for (const w of wrappers) {
+    const flag = w.availability === 'demo-only' ? ' _(demo-only)_' : '';
+    lines.push(`- **${w.type}** (${w.category}, \`${w.package}\`)${flag} — ${w.description.split('.')[0]}.`);
+  }
+
+  lines.push('');
+  lines.push('Use `ngforge_lookup topic="<name>"` for full details on any individual wrapper.');
+
+  lines.push('');
+  lines.push('## Authoring Contract');
+  lines.push('');
+  lines.push(wrappers[0]?.contract ?? '');
+
+  return lines.join('\n');
+}
+
+/**
  * Try to fetch live documentation for a topic, falling back to hardcoded content.
  *
  * Resolution order:
@@ -182,6 +318,46 @@ async function resolveTopicContent(
   depth: 'brief' | 'full' | 'schema',
   uiIntegration?: (typeof UI_INTEGRATIONS)[number],
 ): Promise<string | null> {
+  // Wrapper meta-topic: list every registered wrapper
+  if (resolvedTopic === 'wrappers' || resolvedTopic === 'wrapper') {
+    if (depth === 'brief') {
+      const wrappers = getWrappers();
+      return [
+        "**Wrappers** decorate a field's rendered output without changing form data.",
+        '',
+        'Registered:',
+        ...wrappers.map((w) => `- \`${w.type}\` (${w.category}${w.availability === 'demo-only' ? ', demo-only' : ''})`),
+        '',
+        'Use `wrappers: [{ type: "css", cssClasses: "..." }]` on any field. See `ngforge_lookup topic="wrappers"` for the full overview.',
+      ].join('\n');
+    }
+    return formatWrappersOverview();
+  }
+
+  // Wrapper-specific topic (e.g., "css", "arraySection", "section")
+  const wrapperInfo = getWrapper(resolvedTopic);
+  if (wrapperInfo) {
+    const formatted = formatWrapperInfo(wrapperInfo);
+    if (depth === 'brief') {
+      // Brief: just the header + description + minimal example
+      const lines = [
+        `# ${wrapperInfo.type} wrapper`,
+        '',
+        `${wrapperInfo.description.split('.')[0]}.`,
+        '',
+        '```typescript',
+        wrapperInfo.minimalExample ?? `{ type: '${wrapperInfo.type}' }`,
+        '```',
+      ];
+      if (wrapperInfo.availability === 'demo-only') {
+        lines.push('');
+        lines.push(`**Demo-only** — ships from \`${wrapperInfo.package}\`, not \`@ng-forge/dynamic-forms\`.`);
+      }
+      return lines.join('\n');
+    }
+    return formatted;
+  }
+
   // For brief depth, always use hardcoded content (it's curated for brevity)
   if (depth === 'brief') {
     const topicContent = TOPICS[resolvedTopic];
@@ -299,6 +475,14 @@ const NEXT_STEPS: Record<string, string> = {
     '**Next:** `ngforge_lookup topic="conditional"` for full conditional logic docs · `ngforge_examples pattern="minimal-conditional"` for working example',
   workflow:
     '**Next:** `ngforge_lookup topic="golden-path"` for form structure templates · `ngforge_examples pattern="complete"` for a full working example',
+  // Wrappers
+  wrappers:
+    '**Next:** `ngforge_lookup topic="css"` for the shipping CSS wrapper · `ngforge_lookup topic="section"` or `ngforge_lookup topic="arraySection"` for demo wrappers · `ngforge_examples pattern="wrapper-array-actions"` for a working array-section example',
+  css: '**Next:** `ngforge_lookup topic="wrappers"` for the full wrapper overview · `ngforge_lookup topic="field-placement"` for where wrappers can apply',
+  arraySection:
+    '**Next:** `ngforge_lookup topic="wrappers"` for the wrapper overview · `ngforge_lookup topic="array"` for array field docs · `ngforge_lookup topic="array-buttons"` for the button-field alternative',
+  section:
+    '**Next:** `ngforge_lookup topic="wrappers"` for the wrapper overview · `ngforge_lookup topic="css"` for the shipping CSS wrapper',
 };
 
 /**
@@ -324,6 +508,8 @@ Field types: input, select, slider, radio, checkbox, textarea, datepicker, toggl
 
 Containers: group, row, array, simplified-array, page
 
+Wrappers: wrappers (overview), css (shipping), section, arraySection (demo-only)
+
 Concepts: validation, conditional, derivation, property-derivation, options-format, expression-variables, async-validators
 
 Patterns: field-placement, logic-matrix, context-api, containers, multi-page-gotchas
@@ -334,7 +520,7 @@ Use ngforge_search query="your question" to find topics by keyword.`,
       topic: z
         .string()
         .describe(
-          'Topic to look up: field types (input, select, hidden, group, row, array, page), concepts (validation, conditional, derivation, property-derivation, options-format), patterns (golden-path, pitfalls, multi-page-gotchas), or "list" to see all topics',
+          'Topic to look up: field types (input, select, hidden, group, row, array, page), wrappers (wrappers, css, section, arraySection), concepts (validation, conditional, derivation, property-derivation, options-format), patterns (golden-path, pitfalls, multi-page-gotchas), or "list" to see all topics',
         ),
       depth: z
         .enum(['brief', 'full', 'schema'])

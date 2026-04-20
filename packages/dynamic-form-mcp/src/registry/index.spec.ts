@@ -15,6 +15,10 @@ import {
   getUIAdapters,
   getUIAdapter,
   getUIAdapterFieldType,
+  getWrappers,
+  getWrapper,
+  getWrappersByCategory,
+  WRAPPER_AUTHORING_CONTRACT,
 } from './index.js';
 
 describe('Registry', () => {
@@ -106,6 +110,68 @@ describe('Registry', () => {
     });
   });
 
+  describe('Wrappers', () => {
+    it('should return all wrappers', () => {
+      const wrappers = getWrappers();
+      expect(wrappers).toBeDefined();
+      expect(Array.isArray(wrappers)).toBe(true);
+      expect(wrappers.length).toBeGreaterThan(0);
+    });
+
+    it('should include the built-in css wrapper', () => {
+      const css = getWrapper('css');
+      expect(css).toBeDefined();
+      expect(css?.type).toBe('css');
+      expect(css?.category).toBe('core');
+      expect(css?.availability).toBe('shipping');
+      expect(css?.package).toBe('@ng-forge/dynamic-forms');
+      expect(css?.props.cssClasses).toBeDefined();
+    });
+
+    it('should include the demo arraySection wrapper', () => {
+      const arraySection = getWrapper('arraySection');
+      expect(arraySection).toBeDefined();
+      expect(arraySection?.category).toBe('demo');
+      expect(arraySection?.availability).toBe('demo-only');
+      expect(arraySection?.package).toBe('@internal/examples-shared-ui');
+      expect(arraySection?.props.itemTemplate).toBeDefined();
+      expect(arraySection?.props.itemTemplate.required).toBe(true);
+    });
+
+    it('should include the demo section wrapper', () => {
+      const section = getWrapper('section');
+      expect(section).toBeDefined();
+      expect(section?.category).toBe('demo');
+      expect(section?.availability).toBe('demo-only');
+      expect(section?.props.title).toBeDefined();
+      expect(section?.props.title.required).toBe(false);
+    });
+
+    it('should return undefined for unknown wrapper', () => {
+      expect(getWrapper('nonexistent-wrapper')).toBeUndefined();
+    });
+
+    it('should filter wrappers by category', () => {
+      const core = getWrappersByCategory('core');
+      expect(core.every((w) => w.category === 'core')).toBe(true);
+      expect(core.some((w) => w.type === 'css')).toBe(true);
+
+      const demo = getWrappersByCategory('demo');
+      expect(demo.every((w) => w.category === 'demo')).toBe(true);
+      expect(demo.some((w) => w.type === 'section')).toBe(true);
+      expect(demo.some((w) => w.type === 'arraySection')).toBe(true);
+    });
+
+    it('exposes the shared authoring contract string', () => {
+      expect(WRAPPER_AUTHORING_CONTRACT).toBeTruthy();
+      expect(WRAPPER_AUTHORING_CONTRACT).toContain('FieldWrapperContract');
+      expect(WRAPPER_AUTHORING_CONTRACT).toContain("viewChild.required('fieldComponent'");
+      expect(WRAPPER_AUTHORING_CONTRACT).toContain('@if');
+      expect(WRAPPER_AUTHORING_CONTRACT).toContain('@defer');
+      expect(WRAPPER_AUTHORING_CONTRACT).toContain('@for');
+    });
+  });
+
   describe('Staleness Guard', () => {
     describe('Field type completeness', () => {
       it('every field type entry has required properties', () => {
@@ -183,6 +249,60 @@ describe('Registry', () => {
         for (const adapter of adapters) {
           for (const ft of adapter.fieldTypes) {
             expect(registryTypes.has(ft.type), `${adapter.library} adapter references unknown type '${ft.type}'`).toBe(true);
+          }
+        }
+      });
+    });
+
+    describe('Wrapper completeness', () => {
+      it('every wrapper entry has the required properties', () => {
+        const wrappers = getWrappers();
+
+        for (const w of wrappers) {
+          expect(w.type, `wrapper missing 'type'`).toBeTruthy();
+          expect(w.category, `${w.type} missing 'category'`).toBeTruthy();
+          expect(w.availability, `${w.type} missing 'availability'`).toBeTruthy();
+          expect(w.package, `${w.type} missing 'package'`).toBeTruthy();
+          expect(w.description, `${w.type} missing 'description'`).toBeTruthy();
+          expect(w.componentName, `${w.type} missing 'componentName'`).toBeTruthy();
+          expect(w.example, `${w.type} missing 'example'`).toBeTruthy();
+          expect(w.contract, `${w.type} missing 'contract'`).toBeTruthy();
+          expect(['core', 'demo', 'adapter']).toContain(w.category);
+          expect(['shipping', 'demo-only']).toContain(w.availability);
+          expect(Array.isArray(w.autoAppliesTo)).toBe(true);
+        }
+      });
+
+      it('no duplicate wrapper entries', () => {
+        const wrappers = getWrappers();
+        const types = wrappers.map((w) => w.type);
+        const unique = new Set(types);
+
+        expect(types.length).toBe(unique.size);
+      });
+
+      it('demo-only wrappers ship from @internal/examples-shared-ui', () => {
+        const demoOnly = getWrappers().filter((w) => w.availability === 'demo-only');
+        expect(demoOnly.length).toBeGreaterThan(0);
+        for (const w of demoOnly) {
+          expect(w.package, `${w.type} should be sourced from examples-shared-ui`).toBe('@internal/examples-shared-ui');
+          expect(w.category, `${w.type} should have category 'demo'`).toBe('demo');
+        }
+      });
+
+      it('every wrapper shares the canonical authoring contract', () => {
+        for (const w of getWrappers()) {
+          expect(w.contract, `${w.type} should reference the shared authoring contract`).toBe(WRAPPER_AUTHORING_CONTRACT);
+        }
+      });
+
+      it('every wrapper prop entry has required fields', () => {
+        for (const w of getWrappers()) {
+          for (const prop of Object.values(w.props)) {
+            expect(prop.name, `${w.type}.${prop.name} missing 'name'`).toBeTruthy();
+            expect(prop.type, `${w.type}.${prop.name} missing 'type'`).toBeTruthy();
+            expect(prop.description, `${w.type}.${prop.name} missing 'description'`).toBeTruthy();
+            expect(typeof prop.required).toBe('boolean');
           }
         }
       });

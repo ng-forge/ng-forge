@@ -129,6 +129,30 @@ describe('Search Tool', () => {
     });
   });
 
+  describe('wrapper search', () => {
+    it('finds the css wrapper by name', async () => {
+      const text = getResultText(await registeredTool.handler({ query: 'css' }));
+
+      expect(text).toContain('# Search Results');
+      expect(text).toContain('**css**');
+      expect(text).toContain('ngforge_lookup topic="css"');
+    });
+
+    it('finds the arraySection demo wrapper', async () => {
+      const text = getResultText(await registeredTool.handler({ query: 'arraySection' }));
+
+      expect(text).toContain('# Search Results');
+      expect(text).toContain('arraySection');
+      expect(text).toContain('Wrapper');
+    });
+
+    it('labels demo-only wrappers as such', async () => {
+      const text = getResultText(await registeredTool.handler({ query: 'arraySection' }));
+
+      expect(text).toContain('demo');
+    });
+  });
+
   describe('cross-tool search', () => {
     it('finds both topics and patterns for overlapping keywords', async () => {
       const text = getResultText(await registeredTool.handler({ query: 'conditional' }));

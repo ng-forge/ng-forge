@@ -32,6 +32,7 @@ import { simplifiedArrayButtonOptoutScenario } from './scenarios/simplified-arra
 import { simplifiedArrayConditionalScenario } from './scenarios/simplified-array-conditional.scenario';
 import { simplifiedArrayMinLengthScenario } from './scenarios/simplified-array-min-length.scenario';
 import { simplifiedArrayMaxLengthScenario } from './scenarios/simplified-array-max-length.scenario';
+import { simplifiedArrayContainerTemplateScenario } from './scenarios/simplified-array-container-template.scenario';
 /**
  * Array Fields Suite
  * Tests various array field operations including add, remove,
@@ -99,6 +100,9 @@ export const arrayFieldsSuite: TestSuite = {
     // Simplified array validation (minLength/maxLength)
     simplifiedArrayMinLengthScenario,
     simplifiedArrayMaxLengthScenario,
+
+    // Regression: container template + wrappers (cherry-picked dereekb fixes)
+    simplifiedArrayContainerTemplateScenario,
   ],
 };
 
