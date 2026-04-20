@@ -199,7 +199,7 @@ Value fields accept a \`nullable?: boolean\` flag. When \`true\`:
 
 - \`value\` accepts \`null\` in addition to the field's normal value type.
 - An omitted \`value\` resolves to \`null\` (instead of the type-specific empty default like \`''\`, \`NaN\`, or \`[]\`).
-- Orthogonal to \`required\` — a field can be nullable AND required (must be provided, but may be provided as null).
+- Orthogonal to \`required\`. \`nullable\` declares that the **model** accepts \`null\`; \`required\` is a **validation** constraint. Angular's \`Validators.required\` treats \`null\` as invalid, so a field that is both \`nullable\` and \`required\` will fail required-validation when the value is \`null\` — the two flags describe different layers (data shape vs. validation), not conflicting semantics.
 - Map OpenAPI \`nullable: true\` (3.0) or \`type: [T, null]\` (3.1) to this flag.
 
 \`\`\`typescript

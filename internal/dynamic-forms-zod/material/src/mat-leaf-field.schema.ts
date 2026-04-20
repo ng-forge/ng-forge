@@ -3,6 +3,7 @@ import { z } from 'zod';
 // Import default leaf fields
 import { TextFieldSchema } from '../../src/lib/schemas/leaves/text-field.schema';
 import { HiddenFieldSchema } from '../../src/lib/schemas/leaves/hidden-field.schema';
+import { nullableValueRefine } from '../../src/lib/schemas/field/nullable-value.refinement';
 
 // Import Material-specific fields
 import { MatInputFieldSchema } from './fields/mat-input-field.schema';
@@ -29,30 +30,32 @@ import {
  * This schema validates any leaf field (non-container) for Material forms.
  * Container fields (page, row, group, array) are handled separately.
  */
-export const MatLeafFieldSchema = z.discriminatedUnion('type', [
-  // Default fields
-  TextFieldSchema,
-  HiddenFieldSchema,
+export const MatLeafFieldSchema = z
+  .discriminatedUnion('type', [
+    // Default fields
+    TextFieldSchema,
+    HiddenFieldSchema,
 
-  // Material value fields
-  MatInputFieldSchema,
-  MatTextareaFieldSchema,
-  MatSelectFieldSchema,
-  MatCheckboxFieldSchema,
-  MatRadioFieldSchema,
-  MatMultiCheckboxFieldSchema,
-  MatToggleFieldSchema,
-  MatSliderFieldSchema,
-  MatDatepickerFieldSchema,
+    // Material value fields
+    MatInputFieldSchema,
+    MatTextareaFieldSchema,
+    MatSelectFieldSchema,
+    MatCheckboxFieldSchema,
+    MatRadioFieldSchema,
+    MatMultiCheckboxFieldSchema,
+    MatToggleFieldSchema,
+    MatSliderFieldSchema,
+    MatDatepickerFieldSchema,
 
-  // Material button fields
-  MatButtonFieldSchema,
-  MatSubmitButtonFieldSchema,
-  MatNextButtonFieldSchema,
-  MatPreviousButtonFieldSchema,
-  MatAddArrayItemButtonFieldSchema,
-  MatRemoveArrayItemButtonFieldSchema,
-]);
+    // Material button fields
+    MatButtonFieldSchema,
+    MatSubmitButtonFieldSchema,
+    MatNextButtonFieldSchema,
+    MatPreviousButtonFieldSchema,
+    MatAddArrayItemButtonFieldSchema,
+    MatRemoveArrayItemButtonFieldSchema,
+  ])
+  .superRefine(nullableValueRefine);
 
 /**
  * Inferred type for Material leaf fields.
