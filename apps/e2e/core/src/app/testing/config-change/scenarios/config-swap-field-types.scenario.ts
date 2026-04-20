@@ -20,7 +20,7 @@ const configA = {
       type: 'input',
       label: 'Shared field (input)',
       value: '',
-      props: { placeholder: 'as input' },
+      placeholder: 'as input',
     },
     {
       key: 'submit',

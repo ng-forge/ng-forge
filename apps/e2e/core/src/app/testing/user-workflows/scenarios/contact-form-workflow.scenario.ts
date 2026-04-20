@@ -28,9 +28,9 @@ const config = {
       type: 'textarea',
       label: 'Message',
       required: true,
+      placeholder: 'Enter your message here...',
       props: {
         rows: 5,
-        placeholder: 'Enter your message here...',
       },
     },
     {

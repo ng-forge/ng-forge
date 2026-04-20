@@ -27,9 +27,7 @@ const contactRowFields = [
             },
           },
         ],
-        props: {
-          placeholder: 'Enter name',
-        },
+        placeholder: 'Enter name',
       },
       {
         key: 'email',
@@ -47,9 +45,9 @@ const contactRowFields = [
             },
           },
         ],
+        placeholder: 'Enter email',
         props: {
           type: 'email',
-          placeholder: 'Enter email',
         },
       },
       {
@@ -68,9 +66,7 @@ const contactRowFields = [
             },
           },
         ],
-        props: {
-          placeholder: 'Enter phone',
-        },
+        placeholder: 'Enter phone',
       },
     ],
   },
@@ -111,9 +107,7 @@ const config = {
       key: 'alwaysVisibleField',
       type: 'input',
       label: 'Always Visible',
-      props: {
-        placeholder: 'This field is always visible',
-      },
+      placeholder: 'This field is always visible',
     },
   ],
 } as FormConfig;

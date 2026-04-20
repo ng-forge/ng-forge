@@ -34,9 +34,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter first name',
-          },
+          placeholder: 'Enter first name',
         },
         {
           key: 'lastName',
@@ -54,9 +52,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter last name',
-          },
+          placeholder: 'Enter last name',
         },
       ],
     },
@@ -64,9 +60,7 @@ const config = {
       key: 'alwaysVisible',
       type: 'input',
       label: 'Always Visible Field',
-      props: {
-        placeholder: 'This field is always visible',
-      },
+      placeholder: 'This field is always visible',
     },
   ],
 } as const satisfies FormConfig;

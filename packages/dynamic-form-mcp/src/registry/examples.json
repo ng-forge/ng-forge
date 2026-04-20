@@ -14,7 +14,9 @@
           "key": "title",
           "type": "text",
           "label": "Sign In",
-          "props": { "elementType": "h2" }
+          "props": {
+            "elementType": "h2"
+          }
         },
         {
           "key": "email",
@@ -22,8 +24,13 @@
           "label": "Email Address",
           "required": true,
           "email": true,
-          "validationMessages": { "email": "Please enter a valid email address" },
-          "props": { "type": "email", "placeholder": "your@email.com" }
+          "validationMessages": {
+            "email": "Please enter a valid email address"
+          },
+          "props": {
+            "type": "email"
+          },
+          "placeholder": "your@email.com"
         },
         {
           "key": "password",
@@ -31,7 +38,10 @@
           "label": "Password",
           "required": true,
           "minLength": 8,
-          "props": { "type": "password", "placeholder": "Enter your password" }
+          "props": {
+            "type": "password"
+          },
+          "placeholder": "Enter your password"
         },
         {
           "key": "remember",
@@ -42,7 +52,9 @@
           "key": "submit",
           "type": "submit",
           "label": "Sign In",
-          "props": { "color": "primary" }
+          "props": {
+            "color": "primary"
+          }
         }
       ]
     }
@@ -64,7 +76,7 @@
             "required": "First name is required",
             "minLength": "Must be at least {{requiredLength}} characters"
           },
-          "props": { "placeholder": "Enter your first name" }
+          "placeholder": "Enter your first name"
         },
         {
           "key": "lastName",
@@ -76,7 +88,7 @@
             "required": "Last name is required",
             "minLength": "Must be at least {{requiredLength}} characters"
           },
-          "props": { "placeholder": "Enter your last name" }
+          "placeholder": "Enter your last name"
         },
         {
           "key": "email",
@@ -88,7 +100,10 @@
             "required": "Email is required",
             "email": "Please enter a valid email address"
           },
-          "props": { "type": "email", "placeholder": "user@example.com" }
+          "props": {
+            "type": "email"
+          },
+          "placeholder": "user@example.com"
         },
         {
           "key": "age",
@@ -102,22 +117,42 @@
             "min": "Must be at least {{min}}",
             "max": "Must not exceed {{max}}"
           },
-          "props": { "type": "number", "placeholder": "18" }
+          "props": {
+            "type": "number"
+          },
+          "placeholder": "18"
         },
         {
           "key": "country",
           "type": "select",
           "label": "Country",
           "required": true,
-          "validationMessages": { "required": "Please select a country" },
+          "validationMessages": {
+            "required": "Please select a country"
+          },
           "options": [
-            { "value": "us", "label": "United States" },
-            { "value": "uk", "label": "United Kingdom" },
-            { "value": "ca", "label": "Canada" },
-            { "value": "au", "label": "Australia" },
-            { "value": "de", "label": "Germany" }
+            {
+              "value": "us",
+              "label": "United States"
+            },
+            {
+              "value": "uk",
+              "label": "United Kingdom"
+            },
+            {
+              "value": "ca",
+              "label": "Canada"
+            },
+            {
+              "value": "au",
+              "label": "Australia"
+            },
+            {
+              "value": "de",
+              "label": "Germany"
+            }
           ],
-          "props": { "placeholder": "Select your country" }
+          "placeholder": "Select your country"
         },
         {
           "key": "newsletter",
@@ -129,13 +164,17 @@
           "type": "checkbox",
           "label": "I agree to the terms and conditions",
           "required": true,
-          "validationMessages": { "required": "You must accept the terms" }
+          "validationMessages": {
+            "required": "You must accept the terms"
+          }
         },
         {
           "key": "submit",
           "type": "submit",
           "label": "Create Account",
-          "props": { "color": "primary" }
+          "props": {
+            "color": "primary"
+          }
         }
       ]
     }
@@ -160,7 +199,7 @@
               "label": "First Name",
               "required": true,
               "col": 6,
-              "props": { "placeholder": "Your first name" }
+              "placeholder": "Your first name"
             },
             {
               "key": "lastName",
@@ -168,7 +207,7 @@
               "label": "Last Name",
               "required": true,
               "col": 6,
-              "props": { "placeholder": "Your last name" }
+              "placeholder": "Your last name"
             }
           ]
         },
@@ -178,8 +217,13 @@
           "label": "Email Address",
           "required": true,
           "email": true,
-          "validationMessages": { "email": "Please enter a valid email" },
-          "props": { "type": "email", "placeholder": "email@example.com" }
+          "validationMessages": {
+            "email": "Please enter a valid email"
+          },
+          "props": {
+            "type": "email"
+          },
+          "placeholder": "email@example.com"
         },
         {
           "key": "subject",
@@ -187,12 +231,24 @@
           "label": "Subject",
           "required": true,
           "options": [
-            { "value": "general", "label": "General Inquiry" },
-            { "value": "support", "label": "Technical Support" },
-            { "value": "billing", "label": "Billing Question" },
-            { "value": "feedback", "label": "Feedback" }
+            {
+              "value": "general",
+              "label": "General Inquiry"
+            },
+            {
+              "value": "support",
+              "label": "Technical Support"
+            },
+            {
+              "value": "billing",
+              "label": "Billing Question"
+            },
+            {
+              "value": "feedback",
+              "label": "Feedback"
+            }
           ],
-          "props": { "placeholder": "Select a subject" }
+          "placeholder": "Select a subject"
         },
         {
           "key": "message",
@@ -205,13 +261,18 @@
             "minLength": "Message must be at least {{requiredLength}} characters",
             "maxLength": "Message cannot exceed {{requiredLength}} characters"
           },
-          "props": { "rows": 5, "placeholder": "How can we help you?" }
+          "props": {
+            "rows": 5
+          },
+          "placeholder": "How can we help you?"
         },
         {
           "key": "submit",
           "type": "submit",
           "label": "Send Message",
-          "props": { "color": "primary" }
+          "props": {
+            "color": "primary"
+          }
         }
       ]
     }
@@ -238,13 +299,17 @@
           "label": "Email",
           "required": true,
           "email": true,
-          "props": { "type": "email" }
+          "props": {
+            "type": "email"
+          }
         },
         {
           "key": "addressTitle",
           "type": "text",
           "label": "Shipping Address",
-          "props": { "elementType": "h4" }
+          "props": {
+            "elementType": "h4"
+          }
         },
         {
           "key": "address",
@@ -260,8 +325,20 @@
               "key": "cityStateRow",
               "type": "row",
               "fields": [
-                { "key": "city", "type": "input", "label": "City", "required": true, "col": 6 },
-                { "key": "state", "type": "input", "label": "State", "required": true, "col": 3 },
+                {
+                  "key": "city",
+                  "type": "input",
+                  "label": "City",
+                  "required": true,
+                  "col": 6
+                },
+                {
+                  "key": "state",
+                  "type": "input",
+                  "label": "State",
+                  "required": true,
+                  "col": 3
+                },
                 {
                   "key": "zip",
                   "type": "input",
@@ -269,7 +346,9 @@
                   "required": true,
                   "col": 3,
                   "pattern": "^\\d{5}$",
-                  "validationMessages": { "pattern": "ZIP must be 5 digits" }
+                  "validationMessages": {
+                    "pattern": "ZIP must be 5 digits"
+                  }
                 }
               ]
             },
@@ -279,8 +358,14 @@
               "label": "Country",
               "required": true,
               "options": [
-                { "value": "us", "label": "United States" },
-                { "value": "ca", "label": "Canada" }
+                {
+                  "value": "us",
+                  "label": "United States"
+                },
+                {
+                  "value": "ca",
+                  "label": "Canada"
+                }
               ]
             }
           ]
@@ -311,12 +396,37 @@
               "key": "stepTitle1",
               "type": "text",
               "label": "Step 1: Personal Information",
-              "props": { "elementType": "h3" }
+              "props": {
+                "elementType": "h3"
+              }
             },
-            { "key": "firstName", "type": "input", "label": "First Name", "required": true },
-            { "key": "lastName", "type": "input", "label": "Last Name", "required": true },
-            { "key": "email", "type": "input", "label": "Email", "required": true, "email": true, "props": { "type": "email" } },
-            { "key": "next1", "type": "next", "label": "Continue" }
+            {
+              "key": "firstName",
+              "type": "input",
+              "label": "First Name",
+              "required": true
+            },
+            {
+              "key": "lastName",
+              "type": "input",
+              "label": "Last Name",
+              "required": true
+            },
+            {
+              "key": "email",
+              "type": "input",
+              "label": "Email",
+              "required": true,
+              "email": true,
+              "props": {
+                "type": "email"
+              }
+            },
+            {
+              "key": "next1",
+              "type": "next",
+              "label": "Continue"
+            }
           ]
         },
         {
@@ -327,17 +437,44 @@
               "key": "stepTitle2",
               "type": "text",
               "label": "Step 2: Address",
-              "props": { "elementType": "h3" }
+              "props": {
+                "elementType": "h3"
+              }
             },
-            { "key": "street", "type": "input", "label": "Street Address", "required": true },
-            { "key": "city", "type": "input", "label": "City", "required": true },
-            { "key": "state", "type": "input", "label": "State", "required": true },
+            {
+              "key": "street",
+              "type": "input",
+              "label": "Street Address",
+              "required": true
+            },
+            {
+              "key": "city",
+              "type": "input",
+              "label": "City",
+              "required": true
+            },
+            {
+              "key": "state",
+              "type": "input",
+              "label": "State",
+              "required": true
+            },
             {
               "key": "navRow2",
               "type": "row",
               "fields": [
-                { "key": "prev2", "type": "previous", "label": "Back", "col": 6 },
-                { "key": "next2", "type": "next", "label": "Continue", "col": 6 }
+                {
+                  "key": "prev2",
+                  "type": "previous",
+                  "label": "Back",
+                  "col": 6
+                },
+                {
+                  "key": "next2",
+                  "type": "next",
+                  "label": "Continue",
+                  "col": 6
+                }
               ]
             }
           ]
@@ -350,21 +487,35 @@
               "key": "stepTitle3",
               "type": "text",
               "label": "Step 3: Review & Submit",
-              "props": { "elementType": "h3" }
+              "props": {
+                "elementType": "h3"
+              }
             },
             {
               "key": "confirm",
               "type": "checkbox",
               "label": "I confirm all information is correct",
               "required": true,
-              "validationMessages": { "required": "Please confirm before submitting" }
+              "validationMessages": {
+                "required": "Please confirm before submitting"
+              }
             },
             {
               "key": "navRow3",
               "type": "row",
               "fields": [
-                { "key": "prev3", "type": "previous", "label": "Back", "col": 6 },
-                { "key": "submit", "type": "submit", "label": "Submit", "col": 6 }
+                {
+                  "key": "prev3",
+                  "type": "previous",
+                  "label": "Back",
+                  "col": 6
+                },
+                {
+                  "key": "submit",
+                  "type": "submit",
+                  "label": "Submit",
+                  "col": 6
+                }
               ]
             }
           ]
@@ -385,8 +536,14 @@
           "label": "Account Type",
           "required": true,
           "options": [
-            { "value": "personal", "label": "Personal" },
-            { "value": "business", "label": "Business" }
+            {
+              "value": "personal",
+              "label": "Personal"
+            },
+            {
+              "value": "business",
+              "label": "Business"
+            }
           ]
         },
         {
@@ -413,7 +570,9 @@
               }
             }
           ],
-          "validationMessages": { "required": "Business name is required" }
+          "validationMessages": {
+            "required": "Business name is required"
+          }
         },
         {
           "key": "taxId",
@@ -430,7 +589,7 @@
               }
             }
           ],
-          "props": { "placeholder": "XX-XXXXXXX" }
+          "placeholder": "XX-XXXXXXX"
         },
         {
           "key": "newsletter",
@@ -442,9 +601,18 @@
           "type": "select",
           "label": "Email Frequency",
           "options": [
-            { "value": "daily", "label": "Daily" },
-            { "value": "weekly", "label": "Weekly" },
-            { "value": "monthly", "label": "Monthly" }
+            {
+              "value": "daily",
+              "label": "Daily"
+            },
+            {
+              "value": "weekly",
+              "label": "Weekly"
+            },
+            {
+              "value": "monthly",
+              "label": "Monthly"
+            }
           ],
           "logic": [
             {
@@ -486,7 +654,9 @@
           "key": "contactsTitle",
           "type": "text",
           "label": "Emergency Contacts",
-          "props": { "elementType": "h4" }
+          "props": {
+            "elementType": "h4"
+          }
         },
         {
           "key": "contacts",
@@ -501,19 +671,49 @@
                   "key": "contactRow",
                   "type": "row",
                   "fields": [
-                    { "key": "name", "type": "input", "label": "Contact Name", "required": true, "col": 4 },
-                    { "key": "phone", "type": "input", "label": "Phone", "required": true, "col": 4, "props": { "type": "tel" } },
+                    {
+                      "key": "name",
+                      "type": "input",
+                      "label": "Contact Name",
+                      "required": true,
+                      "col": 4
+                    },
+                    {
+                      "key": "phone",
+                      "type": "input",
+                      "label": "Phone",
+                      "required": true,
+                      "col": 4,
+                      "props": {
+                        "type": "tel"
+                      }
+                    },
                     {
                       "key": "relationship",
                       "type": "select",
                       "label": "Relationship",
                       "col": 4,
                       "options": [
-                        { "value": "spouse", "label": "Spouse" },
-                        { "value": "parent", "label": "Parent" },
-                        { "value": "sibling", "label": "Sibling" },
-                        { "value": "friend", "label": "Friend" },
-                        { "value": "other", "label": "Other" }
+                        {
+                          "value": "spouse",
+                          "label": "Spouse"
+                        },
+                        {
+                          "value": "parent",
+                          "label": "Parent"
+                        },
+                        {
+                          "value": "sibling",
+                          "label": "Sibling"
+                        },
+                        {
+                          "value": "friend",
+                          "label": "Friend"
+                        },
+                        {
+                          "value": "other",
+                          "label": "Other"
+                        }
                       ]
                     }
                   ]
@@ -541,15 +741,23 @@
           "key": "title",
           "type": "text",
           "label": "Customer Feedback",
-          "props": { "elementType": "h2" }
+          "props": {
+            "elementType": "h2"
+          }
         },
         {
           "key": "satisfaction",
           "type": "slider",
           "label": "Overall Satisfaction (1-10)",
           "required": true,
-          "props": { "min": 1, "max": 10, "step": 1 },
-          "validationMessages": { "required": "Please rate your satisfaction" }
+          "props": {
+            "min": 1,
+            "max": 10,
+            "step": 1
+          },
+          "validationMessages": {
+            "required": "Please rate your satisfaction"
+          }
         },
         {
           "key": "recommend",
@@ -557,30 +765,62 @@
           "label": "Would you recommend us?",
           "required": true,
           "options": [
-            { "value": "yes", "label": "Yes, definitely" },
-            { "value": "maybe", "label": "Maybe" },
-            { "value": "no", "label": "No" }
+            {
+              "value": "yes",
+              "label": "Yes, definitely"
+            },
+            {
+              "value": "maybe",
+              "label": "Maybe"
+            },
+            {
+              "value": "no",
+              "label": "No"
+            }
           ],
-          "validationMessages": { "required": "Please select an option" }
+          "validationMessages": {
+            "required": "Please select an option"
+          }
         },
         {
           "key": "improvements",
           "type": "select",
           "label": "What could we improve?",
-          "props": { "multiple": true, "placeholder": "Select all that apply" },
+          "props": {
+            "multiple": true
+          },
           "options": [
-            { "value": "speed", "label": "Response Time" },
-            { "value": "quality", "label": "Product Quality" },
-            { "value": "price", "label": "Pricing" },
-            { "value": "support", "label": "Customer Support" },
-            { "value": "ui", "label": "User Interface" }
-          ]
+            {
+              "value": "speed",
+              "label": "Response Time"
+            },
+            {
+              "value": "quality",
+              "label": "Product Quality"
+            },
+            {
+              "value": "price",
+              "label": "Pricing"
+            },
+            {
+              "value": "support",
+              "label": "Customer Support"
+            },
+            {
+              "value": "ui",
+              "label": "User Interface"
+            }
+          ],
+          "placeholder": "Select all that apply"
         },
         {
           "key": "comments",
           "type": "textarea",
           "label": "Additional Comments",
-          "props": { "rows": 4, "placeholder": "Share any additional feedback..." }
+          "props": {
+            "rows": 4
+          },
+          "placeholder": "Share any additional feedback..."
         },
         {
           "key": "followUp",
@@ -592,7 +832,9 @@
           "type": "input",
           "label": "Email Address",
           "email": true,
-          "props": { "type": "email", "placeholder": "your@email.com" },
+          "props": {
+            "type": "email"
+          },
           "logic": [
             {
               "type": "hidden",
@@ -616,7 +858,8 @@
           "validationMessages": {
             "required": "Email required for follow-up",
             "email": "Please enter a valid email"
-          }
+          },
+          "placeholder": "your@email.com"
         },
         {
           "key": "submit",

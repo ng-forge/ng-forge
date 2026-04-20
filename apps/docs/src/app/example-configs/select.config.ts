@@ -16,9 +16,7 @@ export const selectConfig = {
         { value: 'ca', label: 'Canada' },
         { value: 'au', label: 'Australia' },
       ],
-      props: {
-        placeholder: 'Select your country',
-      },
+      placeholder: 'Select your country',
     },
   ],
 } as const satisfies FormConfig;

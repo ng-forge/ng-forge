@@ -379,9 +379,9 @@ const validConfig = {
       key: 'email',
       value: '',
       label: 'Email Address',
+      placeholder: 'Enter email',
       props: {
         type: 'email',
-        placeholder: 'Enter email',
         size: 'medium',
         variant: 'outlined',
         icon: 'mail',

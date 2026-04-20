@@ -37,9 +37,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter company name',
-          },
+          placeholder: 'Enter company name',
         },
         {
           key: 'taxId',
@@ -56,9 +54,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter tax ID',
-          },
+          placeholder: 'Enter tax ID',
         },
         {
           key: 'employeeCount',
@@ -88,9 +84,9 @@ const config = {
       key: 'commonField',
       type: 'input',
       label: 'Email',
+      placeholder: 'Enter email address',
       props: {
         type: 'email',
-        placeholder: 'Enter email address',
       },
     },
   ],

@@ -53,13 +53,13 @@ For fields that collect user input (\`input\`, \`textarea\`, \`select\`, \`check
   label: 'Email Address',
   required: true,           // Shorthand validator
   email: true,              // Shorthand validator
+  placeholder: 'user@example.com',  // Field-level, not inside props
   validationMessages: {     // Always provide clear messages
     required: 'Email is required',
     email: 'Please enter a valid email'
   },
   props: {
     type: 'email',          // HTML input type
-    placeholder: 'user@example.com',
     hint: 'We will never share your email'  // UI library specific
   }
 }
@@ -75,11 +75,11 @@ MUST include \`options\` array:
   type: 'select',
   label: 'Country',
   required: true,
+  placeholder: 'Select a country',
   options: [
     { value: 'us', label: 'United States' },
     { value: 'uk', label: 'United Kingdom' }
-  ],
-  props: { placeholder: 'Select a country' }
+  ]
 }
 \`\`\`
 

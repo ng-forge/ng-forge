@@ -21,9 +21,7 @@ export const groupScenario: ExampleScenario = {
         label: 'Full Name',
         value: '',
         required: true,
-        props: {
-          placeholder: 'Enter your full name',
-        },
+        placeholder: 'Enter your full name',
       },
       {
         key: 'address',
@@ -35,9 +33,7 @@ export const groupScenario: ExampleScenario = {
             label: 'Street Address',
             value: '',
             required: true,
-            props: {
-              placeholder: '123 Main St',
-            },
+            placeholder: '123 Main St',
           },
           {
             key: 'city',
@@ -45,9 +41,7 @@ export const groupScenario: ExampleScenario = {
             label: 'City',
             value: '',
             required: true,
-            props: {
-              placeholder: 'Springfield',
-            },
+            placeholder: 'Springfield',
           },
           {
             key: 'state',
@@ -59,8 +53,8 @@ export const groupScenario: ExampleScenario = {
             validationMessages: {
               maxLength: 'State abbreviation must be 2 characters',
             },
+            placeholder: 'IL',
             props: {
-              placeholder: 'IL',
               hint: 'Enter 2-letter state abbreviation',
             },
           },
@@ -74,9 +68,7 @@ export const groupScenario: ExampleScenario = {
             validationMessages: {
               pattern: 'Please enter a valid 5-digit ZIP code',
             },
-            props: {
-              placeholder: '62701',
-            },
+            placeholder: '62701',
           },
         ],
       },

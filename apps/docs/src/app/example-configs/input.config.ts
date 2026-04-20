@@ -13,9 +13,9 @@ export const inputConfig = {
         required: 'This field is required',
         email: 'Please enter a valid email address',
       },
+      placeholder: 'Enter your email',
       props: {
         type: 'email',
-        placeholder: 'Enter your email',
       },
     },
     {
@@ -29,9 +29,7 @@ export const inputConfig = {
         required: 'This field is required',
         minLength: 'Must be at least {{requiredLength}} characters',
       },
-      props: {
-        placeholder: 'Choose a username',
-      },
+      placeholder: 'Choose a username',
     },
   ],
 } as const satisfies FormConfig;

@@ -23,9 +23,7 @@ const config = {
           key: 'fullName',
           type: 'input',
           label: 'Full Name',
-          props: {
-            placeholder: 'Enter your full name',
-          },
+          placeholder: 'Enter your full name',
           col: 12,
         },
         {
@@ -73,18 +71,14 @@ const config = {
           key: 'companyName',
           type: 'input',
           label: 'Company Name',
-          props: {
-            placeholder: 'Enter company name',
-          },
+          placeholder: 'Enter company name',
           col: 12,
         },
         {
           key: 'taxId',
           type: 'input',
           label: 'Tax ID',
-          props: {
-            placeholder: 'Enter tax ID',
-          },
+          placeholder: 'Enter tax ID',
           col: 6,
         },
         {

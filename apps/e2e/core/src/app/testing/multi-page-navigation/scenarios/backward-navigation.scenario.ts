@@ -17,9 +17,7 @@ const config = {
           key: 'field1',
           type: 'input',
           label: 'Field 1',
-          props: {
-            placeholder: 'Enter data for step 1',
-          },
+          placeholder: 'Enter data for step 1',
           col: 12,
         },
         {
@@ -44,9 +42,7 @@ const config = {
           key: 'field2',
           type: 'input',
           label: 'Field 2',
-          props: {
-            placeholder: 'Enter data for step 2',
-          },
+          placeholder: 'Enter data for step 2',
           col: 12,
         },
         {
@@ -77,9 +73,7 @@ const config = {
           key: 'field3',
           type: 'input',
           label: 'Field 3',
-          props: {
-            placeholder: 'Enter data for step 3',
-          },
+          placeholder: 'Enter data for step 3',
           col: 12,
         },
         {

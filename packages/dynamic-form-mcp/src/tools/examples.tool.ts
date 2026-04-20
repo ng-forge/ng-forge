@@ -2057,7 +2057,7 @@ const megaFormConfig = {
         { key: 'pageHeader', type: 'text', label: 'All Field Types Demo', props: { elementType: 'h1' } },
 
         // TEXT INPUTS
-        { key: 'textInput', type: 'input', label: 'Text Input', props: { placeholder: 'Type here' } },
+        { key: 'textInput', type: 'input', label: 'Text Input', placeholder: 'Type here' },
         { key: 'emailInput', type: 'input', label: 'Email', email: true, props: { type: 'email' } },
         { key: 'passwordInput', type: 'input', label: 'Password', minLength: 8, props: { type: 'password' } },
         { key: 'numberInput', type: 'input', label: 'Number', min: 0, max: 100, props: { type: 'number' } },

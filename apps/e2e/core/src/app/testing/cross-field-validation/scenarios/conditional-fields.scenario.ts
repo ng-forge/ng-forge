@@ -17,27 +17,21 @@ const config = {
       key: 'streetAddress',
       type: 'input',
       label: 'Street Address',
-      props: {
-        placeholder: 'Enter street address',
-      },
+      placeholder: 'Enter street address',
       col: 12,
     },
     {
       key: 'city',
       type: 'input',
       label: 'City',
-      props: {
-        placeholder: 'Enter city',
-      },
+      placeholder: 'Enter city',
       col: 6,
     },
     {
       key: 'zipCode',
       type: 'input',
       label: 'ZIP Code',
-      props: {
-        placeholder: 'Enter ZIP code',
-      },
+      placeholder: 'Enter ZIP code',
       pattern: '^[0-9]{5}(-[0-9]{4})?$',
       col: 6,
     },

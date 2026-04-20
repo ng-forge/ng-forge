@@ -17,6 +17,11 @@ export interface BaseValueField<TProps, TValue, TMeta extends FieldMeta = FieldM
   /**
    * Placeholder text displayed when the field is empty.
    * Supports static strings, Observables, and Signals for dynamic content.
+   *
+   * Note: placeholder lives at the field level, NOT inside `props`. The integration-layer
+   * `props` interfaces (InputProps, TextareaProps, SelectProps, DatepickerProps) intentionally
+   * omit `placeholder` — TypeScript's excess property check rejects `props: { placeholder: ... }`
+   * for any `props` literal typed against those interfaces.
    */
   placeholder?: DynamicText;
 

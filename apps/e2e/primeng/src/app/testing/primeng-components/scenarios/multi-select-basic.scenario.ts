@@ -14,9 +14,9 @@ const config = {
         { value: 'vue', label: 'Vue' },
         { value: 'nodejs', label: 'Node.js' },
       ],
+      placeholder: 'Select skills',
       props: {
         multiple: true,
-        placeholder: 'Select skills',
       },
     },
   ],

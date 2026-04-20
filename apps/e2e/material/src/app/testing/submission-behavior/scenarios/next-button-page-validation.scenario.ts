@@ -28,7 +28,7 @@ export const nextButtonPageValidationScenario: TestScenario = {
             key: 'requiredField',
             type: 'input',
             label: 'Required Field',
-            props: { placeholder: 'Fill this to enable Next button' },
+            placeholder: 'Fill this to enable Next button',
             required: true,
             col: 12,
           },
@@ -54,7 +54,7 @@ export const nextButtonPageValidationScenario: TestScenario = {
             key: 'optionalField',
             type: 'input',
             label: 'Optional Field',
-            props: { placeholder: 'This is optional' },
+            placeholder: 'This is optional',
             col: 12,
           },
           {

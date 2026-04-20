@@ -20,16 +20,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('BsSelectProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys =
-    | 'multiple'
-    | 'size'
-    | 'htmlSize'
-    | 'floatingLabel'
-    | 'hint'
-    | 'validFeedback'
-    | 'invalidFeedback'
-    | 'compareWith'
-    | 'placeholder';
+  type ExpectedKeys = 'multiple' | 'size' | 'htmlSize' | 'floatingLabel' | 'hint' | 'validFeedback' | 'invalidFeedback' | 'compareWith';
   type ActualKeys = keyof BsSelectProps;
 
   it('should have exactly the expected keys', () => {
@@ -72,10 +63,6 @@ describe('BsSelectProps - Exhaustive Whitelist', () => {
     it('compareWith', () => {
       // Bootstrap select uses string for compareWith since native HTML select only supports strings
       expectTypeOf<BsSelectProps['compareWith']>().toEqualTypeOf<((o1: string, o2: string) => boolean) | undefined>();
-    });
-
-    it('placeholder', () => {
-      expectTypeOf<BsSelectProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });

@@ -4362,7 +4362,8 @@ const tagTemplate = {
       label: 'Tag',
       required: true,
       minLength: 2,
-      props: { placeholder: 'Enter a tag', hint: 'Tags must be at least 2 characters' },
+      placeholder: 'Enter a tag',
+      props: { hint: 'Tags must be at least 2 characters' },
     },
     {
       key: 'removeTag',
@@ -4382,7 +4383,8 @@ const contactTemplate = [
     label: 'Contact Name',
     required: true,
     minLength: 2,
-    props: { placeholder: 'Enter contact name', hint: 'Full name of the emergency contact' },
+    placeholder: 'Enter contact name',
+    props: { hint: 'Full name of the emergency contact' },
   },
   {
     key: 'phone',
@@ -4391,7 +4393,8 @@ const contactTemplate = [
     required: true,
     pattern: /^\d{10}$/,
     validationMessages: { pattern: 'Please enter a valid 10-digit phone number' },
-    props: { type: 'tel', placeholder: '5551234567' },
+    placeholder: '5551234567',
+    props: { type: 'tel' },
   },
   {
     key: 'relationship',
@@ -5047,7 +5050,7 @@ export class ContactFormComponent {
         label: 'First Name',
         value: '',
         required: true,
-        props: { placeholder: 'Your first name' },
+        placeholder: 'Your first name',
       },
       {
         key: 'lastName',
@@ -5055,7 +5058,7 @@ export class ContactFormComponent {
         label: 'Last Name',
         value: '',
         required: true,
-        props: { placeholder: 'Your last name' },
+        placeholder: 'Your last name',
       },
       {
         key: 'email',
@@ -5064,9 +5067,9 @@ export class ContactFormComponent {
         value: '',
         required: true,
         email: true,
+        placeholder: 'email@example.com',
         props: {
           type: 'email',
-          placeholder: 'email@example.com',
         },
       },
       {
@@ -5074,9 +5077,9 @@ export class ContactFormComponent {
         type: 'input',
         label: 'Phone',
         value: '',
+        placeholder: '+1 (555) 000-0000',
         props: {
           type: 'tel',
-          placeholder: '+1 (555) 000-0000',
         },
       },
       {
@@ -5091,7 +5094,7 @@ export class ContactFormComponent {
           { value: 'sales', label: 'Sales Question' },
           { value: 'feedback', label: 'Feedback' },
         ],
-        props: { placeholder: 'Select a subject' },
+        placeholder: 'Select a subject',
       },
       {
         key: 'message',
@@ -5106,8 +5109,8 @@ export class ContactFormComponent {
           minLength: 'Message must be at least 10 characters',
           maxLength: 'Message cannot exceed 500 characters',
         },
+        placeholder: 'Tell us how we can help...',
         props: {
-          placeholder: 'Tell us how we can help...',
           rows: 5,
         },
       },
@@ -5154,9 +5157,7 @@ All critical fields have validation:
 Every field includes helpful placeholder text:
 
 ```typescript
-props: {
-  placeholder: 'email@example.com',  // Shows expected format
-}
+placeholder: 'email@example.com',  // Shows expected format,
 ```
 
 ### Subject Categorization
@@ -5588,9 +5589,9 @@ export class LoginFormComponent {
         validationMessages: {
           email: 'Please enter a valid email address',
         },
+        placeholder: 'your@email.com',
         props: {
           type: 'email',
-          placeholder: 'your@email.com',
           hint: 'Enter the email associated with your account',
         },
       },
@@ -5605,9 +5606,9 @@ export class LoginFormComponent {
           required: 'Password is required',
         },
         // 'minLength' will use default with interpolated {{requiredLength}}
+        placeholder: 'Enter your password',
         props: {
           type: 'password',
-          placeholder: 'Enter your password',
         },
       },
       {
@@ -6484,7 +6485,7 @@ export class SimplifiedArrayFormComponent {
           label: 'Tag',
           required: true,
           minLength: 2,
-          props: { placeholder: 'Enter a tag' },
+          placeholder: 'Enter a tag',
         },
         value: ['angular', 'typescript'],
         addButton: { label: 'Add Tag', props: { color: 'primary' } },
@@ -6502,13 +6503,14 @@ export class SimplifiedArrayFormComponent {
             label: 'Contact Name',
             required: true,
             minLength: 2,
-            props: { placeholder: 'Enter contact name' },
+            placeholder: 'Enter contact name',
           },
           {
             key: 'phone',
             type: 'input',
             label: 'Phone Number',
-            props: { type: 'tel', placeholder: '5551234567' },
+            placeholder: '5551234567',
+            props: { type: 'tel' },
           },
         ],
         value: [
@@ -6526,7 +6528,7 @@ export class SimplifiedArrayFormComponent {
           key: 'text',
           type: 'input',
           label: 'Note',
-          props: { placeholder: 'Enter a note' },
+          placeholder: 'Enter a note',
         },
         addButton: { label: 'Add Note' },
       },
@@ -6842,9 +6844,9 @@ const registrationConfig = {
               },
             },
           ],
+          placeholder: 'Select your industry',
           props: {
             appearance: 'outline',
-            placeholder: 'Select your industry',
           },
         },
         {
@@ -7299,9 +7301,7 @@ Date selection control.
   required: true,
   minDate: new Date(1900, 0, 1),  // optional
   maxDate: new Date(),            // optional
-  props: {
-    placeholder: 'Select your birth date',
-  }
+  placeholder: 'Select your birth date',
 }
 ```
 
@@ -7558,9 +7558,7 @@ Single or multi-select dropdown.
     { value: 'us', label: 'United States' },
     { value: 'uk', label: 'United Kingdom' },
   ],
-  props: {
-    placeholder: 'Select country',
-  }
+  placeholder: 'Select country',
 }
 ```
 
@@ -7699,9 +7697,9 @@ Text-based input with HTML5 type support.
   label: 'Email',
   required: true,
   email: true,
+  placeholder: 'user@example.com',
   props: {
     type: 'email',              // 'text' | 'email' | 'password' | 'number' | 'tel' | 'url'
-    placeholder: 'user@example.com',
   }
 }
 ```
@@ -7730,8 +7728,8 @@ Multi-line text input.
   value: '',
   label: 'Biography',
   maxLength: 500,
+  placeholder: 'Tell us about yourself',
   props: {
-    placeholder: 'Tell us about yourself',
     rows: 4,
   }
 }

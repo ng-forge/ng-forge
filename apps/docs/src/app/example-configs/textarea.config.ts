@@ -11,9 +11,9 @@ export const textareaConfig = {
       validationMessages: {
         maxLength: 'Must not exceed {{maxLength}} characters',
       },
+      placeholder: 'Tell us about yourself',
       props: {
         rows: 4,
-        placeholder: 'Tell us about yourself',
       },
     },
   ],

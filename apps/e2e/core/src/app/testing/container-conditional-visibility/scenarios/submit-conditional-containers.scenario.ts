@@ -14,7 +14,7 @@ const config = {
       type: 'input',
       label: 'Name',
       value: 'Test User',
-      props: { placeholder: 'Enter name' },
+      placeholder: 'Enter name',
     },
     {
       key: 'addressGroup',
@@ -36,7 +36,7 @@ const config = {
               },
             },
           ],
-          props: { placeholder: 'Enter street' },
+          placeholder: 'Enter street',
         },
         {
           key: 'city',
@@ -54,7 +54,7 @@ const config = {
               },
             },
           ],
-          props: { placeholder: 'Enter city' },
+          placeholder: 'Enter city',
         },
       ],
     },

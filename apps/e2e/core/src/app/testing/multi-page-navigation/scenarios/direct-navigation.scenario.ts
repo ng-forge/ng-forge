@@ -17,9 +17,7 @@ const config = {
           key: 'introText',
           type: 'input',
           label: 'Introduction',
-          props: {
-            placeholder: 'Introduction text',
-          },
+          placeholder: 'Introduction text',
           col: 12,
         },
         {
@@ -44,9 +42,7 @@ const config = {
           key: 'detailText',
           type: 'input',
           label: 'Details',
-          props: {
-            placeholder: 'Detail text',
-          },
+          placeholder: 'Detail text',
           col: 12,
         },
         {
@@ -77,9 +73,7 @@ const config = {
           key: 'summaryText',
           type: 'input',
           label: 'Summary',
-          props: {
-            placeholder: 'Summary text',
-          },
+          placeholder: 'Summary text',
           col: 12,
         },
         {

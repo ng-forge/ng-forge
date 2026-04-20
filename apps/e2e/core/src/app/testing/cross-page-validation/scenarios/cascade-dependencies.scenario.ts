@@ -88,9 +88,7 @@ const config = {
           key: 'streetAddress',
           type: 'input',
           label: 'Street Address',
-          props: {
-            placeholder: 'Enter street address',
-          },
+          placeholder: 'Enter street address',
           required: true,
           col: 12,
         },
@@ -98,9 +96,7 @@ const config = {
           key: 'city',
           type: 'input',
           label: 'City',
-          props: {
-            placeholder: 'Enter city',
-          },
+          placeholder: 'Enter city',
           required: true,
           col: 6,
         },
@@ -108,9 +104,7 @@ const config = {
           key: 'postalCode',
           type: 'input',
           label: 'Postal/ZIP Code',
-          props: {
-            placeholder: 'Enter postal/ZIP code',
-          },
+          placeholder: 'Enter postal/ZIP code',
           required: true,
           col: 6,
         },

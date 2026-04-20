@@ -12,7 +12,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('BsTextareaProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'rows' | 'cols' | 'size' | 'floatingLabel' | 'hint' | 'validFeedback' | 'invalidFeedback' | 'placeholder';
+  type ExpectedKeys = 'rows' | 'cols' | 'size' | 'floatingLabel' | 'hint' | 'validFeedback' | 'invalidFeedback';
   type ActualKeys = keyof BsTextareaProps;
 
   it('should have exactly the expected keys', () => {
@@ -50,10 +50,6 @@ describe('BsTextareaProps - Exhaustive Whitelist', () => {
 
     it('invalidFeedback', () => {
       expectTypeOf<BsTextareaProps['invalidFeedback']>().toEqualTypeOf<DynamicText | undefined>();
-    });
-
-    it('placeholder', () => {
-      expectTypeOf<BsTextareaProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });

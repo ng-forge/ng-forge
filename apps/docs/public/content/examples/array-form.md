@@ -35,7 +35,8 @@ const tagTemplate = {
       label: 'Tag',
       required: true,
       minLength: 2,
-      props: { placeholder: 'Enter a tag', hint: 'Tags must be at least 2 characters' },
+      placeholder: 'Enter a tag',
+      props: { hint: 'Tags must be at least 2 characters' },
     },
     {
       key: 'removeTag',
@@ -55,7 +56,8 @@ const contactTemplate = [
     label: 'Contact Name',
     required: true,
     minLength: 2,
-    props: { placeholder: 'Enter contact name', hint: 'Full name of the emergency contact' },
+    placeholder: 'Enter contact name',
+    props: { hint: 'Full name of the emergency contact' },
   },
   {
     key: 'phone',
@@ -64,7 +66,8 @@ const contactTemplate = [
     required: true,
     pattern: /^\d{10}$/,
     validationMessages: { pattern: 'Please enter a valid 10-digit phone number' },
-    props: { type: 'tel', placeholder: '5551234567' },
+    placeholder: '5551234567',
+    props: { type: 'tel' },
   },
   {
     key: 'relationship',

@@ -7,18 +7,14 @@ const config = {
       key: 'stateInput1',
       type: 'input',
       label: 'State Input 1',
-      props: {
-        placeholder: 'Enter value 1',
-      },
+      placeholder: 'Enter value 1',
       col: 6,
     },
     {
       key: 'stateInput2',
       type: 'input',
       label: 'State Input 2',
-      props: {
-        placeholder: 'Enter value 2',
-      },
+      placeholder: 'Enter value 2',
       col: 6,
     },
     {

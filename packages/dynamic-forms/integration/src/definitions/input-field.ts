@@ -1,4 +1,4 @@
-import { BaseValueField, DynamicText } from '@ng-forge/dynamic-forms';
+import { BaseValueField } from '@ng-forge/dynamic-forms';
 import { InputMeta } from './input-meta';
 
 /**
@@ -74,7 +74,6 @@ export interface InputProps<T extends HtmlInputType = InputType> {
    * - All other types: value will be string
    */
   type?: T;
-  placeholder?: DynamicText;
 }
 
 // ============================================================================

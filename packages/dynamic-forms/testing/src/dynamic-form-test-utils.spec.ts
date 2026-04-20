@@ -20,7 +20,7 @@ describe('DynamicFormTestUtils', () => {
         key: 'name',
         type: 'input',
         label: 'Name',
-        props: { placeholder: 'Enter your name' },
+        placeholder: 'Enter your name',
       });
     });
 
@@ -40,7 +40,8 @@ describe('DynamicFormTestUtils', () => {
         type: 'input',
         label: 'Email',
         required: true,
-        props: { type: 'email', placeholder: 'Enter email' },
+        placeholder: 'Enter email',
+        props: { type: 'email' },
       });
       expect(config.fields[1]).toEqual({
         key: 'country',

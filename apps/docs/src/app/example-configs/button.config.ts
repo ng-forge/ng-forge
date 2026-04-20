@@ -13,9 +13,9 @@ export const buttonConfig = {
         required: 'This field is required',
         email: 'Please enter a valid email address',
       },
+      placeholder: 'Enter your email',
       props: {
         type: 'email',
-        placeholder: 'Enter your email',
       },
     },
     {

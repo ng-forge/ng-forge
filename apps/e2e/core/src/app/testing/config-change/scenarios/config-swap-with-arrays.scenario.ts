@@ -19,18 +19,16 @@ const contactsConfig = {
             type: 'input',
             label: 'Contact Name',
             col: 6,
-            props: {
-              placeholder: 'Enter contact name',
-            },
+            placeholder: 'Enter contact name',
           },
           {
             key: 'email',
             type: 'input',
             label: 'Contact Email',
             col: 6,
+            placeholder: 'Enter contact email',
             props: {
               type: 'email',
-              placeholder: 'Enter contact email',
             },
           },
         ],
@@ -47,18 +45,16 @@ const contactsConfig = {
           type: 'input',
           label: 'Contact Name',
           col: 6,
-          props: {
-            placeholder: 'Enter contact name',
-          },
+          placeholder: 'Enter contact name',
         },
         {
           key: 'email',
           type: 'input',
           label: 'Contact Email',
           col: 6,
+          placeholder: 'Enter contact email',
           props: {
             type: 'email',
-            placeholder: 'Enter contact email',
           },
         },
       ],
@@ -83,18 +79,16 @@ const itemsConfig = {
             type: 'input',
             label: 'Product Name',
             col: 6,
-            props: {
-              placeholder: 'Enter product name',
-            },
+            placeholder: 'Enter product name',
           },
           {
             key: 'quantity',
             type: 'input',
             label: 'Quantity',
             col: 6,
+            placeholder: 'Enter quantity',
             props: {
               type: 'number',
-              placeholder: 'Enter quantity',
             },
           },
         ],
@@ -111,18 +105,16 @@ const itemsConfig = {
           type: 'input',
           label: 'Product Name',
           col: 6,
-          props: {
-            placeholder: 'Enter product name',
-          },
+          placeholder: 'Enter product name',
         },
         {
           key: 'quantity',
           type: 'input',
           label: 'Quantity',
           col: 6,
+          placeholder: 'Enter quantity',
           props: {
             type: 'number',
-            placeholder: 'Enter quantity',
           },
         },
       ],

@@ -69,9 +69,7 @@ export const hiddenFieldScenario: TestScenario = {
         key: 'name',
         type: 'input',
         label: 'Name',
-        props: {
-          placeholder: 'Enter your name',
-        },
+        placeholder: 'Enter your name',
         required: true,
         col: 12,
       },

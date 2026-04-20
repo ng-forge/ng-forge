@@ -17,9 +17,7 @@ export const httpErrorHandlingScenario: TestScenario = {
         key: 'username',
         type: 'input',
         label: 'Username',
-        props: {
-          placeholder: 'Enter username',
-        },
+        placeholder: 'Enter username',
         required: true,
         col: 6,
       },
@@ -27,9 +25,9 @@ export const httpErrorHandlingScenario: TestScenario = {
         key: 'email',
         type: 'input',
         label: 'Email',
+        placeholder: 'Enter email',
         props: {
           type: 'email',
-          placeholder: 'Enter email',
         },
         required: true,
         col: 6,
@@ -38,9 +36,7 @@ export const httpErrorHandlingScenario: TestScenario = {
         key: 'message',
         type: 'input',
         label: 'Message',
-        props: {
-          placeholder: 'Enter message',
-        },
+        placeholder: 'Enter message',
         col: 12,
       },
       {

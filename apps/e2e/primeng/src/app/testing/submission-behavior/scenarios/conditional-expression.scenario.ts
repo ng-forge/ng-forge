@@ -15,7 +15,8 @@ export const conditionalExpressionScenario: TestScenario = {
         key: 'email2',
         type: 'input',
         label: 'Email',
-        props: { type: 'email', placeholder: 'Enter email' },
+        placeholder: 'Enter email',
+        props: { type: 'email' },
         col: 6,
       },
       {

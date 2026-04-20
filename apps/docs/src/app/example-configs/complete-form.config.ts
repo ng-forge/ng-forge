@@ -23,8 +23,8 @@ export const completeFormConfig = {
       label: 'First Name',
       value: '',
       required: true,
+      placeholder: 'Your first name',
       validationMessages: { required: 'This field is required' },
-      props: { placeholder: 'Your first name' },
     },
     {
       key: 'lastName',
@@ -32,8 +32,8 @@ export const completeFormConfig = {
       label: 'Last Name',
       value: '',
       required: true,
+      placeholder: 'Your last name',
       validationMessages: { required: 'This field is required' },
-      props: { placeholder: 'Your last name' },
     },
     {
       key: 'email',
@@ -42,13 +42,13 @@ export const completeFormConfig = {
       value: '',
       required: true,
       email: true,
+      placeholder: 'email@example.com',
       validationMessages: {
         required: 'This field is required',
         email: 'Please enter a valid email address',
       },
       props: {
         type: 'email',
-        placeholder: 'email@example.com',
       },
     },
     {
@@ -56,16 +56,16 @@ export const completeFormConfig = {
       type: 'input',
       label: 'Phone Number',
       value: '',
+      placeholder: '+1 (555) 000-0000',
       props: {
         type: 'tel',
-        placeholder: '+1 (555) 000-0000',
       },
     },
     {
       key: 'birthDate',
       type: 'datepicker',
       label: 'Birth Date',
-      props: { placeholder: 'Select your birth date' },
+      placeholder: 'Select your birth date',
     },
     {
       key: 'bio',
@@ -73,23 +73,23 @@ export const completeFormConfig = {
       label: 'Biography',
       value: '',
       maxLength: 500,
+      placeholder: 'Tell us about yourself',
       validationMessages: { maxLength: 'Must not exceed 500 characters' },
       props: {
         rows: 4,
-        placeholder: 'Tell us about yourself',
       },
     },
     {
       key: 'country',
       type: 'select',
       label: 'Country',
+      placeholder: 'Select your country',
       options: [
         { value: 'us', label: 'United States' },
         { value: 'uk', label: 'United Kingdom' },
         { value: 'ca', label: 'Canada' },
         { value: 'au', label: 'Australia' },
       ],
-      props: { placeholder: 'Select your country' },
     },
     {
       key: 'plan',

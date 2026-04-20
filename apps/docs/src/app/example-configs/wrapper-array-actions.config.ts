@@ -13,7 +13,7 @@ const tagItemTemplate = [
     label: 'Tag',
     required: true,
     minLength: 2,
-    props: { placeholder: 'Enter a tag' },
+    placeholder: 'Enter a tag',
   },
   {
     key: 'removeTag',
@@ -44,7 +44,7 @@ export const wrapperArrayActionsConfig: FormConfig = {
             label: 'Tag',
             required: true,
             minLength: 2,
-            props: { placeholder: 'Enter a tag' },
+            placeholder: 'Enter a tag',
             value: 'angular',
           },
           {
@@ -61,7 +61,7 @@ export const wrapperArrayActionsConfig: FormConfig = {
             label: 'Tag',
             required: true,
             minLength: 2,
-            props: { placeholder: 'Enter a tag' },
+            placeholder: 'Enter a tag',
             value: 'forms',
           },
           {

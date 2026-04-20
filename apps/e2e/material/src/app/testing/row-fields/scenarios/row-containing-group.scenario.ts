@@ -16,17 +16,13 @@ const config = {
               key: 'firstName',
               type: 'input',
               label: 'First Name',
-              props: {
-                placeholder: 'Enter first name',
-              },
+              placeholder: 'Enter first name',
             },
             {
               key: 'lastName',
               type: 'input',
               label: 'Last Name',
-              props: {
-                placeholder: 'Enter last name',
-              },
+              placeholder: 'Enter last name',
             },
           ],
         },
@@ -39,18 +35,16 @@ const config = {
               key: 'email',
               type: 'input',
               label: 'Email',
+              placeholder: 'Enter email',
               props: {
                 type: 'email',
-                placeholder: 'Enter email',
               },
             },
             {
               key: 'phone',
               type: 'input',
               label: 'Phone',
-              props: {
-                placeholder: 'Enter phone',
-              },
+              placeholder: 'Enter phone',
             },
           ],
         },

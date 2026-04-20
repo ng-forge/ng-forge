@@ -18,9 +18,7 @@ export const heroFormConfig = {
       type: 'input',
       label: 'Your Name',
       required: true,
-      props: {
-        placeholder: 'John Doe',
-      },
+      placeholder: 'John Doe',
     },
     {
       key: 'email',
@@ -31,9 +29,9 @@ export const heroFormConfig = {
       validationMessages: {
         email: 'Please enter a valid email address',
       },
+      placeholder: 'you@example.com',
       props: {
         type: 'email',
-        placeholder: 'you@example.com',
       },
     },
     {
@@ -45,8 +43,8 @@ export const heroFormConfig = {
       validationMessages: {
         minLength: 'Message must be at least {{requiredLength}} characters',
       },
+      placeholder: 'How can we help?',
       props: {
-        placeholder: 'How can we help?',
         rows: 3,
       },
     },
@@ -75,9 +73,9 @@ export const validationFormConfig = {
       label: 'Email',
       required: true,
       email: true,
+      placeholder: 'try "not-an-email"',
       props: {
         type: 'email',
-        placeholder: 'try "not-an-email"',
       },
     },
     {
@@ -90,9 +88,9 @@ export const validationFormConfig = {
       validationMessages: {
         pattern: 'Need uppercase, lowercase & number',
       },
+      placeholder: 'try "weak"',
       props: {
         type: 'password',
-        placeholder: 'try "weak"',
       },
     },
     {
@@ -102,9 +100,9 @@ export const validationFormConfig = {
       required: true,
       min: 18,
       max: 120,
+      placeholder: 'try 10 or 150',
       props: {
         type: 'number',
-        placeholder: 'try 10 or 150',
       },
     },
     {
@@ -118,9 +116,7 @@ export const validationFormConfig = {
       validationMessages: {
         pattern: 'Only lowercase letters, numbers, underscores',
       },
-      props: {
-        placeholder: 'try "AB" or "Invalid User!"',
-      },
+      placeholder: 'try "AB" or "Invalid User!"',
     },
     {
       key: 'submit',

@@ -66,3 +66,9 @@ vitest.config.*.timestamp*
 **/__screenshots__/
 .vercel
 .pnpm-store
+
+# Vitest attachments (screenshots from failed assertions)
+.vitest-attachments/
+.claude/scheduled_tasks.lock
+.claude/worktrees/
+graph.json

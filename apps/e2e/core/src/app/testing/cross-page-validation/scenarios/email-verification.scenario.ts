@@ -32,9 +32,9 @@ const config = {
           key: 'primaryEmail',
           type: 'input',
           label: 'Primary Email Address',
+          placeholder: 'Enter your primary email',
           props: {
             type: 'email',
-            placeholder: 'Enter your primary email',
           },
           email: true,
           required: true,
@@ -84,9 +84,7 @@ const config = {
           key: 'fullName',
           type: 'input',
           label: 'Full Name',
-          props: {
-            placeholder: 'Enter your full name',
-          },
+          placeholder: 'Enter your full name',
           required: true,
           col: 12,
         },
@@ -94,18 +92,16 @@ const config = {
           key: 'companyName',
           type: 'input',
           label: 'Company Name',
-          props: {
-            placeholder: 'Enter company name (for business emails)',
-          },
+          placeholder: 'Enter company name (for business emails)',
           col: 12,
         },
         {
           key: 'phoneNumber',
           type: 'input',
           label: 'Phone Number',
+          placeholder: 'Enter phone number',
           props: {
             type: 'tel',
-            placeholder: 'Enter phone number',
           },
           pattern: '^[+]?[0-9\\s\\-\\(\\)]+$',
           required: true,
@@ -149,9 +145,9 @@ const config = {
           key: 'confirmEmail',
           type: 'input',
           label: 'Confirm Email Address',
+          placeholder: 'Re-enter your email to confirm',
           props: {
             type: 'email',
-            placeholder: 'Re-enter your email to confirm',
           },
           email: true,
           required: true,

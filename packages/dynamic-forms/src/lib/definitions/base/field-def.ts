@@ -14,11 +14,11 @@ import { FieldMeta } from './field-meta';
  * @example
  * ```typescript
  * // Basic text input field
- * const textField: FieldDef<{ placeholder: string }> = {
+ * const textField: FieldDef<{ type?: string }> = {
  *   key: 'email',
  *   type: 'input',
  *   label: 'Email Address',
- *   props: { placeholder: 'Enter your email' },
+ *   props: { type: 'email' },
  *   col: 12
  * };
  * ```
@@ -116,8 +116,8 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
    *
    * @example
    * ```typescript
-   * // Input field props
-   * props: { placeholder: 'Enter email', type: 'email' }
+   * // Input field props (placeholder is at field level, not inside props)
+   * props: { type: 'email' }
    *
    * // Select field props
    * props: { options: [{ label: 'Yes', value: true }], multiple: false }

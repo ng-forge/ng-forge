@@ -46,22 +46,27 @@ export class FormConfigBuilder {
     return this;
   }
 
-  inputField(key: string, props?: Record<string, unknown>): FormConfigBuilder {
-    return this.field({
+  inputField(key: string, options?: { placeholder?: string } & Record<string, unknown>): FormConfigBuilder {
+    const { placeholder, ...props } = options ?? {};
+    const field: FieldDef<unknown> = {
       key,
       type: 'input',
       label: key.charAt(0).toUpperCase() + key.slice(1),
-      props: { placeholder: `Enter ${key}`, ...props },
-    });
+      placeholder: placeholder ?? `Enter ${key}`,
+    };
+    if (Object.keys(props).length > 0) field.props = props;
+    return this.field(field);
   }
 
-  requiredInputField(key: string, props?: Record<string, unknown>): FormConfigBuilder {
+  requiredInputField(key: string, options?: { placeholder?: string } & Record<string, unknown>): FormConfigBuilder {
+    const { placeholder, ...props } = options ?? {};
     const inputField: InputField<Record<string, unknown>> = {
       key,
       type: 'input',
       label: key.charAt(0).toUpperCase() + key.slice(1),
       required: true,
-      props: { placeholder: `Enter ${key}`, ...props },
+      placeholder: placeholder ?? `Enter ${key}`,
+      props: { ...props },
     };
     return this.field(inputField);
   }
@@ -178,7 +183,6 @@ export class DynamicFormTestUtils {
       return computed(() => ({
         ...baseInputsSignal(),
         type: (fieldDef.props as Record<string, unknown>)?.['type'] || 'text',
-        placeholder: (fieldDef.props as Record<string, unknown>)?.['placeholder'] || '',
       }));
     };
 

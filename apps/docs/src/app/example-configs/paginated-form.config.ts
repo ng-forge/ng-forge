@@ -27,8 +27,8 @@ export const paginatedFormConfig = {
           label: 'First Name',
           value: '',
           required: true,
+          placeholder: 'Enter your first name',
           validationMessages: { required: 'First name is required' },
-          props: { placeholder: 'Enter your first name' },
         },
         {
           key: 'lastName',
@@ -36,16 +36,16 @@ export const paginatedFormConfig = {
           label: 'Last Name',
           value: '',
           required: true,
+          placeholder: 'Enter your last name',
           validationMessages: { required: 'Last name is required' },
-          props: { placeholder: 'Enter your last name' },
         },
         {
           key: 'birthDate',
           type: 'datepicker',
           label: 'Date of Birth',
           required: true,
+          placeholder: 'Select your birth date',
           validationMessages: { required: 'Birth date is required' },
-          props: { placeholder: 'Select your birth date' },
         },
         {
           type: 'next',
@@ -76,13 +76,13 @@ export const paginatedFormConfig = {
           value: '',
           required: true,
           email: true,
+          placeholder: 'your.email@example.com',
           validationMessages: {
             required: 'Email is required',
             email: 'Please enter a valid email address',
           },
           props: {
             type: 'email',
-            placeholder: 'your.email@example.com',
           },
         },
         {
@@ -91,10 +91,10 @@ export const paginatedFormConfig = {
           label: 'Phone Number',
           value: '',
           required: true,
+          placeholder: '+1 (555) 000-0000',
           validationMessages: { required: 'Phone number is required' },
           props: {
             type: 'tel',
-            placeholder: '+1 (555) 000-0000',
           },
         },
         {
@@ -144,8 +144,8 @@ export const paginatedFormConfig = {
           label: 'Street Address',
           value: '',
           required: true,
+          placeholder: '123 Main Street',
           validationMessages: { required: 'Street address is required' },
-          props: { placeholder: '123 Main Street' },
         },
         {
           type: 'row',
@@ -157,8 +157,8 @@ export const paginatedFormConfig = {
               label: 'City',
               value: '',
               required: true,
+              placeholder: 'New York',
               validationMessages: { required: 'City is required' },
-              props: { placeholder: 'New York' },
               col: 6,
             },
             {
@@ -166,6 +166,7 @@ export const paginatedFormConfig = {
               type: 'select',
               label: 'State',
               required: true,
+              placeholder: 'Select state',
               validationMessages: { required: 'State is required' },
               options: [
                 { value: 'ny', label: 'New York' },
@@ -173,7 +174,6 @@ export const paginatedFormConfig = {
                 { value: 'tx', label: 'Texas' },
                 { value: 'fl', label: 'Florida' },
               ],
-              props: { placeholder: 'Select state' },
               col: 6,
             },
           ],
@@ -185,11 +185,11 @@ export const paginatedFormConfig = {
           value: '',
           required: true,
           pattern: '^\\d{5}$',
+          placeholder: '10001',
           validationMessages: {
             required: 'ZIP code is required',
             pattern: 'ZIP code must be 5 digits',
           },
-          props: { placeholder: '10001' },
         },
         {
           type: 'row',

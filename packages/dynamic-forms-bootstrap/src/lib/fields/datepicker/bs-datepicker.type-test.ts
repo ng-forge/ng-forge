@@ -22,8 +22,7 @@ describe('BsDatepickerProps - Exhaustive Whitelist', () => {
     | 'displayMonths'
     | 'navigation'
     | 'outsideDays'
-    | 'showWeekNumbers'
-    | 'placeholder';
+    | 'showWeekNumbers';
   type ActualKeys = keyof BsDatepickerProps;
 
   it('should have exactly the expected keys', () => {
@@ -73,10 +72,6 @@ describe('BsDatepickerProps - Exhaustive Whitelist', () => {
 
     it('showWeekNumbers', () => {
       expectTypeOf<BsDatepickerProps['showWeekNumbers']>().toEqualTypeOf<boolean | undefined>();
-    });
-
-    it('placeholder', () => {
-      expectTypeOf<BsDatepickerProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });

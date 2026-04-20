@@ -10,9 +10,7 @@ export const datepickerConfig = {
       type: 'datepicker',
       label: 'Birth Date',
       required: true,
-      props: {
-        placeholder: 'Select your birth date',
-      },
+      placeholder: 'Select your birth date',
     },
   ],
 } as const satisfies FormConfig;

@@ -40,9 +40,7 @@ const config = {
       key: 'productName',
       type: 'input',
       label: 'Product Name',
-      props: {
-        placeholder: 'Enter product name',
-      },
+      placeholder: 'Enter product name',
       required: true,
       col: 12,
     },
@@ -50,9 +48,9 @@ const config = {
       key: 'price',
       type: 'input',
       label: 'Price',
+      placeholder: 'Enter price',
       props: {
         type: 'number',
-        placeholder: 'Enter price',
       },
       min: 0,
       required: true,

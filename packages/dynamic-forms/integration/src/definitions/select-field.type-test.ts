@@ -3,7 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { SelectField, SelectProps } from './select-field';
-import type { DynamicText, FieldOption } from '@ng-forge/dynamic-forms';
+import type { FieldOption } from '@ng-forge/dynamic-forms';
 
 // ============================================================================
 // SelectField - Keys Whitelist Test
@@ -106,15 +106,10 @@ describe('SelectField<{ id: string; name: string }>', () => {
 // ============================================================================
 
 describe('SelectProps', () => {
-  type ExpectedKeys = 'placeholder';
   type ActualKeys = keyof SelectProps;
 
-  it('should have exactly the expected keys', () => {
-    expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
-  });
-
-  it('has optional placeholder of type DynamicText', () => {
-    expectTypeOf<SelectProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
+  it('should have no keys (empty base props)', () => {
+    expectTypeOf<ActualKeys>().toEqualTypeOf<never>();
   });
 });
 

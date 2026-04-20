@@ -38,7 +38,7 @@ export class ContactFormComponent {
         label: 'First Name',
         value: '',
         required: true,
-        props: { placeholder: 'Your first name' },
+        placeholder: 'Your first name',
       },
       {
         key: 'lastName',
@@ -46,7 +46,7 @@ export class ContactFormComponent {
         label: 'Last Name',
         value: '',
         required: true,
-        props: { placeholder: 'Your last name' },
+        placeholder: 'Your last name',
       },
       {
         key: 'email',
@@ -55,9 +55,9 @@ export class ContactFormComponent {
         value: '',
         required: true,
         email: true,
+        placeholder: 'email@example.com',
         props: {
           type: 'email',
-          placeholder: 'email@example.com',
         },
       },
       {
@@ -65,9 +65,9 @@ export class ContactFormComponent {
         type: 'input',
         label: 'Phone',
         value: '',
+        placeholder: '+1 (555) 000-0000',
         props: {
           type: 'tel',
-          placeholder: '+1 (555) 000-0000',
         },
       },
       {
@@ -82,7 +82,7 @@ export class ContactFormComponent {
           { value: 'sales', label: 'Sales Question' },
           { value: 'feedback', label: 'Feedback' },
         ],
-        props: { placeholder: 'Select a subject' },
+        placeholder: 'Select a subject',
       },
       {
         key: 'message',
@@ -97,8 +97,8 @@ export class ContactFormComponent {
           minLength: 'Message must be at least 10 characters',
           maxLength: 'Message cannot exceed 500 characters',
         },
+        placeholder: 'Tell us how we can help...',
         props: {
-          placeholder: 'Tell us how we can help...',
           rows: 5,
         },
       },
@@ -145,9 +145,7 @@ All critical fields have validation:
 Every field includes helpful placeholder text:
 
 ```typescript
-props: {
-  placeholder: 'email@example.com',  // Shows expected format
-}
+placeholder: 'email@example.com',  // Shows expected format,
 ```
 
 ### Subject Categorization

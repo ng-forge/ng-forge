@@ -32,8 +32,8 @@ export const completeFormScenario: ExampleScenario = {
           required: 'This field is required',
           minLength: 'Must be at least {{requiredLength}} characters',
         },
+        placeholder: 'Enter your first name',
         props: {
-          placeholder: 'Enter your first name',
           floatingLabel: true,
         },
       },
@@ -47,8 +47,8 @@ export const completeFormScenario: ExampleScenario = {
           required: 'This field is required',
           minLength: 'Must be at least {{requiredLength}} characters',
         },
+        placeholder: 'Enter your last name',
         props: {
-          placeholder: 'Enter your last name',
           floatingLabel: true,
         },
       },
@@ -62,9 +62,9 @@ export const completeFormScenario: ExampleScenario = {
           required: 'This field is required',
           email: 'Please enter a valid email address',
         },
+        placeholder: 'user@example.com',
         props: {
           type: 'email',
-          placeholder: 'user@example.com',
           floatingLabel: true,
           hint: 'We will never share your email',
         },
@@ -83,9 +83,9 @@ export const completeFormScenario: ExampleScenario = {
           min: 'Must be at least {{min}}',
           max: 'Must not exceed {{max}}',
         },
+        placeholder: '18',
         props: {
           type: 'number',
-          placeholder: '18',
           floatingLabel: true,
         },
       },
@@ -106,8 +106,8 @@ export const completeFormScenario: ExampleScenario = {
           { value: 'fr', label: 'France' },
           { value: 'jp', label: 'Japan' },
         ],
+        placeholder: 'Select your country',
         props: {
-          placeholder: 'Select your country',
           floatingLabel: true,
         },
       },
@@ -126,8 +126,8 @@ export const completeFormScenario: ExampleScenario = {
           { value: 'pro', label: 'Pro - $10/month' },
           { value: 'enterprise', label: 'Enterprise - $50/month' },
         ],
+        placeholder: 'Choose a plan',
         props: {
-          placeholder: 'Choose a plan',
           floatingLabel: true,
         },
       },
@@ -135,8 +135,8 @@ export const completeFormScenario: ExampleScenario = {
         key: 'bio',
         type: 'textarea',
         label: 'Bio',
+        placeholder: 'Tell us about yourself',
         props: {
-          placeholder: 'Tell us about yourself',
           floatingLabel: true,
           hint: 'Optional - share a bit about yourself',
           rows: 4,

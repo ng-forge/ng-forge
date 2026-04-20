@@ -29,8 +29,7 @@ describe('MatSelectProps - Exhaustive Whitelist', () => {
     | 'floatLabel'
     | 'hideRequiredMarker'
     | 'compareWith'
-    | 'hint'
-    | 'placeholder';
+    | 'hint';
   type ActualKeys = keyof MatSelectProps;
 
   it('should have exactly the expected keys', () => {
@@ -73,10 +72,6 @@ describe('MatSelectProps - Exhaustive Whitelist', () => {
 
     it('hint', () => {
       expectTypeOf<MatSelectProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
-    });
-
-    it('placeholder', () => {
-      expectTypeOf<MatSelectProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });

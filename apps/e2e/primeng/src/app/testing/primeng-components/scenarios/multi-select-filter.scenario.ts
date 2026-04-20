@@ -19,10 +19,10 @@ const config = {
         { value: 'br', label: 'Brazil' },
         { value: 'au', label: 'Australia' },
       ],
+      placeholder: 'Search and select countries',
       props: {
         multiple: true,
         filter: true,
-        placeholder: 'Search and select countries',
       },
     },
   ],

@@ -19,7 +19,7 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
-      [placeholder]="(placeholder() ?? props()?.placeholder | dynamicText | async) ?? ''"
+      [placeholder]="(placeholder() | dynamicText | async) ?? ''"
       [multiple]="props()?.multiple ?? false"
       [compareWith]="props()?.compareWith ?? defaultCompare"
       [interface]="props()?.interface ?? 'alert'"

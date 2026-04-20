@@ -21,9 +21,7 @@ Single or multi-select dropdown.
     { value: 'us', label: 'United States' },
     { value: 'uk', label: 'United Kingdom' },
   ],
-  props: {
-    placeholder: 'Select country',
-  }
+  placeholder: 'Select country',
 }
 ```
 

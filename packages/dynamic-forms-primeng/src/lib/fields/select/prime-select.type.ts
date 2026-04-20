@@ -14,10 +14,6 @@ export interface PrimeSelectProps extends SelectProps {
    */
   filter?: boolean;
   /**
-   * Placeholder text when no option is selected.
-   */
-  placeholder?: DynamicText;
-  /**
    * Show clear button to deselect value.
    */
   showClear?: boolean;

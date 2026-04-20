@@ -20,7 +20,7 @@ export function generateFlatFields(count: number, type = 'input'): FormConfig {
     key: `field${i}`,
     type,
     label: `Field ${i + 1}`,
-    props: { placeholder: `Enter value ${i + 1}` },
+    placeholder: `Enter value ${i + 1}`,
     col: 12,
   }));
 
@@ -52,7 +52,7 @@ export function generateMixedFields(count: number): FormConfig {
     }
 
     if (fieldType === 'input' || fieldType === 'textarea') {
-      base['props'] = { placeholder: `Enter ${fieldType} ${i + 1}` };
+      base['placeholder'] = `Enter ${fieldType} ${i + 1}`;
     }
 
     if (fieldType === 'slider') {
@@ -91,7 +91,7 @@ export function generateConditionalFields(totalFields: number, conditionalCount:
       key: `field${i}`,
       type: 'input',
       label: `Field ${i + 1}`,
-      props: { placeholder: `Value ${i + 1}` },
+      placeholder: `Value ${i + 1}`,
       col: 6,
     };
 
@@ -126,7 +126,7 @@ export function generateArrayConfig(itemCount: number, fieldsPerItem: number): F
     type: 'input',
     label: `Item Field ${i + 1}`,
     col: Math.floor(12 / fieldsPerItem) || 4,
-    props: { placeholder: `Value ${i + 1}` },
+    placeholder: `Value ${i + 1}`,
   }));
 
   const items = Array.from({ length: itemCount }, () => [...itemTemplate]);
@@ -152,7 +152,7 @@ export function generatePagedConfig(pages: number, fieldsPerPage: number): FormC
       key: `p${pageIndex}f${fieldIndex}`,
       type: 'input',
       label: `Page ${pageIndex + 1} - Field ${fieldIndex + 1}`,
-      props: { placeholder: `Enter value` },
+      placeholder: `Enter value`,
       col: 6,
     }));
 

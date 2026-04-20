@@ -170,7 +170,7 @@ describe('FieldDef - Usage Examples', () => {
 
   it('should accept complete field definition', () => {
     interface InputProps {
-      placeholder?: string;
+      type?: string;
       maxLength?: number;
     }
 
@@ -179,7 +179,7 @@ describe('FieldDef - Usage Examples', () => {
       type: 'input',
       label: 'Email Address',
       props: {
-        placeholder: 'Enter your email',
+        type: 'email',
         maxLength: 100,
       },
       className: 'custom-input',

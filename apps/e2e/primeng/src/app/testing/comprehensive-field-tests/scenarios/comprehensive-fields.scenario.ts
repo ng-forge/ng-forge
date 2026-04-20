@@ -15,9 +15,7 @@ const config = {
       key: 'textInput',
       type: 'input',
       label: 'Text Input',
-      props: {
-        placeholder: 'Enter text',
-      },
+      placeholder: 'Enter text',
       required: true,
       col: 6,
     },
@@ -26,9 +24,9 @@ const config = {
       key: 'emailInput',
       type: 'input',
       label: 'Email Input',
+      placeholder: 'Enter email',
       props: {
         type: 'email',
-        placeholder: 'Enter email',
       },
       email: true,
       required: true,
@@ -39,9 +37,9 @@ const config = {
       key: 'passwordInput',
       type: 'input',
       label: 'Password',
+      placeholder: 'Enter password',
       props: {
         type: 'password',
-        placeholder: 'Enter password',
       },
       required: true,
       minLength: 8,
@@ -52,9 +50,9 @@ const config = {
       key: 'numberInput',
       type: 'input',
       label: 'Number Input',
+      placeholder: 'Enter number',
       props: {
         type: 'number',
-        placeholder: 'Enter number',
       },
       min: 1,
       max: 100,
@@ -65,8 +63,8 @@ const config = {
       key: 'textareaField',
       type: 'textarea',
       label: 'Textarea Field',
+      placeholder: 'Enter long text',
       props: {
-        placeholder: 'Enter long text',
         rows: 4,
       },
       col: 12,

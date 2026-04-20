@@ -22,9 +22,7 @@ const config = {
           key: 'requiredField',
           type: 'input',
           label: 'Required Field',
-          props: {
-            placeholder: 'This field is required',
-          },
+          placeholder: 'This field is required',
           required: true,
           col: 12,
         },
@@ -32,9 +30,9 @@ const config = {
           key: 'emailField',
           type: 'input',
           label: 'Email',
+          placeholder: 'Enter valid email',
           props: {
             type: 'email',
-            placeholder: 'Enter valid email',
           },
           email: true,
           required: true,
@@ -63,9 +61,7 @@ const config = {
           key: 'optionalField',
           type: 'input',
           label: 'Optional Field',
-          props: {
-            placeholder: 'This field is optional',
-          },
+          placeholder: 'This field is optional',
           col: 12,
         },
         {

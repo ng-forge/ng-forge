@@ -27,7 +27,7 @@ export const wrapperSectionConfig: FormConfig = {
       label: 'Contact name',
       value: '',
       required: true,
-      props: { placeholder: 'Ada Lovelace' },
+      placeholder: 'Ada Lovelace',
       wrappers: [{ type: 'section', title: 'Primary contact' }],
     },
     {
@@ -37,15 +37,16 @@ export const wrapperSectionConfig: FormConfig = {
       value: '',
       required: true,
       email: true,
-      props: { type: 'email', placeholder: 'ada@example.com' },
+      placeholder: 'ada@example.com',
+      props: { type: 'email' },
     },
     {
       key: 'notes',
       type: 'input',
       label: 'Internal notes (defaults opted out)',
       value: '',
+      placeholder: 'wrappers: null skips the form-level defaults',
       wrappers: null,
-      props: { placeholder: 'wrappers: null skips the form-level defaults' },
     },
   ],
 };

@@ -17,15 +17,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('MatInputProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys =
-    | 'appearance'
-    | 'disableRipple'
-    | 'subscriptSizing'
-    | 'floatLabel'
-    | 'hideRequiredMarker'
-    | 'type'
-    | 'hint'
-    | 'placeholder';
+  type ExpectedKeys = 'appearance' | 'disableRipple' | 'subscriptSizing' | 'floatLabel' | 'hideRequiredMarker' | 'type' | 'hint';
   type ActualKeys = keyof MatInputProps;
 
   it('should have exactly the expected keys', () => {
@@ -64,10 +56,6 @@ describe('MatInputProps - Exhaustive Whitelist', () => {
 
     it('hint', () => {
       expectTypeOf<MatInputProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
-    });
-
-    it('placeholder', () => {
-      expectTypeOf<MatInputProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });

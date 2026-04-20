@@ -7,7 +7,6 @@ export interface IonicSelectProps extends SelectProps {
   interfaceOptions?: unknown;
   cancelText?: string;
   okText?: string;
-  placeholder?: DynamicText;
   fill?: 'solid' | 'outline';
   shape?: 'round';
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked' | 'floating';

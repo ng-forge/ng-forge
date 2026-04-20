@@ -34,9 +34,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter street address',
-          },
+          placeholder: 'Enter street address',
         },
         {
           key: 'city',
@@ -54,9 +52,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter city',
-          },
+          placeholder: 'Enter city',
         },
         {
           key: 'zipCode',
@@ -74,9 +70,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter ZIP',
-          },
+          placeholder: 'Enter ZIP',
         },
       ],
     },
@@ -128,9 +122,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter phone number',
-          },
+          placeholder: 'Enter phone number',
         },
       ],
     },

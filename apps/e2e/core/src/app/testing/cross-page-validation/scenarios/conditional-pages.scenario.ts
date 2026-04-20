@@ -76,9 +76,7 @@ const config = {
           key: 'firstName',
           type: 'input',
           label: 'First Name',
-          props: {
-            placeholder: 'Enter first name',
-          },
+          placeholder: 'Enter first name',
           validators: [
             {
               type: 'required',
@@ -96,9 +94,7 @@ const config = {
           key: 'lastName',
           type: 'input',
           label: 'Last Name',
-          props: {
-            placeholder: 'Enter last name',
-          },
+          placeholder: 'Enter last name',
           validators: [
             {
               type: 'required',
@@ -168,9 +164,7 @@ const config = {
           key: 'businessName',
           type: 'input',
           label: 'Business Name',
-          props: {
-            placeholder: 'Enter business name',
-          },
+          placeholder: 'Enter business name',
           validators: [
             {
               type: 'required',
@@ -188,9 +182,7 @@ const config = {
           key: 'taxId',
           type: 'input',
           label: 'Tax ID / EIN',
-          props: {
-            placeholder: 'Enter tax identification number',
-          },
+          placeholder: 'Enter tax identification number',
           validators: [
             {
               type: 'required',
@@ -265,9 +257,7 @@ const config = {
           key: 'confirmationCode',
           type: 'input',
           label: 'Confirmation Code',
-          props: {
-            placeholder: 'Enter confirmation code (sent via email)',
-          },
+          placeholder: 'Enter confirmation code (sent via email)',
           pattern: '^[A-Z0-9]{6}$',
           required: true,
           col: 12,

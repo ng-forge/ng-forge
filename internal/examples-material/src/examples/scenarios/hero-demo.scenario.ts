@@ -23,9 +23,7 @@ export const heroDemoScenario: ExampleScenario = {
         type: 'input',
         label: 'Your Name',
         required: true,
-        props: {
-          placeholder: 'John Doe',
-        },
+        placeholder: 'John Doe',
       },
       {
         key: 'email',
@@ -36,9 +34,9 @@ export const heroDemoScenario: ExampleScenario = {
         validationMessages: {
           email: 'Please enter a valid email address',
         },
+        placeholder: 'you@example.com',
         props: {
           type: 'email',
-          placeholder: 'you@example.com',
         },
       },
       {
@@ -50,8 +48,8 @@ export const heroDemoScenario: ExampleScenario = {
         validationMessages: {
           minLength: 'Message must be at least {{requiredLength}} characters',
         },
+        placeholder: 'How can we help?',
         props: {
-          placeholder: 'How can we help?',
           rows: 3,
         },
       },

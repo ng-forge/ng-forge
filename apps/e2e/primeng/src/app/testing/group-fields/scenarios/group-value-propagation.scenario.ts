@@ -7,9 +7,7 @@ const config = {
       key: 'name',
       type: 'input',
       label: 'Name',
-      props: {
-        placeholder: 'Enter your name',
-      },
+      placeholder: 'Enter your name',
     },
     {
       key: 'address',
@@ -19,25 +17,19 @@ const config = {
           key: 'street',
           type: 'input',
           label: 'Street',
-          props: {
-            placeholder: 'Enter street address',
-          },
+          placeholder: 'Enter street address',
         },
         {
           key: 'city',
           type: 'input',
           label: 'City',
-          props: {
-            placeholder: 'Enter city',
-          },
+          placeholder: 'Enter city',
         },
         {
           key: 'zip',
           type: 'input',
           label: 'ZIP Code',
-          props: {
-            placeholder: 'Enter ZIP',
-          },
+          placeholder: 'Enter ZIP',
         },
       ],
     },

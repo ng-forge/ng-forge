@@ -22,8 +22,7 @@ describe('MatTextareaProps - Exhaustive Whitelist', () => {
     | 'rows'
     | 'cols'
     | 'resize'
-    | 'maxLength'
-    | 'placeholder';
+    | 'maxLength';
   type ActualKeys = keyof MatTextareaProps;
 
   it('should have exactly the expected keys', () => {
@@ -69,10 +68,6 @@ describe('MatTextareaProps - Exhaustive Whitelist', () => {
 
     it('maxLength', () => {
       expectTypeOf<MatTextareaProps['maxLength']>().toEqualTypeOf<number | undefined>();
-    });
-
-    it('placeholder', () => {
-      expectTypeOf<MatTextareaProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });

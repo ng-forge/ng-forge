@@ -54,9 +54,7 @@ const config = {
           key: 'promoCode',
           type: 'input',
           label: 'Promo Code (Optional)',
-          props: {
-            placeholder: 'Enter promo code',
-          },
+          placeholder: 'Enter promo code',
           col: 12,
         },
         {
@@ -93,9 +91,7 @@ const config = {
           key: 'shippingFirstName',
           type: 'input',
           label: 'First Name',
-          props: {
-            placeholder: 'Shipping first name',
-          },
+          placeholder: 'Shipping first name',
           required: true,
           col: 6,
         },
@@ -103,9 +99,7 @@ const config = {
           key: 'shippingLastName',
           type: 'input',
           label: 'Last Name',
-          props: {
-            placeholder: 'Shipping last name',
-          },
+          placeholder: 'Shipping last name',
           required: true,
           col: 6,
         },
@@ -113,8 +107,8 @@ const config = {
           key: 'shippingAddress',
           type: 'textarea',
           label: 'Shipping Address',
+          placeholder: 'Enter complete shipping address',
           props: {
-            placeholder: 'Enter complete shipping address',
             rows: 3,
           },
           required: true,
@@ -137,8 +131,8 @@ const config = {
           key: 'deliveryInstructions',
           type: 'textarea',
           label: 'Delivery Instructions (Optional)',
+          placeholder: 'Special delivery instructions',
           props: {
-            placeholder: 'Special delivery instructions',
             rows: 2,
           },
           col: 12,
@@ -183,18 +177,14 @@ const config = {
           key: 'billingFirstName',
           type: 'input',
           label: 'Billing First Name',
-          props: {
-            placeholder: 'Billing first name',
-          },
+          placeholder: 'Billing first name',
           col: 6,
         },
         {
           key: 'billingLastName',
           type: 'input',
           label: 'Billing Last Name',
-          props: {
-            placeholder: 'Billing last name',
-          },
+          placeholder: 'Billing last name',
           col: 6,
         },
         {
@@ -214,9 +204,7 @@ const config = {
           key: 'cardNumber',
           type: 'input',
           label: 'Card Number',
-          props: {
-            placeholder: '1234 5678 9012 3456',
-          },
+          placeholder: '1234 5678 9012 3456',
           pattern: '^[0-9\\s]{13,19}$',
           required: true,
           col: 8,
@@ -225,9 +213,7 @@ const config = {
           key: 'cvv',
           type: 'input',
           label: 'CVV',
-          props: {
-            placeholder: '123',
-          },
+          placeholder: '123',
           maxLength: 4,
           pattern: '^[0-9]{3,4}$',
           required: true,
@@ -272,8 +258,8 @@ const config = {
           key: 'orderNotes',
           type: 'textarea',
           label: 'Order Notes (Optional)',
+          placeholder: 'Any special notes for this order',
           props: {
-            placeholder: 'Any special notes for this order',
             rows: 3,
           },
           col: 12,

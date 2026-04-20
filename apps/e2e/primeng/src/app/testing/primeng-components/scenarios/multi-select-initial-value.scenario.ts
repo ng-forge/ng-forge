@@ -14,9 +14,9 @@ const config = {
         { value: 'delete', label: 'Delete' },
         { value: 'admin', label: 'Admin' },
       ],
+      placeholder: 'Select permissions',
       props: {
         multiple: true,
-        placeholder: 'Select permissions',
       },
     },
   ],

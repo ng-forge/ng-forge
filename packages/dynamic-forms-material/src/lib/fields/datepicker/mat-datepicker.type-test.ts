@@ -22,8 +22,7 @@ describe('MatDatepickerProps - Exhaustive Whitelist', () => {
     | 'hideRequiredMarker'
     | 'startView'
     | 'touchUi'
-    | 'hint'
-    | 'placeholder';
+    | 'hint';
   type ActualKeys = keyof MatDatepickerProps;
 
   it('should have exactly the expected keys', () => {
@@ -69,10 +68,6 @@ describe('MatDatepickerProps - Exhaustive Whitelist', () => {
 
     it('hint', () => {
       expectTypeOf<MatDatepickerProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
-    });
-
-    it('placeholder', () => {
-      expectTypeOf<MatDatepickerProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });

@@ -12,17 +12,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('PrimeDatepickerProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys =
-    | 'dateFormat'
-    | 'inline'
-    | 'showIcon'
-    | 'showButtonBar'
-    | 'selectionMode'
-    | 'touchUI'
-    | 'view'
-    | 'hint'
-    | 'styleClass'
-    | 'placeholder';
+  type ExpectedKeys = 'dateFormat' | 'inline' | 'showIcon' | 'showButtonBar' | 'selectionMode' | 'touchUI' | 'view' | 'hint' | 'styleClass';
   type ActualKeys = keyof PrimeDatepickerProps;
 
   it('should have exactly the expected keys', () => {
@@ -68,10 +58,6 @@ describe('PrimeDatepickerProps - Exhaustive Whitelist', () => {
 
     it('styleClass', () => {
       expectTypeOf<PrimeDatepickerProps['styleClass']>().toEqualTypeOf<string | undefined>();
-    });
-
-    it('placeholder', () => {
-      expectTypeOf<PrimeDatepickerProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });

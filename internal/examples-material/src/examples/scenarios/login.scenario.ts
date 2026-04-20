@@ -30,9 +30,9 @@ export const loginScenario: ExampleScenario = {
         validationMessages: {
           email: 'Please enter a valid email address',
         },
+        placeholder: 'your@email.com',
         props: {
           type: 'email',
-          placeholder: 'your@email.com',
           hint: 'Enter the email associated with your account',
         },
       },
@@ -47,9 +47,9 @@ export const loginScenario: ExampleScenario = {
           required: 'Password is required',
         },
         // 'minLength' will use default with interpolated {{requiredLength}}
+        placeholder: 'Enter your password',
         props: {
           type: 'password',
-          placeholder: 'Enter your password',
         },
       },
       {

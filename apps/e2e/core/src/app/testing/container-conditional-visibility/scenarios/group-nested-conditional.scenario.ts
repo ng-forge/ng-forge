@@ -33,9 +33,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter first name',
-          },
+          placeholder: 'Enter first name',
         },
         {
           key: 'lastName',
@@ -52,9 +50,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter last name',
-          },
+          placeholder: 'Enter last name',
         },
         {
           key: 'hasMiddleName',
@@ -108,9 +104,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter middle name',
-          },
+          placeholder: 'Enter middle name',
         },
         {
           key: 'contactMethod',
@@ -159,9 +153,9 @@ const config = {
               },
             },
           ],
+          placeholder: 'Enter email',
           props: {
             type: 'email',
-            placeholder: 'Enter email',
           },
         },
         {
@@ -190,9 +184,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter phone number',
-          },
+          placeholder: 'Enter phone number',
         },
       ],
     },

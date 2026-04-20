@@ -32,9 +32,7 @@ const config = {
           type: 'input',
           label: 'First Name',
           col: 4,
-          props: {
-            placeholder: 'Enter first name',
-          },
+          placeholder: 'Enter first name',
         },
         {
           key: 'middleName',
@@ -52,18 +50,14 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter middle name',
-          },
+          placeholder: 'Enter middle name',
         },
         {
           key: 'lastName',
           type: 'input',
           label: 'Last Name',
           col: 4,
-          props: {
-            placeholder: 'Enter last name',
-          },
+          placeholder: 'Enter last name',
         },
       ],
     },
@@ -87,9 +81,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter nickname',
-          },
+          placeholder: 'Enter nickname',
         },
         {
           key: 'preferredName',

@@ -26,18 +26,14 @@ const twoPageConfig = {
           type: 'input',
           label: 'First Name',
           col: 6,
-          props: {
-            placeholder: 'Enter first name',
-          },
+          placeholder: 'Enter first name',
         },
         {
           key: 'lastName',
           type: 'input',
           label: 'Last Name',
           col: 6,
-          props: {
-            placeholder: 'Enter last name',
-          },
+          placeholder: 'Enter last name',
         },
         {
           key: 'nextToContact',
@@ -63,9 +59,9 @@ const twoPageConfig = {
           type: 'input',
           label: 'Email',
           col: 6,
+          placeholder: 'Enter email',
           props: {
             type: 'email',
-            placeholder: 'Enter email',
           },
         },
         {
@@ -73,9 +69,9 @@ const twoPageConfig = {
           type: 'input',
           label: 'Phone',
           col: 6,
+          placeholder: 'Enter phone number',
           props: {
             type: 'tel',
-            placeholder: 'Enter phone number',
           },
         },
         {
@@ -113,9 +109,7 @@ const threePageConfig = {
           type: 'input',
           label: 'Full Name',
           col: 12,
-          props: {
-            placeholder: 'Enter full name',
-          },
+          placeholder: 'Enter full name',
         },
         {
           key: 'dateOfBirth',
@@ -147,27 +141,21 @@ const threePageConfig = {
           type: 'input',
           label: 'Street Address',
           col: 12,
-          props: {
-            placeholder: 'Enter street address',
-          },
+          placeholder: 'Enter street address',
         },
         {
           key: 'city',
           type: 'input',
           label: 'City',
           col: 6,
-          props: {
-            placeholder: 'Enter city',
-          },
+          placeholder: 'Enter city',
         },
         {
           key: 'zipCode',
           type: 'input',
           label: 'Zip Code',
           col: 6,
-          props: {
-            placeholder: 'Enter zip code',
-          },
+          placeholder: 'Enter zip code',
         },
         {
           key: 'prevToBasic',

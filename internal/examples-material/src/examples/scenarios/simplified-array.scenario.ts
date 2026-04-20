@@ -31,8 +31,8 @@ export const simplifiedArrayScenario: ExampleScenario = {
           label: 'Tag',
           required: true,
           minLength: 2,
+          placeholder: 'Enter a tag',
           props: {
-            placeholder: 'Enter a tag',
             hint: 'Tags must be at least 2 characters',
           },
         },
@@ -63,17 +63,15 @@ export const simplifiedArrayScenario: ExampleScenario = {
             label: 'Contact Name',
             required: true,
             minLength: 2,
-            props: {
-              placeholder: 'Enter contact name',
-            },
+            placeholder: 'Enter contact name',
           },
           {
             key: 'phone',
             type: 'input',
             label: 'Phone Number',
+            placeholder: '5551234567',
             props: {
               type: 'tel',
-              placeholder: '5551234567',
             },
           },
         ],
@@ -103,9 +101,7 @@ export const simplifiedArrayScenario: ExampleScenario = {
           key: 'text',
           type: 'input',
           label: 'Note',
-          props: {
-            placeholder: 'Enter a note',
-          },
+          placeholder: 'Enter a note',
         },
         addButton: { label: 'Add Note' },
       },

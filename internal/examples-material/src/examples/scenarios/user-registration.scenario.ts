@@ -222,9 +222,9 @@ export const userRegistrationScenario: ExampleScenario = {
                 },
               },
             ],
+            placeholder: 'Select your industry',
             props: {
               appearance: 'outline',
-              placeholder: 'Select your industry',
             },
           },
           {

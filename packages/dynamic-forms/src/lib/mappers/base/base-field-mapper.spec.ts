@@ -430,7 +430,8 @@ describe('baseFieldMapper', () => {
         label: 'Complex Field',
         className: 'complex-class',
         tabIndex: 5,
-        props: { placeholder: 'Enter value', hint: 'This is a hint' },
+        placeholder: 'Enter value',
+        props: { hint: 'This is a hint' },
         // These should NOT be included (inclusion-based)
         customAttribute: 'custom-value',
         anotherCustomProp: 42,

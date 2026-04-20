@@ -22,8 +22,7 @@ describe('IonicInputProps - Exhaustive Whitelist', () => {
     | 'counter'
     | 'maxlength'
     | 'clearInput'
-    | 'type'
-    | 'placeholder';
+    | 'type';
   type ActualKeys = keyof IonicInputProps;
 
   it('should have exactly the expected keys', () => {
@@ -75,10 +74,6 @@ describe('IonicInputProps - Exhaustive Whitelist', () => {
 
     it('type', () => {
       expectTypeOf<IonicInputProps['type']>().toEqualTypeOf<'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | undefined>();
-    });
-
-    it('placeholder', () => {
-      expectTypeOf<IonicInputProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });
