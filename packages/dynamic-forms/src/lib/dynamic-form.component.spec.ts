@@ -2567,6 +2567,57 @@ describe('DynamicFormComponent', () => {
       expect(allInputs.length).toBe(2);
     });
 
+    it('should render container children when appended as a single FieldDef (not array-wrapped)', async () => {
+      // When dispatching append with a single container FieldDef (not wrapped in []),
+      // the container should still be treated as an object item (not primitive).
+      const containerField = {
+        key: 'itemContainer',
+        type: 'container',
+        fields: [
+          {
+            key: 'name',
+            type: 'input',
+            label: 'Name',
+            wrappers: [{ type: 'css', cssClasses: 'input-item-wrapper' }],
+          },
+        ],
+        wrappers: [{ type: 'test-child' }],
+      };
+
+      const config = {
+        fields: [
+          {
+            type: 'array',
+            key: 'items',
+            wrappers: [{ type: 'test-parent' }],
+            fields: [],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // Append a single container FieldDef (NOT wrapped in array)
+      const eventBus = fixture.debugElement.injector.get(EventBus);
+      eventBus.dispatch(arrayEvent('items').append(containerField as any));
+
+      for (let i = 0; i < 4; i++) {
+        await waitForDynamicComponents(fixture);
+      }
+
+      // The container and its wrapper should render
+      const childWrapper = fixture.nativeElement.querySelector('[data-wrapper="child"]');
+      expect(childWrapper).toBeTruthy();
+
+      // The container's child input should render inside the wrapper
+      const inputWrappers = fixture.nativeElement.querySelectorAll('.input-item-wrapper');
+      expect(inputWrappers.length).toBe(1);
+
+      const inputs = fixture.nativeElement.querySelectorAll('.input-item-wrapper input');
+      expect(inputs.length).toBe(1);
+    });
+
     it('should render container children inside a css wrapper (no array)', async () => {
       // Container with a css wrapper as a direct form field.
       // DfFieldOutlet handles the css wrapper; container's internal chain

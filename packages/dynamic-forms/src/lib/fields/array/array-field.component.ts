@@ -316,9 +316,13 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * Supports both primitive (single FieldDef) and object (FieldDef[]) templates.
    */
   private async handleAddFromEvent(template: FieldDef<unknown> | readonly FieldDef<unknown>[], index?: number): Promise<void> {
-    // Normalize template to mutable array for consistent handling
+    // Normalize template to mutable array for consistent handling.
+    // A single FieldDef with valueHandling: 'flatten' (container, row) is an object item
+    // whose children should be flattened — NOT a primitive item. Only true leaf fields
+    // (input, checkbox, etc.) are primitive when passed as a single FieldDef.
     const templates: FieldDef<unknown>[] = Array.isArray(template) ? [...template] : [template];
-    const isPrimitiveItem = !Array.isArray(template);
+    const isSingleField = !Array.isArray(template);
+    const isPrimitiveItem = isSingleField && getFieldValueHandling(templates[0].type, this.rawFieldRegistry()) !== 'flatten';
 
     // Track primitive field key for full-API arrays that start empty.
     // Simplified arrays already have this info from normalization metadata.
