@@ -141,8 +141,8 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
         if (templateField.type === 'group' && 'key' in templateField && templateField.key) {
           // Groups wrap their value under the group key
           itemValue[templateField.key] = fieldValue;
-        } else if (templateField.type === 'row') {
-          // Rows flatten their fields directly
+        } else if (templateField.type === 'row' || templateField.type === 'container') {
+          // Rows and containers flatten their fields directly
           if (fieldValue && typeof fieldValue === 'object') {
             itemValue = { ...itemValue, ...(fieldValue as Record<string, unknown>) };
           }

@@ -368,6 +368,55 @@ describe('getFieldDefaultValue', () => {
 
       expect(result).toEqual([]);
     });
+
+    it('should flatten container children in object array items', () => {
+      registry.set('container', { component: {} as any, valueHandling: 'flatten' });
+
+      const field: FieldDef<any> = {
+        type: 'array',
+        key: 'items',
+        fields: [
+          [
+            {
+              type: 'container',
+              key: 'section',
+              fields: [
+                { type: 'input', key: 'name', value: 'Alice' },
+                { type: 'input', key: 'email', value: 'alice@test.com' },
+              ],
+              wrappers: [],
+            },
+          ],
+        ],
+      };
+      const result = getFieldDefaultValue(field, registry);
+
+      // Container children should be flattened into the item (not nested under 'section')
+      expect(result).toEqual([{ name: 'Alice', email: 'alice@test.com' }]);
+    });
+
+    it('should flatten container children alongside sibling fields in object array items', () => {
+      registry.set('container', { component: {} as any, valueHandling: 'flatten' });
+
+      const field: FieldDef<any> = {
+        type: 'array',
+        key: 'items',
+        fields: [
+          [
+            { type: 'input', key: 'id', value: '1' },
+            {
+              type: 'container',
+              key: 'details',
+              fields: [{ type: 'input', key: 'name', value: 'Bob' }],
+              wrappers: [],
+            },
+          ],
+        ],
+      };
+      const result = getFieldDefaultValue(field, registry);
+
+      expect(result).toEqual([{ id: '1', name: 'Bob' }]);
+    });
   });
 
   describe('edge cases', () => {

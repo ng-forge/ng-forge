@@ -352,14 +352,14 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       for (const templateField of templates) {
         const rawValue = getFieldDefaultValue(templateField, this.rawFieldRegistry());
         const valueHandling = getFieldValueHandling(templateField.type, this.rawFieldRegistry());
-        const isContainer = templateField.type === 'group' || templateField.type === 'row';
+        const isContainer = templateField.type === 'group' || templateField.type === 'row' || templateField.type === 'container';
 
         if (isContainer) {
           if (isGroupField(templateField)) {
             // Groups wrap their fields under the group key
             value = { ...(value as Record<string, unknown>), [templateField.key]: rawValue };
           } else {
-            // Rows flatten their fields directly
+            // Rows and containers flatten their fields directly
             value = { ...(value as Record<string, unknown>), ...(rawValue as Record<string, unknown>) };
           }
         } else if (valueHandling === 'include' && templateField.key) {

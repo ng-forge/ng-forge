@@ -54,6 +54,31 @@ describe('form-mapping', () => {
         });
       });
 
+      it('should handle container fields by flattening children', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ name: '', email: '' });
+          const containerField: FieldDef = {
+            type: 'container',
+            key: 'section',
+            fields: [
+              { key: 'name', type: 'input' },
+              { key: 'email', type: 'input' },
+            ],
+            wrappers: [],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(containerField, path as any);
+              }).not.toThrow();
+            }),
+          );
+          mockFormSignal.set(formInstance);
+        });
+      });
+
       it('should handle group fields without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ address: { street: '', city: '' } });

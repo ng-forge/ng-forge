@@ -22,6 +22,7 @@ import { isGroupField } from '../definitions/default/group-field';
 import { isArrayField } from '../definitions/default/array-field';
 import { isPageField } from '../definitions/default/page-field';
 import { isRowField } from '../definitions/default/row-field';
+import { isContainerTypedField } from '../definitions/default/container-field';
 import { DynamicFormError } from '../errors/dynamic-form-error';
 
 // Type alias for schema path parameters
@@ -128,8 +129,8 @@ function getNumberValidationConfig(fieldDef: FieldWithValidation): NumberValidat
  * Cross-field validators are skipped at field level and applied at form level via validateTree.
  */
 export function mapFieldToForm(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath): void {
-  // Layout containers (page, row) - flatten children to current level
-  if (isPageField(fieldDef) || isRowField(fieldDef)) {
+  // Layout containers (page, row, container) - flatten children to current level
+  if (isPageField(fieldDef) || isRowField(fieldDef) || isContainerTypedField(fieldDef)) {
     mapContainerChildren(fieldDef.fields as FieldDef<unknown>[] | undefined, fieldPath);
     return;
   }
@@ -311,8 +312,8 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
 
     // Map ALL unique template fields from all object items
     for (const templateField of allObjectFields) {
-      if (isRowField(templateField) || isPageField(templateField)) {
-        // Row/page templates flatten their children
+      if (isRowField(templateField) || isPageField(templateField) || isContainerTypedField(templateField)) {
+        // Row/page/container templates flatten their children
         mapContainerChildren(templateField.fields as FieldDef<unknown>[] | undefined, itemPath);
       } else if (isGroupField(templateField)) {
         // Group template - access group's path first
@@ -351,8 +352,8 @@ function collectFieldsFromObjectItem(itemFields: readonly FieldDef<unknown>[], a
   const seenKeys = new Set(allFields.map((f) => f.key).filter(Boolean));
 
   for (const field of itemFields) {
-    // For row/page fields, we need to collect their children's keys
-    if (isRowField(field) || isPageField(field)) {
+    // For row/page/container fields, we need to collect their children's keys
+    if (isRowField(field) || isPageField(field) || isContainerTypedField(field)) {
       // Use a synthetic key for container fields to dedupe them
       const containerKey = `__container_${field.type}_${JSON.stringify(field.fields?.map((f) => f.key))}`;
       if (!seenKeys.has(containerKey)) {

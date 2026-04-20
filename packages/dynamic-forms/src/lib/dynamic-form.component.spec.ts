@@ -2525,8 +2525,9 @@ describe('DynamicFormComponent', () => {
       eventBus.dispatch(arrayEvent('items').append(containerTemplate as any));
       // Multiple settle passes: array resolve → container render →
       // derivedFromDeferred resolves children → DfFieldOutlet loads CSS wrapper
-      await waitForDynamicComponents(fixture);
-      await waitForDynamicComponents(fixture);
+      for (let i = 0; i < 4; i++) {
+        await waitForDynamicComponents(fixture);
+      }
 
       const parentEl = fixture.nativeElement.querySelector('[data-wrapper="parent"]');
       expect(parentEl).toBeTruthy();
@@ -2548,8 +2549,9 @@ describe('DynamicFormComponent', () => {
 
       // Add a second item
       eventBus.dispatch(arrayEvent('items').append(containerTemplate as any));
-      await waitForDynamicComponents(fixture);
-      await waitForDynamicComponents(fixture);
+      for (let i = 0; i < 4; i++) {
+        await waitForDynamicComponents(fixture);
+      }
 
       const childEls2 = fixture.nativeElement.querySelectorAll('[data-wrapper="child"]');
       expect(childEls2.length).toBe(2);
