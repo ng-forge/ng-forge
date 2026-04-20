@@ -176,6 +176,31 @@ describe('generateFormConfig', () => {
     expect(result).toContain("placeholder: 'Enter your bio'");
   });
 
+  it('should render nullable: true when field is nullable', () => {
+    const fields: FieldConfig[] = [{ key: 'note', type: 'input', label: 'Note', nullable: true }];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain('nullable: true');
+  });
+
+  it('should render nullable together with null value', () => {
+    const fields: FieldConfig[] = [{ key: 'note', type: 'input', label: 'Note', nullable: true, value: null }];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).toContain('nullable: true');
+    expect(result).toContain('value: null');
+  });
+
+  it('should omit nullable line when field is not nullable', () => {
+    const fields: FieldConfig[] = [{ key: 'note', type: 'input', label: 'Note' }];
+
+    const result = generateFormConfig(fields, defaultOptions);
+
+    expect(result).not.toContain('nullable');
+  });
+
   it('should render logic blocks when present', () => {
     const fields: FieldConfig[] = [
       {

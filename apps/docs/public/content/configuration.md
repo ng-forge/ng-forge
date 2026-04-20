@@ -22,6 +22,26 @@ ng-forge applies props in priority order — more specific always wins:
 
 Each field type also accepts its own adapter-specific `props`. See [Field Types](/field-types/text-inputs) for the full per-field reference.
 
+### Nullable values
+
+Value fields accept an optional `nullable?: boolean` flag. When `true`:
+
+- `value` accepts `null` in addition to the field's normal type (e.g. `string | null`).
+- An omitted `value` resolves to `null` instead of the type-specific empty default (`''`, `NaN`, `[]`, …).
+- `nullable` stays orthogonal to `required` — a field can be both. Nullable says "null is a valid value"; required says "a value must be provided." They're independent OpenAPI concepts.
+
+```typescript
+{
+  key: 'middleName',
+  type: 'input',
+  label: 'Middle Name',
+  nullable: true,
+  value: null,       // allowed; also the resolved default when omitted
+}
+```
+
+**Read-side caveat.** A user clearing a text input reads back as `""`, not `null` — this is a DOM/Web IDL contract, identical to classic Reactive Forms. `nullable` is a contract for _accepted_ values, not a guarantee of _emitted_ ones. If your backend distinguishes null from empty string, handle the coercion at submission.
+
 ## Next Steps
 
 - **[Examples](/examples)** — Browse complete form examples

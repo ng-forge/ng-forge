@@ -166,6 +166,18 @@ The generator maps OpenAPI schema types and formats to `@ng-forge/dynamic-forms`
 | `array`              | + object items       | `array`          | _(container)_          |
 | `object`             | _(any)_              | `group`          | _(container)_          |
 
+### Nullable Values
+
+OpenAPI nullability is preserved end-to-end:
+
+| OpenAPI Spec | Schema Example                       | Emitted FieldDef              |
+| ------------ | ------------------------------------ | ----------------------------- |
+| 3.0          | `{ type: 'string', nullable: true }` | `nullable: true`              |
+| 3.1          | `{ type: ['string', 'null'] }`       | `nullable: true`              |
+| Either       | `{ nullable: true, default: null }`  | `nullable: true, value: null` |
+
+See [Configuration → Nullable values](/configuration#nullable-values) for runtime behavior and the read-side caveat.
+
 ### Ambiguous Field Types
 
 Some mappings have alternatives. In interactive mode, the CLI prompts you to choose:

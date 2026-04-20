@@ -7,7 +7,12 @@ export interface TextareaProps {
   cols?: number | undefined;
 }
 
-export interface TextareaField<TProps = TextareaProps> extends BaseValueField<TProps, string, TextareaMeta> {
+export interface TextareaField<TProps = TextareaProps, TNullable extends boolean = false> extends BaseValueField<
+  TProps,
+  string,
+  TextareaMeta,
+  TNullable
+> {
   type: 'textarea';
   maxLength?: number | undefined;
 }

@@ -1,6 +1,6 @@
-import { BaseValueField } from '@ng-forge/dynamic-forms';
+import { BaseValueField, FieldMeta } from '@ng-forge/dynamic-forms';
 
-export interface SliderField<TProps> extends BaseValueField<TProps, number> {
+export interface SliderField<TProps, TNullable extends boolean = false> extends BaseValueField<TProps, number, FieldMeta, TNullable> {
   type: 'slider';
   minValue?: number;
   maxValue?: number;

@@ -1,4 +1,4 @@
-import { BaseValueField, FieldOption } from '@ng-forge/dynamic-forms';
+import { BaseValueField, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms';
 
 /**
  * Multi-checkbox field for selecting multiple values from a list of options.
@@ -16,7 +16,12 @@ import { BaseValueField, FieldOption } from '@ng-forge/dynamic-forms';
  *   ]
  * };
  */
-export interface MultiCheckboxField<TValue, TProps = object> extends BaseValueField<TProps, TValue[]> {
+export interface MultiCheckboxField<TValue, TProps = object, TNullable extends boolean = false> extends BaseValueField<
+  TProps,
+  TValue[],
+  FieldMeta,
+  TNullable
+> {
   type: 'multi-checkbox';
   readonly options: readonly FieldOption<TValue>[];
 }

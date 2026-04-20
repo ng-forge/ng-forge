@@ -5,6 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText } from '../../models/types/dynamic-text';
 import type { BaseValueField, ValueType, ValueFieldComponent } from './base-value-field';
 import type { FieldDef } from './field-def';
+import type { FieldMeta } from './field-meta';
 import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
@@ -81,7 +82,8 @@ describe('BaseValueField - Exhaustive Whitelist', () => {
     | 'schemas'
     // From BaseValueField
     | 'value'
-    | 'placeholder';
+    | 'placeholder'
+    | 'nullable';
 
   type ActualKeys = keyof BaseValueField<TestProps, TestValue>;
 
@@ -316,5 +318,40 @@ describe('BaseValueField - Interface Extension', () => {
   it('should have additional value and placeholder properties', () => {
     expectTypeOf<TestField>().toHaveProperty('value');
     expectTypeOf<TestField>().toHaveProperty('placeholder');
+  });
+});
+
+// ============================================================================
+// BaseValueField - Nullable widening
+// ============================================================================
+
+describe('BaseValueField - Nullable', () => {
+  interface TestProps {
+    size?: 'sm';
+  }
+  type NullableField = BaseValueField<TestProps, string, FieldMeta, true>;
+  type NonNullableField = BaseValueField<TestProps, string>;
+
+  it('should widen value to T | null when TNullable is true', () => {
+    expectTypeOf<NullableField['value']>().toEqualTypeOf<string | null | undefined>();
+  });
+
+  it('should keep value as T when TNullable defaults to false', () => {
+    expectTypeOf<NonNullableField['value']>().toEqualTypeOf<string | undefined>();
+  });
+
+  it('should accept null literal value when nullable is true', () => {
+    const field: NullableField = {
+      key: 'name',
+      type: 'input',
+      nullable: true,
+      value: null,
+    };
+    expectTypeOf(field.value).toEqualTypeOf<string | null | undefined>();
+  });
+
+  it('should have nullable property typed as the generic literal', () => {
+    expectTypeOf<NullableField['nullable']>().toEqualTypeOf<true | undefined>();
+    expectTypeOf<NonNullableField['nullable']>().toEqualTypeOf<false | undefined>();
   });
 });

@@ -275,6 +275,55 @@ describe('mapSchemaToFields', () => {
     expect(result.fields[0].value).toBe('active');
   });
 
+  it('should map OpenAPI 3.0 nullable:true to nullable:true on field', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        note: { type: 'string', nullable: true } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].nullable).toBe(true);
+  });
+
+  it('should map OpenAPI 3.1 type:[T, null] to nullable:true on field', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        note: { type: ['string', 'null'] },
+      },
+    } as unknown as SchemaObject;
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].nullable).toBe(true);
+  });
+
+  it('should preserve null as default value for nullable fields', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        note: { type: 'string', nullable: true, default: null } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].nullable).toBe(true);
+    expect(result.fields[0].value).toBeNull();
+  });
+
+  it('should omit nullable when schema does not declare it', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        note: { type: 'string' } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].nullable).toBeUndefined();
+  });
+
   it('should map description to props.hint', () => {
     const schema: SchemaObject = {
       type: 'object',

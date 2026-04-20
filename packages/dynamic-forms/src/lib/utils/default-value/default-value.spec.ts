@@ -263,6 +263,29 @@ describe('getFieldDefaultValue', () => {
       expect(result).toBe(false);
     });
 
+    it('should return empty array for array field with explicit null value', () => {
+      const field: FieldDef<any> = {
+        type: 'array',
+        key: 'items',
+        value: null,
+      };
+      const result = getFieldDefaultValue(field, registry);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return NaN for number input field with explicit null value', () => {
+      const field: FieldDef<any> = {
+        type: 'input',
+        key: 'age',
+        value: null,
+        props: { type: 'number' },
+      };
+      const result = getFieldDefaultValue(field, registry);
+
+      expect(result).toBeNaN();
+    });
+
     it('should handle explicit undefined value (fall through to type default)', () => {
       const field: FieldDef<any> = {
         type: 'input',
@@ -438,6 +461,78 @@ describe('getFieldDefaultValue', () => {
         verified: true,
         settings: { theme: 'dark' },
       });
+    });
+  });
+
+  describe('nullable fields', () => {
+    it('should return null for nullable field with no explicit value', () => {
+      const field: FieldDef<any> = {
+        type: 'input',
+        key: 'name',
+        nullable: true,
+      } as FieldDef<any>;
+      const result = getFieldDefaultValue(field, registry);
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null for nullable field with explicit null value', () => {
+      const field: FieldDef<any> = {
+        type: 'input',
+        key: 'name',
+        nullable: true,
+        value: null,
+      } as FieldDef<any>;
+      const result = getFieldDefaultValue(field, registry);
+
+      expect(result).toBeNull();
+    });
+
+    it('should preserve explicit value when nullable is true and value is not null', () => {
+      const field: FieldDef<any> = {
+        type: 'input',
+        key: 'name',
+        nullable: true,
+        value: 'hello',
+      } as FieldDef<any>;
+      const result = getFieldDefaultValue(field, registry);
+
+      expect(result).toBe('hello');
+    });
+
+    it('should return null for nullable array field', () => {
+      const field: FieldDef<any> = {
+        type: 'array',
+        key: 'items',
+        nullable: true,
+      } as FieldDef<any>;
+      const result = getFieldDefaultValue(field, registry);
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null for nullable number input', () => {
+      const field: FieldDef<any> = {
+        type: 'input',
+        key: 'age',
+        nullable: true,
+        props: { type: 'number' },
+      } as FieldDef<any>;
+      const result = getFieldDefaultValue(field, registry);
+
+      expect(result).toBeNull();
+    });
+
+    it('should fall through to type default when nullable is false with value null', () => {
+      const field: FieldDef<any> = {
+        type: 'input',
+        key: 'name',
+        nullable: false,
+        value: null,
+      } as FieldDef<any>;
+      const result = getFieldDefaultValue(field, registry);
+
+      expect(result).toBe('');
     });
   });
 });

@@ -64,6 +64,8 @@ Not every `FormConfig` property can come from a JSON API. Some require runtime c
 
 The serializable properties cover the vast majority of form configuration. The non-serializable ones are for advanced features that inherently require client-side code.
 
+Fields accept a [`nullable: true`](/configuration#nullable-values) flag to preserve `null` through defaults and submission — useful when mirroring OpenAPI schemas that distinguish null from empty.
+
 ## Hydrating Runtime Features
 
 When you need both API-driven structure and client-side behavior, merge them:

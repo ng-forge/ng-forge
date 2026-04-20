@@ -193,6 +193,27 @@ Use shorthand properties directly on field definitions:
 
 Available shorthands: \`required\`, \`email\`, \`min\`, \`max\`, \`minLength\`, \`maxLength\`, \`pattern\`
 
+### Nullable Values
+
+Value fields accept a \`nullable?: boolean\` flag. When \`true\`:
+
+- \`value\` accepts \`null\` in addition to the field's normal value type.
+- An omitted \`value\` resolves to \`null\` (instead of the type-specific empty default like \`''\`, \`NaN\`, or \`[]\`).
+- Orthogonal to \`required\` — a field can be nullable AND required (must be provided, but may be provided as null).
+- Map OpenAPI \`nullable: true\` (3.0) or \`type: [T, null]\` (3.1) to this flag.
+
+\`\`\`typescript
+{
+  key: 'middleName',
+  type: 'input',
+  label: 'Middle Name',
+  nullable: true,
+  value: null,  // valid; default-resolves to null
+}
+\`\`\`
+
+Read-side caveat: a user clearing a text input reads back as \`""\`, not \`null\` — this is a DOM/Web IDL contract, identical to classic Reactive Forms. \`nullable\` is a contract for accepted values, not a guarantee of emitted ones.
+
 ### Validation Messages
 
 ALWAYS provide validation messages. Use template variables:

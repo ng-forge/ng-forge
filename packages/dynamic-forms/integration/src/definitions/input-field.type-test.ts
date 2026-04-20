@@ -394,3 +394,69 @@ describe('InputField - Usage Tests', () => {
     expectTypeOf(field.col).toEqualTypeOf<6>();
   });
 });
+
+// ============================================================================
+// InputField - Nullable widening
+// ============================================================================
+
+describe('InputField - Nullable widening', () => {
+  it('should accept value: null on nullable string input', () => {
+    const field = {
+      type: 'input',
+      key: 'name',
+      props: { type: 'text' },
+      nullable: true,
+      value: null,
+    } as const satisfies InputField<import('./input-field').InputProps, true>;
+
+    expectTypeOf(field.value).toEqualTypeOf<null>();
+    expectTypeOf(field.nullable).toEqualTypeOf<true>();
+  });
+
+  it('should accept value: null on nullable number input', () => {
+    const field = {
+      type: 'input',
+      key: 'age',
+      props: { type: 'number' },
+      nullable: true,
+      value: null,
+    } as const satisfies InputField<import('./input-field').InputProps, true>;
+
+    expectTypeOf(field.value).toEqualTypeOf<null>();
+  });
+
+  it('should accept a real string value when nullable is true', () => {
+    const field = {
+      type: 'input',
+      key: 'name',
+      props: { type: 'text' },
+      nullable: true,
+      value: 'hello',
+    } as const satisfies InputField<import('./input-field').InputProps, true>;
+
+    expectTypeOf(field.value).toEqualTypeOf<'hello'>();
+  });
+
+  it('should reject null value when nullable is false/absent', () => {
+    type NonNullableField = InputField;
+    type ValueType = NonNullableField['value'];
+    expectTypeOf<null>().not.toMatchTypeOf<NonNullableField['value']>();
+    // Value may be string | number | undefined depending on discriminated branch,
+    // but never null.
+    expectTypeOf<ValueType>().not.toEqualTypeOf<string | number | null | undefined>();
+  });
+
+  it('should keep required orthogonal from nullable', () => {
+    const field = {
+      type: 'input',
+      key: 'name',
+      props: { type: 'text' },
+      nullable: true,
+      required: true,
+      value: null,
+    } as const satisfies InputField<import('./input-field').InputProps, true>;
+
+    expectTypeOf(field.required).toEqualTypeOf<true>();
+    expectTypeOf(field.nullable).toEqualTypeOf<true>();
+  });
+});

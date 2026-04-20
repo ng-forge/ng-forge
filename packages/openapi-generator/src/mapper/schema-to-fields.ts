@@ -25,6 +25,7 @@ export interface FieldConfig {
   type: string;
   label: string;
   value?: unknown;
+  nullable?: boolean;
   placeholder?: string;
   props?: Record<string, unknown>;
   options?: Array<{ label: string; value: string }>;
@@ -199,6 +200,14 @@ function mapPropertyToField(
   if ((prop.schema as Record<string, unknown>)['readOnly']) {
     field.disabled = true;
     logger.verbose(`Field '${fieldPath}': disabled (readOnly in schema)`);
+  }
+
+  // nullable → nullable (OpenAPI 3.0 nullable:true, 3.1 type:[T, null])
+  const schemaObj = prop.schema as Record<string, unknown>;
+  const isNullable =
+    schemaObj['nullable'] === true || (Array.isArray(schemaObj['type']) && (schemaObj['type'] as unknown[]).includes('null'));
+  if (isNullable) {
+    field.nullable = true;
   }
 
   // default → value
