@@ -66,7 +66,7 @@ describe('containerFieldMapper', () => {
     expect(inputs).toHaveProperty('className', 'container-class');
   });
 
-  it('should include the field definition with container wrappers config', () => {
+  it('should strip wrapper props from the field input (DfFieldOutlet handles wrappers)', () => {
     const fieldDef = {
       key: 'containerSection',
       type: 'container',
@@ -75,13 +75,21 @@ describe('containerFieldMapper', () => {
         { type: 'section', header: 'Details' },
         { type: 'style', class: 'highlight' },
       ],
+      skipAutoWrappers: true,
+      skipDefaultWrappers: true,
     } as unknown as ContainerField;
 
     const inputs = testMapper(fieldDef);
-    const field = inputs['field'] as ContainerField;
-    expect(field.wrappers).toHaveLength(2);
-    expect(field.wrappers[0].type).toBe('section');
-    expect(field.wrappers[1].type).toBe('style');
+    const field = inputs['field'] as Record<string, unknown>;
+    // Wrapper-related props are nullified to avoid double-wrapping.
+    // DfFieldOutlet reads wrappers from the original fieldDef; the container's
+    // internal wrapper chain only handles mapper-synthesized wrappers (e.g., row).
+    expect(field.wrappers).toBeUndefined();
+    expect(field.skipAutoWrappers).toBeUndefined();
+    expect(field.skipDefaultWrappers).toBeUndefined();
+    // Other props are preserved
+    expect(field).toHaveProperty('key', 'containerSection');
+    expect(field).toHaveProperty('fields');
   });
 
   describe('hidden logic', () => {

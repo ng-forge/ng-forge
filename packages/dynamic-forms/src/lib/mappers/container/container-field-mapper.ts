@@ -20,9 +20,17 @@ export function containerFieldMapper(fieldDef: ContainerField): Signal<Record<st
   const className = buildClassName(fieldDef);
 
   return computed(() => {
+    // Nullify wrapper-related props on the field passed to the container
+    // component — DfFieldOutlet handles field-level wrappers at the outlet
+    // level. Passing them here would cause double-wrapping since the
+    // container's internal wrapper chain also resolves from `this.field()`.
+    // We set wrappers to undefined (not stripped) so the object identity
+    // stays close to the original fieldDef shape.
+    const containerField = { ...fieldDef, wrappers: undefined, skipAutoWrappers: undefined, skipDefaultWrappers: undefined };
+
     const inputs: Record<string, unknown> = {
       key: fieldDef.key,
-      field: fieldDef,
+      field: containerField,
       ...(className !== undefined && { className }),
     };
 
