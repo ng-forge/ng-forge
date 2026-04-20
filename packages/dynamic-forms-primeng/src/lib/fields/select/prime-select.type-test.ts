@@ -101,6 +101,7 @@ describe('PrimeSelectField - Exhaustive Whitelist', () => {
     // From BaseValueField
     | 'value'
     | 'placeholder'
+    | 'nullable'
     // From SelectField
     | 'options';
 

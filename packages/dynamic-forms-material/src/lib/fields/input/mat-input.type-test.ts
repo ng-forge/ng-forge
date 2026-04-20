@@ -97,7 +97,8 @@ describe('MatInputField (String) - Exhaustive Whitelist', () => {
     | 'schemas'
     // From BaseValueField
     | 'value'
-    | 'placeholder';
+    | 'placeholder'
+    | 'nullable';
 
   type ActualKeys = keyof StringInputField;
 
@@ -245,7 +246,8 @@ describe('MatInputField (Number) - Exhaustive Whitelist', () => {
     | 'derivation'
     | 'schemas'
     | 'value'
-    | 'placeholder';
+    | 'placeholder'
+    | 'nullable';
 
   type ActualKeys = keyof NumberInputField;
 

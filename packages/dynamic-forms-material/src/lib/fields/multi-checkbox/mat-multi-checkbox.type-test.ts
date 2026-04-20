@@ -92,6 +92,7 @@ describe('MatMultiCheckboxField - Exhaustive Whitelist', () => {
     // From BaseValueField
     | 'value'
     | 'placeholder'
+    | 'nullable'
     // From MultiCheckboxField
     | 'options';
 

@@ -91,6 +91,7 @@ describe('IonicRadioField - Exhaustive Whitelist', () => {
     // From BaseValueField
     | 'value'
     | 'placeholder'
+    | 'nullable'
     // From RadioField
     | 'options';
 

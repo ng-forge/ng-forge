@@ -283,6 +283,8 @@ Not every `FormConfig` property can come from a JSON API. Some require runtime c
 
 The serializable properties cover the vast majority of form configuration. The non-serializable ones are for advanced features that inherently require client-side code.
 
+Fields accept a [`nullable: true`](/configuration#nullable-values) flag to preserve `null` through defaults and submission — useful when mirroring OpenAPI schemas that distinguish null from empty.
+
 ## Hydrating Runtime Features
 
 When you need both API-driven structure and client-side behavior, merge them:
@@ -956,6 +958,26 @@ ng-forge applies props in priority order — more specific always wins:
 ## Field-level Props
 
 Each field type also accepts its own adapter-specific `props`. See [Field Types](/field-types/text-inputs) for the full per-field reference.
+
+### Nullable values
+
+Value fields accept an optional `nullable?: boolean` flag. When `true`:
+
+- `value` accepts `null` in addition to the field's normal type (e.g. `string | null`).
+- An omitted `value` resolves to `null` instead of the type-specific empty default (`''`, `NaN`, `[]`, …).
+- `nullable` stays orthogonal to `required` — a field can be both. Nullable says "null is a valid value"; required says "a value must be provided." They're independent OpenAPI concepts.
+
+```typescript
+{
+  key: 'middleName',
+  type: 'input',
+  label: 'Middle Name',
+  nullable: true,
+  value: null,       // allowed; also the resolved default when omitted
+}
+```
+
+**Read-side caveat.** A user clearing a text input reads back as `""`, not `null` — this is a DOM/Web IDL contract, identical to classic Reactive Forms. `nullable` is a contract for _accepted_ values, not a guarantee of _emitted_ ones. If your backend distinguishes null from empty string, handle the coercion at submission.
 
 ## Next Steps
 
@@ -7933,6 +7955,18 @@ The generator maps OpenAPI schema types and formats to `@ng-forge/dynamic-forms`
 | `array`              | + enum items         | `multi-checkbox` | —                      |
 | `array`              | + object items       | `array`          | _(container)_          |
 | `object`             | _(any)_              | `group`          | _(container)_          |
+
+### Nullable Values
+
+OpenAPI nullability is preserved end-to-end:
+
+| OpenAPI Spec | Schema Example                       | Emitted FieldDef              |
+| ------------ | ------------------------------------ | ----------------------------- |
+| 3.0          | `{ type: 'string', nullable: true }` | `nullable: true`              |
+| 3.1          | `{ type: ['string', 'null'] }`       | `nullable: true`              |
+| Either       | `{ nullable: true, default: null }`  | `nullable: true, value: null` |
+
+See [Configuration → Nullable values](/configuration#nullable-values) for runtime behavior and the read-side caveat.
 
 ### Ambiguous Field Types
 

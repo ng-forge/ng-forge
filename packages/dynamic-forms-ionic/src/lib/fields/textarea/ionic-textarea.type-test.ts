@@ -125,7 +125,8 @@ describe('IonicTextareaField - Exhaustive Whitelist', () => {
     | 'schemas'
     // From BaseValueField
     | 'value'
-    | 'placeholder';
+    | 'placeholder'
+    | 'nullable';
 
   type ActualKeys = keyof IonicTextareaField;
 

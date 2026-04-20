@@ -92,6 +92,7 @@ describe('PrimeSliderField - Exhaustive Whitelist', () => {
     // From BaseValueField
     | 'value'
     | 'placeholder'
+    | 'nullable'
     // From SliderField
     | 'minValue'
     | 'maxValue'

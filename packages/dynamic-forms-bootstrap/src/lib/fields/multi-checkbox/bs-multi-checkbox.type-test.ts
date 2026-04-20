@@ -87,6 +87,7 @@ describe('BsMultiCheckboxField - Exhaustive Whitelist', () => {
     // From BaseValueField
     | 'value'
     | 'placeholder'
+    | 'nullable'
     // From MultiCheckboxField
     | 'options';
 

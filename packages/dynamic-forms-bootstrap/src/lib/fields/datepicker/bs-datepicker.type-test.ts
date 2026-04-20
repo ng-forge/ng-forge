@@ -119,6 +119,7 @@ describe('BsDatepickerField - Exhaustive Whitelist', () => {
     // From BaseValueField
     | 'value'
     | 'placeholder'
+    | 'nullable'
     // From DatepickerField
     | 'minDate'
     | 'maxDate'
