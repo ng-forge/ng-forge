@@ -573,56 +573,60 @@ describe('getFieldDefaultValue', () => {
 
   describe('nullable inside containers', () => {
     it('should propagate null default when a group contains a nullable field', () => {
-      const field: FieldDef<any> = {
+      const field = {
         type: 'group',
         key: 'profile',
-        fields: [{ type: 'input', key: 'firstName' }, { type: 'input', key: 'middleName', nullable: true } as FieldDef<any>],
-      } as FieldDef<any>;
+        fields: [
+          { type: 'input', key: 'firstName' },
+          { type: 'input', key: 'middleName', nullable: true },
+        ],
+      } satisfies FieldDef<unknown>;
 
       const result = getFieldDefaultValue(field, registry);
       expect(result).toEqual({ firstName: '', middleName: null });
     });
 
     it('should propagate null default through nested groups', () => {
-      const field: FieldDef<any> = {
+      const field = {
         type: 'group',
         key: 'outer',
         fields: [
           {
             type: 'group',
             key: 'inner',
-            fields: [{ type: 'input', key: 'nickname', nullable: true } as FieldDef<any>],
+            fields: [{ type: 'input', key: 'nickname', nullable: true }],
           },
         ],
-      } as FieldDef<any>;
+      } satisfies FieldDef<unknown>;
 
       const result = getFieldDefaultValue(field, registry);
       expect(result).toEqual({ inner: { nickname: null } });
     });
 
     it('should preserve null values in array primitive items', () => {
-      // Array template with a single primitive nullable field → empty array (no initial items)
-      const field: FieldDef<any> = {
+      // Primitive-item array: `fields` is a single-item array of FieldDef (not a tuple).
+      // Each item in the declared template contributes one initial entry — here the sole
+      // nullable input resolves to `null`, producing `[null]`.
+      const field = {
         type: 'array',
         key: 'nicknames',
-        fields: [{ type: 'input', key: 'item', nullable: true } as FieldDef<any>],
-      } as FieldDef<any>;
+        fields: [{ type: 'input', key: 'item', nullable: true }],
+      } satisfies FieldDef<unknown>;
 
       const result = getFieldDefaultValue(field, registry);
-      // Array default itself is [] unless nullable; the template shape informs new-item defaults
       expect(result).toEqual([null]);
     });
 
     it('should keep nullable orthogonal from containers — non-nullable inside group stays on type default', () => {
-      const field: FieldDef<any> = {
+      const field = {
         type: 'group',
         key: 'profile',
         fields: [
           { type: 'input', key: 'firstName' },
-          { type: 'input', key: 'middleName', nullable: true } as FieldDef<any>,
+          { type: 'input', key: 'middleName', nullable: true },
           { type: 'input', key: 'lastName' },
         ],
-      } as FieldDef<any>;
+      } satisfies FieldDef<unknown>;
 
       const result = getFieldDefaultValue(field, registry);
       expect(result).toEqual({ firstName: '', middleName: null, lastName: '' });

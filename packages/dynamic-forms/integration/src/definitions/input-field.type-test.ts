@@ -456,12 +456,12 @@ describe('InputField - Nullable widening', () => {
 
   it('should allow the inferred union form to accept both null and non-null values', () => {
     // With the default TNullable = boolean, InputField distributes over
-    // both nullable variants. This keeps generator output (`value: null,
-    // nullable: true`) valid while still letting callers pin strictness
-    // via explicit `InputField<Props, false>`.
+    // both nullable variants. The default InputProps also allows props.type
+    // to be 'number', so the value union is string | number | null | undefined.
+    // Using toEqualTypeOf (not toMatchTypeOf) to catch accidental drops like
+    // `number` disappearing from the discriminated union.
     type Inferred = InputField;
-    // Value accepts either string or null (per props.type) across the union
-    expectTypeOf<string | null | undefined>().toMatchTypeOf<Inferred['value']>();
+    expectTypeOf<Inferred['value']>().toEqualTypeOf<string | number | null | undefined>();
   });
 
   it('should keep required orthogonal from nullable', () => {

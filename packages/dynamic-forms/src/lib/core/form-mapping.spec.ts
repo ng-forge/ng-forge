@@ -809,9 +809,10 @@ describe('form-mapping', () => {
       it('should mark a nullable+required field as invalid when value is null', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal<{ middleName: string | null }>({ middleName: null });
-          const fieldDef: FieldDef & FieldWithValidation = {
+          const fieldDef: FieldDef & FieldWithValidation & { nullable: true } = {
             key: 'middleName',
             type: 'input',
+            nullable: true,
             required: true,
           };
 
@@ -830,9 +831,10 @@ describe('form-mapping', () => {
       it('should mark a nullable+required field as valid when a non-null value is present', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal<{ middleName: string | null }>({ middleName: 'Quincy' });
-          const fieldDef: FieldDef & FieldWithValidation = {
+          const fieldDef: FieldDef & FieldWithValidation & { nullable: true } = {
             key: 'middleName',
             type: 'input',
+            nullable: true,
             required: true,
           };
 
@@ -851,9 +853,10 @@ describe('form-mapping', () => {
       it('should not require a value for nullable fields without required', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal<{ middleName: string | null }>({ middleName: null });
-          const fieldDef: FieldDef & FieldWithValidation = {
+          const fieldDef: FieldDef & FieldWithValidation & { nullable: true } = {
             key: 'middleName',
             type: 'input',
+            nullable: true,
           };
 
           const formInstance = form(
@@ -877,9 +880,10 @@ describe('form-mapping', () => {
       it('should skip minLength validation when a nullable field is null', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal<{ name: string | null }>({ name: null });
-          const fieldDef: FieldDef & FieldWithValidation = {
+          const fieldDef: FieldDef & FieldWithValidation & { nullable: true } = {
             key: 'name',
             type: 'input',
+            nullable: true,
             minLength: 3,
           };
 
@@ -898,9 +902,10 @@ describe('form-mapping', () => {
       it('should enforce minLength once a nullable field carries a non-null value', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal<{ name: string | null }>({ name: 'ab' });
-          const fieldDef: FieldDef & FieldWithValidation = {
+          const fieldDef: FieldDef & FieldWithValidation & { nullable: true } = {
             key: 'name',
             type: 'input',
+            nullable: true,
             minLength: 3,
           };
 
@@ -920,9 +925,10 @@ describe('form-mapping', () => {
       it('should skip pattern validation when a nullable field is null', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal<{ code: string | null }>({ code: null });
-          const fieldDef: FieldDef & FieldWithValidation = {
+          const fieldDef: FieldDef & FieldWithValidation & { nullable: true } = {
             key: 'code',
             type: 'input',
+            nullable: true,
             pattern: '^[A-Z]+$',
           };
 

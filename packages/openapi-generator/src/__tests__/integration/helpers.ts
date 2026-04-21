@@ -1,4 +1,6 @@
 import { mkdtemp, rm, readFile, writeFile } from 'node:fs/promises';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { basename } from 'node:path';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,6 +40,40 @@ export async function fileExists(filePath: string): Promise<boolean> {
   }
 }
 
+// Shared adapter typing path — used by both the programmatic typecheck and the tsconfig writer
+// so they can't drift. ng-packagr places typings under types/<pkg-name>.d.ts.
+function resolveAdapterTypings(adapter: AdapterName): { pkg: string; typingsPath: string; dist: string } {
+  const repoRoot = resolve(__dirname, '../../../../..');
+  const dist = resolve(repoRoot, `dist/packages/dynamic-forms-${adapter}`);
+  return {
+    pkg: `@ng-forge/dynamic-forms-${adapter}`,
+    typingsPath: resolve(dist, `types/ng-forge-dynamic-forms-${adapter}.d.ts`),
+    dist,
+  };
+}
+
+function resolveCompilerPaths(adapter: AdapterName): Record<string, string[]> {
+  const repoRoot = resolve(__dirname, '../../../../..');
+  const dynamicFormsDist = resolve(repoRoot, 'dist/packages/dynamic-forms');
+  const { pkg, typingsPath } = resolveAdapterTypings(adapter);
+  return {
+    '@ng-forge/dynamic-forms': [dynamicFormsDist],
+    '@ng-forge/dynamic-forms/integration': [join(dynamicFormsDist, 'integration')],
+    [pkg]: [typingsPath.replace(/\.d\.ts$/, '')],
+  };
+}
+
+/**
+ * Extract the exported `...FormConfig` identifier from a generator-produced form file.
+ * The generator always emits exactly one `export const <name>FormConfig = {...}`.
+ */
+function extractFormConfigExport(formSource: string): string | null {
+  const match = formSource.match(/export\s+const\s+(\w+FormConfig)\s*=/);
+  return match ? match[1] : null;
+}
+
+export type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic';
+
 /**
  * Type-check a generator-produced form file the way a real consumer would: with a UI
  * adapter (Material by default) registered via module augmentation. The adapter import
@@ -51,26 +87,24 @@ export async function fileExists(filePath: string): Promise<boolean> {
  *
  * Returns an array of pretty-formatted diagnostics. Empty array === clean compile.
  */
-export function typecheckGeneratedForm(
-  formFilePath: string,
-  adapter: 'material' | 'bootstrap' | 'primeng' | 'ionic' = 'material',
-): string[] {
+export function typecheckGeneratedForm(formFilePath: string, adapter: AdapterName = 'material'): string[] {
   const repoRoot = resolve(__dirname, '../../../../..');
-  const dynamicFormsDist = resolve(repoRoot, 'dist/packages/dynamic-forms');
-  const adapterDist = resolve(repoRoot, `dist/packages/dynamic-forms-${adapter}`);
-  const adapterPkg = `@ng-forge/dynamic-forms-${adapter}`;
-  // ng-packagr places typings under types/<pkg-name>.d.ts; point `paths` at that file
-  // directly so module augmentation is picked up regardless of NodeNext resolution quirks.
-  const adapterTypings = resolve(adapterDist, `types/ng-forge-dynamic-forms-${adapter}.d.ts`);
+  const { pkg } = resolveAdapterTypings(adapter);
 
-  // Write a companion file that activates the adapter registry via side-effect import.
-  // Mirrors the user's app-level `import '@ng-forge/dynamic-forms-material'` (or the
-  // equivalent `types` entry in tsconfig) that issue #341 surfaced.
+  // Derive the form-file identifier so this works for any fixture, not just create-user.
+  const formSource = readFileSync(formFilePath, 'utf-8');
+  const exportName = extractFormConfigExport(formSource);
+  if (!exportName) {
+    return [`Could not locate an \`export const …FormConfig\` in ${formFilePath}`];
+  }
+  const formModuleBasename = basename(formFilePath).replace(/\.ts$/, '');
+
+  // Companion file activates the adapter registry via side-effect import. Mirrors the
+  // consumer-side `import '@ng-forge/dynamic-forms-material'` (or equivalent tsconfig
+  // `types` entry) that issue #341 surfaced.
   const consumerFilePath = join(formFilePath, '..', 'use-generated.ts');
-  const consumerSource = `import '${adapterPkg}';\nimport { createUserFormConfig } from './create-user.form';\nexport const _config = createUserFormConfig;\n`;
-  // Sync write — fs/promises is overkill for a small shim inside a single test
-
-  require('node:fs').writeFileSync(consumerFilePath, consumerSource);
+  const consumerSource = `import '${pkg}';\nimport { ${exportName} } from './${formModuleBasename}';\nexport const _config = ${exportName};\n`;
+  writeFileSync(consumerFilePath, consumerSource);
 
   const options: ts.CompilerOptions = {
     target: ts.ScriptTarget.ES2022,
@@ -82,11 +116,7 @@ export function typecheckGeneratedForm(
     experimentalDecorators: true,
     allowImportingTsExtensions: false,
     baseUrl: repoRoot,
-    paths: {
-      '@ng-forge/dynamic-forms': [dynamicFormsDist],
-      '@ng-forge/dynamic-forms/integration': [join(dynamicFormsDist, 'integration')],
-      [adapterPkg]: [adapterTypings.replace(/\.d\.ts$/, '')],
-    },
+    paths: resolveCompilerPaths(adapter),
     // Ensure the adapter's module augmentation is loaded (the side-effect import in the
     // companion file alone isn't enough — TS tree-shakes unused .d.ts files).
     types: [],
@@ -107,25 +137,22 @@ export function typecheckGeneratedForm(
 }
 
 /**
- * Write a small tsconfig file next to a generated form so that editors and ad-hoc
- * tsc invocations can resolve the package paths the same way `typecheckGeneratedForm` does.
- *
- * Primarily used when extending the test with additional consumer code.
+ * Write a tsconfig next to a generated form that mirrors the compile options used by
+ * `typecheckGeneratedForm`. Editors and ad-hoc `tsc` invocations pick up the same
+ * adapter paths and module/resolution settings, so local inspection matches CI.
  */
-export async function writeRepoRelativeTsconfig(outputDir: string): Promise<void> {
-  const repoRoot = resolve(__dirname, '../../../../..');
+export async function writeRepoRelativeTsconfig(outputDir: string, adapter: AdapterName = 'material'): Promise<void> {
   const tsconfig = {
     compilerOptions: {
       target: 'ES2022',
-      module: 'NodeNext',
-      moduleResolution: 'NodeNext',
+      module: 'ESNext',
+      moduleResolution: 'Bundler',
       strict: true,
       noEmit: true,
       skipLibCheck: true,
-      paths: {
-        '@ng-forge/dynamic-forms': [resolve(repoRoot, 'dist/packages/dynamic-forms')],
-        '@ng-forge/dynamic-forms/integration': [resolve(repoRoot, 'dist/packages/dynamic-forms/integration')],
-      },
+      experimentalDecorators: true,
+      paths: resolveCompilerPaths(adapter),
+      types: [],
     },
     include: ['**/*.ts'],
   };
