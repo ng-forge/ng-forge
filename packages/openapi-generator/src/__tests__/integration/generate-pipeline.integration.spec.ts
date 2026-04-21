@@ -73,7 +73,7 @@ describe('Basic Pipeline', () => {
     const diagnostics = typecheckGeneratedForm(formPath);
 
     expect(diagnostics, `Generated form should type-check cleanly. Errors:\n${diagnostics.join('\n')}`).toEqual([]);
-  });
+  }, 30_000); // tsc program creation + type-check is slow in CI
 });
 
 // ─── B. Validators ───────────────────────────────────────────────────
@@ -421,7 +421,7 @@ describe('Nullable values', () => {
     const diagnostics = typecheckGeneratedForm(formPath);
 
     expect(diagnostics, `Generated form should type-check cleanly. Errors:\n${diagnostics.join('\n')}`).toEqual([]);
-  });
+  }, 30_000); // tsc program creation + type-check is slow in CI
 
   it('should silently drop nullable:true for field types that do not support it', async () => {
     await generate('nullable-edge-cases.yaml');
