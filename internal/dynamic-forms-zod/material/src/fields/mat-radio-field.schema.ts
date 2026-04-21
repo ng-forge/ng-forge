@@ -4,6 +4,7 @@ import { FieldWithValidationSchema } from '../../../src/lib/schemas/field/field-
 import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
 import { FieldOptionsSchema } from '../../../src/lib/schemas/common/field-option.schema';
 import { MatRadioPropsSchema } from '../props/mat-radio-props.schema';
+import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
 
 /**
  * Schema for Material radio field.
@@ -18,7 +19,7 @@ import { MatRadioPropsSchema } from '../props/mat-radio-props.schema';
  * }
  * ```
  */
-export const MatRadioFieldSchema = BaseFieldDefSchema.merge(FieldWithValidationSchema).extend({
+const MatRadioFieldSchemaObject = BaseFieldDefSchema.merge(FieldWithValidationSchema).extend({
   /**
    * Field type discriminant.
    */
@@ -45,5 +46,13 @@ export const MatRadioFieldSchema = BaseFieldDefSchema.merge(FieldWithValidationS
    */
   props: MatRadioPropsSchema.optional(),
 });
+
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * `value: null` is only valid when `nullable: true`.
+ * The raw `MatRadioFieldSchemaObject` is used internally for discriminatedUnion composition.
+ */
+export const MatRadioFieldSchema = MatRadioFieldSchemaObject.superRefine(nullableValueRefine);
+export { MatRadioFieldSchemaObject };
 
 export type MatRadioFieldSchemaType = z.infer<typeof MatRadioFieldSchema>;

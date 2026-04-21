@@ -3,6 +3,7 @@ import { BaseFieldDefSchema } from '../../../src/lib/schemas/field/field-def.sch
 import { FieldWithValidationSchema } from '../../../src/lib/schemas/field/field-with-validation.schema';
 import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
 import { MatSliderPropsSchema } from '../props/mat-slider-props.schema';
+import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
 
 /**
  * Schema for Material slider field.
@@ -19,7 +20,7 @@ import { MatSliderPropsSchema } from '../props/mat-slider-props.schema';
  * }
  * ```
  */
-export const MatSliderFieldSchema = BaseFieldDefSchema.merge(FieldWithValidationSchema).extend({
+const MatSliderFieldSchemaObject = BaseFieldDefSchema.merge(FieldWithValidationSchema).extend({
   /**
    * Field type discriminant.
    */
@@ -56,5 +57,13 @@ export const MatSliderFieldSchema = BaseFieldDefSchema.merge(FieldWithValidation
    */
   props: MatSliderPropsSchema.optional(),
 });
+
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * `value: null` is only valid when `nullable: true`.
+ * The raw `MatSliderFieldSchemaObject` is used internally for discriminatedUnion composition.
+ */
+export const MatSliderFieldSchema = MatSliderFieldSchemaObject.superRefine(nullableValueRefine);
+export { MatSliderFieldSchemaObject };
 
 export type MatSliderFieldSchemaType = z.infer<typeof MatSliderFieldSchema>;

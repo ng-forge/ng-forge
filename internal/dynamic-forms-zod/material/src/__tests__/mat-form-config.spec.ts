@@ -428,6 +428,24 @@ describe('MatInputFieldSchema', () => {
   });
 });
 
+describe('MatInputFieldSchema - nullable gating (direct parse)', () => {
+  it('should reject value:null on the individual schema when nullable is absent', () => {
+    const field = {
+      key: 'name',
+      type: 'input',
+      label: 'Name',
+      value: null,
+    };
+    const result = MatInputFieldSchema.safeParse(field);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const issue = result.error.issues[0];
+      expect(issue.path).toEqual(['value']);
+      expect(issue.message).toMatch(/nullable/);
+    }
+  });
+});
+
 describe('MatLeafFieldSchema - nullable gating', () => {
   it('should reject value:null when nullable is absent', () => {
     const field = {

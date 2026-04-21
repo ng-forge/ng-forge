@@ -16,17 +16,26 @@ import {
   PrimeTogglePropsSchema,
   PrimeButtonPropsSchema,
 } from '../props';
+import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
 
 const PrimeValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
 
 // Input field
-export const PrimeInputFieldSchema = PrimeValueFieldBase.extend({
+const PrimeInputFieldSchemaObject = PrimeValueFieldBase.extend({
   type: z.literal('input'),
   nullable: z.boolean().optional(),
   value: z.string().nullable().optional(),
   placeholder: DynamicTextSchema.optional(),
   props: PrimeInputPropsSchema.optional(),
 });
+
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`PrimeInputFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const PrimeInputFieldSchema = PrimeInputFieldSchemaObject.superRefine(nullableValueRefine);
+export { PrimeInputFieldSchemaObject };
 
 // Checkbox field
 export const PrimeCheckboxFieldSchema = PrimeValueFieldBase.extend({
@@ -37,7 +46,7 @@ export const PrimeCheckboxFieldSchema = PrimeValueFieldBase.extend({
 });
 
 // Radio field
-export const PrimeRadioFieldSchema = PrimeValueFieldBase.extend({
+const PrimeRadioFieldSchemaObject = PrimeValueFieldBase.extend({
   type: z.literal('radio'),
   nullable: z.boolean().optional(),
   value: z.unknown().nullable().optional(),
@@ -46,8 +55,16 @@ export const PrimeRadioFieldSchema = PrimeValueFieldBase.extend({
   props: PrimeRadioPropsSchema.optional(),
 });
 
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`PrimeRadioFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const PrimeRadioFieldSchema = PrimeRadioFieldSchemaObject.superRefine(nullableValueRefine);
+export { PrimeRadioFieldSchemaObject };
+
 // Select field
-export const PrimeSelectFieldSchema = PrimeValueFieldBase.extend({
+const PrimeSelectFieldSchemaObject = PrimeValueFieldBase.extend({
   type: z.literal('select'),
   nullable: z.boolean().optional(),
   value: z.unknown().nullable().optional(),
@@ -56,8 +73,16 @@ export const PrimeSelectFieldSchema = PrimeValueFieldBase.extend({
   props: PrimeSelectPropsSchema.optional(),
 });
 
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`PrimeSelectFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const PrimeSelectFieldSchema = PrimeSelectFieldSchemaObject.superRefine(nullableValueRefine);
+export { PrimeSelectFieldSchemaObject };
+
 // Multi-checkbox field
-export const PrimeMultiCheckboxFieldSchema = PrimeValueFieldBase.extend({
+const PrimeMultiCheckboxFieldSchemaObject = PrimeValueFieldBase.extend({
   type: z.literal('multi-checkbox'),
   nullable: z.boolean().optional(),
   value: z.array(z.unknown()).nullable().optional(),
@@ -66,8 +91,16 @@ export const PrimeMultiCheckboxFieldSchema = PrimeValueFieldBase.extend({
   props: PrimeMultiCheckboxPropsSchema.optional(),
 });
 
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`PrimeMultiCheckboxFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const PrimeMultiCheckboxFieldSchema = PrimeMultiCheckboxFieldSchemaObject.superRefine(nullableValueRefine);
+export { PrimeMultiCheckboxFieldSchemaObject };
+
 // Datepicker field
-export const PrimeDatepickerFieldSchema = PrimeValueFieldBase.extend({
+const PrimeDatepickerFieldSchemaObject = PrimeValueFieldBase.extend({
   type: z.literal('datepicker'),
   nullable: z.boolean().optional(),
   value: z.union([z.string(), z.null()]).optional(),
@@ -78,8 +111,16 @@ export const PrimeDatepickerFieldSchema = PrimeValueFieldBase.extend({
   props: PrimeDatepickerPropsSchema.optional(),
 });
 
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`PrimeDatepickerFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const PrimeDatepickerFieldSchema = PrimeDatepickerFieldSchemaObject.superRefine(nullableValueRefine);
+export { PrimeDatepickerFieldSchemaObject };
+
 // Textarea field
-export const PrimeTextareaFieldSchema = PrimeValueFieldBase.extend({
+const PrimeTextareaFieldSchemaObject = PrimeValueFieldBase.extend({
   type: z.literal('textarea'),
   nullable: z.boolean().optional(),
   value: z.string().nullable().optional(),
@@ -87,8 +128,16 @@ export const PrimeTextareaFieldSchema = PrimeValueFieldBase.extend({
   props: PrimeTextareaPropsSchema.optional(),
 });
 
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`PrimeTextareaFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const PrimeTextareaFieldSchema = PrimeTextareaFieldSchemaObject.superRefine(nullableValueRefine);
+export { PrimeTextareaFieldSchemaObject };
+
 // Slider field
-export const PrimeSliderFieldSchema = PrimeValueFieldBase.extend({
+const PrimeSliderFieldSchemaObject = PrimeValueFieldBase.extend({
   type: z.literal('slider'),
   nullable: z.boolean().optional(),
   value: z.number().nullable().optional(),
@@ -98,6 +147,14 @@ export const PrimeSliderFieldSchema = PrimeValueFieldBase.extend({
   placeholder: DynamicTextSchema.optional(),
   props: PrimeSliderPropsSchema.optional(),
 });
+
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`PrimeSliderFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const PrimeSliderFieldSchema = PrimeSliderFieldSchemaObject.superRefine(nullableValueRefine);
+export { PrimeSliderFieldSchemaObject };
 
 // Toggle field
 export const PrimeToggleFieldSchema = PrimeValueFieldBase.extend({

@@ -4,6 +4,7 @@ import { FieldWithValidationSchema } from '../../../src/lib/schemas/field/field-
 import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
 import { FieldOptionsSchema } from '../../../src/lib/schemas/common/field-option.schema';
 import { MatMultiCheckboxPropsSchema } from '../props/mat-multi-checkbox-props.schema';
+import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
 
 /**
  * Schema for Material multi-checkbox field.
@@ -18,7 +19,7 @@ import { MatMultiCheckboxPropsSchema } from '../props/mat-multi-checkbox-props.s
  * }
  * ```
  */
-export const MatMultiCheckboxFieldSchema = BaseFieldDefSchema.merge(FieldWithValidationSchema).extend({
+const MatMultiCheckboxFieldSchemaObject = BaseFieldDefSchema.merge(FieldWithValidationSchema).extend({
   /**
    * Field type discriminant.
    */
@@ -45,5 +46,13 @@ export const MatMultiCheckboxFieldSchema = BaseFieldDefSchema.merge(FieldWithVal
    */
   props: MatMultiCheckboxPropsSchema.optional(),
 });
+
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * `value: null` is only valid when `nullable: true`.
+ * The raw `MatMultiCheckboxFieldSchemaObject` is used internally for discriminatedUnion composition.
+ */
+export const MatMultiCheckboxFieldSchema = MatMultiCheckboxFieldSchemaObject.superRefine(nullableValueRefine);
+export { MatMultiCheckboxFieldSchemaObject };
 
 export type MatMultiCheckboxFieldSchemaType = z.infer<typeof MatMultiCheckboxFieldSchema>;

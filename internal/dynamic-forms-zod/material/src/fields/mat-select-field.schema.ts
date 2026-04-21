@@ -4,6 +4,7 @@ import { FieldWithValidationSchema } from '../../../src/lib/schemas/field/field-
 import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
 import { FieldOptionsSchema } from '../../../src/lib/schemas/common/field-option.schema';
 import { MatSelectPropsSchema } from '../props/mat-select-props.schema';
+import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
 
 /**
  * Schema for Material select field.
@@ -18,7 +19,7 @@ import { MatSelectPropsSchema } from '../props/mat-select-props.schema';
  * }
  * ```
  */
-export const MatSelectFieldSchema = BaseFieldDefSchema.merge(FieldWithValidationSchema).extend({
+const MatSelectFieldSchemaObject = BaseFieldDefSchema.merge(FieldWithValidationSchema).extend({
   /**
    * Field type discriminant.
    */
@@ -46,5 +47,13 @@ export const MatSelectFieldSchema = BaseFieldDefSchema.merge(FieldWithValidation
    */
   props: MatSelectPropsSchema.optional(),
 });
+
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * `value: null` is only valid when `nullable: true`.
+ * The raw `MatSelectFieldSchemaObject` is used internally for discriminatedUnion composition.
+ */
+export const MatSelectFieldSchema = MatSelectFieldSchemaObject.superRefine(nullableValueRefine);
+export { MatSelectFieldSchemaObject };
 
 export type MatSelectFieldSchemaType = z.infer<typeof MatSelectFieldSchema>;

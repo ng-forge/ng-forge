@@ -16,12 +16,13 @@ import {
   BsSliderPropsSchema,
   BsButtonPropsSchema,
 } from '../props';
+import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
 
 // Value field base (extends BaseFieldDef with validation)
 const BsValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
 
 // Input field
-export const BsInputFieldSchema = BsValueFieldBase.extend({
+const BsInputFieldSchemaObject = BsValueFieldBase.extend({
   type: z.literal('input'),
   nullable: z.boolean().optional(),
   value: z.string().nullable().optional(),
@@ -29,8 +30,16 @@ export const BsInputFieldSchema = BsValueFieldBase.extend({
   props: BsInputPropsSchema.optional(),
 });
 
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`BsInputFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const BsInputFieldSchema = BsInputFieldSchemaObject.superRefine(nullableValueRefine);
+export { BsInputFieldSchemaObject };
+
 // Textarea field
-export const BsTextareaFieldSchema = BsValueFieldBase.extend({
+const BsTextareaFieldSchemaObject = BsValueFieldBase.extend({
   type: z.literal('textarea'),
   nullable: z.boolean().optional(),
   value: z.string().nullable().optional(),
@@ -38,8 +47,16 @@ export const BsTextareaFieldSchema = BsValueFieldBase.extend({
   props: BsTextareaPropsSchema.optional(),
 });
 
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`BsTextareaFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const BsTextareaFieldSchema = BsTextareaFieldSchemaObject.superRefine(nullableValueRefine);
+export { BsTextareaFieldSchemaObject };
+
 // Select field
-export const BsSelectFieldSchema = BsValueFieldBase.extend({
+const BsSelectFieldSchemaObject = BsValueFieldBase.extend({
   type: z.literal('select'),
   nullable: z.boolean().optional(),
   value: z.string().nullable().optional(), // Bootstrap select only supports strings
@@ -47,6 +64,14 @@ export const BsSelectFieldSchema = BsValueFieldBase.extend({
   options: FieldOptionsSchema,
   props: BsSelectPropsSchema.optional(),
 });
+
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`BsSelectFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const BsSelectFieldSchema = BsSelectFieldSchemaObject.superRefine(nullableValueRefine);
+export { BsSelectFieldSchemaObject };
 
 // Checkbox field
 export const BsCheckboxFieldSchema = BsValueFieldBase.extend({
@@ -57,7 +82,7 @@ export const BsCheckboxFieldSchema = BsValueFieldBase.extend({
 });
 
 // Radio field
-export const BsRadioFieldSchema = BsValueFieldBase.extend({
+const BsRadioFieldSchemaObject = BsValueFieldBase.extend({
   type: z.literal('radio'),
   nullable: z.boolean().optional(),
   value: z.unknown().nullable().optional(),
@@ -66,8 +91,16 @@ export const BsRadioFieldSchema = BsValueFieldBase.extend({
   props: BsRadioPropsSchema.optional(),
 });
 
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`BsRadioFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const BsRadioFieldSchema = BsRadioFieldSchemaObject.superRefine(nullableValueRefine);
+export { BsRadioFieldSchemaObject };
+
 // Multi-checkbox field
-export const BsMultiCheckboxFieldSchema = BsValueFieldBase.extend({
+const BsMultiCheckboxFieldSchemaObject = BsValueFieldBase.extend({
   type: z.literal('multi-checkbox'),
   nullable: z.boolean().optional(),
   value: z.array(z.unknown()).nullable().optional(),
@@ -75,6 +108,14 @@ export const BsMultiCheckboxFieldSchema = BsValueFieldBase.extend({
   options: FieldOptionsSchema,
   props: BsMultiCheckboxPropsSchema.optional(),
 });
+
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`BsMultiCheckboxFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const BsMultiCheckboxFieldSchema = BsMultiCheckboxFieldSchemaObject.superRefine(nullableValueRefine);
+export { BsMultiCheckboxFieldSchemaObject };
 
 // Toggle field
 export const BsToggleFieldSchema = BsValueFieldBase.extend({
@@ -85,7 +126,7 @@ export const BsToggleFieldSchema = BsValueFieldBase.extend({
 });
 
 // Datepicker field
-export const BsDatepickerFieldSchema = BsValueFieldBase.extend({
+const BsDatepickerFieldSchemaObject = BsValueFieldBase.extend({
   type: z.literal('datepicker'),
   nullable: z.boolean().optional(),
   value: z.union([z.string(), z.null()]).optional(),
@@ -96,8 +137,16 @@ export const BsDatepickerFieldSchema = BsValueFieldBase.extend({
   props: BsDatepickerPropsSchema.optional(),
 });
 
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`BsDatepickerFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const BsDatepickerFieldSchema = BsDatepickerFieldSchemaObject.superRefine(nullableValueRefine);
+export { BsDatepickerFieldSchemaObject };
+
 // Slider field
-export const BsSliderFieldSchema = BsValueFieldBase.extend({
+const BsSliderFieldSchemaObject = BsValueFieldBase.extend({
   type: z.literal('slider'),
   nullable: z.boolean().optional(),
   value: z.number().nullable().optional(),
@@ -107,6 +156,14 @@ export const BsSliderFieldSchema = BsValueFieldBase.extend({
   placeholder: DynamicTextSchema.optional(),
   props: BsSliderPropsSchema.optional(),
 });
+
+/**
+ * Publicly-used schema with cross-field nullable enforcement applied:
+ * \`value: null\` is only valid when \`nullable: true\`.
+ * The raw \`BsSliderFieldSchemaObject\` is used internally for discriminatedUnion composition.
+ */
+export const BsSliderFieldSchema = BsSliderFieldSchemaObject.superRefine(nullableValueRefine);
+export { BsSliderFieldSchemaObject };
 
 // Button fields
 export const BsButtonFieldSchema = BaseFieldDefSchema.extend({
