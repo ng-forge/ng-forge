@@ -4,7 +4,7 @@ export interface SelectProps {
   placeholder?: DynamicText;
 }
 
-export interface SelectField<T, TProps = SelectProps, TNullable extends boolean = false> extends BaseValueField<
+export interface SelectField<T, TProps = SelectProps, TNullable extends boolean = boolean> extends BaseValueField<
   TProps,
   T,
   FieldMeta,

@@ -107,7 +107,7 @@ export type StringInputType<T extends HtmlInputType = InputType> = Exclude<T, 'n
  * When props.type is 'number', value must be number.
  * Props is REQUIRED and must include type: 'number'.
  */
-interface NumberInputField<TProps extends { type?: string } = InputProps, TNullable extends boolean = false> extends BaseValueField<
+interface NumberInputField<TProps extends { type?: string } = InputProps, TNullable extends boolean = boolean> extends BaseValueField<
   TProps & { type: 'number' },
   number,
   InputMeta,
@@ -122,7 +122,7 @@ interface NumberInputField<TProps extends { type?: string } = InputProps, TNulla
  * When props.type is text/email/etc (or undefined), value must be string.
  * Props type cannot be 'number'.
  */
-interface StringInputField<TProps extends { type?: string } = InputProps, TNullable extends boolean = false> extends BaseValueField<
+interface StringInputField<TProps extends { type?: string } = InputProps, TNullable extends boolean = boolean> extends BaseValueField<
   TProps & { type?: Exclude<TProps['type'], 'number'> },
   string,
   InputMeta,
@@ -137,7 +137,7 @@ interface StringInputField<TProps extends { type?: string } = InputProps, TNulla
  * - If props.type is 'number', only NumberInputField matches (value: number)
  * - If props.type is undefined/text/email/etc, only StringInputField matches (value: string)
  */
-type BuildInputFieldUnion<TProps extends { type?: string }, TNullable extends boolean = false> =
+type BuildInputFieldUnion<TProps extends { type?: string }, TNullable extends boolean = boolean> =
   | NumberInputField<TProps, TNullable>
   | StringInputField<TProps, TNullable>;
 
@@ -169,7 +169,7 @@ type BuildInputFieldUnion<TProps extends { type?: string }, TNullable extends bo
  * }
  * type MatInputField = InputField<MatInputProps>; // Automatically gets discriminated union
  */
-export type InputField<TProps extends { type?: string } = InputProps, TNullable extends boolean = false> = BuildInputFieldUnion<
+export type InputField<TProps extends { type?: string } = InputProps, TNullable extends boolean = boolean> = BuildInputFieldUnion<
   TProps,
   TNullable
 >;

@@ -437,24 +437,31 @@ describe('InputField - Nullable widening', () => {
     expectTypeOf(field.value).toEqualTypeOf<'hello'>();
   });
 
-  it('should reject null value when nullable is false/absent', () => {
-    type NonNullableField = InputField;
-    type ValueType = NonNullableField['value'];
+  it('should reject null value when nullable is explicitly false', () => {
+    // When the user pins nullable:false, the non-nullable branch is selected
+    // and `value: null` must not be assignable.
+    type NonNullableField = InputField<import('./input-field').InputProps, false>;
     expectTypeOf<null>().not.toMatchTypeOf<NonNullableField['value']>();
-    // Value may be string | number | undefined depending on discriminated branch,
-    // but never null.
-    expectTypeOf<ValueType>().not.toEqualTypeOf<string | number | null | undefined>();
 
     // Literal assignment must be rejected at compile time.
-    // @ts-expect-error - null is not assignable to value when nullable is absent
-    const field: InputField = {
+    // @ts-expect-error - null is not assignable to value when nullable: false
+    const field: InputField<import('./input-field').InputProps, false> = {
       type: 'input',
       key: 'name',
       props: { type: 'text' },
       value: null,
     };
-    // Reference `field` so TS doesn't dead-code the assertion.
     expectTypeOf(field).not.toBeAny();
+  });
+
+  it('should allow the inferred union form to accept both null and non-null values', () => {
+    // With the default TNullable = boolean, InputField distributes over
+    // both nullable variants. This keeps generator output (`value: null,
+    // nullable: true`) valid while still letting callers pin strictness
+    // via explicit `InputField<Props, false>`.
+    type Inferred = InputField;
+    // Value accepts either string or null (per props.type) across the union
+    expectTypeOf<string | null | undefined>().toMatchTypeOf<Inferred['value']>();
   });
 
   it('should keep required orthogonal from nullable', () => {

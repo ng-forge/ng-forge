@@ -1,0 +1,32 @@
+openapi: '3.0.3'
+info:
+  title: Nullable Repro
+  version: '1.0.0'
+paths:
+  /users:
+    post:
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                middleName:
+                  type: string
+                  nullable: true
+                  default: null
+                nickname:
+                  type: string
+                  nullable: true
+                age:
+                  type: integer
+                  nullable: true
+                  default: null
+      responses:
+        '201':
+          description: Created

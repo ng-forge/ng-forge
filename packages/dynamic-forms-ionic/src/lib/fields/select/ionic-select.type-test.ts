@@ -239,7 +239,7 @@ describe('IonicSelectField - Exhaustive Whitelist', () => {
 
   describe('value field keys from BaseValueField', () => {
     it('value type matches generic parameter', () => {
-      expectTypeOf<IonicSelectField<string>['value']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<IonicSelectField<string>['value']>().toEqualTypeOf<string | null | undefined>();
     });
 
     it('placeholder', () => {
@@ -249,7 +249,7 @@ describe('IonicSelectField - Exhaustive Whitelist', () => {
 
   describe('generic type parameter', () => {
     it('value type is number when T is number', () => {
-      expectTypeOf<IonicSelectField<number>['value']>().toEqualTypeOf<number | undefined>();
+      expectTypeOf<IonicSelectField<number>['value']>().toEqualTypeOf<number | null | undefined>();
     });
 
     it('options type matches generic parameter', () => {

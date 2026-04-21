@@ -16,7 +16,7 @@ import { BaseValueField, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms'
  *   ]
  * };
  */
-export interface MultiCheckboxField<TValue, TProps = object, TNullable extends boolean = false> extends BaseValueField<
+export interface MultiCheckboxField<TValue, TProps = object, TNullable extends boolean = boolean> extends BaseValueField<
   TProps,
   TValue[],
   FieldMeta,

@@ -193,7 +193,7 @@ describe('PrimeTextareaField - Exhaustive Whitelist', () => {
 
   describe('value field keys', () => {
     it('value is string', () => {
-      expectTypeOf<PrimeTextareaField['value']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<PrimeTextareaField['value']>().toEqualTypeOf<string | null | undefined>();
     });
 
     it('placeholder', () => {

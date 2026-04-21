@@ -191,7 +191,7 @@ describe('PrimeInputField (String) - Exhaustive Whitelist', () => {
 
   describe('value field keys from BaseValueField', () => {
     it('value is string for string input', () => {
-      expectTypeOf<StringInputField['value']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<StringInputField['value']>().toEqualTypeOf<string | null | undefined>();
     });
 
     it('placeholder', () => {
@@ -261,7 +261,7 @@ describe('PrimeInputField (Number) - Exhaustive Whitelist', () => {
 
   describe('value type', () => {
     it('value is number for number input', () => {
-      expectTypeOf<NumberInputField['value']>().toEqualTypeOf<number | undefined>();
+      expectTypeOf<NumberInputField['value']>().toEqualTypeOf<number | null | undefined>();
     });
   });
 });

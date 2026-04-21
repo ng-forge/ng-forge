@@ -223,7 +223,7 @@ describe('IonicSliderField - Exhaustive Whitelist', () => {
 
   describe('value field keys from BaseValueField', () => {
     it('value is number', () => {
-      expectTypeOf<IonicSliderField['value']>().toEqualTypeOf<number | undefined>();
+      expectTypeOf<IonicSliderField['value']>().toEqualTypeOf<number | null | undefined>();
     });
 
     it('placeholder', () => {

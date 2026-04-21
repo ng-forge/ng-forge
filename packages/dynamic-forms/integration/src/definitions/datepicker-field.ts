@@ -4,7 +4,7 @@ export interface DatepickerProps {
   placeholder?: DynamicText;
 }
 
-export interface DatepickerField<TProps, TNullable extends boolean = false> extends BaseValueField<
+export interface DatepickerField<TProps, TNullable extends boolean = boolean> extends BaseValueField<
   TProps,
   Date | string,
   FieldMeta,

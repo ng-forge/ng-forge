@@ -227,7 +227,7 @@ describe('IonicTextareaField - Exhaustive Whitelist', () => {
 
   describe('value field keys from BaseValueField', () => {
     it('value is string', () => {
-      expectTypeOf<IonicTextareaField['value']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<IonicTextareaField['value']>().toEqualTypeOf<string | null | undefined>();
     });
 
     it('placeholder', () => {

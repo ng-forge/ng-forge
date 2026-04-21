@@ -184,8 +184,8 @@ describe('PrimeSelectField - Exhaustive Whitelist', () => {
 
   describe('value field keys', () => {
     it('value is of generic type', () => {
-      expectTypeOf<PrimeSelectField<string>['value']>().toEqualTypeOf<string | undefined>();
-      expectTypeOf<PrimeSelectField<number>['value']>().toEqualTypeOf<number | undefined>();
+      expectTypeOf<PrimeSelectField<string>['value']>().toEqualTypeOf<string | null | undefined>();
+      expectTypeOf<PrimeSelectField<number>['value']>().toEqualTypeOf<number | null | undefined>();
     });
 
     it('placeholder', () => {
@@ -233,6 +233,6 @@ describe('PrimeSelectField - Usage', () => {
       value: 2,
     };
 
-    expectTypeOf(field.value).toEqualTypeOf<number | undefined>();
+    expectTypeOf(field.value).toEqualTypeOf<number | null | undefined>();
   });
 });

@@ -193,7 +193,7 @@ describe('IonicMultiCheckboxField - Exhaustive Whitelist', () => {
 
   describe('value field keys from BaseValueField', () => {
     it('value is array of T', () => {
-      expectTypeOf<IonicMultiCheckboxField<string>['value']>().toEqualTypeOf<string[] | undefined>();
+      expectTypeOf<IonicMultiCheckboxField<string>['value']>().toEqualTypeOf<string[] | null | undefined>();
     });
 
     it('placeholder', () => {
@@ -203,7 +203,7 @@ describe('IonicMultiCheckboxField - Exhaustive Whitelist', () => {
 
   describe('generic type parameter', () => {
     it('value type is number[] when T is number', () => {
-      expectTypeOf<IonicMultiCheckboxField<number>['value']>().toEqualTypeOf<number[] | undefined>();
+      expectTypeOf<IonicMultiCheckboxField<number>['value']>().toEqualTypeOf<number[] | null | undefined>();
     });
 
     it('options type matches generic parameter', () => {

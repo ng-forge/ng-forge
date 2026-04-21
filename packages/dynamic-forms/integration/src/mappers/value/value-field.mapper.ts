@@ -1,4 +1,4 @@
-import { BaseValueField } from '@ng-forge/dynamic-forms';
+import { BaseValueField, FieldMeta } from '@ng-forge/dynamic-forms';
 import { computed, inject, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { buildBaseInputs, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES } from '@ng-forge/dynamic-forms';
@@ -70,7 +70,7 @@ export function resolveValueFieldContext(): ValueFieldContext {
  * @returns Record of input names to values
  */
 export function buildValueFieldInputs<TProps, TValue = unknown>(
-  fieldDef: BaseValueField<TProps, TValue>,
+  fieldDef: BaseValueField<TProps, TValue, FieldMeta, boolean>,
   ctx: ValueFieldContext,
   defaultProps?: Record<string, unknown>,
   defaultValidationMessages?: ValidationMessages,
@@ -123,7 +123,7 @@ export function buildValueFieldInputs<TProps, TValue = unknown>(
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function valueFieldMapper<TProps = unknown, TValue = unknown>(
-  fieldDef: BaseValueField<TProps, TValue>,
+  fieldDef: BaseValueField<TProps, TValue, FieldMeta, boolean>,
 ): Signal<Record<string, unknown>> {
   // Get the context once at injection time (captures the FIELD_SIGNAL_CONTEXT reference)
   const ctx = resolveValueFieldContext();

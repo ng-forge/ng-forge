@@ -199,7 +199,7 @@ describe('IonicRadioField - Exhaustive Whitelist', () => {
 
   describe('value field keys from BaseValueField', () => {
     it('value type matches generic parameter', () => {
-      expectTypeOf<IonicRadioField<string>['value']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<IonicRadioField<string>['value']>().toEqualTypeOf<string | null | undefined>();
     });
 
     it('placeholder', () => {
@@ -209,7 +209,7 @@ describe('IonicRadioField - Exhaustive Whitelist', () => {
 
   describe('generic type parameter', () => {
     it('value type is number when T is number', () => {
-      expectTypeOf<IonicRadioField<number>['value']>().toEqualTypeOf<number | undefined>();
+      expectTypeOf<IonicRadioField<number>['value']>().toEqualTypeOf<number | null | undefined>();
     });
 
     it('options type matches generic parameter', () => {

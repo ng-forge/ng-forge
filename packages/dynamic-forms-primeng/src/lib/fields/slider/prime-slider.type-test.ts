@@ -173,7 +173,7 @@ describe('PrimeSliderField - Exhaustive Whitelist', () => {
 
   describe('value field keys', () => {
     it('value is number', () => {
-      expectTypeOf<PrimeSliderField['value']>().toEqualTypeOf<number | undefined>();
+      expectTypeOf<PrimeSliderField['value']>().toEqualTypeOf<number | null | undefined>();
     });
 
     it('placeholder', () => {

@@ -378,3 +378,30 @@ describe('Edge Cases', () => {
     expect(getPet).toBe(true);
   });
 });
+
+// ─── N. Nullable Values (issue #341) ─────────────────────────────────
+
+describe('Nullable values', () => {
+  it('should emit nullable:true + value:null for OpenAPI 3.0 nullable fields', async () => {
+    await generate('nullable-values.yaml');
+
+    const form = await readGenerated(outputDir, 'forms', 'create-user.form.ts');
+    // middleName has nullable + default:null
+    expect(form).toContain("key: 'middleName'");
+    expect(form).toMatch(/value:\s*null,\s*\n\s*nullable:\s*true/);
+    // nickname has nullable without default → just nullable
+    expect(form).toContain("key: 'nickname'");
+    // age has nullable:true + default:null on a numeric field
+    expect(form).toContain("key: 'age'");
+    expect(form).toContain('type: "number"');
+  });
+
+  it('should emit union types with null in generated interfaces', async () => {
+    await generate('nullable-values.yaml');
+
+    const types = await readGenerated(outputDir, 'types', 'create-user.types.ts');
+    expect(types).toContain('name: string');
+    expect(types).toContain('middleName?: string | null');
+    expect(types).toContain('age?: number | null');
+  });
+});

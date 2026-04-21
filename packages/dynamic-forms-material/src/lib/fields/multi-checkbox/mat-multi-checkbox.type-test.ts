@@ -175,8 +175,8 @@ describe('MatMultiCheckboxField - Exhaustive Whitelist', () => {
 
   describe('value field keys', () => {
     it('value is array of generic type', () => {
-      expectTypeOf<MatMultiCheckboxField<string>['value']>().toEqualTypeOf<string[] | undefined>();
-      expectTypeOf<MatMultiCheckboxField<number>['value']>().toEqualTypeOf<number[] | undefined>();
+      expectTypeOf<MatMultiCheckboxField<string>['value']>().toEqualTypeOf<string[] | null | undefined>();
+      expectTypeOf<MatMultiCheckboxField<number>['value']>().toEqualTypeOf<number[] | null | undefined>();
     });
 
     it('placeholder', () => {
@@ -222,6 +222,6 @@ describe('MatMultiCheckboxField - Usage', () => {
       value: [1, 2],
     };
 
-    expectTypeOf(field.value).toEqualTypeOf<number[] | undefined>();
+    expectTypeOf(field.value).toEqualTypeOf<number[] | null | undefined>();
   });
 });
