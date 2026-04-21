@@ -937,4 +937,66 @@ describe('InferFormValue type inference', () => {
 
     expect(config.customFnConfig?.derivations?.getCurrency).toBeDefined();
   });
+
+  describe('nullable inference', () => {
+    it('should widen inferred value to include null when nullable: true', () => {
+      const config = {
+        fields: [
+          { key: 'firstName', type: 'input', value: '' },
+          { key: 'middleName', type: 'input', nullable: true, value: null },
+          { key: 'age', type: 'input', nullable: true, value: null, props: { type: 'number' } },
+        ],
+      } as const satisfies FormConfig;
+
+      type Value = InferFormValue<typeof config>;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test
+      type _Tests = [
+        Expect<Equal<Value['firstName'], string>>,
+        // nullable widens to T | null (undefined also present because value field is optional in the discriminated union)
+        Expect<Equal<Value['middleName'], string | null | undefined>>,
+        Expect<Equal<Value['age'], number | null | undefined>>,
+      ];
+
+      expect(config.fields[1].nullable).toBe(true);
+    });
+
+    it('should not add null to inferred value for non-nullable fields', () => {
+      const config = {
+        fields: [
+          { key: 'firstName', type: 'input', value: '' },
+          { key: 'age', type: 'input', value: 0, props: { type: 'number' } },
+        ],
+      } as const satisfies FormConfig;
+
+      type Value = InferFormValue<typeof config>;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test
+      type _Tests = [Expect<Equal<Value['firstName'], string>>, Expect<Equal<Value['age'], number>>];
+
+      expect(config.fields[0].key).toBe('firstName');
+    });
+
+    it('should widen nullable fields inside a group', () => {
+      const config = {
+        fields: [
+          {
+            key: 'profile',
+            type: 'group',
+            fields: [
+              { key: 'firstName', type: 'input', value: '' },
+              { key: 'nickname', type: 'input', nullable: true, value: null },
+            ],
+          },
+        ],
+      } as const satisfies FormConfig;
+
+      type Value = InferFormValue<typeof config>;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test
+      type _Tests = [
+        Expect<Equal<Value['profile']['firstName'], string>>,
+        Expect<Equal<Value['profile']['nickname'], string | null | undefined>>,
+      ];
+
+      expect(config.fields[0].type).toBe('group');
+    });
+  });
 });

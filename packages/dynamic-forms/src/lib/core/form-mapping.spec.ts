@@ -867,6 +867,76 @@ describe('form-mapping', () => {
           expect(formInstance().valid()).toBe(true);
         });
       });
+
+      // Pins the friendly behavior for nullable fields: Signal Forms' built-in
+      // validators (minLength, maxLength, pattern, email) short-circuit via
+      // isEmpty(ctx.value()) and return no error when the value is null. This
+      // means users can declare nullable + minLength on the same field without
+      // extra conditional logic — length constraints only fire once the user
+      // actually types something.
+      it('should skip minLength validation when a nullable field is null', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal<{ name: string | null }>({ name: null });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'name',
+            type: 'input',
+            minLength: 3,
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.name);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('should enforce minLength once a nullable field carries a non-null value', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal<{ name: string | null }>({ name: 'ab' });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'name',
+            type: 'input',
+            minLength: 3,
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.name);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // Value is 'ab' (length 2), below minLength — should error
+          expect(formInstance().valid()).toBe(false);
+        });
+      });
+
+      it('should skip pattern validation when a nullable field is null', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal<{ code: string | null }>({ code: null });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'code',
+            type: 'input',
+            pattern: '^[A-Z]+$',
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.code);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
     });
   });
 });

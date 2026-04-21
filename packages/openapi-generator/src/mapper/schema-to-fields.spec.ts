@@ -340,6 +340,88 @@ describe('mapSchemaToFields', () => {
     expect(result.fields[0].nullable).toBeUndefined();
   });
 
+  it('should NOT emit nullable on checkbox (boolean) fields — tri-state deferred', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        subscribed: { type: 'boolean', nullable: true } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].type).toBe('checkbox');
+    expect(result.fields[0].nullable).toBeUndefined();
+  });
+
+  it('should NOT emit nullable on container (group) fields', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        address: {
+          type: 'object',
+          nullable: true,
+          properties: {
+            street: { type: 'string' },
+          },
+        } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].type).toBe('group');
+    expect(result.fields[0].nullable).toBeUndefined();
+  });
+
+  it('should NOT emit nullable on array container fields', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        tags: {
+          type: 'array',
+          nullable: true,
+          items: { type: 'string' },
+        } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].type).toBe('array');
+    expect(result.fields[0].nullable).toBeUndefined();
+  });
+
+  it('should propagate nullable onto array template when items are nullable', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        scores: {
+          type: 'array',
+          items: { type: 'integer', nullable: true },
+        } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].type).toBe('array');
+    const template = result.fields[0].template as { type: string; nullable?: boolean };
+    expect(template.nullable).toBe(true);
+  });
+
+  it('should NOT propagate nullable onto array template when item type does not support it (boolean items)', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        flags: {
+          type: 'array',
+          items: { type: 'boolean', nullable: true },
+        } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    const template = result.fields[0].template as { type: string; nullable?: boolean };
+    expect(template.nullable).toBeUndefined();
+  });
+
   it('should map description to props.hint', () => {
     const schema: SchemaObject = {
       type: 'object',

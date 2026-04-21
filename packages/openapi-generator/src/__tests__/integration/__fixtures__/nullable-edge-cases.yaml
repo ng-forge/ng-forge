@@ -1,0 +1,64 @@
+openapi: '3.0.3'
+info:
+  title: Nullable Edge Cases
+  version: '1.0.0'
+paths:
+  /entities:
+    post:
+      operationId: createEntity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: string
+                # Scenario A: nullable with enum (select/radio candidate)
+                status:
+                  type: string
+                  nullable: true
+                  enum: [active, inactive, pending]
+                # Scenario B: nullable date
+                startDate:
+                  type: string
+                  format: date
+                  nullable: true
+                # Scenario C: nullable object (group)
+                address:
+                  type: object
+                  nullable: true
+                  properties:
+                    street: { type: string }
+                    city: { type: string }
+                # Scenario D: nullable array
+                tags:
+                  type: array
+                  nullable: true
+                  items: { type: string }
+                # Scenario E: array of nullable items
+                scores:
+                  type: array
+                  items:
+                    type: integer
+                    nullable: true
+                # Scenario F: nullable boolean
+                subscribed:
+                  type: boolean
+                  nullable: true
+                # Scenario G: nullable with default
+                role:
+                  type: string
+                  nullable: true
+                  default: null
+                # Scenario H: nullable + readOnly (should disable)
+                createdAt:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  readOnly: true
+      responses:
+        '201':
+          description: Created

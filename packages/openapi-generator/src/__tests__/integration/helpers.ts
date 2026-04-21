@@ -69,7 +69,7 @@ export function typecheckGeneratedForm(
   const consumerFilePath = join(formFilePath, '..', 'use-generated.ts');
   const consumerSource = `import '${adapterPkg}';\nimport { createUserFormConfig } from './create-user.form';\nexport const _config = createUserFormConfig;\n`;
   // Sync write — fs/promises is overkill for a small shim inside a single test
-   
+
   require('node:fs').writeFileSync(consumerFilePath, consumerSource);
 
   const options: ts.CompilerOptions = {

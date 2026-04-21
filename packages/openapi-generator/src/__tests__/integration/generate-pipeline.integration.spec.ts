@@ -422,4 +422,28 @@ describe('Nullable values', () => {
 
     expect(diagnostics, `Generated form should type-check cleanly. Errors:\n${diagnostics.join('\n')}`).toEqual([]);
   });
+
+  it('should silently drop nullable:true for field types that do not support it', async () => {
+    await generate('nullable-edge-cases.yaml');
+
+    const form = await readGenerated(outputDir, 'forms', 'create-entity.form.ts');
+    // Nullable on value fields (select, datepicker, input) — emitted
+    expect(form).toMatch(/key: 'status',[\s\S]+?type: 'select',[\s\S]+?nullable: true/);
+    expect(form).toMatch(/key: 'startDate',[\s\S]+?type: 'datepicker',[\s\S]+?nullable: true/);
+    // Nullable on container/checked — NOT emitted
+    // (find the 'subscribed' block: checkbox field; it should NOT have `nullable: true` on that block)
+    const subscribedBlock = form.substring(form.indexOf("key: 'subscribed'"));
+    expect(subscribedBlock.split('},')[0]).not.toContain('nullable: true');
+    const addressBlock = form.substring(form.indexOf("key: 'address'"), form.indexOf("key: 'tags'"));
+    expect(addressBlock).not.toContain('nullable: true');
+  });
+
+  it('should propagate nullable onto array primitive templates', async () => {
+    await generate('nullable-edge-cases.yaml');
+
+    const form = await readGenerated(outputDir, 'forms', 'create-entity.form.ts');
+    // scores: array of nullable integers → template has nullable:true, outer array does not
+    const scoresBlock = form.substring(form.indexOf("key: 'scores'"), form.indexOf("key: 'subscribed'"));
+    expect(scoresBlock).toMatch(/template:\s*\{[\s\S]+?nullable: true/);
+  });
 });

@@ -7,6 +7,14 @@ import { mapDiscriminator } from './discriminator-mapping.js';
 import { toLabel, toEnumLabel } from '../utils/naming.js';
 import { logger } from '../utils/logger.js';
 
+/**
+ * Field types whose runtime `BaseValueField` accepts the `nullable` flag.
+ * Container types (group, array, row, page), checked fields (checkbox, toggle)
+ * and control/display fields do not support nullable in this release — the generator
+ * silently drops nullable:true for those with a verbose log.
+ */
+const NULLABLE_SUPPORTED_FIELD_TYPES = new Set(['input', 'textarea', 'select', 'radio', 'multi-checkbox', 'slider', 'datepicker']);
+
 function singularize(label: string): string {
   // Only strip trailing 's' if word is 4+ chars and doesn't end in 'ss'
   if (label.length >= 4 && label.endsWith('s') && !label.endsWith('ss')) {
@@ -203,11 +211,15 @@ function mapPropertyToField(
   }
 
   // nullable → nullable (OpenAPI 3.0 nullable:true, 3.1 type:[T, null])
+  // Only emit on value-bearing field types; checkbox/toggle (BaseCheckedField, tri-state
+  // deferred) and container/button/display types don't support the `nullable` flag.
   const schemaObj = prop.schema as Record<string, unknown>;
   const isNullable =
     schemaObj['nullable'] === true || (Array.isArray(schemaObj['type']) && (schemaObj['type'] as unknown[]).includes('null'));
-  if (isNullable) {
+  if (isNullable && NULLABLE_SUPPORTED_FIELD_TYPES.has(finalType)) {
     field.nullable = true;
+  } else if (isNullable) {
+    logger.verbose(`Field '${fieldPath}': schema nullable ignored — '${finalType}' does not support the nullable flag in this release.`);
   }
 
   // default → value
@@ -319,6 +331,13 @@ function mapPropertyToField(
             label: toEnumLabel(String(v)),
             value: String(v),
           }));
+        }
+        // Propagate item nullability onto the template (if the template field type supports it)
+        const itemsObj = items as Record<string, unknown>;
+        const itemsNullable =
+          itemsObj['nullable'] === true || (Array.isArray(itemsObj['type']) && (itemsObj['type'] as unknown[]).includes('null'));
+        if (itemsNullable && NULLABLE_SUPPORTED_FIELD_TYPES.has(templateField.type)) {
+          templateField.nullable = true;
         }
         field.template = templateField;
       }
