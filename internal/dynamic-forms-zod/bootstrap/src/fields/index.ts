@@ -22,6 +22,20 @@ import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-val
 const BsValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
 
 // Input field
+/*
+ * For each value-bearing field schema below we follow a dual-export pattern:
+ *
+ *   const Xxx...FieldSchemaObject = base.extend({ ... });   // raw ZodObject
+ *   export const Xxx...FieldSchema =
+ *     Xxx...FieldSchemaObject.superRefine(nullableValueRefine);   // public, refined
+ *
+ * The raw object is required because z.discriminatedUnion in the leaf schema
+ * rejects ZodEffects; the refined version enforces the cross-field contract
+ * (`value: null` requires `nullable: true`) on direct parse. The union applies
+ * `.superRefine(nullableValueRefine)` at its top level too, so the refinement
+ * runs for full-config validation regardless of which entry point is used.
+ */
+
 const BsInputFieldSchemaObject = BsValueFieldBase.extend({
   type: z.literal('input'),
   nullable: z.boolean().optional(),

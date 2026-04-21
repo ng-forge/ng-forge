@@ -17,6 +17,13 @@ import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-val
  * }
  * ```
  */
+/**
+ * Raw ZodObject. Used internally by `MatLeafFieldSchema`'s `z.discriminatedUnion`,
+ * which rejects `ZodEffects`. The cross-field nullable contract (`value: null`
+ * requires `nullable: true`) is enforced on the public `MatInputFieldSchema` export
+ * below via `.superRefine(nullableValueRefine)`, and redundantly at the
+ * union level. Direct parse on this raw schema is not a public API.
+ */
 const MatInputFieldSchemaObject = BaseFieldDefSchema.merge(FieldWithValidationSchema).extend({
   /**
    * Field type discriminant.

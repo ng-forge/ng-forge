@@ -28,6 +28,13 @@ export const DateValueSchema = z.union([z.string(), z.null()]);
  *
  * Note: In JSON configs, Date values are represented as ISO 8601 strings.
  */
+/**
+ * Raw ZodObject. Used internally by `MatLeafFieldSchema`'s `z.discriminatedUnion`,
+ * which rejects `ZodEffects`. The cross-field nullable contract (`value: null`
+ * requires `nullable: true`) is enforced on the public `MatDatepickerFieldSchema` export
+ * below via `.superRefine(nullableValueRefine)`, and redundantly at the
+ * union level. Direct parse on this raw schema is not a public API.
+ */
 const MatDatepickerFieldSchemaObject = BaseFieldDefSchema.merge(FieldWithValidationSchema).extend({
   /**
    * Field type discriminant.
