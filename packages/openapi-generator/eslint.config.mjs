@@ -8,7 +8,12 @@ export default [
       '@nx/dependency-checks': [
         'error',
         {
-          ignoredFiles: ['{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}'],
+          ignoredFiles: [
+            '{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}',
+            // Integration test helpers use `typescript` programmatically to regression-test
+            // generator output; it's a dev-time tool, not a runtime dependency of the package.
+            '{projectRoot}/src/__tests__/**',
+          ],
           ignoredDependencies: ['vite', '@nx/vite', 'vitest', '@inquirer/prompts', 'chokidar', 'chalk'],
         },
       ],
