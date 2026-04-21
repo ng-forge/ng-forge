@@ -22,7 +22,7 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
     <mat-slider
       [min]="f().min?.() ?? 0"
       [max]="f().max?.() ?? 100"
-      [step]="props()?.step ?? 1"
+      [step]="step() ?? props()?.step ?? 1"
       [discrete]="props()?.thumbLabel || props()?.showThumbLabel"
       [showTickMarks]="props()?.tickInterval !== undefined"
       [color]="props()?.color || 'primary'"
@@ -76,6 +76,7 @@ export default class MatSliderFieldComponent implements MatSliderComponent {
 
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
+  readonly step = input<number>();
 
   readonly props = input<MatSliderProps>();
   readonly meta = input<InputMeta>();

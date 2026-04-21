@@ -22,7 +22,9 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       <p-slider
         [id]="key()"
         [formField]="f"
-        [step]="props()?.step ?? 1"
+        [min]="f().min?.() ?? props()?.min ?? 0"
+        [max]="f().max?.() ?? props()?.max ?? 100"
+        [step]="step() ?? props()?.step ?? 1"
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"
         [attr.tabindex]="tabIndex()"
@@ -64,6 +66,7 @@ export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
   readonly placeholder = input<DynamicText>();
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
+  readonly step = input<number>();
 
   readonly props = input<PrimeSliderProps>();
   readonly meta = input<FieldMeta>();

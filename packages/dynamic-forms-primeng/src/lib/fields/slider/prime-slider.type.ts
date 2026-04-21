@@ -4,14 +4,24 @@ import { SliderField } from '@ng-forge/dynamic-forms/integration';
 export interface PrimeSliderProps {
   /**
    * Minimum value of the slider.
+   *
+   * Adapter-level override. Field-level `minValue` (or the validator `min`) takes
+   * precedence — set this only when you need a render-only override that should
+   * not flow into form validation.
    */
   min?: number;
   /**
    * Maximum value of the slider.
+   *
+   * Adapter-level override. Field-level `maxValue` (or the validator `max`) takes
+   * precedence — set this only when you need a render-only override that should
+   * not flow into form validation.
    */
   max?: number;
   /**
    * Step increment for slider values.
+   *
+   * Adapter-level override. Field-level `step` on `SliderField` takes precedence.
    */
   step?: number;
   /**

@@ -153,6 +153,23 @@ test.describe('PrimeNG Components Tests', () => {
       const slider = scenario.locator('#lockedSlider p-slider');
       await expect(slider).toHaveClass(/p-disabled/);
     });
+
+    test('should respect field-level min and max bounds', async ({ page, helpers }) => {
+      await page.goto('/#/test/primeng-components/slider-bounds');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('slider-bounds');
+      await expect(scenario).toBeVisible();
+
+      // PrimeNG renders the slider handle with role="slider" and aria-valuemin/max
+      // reflecting the [min] / [max] component inputs. Field-level minValue/maxValue
+      // must propagate to those bounds — regression guard for the original wiring bug.
+      const handle = scenario.locator('#temperature [role="slider"]');
+      await expect(handle).toBeVisible();
+      await expect(handle).toHaveAttribute('aria-valuemin', '10');
+      await expect(handle).toHaveAttribute('aria-valuemax', '30');
+      await expect(handle).toHaveAttribute('aria-valuenow', '20');
+    });
   });
 
   test.describe('Toggle Component', () => {

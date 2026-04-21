@@ -161,11 +161,12 @@ test.describe('Bootstrap Components Tests', () => {
       const slider = scenario.locator('#temperature input[type="range"]');
       await expect(slider).toBeVisible();
 
-      // Verify slider has the configured initial value
+      // Field-level minValue/maxValue must reach the rendered <input type="range">
+      // via the dfBsInputConstraints directive. Regression guard for the original
+      // wiring bug — see fix(dynamic-forms): wire slider range consistently across adapters.
+      await expect(slider).toHaveAttribute('min', '10');
+      await expect(slider).toHaveAttribute('max', '30');
       await expect(slider).toHaveValue('20');
-
-      // Note: min/max validation is enforced by the form framework
-      // Testing exact HTML attributes would require additional mapper implementation
     });
 
     test('should work with step increments', async ({ page, helpers }) => {

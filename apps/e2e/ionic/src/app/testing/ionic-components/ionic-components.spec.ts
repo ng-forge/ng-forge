@@ -71,7 +71,7 @@ test.describe('Ionic Components Tests', () => {
       expect(newValue).toBe(75);
     });
 
-    test('should respect min and max bounds', async ({ page, helpers }) => {
+    test('should respect field-level min and max bounds', async ({ page, helpers }) => {
       await page.goto('/#/testing/ionic-components/range-component');
       await page.waitForLoadState('networkidle');
 
@@ -81,7 +81,10 @@ test.describe('Ionic Components Tests', () => {
       const range = scenario.locator('#volume ion-range');
       await expect(range).toBeVisible({ timeout: 5000 });
 
-      // Verify min and max attributes
+      // The scenario sets minValue/maxValue at the field level (NOT in props).
+      // The component must resolve via f().min?.()/f().max?.(), so this assertion
+      // is a regression guard for the original wiring bug — see
+      // fix(dynamic-forms): wire slider range consistently across adapters.
       const min = await range.evaluate((el: HTMLIonRangeElement) => el.min);
       const max = await range.evaluate((el: HTMLIonRangeElement) => el.max);
 

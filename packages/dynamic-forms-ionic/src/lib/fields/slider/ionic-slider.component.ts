@@ -19,9 +19,9 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
-      [min]="props()?.min ?? 0"
-      [max]="props()?.max ?? 100"
-      [step]="props()?.step ?? 1"
+      [min]="f().min?.() ?? props()?.min ?? 0"
+      [max]="f().max?.() ?? props()?.max ?? 100"
+      [step]="step() ?? props()?.step ?? 1"
       [dualKnobs]="props()?.dualKnobs ?? false"
       [pin]="props()?.pin ?? false"
       [pinFormatter]="props()?.pinFormatter ?? defaultPinFormatter"
@@ -70,6 +70,7 @@ export default class IonicSliderFieldComponent implements IonicSliderComponent {
   readonly placeholder = input<DynamicText>();
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
+  readonly step = input<number>();
 
   readonly props = input<IonicSliderProps>();
   readonly meta = input<FieldMeta>();

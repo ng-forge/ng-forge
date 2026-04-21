@@ -8,10 +8,13 @@ const config = {
       type: 'slider',
       label: 'Volume',
       value: 50,
+      // Field-level slider config — adapter components must read these, not just
+      // adapter-specific props.min / props.max. See fix(dynamic-forms): wire slider
+      // range consistently across adapters.
+      minValue: 0,
+      maxValue: 100,
+      step: 1,
       props: {
-        min: 0,
-        max: 100,
-        step: 1,
         pin: true,
         ticks: true,
         snaps: true,

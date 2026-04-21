@@ -29,9 +29,9 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
         dfBsInputConstraints
         [formField]="f"
         [id]="inputId"
-        [dfMin]="props()?.min ?? min()"
-        [dfMax]="props()?.max ?? max()"
-        [dfStep]="props()?.step ?? step()"
+        [dfMin]="f().min?.() ?? props()?.min ?? min()"
+        [dfMax]="f().max?.() ?? props()?.max ?? max()"
+        [dfStep]="step() ?? props()?.step ?? 1"
         [attr.tabindex]="tabIndex()"
         [attr.aria-invalid]="ariaInvalid()"
         [attr.aria-required]="ariaRequired()"
@@ -79,7 +79,7 @@ export default class BsSliderFieldComponent implements BsSliderComponent {
 
   readonly min = input<number>(0);
   readonly max = input<number>(100);
-  readonly step = input<number>(1);
+  readonly step = input<number>();
 
   readonly props = input<BsSliderProps>();
   readonly validationMessages = input<ValidationMessages>();

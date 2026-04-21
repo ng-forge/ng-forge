@@ -6,8 +6,20 @@ export interface BsSliderProps {
   valuePrefix?: string;
   valueSuffix?: string;
   hint?: DynamicText;
+  /**
+   * Adapter-level override for the slider minimum.
+   * Field-level `minValue` (or the validator `min`) takes precedence.
+   */
   min?: number;
+  /**
+   * Adapter-level override for the slider maximum.
+   * Field-level `maxValue` (or the validator `max`) takes precedence.
+   */
   max?: number;
+  /**
+   * Adapter-level override for the slider step increment.
+   * Field-level `step` on `SliderField` takes precedence.
+   */
   step?: number;
 }
 
