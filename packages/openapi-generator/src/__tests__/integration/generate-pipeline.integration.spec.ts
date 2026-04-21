@@ -1,7 +1,7 @@
 import { writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { runGenerateAction } from '../../cli/commands/generate.command.js';
-import { createTempDir, cleanupDir, fixturePath, readGenerated, readConfigFile, fileExists } from './helpers.js';
+import { createTempDir, cleanupDir, fixturePath, readGenerated, readConfigFile, fileExists, typecheckGeneratedForm } from './helpers.js';
 
 let outputDir: string;
 let exitSpy: ReturnType<typeof vi.spyOn>;
@@ -64,6 +64,15 @@ describe('Basic Pipeline', () => {
     const config = await readConfigFile(outputDir);
     expect(config['endpoints']).toEqual(['POST:/users']);
     expect(config['decisions']).toBeDefined();
+  });
+
+  it('should produce a form file that compiles against the published types', async () => {
+    await generate('basic-post.yaml');
+
+    const formPath = join(outputDir, 'forms', 'create-user.form.ts');
+    const diagnostics = typecheckGeneratedForm(formPath);
+
+    expect(diagnostics, `Generated form should type-check cleanly. Errors:\n${diagnostics.join('\n')}`).toEqual([]);
   });
 });
 
@@ -403,5 +412,14 @@ describe('Nullable values', () => {
     expect(types).toContain('name: string');
     expect(types).toContain('middleName?: string | null');
     expect(types).toContain('age?: number | null');
+  });
+
+  it('should produce a form file that compiles against the published types (regression for #341)', async () => {
+    await generate('nullable-values.yaml');
+
+    const formPath = join(outputDir, 'forms', 'create-user.form.ts');
+    const diagnostics = typecheckGeneratedForm(formPath);
+
+    expect(diagnostics, `Generated form should type-check cleanly. Errors:\n${diagnostics.join('\n')}`).toEqual([]);
   });
 });

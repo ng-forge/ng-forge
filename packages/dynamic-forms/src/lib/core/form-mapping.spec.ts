@@ -800,5 +800,73 @@ describe('form-mapping', () => {
         });
       });
     });
+
+    describe('nullable + required interaction', () => {
+      // Documents that `nullable` and `required` describe different layers: nullable
+      // widens the accepted value shape; required validates that a value is present.
+      // Angular's Validators.required treats null as invalid, so a field that is both
+      // `nullable` and `required` and carries `null` fails required-validation.
+      it('should mark a nullable+required field as invalid when value is null', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal<{ middleName: string | null }>({ middleName: null });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'middleName',
+            type: 'input',
+            required: true,
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.middleName);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(false);
+        });
+      });
+
+      it('should mark a nullable+required field as valid when a non-null value is present', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal<{ middleName: string | null }>({ middleName: 'Quincy' });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'middleName',
+            type: 'input',
+            required: true,
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.middleName);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('should not require a value for nullable fields without required', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal<{ middleName: string | null }>({ middleName: null });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'middleName',
+            type: 'input',
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.middleName);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+    });
   });
 });

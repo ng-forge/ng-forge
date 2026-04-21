@@ -535,4 +535,97 @@ describe('getFieldDefaultValue', () => {
       expect(result).toBe('');
     });
   });
+
+  describe('nullable across field types', () => {
+    // Single parametrized smoke test — if nullable resolution ever gets special-cased
+    // per field type, this catches it. Only includes value-bearing types (BaseValueField);
+    // checkbox/toggle (BaseCheckedField) do not support nullable in this pass.
+    const FIELD_TYPES = [
+      { type: 'input' },
+      { type: 'input', props: { type: 'number' } }, // numeric input
+      { type: 'select' },
+      { type: 'array' },
+    ] as const;
+
+    for (const config of FIELD_TYPES) {
+      const label = 'props' in config ? `${config.type} (type: ${config.props.type})` : config.type;
+
+      it(`resolves nullable:true without value to null for ${label}`, () => {
+        const field = {
+          ...config,
+          key: 'foo',
+          nullable: true,
+        } as unknown as FieldDef<any>;
+        expect(getFieldDefaultValue(field, registry)).toBeNull();
+      });
+
+      it(`resolves nullable:true + explicit null to null for ${label}`, () => {
+        const field = {
+          ...config,
+          key: 'foo',
+          nullable: true,
+          value: null,
+        } as unknown as FieldDef<any>;
+        expect(getFieldDefaultValue(field, registry)).toBeNull();
+      });
+    }
+  });
+
+  describe('nullable inside containers', () => {
+    it('should propagate null default when a group contains a nullable field', () => {
+      const field: FieldDef<any> = {
+        type: 'group',
+        key: 'profile',
+        fields: [{ type: 'input', key: 'firstName' }, { type: 'input', key: 'middleName', nullable: true } as FieldDef<any>],
+      } as FieldDef<any>;
+
+      const result = getFieldDefaultValue(field, registry);
+      expect(result).toEqual({ firstName: '', middleName: null });
+    });
+
+    it('should propagate null default through nested groups', () => {
+      const field: FieldDef<any> = {
+        type: 'group',
+        key: 'outer',
+        fields: [
+          {
+            type: 'group',
+            key: 'inner',
+            fields: [{ type: 'input', key: 'nickname', nullable: true } as FieldDef<any>],
+          },
+        ],
+      } as FieldDef<any>;
+
+      const result = getFieldDefaultValue(field, registry);
+      expect(result).toEqual({ inner: { nickname: null } });
+    });
+
+    it('should preserve null values in array primitive items', () => {
+      // Array template with a single primitive nullable field → empty array (no initial items)
+      const field: FieldDef<any> = {
+        type: 'array',
+        key: 'nicknames',
+        fields: [{ type: 'input', key: 'item', nullable: true } as FieldDef<any>],
+      } as FieldDef<any>;
+
+      const result = getFieldDefaultValue(field, registry);
+      // Array default itself is [] unless nullable; the template shape informs new-item defaults
+      expect(result).toEqual([null]);
+    });
+
+    it('should keep nullable orthogonal from containers — non-nullable inside group stays on type default', () => {
+      const field: FieldDef<any> = {
+        type: 'group',
+        key: 'profile',
+        fields: [
+          { type: 'input', key: 'firstName' },
+          { type: 'input', key: 'middleName', nullable: true } as FieldDef<any>,
+          { type: 'input', key: 'lastName' },
+        ],
+      } as FieldDef<any>;
+
+      const result = getFieldDefaultValue(field, registry);
+      expect(result).toEqual({ firstName: '', middleName: null, lastName: '' });
+    });
+  });
 });
