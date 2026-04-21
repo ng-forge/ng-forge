@@ -5,6 +5,7 @@ import { PageField } from '../../definitions/default/page-field';
 import { RowField } from '../../definitions/default/row-field';
 import { TextField } from '../../definitions/default/text-field';
 import { CssWrapper } from '../../wrappers/css/css-wrapper.type';
+import { RowWrapper } from '../../wrappers/row/row-wrapper.type';
 import { ContainerField } from '../../definitions/default/container-field';
 
 /**
@@ -60,6 +61,7 @@ export interface FieldRegistryLeaves {
  */
 export interface FieldRegistryWrappers {
   css: CssWrapper;
+  row: RowWrapper;
 }
 
 /**

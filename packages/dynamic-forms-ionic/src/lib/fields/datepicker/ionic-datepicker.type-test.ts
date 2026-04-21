@@ -24,7 +24,6 @@ describe('IonicDatepickerProps - Exhaustive Whitelist', () => {
     | 'cancelText'
     | 'size'
     | 'color'
-    | 'placeholder'
     | 'hint';
   type ActualKeys = keyof IonicDatepickerProps;
 
@@ -84,10 +83,6 @@ describe('IonicDatepickerProps - Exhaustive Whitelist', () => {
         'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | undefined
       >();
     });
-
-    it('placeholder', () => {
-      expectTypeOf<IonicDatepickerProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
-    });
   });
 });
 
@@ -113,6 +108,9 @@ describe('IonicDatepickerField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -267,6 +265,7 @@ describe('IonicDatepickerField - Usage Tests', () => {
       type: 'datepicker',
       key: 'birthday',
       label: 'Birthday',
+      placeholder: 'Select your birthday',
       props: {
         presentation: 'date',
         multiple: false,
@@ -279,7 +278,6 @@ describe('IonicDatepickerField - Usage Tests', () => {
         cancelText: 'Cancel',
         size: 'cover',
         color: 'primary',
-        placeholder: 'Select your birthday',
       },
       value: new Date('2000-01-01'),
       minDate: new Date('1900-01-01'),

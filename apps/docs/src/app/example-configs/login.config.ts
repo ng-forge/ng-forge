@@ -23,9 +23,9 @@ export const loginConfig = {
       validationMessages: {
         email: 'Please enter a valid email address',
       },
+      placeholder: 'your@email.com',
       props: {
         type: 'email',
-        placeholder: 'your@email.com',
         hint: 'Enter the email associated with your account',
       },
     },
@@ -38,9 +38,9 @@ export const loginConfig = {
       validationMessages: {
         required: 'Password is required',
       },
+      placeholder: 'Enter your password',
       props: {
         type: 'password',
-        placeholder: 'Enter your password',
       },
     },
     {

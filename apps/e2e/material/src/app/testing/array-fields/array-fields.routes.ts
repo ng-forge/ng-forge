@@ -184,10 +184,21 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getArrayFieldsScenario('simplified-array-max-length') },
   },
+  // Regression: container template + wrappers (cherry-picked dereekb fixes)
+  {
+    path: 'simplified-array-container-template',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('simplified-array-container-template') },
+  },
   // EventDispatcher injectable
   {
     path: 'array-event-dispatcher',
     loadComponent: () => import('./array-event-dispatcher.component').then((m) => m.ArrayEventDispatcherComponent),
+  },
+  // Array move (reorder without destroy)
+  {
+    path: 'array-move',
+    loadComponent: () => import('./array-move.component').then((m) => m.ArrayMoveComponent),
   },
 ];
 

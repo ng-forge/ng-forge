@@ -2,7 +2,6 @@
  * Exhaustive type tests for MatButton field types.
  */
 import { expectTypeOf } from 'vitest';
-import type { StateLogicConfig } from '@ng-forge/dynamic-forms';
 import type { RequiredKeys } from '@ng-forge/utils';
 
 // Import registry augmentation to include Material field types in ArrayAllowedChildren
@@ -65,6 +64,9 @@ describe('MatSubmitButtonField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     | 'logic';
 
   type ActualKeys = keyof MatSubmitButtonField;
@@ -119,6 +121,9 @@ describe('MatNextButtonField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     | 'logic';
 
   type ActualKeys = keyof MatNextButtonField;
@@ -169,6 +174,9 @@ describe('MatPreviousButtonField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     | 'logic';
 
   type ActualKeys = keyof MatPreviousButtonField;
@@ -219,6 +227,9 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     | 'logic'
     | 'arrayKey'
     | 'template';
@@ -275,6 +286,9 @@ describe('RemoveArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     | 'logic'
     | 'arrayKey';
 

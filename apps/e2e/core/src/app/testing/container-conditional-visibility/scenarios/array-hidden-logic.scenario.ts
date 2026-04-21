@@ -12,14 +12,14 @@ const memberFields = [
     type: 'input',
     label: 'Name',
     col: 6,
-    props: { placeholder: 'Enter name' },
+    placeholder: 'Enter name',
   },
   {
     key: 'email',
     type: 'input',
     label: 'Email',
     col: 6,
-    props: { placeholder: 'Enter email' },
+    placeholder: 'Enter email',
   },
 ];
 
@@ -69,7 +69,7 @@ const config = {
       key: 'notes',
       type: 'input',
       label: 'Notes',
-      props: { placeholder: 'Always visible' },
+      placeholder: 'Always visible',
     },
   ],
 } as FormConfig;

@@ -19,7 +19,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('PrimeSelectProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'multiple' | 'filter' | 'placeholder' | 'showClear' | 'styleClass' | 'hint' | 'compareWith';
+  type ExpectedKeys = 'multiple' | 'filter' | 'showClear' | 'styleClass' | 'hint' | 'compareWith';
   type ActualKeys = keyof PrimeSelectProps;
 
   it('should have exactly the expected keys', () => {
@@ -37,10 +37,6 @@ describe('PrimeSelectProps - Exhaustive Whitelist', () => {
 
     it('filter', () => {
       expectTypeOf<PrimeSelectProps['filter']>().toEqualTypeOf<boolean | undefined>();
-    });
-
-    it('placeholder', () => {
-      expectTypeOf<PrimeSelectProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('showClear', () => {
@@ -85,6 +81,9 @@ describe('PrimeSelectField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     // From FieldWithValidation
     | 'required'
     | 'email'

@@ -2,7 +2,8 @@
  * Exhaustive type tests for ContainerField type.
  */
 import { expectTypeOf } from 'vitest';
-import type { ContainerField, WrapperConfig, ContainerComponent } from './container-field';
+import type { ContainerField, ContainerComponent } from './container-field';
+import type { WrapperConfig } from '../../models/wrapper-type';
 import type { CssWrapper } from '../../wrappers/css/css-wrapper.type';
 import type { ContainerLogicConfig } from '../base/container-logic-config';
 import type { ContainerAllowedChildren } from '../../models/types/nesting-constraints';
@@ -34,6 +35,8 @@ describe('ContainerField - Exhaustive Whitelist', () => {
     | 'excludeValueIfReadonly'
     | 'fields'
     | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     | 'logic';
 
   type ActualKeys = keyof ContainerField;
@@ -125,8 +128,8 @@ describe('ContainerField - Exhaustive Whitelist', () => {
 
 describe('WrapperConfig', () => {
   it('type resolves to registered wrapper types', () => {
-    // RegisteredWrapperTypes = keyof FieldRegistryWrappers = 'css' (from CssWrapper)
-    expectTypeOf<WrapperConfig['type']>().toEqualTypeOf<'css'>();
+    // FieldRegistryWrappers: 'css' (CssWrapper) + 'row' (RowWrapper)
+    expectTypeOf<WrapperConfig['type']>().toEqualTypeOf<'css' | 'row'>();
   });
 
   it('resolves to CssWrapper for the css type', () => {

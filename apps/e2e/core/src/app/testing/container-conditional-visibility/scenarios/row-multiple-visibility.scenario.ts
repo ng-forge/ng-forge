@@ -39,9 +39,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter first name',
-          },
+          placeholder: 'Enter first name',
         },
         {
           key: 'lastName',
@@ -59,9 +57,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter last name',
-          },
+          placeholder: 'Enter last name',
         },
       ],
     },
@@ -85,9 +81,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter company name',
-          },
+          placeholder: 'Enter company name',
         },
         {
           key: 'taxId',
@@ -105,9 +99,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter tax ID',
-          },
+          placeholder: 'Enter tax ID',
         },
       ],
     },
@@ -131,9 +123,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter corporate name',
-          },
+          placeholder: 'Enter corporate name',
         },
         {
           key: 'dunsNumber',
@@ -151,9 +141,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter DUNS number',
-          },
+          placeholder: 'Enter DUNS number',
         },
         {
           key: 'accountManager',
@@ -171,9 +159,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter account manager',
-          },
+          placeholder: 'Enter account manager',
         },
       ],
     },

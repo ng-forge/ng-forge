@@ -12,10 +12,11 @@ export const TOPICS: Record<string, { brief: string; full: string }> = {
   // ========== FIELD TYPES ==========
   input: {
     brief: `\`\`\`typescript
-{ key: 'email', type: 'input', label: 'Email', required: true, email: true, props: { type: 'email', placeholder: 'you@example.com' } }
+{ key: 'email', type: 'input', label: 'Email', required: true, email: true, placeholder: 'you@example.com', props: { type: 'email' } }
 \`\`\`
 **Shorthand:** required, email, min, max, minLength, maxLength, pattern
-**Props:** type (text|email|password|number|tel|url), placeholder, appearance (Material)`,
+**Field-level:** placeholder
+**Props:** type (text|email|password|number|tel|url), appearance (Material)`,
 
     full: `# Input Field
 
@@ -26,9 +27,9 @@ export const TOPICS: Record<string, { brief: string; full: string }> = {
   label: 'Email',
   required: true,
   email: true,
+  placeholder: 'you@example.com',
   props: {
     type: 'email',           // 'text' | 'email' | 'password' | 'number' | 'tel' | 'url'
-    placeholder: 'you@example.com',
     appearance: 'outline'    // Material: 'outline' | 'fill'
   }
 }
@@ -36,7 +37,8 @@ export const TOPICS: Record<string, { brief: string; full: string }> = {
 
 **Validation shorthand:** \`required\`, \`email\`, \`min\`, \`max\`, \`minLength\`, \`maxLength\`, \`pattern\`
 
-**Props:** \`type\`, \`placeholder\`, \`appearance\` (Material), \`hint\` (Material)
+**Field-level:** \`placeholder\`
+**Props:** \`type\`, \`appearance\` (Material), \`hint\` (Material)
 
 **Value Type:** \`string | number\`
 
@@ -45,7 +47,7 @@ export const TOPICS: Record<string, { brief: string; full: string }> = {
 
   select: {
     brief: `\`\`\`typescript
-{ key: 'country', type: 'select', label: 'Country', options: [{ label: 'USA', value: 'us' }], props: { placeholder: 'Choose...' } }
+{ key: 'country', type: 'select', label: 'Country', placeholder: 'Choose...', options: [{ label: 'USA', value: 'us' }] }
 \`\`\`
 ⚠️ **options at FIELD level, NOT in props!**`,
 
@@ -61,8 +63,8 @@ export const TOPICS: Record<string, { brief: string; full: string }> = {
     { label: 'USA', value: 'us' },
     { label: 'Canada', value: 'ca' }
   ],
+  placeholder: 'Choose...',
   props: {
-    placeholder: 'Choose...',
     multiple: false             // Allow multiple selection
   }
 }
@@ -162,7 +164,7 @@ For multiple selections, use **multi-checkbox** type.`,
 
   textarea: {
     brief: `\`\`\`typescript
-{ key: 'bio', type: 'textarea', label: 'Bio', maxLength: 500, props: { rows: 4, placeholder: 'Tell us about yourself...' } }
+{ key: 'bio', type: 'textarea', label: 'Bio', maxLength: 500, placeholder: 'Tell us about yourself...', props: { rows: 4 } }
 \`\`\``,
 
     full: `# Textarea Field
@@ -173,9 +175,9 @@ For multiple selections, use **multi-checkbox** type.`,
   type: 'textarea',
   label: 'Biography',
   maxLength: 500,
+  placeholder: 'Tell us about yourself...',
   props: {
     rows: 4,
-    placeholder: 'Tell us about yourself...'
   }
 }
 \`\`\`
@@ -2508,6 +2510,12 @@ export const TOPIC_DESCRIPTIONS: Record<string, string> = {
   'common-expressions': 'Frequently used derivation expressions (age, math, concatenation)',
   'type-narrowing': 'TypeScript type safety with as const satisfies FormConfig',
   workflow: 'Recommended tool usage guide — start here',
+  // Wrappers
+  wrappers: 'Overview of the wrapper chain: how to apply, compose, and author wrappers',
+  wrapper: 'Overview of the wrapper chain (alias of `wrappers`)',
+  css: 'Built-in CSS wrapper — applies DynamicText class names to the host element',
+  arraySection: 'Demo wrapper — array card whose header owns the Add button (examples-shared-ui)',
+  section: 'Demo wrapper — titled card around any field or container (examples-shared-ui)',
 };
 
 /**
@@ -2639,4 +2647,18 @@ export const TOPIC_ALIASES: Record<string, string> = {
   'how-to': 'workflow',
   guide: 'workflow',
   'getting-started': 'workflow',
+  // Wrapper aliases
+  wrapper: 'wrappers',
+  'field-wrapper': 'wrappers',
+  'field-wrappers': 'wrappers',
+  decorator: 'wrappers',
+  decorators: 'wrappers',
+  'wrapper-chain': 'wrappers',
+  'css-wrapper': 'css',
+  csswrapper: 'css',
+  cssclasses: 'css',
+  'array-section': 'arraySection',
+  arraysection: 'arraySection',
+  'section-wrapper': 'section',
+  sectionwrapper: 'section',
 };

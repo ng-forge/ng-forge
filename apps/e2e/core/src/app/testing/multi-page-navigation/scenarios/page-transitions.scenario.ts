@@ -17,8 +17,8 @@ const config = {
           key: 'data1',
           type: 'textarea',
           label: 'Large Data Field',
+          placeholder: 'Enter large amount of data',
           props: {
-            placeholder: 'Enter large amount of data',
             rows: 5,
           },
           col: 12,
@@ -45,8 +45,8 @@ const config = {
           key: 'data2',
           type: 'textarea',
           label: 'More Data',
+          placeholder: 'Enter more data',
           props: {
-            placeholder: 'Enter more data',
             rows: 5,
           },
           col: 12,

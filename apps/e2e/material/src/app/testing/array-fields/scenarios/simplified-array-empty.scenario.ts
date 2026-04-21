@@ -10,7 +10,7 @@ const config = {
     {
       key: 'notes',
       type: 'array',
-      template: { key: 'text', type: 'input', label: 'Note', props: { placeholder: 'Enter a note' } },
+      template: { key: 'text', type: 'input', label: 'Note', placeholder: 'Enter a note' },
     },
     {
       key: 'submit',

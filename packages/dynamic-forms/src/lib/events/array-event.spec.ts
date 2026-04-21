@@ -3,6 +3,7 @@ import { arrayEvent } from './array-event';
 import { AppendArrayItemEvent } from './constants/append-array-item.event';
 import { PrependArrayItemEvent } from './constants/prepend-array-item.event';
 import { InsertArrayItemEvent } from './constants/insert-array-item.event';
+import { MoveArrayItemEvent } from './constants/move-array-item.event';
 import { PopArrayItemEvent } from './constants/pop-array-item.event';
 import { ShiftArrayItemEvent } from './constants/shift-array-item.event';
 import { RemoveAtIndexEvent } from './constants/remove-at-index.event';
@@ -106,11 +107,37 @@ describe('arrayEvent builder', () => {
     });
   });
 
+  describe('move()', () => {
+    it('should create MoveArrayItemEvent with arrayKey, fromIndex, and toIndex', () => {
+      const event = arrayEvent('contacts').move(0, 2);
+
+      expect(event).toBeInstanceOf(MoveArrayItemEvent);
+      expect(event.arrayKey).toBe('contacts');
+      expect(event.fromIndex).toBe(0);
+      expect(event.toIndex).toBe(2);
+    });
+
+    it('should accept same from and to index', () => {
+      const event = arrayEvent('contacts').move(1, 1);
+
+      expect(event.fromIndex).toBe(1);
+      expect(event.toIndex).toBe(1);
+    });
+
+    it('should accept zero as valid index', () => {
+      const event = arrayEvent('contacts').move(0, 0);
+
+      expect(event.fromIndex).toBe(0);
+      expect(event.toIndex).toBe(0);
+    });
+  });
+
   describe('builder returns correct event types', () => {
     it('should have correct type discriminants', () => {
       expect(arrayEvent('x').append(defaultTemplate).type).toBe('append-array-item');
       expect(arrayEvent('x').prepend(defaultTemplate).type).toBe('prepend-array-item');
       expect(arrayEvent('x').insertAt(0, defaultTemplate).type).toBe('insert-array-item');
+      expect(arrayEvent('x').move(0, 1).type).toBe('move-array-item');
       expect(arrayEvent('x').pop().type).toBe('pop-array-item');
       expect(arrayEvent('x').shift().type).toBe('shift-array-item');
       expect(arrayEvent('x').removeAt(0).type).toBe('remove-at-index');

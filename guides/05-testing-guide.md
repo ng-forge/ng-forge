@@ -198,10 +198,8 @@ const config = {
       key: 'email',
       value: '',
       label: 'Email',
-      props: {
-        type: 'email',
-        placeholder: 'Enter email',
-      },
+      placeholder: 'Enter email',
+      props: { type: 'email' },
     },
   ],
 } as const satisfies FormConfig;

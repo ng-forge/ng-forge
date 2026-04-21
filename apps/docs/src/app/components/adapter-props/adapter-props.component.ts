@@ -75,6 +75,8 @@ const ADAPTER_PROPS_DATA = {
       { prop: 'appearance', type: "'fill' | 'outline'", description: 'Material form field appearance variant' },
       { prop: 'hint', type: 'string', description: 'Helper text displayed below the field' },
       { prop: 'subscriptSizing', description: 'Controls space reserved for hint/error', type: "'fixed' | 'dynamic'" },
+      { prop: 'floatLabel', type: "'auto' | 'always' | 'never'", description: 'Label float behavior' },
+      { prop: 'hideRequiredMarker', type: 'boolean', description: 'Hide the required asterisk' },
     ],
     bootstrap: [
       { prop: 'size', type: "'sm' | 'lg'", description: 'Bootstrap input size variant' },
@@ -106,6 +108,8 @@ const ADAPTER_PROPS_DATA = {
       { prop: 'appearance', type: "'fill' | 'outline'", description: 'Material form field appearance variant' },
       { prop: 'hint', type: 'string', description: 'Helper text below the field' },
       { prop: 'resize', type: "'none' | 'vertical' | 'horizontal' | 'both'", description: 'Resize handle behavior' },
+      { prop: 'floatLabel', type: "'auto' | 'always' | 'never'", description: 'Label float behavior' },
+      { prop: 'hideRequiredMarker', type: 'boolean', description: 'Hide the required asterisk' },
     ],
     bootstrap: [
       { prop: 'size', type: "'sm' | 'lg'", description: 'Bootstrap textarea size' },
@@ -130,6 +134,8 @@ const ADAPTER_PROPS_DATA = {
       { prop: 'multiple', type: 'boolean', description: 'Allow multiple selections' },
       { prop: 'hint', type: 'string', description: 'Helper text below the field' },
       { prop: 'panelMaxHeight', type: 'number', description: 'Max height of dropdown panel in pixels' },
+      { prop: 'floatLabel', type: "'auto' | 'always' | 'never'", description: 'Label float behavior' },
+      { prop: 'hideRequiredMarker', type: 'boolean', description: 'Hide the required asterisk' },
     ],
     bootstrap: [
       { prop: 'size', type: "'sm' | 'lg'", description: 'Select size variant' },
@@ -284,6 +290,8 @@ const ADAPTER_PROPS_DATA = {
       { prop: 'startView', type: "'month' | 'year' | 'multi-year'", description: 'Initial calendar view' },
       { prop: 'touchUi', type: 'boolean', description: 'Use touch-friendly popup UI' },
       { prop: 'hint', type: 'string', description: 'Helper text below the field' },
+      { prop: 'floatLabel', type: "'auto' | 'always' | 'never'", description: 'Label float behavior' },
+      { prop: 'hideRequiredMarker', type: 'boolean', description: 'Hide the required asterisk' },
     ],
     bootstrap: [
       { prop: 'size', type: "'sm' | 'lg'", description: 'Input size' },

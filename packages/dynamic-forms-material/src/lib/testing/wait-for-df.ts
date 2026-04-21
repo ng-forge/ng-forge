@@ -16,7 +16,7 @@ import { firstValueFrom } from 'rxjs';
  * The page orchestration refactoring introduced reactive primitives that require additional
  * stabilization cycles for UI component templates to fully hydrate.
  */
-export async function waitForDFInit(component: DynamicForm, fixture: ComponentFixture<any>): Promise<void> {
+export async function waitForDFInit(component: DynamicForm, fixture: ComponentFixture<DynamicForm>): Promise<void> {
   fixture.detectChanges();
 
   // Step 1: Wait for event-based initialization
@@ -45,7 +45,7 @@ export async function waitForDFInit(component: DynamicForm, fixture: ComponentFi
  * and no loading placeholders remain. Uses timeout-based safety net instead
  * of arbitrary iteration limits.
  */
-async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs = 500): Promise<void> {
+async function waitForFieldComponents(fixture: ComponentFixture<DynamicForm>, timeoutMs = 500): Promise<void> {
   const formElement = fixture.nativeElement.querySelector('.df-form');
   if (!formElement) return;
 

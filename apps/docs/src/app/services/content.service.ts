@@ -203,16 +203,22 @@ export class ContentService {
   private async renderMarkdown(markdown: string): Promise<RenderedContent> {
     const headings: HeadingEntry[] = [];
 
-    // Pass 1: Lex markdown, extract code tokens, highlight with shiki
+    // Pass 1: Lex markdown, extract code tokens (block + inline), highlight with shiki
     const lexer = new Marked();
     const tokens = lexer.lexer(markdown);
     const codeTokens: Tokens.Code[] = [];
+    const codespanTexts = new Set<string>();
 
     const walkTokens = (tokenList: Tokens.Generic[]): void => {
       for (const token of tokenList) {
         if (token.type === 'code') {
           codeTokens.push(token as Tokens.Code);
+        } else if (token.type === 'codespan') {
+          codespanTexts.add((token as Tokens.Codespan).text);
         }
+        // Recurse into nested tokens (inline tokens inside block tokens)
+        const nested = (token as Tokens.Generic).tokens as Tokens.Generic[] | undefined;
+        if (Array.isArray(nested)) walkTokens(nested);
       }
     };
     walkTokens(tokens as Tokens.Generic[]);
@@ -230,15 +236,37 @@ export class ContentService {
       }),
     );
 
+    // Highlight inline codespans with shiki too, defaulting to TypeScript —
+    // most inline code in the docs is TS identifiers, type names, or short
+    // snippets. The result is the tokenised inner HTML which we splice into
+    // a `<code>` element via the codespan renderer below.
+    const inlineHighlightedMap = new Map<string, string>();
+    await Promise.all(
+      [...codespanTexts].map(async (text) => {
+        // Markdown codespans arrive with HTML entities like `&lt;`; shiki
+        // needs the raw text to tokenise correctly.
+        const decoded = decodeHtmlEntities(text);
+        const html = await this.shiki.highlightInline(decoded, 'typescript');
+        inlineHighlightedMap.set(text, html);
+      }),
+    );
+
     // Pass 2: Render with custom renderer
     const usedIds = new Map<string, number>();
     const renderer: Partial<Renderer> = {
-      heading({ text, depth }: Tokens.Heading): string {
+      heading(this: { parser: { parseInline(tokens: Tokens.Generic[]): string } }, token: Tokens.Heading): string {
+        const { text, depth, tokens } = token;
+        // Parse inline markdown (backticks, links, emphasis) into HTML so
+        // headings like `## Register with \`createWrappers\`` render with a
+        // real <code> span instead of literal backticks.
+        const innerHtml = this.parser.parseInline(tokens);
         let id = slugify(text);
         const count = usedIds.get(id) ?? 0;
         usedIds.set(id, count + 1);
         if (count > 0) id = `${id}-${count}`;
         if (depth === 2 || depth === 3) {
+          // TOC entries keep the raw text; renderers consuming `HeadingEntry.text`
+          // can slot backticks into their own <code> element if they need to.
           headings.push({ id, text, level: depth });
         }
         const anchor =
@@ -249,7 +277,15 @@ export class ContentService {
               `<path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>` +
               `</svg></button>`
             : '';
-        return `<h${depth} id="${id}">${text}${anchor}</h${depth}>`;
+        return `<h${depth} id="${id}">${innerHtml}${anchor}</h${depth}>`;
+      },
+      codespan({ text }: Tokens.Codespan): string {
+        // Prefer the shiki-tokenised inner HTML so inline `Foo<Bar>` gets
+        // the same syntax colours as a fenced block would. Fall back to
+        // the raw text (already HTML-escaped by marked) when shiki isn't
+        // available (SSR, missing language).
+        const highlighted = inlineHighlightedMap.get(text);
+        return `<code class="inline-code">${highlighted ?? text}</code>`;
       },
       code({ text, lang: rawLang }: Tokens.Code): string {
         const lang = (rawLang ?? '').split(/\s+/)[0] || 'text';
@@ -285,6 +321,13 @@ export class ContentService {
     const marked = new Marked({ renderer });
     let html = await marked.parse(markdown);
 
+    // Wrap each rendered <table> in a horizontally-scrolling container so
+    // narrow viewports scroll the table rather than cramming every word
+    // onto its own line. Tokens with `white-space: nowrap` inside cells
+    // stay whole and the wrapper's `overflow-x: auto` only shows a scroll
+    // bar when content actually doesn't fit.
+    html = html.replace(/<table\b[^>]*>[\s\S]*?<\/table>/g, (match) => `<div class="table-scroll">${match}</div>`);
+
     // Replace {@link SymbolName} with API reference links.
     // Uses data-api-link attribute so the adapter prefix can be resolved at click time.
     html = html.replace(
@@ -307,30 +350,52 @@ export class ContentService {
   }
 
   /**
-   * Post-hydration: replace plain <pre><code> blocks (from SSR) with Shiki-highlighted versions.
-   * Finds all code blocks rendered by the Marked code renderer (wrapped in .code-block-wrapper)
-   * and re-highlights them using the client-side Shiki instance.
+   * Post-hydration: replace plain <pre><code> blocks (from SSR) with Shiki-highlighted versions,
+   * and tokenise inline `.inline-code` spans too. Runs once on the client after hydration, so
+   * SSR stays cheap (plain text) while the browser sees full syntax colours.
    */
   private async reHighlightCodeBlocks(html: string): Promise<string> {
-    // Match code blocks: <div class="code-block-wrapper">...<pre><code class="language-xxx">CODE</code></pre></div>
-    const codeBlockPattern = /<pre><code class="language-([\w-]+)">([\s\S]*?)<\/code><\/pre>/g;
-    const matches = [...html.matchAll(codeBlockPattern)];
-    if (matches.length === 0) return html;
-
     let result = html;
-    // Process all code blocks in parallel
-    const replacements = await Promise.all(
-      matches.map(async (match) => {
-        const lang = match[1];
-        const encoded = match[2];
+
+    // Code blocks: <pre><code class="language-xxx">CODE</code></pre>
+    const codeBlockPattern = /<pre><code class="language-([\w-]+)">([\s\S]*?)<\/code><\/pre>/g;
+    const blockMatches = [...result.matchAll(codeBlockPattern)];
+    if (blockMatches.length > 0) {
+      const replacements = await Promise.all(
+        blockMatches.map(async (match) => {
+          const lang = match[1];
+          const decoded = decodeHtmlEntities(match[2]);
+          const highlighted = await this.shiki.highlightCode(decoded, lang);
+          return { original: match[0], replacement: highlighted };
+        }),
+      );
+      for (const { original, replacement } of replacements) {
+        result = result.replace(original, replacement);
+      }
+    }
+
+    // Inline code spans: <code class="inline-code">TEXT</code> — default to
+    // TypeScript so short identifiers, type names and config literals get
+    // the same token colours as the fenced blocks would.
+    const inlinePattern = /<code class="inline-code">([\s\S]*?)<\/code>/g;
+    const inlineMatches = [...result.matchAll(inlinePattern)];
+    if (inlineMatches.length === 0) return result;
+
+    const unique = new Set(inlineMatches.map((m) => m[1]));
+    const highlightedByText = new Map<string, string>();
+    await Promise.all(
+      [...unique].map(async (encoded) => {
         const decoded = decodeHtmlEntities(encoded);
-        const highlighted = await this.shiki.highlightCode(decoded, lang);
-        return { original: match[0], replacement: highlighted };
+        const highlighted = await this.shiki.highlightInline(decoded, 'typescript');
+        highlightedByText.set(encoded, highlighted);
       }),
     );
-    for (const { original, replacement } of replacements) {
-      result = result.replace(original, replacement);
-    }
+
+    result = result.replace(inlinePattern, (_match, text) => {
+      const highlighted = highlightedByText.get(text);
+      return `<code class="inline-code">${highlighted ?? text}</code>`;
+    });
+
     return result;
   }
 }

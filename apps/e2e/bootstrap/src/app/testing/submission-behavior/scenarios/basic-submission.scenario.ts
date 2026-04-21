@@ -17,9 +17,9 @@ export const basicSubmissionScenario: TestScenario = {
         key: 'email',
         type: 'input',
         label: 'Email',
+        placeholder: 'Enter email',
         props: {
           type: 'email',
-          placeholder: 'Enter email',
         },
         required: true,
         col: 6,
@@ -28,9 +28,7 @@ export const basicSubmissionScenario: TestScenario = {
         key: 'name',
         type: 'input',
         label: 'Name',
-        props: {
-          placeholder: 'Enter name',
-        },
+        placeholder: 'Enter name',
         required: true,
         col: 6,
       },

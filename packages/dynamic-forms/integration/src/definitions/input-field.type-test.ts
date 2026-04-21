@@ -342,7 +342,8 @@ describe('InputField - Usage Tests', () => {
     const field = {
       type: 'input',
       key: 'email',
-      props: { type: 'email', placeholder: 'Enter email' },
+      placeholder: 'Enter email',
+      props: { type: 'email' },
     } as const satisfies InputField;
 
     expectTypeOf(field.props.type).toEqualTypeOf<'email'>();

@@ -1,30 +1,20 @@
-import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
 import type { Provider } from '@angular/core';
+import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
 import { IONIC_FIELD_TYPES } from '../config/ionic-field-config';
 import { IonicConfig } from '../models/ionic-config';
 import { IONIC_CONFIG } from '../models/ionic-config.token';
-import {
-  IonicButtonField,
-  IonicCheckboxField,
-  IonicDatepickerField,
-  IonicInputField,
-  IonicMultiCheckboxField,
-  IonicNextButtonField,
-  IonicPreviousButtonField,
-  IonicRadioField,
-  IonicSelectField,
-  IonicSliderField,
-  IonicSubmitButtonField,
-  IonicTextareaField,
-  IonicToggleField,
-} from '../fields';
 
 /**
- * Field type definitions with optional config providers
+ * Field type definitions for Ionic components.
  */
-export type FieldTypeDefinitionsWithConfig = FieldTypeDefinition[] & {
-  __configProviders?: Provider[];
+export type IonicFieldTypes = FieldTypeDefinition[];
+
+type IonicConfigFeature = {
+  ɵkind: 'ionic-config';
+  ɵproviders: Provider[];
 };
+
+type IonicFieldsWithConfig = [...IonicFieldTypes, IonicConfigFeature];
 
 /**
  * Configure dynamic forms with Ionic field types.
@@ -61,41 +51,24 @@ export type FieldTypeDefinitionsWithConfig = FieldTypeDefinition[] & {
  * };
  * ```
  *
- * @returns Array of field type definitions for Ionic components
+ * @returns Array of field type definitions and optionally a config feature
  */
-export function withIonicFields(config?: IonicConfig): FieldTypeDefinitionsWithConfig {
-  const fields = IONIC_FIELD_TYPES as FieldTypeDefinitionsWithConfig;
-
-  if (config) {
-    fields.__configProviders = [
-      {
-        provide: IONIC_CONFIG,
-        useValue: config,
-      },
-    ];
+export function withIonicFields(): IonicFieldTypes;
+export function withIonicFields(config: IonicConfig): IonicFieldsWithConfig;
+export function withIonicFields(config: IonicConfig | undefined): IonicFieldTypes | IonicFieldsWithConfig;
+export function withIonicFields(config?: IonicConfig): IonicFieldTypes | IonicFieldsWithConfig {
+  if (!config) {
+    return IONIC_FIELD_TYPES;
   }
 
-  return fields;
-}
+  const fieldsWithConfig = [
+    ...IONIC_FIELD_TYPES,
+    {
+      ɵkind: 'ionic-config',
+      ɵproviders: [{ provide: IONIC_CONFIG, useValue: config }],
+    } satisfies IonicConfigFeature,
+  ];
 
-/**
- * Module augmentation to extend the global DynamicFormFieldRegistry
- * with Ionic field types
- */
-declare module '@ng-forge/dynamic-forms' {
-  interface DynamicFormFieldRegistry {
-    input: IonicInputField;
-    select: IonicSelectField<any>;
-    checkbox: IonicCheckboxField;
-    button: IonicButtonField<any>;
-    submit: IonicSubmitButtonField;
-    next: IonicNextButtonField;
-    previous: IonicPreviousButtonField;
-    textarea: IonicTextareaField;
-    radio: IonicRadioField<any>;
-    'multi-checkbox': IonicMultiCheckboxField<any>;
-    datepicker: IonicDatepickerField;
-    slider: IonicSliderField;
-    toggle: IonicToggleField;
-  }
+  // Safe: this preserves all Ionic field definitions and appends exactly one config feature.
+  return fieldsWithConfig as IonicFieldsWithConfig;
 }

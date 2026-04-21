@@ -1,4 +1,4 @@
-import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
+import { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 import { DynamicText, ValueFieldComponent, ValueType } from '@ng-forge/dynamic-forms';
 import { SelectField, SelectProps } from '@ng-forge/dynamic-forms/integration';
 
@@ -7,6 +7,8 @@ export interface MatSelectProps extends SelectProps {
   multiple?: boolean;
   panelMaxHeight?: string;
   subscriptSizing?: SubscriptSizing;
+  floatLabel?: FloatLabelType;
+  hideRequiredMarker?: boolean;
   compareWith?: (o1: ValueType, o2: ValueType) => boolean;
   hint?: DynamicText;
 }

@@ -5,6 +5,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { appRoutes } from './app.routes';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
+import { DEMO_WRAPPERS } from '@ng-forge/examples-shared-ui';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,6 +16,6 @@ export const appConfig: ApplicationConfig = {
     provideIonicAngular({
       mode: 'md',
     }),
-    provideDynamicForm(...withIonicFields()),
+    provideDynamicForm(...withIonicFields(), ...DEMO_WRAPPERS),
   ],
 };

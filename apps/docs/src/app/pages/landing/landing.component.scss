@@ -2317,6 +2317,22 @@ section {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    // Stack full-width to avoid "Read the Docs" wrapping awkwardly when two
+    // buttons share a narrow row. The btn already opts into width: 100% at
+    // this breakpoint.
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .btn {
+    white-space: nowrap;
+  }
 }
 
 // ============================================

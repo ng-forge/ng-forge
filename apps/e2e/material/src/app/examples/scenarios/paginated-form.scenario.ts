@@ -33,9 +33,7 @@ export const paginatedFormScenario: ExampleScenario = {
             validationMessages: {
               required: 'First name is required',
             },
-            props: {
-              placeholder: 'Enter your first name',
-            },
+            placeholder: 'Enter your first name',
           },
           {
             key: 'lastName',
@@ -46,9 +44,7 @@ export const paginatedFormScenario: ExampleScenario = {
             validationMessages: {
               required: 'Last name is required',
             },
-            props: {
-              placeholder: 'Enter your last name',
-            },
+            placeholder: 'Enter your last name',
           },
           {
             key: 'birthDate',
@@ -58,9 +54,7 @@ export const paginatedFormScenario: ExampleScenario = {
             validationMessages: {
               required: 'Birth date is required',
             },
-            props: {
-              placeholder: 'Select your birth date',
-            },
+            placeholder: 'Select your birth date',
           },
           {
             type: 'next',
@@ -100,9 +94,9 @@ export const paginatedFormScenario: ExampleScenario = {
               required: 'Email is required',
               email: 'Please enter a valid email address',
             },
+            placeholder: 'your.email@example.com',
             props: {
               type: 'email',
-              placeholder: 'your.email@example.com',
             },
           },
           {
@@ -114,9 +108,9 @@ export const paginatedFormScenario: ExampleScenario = {
             validationMessages: {
               required: 'Phone number is required',
             },
+            placeholder: '+1 (555) 000-0000',
             props: {
               type: 'tel',
-              placeholder: '+1 (555) 000-0000',
             },
           },
           {
@@ -178,9 +172,7 @@ export const paginatedFormScenario: ExampleScenario = {
             validationMessages: {
               required: 'Street address is required',
             },
-            props: {
-              placeholder: '123 Main Street',
-            },
+            placeholder: '123 Main Street',
           },
           {
             type: 'row',
@@ -195,9 +187,7 @@ export const paginatedFormScenario: ExampleScenario = {
                 validationMessages: {
                   required: 'City is required',
                 },
-                props: {
-                  placeholder: 'New York',
-                },
+                placeholder: 'New York',
                 col: 6,
               },
               {
@@ -214,9 +204,7 @@ export const paginatedFormScenario: ExampleScenario = {
                   { value: 'tx', label: 'Texas' },
                   { value: 'fl', label: 'Florida' },
                 ],
-                props: {
-                  placeholder: 'Select state',
-                },
+                placeholder: 'Select state',
                 col: 6,
               },
             ],
@@ -232,9 +220,7 @@ export const paginatedFormScenario: ExampleScenario = {
               required: 'ZIP code is required',
               pattern: 'ZIP code must be 5 digits',
             },
-            props: {
-              placeholder: '10001',
-            },
+            placeholder: '10001',
           },
           {
             type: 'row',

@@ -13,18 +13,14 @@ const config = {
       type: 'input',
       label: 'First Name',
       required: true,
-      props: {
-        placeholder: 'Enter first name',
-      },
+      placeholder: 'Enter first name',
     },
     {
       key: 'lastName',
       type: 'input',
       label: 'Last Name',
       required: true,
-      props: {
-        placeholder: 'Enter last name',
-      },
+      placeholder: 'Enter last name',
     },
     {
       key: 'email',
@@ -32,9 +28,9 @@ const config = {
       label: 'Email Address',
       email: true,
       required: true,
+      placeholder: 'user@example.com',
       props: {
         type: 'email',
-        placeholder: 'user@example.com',
       },
     },
     {
@@ -43,9 +39,9 @@ const config = {
       label: 'Age',
       required: true,
       min: 18,
+      placeholder: '18',
       props: {
         type: 'number',
-        placeholder: '18',
       },
     },
     {

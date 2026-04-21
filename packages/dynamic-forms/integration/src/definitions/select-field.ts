@@ -1,8 +1,10 @@
-import { BaseValueField, DynamicText, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms';
+import { BaseValueField, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms';
 
-export interface SelectProps {
-  placeholder?: DynamicText;
-}
+/**
+ * Base props for select fields. Intentionally empty — adapter libraries
+ * extend this with adapter-specific options (styleClass, size, appearance, etc.).
+ */
+export type SelectProps = object;
 
 export interface SelectField<T, TProps = SelectProps, TNullable extends boolean = boolean> extends BaseValueField<
   TProps,

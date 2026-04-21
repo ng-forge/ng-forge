@@ -10,9 +10,9 @@ const config = {
       key: 'age',
       type: 'input',
       label: 'Age',
+      placeholder: 'Enter your age',
       props: {
         type: 'number',
-        placeholder: 'Enter your age',
       },
       required: true,
     },
@@ -47,9 +47,7 @@ const config = {
       key: 'city',
       type: 'input',
       label: 'City',
-      props: {
-        placeholder: 'Enter city',
-      },
+      placeholder: 'Enter city',
     },
     {
       key: 'submit',

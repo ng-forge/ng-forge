@@ -44,9 +44,7 @@ const config = {
           key: 'businessName',
           type: 'input',
           label: 'Business Name',
-          props: {
-            placeholder: 'Enter business name',
-          },
+          placeholder: 'Enter business name',
           required: true,
           col: 12,
         },
@@ -54,9 +52,7 @@ const config = {
           key: 'taxId',
           type: 'input',
           label: 'Tax ID / EIN',
-          props: {
-            placeholder: 'Format: XX-XXXXXXX',
-          },
+          placeholder: 'Format: XX-XXXXXXX',
           pattern: '^[0-9]{2}-[0-9]{7}$',
           required: true,
           col: 12,

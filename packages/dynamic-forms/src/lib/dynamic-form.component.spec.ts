@@ -6,14 +6,18 @@ import TestInputHarnessComponent from '../../testing/src/harnesses/test-input.ha
 import TestCheckboxHarnessComponent from '../../testing/src/harnesses/test-checkbox.harness';
 import { FIELD_REGISTRY, FieldTypeDefinition } from './models/field-type';
 import { checkboxFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
-import { BUILT_IN_FIELDS } from './providers/built-in-fields';
+import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './providers/built-in-fields';
+import { FieldWrapperContract, WRAPPER_REGISTRY, WrapperTypeDefinition } from './models/wrapper-type';
+import { ARRAY_CONTEXT } from './models/field-signal-context.token';
+import { ArrayContext } from './mappers/types';
 import { BaseCheckedField, BaseValueField } from './definitions';
-import { DebugElement } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DebugElement, inject, viewChild, ViewContainerRef } from '@angular/core';
 import { firstValueFrom, timeout } from 'rxjs';
 import { FormResetEvent } from './events/constants/form-reset.event';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormStateManager } from './state/form-state-manager';
 import { EventBus } from './events/event.bus';
+import { arrayEvent } from './events/array-event';
 import { FormConfig } from './models/form-config';
 
 // Test specific form config type
@@ -25,8 +29,49 @@ type TestFormConfig = {
     | { type: 'group'; key: string; label: string; fields: any[] }
     | { type: 'page'; key: string; label?: string; fields: any[] }
     | { type: 'container'; key: string; fields: any[]; wrappers: any[] }
+    | { type: 'array'; key: string; fields: any[]; wrappers?: any[] }
+    | { type: 'array'; key: string; template: any; value?: any[]; wrappers?: any[] }
   >;
 };
+
+// -- Test wrapper components for cross-field DI tests --
+
+@Component({
+  selector: 'test-parent-wrapper',
+  template: `<div data-wrapper="parent"><ng-container #fieldComponent></ng-container></div>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class TestParentWrapperComponent implements FieldWrapperContract {
+  readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
+}
+
+@Component({
+  selector: 'test-child-wrapper',
+  template: `<div data-wrapper="child" [attr.data-has-parent]="!!parent"><ng-container #fieldComponent></ng-container></div>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class TestChildWrapperComponent implements FieldWrapperContract {
+  readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
+  readonly parent = inject(TestParentWrapperComponent);
+}
+
+@Component({
+  selector: 'test-array-ctx-wrapper',
+  template: `<div data-wrapper="array-ctx" [attr.data-array-key]="arrayContext?.arrayKey ?? 'none'">
+    <ng-container #fieldComponent></ng-container>
+  </div>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class TestArrayContextWrapperComponent implements FieldWrapperContract {
+  readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
+  readonly arrayContext = inject(ARRAY_CONTEXT, { optional: true }) as ArrayContext | null;
+}
+
+const TEST_WRAPPER_TYPES: WrapperTypeDefinition[] = [
+  { wrapperName: 'test-parent', loadComponent: () => Promise.resolve({ default: TestParentWrapperComponent }) },
+  { wrapperName: 'test-child', loadComponent: () => Promise.resolve({ default: TestChildWrapperComponent }) },
+  { wrapperName: 'test-array-ctx', loadComponent: () => Promise.resolve({ default: TestArrayContextWrapperComponent }) },
+];
 
 // Test field type definitions for registration
 const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
@@ -65,7 +110,14 @@ describe('DynamicFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DynamicForm, TestInputHarnessComponent, TestCheckboxHarnessComponent],
+      imports: [
+        DynamicForm,
+        TestInputHarnessComponent,
+        TestCheckboxHarnessComponent,
+        TestParentWrapperComponent,
+        TestChildWrapperComponent,
+        TestArrayContextWrapperComponent,
+      ],
       providers: [
         {
           provide: FIELD_REGISTRY,
@@ -78,6 +130,19 @@ describe('DynamicFormComponent', () => {
             // Add test fields
             TEST_FIELD_TYPES.forEach((fieldType) => {
               registry.set(fieldType.name, fieldType);
+            });
+            return registry;
+          },
+        },
+        {
+          provide: WRAPPER_REGISTRY,
+          useFactory: () => {
+            const registry = new Map();
+            BUILT_IN_WRAPPERS.forEach((wrapperType) => {
+              registry.set(wrapperType.wrapperName, wrapperType);
+            });
+            TEST_WRAPPER_TYPES.forEach((wrapperType) => {
+              registry.set(wrapperType.wrapperName, wrapperType);
             });
             return registry;
           },
@@ -1960,7 +2025,8 @@ describe('DynamicFormComponent', () => {
       await waitForDynamicComponents(fixture);
 
       const groupElement = fixture.nativeElement.querySelector('[data-testid="contact"]');
-      const rowElement = fixture.nativeElement.querySelector('[data-testid="name"]');
+      const rowContainer = fixture.nativeElement.querySelector('[data-testid="name"]');
+      const rowElement = rowContainer?.querySelector('df-row-wrapper');
 
       // Should create nested structure with group containing row-flattened fields
       expect(component.formValue()).toEqual({
@@ -1972,7 +2038,7 @@ describe('DynamicFormComponent', () => {
       });
       expect(groupElement?.classList.contains('df-group')).toBe(true);
       expect(rowElement?.classList.contains('df-row')).toBe(true);
-      expect(groupElement?.contains(rowElement)).toBe(true);
+      expect(groupElement?.contains(rowContainer)).toBe(true);
     });
 
     it('should handle mixed regular definitions with row and group definitions', async () => {
@@ -2082,7 +2148,8 @@ describe('DynamicFormComponent', () => {
       await waitForDynamicComponents(fixture);
 
       const groupElement = fixture.nativeElement.querySelector('[data-testid="contact"]');
-      const rowElement = fixture.nativeElement.querySelector('[data-testid="nameRow"]');
+      const rowContainer = fixture.nativeElement.querySelector('[data-testid="nameRow"]');
+      const rowElement = rowContainer?.querySelector('df-row-wrapper');
 
       expect(component.formValue()).toEqual({
         contact: {
@@ -2093,7 +2160,7 @@ describe('DynamicFormComponent', () => {
       });
       expect(groupElement?.classList.contains('df-group')).toBe(true);
       expect(rowElement?.classList.contains('df-row')).toBe(true);
-      expect(groupElement?.contains(rowElement)).toBe(true);
+      expect(groupElement?.contains(rowContainer)).toBe(true);
     });
 
     it('should preserve field validation for nested definitions', async () => {
@@ -2317,7 +2384,8 @@ describe('DynamicFormComponent', () => {
         email: 'john@example.com',
       });
 
-      const rowElement = fixture.nativeElement.querySelector('[data-testid="nameRow"]');
+      const rowContainer = fixture.nativeElement.querySelector('[data-testid="nameRow"]');
+      const rowElement = rowContainer?.querySelector('df-row-wrapper');
       expect(rowElement?.classList.contains('df-row')).toBe(true);
     });
 
@@ -2355,6 +2423,301 @@ describe('DynamicFormComponent', () => {
           deepField: 'nested',
         },
       });
+    });
+
+    it('should allow a child wrapper to inject a parent wrapper across nested fields', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'outer',
+            type: 'container',
+            fields: [
+              {
+                key: 'inner',
+                type: 'container',
+                fields: [{ key: 'name', type: 'input', label: 'Name', value: 'test' }],
+                wrappers: [{ type: 'test-child' }],
+              },
+            ],
+            wrappers: [{ type: 'test-parent' }],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // If parent injection failed, Angular would throw NullInjectorError and
+      // the child wrapper wouldn't render at all.
+      const parentEl = fixture.nativeElement.querySelector('[data-wrapper="parent"]');
+      const childEl = fixture.nativeElement.querySelector('[data-wrapper="child"]');
+      expect(parentEl).toBeTruthy();
+      expect(childEl).toBeTruthy();
+      expect(childEl.getAttribute('data-has-parent')).toBe('true');
+      expect(parentEl.contains(childEl)).toBe(true);
+    });
+
+    it('should provide ARRAY_CONTEXT to wrappers on fields inside an array', async () => {
+      const config = {
+        fields: [
+          {
+            type: 'array',
+            key: 'items',
+            fields: [
+              {
+                key: 'itemContainer',
+                type: 'container',
+                fields: [{ key: 'name', type: 'input', label: 'Name' }],
+                wrappers: [{ type: 'test-array-ctx' }],
+              },
+            ],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { fixture } = createComponent(config, { items: [{}] });
+      await waitForDynamicComponents(fixture);
+
+      const wrapperEl = fixture.nativeElement.querySelector('[data-wrapper="array-ctx"]');
+      expect(wrapperEl).toBeTruthy();
+      expect(wrapperEl.getAttribute('data-array-key')).toBe('items');
+    });
+
+    it('should render parent + child wrappers on array items when an item is added', async () => {
+      // Container template with a child wrapper, containing a single input
+      // that also has its own CSS wrapper. Verifies the full nesting chain:
+      // parent-wrapper → container → child-css-wrapper → input
+      const containerTemplate = [
+        {
+          key: 'itemContainer',
+          type: 'container',
+          fields: [
+            {
+              key: 'name',
+              type: 'input',
+              label: 'Name',
+              wrappers: [{ type: 'css', cssClasses: 'input-item-wrapper' }],
+            },
+          ],
+          wrappers: [{ type: 'test-child' }],
+        },
+      ];
+
+      const config = {
+        fields: [
+          {
+            type: 'array',
+            key: 'items',
+            wrappers: [{ type: 'test-parent' }],
+            fields: [],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // No items yet
+      expect(fixture.nativeElement.querySelector('[data-wrapper="child"]')).toBeNull();
+
+      // Add the first item via EventBus
+      const eventBus = fixture.debugElement.injector.get(EventBus);
+      eventBus.dispatch(arrayEvent('items').append(containerTemplate as any));
+      // Multiple settle passes: array resolve → container render →
+      // derivedFromDeferred resolves children → DfFieldOutlet loads CSS wrapper
+      for (let i = 0; i < 4; i++) {
+        await waitForDynamicComponents(fixture);
+      }
+
+      const parentEl = fixture.nativeElement.querySelector('[data-wrapper="parent"]');
+      expect(parentEl).toBeTruthy();
+
+      // Exactly one container wrapper
+      const childEls1 = fixture.nativeElement.querySelectorAll('[data-wrapper="child"]');
+      expect(childEls1.length).toBe(1);
+      expect(childEls1[0].getAttribute('data-has-parent')).toBe('true');
+      expect(parentEl.contains(childEls1[0])).toBe(true);
+
+      // The input's CSS wrapper should render inside the container wrapper
+      const inputWrappers1 = fixture.nativeElement.querySelectorAll('.input-item-wrapper');
+      expect(inputWrappers1.length).toBe(1);
+      expect(childEls1[0].contains(inputWrappers1[0])).toBe(true);
+
+      // The actual input element should render inside the input wrapper
+      const inputs1 = inputWrappers1[0].querySelectorAll('input');
+      expect(inputs1.length).toBe(1);
+
+      // Add a second item
+      eventBus.dispatch(arrayEvent('items').append(containerTemplate as any));
+      for (let i = 0; i < 4; i++) {
+        await waitForDynamicComponents(fixture);
+      }
+
+      const childEls2 = fixture.nativeElement.querySelectorAll('[data-wrapper="child"]');
+      expect(childEls2.length).toBe(2);
+      for (const el of childEls2) {
+        expect(el.getAttribute('data-has-parent')).toBe('true');
+        expect(parentEl.contains(el)).toBe(true);
+      }
+
+      // Both items should have their input wrappers and actual inputs
+      const inputWrappers2 = fixture.nativeElement.querySelectorAll('.input-item-wrapper');
+      expect(inputWrappers2.length).toBe(2);
+      const allInputs = fixture.nativeElement.querySelectorAll('.input-item-wrapper input');
+      expect(allInputs.length).toBe(2);
+    });
+
+    it('should render container children when appended as a single FieldDef (not array-wrapped)', async () => {
+      // When dispatching append with a single container FieldDef (not wrapped in []),
+      // the container should still be treated as an object item (not primitive).
+      const containerField = {
+        key: 'itemContainer',
+        type: 'container',
+        fields: [
+          {
+            key: 'name',
+            type: 'input',
+            label: 'Name',
+            wrappers: [{ type: 'css', cssClasses: 'input-item-wrapper' }],
+          },
+        ],
+        wrappers: [{ type: 'test-child' }],
+      };
+
+      const config = {
+        fields: [
+          {
+            type: 'array',
+            key: 'items',
+            wrappers: [{ type: 'test-parent' }],
+            fields: [],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // Append a single container FieldDef (NOT wrapped in array)
+      const eventBus = fixture.debugElement.injector.get(EventBus);
+      eventBus.dispatch(arrayEvent('items').append(containerField as any));
+
+      for (let i = 0; i < 4; i++) {
+        await waitForDynamicComponents(fixture);
+      }
+
+      // The container and its wrapper should render
+      const childWrapper = fixture.nativeElement.querySelector('[data-wrapper="child"]');
+      expect(childWrapper).toBeTruthy();
+
+      // The container's child input should render inside the wrapper
+      const inputWrappers = fixture.nativeElement.querySelectorAll('.input-item-wrapper');
+      expect(inputWrappers.length).toBe(1);
+
+      const inputs = fixture.nativeElement.querySelectorAll('.input-item-wrapper input');
+      expect(inputs.length).toBe(1);
+    });
+
+    it('should render container children inside a css wrapper (no array)', async () => {
+      // Container with a css wrapper as a direct form field.
+      // DfFieldOutlet handles the css wrapper; container's internal chain
+      // sees empty wrappers (mapper nullifies them). Children render inside.
+      const config = {
+        fields: [
+          {
+            type: 'container',
+            key: 'wrappedContainer',
+            fields: [{ key: 'name', type: 'input', label: 'Name', value: 'hello' }],
+            wrappers: [{ type: 'css', cssClasses: 'container-outer-wrap' }],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { fixture } = createComponent(config);
+
+      for (let i = 0; i < 6; i++) {
+        await waitForDynamicComponents(fixture);
+      }
+
+      const containerEl = fixture.nativeElement.querySelector('[data-testid="wrappedContainer"]');
+      const cssWrapper = fixture.nativeElement.querySelector('.container-outer-wrap');
+      const inputs = fixture.nativeElement.querySelectorAll('input');
+
+      expect(cssWrapper).toBeTruthy();
+      expect(containerEl).toBeTruthy();
+      expect(inputs.length).toBe(1);
+      // CSS wrapper should be outside the container, not duplicated inside
+      expect(cssWrapper.contains(containerEl)).toBe(true);
+    });
+
+    it('should render a css wrapper on a simplified array field (template API)', async () => {
+      const config = {
+        fields: [
+          {
+            type: 'array',
+            key: 'tags',
+            wrappers: [{ type: 'css', cssClasses: 'array-wrapper-css-test' }],
+            template: { key: 'value', type: 'input', label: 'Tag' },
+            value: ['angular'],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // The css wrapper should be present around the array field
+      const cssWrapper = fixture.nativeElement.querySelector('.array-wrapper-css-test');
+      expect(cssWrapper).toBeTruthy();
+
+      // The array field should be inside the css wrapper
+      const arrayEl = fixture.nativeElement.querySelector('[data-testid="tags"]');
+      expect(arrayEl).toBeTruthy();
+      expect(cssWrapper.contains(arrayEl)).toBe(true);
+    });
+
+    it('should render wrappers on dynamically added array items via EventBus append', async () => {
+      // Container template with a CSS wrapper, containing a single input field
+      const containerTemplate = [
+        {
+          key: 'itemContainer',
+          type: 'container',
+          fields: [{ key: 'name', type: 'input', label: 'Name' }],
+          wrappers: [{ type: 'css', cssClasses: 'dynamic-item-wrapper' }],
+        },
+      ];
+
+      const config = {
+        fields: [
+          {
+            type: 'array',
+            key: 'items',
+            fields: [],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // No items yet — no wrappers
+      expect(fixture.nativeElement.querySelector('.dynamic-item-wrapper')).toBeNull();
+
+      // Dispatch an append event with the container template
+      const eventBus = fixture.debugElement.injector.get(EventBus);
+      eventBus.dispatch(arrayEvent('items').append(containerTemplate as any));
+      await waitForDynamicComponents(fixture);
+
+      // The dynamically added item should have the CSS wrapper
+      const wrapperEls = fixture.nativeElement.querySelectorAll('.dynamic-item-wrapper');
+      expect(wrapperEls.length).toBe(1);
+
+      // Append a second item
+      eventBus.dispatch(arrayEvent('items').append(containerTemplate as any));
+      await waitForDynamicComponents(fixture);
+
+      const wrapperEls2 = fixture.nativeElement.querySelectorAll('.dynamic-item-wrapper');
+      expect(wrapperEls2.length).toBe(2);
     });
   });
 

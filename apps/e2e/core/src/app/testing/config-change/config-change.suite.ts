@@ -6,6 +6,7 @@ import { configRemoveFieldsScenario } from './scenarios/config-remove-fields.sce
 import { configSwapWithArraysScenario } from './scenarios/config-swap-with-arrays.scenario';
 import { configSwapPagesScenario } from './scenarios/config-swap-pages.scenario';
 import { valueBindingScenario } from './scenarios/value-binding.scenario';
+import { configSwapFieldTypesScenario } from './scenarios/config-swap-field-types.scenario';
 
 /**
  * Config Change Suite
@@ -25,6 +26,7 @@ export const configChangeSuite: TestSuite = {
     configSwapWithArraysScenario,
     configSwapPagesScenario,
     valueBindingScenario,
+    configSwapFieldTypesScenario,
   ],
 };
 

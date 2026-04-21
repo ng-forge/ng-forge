@@ -23,7 +23,7 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
         [formField]="f"
         [inputId]="key()"
         [options]="options()"
-        [placeholder]="(props()?.placeholder | dynamicText | async) ?? ''"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [multiple]="isMultiple()"
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"

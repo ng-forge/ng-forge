@@ -23,8 +23,7 @@ describe('IonicTextareaProps - Exhaustive Whitelist', () => {
     | 'labelPlacement'
     | 'hint'
     | 'errorText'
-    | 'color'
-    | 'placeholder';
+    | 'color';
   type ActualKeys = keyof IonicTextareaProps;
 
   it('should have exactly the expected keys', () => {
@@ -81,10 +80,6 @@ describe('IonicTextareaProps - Exhaustive Whitelist', () => {
         'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark' | undefined
       >();
     });
-
-    it('placeholder', () => {
-      expectTypeOf<IonicTextareaProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
-    });
   });
 });
 
@@ -110,6 +105,9 @@ describe('IonicTextareaField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -246,6 +244,7 @@ describe('IonicTextareaField - Usage Tests', () => {
       type: 'textarea',
       key: 'description',
       label: 'Description',
+      placeholder: 'Type here...',
       props: {
         rows: 5,
         cols: 40,
@@ -258,7 +257,6 @@ describe('IonicTextareaField - Usage Tests', () => {
         hint: 'Enter a detailed description',
         errorText: 'Description is required',
         color: 'primary',
-        placeholder: 'Type here...',
       },
       value: 'Sample text',
     } as const satisfies IonicTextareaField;

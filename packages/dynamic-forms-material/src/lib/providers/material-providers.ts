@@ -1,30 +1,20 @@
-import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
 import type { Provider } from '@angular/core';
+import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
 import { MATERIAL_FIELD_TYPES } from '../config/material-field-config';
 import { MaterialConfig } from '../models/material-config';
 import { MATERIAL_CONFIG } from '../models/material-config.token';
-import {
-  MatButtonField,
-  MatCheckboxField,
-  MatDatepickerField,
-  MatInputField,
-  MatMultiCheckboxField,
-  MatNextButtonField,
-  MatPreviousButtonField,
-  MatRadioField,
-  MatSelectField,
-  MatSliderField,
-  MatSubmitButtonField,
-  MatTextareaField,
-  MatToggleField,
-} from '../fields';
 
 /**
- * Field type definitions with optional config providers
+ * Field type definitions for Material Design components.
  */
-export type FieldTypeDefinitionsWithConfig = FieldTypeDefinition[] & {
-  __configProviders?: Provider[];
+export type MaterialFieldTypes = FieldTypeDefinition[];
+
+type MaterialConfigFeature = {
+  ɵkind: 'material-config';
+  ɵproviders: Provider[];
 };
+
+type MaterialFieldsWithConfig = [...MaterialFieldTypes, MaterialConfigFeature];
 
 /**
  * Configure dynamic forms with Material Design field types.
@@ -61,41 +51,24 @@ export type FieldTypeDefinitionsWithConfig = FieldTypeDefinition[] & {
  * };
  * ```
  *
- * @returns Array of field type definitions for Material Design components
+ * @returns Array of field type definitions and optionally a config feature
  */
-export function withMaterialFields(config?: MaterialConfig): FieldTypeDefinitionsWithConfig {
-  const fields = MATERIAL_FIELD_TYPES as FieldTypeDefinitionsWithConfig;
-
-  if (config) {
-    fields.__configProviders = [
-      {
-        provide: MATERIAL_CONFIG,
-        useValue: config,
-      },
-    ];
+export function withMaterialFields(): MaterialFieldTypes;
+export function withMaterialFields(config: MaterialConfig): MaterialFieldsWithConfig;
+export function withMaterialFields(config: MaterialConfig | undefined): MaterialFieldTypes | MaterialFieldsWithConfig;
+export function withMaterialFields(config?: MaterialConfig): MaterialFieldTypes | MaterialFieldsWithConfig {
+  if (!config) {
+    return MATERIAL_FIELD_TYPES;
   }
 
-  return fields;
-}
+  const fieldsWithConfig = [
+    ...MATERIAL_FIELD_TYPES,
+    {
+      ɵkind: 'material-config',
+      ɵproviders: [{ provide: MATERIAL_CONFIG, useValue: config }],
+    } satisfies MaterialConfigFeature,
+  ];
 
-/**
- * Module augmentation to extend the global DynamicFormFieldRegistry
- * with Material Design field types
- */
-declare module '@ng-forge/dynamic-forms' {
-  interface DynamicFormFieldRegistry {
-    input: MatInputField;
-    select: MatSelectField<any>;
-    checkbox: MatCheckboxField;
-    button: MatButtonField<any>;
-    submit: MatSubmitButtonField;
-    next: MatNextButtonField;
-    previous: MatPreviousButtonField;
-    textarea: MatTextareaField;
-    radio: MatRadioField<any>;
-    'multi-checkbox': MatMultiCheckboxField<any>;
-    datepicker: MatDatepickerField;
-    slider: MatSliderField;
-    toggle: MatToggleField;
-  }
+  // Safe: this preserves all material field definitions and appends exactly one config feature.
+  return fieldsWithConfig as MaterialFieldsWithConfig;
 }

@@ -11,7 +11,7 @@ import {
   runInInjectionContext,
   untracked,
 } from '@angular/core';
-import { NgComponentOutlet } from '@angular/common';
+import { DfFieldOutlet } from '../../directives/df-field-outlet.directive';
 import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
@@ -39,14 +39,10 @@ import { SubmitEvent } from '../../events/constants/submit.event';
  */
 @Component({
   selector: 'fieldset[group-field]',
-  imports: [NgComponentOutlet],
+  imports: [DfFieldOutlet],
   template: `
     @for (field of resolvedFields(); track field.key) {
-      @if (field.renderReady()) {
-        <ng-container
-          *ngComponentOutlet="field.component; injector: field.injector; environmentInjector: environmentInjector; inputs: field.inputs()"
-        />
-      }
+      <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
     }
   `,
   styleUrl: './group-field.component.scss',

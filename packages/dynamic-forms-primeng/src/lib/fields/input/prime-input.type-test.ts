@@ -12,7 +12,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('PrimeInputProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'styleClass' | 'hint' | 'size' | 'variant' | 'type' | 'placeholder';
+  type ExpectedKeys = 'styleClass' | 'hint' | 'size' | 'variant' | 'type';
   type ActualKeys = keyof PrimeInputProps;
 
   it('should have exactly the expected keys', () => {
@@ -43,10 +43,6 @@ describe('PrimeInputProps - Exhaustive Whitelist', () => {
     it('type', () => {
       expectTypeOf<PrimeInputProps['type']>().toEqualTypeOf<'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | undefined>();
     });
-
-    it('placeholder', () => {
-      expectTypeOf<PrimeInputProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
-    });
   });
 });
 
@@ -72,6 +68,9 @@ describe('PrimeInputField (String) - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -221,6 +220,9 @@ describe('PrimeInputField (Number) - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     | 'required'
     | 'email'
     | 'min'

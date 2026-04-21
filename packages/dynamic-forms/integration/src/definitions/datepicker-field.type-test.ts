@@ -10,15 +10,10 @@ import type { DynamicText } from '@ng-forge/dynamic-forms';
 // ============================================================================
 
 describe('DatepickerProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'placeholder';
   type ActualKeys = keyof DatepickerProps;
 
-  it('should have exactly the expected keys', () => {
-    expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
-  });
-
-  it('placeholder is optional DynamicText', () => {
-    expectTypeOf<DatepickerProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
+  it('should have no keys (empty base props)', () => {
+    expectTypeOf<ActualKeys>().toEqualTypeOf<never>();
   });
 });
 
@@ -131,9 +126,6 @@ describe('DatepickerField - Usage Tests', () => {
       maxDate: '2026-12-31',
       startAt: new Date('2026-06-01'),
       placeholder: 'Select a date',
-      props: {
-        placeholder: 'Pick date',
-      },
     } as const satisfies DatepickerField<DatepickerProps>;
 
     expectTypeOf(field.type).toEqualTypeOf<'datepicker'>();

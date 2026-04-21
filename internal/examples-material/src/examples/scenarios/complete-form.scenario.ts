@@ -29,9 +29,7 @@ export const completeFormScenario: ExampleScenario = {
         validationMessages: {
           required: 'This field is required',
         },
-        props: {
-          placeholder: 'Your first name',
-        },
+        placeholder: 'Your first name',
       },
       {
         key: 'lastName',
@@ -42,9 +40,7 @@ export const completeFormScenario: ExampleScenario = {
         validationMessages: {
           required: 'This field is required',
         },
-        props: {
-          placeholder: 'Your last name',
-        },
+        placeholder: 'Your last name',
       },
       {
         key: 'email',
@@ -57,9 +53,9 @@ export const completeFormScenario: ExampleScenario = {
           required: 'This field is required',
           email: 'Please enter a valid email address',
         },
+        placeholder: 'email@example.com',
         props: {
           type: 'email',
-          placeholder: 'email@example.com',
         },
       },
       {
@@ -67,18 +63,16 @@ export const completeFormScenario: ExampleScenario = {
         type: 'input',
         label: 'Phone Number',
         value: '',
+        placeholder: '+1 (555) 000-0000',
         props: {
           type: 'tel',
-          placeholder: '+1 (555) 000-0000',
         },
       },
       {
         key: 'birthDate',
         type: 'datepicker',
         label: 'Birth Date',
-        props: {
-          placeholder: 'Select your birth date',
-        },
+        placeholder: 'Select your birth date',
       },
       {
         key: 'bio',
@@ -89,9 +83,9 @@ export const completeFormScenario: ExampleScenario = {
         validationMessages: {
           maxLength: 'Must not exceed 500 characters',
         },
+        placeholder: 'Tell us about yourself',
         props: {
           rows: 4,
-          placeholder: 'Tell us about yourself',
         },
       },
       {
@@ -104,9 +98,7 @@ export const completeFormScenario: ExampleScenario = {
           { value: 'ca', label: 'Canada' },
           { value: 'au', label: 'Australia' },
         ],
-        props: {
-          placeholder: 'Select your country',
-        },
+        placeholder: 'Select your country',
       },
       {
         key: 'plan',

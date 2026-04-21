@@ -1,15 +1,20 @@
-import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
 import type { Provider } from '@angular/core';
+import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
 import { BOOTSTRAP_FIELD_TYPES } from '../config/bootstrap-field-config';
 import { BootstrapConfig } from '../models/bootstrap-config';
 import { BOOTSTRAP_CONFIG } from '../models/bootstrap-config.token';
 
 /**
- * Field type definitions with optional config providers
+ * Field type definitions for Bootstrap components.
  */
-export type FieldTypeDefinitionsWithConfig = FieldTypeDefinition[] & {
-  __configProviders?: Provider[];
+export type BootstrapFieldTypes = FieldTypeDefinition[];
+
+type BootstrapConfigFeature = {
+  ɵkind: 'bootstrap-config';
+  ɵproviders: Provider[];
 };
+
+type BootstrapFieldsWithConfig = [...BootstrapFieldTypes, BootstrapConfigFeature];
 
 /**
  * Provides Bootstrap field types for the dynamic form system.
@@ -46,19 +51,24 @@ export type FieldTypeDefinitionsWithConfig = FieldTypeDefinition[] & {
  * };
  * ```
  *
- * @returns Array of field type definitions for Bootstrap components
+ * @returns Array of field type definitions and optionally a config feature
  */
-export function withBootstrapFields(config?: BootstrapConfig): FieldTypeDefinitionsWithConfig {
-  const fields = BOOTSTRAP_FIELD_TYPES as FieldTypeDefinitionsWithConfig;
-
-  if (config) {
-    fields.__configProviders = [
-      {
-        provide: BOOTSTRAP_CONFIG,
-        useValue: config,
-      },
-    ];
+export function withBootstrapFields(): BootstrapFieldTypes;
+export function withBootstrapFields(config: BootstrapConfig): BootstrapFieldsWithConfig;
+export function withBootstrapFields(config: BootstrapConfig | undefined): BootstrapFieldTypes | BootstrapFieldsWithConfig;
+export function withBootstrapFields(config?: BootstrapConfig): BootstrapFieldTypes | BootstrapFieldsWithConfig {
+  if (!config) {
+    return BOOTSTRAP_FIELD_TYPES;
   }
 
-  return fields;
+  const fieldsWithConfig = [
+    ...BOOTSTRAP_FIELD_TYPES,
+    {
+      ɵkind: 'bootstrap-config',
+      ɵproviders: [{ provide: BOOTSTRAP_CONFIG, useValue: config }],
+    } satisfies BootstrapConfigFeature,
+  ];
+
+  // Safe: this preserves all bootstrap field definitions and appends exactly one config feature.
+  return fieldsWithConfig as BootstrapFieldsWithConfig;
 }

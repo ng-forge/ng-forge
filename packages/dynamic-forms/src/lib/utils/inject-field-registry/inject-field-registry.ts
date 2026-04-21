@@ -1,6 +1,7 @@
 import { inject, InjectionToken, Type } from '@angular/core';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
+import { resolveDefaultExport } from '../wrapper-chain/wrapper-chain';
 
 /**
  * Cache for resolved field type components.
@@ -137,15 +138,9 @@ export function injectFieldRegistry() {
         return cached;
       }
 
-      // Handle async loading
       try {
-        const result = await fieldType.loadComponent();
-        // Handle ES module imports - extract default export if needed
-        const moduleResult = result as { default?: Type<unknown> } | Type<unknown>;
-        const component =
-          (typeof moduleResult === 'object' && 'default' in moduleResult && moduleResult.default) || (result as Type<unknown>);
+        const component = resolveDefaultExport(await fieldType.loadComponent());
 
-        // Populate cache for future sync lookups
         if (component) {
           componentCache.set(name, component);
         }

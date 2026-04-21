@@ -23,9 +23,7 @@ const teamMemberFields = [
         },
       },
     ],
-    props: {
-      placeholder: 'Enter name',
-    },
+    placeholder: 'Enter name',
   },
   {
     key: 'role',
@@ -90,9 +88,7 @@ const config = {
       key: 'notes',
       type: 'textarea',
       label: 'Notes',
-      props: {
-        placeholder: 'Additional notes',
-      },
+      placeholder: 'Additional notes',
     },
   ],
 } as FormConfig;

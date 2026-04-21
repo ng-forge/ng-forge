@@ -4,6 +4,7 @@ import {
   computed,
   inject,
   Injector,
+  input,
   runInInjectionContext,
   signal,
   viewChild,
@@ -18,7 +19,7 @@ import { createSimpleTestField, TestFieldComponent } from '../../../../testing/s
 import { baseFieldMapper, FieldSignalContext } from '../../mappers';
 import { provideDynamicForm } from '../../providers';
 import { FieldTypeDefinition } from '../../models/field-type';
-import { FIELD_SIGNAL_CONTEXT, WRAPPER_CONTEXT } from '../../models/field-signal-context.token';
+import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { EventBus } from '../../events';
 import { FieldWrapperContract, WrapperTypeDefinition } from '../../models/wrapper-type';
 import { applyValidator } from '../../core/validation/validator-factory';
@@ -33,14 +34,13 @@ import { ConsoleLogger } from '../../providers/features/logger/console-logger';
 
 /**
  * Mock wrapper component that provides a #fieldComponent slot.
- * Simulates a "section" wrapper with a header.
- * Injects WRAPPER_CONTEXT to get its config.
+ * Simulates a "section" wrapper with a header input.
  */
 @Component({
   selector: 'test-section-wrapper',
   template: `
     <div class="test-section-wrapper">
-      <h3 class="test-section-header">{{ header() }}</h3>
+      <h3 class="test-section-header">{{ header() ?? '' }}</h3>
       <div class="test-section-content">
         <ng-container #fieldComponent></ng-container>
       </div>
@@ -50,19 +50,17 @@ import { ConsoleLogger } from '../../providers/features/logger/console-logger';
 })
 class TestSectionWrapperComponent implements FieldWrapperContract {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
-  private readonly context = inject(WRAPPER_CONTEXT);
-  readonly header = computed(() => (this.context.config['header'] as string) ?? '');
+  readonly header = input<string>();
 }
 
 /**
  * Mock wrapper component for chaining tests.
- * Simulates a "style" wrapper with a CSS class.
- * Injects WRAPPER_CONTEXT to get its config.
+ * Simulates a "style" wrapper with a CSS class input.
  */
 @Component({
   selector: 'test-style-wrapper',
   template: `
-    <div class="test-style-wrapper" [class]="wrapperClass()">
+    <div class="test-style-wrapper" [class]="wrapperClass() ?? ''">
       <ng-container #fieldComponent></ng-container>
     </div>
   `,
@@ -70,13 +68,15 @@ class TestSectionWrapperComponent implements FieldWrapperContract {
 })
 class TestStyleWrapperComponent implements FieldWrapperContract {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
-  private readonly context = inject(WRAPPER_CONTEXT);
-  readonly wrapperClass = computed(() => (this.context.config['wrapperClass'] as string) ?? '');
+  readonly wrapperClass = input<string>();
 }
 
 /**
- * Mock validation-aware wrapper that reads form validity from WRAPPER_CONTEXT
- * and applies validClass or invalidClass accordingly.
+ * Mock validation-aware wrapper.
+ *
+ * Receives validClass/invalidClass as inputs; reads form validity directly
+ * from FIELD_SIGNAL_CONTEXT. Container-used wrappers don't get `fieldInputs`
+ * since the container wraps a children template, not a single field.
  */
 @Component({
   selector: 'test-validation-wrapper',
@@ -89,13 +89,12 @@ class TestStyleWrapperComponent implements FieldWrapperContract {
 })
 class TestValidationWrapperComponent implements FieldWrapperContract {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
-  private readonly context = inject(WRAPPER_CONTEXT);
+  readonly validClass = input<string>('is-valid');
+  readonly invalidClass = input<string>('is-invalid');
 
-  private readonly validClass = computed(() => (this.context.config['validClass'] as string) ?? 'is-valid');
-  private readonly invalidClass = computed(() => (this.context.config['invalidClass'] as string) ?? 'is-invalid');
+  private readonly fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext;
 
-  /** Reads validity from the parent field signal context's form */
-  private readonly isValid = computed(() => this.context.fieldSignalContext.form().valid());
+  private readonly isValid = computed(() => this.fieldSignalContext.form().valid());
 
   readonly activeClass = computed(() => (this.isValid() ? this.validClass() : this.invalidClass()));
 }

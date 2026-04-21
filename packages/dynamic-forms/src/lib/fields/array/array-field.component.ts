@@ -11,7 +11,7 @@ import {
   Signal,
   signal,
 } from '@angular/core';
-import { NgComponentOutlet } from '@angular/common';
+import { DfFieldOutlet } from '../../directives/df-field-outlet.directive';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -41,14 +41,14 @@ import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-a
 /**
  * Container component for rendering dynamic arrays of fields.
  *
- * Supports add/remove operations via the arrayEvent() builder API.
+ * Supports add/remove/move operations via the arrayEvent() builder API.
  * Uses differential updates to optimize rendering - only recreates items when necessary.
  * Each item gets a scoped injector with ARRAY_CONTEXT for position-aware operations.
  * Supports multiple sibling fields per array item (e.g., name + email without a wrapper).
  */
 @Component({
   selector: 'array-field',
-  imports: [NgComponentOutlet],
+  imports: [DfFieldOutlet],
   template: `
     @for (item of resolvedItems(); track item.id; let i = $index) {
       <div
@@ -59,16 +59,7 @@ import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-a
         [attr.data-array-item-index]="i"
       >
         @for (field of item.fields; track $index) {
-          @if (field.renderReady()) {
-            <ng-container
-              *ngComponentOutlet="
-                field.component;
-                injector: field.injector;
-                environmentInjector: environmentInjector;
-                inputs: field.inputs()
-              "
-            />
-          }
+          <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
         }
       </div>
     }
@@ -166,6 +157,23 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   });
 
   /**
+   * Normalized item templates WITHOUT auto-remove button appended.
+   * Each element is normalized to an array: single FieldDef → [FieldDef], array stays as-is.
+   *
+   * Used by moveItem() to stash raw templates into the templateRegistry, preserving
+   * the invariant that registry entries are pre-synthesis (withAutoRemove() adds the
+   * button during resolution).
+   */
+  private readonly rawItemTemplates = computed<ArrayItemTemplate[]>(() => {
+    const arrayField = this.field();
+    const definitions = (arrayField.fields as ArrayItemDefinition[]) || [];
+
+    return definitions.map((def) => {
+      return (Array.isArray(def) ? def : [def]) as ArrayItemTemplate;
+    });
+  });
+
+  /**
    * Gets the item templates (field definitions) for the array.
    * Each element can be either:
    * - A single FieldDef (primitive item) - normalized to [FieldDef]
@@ -178,18 +186,13 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * Returns normalized templates where all items are arrays for consistent handling.
    */
   private readonly itemTemplates = computed<ArrayItemTemplate[]>(() => {
-    const arrayField = this.field();
-    const definitions = (arrayField.fields as ArrayItemDefinition[]) || [];
+    const raw = this.rawItemTemplates();
     const removeButton = this.autoRemoveButton();
 
-    // Normalize: single FieldDef → [FieldDef], array stays as-is
-    // Append auto-remove button if configured (for primitive simplified arrays)
-    return definitions.map((def) => {
-      const normalized = (Array.isArray(def) ? def : [def]) as ArrayItemTemplate;
-      if (removeButton) {
-        return [...normalized, removeButton] as unknown as ArrayItemTemplate;
-      }
-      return normalized;
+    if (!removeButton) return raw;
+
+    return raw.map((normalized) => {
+      return [...normalized, removeButton] as unknown as ArrayItemTemplate;
     });
   });
 
@@ -310,6 +313,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
             return;
           }
           void this.handleAddFromEvent(action.template, action.index);
+        } else if (action.action === 'move') {
+          this.moveItem(action.fromIndex, action.toIndex);
         } else {
           this.removeItem(action.index);
         }
@@ -325,9 +330,13 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * Supports both primitive (single FieldDef) and object (FieldDef[]) templates.
    */
   private async handleAddFromEvent(template: FieldDef<unknown> | readonly FieldDef<unknown>[], index?: number): Promise<void> {
-    // Normalize template to mutable array for consistent handling
+    // Normalize template to mutable array for consistent handling.
+    // A single FieldDef with valueHandling: 'flatten' (container, row) is an object item
+    // whose children should be flattened — NOT a primitive item. Only true leaf fields
+    // (input, checkbox, etc.) are primitive when passed as a single FieldDef.
     const templates: FieldDef<unknown>[] = Array.isArray(template) ? [...template] : [template];
-    const isPrimitiveItem = !Array.isArray(template);
+    const isSingleField = !Array.isArray(template);
+    const isPrimitiveItem = isSingleField && getFieldValueHandling(templates[0].type, this.rawFieldRegistry()) !== 'flatten';
 
     // Track primitive field key for full-API arrays that start empty.
     // Simplified arrays already have this info from normalization metadata.
@@ -361,14 +370,14 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       for (const templateField of templates) {
         const rawValue = getFieldDefaultValue(templateField, this.rawFieldRegistry());
         const valueHandling = getFieldValueHandling(templateField.type, this.rawFieldRegistry());
-        const isContainer = templateField.type === 'group' || templateField.type === 'row';
+        const isContainer = templateField.type === 'group' || templateField.type === 'row' || templateField.type === 'container';
 
         if (isContainer) {
           if (isGroupField(templateField)) {
             // Groups wrap their fields under the group key
             value = { ...(value as Record<string, unknown>), [templateField.key]: rawValue };
           } else {
-            // Rows flatten their fields directly
+            // Rows and containers flatten their fields directly
             value = { ...(value as Record<string, unknown>), ...(rawValue as Record<string, unknown>) };
           }
         } else if (valueHandling === 'include' && templateField.key) {
@@ -461,15 +470,12 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         void this.appendItems(fieldTrees, operation.startIndex, operation.endIndex, currentVersion);
         break;
       case 'recreate': {
-        // Before clearing, capture templates by position for items beyond defined templates.
-        // This allows dynamically added items to be recreated with their original templates.
-        const itemTemplates = this.itemTemplates();
-        const positionalTemplates: (FieldDef<unknown>[] | undefined)[] = resolvedItems.map((item, idx) => {
-          // For items within the defined templates range, use the config directly
-          if (idx < itemTemplates.length) {
-            return undefined; // Will use itemTemplates[idx] during resolve
-          }
-          // For dynamically added items, look up their stored template
+        // Capture templates by item ID so each item is recreated with its original template,
+        // even after move operations that change positions. Registry entries (from dynamic adds
+        // or moves) take priority over positional itemTemplates lookup.
+        const positionalTemplates: (FieldDef<unknown>[] | undefined)[] = resolvedItems.map((item) => {
+          // Registry entries (from dynamic adds or moves) take priority;
+          // unmoved initial items return undefined → falls through to itemTemplates[idx] during resolve.
           return this.templateRegistry.get(item.id);
         });
 
@@ -645,6 +651,72 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     cached = [...templates, removeButton];
     this.autoRemoveCache.set(templates, cached);
     return cached;
+  }
+
+  /**
+   * Handles move operations — reorders an existing item without destroying it.
+   * Updates resolvedItems and form value atomically. Since the array length
+   * doesn't change, `determineDifferentialOperation` returns 'none' and no
+   * recreate is triggered. The `@for` loop tracks by `item.id`, so Angular
+   * moves the DOM node instead of destroying/recreating. The `itemPositionMap`
+   * computed auto-recomputes, propagating new indices to child linkedSignals.
+   */
+  private moveItem(fromIndex: number, toIndex: number): void {
+    const arrayKey = this.field().key;
+    const parentForm = this.parentFieldSignalContext.form;
+    const currentValue = parentForm().value() as TModel;
+    const currentArray = getArrayValue(currentValue as Partial<TModel>, arrayKey);
+    const length = currentArray.length;
+
+    if (fromIndex < 0 || fromIndex >= length) {
+      this.logger.warn(
+        `moveArrayItem fromIndex ${fromIndex} is out of bounds for array '${arrayKey}' with length ${length}. Operation skipped.`,
+      );
+      return;
+    }
+
+    if (toIndex < 0 || toIndex >= length) {
+      this.logger.warn(
+        `moveArrayItem toIndex ${toIndex} is out of bounds for array '${arrayKey}' with length ${length}. Operation skipped.`,
+      );
+      return;
+    }
+
+    if (fromIndex === toIndex) return;
+
+    // Register raw (pre-auto-remove) templates for all items whose position will change.
+    // Initial items use itemTemplates[currentIndex] during recreate, but after
+    // a move their position no longer matches their original template. Stashing
+    // the template by item ID lets the recreate path resolve the correct one.
+    // We use rawItemTemplates (without auto-remove button) because the recreate path
+    // calls withAutoRemove() during resolution — storing the synthesized version would
+    // cause duplicate remove buttons.
+    const rawTemplates = this.rawItemTemplates();
+    const currentItems = this.resolvedItemsSignal();
+    const lo = Math.min(fromIndex, toIndex);
+    const hi = Math.max(fromIndex, toIndex);
+    for (let i = lo; i <= hi; i++) {
+      const item = currentItems[i];
+      if (item && !this.templateRegistry.has(item.id) && i < rawTemplates.length) {
+        this.templateRegistry.set(item.id, rawTemplates[i] as FieldDef<unknown>[]);
+      }
+    }
+
+    // Reorder resolvedItems — splice preserves object identity (no destroy/recreate)
+    this.resolvedItemsSignal.update((current) => {
+      const newItems = [...current];
+      const [moved] = newItems.splice(fromIndex, 1);
+      newItems.splice(toIndex, 0, moved);
+      return newItems;
+    });
+
+    // Reorder form value array the same way
+    const newArray = [...currentArray];
+    const [movedValue] = newArray.splice(fromIndex, 1);
+    newArray.splice(toIndex, 0, movedValue);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    parentForm().value.set({ ...currentValue, [arrayKey]: newArray } as any);
   }
 
   /**

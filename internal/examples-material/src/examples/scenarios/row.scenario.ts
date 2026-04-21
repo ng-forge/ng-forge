@@ -26,9 +26,7 @@ export const rowScenario: ExampleScenario = {
             value: '',
             required: true,
             col: 6,
-            props: {
-              placeholder: 'John',
-            },
+            placeholder: 'John',
           },
           {
             key: 'lastName',
@@ -37,9 +35,7 @@ export const rowScenario: ExampleScenario = {
             value: '',
             required: true,
             col: 6,
-            props: {
-              placeholder: 'Doe',
-            },
+            placeholder: 'Doe',
           },
         ],
       },
@@ -50,9 +46,9 @@ export const rowScenario: ExampleScenario = {
         value: '',
         required: true,
         email: true,
+        placeholder: 'john.doe@example.com',
         props: {
           type: 'email',
-          placeholder: 'john.doe@example.com',
         },
       },
       {
@@ -66,9 +62,7 @@ export const rowScenario: ExampleScenario = {
             value: '',
             required: true,
             col: 6,
-            props: {
-              placeholder: 'Springfield',
-            },
+            placeholder: 'Springfield',
           },
           {
             key: 'state',
@@ -81,9 +75,7 @@ export const rowScenario: ExampleScenario = {
             validationMessages: {
               maxLength: 'Use 2-letter abbreviation',
             },
-            props: {
-              placeholder: 'IL',
-            },
+            placeholder: 'IL',
           },
           {
             key: 'zip',
@@ -96,9 +88,7 @@ export const rowScenario: ExampleScenario = {
             validationMessages: {
               pattern: 'Must be 5 digits',
             },
-            props: {
-              placeholder: '62701',
-            },
+            placeholder: '62701',
           },
         ],
       },

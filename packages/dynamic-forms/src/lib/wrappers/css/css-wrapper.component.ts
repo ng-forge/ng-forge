@@ -1,15 +1,20 @@
-import { ChangeDetectionStrategy, Component, computed, inject, isSignal, Signal, ViewContainerRef, viewChild } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, input, Signal, ViewContainerRef, viewChild } from '@angular/core';
+import { pipe, switchMap } from 'rxjs';
+import { derivedFrom } from 'ngxtension/derived-from';
 import { FieldWrapperContract } from '../../models/wrapper-type';
-import { WRAPPER_CONTEXT, WrapperContext } from '../../models/field-signal-context.token';
 import { DynamicText } from '../../models/types/dynamic-text';
-import { CssWrapper } from './css-wrapper.type';
+import { dynamicTextToObservable } from '../../utils/dynamic-text-to-observable';
+import { WrapperFieldInputs } from '../wrapper-field-inputs';
 
 /**
  * Built-in CSS wrapper component.
  *
  * Applies CSS classes from the `cssClasses` config property to the host element,
  * wrapping the inner content (next wrapper or children) in its ViewContainerRef slot.
+ *
+ * Receives `cssClasses` as an individual Angular input (set by the outlet via
+ * `setInput()`). `fieldInputs` carries the wrapped field's mapper outputs +
+ * a read-only view of its form state (via `ReadonlyFieldTree`).
  *
  * @example
  * ```typescript
@@ -32,36 +37,12 @@ import { CssWrapper } from './css-wrapper.type';
 export default class CssWrapperComponent implements FieldWrapperContract {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
 
-  private readonly context = inject<WrapperContext<CssWrapper>>(WRAPPER_CONTEXT);
+  readonly cssClasses = input<DynamicText>();
+  readonly fieldInputs = input<WrapperFieldInputs>();
 
-  readonly resolvedClasses: Signal<string>;
-
-  constructor() {
-    const raw = this.context.config.cssClasses;
-    this.resolvedClasses = resolveDynamicTextToSignal(raw);
-  }
-}
-
-/**
- * Converts a DynamicText value to a Signal<string>.
- *
- * Must be called in an injection context (constructor or field initializer)
- * because `toSignal()` requires it for Observable cleanup.
- */
-function resolveDynamicTextToSignal(value: DynamicText | undefined): Signal<string> {
-  let signal: Signal<string>;
-
-  if (!value) {
-    signal = computed(() => '');
-  } else if (typeof value === 'string') {
-    signal = computed(() => value);
-  } else if (isSignal(value)) {
-    signal = value;
-  } else {
-    signal = toSignal(value, { initialValue: '' });
-  }
-
-  return signal;
+  readonly resolvedClasses: Signal<string> = derivedFrom([this.cssClasses], pipe(switchMap(([value]) => dynamicTextToObservable(value))), {
+    initialValue: '',
+  });
 }
 
 export { CssWrapperComponent };

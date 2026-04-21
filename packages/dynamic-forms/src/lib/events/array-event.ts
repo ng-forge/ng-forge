@@ -1,6 +1,7 @@
 import { AppendArrayItemEvent, ArrayItemDefinitionTemplate } from './constants/append-array-item.event';
 import { PrependArrayItemEvent } from './constants/prepend-array-item.event';
 import { InsertArrayItemEvent } from './constants/insert-array-item.event';
+import { MoveArrayItemEvent } from './constants/move-array-item.event';
 import { PopArrayItemEvent } from './constants/pop-array-item.event';
 import { ShiftArrayItemEvent } from './constants/shift-array-item.event';
 import { RemoveAtIndexEvent } from './constants/remove-at-index.event';
@@ -36,10 +37,13 @@ import { RemoveAtIndexEvent } from './constants/remove-at-index.event';
  * eventBus.dispatch(arrayEvent('contacts').pop());      // Remove last
  * eventBus.dispatch(arrayEvent('contacts').shift());    // Remove first
  * eventBus.dispatch(arrayEvent('contacts').removeAt(2)); // Remove at index
+ *
+ * // Reordering items (no template needed, preserves item identity)
+ * eventBus.dispatch(arrayEvent('contacts').move(0, 2)); // Move first to third
  * ```
  *
  * @param arrayKey - The key of the array field to operate on
- * @returns An object with methods for all 6 array operations
+ * @returns An object with methods for all 7 array operations
  */
 export function arrayEvent(arrayKey: string) {
   return {
@@ -155,5 +159,22 @@ export function arrayEvent(arrayKey: string) {
      * ```
      */
     removeAt: (index: number) => new RemoveAtIndexEvent(arrayKey, index),
+
+    /**
+     * Move an existing item from one position to another within the array.
+     * This is an atomic reorder — the item is NOT destroyed and recreated.
+     * The resolved component, form value, and stored template are preserved.
+     *
+     * @param from - The current index of the item to move
+     * @param to - The target index to move the item to
+     * @returns A MoveArrayItemEvent to dispatch
+     *
+     * @example
+     * ```typescript
+     * // Move item from index 0 to index 2
+     * eventBus.dispatch(arrayEvent('contacts').move(0, 2));
+     * ```
+     */
+    move: (from: number, to: number) => new MoveArrayItemEvent(arrayKey, from, to),
   };
 }

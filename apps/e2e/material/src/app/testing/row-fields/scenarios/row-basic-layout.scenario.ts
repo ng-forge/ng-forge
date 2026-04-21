@@ -12,18 +12,14 @@ const config = {
           type: 'input',
           label: 'First Name',
           col: 6,
-          props: {
-            placeholder: 'Enter first name',
-          },
+          placeholder: 'Enter first name',
         },
         {
           key: 'lastName',
           type: 'input',
           label: 'Last Name',
           col: 6,
-          props: {
-            placeholder: 'Enter last name',
-          },
+          placeholder: 'Enter last name',
         },
       ],
     },
@@ -36,9 +32,9 @@ const config = {
           type: 'input',
           label: 'Email',
           col: 4,
+          placeholder: 'Enter email',
           props: {
             type: 'email',
-            placeholder: 'Enter email',
           },
         },
         {
@@ -46,9 +42,7 @@ const config = {
           type: 'input',
           label: 'Phone',
           col: 4,
-          props: {
-            placeholder: 'Enter phone',
-          },
+          placeholder: 'Enter phone',
         },
         {
           key: 'country',

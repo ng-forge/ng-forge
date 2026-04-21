@@ -2,6 +2,7 @@ import { filter, map, Observable } from 'rxjs';
 import { AppendArrayItemEvent } from '../../events/constants/append-array-item.event';
 import { PrependArrayItemEvent } from '../../events/constants/prepend-array-item.event';
 import { InsertArrayItemEvent } from '../../events/constants/insert-array-item.event';
+import { MoveArrayItemEvent } from '../../events/constants/move-array-item.event';
 import { PopArrayItemEvent } from '../../events/constants/pop-array-item.event';
 import { ShiftArrayItemEvent } from '../../events/constants/shift-array-item.event';
 import { RemoveAtIndexEvent } from '../../events/constants/remove-at-index.event';
@@ -15,6 +16,7 @@ export type ArrayEvent =
   | AppendArrayItemEvent
   | PrependArrayItemEvent
   | InsertArrayItemEvent
+  | MoveArrayItemEvent
   | PopArrayItemEvent
   | ShiftArrayItemEvent
   | RemoveAtIndexEvent;
@@ -26,6 +28,7 @@ const ARRAY_EVENT_TYPES: ArrayEvent['type'][] = [
   'append-array-item',
   'prepend-array-item',
   'insert-array-item',
+  'move-array-item',
   'pop-array-item',
   'shift-array-item',
   'remove-at-index',
@@ -39,7 +42,8 @@ const ARRAY_EVENT_TYPES: ArrayEvent['type'][] = [
  */
 export type ArrayAction =
   | { action: 'add'; template: FieldDef<unknown> | readonly FieldDef<unknown>[]; index?: number }
-  | { action: 'remove'; index?: number };
+  | { action: 'remove'; index?: number }
+  | { action: 'move'; fromIndex: number; toIndex: number };
 
 /**
  * Converts an array event to a normalized action.
@@ -53,6 +57,8 @@ function toArrayAction(event: ArrayEvent): ArrayAction {
       return { action: 'add', template: event.template, index: 0 };
     case 'insert-array-item':
       return { action: 'add', template: event.template, index: event.index };
+    case 'move-array-item':
+      return { action: 'move', fromIndex: event.fromIndex, toIndex: event.toIndex };
     case 'pop-array-item':
       return { action: 'remove' };
     case 'shift-array-item':

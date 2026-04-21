@@ -12,7 +12,7 @@ export const contactConfig = {
       label: 'First Name',
       value: '',
       required: true,
-      props: { placeholder: 'Your first name' },
+      placeholder: 'Your first name',
     },
     {
       key: 'lastName',
@@ -20,7 +20,7 @@ export const contactConfig = {
       label: 'Last Name',
       value: '',
       required: true,
-      props: { placeholder: 'Your last name' },
+      placeholder: 'Your last name',
     },
     {
       key: 'email',
@@ -29,20 +29,16 @@ export const contactConfig = {
       value: '',
       required: true,
       email: true,
-      props: {
-        type: 'email',
-        placeholder: 'email@example.com',
-      },
+      placeholder: 'email@example.com',
+      props: { type: 'email' },
     },
     {
       key: 'phone',
       type: 'input',
       label: 'Phone',
       value: '',
-      props: {
-        type: 'tel',
-        placeholder: '+1 (555) 000-0000',
-      },
+      placeholder: '+1 (555) 000-0000',
+      props: { type: 'tel' },
     },
     {
       key: 'subject',
@@ -50,13 +46,13 @@ export const contactConfig = {
       label: 'Subject',
       value: '',
       required: true,
+      placeholder: 'Select a subject',
       options: [
         { value: 'general', label: 'General Inquiry' },
         { value: 'support', label: 'Technical Support' },
         { value: 'sales', label: 'Sales Question' },
         { value: 'feedback', label: 'Feedback' },
       ],
-      props: { placeholder: 'Select a subject' },
     },
     {
       key: 'message',
@@ -66,15 +62,13 @@ export const contactConfig = {
       required: true,
       minLength: 10,
       maxLength: 500,
+      placeholder: 'Tell us how we can help...',
       validationMessages: {
         required: 'Please enter your message',
         minLength: 'Message must be at least 10 characters',
         maxLength: 'Message cannot exceed 500 characters',
       },
-      props: {
-        placeholder: 'Tell us how we can help...',
-        rows: 5,
-      },
+      props: { rows: 5 },
     },
     {
       key: 'subscribe',

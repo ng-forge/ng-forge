@@ -1,0 +1,83 @@
+:host {
+  display: block;
+
+  // Use currentColor + semi-transparent tints so the wrapper inherits
+  // contrast from the surrounding page rather than picking a fixed palette.
+  // This makes the demo look consistent in light mode, dark mode, and any
+  // custom theme the host page might be using — no `prefers-color-scheme`
+  // lottery where the wrapper's idea of "dark" disagrees with the host's.
+  --demo-section-border: color-mix(in srgb, currentColor 20%, transparent);
+  --demo-section-bg: color-mix(in srgb, currentColor 4%, transparent);
+  --demo-section-header-text: currentColor;
+  --demo-section-header-bg: color-mix(in srgb, currentColor 7%, transparent);
+  --demo-section-header-border: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.demo-section {
+  border: 1px solid var(--demo-section-border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--demo-section-bg);
+  margin-bottom: 0.75rem;
+}
+
+.demo-section__header {
+  padding: 0.6rem 0.9rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--demo-section-header-text);
+  background: var(--demo-section-header-bg);
+  border-bottom: 1px solid var(--demo-section-header-border);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.8;
+
+  &--with-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    text-transform: none;
+    letter-spacing: 0;
+    opacity: 1;
+  }
+}
+
+.demo-section__title {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.demo-section__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: currentColor;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, currentColor 14%, transparent);
+    border-color: color-mix(in srgb, currentColor 45%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+.demo-section__body {
+  padding: 0.9rem;
+}

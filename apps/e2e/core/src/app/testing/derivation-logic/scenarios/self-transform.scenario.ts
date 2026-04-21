@@ -36,7 +36,7 @@ const config = {
       type: 'input',
       label: 'Phone (format debounced)',
       value: '',
-      props: { placeholder: 'Enter 10 digits' },
+      placeholder: 'Enter 10 digits',
       col: 6,
       logic: [
         {
@@ -52,7 +52,7 @@ const config = {
       type: 'input',
       label: 'Credit Card (mask debounced)',
       value: '',
-      props: { placeholder: 'Enter 16 digits' },
+      placeholder: 'Enter 16 digits',
       col: 6,
       logic: [
         {

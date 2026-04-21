@@ -1,8 +1,7 @@
-import { BaseValueField, DynamicText } from '@ng-forge/dynamic-forms';
+import { BaseValueField } from '@ng-forge/dynamic-forms';
 import { TextareaMeta } from './textarea-meta';
 
 export interface TextareaProps {
-  placeholder?: DynamicText;
   rows?: number;
   cols?: number | undefined;
 }

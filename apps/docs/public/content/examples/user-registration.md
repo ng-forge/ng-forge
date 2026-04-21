@@ -242,9 +242,9 @@ const registrationConfig = {
               },
             },
           ],
+          placeholder: 'Select your industry',
           props: {
             appearance: 'outline',
-            placeholder: 'Select your industry',
           },
         },
         {

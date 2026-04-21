@@ -44,6 +44,33 @@ export interface ValidatorInfo {
   example: string;
 }
 
+export interface WrapperInfo {
+  /** Wrapper type discriminant (used in `wrappers: [{ type: '...' }]`) */
+  type: string;
+  /** Source category: core ships from the library, demo from examples-shared-ui, adapter from a UI integration package */
+  category: 'core' | 'demo' | 'adapter';
+  /** Shipping status: `shipping` is importable from the listed package; `demo-only` lives in examples-shared-ui and is not a library primitive */
+  availability: 'shipping' | 'demo-only';
+  /** Package the wrapper is exported from */
+  package: string;
+  description: string;
+  /** Config props the wrapper accepts (keyed by prop name). Excludes the required `type` discriminant. */
+  props: Record<string, PropertyInfo>;
+  /**
+   * Field types this wrapper auto-applies to via its `WrapperTypeDefinition.types` registration.
+   * Empty array = the wrapper never auto-applies and must be opt-in via the field's `wrappers` array.
+   */
+  autoAppliesTo: string[];
+  /** Angular component class that implements the wrapper */
+  componentName: string;
+  /** Authoring-contract rules the wrapper component must satisfy (shared across all wrappers) */
+  contract: string;
+  /** Full usage example showing the wrapper in a form config */
+  example: string;
+  /** Minimal valid wrapper config entry */
+  minimalExample?: string;
+}
+
 export interface UIAdapterFieldType {
   type: string;
   componentName: string;
@@ -61,6 +88,9 @@ import { FIELD_TYPES } from './field-types.js';
 import { VALIDATORS } from './validators.js';
 import { UI_ADAPTERS } from './ui-adapters.js';
 import { DOCUMENTATION, type DocPage } from './documentation.js';
+import { WRAPPERS, WRAPPER_AUTHORING_CONTRACT } from './wrappers.js';
+
+export { WRAPPER_AUTHORING_CONTRACT };
 
 export type { DocPage };
 
@@ -129,6 +159,27 @@ export function getUIAdapterFieldType(
 ): UIAdapterFieldType | undefined {
   const adapter = getUIAdapter(library);
   return adapter?.fieldTypes.find((ft) => ft.type === fieldType);
+}
+
+/**
+ * Get all wrappers
+ */
+export function getWrappers(): WrapperInfo[] {
+  return WRAPPERS;
+}
+
+/**
+ * Get a specific wrapper by type
+ */
+export function getWrapper(type: string): WrapperInfo | undefined {
+  return WRAPPERS.find((w) => w.type === type);
+}
+
+/**
+ * Get wrappers by category
+ */
+export function getWrappersByCategory(category: 'core' | 'demo' | 'adapter'): WrapperInfo[] {
+  return WRAPPERS.filter((w) => w.category === category);
 }
 
 /**

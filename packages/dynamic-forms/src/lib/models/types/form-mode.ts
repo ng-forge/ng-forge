@@ -17,7 +17,7 @@ interface ContainerField<T> extends FieldDef<T> {
  */
 function isContainerWithFields<T>(field: FieldDef<T>): field is FieldDef<T> & ContainerField<T> {
   return (
-    (field.type === 'row' || field.type === 'group' || field.type === 'page') &&
+    (field.type === 'row' || field.type === 'group' || field.type === 'page' || field.type === 'container') &&
     'fields' in field &&
     Array.isArray((field as ContainerField<T>).fields)
   );

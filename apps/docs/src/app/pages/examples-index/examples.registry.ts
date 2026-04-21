@@ -91,6 +91,14 @@ export const EXAMPLES_REGISTRY: ExampleItem[] = [
     tags: ['Layout', 'Arrays'],
     path: '/examples/array-form',
   },
+  {
+    id: 'wrapper-array-actions',
+    title: 'Array With Wrapper Chrome',
+    description:
+      'Wrap an array and its add button with a section wrapper — titles, framing, and action grouping without touching the array config',
+    tags: ['Layout', 'Arrays', 'Wrappers'],
+    path: '/examples/wrapper-array-actions',
+  },
 ];
 
 export const ALL_TAGS = [...new Set(EXAMPLES_REGISTRY.flatMap((e) => e.tags))].sort();

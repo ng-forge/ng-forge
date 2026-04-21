@@ -11,17 +11,13 @@ const addressFields = [
     key: 'street',
     type: 'input',
     label: 'Street',
-    props: {
-      placeholder: 'Enter street address',
-    },
+    placeholder: 'Enter street address',
   },
   {
     key: 'city',
     type: 'input',
     label: 'City',
-    props: {
-      placeholder: 'Enter city',
-    },
+    placeholder: 'Enter city',
   },
   {
     key: 'hasApartment',
@@ -44,9 +40,7 @@ const addressFields = [
         },
       },
     ],
-    props: {
-      placeholder: 'Enter apartment/unit number',
-    },
+    placeholder: 'Enter apartment/unit number',
   },
   {
     key: 'addressType',
@@ -73,9 +67,7 @@ const addressFields = [
         },
       },
     ],
-    props: {
-      placeholder: 'Enter business name',
-    },
+    placeholder: 'Enter business name',
   },
 ];
 

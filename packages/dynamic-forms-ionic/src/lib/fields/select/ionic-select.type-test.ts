@@ -26,7 +26,6 @@ describe('IonicSelectProps - Exhaustive Whitelist', () => {
     | 'interfaceOptions'
     | 'cancelText'
     | 'okText'
-    | 'placeholder'
     | 'fill'
     | 'shape'
     | 'labelPlacement'
@@ -62,10 +61,6 @@ describe('IonicSelectProps - Exhaustive Whitelist', () => {
 
     it('okText', () => {
       expectTypeOf<IonicSelectProps['okText']>().toEqualTypeOf<string | undefined>();
-    });
-
-    it('placeholder', () => {
-      expectTypeOf<IonicSelectProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('fill', () => {
@@ -115,6 +110,9 @@ describe('IonicSelectField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -268,6 +266,7 @@ describe('IonicSelectField - Usage Tests', () => {
       type: 'select',
       key: 'country',
       label: 'Select Country',
+      placeholder: 'Choose a country',
       options: [
         { label: 'USA', value: 'us' },
         { label: 'Canada', value: 'ca' },
@@ -279,7 +278,6 @@ describe('IonicSelectField - Usage Tests', () => {
         shape: 'round',
         labelPlacement: 'floating',
         color: 'primary',
-        placeholder: 'Choose a country',
         cancelText: 'Cancel',
         okText: 'OK',
       },

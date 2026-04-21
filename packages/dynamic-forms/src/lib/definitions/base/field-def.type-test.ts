@@ -3,6 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { DynamicText } from '../../models/types/dynamic-text';
+import type { WrapperConfig } from '../../models/wrapper-type';
 import type { FieldDef, FieldComponent } from './field-def';
 import type { RequiredKeys, OptionalKeys } from '@ng-forge/utils';
 
@@ -26,7 +27,10 @@ describe('FieldDef - Exhaustive Whitelist', () => {
     | 'meta'
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
-    | 'excludeValueIfReadonly';
+    | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers';
   type ActualKeys = keyof FieldDef<TestProps>;
 
   it('should have exactly the expected keys', () => {
@@ -62,6 +66,9 @@ describe('FieldDef - Exhaustive Whitelist', () => {
         | 'excludeValueIfHidden'
         | 'excludeValueIfDisabled'
         | 'excludeValueIfReadonly'
+        | 'wrappers'
+        | 'skipAutoWrappers'
+        | 'skipDefaultWrappers'
       >();
     });
 
@@ -107,6 +114,10 @@ describe('FieldDef - Exhaustive Whitelist', () => {
 
     it('excludeValueIfReadonly', () => {
       expectTypeOf<FieldDef<TestProps>['excludeValueIfReadonly']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('wrappers supports three states: undefined, null, or readonly WrapperConfig[]', () => {
+      expectTypeOf<FieldDef<TestProps>['wrappers']>().toEqualTypeOf<readonly WrapperConfig[] | null | undefined>();
     });
   });
 });
@@ -159,7 +170,7 @@ describe('FieldDef - Usage Examples', () => {
 
   it('should accept complete field definition', () => {
     interface InputProps {
-      placeholder?: string;
+      type?: string;
       maxLength?: number;
     }
 
@@ -168,7 +179,7 @@ describe('FieldDef - Usage Examples', () => {
       type: 'input',
       label: 'Email Address',
       props: {
-        placeholder: 'Enter your email',
+        type: 'email',
         maxLength: 100,
       },
       className: 'custom-input',

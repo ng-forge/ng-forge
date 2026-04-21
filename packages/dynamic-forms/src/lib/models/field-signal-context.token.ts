@@ -1,9 +1,22 @@
 import { InjectionToken, Signal } from '@angular/core';
 import type { FieldSignalContext, ArrayContext } from '../mappers/types';
-import type { WrapperConfig, ContainerField } from '../definitions/default/container-field';
+import type { WrapperConfig } from './wrapper-type';
 import type { ValidationMessages } from './validation-types';
 import type { FormOptions } from './form-config';
 import { DynamicFormError } from '../errors/dynamic-form-error';
+
+/**
+ * Injection token for form-level default wrappers.
+ *
+ * Provides a Signal of the `defaultWrappers` array from FormConfig. Consumed by
+ * `DfFieldOutlet` / `ContainerFieldComponent` to merge into each field's
+ * effective wrapper chain (lowest priority after auto-associations, higher
+ * than field-level `wrappers`).
+ *
+ * Provided once at the DynamicForm level and inherited via Angular's
+ * hierarchical injector.
+ */
+export const DEFAULT_WRAPPERS = new InjectionToken<Signal<readonly WrapperConfig[] | undefined>>('DEFAULT_WRAPPERS');
 
 /**
  * Injection token for providing field signal context to mappers and components.
@@ -226,63 +239,3 @@ export function createArrayItemIdGenerator(): () => string {
   let counter = 0;
   return () => `item-${counter++}`;
 }
-
-/**
- * Context provided to wrapper components via dependency injection.
- *
- * Each wrapper component in a wrapper chain receives its own context with:
- * - Its specific `WrapperConfig` (type + props)
- * - The full `ContainerField` definition (all wrappers, children, etc.)
- * - The parent `FieldSignalContext` for accessing form state (value, validity, etc.)
- *
- * Since container fields flatten (like rows), the `fieldSignalContext` is the
- * same as the parent's — there is no nested form tree. Wrapper components
- * can use it to observe field values, validity, dirty state, etc.
- *
- * @example
- * ```typescript
- * @Component({
- *   template: `
- *     <dbx-section [header]="header()">
- *       <ng-container #fieldComponent></ng-container>
- *     </dbx-section>
- *   `,
- * })
- * export class SectionWrapperComponent implements FieldWrapperContract {
- *   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
- *
- *   private readonly context = inject(WRAPPER_CONTEXT);
- *
- *   readonly header = computed(() => this.context.config.header as string);
- *   readonly formValue = computed(() => this.context.fieldSignalContext.value());
- * }
- * ```
- */
-export interface WrapperContext<T extends WrapperConfig<any> = WrapperConfig<any>> {
-  /** The WrapperConfig for this specific wrapper in the chain */
-  readonly config: T;
-  /** The full ContainerField definition (all wrappers, children, key, etc.) */
-  readonly containerField: ContainerField;
-  /** The parent field signal context — shared with children since container flattens */
-  readonly fieldSignalContext: FieldSignalContext;
-}
-
-/**
- * Injection token for providing wrapper context to wrapper components.
- *
- * Each wrapper component in a chain receives its own context via a scoped injector
- * created by `ContainerFieldComponent`. The context provides the wrapper's config
- * and access to the form state.
- *
- * Wrapper components inject this token to access their configuration and form state
- * instead of receiving props via `setInput()`.
- *
- * @example
- * ```typescript
- * export class SectionWrapperComponent {
- *   private readonly wrapperContext = inject(WRAPPER_CONTEXT);
- *   readonly header = computed(() => this.wrapperContext.config.header as string);
- * }
- * ```
- */
-export const WRAPPER_CONTEXT = new InjectionToken<WrapperContext>('WRAPPER_CONTEXT');

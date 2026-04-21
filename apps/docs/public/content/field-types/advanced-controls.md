@@ -49,9 +49,7 @@ Date selection control.
   required: true,
   minDate: new Date(1900, 0, 1),  // optional
   maxDate: new Date(),            // optional
-  props: {
-    placeholder: 'Select your birth date',
-  }
+  placeholder: 'Select your birth date',
 }
 ```
 

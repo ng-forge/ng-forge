@@ -8,7 +8,7 @@ const config = {
       type: 'input',
       label: 'Project Name',
       value: 'My Project',
-      props: { placeholder: 'Enter project name' },
+      placeholder: 'Enter project name',
     },
     {
       key: 'tasks',
@@ -21,7 +21,7 @@ const config = {
             label: 'Task Name',
             value: 'Task 1',
             col: 6,
-            props: { placeholder: 'Enter task name' },
+            placeholder: 'Enter task name',
           },
           {
             key: 'priority',
@@ -43,7 +43,7 @@ const config = {
             label: 'Task Name',
             value: 'Task 2',
             col: 6,
-            props: { placeholder: 'Enter task name' },
+            placeholder: 'Enter task name',
           },
           {
             key: 'priority',

@@ -22,12 +22,6 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
         required: false,
         default: 'text',
       },
-      placeholder: {
-        name: 'placeholder',
-        type: 'DynamicText',
-        description: 'Placeholder text displayed when field is empty',
-        required: false,
-      },
     },
     validationSupported: true,
     source: 'adapter',
@@ -38,7 +32,8 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
   label: 'Email Address',
   required: true,
   email: true,
-  props: { type: 'email', placeholder: 'user@example.com' }
+  placeholder: 'user@example.com',
+  props: { type: 'email' }
 }`,
     minimalExample: `{ key: 'name', type: 'input', label: 'Name' }`,
   },
@@ -56,12 +51,6 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
         required: false,
         default: 3,
       },
-      placeholder: {
-        name: 'placeholder',
-        type: 'DynamicText',
-        description: 'Placeholder text displayed when field is empty',
-        required: false,
-      },
     },
     validationSupported: true,
     source: 'adapter',
@@ -70,7 +59,8 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
   key: 'description',
   type: 'textarea',
   label: 'Description',
-  props: { rows: 5, placeholder: 'Enter description...' }
+  placeholder: 'Enter description...',
+  props: { rows: 5 }
 }`,
     minimalExample: `{ key: 'bio', type: 'textarea', label: 'Bio' }`,
   },
@@ -93,12 +83,6 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
         description: 'Allow multiple selections',
         required: false,
         default: false,
-      },
-      placeholder: {
-        name: 'placeholder',
-        type: 'DynamicText',
-        description: 'Placeholder text for empty selection',
-        required: false,
       },
     },
     validationSupported: true,

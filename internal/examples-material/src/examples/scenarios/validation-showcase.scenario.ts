@@ -22,9 +22,9 @@ export const validationShowcaseScenario: ExampleScenario = {
         label: 'Email',
         required: true,
         email: true,
+        placeholder: 'try "not-an-email"',
         props: {
           type: 'email',
-          placeholder: 'try "not-an-email"',
         },
       },
       {
@@ -37,9 +37,9 @@ export const validationShowcaseScenario: ExampleScenario = {
         validationMessages: {
           pattern: 'Need uppercase, lowercase & number',
         },
+        placeholder: 'try "weak"',
         props: {
           type: 'password',
-          placeholder: 'try "weak"',
         },
       },
       {
@@ -49,9 +49,9 @@ export const validationShowcaseScenario: ExampleScenario = {
         required: true,
         min: 18,
         max: 120,
+        placeholder: 'try 10 or 150',
         props: {
           type: 'number',
-          placeholder: 'try 10 or 150',
         },
       },
       {
@@ -65,9 +65,7 @@ export const validationShowcaseScenario: ExampleScenario = {
         validationMessages: {
           pattern: 'Only lowercase letters, numbers, underscores',
         },
-        props: {
-          placeholder: 'try "AB" or "Invalid User!"',
-        },
+        placeholder: 'try "AB" or "Invalid User!"',
       },
       {
         key: 'submit',

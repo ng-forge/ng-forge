@@ -14,34 +14,30 @@ const fullConfig = {
       key: 'firstName',
       type: 'input',
       label: 'First Name',
-      props: {
-        placeholder: 'Enter first name',
-      },
+      placeholder: 'Enter first name',
     },
     {
       key: 'lastName',
       type: 'input',
       label: 'Last Name',
-      props: {
-        placeholder: 'Enter last name',
-      },
+      placeholder: 'Enter last name',
     },
     {
       key: 'email',
       type: 'input',
       label: 'Email',
+      placeholder: 'Enter email',
       props: {
         type: 'email',
-        placeholder: 'Enter email',
       },
     },
     {
       key: 'phone',
       type: 'input',
       label: 'Phone',
+      placeholder: 'Enter phone number',
       props: {
         type: 'tel',
-        placeholder: 'Enter phone number',
       },
     },
     {
@@ -58,17 +54,13 @@ const reducedConfig = {
       key: 'firstName',
       type: 'input',
       label: 'First Name',
-      props: {
-        placeholder: 'Enter first name',
-      },
+      placeholder: 'Enter first name',
     },
     {
       key: 'lastName',
       type: 'input',
       label: 'Last Name',
-      props: {
-        placeholder: 'Enter last name',
-      },
+      placeholder: 'Enter last name',
     },
     {
       key: 'submit',

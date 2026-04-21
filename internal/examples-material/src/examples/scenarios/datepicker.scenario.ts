@@ -15,9 +15,7 @@ export const datepickerScenario: ExampleScenario = {
         validationMessages: {
           required: 'This field is required',
         },
-        props: {
-          placeholder: 'Select your birth date',
-        },
+        placeholder: 'Select your birth date',
       },
     ],
   } as const satisfies FormConfig,

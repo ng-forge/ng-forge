@@ -18,6 +18,11 @@ export interface BaseValueField<TProps, TValue, TMeta extends FieldMeta = FieldM
   /**
    * Placeholder text displayed when the field is empty.
    * Supports static strings, Observables, and Signals for dynamic content.
+   *
+   * Note: placeholder lives at the field level, NOT inside `props`. The integration-layer
+   * `props` interfaces (InputProps, TextareaProps, SelectProps, DatepickerProps) intentionally
+   * omit `placeholder` — TypeScript's excess property check rejects `props: { placeholder: ... }`
+   * for any `props` literal typed against those interfaces.
    */
   placeholder?: DynamicText;
 
@@ -75,7 +80,11 @@ type ExcludedKeys =
   // Value exclusion config (submission-only, not component inputs)
   | 'excludeValueIfHidden'
   | 'excludeValueIfDisabled'
-  | 'excludeValueIfReadonly';
+  | 'excludeValueIfReadonly'
+  // Wrappers are consumed by DfFieldOutlet / ContainerFieldComponent, not individual fields
+  | 'wrappers'
+  | 'skipAutoWrappers'
+  | 'skipDefaultWrappers';
 // Note: 'meta' is NOT excluded - components must handle meta attributes
 
 export type ValueFieldComponent<T extends BaseValueField<Record<string, unknown> | unknown, unknown, FieldMeta, boolean>> = Prettify<

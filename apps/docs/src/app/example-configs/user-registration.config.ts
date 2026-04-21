@@ -193,9 +193,7 @@ export const userRegistrationConfig = {
               },
             },
           ],
-          props: {
-            placeholder: 'Select your industry',
-          },
+          placeholder: 'Select your industry',
         },
         {
           type: 'row',

@@ -13,7 +13,7 @@ export const contactScenario: ExampleScenario = {
         label: 'First Name',
         value: '',
         required: true,
-        props: { placeholder: 'Your first name' },
+        placeholder: 'Your first name',
       },
       {
         key: 'lastName',
@@ -21,7 +21,7 @@ export const contactScenario: ExampleScenario = {
         label: 'Last Name',
         value: '',
         required: true,
-        props: { placeholder: 'Your last name' },
+        placeholder: 'Your last name',
       },
       {
         key: 'email',
@@ -30,9 +30,9 @@ export const contactScenario: ExampleScenario = {
         value: '',
         required: true,
         email: true,
+        placeholder: 'email@example.com',
         props: {
           type: 'email',
-          placeholder: 'email@example.com',
         },
       },
       {
@@ -40,9 +40,9 @@ export const contactScenario: ExampleScenario = {
         type: 'input',
         label: 'Phone',
         value: '',
+        placeholder: '+1 (555) 000-0000',
         props: {
           type: 'tel',
-          placeholder: '+1 (555) 000-0000',
         },
       },
       {
@@ -57,7 +57,7 @@ export const contactScenario: ExampleScenario = {
           { value: 'sales', label: 'Sales Question' },
           { value: 'feedback', label: 'Feedback' },
         ],
-        props: { placeholder: 'Select a subject' },
+        placeholder: 'Select a subject',
       },
       {
         key: 'message',
@@ -72,8 +72,8 @@ export const contactScenario: ExampleScenario = {
           minLength: 'Message must be at least 10 characters',
           maxLength: 'Message cannot exceed 500 characters',
         },
+        placeholder: 'Tell us how we can help...',
         props: {
-          placeholder: 'Tell us how we can help...',
           rows: 5,
         },
       },

@@ -180,8 +180,8 @@ const config = {
           key: 'improvements',
           type: 'textarea',
           label: 'What could we improve?',
+          placeholder: 'Share your suggestions for improvement...',
           props: {
-            placeholder: 'Share your suggestions for improvement...',
             rows: 4,
           },
           col: 12,
@@ -190,8 +190,8 @@ const config = {
           key: 'favoriteAspect',
           type: 'textarea',
           label: 'What do you like most about us?',
+          placeholder: 'Tell us what you appreciate...',
           props: {
-            placeholder: 'Tell us what you appreciate...',
             rows: 3,
           },
           col: 12,
@@ -269,9 +269,9 @@ const config = {
           key: 'contactEmail',
           type: 'input',
           label: 'Contact Email (if willing to be contacted)',
+          placeholder: 'your.email@example.com',
           props: {
             type: 'email',
-            placeholder: 'your.email@example.com',
           },
           email: true,
           col: 12,
@@ -280,8 +280,8 @@ const config = {
           key: 'additionalComments',
           type: 'textarea',
           label: 'Any additional comments?',
+          placeholder: "Anything else you'd like to share...",
           props: {
-            placeholder: "Anything else you'd like to share...",
             rows: 3,
           },
           col: 12,

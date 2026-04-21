@@ -12,7 +12,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('PrimeTextareaProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'rows' | 'cols' | 'autoResize' | 'maxlength' | 'styleClass' | 'hint' | 'placeholder';
+  type ExpectedKeys = 'rows' | 'cols' | 'autoResize' | 'maxlength' | 'styleClass' | 'hint';
   type ActualKeys = keyof PrimeTextareaProps;
 
   it('should have exactly the expected keys', () => {
@@ -47,10 +47,6 @@ describe('PrimeTextareaProps - Exhaustive Whitelist', () => {
     it('hint', () => {
       expectTypeOf<PrimeTextareaProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
-
-    it('placeholder', () => {
-      expectTypeOf<PrimeTextareaProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
-    });
   });
 });
 
@@ -76,6 +72,9 @@ describe('PrimeTextareaField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     // From FieldWithValidation
     | 'required'
     | 'email'

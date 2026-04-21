@@ -1,6 +1,7 @@
 import { InjectionToken } from '@angular/core';
 import { FieldDef } from '../definitions/base/field-def';
 import { MapperFn } from '../mappers/types';
+import { LazyComponentLoader } from './wrapper-type';
 
 /**
  * Defines how a field type handles form values and data collection.
@@ -63,8 +64,7 @@ export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
    * Optional - omit for componentless fields (e.g., hidden fields) that only
    * contribute to form values without rendering any UI.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Component loading returns dynamic module structure
-  loadComponent?: () => Promise<any>;
+  loadComponent?: LazyComponentLoader;
   /**
    * Mapper function that converts field definition to component bindings.
    *

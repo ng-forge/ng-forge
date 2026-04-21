@@ -253,6 +253,15 @@ html[data-theme='dark'] .example-frame {
   scrollbar-color: #{$ember-core} #f5f5f5;
 }
 
+html,
+body {
+  // Keep pages from horizontally scrolling. Tables, code blocks and any
+  // deliberately-wide content live inside their own scroll containers
+  // (e.g. `.table-scroll`, `pre`) — the page itself should not scroll
+  // sideways just because a child rounded past the viewport edge.
+  overflow-x: clip;
+}
+
 html {
   &::-webkit-scrollbar {
     width: 10px;
@@ -478,20 +487,23 @@ html:has(app-landing) .shiki span[style*='--shiki-dark:#545454'] {
 // ============================================
 // SHIKI DUAL-THEME (CodeHighlightDirective)
 // ============================================
-pre.shiki span {
+pre.shiki span,
+code.inline-code span {
   color: var(--shiki-light);
   font-style: var(--shiki-light-font-style, normal);
   font-weight: var(--shiki-light-font-weight, normal);
 }
 
-html[data-theme='dark'] pre.shiki span {
+html[data-theme='dark'] pre.shiki span,
+html[data-theme='dark'] code.inline-code span {
   color: var(--shiki-dark);
   font-style: var(--shiki-dark-font-style, normal);
   font-weight: var(--shiki-dark-font-weight, normal);
 }
 
 @media (prefers-color-scheme: dark) {
-  html[data-theme='auto'] pre.shiki span {
+  html[data-theme='auto'] pre.shiki span,
+  html[data-theme='auto'] code.inline-code span {
     color: var(--shiki-dark);
     font-style: var(--shiki-dark-font-style, normal);
     font-weight: var(--shiki-dark-font-weight, normal);
@@ -722,24 +734,77 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
   }
 
   *:not(pre) > code {
-    vertical-align: bottom;
+    vertical-align: baseline;
     border-radius: 4px;
     color: var(--forge-text);
-    padding: 2px 8px;
+    padding: 0.15em 0.45em;
     font-family: $doc-code-font;
-    font-size: 14px;
-    line-height: 20px;
+    font-size: 0.88em;
+    line-height: inherit;
     font-weight: 400;
     background: color-mix(in srgb, var(--forge-base-4) 15%, transparent);
     white-space: nowrap;
+
+    // On narrow viewports, long inline symbols (function/type names in
+    // headings and prose) push the page wider than the container. Allow
+    // them to break so the line wraps instead of overflowing horizontally.
+    @media (max-width: 768px) {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
   }
 
-  // Allow inline code to wrap inside table cells on narrow screens
+  // Code inside headings and table headers should blend with the header's
+  // typography rather than render as a grey chip. Keep the mono font,
+  // match the ember colour as the "this is code" marker, and use a
+  // slightly lighter weight so bold mono doesn't visually dominate.
+  h1 > code,
+  h2 > code,
+  h3 > code,
+  h4 > code,
+  h5 > code,
+  h6 > code,
+  th > code,
+  th *:not(pre) > code {
+    background: transparent;
+    padding: 0;
+    font-size: 0.82em;
+    line-height: 1;
+    font-weight: 500;
+    color: var(--forge-primary);
+    border-radius: 0;
+    vertical-align: baseline;
+  }
+
+  // Inside table cells, keep short tokens intact (nowrap on the code).
+  // `'outline'` stays `'outline'` even in a narrow cell — if the whole row
+  // doesn't fit the viewport, the .table-scroll wrapper below scrolls the
+  // table horizontally instead of breaking tokens mid-character.
   td > code,
   td *:not(pre) > code {
-    white-space: normal;
-    overflow-wrap: break-word;
-    word-break: break-word;
+    white-space: nowrap;
+  }
+
+  // Keep cells readable at narrow viewports — the .table-scroll wrapper
+  // handles horizontal overflow, so we don't need to crush padding.
+  @media (max-width: 768px) {
+    table {
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px !important;
+
+      &:first-child {
+        padding-left: 16px !important;
+      }
+
+      &:last-child {
+        padding-right: 16px !important;
+      }
+    }
   }
 
   pre {
@@ -883,12 +948,37 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
     background: rgba(239, 68, 68, 0.08);
   }
 
+  // The marked renderer wraps each table in `.table-scroll` which handles
+  // horizontal scrolling on narrow viewports. The table itself keeps
+  // native `display: table` semantics so columns size to content. When
+  // content fits the wrapper, the scroll bar doesn't appear (browser's
+  // default `overflow: auto` behaviour). When it doesn't fit, the whole
+  // table scrolls horizontally — tokens stay whole.
+  .table-scroll {
+    margin: 24px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    border: 1px solid var(--forge-base-2);
+  }
+
   table {
     width: 100%;
     border-spacing: 0;
-    margin: 24px 0;
+    // Force the table to claim at least its intrinsic width. Combined with
+    // nowrap on code cells, this means the wrapper scrolls when columns
+    // can't all fit, rather than cramming each word onto its own line.
+    min-width: max-content;
+  }
+
+  // Tables were rendering with a `<div class="table-scroll">` wrapper AND
+  // without one for older cached content. When unwrapped, fall back to
+  // giving the bare table its own scroll.
+  .doc-page-content > table,
+  .content-html > table {
     display: block;
     overflow-x: auto;
+    max-width: 100%;
   }
   th {
     padding: 12px;

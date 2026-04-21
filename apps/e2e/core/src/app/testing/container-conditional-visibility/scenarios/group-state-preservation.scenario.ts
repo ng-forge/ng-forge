@@ -33,9 +33,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter street address',
-          },
+          placeholder: 'Enter street address',
         },
         {
           key: 'city',
@@ -52,9 +50,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter city',
-          },
+          placeholder: 'Enter city',
         },
         {
           key: 'state',
@@ -93,9 +89,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter ZIP code',
-          },
+          placeholder: 'Enter ZIP code',
         },
       ],
     },
@@ -124,9 +118,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter billing street',
-          },
+          placeholder: 'Enter billing street',
         },
         {
           key: 'billingCity',
@@ -143,9 +135,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter billing city',
-          },
+          placeholder: 'Enter billing city',
         },
         {
           key: 'billingZip',
@@ -162,9 +152,7 @@ const config = {
               },
             },
           ],
-          props: {
-            placeholder: 'Enter billing ZIP',
-          },
+          placeholder: 'Enter billing ZIP',
         },
       ],
     },

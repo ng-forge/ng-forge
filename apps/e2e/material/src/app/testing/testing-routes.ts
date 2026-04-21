@@ -60,4 +60,10 @@ export default [
     path: 'submission-behavior',
     loadChildren: () => import('./submission-behavior/submission-behavior.routes'),
   },
+
+  // Wrapper Fields Tests - css wrapper, custom wrappers, defaultWrappers, opt-out
+  {
+    path: 'wrapper-fields',
+    loadChildren: () => import('./wrapper-fields/wrapper-fields.routes'),
+  },
 ] satisfies Route[];

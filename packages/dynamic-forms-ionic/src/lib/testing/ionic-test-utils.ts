@@ -39,9 +39,9 @@ export interface IonicFormTestResult {
  * Fluent API for building Ionic form configurations
  */
 export class IonicFormConfigBuilder {
-  private fields: any[] = [];
+  private fields: unknown[] = [];
 
-  field(field: any): IonicFormConfigBuilder {
+  field(field: unknown): IonicFormConfigBuilder {
     this.fields.push(field);
     return this;
   }
@@ -382,8 +382,8 @@ export class IonicFormTestUtils {
   /**
    * Gets validation errors from the component
    */
-  static getFormErrors(component: DynamicForm): any[] {
-    return component.errors();
+  static getFormErrors(component: DynamicForm): unknown[] {
+    return component.errors() as unknown[];
   }
 
   /**

@@ -9,10 +9,11 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { TOPICS, TOPIC_ALIASES, TOPIC_DESCRIPTIONS } from './data/lookup-topics.js';
 import { PATTERNS } from './examples.tool.js';
+import { getWrappers } from '../registry/index.js';
 
 interface SearchEntry {
   id: string;
-  category: 'topic' | 'pattern';
+  category: 'topic' | 'pattern' | 'wrapper';
   subcategory: string;
   description: string;
   aliases: string[];
@@ -94,6 +95,20 @@ function buildIndex(): SearchEntry[] {
     });
   }
 
+  // Index WRAPPERS registry
+  for (const wrapper of getWrappers()) {
+    const subcategory = wrapper.availability === 'demo-only' ? `Wrapper (demo, ${wrapper.category})` : `Wrapper (${wrapper.category})`;
+    entries.push({
+      id: wrapper.type,
+      category: 'wrapper',
+      subcategory,
+      description: wrapper.description,
+      aliases: [],
+      content: `${wrapper.type} wrapper ${wrapper.description} ${wrapper.package}`.toLowerCase(),
+      toolCall: `ngforge_lookup topic="${wrapper.type}"`,
+    });
+  }
+
   searchIndex = entries;
   return entries;
 }
@@ -155,7 +170,12 @@ Try broader terms or check available topics:
 
   for (let i = 0; i < results.length; i++) {
     const { entry } = results[i];
-    const categoryLabel = entry.category === 'topic' ? `Topic · ${entry.subcategory}` : `Example · ${entry.subcategory}`;
+    const categoryLabel =
+      entry.category === 'topic'
+        ? `Topic · ${entry.subcategory}`
+        : entry.category === 'wrapper'
+          ? entry.subcategory
+          : `Example · ${entry.subcategory}`;
 
     lines.push(`${i + 1}. **${entry.id}** (${categoryLabel})`);
     lines.push(`   ${entry.description}`);

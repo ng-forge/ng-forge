@@ -28,7 +28,7 @@ export const nextButtonNeverDisabledScenario: TestScenario = {
             key: 'requiredField2',
             type: 'input',
             label: 'Required Field (but next still enabled)',
-            props: { placeholder: 'This is required but next stays enabled' },
+            placeholder: 'This is required but next stays enabled',
             required: true,
             col: 12,
           },

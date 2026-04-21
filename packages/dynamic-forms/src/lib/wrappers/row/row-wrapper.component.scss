@@ -1,0 +1,64 @@
+// Row wrapper styling — migrated from the former RowFieldComponent.
+// The wrapper is nested inside a ContainerFieldComponent host, so utility
+// classes set via the user's `className` land on the outer container. We use
+// `:host-context()` so those modifier classes still reach the wrapper's
+// internals regardless of whether the class is on the wrapper or an ancestor.
+@use 'sass:math';
+@use '../../styles/grid-system.scss';
+
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--df-grid-gap);
+  align-items: flex-start;
+  width: 100%;
+
+  ::ng-deep > *:not([class*='df-col-']) {
+    flex: 0 0 auto;
+  }
+
+  @for $i from 1 through 12 {
+    ::ng-deep > .df-col-#{$i} {
+      flex: 0 0 calc(#{math.percentage(math.div($i, 12))} - var(--df-grid-gap) * #{math.div((12 - $i), 12)});
+      max-width: calc(#{math.percentage(math.div($i, 12))} - var(--df-grid-gap) * #{math.div((12 - $i), 12)});
+    }
+  }
+}
+
+:host-context(.df-gap-custom) {
+  --df-grid-gap: var(--row-custom-gap, 1rem);
+}
+
+:host-context(.df-row-mobile-stack) {
+  @media (max-width: 576px) {
+    ::ng-deep > * {
+      flex: 0 0 100% !important;
+      max-width: 100% !important;
+    }
+  }
+}
+
+:host-context(.df-row-tablet-2col) {
+  @media (min-width: 577px) and (max-width: 768px) {
+    ::ng-deep > * {
+      flex: 0 0 calc(50% - var(--df-grid-gap) / 2);
+      max-width: calc(50% - var(--df-grid-gap) / 2);
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  :host ::ng-deep > * {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  :host-context(.df-row-mobile-keep-cols) {
+    flex-direction: row;
+
+    ::ng-deep > *:not([class*='df-col-']) {
+      flex: 0 0 auto !important;
+      max-width: none !important;
+    }
+  }
+}

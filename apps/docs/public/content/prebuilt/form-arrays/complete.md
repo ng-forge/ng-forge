@@ -332,6 +332,10 @@ export class MyFormComponent {
   removeItemAt(index: number) {
     this.dispatcher.dispatch(arrayEvent('contacts').removeAt(index));
   }
+
+  moveItem(from: number, to: number) {
+    this.dispatcher.dispatch(arrayEvent('contacts').move(from, to));
+  }
 }
 ```
 

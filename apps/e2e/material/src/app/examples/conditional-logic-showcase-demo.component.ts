@@ -151,9 +151,9 @@ export default class ConditionalLogicShowcaseDemoComponent {
               { value: 'expert', label: 'Expert Level - Advanced certification' },
               { value: 'specialist', label: 'Specialist - Domain-specific certification' },
             ],
+            placeholder: 'Select certification level',
             props: {
               appearance: 'outline',
-              placeholder: 'Select certification level',
               hint: 'This determines the requirements for your application',
             },
           },
@@ -170,9 +170,9 @@ export default class ConditionalLogicShowcaseDemoComponent {
               { value: 'au', label: 'Australia' },
               { value: 'other', label: 'Other' },
             ],
+            placeholder: 'Select your country',
             props: {
               appearance: 'outline',
-              placeholder: 'Select your country',
             },
           },
           {
@@ -234,9 +234,9 @@ export default class ConditionalLogicShowcaseDemoComponent {
             validationMessages: {
               required: 'State/Province is required for US and Canada',
             },
+            placeholder: 'Select state/province',
             props: {
               appearance: 'outline',
-              placeholder: 'Select state/province',
               hint: 'Only shown for US/Canada',
             },
           },
@@ -473,9 +473,9 @@ export default class ConditionalLogicShowcaseDemoComponent {
             validationMessages: {
               required: 'Please select your industry',
             },
+            placeholder: 'Select your industry',
             props: {
               appearance: 'outline',
-              placeholder: 'Select your industry',
             },
           },
           {

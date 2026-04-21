@@ -32,9 +32,7 @@ export const completeFormScenario: ExampleScenario = {
           required: 'This field is required',
           minLength: 'Must be at least {{requiredLength}} characters',
         },
-        props: {
-          placeholder: 'Enter your first name',
-        },
+        placeholder: 'Enter your first name',
       },
       {
         key: 'lastName',
@@ -46,9 +44,7 @@ export const completeFormScenario: ExampleScenario = {
           required: 'This field is required',
           minLength: 'Must be at least {{requiredLength}} characters',
         },
-        props: {
-          placeholder: 'Enter your last name',
-        },
+        placeholder: 'Enter your last name',
       },
       {
         key: 'email',
@@ -60,9 +56,9 @@ export const completeFormScenario: ExampleScenario = {
           required: 'This field is required',
           email: 'Please enter a valid email address',
         },
+        placeholder: 'user@example.com',
         props: {
           type: 'email',
-          placeholder: 'user@example.com',
           hint: 'We will never share your email',
         },
       },
@@ -80,9 +76,9 @@ export const completeFormScenario: ExampleScenario = {
           min: 'Must be at least {{min}}',
           max: 'Must not exceed {{max}}',
         },
+        placeholder: '18',
         props: {
           type: 'number',
-          placeholder: '18',
         },
       },
       {
@@ -102,9 +98,7 @@ export const completeFormScenario: ExampleScenario = {
           { value: 'fr', label: 'France' },
           { value: 'jp', label: 'Japan' },
         ],
-        props: {
-          placeholder: 'Select your country',
-        },
+        placeholder: 'Select your country',
       },
 
       // Preferences
@@ -121,16 +115,14 @@ export const completeFormScenario: ExampleScenario = {
           { value: 'pro', label: 'Pro - $10/month' },
           { value: 'enterprise', label: 'Enterprise - $50/month' },
         ],
-        props: {
-          placeholder: 'Choose a plan',
-        },
+        placeholder: 'Choose a plan',
       },
       {
         key: 'bio',
         type: 'textarea',
         label: 'Bio',
+        placeholder: 'Tell us about yourself',
         props: {
-          placeholder: 'Tell us about yourself',
           hint: 'Optional - share a bit about yourself',
           rows: 4,
           autoGrow: true,

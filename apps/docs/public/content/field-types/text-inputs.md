@@ -18,9 +18,9 @@ Text-based input with HTML5 type support.
   label: 'Email',
   required: true,
   email: true,
+  placeholder: 'user@example.com',
   props: {
     type: 'email',              // 'text' | 'email' | 'password' | 'number' | 'tel' | 'url'
-    placeholder: 'user@example.com',
   }
 }
 ```
@@ -49,8 +49,8 @@ Multi-line text input.
   value: '',
   label: 'Biography',
   maxLength: 500,
+  placeholder: 'Tell us about yourself',
   props: {
-    placeholder: 'Tell us about yourself',
     rows: 4,
   }
 }

@@ -16,9 +16,7 @@ const config = {
       key: 'requiredText',
       type: 'input',
       label: 'Required Text (minimum 5 characters)',
-      props: {
-        placeholder: 'Enter at least 5 characters',
-      },
+      placeholder: 'Enter at least 5 characters',
       required: true,
       minLength: 5,
       col: 12,
@@ -28,9 +26,9 @@ const config = {
       key: 'emailValidation',
       type: 'input',
       label: 'Email Validation',
+      placeholder: 'Enter valid email',
       props: {
         type: 'email',
-        placeholder: 'Enter valid email',
       },
       email: true,
       required: true,
@@ -41,9 +39,9 @@ const config = {
       key: 'numberRange',
       type: 'input',
       label: 'Number (1-100)',
+      placeholder: 'Enter number between 1 and 100',
       props: {
         type: 'number',
-        placeholder: 'Enter number between 1 and 100',
       },
       min: 1,
       max: 100,
@@ -55,9 +53,7 @@ const config = {
       key: 'patternValidation',
       type: 'input',
       label: 'Pattern Validation (Only letters and spaces)',
-      props: {
-        placeholder: 'Only letters and spaces allowed',
-      },
+      placeholder: 'Only letters and spaces allowed',
       pattern: '^[a-zA-Z\\s]+$',
       required: true,
       col: 12,

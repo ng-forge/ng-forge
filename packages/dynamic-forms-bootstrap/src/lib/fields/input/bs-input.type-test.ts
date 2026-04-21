@@ -12,7 +12,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('BsInputProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'size' | 'floatingLabel' | 'hint' | 'validFeedback' | 'invalidFeedback' | 'plaintext' | 'type' | 'placeholder';
+  type ExpectedKeys = 'size' | 'floatingLabel' | 'hint' | 'validFeedback' | 'invalidFeedback' | 'plaintext' | 'type';
   type ActualKeys = keyof BsInputProps;
 
   it('should have exactly the expected keys', () => {
@@ -51,10 +51,6 @@ describe('BsInputProps - Exhaustive Whitelist', () => {
     it('type', () => {
       expectTypeOf<BsInputProps['type']>().toEqualTypeOf<'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | undefined>();
     });
-
-    it('placeholder', () => {
-      expectTypeOf<BsInputProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
-    });
   });
 });
 
@@ -80,6 +76,9 @@ describe('BsInputField (String) - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -229,6 +228,9 @@ describe('BsInputField (Number) - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     | 'required'
     | 'email'
     | 'min'

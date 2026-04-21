@@ -12,8 +12,8 @@ const tagTemplate = {
       label: 'Tag',
       required: true,
       minLength: 2,
+      placeholder: 'Enter a tag',
       props: {
-        placeholder: 'Enter a tag',
         hint: 'Tags must be at least 2 characters',
       },
     },
@@ -36,8 +36,8 @@ const contactTemplate = [
     label: 'Contact Name',
     required: true,
     minLength: 2,
+    placeholder: 'Enter contact name',
     props: {
-      placeholder: 'Enter contact name',
       hint: 'Full name of the emergency contact',
     },
   },
@@ -50,9 +50,9 @@ const contactTemplate = [
     validationMessages: {
       pattern: 'Please enter a valid 10-digit phone number',
     },
+    placeholder: '5551234567',
     props: {
       type: 'tel',
-      placeholder: '5551234567',
       hint: 'Enter 10-digit phone number without spaces or dashes',
     },
   },
@@ -117,8 +117,8 @@ export const arrayScenario: ExampleScenario = {
                   label: 'Tag',
                   required: true,
                   minLength: 2,
+                  placeholder: 'Enter a tag',
                   props: {
-                    placeholder: 'Enter a tag',
                     hint: 'Tags must be at least 2 characters',
                   },
                   value: 'angular',
@@ -146,8 +146,8 @@ export const arrayScenario: ExampleScenario = {
                   label: 'Tag',
                   required: true,
                   minLength: 2,
+                  placeholder: 'Enter a tag',
                   props: {
-                    placeholder: 'Enter a tag',
                     hint: 'Tags must be at least 2 characters',
                   },
                   value: 'typescript',
@@ -201,8 +201,8 @@ export const arrayScenario: ExampleScenario = {
               label: 'Contact Name',
               required: true,
               minLength: 2,
+              placeholder: 'Enter contact name',
               props: {
-                placeholder: 'Enter contact name',
                 hint: 'Full name of the emergency contact',
               },
               value: 'Jane Smith',
@@ -216,9 +216,9 @@ export const arrayScenario: ExampleScenario = {
               validationMessages: {
                 pattern: 'Please enter a valid 10-digit phone number',
               },
+              placeholder: '5551234567',
               props: {
                 type: 'tel',
-                placeholder: '5551234567',
                 hint: 'Enter 10-digit phone number without spaces or dashes',
               },
               value: '5551234567',

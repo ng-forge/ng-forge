@@ -6,6 +6,7 @@ import { PRIMENG_EMBER_THEME } from '@ng-forge/styling';
 import { appRoutes } from './app.routes';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
+import { DEMO_WRAPPERS } from '@ng-forge/examples-shared-ui';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,6 +17,6 @@ export const appConfig: ApplicationConfig = {
     providePrimeNG({
       theme: PRIMENG_EMBER_THEME,
     }),
-    provideDynamicForm(...withPrimeNGFields()),
+    provideDynamicForm(...withPrimeNGFields(), ...DEMO_WRAPPERS),
   ],
 };

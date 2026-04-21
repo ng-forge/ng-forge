@@ -76,6 +76,7 @@ export const NAV_ITEMS: NavItem[] = [
       { label: 'Form Groups', path: 'prebuilt/form-groups' },
       { label: 'Form Pages', path: 'prebuilt/form-pages' },
       { label: 'Form Rows', path: 'prebuilt/form-rows' },
+      { label: 'Container Fields', path: 'prebuilt/container-field' },
       {
         label: 'Form Arrays',
         path: 'prebuilt/form-arrays',
@@ -86,6 +87,16 @@ export const NAV_ITEMS: NavItem[] = [
       },
       { label: 'Hidden Fields', path: 'prebuilt/hidden-fields' },
       { label: 'Text Components', path: 'prebuilt/text-components' },
+    ],
+  },
+  {
+    label: 'Wrappers',
+    path: 'wrappers',
+    badge: 'NEW',
+    children: [
+      { label: 'Overview', path: 'wrappers/overview' },
+      { label: 'Writing a Wrapper', path: 'wrappers/writing-a-wrapper' },
+      { label: 'Registering and Applying', path: 'wrappers/registering-and-applying' },
     ],
   },
   {
@@ -108,7 +119,6 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'OpenAPI Generator',
     path: 'openapi-generator',
     cssClass: 'sidebar-link--openapi',
-    badge: 'NEW',
   },
   {
     label: 'API Reference',

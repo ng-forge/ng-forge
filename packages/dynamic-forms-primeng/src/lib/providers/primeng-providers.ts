@@ -1,15 +1,20 @@
-import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
 import type { Provider } from '@angular/core';
+import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
 import { PRIMENG_FIELD_TYPES } from '../config/primeng-field-config';
 import { PrimeNGConfig } from '../models/primeng-config';
 import { PRIMENG_CONFIG } from '../models/primeng-config.token';
 
 /**
- * Field type definitions with optional config providers
+ * Field type definitions for PrimeNG components.
  */
-export type FieldTypeDefinitionsWithConfig = FieldTypeDefinition[] & {
-  __configProviders?: Provider[];
+export type PrimeNGFieldTypes = FieldTypeDefinition[];
+
+type PrimeNGConfigFeature = {
+  ɵkind: 'primeng-config';
+  ɵproviders: Provider[];
 };
+
+type PrimeNGFieldsWithConfig = [...PrimeNGFieldTypes, PrimeNGConfigFeature];
 
 /**
  * Provides PrimeNG field type definitions for the dynamic form system.
@@ -47,19 +52,24 @@ export type FieldTypeDefinitionsWithConfig = FieldTypeDefinition[] & {
  * };
  * ```
  *
- * @returns Array of field type definitions for PrimeNG components
+ * @returns Array of field type definitions and optionally a config feature
  */
-export function withPrimeNGFields(config?: PrimeNGConfig): FieldTypeDefinitionsWithConfig {
-  const fields = PRIMENG_FIELD_TYPES as FieldTypeDefinitionsWithConfig;
-
-  if (config) {
-    fields.__configProviders = [
-      {
-        provide: PRIMENG_CONFIG,
-        useValue: config,
-      },
-    ];
+export function withPrimeNGFields(): PrimeNGFieldTypes;
+export function withPrimeNGFields(config: PrimeNGConfig): PrimeNGFieldsWithConfig;
+export function withPrimeNGFields(config: PrimeNGConfig | undefined): PrimeNGFieldTypes | PrimeNGFieldsWithConfig;
+export function withPrimeNGFields(config?: PrimeNGConfig): PrimeNGFieldTypes | PrimeNGFieldsWithConfig {
+  if (!config) {
+    return PRIMENG_FIELD_TYPES;
   }
 
-  return fields;
+  const fieldsWithConfig = [
+    ...PRIMENG_FIELD_TYPES,
+    {
+      ɵkind: 'primeng-config',
+      ɵproviders: [{ provide: PRIMENG_CONFIG, useValue: config }],
+    } satisfies PrimeNGConfigFeature,
+  ];
+
+  // Safe: this preserves all PrimeNG field definitions and appends exactly one config feature.
+  return fieldsWithConfig as PrimeNGFieldsWithConfig;
 }

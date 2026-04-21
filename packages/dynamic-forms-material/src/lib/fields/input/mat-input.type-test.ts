@@ -6,7 +6,7 @@
  * changes, these tests will fail.
  */
 import { expectTypeOf } from 'vitest';
-import type { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
+import type { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { MatInputProps, MatInputField } from './mat-input.type';
@@ -17,7 +17,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('MatInputProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'appearance' | 'disableRipple' | 'subscriptSizing' | 'type' | 'hint' | 'placeholder';
+  type ExpectedKeys = 'appearance' | 'disableRipple' | 'subscriptSizing' | 'floatLabel' | 'hideRequiredMarker' | 'type' | 'hint';
   type ActualKeys = keyof MatInputProps;
 
   it('should have exactly the expected keys', () => {
@@ -42,16 +42,20 @@ describe('MatInputProps - Exhaustive Whitelist', () => {
       expectTypeOf<MatInputProps['subscriptSizing']>().toEqualTypeOf<SubscriptSizing | undefined>();
     });
 
+    it('floatLabel', () => {
+      expectTypeOf<MatInputProps['floatLabel']>().toEqualTypeOf<FloatLabelType | undefined>();
+    });
+
+    it('hideRequiredMarker', () => {
+      expectTypeOf<MatInputProps['hideRequiredMarker']>().toEqualTypeOf<boolean | undefined>();
+    });
+
     it('type', () => {
       expectTypeOf<MatInputProps['type']>().toEqualTypeOf<'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | undefined>();
     });
 
     it('hint', () => {
       expectTypeOf<MatInputProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
-    });
-
-    it('placeholder', () => {
-      expectTypeOf<MatInputProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });
@@ -82,6 +86,9 @@ describe('MatInputField (String) - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -233,6 +240,9 @@ describe('MatInputField (Number) - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     | 'required'
     | 'email'
     | 'min'

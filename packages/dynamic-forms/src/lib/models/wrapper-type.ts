@@ -1,5 +1,44 @@
 import { InjectionToken, Signal, Type, ViewContainerRef } from '@angular/core';
-import { WrapperConfig } from '../definitions/default/container-field';
+import { FieldRegistryWrappers, RegisteredWrapperTypes } from './registry/field-registry';
+
+/**
+ * Resolves a wrapper type name to its registered config interface.
+ *
+ * When `TWrappers` is a specific registered key (e.g., `'css'`), resolves to
+ * the full config type from `FieldRegistryWrappers` (e.g., `CssWrapper`),
+ * providing type-safe access to wrapper-specific properties like `cssClasses`.
+ *
+ * When `TWrappers` is the full `RegisteredWrapperTypes` union, distributes
+ * to produce a discriminated union of all registered wrapper configs.
+ *
+ * @example
+ * ```typescript
+ * // Resolves to CssWrapper — cssClasses is typed
+ * type CssConfig = WrapperConfig<'css'>;
+ *
+ * // Union of all registered wrapper configs
+ * type AnyConfig = WrapperConfig;
+ * ```
+ */
+
+export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredWrapperTypes> = TWrappers extends keyof FieldRegistryWrappers
+  ? FieldRegistryWrappers[TWrappers]
+  : { readonly type: TWrappers };
+
+/**
+ * Signature of a lazy component loader — either a direct component class or
+ * an ES module whose `default` export is the component. Shared by field and
+ * wrapper registrations so the `loadComponent: () => import('./x.component')`
+ * idiom types cleanly in both places.
+ */
+export type LazyComponentLoader<T = unknown> = () => Promise<Type<T> | { default: Type<T> }>;
+
+/**
+ * Pre-computed reverse index used by `resolveWrappers`: field type → the
+ * wrappers that auto-apply to it. Built once in the `provideDynamicForm(...)`
+ * factory from every registered `WrapperTypeDefinition.types` entry.
+ */
+export type WrapperAutoAssociations = ReadonlyMap<string, readonly WrapperConfig[]>;
 
 /**
  * Configuration interface for registering wrapper types.
@@ -16,7 +55,7 @@ import { WrapperConfig } from '../definitions/default/container-field';
  * };
  * ```
  */
-export interface WrapperTypeDefinition<T extends WrapperConfig<any> = WrapperConfig<any>> {
+export interface WrapperTypeDefinition<T extends WrapperConfig = WrapperConfig> {
   /** Unique identifier for the wrapper type (also serves as discriminant from FieldTypeDefinition) */
   wrapperName: string;
   /** Wrapper definition type marker (internal use) */
@@ -25,7 +64,16 @@ export interface WrapperTypeDefinition<T extends WrapperConfig<any> = WrapperCon
    * Function to load the wrapper component (supports lazy loading).
    * Returns a Promise that resolves to the component class or module with default export.
    */
-  loadComponent: () => Promise<Type<unknown> | { default: Type<unknown> }>;
+  loadComponent: LazyComponentLoader;
+  /**
+   * Field types this wrapper should auto-apply to.
+   *
+   * When a field's `type` matches any entry, the wrapper is injected into that
+   * field's effective wrapper chain at the lowest priority (can be overridden
+   * by `FormConfig.defaultWrappers` or the field-level `wrappers` array, and
+   * fully cleared with `wrappers: null`).
+   */
+  types?: readonly string[];
 }
 
 /**
@@ -40,26 +88,27 @@ export function isWrapperTypeDefinition(value: unknown): value is WrapperTypeDef
 /**
  * Contract that wrapper components must satisfy.
  *
- * Each wrapper component provides a `#fieldComponent` ViewContainerRef where
- * inner content (the next wrapper in the chain, or the children) will be
- * rendered imperatively by `ContainerFieldComponent`.
- *
- * The wrapper itself is unaware of what gets rendered inside it — it just
- * provides the slot and its own UI chrome.
+ * Each wrapper exposes a `#fieldComponent` ViewContainerRef where the inner
+ * content (next wrapper, or the field) is rendered imperatively. Config
+ * properties (minus `type`) are set on the component via `setInput`; a
+ * wrapper opts into a key by declaring a matching `input()`, and unknown
+ * keys are silently dropped. Wrappers may additionally declare a
+ * `fieldInputs` input for the wrapped field's mapper outputs (see
+ * `WrapperFieldInputs` for when that's undefined).
  *
  * @example
  * ```typescript
  * @Component({
  *   template: `
- *     <dbx-section [header]="header()">
+ *     <dbx-section [header]="header() ?? ''">
  *       <ng-container #fieldComponent></ng-container>
  *     </dbx-section>
  *   `,
  * })
  * export class SectionWrapperComponent implements FieldWrapperContract {
  *   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
- *   private readonly context = inject(WRAPPER_CONTEXT);
- *   readonly header = computed(() => this.context.config['header'] as string);
+ *   readonly header = input<string>();
+ *   readonly fieldInputs = input<WrapperFieldInputs>();
  * }
  * ```
  */
@@ -85,8 +134,24 @@ export const WRAPPER_REGISTRY = new InjectionToken<Map<string, WrapperTypeDefini
  *
  * Caches resolved wrapper component classes for instant re-resolution.
  * SSR-safe because it's DI-scoped, not module-scoped.
+ *
+ * NOTE: The cache grows across the application lifetime. It's bounded by the
+ * number of wrapper types registered (typically small), so this is not a leak;
+ * the COMPONENT_CACHE for field types has the same shape.
  */
 export const WRAPPER_COMPONENT_CACHE = new InjectionToken<Map<string, Type<unknown>>>('WRAPPER_COMPONENT_CACHE', {
+  providedIn: 'root',
+  factory: () => new Map(),
+});
+
+/**
+ * Pre-computed reverse index: `fieldType → WrapperConfig[]` for every
+ * registered `WrapperTypeDefinition.types` entry. Built once in the
+ * `provideDynamicForm(...)` factory so `resolveWrappers` can look up
+ * auto-associations in O(1) per field instead of scanning the full
+ * wrapper registry on every render.
+ */
+export const WRAPPER_AUTO_ASSOCIATIONS = new InjectionToken<WrapperAutoAssociations>('WRAPPER_AUTO_ASSOCIATIONS', {
   providedIn: 'root',
   factory: () => new Map(),
 });

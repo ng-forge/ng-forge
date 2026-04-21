@@ -17,7 +17,7 @@ export const groupConfig = {
       label: 'Full Name',
       value: '',
       required: true,
-      props: { placeholder: 'Enter your full name' },
+      placeholder: 'Enter your full name',
     },
     {
       key: 'address',
@@ -29,7 +29,7 @@ export const groupConfig = {
           label: 'Street Address',
           value: '',
           required: true,
-          props: { placeholder: '123 Main St' },
+          placeholder: '123 Main St',
         },
         {
           key: 'city',
@@ -37,7 +37,7 @@ export const groupConfig = {
           label: 'City',
           value: '',
           required: true,
-          props: { placeholder: 'Springfield' },
+          placeholder: 'Springfield',
         },
         {
           key: 'state',
@@ -46,11 +46,11 @@ export const groupConfig = {
           value: '',
           required: true,
           maxLength: 2,
+          placeholder: 'IL',
           validationMessages: {
             maxLength: 'State abbreviation must be 2 characters',
           },
           props: {
-            placeholder: 'IL',
             hint: 'Enter 2-letter state abbreviation',
           },
         },
@@ -61,10 +61,10 @@ export const groupConfig = {
           value: '',
           required: true,
           pattern: '^\\d{5}$',
+          placeholder: '62701',
           validationMessages: {
             pattern: 'Please enter a valid 5-digit ZIP code',
           },
-          props: { placeholder: '62701' },
         },
       ],
     },

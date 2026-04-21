@@ -4,6 +4,7 @@ export {
   FormClearEvent,
   FormResetEvent,
   InsertArrayItemEvent,
+  MoveArrayItemEvent,
   NextPageEvent,
   PageChangeEvent,
   PopArrayItemEvent,

@@ -1,4 +1,4 @@
-import { afterNextRender, computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
+import { computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 
@@ -11,11 +11,12 @@ export class ThemeService {
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
   /**
-   * Current theme: 'auto' | 'light' | 'dark'.
-   * Always starts as 'auto' to match SSR output and prevent hydration mismatches.
-   * The saved theme from localStorage is applied post-hydration via afterNextRender.
-   * The inline <script> in index.html sets data-theme on <html> before first paint,
-   * so the visual appearance is correct even before this signal updates.
+   * Current theme: 'auto' | 'light' | 'dark'. Seeded from localStorage on
+   * the client during construction so a refresh preserves the user's
+   * preference. On the server it defaults to 'auto' (no localStorage).
+   * The inline script in index.html sets the matching `data-theme` on
+   * <html> before first paint, so FOUC is avoided without waiting for
+   * Angular to boot.
    */
   readonly theme = signal<ThemeType>('auto');
 
@@ -35,14 +36,10 @@ export class ThemeService {
     // Initialize system theme state
     this.systemDarkQuery.set(window.matchMedia('(prefers-color-scheme: dark)').matches);
 
-    // Apply saved theme AFTER hydration to avoid SSR/client mismatch.
-    // The inline script in index.html already set data-theme visually.
-    afterNextRender(() => {
-      const saved = this.loadSavedTheme();
-      if (saved !== 'auto') {
-        this.theme.set(saved);
-      }
-    });
+    // Seed the theme from localStorage BEFORE the persist effect runs —
+    // otherwise the effect's first emission (with the default 'auto') would
+    // overwrite the saved preference on every reload.
+    this.theme.set(this.loadSavedTheme());
 
     // DOM attribute IS a reflection of theme
     explicitEffect([this.theme], ([t]) => {

@@ -20,9 +20,7 @@ const config: any = {
       key: 'validField',
       type: 'input',
       label: 'Valid Field',
-      props: {
-        placeholder: 'This should work',
-      },
+      placeholder: 'This should work',
     },
     {
       key: 'submitInvalid',

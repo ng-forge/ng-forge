@@ -12,16 +12,14 @@ const config = {
       type: 'input',
       label: 'Username',
       required: true,
-      props: {
-        placeholder: 'Enter username',
-      },
+      placeholder: 'Enter username',
     },
     {
       key: 'bio',
       type: 'textarea',
       label: 'Bio',
+      placeholder: 'Tell us about yourself',
       props: {
-        placeholder: 'Tell us about yourself',
         rows: 4,
       },
     },
@@ -29,18 +27,18 @@ const config = {
       key: 'currentPassword',
       type: 'input',
       label: 'Current Password',
+      placeholder: 'Enter current password',
       props: {
         type: 'password',
-        placeholder: 'Enter current password',
       },
     },
     {
       key: 'newPassword',
       type: 'input',
       label: 'New Password',
+      placeholder: 'Enter new password',
       props: {
         type: 'password',
-        placeholder: 'Enter new password',
       },
       minLength: 8,
     },
@@ -48,9 +46,9 @@ const config = {
       key: 'confirmNewPassword',
       type: 'input',
       label: 'Confirm New Password',
+      placeholder: 'Confirm new password',
       props: {
         type: 'password',
-        placeholder: 'Confirm new password',
       },
     },
     {

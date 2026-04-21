@@ -305,6 +305,13 @@ eventBus.dispatch(arrayEvent('contacts').shift());
 eventBus.dispatch(arrayEvent('contacts').removeAt(2));
 ```
 
+#### Reordering Items
+
+```typescript
+// Move item from one index to another (atomic, no destroy/recreate)
+eventBus.dispatch(arrayEvent('contacts').move(0, 2));
+```
+
 #### Internal Event Classes
 
 For advanced use cases (extending events or type-checking), you can import the underlying event classes:
@@ -314,6 +321,7 @@ import {
   AppendArrayItemEvent,
   PrependArrayItemEvent,
   InsertArrayItemEvent,
+  MoveArrayItemEvent,
   PopArrayItemEvent,
   ShiftArrayItemEvent,
   RemoveAtIndexEvent,
@@ -338,14 +346,15 @@ eventBus.dispatch(AddContactEvent);
 
 **Event types:**
 
-| Event                   | Description                    |
-| ----------------------- | ------------------------------ |
-| `AppendArrayItemEvent`  | Add item at end of array       |
-| `PrependArrayItemEvent` | Add item at beginning of array |
-| `InsertArrayItemEvent`  | Add item at specific index     |
-| `PopArrayItemEvent`     | Remove last item               |
-| `ShiftArrayItemEvent`   | Remove first item              |
-| `RemoveAtIndexEvent`    | Remove item at specific index  |
+| Event                   | Description                         |
+| ----------------------- | ----------------------------------- |
+| `AppendArrayItemEvent`  | Add item at end of array            |
+| `PrependArrayItemEvent` | Add item at beginning of array      |
+| `InsertArrayItemEvent`  | Add item at specific index          |
+| `MoveArrayItemEvent`    | Move item from one index to another |
+| `PopArrayItemEvent`     | Remove last item                    |
+| `ShiftArrayItemEvent`   | Remove first item                   |
+| `RemoveAtIndexEvent`    | Remove item at specific index       |
 
 ---
 

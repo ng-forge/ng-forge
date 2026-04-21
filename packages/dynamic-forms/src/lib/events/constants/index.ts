@@ -12,4 +12,5 @@ export { PrependArrayItemEvent } from './prepend-array-item.event';
 export { InsertArrayItemEvent } from './insert-array-item.event';
 export { PopArrayItemEvent } from './pop-array-item.event';
 export { ShiftArrayItemEvent } from './shift-array-item.event';
+export { MoveArrayItemEvent } from './move-array-item.event';
 export { RemoveAtIndexEvent } from './remove-at-index.event';

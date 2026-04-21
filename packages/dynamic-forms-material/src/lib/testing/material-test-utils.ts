@@ -37,9 +37,9 @@ export interface MaterialFormTestResult {
  * Fluent API for building material form configurations
  */
 export class MaterialFormConfigBuilder {
-  private fields: any[] = [];
+  private fields: unknown[] = [];
 
-  field(field: any): MaterialFormConfigBuilder {
+  field(field: unknown): MaterialFormConfigBuilder {
     this.fields.push(field);
     return this;
   }
@@ -326,8 +326,8 @@ export class MaterialFormTestUtils {
   /**
    * Gets validation errors from the component
    */
-  static getFormErrors(component: DynamicForm): any[] {
-    return component.errors();
+  static getFormErrors(component: DynamicForm): unknown[] {
+    return component.errors() as unknown[];
   }
 
   /**

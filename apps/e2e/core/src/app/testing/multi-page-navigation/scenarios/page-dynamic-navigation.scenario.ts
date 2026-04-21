@@ -35,9 +35,7 @@ const config = {
           key: 'respondentName',
           type: 'input',
           label: 'Your Name',
-          props: {
-            placeholder: 'Enter your name',
-          },
+          placeholder: 'Enter your name',
           col: 12,
         },
         {
@@ -132,9 +130,7 @@ const config = {
           key: 'favoriteFeature',
           type: 'input',
           label: 'What is your favorite feature?',
-          props: {
-            placeholder: 'Enter your favorite feature',
-          },
+          placeholder: 'Enter your favorite feature',
           col: 12,
         },
         {
@@ -177,8 +173,8 @@ const config = {
           key: 'improvementSuggestion',
           type: 'textarea',
           label: 'What improvements would you suggest?',
+          placeholder: 'Enter your suggestions',
           props: {
-            placeholder: 'Enter your suggestions',
             rows: 4,
           },
           col: 12,
@@ -223,8 +219,8 @@ const config = {
           key: 'additionalComments',
           type: 'textarea',
           label: 'Any additional comments?',
+          placeholder: 'Optional additional comments',
           props: {
-            placeholder: 'Optional additional comments',
             rows: 3,
           },
           col: 12,

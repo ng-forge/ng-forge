@@ -9,14 +9,14 @@ const DEMO_CONFIG = {
       type: 'input',
       label: 'Full Name',
       required: true,
-      props: { placeholder: 'Enter your name' },
+      placeholder: 'Enter your name',
     },
     {
       key: 'email',
       type: 'input',
       label: 'Email Address',
       required: true,
-      props: { placeholder: 'Enter your email' },
+      placeholder: 'Enter your email',
     },
     {
       key: 'role',
@@ -27,7 +27,7 @@ const DEMO_CONFIG = {
         { label: 'Designer', value: 'designer' },
         { label: 'Manager', value: 'manager' },
       ],
-      props: { placeholder: 'Select a role' },
+      placeholder: 'Select a role',
     },
     {
       key: 'subscribe',

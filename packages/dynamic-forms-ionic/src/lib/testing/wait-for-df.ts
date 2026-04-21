@@ -16,7 +16,7 @@ import { firstValueFrom } from 'rxjs';
  * The short poll handles edge cases where Ionic component templates need additional
  * change detection cycles before DOM elements match test selectors.
  */
-export async function waitForDFInit(component: DynamicForm, fixture: ComponentFixture<any>): Promise<void> {
+export async function waitForDFInit(component: DynamicForm, fixture: ComponentFixture<DynamicForm>): Promise<void> {
   fixture.detectChanges();
 
   // Step 1: Wait for event-based initialization
@@ -49,7 +49,7 @@ export async function waitForDFInit(component: DynamicForm, fixture: ComponentFi
  * the 1000ms test timeout. Ionic web components with shadow DOM typically
  * stabilize well within this window.
  */
-async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs = 500): Promise<void> {
+async function waitForFieldComponents(fixture: ComponentFixture<DynamicForm>, timeoutMs = 500): Promise<void> {
   const formElement = fixture.nativeElement.querySelector('.df-form, form');
   if (!formElement) return;
 

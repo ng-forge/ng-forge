@@ -10,6 +10,7 @@ import { groupFieldsSuite } from '../group-fields/group-fields.suite';
 import { materialComponentsSuite } from '../material-components/material-components.suite';
 import { rowFieldsSuite } from '../row-fields/row-fields.suite';
 import { submissionBehaviorSuite } from '../submission-behavior/submission-behavior.suite';
+import { wrapperFieldsSuite } from '../wrapper-fields/wrapper-fields.suite';
 
 /**
  * Registry of all visual/UI test suites in the material app.
@@ -25,4 +26,5 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   materialComponentsSuite,
   rowFieldsSuite,
   submissionBehaviorSuite,
+  wrapperFieldsSuite,
 ];

@@ -1,8 +1,10 @@
-import { BaseValueField, DynamicText, FieldMeta } from '@ng-forge/dynamic-forms';
+import { BaseValueField, FieldMeta } from '@ng-forge/dynamic-forms';
 
-export interface DatepickerProps {
-  placeholder?: DynamicText;
-}
+/**
+ * Base props for datepicker fields. Intentionally empty — adapter libraries
+ * extend this with adapter-specific options (startView, appearance, hint, etc.).
+ */
+export type DatepickerProps = object;
 
 export interface DatepickerField<TProps, TNullable extends boolean = boolean> extends BaseValueField<
   TProps,

@@ -612,7 +612,8 @@ my-service.service.ts
  *   key: 'email',
  *   type: 'input',
  *   label: 'Email Address',
- *   props: { placeholder: 'Enter email' },
+ *   placeholder: 'Enter email',
+ *   props: { type: 'email' },
  * };
  * ```
  *

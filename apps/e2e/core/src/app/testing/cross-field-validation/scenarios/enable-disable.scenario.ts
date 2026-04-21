@@ -23,8 +23,8 @@ const config = {
       key: 'shippingAddress',
       type: 'textarea',
       label: 'Shipping Address',
+      placeholder: 'Enter shipping address',
       props: {
-        placeholder: 'Enter shipping address',
         rows: 3,
       },
       col: 12,
@@ -33,8 +33,8 @@ const config = {
       key: 'expressInstructions',
       type: 'textarea',
       label: 'Special Delivery Instructions',
+      placeholder: 'Special instructions for express/overnight delivery',
       props: {
-        placeholder: 'Special instructions for express/overnight delivery',
         rows: 2,
       },
       col: 12,

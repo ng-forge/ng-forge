@@ -131,6 +131,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getArrayFieldsScenario('array-boundary-indices') },
   },
+  // Array move (reorder without destroy)
+  {
+    path: 'array-move',
+    loadComponent: () => import('./array-move.component').then((m) => m.ArrayMoveComponent),
+  },
 ];
 
 export default routes;

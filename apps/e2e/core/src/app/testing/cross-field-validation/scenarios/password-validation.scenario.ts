@@ -12,9 +12,9 @@ const config = {
       key: 'password',
       type: 'input',
       label: 'Password',
+      placeholder: 'Enter password',
       props: {
         type: 'password',
-        placeholder: 'Enter password',
       },
       required: true,
       minLength: 8,
@@ -24,9 +24,9 @@ const config = {
       key: 'confirmPassword',
       type: 'input',
       label: 'Confirm Password',
+      placeholder: 'Confirm password',
       props: {
         type: 'password',
-        placeholder: 'Confirm password',
       },
       required: true,
       col: 6,
@@ -45,9 +45,9 @@ const config = {
       key: 'email',
       type: 'input',
       label: 'Email',
+      placeholder: 'Enter email',
       props: {
         type: 'email',
-        placeholder: 'Enter email',
       },
       email: true,
       required: true,

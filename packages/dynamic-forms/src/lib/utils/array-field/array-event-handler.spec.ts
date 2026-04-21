@@ -22,6 +22,7 @@ describe('array-event-handler', () => {
         'append-array-item',
         'prepend-array-item',
         'insert-array-item',
+        'move-array-item',
         'pop-array-item',
         'shift-array-item',
         'remove-at-index',
@@ -103,6 +104,17 @@ describe('array-event-handler', () => {
         eventSubject.next({ type: 'remove-at-index', arrayKey: 'arr', index: 3 });
 
         expect(actions[0]).toEqual({ action: 'remove', index: 3 });
+      });
+    });
+
+    describe('move actions', () => {
+      it('should convert move-array-item to move action with fromIndex and toIndex', () => {
+        const actions: ArrayAction[] = [];
+        observeArrayActions(eventBus, () => 'arr').subscribe((a) => actions.push(a));
+
+        eventSubject.next({ type: 'move-array-item', arrayKey: 'arr', fromIndex: 1, toIndex: 3 });
+
+        expect(actions[0]).toEqual({ action: 'move', fromIndex: 1, toIndex: 3 });
       });
     });
 

@@ -36,7 +36,11 @@ type ExcludedKeys =
   // Value exclusion config (submission-only, not component inputs)
   | 'excludeValueIfHidden'
   | 'excludeValueIfDisabled'
-  | 'excludeValueIfReadonly';
+  | 'excludeValueIfReadonly'
+  // Wrappers are consumed by DfFieldOutlet / ContainerFieldComponent, not individual fields
+  | 'wrappers'
+  | 'skipAutoWrappers'
+  | 'skipDefaultWrappers';
 
 export type CheckedFieldComponent<T extends BaseCheckedField<Record<string, unknown> | unknown>> = Prettify<
   WithInputSignals<Omit<T, ExcludedKeys>>

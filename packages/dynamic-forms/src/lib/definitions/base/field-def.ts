@@ -1,6 +1,7 @@
 import { WithInputSignals } from '../../models/component-type';
 import { Prettify } from '../../models/prettify';
 import { DynamicText } from '../../models/types/dynamic-text';
+import { WrapperConfig } from '../../models/wrapper-type';
 import { FieldMeta } from './field-meta';
 
 /**
@@ -13,11 +14,11 @@ import { FieldMeta } from './field-meta';
  * @example
  * ```typescript
  * // Basic text input field
- * const textField: FieldDef<{ placeholder: string }> = {
+ * const textField: FieldDef<{ type?: string }> = {
  *   key: 'email',
  *   type: 'input',
  *   label: 'Email Address',
- *   props: { placeholder: 'Enter your email' },
+ *   props: { type: 'email' },
  *   col: 12
  * };
  * ```
@@ -115,8 +116,8 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
    *
    * @example
    * ```typescript
-   * // Input field props
-   * props: { placeholder: 'Enter email', type: 'email' }
+   * // Input field props (placeholder is at field level, not inside props)
+   * props: { type: 'email' }
    *
    * // Select field props
    * props: { options: [{ label: 'Yes', value: true }], multiple: false }
@@ -257,6 +258,29 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
    * @value 12
    */
   col?: number;
+
+  /**
+   * Wrapper components to chain around this field.
+   *
+   * - `undefined` — inherit auto-associations + form defaults.
+   * - `null` — render bare (see `skipAuto`/`skipDefaults` for partial opt-out).
+   * - `readonly WrapperConfig[]` — merged innermost with auto + defaults.
+   * - `[]` is **not** an opt-out; inherits like `undefined`.
+   */
+  wrappers?: readonly WrapperConfig[] | null;
+
+  /**
+   * Skip the auto-association layer (`WrapperTypeDefinition.types`) while
+   * keeping form-level defaults and any field-level `wrappers`. Use when a
+   * global wrapper auto-applies to this field type but isn't wanted here.
+   */
+  skipAutoWrappers?: boolean;
+
+  /**
+   * Skip the form-level `defaultWrappers` layer while keeping auto-associations
+   * and any field-level `wrappers`.
+   */
+  skipDefaultWrappers?: boolean;
 }
 
 type IncludedKeys = 'label' | 'className' | 'hidden' | 'tabIndex';

@@ -2,7 +2,7 @@
  * Exhaustive type tests for MatDatepicker field.
  */
 import { expectTypeOf } from 'vitest';
-import type { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
+import type { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { MatDatepickerProps, MatDatepickerField } from './mat-datepicker.type';
@@ -13,7 +13,16 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('MatDatepickerProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'appearance' | 'color' | 'disableRipple' | 'subscriptSizing' | 'startView' | 'touchUi' | 'hint' | 'placeholder';
+  type ExpectedKeys =
+    | 'appearance'
+    | 'color'
+    | 'disableRipple'
+    | 'subscriptSizing'
+    | 'floatLabel'
+    | 'hideRequiredMarker'
+    | 'startView'
+    | 'touchUi'
+    | 'hint';
   type ActualKeys = keyof MatDatepickerProps;
 
   it('should have exactly the expected keys', () => {
@@ -41,6 +50,14 @@ describe('MatDatepickerProps - Exhaustive Whitelist', () => {
       expectTypeOf<MatDatepickerProps['subscriptSizing']>().toEqualTypeOf<SubscriptSizing | undefined>();
     });
 
+    it('floatLabel', () => {
+      expectTypeOf<MatDatepickerProps['floatLabel']>().toEqualTypeOf<FloatLabelType | undefined>();
+    });
+
+    it('hideRequiredMarker', () => {
+      expectTypeOf<MatDatepickerProps['hideRequiredMarker']>().toEqualTypeOf<boolean | undefined>();
+    });
+
     it('startView', () => {
       expectTypeOf<MatDatepickerProps['startView']>().toEqualTypeOf<'month' | 'year' | 'multi-year' | undefined>();
     });
@@ -51,10 +68,6 @@ describe('MatDatepickerProps - Exhaustive Whitelist', () => {
 
     it('hint', () => {
       expectTypeOf<MatDatepickerProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
-    });
-
-    it('placeholder', () => {
-      expectTypeOf<MatDatepickerProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });
@@ -81,6 +94,9 @@ describe('MatDatepickerField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
     // From FieldWithValidation
     | 'required'
     | 'email'

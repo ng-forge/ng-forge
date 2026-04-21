@@ -14,7 +14,8 @@ export const explicitDisabledScenario: TestScenario = {
         key: 'email3',
         type: 'input',
         label: 'Email',
-        props: { type: 'email', placeholder: 'Enter email' },
+        placeholder: 'Enter email',
+        props: { type: 'email' },
         col: 12,
       },
       {

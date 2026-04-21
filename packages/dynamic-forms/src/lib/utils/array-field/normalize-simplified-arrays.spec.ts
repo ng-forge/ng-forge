@@ -561,6 +561,105 @@ describe('normalizeSimplifiedArrays', () => {
     });
   });
 
+  describe('wrapper preservation', () => {
+    it('should preserve wrappers on the expanded array field', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: primitiveTemplate,
+        wrappers: [{ type: 'css', cssClasses: 'my-class' }],
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.wrappers).toEqual([{ type: 'css', cssClasses: 'my-class' }]);
+    });
+
+    it('should preserve skipAutoWrappers on the expanded array field', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: primitiveTemplate,
+        skipAutoWrappers: true,
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.skipAutoWrappers).toBe(true);
+    });
+
+    it('should preserve skipDefaultWrappers on the expanded array field', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: primitiveTemplate,
+        skipDefaultWrappers: true,
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.skipDefaultWrappers).toBe(true);
+    });
+
+    it('should preserve wrappers on primitive template items', () => {
+      const templateWithWrappers = { ...primitiveTemplate, wrappers: [{ type: 'css', cssClasses: 'item-class' }] };
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: templateWithWrappers,
+        value: ['angular'],
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      const items = arrayField.fields as Record<string, unknown>[];
+      expect(items[0].wrappers).toEqual([{ type: 'css', cssClasses: 'item-class' }]);
+
+      // Add button template should also preserve wrappers
+      const addButton = result[1] as Record<string, unknown>;
+      const addTemplate = addButton.template as Record<string, unknown>;
+      expect(addTemplate.wrappers).toEqual([{ type: 'css', cssClasses: 'item-class' }]);
+    });
+
+    it('should preserve wrappers on object template fields', () => {
+      const templateWithWrappers = [{ ...objectTemplate[0], wrappers: [{ type: 'css', cssClasses: 'name-class' }] }, objectTemplate[1]];
+      const input = fields({
+        key: 'contacts',
+        type: 'array',
+        template: templateWithWrappers,
+        value: [{ name: 'Alice', phone: '555' }],
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      const items = arrayField.fields as Record<string, unknown>[][];
+      // Object items are arrays of fields
+      const firstItem = items[0] as Record<string, unknown>[];
+      expect(firstItem[0].wrappers).toEqual([{ type: 'css', cssClasses: 'name-class' }]);
+      expect(firstItem[1]).not.toHaveProperty('wrappers');
+    });
+
+    it('should not include wrapper properties when not specified', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: primitiveTemplate,
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField).not.toHaveProperty('wrappers');
+      expect(arrayField).not.toHaveProperty('skipAutoWrappers');
+      expect(arrayField).not.toHaveProperty('skipDefaultWrappers');
+    });
+  });
+
   describe('idempotency', () => {
     it('should produce the same result when called on already-normalized output', () => {
       const input = fields({
