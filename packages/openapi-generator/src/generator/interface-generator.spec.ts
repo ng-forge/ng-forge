@@ -279,13 +279,11 @@ describe('generateInterface', () => {
     expect(result).toContain('count?: number | null;');
   });
 
-  // Pins current best-effort behavior for `allOf` with a nullable branch. TS operator
-  // precedence parses `A & B | null` as `(A & B) | null`, which is a slightly loose
-  // projection: the strict intersection semantics would drop null because null can't
-  // satisfy a non-null `A`. The pattern is uncommon (allOf is typically used for
-  // schema composition, not nullability), so we leave the simpler output in place.
-  // If a real user encounters this, widen to strict intersection behavior in a follow-up.
-  it('documents allOf + nullable branch — intersection output includes | null (best-effort)', () => {
+  // `allOf` is intersection: a value must satisfy every branch. If one branch is
+  // `A | null`, the intersection with non-null `A` eliminates null. The generator
+  // parenthesises each union branch before joining with `&` so TypeScript's built-in
+  // distribution + simplification yields the strict semantic answer.
+  it('should parenthesise union branches in allOf so TS reduces null correctly', () => {
     const schema = {
       type: 'object',
       properties: {
@@ -296,10 +294,28 @@ describe('generateInterface', () => {
     } as unknown as OpenAPIV3.SchemaObject;
 
     const result = generateInterface(schema, defaultOptions);
-    // Current output: `string & string | null`. Semantically: (string & string) | null = string | null.
-    // Strict allOf semantics would yield just `string` (null excluded by intersection).
-    // Accept either for forward-compat.
-    expect(result).toMatch(/composed\?: (string & string \| null|string);/);
+    // `string & (string | null)` → TypeScript reduces to `string` at use-site.
+    // We emit the pre-reduction form so intent remains visible in the source.
+    expect(result).toContain('composed?: string & (string | null);');
+  });
+
+  it('should emit plain intersection when no allOf branch is nullable', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        composed: {
+          allOf: [
+            { type: 'object', properties: { a: { type: 'string' } } },
+            { type: 'object', properties: { b: { type: 'number' } } },
+          ],
+        },
+      },
+    } as unknown as OpenAPIV3.SchemaObject;
+
+    const result = generateInterface(schema, defaultOptions);
+    // No nullable branches → no parens needed — existing composition pattern unchanged.
+    expect(result).not.toContain('(');
+    expect(result).toContain(' & ');
   });
 
   it('should handle oneOf as union type', () => {

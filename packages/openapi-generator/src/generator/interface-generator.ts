@@ -188,11 +188,19 @@ function schemaToTsType(propertyName: string, schema: SchemaObject, parentName: 
     return types.join(' | ');
   }
 
-  // Handle allOf → intersection
+  // Handle allOf → intersection.
+  // Each branch that is itself a union (contains `|`) must be parenthesised so the
+  // intersection operator binds tighter than the outer unions. Without parens,
+  // TypeScript reads `A & B | null` as `(A & B) | null`, which is looser than the
+  // strict intersection semantics of allOf. With parens, `(A) & (B | null)` reduces
+  // correctly: null is incompatible with A so it drops out of the intersection.
   if (schema.allOf) {
     const types = (schema.allOf as SchemaObject[])
       .filter((s) => !isReferenceObject(s))
-      .map((s) => schemaToTsType(propertyName, s, parentName, nestedInterfaces));
+      .map((s) => {
+        const t = schemaToTsType(propertyName, s, parentName, nestedInterfaces);
+        return t.includes(' | ') ? `(${t})` : t;
+      });
     return types.join(' & ');
   }
 
