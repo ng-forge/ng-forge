@@ -203,6 +203,30 @@ describe('generateInterface', () => {
     expect(result).toContain('  name?: string | null;');
   });
 
+  it('should include null in an enum union when nullable is true', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      properties: {
+        country: { type: 'string', enum: ['US', 'UK', 'CA'], nullable: true } as OpenAPIV3.SchemaObject,
+      },
+    };
+
+    const result = generateInterface(schema, defaultOptions);
+    expect(result).toContain("country?: 'US' | 'UK' | 'CA' | null;");
+  });
+
+  it('should include null in a numeric enum union when nullable is true', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      properties: {
+        priority: { type: 'integer', enum: [1, 2, 3], nullable: true } as OpenAPIV3.SchemaObject,
+      },
+    };
+
+    const result = generateInterface(schema, defaultOptions);
+    expect(result).toContain('priority?: 1 | 2 | 3 | null;');
+  });
+
   it('should handle oneOf as union type', () => {
     const schema: OpenAPIV3.SchemaObject = {
       type: 'object',

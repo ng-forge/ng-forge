@@ -137,13 +137,16 @@ function resolveSchemaProperties(schema: SchemaObject): { properties: Array<[str
 
 function schemaToTsType(propertyName: string, schema: SchemaObject, parentName: string, nestedInterfaces: string[]): string {
   const type = schema.type as string | undefined;
+  const isNullable = (schema as Record<string, unknown>)['nullable'] === true;
 
   if (schema.enum) {
-    return schema.enum.map((v: unknown) => (typeof v === 'string' ? `'${v}'` : String(v))).join(' | ');
+    const enumUnion = schema.enum.map((v: unknown) => (typeof v === 'string' ? `'${v}'` : String(v))).join(' | ');
+    // Enum + nullable: the union must include null (OpenAPI 3.0 nullable keyword can combine with enum).
+    return isNullable ? `${enumUnion} | null` : enumUnion;
   }
 
   // Handle nullable (OpenAPI 3.0)
-  if ((schema as Record<string, unknown>)['nullable']) {
+  if (isNullable) {
     const baseSchema = { ...schema, nullable: undefined } as SchemaObject;
     const baseType = schemaToTsType(propertyName, baseSchema, parentName, nestedInterfaces);
     return `${baseType} | null`;
