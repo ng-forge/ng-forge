@@ -136,18 +136,30 @@ function resolveSchemaProperties(schema: SchemaObject): { properties: Array<[str
 }
 
 function schemaToTsType(propertyName: string, schema: SchemaObject, parentName: string, nestedInterfaces: string[]): string {
-  const type = schema.type as string | undefined;
-  const isNullable = (schema as Record<string, unknown>)['nullable'] === true;
+  const rawType = (schema as Record<string, unknown>)['type'];
+  // Normalize OpenAPI 3.1 `type: [T, 'null']` → `type: T` and remember nullability.
+  let type: string | undefined;
+  let nullableFrom31Type = false;
+  if (Array.isArray(rawType)) {
+    const nonNull = (rawType as string[]).filter((t) => t !== 'null');
+    nullableFrom31Type = nonNull.length !== rawType.length;
+    type = nonNull[0];
+  } else {
+    type = rawType as string | undefined;
+  }
+  const isNullable = (schema as Record<string, unknown>)['nullable'] === true || nullableFrom31Type;
+  // Filter `null` out of enum values when the type is nullable — it's handled by `| null` below.
+  const enumValues = schema.enum ? schema.enum.filter((v: unknown) => v !== null) : undefined;
 
-  if (schema.enum) {
-    const enumUnion = schema.enum.map((v: unknown) => (typeof v === 'string' ? `'${v}'` : String(v))).join(' | ');
+  if (enumValues && enumValues.length > 0) {
+    const enumUnion = enumValues.map((v: unknown) => (typeof v === 'string' ? `'${v}'` : String(v))).join(' | ');
     // Enum + nullable: the union must include null (OpenAPI 3.0 nullable keyword can combine with enum).
     return isNullable ? `${enumUnion} | null` : enumUnion;
   }
 
-  // Handle nullable (OpenAPI 3.0)
+  // Handle nullable (OpenAPI 3.0 and 3.1 type:[T,null])
   if (isNullable) {
-    const baseSchema = { ...schema, nullable: undefined } as SchemaObject;
+    const baseSchema = { ...schema, nullable: undefined, type } as SchemaObject;
     const baseType = schemaToTsType(propertyName, baseSchema, parentName, nestedInterfaces);
     return `${baseType} | null`;
   }

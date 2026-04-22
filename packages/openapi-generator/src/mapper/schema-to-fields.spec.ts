@@ -422,6 +422,23 @@ describe('mapSchemaToFields', () => {
     expect(template.nullable).toBeUndefined();
   });
 
+  it('should filter null out of select options when enum includes null (OpenAPI 3.1 nullable enum)', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        country: { type: ['string', 'null'], enum: ['US', 'UK', null] },
+      },
+    } as unknown as SchemaObject;
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].type).toBe('select');
+    expect(result.fields[0].nullable).toBe(true);
+    const options = result.fields[0].options!;
+    expect(options).toHaveLength(2);
+    expect(options.map((o) => o.value)).toEqual(['US', 'UK']);
+    expect(options.map((o) => o.label)).not.toContain('Null');
+  });
+
   it('should map description to props.hint', () => {
     const schema: SchemaObject = {
       type: 'object',

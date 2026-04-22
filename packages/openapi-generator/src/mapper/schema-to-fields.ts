@@ -237,22 +237,28 @@ function mapPropertyToField(
     field.props = { ...field.props, hint: prop.schema.description };
   }
 
-  // Add enum options for select/radio/multi-checkbox
+  // Add enum options for select/radio/multi-checkbox.
+  // OpenAPI 3.1 allows `null` to appear in `enum` alongside `type: [T, 'null']` to signal
+  // nullability — it's NOT meant as a literal option. Filter it out here; nullability is
+  // expressed via `field.nullable = true` on the field.
   if (prop.schema.enum) {
-    // Support x-enum-labels extension for human-readable enum labels
-    const enumLabels = (prop.schema as Record<string, unknown>)['x-enum-labels'] as Record<string, string> | string[] | undefined;
-    field.options = prop.schema.enum.map((v: unknown, i: number) => {
-      const strVal = String(v);
-      let label: string;
-      if (Array.isArray(enumLabels) && enumLabels[i]) {
-        label = enumLabels[i];
-      } else if (enumLabels && !Array.isArray(enumLabels) && enumLabels[strVal]) {
-        label = enumLabels[strVal];
-      } else {
-        label = toEnumLabel(strVal);
-      }
-      return { label, value: strVal };
-    });
+    const filteredEnum = prop.schema.enum.filter((v: unknown) => v !== null);
+    if (filteredEnum.length > 0) {
+      // Support x-enum-labels extension for human-readable enum labels
+      const enumLabels = (prop.schema as Record<string, unknown>)['x-enum-labels'] as Record<string, string> | string[] | undefined;
+      field.options = filteredEnum.map((v: unknown, i: number) => {
+        const strVal = String(v);
+        let label: string;
+        if (Array.isArray(enumLabels) && enumLabels[i]) {
+          label = enumLabels[i];
+        } else if (enumLabels && !Array.isArray(enumLabels) && enumLabels[strVal]) {
+          label = enumLabels[strVal];
+        } else {
+          label = toEnumLabel(strVal);
+        }
+        return { label, value: strVal };
+      });
+    }
   }
 
   // Add validators

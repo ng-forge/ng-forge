@@ -227,6 +227,34 @@ describe('generateInterface', () => {
     expect(result).toContain('priority?: 1 | 2 | 3 | null;');
   });
 
+  it('should handle OpenAPI 3.1 type:[T, null] on primitive properties', () => {
+    // 3.1-style nullable on string
+    const schema = {
+      type: 'object',
+      properties: {
+        middleName: { type: ['string', 'null'] },
+        age: { type: ['integer', 'null'] },
+      },
+    } as unknown as OpenAPIV3.SchemaObject;
+
+    const result = generateInterface(schema, defaultOptions);
+    expect(result).toContain('middleName?: string | null;');
+    expect(result).toContain('age?: number | null;');
+  });
+
+  it('should handle OpenAPI 3.1 type:[T, null] combined with enum', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        country: { type: ['string', 'null'], enum: ['US', 'UK', null] },
+      },
+    } as unknown as OpenAPIV3.SchemaObject;
+
+    const result = generateInterface(schema, defaultOptions);
+    // null enum value should be dropped from the literal union; nullability expressed as `| null`
+    expect(result).toContain("country?: 'US' | 'UK' | null;");
+  });
+
   it('should handle oneOf as union type', () => {
     const schema: OpenAPIV3.SchemaObject = {
       type: 'object',
