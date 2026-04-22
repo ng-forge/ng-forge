@@ -218,10 +218,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          # On the @next path pin to the gate's SHA (avoids racing in-flight commits
-          # between gate and release). On workflow_dispatch without a gate SHA, default
-          # to the dispatched ref.
-          ref: ${{ needs.next-gate.outputs.sha || github.ref }}
+          # Pin to an immutable SHA so a commit landing between gate/check-ci and release
+          # can't be silently published:
+          #   - @next path: gate's captured SHA (main tip at gate time)
+          #   - stable dispatch: github.sha (the workflow event's immutable commit)
+          # Do NOT fall back to github.ref — it resolves to the branch TIP at checkout
+          # time, which races in-flight commits and could publish unvalidated code.
+          ref: ${{ needs.next-gate.outputs.sha || github.sha }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
