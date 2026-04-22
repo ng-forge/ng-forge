@@ -162,6 +162,19 @@ jobs:
           # version doesn't embed the SHA, so pinning the ref is our only defense.)
           FULL_SHA=$(git rev-parse HEAD)
 
+          # Idempotency: if this commit was already published as @next (see the
+          # post-publish "Tag the @next publish" step in the release job), skip.
+          # Cheap, git-native — no API calls. Tag-after-publish ordering means the
+          # worst case on failure is one duplicate publish (not a phantom tag that
+          # blocks forever).
+          git fetch --tags origin --quiet || true
+          EXISTING_TAG=$(git tag --points-at "$FULL_SHA" | { grep '^next/' || true; } | head -1)
+          if [ -n "$EXISTING_TAG" ]; then
+            echo "::notice::$FULL_SHA already published as $EXISTING_TAG — skipping"
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           LAST_VERSION=${LAST_TAG#v}
           # Bump minor: @next always signals "the upcoming minor release", regardless
           # of whether the next stable ends up being a patch or a minor. This keeps
@@ -432,6 +445,23 @@ jobs:
           for pkg in ${{ env.LIBRARY_PACKAGES }}; do
             npm publish "dist/packages/$pkg" --access public --provenance --tag "$DIST_TAG"
           done
+
+      - name: Tag the @next publish
+        # Idempotency marker: next-gate checks for tags under `next/` pointing at HEAD
+        # and skips if found, so re-runs on the same commit become no-ops.
+        # Tag-after-publish (not before): if the tag push fails, worst case is one
+        # duplicate publish on the next run — strictly better than the tag-first
+        # failure mode where a phantom tag could permanently block future publishes.
+        # continue-on-error makes the job succeed even if the tag push fails.
+        if: github.event_name == 'schedule' || inputs.mode == 'next'
+        continue-on-error: true
+        env:
+          NEXT_SHA: ${{ needs.next-gate.outputs.sha }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag -a "next/${VERSION}" -m "Published @next ${VERSION}" "${NEXT_SHA}"
+          git push origin "next/${VERSION}"
 
       - name: Summary
         run: |
