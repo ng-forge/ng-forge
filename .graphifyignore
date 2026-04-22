@@ -1,0 +1,16 @@
+# Vitest browser-mode visual regression screenshots — not architectural signal
+**/__screenshots__/**
+
+# Playwright test artifacts
+**/test-results/**
+**/playwright-report/**
+**/.playwright-cache/**
+
+# Build / cache output
+**/dist/**
+**/.angular/**
+**/coverage/**
+**/.nx/**
+
+# graphify's own output
+graphify-out/**

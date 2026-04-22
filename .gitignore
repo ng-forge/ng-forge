@@ -71,4 +71,12 @@ vitest.config.*.timestamp*
 packages/*/.vitest-attachments/
 .claude/scheduled_tasks.lock
 .claude/worktrees/
-graph.json
+
+# nx dep graph output (written by `nx graph --file=graph.json` in CI)
+/graph.json
+
+# graphify machine-local outputs (graph.json, GRAPH_REPORT.md, graph.html are committed)
+graphify-out/cache/
+graphify-out/manifest.json
+graphify-out/cost.json
+graphify-out/.graphify_python
