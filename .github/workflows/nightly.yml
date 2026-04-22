@@ -10,9 +10,6 @@ permissions:
   id-token: write
   actions: read
 
-env:
-  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng dynamic-form-mcp openapi-generator'
-
 jobs:
   check:
     name: Check for relevant changes
@@ -76,86 +73,16 @@ jobs:
           echo "should_publish=true" >> "$GITHUB_OUTPUT"
           echo "nightly_version=${NIGHTLY_VERSION}" >> "$GITHUB_OUTPUT"
 
-  release:
+  publish:
     name: Publish nightly
-    runs-on: ubuntu-latest
     needs: check
     if: needs.check.outputs.should_publish == 'true'
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          ref: main
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v5
-        with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Strip preVersionCommand
-        # The configured preVersionCommand builds with stale versions; we build
-        # ourselves after the bump so the dist contains the nightly version.
-        run: |
-          node -e "
-            const fs = require('fs');
-            const cfg = JSON.parse(fs.readFileSync('nx.json', 'utf8'));
-            if (cfg.release?.version?.preVersionCommand !== undefined) {
-              delete cfg.release.version.preVersionCommand;
-              fs.writeFileSync('nx.json', JSON.stringify(cfg, null, 2));
-            }
-          "
-
-      - name: Bump source versions to nightly
-        run: |
-          pnpm nx release version "${{ needs.check.outputs.nightly_version }}" \
-            --git-commit=false --git-tag=false --stage-changes=false
-
-      - name: Build libraries
-        run: pnpm nx run-many -t build -p ${{ env.LIBRARY_PACKAGES }}
-
-      - name: Verify build outputs
-        run: |
-          for pkg in ${{ env.LIBRARY_PACKAGES }}; do
-            if [ ! -d "dist/packages/$pkg" ]; then
-              echo "::error::Build output missing for $pkg"
-              exit 1
-            fi
-          done
-
-      - name: Upgrade npm for OIDC Trusted Publisher support
-        run: npm install -g npm@latest
-
-      - name: Publish nightly to npm
-        run: |
-          for pkg in ${{ env.LIBRARY_PACKAGES }}; do
-            npm publish dist/packages/$pkg --access public --provenance --tag nightly
-          done
-
-      - name: Summary
-        run: |
-          {
-            echo "## Nightly Release \`${{ needs.check.outputs.nightly_version }}\`"
-            echo ""
-            echo "Published with npm dist-tag \`nightly\`. Install via:"
-            echo ""
-            echo '```bash'
-            echo "pnpm add @ng-forge/dynamic-forms@nightly"
-            echo '```'
-            echo ""
-            echo "### Packages"
-            for pkg in ${{ env.LIBRARY_PACKAGES }}; do
-              echo "- \`@ng-forge/$pkg@${{ needs.check.outputs.nightly_version }}\`"
-            done
-          } >> "$GITHUB_STEP_SUMMARY"
+    uses: ./.github/workflows/release.yml
+    with:
+      version: ${{ needs.check.outputs.nightly_version }}
+      dist-tag: nightly
+      create-github-release: false
+    permissions:
+      contents: read
+      id-token: write
+      actions: read
