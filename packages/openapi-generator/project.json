@@ -42,7 +42,8 @@
       "executor": "@nx/vitest:test",
       "options": {
         "configFile": "packages/openapi-generator/vite.config.ts"
-      }
+      },
+      "dependsOn": [{ "target": "build", "projects": ["dynamic-forms", "dynamic-forms-material"] }]
     }
   }
 }
