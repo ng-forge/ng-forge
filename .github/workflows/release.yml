@@ -29,6 +29,10 @@ on:
         type: boolean
         required: false
         default: true
+      ref:
+        description: 'Git ref/SHA to check out and publish. Pin this from the caller to avoid races against in-flight commits.'
+        type: string
+        required: false
 
 permissions:
   contents: write
@@ -107,7 +111,10 @@ jobs:
     name: Release Libraries
     runs-on: ubuntu-latest
     needs: check-ci
-    # Run when check-ci succeeds (workflow_dispatch) or is skipped (workflow_call — caller is responsible for its own gating).
+    # `always()` is load-bearing: it lets this job run even when `check-ci` is *skipped*
+    # (the workflow_call path, where the caller has already gated). Without `always()`,
+    # `needs: check-ci` would short-circuit the job whenever check-ci doesn't run.
+    # Don't drop it without rethinking the gating.
     if: |
       always() &&
       (needs.check-ci.result == 'success' || needs.check-ci.result == 'skipped') &&
@@ -117,6 +124,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          # Pin to the caller-provided ref when present (avoids racing in-flight
+          # commits between gate and publish). Falls back to the workflow's default
+          # ref otherwise (workflow_dispatch on the dispatched branch).
+          ref: ${{ inputs.ref || github.ref }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -137,8 +148,12 @@ jobs:
 
       - name: Bump source versions (workflow_call path)
         if: ${{ inputs.version != '' && inputs.version != null }}
-        # Strip the configured preVersionCommand to avoid a wasted stale-version build;
-        # we build explicitly below after the bump so dist/ picks up the new version.
+        # Strips the configured preVersionCommand to avoid a wasted stale-version
+        # build (we build explicitly below after the bump). The mutation is ephemeral
+        # — the runner discards its checkout after the job, so nx.json on disk is
+        # never affected.
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
           node -e "
             const fs = require('fs');
@@ -148,20 +163,26 @@ jobs:
               fs.writeFileSync('nx.json', JSON.stringify(cfg, null, 2));
             }
           "
-          pnpm nx release version "${{ inputs.version }}" \
+          pnpm nx release version "$INPUT_VERSION" \
             --git-commit=false --git-tag=false --stage-changes=false
 
-      - name: Get version
-        id: version
+      - name: Resolve version + dist-tag
+        id: resolve
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_DIST_TAG: ${{ inputs.dist-tag }}
         run: |
-          if [ -n "${{ inputs.version }}" ]; then
-            VERSION="${{ inputs.version }}"
+          if [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
           else
             VERSION=$(node -p "require('./packages/dynamic-forms/package.json').version")
           fi
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "📦 Releasing version: $VERSION"
+          DIST_TAG="${INPUT_DIST_TAG:-latest}"
+
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "DIST_TAG=$DIST_TAG" >> "$GITHUB_ENV"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "📦 Releasing version: $VERSION (dist-tag: $DIST_TAG)"
 
       - name: Build libraries
         run: pnpm nx run-many -t build -p ${{ env.LIBRARY_PACKAGES }}
@@ -235,29 +256,27 @@ jobs:
       - name: Publish to npm
         if: ${{ github.event_name == 'workflow_call' || inputs.mode == 'publish' }}
         run: |
-          DIST_TAG="${{ inputs.dist-tag }}"
-          DIST_TAG="${DIST_TAG:-latest}"
           echo "Publishing with dist-tag: $DIST_TAG"
           for pkg in ${{ env.LIBRARY_PACKAGES }}; do
-            npm publish dist/packages/$pkg --access public --provenance --tag "$DIST_TAG"
+            npm publish "dist/packages/$pkg" --access public --provenance --tag "$DIST_TAG"
           done
 
       - name: Summary
         run: |
-          DIST_TAG="${{ inputs.dist-tag }}"
-          DIST_TAG="${DIST_TAG:-latest}"
-          echo "## Release v${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Published packages (dist-tag: \`$DIST_TAG\`):" >> $GITHUB_STEP_SUMMARY
-          for pkg in ${{ env.LIBRARY_PACKAGES }}; do
-            echo "- \`@ng-forge/$pkg@${{ env.VERSION }}\`" >> $GITHUB_STEP_SUMMARY
-          done
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ inputs.create-github-release }}" != "false" ]; then
-            echo "### Links:" >> $GITHUB_STEP_SUMMARY
-            echo "- [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }})" >> $GITHUB_STEP_SUMMARY
-            echo "- [npm](https://www.npmjs.com/package/@ng-forge/dynamic-forms/v/${{ env.VERSION }})" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "### npm" >> $GITHUB_STEP_SUMMARY
-            echo "- [npm](https://www.npmjs.com/package/@ng-forge/dynamic-forms/v/${{ env.VERSION }})" >> $GITHUB_STEP_SUMMARY
-          fi
+          {
+            echo "## Release v${{ env.VERSION }}"
+            echo ""
+            echo "### Published packages (dist-tag: \`$DIST_TAG\`):"
+            for pkg in ${{ env.LIBRARY_PACKAGES }}; do
+              echo "- \`@ng-forge/$pkg@${{ env.VERSION }}\`"
+            done
+            echo ""
+            if [ "${{ inputs.create-github-release }}" != "false" ]; then
+              echo "### Links:"
+              echo "- [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }})"
+              echo "- [npm](https://www.npmjs.com/package/@ng-forge/dynamic-forms/v/${{ env.VERSION }})"
+            else
+              echo "### npm"
+              echo "- [npm](https://www.npmjs.com/package/@ng-forge/dynamic-forms/v/${{ env.VERSION }})"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
