@@ -71,7 +71,7 @@ ng-forge/
 
 ## Environment
 
-- **Node.js**: `>=22.0.0`
+- **Node.js**: `>=24.0.0`
 - **pnpm**: `>=10.0.0`
 - **Angular**: `~21.1.0`
 - **TypeScript**: `~5.9.2`
