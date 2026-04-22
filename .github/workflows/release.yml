@@ -28,6 +28,14 @@ permissions:
   id-token: write
   actions: read
 
+# Serialize @next runs against @next runs, stable against stable — but allow @next and
+# stable to run in parallel (they publish different versions and different tag names,
+# so they don't collide). Prevents the "two @next dispatches compute the same counter,
+# race the npm publish, second gets a 409" case.
+concurrency:
+  group: release-${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'next')) && 'next' || 'stable' }}
+  cancel-in-progress: false
+
 env:
   LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng dynamic-form-mcp openapi-generator'
 
@@ -167,7 +175,9 @@ jobs:
           # Cheap, git-native — no API calls. Tag-after-publish ordering means the
           # worst case on failure is one duplicate publish (not a phantom tag that
           # blocks forever).
-          git fetch --tags origin --quiet || true
+          # Fail loud if the fetch itself errors — a silent failure here would make
+          # us miss a recent `next/` tag and double-publish the same commit.
+          git fetch --tags origin --quiet
           EXISTING_TAG=$(git tag --points-at "$FULL_SHA" | { grep '^next/' || true; } | head -1)
           if [ -n "$EXISTING_TAG" ]; then
             echo "::notice::$FULL_SHA already published as $EXISTING_TAG — skipping"
@@ -232,6 +242,12 @@ jobs:
         uses: actions/github-script@v9
         with:
           script: |
+            // Fail-safe default: if anything below throws before we explicitly flip this
+            // to 'true', the job's should_publish output ANDs in 'false' and we skip.
+            // Without this, an unhandled exception (API outage, schema change) leaves
+            // `ok` unset — and `undefined != 'false'` evaluates TRUE, publishing despite
+            // a failed CI check.
+            core.setOutput('ok', 'false');
             const sha = '${{ steps.gate.outputs.sha }}';
             const { owner, repo } = context.repo;
             const runs = await github.rest.actions.listWorkflowRuns({
@@ -240,17 +256,14 @@ jobs:
             const run = runs.data.workflow_runs[0];
             if (!run) {
               core.warning(`No CI run found for ${sha} — skipping @next publish`);
-              core.setOutput('ok', 'false');
               return;
             }
             if (run.status !== 'completed') {
               core.warning(`CI for ${sha} still ${run.status} — skipping @next publish`);
-              core.setOutput('ok', 'false');
               return;
             }
             if (run.conclusion !== 'success') {
               core.warning(`CI for ${sha} concluded ${run.conclusion} — skipping @next publish`);
-              core.setOutput('ok', 'false');
               return;
             }
             console.log(`✅ CI for ${sha} passed — proceeding with @next publish`);
@@ -377,18 +390,11 @@ jobs:
           pnpm nx release version "$NEW_VERSION" \
             --git-commit=false --git-tag=false --stage-changes=false
 
-      # Git tag + changelog + GitHub release are ONLY for the stable publish path.
-      # Previously these ran unconditionally on workflow_dispatch, so `mode=dry-run`
-      # created real tags and real GitHub releases — real footgun. Gating on
-      # `mode=publish` fixes that; the @next and dry-run paths never create tags.
-      - name: Configure Git
-        if: inputs.mode == 'publish'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
       - name: Generate Changelog
         if: inputs.mode == 'publish'
+        # Changelog lives in a local file; writing it has no side effect outside the
+        # runner, so ordering before publish is fine. Earlier placement also means
+        # `RELEASE_NOTES.md` is ready when the GitHub Release step runs below.
         run: |
           PREV_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*next*' --exclude '*nightly*' 2>/dev/null || echo "")
 
@@ -406,15 +412,54 @@ jobs:
           **Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG:-initial}...v${{ env.VERSION }}
           EOF
 
-      - name: Create Git Tag
+      - name: Publish to npm (dry-run)
+        if: inputs.mode == 'dry-run'
+        run: pnpm nx release publish --access public --dry-run
+
+      - name: Publish to npm
+        # Real publish: workflow_dispatch mode=publish, workflow_dispatch mode=next, or schedule.
+        # Runs BEFORE git tag + GitHub release on the stable path (and @next tag below) so
+        # that the irreversible-first-so-reversible-second pattern holds: if npm fails, no
+        # stale tag/release is left behind. On re-run after a partial failure, the
+        # per-package `npm view` check below skips packages already on npm so we don't 409.
+        # Node 22 ships with npm ≥ 10.9, which natively supports OIDC Trusted Publisher
+        # + provenance — no pre-publish `npm install -g npm@latest` self-upgrade needed
+        # (that step is also flaky because npm can corrupt its own node_modules mid-upgrade).
+        if: |
+          github.event_name == 'schedule' ||
+          (github.event_name == 'workflow_dispatch' && (inputs.mode == 'publish' || inputs.mode == 'next'))
+        run: |
+          echo "Publishing with dist-tag: $DIST_TAG"
+          for pkg in ${{ env.LIBRARY_PACKAGES }}; do
+            # Idempotency: skip if this exact version is already on npm (previous run
+            # may have published some packages before dying mid-loop).
+            if npm view "@ng-forge/${pkg}@${VERSION}" version >/dev/null 2>&1; then
+              echo "@ng-forge/${pkg}@${VERSION} already published — skipping"
+              continue
+            fi
+            npm publish "dist/packages/$pkg" --access public --provenance --tag "$DIST_TAG"
+          done
+
+      - name: Configure Git
+        # Git identity for the tag-creation steps below (stable and @next paths).
+        if: inputs.mode == 'publish' || github.event_name == 'schedule' || inputs.mode == 'next'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Create Git Tag (stable)
+        # Runs AFTER npm publish so a failed publish doesn't leave a stale v* tag.
+        # If the tag step itself fails after a successful publish, re-running
+        # succeeds because the idempotency check in Publish skips the already-pushed
+        # packages. Manual recovery: re-dispatch mode=publish.
         if: inputs.mode == 'publish'
         run: |
           if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
-            echo "❌ Tag v${{ env.VERSION }} already exists!"
-            exit 1
+            echo "Tag v${{ env.VERSION }} already exists (likely from a retry after partial failure) — skipping create"
+          else
+            git tag -a "v${{ env.VERSION }}" -m "Release v${{ env.VERSION }}"
+            git push origin "v${{ env.VERSION }}"
           fi
-          git tag -a "v${{ env.VERSION }}" -m "Release v${{ env.VERSION }}"
-          git push origin "v${{ env.VERSION }}"
 
       - name: Create GitHub Release
         if: inputs.mode == 'publish'
@@ -428,24 +473,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish to npm (dry-run)
-        if: inputs.mode == 'dry-run'
-        run: pnpm nx release publish --access public --dry-run
-
-      - name: Publish to npm
-        # Real publish: workflow_dispatch mode=publish, workflow_dispatch mode=next, or schedule.
-        # Node 22 ships with npm ≥ 10.9, which natively supports OIDC Trusted Publisher
-        # + provenance — no pre-publish `npm install -g npm@latest` self-upgrade needed
-        # (that step is also flaky because npm can corrupt its own node_modules mid-upgrade).
-        if: |
-          github.event_name == 'schedule' ||
-          (github.event_name == 'workflow_dispatch' && (inputs.mode == 'publish' || inputs.mode == 'next'))
-        run: |
-          echo "Publishing with dist-tag: $DIST_TAG"
-          for pkg in ${{ env.LIBRARY_PACKAGES }}; do
-            npm publish "dist/packages/$pkg" --access public --provenance --tag "$DIST_TAG"
-          done
-
       - name: Tag the @next publish
         # Idempotency marker: next-gate checks for tags under `next/` pointing at HEAD
         # and skips if found, so re-runs on the same commit become no-ops.
@@ -458,8 +485,6 @@ jobs:
         env:
           NEXT_SHA: ${{ needs.next-gate.outputs.sha }}
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
           git tag -a "next/${VERSION}" -m "Published @next ${VERSION}" "${NEXT_SHA}"
           git push origin "next/${VERSION}"
 
