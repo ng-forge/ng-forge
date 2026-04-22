@@ -1,5 +1,11 @@
 name: Release
 
+# Single-workflow release pipeline. All publishes — stable (latest) and nightly (@next) —
+# happen from THIS file. This is required by npm Trusted Publisher, which verifies the
+# OIDC token's outermost workflow_ref claim against a single registered entry per package.
+# Reusable workflows don't help here: the attestation only records the calling workflow's
+# path, so a called workflow can never be the TP even if it does the actual publishing.
+
 on:
   push:
     branches: ['release-*']
@@ -11,28 +17,11 @@ on:
         default: 'dry-run'
         type: choice
         options:
-          - dry-run
-          - publish
-  workflow_call:
-    inputs:
-      version:
-        description: 'Exact version to publish. If unset, uses the version already in package.json (stable release path).'
-        type: string
-        required: false
-      dist-tag:
-        description: 'npm dist-tag to publish under.'
-        type: string
-        required: false
-        default: 'latest'
-      create-github-release:
-        description: 'Create git tag, changelog, and GitHub release.'
-        type: boolean
-        required: false
-        default: true
-      ref:
-        description: 'Git ref/SHA to check out and publish. Pin this from the caller to avoid races against in-flight commits.'
-        type: string
-        required: false
+          - dry-run # stable path, no npm publish (dry-run only)
+          - publish # stable path, real publish to @latest + tag + GH release
+          - next # manual invocation of the @next path — same code as the scheduled run
+  schedule:
+    - cron: '27 1 * * *' # 01:27 UTC daily (~04:27 EEST) — after the late-night commit window, off the hour to avoid GH Actions cron stampede
 
 permissions:
   contents: write
@@ -43,7 +32,8 @@ env:
   LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng dynamic-form-mcp openapi-generator'
 
 jobs:
-  # This job runs on push and skips immediately - just to show the workflow in PR
+  # Push to release-* branches just surfaces this workflow in the PR checks — the actual
+  # stable release is triggered manually via "Run workflow" after the PR is merged.
   await-dispatch:
     name: Awaiting manual trigger
     if: github.event_name == 'push'
@@ -57,7 +47,9 @@ jobs:
 
   check-ci:
     name: Verify CI Passed
-    if: github.event_name == 'workflow_dispatch'
+    # Only gates the stable dispatch paths. mode=next skips CI check — the @next gate
+    # in the next-gate job doesn't need it, and scheduled runs don't hit this job at all.
+    if: github.event_name == 'workflow_dispatch' && inputs.mode != 'next'
     runs-on: ubuntu-latest
     steps:
       - name: Check CI workflow status
@@ -107,27 +99,129 @@ jobs:
 
             console.log('✅ CI passed for the current commit!');
 
+  next-gate:
+    name: Check for relevant changes (next)
+    # Fires on scheduled cron OR on a manual `mode=next` dispatch (useful for on-demand
+    # @next publishes without waiting for cron — e.g. to unblock a user or smoke-test).
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'next')
+    runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.gate.outputs.should_publish }}
+      version: ${{ steps.gate.outputs.version }}
+      sha: ${{ steps.gate.outputs.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Detect relevant changes & compute version
+        id: gate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          LAST_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*next*' --exclude '*nightly*' 2>/dev/null || echo "")
+
+          if [ -z "$LAST_TAG" ]; then
+            echo "::warning::No prior stable tag found — skipping next release"
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Last stable tag: $LAST_TAG"
+
+          # Bump-worthy commit types per nx.json release.conventionalCommits:
+          # feat, fix, perf, revert. Everything else (docs/ci/chore/test/build/style/refactor)
+          # is classified semverBump:none and should not trigger a next release.
+          # Disable pipefail for this pipeline so we can distinguish grep's "no matches"
+          # (exit 1, fine) from a real grep error (exit ≥2, fail loud).
+          set +o pipefail
+          RELEVANT=$(git log "${LAST_TAG}..HEAD" --pretty=format:'%s' \
+            | grep -cE '^(feat|fix|perf|revert)(\([^)]+\))?!?: ')
+          GREP_EXIT=$?
+          set -o pipefail
+          if [ "$GREP_EXIT" -gt 1 ]; then
+            echo "::error::grep failed unexpectedly (exit $GREP_EXIT)"
+            exit 1
+          fi
+
+          echo "Relevant commits since $LAST_TAG: $RELEVANT"
+
+          if [ "$RELEVANT" -eq 0 ]; then
+            echo "No version-bumping commits since last stable — skipping next release"
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Capture the SHA NOW so the release job uses the same commit — no race
+          # against in-flight commits between gate and release. (The counter-based
+          # version doesn't embed the SHA, so pinning the ref is our only defense.)
+          FULL_SHA=$(git rev-parse HEAD)
+
+          LAST_VERSION=${LAST_TAG#v}
+          # Bump minor: @next always signals "the upcoming minor release", regardless
+          # of whether the next stable ends up being a patch or a minor. This keeps
+          # versions like 0.8.0-next.1, 0.8.0-next.2, … stable across a release cycle.
+          # When the real 0.8.0 (or 0.9.0) ships, the base rolls forward and the
+          # counter resets.
+          NEXT_MINOR=$(node -e "const [M,m,p]='${LAST_VERSION}'.split('.').map(Number); console.log(\`\${M}.\${m+1}.0\`)")
+
+          # Monotonic counter per base version: 0.8.0-next.1, 0.8.0-next.2, ...
+          # Commit traceability is still recoverable via the publish timestamp + the
+          # npm provenance attestation (records exact SHA).
+          # We MUST succeed at querying npm here — fail loud rather than default to
+          # counter=1, which could clobber a real previous publish on a transient error.
+          if ! VERSIONS_JSON=$(npm view '@ng-forge/dynamic-forms' versions --json); then
+            echo "::error::npm registry lookup failed"
+            exit 1
+          fi
+          MAX_COUNTER=$(echo "$VERSIONS_JSON" \
+            | node -e "
+              const v=JSON.parse(require('fs').readFileSync(0,'utf8'));
+              const re=new RegExp('^${NEXT_MINOR}-next\\\\.(\\\\d+)\$');
+              const nums=(Array.isArray(v)?v:[v]).map(x=>{const m=re.exec(x);return m?+m[1]:-1}).filter(n=>n>=0);
+              console.log(nums.length?Math.max(...nums):0);
+            ")
+          COUNTER=$((MAX_COUNTER + 1))
+          NEXT_VERSION="${NEXT_MINOR}-next.${COUNTER}"
+
+          echo "Proposed next version: $NEXT_VERSION"
+
+          echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          echo "version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "sha=${FULL_SHA}" >> "$GITHUB_OUTPUT"
+
   release:
     name: Release Libraries
     runs-on: ubuntu-latest
-    needs: check-ci
-    # `always()` is load-bearing: it lets this job run even when `check-ci` is *skipped*
-    # (the workflow_call path, where the caller has already gated). Without `always()`,
-    # `needs: check-ci` would short-circuit the job whenever check-ci doesn't run.
-    # Don't drop it without rethinking the gating.
+    needs: [check-ci, next-gate]
+    # `always()` is load-bearing: one of check-ci / next-gate is always skipped per run
+    # (they gate on mutually exclusive conditions). Without `always()`, `needs:` would
+    # short-circuit whenever either isn't successful.
+    # Gating:
+    #   - push             → never runs (release-* placeholder only)
+    #   - dispatch+publish → check-ci must pass (mode=dry-run also hits this branch)
+    #   - dispatch+dry-run → check-ci must pass
+    #   - dispatch+next    → next-gate must decide to publish
+    #   - schedule         → next-gate must decide to publish
     if: |
       always() &&
-      (needs.check-ci.result == 'success' || needs.check-ci.result == 'skipped') &&
-      github.event_name != 'push'
+      github.event_name != 'push' &&
+      (
+        (github.event_name == 'workflow_dispatch' && inputs.mode != 'next' && needs.check-ci.result == 'success') ||
+        ((github.event_name == 'schedule' || inputs.mode == 'next') && needs.next-gate.outputs.should_publish == 'true')
+      )
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          # Pin to the caller-provided ref when present (avoids racing in-flight
-          # commits between gate and publish). Falls back to the workflow's default
-          # ref otherwise (workflow_dispatch on the dispatched branch).
-          ref: ${{ inputs.ref || github.ref }}
+          # On the @next path pin to the gate's SHA (avoids racing in-flight commits
+          # between gate and release). On workflow_dispatch without a gate SHA, default
+          # to the dispatched ref.
+          ref: ${{ needs.next-gate.outputs.sha || github.ref }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -146,45 +240,33 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Bump source versions (workflow_call path)
-        if: ${{ inputs.version != '' && inputs.version != null }}
-        # Strips the configured preVersionCommand to avoid a wasted stale-version
-        # build (we build explicitly below after the bump). The mutation is ephemeral
-        # — the runner discards its checkout after the job, so nx.json on disk is
-        # never affected.
-        env:
-          INPUT_VERSION: ${{ inputs.version }}
-        run: |
-          node -e "
-            const fs = require('fs');
-            const cfg = JSON.parse(fs.readFileSync('nx.json', 'utf8'));
-            if (cfg.release?.version?.preVersionCommand !== undefined) {
-              delete cfg.release.version.preVersionCommand;
-              fs.writeFileSync('nx.json', JSON.stringify(cfg, null, 2));
-            }
-          "
-          pnpm nx release version "$INPUT_VERSION" \
-            --git-commit=false --git-tag=false --stage-changes=false
-
       - name: Resolve version + dist-tag
         id: resolve
         env:
-          INPUT_VERSION: ${{ inputs.version }}
-          INPUT_DIST_TAG: ${{ inputs.dist-tag }}
+          GATE_VERSION: ${{ needs.next-gate.outputs.version }}
+          # Single source of truth for "are we on the @next path?"
+          IS_NEXT_PATH: ${{ github.event_name == 'schedule' || inputs.mode == 'next' }}
         run: |
-          if [ -n "$INPUT_VERSION" ]; then
-            VERSION="$INPUT_VERSION"
+          if [ "$IS_NEXT_PATH" = "true" ]; then
+            VERSION="$GATE_VERSION"
+            DIST_TAG="next"
           else
+            # Stable dispatch (dry-run or publish): sources were already bumped by /release PR.
             VERSION=$(node -p "require('./packages/dynamic-forms/package.json').version")
+            DIST_TAG="latest"
           fi
-          DIST_TAG="${INPUT_DIST_TAG:-latest}"
-
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "DIST_TAG=$DIST_TAG" >> "$GITHUB_ENV"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "📦 Releasing version: $VERSION (dist-tag: $DIST_TAG)"
+          echo "📦 Releasing $VERSION (dist-tag: $DIST_TAG)"
 
       - name: Build libraries
+        # Build BEFORE bumping. Some packages (e.g. openapi-generator) declare
+        # `manifestRootsToUpdate: ['{projectRoot}', 'dist/{projectRoot}']`, so
+        # `nx release version` below needs `dist/.../package.json` to exist first.
+        # For stable dispatch this builds the source already-bumped by /release.
+        # For the @next path this builds unbumped sources; the next step rewrites both
+        # source and dist package.jsons to the @next version.
         run: pnpm nx run-many -t build -p ${{ env.LIBRARY_PACKAGES }}
 
       - name: Verify build outputs
@@ -198,16 +280,47 @@ jobs:
             echo "✅ $pkg"
           done
 
+      - name: Bump source + dist versions (@next path)
+        if: github.event_name == 'schedule' || inputs.mode == 'next'
+        # Two ephemeral mutations to nx.json (the runner discards its checkout
+        # after the job, so on-disk nx.json is never affected):
+        #   1. Strip preVersionCommand — `nx release version` would otherwise
+        #      rebuild; we already built above.
+        #   2. Disable preserveMatchingDependencyRanges — it defaults to true,
+        #      which makes nx bail when the new version (e.g. prerelease
+        #      `0.8.0-next.X`) sits outside the existing peer-dep range
+        #      (`~0.7.0`). Disabling it lets nx rewrite the range to point at
+        #      the @next version, which is what we want for cross-package
+        #      installs of `@next`.
+        env:
+          NEW_VERSION: ${{ needs.next-gate.outputs.version }}
+        run: |
+          node -e "
+            const fs = require('fs');
+            const cfg = JSON.parse(fs.readFileSync('nx.json', 'utf8'));
+            cfg.release ??= {};
+            cfg.release.version ??= {};
+            delete cfg.release.version.preVersionCommand;
+            cfg.release.version.preserveMatchingDependencyRanges = false;
+            fs.writeFileSync('nx.json', JSON.stringify(cfg, null, 2));
+          "
+          pnpm nx release version "$NEW_VERSION" \
+            --git-commit=false --git-tag=false --stage-changes=false
+
+      # Git tag + changelog + GitHub release are ONLY for the stable publish path.
+      # Previously these ran unconditionally on workflow_dispatch, so `mode=dry-run`
+      # created real tags and real GitHub releases — real footgun. Gating on
+      # `mode=publish` fixes that; the @next and dry-run paths never create tags.
       - name: Configure Git
-        if: ${{ inputs.create-github-release != false }}
+        if: inputs.mode == 'publish'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
       - name: Generate Changelog
-        if: ${{ inputs.create-github-release != false }}
+        if: inputs.mode == 'publish'
         run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*nightly*' 2>/dev/null || echo "")
+          PREV_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*next*' --exclude '*nightly*' 2>/dev/null || echo "")
 
           if [ -z "$PREV_TAG" ]; then
             CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges -50)
@@ -224,7 +337,7 @@ jobs:
           EOF
 
       - name: Create Git Tag
-        if: ${{ inputs.create-github-release != false }}
+        if: inputs.mode == 'publish'
         run: |
           if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
             echo "❌ Tag v${{ env.VERSION }} already exists!"
@@ -234,7 +347,7 @@ jobs:
           git push origin "v${{ env.VERSION }}"
 
       - name: Create GitHub Release
-        if: ${{ inputs.create-github-release != false }}
+        if: inputs.mode == 'publish'
         uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ env.VERSION }}
@@ -246,15 +359,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to npm (dry-run)
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'dry-run' }}
+        if: inputs.mode == 'dry-run'
         run: pnpm nx release publish --access public --dry-run
 
-      - name: Upgrade npm for OIDC Trusted Publisher support
-        if: ${{ github.event_name == 'workflow_call' || inputs.mode == 'publish' }}
-        run: npm install -g npm@latest
-
       - name: Publish to npm
-        if: ${{ github.event_name == 'workflow_call' || inputs.mode == 'publish' }}
+        # Real publish: workflow_dispatch mode=publish, workflow_dispatch mode=next, or schedule.
+        # Node 22 ships with npm ≥ 10.9, which natively supports OIDC Trusted Publisher
+        # + provenance — no pre-publish `npm install -g npm@latest` self-upgrade needed
+        # (that step is also flaky because npm can corrupt its own node_modules mid-upgrade).
+        if: |
+          github.event_name == 'schedule' ||
+          (github.event_name == 'workflow_dispatch' && (inputs.mode == 'publish' || inputs.mode == 'next'))
         run: |
           echo "Publishing with dist-tag: $DIST_TAG"
           for pkg in ${{ env.LIBRARY_PACKAGES }}; do
@@ -271,7 +386,7 @@ jobs:
               echo "- \`@ng-forge/$pkg@${{ env.VERSION }}\`"
             done
             echo ""
-            if [ "${{ inputs.create-github-release }}" != "false" ]; then
+            if [ "${{ inputs.mode }}" = "publish" ]; then
               echo "### Links:"
               echo "- [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }})"
               echo "- [npm](https://www.npmjs.com/package/@ng-forge/dynamic-forms/v/${{ env.VERSION }})"
