@@ -468,4 +468,64 @@ describe('Form Submission Integration', () => {
       });
     });
   });
+
+  describe('Nullable field submission payload', () => {
+    // Pins the promise from #341: a nullable field, left untouched by the user,
+    // reaches the submission action as `null` — not `""` or `undefined`.
+    it('should pass null from an untouched nullable field through to the submission action', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal<{ firstName: string; middleName: string | null; age: number | null }>({
+          firstName: 'Jane',
+          middleName: null,
+          age: null,
+        });
+        const formInstance = form(formValue);
+        mockFormSignal.set(formInstance);
+
+        let submittedPayload: { firstName: string; middleName: string | null; age: number | null } | undefined;
+        await submit(formInstance, async (f) => {
+          submittedPayload = f().value();
+          return undefined;
+        });
+
+        expect(submittedPayload).toEqual({ firstName: 'Jane', middleName: null, age: null });
+      });
+    });
+
+    // Pins the documented read-side asymmetry: once the user types into a nullable
+    // text field and then clears it, the submission payload carries `""`, not `null`.
+    // This is the Web IDL contract; treating it as a nullable round-trip would be a lie.
+    it('should pass "" (not null) when a nullable text field was typed then cleared', async () => {
+      await runInInjectionContext(injector, async () => {
+        // Simulate a user who typed then cleared: the model already reflects the "" state.
+        const formValue = signal<{ middleName: string | null }>({ middleName: '' });
+        const formInstance = form(formValue);
+        mockFormSignal.set(formInstance);
+
+        let submittedPayload: { middleName: string | null } | undefined;
+        await submit(formInstance, async (f) => {
+          submittedPayload = f().value();
+          return undefined;
+        });
+
+        expect(submittedPayload).toEqual({ middleName: '' });
+      });
+    });
+
+    it('should preserve an explicit non-null value on a nullable field through submission', async () => {
+      await runInInjectionContext(injector, async () => {
+        const formValue = signal<{ nickname: string | null }>({ nickname: 'Quincy' });
+        const formInstance = form(formValue);
+        mockFormSignal.set(formInstance);
+
+        let submittedPayload: { nickname: string | null } | undefined;
+        await submit(formInstance, async (f) => {
+          submittedPayload = f().value();
+          return undefined;
+        });
+
+        expect(submittedPayload).toEqual({ nickname: 'Quincy' });
+      });
+    });
+  });
 });

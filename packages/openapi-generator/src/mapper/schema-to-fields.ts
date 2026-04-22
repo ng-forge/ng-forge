@@ -210,12 +210,20 @@ function mapPropertyToField(
     logger.verbose(`Field '${fieldPath}': disabled (readOnly in schema)`);
   }
 
-  // nullable → nullable (OpenAPI 3.0 nullable:true, 3.1 type:[T, null])
+  // nullable detection covers three canonical OpenAPI / JSON Schema forms:
+  //   - 3.0: `nullable: true`
+  //   - 3.1: `type: [T, 'null']`
+  //   - 3.1 / JSON Schema: `oneOf` / `anyOf` with a `{ type: 'null' }` branch
   // Only emit on value-bearing field types; checkbox/toggle (BaseCheckedField, tri-state
   // deferred) and container/button/display types don't support the `nullable` flag.
   const schemaObj = prop.schema as Record<string, unknown>;
+  const hasNullBranch = (variants: unknown): boolean =>
+    Array.isArray(variants) && (variants as Array<Record<string, unknown>>).some((v) => v && v['type'] === 'null');
   const isNullable =
-    schemaObj['nullable'] === true || (Array.isArray(schemaObj['type']) && (schemaObj['type'] as unknown[]).includes('null'));
+    schemaObj['nullable'] === true ||
+    (Array.isArray(schemaObj['type']) && (schemaObj['type'] as unknown[]).includes('null')) ||
+    hasNullBranch(schemaObj['oneOf']) ||
+    hasNullBranch(schemaObj['anyOf']);
   if (isNullable && NULLABLE_SUPPORTED_FIELD_TYPES.has(finalType)) {
     field.nullable = true;
   } else if (isNullable) {

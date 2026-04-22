@@ -439,6 +439,30 @@ describe('mapSchemaToFields', () => {
     expect(options.map((o) => o.label)).not.toContain('Null');
   });
 
+  it('should detect nullable from oneOf with { type: "null" } branch', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        nick: { oneOf: [{ type: 'string' }, { type: 'null' }] },
+      },
+    } as unknown as SchemaObject;
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].nullable).toBe(true);
+  });
+
+  it('should detect nullable from anyOf with { type: "null" } branch', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        count: { anyOf: [{ type: 'integer' }, { type: 'null' }] },
+      },
+    } as unknown as SchemaObject;
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields[0].nullable).toBe(true);
+  });
+
   it('should map description to props.hint', () => {
     const schema: SchemaObject = {
       type: 'object',

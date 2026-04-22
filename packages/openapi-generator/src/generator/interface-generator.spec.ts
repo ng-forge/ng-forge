@@ -255,6 +255,30 @@ describe('generateInterface', () => {
     expect(result).toContain("country?: 'US' | 'UK' | null;");
   });
 
+  it('should handle oneOf with { type: "null" } as nullable union', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        nick: { oneOf: [{ type: 'string' }, { type: 'null' }] },
+      },
+    } as unknown as OpenAPIV3.SchemaObject;
+
+    const result = generateInterface(schema, defaultOptions);
+    expect(result).toContain('nick?: string | null;');
+  });
+
+  it('should handle anyOf with { type: "null" } as nullable union', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        count: { anyOf: [{ type: 'integer' }, { type: 'null' }] },
+      },
+    } as unknown as OpenAPIV3.SchemaObject;
+
+    const result = generateInterface(schema, defaultOptions);
+    expect(result).toContain('count?: number | null;');
+  });
+
   it('should handle oneOf as union type', () => {
     const schema: OpenAPIV3.SchemaObject = {
       type: 'object',

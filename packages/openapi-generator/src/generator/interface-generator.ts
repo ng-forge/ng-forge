@@ -196,6 +196,9 @@ function schemaToTsType(propertyName: string, schema: SchemaObject, parentName: 
     return types.join(' & ');
   }
 
+  // JSON Schema / OpenAPI 3.1 allow `type: 'null'` as a standalone branch
+  // (commonly seen inside oneOf / anyOf to express "X or null").
+  if (type === 'null') return 'null';
   if (type === 'string') return 'string';
   if (type === 'integer' || type === 'number') return 'number';
   if (type === 'boolean') return 'boolean';

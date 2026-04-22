@@ -1606,4 +1606,68 @@ describe('derivation-applicator', () => {
       expect(capturedContext!['formFieldState']).toBeDefined();
     });
   });
+
+  describe('nullable sources and targets', () => {
+    // A derivation function reading from a nullable field should see `null`,
+    // not a coerced empty string, when the source carries null.
+    it('should pass null to a derivation function when the source field is null', () => {
+      const { form, values } = createMockForm({ middleName: null, greeting: '' });
+      const formValueSignal = signal<Record<string, unknown>>({ middleName: null, greeting: '' });
+
+      const entry = createEntry('greeting', {
+        functionName: 'buildGreeting',
+        dependsOn: ['middleName'],
+      });
+
+      const captured: Array<unknown> = [];
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        derivationFunctions: {
+          buildGreeting: (ctx) => {
+            const fv = (ctx as Record<string, unknown>)['formValue'] as Record<string, unknown>;
+            captured.push(fv['middleName']);
+            // Behavior under test: emit different output for null vs non-null
+            return fv['middleName'] === null ? 'Hello, no-middle-name' : `Hello, ${fv['middleName']}`;
+          },
+        },
+        logger: createMockLogger(),
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      applyDerivations(createCollection([entry]), context);
+
+      expect(captured[0]).toBe(null);
+      expect(values.greeting).toBe('Hello, no-middle-name');
+    });
+
+    // A derivation writing null back into a nullable target should stick —
+    // the applicator shouldn't coerce null into '' or drop the write.
+    it('should preserve null when a derivation function returns null to a nullable target', () => {
+      const { form, values } = createMockForm({ clearFlag: true, middleName: 'Quincy' });
+      const formValueSignal = signal<Record<string, unknown>>({ clearFlag: true, middleName: 'Quincy' });
+
+      const entry = createEntry('middleName', {
+        functionName: 'clearIfFlagged',
+        dependsOn: ['clearFlag'],
+      });
+
+      const context: DerivationApplicatorContext = {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        derivationFunctions: {
+          clearIfFlagged: (ctx) => {
+            const fv = (ctx as Record<string, unknown>)['formValue'] as Record<string, unknown>;
+            return fv['clearFlag'] === true ? null : fv['middleName'];
+          },
+        },
+        logger: createMockLogger(),
+        derivationLogger: createMockDerivationLogger(),
+      };
+
+      applyDerivations(createCollection([entry]), context);
+
+      expect(values.middleName).toBe(null);
+    });
+  });
 });
