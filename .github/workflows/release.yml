@@ -106,7 +106,9 @@ jobs:
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'next')
     runs-on: ubuntu-latest
     outputs:
-      should_publish: ${{ steps.gate.outputs.should_publish }}
+      # Job output is the AND of "relevant commits exist" (gate) and "CI is green on
+      # that commit" (ci-check). Either failing means we skip the @next publish.
+      should_publish: ${{ steps.gate.outputs.should_publish == 'true' && steps.ci-check.outputs.ok != 'false' }}
       version: ${{ steps.gate.outputs.version }}
       sha: ${{ steps.gate.outputs.sha }}
     steps:
@@ -169,21 +171,33 @@ jobs:
           NEXT_MINOR=$(node -e "const [M,m,p]='${LAST_VERSION}'.split('.').map(Number); console.log(\`\${M}.\${m+1}.0\`)")
 
           # Monotonic counter per base version: 0.8.0-next.1, 0.8.0-next.2, ...
-          # Commit traceability is still recoverable via the publish timestamp + the
-          # npm provenance attestation (records exact SHA).
-          # We MUST succeed at querying npm here — fail loud rather than default to
-          # counter=1, which could clobber a real previous publish on a transient error.
-          if ! VERSIONS_JSON=$(npm view '@ng-forge/dynamic-forms' versions --json); then
-            echo "::error::npm registry lookup failed"
-            exit 1
-          fi
-          MAX_COUNTER=$(echo "$VERSIONS_JSON" \
-            | node -e "
-              const v=JSON.parse(require('fs').readFileSync(0,'utf8'));
-              const re=new RegExp('^${NEXT_MINOR}-next\\\\.(\\\\d+)\$');
-              const nums=(Array.isArray(v)?v:[v]).map(x=>{const m=re.exec(x);return m?+m[1]:-1}).filter(n=>n>=0);
-              console.log(nums.length?Math.max(...nums):0);
-            ")
+          # Query *every* library package and take the max — if one package failed
+          # to publish on a prior run the others advanced, and we must not collide
+          # with the highest existing counter anywhere. Commit traceability is still
+          # recoverable via the publish timestamp + the npm provenance attestation
+          # (records exact SHA).
+          # We MUST succeed at every package lookup — fail loud rather than default
+          # to counter=1, which could clobber a real previous publish on a transient error.
+          MAX_COUNTER=0
+          for pkg in ${{ env.LIBRARY_PACKAGES }}; do
+            if ! VERSIONS_JSON=$(npm view "@ng-forge/${pkg}" versions --json); then
+              echo "::error::npm registry lookup failed for @ng-forge/${pkg}"
+              exit 1
+            fi
+            # Regex-escape the base via env var inside Node — avoids leaving
+            # literal dots as wildcards in the pattern (0x8x0 would otherwise match).
+            PKG_MAX=$(echo "$VERSIONS_JSON" \
+              | NEXT_MINOR="$NEXT_MINOR" node -e "
+                const v=JSON.parse(require('fs').readFileSync(0,'utf8'));
+                const base=process.env.NEXT_MINOR.replace(/\\./g, '\\\\.');
+                const re=new RegExp('^'+base+'-next\\\\.(\\\\d+)\$');
+                const nums=(Array.isArray(v)?v:[v]).map(x=>{const m=re.exec(x);return m?+m[1]:-1}).filter(n=>n>=0);
+                console.log(nums.length?Math.max(...nums):0);
+              ")
+            if [ "$PKG_MAX" -gt "$MAX_COUNTER" ]; then
+              MAX_COUNTER=$PKG_MAX
+            fi
+          done
           COUNTER=$((MAX_COUNTER + 1))
           NEXT_VERSION="${NEXT_MINOR}-next.${COUNTER}"
 
@@ -192,6 +206,42 @@ jobs:
           echo "should_publish=true" >> "$GITHUB_OUTPUT"
           echo "version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
           echo "sha=${FULL_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify CI passed on the candidate commit
+        # Skip @next publishes when main's CI is red. The stable path already has this
+        # via the check-ci job; mirroring it here prevents a scheduled cron from
+        # smoke-testing broken code under the @next dist-tag.
+        # Sets ci-check.outputs.ok to 'false' on miss; the job's should_publish output
+        # ANDs that in. Uses `core.warning` (not setFailed) so the STEP succeeds and
+        # the output is actually emitted.
+        if: steps.gate.outputs.should_publish == 'true'
+        id: ci-check
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const sha = '${{ steps.gate.outputs.sha }}';
+            const { owner, repo } = context.repo;
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner, repo, workflow_id: 'ci.yml', head_sha: sha, per_page: 1
+            });
+            const run = runs.data.workflow_runs[0];
+            if (!run) {
+              core.warning(`No CI run found for ${sha} — skipping @next publish`);
+              core.setOutput('ok', 'false');
+              return;
+            }
+            if (run.status !== 'completed') {
+              core.warning(`CI for ${sha} still ${run.status} — skipping @next publish`);
+              core.setOutput('ok', 'false');
+              return;
+            }
+            if (run.conclusion !== 'success') {
+              core.warning(`CI for ${sha} concluded ${run.conclusion} — skipping @next publish`);
+              core.setOutput('ok', 'false');
+              return;
+            }
+            console.log(`✅ CI for ${sha} passed — proceeding with @next publish`);
+            core.setOutput('ok', 'true');
 
   release:
     name: Release Libraries
@@ -270,6 +320,10 @@ jobs:
         # For stable dispatch this builds the source already-bumped by /release.
         # For the @next path this builds unbumped sources; the next step rewrites both
         # source and dist package.jsons to the @next version.
+        # Assumes the build doesn't embed `package.json`'s `version` string into emitted
+        # JS (true for ng-packagr: version is only set on the dist manifest, not in code).
+        # If any source ever starts doing `import pkg from './package.json'` and exposes
+        # `pkg.version`, the dist would carry the unbumped value and the order needs to flip.
         run: pnpm nx run-many -t build -p ${{ env.LIBRARY_PACKAGES }}
 
       - name: Verify build outputs
