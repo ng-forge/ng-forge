@@ -43,7 +43,7 @@ We welcome several types of contributions:
 
 ### Prerequisites
 
-- **Node.js**: >=22.0.0 (use `.nvmrc` with nvm for automatic version switching)
+- **Node.js**: >=24.0.0 (use `.nvmrc` with nvm for automatic version switching)
 - **pnpm**: >=10.0.0
 - **Git**: Latest version
 
