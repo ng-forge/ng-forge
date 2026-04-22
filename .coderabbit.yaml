@@ -1,0 +1,173 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit configuration. Tuned for low noise on an Nx + Angular monorepo.
+# Docs: https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: en-US
+early_access: false
+tone_instructions: >
+  Be concise and direct. Skip pleasantries, poems, and motivational comments.
+  Only flag issues that are actionable. Prefer one well-reasoned comment over
+  several small style nits. Cite file:line when referencing code.
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  high_level_summary_placeholder: '@coderabbitai summary'
+  high_level_summary_in_walkthrough: true
+  auto_title_placeholder: '@coderabbitai'
+  auto_title_instructions: >
+    Use Angular conventional commit format: <type>(<scope>): <subject>.
+    Types: feat, fix, perf, refactor, docs, test, build, ci, chore, style, revert.
+    Scopes: core, forms, dynamic-forms, material, bootstrap, primeng, ionic,
+    mcp, docs, examples, release, deps, config. Lowercase, imperative, no period,
+    max 100 chars.
+  review_status: false
+  commit_status: true
+  fail_commit_status: false
+  collapse_walkthrough: true
+  changed_files_summary: true
+  sequence_diagrams: false
+  assess_linked_issues: false
+  related_issues: false
+  related_prs: false
+  suggested_labels: false
+  auto_apply_labels: false
+  suggested_reviewers: false
+  auto_assign_reviewers: false
+  poem: false
+
+  # Skip noisy / generated / vendored paths.
+  path_filters:
+    - '!**/pnpm-lock.yaml'
+    - '!**/package-lock.json'
+    - '!**/yarn.lock'
+    - '!**/dist/**'
+    - '!**/.angular/**'
+    - '!**/.nx/**'
+    - '!**/coverage/**'
+    - '!**/node_modules/**'
+    - '!**/__snapshots__/**'
+    - '!**/*.snap'
+    - '!**/*-snapshots/**' # Playwright screenshot folders
+    - '!**/test-results/**'
+    - '!**/playwright-report/**'
+    - '!**/*.min.js'
+    - '!**/*.min.css'
+    - '!**/CHANGELOG.md'
+
+  # Per-area guidance. Keep light — heavy instructions cause over-commenting.
+  path_instructions:
+    - path: 'packages/dynamic-forms/**'
+      instructions: >
+        Core library. Do NOT import from barrel files (index.ts) — import from
+        the specific file. Flag any new module-scoped mutable state (Maps,
+        caches, singletons outside DI) as SSR-unsafe. Effects must use
+        explicitEffect from ngxtension, not effect(). Components must set
+        ChangeDetection.OnPush. No `standalone: true` (default in v20+).
+    - path: 'packages/dynamic-forms-{material,bootstrap,primeng,ionic}/**'
+      instructions: >
+        UI adapters. May depend on core; core must NOT depend on adapters.
+        Cross-adapter changes should keep behavior consistent across all four.
+    - path: 'packages/dynamic-form-mcp/**'
+      instructions: >
+        MCP server mirrors the core library API. If a PR changes field types,
+        validators, field configuration options, or the form configuration
+        schema in `packages/dynamic-forms`, flag whether the MCP registry
+        under `packages/dynamic-form-mcp/src/registry/` was updated to match.
+    - path: 'apps/examples/sandbox/src/app/testing/**'
+      instructions: >
+        Playwright E2E specs. Do not suggest running --update-snapshots
+        locally; screenshots are generated in Docker only. Firefox has known
+        pre-existing flakiness — don't flag Firefox-only failures.
+    - path: 'apps/docs/**'
+      instructions: >
+        AnalogJS docs app with SSR. Route components use default exports.
+        Watch for module-scoped mutable state (SSR-unsafe).
+    - path: '**/*.spec.ts'
+      instructions: >
+        Vitest unit tests. Don't suggest adding tests for trivial getters or
+        re-exports.
+
+  abort_on_close: true
+
+  auto_review:
+    enabled: true
+    auto_incremental_review: false # biggest noise reducer — don't re-review every push
+    drafts: false
+    base_branches:
+      - main
+    ignore_title_keywords:
+      - 'WIP'
+      - 'DO NOT MERGE'
+      - 'DRAFT'
+      - 'wip'
+
+  finishing_touches:
+    docstrings:
+      enabled: false # repo style: avoid trivial docstrings
+    unit_tests:
+      enabled: false
+
+  tools:
+    # Keep security + code-correctness tools, drop prose/style noise.
+    eslint:
+      enabled: true
+    biome:
+      enabled: false
+    prettier:
+      enabled: false # CI runs prettier; don't double-report
+    gitleaks:
+      enabled: true
+    semgrep:
+      enabled: true
+    actionlint:
+      enabled: true
+    yamllint:
+      enabled: true
+    shellcheck:
+      enabled: true
+    markdownlint:
+      enabled: false
+    languagetool:
+      enabled: false # prose nitpicks
+    hadolint:
+      enabled: true # repo has Dockerfiles for E2E
+    checkov:
+      enabled: false
+    detekt:
+      enabled: false
+    rubocop:
+      enabled: false
+    swiftlint:
+      enabled: false
+    phpstan:
+      enabled: false
+    golangci-lint:
+      enabled: false
+    pmd:
+      enabled: false
+    cppcheck:
+      enabled: false
+    circleci:
+      enabled: false
+    ast-grep:
+      essential_rules: true
+
+chat:
+  auto_reply: false # only respond when @coderabbitai is mentioned
+
+knowledge_base:
+  opt_out: false
+  learnings:
+    scope: auto
+  issues:
+    scope: auto
+  pull_requests:
+    scope: auto
+
+code_generation:
+  docstrings:
+    language: en-US
+  unit_tests:
+    language: en-US
