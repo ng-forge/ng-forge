@@ -129,19 +129,20 @@ ng-forge-generator --spec openapi.yaml --output src/generated
 
 ### Options
 
-| Option                 | Description                                                                              |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| `--spec <path>`        | Path to OpenAPI spec file (required)                                                     |
-| `--output <path>`      | Output directory for generated files (required)                                          |
-| `--interactive <mode>` | `full` (prompt for endpoints + ambiguous types) or `none` (auto-select). Default: `full` |
-| `--endpoints <list>`   | Comma-separated endpoints, e.g. `"POST:/users,PUT:/users/{id}"`                          |
-| `--read-only`          | Generate GET endpoint forms with all fields disabled                                     |
-| `--watch`              | Watch spec file for changes and regenerate                                               |
-| `--config <path>`      | Directory for `.ng-forge-generator.json` config (defaults to `--output`)                 |
-| `--dry-run`            | List files that would be generated without writing them                                  |
-| `--skip-existing`      | Skip files that already exist on disk                                                    |
-| `--verbose`            | Show detailed output including field mapping decisions                                   |
-| `--quiet`              | Suppress info output; still shows success summary, warnings, and errors                  |
+| Option                     | Description                                                                                  |
+| -------------------------- | -------------------------------------------------------------------------------------------- |
+| `--spec <path>`            | Path to OpenAPI spec file (required)                                                         |
+| `--output <path>`          | Output directory for generated files (required)                                              |
+| `--interactive <mode>`     | `full` (prompt for endpoints + ambiguous types) or `none` (auto-select). Default: `full`     |
+| `--endpoints <list>`       | Comma-separated endpoints, e.g. `"POST:/users,PUT:/users/{id}"`                              |
+| `--read-only`              | Generate GET endpoint forms with all fields disabled                                         |
+| `--barrel-extension <ext>` | Extension used in barrel file exports. Default: empty (no extension). Use `.js` for Node ESM |
+| `--watch`                  | Watch spec file for changes and regenerate                                                   |
+| `--config <path>`          | Directory for `.ng-forge-generator.json` config (defaults to `--output`)                     |
+| `--dry-run`                | List files that would be generated without writing them                                      |
+| `--skip-existing`          | Skip files that already exist on disk                                                        |
+| `--verbose`                | Show detailed output including field mapping decisions                                       |
+| `--quiet`                  | Suppress info output; still shows success summary, warnings, and errors                      |
 
 ### Interactive Modes
 
@@ -163,6 +164,9 @@ ng-forge-generator --spec openapi.yaml --output src/generated \
 
 # Generate GET endpoints with disabled (read-only) fields
 ng-forge-generator --spec openapi.yaml --output src/generated --interactive none --read-only
+
+# Node ESM / moduleResolution nodenext — emit .js extensions in barrel files
+ng-forge-generator --spec openapi.yaml --output src/generated --barrel-extension .js
 
 # Preview without writing
 ng-forge-generator --spec openapi.yaml --output src/generated --dry-run
@@ -288,6 +292,7 @@ A `.ng-forge-generator.json` config file is saved in the output directory (or th
 - **Selected endpoints** — which `METHOD:/path` pairs to generate
 - **Field type decisions** — ambiguous field type choices (e.g., `"registerUser.acceptTerms": "checkbox"`)
 - **Read-only flag** — whether GET endpoint fields are disabled
+- **Barrel extension** — extension used in generated `index.ts` re-exports (empty by default)
 
 This enables reproducible non-interactive re-runs. On subsequent runs, the generator reuses saved decisions without prompting.
 
@@ -308,6 +313,18 @@ This enables reproducible non-interactive re-runs. On subsequent runs, the gener
 
 - **With `operationId`**: kebab-cased operationId (e.g., `createPet` -> `create-pet.form.ts`)
 - **Without `operationId`**: method + path (e.g., `POST /users/register` -> `post-users-register.form.ts`)
+
+### Barrel Exports
+
+By default, generated `index.ts` barrel files re-export modules without a file extension:
+
+```typescript
+// forms/index.ts
+export * from './create-pet.form';
+export * from './update-pet.form';
+```
+
+This matches the typical Angular app setup (`moduleResolution: bundler`). For Node ESM consumers running with `moduleResolution: node16` or `nodenext`, pass `--barrel-extension .js` to emit fully-qualified ESM imports.
 
 ## Programmatic API
 
@@ -348,8 +365,9 @@ generateFormConfig(fields: FieldConfig[], options: FormConfigGeneratorOptions): 
 // Generate a TypeScript interface source string from a schema
 generateInterface(schema: SchemaObject, options: InterfaceGeneratorOptions): string
 
-// Generate an index.ts barrel file
-generateBarrel(fileNames: string[]): string
+// Generate an index.ts barrel file. `options.extension` controls the re-export
+// suffix (default: '' — no extension; use '.js' for Node ESM/nodenext).
+generateBarrel(fileNames: string[], options?: BarrelOptions): string
 ```
 
 ### I/O

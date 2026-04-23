@@ -82,6 +82,14 @@ describe('registerGenerateOptions', () => {
     const readOnlyOption = program.options.find((opt) => opt.long === '--read-only');
     expect(readOnlyOption).toBeDefined();
   });
+
+  it('should register --barrel-extension option', () => {
+    const program = new Command();
+    registerGenerateOptions(program);
+
+    const barrelExtOption = program.options.find((opt) => opt.long === '--barrel-extension');
+    expect(barrelExtOption).toBeDefined();
+  });
 });
 
 describe('filterEndpoints', () => {

@@ -43,10 +43,12 @@ describe('Basic Pipeline', () => {
     expect(types).toContain('export interface CreateUserFormValue');
 
     const formBarrel = await readGenerated(outputDir, 'forms', 'index.ts');
-    expect(formBarrel).toContain("from './create-user.form.js'");
+    expect(formBarrel).toContain("from './create-user.form'");
+    expect(formBarrel).not.toContain('.js');
 
     const typeBarrel = await readGenerated(outputDir, 'types', 'index.ts');
-    expect(typeBarrel).toContain("from './create-user.types.js'");
+    expect(typeBarrel).toContain("from './create-user.types'");
+    expect(typeBarrel).not.toContain('.js');
   });
 
   it('should generate correct required/optional interface properties', async () => {
