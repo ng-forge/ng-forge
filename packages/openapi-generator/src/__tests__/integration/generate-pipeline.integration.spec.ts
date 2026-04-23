@@ -68,6 +68,52 @@ describe('Basic Pipeline', () => {
     expect(config['decisions']).toBeDefined();
   });
 
+  it('should omit barrelExtension from config when using the default', async () => {
+    await generate('basic-post.yaml');
+
+    const config = await readConfigFile(outputDir);
+    // Default (empty) state is representable as "field absent" so users can tell
+    // apart "never configured" from "explicitly empty".
+    expect(config['barrelExtension']).toBeUndefined();
+  });
+
+  it('should emit .js suffixes and persist barrelExtension when requested', async () => {
+    await generate('basic-post.yaml', { barrelExtension: '.js' });
+
+    const formBarrel = await readGenerated(outputDir, 'forms', 'index.ts');
+    expect(formBarrel).toContain("from './create-user.form.js'");
+
+    const config = await readConfigFile(outputDir);
+    expect(config['barrelExtension']).toBe('.js');
+  });
+
+  it('should honor saved barrelExtension on re-run without the flag', async () => {
+    // First run: opt into .js and persist.
+    await generate('basic-post.yaml', { barrelExtension: '.js' });
+    // Second run: no flag — must reuse the saved value, not fall back to default.
+    await generate('basic-post.yaml');
+
+    const formBarrel = await readGenerated(outputDir, 'forms', 'index.ts');
+    expect(formBarrel).toContain("from './create-user.form.js'");
+
+    const config = await readConfigFile(outputDir);
+    expect(config['barrelExtension']).toBe('.js');
+  });
+
+  it('should clear saved barrelExtension when explicitly set to empty', async () => {
+    // Prime a persisted .js value.
+    await generate('basic-post.yaml', { barrelExtension: '.js' });
+    // Explicit reset.
+    await generate('basic-post.yaml', { barrelExtension: '' });
+
+    const formBarrel = await readGenerated(outputDir, 'forms', 'index.ts');
+    expect(formBarrel).toContain("from './create-user.form'");
+    expect(formBarrel).not.toContain('.js');
+
+    const config = await readConfigFile(outputDir);
+    expect(config['barrelExtension']).toBeUndefined();
+  });
+
   it('should produce a form file that compiles against the published types', async () => {
     await generate('basic-post.yaml');
 

@@ -129,20 +129,20 @@ ng-forge-generator --spec openapi.yaml --output src/generated
 
 ### Options
 
-| Option                     | Description                                                                                  |
-| -------------------------- | -------------------------------------------------------------------------------------------- |
-| `--spec <path>`            | Path to OpenAPI spec file (required)                                                         |
-| `--output <path>`          | Output directory for generated files (required)                                              |
-| `--interactive <mode>`     | `full` (prompt for endpoints + ambiguous types) or `none` (auto-select). Default: `full`     |
-| `--endpoints <list>`       | Comma-separated endpoints, e.g. `"POST:/users,PUT:/users/{id}"`                              |
-| `--read-only`              | Generate GET endpoint forms with all fields disabled                                         |
-| `--barrel-extension <ext>` | Extension used in barrel file exports. Default: empty (no extension). Use `.js` for Node ESM |
-| `--watch`                  | Watch spec file for changes and regenerate                                                   |
-| `--config <path>`          | Directory for `.ng-forge-generator.json` config (defaults to `--output`)                     |
-| `--dry-run`                | List files that would be generated without writing them                                      |
-| `--skip-existing`          | Skip files that already exist on disk                                                        |
-| `--verbose`                | Show detailed output including field mapping decisions                                       |
-| `--quiet`                  | Suppress info output; still shows success summary, warnings, and errors                      |
+| Option                     | Description                                                                                                                                   |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--spec <path>`            | Path to OpenAPI spec file (required)                                                                                                          |
+| `--output <path>`          | Output directory for generated files (required)                                                                                               |
+| `--interactive <mode>`     | `full` (prompt for endpoints + ambiguous types) or `none` (auto-select). Default: `full`                                                      |
+| `--endpoints <list>`       | Comma-separated endpoints, e.g. `"POST:/users,PUT:/users/{id}"`                                                                               |
+| `--read-only`              | Generate GET endpoint forms with all fields disabled                                                                                          |
+| `--barrel-extension <ext>` | Extension in barrel re-exports. Accepts `""` (default — no extension) or a dot-prefixed value like `".js"` (for Node ESM). Pass `""` to reset |
+| `--watch`                  | Watch spec file for changes and regenerate                                                                                                    |
+| `--config <path>`          | Directory for `.ng-forge-generator.json` config (defaults to `--output`)                                                                      |
+| `--dry-run`                | List files that would be generated without writing them                                                                                       |
+| `--skip-existing`          | Skip files that already exist on disk                                                                                                         |
+| `--verbose`                | Show detailed output including field mapping decisions                                                                                        |
+| `--quiet`                  | Suppress info output; still shows success summary, warnings, and errors                                                                       |
 
 ### Interactive Modes
 
@@ -325,6 +325,10 @@ export * from './update-pet.form';
 ```
 
 This matches the typical Angular app setup (`moduleResolution: bundler`). For Node ESM consumers running with `moduleResolution: node16` or `nodenext`, pass `--barrel-extension .js` to emit fully-qualified ESM imports.
+
+The selected extension persists in `.ng-forge-generator.json` (only when non-empty) so future runs keep your choice. To clear a previously-saved `.js` and return to the default, pass `--barrel-extension ""` or delete the `barrelExtension` key from the config file.
+
+> **Migrating from pre-1.x:** Earlier versions emitted `.js` suffixes by default. Upgrading will change generated barrel output for users who had not explicitly configured this — pass `--barrel-extension .js` on your next run to preserve the old behavior.
 
 ## Programmatic API
 

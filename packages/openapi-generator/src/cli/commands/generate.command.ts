@@ -60,7 +60,13 @@ export function registerGenerateOptions(cmd: Command): void {
     .option('--skip-existing', 'Skip files that already exist on disk')
     .option(
       '--barrel-extension <ext>',
-      'Extension used in barrel file exports (e.g. ".js" for Node ESM / moduleResolution node16|nodenext). Defaults to empty (no extension) for bundler/Angular setups',
+      'Extension used in barrel file exports. Accepts "" (default — no extension, for bundler/Angular setups) or a dot-prefixed extension like ".js" (for Node ESM / moduleResolution node16|nodenext). Pass "" to clear a previously-saved value',
+      (value: string) => {
+        if (value !== '' && !/^\.[a-z0-9]+$/i.test(value)) {
+          throw new Error(`Invalid --barrel-extension '${value}'. Expected "" or a dot-prefixed extension like ".js".`);
+        }
+        return value;
+      },
     )
     .option('--verbose', 'Show detailed output including field mapping decisions')
     .option('--quiet', 'Suppress info output; still shows success summary, warnings, and errors')
@@ -315,7 +321,10 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
     endpoints: configEndpoints,
     decisions: updatedDecisions,
     readOnly: options.readOnly,
-    barrelExtension,
+    // Only persist when non-default so the empty (default) state is representable
+    // as "field absent" — letting users clear a previously-saved .js setting by
+    // passing --barrel-extension "" (or deleting the key manually).
+    ...(barrelExtension !== '' && { barrelExtension }),
   };
   await saveConfig(configDir, config);
 
