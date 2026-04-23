@@ -7,7 +7,12 @@ pre-commit:
       stage_fixed: true
     format:
       glob: '*.{ts,js,json,md,html,scss,css}'
+      exclude: 'graphify-out/**'
       run: pnpm prettier --write {staged_files}
+      stage_fixed: true
+    sanitize-graphify-paths:
+      glob: 'graphify-out/**/*.{md,json,html}'
+      run: perl -i -pe "s{\Q$(git rev-parse --show-toplevel)\E/}{}g" {staged_files}
       stage_fixed: true
 
 commit-msg:

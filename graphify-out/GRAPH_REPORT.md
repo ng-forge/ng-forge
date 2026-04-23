@@ -225,15 +225,15 @@
 ## Surprising Connections (you probably didn't know these)
 
 - `withMaterialFields()` --cites--> `@ng-forge/dynamic-forms-material README` [INFERRED]
-  /Users/antimprisacaru/WebstormProjects/dynamic-form-lib/ng-forge/packages/dynamic-forms-material/src/lib/providers/material-providers.ts → packages/dynamic-forms-material/README.md
+  packages/dynamic-forms-material/src/lib/providers/material-providers.ts → packages/dynamic-forms-material/README.md
 - `buttonFieldMapper()` --semantically_similar_to--> `Ionic Specific Button Mappers (re-export)` [INFERRED] [semantically similar]
-  /Users/antimprisacaru/WebstormProjects/dynamic-form-lib/ng-forge/packages/dynamic-forms-ionic/src/lib/fields/button/ionic-button.mapper.ts → packages/dynamic-forms-ionic/src/lib/fields/button/ionic-specific-button.mapper.ts
+  packages/dynamic-forms-ionic/src/lib/fields/button/ionic-button.mapper.ts → packages/dynamic-forms-ionic/src/lib/fields/button/ionic-specific-button.mapper.ts
 - `IonicButtonFieldComponent` --semantically_similar_to--> `MatInputFieldComponent` [INFERRED] [semantically similar]
-  /Users/antimprisacaru/WebstormProjects/dynamic-form-lib/ng-forge/packages/dynamic-forms-ionic/src/lib/fields/button/ionic-button.component.ts → packages/dynamic-forms-material/src/lib/fields/input/mat-input.component.ts
+  packages/dynamic-forms-ionic/src/lib/fields/button/ionic-button.component.ts → packages/dynamic-forms-material/src/lib/fields/input/mat-input.component.ts
 - `parseOpenAPISpec()` --semantically_similar_to--> `logger.spec.ts - logger tests` [INFERRED] [semantically similar]
-  /Users/antimprisacaru/WebstormProjects/dynamic-form-lib/ng-forge/packages/openapi-generator/src/parser/openapi-parser.ts → packages/openapi-generator/src/utils/logger.spec.ts
+  packages/openapi-generator/src/parser/openapi-parser.ts → packages/openapi-generator/src/utils/logger.spec.ts
 - `withPrimeNGFields()` --cites--> `withPrimeNGFields setup example` [EXTRACTED]
-  /Users/antimprisacaru/WebstormProjects/dynamic-form-lib/ng-forge/packages/dynamic-forms-primeng/src/lib/providers/primeng-providers.ts → packages/dynamic-forms-primeng/README.md
+  packages/dynamic-forms-primeng/src/lib/providers/primeng-providers.ts → packages/dynamic-forms-primeng/README.md
 
 ## Hyperedges (group relationships)
 
