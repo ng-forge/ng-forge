@@ -54,5 +54,9 @@ export default {
     'header-max-length': [2, 'always', 100],
     'body-leading-blank': [2, 'always'],
     'footer-leading-blank': [2, 'always'],
+    // Allow the Conventional Commits breaking-change marker (e.g. `feat!: ...`).
+    // The Angular preset disables this in favor of a `BREAKING CHANGE:` footer;
+    // we enable both so PR titles can flag breaking changes inline.
+    'subject-exclamation-mark': [0],
   },
 };
