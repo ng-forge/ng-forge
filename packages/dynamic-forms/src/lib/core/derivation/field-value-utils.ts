@@ -182,10 +182,10 @@ function setFieldValue(
 export function warnMissingField(fieldKey: string, logger?: Logger, warningTracker?: DerivationWarningTracker): void {
   // If tracker is provided, check if we've already warned about this field
   if (warningTracker) {
-    if (warningTracker.warnedFields.has(fieldKey)) {
+    if (warningTracker.warnedKeys.has(fieldKey)) {
       return;
     }
-    warningTracker.warnedFields.add(fieldKey);
+    warningTracker.warnedKeys.add(fieldKey);
   }
 
   logger?.warn(

@@ -1,18 +1,13 @@
 import { InjectionToken } from '@angular/core';
+import { createWarningTracker, WarningTracker } from '../../utils/warning-tracker';
 
 /**
  * Tracks fields that have already been warned about to prevent log spam.
  * Scoped to a single form instance via DI.
  *
- * This replaces the module-level Set to avoid SSR/testing issues where
- * warnings from one form instance would suppress warnings for all others.
- *
  * @public
  */
-export interface DerivationWarningTracker {
-  /** Set of field keys we've already warned about */
-  warnedFields: Set<string>;
-}
+export type DerivationWarningTracker = WarningTracker;
 
 /**
  * Injection token for the derivation warning tracker.
@@ -22,16 +17,12 @@ export interface DerivationWarningTracker {
  */
 export const DERIVATION_WARNING_TRACKER = new InjectionToken<DerivationWarningTracker>('DerivationWarningTracker', {
   providedIn: null,
-  factory: () => ({ warnedFields: new Set<string>() }),
+  factory: createWarningTracker,
 });
 
 /**
  * Creates a fresh warning tracker instance.
  *
- * @returns A new DerivationWarningTracker with an empty warnedFields Set
- *
  * @public
  */
-export function createDerivationWarningTracker(): DerivationWarningTracker {
-  return { warnedFields: new Set<string>() };
-}
+export const createDerivationWarningTracker = createWarningTracker;

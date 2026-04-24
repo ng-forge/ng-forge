@@ -19,69 +19,15 @@ export const INITIALIZATION_TIMEOUT_MS = new InjectionToken<number>('INITIALIZAT
 /**
  * Creates an observable that tracks component initialization progress.
  *
- * This function returns an observable that emits when all expected components
- * have been initialized. It uses the scan operator to accumulate initialization
- * events and emits true when the count reaches the expected total.
- *
- * @param eventBus - The event bus instance to subscribe to
- * @param expectedCount - Total number of components expected to initialize
- * @returns Observable<boolean> that emits true when all components are initialized
- *
- * @example
- * ```typescript
- * const eventBus = inject(EventBus);
- * const totalComponents = 5; // 1 dynamic-form + 2 pages + 1 row + 1 group
- *
- * const allInitialized$ = createInitializationTracker(eventBus, totalComponents);
- *
- * allInitialized$.subscribe(isComplete => {
- *   if (isComplete) {
- *     console.log('All components are initialized!');
- *   }
- * });
- * ```
+ * Emits once with `true` when `expectedCount` component-initialized events have
+ * been seen on the bus. Used internally by {@link setupInitializationTracking}
+ * and kept as a named export for focused unit testing.
  */
 export function createInitializationTracker(eventBus: EventBus, expectedCount: number): Observable<boolean> {
   return eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
     scan((count) => count + 1, 0),
     map((currentCount) => currentCount >= expectedCount),
     filter((isComplete) => isComplete),
-  );
-}
-
-/**
- * Creates an observable that tracks component initialization progress with detailed status.
- *
- * This function returns an observable that emits the current count and completion status
- * for each initialization event, providing more granular tracking capabilities.
- *
- * @param eventBus - The event bus instance to subscribe to
- * @param expectedCount - Total number of components expected to initialize
- * @returns Observable with current count, expected count, and completion status
- *
- * @example
- * ```typescript
- * const eventBus = inject(EventBus);
- * const totalComponents = 5;
- *
- * const progress$ = createDetailedInitializationTracker(eventBus, totalComponents);
- *
- * progress$.subscribe(({ currentCount, expectedCount, isComplete }) => {
- *   console.log(`Progress: ${currentCount}/${expectedCount} (${isComplete ? 'Complete' : 'In Progress'})`);
- * });
- * ```
- */
-export function createDetailedInitializationTracker(
-  eventBus: EventBus,
-  expectedCount: number,
-): Observable<{ currentCount: number; expectedCount: number; isComplete: boolean }> {
-  return eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
-    scan((count) => count + 1, 0),
-    map((currentCount) => ({
-      currentCount,
-      expectedCount,
-      isComplete: currentCount >= expectedCount,
-    })),
   );
 }
 
@@ -105,9 +51,6 @@ export interface InitializationTrackingOptions {
  * before emitting its initialization event. On timeout, a warning is logged
  * and true is emitted as a best-effort fallback.
  *
- * @param options - Configuration options for initialization tracking
- * @returns Observable<boolean> that emits true when all components are initialized
- *
  * @example
  * ```typescript
  * const eventBus = inject(EventBus);
@@ -130,18 +73,15 @@ export function setupInitializationTracking(options: InitializationTrackingOptio
   return toObservable(totalComponentsCount, { injector }).pipe(
     take(1),
     switchMap((count) => {
-      let tracking$: Observable<boolean>;
-
-      if (count === 1) {
-        // Only dynamic-form component, emit immediately when it initializes
-        tracking$ = eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
-          filter((event) => event.componentType === 'dynamic-form' && event.componentId === componentId),
-          map(() => true),
-          take(1),
-        );
-      } else {
-        tracking$ = createInitializationTracker(eventBus, count);
-      }
+      const tracking$: Observable<boolean> =
+        count === 1
+          ? // Only dynamic-form component, emit immediately when it initializes
+            eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
+              filter((event) => event.componentType === 'dynamic-form' && event.componentId === componentId),
+              map(() => true),
+              take(1),
+            )
+          : createInitializationTracker(eventBus, count);
 
       // Timeout guard: emit best-effort true if a container throws before initializing
       return tracking$.pipe(
