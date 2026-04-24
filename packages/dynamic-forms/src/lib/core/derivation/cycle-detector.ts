@@ -1,4 +1,4 @@
-import { isDevMode } from '@angular/core';
+import { DEV_MODE } from '../../utils/dev-mode';
 import { CycleDetectionResult, DerivationCollection } from './derivation-types';
 import { Logger } from '../../providers/features/logger/logger.interface';
 
@@ -372,7 +372,7 @@ export function validateNoCycles(collection: DerivationCollection, logger?: Logg
   }
 
   // Warn about bidirectional patterns in dev mode
-  if (isDevMode() && result.bidirectionalPairs && result.bidirectionalPairs.length > 0 && logger) {
+  if (DEV_MODE && result.bidirectionalPairs && result.bidirectionalPairs.length > 0 && logger) {
     logger.warn(
       '[Derivation] Bidirectional derivation patterns detected. ' +
         'These patterns stabilize via equality checks, but may oscillate with floating-point values ' +

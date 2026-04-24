@@ -1,4 +1,4 @@
-import { isDevMode } from '@angular/core';
+import { DEV_MODE } from '../../utils/dev-mode';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { BaseValueField } from '../../definitions/base/base-value-field';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
@@ -81,7 +81,7 @@ export function applyPropertyOverrides(inputs: Record<string, unknown>, override
     // Dev-mode check: warn only when a known standard field property is missing from inputs,
     // which likely indicates a typo. Dynamic/custom keys are intentionally skipped to avoid
     // false positives for properties added by derivations that aren't in the initial config.
-    if (isDevMode()) {
+    if (DEV_MODE) {
       const topLevelKey = dotIndex === -1 ? key : key.substring(0, dotIndex);
       if (KNOWN_FIELD_PROPERTIES.has(topLevelKey) && !(topLevelKey in inputs)) {
         console.warn(

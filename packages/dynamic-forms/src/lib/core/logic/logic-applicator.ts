@@ -1,5 +1,5 @@
-import { isDevMode } from '@angular/core';
 import { disabled, hidden, readonly, required, LogicFn } from '@angular/forms/signals';
+import { DEV_MODE } from '../../utils/dev-mode';
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import {
   LogicConfig,
@@ -45,7 +45,7 @@ export function applyLogic<TValue>(config: LogicConfig, fieldPath: SchemaPath<TV
 
   // Guard against unrecognized logic types that may be added in the future.
   if (!isStateLogicConfig(config)) {
-    if (isDevMode()) {
+    if (DEV_MODE) {
       console.warn(
         `[Dynamic Forms] Unrecognized logic config type '${(config as { type: string }).type}' in applyLogic. ` +
           'This config will be ignored. If this is a new logic type, ensure it is handled explicitly.',

@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { computed, DestroyRef, inject, InjectionToken, Injector, isDevMode, isSignal, Signal, untracked } from '@angular/core';
+import { computed, DestroyRef, inject, InjectionToken, Injector, isSignal, Signal, untracked } from '@angular/core';
+import { DEV_MODE } from '../../utils/dev-mode';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FieldTree } from '@angular/forms/signals';
 import {
@@ -121,8 +122,10 @@ export class DerivationOrchestrator {
       }
 
       validateNoCycles(collection, this.logger);
-      this.warnAboutWildcardDependencies(collection.entries, fields.length);
-      this.warnAboutMisconfiguredReEngagement(collection.entries);
+      if (DEV_MODE) {
+        this.warnAboutWildcardDependencies(collection.entries, fields.length);
+        this.warnAboutMisconfiguredReEngagement(collection.entries);
+      }
 
       return collection;
     });
@@ -508,8 +511,6 @@ export class DerivationOrchestrator {
   }
 
   private warnAboutWildcardDependencies(entries: DerivationEntry[], fieldCount: number): void {
-    if (!isDevMode()) return;
-
     // Find entries with wildcard dependency
     const wildcardEntries = entries.filter((entry) => entry.dependsOn.includes('*'));
     if (wildcardEntries.length === 0) return;
@@ -542,8 +543,6 @@ export class DerivationOrchestrator {
    * `stopOnUserOverride` is enabled — without it, `reEngageOnDependencyChange` is a no-op.
    */
   private warnAboutMisconfiguredReEngagement(entries: DerivationEntry[]): void {
-    if (!isDevMode()) return;
-
     const misconfigured = entries.filter((entry) => entry.reEngageOnDependencyChange && !entry.stopOnUserOverride);
     if (misconfigured.length === 0) return;
 

@@ -1,4 +1,5 @@
-import { computed, DestroyRef, inject, InjectionToken, Injector, isDevMode, isSignal, Signal, untracked } from '@angular/core';
+import { computed, DestroyRef, inject, InjectionToken, Injector, isSignal, Signal, untracked } from '@angular/core';
+import { DEV_MODE } from '../../utils/dev-mode';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import {
@@ -107,7 +108,9 @@ export class PropertyDerivationOrchestrator {
         config.store.registerField(entry.fieldKey);
       }
 
-      this.warnAboutWildcardDependencies(collection.entries, fields?.length ?? 0);
+      if (DEV_MODE) {
+        this.warnAboutWildcardDependencies(collection.entries, fields?.length ?? 0);
+      }
     });
 
     this.setupOnChangeStream();
@@ -224,8 +227,6 @@ export class PropertyDerivationOrchestrator {
   }
 
   private warnAboutWildcardDependencies(entries: PropertyDerivationEntry[], fieldCount: number): void {
-    if (!isDevMode()) return;
-
     const implicitWildcards = entries.filter(
       (entry) =>
         entry.dependsOn.includes('*') &&
