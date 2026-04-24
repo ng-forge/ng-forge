@@ -11,20 +11,17 @@ import { CustomFunctionScope } from '../expressions/custom-function-types';
 const FORM_VALUE_ACCESS_PATTERN = /\bformValue\s*(?:\.|\[)/;
 
 /**
- * Regular expressions to extract field paths from formValue expressions.
+ * Combined regex for extracting field paths from formValue expressions.
  *
- * Enhanced to capture full nested paths including dot notation chains:
- * - formValue.fieldName → captures 'fieldName'
- * - formValue.parent.child.grandchild → captures 'parent.child.grandchild'
- * - formValue['field-name'] → captures 'field-name'
- * - formValue["field.with.dots"] → captures 'field.with.dots'
+ * Captures one of three groups per match:
+ * - group 1: dot notation (formValue.parent.child) — JS identifier chars only
+ * - group 2: single-quoted bracket (formValue['field-name']) — allows `-`
+ * - group 3: double-quoted bracket (formValue["field-name"]) — allows `-`
  *
  * Note: Computed property access (formValue[variableName]) is NOT supported
  * and must use explicit dependsOn configuration.
  */
-const FORM_VALUE_DOT_PATTERN = /\bformValue\.([\w.]+)/g;
-const FORM_VALUE_BRACKET_SINGLE_PATTERN = /\bformValue\s*\[\s*'([\w.-]+)'\s*\]/g;
-const FORM_VALUE_BRACKET_DOUBLE_PATTERN = /\bformValue\s*\[\s*"([\w.-]+)"\s*\]/g;
+const FORM_VALUE_PATTERN = /\bformValue\s*(?:\.([\w.]+)|\[\s*'([\w.-]+)'\s*\]|\[\s*"([\w.-]+)"\s*\])/g;
 
 /**
  * Context for cross-field detection, providing access to function scope information.
@@ -172,36 +169,13 @@ export function extractStringDependencies(expression: string): string[] {
  * - 'formValue.simple' → adds 'simple'
  */
 function extractFromExpressionString(expression: string, deps: Set<string>): void {
-  // Extract from dot notation: formValue.fieldName or formValue.parent.child.grandchild
-  const dotMatches = expression.matchAll(FORM_VALUE_DOT_PATTERN);
-  for (const match of dotMatches) {
-    const fullPath = match[1];
+  for (const match of expression.matchAll(FORM_VALUE_PATTERN)) {
+    const fullPath = match[1] ?? match[2] ?? match[3];
+    if (!fullPath) continue;
     // Always add the root field (first segment) as the primary dependency
     const rootField = fullPath.split('.')[0];
     deps.add(rootField);
     // Also add the full path for more precise dependency tracking if nested
-    if (fullPath.includes('.')) {
-      deps.add(fullPath);
-    }
-  }
-
-  // Extract from bracket notation with single quotes: formValue['fieldName']
-  const bracketSingleMatches = expression.matchAll(FORM_VALUE_BRACKET_SINGLE_PATTERN);
-  for (const match of bracketSingleMatches) {
-    const fullPath = match[1];
-    const rootField = fullPath.split('.')[0];
-    deps.add(rootField);
-    if (fullPath.includes('.')) {
-      deps.add(fullPath);
-    }
-  }
-
-  // Extract from bracket notation with double quotes: formValue["fieldName"]
-  const bracketDoubleMatches = expression.matchAll(FORM_VALUE_BRACKET_DOUBLE_PATTERN);
-  for (const match of bracketDoubleMatches) {
-    const fullPath = match[1];
-    const rootField = fullPath.split('.')[0];
-    deps.add(rootField);
     if (fullPath.includes('.')) {
       deps.add(fullPath);
     }
