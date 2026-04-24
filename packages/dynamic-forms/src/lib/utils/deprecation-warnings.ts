@@ -16,6 +16,6 @@ import { DEV_MODE } from './dev-mode';
 export function warnDeprecated(logger: Logger, tracker: DeprecationWarningTracker, id: string, message: string): void {
   if (DEV_MODE && !tracker.warnedKeys.has(id)) {
     tracker.warnedKeys.add(id);
-    logger.warn(`[Dynamic Forms] DEPRECATED: ${message}`);
+    logger.warn(`DEPRECATED: ${message}`);
   }
 }

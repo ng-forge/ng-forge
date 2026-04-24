@@ -163,7 +163,7 @@ export class EventBus {
     try {
       this.pipeline$.next(event);
     } catch (err: unknown) {
-      this.logger.error('[Dynamic Forms] Exception in EventBus subscriber during dispatch', err);
+      this.logger.error('Exception in EventBus subscriber during dispatch', err);
     }
   }
 

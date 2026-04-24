@@ -374,7 +374,7 @@ export function validateNoCycles(collection: DerivationCollection, logger?: Logg
   // Warn about bidirectional patterns in dev mode
   if (DEV_MODE && result.bidirectionalPairs && result.bidirectionalPairs.length > 0 && logger) {
     logger.warn(
-      '[Derivation] Bidirectional derivation patterns detected. ' +
+      'Derivation - bidirectional derivation patterns detected. ' +
         'These patterns stabilize via equality checks, but may oscillate with floating-point values ' +
         '(e.g., currency conversions with rounding). ' +
         'Consider adding tolerance-based comparisons for numeric values.',

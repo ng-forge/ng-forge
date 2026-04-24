@@ -21,6 +21,7 @@ import {
 import { FieldDef } from '../../definitions/base/field-def';
 import { FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { Logger } from '../../providers/features/logger/logger.interface';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { getChangedKeys } from '../../utils/object-utils';
 import { FunctionRegistryService } from '../registry';
@@ -109,7 +110,7 @@ export class PropertyDerivationOrchestrator {
       }
 
       if (DEV_MODE) {
-        this.warnAboutWildcardDependencies(collection.entries, fields?.length ?? 0);
+        warnAboutWildcardDependencies(this.logger, collection.entries, fields?.length ?? 0);
       }
     });
 
@@ -226,26 +227,6 @@ export class PropertyDerivationOrchestrator {
     return Array.from(periods);
   }
 
-  private warnAboutWildcardDependencies(entries: PropertyDerivationEntry[], fieldCount: number): void {
-    const implicitWildcards = entries.filter(
-      (entry) =>
-        entry.dependsOn.includes('*') &&
-        entry.functionName &&
-        (!entry.originalConfig?.dependsOn || entry.originalConfig.dependsOn.length === 0),
-    );
-
-    if (implicitWildcards.length > 0) {
-      const derivationDescs = implicitWildcards.map((e) => `${e.fieldKey}.${e.targetProperty} (${e.functionName})`);
-
-      this.logger.warn(
-        '[PropertyDerivation] Property derivations using custom functions without explicit dependsOn detected. ' +
-          `These run on EVERY form change, which may impact performance (form has ${fieldCount} fields). ` +
-          'Consider specifying explicit dependsOn arrays for better performance.',
-        derivationDescs,
-      );
-    }
-  }
-
   /**
    * Resolves external data signals to their current values.
    *
@@ -292,3 +273,26 @@ export function createPropertyDerivationOrchestrator(config: PropertyDerivationO
  * @public
  */
 export const PROPERTY_DERIVATION_ORCHESTRATOR = new InjectionToken<PropertyDerivationOrchestrator>('PROPERTY_DERIVATION_ORCHESTRATOR');
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dev-mode diagnostics (tree-shaken in prod via DEV_MODE gate at call site)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function warnAboutWildcardDependencies(logger: Logger, entries: PropertyDerivationEntry[], fieldCount: number): void {
+  const implicitWildcards = entries.filter(
+    (entry) =>
+      entry.dependsOn.includes('*') &&
+      entry.functionName &&
+      (!entry.originalConfig?.dependsOn || entry.originalConfig.dependsOn.length === 0),
+  );
+
+  if (implicitWildcards.length > 0) {
+    const derivationDescs = implicitWildcards.map((e) => `${e.fieldKey}.${e.targetProperty} (${e.functionName})`);
+    logger.warn(
+      'PropertyDerivation - custom functions without explicit dependsOn detected. ' +
+        `These run on EVERY form change, which may impact performance (form has ${fieldCount} fields). ` +
+        'Consider specifying explicit dependsOn arrays for better performance.',
+      derivationDescs,
+    );
+  }
+}

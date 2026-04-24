@@ -5,12 +5,6 @@ import { Logger } from '../../providers/features/logger/logger.interface';
 import { DerivationWarningTracker } from './derivation-warning-tracker';
 
 /**
- * Error message prefix for derivation-related errors.
- * @internal
- */
-const ERROR_PREFIX = '[Derivation]';
-
-/**
  * Navigates the form tree to resolve a field instance at the given path.
  *
  * Walks the tree following the same pattern as `setFieldValue`:
@@ -189,7 +183,7 @@ export function warnMissingField(fieldKey: string, logger?: Logger, warningTrack
   }
 
   logger?.warn(
-    `${ERROR_PREFIX} Target field '${fieldKey}' not found in form. ` +
+    `Derivation - target field '${fieldKey}' not found in form. ` +
       `Ensure the field is defined in your form configuration. ` +
       `This warning is shown once per field.`,
   );

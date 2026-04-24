@@ -23,6 +23,7 @@ import {
 import { FieldDef } from '../../definitions/base/field-def';
 import { FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { Logger } from '../../providers/features/logger/logger.interface';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { getChangedKeys } from '../../utils/object-utils';
 import { FunctionRegistryService } from '../registry';
@@ -123,8 +124,8 @@ export class DerivationOrchestrator {
 
       validateNoCycles(collection, this.logger);
       if (DEV_MODE) {
-        this.warnAboutWildcardDependencies(collection.entries, fields.length);
-        this.warnAboutMisconfiguredReEngagement(collection.entries);
+        warnAboutWildcardDependencies(this.logger, collection.entries, fields.length);
+        warnAboutMisconfiguredReEngagement(this.logger, collection.entries);
       }
 
       return collection;
@@ -510,51 +511,6 @@ export class DerivationOrchestrator {
     return Array.from(periods);
   }
 
-  private warnAboutWildcardDependencies(entries: DerivationEntry[], fieldCount: number): void {
-    // Find entries with wildcard dependency
-    const wildcardEntries = entries.filter((entry) => entry.dependsOn.includes('*'));
-    if (wildcardEntries.length === 0) return;
-
-    // Find implicit wildcards (custom functions without explicit dependsOn)
-    // HTTP and async entries are excluded because they require explicit dependsOn (validated at collection time)
-    const implicitWildcards = wildcardEntries.filter(
-      (entry) =>
-        !entry.http &&
-        !entry.asyncFunctionName &&
-        entry.functionName &&
-        (!entry.originalConfig?.dependsOn || entry.originalConfig.dependsOn.length === 0),
-    );
-
-    if (implicitWildcards.length > 0) {
-      const derivationDescs = implicitWildcards.map((e) => `${e.fieldKey} (${e.functionName})`);
-
-      this.logger.warn(
-        '[Derivation] Derivations using custom functions without explicit dependsOn detected. ' +
-          `These run on EVERY form change, which may impact performance (form has ${fieldCount} fields). ` +
-          'Consider specifying explicit dependsOn arrays for better performance.',
-        derivationDescs,
-      );
-    }
-  }
-
-  /**
-   * Warns about derivations with `reEngageOnDependencyChange: true` but without
-   * `stopOnUserOverride: true`. The re-engagement flag only has an effect when
-   * `stopOnUserOverride` is enabled — without it, `reEngageOnDependencyChange` is a no-op.
-   */
-  private warnAboutMisconfiguredReEngagement(entries: DerivationEntry[]): void {
-    const misconfigured = entries.filter((entry) => entry.reEngageOnDependencyChange && !entry.stopOnUserOverride);
-    if (misconfigured.length === 0) return;
-
-    const fieldKeys = misconfigured.map((e) => e.debugName ?? e.fieldKey);
-    this.logger.warn(
-      '[Derivation] Derivations with reEngageOnDependencyChange but without stopOnUserOverride detected. ' +
-        'reEngageOnDependencyChange only takes effect when stopOnUserOverride is true. ' +
-        'Either add stopOnUserOverride: true or remove reEngageOnDependencyChange.',
-      fieldKeys,
-    );
-  }
-
   /**
    * Resolves external data signals to their current values without creating dependencies.
    *
@@ -613,4 +569,45 @@ export const DERIVATION_ORCHESTRATOR = new InjectionToken<DerivationOrchestrator
  */
 export function injectDerivationOrchestrator(): DerivationOrchestrator {
   return inject(DERIVATION_ORCHESTRATOR);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dev-mode diagnostics (tree-shaken in prod via DEV_MODE gate at call site)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function warnAboutWildcardDependencies(logger: Logger, entries: DerivationEntry[], fieldCount: number): void {
+  const wildcardEntries = entries.filter((entry) => entry.dependsOn.includes('*'));
+  if (wildcardEntries.length === 0) return;
+
+  // HTTP and async entries require explicit dependsOn (validated at collection time)
+  const implicitWildcards = wildcardEntries.filter(
+    (entry) =>
+      !entry.http &&
+      !entry.asyncFunctionName &&
+      entry.functionName &&
+      (!entry.originalConfig?.dependsOn || entry.originalConfig.dependsOn.length === 0),
+  );
+
+  if (implicitWildcards.length > 0) {
+    const derivationDescs = implicitWildcards.map((e) => `${e.fieldKey} (${e.functionName})`);
+    logger.warn(
+      'Derivation - custom functions without explicit dependsOn detected. ' +
+        `These run on EVERY form change, which may impact performance (form has ${fieldCount} fields). ` +
+        'Consider specifying explicit dependsOn arrays for better performance.',
+      derivationDescs,
+    );
+  }
+}
+
+function warnAboutMisconfiguredReEngagement(logger: Logger, entries: DerivationEntry[]): void {
+  const misconfigured = entries.filter((entry) => entry.reEngageOnDependencyChange && !entry.stopOnUserOverride);
+  if (misconfigured.length === 0) return;
+
+  const fieldKeys = misconfigured.map((e) => e.debugName ?? e.fieldKey);
+  logger.warn(
+    'Derivation - reEngageOnDependencyChange without stopOnUserOverride detected. ' +
+      'reEngageOnDependencyChange only takes effect when stopOnUserOverride is true. ' +
+      'Either add stopOnUserOverride: true or remove reEngageOnDependencyChange.',
+    fieldKeys,
+  );
 }

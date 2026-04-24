@@ -19,7 +19,7 @@ describe('deprecation-warnings', () => {
       warnDeprecated(logger, tracker, 'test-key', 'Test message');
 
       expect(logger.warn).toHaveBeenCalledOnce();
-      expect(logger.warn).toHaveBeenCalledWith('[Dynamic Forms] DEPRECATED: Test message');
+      expect(logger.warn).toHaveBeenCalledWith('DEPRECATED: Test message');
     });
 
     it('should fire only once per key (idempotent)', () => {
@@ -35,8 +35,8 @@ describe('deprecation-warnings', () => {
       warnDeprecated(logger, tracker, 'key-b', 'Message B');
 
       expect(logger.warn).toHaveBeenCalledTimes(2);
-      expect(logger.warn).toHaveBeenCalledWith('[Dynamic Forms] DEPRECATED: Message A');
-      expect(logger.warn).toHaveBeenCalledWith('[Dynamic Forms] DEPRECATED: Message B');
+      expect(logger.warn).toHaveBeenCalledWith('DEPRECATED: Message A');
+      expect(logger.warn).toHaveBeenCalledWith('DEPRECATED: Message B');
     });
 
     it('should track warned keys in the tracker', () => {
