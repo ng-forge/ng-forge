@@ -344,22 +344,6 @@ export function getChangedKeys(
 }
 
 /**
- * Fast 32-bit FNV-1a hash for strings.
- * Used as a cache key to avoid expensive string concatenation in memoize resolvers.
- *
- * @param str - String to hash
- * @returns 32-bit integer hash
- */
-export function simpleStringHash(str: string): number {
-  let hash = 0x811c9dc5; // FNV offset basis
-  for (let i = 0; i < str.length; i++) {
-    hash ^= str.charCodeAt(i);
-    hash = (hash * 0x01000193) | 0; // FNV prime, keep as 32-bit int
-  }
-  return hash;
-}
-
-/**
  * Compile-time exhaustiveness check for discriminated unions.
  *
  * Place in the `default` branch of a `switch` over a union's discriminant.
