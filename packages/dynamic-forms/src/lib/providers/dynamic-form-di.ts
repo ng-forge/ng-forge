@@ -43,6 +43,7 @@ import {
   PROPERTY_DERIVATION_ORCHESTRATOR,
   PropertyDerivationOrchestratorConfig,
 } from '../core/property-derivation/property-derivation-orchestrator';
+import { FORM_INITIALIZER } from './form-initializer.token';
 
 /**
  * Always-on providers for any DynamicForm: state machine, registries, signal-context tokens.
@@ -131,6 +132,10 @@ function derivationProviders(): Provider[] {
       },
       deps: [FormStateManager, DynamicFormLogger, DERIVATION_LOG_CONFIG, EXTERNAL_DATA],
     },
+    // Wake the orchestrator at form bootstrap without DynamicForm needing a static
+    // reference to the token. Keeps the orchestrator module reachable only from
+    // this provider group, which a future PR can lift to a secondary entry point.
+    { provide: FORM_INITIALIZER, useExisting: DERIVATION_ORCHESTRATOR, multi: true },
   ];
 }
 
@@ -160,6 +165,7 @@ function propertyDerivationProviders(): Provider[] {
       },
       deps: [FormStateManager, EXTERNAL_DATA, PROPERTY_OVERRIDE_STORE],
     },
+    { provide: FORM_INITIALIZER, useExisting: PROPERTY_DERIVATION_ORCHESTRATOR, multi: true },
   ];
 }
 
