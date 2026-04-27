@@ -19,7 +19,7 @@ import {
   DerivationEntry,
   DerivationProcessingResult,
 } from './derivation-types';
-import { DerivationWarningTracker } from './derivation-warning-tracker';
+import type { WarningTracker } from '../../utils/warning-tracker';
 import { MAX_DERIVATION_ITERATIONS } from './derivation-constants';
 import { DerivationLogger } from './derivation-logger.service';
 import { readFieldStateInfo, createFormFieldStateMap } from './field-state-extractor';
@@ -59,7 +59,7 @@ export interface DerivationApplicatorContext {
    * Instance-scoped warning tracker to prevent log spam.
    * If not provided, warnings will be logged every time.
    */
-  warningTracker?: DerivationWarningTracker;
+  warningTracker?: WarningTracker;
 
   /**
    * Derivation logger for debug output.

@@ -3,7 +3,7 @@ import { FieldWithValidation } from '../../definitions/base/field-with-validatio
 import { DerivationLogicConfig, isDerivationLogicConfig, hasTargetProperty } from '../../models/logic/logic-config';
 import { hasChildFields } from '../../models/types/type-guards';
 import { Logger } from '../../providers/features/logger/logger.interface';
-import { DeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
+import type { WarningTracker } from '../../utils/warning-tracker';
 import { normalizeFieldsArray } from '../../utils/object-utils';
 import { extractExpressionDependencies, extractStringDependencies } from '../cross-field/cross-field-detector';
 import { buildPropertyOverrideKey, PLACEHOLDER_INDEX } from './property-override-key';
@@ -18,7 +18,7 @@ interface CollectionContext {
   /** Current array path for resolving relative field references. */
   arrayPath?: string;
   logger: Logger;
-  tracker: DeprecationWarningTracker;
+  tracker: WarningTracker;
 }
 
 /**
@@ -38,7 +38,7 @@ interface CollectionContext {
 export function collectPropertyDerivations(
   fields: FieldDef<unknown>[],
   logger: Logger,
-  tracker: DeprecationWarningTracker,
+  tracker: WarningTracker,
 ): PropertyDerivationCollection {
   const entries: PropertyDerivationEntry[] = [];
   const context: CollectionContext = { logger, tracker };

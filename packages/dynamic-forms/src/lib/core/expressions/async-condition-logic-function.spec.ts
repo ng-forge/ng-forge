@@ -10,7 +10,8 @@ import { RootFormRegistryService } from '../registry/root-form-registry.service'
 import { FormStateManager } from '../../state/form-state-manager';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
-import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
+import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
+import { createWarningTracker } from '../../utils/warning-tracker';
 import { createAsyncConditionLogicFunction } from './async-condition-logic-function';
 import { AsyncConditionFunctionCacheService } from './async-condition-function-cache.service';
 import { LogicFunctionCacheService } from './logic-function-cache.service';
@@ -35,7 +36,7 @@ describe('createAsyncConditionLogicFunction', () => {
         { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
         { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         { provide: DynamicFormLogger, useValue: mockLogger },
-        { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
+        { provide: DEPRECATION_WARNING_TRACKER, useFactory: createWarningTracker },
         AsyncConditionFunctionCacheService,
         LogicFunctionCacheService,
         DynamicValueFunctionCacheService,

@@ -6,7 +6,8 @@ import { ValidatorConfig } from '../../models/validation/validator-config';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { FormStateManager } from '../../state/form-state-manager';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { DEPRECATION_WARNING_TRACKER, createDeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
+import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
+import { createWarningTracker } from '../../utils/warning-tracker';
 import { applyValidator, applyValidators } from './validator-factory';
 import { LogicFunctionCacheService } from '../expressions/logic-function-cache.service';
 import { HttpConditionFunctionCacheService } from '../expressions/http-condition-function-cache.service';
@@ -39,7 +40,7 @@ describe('validator-factory', () => {
         { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
         { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         { provide: DynamicFormLogger, useValue: mockLogger },
-        { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
+        { provide: DEPRECATION_WARNING_TRACKER, useFactory: createWarningTracker },
         FunctionRegistryService,
         FieldContextRegistryService,
         LogicFunctionCacheService,

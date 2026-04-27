@@ -8,8 +8,9 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { FunctionRegistryService } from '../registry/function-registry.service';
-import { createDerivationWarningTracker, DERIVATION_WARNING_TRACKER } from '../derivation/derivation-warning-tracker';
-import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
+import { DERIVATION_WARNING_TRACKER } from '../derivation/derivation-warning-tracker';
+import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
+import { createWarningTracker } from '../../utils/warning-tracker';
 import { createPropertyOverrideStore, PropertyOverrideStore } from './property-override-store';
 import { PropertyDerivationOrchestrator, PropertyDerivationOrchestratorConfig } from './property-derivation-orchestrator';
 
@@ -93,14 +94,8 @@ describe('PropertyDerivationOrchestrator', () => {
       providers: [
         FunctionRegistryService,
         { provide: DynamicFormLogger, useValue: mockLogger },
-        {
-          provide: DERIVATION_WARNING_TRACKER,
-          useFactory: createDerivationWarningTracker,
-        },
-        {
-          provide: DEPRECATION_WARNING_TRACKER,
-          useFactory: createDeprecationWarningTracker,
-        },
+        { provide: DERIVATION_WARNING_TRACKER, useFactory: createWarningTracker },
+        { provide: DEPRECATION_WARNING_TRACKER, useFactory: createWarningTracker },
         { provide: FORM_OPTIONS, useValue: signal(undefined) },
       ],
     });

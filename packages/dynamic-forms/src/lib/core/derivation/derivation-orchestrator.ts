@@ -350,7 +350,7 @@ export class DerivationOrchestrator {
         // Validate HttpClient availability
         if (!this.httpClient) {
           this.logger.error(
-            'HTTP Derivation - HttpClient is not available. ' + 'Ensure provideHttpClient() is included in your application providers.',
+            'HTTP Derivation: HttpClient is not available. ' + 'Ensure provideHttpClient() is included in your application providers.',
           );
           return;
         }
@@ -378,7 +378,7 @@ export class DerivationOrchestrator {
 
           this.httpSubscriptions.push(
             stream.subscribe({
-              error: (err) => this.logger.error(`HTTP Derivation - Stream error for '${entry.fieldKey}'`, err),
+              error: (err) => this.logger.error(`HTTP Derivation: Stream error for '${entry.fieldKey}'`, err),
             }),
           );
         }
@@ -462,7 +462,7 @@ export class DerivationOrchestrator {
 
           this.asyncFunctionSubscriptions.push(
             stream.subscribe({
-              error: (err) => this.logger.error(`Async Derivation - Stream error for '${entry.fieldKey}'`, err),
+              error: (err) => this.logger.error(`Async Derivation: Stream error for '${entry.fieldKey}'`, err),
             }),
           );
         }
@@ -591,7 +591,7 @@ function warnAboutWildcardDependencies(logger: Logger, entries: DerivationEntry[
   if (implicitWildcards.length > 0) {
     const derivationDescs = implicitWildcards.map((e) => `${e.fieldKey} (${e.functionName})`);
     logger.warn(
-      'Derivation - custom functions without explicit dependsOn detected. ' +
+      'Derivation: custom functions without explicit dependsOn detected. ' +
         `These run on EVERY form change, which may impact performance (form has ${fieldCount} fields). ` +
         'Consider specifying explicit dependsOn arrays for better performance.',
       derivationDescs,
@@ -605,7 +605,7 @@ function warnAboutMisconfiguredReEngagement(logger: Logger, entries: DerivationE
 
   const fieldKeys = misconfigured.map((e) => e.debugName ?? e.fieldKey);
   logger.warn(
-    'Derivation - reEngageOnDependencyChange without stopOnUserOverride detected. ' +
+    'Derivation: reEngageOnDependencyChange without stopOnUserOverride detected. ' +
       'reEngageOnDependencyChange only takes effect when stopOnUserOverride is true. ' +
       'Either add stopOnUserOverride: true or remove reEngageOnDependencyChange.',
     fieldKeys,

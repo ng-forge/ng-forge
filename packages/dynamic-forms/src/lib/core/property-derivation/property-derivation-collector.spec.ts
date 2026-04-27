@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { collectPropertyDerivations } from './property-derivation-collector';
 import { FieldDef } from '../../definitions/base/field-def';
 import { createMockLogger } from '../../../../testing/src/mock-logger';
-import { createDeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
+import { createWarningTracker } from '../../utils/warning-tracker';
 
 describe('property-derivation-collector', () => {
   const logger = createMockLogger();
-  const tracker = createDeprecationWarningTracker();
+  const tracker = createWarningTracker();
 
   describe('collectPropertyDerivations', () => {
     it('should return empty collection when no fields have propertyDerivation logic', () => {

@@ -1,5 +1,5 @@
 import type { Logger } from '../../providers/features/logger/logger.interface';
-import type { DeprecationWarningTracker } from '../../utils/deprecation-warning-tracker';
+import type { WarningTracker } from '../../utils/warning-tracker';
 import type { FieldStateContext, FormFieldStateMap } from './field-state-context';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- default `any` for TFormValue ensures backward compatibility at registry boundaries
@@ -87,7 +87,7 @@ export interface EvaluationContext<TValue = unknown, TFormValue extends Record<s
    * DI-scoped tracker for deprecation warnings.
    * Used by the condition evaluator to deduplicate deprecation warnings.
    */
-  deprecationTracker?: DeprecationWarningTracker;
+  deprecationTracker?: WarningTracker;
 
   /**
    * State of the current field being evaluated.

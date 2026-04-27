@@ -289,7 +289,7 @@ function warnAboutWildcardDependencies(logger: Logger, entries: PropertyDerivati
   if (implicitWildcards.length > 0) {
     const derivationDescs = implicitWildcards.map((e) => `${e.fieldKey}.${e.targetProperty} (${e.functionName})`);
     logger.warn(
-      'PropertyDerivation - custom functions without explicit dependsOn detected. ' +
+      'PropertyDerivation: custom functions without explicit dependsOn detected. ' +
         `These run on EVERY form change, which may impact performance (form has ${fieldCount} fields). ` +
         'Consider specifying explicit dependsOn arrays for better performance.',
       derivationDescs,

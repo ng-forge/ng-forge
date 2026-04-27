@@ -23,8 +23,7 @@ export type { DerivationApplicatorContext } from './derivation-applicator';
 export { applyDerivations, applyDerivationsForTrigger, getDebouncedDerivationEntries } from './derivation-applicator';
 
 // Warning Tracker
-export type { DerivationWarningTracker } from './derivation-warning-tracker';
-export { DERIVATION_WARNING_TRACKER, createDerivationWarningTracker } from './derivation-warning-tracker';
+export { DERIVATION_WARNING_TRACKER } from './derivation-warning-tracker';
 
 // Constants
 export { MAX_DERIVATION_ITERATIONS, ARRAY_PLACEHOLDER, MAX_AST_CACHE_SIZE, DERIVATION_KEY_DELIMITER } from './derivation-constants';

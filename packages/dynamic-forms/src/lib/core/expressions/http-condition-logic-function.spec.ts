@@ -12,7 +12,8 @@ import { FormStateManager } from '../../state/form-state-manager';
 import { HTTP_CONDITION_CACHE, HttpConditionCache } from '../http/http-condition-cache';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
-import { createDeprecationWarningTracker, DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
+import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
+import { createWarningTracker } from '../../utils/warning-tracker';
 import { createHttpConditionLogicFunction } from './http-condition-logic-function';
 import { HttpConditionFunctionCacheService } from './http-condition-function-cache.service';
 import { LogicFunctionCacheService } from './logic-function-cache.service';
@@ -40,7 +41,7 @@ describe('createHttpConditionLogicFunction', () => {
         { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
         { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         { provide: DynamicFormLogger, useValue: mockLogger },
-        { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
+        { provide: DEPRECATION_WARNING_TRACKER, useFactory: createWarningTracker },
         { provide: HttpClient, useValue: httpClient },
         { provide: HTTP_CONDITION_CACHE, useValue: conditionCache },
         HttpConditionFunctionCacheService,

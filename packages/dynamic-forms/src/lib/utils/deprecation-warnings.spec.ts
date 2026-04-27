@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { warnDeprecated } from './deprecation-warnings';
-import { createDeprecationWarningTracker, DeprecationWarningTracker } from './deprecation-warning-tracker';
+import { createWarningTracker, type WarningTracker } from './warning-tracker';
 import { createMockLogger, MockLogger } from '../../../testing/src/mock-logger';
 
 describe('deprecation-warnings', () => {
   let logger: MockLogger;
-  let tracker: DeprecationWarningTracker;
+  let tracker: WarningTracker;
 
   beforeEach(() => {
     logger = createMockLogger();
-    tracker = createDeprecationWarningTracker();
+    tracker = createWarningTracker();
   });
 
   describe('warnDeprecated', () => {

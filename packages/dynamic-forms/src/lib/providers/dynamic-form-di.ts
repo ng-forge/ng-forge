@@ -13,8 +13,9 @@ import {
   EXTERNAL_DATA,
   FORM_OPTIONS,
 } from '../models/field-signal-context.token';
-import { DERIVATION_WARNING_TRACKER, createDerivationWarningTracker } from '../core/derivation/derivation-warning-tracker';
-import { DEPRECATION_WARNING_TRACKER, createDeprecationWarningTracker } from '../utils/deprecation-warning-tracker';
+import { DERIVATION_WARNING_TRACKER } from '../core/derivation/derivation-warning-tracker';
+import { DEPRECATION_WARNING_TRACKER } from '../utils/deprecation-warning-tracker';
+import { createWarningTracker } from '../utils/warning-tracker';
 import {
   DERIVATION_ORCHESTRATOR,
   createDerivationOrchestrator,
@@ -90,8 +91,8 @@ export function provideDynamicFormDI(): Provider[] {
       useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.externalData),
       deps: [FormStateManager],
     },
-    { provide: DERIVATION_WARNING_TRACKER, useFactory: createDerivationWarningTracker },
-    { provide: DEPRECATION_WARNING_TRACKER, useFactory: createDeprecationWarningTracker },
+    { provide: DERIVATION_WARNING_TRACKER, useFactory: createWarningTracker },
+    { provide: DEPRECATION_WARNING_TRACKER, useFactory: createWarningTracker },
     {
       provide: DERIVATION_ORCHESTRATOR,
       useFactory: (

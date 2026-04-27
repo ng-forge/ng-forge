@@ -1,5 +1,5 @@
 import { Logger } from '../providers/features/logger/logger.interface';
-import { DeprecationWarningTracker } from './deprecation-warning-tracker';
+import type { WarningTracker } from './warning-tracker';
 import { DEV_MODE } from './dev-mode';
 
 /**
@@ -11,9 +11,9 @@ import { DEV_MODE } from './dev-mode';
  * @param id - Unique identifier for this deprecation (e.g., 'type:propertyDerivation')
  * @param message - Human-readable deprecation message
  *
- * @public
+ * @internal
  */
-export function warnDeprecated(logger: Logger, tracker: DeprecationWarningTracker, id: string, message: string): void {
+export function warnDeprecated(logger: Logger, tracker: WarningTracker, id: string, message: string): void {
   if (DEV_MODE && !tracker.warnedKeys.has(id)) {
     tracker.warnedKeys.add(id);
     logger.warn(`DEPRECATED: ${message}`);

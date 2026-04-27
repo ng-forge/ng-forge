@@ -9,7 +9,7 @@ import { evaluateCondition } from '../expressions/condition-evaluator';
 import { ExpressionParser } from '../expressions/parser/expression-parser';
 import { getNestedValue } from '../expressions/value-utils';
 import { Logger } from '../../providers/features/logger/logger.interface';
-import { DerivationWarningTracker } from '../derivation/derivation-warning-tracker';
+import type { WarningTracker } from '../../utils/warning-tracker';
 import { PropertyDerivationCollection, PropertyDerivationEntry } from './property-derivation-types';
 import { PropertyOverrideStore } from './property-override-store';
 
@@ -38,7 +38,7 @@ export interface PropertyDerivationApplicatorContext {
   logger: Logger;
 
   /** Warning tracker to prevent log spam */
-  warningTracker?: DerivationWarningTracker;
+  warningTracker?: WarningTracker;
 }
 
 /**

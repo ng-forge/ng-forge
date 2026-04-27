@@ -14,7 +14,7 @@ import { resolveHttpRequest } from '../http/http-request-resolver';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
-import { DerivationWarningTracker } from './derivation-warning-tracker';
+import type { WarningTracker } from '../../utils/warning-tracker';
 import { readFieldDirty, resetFieldState, applyValueToForm } from './field-value-utils';
 import { readFieldStateInfo, createFormFieldStateMap } from './field-state-extractor';
 import type { FieldTreeRecord } from '../field-tree-utils';
@@ -47,7 +47,7 @@ export interface HttpDerivationStreamContext {
   externalData?: () => Record<string, unknown> | undefined;
 
   /** Warning tracker to suppress duplicate missing-field warnings */
-  warningTracker?: DerivationWarningTracker;
+  warningTracker?: WarningTracker;
 
   /**
    * Observable that emits when the current generation of streams should be torn down.
