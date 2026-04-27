@@ -217,8 +217,11 @@ export { ARRAY_CONTEXT, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, DEFAULT_WRAP
 export { dynamicTextToObservable } from './utils';
 export { DynamicTextPipe } from './pipes';
 
-// Container Components - for building custom containers
-export { ArrayFieldComponent, GroupFieldComponent, ContainerFieldComponent } from './fields';
+// Container Components — type-only so they ship as separate lazy chunks via the
+// dynamic registry (loadComponent in built-in-fields). Direct instantiation is not
+// the supported API; use the field type registry. Type-only export preserves
+// `Type<>` / generic-constraint usage at zero runtime cost.
+export type { ArrayFieldComponent, GroupFieldComponent, ContainerFieldComponent } from './fields';
 
 // Validation utilities
 export { applyValidator, applyValidators } from './core/validation';
