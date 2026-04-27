@@ -44,8 +44,13 @@ import {
   PropertyDerivationOrchestratorConfig,
 } from '../core/property-derivation/property-derivation-orchestrator';
 
-/** @internal */
-export function provideDynamicFormDI(): Provider[] {
+/**
+ * Always-on providers for any DynamicForm: state machine, registries, signal-context tokens.
+ * Pure form bootstrap — no derivation, HTTP, or async machinery.
+ *
+ * @internal
+ */
+function coreProviders(): Provider[] {
   return [
     EventBus,
     { provide: CONTAINER_FIELD_PROCESSORS, useFactory: createContainerFieldProcessors },
@@ -91,8 +96,19 @@ export function provideDynamicFormDI(): Provider[] {
       useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.externalData),
       deps: [FormStateManager],
     },
-    { provide: DERIVATION_WARNING_TRACKER, useFactory: createWarningTracker },
     { provide: DEPRECATION_WARNING_TRACKER, useFactory: createWarningTracker },
+  ];
+}
+
+/**
+ * Providers for the value-derivation engine: orchestrator + warning tracker.
+ * Future: this group becomes opt-in via withDerivations() at a separate entry point.
+ *
+ * @internal
+ */
+function derivationProviders(): Provider[] {
+  return [
+    { provide: DERIVATION_WARNING_TRACKER, useFactory: createWarningTracker },
     {
       provide: DERIVATION_ORCHESTRATOR,
       useFactory: (
@@ -115,11 +131,17 @@ export function provideDynamicFormDI(): Provider[] {
       },
       deps: [FormStateManager, DynamicFormLogger, DERIVATION_LOG_CONFIG, EXTERNAL_DATA],
     },
-    { provide: HTTP_CONDITION_CACHE, useFactory: () => new HttpConditionCache(100) },
-    LogicFunctionCacheService,
-    HttpConditionFunctionCacheService,
-    AsyncConditionFunctionCacheService,
-    DynamicValueFunctionCacheService,
+  ];
+}
+
+/**
+ * Providers for the property-derivation engine (writes to property override store).
+ * Future: opt-in via withPropertyDerivations() — separate from value derivations.
+ *
+ * @internal
+ */
+function propertyDerivationProviders(): Provider[] {
+  return [
     { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
     {
       provide: PROPERTY_DERIVATION_ORCHESTRATOR,
@@ -138,5 +160,67 @@ export function provideDynamicFormDI(): Provider[] {
       },
       deps: [FormStateManager, EXTERNAL_DATA, PROPERTY_OVERRIDE_STORE],
     },
+  ];
+}
+
+/**
+ * Providers for HTTP-backed condition expressions and validators.
+ * Future: opt-in via withHttpExpressions() at a separate entry point.
+ *
+ * @internal
+ */
+function httpExpressionProviders(): Provider[] {
+  return [{ provide: HTTP_CONDITION_CACHE, useFactory: () => new HttpConditionCache(100) }, HttpConditionFunctionCacheService];
+}
+
+/**
+ * Providers for async (Promise/Observable-returning) condition expressions.
+ * Future: opt-in via withAsyncExpressions() at a separate entry point.
+ *
+ * @internal
+ */
+function asyncExpressionProviders(): Provider[] {
+  return [AsyncConditionFunctionCacheService];
+}
+
+/**
+ * Providers for dynamic-value functions (numeric/string validator parameters resolved
+ * from formValue expressions, e.g. `min: { expression: 'formValue.minAge' }`).
+ * Future: opt-in via withDynamicValues() at a separate entry point.
+ *
+ * @internal
+ */
+function dynamicValueProviders(): Provider[] {
+  return [DynamicValueFunctionCacheService];
+}
+
+/**
+ * Providers for the logic function cache (memoizes compiled state-logic conditions
+ * — `when`, `disabled`, `readonly`, `hidden` predicates). Used universally by
+ * validator-factory, logic-applicator, schema-application; treated as core for now.
+ *
+ * @internal
+ */
+function logicProviders(): Provider[] {
+  return [LogicFunctionCacheService];
+}
+
+/**
+ * Composes all DynamicForm-level providers. Today: every feature group is included so
+ * behavior matches the prior monolithic provider list. The grouped composition exists
+ * so future feature flags / secondary entry points can drop groups consumers don't use
+ * without re-touching every provider.
+ *
+ * @internal
+ */
+export function provideDynamicFormDI(): Provider[] {
+  return [
+    ...coreProviders(),
+    ...logicProviders(),
+    ...dynamicValueProviders(),
+    ...httpExpressionProviders(),
+    ...asyncExpressionProviders(),
+    ...derivationProviders(),
+    ...propertyDerivationProviders(),
   ];
 }
