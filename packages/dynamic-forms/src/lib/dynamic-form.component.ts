@@ -251,17 +251,17 @@ export class DynamicForm<
   // Constructor
   // ─────────────────────────────────────────────────────────────────────────────
 
-  // Wakes feature-provider orchestrators (derivation, property-derivation, …) at
-  // bootstrap so their reactive streams are wired before first render. Each feature
-  // provider registers itself via FORM_INITIALIZER multi-provider; the array binding
-  // here forces DI to construct each entry. Without a feature provider, the array
-  // stays empty and no static reference to that feature's classes leaks into this
-  // component.
-  private readonly _featureInitializers = inject(FORM_INITIALIZER, { optional: true });
-
   constructor() {
     this.dispatcher?.connect(this.eventBus);
     this.destroyRef.onDestroy(() => this.dispatcher?.disconnect());
+
+    // Wake feature-provider orchestrators (derivation, property-derivation, …) so their
+    // reactive streams are wired before first render. Each feature provider registers
+    // itself via FORM_INITIALIZER multi-provider; resolving the array forces DI to
+    // construct each entry. Without a feature provider, the array stays empty and no
+    // static reference to that feature's classes leaks into this component.
+    // Runs after dispatcher.connect() to preserve the prior bootstrap order.
+    inject(FORM_INITIALIZER, { optional: true });
 
     this.setupEffects();
     this.setupEventHandlers();
