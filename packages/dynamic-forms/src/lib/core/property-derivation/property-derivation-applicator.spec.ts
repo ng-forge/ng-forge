@@ -307,6 +307,133 @@ describe('applyPropertyDerivations', () => {
       expect(context.store.getOverrides('items.1.discount')()).toEqual({});
       expect(context.store.getOverrides('items.2.discount')()).toEqual({ visible: true });
     });
+
+    it('should pass the leaf field value (not the array item) as ctx.fieldValue', () => {
+      const captured: Array<{ fieldValue: unknown; fieldPath: unknown; arrayIndex: unknown; groupValue: unknown }> = [];
+      const entry = createEntry({
+        fieldKey: 'items.$.label',
+        targetProperty: 'label',
+        dependsOn: ['items'],
+        expression: undefined,
+        functionName: 'capture',
+      });
+      const collection: PropertyDerivationCollection = { entries: [entry] };
+      const context = createContext({
+        items: [{ label: 'first' }, { label: 'second' }],
+      });
+      context.derivationFunctions = {
+        capture: (evalCtx) => {
+          captured.push({
+            fieldValue: evalCtx.fieldValue,
+            fieldPath: evalCtx.fieldPath,
+            arrayIndex: evalCtx.arrayIndex,
+            groupValue: evalCtx.groupValue,
+          });
+          return evalCtx.fieldValue;
+        },
+      };
+
+      applyPropertyDerivations(collection, context);
+
+      expect(captured).toHaveLength(2);
+      expect(captured[0].fieldValue).toBe('first');
+      expect(captured[0].fieldPath).toBe('items.0.label');
+      expect(captured[0].arrayIndex).toBe(0);
+      // groupValue for a leaf direct under the array item is the item itself.
+      expect(captured[0].groupValue).toEqual({ label: 'first' });
+      expect(captured[1].fieldValue).toBe('second');
+      expect(captured[1].fieldPath).toBe('items.1.label');
+      expect(captured[1].arrayIndex).toBe(1);
+      expect(captured[1].groupValue).toEqual({ label: 'second' });
+    });
+
+    it('should resolve groupValue to the inner group when the leaf is nested under a group inside the array item', () => {
+      const captured: Array<{ fieldValue: unknown; fieldPath: unknown; groupValue: unknown }> = [];
+      const entry = createEntry({
+        fieldKey: 'items.$.address.state',
+        targetProperty: 'label',
+        dependsOn: ['items'],
+        expression: undefined,
+        functionName: 'capture',
+      });
+      const collection: PropertyDerivationCollection = { entries: [entry] };
+      const context = createContext({
+        items: [{ address: { country: 'usa', state: 'NY' } }, { address: { country: 'canada', state: 'ON' } }],
+      });
+      context.derivationFunctions = {
+        capture: (evalCtx) => {
+          captured.push({
+            fieldValue: evalCtx.fieldValue,
+            fieldPath: evalCtx.fieldPath,
+            groupValue: evalCtx.groupValue,
+          });
+          return evalCtx.fieldValue;
+        },
+      };
+
+      applyPropertyDerivations(collection, context);
+
+      expect(captured).toHaveLength(2);
+      expect(captured[0].fieldValue).toBe('NY');
+      expect(captured[0].fieldPath).toBe('items.0.address.state');
+      expect(captured[0].groupValue).toEqual({ country: 'usa', state: 'NY' });
+      expect(captured[1].fieldValue).toBe('ON');
+      expect(captured[1].fieldPath).toBe('items.1.address.state');
+      expect(captured[1].groupValue).toEqual({ country: 'canada', state: 'ON' });
+    });
+  });
+
+  describe('non-array evaluation context', () => {
+    it('should populate groupValue with the parent group object for fields nested in a group', () => {
+      const captured: Array<{ fieldValue: unknown; groupValue: unknown }> = [];
+      const entry = createEntry({
+        fieldKey: 'address.state',
+        targetProperty: 'label',
+        dependsOn: ['address'],
+        expression: undefined,
+        functionName: 'capture',
+      });
+      const collection: PropertyDerivationCollection = { entries: [entry] };
+      const context = createContext({
+        address: { country: 'usa', state: 'NY' },
+      });
+      context.derivationFunctions = {
+        capture: (evalCtx) => {
+          captured.push({ fieldValue: evalCtx.fieldValue, groupValue: evalCtx.groupValue });
+          return evalCtx.fieldValue;
+        },
+      };
+
+      applyPropertyDerivations(collection, context);
+
+      expect(captured).toHaveLength(1);
+      expect(captured[0].fieldValue).toBe('NY');
+      expect(captured[0].groupValue).toEqual({ country: 'usa', state: 'NY' });
+    });
+
+    it('should leave groupValue undefined for fields at form root', () => {
+      const captured: Array<{ groupValue: unknown }> = [];
+      const entry = createEntry({
+        fieldKey: 'rootField',
+        targetProperty: 'label',
+        dependsOn: ['rootField'],
+        expression: undefined,
+        functionName: 'capture',
+      });
+      const collection: PropertyDerivationCollection = { entries: [entry] };
+      const context = createContext({ rootField: 'foo' });
+      context.derivationFunctions = {
+        capture: (evalCtx) => {
+          captured.push({ groupValue: evalCtx.groupValue });
+          return evalCtx.fieldValue;
+        },
+      };
+
+      applyPropertyDerivations(collection, context);
+
+      expect(captured).toHaveLength(1);
+      expect(captured[0].groupValue).toBeUndefined();
+    });
   });
 });
 

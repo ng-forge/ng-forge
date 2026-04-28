@@ -228,14 +228,33 @@ function createEvaluationContext(
 ): EvaluationContext {
   const fieldValue = getNestedValue(formValue, entry.fieldKey);
 
+  // Parent group value: the absolute path with the trailing field segment
+  // dropped. `undefined` when the field is at form root.
+  const parentPath = getParentPathInScope(entry.fieldKey);
+  const groupValue = parentPath ? getNestedValue(formValue, parentPath) : undefined;
+
   return {
     fieldValue,
     formValue,
     fieldPath: entry.fieldKey,
+    groupValue,
     customFunctions: context.customFunctions,
     externalData: context.externalData,
     logger: context.logger,
   };
+}
+
+/**
+ * Returns the path to the parent of the given field path. Drops the last
+ * `.`-delimited segment. Returns `undefined` when the field has no parent
+ * in scope (single-segment root key).
+ *
+ * @internal
+ */
+function getParentPathInScope(fieldKey: string): string | undefined {
+  const lastDot = fieldKey.lastIndexOf('.');
+  if (lastDot <= 0) return undefined;
+  return fieldKey.slice(0, lastDot);
 }
 
 /**
@@ -251,10 +270,26 @@ function createArrayItemEvaluationContext(
   arrayPath: string,
   context: PropertyDerivationApplicatorContext,
 ): EvaluationContext {
+  const pathInfo = parseArrayPath(entry.fieldKey);
+
+  // groupValue inside an array item:
+  // - Field directly under the array item (no inner group): the array item
+  //   itself is the "nearest parent group".
+  // - Field inside an inner group within the item: the inner group's value.
+  // The relative path within the item is everything after `'.$.'`.
+  const relativePath = pathInfo.isArrayPath ? (pathInfo.relativePath ?? '') : '';
+  const innerParentPath = relativePath.includes('.') ? relativePath.slice(0, relativePath.lastIndexOf('.')) : '';
+  const groupValue = innerParentPath ? getNestedValue(arrayItem, innerParentPath) : arrayItem;
+  // Resolve fieldValue to the leaf value addressed by the entry's relative path
+  // within the array item. Without this, $self / fieldValue derivations inside
+  // arrays receive the whole array item instead of the field's own value.
+  const fieldValue = relativePath ? getNestedValue(arrayItem, relativePath) : arrayItem;
+
   return {
-    fieldValue: arrayItem,
+    fieldValue,
     formValue: arrayItem,
-    fieldPath: `${arrayPath}.${itemIndex}`,
+    fieldPath: relativePath ? `${arrayPath}.${itemIndex}.${relativePath}` : `${arrayPath}.${itemIndex}`,
+    groupValue,
     customFunctions: context.customFunctions,
     externalData: context.externalData,
     logger: context.logger,
