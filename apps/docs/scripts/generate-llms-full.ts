@@ -11,7 +11,7 @@
  */
 
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative, dirname } from 'node:path';
+import { join, relative, dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -39,7 +39,7 @@ function collectMarkdownFiles(dir: string): string[] {
 
 function getSectionPath(filePath: string): string {
   const rel = relative(CONTENT_DIR, filePath);
-  return rel.replace(/\.md$/, '');
+  return rel.split(sep).join('/').replace(/\.md$/, '');
 }
 
 /** Strip YAML frontmatter (--- ... ---) from markdown content. */

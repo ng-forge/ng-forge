@@ -1017,7 +1017,7 @@ Value fields accept an optional `nullable?: boolean` flag. When `true`:
 - **[Field Types](/field-types/text-inputs)** — Per-field adapter props reference
 - **[Building an Adapter](/building-an-adapter)** — Build your own adapter
 
---- dynamic-behavior\conditional-logic ---
+--- dynamic-behavior/conditional-logic ---
 
 Control field behavior dynamically based on form state. Dynamic forms provides a declarative API for conditional visibility, required state, and readonly state that maps directly to Angular's signal forms.
 
@@ -2242,7 +2242,7 @@ const config = {
 - **[Type Safety](/recipes/type-safety)** — TypeScript integration
 - **[Examples](/examples)** — Real-world form patterns
 
---- dynamic-behavior\derivation\async ---
+--- dynamic-behavior/derivation/async ---
 
 Derive field values from HTTP responses or custom async functions. Async derivations are ideal for server-driven computed values, address/zip lookups, exchange rates, and any value that requires a network call.
 
@@ -2638,7 +2638,7 @@ When the user changes the country, the phone prefix is auto-filled again — ove
 - **[HTTP Conditions](/dynamic-behavior/conditional-logic)** — HTTP-driven field visibility and state
 - **[Custom Validators](/validation/custom-validators)** — Async and HTTP validation
 
---- dynamic-behavior\derivation\property ---
+--- dynamic-behavior/derivation/property ---
 
 Reactively derive field component properties (like `minDate`, `options`, `label`, `placeholder`) based on form values. While value derivations set a field's form value, property derivations set **component input properties**.
 
@@ -3124,7 +3124,7 @@ External data values are reactively tracked - when signals change, property deri
 - **[Conditional Logic](/dynamic-behavior/overview)** - Control field visibility and state
 - **[Array Fields](/prebuilt/form-arrays/simplified)** - Working with array fields
 
---- dynamic-behavior\derivation\values ---
+--- dynamic-behavior/derivation/values ---
 
 Automatically compute and set field values based on other form values. Derivations enable calculated fields, auto-fill patterns, and value transformations.
 
@@ -3610,7 +3610,7 @@ External data values are reactively tracked - when signals change, derivations a
 - **[Array Fields](/prebuilt/form-arrays/simplified)** — Working with array fields
 - **[Examples](/examples)** — Real-world form patterns
 
---- dynamic-behavior\i18n ---
+--- dynamic-behavior/i18n ---
 
 Dynamic Forms supports internationalization through Angular's reactive primitives: **Observables** and **Signals**. It's framework-agnostic - use any translation library that provides these types.
 
@@ -3904,7 +3904,7 @@ The key is that your translation method returns `Observable<string>` or `Signal<
 - **[Conditional Logic](/dynamic-behavior/overview)** — Show, hide, and disable fields based on form state
 - **[Value Derivation](/dynamic-behavior/derivation)** — Automatically compute field values from other fields
 
---- dynamic-behavior\submission ---
+--- dynamic-behavior/submission ---
 
 Form submission in dynamic forms integrates with Angular Signal Forms' native `submit()` function, providing automatic button disabling, loading states, and server error handling.
 
@@ -4124,7 +4124,7 @@ export class MyFormComponent {
 - **[Schema Validation](/schema-validation/overview)** — Add cross-field validation rules with Angular schemas or Zod
 - **[Value Exclusion](/recipes/value-exclusion)** — Control which field values are included in submission output
 
---- examples\age-conditional-form ---
+--- examples/age-conditional-form ---
 
 Registration form demonstrating numeric comparison operators for age-based conditional logic.
 
@@ -4381,7 +4381,7 @@ This example uses numeric comparison operators:
 - **[Validation](/validation/basics)** - Min/max validation
 - **[User Registration](/examples/user-registration)** - Basic registration example
 
---- examples\array-form ---
+--- examples/array-form ---
 
 Dynamic form arrays using the complete API with declarative add/remove buttons, custom button placement, and full control over item structure.
 
@@ -4643,7 +4643,7 @@ const contactTemplate = [
 - **[Simplified Array API](/prebuilt/form-arrays/simplified)** - Simpler alternative
 - **[Validation](/validation/basics)** - Form validation guide
 
---- examples\business-account-form ---
+--- examples/business-account-form ---
 
 Account registration form that shows different fields based on whether the user selects personal or business account type.
 
@@ -4863,7 +4863,7 @@ Business fields are hidden when personal is selected:
 - **[User Registration](/examples/user-registration)** - Basic registration example
 - **[Radio Buttons](/field-types/selection)** - Field types reference
 
---- examples\contact-dynamic-fields ---
+--- examples/contact-dynamic-fields ---
 
 Contact form demonstrating dynamic field visibility based on preferred contact method selection.
 
@@ -5066,7 +5066,7 @@ This ensures that visible contact fields are required.
 - **[Validation](/validation/basics)** - Form validation
 - **[Contact Form](/examples/contact-form)** - Basic contact form example
 
---- examples\contact-form ---
+--- examples/contact-form ---
 
 Simple contact form demonstrating basic form fields, validation, and user input.
 
@@ -5249,7 +5249,7 @@ Dropdown allows users to categorize their inquiry:
 - **[Validation](/validation/basics)** - Form validation guide
 - **[Material Integration](/configuration)** - Material Design styling
 
---- examples\enterprise-features ---
+--- examples/enterprise-features ---
 
 Complex configuration form demonstrating AND/OR logic for enterprise feature gating.
 
@@ -5588,7 +5588,7 @@ For features that require ALL conditions to be met, use `type: 'and'`:
 - **[Combining Conditions](/dynamic-behavior/conditional-logic)** - AND/OR logic
 - **[Form Groups](/prebuilt/form-groups)** - Organizing fields
 
---- examples\login-form ---
+--- examples/login-form ---
 
 Simple login form demonstrating authentication UI with email and password fields.
 
@@ -5779,7 +5779,7 @@ For social login buttons, you can use text fields with links or handle this outs
 - **[Validation](/validation/basics)** - Form validation guide
 - **[Material Integration](/configuration)** - Material Design styling
 
---- examples\paginated-form ---
+--- examples/paginated-form ---
 
 A comprehensive multi-step registration form demonstrating the `page` field type for creating wizards and stepped workflows.
 
@@ -6271,7 +6271,7 @@ Apply different validation rules per step:
 - [Validation](/validation/basics) - Per-page and cross-page validation
 - [Material Integration](/configuration) - Material Design styling
 
---- examples\shipping-billing-address ---
+--- examples/shipping-billing-address ---
 
 Checkout form demonstrating the common "same as billing" pattern for shipping addresses.
 
@@ -6495,7 +6495,7 @@ The section title is also hidden along with the group:
 - **[Form Groups](/prebuilt/form-groups)** - Working with groups
 - **[Checkbox Fields](/field-types/selection)** - Field types reference
 
---- examples\simplified-array-form ---
+--- examples/simplified-array-form ---
 
 Dynamic arrays using the simplified API with auto-generated add/remove buttons, template-based item definitions, and both primitive and object arrays.
 
@@ -6656,7 +6656,7 @@ addButton: false,     // No add button
 - **[Complete Array API](/prebuilt/form-arrays/complete)** - Advanced array features
 - **[Validation](/validation/basics)** - Form validation guide
 
---- examples\user-registration ---
+--- examples/user-registration ---
 
 Complete example of a user registration form with validation, conditional logic, and proper type safety.
 
@@ -7163,7 +7163,7 @@ Add social login buttons before the form:
 - **[Conditional Logic](/dynamic-behavior/overview)** - Dynamic field behavior
 - **[Material Integration](/configuration)** - Material Design styling
 
---- examples\value-derivation ---
+--- examples/value-derivation ---
 
 This example demonstrates automatic value derivation using expressions. Watch how changing input values automatically updates calculated fields.
 
@@ -7229,7 +7229,7 @@ Derivations can reference other derived values. The system automatically process
 
 - **[Value Derivation](/dynamic-behavior/derivation)** - Core concepts, syntax, array derivations, debugging, and bidirectional patterns
 
---- examples\wrapper-array-actions ---
+--- examples/wrapper-array-actions ---
 
 Action buttons for an array (Add, Clear, etc.) don't have to be separate fields in the config — a wrapper can own the button and the behaviour. Here, `arraySection` renders a titled card whose header contains an Add button; clicking it dispatches `arrayEvent(key).append(itemTemplate)` against the array it wraps.
 
@@ -7308,7 +7308,7 @@ export default class ArraySectionWrapper implements FieldWrapperContract {
 - **[Writing a wrapper](/wrappers/writing-a-wrapper)** — the component contract
 - **[Complete Array API](/prebuilt/form-arrays/complete)** — alternative: add button as a separate field
 
---- field-types\advanced-controls ---
+--- field-types/advanced-controls ---
 
 Specialized controls for numeric ranges and date selection.
 
@@ -7378,7 +7378,7 @@ Date selection control.
 
 <docs-live-example scenario="examples/datepicker" hideForCustom="true"></docs-live-example>
 
---- field-types\buttons ---
+--- field-types/buttons ---
 
 Action fields for form submission, multi-step navigation, and array manipulation.
 
@@ -7593,7 +7593,7 @@ Removes the first item from the target array.
 
 - `arrayKey`: Key of the target array field (**required**)
 
---- field-types\selection ---
+--- field-types/selection ---
 
 Fields for selecting one or multiple values from a set of options.
 
@@ -7735,7 +7735,7 @@ Multiple selection from a list of checkboxes. Value is an array of selected valu
 
 <docs-live-example scenario="examples/multi-checkbox" hideForCustom="true"></docs-live-example>
 
---- field-types\text-inputs ---
+--- field-types/text-inputs ---
 
 Text-based input fields for collecting typed data from users.
 
@@ -7802,7 +7802,7 @@ Multi-line text input.
 
 <docs-live-example scenario="examples/textarea" hideForCustom="true"></docs-live-example>
 
---- field-types\utility ---
+--- field-types/utility ---
 
 Non-input fields for displaying content and passing hidden data.
 
@@ -8227,7 +8227,7 @@ import {
 
 Use these to integrate form generation into custom build pipelines, Nx generators, or CI workflows.
 
---- prebuilt\container-field ---
+--- prebuilt/container-field ---
 
 A `container` is a layout-only field that chains [wrapper components](/wrappers/overview) around its children. It gives you a place to stack wrappers without the wrappers having to know about each other — no form nesting, no new form context, values flatten to the parent just like a [row](/prebuilt/form-rows).
 
@@ -8419,7 +8419,7 @@ The resulting form value is flat — containers contribute structure to the UI, 
 - **[Form Rows](/prebuilt/form-rows)** — horizontal layout without a wrapper chain
 - **[Form Groups](/prebuilt/form-groups)** — add a nested value shape instead of flattening
 
---- prebuilt\form-arrays\complete ---
+--- prebuilt/form-arrays/complete ---
 
 Arrays create dynamic collections of field values. Each item in the `fields` array defines **one array item** with its structure and initial values.
 
@@ -9026,7 +9026,7 @@ The complete API documented on this page is the right choice when you need capab
 
 For all other scenarios, the [simplified array API](/prebuilt/form-arrays/simplified) provides a more concise configuration with auto-generated buttons.
 
---- prebuilt\form-arrays\simplified ---
+--- prebuilt/form-arrays/simplified ---
 
 The simplified array API provides a concise way to define dynamic arrays. Instead of manually specifying each item in `fields`, you provide a `template` for the item structure and a `value` array with initial data. Add and remove buttons are generated automatically.
 
@@ -9346,7 +9346,7 @@ Simplified arrays support `logic` for conditional visibility, just like the comp
 
 As a rule of thumb: **start with the simplified API**. If you hit a limitation, switch to the [complete API](/prebuilt/form-arrays/complete).
 
---- prebuilt\form-groups ---
+--- prebuilt/form-groups ---
 
 Groups nest form fields under a single key in the form value. This creates logical grouping for form data, not visual grouping.
 
@@ -9516,7 +9516,7 @@ For all available condition types and operators, see [Conditional Logic](/dynami
 - **[Form Pages](/prebuilt/form-pages)** — Build multi-step wizard forms with page navigation
 - **[Form Arrays](/prebuilt/form-arrays/simplified)** — Create repeating sections with dynamic add/remove
 
---- prebuilt\form-pages ---
+--- prebuilt/form-pages ---
 
 Create multi-step forms by using page fields. When your form contains page fields, it automatically enters "paged mode" and renders with navigation controls.
 
@@ -9720,7 +9720,7 @@ Page fields use these classes for styling:
 - **[Dynamic Behavior](/dynamic-behavior/overview)** — Conditional logic, value derivation, and form submission
 - **[Form Rows](/prebuilt/form-rows)** — Arrange fields side-by-side within pages
 
---- prebuilt\form-rows ---
+--- prebuilt/form-rows ---
 
 Organize fields into horizontal rows for compact layouts. Rows display fields side-by-side.
 
@@ -9940,7 +9940,7 @@ Only `'hidden'` is supported as a logic type on containers. For all available co
 - **[Form Arrays](/prebuilt/form-arrays/simplified)** — Create repeating sections with add/remove controls
 - **[Form Pages](/prebuilt/form-pages)** — Build multi-step wizard forms with page navigation
 
---- prebuilt\hidden-fields ---
+--- prebuilt/hidden-fields ---
 
 Hidden fields store values in the form model without rendering any visible UI. They're useful for persisting IDs, metadata, or other non-user-facing data.
 
@@ -10130,7 +10130,7 @@ See the **Value Exclusion** page under Recipes for full details.
 - **[Value Exclusion](/recipes/value-exclusion)** — Control which field values are included in submission output
 - **[Field Types](/field-types/text-inputs)** — Explore all available input field types and their props
 
---- prebuilt\text-components ---
+--- prebuilt/text-components ---
 
 Display static or dynamic text content in forms. Text fields are **display-only** - they don't collect user input or contribute to form values.
 
@@ -10268,7 +10268,7 @@ Add custom classes via the `className` property:
 - **[Field Types](/field-types/text-inputs)** — Explore all available input field types and their props
 - **[i18n](/dynamic-behavior/i18n)** — Translate text labels with Observables and Signals
 
---- recipes\custom-fields ---
+--- recipes/custom-fields ---
 
 Add a custom field type to any existing ng-forge adapter — no need to build a full adapter from scratch.
 
@@ -10358,7 +10358,7 @@ If you need a completely custom adapter (no existing adapter as base), or want t
 - **[Type Safety](/recipes/type-safety)** — Leverage TypeScript inference for form values and field types
 - **[Events](/recipes/events)** — Dispatch and subscribe to form events from custom field components
 
---- recipes\events ---
+--- recipes/events ---
 
 The events API provides two complementary services for working with form events. Which one you use depends on **where your code lives** relative to the `dynamic-form` element.
 
@@ -10841,7 +10841,7 @@ This is useful when you need the complete form state at the time an event occurr
 - **[Custom Fields](/recipes/custom-fields)** — Build custom field components that use EventBus
 - **[Form Arrays](/prebuilt/form-arrays/simplified)** — Use array events to add and remove items programmatically
 
---- recipes\expression-parser ---
+--- recipes/expression-parser ---
 
 Dynamic forms use expressions for conditional logic and dynamic values. When you use JavaScript expressions with `type: 'javascript'`, the expression parser evaluates them safely, preventing code injection attacks while maintaining the flexibility you need.
 
@@ -11186,7 +11186,7 @@ The expression parser lets you write flexible conditional logic while preventing
 - **[Type Safety](/recipes/type-safety)** — Leverage TypeScript inference for form values and field types
 - **[Value Derivation](/dynamic-behavior/derivation)** — Use expressions to compute field values dynamically
 
---- recipes\type-safety ---
+--- recipes/type-safety ---
 
 Complete type inference for form configurations using TypeScript's type system and Angular signal forms.
 
@@ -12027,7 +12027,7 @@ const config = {
 - **[Field Types](/field-types/text-inputs)** - Understanding available field types
 - **[Form Layout](/prebuilt/form-groups)** - Visual guide to container fields
 
---- recipes\value-exclusion ---
+--- recipes/value-exclusion ---
 
 Value exclusion controls which field values are included in the form submission output based on the field's reactive state (hidden, disabled, readonly).
 
@@ -12193,7 +12193,7 @@ const config: FormConfig = {
 - **[Events](/recipes/events)** — Dispatch and subscribe to form events from inside or outside the form
 - **[Conditional Logic](/dynamic-behavior/overview)** — Control field visibility, required state, and disabled state
 
---- schema-validation\angular-schema ---
+--- schema-validation/angular-schema ---
 
 Angular's signal forms include a native `Schema<T>` API for form-level validation. This approach requires no additional dependencies and integrates seamlessly with Dynamic Forms.
 
@@ -12480,7 +12480,7 @@ Consider [Standard Schema (Zod)](/schema-validation/zod) if you:
 - **[Field Validation](/validation/basics)** — Add built-in and custom validators to individual fields
 - **[Schema Validation Overview](/schema-validation/overview)** — Compare Angular and Standard Schema approaches
 
---- schema-validation\overview ---
+--- schema-validation/overview ---
 
 Form-level schema validation enables cross-field validation rules that examine the entire form state. While field-level validators check individual fields, schema validators validate relationships between multiple fields.
 
@@ -12581,7 +12581,7 @@ const config = {
 - **[Standard Schema (Zod)](/schema-validation/zod)** - Use Zod, Valibot, or ArkType
 - **[Field Validation](/validation/basics)** - Individual field validators
 
---- schema-validation\zod ---
+--- schema-validation/zod ---
 
 Use [Zod](https://zod.dev) schemas to validate your dynamic forms. This lets you reuse existing schemas, share validation logic between frontend and backend, and leverage Zod's powerful cross-field validation like `.refine()`.
 
@@ -12798,7 +12798,7 @@ const config = { schema: standardSchema(schema), fields: [...] };
 - **[Field Validation](/validation/basics)** — Add built-in and custom validators to individual fields
 - **[Schema Validation Overview](/schema-validation/overview)** — Compare Angular and Standard Schema approaches
 
---- validation\advanced ---
+--- validation/advanced ---
 
 Advanced validation techniques including conditional validators, dynamic values, and cross-field validation.
 
@@ -13163,7 +13163,7 @@ when: {
 - **[Conditional Logic](/dynamic-behavior/overview)** - Field behavior changes
 - **[Examples](/examples)** - Real-world patterns
 
---- validation\basics ---
+--- validation/basics ---
 
 Dynamic Forms provides powerful, type-safe validation that integrates directly with Angular's signal forms. Start with simple shorthand validators and progress to advanced conditional validation as your needs grow.
 
@@ -13478,7 +13478,7 @@ Invalid fields prevent form submission and display error messages.
 - **[Conditional Logic](/dynamic-behavior/overview)** - Dynamic field behavior
 - **[Examples](/examples)** - Real-world validation patterns
 
---- validation\custom-validators ---
+--- validation/custom-validators ---
 
 Custom validation functions for complex validation logic that goes beyond built-in validators.
 
@@ -14321,7 +14321,7 @@ const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
 - [Validation Reference](/validation/reference) - Standard validation rules
 - [Type Safety](/recipes/type-safety) - TypeScript integration
 
---- validation\reference ---
+--- validation/reference ---
 
 Complete reference for all validators, conditional expressions, and validation configuration options.
 
@@ -14748,7 +14748,7 @@ type ConditionalExpression = FieldValueCondition | CustomCondition | JavascriptC
 - **[Conditional Logic](/dynamic-behavior/overview)** - Field behavior changes
 - **[Type Safety](/recipes/type-safety)** - TypeScript integration
 
---- wrappers\overview ---
+--- wrappers/overview ---
 
 Wrappers decorate a rendered field with extra UI chrome — a titled section, a validation indicator, a card, a collapsible panel — without modifying the field component itself. Multiple wrappers stack outermost → innermost.
 
@@ -14812,7 +14812,7 @@ Wrappers are SSR-safe. The component cache (`WRAPPER_COMPONENT_CACHE`) and regis
 1. **[Writing a wrapper](/wrappers/writing-a-wrapper)** — build your own wrapper component: the contract, reading field state, styling, testing.
 2. **[Registering and applying wrappers](/wrappers/registering-and-applying)** — `createWrappers(…)`, module augmentation, `wrappers` on a field, `defaultWrappers`, auto-associations, opting out.
 
---- wrappers\registering-and-applying ---
+--- wrappers/registering-and-applying ---
 
 Wrappers travel through the library as **registered types** — a `WrapperTypeDefinition` with a lazy-loaded component. Registration tells `provideDynamicForm(...)` how to resolve a config like `{ type: 'section' }` to your component class, and how to type-check wrapper configs in form definitions.
 
@@ -14959,7 +14959,7 @@ The form below sets `defaultWrappers: [{ type: 'css', cssClasses: 'demo-field' }
 - Back to **[Writing a wrapper](/wrappers/writing-a-wrapper)** for the component contract and field-state reading patterns.
 - **[Recipes → Adding Custom Fields](/recipes/custom-fields)** when a new wrapper isn't enough — you need a brand-new control.
 
---- wrappers\writing-a-wrapper ---
+--- wrappers/writing-a-wrapper ---
 
 Build a custom wrapper component that decorates any dynamic form field. This page walks through the contract, the data that flows in, and the common extensions (validation-aware chrome, styling, tests). Once the component exists, **[Registering and applying wrappers](/wrappers/registering-and-applying)** covers how to make it available to a form.
 
