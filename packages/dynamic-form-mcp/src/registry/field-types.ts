@@ -51,6 +51,12 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
         required: false,
         default: 3,
       },
+      cols: {
+        name: 'cols',
+        type: 'number',
+        description: 'Number of visible columns',
+        required: false,
+      },
     },
     validationSupported: true,
     source: 'adapter',
@@ -60,6 +66,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
   type: 'textarea',
   label: 'Description',
   placeholder: 'Enter description...',
+  maxLength: 500,
   props: { rows: 5 }
 }`,
     minimalExample: `{ key: 'bio', type: 'textarea', label: 'Bio' }`,

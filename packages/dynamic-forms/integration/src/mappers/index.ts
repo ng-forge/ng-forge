@@ -5,7 +5,6 @@ export { checkboxFieldMapper } from './checkbox/checkbox-field-mapper';
 export { datepickerFieldMapper } from './datepicker/datepicker-field-mapper';
 export { optionsFieldMapper } from './select/options-field-mapper';
 export type { FieldWithOptions } from './select/options-field-mapper';
-export { textareaFieldMapper } from './textarea/textarea-field-mapper';
 export { sliderFieldMapper } from './slider/slider-field-mapper';
 
 // Button field mappers

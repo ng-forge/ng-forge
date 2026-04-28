@@ -4,7 +4,6 @@ import { ThemePalette } from '@angular/material/core';
 
 export interface MatMultiCheckboxProps {
   disableRipple?: boolean;
-  tabIndex?: number;
   hint?: DynamicText;
   labelPosition?: 'before' | 'after';
   color?: ThemePalette;

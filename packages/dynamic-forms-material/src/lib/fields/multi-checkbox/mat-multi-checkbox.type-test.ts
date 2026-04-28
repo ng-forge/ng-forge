@@ -20,7 +20,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('MatMultiCheckboxProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'disableRipple' | 'tabIndex' | 'hint' | 'labelPosition' | 'color';
+  type ExpectedKeys = 'disableRipple' | 'hint' | 'labelPosition' | 'color';
   type ActualKeys = keyof MatMultiCheckboxProps;
 
   it('should have exactly the expected keys', () => {
@@ -34,10 +34,6 @@ describe('MatMultiCheckboxProps - Exhaustive Whitelist', () => {
   describe('property types', () => {
     it('disableRipple', () => {
       expectTypeOf<MatMultiCheckboxProps['disableRipple']>().toEqualTypeOf<boolean | undefined>();
-    });
-
-    it('tabIndex', () => {
-      expectTypeOf<MatMultiCheckboxProps['tabIndex']>().toEqualTypeOf<number | undefined>();
     });
 
     it('hint', () => {

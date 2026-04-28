@@ -13,16 +13,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('MatTextareaProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys =
-    | 'hint'
-    | 'appearance'
-    | 'subscriptSizing'
-    | 'floatLabel'
-    | 'hideRequiredMarker'
-    | 'rows'
-    | 'cols'
-    | 'resize'
-    | 'maxLength';
+  type ExpectedKeys = 'hint' | 'appearance' | 'subscriptSizing' | 'floatLabel' | 'hideRequiredMarker' | 'resize' | 'rows' | 'cols';
   type ActualKeys = keyof MatTextareaProps;
 
   it('should have exactly the expected keys', () => {
@@ -54,20 +45,8 @@ describe('MatTextareaProps - Exhaustive Whitelist', () => {
       expectTypeOf<MatTextareaProps['hideRequiredMarker']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('rows', () => {
-      expectTypeOf<MatTextareaProps['rows']>().toEqualTypeOf<number | undefined>();
-    });
-
-    it('cols', () => {
-      expectTypeOf<MatTextareaProps['cols']>().toEqualTypeOf<number | undefined>();
-    });
-
     it('resize', () => {
       expectTypeOf<MatTextareaProps['resize']>().toEqualTypeOf<'none' | 'both' | 'horizontal' | 'vertical' | undefined>();
-    });
-
-    it('maxLength', () => {
-      expectTypeOf<MatTextareaProps['maxLength']>().toEqualTypeOf<number | undefined>();
     });
   });
 });

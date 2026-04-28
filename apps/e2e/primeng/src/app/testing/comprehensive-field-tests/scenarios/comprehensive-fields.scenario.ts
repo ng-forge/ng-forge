@@ -64,6 +64,11 @@ const config = {
       type: 'textarea',
       label: 'Textarea Field',
       placeholder: 'Enter long text',
+      // Field-level maxLength becomes both a validator and an HTML maxlength attribute on
+      // the rendered <textarea>. PrimeNG textarea hosts [formField] on a custom control,
+      // so the wiring goes through Signal Forms's setInputOnDirectives() onto the renamed
+      // camelCase `maxLength` input on PrimeTextareaControlComponent.
+      maxLength: 200,
       props: {
         rows: 4,
       },

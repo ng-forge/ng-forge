@@ -9,9 +9,7 @@ export interface IonicInputProps extends InputProps {
   hint?: DynamicText;
   errorText?: DynamicText;
   counter?: boolean;
-  maxlength?: number;
   clearInput?: boolean;
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
 }
 
 export type IonicInputField = InputField<IonicInputProps>;

@@ -180,7 +180,7 @@ describe('valueFieldMapper', () => {
       expect(inputs).not.toHaveProperty('maxValue');
     });
 
-    it('should NOT include rows and cols (use textareaFieldMapper instead)', () => {
+    it('should NOT include rows and cols (delivered via propsToMeta → meta tracking)', () => {
       const textareaField = {
         key: 'textareaField',
         type: 'textarea' as const,
@@ -190,7 +190,8 @@ describe('valueFieldMapper', () => {
       const injector = createTestInjector({ fieldKey: 'textareaField' });
       const inputs = testMapper(textareaField as BaseValueField<unknown, string>, injector);
 
-      // valueFieldMapper does NOT extract rows/cols from props - use textareaFieldMapper
+      // valueFieldMapper does not write rows/cols to component inputs;
+      // they reach the DOM via the propsToMeta → meta-tracking pipeline instead.
       expect(inputs).not.toHaveProperty('rows');
       expect(inputs).not.toHaveProperty('cols');
     });

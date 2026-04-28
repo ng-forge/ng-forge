@@ -8,10 +8,7 @@ export interface MatTextareaProps extends TextareaProps {
   subscriptSizing?: SubscriptSizing;
   floatLabel?: FloatLabelType;
   hideRequiredMarker?: boolean;
-  rows?: number;
-  cols?: number;
   resize?: 'none' | 'both' | 'horizontal' | 'vertical';
-  maxLength?: number;
 }
 
 export type MatTextareaField = TextareaField<MatTextareaProps>;

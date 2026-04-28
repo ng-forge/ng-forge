@@ -6,17 +6,9 @@ import { TextareaField, TextareaProps } from '@ng-forge/dynamic-forms/integratio
  */
 export interface PrimeTextareaProps extends TextareaProps {
   /**
-   * Number of visible text lines.
-   */
-  rows?: number;
-  /**
    * Enable automatic resizing based on content.
    */
   autoResize?: boolean;
-  /**
-   * Maximum number of characters allowed.
-   */
-  maxlength?: number;
   /**
    * CSS class to apply to the textarea element.
    */

@@ -26,7 +26,6 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
-        [maxlength]="props()?.maxlength"
         [tabIndex]="tabIndex()"
         [autoResize]="props()?.autoResize ?? false"
         [ariaDescribedBy]="ariaDescribedBy()"

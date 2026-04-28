@@ -24,6 +24,8 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       [rows]="props()?.rows ?? 4"
       [autoGrow]="props()?.autoGrow ?? false"
       [counter]="props()?.counter ?? false"
+      [minlength]="f().minLength?.()"
+      [maxlength]="f().maxLength?.()"
       [color]="props()?.color"
       [fill]="props()?.fill ?? 'outline'"
       [shape]="props()?.shape"

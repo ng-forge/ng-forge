@@ -61,7 +61,6 @@ export const PrimeDatepickerPropsSchema = PrimeCommonPropsSchema.extend({
 export const PrimeTextareaPropsSchema = PrimeCommonPropsSchema.extend({
   rows: z.number().positive().optional(),
   autoResize: z.boolean().optional(),
-  maxlength: z.number().positive().optional(),
   placeholder: DynamicTextSchema.optional(),
 });
 

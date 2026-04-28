@@ -30,9 +30,8 @@ export const IonicInputPropsSchema = z.object({
   hint: DynamicTextSchema.optional(),
   errorText: DynamicTextSchema.optional(),
   counter: z.boolean().optional(),
-  maxlength: z.number().positive().optional(),
   clearInput: z.boolean().optional(),
-  type: z.enum(['text', 'email', 'password', 'number', 'tel', 'url']).optional(),
+  type: z.enum(['text', 'email', 'password', 'number', 'tel', 'url', 'search']).optional(),
   placeholder: DynamicTextSchema.optional(),
 });
 
@@ -111,7 +110,6 @@ export const IonicSelectPropsSchema = z.object({
 export const IonicTextareaPropsSchema = z.object({
   rows: z.number().positive().optional(),
   autoGrow: z.boolean().optional(),
-  maxlength: z.number().positive().optional(),
   counter: z.boolean().optional(),
   fill: z.enum(['solid', 'outline']).optional(),
   shape: z.literal('round').optional(),

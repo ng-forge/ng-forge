@@ -17,6 +17,10 @@ const config = {
       label: 'Text Input',
       placeholder: 'Enter text',
       required: true,
+      // Field-level maxLength reaches the rendered <ion-input> via the explicit
+      // [maxlength]="f().maxLength?.()" template binding (Signal Forms cannot
+      // auto-wire here because <ion-input> exposes a lowercase `maxlength` property).
+      maxLength: 50,
       col: 6,
     },
     // Email Input
@@ -64,6 +68,9 @@ const config = {
       type: 'textarea',
       label: 'Textarea Field',
       placeholder: 'Enter long text',
+      // Field-level maxLength reaches the rendered <ion-textarea> via the explicit
+      // [maxlength]="f().maxLength?.()" template binding (same reason as Ionic input).
+      maxLength: 200,
       props: {
         rows: 4,
       },

@@ -17,7 +17,8 @@ import { TextareaModule } from 'primeng/textarea';
       [ngModel]="value()"
       (ngModelChange)="value.set($event)"
       [placeholder]="placeholder()"
-      [attr.maxlength]="maxlength()"
+      [attr.minlength]="minLength()"
+      [attr.maxlength]="maxLength()"
       [attr.tabindex]="tabIndex()"
       [autoResize]="autoResize()"
       [disabled]="disabled()"
@@ -64,7 +65,14 @@ export class PrimeTextareaControlComponent implements FormValueControl<string> {
   readonly placeholder = input<string>('');
   readonly rows = input<number>(4);
   readonly cols = input<number | undefined>(undefined);
-  readonly maxlength = input<number | undefined>(undefined);
+  // Length-validator → DOM wiring uses Signal Forms's setInputOnDirectives to copy
+  // FieldState.maxLength/minLength onto these camelCase-named inputs automatically.
+  // The match must be exact-case — renaming these to lowercase would silently break the
+  // wiring. The Ionic adapter takes the alternate strategy (direct template binding)
+  // because <ion-input> / <ion-textarea> use lowercase property names we cannot rename.
+  // See packages/dynamic-forms-ionic/src/lib/fields/input/ionic-input.component.ts.
+  readonly maxLength = input<number | undefined>(undefined);
+  readonly minLength = input<number | undefined>(undefined);
   readonly tabIndex = input<number | undefined>(undefined);
   readonly autoResize = input<boolean>(false);
   readonly styleClass = input<string>('');

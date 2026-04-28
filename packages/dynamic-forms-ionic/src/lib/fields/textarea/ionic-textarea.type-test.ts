@@ -12,18 +12,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('IonicTextareaProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys =
-    | 'rows'
-    | 'cols'
-    | 'autoGrow'
-    | 'maxlength'
-    | 'counter'
-    | 'fill'
-    | 'shape'
-    | 'labelPlacement'
-    | 'hint'
-    | 'errorText'
-    | 'color';
+  type ExpectedKeys = 'rows' | 'cols' | 'autoGrow' | 'counter' | 'fill' | 'shape' | 'labelPlacement' | 'hint' | 'errorText' | 'color';
   type ActualKeys = keyof IonicTextareaProps;
 
   it('should have exactly the expected keys', () => {
@@ -35,20 +24,12 @@ describe('IonicTextareaProps - Exhaustive Whitelist', () => {
   });
 
   describe('property types', () => {
-    it('rows', () => {
-      expectTypeOf<IonicTextareaProps['rows']>().toEqualTypeOf<number | undefined>();
-    });
-
     it('cols', () => {
       expectTypeOf<IonicTextareaProps['cols']>().toEqualTypeOf<number | undefined>();
     });
 
     it('autoGrow', () => {
       expectTypeOf<IonicTextareaProps['autoGrow']>().toEqualTypeOf<boolean | undefined>();
-    });
-
-    it('maxlength', () => {
-      expectTypeOf<IonicTextareaProps['maxlength']>().toEqualTypeOf<number | undefined>();
     });
 
     it('counter', () => {
@@ -249,7 +230,6 @@ describe('IonicTextareaField - Usage Tests', () => {
         rows: 5,
         cols: 40,
         autoGrow: true,
-        maxlength: 500,
         counter: true,
         fill: 'solid',
         shape: 'round',
@@ -300,17 +280,15 @@ describe('IonicTextareaField - Usage Tests', () => {
     expectTypeOf(field.props?.autoGrow).toEqualTypeOf<true>();
   });
 
-  it('should accept maxlength and counter', () => {
+  it('should accept counter', () => {
     const field = {
       type: 'textarea',
       key: 'bio',
       props: {
-        maxlength: 200,
         counter: true,
       },
     } as const satisfies IonicTextareaField;
 
-    expectTypeOf(field.props?.maxlength).toEqualTypeOf<200>();
     expectTypeOf(field.props?.counter).toEqualTypeOf<true>();
   });
 

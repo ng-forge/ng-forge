@@ -9,6 +9,25 @@ import { AsyncPipe } from '@angular/common';
 import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
+// Length-validator → DOM wiring (minlength/maxlength):
+//
+// On NATIVE form elements (<input>/<textarea>), Signal Forms's [formField] directive
+// auto-syncs minLength/maxLength HTML attributes via setNativeDomProperty (gated by
+// elementAcceptsNativeProperty). See the source in @angular/forms/signals.
+//
+// <ion-input> is a custom Ionic web component, not a native form element, so Signal
+// Forms's auto-sync does NOT apply here — it instead routes via setInputOnDirectives
+// looking up an exact camelCase input ('maxLength'). <ion-input>'s property is the
+// lowercase 'maxlength', which doesn't match. We therefore bind directly from the
+// FieldState signals.
+//
+// `f().maxLength?.()` — the optional `?.()` is required: FieldState.maxLength is
+// `Signal<number | undefined> | undefined` (the entire signal is missing if the
+// field has no maxLength validator). Same for minLength.
+//
+// PrimeNG textarea uses the alternate strategy: its control component declares
+// camelCase `maxLength` / `minLength` inputs so Signal Forms's setInputOnDirectives
+// auto-wires. See packages/dynamic-forms-primeng/src/lib/fields/textarea/.
 @Component({
   selector: 'df-ion-input',
   imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe],
@@ -25,6 +44,8 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"
       [clearInput]="props()?.clearInput ?? false"
       [counter]="props()?.counter ?? false"
+      [minlength]="f().minLength?.()"
+      [maxlength]="f().maxLength?.()"
       [color]="effectiveColor()"
       [fill]="effectiveFill()"
       [shape]="effectiveShape()"

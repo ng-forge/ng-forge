@@ -12,17 +12,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('IonicInputProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys =
-    | 'fill'
-    | 'shape'
-    | 'labelPlacement'
-    | 'color'
-    | 'hint'
-    | 'errorText'
-    | 'counter'
-    | 'maxlength'
-    | 'clearInput'
-    | 'type';
+  type ExpectedKeys = 'fill' | 'shape' | 'labelPlacement' | 'color' | 'hint' | 'errorText' | 'counter' | 'clearInput' | 'type';
   type ActualKeys = keyof IonicInputProps;
 
   it('should have exactly the expected keys', () => {
@@ -64,16 +54,14 @@ describe('IonicInputProps - Exhaustive Whitelist', () => {
       expectTypeOf<IonicInputProps['counter']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('maxlength', () => {
-      expectTypeOf<IonicInputProps['maxlength']>().toEqualTypeOf<number | undefined>();
-    });
-
     it('clearInput', () => {
       expectTypeOf<IonicInputProps['clearInput']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('type', () => {
-      expectTypeOf<IonicInputProps['type']>().toEqualTypeOf<'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | undefined>();
+      expectTypeOf<IonicInputProps['type']>().toEqualTypeOf<
+        'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | undefined
+      >();
     });
   });
 });
@@ -122,7 +110,7 @@ describe('IonicInputField (String) - Exhaustive Whitelist', () => {
     | 'nullable';
 
   // String input field (without props.type: 'number')
-  type StringInputField = Extract<IonicInputField, { props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url' } }>;
+  type StringInputField = Extract<IonicInputField, { props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url' | 'search' } }>;
   type ActualKeys = keyof StringInputField;
 
   it('should have exactly the expected keys', () => {
@@ -350,7 +338,6 @@ describe('IonicInputField - Discriminated Union', () => {
         hint: 'Enter your email',
         errorText: 'Invalid email',
         counter: true,
-        maxlength: 50,
         clearInput: true,
       },
     } as const satisfies IonicInputField;

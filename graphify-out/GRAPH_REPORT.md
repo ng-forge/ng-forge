@@ -1,242 +1,176 @@
-# Graph Report - packages/ (2026-04-23)
+# Graph Report - textarea-pr  (2026-04-29)
 
 ## Corpus Check
-
-- 794 files · ~309,859 words
+- 1986 files · ~1,022,496 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-
-- 3239 nodes · 4396 edges · 195 communities detected
-- Extraction: 81% EXTRACTED · 19% INFERRED · 0% AMBIGUOUS · INFERRED: 836 edges (avg confidence: 0.79)
+- 3989 nodes · 3941 edges · 135 communities detected
+- Extraction: 73% EXTRACTED · 27% INFERRED · 0% AMBIGUOUS · INFERRED: 1062 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-
-- [[_COMMUNITY_Derivation Orchestration (core)|Derivation Orchestration (core)]]
-- [[_COMMUNITY_OpenAPI Generator Source|OpenAPI Generator: Source]]
-- [[_COMMUNITY_Adapter Test Utilities (BootstrapIonicMaterial)|Adapter Test Utilities (Bootstrap/Ionic/Material)]]
-- [[_COMMUNITY_MCP Server Tool Handlers & Registry|MCP Server: Tool Handlers & Registry]]
-- [[_COMMUNITY_Function Registry & Logic Functions (core)|Function Registry & Logic Functions (core)]]
-- [[_COMMUNITY_Test Harnesses & Array Events (core)|Test Harnesses & Array Events (core)]]
-- [[_COMMUNITY_Provider Wiring & Wrapper Chains (core)|Provider Wiring & Wrapper Chains (core)]]
-- [[_COMMUNITY_Field Tree Mapping & Schema (core)|Field Tree Mapping & Schema (core)]]
-- [[_COMMUNITY_Logic Expressions & Conditionals (core)|Logic Expressions & Conditionals (core)]]
-- [[_COMMUNITY_PrimeNG Adapter Integration|PrimeNG Adapter Integration]]
-- [[_COMMUNITY_Form State Machine & Manager (core)|Form State Machine & Manager (core)]]
-- [[_COMMUNITY_Validator Factory & Dynamic Values (core)|Validator Factory & Dynamic Values (core)]]
-- [[_COMMUNITY_MCP Server Doc Fetcher & Tools|MCP Server: Doc Fetcher & Tools]]
-- [[_COMMUNITY_BootstrapPrimeNG Field Components|Bootstrap/PrimeNG Field Components]]
-- [[_COMMUNITY_Cross-Adapter Field Components|Cross-Adapter Field Components]]
-- [[_COMMUNITY_Adapter Test Builders (MaterialIonic)|Adapter Test Builders (Material/Ionic)]]
-- [[_COMMUNITY_Adapter Field Mappers (MaterialIonic)|Adapter Field Mappers (Material/Ionic)]]
-- [[_COMMUNITY_Field Definitions (core)|Field Definitions (core)]]
-- [[_COMMUNITY_Event Bus & Array Events (core)|Event Bus & Array Events (core)]]
-- [[_COMMUNITY_Cross-Field Detection (core)|Cross-Field Detection (core)]]
-- [[_COMMUNITY_Core Field Mappers|Core Field Mappers]]
-- [[_COMMUNITY_Wrapper Chain & Field Outlet (core)|Wrapper Chain & Field Outlet (core)]]
-- [[_COMMUNITY_Expression Parser (core)|Expression Parser (core)]]
-- [[_COMMUNITY_MCP Server Registry Data (FieldsAdapters)|MCP Server: Registry Data (Fields/Adapters)]]
-- [[_COMMUNITY_OpenAPI Generator Docs|OpenAPI Generator: Docs]]
-- [[_COMMUNITY_Page Orchestrator & Field Context (core)|Page Orchestrator & Field Context (core)]]
-- [[_COMMUNITY_Integration Field Definitions (core)|Integration Field Definitions (core)]]
-- [[_COMMUNITY_Integration Mappers (core)|Integration Mappers (core)]]
-- [[_COMMUNITY_Simple Test Utilities (core testing)|Simple Test Utilities (core testing)]]
-- [[_COMMUNITY_Form Config Factory & Helpers (core)|Form Config Factory & Helpers (core)]]
-- [[_COMMUNITY_Container Fields — GroupArray (core)|Container Fields — Group/Array (core)]]
-- [[_COMMUNITY_Material Adapter Integration|Material Adapter Integration]]
-- [[_COMMUNITY_Ionic Adapter Integration|Ionic Adapter Integration]]
-- [[_COMMUNITY_Integration Array Button Mappers|Integration Array Button Mappers]]
-- [[_COMMUNITY_Core Library Documentation|Core Library Documentation]]
-- [[_COMMUNITY_PrimeNG Select Field|PrimeNG Select Field]]
-- [[_COMMUNITY_Expression Evaluator (core)|Expression Evaluator (core)]]
-- [[_COMMUNITY_Config Normalization (core)|Config Normalization (core)]]
-- [[_COMMUNITY_Submission Integration Tests (core)|Submission Integration Tests (core)]]
-- [[_COMMUNITY_Event Bus Tests (core)|Event Bus Tests (core)]]
-- [[_COMMUNITY_State Machine Tests (core)|State Machine Tests (core)]]
-- [[_COMMUNITY_Bootstrap Button Field|Bootstrap Button Field]]
-- [[_COMMUNITY_dynamic-forms wrapper-chain.spec.ts|dynamic-forms: wrapper-chain.spec.ts]]
-- [[_COMMUNITY_dynamic-forms RowWrapperComponent|dynamic-forms: RowWrapperComponent]]
-- [[_COMMUNITY_dynamic-forms resolveField()|dynamic-forms: resolveField()]]
-- [[_COMMUNITY_ionic Ionic lib barrel (srclibinde|ionic: Ionic lib barrel (src/lib/inde]]
-- [[_COMMUNITY_primeng PrimeDatepickerControlComponen|primeng: PrimeDatepickerControlComponen]]
-- [[_COMMUNITY_dynamic-forms createWrappers()|dynamic-forms: createWrappers()]]
-- [[_COMMUNITY_dynamic-forms field-state-extractor.spec.ts|dynamic-forms: field-state-extractor.spec.ts]]
-- [[_COMMUNITY_dynamic-forms interpolateParams()|dynamic-forms: interpolateParams()]]
-- [[_COMMUNITY_dynamic-forms DynamicTextPipe|dynamic-forms: DynamicTextPipe]]
-- [[_COMMUNITY_dynamic-forms Page Orchestration Integration|dynamic-forms: Page Orchestration Integration]]
-- [[_COMMUNITY_primeng PrimeSelectControlComponent|primeng: PrimeSelectControlComponent]]
-- [[_COMMUNITY_dynamic-forms array-button.mapper.spec.ts|dynamic-forms: array-button.mapper.spec.ts]]
-- [[_COMMUNITY_dynamic-forms injectFieldRegistry()|dynamic-forms: injectFieldRegistry()]]
-- [[_COMMUNITY_material mat-input.type-test.ts|material: mat-input.type-test.ts]]
-- [[_COMMUNITY_dynamic-forms buttonFieldMapper()|dynamic-forms: buttonFieldMapper()]]
-- [[_COMMUNITY_ionic IonicToggleControlComponent|ionic: IonicToggleControlComponent]]
-- [[_COMMUNITY_bootstrap dynamic-forms-bootstrap README|bootstrap: dynamic-forms-bootstrap README]]
-- [[_COMMUNITY_dynamic-forms inject-field-registry.spec.ts|dynamic-forms: inject-field-registry.spec.ts]]
-- [[_COMMUNITY_dynamic-forms withPreviousValue()|dynamic-forms: withPreviousValue()]]
-- [[_COMMUNITY_dynamic-forms createDebouncedSignal()|dynamic-forms: createDebouncedSignal()]]
-- [[_COMMUNITY_dynamic-forms DynamicFormError|dynamic-forms: DynamicFormError]]
-- [[_COMMUNITY_dynamic-forms event-dispatcher.spec.ts|dynamic-forms: event-dispatcher.spec.ts]]
-- [[_COMMUNITY_dynamic-forms SignalFormsAdapterService Unit|dynamic-forms: SignalFormsAdapterService Unit]]
-- [[_COMMUNITY_primeng PrimeMultiCheckboxFieldCompone|primeng: PrimeMultiCheckboxFieldCompone]]
-- [[_COMMUNITY_primeng PrimeTextareaControlComponent|primeng: PrimeTextareaControlComponent]]
-- [[_COMMUNITY_primeng PrimeButtonFieldComponent|primeng: PrimeButtonFieldComponent]]
-- [[_COMMUNITY_bootstrap BsButtonFieldComponent|bootstrap: BsButtonFieldComponent]]
-- [[_COMMUNITY_bootstrap BsSelectFieldComponent|bootstrap: BsSelectFieldComponent]]
-- [[_COMMUNITY_material MatMultiCheckboxFieldComponent|material: MatMultiCheckboxFieldComponent]]
-- [[_COMMUNITY_material MatButtonFieldComponent|material: MatButtonFieldComponent]]
-- [[_COMMUNITY_ionic IonicMultiCheckboxFieldCompone|ionic: IonicMultiCheckboxFieldCompone]]
-- [[_COMMUNITY_bootstrap BsToggleField type|bootstrap: BsToggleField type]]
-- [[_COMMUNITY_dynamic-forms render-ready-metadata.spec.ts|dynamic-forms: render-ready-metadata.spec.ts]]
-- [[_COMMUNITY_dynamic-forms validator-factory.spec.ts|dynamic-forms: validator-factory.spec.ts]]
-- [[_COMMUNITY_dynamic-forms TextFieldComponent|dynamic-forms: TextFieldComponent]]
-- [[_COMMUNITY_dynamic-forms RowAllowedChildren|dynamic-forms: RowAllowedChildren]]
-- [[_COMMUNITY_dynamic-forms provideDynamicForm type tests|dynamic-forms: provideDynamicForm type tests]]
-- [[_COMMUNITY_primeng PrimeRadioFieldComponent|primeng: PrimeRadioFieldComponent]]
-- [[_COMMUNITY_primeng PrimeRadioGroupComponent|primeng: PrimeRadioGroupComponent]]
-- [[_COMMUNITY_primeng PrimeInputFieldComponent|primeng: PrimeInputFieldComponent]]
-- [[_COMMUNITY_primeng PrimeDatepickerFieldComponent|primeng: PrimeDatepickerFieldComponent]]
-- [[_COMMUNITY_primeng PrimeCheckboxFieldComponent|primeng: PrimeCheckboxFieldComponent]]
-- [[_COMMUNITY_primeng PrimeSliderFieldComponent|primeng: PrimeSliderFieldComponent]]
-- [[_COMMUNITY_primeng PrimeToggleFieldComponent|primeng: PrimeToggleFieldComponent]]
-- [[_COMMUNITY_primeng PrimeTextareaFieldComponent|primeng: PrimeTextareaFieldComponent]]
-- [[_COMMUNITY_primeng PrimeSelectFieldComponent|primeng: PrimeSelectFieldComponent]]
-- [[_COMMUNITY_bootstrap BsRadioFieldComponent|bootstrap: BsRadioFieldComponent]]
-- [[_COMMUNITY_bootstrap BsInputFieldComponent|bootstrap: BsInputFieldComponent]]
-- [[_COMMUNITY_bootstrap BsDatepickerFieldComponent|bootstrap: BsDatepickerFieldComponent]]
-- [[_COMMUNITY_bootstrap BsCheckboxFieldComponent|bootstrap: BsCheckboxFieldComponent]]
-- [[_COMMUNITY_bootstrap BsSliderFieldComponent|bootstrap: BsSliderFieldComponent]]
-- [[_COMMUNITY_bootstrap BsToggleFieldComponent|bootstrap: BsToggleFieldComponent]]
-- [[_COMMUNITY_bootstrap BsTextareaFieldComponent|bootstrap: BsTextareaFieldComponent]]
-- [[_COMMUNITY_material MatRadioFieldComponent|material: MatRadioFieldComponent]]
-- [[_COMMUNITY_material MatInputFieldComponent|material: MatInputFieldComponent]]
-- [[_COMMUNITY_material MatSelectFieldComponent|material: MatSelectFieldComponent]]
-- [[_COMMUNITY_ionic IonicRadioFieldComponent|ionic: IonicRadioFieldComponent]]
-- [[_COMMUNITY_ionic IonicInputFieldComponent|ionic: IonicInputFieldComponent]]
-- [[_COMMUNITY_ionic IonicCheckboxFieldComponent|ionic: IonicCheckboxFieldComponent]]
-- [[_COMMUNITY_ionic IonicSliderFieldComponent|ionic: IonicSliderFieldComponent]]
-- [[_COMMUNITY_ionic IonicToggleFieldComponent|ionic: IonicToggleFieldComponent]]
-- [[_COMMUNITY_ionic IonicTextareaFieldComponent|ionic: IonicTextareaFieldComponent]]
-- [[_COMMUNITY_material MatCheckboxField type|material: MatCheckboxField type]]
-- [[_COMMUNITY_material MatToggleField type|material: MatToggleField type]]
-- [[_COMMUNITY_material MatTextareaField type|material: MatTextareaField type]]
-- [[_COMMUNITY_material MatSliderField type|material: MatSliderField type]]
-- [[_COMMUNITY_TestClass|TestClass]]
-- [[_COMMUNITY_text-field.component.spec.ts|text-field.component.spec.ts]]
-- [[_COMMUNITY_ArrayItemDefinition|ArrayItemDefinition]]
-- [[_COMMUNITY_array-event-handler tests|array-event-handler tests]]
-- [[_COMMUNITY_dynamic-forms vite config (browser mode)|dynamic-forms vite config (browser mode)]]
-- [[_COMMUNITY_input-constraints.directive.ts|input-constraints.directive.ts]]
-- [[_COMMUNITY_Ionic input field barrel export|Ionic input field barrel export]]
-- [[_COMMUNITY_Ionic Testing Entry Point (testingindex|Ionic Testing Entry Point (testing/index]]
-- [[_COMMUNITY_submitButtonFieldMapper (integration)|submitButtonFieldMapper (integration)]]
-- [[_COMMUNITY_Gotcha Firefox E2E flakiness|Gotcha: Firefox E2E flakiness]]
-- [[_COMMUNITY_dynamic-forms ESLint config|dynamic-forms ESLint config]]
-- [[_COMMUNITY_TextareaProps interface|TextareaProps interface]]
-- [[_COMMUNITY_TextareaWrap type|TextareaWrap type]]
-- [[_COMMUNITY_BaseArrayAddButtonField|BaseArrayAddButtonField]]
-- [[_COMMUNITY_BaseArrayRemoveButtonField|BaseArrayRemoveButtonField]]
-- [[_COMMUNITY_dynamic-forms package barrel|dynamic-forms package barrel]]
-- [[_COMMUNITY_CrossFieldCategory|CrossFieldCategory]]
-- [[_COMMUNITY_ARRAY_PLACEHOLDER (.$.)|ARRAY_PLACEHOLDER (.$.)]]
-- [[_COMMUNITY_MAX_AST_CACHE_SIZE (=1000)|MAX_AST_CACHE_SIZE (=1000)]]
-- [[_COMMUNITY_DERIVATION_KEY_DELIMITER (x00)|DERIVATION_KEY_DELIMITER (\x00)]]
-- [[_COMMUNITY_DerivationChainContext|DerivationChainContext]]
-- [[_COMMUNITY_DerivationProcessingResult|DerivationProcessingResult]]
-- [[_COMMUNITY_CycleDetectionResult|CycleDetectionResult]]
-- [[_COMMUNITY_DerivationApplicatorContext|DerivationApplicatorContext]]
-- [[_COMMUNITY_HttpDerivationStreamContext|HttpDerivationStreamContext]]
-- [[_COMMUNITY_AsyncDerivationStreamContext|AsyncDerivationStreamContext]]
-- [[_COMMUNITY_derivation-collector tests|derivation-collector tests]]
-- [[_COMMUNITY_async-derivation-stream tests|async-derivation-stream tests]]
-- [[_COMMUNITY_http-request-resolver tests|http-request-resolver tests]]
-- [[_COMMUNITY_http-response-evaluator tests|http-response-evaluator tests]]
-- [[_COMMUNITY_CustomFunctionOptions|CustomFunctionOptions]]
-- [[_COMMUNITY_CustomFunctionScope type|CustomFunctionScope type]]
-- [[_COMMUNITY_property-derivation-types spec suite|property-derivation-types spec suite]]
-- [[_COMMUNITY_property-override-key spec suite|property-override-key spec suite]]
-- [[_COMMUNITY_NextPageEvent tests|NextPageEvent tests]]
-- [[_COMMUNITY_PreviousPageEvent tests|PreviousPageEvent tests]]
-- [[_COMMUNITY_MoveArrayItemEvent tests|MoveArrayItemEvent tests]]
-- [[_COMMUNITY_SubmitEvent tests|SubmitEvent tests]]
-- [[_COMMUNITY_WithInputSignals|WithInputSignals]]
-- [[_COMMUNITY_FieldOption|FieldOption]]
-- [[_COMMUNITY_FieldWrapperContract|FieldWrapperContract]]
-- [[_COMMUNITY_GroupAllowedChildren|GroupAllowedChildren]]
-- [[_COMMUNITY_ArrayAllowedChildren|ArrayAllowedChildren]]
-- [[_COMMUNITY_FormMode type|FormMode type]]
-- [[_COMMUNITY_FieldPathAccess|FieldPathAccess]]
-- [[_COMMUNITY_LogicTrigger|LogicTrigger]]
-- [[_COMMUNITY_validation models barrel|validation models barrel]]
-- [[_COMMUNITY_omit  keyBy  mapValues helpers|omit / keyBy / mapValues helpers]]
-- [[_COMMUNITY_createResolvedErrorsSignal Spec|createResolvedErrorsSignal Spec]]
-- [[_COMMUNITY_deprecation-warnings Spec|deprecation-warnings Spec]]
-- [[_COMMUNITY_shouldShowErrors tests|shouldShowErrors tests]]
-- [[_COMMUNITY_utilsindex barrel|utils/index barrel]]
-- [[_COMMUNITY_object-utils tests|object-utils tests]]
-- [[_COMMUNITY_interpolateParams tests|interpolateParams tests]]
-- [[_COMMUNITY_applyMetaToElement tests|applyMetaToElement tests]]
-- [[_COMMUNITY_resolve-wrappers tests|resolve-wrappers tests]]
-- [[_COMMUNITY_Form Submission Integration tests|Form Submission Integration tests]]
-- [[_COMMUNITY_ng-forge Dynamic Forms Logo|ng-forge Dynamic Forms Logo]]
-- [[_COMMUNITY_runStdioServer() (imported)|runStdioServer() (imported)]]
-- [[_COMMUNITY_MCP ESLint config|MCP ESLint config]]
-- [[_COMMUNITY_Bootstrap shared index (empty)|Bootstrap shared index (empty)]]
-- [[_COMMUNITY_BsRadio type tests|BsRadio type tests]]
-- [[_COMMUNITY_DynamicTextPipe (core)|DynamicTextPipe (core)]]
-- [[_COMMUNITY_IonicSlider type tests|IonicSlider type tests]]
-- [[_COMMUNITY_IonicToggle type tests|IonicToggle type tests]]
-- [[_COMMUNITY_IonicTextarea type tests|IonicTextarea type tests]]
-- [[_COMMUNITY_DynamicTextPipe|DynamicTextPipe]]
-- [[_COMMUNITY_Ionic Textarea Field Barrel Export|Ionic Textarea Field Barrel Export]]
-- [[_COMMUNITY_Material ESLint Config|Material ESLint Config]]
-- [[_COMMUNITY_Ionic Textarea Barrel Export|Ionic Textarea Barrel Export]]
-- [[_COMMUNITY_Ionic Button Barrel|Ionic Button Barrel]]
-- [[_COMMUNITY_Ionic Select Barrel|Ionic Select Barrel]]
-- [[_COMMUNITY_Material ESLint Config|Material ESLint Config]]
-- [[_COMMUNITY_Material Multi-Checkbox Barrel|Material Multi-Checkbox Barrel]]
-- [[_COMMUNITY_Material Input Barrel|Material Input Barrel]]
-- [[_COMMUNITY_Shared aria-describedby pattern across M|Shared aria-describedby pattern across M]]
-- [[_COMMUNITY_effectiveAppearance computed|effectiveAppearance computed]]
-- [[_COMMUNITY_MatButtonProps interface|MatButtonProps interface]]
-- [[_COMMUNITY_PrimeNG Test Utils Module|PrimeNG Test Utils Module]]
-- [[_COMMUNITY_ng-forge Ionic Logo|ng-forge Ionic Logo]]
-- [[_COMMUNITY_ng-forge Dynamic Forms Bootstrap Logo|ng-forge Dynamic Forms Bootstrap Logo]]
-- [[_COMMUNITY_ng-forge Dynamic Forms Material Logo|ng-forge Dynamic Forms Material Logo]]
-- [[_COMMUNITY_vite test config (openapi-generator)|vite test config (openapi-generator)]]
-- [[_COMMUNITY_eslint config (openapi-generator)|eslint config (openapi-generator)]]
-- [[_COMMUNITY_MappingResult interface|MappingResult interface]]
-- [[_COMMUNITY_MappingOptions interface|MappingOptions interface]]
-- [[_COMMUNITY_DiscriminatorFieldConfig interface|DiscriminatorFieldConfig interface]]
+- [[_COMMUNITY_Community 0|Community 0]]
+- [[_COMMUNITY_Community 1|Community 1]]
+- [[_COMMUNITY_Community 2|Community 2]]
+- [[_COMMUNITY_Community 3|Community 3]]
+- [[_COMMUNITY_Community 4|Community 4]]
+- [[_COMMUNITY_Community 5|Community 5]]
+- [[_COMMUNITY_Community 6|Community 6]]
+- [[_COMMUNITY_Community 7|Community 7]]
+- [[_COMMUNITY_Community 8|Community 8]]
+- [[_COMMUNITY_Community 9|Community 9]]
+- [[_COMMUNITY_Community 10|Community 10]]
+- [[_COMMUNITY_Community 11|Community 11]]
+- [[_COMMUNITY_Community 12|Community 12]]
+- [[_COMMUNITY_Community 13|Community 13]]
+- [[_COMMUNITY_Community 14|Community 14]]
+- [[_COMMUNITY_Community 15|Community 15]]
+- [[_COMMUNITY_Community 16|Community 16]]
+- [[_COMMUNITY_Community 17|Community 17]]
+- [[_COMMUNITY_Community 18|Community 18]]
+- [[_COMMUNITY_Community 19|Community 19]]
+- [[_COMMUNITY_Community 20|Community 20]]
+- [[_COMMUNITY_Community 21|Community 21]]
+- [[_COMMUNITY_Community 22|Community 22]]
+- [[_COMMUNITY_Community 23|Community 23]]
+- [[_COMMUNITY_Community 24|Community 24]]
+- [[_COMMUNITY_Community 26|Community 26]]
+- [[_COMMUNITY_Community 27|Community 27]]
+- [[_COMMUNITY_Community 28|Community 28]]
+- [[_COMMUNITY_Community 29|Community 29]]
+- [[_COMMUNITY_Community 30|Community 30]]
+- [[_COMMUNITY_Community 31|Community 31]]
+- [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_Community 33|Community 33]]
+- [[_COMMUNITY_Community 34|Community 34]]
+- [[_COMMUNITY_Community 35|Community 35]]
+- [[_COMMUNITY_Community 36|Community 36]]
+- [[_COMMUNITY_Community 37|Community 37]]
+- [[_COMMUNITY_Community 38|Community 38]]
+- [[_COMMUNITY_Community 39|Community 39]]
+- [[_COMMUNITY_Community 40|Community 40]]
+- [[_COMMUNITY_Community 42|Community 42]]
+- [[_COMMUNITY_Community 44|Community 44]]
+- [[_COMMUNITY_Community 45|Community 45]]
+- [[_COMMUNITY_Community 46|Community 46]]
+- [[_COMMUNITY_Community 47|Community 47]]
+- [[_COMMUNITY_Community 48|Community 48]]
+- [[_COMMUNITY_Community 49|Community 49]]
+- [[_COMMUNITY_Community 52|Community 52]]
+- [[_COMMUNITY_Community 53|Community 53]]
+- [[_COMMUNITY_Community 54|Community 54]]
+- [[_COMMUNITY_Community 55|Community 55]]
+- [[_COMMUNITY_Community 56|Community 56]]
+- [[_COMMUNITY_Community 58|Community 58]]
+- [[_COMMUNITY_Community 59|Community 59]]
+- [[_COMMUNITY_Community 60|Community 60]]
+- [[_COMMUNITY_Community 61|Community 61]]
+- [[_COMMUNITY_Community 62|Community 62]]
+- [[_COMMUNITY_Community 63|Community 63]]
+- [[_COMMUNITY_Community 64|Community 64]]
+- [[_COMMUNITY_Community 65|Community 65]]
+- [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 67|Community 67]]
+- [[_COMMUNITY_Community 68|Community 68]]
+- [[_COMMUNITY_Community 69|Community 69]]
+- [[_COMMUNITY_Community 70|Community 70]]
+- [[_COMMUNITY_Community 71|Community 71]]
+- [[_COMMUNITY_Community 72|Community 72]]
+- [[_COMMUNITY_Community 73|Community 73]]
+- [[_COMMUNITY_Community 74|Community 74]]
+- [[_COMMUNITY_Community 76|Community 76]]
+- [[_COMMUNITY_Community 77|Community 77]]
+- [[_COMMUNITY_Community 78|Community 78]]
+- [[_COMMUNITY_Community 82|Community 82]]
+- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
+- [[_COMMUNITY_Community 87|Community 87]]
+- [[_COMMUNITY_Community 88|Community 88]]
+- [[_COMMUNITY_Community 89|Community 89]]
+- [[_COMMUNITY_Community 90|Community 90]]
+- [[_COMMUNITY_Community 91|Community 91]]
+- [[_COMMUNITY_Community 92|Community 92]]
+- [[_COMMUNITY_Community 99|Community 99]]
+- [[_COMMUNITY_Community 100|Community 100]]
+- [[_COMMUNITY_Community 102|Community 102]]
+- [[_COMMUNITY_Community 103|Community 103]]
+- [[_COMMUNITY_Community 104|Community 104]]
+- [[_COMMUNITY_Community 105|Community 105]]
+- [[_COMMUNITY_Community 107|Community 107]]
+- [[_COMMUNITY_Community 108|Community 108]]
+- [[_COMMUNITY_Community 109|Community 109]]
+- [[_COMMUNITY_Community 110|Community 110]]
+- [[_COMMUNITY_Community 111|Community 111]]
+- [[_COMMUNITY_Community 113|Community 113]]
+- [[_COMMUNITY_Community 114|Community 114]]
+- [[_COMMUNITY_Community 115|Community 115]]
+- [[_COMMUNITY_Community 116|Community 116]]
+- [[_COMMUNITY_Community 117|Community 117]]
+- [[_COMMUNITY_Community 142|Community 142]]
+- [[_COMMUNITY_Community 146|Community 146]]
+- [[_COMMUNITY_Community 147|Community 147]]
+- [[_COMMUNITY_Community 154|Community 154]]
+- [[_COMMUNITY_Community 155|Community 155]]
+- [[_COMMUNITY_Community 161|Community 161]]
+- [[_COMMUNITY_Community 165|Community 165]]
+- [[_COMMUNITY_Community 166|Community 166]]
+- [[_COMMUNITY_Community 167|Community 167]]
+- [[_COMMUNITY_Community 168|Community 168]]
+- [[_COMMUNITY_Community 169|Community 169]]
+- [[_COMMUNITY_Community 170|Community 170]]
+- [[_COMMUNITY_Community 171|Community 171]]
+- [[_COMMUNITY_Community 172|Community 172]]
+- [[_COMMUNITY_Community 173|Community 173]]
+- [[_COMMUNITY_Community 174|Community 174]]
+- [[_COMMUNITY_Community 175|Community 175]]
+- [[_COMMUNITY_Community 176|Community 176]]
+- [[_COMMUNITY_Community 177|Community 177]]
+- [[_COMMUNITY_Community 182|Community 182]]
+- [[_COMMUNITY_Community 198|Community 198]]
+- [[_COMMUNITY_Community 201|Community 201]]
+- [[_COMMUNITY_Community 202|Community 202]]
+- [[_COMMUNITY_Community 203|Community 203]]
+- [[_COMMUNITY_Community 204|Community 204]]
+- [[_COMMUNITY_Community 205|Community 205]]
+- [[_COMMUNITY_Community 206|Community 206]]
+- [[_COMMUNITY_Community 207|Community 207]]
+- [[_COMMUNITY_Community 214|Community 214]]
+- [[_COMMUNITY_Community 226|Community 226]]
+- [[_COMMUNITY_Community 1549|Community 1549]]
+- [[_COMMUNITY_Community 1550|Community 1550]]
+- [[_COMMUNITY_Community 1551|Community 1551]]
+- [[_COMMUNITY_Community 1552|Community 1552]]
+- [[_COMMUNITY_Community 1553|Community 1553]]
+- [[_COMMUNITY_Community 1554|Community 1554]]
+- [[_COMMUNITY_Community 1555|Community 1555]]
 
 ## God Nodes (most connected - your core abstractions)
-
-1. `FunctionRegistryService` - 40 edges
-2. `MinimalTestBuilder` - 39 edges
-3. `PrimeNGFormTestUtils` - 34 edges
-4. `DerivationOrchestrator` - 30 edges
-5. `FormStateMachine` - 30 edges
-6. `Parser` - 27 edges
-7. `FormStateManager` - 25 edges
-8. `DynamicFormTestUtils` - 24 edges
-9. `EventBus` - 23 edges
-10. `BootstrapFormTestUtils` - 22 edges
+1. `delay()` - 47 edges
+2. `setupMetaTracking()` - 43 edges
+3. `MinimalTestBuilder` - 39 edges
+4. `FunctionRegistryService` - 37 edges
+5. `PrimeNGFormTestUtils` - 26 edges
+6. `provideDynamicForm()` - 23 edges
+7. `Parser` - 22 edges
+8. `runGenerate()` - 22 edges
+9. `FormStateMachine` - 19 edges
+10. `BootstrapFormTestUtils` - 19 edges
 
 ## Surprising Connections (you probably didn't know these)
-
-- `withMaterialFields()` --cites--> `@ng-forge/dynamic-forms-material README` [INFERRED]
-  packages/dynamic-forms-material/src/lib/providers/material-providers.ts → packages/dynamic-forms-material/README.md
-- `buttonFieldMapper()` --semantically_similar_to--> `Ionic Specific Button Mappers (re-export)` [INFERRED] [semantically similar]
-  packages/dynamic-forms-ionic/src/lib/fields/button/ionic-button.mapper.ts → packages/dynamic-forms-ionic/src/lib/fields/button/ionic-specific-button.mapper.ts
-- `IonicButtonFieldComponent` --semantically_similar_to--> `MatInputFieldComponent` [INFERRED] [semantically similar]
-  packages/dynamic-forms-ionic/src/lib/fields/button/ionic-button.component.ts → packages/dynamic-forms-material/src/lib/fields/input/mat-input.component.ts
-- `parseOpenAPISpec()` --semantically_similar_to--> `logger.spec.ts - logger tests` [INFERRED] [semantically similar]
-  packages/openapi-generator/src/parser/openapi-parser.ts → packages/openapi-generator/src/utils/logger.spec.ts
-- `withPrimeNGFields()` --cites--> `withPrimeNGFields setup example` [EXTRACTED]
-  packages/dynamic-forms-primeng/src/lib/providers/primeng-providers.ts → packages/dynamic-forms-primeng/README.md
+- `flush()` --calls--> `delay()`  [INFERRED]
+  packages/dynamic-forms/src/lib/utils/wrapper-chain/wrapper-chain.bench.spec.ts → internal/utils/src/lib/async/delay.ts
+- `delayedObservable()` --calls--> `delay()`  [INFERRED]
+  packages/dynamic-forms/testing/src/integration/submission.integration.spec.ts → internal/utils/src/lib/async/delay.ts
+- `waitForDynamicComponents()` --calls--> `delay()`  [INFERRED]
+  packages/dynamic-forms/src/lib/dynamic-form.component.spec.ts → internal/utils/src/lib/async/delay.ts
+- `flush()` --calls--> `delay()`  [INFERRED]
+  packages/dynamic-forms/src/lib/directives/df-field-outlet.directive.spec.ts → internal/utils/src/lib/async/delay.ts
+- `waitForFormInit()` --calls--> `delay()`  [INFERRED]
+  packages/dynamic-forms/src/lib/core/page-orchestrator/page-orchestrator.component.spec.ts → internal/utils/src/lib/async/delay.ts
 
 ## Hyperedges (group relationships)
-
 - **Form lifecycle: state manager + state machine + side effect scheduler** — claude_md_concept_formstatemanager, claude_md_concept_formstatemachine, claude_md_concept_sideeffectscheduler, claude_md_concept_field_resolution_pipeline [EXTRACTED 0.90]
 - **InputField discriminated union (Number/String variants keyed by props.type)** — input_field_inputfield, input_field_numberinputfield, input_field_stringinputfield, input_field_inputprops [EXTRACTED 0.95]
 - **Options-bearing value fields (select, radio, multi-checkbox)** — select_field_selectfield, radio_field_radiofield, multi_checkbox_field_multicheckboxfield [INFERRED 0.85]
@@ -349,1274 +283,744 @@
 
 ## Communities
 
-### Community 0 - "Derivation Orchestration (core)"
+### Community 0 - "Community 0"
+Cohesion: 0.01
+Nodes (87): wrapRoutesWithAdapter(), setupArrayTest(), setupNestedObjectArrayTest(), waitForItems(), createBootstrapApp(), withBootstrapFields(), BootstrapFormTestUtils, setupWrapperTest() (+79 more)
 
+### Community 1 - "Community 1"
+Cohesion: 0.01
+Nodes (33): ActiveAdapterService, AdapterSubBarComponent, ApiIndexComponent, ConditionalLogicShowcaseDemoComponent, registryWith(), CopyButtonComponent, ExampleScenarioComponent, ExampleShikiService (+25 more)
+
+### Community 2 - "Community 2"
 Cohesion: 0.02
-Nodes (93): AsyncConditionFunction, AsyncDerivationFunction, createAsyncDerivationStream(), evaluateAndCondition(), evaluateCondition(), evaluateFieldValueCondition(), evaluateJavaScriptExpression(), evaluateOrCondition() (+85 more)
+Nodes (47): adapterGuard(), ApiDetailComponent, ApiService, createAsyncConditionLogicFunction(), contentRedirectGuard(), extractSlug(), buildTagPattern(), parseAttributes() (+39 more)
 
-### Community 1 - "OpenAPI Generator: Source"
+### Community 3 - "Community 3"
+Cohesion: 0.02
+Nodes (62): extractNode(), extractToJson(), findFormConfigCandidates(), findObjectLiteral(), findObjectLiteralInSatisfies(), findSatisfiesExpression(), hasFormConfigStructure(), fetchAllSections() (+54 more)
 
+### Community 4 - "Community 4"
+Cohesion: 0.02
+Nodes (39): BsCheckboxFieldComponent, BsDatepickerFieldComponent, BsInputFieldComponent, BsMultiCheckboxFieldComponent, BsRadioFieldComponent, BsRadioGroupComponent, BsSelectFieldComponent, BsSliderFieldComponent (+31 more)
+
+### Community 5 - "Community 5"
+Cohesion: 0.02
+Nodes (27): AppendArrayItemEvent, arrayEvent(), observeArrayActions(), ArrayMoveComponent, ArraySectionWrapperComponent, createConsoleTrackerFixture(), logTestResult(), BsButtonFieldComponent (+19 more)
+
+### Community 6 - "Community 6"
 Cohesion: 0.03
-Nodes (94): generateBarrel(), barrel-generator.spec.ts tests, run(), run (cli entrypoint fn, cross-file ref), DEFAULT_FIELD_CHOICES, mapDiscriminator(), FormConfig (core), EndpointInfo type (+86 more)
+Nodes (65): evaluateAndCondition(), evaluateCondition(), evaluateFieldValueCondition(), evaluateJavaScriptExpression(), evaluateOrCondition(), createCollection(), applyDerivations(), computeDerivedValue() (+57 more)
 
-### Community 2 - "Adapter Test Utilities (Bootstrap/Ionic/Material)"
-
-Cohesion: 0.02
-Nodes (61): BootstrapConfig interface, BOOTSTRAP_CONFIG InjectionToken, BOOTSTRAP_FIELD_TYPES array, withBootstrapFields provider tests, withBootstrapFields(), BootstrapFormConfigBuilder, BootstrapFormTestUtils, buttonFieldMapper() (+53 more)
-
-### Community 3 - "MCP Server: Tool Handlers & Registry"
-
-Cohesion: 0.02
-Nodes (60): extractNode(), extractToJson(), findFormConfigCandidates(), findObjectLiteral(), findObjectLiteralInSatisfies(), findSatisfiesExpression(), hasFormConfigStructure(), fetchAllSections() (+52 more)
-
-### Community 4 - "Function Registry & Logic Functions (core)"
-
-Cohesion: 0.03
-Nodes (41): AsyncConditionFunctionCacheService, createAsyncConditionLogicFunction(), Async Condition Logic Function Tests, registryWith(), buildDependencyGraph(), detectBidirectionalPairs(), detectCycles(), detectCyclesWithDFS() (+33 more)
-
-### Community 5 - "Test Harnesses & Array Events (core)"
-
-Cohesion: 0.03
-Nodes (44): AppendArrayItemEvent tests, ARRAY_EVENT_TYPES const, ArrayAction discriminated union, ArrayEvent union type, observeArrayActions(), toArrayAction(), ArrayFieldComponent, ArrayFieldComponent tests (+36 more)
-
-### Community 6 - "Provider Wiring & Wrapper Chains (core)"
-
-Cohesion: 0.02
-Nodes (60): setupArrayTest(), setupNestedObjectArrayTest(), BUILT_IN_FIELDS, BUILT_IN_WRAPPERS, DISPLAY_FIELD_TYPES_BASE, BUILT_IN_FIELDS spec, ConsoleLogger, ConsoleLogger spec (+52 more)
-
-### Community 7 - "Field Tree Mapping & Schema (core)"
-
+### Community 7 - "Community 7"
 Cohesion: 0.04
-Nodes (77): isArrayField(), isContainerTypedField(), cross-field-collector tests, FlattenedField (interface), flattenFields(), field-flattener tests, getFieldValueHandling(), ValueHandlingMode (+69 more)
+Nodes (50): generateBarrel(), run(), mapDiscriminator(), extractEndpoints(), promptEndpointSelection(), getChoicesForScope(), promptFieldTypeChoices(), startWatcher() (+42 more)
 
-### Community 8 - "Logic Expressions & Conditionals (core)"
-
+### Community 8 - "Community 8"
 Cohesion: 0.04
-Nodes (86): AndCondition, AsyncCondition, ComparisonOperator, ConditionalExpression union, CustomCondition, FieldValueCondition, HttpCondition, JavascriptCondition (+78 more)
+Nodes (65): applyHiddenLogic(), collectFieldData(), validateFieldTypesRegistered(), validateFormConfig(), validateNoDuplicateKeys(), validateRegexPattern(), collectCrossFieldEntries(), collectFromField() (+57 more)
 
-### Community 9 - "PrimeNG Adapter Integration"
-
-Cohesion: 0.03
-Nodes (47): provideDynamicForm (core), DynamicForm (core), integration button mappers, valueFieldMapper/optionsFieldMapper/checkboxFieldMapper/datepickerFieldMapper, provideDynamicForm (core), df-prime selector rule, Material Fields Barrel, MatFormConfig / MatFormProps (+39 more)
-
-### Community 10 - "Form State Machine & Manager (core)"
-
-Cohesion: 0.05
-Nodes (38): derivedFromDeferred(), isSignalArray(), isSignalRecord(), derived-from-deferred tests, emitComponentInitialized(), createFormStateMachine(), FormStateMachine, FormStateMachine Spec (+30 more)
-
-### Community 11 - "Validator Factory & Dynamic Values (core)"
-
-Cohesion: 0.05
-Nodes (50): async & HTTP validator integration tests, createDeprecationWarningTracker(), DEPRECATION_WARNING_TRACKER token, DeprecationWarningTracker, warnDeprecated(), formatSkipReason(), logDerivationCycleStart(), logDerivationEvaluation() (+42 more)
-
-### Community 12 - "MCP Server: Doc Fetcher & Tools"
-
-Cohesion: 0.04
-Nodes (67): AST Extractor Spec Suite, createSourceFile (ts-morph), DATE_PLACEHOLDER constant, extractNode (recursive), extractToJson, findFormConfigCandidates, hasFormConfigStructure, Doc Fetcher Spec Suite (+59 more)
-
-### Community 13 - "Bootstrap/PrimeNG Field Components"
-
-Cohesion: 0.05
-Nodes (63): BOOTSTRAP_CONFIG token, BsCheckboxFieldComponent, bs-checkbox barrel, BsCheckbox type tests, BsCheckboxField type, BsCheckboxProps, BsDatepickerFieldComponent, bs-datepicker barrel (+55 more)
-
-### Community 14 - "Cross-Adapter Field Components"
-
-Cohesion: 0.05
-Nodes (64): @angular/forms/signals FormField/FieldTree/FormValueControl, BsSelectFieldComponent, Select index barrel, BsSelectField, BsSelectProps (native <select>, string-only), BsSelect type tests, Submit/Next/Previous button mapper re-exports, BsTextareaFieldComponent (+56 more)
-
-### Community 15 - "Adapter Test Builders (Material/Ionic)"
-
+### Community 9 - "Community 9"
 Cohesion: 0.09
-Nodes (3): IonicDatepickerFieldComponent, IonicFormConfigBuilder, MinimalTestBuilder
+Nodes (3): IonicFormConfigBuilder, MaterialFormConfigBuilder, MinimalTestBuilder
 
-### Community 16 - "Adapter Field Mappers (Material/Ionic)"
-
+### Community 10 - "Community 10"
 Cohesion: 0.05
-Nodes (47): createAriaDescribedBySignal (Material), createAriaDescribedBySignal util, createResolvedErrorsSignal (integration), setupMetaTracking / createResolvedErrorsSignal / shouldShowErrors, setupMetaTracking (integration), shouldShowErrors (integration), Ionic Select Barrel Export, Ionic Testing Public API (+39 more)
+Nodes (37): addArrayItemButtonMapper(), insertArrayItemButtonMapper(), popArrayItemButtonMapper(), prependArrayItemButtonMapper(), removeArrayItemButtonMapper(), shiftArrayItemButtonMapper(), buildArrayButtonEventContext(), resolveArrayButtonContext() (+29 more)
 
-### Community 17 - "Field Definitions (core)"
-
-Cohesion: 0.06
-Nodes (44): ArrayButtonConfig, ArrayComponent, ArrayField, isSimplifiedArrayField(), SimplifiedArrayField, BaseCheckedField, CheckedFieldComponent, isCheckedField() (+36 more)
-
-### Community 18 - "Event Bus & Array Events (core)"
-
-Cohesion: 0.06
-Nodes (22): AppendArrayItemEvent, ArrayItemDefinitionTemplate, arrayEvent(), arrayEvent builder tests, ComponentInitializedEvent, ComponentInitializedEvent tests, attachFormValue(), EventBus (+14 more)
-
-### Community 19 - "Cross-Field Detection (core)"
-
-Cohesion: 0.08
-Nodes (46): collectFieldData(), config-validator tests, validateFieldTypesRegistered(), validateFormConfig(), validateNoDuplicateKeys(), validateRegexPattern(), collectCrossFieldEntries(), collectFromField() (+38 more)
-
-### Community 20 - "Core Field Mappers"
-
-Cohesion: 0.06
-Nodes (39): applyHiddenLogic(), applyPropertyOverrides(), KNOWN_FIELD_PROPERTIES, applyPropertyOverrides tests, arrayFieldMapper(), arrayFieldMapper Spec, baseFieldMapper(), buildBaseInputs() (+31 more)
-
-### Community 21 - "Wrapper Chain & Field Outlet (core)"
-
+### Community 11 - "Community 11"
 Cohesion: 0.07
-Nodes (33): create-wrappers type tests, DfFieldOutlet, DfFieldOutlet Directive Spec, EMPTY_OBJECT (frozen), EMPTY_WRAPPERS (frozen sentinel), isSameWrapperChain(), resolveWrappers(), wrapper-chain perf baseline (+25 more)
+Nodes (35): isArrayField(), isContainerTypedField(), flattenFields(), applyFieldState(), applyNumberValidators(), applySimpleValidationRules(), applyStringValidators(), collectFieldsFromObjectItem() (+27 more)
 
-### Community 22 - "Expression Parser (core)"
+### Community 12 - "Community 12"
+Cohesion: 0.05
+Nodes (27): applyPropertyOverrides(), arrayFieldMapper(), createArrayFieldSchema(), baseFieldMapper(), buildBaseInputs(), checkboxFieldMapper(), containerFieldMapper(), datepickerFieldMapper() (+19 more)
 
-Cohesion: 0.12
-Nodes (11): astCache (module-scoped LRU instance), ExpressionParser, LRUCache, ExpressionParser security test suite, ExpressionParser Tests, expressions/parser barrel export, Parser, Parser Tests (+3 more)
+### Community 13 - "Community 13"
+Cohesion: 0.05
+Nodes (28): ContainerFieldComponent, setupContainerInitEffect(), DfFieldOutlet, toReadonlyFieldTree(), toReadonlyFieldTreeCached(), GroupFieldComponent, PageFieldComponent, isSameWrapperChain() (+20 more)
 
-### Community 23 - "MCP Server: Registry Data (Fields/Adapters)"
-
+### Community 14 - "Community 14"
 Cohesion: 0.06
-Nodes (40): DOCUMENTATION registry (doc URL index), registerDocumentationResource(), Container nesting rules (row/group/array/page), Hidden field constraints (value required, forbidden props), Field type: input, FIELD_TYPES registry data, registerFieldTypesResource(), FieldTypeInfo interface (+32 more)
+Nodes (26): buildRouteSnapshot(), runGuard(), AdapterAwareUrlSerializer, isDocsAdapter(), ContentService, replaceEmojisOutsideCode(), createFakeTransferState(), createService() (+18 more)
 
-### Community 24 - "OpenAPI Generator: Docs"
+### Community 15 - "Community 15"
+Cohesion: 0.07
+Nodes (9): applyDerivationsForTrigger(), DerivationOrchestrator, detectArrayScope(), FieldContextRegistryService, isChildFieldContext(), PropertyDerivationOrchestrator, warnAboutWildcardDependencies(), safeReadPathKeys() (+1 more)
 
+### Community 16 - "Community 16"
+Cohesion: 0.1
+Nodes (12): walk(), stripFrontmatter(), Parser, createStackBlitzProject(), escapeHtml(), openInStackBlitz(), toJsObjectNotation(), buildFormFieldLines() (+4 more)
+
+### Community 17 - "Community 17"
+Cohesion: 0.07
+Nodes (12): ArrayFieldComponent, determineDifferentialOperation(), getArrayValue(), createContainerFieldProcessors(), getFieldDefaultValue(), FormConfigBuilder, getFieldValueHandling(), InsertArrayItemEvent (+4 more)
+
+### Community 18 - "Community 18"
 Cohesion: 0.06
 Nodes (37): allOf Schema Composition, Ambiguous Text Type Resolution, extractEndpoints(), API-first Development Workflow, generateFormConfig(), mapSchemaToFields(), parseOpenAPISpec(), walkSchema() (+29 more)
 
-### Community 25 - "Page Orchestrator & Field Context (core)"
+### Community 19 - "Community 19"
+Cohesion: 0.13
+Nodes (21): ExpressionParser, LRUCache, extractBoolean(), evaluateHttpValidationResponse(), createContext(), createPropertyOverrideStore(), captureFormSubmission(), clearAndFill() (+13 more)
 
-Cohesion: 0.09
-Nodes (17): detectArrayScope(), extractFieldState(), FieldContextRegistryService, isChildFieldContext(), FieldContextRegistryService spec suite, page-orchestrator barrel, core/registry barrel export, collectLeafFieldKeys() (+9 more)
+### Community 20 - "Community 20"
+Cohesion: 0.07
+Nodes (14): animationFrames$(), copyToClipboard(), createFireflyAnimation(), findClosestSnapTarget(), getSnapTargets(), initializeFireflyPositions(), navScrolled$(), scrollProgress$() (+6 more)
 
-### Community 26 - "Integration Field Definitions (core)"
+### Community 21 - "Community 21"
+Cohesion: 0.12
+Nodes (11): FormStateMachine, assertNever(), createSideEffectScheduler(), SideEffectScheduler, createDestroyedState(), createInitializingState(), createReadyState(), createTransitioningState() (+3 more)
 
-Cohesion: 0.08
-Nodes (35): ArrayField type tests, ButtonField interface, EventArgs type, CheckboxField interface, ContainerField type tests, DatepickerField interface, DatepickerProps type, datepickerFieldMapper spec (+27 more)
-
-### Community 27 - "Integration Mappers (core)"
-
-Cohesion: 0.09
-Nodes (24): checkboxFieldMapper(), checkboxFieldMapper tests, createResolvedErrorsSignal(), resolveErrorMessage(), datepickerFieldMapper(), toDate(), dynamicTextToObservable(), dynamicTextToObservable Spec (+16 more)
-
-### Community 28 - "Simple Test Utilities (core testing)"
-
-Cohesion: 0.09
-Nodes (18): createTestFieldContext(), createTestFormInjector(), TestFieldContextConfig, testMapper(), createMockLogger(), MockLogger interface, provideTestLogger(), testing public_api barrel (+10 more)
-
-### Community 29 - "Form Config Factory & Helpers (core)"
-
-Cohesion: 0.08
-Nodes (30): CONTAINER_TYPES constant, createField(), field (alias), createField Spec, FIELD_REGISTRY token, FieldTypeDefinition, CustomFnConfig, formConfig() (+22 more)
-
-### Community 30 - "Container Fields — Group/Array (core)"
-
-Cohesion: 0.08
-Nodes (23): ContainerFieldComponent, ContainerFieldComponent.resolvedFields, ContainerFieldComponent Spec, flushWrapperChain(), TestSectionWrapperComponent, TestStyleWrapperComponent, TestValidationWrapperComponent, ContainerFieldComponent.wrappers (+15 more)
-
-### Community 31 - "Material Adapter Integration"
-
-Cohesion: 0.1
-Nodes (2): MaterialFormConfigBuilder, MaterialFormTestUtils
-
-### Community 32 - "Ionic Adapter Integration"
-
+### Community 22 - "Community 22"
 Cohesion: 0.14
-Nodes (26): createAriaDescribedBySignal (Ionic), @ng-forge/dynamic-forms core + integration, Ionic field-types type barrel, Ionic fields barrel, IonicFormConfig, IonicFormProps, Ionic button mappers, IonicConfig (+18 more)
+Nodes (29): detectAngularKind(), extractAll(), extractClassMembers(), extractDeclaration(), extractInterfaceMembers(), extractParams(), extractTypeAliasMembers(), formatType() (+21 more)
 
-### Community 33 - "Integration Array Button Mappers"
+### Community 23 - "Community 23"
+Cohesion: 0.11
+Nodes (13): ConsoleLogger, formatSkipReason(), logDerivationCycleStart(), logDerivationEvaluation(), logDerivationIteration(), logDerivationSummary(), logMaxIterationsReached(), ActiveDerivationLogger (+5 more)
 
-Cohesion: 0.24
-Nodes (17): addArrayItemButtonMapper(), insertArrayItemButtonMapper(), popArrayItemButtonMapper(), prependArrayItemButtonMapper(), removeArrayItemButtonMapper(), shiftArrayItemButtonMapper(), Array Button Mappers Tests, buildArrayButtonEventContext() (+9 more)
+### Community 24 - "Community 24"
+Cohesion: 0.21
+Nodes (8): AddEmailsEvent, AddItemsEvent, AddMembersEvent, AddNotesEvent, AddTagsEvent, AddUsersEvent, RemoveNotesEvent, RemovePhonesEvent
 
-### Community 34 - "Core Library Documentation"
-
+### Community 26 - "Community 26"
 Cohesion: 0.15
 Nodes (17): COMPONENT_CACHE token, Field Resolution Pipeline, FormStateMachine (concept), FormStateManager (concept), provideDynamicFormDI Provider Architecture, renderReadyWhen convention, SideEffectScheduler (concept), @ng-forge/dynamic-forms Core Library Docs (+9 more)
 
-### Community 35 - "PrimeNG Select Field"
-
+### Community 27 - "Community 27"
 Cohesion: 0.15
-Nodes (17): PrimeSelect field barrel, createAriaDescribedBySignal, createResolvedErrorsSignal, PrimeSelectFieldComponent, shouldShowErrors, FormValueControl<ValueType>, PrimeSelectControlComponent, PrimeNG Select / MultiSelect (+9 more)
+Nodes (9): bench(), benchAsync(), BenchHost, BenchLeaf, BenchWrapA, BenchWrapB, BenchWrapC, flush() (+1 more)
 
-### Community 36 - "Expression Evaluator (core)"
-
-Cohesion: 0.22
-Nodes (4): BLOCKED_PROPERTIES blacklist, Evaluator, SAFE_METHODS whitelist, Evaluator Tests
-
-### Community 37 - "Config Normalization (core)"
-
+### Community 28 - "Community 28"
 Cohesion: 0.25
-Nodes (11): buildObjectItem(), buildObjectItemTemplate(), buildPrimitiveItem(), buildRemoveButton(), expandSimplifiedArray(), normalizeSimplifiedArrays(), normalizeSimplifiedArrays tests, validateSimplifiedTemplate() (+3 more)
+Nodes (1): PrimeNGFormConfigBuilder
 
-### Community 38 - "Submission Integration Tests (core)"
+### Community 29 - "Community 29"
+Cohesion: 0.28
+Nodes (1): BootstrapFormConfigBuilder
 
-Cohesion: 0.23
-Nodes (5): delayedObservable(), errorObservable(), multiEmitObservable(), observableAction(), wrappedAction()
+### Community 30 - "Community 30"
+Cohesion: 0.17
+Nodes (4): isAdapterName(), getAdapterFromHash(), getDefaultRoute(), HostComponent
 
-### Community 39 - "Event Bus Tests (core)"
+### Community 31 - "Community 31"
+Cohesion: 0.24
+Nodes (7): buildObjectItem(), buildObjectItemTemplate(), buildRemoveButton(), expandSimplifiedArray(), normalizeSimplifiedArrays(), validateSimplifiedTemplate(), setNormalizedArrayMetadata()
 
+### Community 32 - "Community 32"
 Cohesion: 0.17
 Nodes (7): AnotherTestEvent, CustomFormEvent, ErrorEvent, EventWithOptionalArgs, TestEvent, TestEventWithArgs, ThirdTestEvent
 
-### Community 40 - "State Machine Tests (core)"
+### Community 33 - "Community 33"
+Cohesion: 0.25
+Nodes (5): delayedObservable(), errorObservable(), multiEmitObservable(), observableAction(), wrappedAction()
 
+### Community 34 - "Community 34"
+Cohesion: 0.31
+Nodes (1): Evaluator
+
+### Community 35 - "Community 35"
 Cohesion: 0.22
 Nodes (5): buildConfig(), createMachine(), createMockLogger(), createFormStateDeps(), initManager()
 
-### Community 41 - "Bootstrap Button Field"
+### Community 36 - "Community 36"
+Cohesion: 0.2
+Nodes (1): TestScenarioComponent
 
+### Community 37 - "Community 37"
 Cohesion: 0.22
-Nodes (10): BsButtonFieldComponent, Button index barrel, buttonFieldMapper, Array item button field types (Add/Prepend/Insert/Remove/Pop/Shift), BsButtonProps, ARRAY_CONTEXT token, buildBaseInputs helper, DEFAULT_PROPS token (+2 more)
+Nodes (1): getScenarioById()
 
-### Community 42 - "dynamic-forms: wrapper-chain.spec.ts"
+### Community 38 - "Community 38"
+Cohesion: 0.22
+Nodes (1): IndexComponent
 
+### Community 39 - "Community 39"
 Cohesion: 0.22
 Nodes (6): TestHostComponent, TestInputComponent, TestWrapperA, TestWrapperB, TestWrapperBNested, TestWrapperBroken
 
-### Community 43 - "dynamic-forms: RowWrapperComponent"
+### Community 40 - "Community 40"
+Cohesion: 0.22
+Nodes (3): ContentSegmentsComponent, FakeComponent, loader()
 
+### Community 42 - "Community 42"
 Cohesion: 0.25
-Nodes (6): CssWrapperComponent, CssWrapper type, CssWrapper type tests, RowWrapperComponent, RowWrapper type, RowWrapper type tests
+Nodes (2): DynamicValueFunctionCacheService, HttpConditionCache
 
-### Community 45 - "dynamic-forms: resolveField()"
-
-Cohesion: 0.57
-Nodes (7): createFieldResolutionPipe(), createRenderReadySignal(), reconcileFields(), ResolvedField (interface), resolveField(), resolveFieldSync(), resolve-field tests
-
-### Community 46 - "ionic: Ionic lib barrel (src/lib/inde"
-
+### Community 44 - "Community 44"
 Cohesion: 0.25
-Nodes (8): ionic eslint: df-ion selector prefix rule, Ionic field-type re-exports (no augmentation), Ionic lib barrel (src/lib/index.ts), Ionic package public API (src/index.ts), Ionic adapter compatibility matrix, @ng-forge/dynamic-forms-ionic README, withIonicFields setup guidance, IonicField constant & IonicFieldType
+Nodes (1): App
 
-### Community 47 - "primeng: PrimeDatepickerControlComponen"
+### Community 45 - "Community 45"
+Cohesion: 0.33
+Nodes (2): decodeHtmlEntities(), DocPageComponent
 
-Cohesion: 0.29
-Nodes (1): PrimeDatepickerControlComponent
+### Community 46 - "Community 46"
+Cohesion: 0.48
+Nodes (2): setupConsoleCheck(), setupTestLogging()
 
-### Community 48 - "dynamic-forms: createWrappers()"
+### Community 47 - "Community 47"
+Cohesion: 0.48
+Nodes (5): generateArrayConfig(), generateConditionalFields(), generateFlatFields(), generateMixedFields(), submitButton()
 
-Cohesion: 0.4
-Nodes (5): createWrappers(), InferWrapperRegistry<T>, isWrappersBundle(), WrapperRegistration, WrappersBundle
+### Community 48 - "Community 48"
+Cohesion: 0.6
+Nodes (5): formatZodError(), generateErrorSummary(), isValidFormConfig(), preValidateConfig(), validateFormConfig()
 
-### Community 49 - "dynamic-forms: field-state-extractor.spec.ts"
-
+### Community 49 - "Community 49"
 Cohesion: 0.47
 Nodes (4): createMockFieldTree(), createMockFieldTreeAsFunction(), createMockForm(), createMockFormAsFunction()
 
-### Community 52 - "dynamic-forms: interpolateParams()"
+### Community 52 - "Community 52"
+Cohesion: 0.33
+Nodes (3): AsyncConditionFunctionCacheService, HttpConditionFunctionCacheService, LogicFunctionCacheService
 
+### Community 53 - "Community 53"
 Cohesion: 0.4
 Nodes (3): applyMetaToElement(), extractErrorParams(), interpolateParams()
 
-### Community 53 - "dynamic-forms: DynamicTextPipe"
-
+### Community 54 - "Community 54"
 Cohesion: 0.33
-Nodes (4): DynamicTextPipe, DynamicTextPipe spec, DynamicTextPipe.transform, pipes barrel
+Nodes (1): TestIndexComponent
 
-### Community 54 - "dynamic-forms: Page Orchestration Integration"
-
+### Community 55 - "Community 55"
 Cohesion: 0.4
-Nodes (6): Signal Forms API Pattern Confirmation tests, Form Mapping Pipeline Integration tests, Hidden Page Auto-Redirect (B15) tests, Page Validity Guard (B2) tests, Page Orchestration Integration test suite, Validator Transformation Pipeline Integration tests
+Nodes (1): DemoScenarioComponent
 
-### Community 55 - "primeng: PrimeSelectControlComponent"
+### Community 56 - "Community 56"
+Cohesion: 0.5
+Nodes (2): isContainerField(), isLeafField()
 
-Cohesion: 0.33
-Nodes (1): PrimeSelectControlComponent
+### Community 58 - "Community 58"
+Cohesion: 0.7
+Nodes (4): encodeImageAsDataUri(), findFailedTests(), findScreenshots(), generateSummary()
 
-### Community 56 - "dynamic-forms: array-button.mapper.spec.ts"
-
+### Community 59 - "Community 59"
 Cohesion: 0.5
 Nodes (2): createMockForm(), createMockRegistry()
 
-### Community 58 - "dynamic-forms: injectFieldRegistry()"
-
+### Community 60 - "Community 60"
 Cohesion: 0.5
-Nodes (4): COMPONENT_CACHE injection token, injectFieldRegistry(), loadTypeComponent method, injectFieldRegistry tests
+Nodes (1): createAriaDescribedBySignal()
 
-### Community 59 - "material: mat-input.type-test.ts"
-
+### Community 61 - "Community 61"
 Cohesion: 0.5
 Nodes (2): isNumberInput(), processField()
 
-### Community 60 - "dynamic-forms: buttonFieldMapper()"
-
+### Community 62 - "Community 62"
 Cohesion: 0.4
-Nodes (4): ARRAY_CONTEXT injection token, buildBaseInputs util, DEFAULT_PROPS token, buttonFieldMapper()
+Nodes (1): sendHeight()
 
-### Community 61 - "ionic: IonicToggleControlComponent"
-
+### Community 63 - "Community 63"
 Cohesion: 0.4
-Nodes (1): IonicToggleControlComponent
+Nodes (1): getGroupFieldsScenario()
 
-### Community 62 - "bootstrap: dynamic-forms-bootstrap README"
-
+### Community 64 - "Community 64"
 Cohesion: 0.4
-Nodes (5): dynamic-forms-bootstrap package exports, dynamic-forms-bootstrap README, Bootstrap compatibility matrix, Bootstrap installation snippet, withBootstrapFields usage pattern
+Nodes (1): getErrorHandlingScenario()
 
-### Community 66 - "dynamic-forms: inject-field-registry.spec.ts"
+### Community 65 - "Community 65"
+Cohesion: 0.4
+Nodes (1): getComprehensiveFieldTestsScenario()
 
+### Community 66 - "Community 66"
+Cohesion: 0.4
+Nodes (1): getSubmissionBehaviorScenario()
+
+### Community 67 - "Community 67"
+Cohesion: 0.4
+Nodes (1): getWrapperFieldsScenario()
+
+### Community 68 - "Community 68"
+Cohesion: 0.4
+Nodes (1): getArrayFieldsScenario()
+
+### Community 69 - "Community 69"
+Cohesion: 0.4
+Nodes (1): getFieldMetaScenario()
+
+### Community 70 - "Community 70"
+Cohesion: 0.4
+Nodes (1): getAccessibilityScenario()
+
+### Community 71 - "Community 71"
+Cohesion: 0.6
+Nodes (3): expectHorizontalLayout(), expectVerticalLayout(), getRequiredBox()
+
+### Community 72 - "Community 72"
+Cohesion: 0.4
+Nodes (5): @ng-forge/dynamic-form-mcp README, ngforge_examples tool spec, ngforge_lookup tool spec, ngforge_scaffold tool spec, ngforge_validate tool spec
+
+### Community 73 - "Community 73"
+Cohesion: 0.5
+Nodes (1): ShadowDomOverlayContainer
+
+### Community 74 - "Community 74"
+Cohesion: 0.83
+Nodes (3): createPlaywrightConfig(), getProjects(), getReporters()
+
+### Community 76 - "Community 76"
+Cohesion: 0.67
+Nodes (2): createTestFormInjector(), testMapper()
+
+### Community 77 - "Community 77"
+Cohesion: 0.5
+Nodes (2): TestCheckboxHarness, TestInputHarness
+
+### Community 78 - "Community 78"
+Cohesion: 0.5
+Nodes (2): CssWrapperComponent, RowWrapperComponent
+
+### Community 82 - "Community 82"
 Cohesion: 0.5
 Nodes (2): AnotherComponent, TestComponent
 
-### Community 67 - "dynamic-forms: withPreviousValue()"
-
-Cohesion: 0.5
-Nodes (3): resource-composition index barrel, withPreviousValue tests, withPreviousValue()
-
-### Community 68 - "dynamic-forms: createDebouncedSignal()"
-
-Cohesion: 0.83
-Nodes (3): createDebouncedEffect(), createDebouncedSignal(), DEFAULT_DEBOUNCE_MS
-
-### Community 70 - "dynamic-forms: DynamicFormError"
-
-Cohesion: 0.5
-Nodes (2): DynamicFormError, Errors Barrel
-
-### Community 71 - "dynamic-forms: event-dispatcher.spec.ts"
-
+### Community 84 - "Community 84"
 Cohesion: 0.5
 Nodes (2): TestEvent, TestEventWithPayload
 
-### Community 72 - "dynamic-forms: SignalFormsAdapterService Unit"
-
+### Community 85 - "Community 85"
 Cohesion: 0.5
-Nodes (4): Button Logic Integration tests, Logic Transformation Integration tests, SignalFormsAdapterService Unit tests, Signal Forms Integration tests
+Nodes (2): NextPageEvent, PreviousPageEvent
 
-### Community 73 - "primeng: PrimeMultiCheckboxFieldCompone"
-
+### Community 86 - "Community 86"
 Cohesion: 0.5
-Nodes (1): PrimeMultiCheckboxFieldComponent
+Nodes (2): createField(), formConfig()
 
-### Community 74 - "primeng: PrimeTextareaControlComponent"
-
-Cohesion: 0.5
-Nodes (1): PrimeTextareaControlComponent
-
-### Community 75 - "primeng: PrimeButtonFieldComponent"
-
+### Community 87 - "Community 87"
 Cohesion: 0.67
-Nodes (1): PrimeButtonFieldComponent
+Nodes (2): getGitLastmod(), todayISO()
 
-### Community 76 - "bootstrap: BsButtonFieldComponent"
-
+### Community 88 - "Community 88"
 Cohesion: 0.67
-Nodes (1): BsButtonFieldComponent
+Nodes (2): buildRouteSnapshot(), runGuard()
 
-### Community 77 - "bootstrap: BsSelectFieldComponent"
-
+### Community 89 - "Community 89"
 Cohesion: 0.5
-Nodes (1): BsSelectFieldComponent
+Nodes (4): dynamic-forms-bootstrap README, Bootstrap compatibility matrix, Bootstrap installation snippet, withBootstrapFields usage pattern
 
-### Community 78 - "material: MatMultiCheckboxFieldComponent"
-
-Cohesion: 0.5
-Nodes (1): MatMultiCheckboxFieldComponent
-
-### Community 79 - "material: MatButtonFieldComponent"
-
+### Community 90 - "Community 90"
 Cohesion: 0.67
-Nodes (1): MatButtonFieldComponent
+Nodes (1): SandboxMountDirective
 
-### Community 80 - "ionic: IonicMultiCheckboxFieldCompone"
+### Community 91 - "Community 91"
+Cohesion: 1.0
+Nodes (2): getAllFormConfigJsonSchemas(), getFormConfigJsonSchema()
 
-Cohesion: 0.5
-Nodes (1): IonicMultiCheckboxFieldComponent
+### Community 92 - "Community 92"
+Cohesion: 0.67
+Nodes (1): noSpaces()
 
-### Community 81 - "bootstrap: BsToggleField type"
-
-Cohesion: 0.5
-Nodes (4): bs-toggle barrel, BsToggle type tests, BsToggleField type, BsToggleProps
-
-### Community 86 - "dynamic-forms: render-ready-metadata.spec.ts"
-
+### Community 99 - "Community 99"
 Cohesion: 0.67
 Nodes (1): TestRequiredFieldComponent
 
-### Community 88 - "dynamic-forms: validator-factory.spec.ts"
+### Community 100 - "Community 100"
+Cohesion: 1.0
+Nodes (2): createLogicStateKey(), parseLogicStateKey()
 
+### Community 102 - "Community 102"
+Cohesion: 0.67
+Nodes (1): ExpressionParserError
+
+### Community 103 - "Community 103"
+Cohesion: 0.67
+Nodes (1): RootFormRegistryService
+
+### Community 104 - "Community 104"
 Cohesion: 1.0
 Nodes (2): getCapturedOptions(), setupAndCapture()
 
-### Community 90 - "dynamic-forms: TextFieldComponent"
-
-Cohesion: 0.67
-Nodes (2): TextFieldComponent Spec, TextFieldComponent
-
-### Community 91 - "dynamic-forms: RowAllowedChildren"
-
-Cohesion: 0.67
-Nodes (3): ContainerAllowedChildren, PageAllowedChildren, RowAllowedChildren
-
-### Community 92 - "dynamic-forms: provideDynamicForm type tests"
-
+### Community 105 - "Community 105"
 Cohesion: 1.0
-Nodes (3): ExtractFieldDefs, ExtractFormValue, provideDynamicForm type tests
+Nodes (2): createDebouncedEffect(), createDebouncedSignal()
 
-### Community 93 - "primeng: PrimeRadioFieldComponent"
-
+### Community 107 - "Community 107"
 Cohesion: 0.67
-Nodes (1): PrimeRadioFieldComponent
+Nodes (1): DynamicTextPipe
 
-### Community 94 - "primeng: PrimeRadioGroupComponent"
-
+### Community 108 - "Community 108"
 Cohesion: 0.67
-Nodes (1): PrimeRadioGroupComponent
+Nodes (1): DynamicFormError
 
-### Community 95 - "primeng: PrimeInputFieldComponent"
-
+### Community 109 - "Community 109"
 Cohesion: 0.67
-Nodes (1): PrimeInputFieldComponent
+Nodes (1): CodeHighlightDirective
 
-### Community 96 - "primeng: PrimeDatepickerFieldComponent"
+### Community 110 - "Community 110"
+Cohesion: 1.0
+Nodes (2): createMockDocument(), createSerializer()
 
+### Community 111 - "Community 111"
 Cohesion: 0.67
-Nodes (1): PrimeDatepickerFieldComponent
+Nodes (1): AdapterIndexPage
 
-### Community 97 - "primeng: PrimeCheckboxFieldComponent"
-
+### Community 113 - "Community 113"
 Cohesion: 0.67
-Nodes (1): PrimeCheckboxFieldComponent
+Nodes (1): PackageManagerService
 
-### Community 98 - "primeng: PrimeSliderFieldComponent"
-
+### Community 114 - "Community 114"
 Cohesion: 0.67
-Nodes (1): PrimeSliderFieldComponent
+Nodes (1): WrapperChainRebuildComponent
 
-### Community 99 - "primeng: PrimeToggleFieldComponent"
-
+### Community 115 - "Community 115"
 Cohesion: 0.67
-Nodes (1): PrimeToggleFieldComponent
+Nodes (1): ArrayEventDispatcherComponent
 
-### Community 100 - "primeng: PrimeTextareaFieldComponent"
-
+### Community 116 - "Community 116"
 Cohesion: 0.67
-Nodes (1): PrimeTextareaFieldComponent
+Nodes (3): Ionic adapter compatibility matrix, @ng-forge/dynamic-forms-ionic README, withIonicFields setup guidance
 
-### Community 101 - "primeng: PrimeSelectFieldComponent"
+### Community 117 - "Community 117"
+Cohesion: 1.0
+Nodes (1): SectionWrapperComponent
 
-Cohesion: 0.67
-Nodes (1): PrimeSelectFieldComponent
-
-### Community 102 - "bootstrap: BsRadioFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): BsRadioFieldComponent
-
-### Community 103 - "bootstrap: BsInputFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): BsInputFieldComponent
-
-### Community 104 - "bootstrap: BsDatepickerFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): BsDatepickerFieldComponent
-
-### Community 105 - "bootstrap: BsCheckboxFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): BsCheckboxFieldComponent
-
-### Community 106 - "bootstrap: BsSliderFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): BsSliderFieldComponent
-
-### Community 107 - "bootstrap: BsToggleFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): BsToggleFieldComponent
-
-### Community 108 - "bootstrap: BsTextareaFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): BsTextareaFieldComponent
-
-### Community 109 - "material: MatRadioFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): MatRadioFieldComponent
-
-### Community 110 - "material: MatInputFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): MatInputFieldComponent
-
-### Community 111 - "material: MatSelectFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): MatSelectFieldComponent
-
-### Community 112 - "ionic: IonicRadioFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): IonicRadioFieldComponent
-
-### Community 113 - "ionic: IonicInputFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): IonicInputFieldComponent
-
-### Community 114 - "ionic: IonicCheckboxFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): IonicCheckboxFieldComponent
-
-### Community 115 - "ionic: IonicSliderFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): IonicSliderFieldComponent
-
-### Community 116 - "ionic: IonicToggleFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): IonicToggleFieldComponent
-
-### Community 117 - "ionic: IonicTextareaFieldComponent"
-
-Cohesion: 0.67
-Nodes (1): IonicTextareaFieldComponent
-
-### Community 118 - "material: MatCheckboxField type"
-
-Cohesion: 0.67
-Nodes (3): CheckboxField type (integration), MatCheckboxField type, MatCheckbox type tests
-
-### Community 119 - "material: MatToggleField type"
-
-Cohesion: 0.67
-Nodes (3): ToggleField type (integration), MatToggleField type, MatToggle type tests
-
-### Community 120 - "material: MatTextareaField type"
-
-Cohesion: 0.67
-Nodes (3): TextareaField type (integration), MatTextareaField type, MatTextarea type tests
-
-### Community 121 - "material: MatSliderField type"
-
-Cohesion: 0.67
-Nodes (3): SliderField type (integration), MatSliderField type, MatSlider type tests
-
-### Community 135 - "TestClass"
-
+### Community 142 - "Community 142"
 Cohesion: 1.0
 Nodes (1): TestClass
 
-### Community 138 - "text-field.component.spec.ts"
-
+### Community 146 - "Community 146"
 Cohesion: 1.0
 Nodes (1): TestHostComponent
 
-### Community 145 - "ArrayItemDefinition"
-
+### Community 147 - "Community 147"
 Cohesion: 1.0
-Nodes (2): ArrayItemDefinition, ArrayItemTemplate
+Nodes (1): TextFieldComponent
 
-### Community 146 - "array-event-handler tests"
-
+### Community 154 - "Community 154"
 Cohesion: 1.0
-Nodes (2): array-event-handler tests, wrapper-chain module
+Nodes (1): FormClearEvent
 
-### Community 147 - "dynamic-forms vite config (browser mode)"
-
+### Community 155 - "Community 155"
 Cohesion: 1.0
-Nodes (2): dynamic-forms vite config (browser mode), dynamic-forms vite typecheck config
+Nodes (1): SubmitEvent
 
-### Community 149 - "input-constraints.directive.ts"
-
+### Community 161 - "Community 161"
 Cohesion: 2.0
 Nodes (1): InputConstraintsDirective
 
-### Community 150 - "Ionic input field barrel export"
-
+### Community 165 - "Community 165"
 Cohesion: 1.0
-Nodes (2): Ionic input field barrel export, IonicInput field type tests
+Nodes (1): CascadeVisualComponent
 
-### Community 151 - "Ionic Testing Entry Point (testing/index"
-
+### Community 166 - "Community 166"
 Cohesion: 1.0
-Nodes (2): Ionic Testing Entry Point (testing/index.ts), Material Testing Barrel
+Nodes (1): DocTabsComponent
 
-### Community 152 - "submitButtonFieldMapper (integration)"
-
+### Community 167 - "Community 167"
 Cohesion: 1.0
-Nodes (2): submitButtonFieldMapper (integration), Material specific button mapper re-exports
+Nodes (1): ThemeContainerComponent
 
-### Community 358 - "Gotcha: Firefox E2E flakiness"
+### Community 168 - "Community 168"
+Cohesion: 1.0
+Nodes (1): NotFoundComponent
 
+### Community 169 - "Community 169"
+Cohesion: 1.0
+Nodes (1): NestingRulesComponent
+
+### Community 170 - "Community 170"
+Cohesion: 1.0
+Nodes (1): AdapterPickerComponent
+
+### Community 171 - "Community 171"
+Cohesion: 1.0
+Nodes (1): DocsConfigurationViewComponent
+
+### Community 172 - "Community 172"
+Cohesion: 1.0
+Nodes (1): Logo
+
+### Community 173 - "Community 173"
+Cohesion: 1.0
+Nodes (1): WrapperChainVisualComponent
+
+### Community 174 - "Community 174"
+Cohesion: 1.0
+Nodes (1): LogicFlowComponent
+
+### Community 175 - "Community 175"
+Cohesion: 1.0
+Nodes (1): DocsAdapterPropsComponent
+
+### Community 176 - "Community 176"
+Cohesion: 1.0
+Nodes (1): DocsIntegrationViewComponent
+
+### Community 177 - "Community 177"
+Cohesion: 1.0
+Nodes (1): DerivationFlowComponent
+
+### Community 182 - "Community 182"
+Cohesion: 1.0
+Nodes (1): DemoFormComponent
+
+### Community 198 - "Community 198"
+Cohesion: 1.0
+Nodes (1): ReactiveConfigChangesComponent
+
+### Community 201 - "Community 201"
+Cohesion: 1.0
+Nodes (1): ConfigAddFieldsComponent
+
+### Community 202 - "Community 202"
+Cohesion: 1.0
+Nodes (1): ConfigRemoveFieldsComponent
+
+### Community 203 - "Community 203"
+Cohesion: 1.0
+Nodes (1): ConfigSwapPreserveValuesComponent
+
+### Community 204 - "Community 204"
+Cohesion: 1.0
+Nodes (1): ConfigSwapFieldTypesComponent
+
+### Community 205 - "Community 205"
+Cohesion: 1.0
+Nodes (1): ConfigSwapSimpleComponent
+
+### Community 206 - "Community 206"
+Cohesion: 1.0
+Nodes (1): ConfigSwapWithArraysComponent
+
+### Community 207 - "Community 207"
+Cohesion: 1.0
+Nodes (1): ConfigSwapPagesComponent
+
+### Community 214 - "Community 214"
+Cohesion: 1.0
+Nodes (1): PerfConfigSwapComponent
+
+### Community 226 - "Community 226"
+Cohesion: 1.0
+Nodes (2): PrimeNG library README, withPrimeNGFields setup example
+
+### Community 1549 - "Community 1549"
 Cohesion: 1.0
 Nodes (1): Gotcha: Firefox E2E flakiness
 
-### Community 359 - "dynamic-forms ESLint config"
-
-Cohesion: 1.0
-Nodes (1): dynamic-forms ESLint config
-
-### Community 360 - "TextareaProps interface"
-
-Cohesion: 1.0
-Nodes (1): TextareaProps interface
-
-### Community 361 - "TextareaWrap type"
-
-Cohesion: 1.0
-Nodes (1): TextareaWrap type
-
-### Community 362 - "BaseArrayAddButtonField"
-
-Cohesion: 1.0
-Nodes (1): BaseArrayAddButtonField
-
-### Community 363 - "BaseArrayRemoveButtonField"
-
-Cohesion: 1.0
-Nodes (1): BaseArrayRemoveButtonField
-
-### Community 364 - "dynamic-forms package barrel"
-
-Cohesion: 1.0
-Nodes (1): dynamic-forms package barrel
-
-### Community 365 - "CrossFieldCategory"
-
-Cohesion: 1.0
-Nodes (1): CrossFieldCategory
-
-### Community 366 - "ARRAY_PLACEHOLDER (.$.)"
-
-Cohesion: 1.0
-Nodes (1): ARRAY_PLACEHOLDER (.$.)
-
-### Community 367 - "MAX_AST_CACHE_SIZE (=1000)"
-
-Cohesion: 1.0
-Nodes (1): MAX_AST_CACHE_SIZE (=1000)
-
-### Community 368 - "DERIVATION_KEY_DELIMITER (\x00)"
-
-Cohesion: 1.0
-Nodes (1): DERIVATION_KEY_DELIMITER (\x00)
-
-### Community 369 - "DerivationChainContext"
-
-Cohesion: 1.0
-Nodes (1): DerivationChainContext
-
-### Community 370 - "DerivationProcessingResult"
-
-Cohesion: 1.0
-Nodes (1): DerivationProcessingResult
-
-### Community 371 - "CycleDetectionResult"
-
-Cohesion: 1.0
-Nodes (1): CycleDetectionResult
-
-### Community 372 - "DerivationApplicatorContext"
-
-Cohesion: 1.0
-Nodes (1): DerivationApplicatorContext
-
-### Community 373 - "HttpDerivationStreamContext"
-
-Cohesion: 1.0
-Nodes (1): HttpDerivationStreamContext
-
-### Community 374 - "AsyncDerivationStreamContext"
-
-Cohesion: 1.0
-Nodes (1): AsyncDerivationStreamContext
-
-### Community 375 - "derivation-collector tests"
-
-Cohesion: 1.0
-Nodes (1): derivation-collector tests
-
-### Community 376 - "async-derivation-stream tests"
-
-Cohesion: 1.0
-Nodes (1): async-derivation-stream tests
-
-### Community 377 - "http-request-resolver tests"
-
-Cohesion: 1.0
-Nodes (1): http-request-resolver tests
-
-### Community 378 - "http-response-evaluator tests"
-
-Cohesion: 1.0
-Nodes (1): http-response-evaluator tests
-
-### Community 379 - "CustomFunctionOptions"
-
-Cohesion: 1.0
-Nodes (1): CustomFunctionOptions
-
-### Community 380 - "CustomFunctionScope type"
-
-Cohesion: 1.0
-Nodes (1): CustomFunctionScope type
-
-### Community 381 - "property-derivation-types spec suite"
-
-Cohesion: 1.0
-Nodes (1): property-derivation-types spec suite
-
-### Community 382 - "property-override-key spec suite"
-
-Cohesion: 1.0
-Nodes (1): property-override-key spec suite
-
-### Community 383 - "NextPageEvent tests"
-
-Cohesion: 1.0
-Nodes (1): NextPageEvent tests
-
-### Community 384 - "PreviousPageEvent tests"
-
-Cohesion: 1.0
-Nodes (1): PreviousPageEvent tests
-
-### Community 385 - "MoveArrayItemEvent tests"
-
-Cohesion: 1.0
-Nodes (1): MoveArrayItemEvent tests
-
-### Community 386 - "SubmitEvent tests"
-
-Cohesion: 1.0
-Nodes (1): SubmitEvent tests
-
-### Community 387 - "WithInputSignals"
-
-Cohesion: 1.0
-Nodes (1): WithInputSignals
-
-### Community 388 - "FieldOption"
-
-Cohesion: 1.0
-Nodes (1): FieldOption
-
-### Community 389 - "FieldWrapperContract"
-
-Cohesion: 1.0
-Nodes (1): FieldWrapperContract
-
-### Community 390 - "GroupAllowedChildren"
-
-Cohesion: 1.0
-Nodes (1): GroupAllowedChildren
-
-### Community 391 - "ArrayAllowedChildren"
-
-Cohesion: 1.0
-Nodes (1): ArrayAllowedChildren
-
-### Community 392 - "FormMode type"
-
-Cohesion: 1.0
-Nodes (1): FormMode type
-
-### Community 393 - "FieldPathAccess"
-
-Cohesion: 1.0
-Nodes (1): FieldPathAccess
-
-### Community 394 - "LogicTrigger"
-
-Cohesion: 1.0
-Nodes (1): LogicTrigger
-
-### Community 395 - "validation models barrel"
-
-Cohesion: 1.0
-Nodes (1): validation models barrel
-
-### Community 396 - "omit / keyBy / mapValues helpers"
-
-Cohesion: 1.0
-Nodes (1): omit / keyBy / mapValues helpers
-
-### Community 397 - "createResolvedErrorsSignal Spec"
-
-Cohesion: 1.0
-Nodes (1): createResolvedErrorsSignal Spec
-
-### Community 398 - "deprecation-warnings Spec"
-
-Cohesion: 1.0
-Nodes (1): deprecation-warnings Spec
-
-### Community 399 - "shouldShowErrors tests"
-
-Cohesion: 1.0
-Nodes (1): shouldShowErrors tests
-
-### Community 400 - "utils/index barrel"
-
-Cohesion: 1.0
-Nodes (1): utils/index barrel
-
-### Community 401 - "object-utils tests"
-
-Cohesion: 1.0
-Nodes (1): object-utils tests
-
-### Community 402 - "interpolateParams tests"
-
-Cohesion: 1.0
-Nodes (1): interpolateParams tests
-
-### Community 403 - "applyMetaToElement tests"
-
-Cohesion: 1.0
-Nodes (1): applyMetaToElement tests
-
-### Community 404 - "resolve-wrappers tests"
-
-Cohesion: 1.0
-Nodes (1): resolve-wrappers tests
-
-### Community 405 - "Form Submission Integration tests"
-
-Cohesion: 1.0
-Nodes (1): Form Submission Integration tests
-
-### Community 406 - "ng-forge Dynamic Forms Logo"
-
+### Community 1550 - "Community 1550"
 Cohesion: 1.0
 Nodes (1): ng-forge Dynamic Forms Logo
 
-### Community 588 - "runStdioServer() (imported)"
-
+### Community 1551 - "Community 1551"
 Cohesion: 1.0
-Nodes (1): runStdioServer() (imported)
+Nodes (1): ng-forge.com /dynamic-forms/llms(-full).txt endpoints
 
-### Community 589 - "MCP ESLint config"
-
+### Community 1552 - "Community 1552"
 Cohesion: 1.0
-Nodes (1): MCP ESLint config
+Nodes (1): @ng-forge/dynamic-forms-material README
 
-### Community 590 - "Bootstrap shared index (empty)"
-
-Cohesion: 1.0
-Nodes (1): Bootstrap shared index (empty)
-
-### Community 591 - "BsRadio type tests"
-
-Cohesion: 1.0
-Nodes (1): BsRadio type tests
-
-### Community 592 - "DynamicTextPipe (core)"
-
-Cohesion: 1.0
-Nodes (1): DynamicTextPipe (core)
-
-### Community 593 - "IonicSlider type tests"
-
-Cohesion: 1.0
-Nodes (1): IonicSlider type tests
-
-### Community 594 - "IonicToggle type tests"
-
-Cohesion: 1.0
-Nodes (1): IonicToggle type tests
-
-### Community 595 - "IonicTextarea type tests"
-
-Cohesion: 1.0
-Nodes (1): IonicTextarea type tests
-
-### Community 596 - "DynamicTextPipe"
-
-Cohesion: 1.0
-Nodes (1): DynamicTextPipe
-
-### Community 597 - "Ionic Textarea Field Barrel Export"
-
-Cohesion: 1.0
-Nodes (1): Ionic Textarea Field Barrel Export
-
-### Community 598 - "Material ESLint Config"
-
-Cohesion: 1.0
-Nodes (1): Material ESLint Config
-
-### Community 599 - "Ionic Textarea Barrel Export"
-
-Cohesion: 1.0
-Nodes (1): Ionic Textarea Barrel Export
-
-### Community 600 - "Ionic Button Barrel"
-
-Cohesion: 1.0
-Nodes (1): Ionic Button Barrel
-
-### Community 601 - "Ionic Select Barrel"
-
-Cohesion: 1.0
-Nodes (1): Ionic Select Barrel
-
-### Community 602 - "Material ESLint Config"
-
-Cohesion: 1.0
-Nodes (1): Material ESLint Config
-
-### Community 603 - "Material Multi-Checkbox Barrel"
-
-Cohesion: 1.0
-Nodes (1): Material Multi-Checkbox Barrel
-
-### Community 604 - "Material Input Barrel"
-
-Cohesion: 1.0
-Nodes (1): Material Input Barrel
-
-### Community 605 - "Shared aria-describedby pattern across M"
-
-Cohesion: 1.0
-Nodes (1): Shared aria-describedby pattern across Material fields
-
-### Community 606 - "effectiveAppearance computed"
-
-Cohesion: 1.0
-Nodes (1): effectiveAppearance computed
-
-### Community 607 - "MatButtonProps interface"
-
-Cohesion: 1.0
-Nodes (1): MatButtonProps interface
-
-### Community 608 - "PrimeNG Test Utils Module"
-
-Cohesion: 1.0
-Nodes (1): PrimeNG Test Utils Module
-
-### Community 609 - "ng-forge Ionic Logo"
-
+### Community 1553 - "Community 1553"
 Cohesion: 1.0
 Nodes (1): ng-forge Ionic Logo
 
-### Community 610 - "ng-forge Dynamic Forms Bootstrap Logo"
-
+### Community 1554 - "Community 1554"
 Cohesion: 1.0
 Nodes (1): ng-forge Dynamic Forms Bootstrap Logo
 
-### Community 611 - "ng-forge Dynamic Forms Material Logo"
-
+### Community 1555 - "Community 1555"
 Cohesion: 1.0
 Nodes (1): ng-forge Dynamic Forms Material Logo
 
-### Community 616 - "vite test config (openapi-generator)"
-
-Cohesion: 1.0
-Nodes (1): vite test config (openapi-generator)
-
-### Community 617 - "eslint config (openapi-generator)"
-
-Cohesion: 1.0
-Nodes (1): eslint config (openapi-generator)
-
-### Community 618 - "MappingResult interface"
-
-Cohesion: 1.0
-Nodes (1): MappingResult interface
-
-### Community 619 - "MappingOptions interface"
-
-Cohesion: 1.0
-Nodes (1): MappingOptions interface
-
-### Community 620 - "DiscriminatorFieldConfig interface"
-
-Cohesion: 1.0
-Nodes (1): DiscriminatorFieldConfig interface
-
-## Ambiguous Edges - Review These
-
-- `Integration public API` → `Schema entrypoint` [AMBIGUOUS]
-  packages/dynamic-forms/schema/index.ts · relation: semantically_similar_to
-- `FormEvent interface` → `HiddenField tests` [AMBIGUOUS]
-  packages/dynamic-forms/src/lib/fields/hidden/hidden-field.spec.ts · relation: conceptually_related_to
-- `Bootstrap testing secondary entry point` → `Bootstrap vite.config typecheck-only (type-test)` [AMBIGUOUS]
-  packages/dynamic-forms-bootstrap/testing/index.ts · relation: conceptually_related_to
-
 ## Knowledge Gaps
-
-- **504 isolated node(s):** `TestParentWrapperComponent`, `TestChildWrapperComponent`, `TestArrayContextWrapperComponent`, `TestRequiredKeyComponent`, `TestSectionWrapper` (+499 more)
+- **113 isolated node(s):** `IonicRootComponent`, `MaterialRootComponent`, `PrimeNGRootComponent`, `SectionWrapperComponent`, `PrimeNGRootComponent` (+108 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Material Adapter Integration`** (28 nodes): `material-test-utils.ts`, `MaterialFormConfigBuilder`, `.build()`, `.field()`, `.matButtonField()`, `.matCheckboxField()`, `.matDatepickerField()`, `.matMultiCheckboxField()`, `.matRadioField()`, `.matSelectField()`, `.matSliderField()`, `.matTextareaField()`, `.matToggleField()`, `MaterialFormTestUtils`, `.assertFormValue()`, `.assertMatFieldError()`, `.assertMatFieldValue()`, `.assertMatFormFieldAppearance()`, `.builder()`, `.createTest()`, `.getFormErrors()`, `.getFormValue()`, `.getMatFieldElements()`, `.isFormValid()`, `.simulateMatButtonClick()`, `.simulateMatSelect()`, `.simulateMatToggle()`, `.waitForInit()`
+- **Thin community `Community 28`** (14 nodes): `PrimeNGFormConfigBuilder`, `.build()`, `.field()`, `.primeButtonField()`, `.primeCheckboxField()`, `.primeDatepickerField()`, `.primeInputField()`, `.primeMultiCheckboxField()`, `.primeRadioField()`, `.primeSelectField()`, `.primeSliderField()`, `.primeTextareaField()`, `.primeToggleField()`, `.simulatePrimeDropdown()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeDatepickerControlComponen`** (7 nodes): `prime-datepicker-control.component.ts`, `PrimeDatepickerControlComponent`, `.constructor()`, `.onBlur()`, `.onClear()`, `.onModelChange()`, `.onSelect()`
+- **Thin community `Community 29`** (13 nodes): `BootstrapFormConfigBuilder`, `.bsButtonField()`, `.bsCheckboxField()`, `.bsDatepickerField()`, `.bsInputField()`, `.bsMultiCheckboxField()`, `.bsRadioField()`, `.bsSelectField()`, `.bsSliderField()`, `.bsTextareaField()`, `.bsToggleField()`, `.build()`, `.field()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeSelectControlComponent`** (6 nodes): `prime-select-control.component.ts`, `PrimeSelectControlComponent`, `.constructor()`, `.onBlur()`, `.onMultiSelectChange()`, `.onSelectChange()`
+- **Thin community `Community 34`** (11 nodes): `Evaluator`, `.constructor()`, `.evaluate()`, `.evaluateArrayLiteral()`, `.evaluateBinaryOp()`, `.evaluateCallExpression()`, `.evaluateIdentifier()`, `.evaluateMemberAccess()`, `.evaluateUnaryOp()`, `.isMethodSafe()`, `evaluator.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `dynamic-forms: array-button.mapper.spec.ts`** (5 nodes): `createMockForm()`, `createMockRegistry()`, `createTestInjector()`, `runMapper()`, `array-button.mapper.spec.ts`
+- **Thin community `Community 36`** (11 nodes): `test-scenario.component.ts`, `test-scenario.component.ts`, `test-scenario.component.ts`, `test-scenario.component.ts`, `test-scenario.component.ts`, `TestScenarioComponent`, `.createHttpAction()`, `.createSimulatedAction()`, `.dispatchSubmissionEvent()`, `.onSubmitted()`, `.wrapSubmissionAction()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `material: mat-input.type-test.ts`** (5 nodes): `mat-input.type-test.ts`, `getValueType()`, `isNumberInput()`, `isStringInput()`, `processField()`
+- **Thin community `Community 37`** (9 nodes): `index.ts`, `index.ts`, `index.ts`, `index.ts`, `getScenarioById()`, `index.ts`, `index.ts`, `index.ts`, `index.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ionic: IonicToggleControlComponent`** (5 nodes): `ionic-toggle-control.component.ts`, `IonicToggleControlComponent`, `.constructor()`, `.onBlur()`, `.onToggleChange()`
+- **Thin community `Community 38`** (9 nodes): `index.component.ts`, `index.component.ts`, `index.component.ts`, `index.component.ts`, `IndexComponent`, `index.component.ts`, `index.component.ts`, `index.component.ts`, `index.component.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `dynamic-forms: inject-field-registry.spec.ts`** (4 nodes): `AnotherComponent`, `loadComponentFn()`, `TestComponent`, `inject-field-registry.spec.ts`
+- **Thin community `Community 42`** (8 nodes): `DynamicValueFunctionCacheService`, `HttpConditionCache`, `.clear()`, `.constructor()`, `.get()`, `.set()`, `http-condition-cache.ts`, `dynamic-value-function-cache.service.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `dynamic-forms: DynamicFormError`** (4 nodes): `DynamicFormError`, `.constructor()`, `Errors Barrel`, `dynamic-form-error.ts`
+- **Thin community `Community 44`** (8 nodes): `App`, `.constructor()`, `app.ts`, `app.ts`, `app.ts`, `app.ts`, `app.ts`, `app.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `dynamic-forms: event-dispatcher.spec.ts`** (4 nodes): `TestEvent`, `TestEventWithPayload`, `.constructor()`, `event-dispatcher.spec.ts`
+- **Thin community `Community 45`** (7 nodes): `doc-page.component.ts`, `decode-html-entities.ts`, `decodeHtmlEntities()`, `DocPageComponent`, `.constructor()`, `.onContentClick()`, `.showCopiedState()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeMultiCheckboxFieldCompone`** (4 nodes): `prime-multi-checkbox.component.ts`, `PrimeMultiCheckboxFieldComponent`, `.constructor()`, `.onCheckboxChange()`
+- **Thin community `Community 46`** (7 nodes): `fixtures.ts`, `fixtures.ts`, `fixtures.ts`, `fixtures.ts`, `fixtures.ts`, `setupConsoleCheck()`, `setupTestLogging()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeTextareaControlComponent`** (4 nodes): `prime-textarea-control.component.ts`, `PrimeTextareaControlComponent`, `.constructor()`, `.onBlur()`
+- **Thin community `Community 54`** (6 nodes): `test-index.component.ts`, `test-index.component.ts`, `test-index.component.ts`, `test-index.component.ts`, `test-index.component.ts`, `TestIndexComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeButtonFieldComponent`** (4 nodes): `prime-button.component.ts`, `PrimeButtonFieldComponent`, `.dispatchEvent()`, `.onClick()`
+- **Thin community `Community 55`** (5 nodes): `DemoScenarioComponent`, `demo-scenario.component.ts`, `demo-scenario.component.ts`, `demo-scenario.component.ts`, `demo-scenario.component.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `bootstrap: BsButtonFieldComponent`** (4 nodes): `BsButtonFieldComponent`, `.dispatchEvent()`, `.onClick()`, `bs-button.component.ts`
+- **Thin community `Community 56`** (5 nodes): `hasChildFields()`, `hasChildFieldsRecord()`, `isContainerField()`, `isLeafField()`, `field-type-guards.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `bootstrap: BsSelectFieldComponent`** (4 nodes): `BsSelectFieldComponent`, `.constructor()`, `.isSelected()`, `bs-select.component.ts`
+- **Thin community `Community 59`** (5 nodes): `createMockForm()`, `createMockRegistry()`, `createTestInjector()`, `runMapper()`, `array-button.mapper.spec.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `material: MatMultiCheckboxFieldComponent`** (4 nodes): `mat-multi-checkbox.component.ts`, `MatMultiCheckboxFieldComponent`, `.constructor()`, `.onCheckboxChange()`
+- **Thin community `Community 60`** (5 nodes): `createAriaDescribedBySignal()`, `create-aria-described-by.ts`, `create-aria-described-by.ts`, `create-aria-described-by.ts`, `create-aria-described-by.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `material: MatButtonFieldComponent`** (4 nodes): `mat-button.component.ts`, `MatButtonFieldComponent`, `.dispatchEvent()`, `.onClick()`
+- **Thin community `Community 61`** (5 nodes): `getValueType()`, `isNumberInput()`, `isStringInput()`, `processField()`, `mat-input.type-test.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ionic: IonicMultiCheckboxFieldCompone`** (4 nodes): `ionic-multi-checkbox.component.ts`, `IonicMultiCheckboxFieldComponent`, `.constructor()`, `.onCheckboxChange()`
+- **Thin community `Community 62`** (5 nodes): `main.ts`, `main.ts`, `main.ts`, `main.ts`, `sendHeight()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `dynamic-forms: render-ready-metadata.spec.ts`** (3 nodes): `delayedFieldMapper()`, `TestRequiredFieldComponent`, `render-ready-metadata.spec.ts`
+- **Thin community `Community 63`** (5 nodes): `group-fields.suite.ts`, `group-fields.suite.ts`, `group-fields.suite.ts`, `group-fields.suite.ts`, `getGroupFieldsScenario()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `dynamic-forms: validator-factory.spec.ts`** (3 nodes): `validator-factory.spec.ts`, `getCapturedOptions()`, `setupAndCapture()`
+- **Thin community `Community 64`** (5 nodes): `error-handling.suite.ts`, `error-handling.suite.ts`, `error-handling.suite.ts`, `error-handling.suite.ts`, `getErrorHandlingScenario()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `dynamic-forms: TextFieldComponent`** (3 nodes): `text-field.component.ts`, `TextFieldComponent Spec`, `TextFieldComponent`
+- **Thin community `Community 65`** (5 nodes): `comprehensive-field-tests.suite.ts`, `comprehensive-field-tests.suite.ts`, `comprehensive-field-tests.suite.ts`, `comprehensive-field-tests.suite.ts`, `getComprehensiveFieldTestsScenario()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeRadioFieldComponent`** (3 nodes): `prime-radio.component.ts`, `PrimeRadioFieldComponent`, `.constructor()`
+- **Thin community `Community 66`** (5 nodes): `submission-behavior.suite.ts`, `submission-behavior.suite.ts`, `submission-behavior.suite.ts`, `submission-behavior.suite.ts`, `getSubmissionBehaviorScenario()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeRadioGroupComponent`** (3 nodes): `prime-radio-group.component.ts`, `PrimeRadioGroupComponent`, `.constructor()`
+- **Thin community `Community 67`** (5 nodes): `wrapper-fields.suite.ts`, `wrapper-fields.suite.ts`, `wrapper-fields.suite.ts`, `wrapper-fields.suite.ts`, `getWrapperFieldsScenario()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeInputFieldComponent`** (3 nodes): `prime-input.component.ts`, `PrimeInputFieldComponent`, `.constructor()`
+- **Thin community `Community 68`** (5 nodes): `array-fields.suite.ts`, `array-fields.suite.ts`, `array-fields.suite.ts`, `array-fields.suite.ts`, `getArrayFieldsScenario()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeDatepickerFieldComponent`** (3 nodes): `prime-datepicker.component.ts`, `PrimeDatepickerFieldComponent`, `.constructor()`
+- **Thin community `Community 69`** (5 nodes): `field-meta.suite.ts`, `field-meta.suite.ts`, `field-meta.suite.ts`, `field-meta.suite.ts`, `getFieldMetaScenario()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeCheckboxFieldComponent`** (3 nodes): `prime-checkbox.component.ts`, `PrimeCheckboxFieldComponent`, `.constructor()`
+- **Thin community `Community 70`** (5 nodes): `getAccessibilityScenario()`, `accessibility.suite.ts`, `accessibility.suite.ts`, `accessibility.suite.ts`, `accessibility.suite.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeSliderFieldComponent`** (3 nodes): `prime-slider.component.ts`, `PrimeSliderFieldComponent`, `.constructor()`
+- **Thin community `Community 73`** (4 nodes): `shadow-dom-overlay-container.ts`, `ShadowDomOverlayContainer`, `._createContainer()`, `.setShadowRootRef()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeToggleFieldComponent`** (3 nodes): `prime-toggle.component.ts`, `PrimeToggleFieldComponent`, `.constructor()`
+- **Thin community `Community 76`** (4 nodes): `createTestFieldContext()`, `createTestFormInjector()`, `testMapper()`, `mapper-test-utils.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeTextareaFieldComponent`** (3 nodes): `prime-textarea.component.ts`, `PrimeTextareaFieldComponent`, `.constructor()`
+- **Thin community `Community 77`** (4 nodes): `test-checkbox.harness.ts`, `test-input.harness.ts`, `TestCheckboxHarness`, `TestInputHarness`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `primeng: PrimeSelectFieldComponent`** (3 nodes): `prime-select.component.ts`, `PrimeSelectFieldComponent`, `.constructor()`
+- **Thin community `Community 78`** (4 nodes): `CssWrapperComponent`, `css-wrapper.component.ts`, `row-wrapper.component.ts`, `RowWrapperComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `bootstrap: BsRadioFieldComponent`** (3 nodes): `BsRadioFieldComponent`, `.constructor()`, `bs-radio.component.ts`
+- **Thin community `Community 82`** (4 nodes): `AnotherComponent`, `loadComponentFn()`, `TestComponent`, `inject-field-registry.spec.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `bootstrap: BsInputFieldComponent`** (3 nodes): `BsInputFieldComponent`, `.constructor()`, `bs-input.component.ts`
+- **Thin community `Community 84`** (4 nodes): `TestEvent`, `TestEventWithPayload`, `.constructor()`, `event-dispatcher.spec.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `bootstrap: BsDatepickerFieldComponent`** (3 nodes): `BsDatepickerFieldComponent`, `.constructor()`, `bs-datepicker.component.ts`
+- **Thin community `Community 85`** (4 nodes): `NextPageEvent`, `next-page.event.ts`, `previous-page.event.ts`, `PreviousPageEvent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `bootstrap: BsCheckboxFieldComponent`** (3 nodes): `BsCheckboxFieldComponent`, `.constructor()`, `bs-checkbox.component.ts`
+- **Thin community `Community 86`** (4 nodes): `createField()`, `formConfig()`, `create-field.ts`, `form-config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `bootstrap: BsSliderFieldComponent`** (3 nodes): `BsSliderFieldComponent`, `.constructor()`, `bs-slider.component.ts`
+- **Thin community `Community 87`** (4 nodes): `generate-sitemap.ts`, `contentFile()`, `getGitLastmod()`, `todayISO()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `bootstrap: BsToggleFieldComponent`** (3 nodes): `BsToggleFieldComponent`, `.constructor()`, `bs-toggle.component.ts`
+- **Thin community `Community 88`** (4 nodes): `content-redirect.guard.spec.ts`, `buildRouteSnapshot()`, `createMockRouter()`, `runGuard()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `bootstrap: BsTextareaFieldComponent`** (3 nodes): `BsTextareaFieldComponent`, `.constructor()`, `bs-textarea.component.ts`
+- **Thin community `Community 90`** (3 nodes): `sandbox-mount.directive.ts`, `SandboxMountDirective`, `.getSlot()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `material: MatRadioFieldComponent`** (3 nodes): `mat-radio.component.ts`, `MatRadioFieldComponent`, `.constructor()`
+- **Thin community `Community 91`** (3 nodes): `getAllFormConfigJsonSchemas()`, `getFormConfigJsonSchema()`, `form-config-json-schema.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `material: MatInputFieldComponent`** (3 nodes): `mat-input.component.ts`, `MatInputFieldComponent`, `.constructor()`
+- **Thin community `Community 92`** (3 nodes): `expression-validators.scenario.ts`, `noSpaces()`, `expression-validators.scenario.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `material: MatSelectFieldComponent`** (3 nodes): `mat-select.component.ts`, `MatSelectFieldComponent`, `.constructor()`
+- **Thin community `Community 99`** (3 nodes): `render-ready-metadata.spec.ts`, `delayedFieldMapper()`, `TestRequiredFieldComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ionic: IonicRadioFieldComponent`** (3 nodes): `ionic-radio.component.ts`, `IonicRadioFieldComponent`, `.constructor()`
+- **Thin community `Community 100`** (3 nodes): `createLogicStateKey()`, `parseLogicStateKey()`, `cross-field-types.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ionic: IonicInputFieldComponent`** (3 nodes): `ionic-input.component.ts`, `IonicInputFieldComponent`, `.constructor()`
+- **Thin community `Community 102`** (3 nodes): `types.ts`, `ExpressionParserError`, `.constructor()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ionic: IonicCheckboxFieldComponent`** (3 nodes): `ionic-checkbox.component.ts`, `IonicCheckboxFieldComponent`, `.constructor()`
+- **Thin community `Community 103`** (3 nodes): `root-form-registry.service.ts`, `RootFormRegistryService`, `.constructor()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ionic: IonicSliderFieldComponent`** (3 nodes): `ionic-slider.component.ts`, `IonicSliderFieldComponent`, `.constructor()`
+- **Thin community `Community 104`** (3 nodes): `validator-factory.spec.ts`, `getCapturedOptions()`, `setupAndCapture()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ionic: IonicToggleFieldComponent`** (3 nodes): `ionic-toggle.component.ts`, `IonicToggleFieldComponent`, `.constructor()`
+- **Thin community `Community 105`** (3 nodes): `createDebouncedEffect()`, `createDebouncedSignal()`, `debounce.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ionic: IonicTextareaFieldComponent`** (3 nodes): `ionic-textarea.component.ts`, `IonicTextareaFieldComponent`, `.constructor()`
+- **Thin community `Community 107`** (3 nodes): `DynamicTextPipe`, `.transform()`, `dynamic-text.pipe.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `TestClass`** (2 nodes): `TestClass`, `derived-from-deferred.spec.ts`
+- **Thin community `Community 108`** (3 nodes): `DynamicFormError`, `.constructor()`, `dynamic-form-error.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `text-field.component.spec.ts`** (2 nodes): `text-field.component.spec.ts`, `TestHostComponent`
+- **Thin community `Community 109`** (3 nodes): `code-highlight.directive.ts`, `CodeHighlightDirective`, `escapeHtml()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ArrayItemDefinition`** (2 nodes): `ArrayItemDefinition`, `ArrayItemTemplate`
+- **Thin community `Community 110`** (3 nodes): `createMockDocument()`, `createSerializer()`, `adapter-url-serializer.spec.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `array-event-handler tests`** (2 nodes): `array-event-handler tests`, `wrapper-chain module`
+- **Thin community `Community 111`** (3 nodes): `index.page.ts`, `AdapterIndexPage`, `.constructor()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `dynamic-forms vite config (browser mode)`** (2 nodes): `dynamic-forms vite config (browser mode)`, `dynamic-forms vite typecheck config`
+- **Thin community `Community 113`** (3 nodes): `package-manager.service.ts`, `PackageManagerService`, `.constructor()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `input-constraints.directive.ts`** (2 nodes): `input-constraints.directive.ts`, `InputConstraintsDirective`
+- **Thin community `Community 114`** (3 nodes): `wrapper-chain-rebuild.component.ts`, `WrapperChainRebuildComponent`, `.toggleWrappers()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Ionic input field barrel export`** (2 nodes): `Ionic input field barrel export`, `IonicInput field type tests`
+- **Thin community `Community 115`** (3 nodes): `array-event-dispatcher.component.ts`, `ArrayEventDispatcherComponent`, `.constructor()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Ionic Testing Entry Point (testing/index`** (2 nodes): `Ionic Testing Entry Point (testing/index.ts)`, `Material Testing Barrel`
+- **Thin community `Community 117`** (2 nodes): `section-wrapper.component.ts`, `SectionWrapperComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `submitButtonFieldMapper (integration)`** (2 nodes): `submitButtonFieldMapper (integration)`, `Material specific button mapper re-exports`
+- **Thin community `Community 142`** (2 nodes): `TestClass`, `derived-from-deferred.spec.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Gotcha: Firefox E2E flakiness`** (1 nodes): `Gotcha: Firefox E2E flakiness`
+- **Thin community `Community 146`** (2 nodes): `text-field.component.spec.ts`, `TestHostComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `dynamic-forms ESLint config`** (1 nodes): `dynamic-forms ESLint config`
+- **Thin community `Community 147`** (2 nodes): `text-field.component.ts`, `TextFieldComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `TextareaProps interface`** (1 nodes): `TextareaProps interface`
+- **Thin community `Community 154`** (2 nodes): `FormClearEvent`, `form-clear.event.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `TextareaWrap type`** (1 nodes): `TextareaWrap type`
+- **Thin community `Community 155`** (2 nodes): `submit.event.ts`, `SubmitEvent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `BaseArrayAddButtonField`** (1 nodes): `BaseArrayAddButtonField`
+- **Thin community `Community 161`** (2 nodes): `InputConstraintsDirective`, `input-constraints.directive.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `BaseArrayRemoveButtonField`** (1 nodes): `BaseArrayRemoveButtonField`
+- **Thin community `Community 165`** (2 nodes): `cascade-visual.component.ts`, `CascadeVisualComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `dynamic-forms package barrel`** (1 nodes): `dynamic-forms package barrel`
+- **Thin community `Community 166`** (2 nodes): `doc-tabs.component.ts`, `DocTabsComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `CrossFieldCategory`** (1 nodes): `CrossFieldCategory`
+- **Thin community `Community 167`** (2 nodes): `theme-container.component.ts`, `ThemeContainerComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ARRAY_PLACEHOLDER (.$.)`** (1 nodes): `ARRAY_PLACEHOLDER (.$.)`
+- **Thin community `Community 168`** (2 nodes): `not-found.component.ts`, `NotFoundComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `MAX_AST_CACHE_SIZE (=1000)`** (1 nodes): `MAX_AST_CACHE_SIZE (=1000)`
+- **Thin community `Community 169`** (2 nodes): `nesting-rules.component.ts`, `NestingRulesComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `DERIVATION_KEY_DELIMITER (\x00)`** (1 nodes): `DERIVATION_KEY_DELIMITER (\x00)`
+- **Thin community `Community 170`** (2 nodes): `AdapterPickerComponent`, `adapter-picker.component.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `DerivationChainContext`** (1 nodes): `DerivationChainContext`
+- **Thin community `Community 171`** (2 nodes): `configuration-view.component.ts`, `DocsConfigurationViewComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `DerivationProcessingResult`** (1 nodes): `DerivationProcessingResult`
+- **Thin community `Community 172`** (2 nodes): `logo.component.ts`, `Logo`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `CycleDetectionResult`** (1 nodes): `CycleDetectionResult`
+- **Thin community `Community 173`** (2 nodes): `wrapper-chain-visual.component.ts`, `WrapperChainVisualComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `DerivationApplicatorContext`** (1 nodes): `DerivationApplicatorContext`
+- **Thin community `Community 174`** (2 nodes): `logic-flow.component.ts`, `LogicFlowComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `HttpDerivationStreamContext`** (1 nodes): `HttpDerivationStreamContext`
+- **Thin community `Community 175`** (2 nodes): `DocsAdapterPropsComponent`, `adapter-props.component.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `AsyncDerivationStreamContext`** (1 nodes): `AsyncDerivationStreamContext`
+- **Thin community `Community 176`** (2 nodes): `integration-view.component.ts`, `DocsIntegrationViewComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `derivation-collector tests`** (1 nodes): `derivation-collector tests`
+- **Thin community `Community 177`** (2 nodes): `derivation-flow.component.ts`, `DerivationFlowComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `async-derivation-stream tests`** (1 nodes): `async-derivation-stream tests`
+- **Thin community `Community 182`** (2 nodes): `demo-form.component.ts`, `DemoFormComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `http-request-resolver tests`** (1 nodes): `http-request-resolver tests`
+- **Thin community `Community 198`** (2 nodes): `reactive-config-changes.component.ts`, `ReactiveConfigChangesComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `http-response-evaluator tests`** (1 nodes): `http-response-evaluator tests`
+- **Thin community `Community 201`** (2 nodes): `config-add-fields.component.ts`, `ConfigAddFieldsComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `CustomFunctionOptions`** (1 nodes): `CustomFunctionOptions`
+- **Thin community `Community 202`** (2 nodes): `config-remove-fields.component.ts`, `ConfigRemoveFieldsComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `CustomFunctionScope type`** (1 nodes): `CustomFunctionScope type`
+- **Thin community `Community 203`** (2 nodes): `config-swap-preserve-values.component.ts`, `ConfigSwapPreserveValuesComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `property-derivation-types spec suite`** (1 nodes): `property-derivation-types spec suite`
+- **Thin community `Community 204`** (2 nodes): `config-swap-field-types.component.ts`, `ConfigSwapFieldTypesComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `property-override-key spec suite`** (1 nodes): `property-override-key spec suite`
+- **Thin community `Community 205`** (2 nodes): `config-swap-simple.component.ts`, `ConfigSwapSimpleComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `NextPageEvent tests`** (1 nodes): `NextPageEvent tests`
+- **Thin community `Community 206`** (2 nodes): `config-swap-with-arrays.component.ts`, `ConfigSwapWithArraysComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `PreviousPageEvent tests`** (1 nodes): `PreviousPageEvent tests`
+- **Thin community `Community 207`** (2 nodes): `config-swap-pages.component.ts`, `ConfigSwapPagesComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `MoveArrayItemEvent tests`** (1 nodes): `MoveArrayItemEvent tests`
+- **Thin community `Community 214`** (2 nodes): `perf-config-swap.component.ts`, `PerfConfigSwapComponent`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `SubmitEvent tests`** (1 nodes): `SubmitEvent tests`
+- **Thin community `Community 226`** (2 nodes): `PrimeNG library README`, `withPrimeNGFields setup example`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `WithInputSignals`** (1 nodes): `WithInputSignals`
+- **Thin community `Community 1549`** (1 nodes): `Gotcha: Firefox E2E flakiness`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `FieldOption`** (1 nodes): `FieldOption`
+- **Thin community `Community 1550`** (1 nodes): `ng-forge Dynamic Forms Logo`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `FieldWrapperContract`** (1 nodes): `FieldWrapperContract`
+- **Thin community `Community 1551`** (1 nodes): `ng-forge.com /dynamic-forms/llms(-full).txt endpoints`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `GroupAllowedChildren`** (1 nodes): `GroupAllowedChildren`
+- **Thin community `Community 1552`** (1 nodes): `@ng-forge/dynamic-forms-material README`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ArrayAllowedChildren`** (1 nodes): `ArrayAllowedChildren`
+- **Thin community `Community 1553`** (1 nodes): `ng-forge Ionic Logo`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `FormMode type`** (1 nodes): `FormMode type`
+- **Thin community `Community 1554`** (1 nodes): `ng-forge Dynamic Forms Bootstrap Logo`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `FieldPathAccess`** (1 nodes): `FieldPathAccess`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `LogicTrigger`** (1 nodes): `LogicTrigger`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `validation models barrel`** (1 nodes): `validation models barrel`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `omit / keyBy / mapValues helpers`** (1 nodes): `omit / keyBy / mapValues helpers`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `createResolvedErrorsSignal Spec`** (1 nodes): `createResolvedErrorsSignal Spec`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `deprecation-warnings Spec`** (1 nodes): `deprecation-warnings Spec`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `shouldShowErrors tests`** (1 nodes): `shouldShowErrors tests`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `utils/index barrel`** (1 nodes): `utils/index barrel`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `object-utils tests`** (1 nodes): `object-utils tests`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `interpolateParams tests`** (1 nodes): `interpolateParams tests`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `applyMetaToElement tests`** (1 nodes): `applyMetaToElement tests`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `resolve-wrappers tests`** (1 nodes): `resolve-wrappers tests`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Form Submission Integration tests`** (1 nodes): `Form Submission Integration tests`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ng-forge Dynamic Forms Logo`** (1 nodes): `ng-forge Dynamic Forms Logo`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `runStdioServer() (imported)`** (1 nodes): `runStdioServer() (imported)`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `MCP ESLint config`** (1 nodes): `MCP ESLint config`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Bootstrap shared index (empty)`** (1 nodes): `Bootstrap shared index (empty)`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `BsRadio type tests`** (1 nodes): `BsRadio type tests`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `DynamicTextPipe (core)`** (1 nodes): `DynamicTextPipe (core)`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `IonicSlider type tests`** (1 nodes): `IonicSlider type tests`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `IonicToggle type tests`** (1 nodes): `IonicToggle type tests`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `IonicTextarea type tests`** (1 nodes): `IonicTextarea type tests`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `DynamicTextPipe`** (1 nodes): `DynamicTextPipe`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Ionic Textarea Field Barrel Export`** (1 nodes): `Ionic Textarea Field Barrel Export`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Material ESLint Config`** (1 nodes): `Material ESLint Config`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Ionic Textarea Barrel Export`** (1 nodes): `Ionic Textarea Barrel Export`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Ionic Button Barrel`** (1 nodes): `Ionic Button Barrel`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Ionic Select Barrel`** (1 nodes): `Ionic Select Barrel`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Material ESLint Config`** (1 nodes): `Material ESLint Config`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Material Multi-Checkbox Barrel`** (1 nodes): `Material Multi-Checkbox Barrel`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Material Input Barrel`** (1 nodes): `Material Input Barrel`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Shared aria-describedby pattern across M`** (1 nodes): `Shared aria-describedby pattern across Material fields`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `effectiveAppearance computed`** (1 nodes): `effectiveAppearance computed`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `MatButtonProps interface`** (1 nodes): `MatButtonProps interface`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `PrimeNG Test Utils Module`** (1 nodes): `PrimeNG Test Utils Module`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ng-forge Ionic Logo`** (1 nodes): `ng-forge Ionic Logo`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ng-forge Dynamic Forms Bootstrap Logo`** (1 nodes): `ng-forge Dynamic Forms Bootstrap Logo`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ng-forge Dynamic Forms Material Logo`** (1 nodes): `ng-forge Dynamic Forms Material Logo`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `vite test config (openapi-generator)`** (1 nodes): `vite test config (openapi-generator)`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `eslint config (openapi-generator)`** (1 nodes): `eslint config (openapi-generator)`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `MappingResult interface`** (1 nodes): `MappingResult interface`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `MappingOptions interface`** (1 nodes): `MappingOptions interface`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `DiscriminatorFieldConfig interface`** (1 nodes): `DiscriminatorFieldConfig interface`
+- **Thin community `Community 1555`** (1 nodes): `ng-forge Dynamic Forms Material Logo`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
-
 _Questions this graph is uniquely positioned to answer:_
 
-- **What is the exact relationship between `Integration public API` and `Schema entrypoint`?**
-  _Edge tagged AMBIGUOUS (relation: semantically_similar_to) - confidence is low._
-- **What is the exact relationship between `FormEvent interface` and `HiddenField tests`?**
-  _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **What is the exact relationship between `Bootstrap testing secondary entry point` and `Bootstrap vite.config typecheck-only (type-test)`?**
-  _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `applyLogic()` connect `Logic Expressions & Conditionals (core)` to `Validator Factory & Dynamic Values (core)`, `Function Registry & Logic Functions (core)`, `Field Tree Mapping & Schema (core)`?**
-  _High betweenness centrality (0.023) - this node is a cross-community bridge._
-- **Why does `FormStateManager` connect `Form State Machine & Manager (core)` to `Derivation Orchestration (core)`, `Function Registry & Logic Functions (core)`, `Config Normalization (core)`, `Provider Wiring & Wrapper Chains (core)`, `Event Bus & Array Events (core)`?**
-  _High betweenness centrality (0.020) - this node is a cross-community bridge._
-- **Why does `NoopLogger` connect `Provider Wiring & Wrapper Chains (core)` to `Derivation Orchestration (core)`, `Validator Factory & Dynamic Values (core)`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+- **Why does `createComponent()` connect `Community 0` to `Community 2`, `Community 13`?**
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+- **Why does `delay()` connect `Community 0` to `Community 33`, `Community 1`, `Community 5`, `Community 27`, `Community 28`?**
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
+- **Why does `runGenerate()` connect `Community 7` to `Community 1`, `Community 10`, `Community 2`, `Community 5`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+- **Are the 46 inferred relationships involving `delay()` (e.g. with `.waitForInit()` and `.simulateInput()`) actually correct?**
+  _`delay()` has 46 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 42 inferred relationships involving `setupMetaTracking()` (e.g. with `.constructor()` and `.constructor()`) actually correct?**
+  _`setupMetaTracking()` has 42 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 2 inferred relationships involving `FunctionRegistryService` (e.g. with `FieldContextRegistryService` and `SchemaRegistryService`) actually correct?**
   _`FunctionRegistryService` has 2 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `IonicRootComponent`, `MaterialRootComponent`, `PrimeNGRootComponent` to the rest of the system?**
+  _113 weakly-connected nodes found - possible documentation gaps or missing edges._

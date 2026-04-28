@@ -57,6 +57,10 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
       await page.waitForSelector('[data-testid="comprehensive-fields-test"] #textareaField textarea', { state: 'visible', timeout: 10000 });
       const textareaField = scenario.locator('#textareaField textarea');
       await expect(textareaField).toBeVisible({ timeout: 10000 });
+      // Regression guard: field-level `maxLength: 200` validator must reach the DOM as
+      // a `maxlength` HTML attribute. PrimeNG textarea is a custom-control host, so the
+      // wiring goes through Signal Forms's setInputOnDirectives → renamed camelCase input.
+      await expect(textareaField).toHaveAttribute('maxlength', '200');
       await textareaField.fill('This is a long text that spans multiple lines and tests the textarea field functionality.');
       await expect(textareaField).toHaveValue('This is a long text that spans multiple lines and tests the textarea field functionality.', {
         timeout: 5000,

@@ -12,7 +12,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 // ============================================================================
 
 describe('PrimeTextareaProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'rows' | 'cols' | 'autoResize' | 'maxlength' | 'styleClass' | 'hint';
+  type ExpectedKeys = 'rows' | 'cols' | 'autoResize' | 'styleClass' | 'hint';
   type ActualKeys = keyof PrimeTextareaProps;
 
   it('should have exactly the expected keys', () => {
@@ -24,20 +24,12 @@ describe('PrimeTextareaProps - Exhaustive Whitelist', () => {
   });
 
   describe('property types', () => {
-    it('rows', () => {
-      expectTypeOf<PrimeTextareaProps['rows']>().toEqualTypeOf<number | undefined>();
-    });
-
     it('cols', () => {
       expectTypeOf<PrimeTextareaProps['cols']>().toEqualTypeOf<number | undefined>();
     });
 
     it('autoResize', () => {
       expectTypeOf<PrimeTextareaProps['autoResize']>().toEqualTypeOf<boolean | undefined>();
-    });
-
-    it('maxlength', () => {
-      expectTypeOf<PrimeTextareaProps['maxlength']>().toEqualTypeOf<number | undefined>();
     });
 
     it('styleClass', () => {
@@ -215,7 +207,6 @@ describe('PrimeTextareaField - Usage', () => {
       props: {
         rows: 5,
         autoResize: true,
-        maxlength: 500,
         styleClass: 'custom-textarea',
         hint: 'Enter your comments',
       },

@@ -26,6 +26,10 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
       await page.waitForSelector('[data-testid="comprehensive-fields-test"] #textInput input', { state: 'visible', timeout: 10000 });
       const textInput = scenario.locator('#textInput input');
       await expect(textInput).toBeVisible({ timeout: 10000 });
+      // Regression guard: field-level `maxLength: 50` validator must reach the inner
+      // <input> via the explicit [maxlength] binding on <ion-input>. Signal Forms cannot
+      // auto-wire here (lowercase property name on the web component).
+      await expect(textInput).toHaveAttribute('maxlength', '50');
       await textInput.fill('Test text value');
       await expect(textInput).toHaveValue('Test text value', { timeout: 5000 });
       await ionBlur(textInput);
@@ -58,6 +62,9 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
       await page.waitForSelector('[data-testid="comprehensive-fields-test"] #textareaField textarea', { state: 'visible', timeout: 10000 });
       const textareaField = scenario.locator('#textareaField textarea');
       await expect(textareaField).toBeVisible({ timeout: 10000 });
+      // Regression guard: field-level `maxLength: 200` reaches the inner <textarea> via
+      // the explicit [maxlength] binding on <ion-textarea>.
+      await expect(textareaField).toHaveAttribute('maxlength', '200');
       await textareaField.fill('This is a long text that spans multiple lines and tests the textarea field functionality.');
       await expect(textareaField).toHaveValue('This is a long text that spans multiple lines and tests the textarea field functionality.', {
         timeout: 5000,
