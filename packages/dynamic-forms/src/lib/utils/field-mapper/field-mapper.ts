@@ -20,6 +20,10 @@ import { hasTargetProperty, isDerivationLogicConfig } from '../../models/logic/l
  * hasn't on the resolveFieldSync path with a warm COMPONENT_CACHE).
  */
 function fieldHasPropertyDerivations(fieldDef: FieldDef<unknown>): boolean {
+  // Match the collector's keyless guard (property-derivation-collector.ts):
+  // keyless fields are never registered in the store, so the mapper must skip
+  // them too — otherwise getOverrides() would be called with an undefined key.
+  if (!fieldDef.key) return false;
   const logic = (fieldDef as FieldDef<unknown> & FieldWithValidation).logic;
   if (!logic || logic.length === 0) return false;
   for (const entry of logic) {
