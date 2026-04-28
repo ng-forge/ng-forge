@@ -114,9 +114,9 @@ export function buildValueFieldInputs<TProps, TValue = unknown>(
  * - Newly added array items will get their field tree once the form value updates
  *
  * For fields with specific properties, use the specialized mappers:
- * - selectFieldMapper: for fields with options (select, radio, multi-checkbox)
+ * - optionsFieldMapper: for fields with options (select, radio, multi-checkbox)
  * - datepickerFieldMapper: for fields with minDate, maxDate, startAt
- * - checkboxFieldMapper: for fields boolean fields (checkbox, toggle)
+ * - checkboxFieldMapper: for boolean fields (checkbox, toggle)
  *
  * @param fieldDef The value field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet

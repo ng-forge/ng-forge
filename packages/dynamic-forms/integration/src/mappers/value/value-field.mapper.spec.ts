@@ -126,7 +126,7 @@ describe('valueFieldMapper', () => {
       expect(inputs['placeholder']).toBe('Enter value...');
     });
 
-    it('should NOT include options (use selectFieldMapper instead)', () => {
+    it('should NOT include options (use optionsFieldMapper instead)', () => {
       const selectField = {
         key: 'selectField',
         type: 'select' as const,
@@ -139,7 +139,7 @@ describe('valueFieldMapper', () => {
       const injector = createTestInjector({ fieldKey: 'selectField' });
       const inputs = testMapper(selectField as BaseValueField<unknown, string>, injector);
 
-      // valueFieldMapper does NOT include options - use selectFieldMapper
+      // valueFieldMapper does NOT include options - use optionsFieldMapper
       expect(inputs).not.toHaveProperty('options');
     });
 

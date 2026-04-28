@@ -189,7 +189,8 @@ Let's create a complete input field component as an example.
 **`src/lib/fields/input/superui-input.type.ts`:**
 
 ```typescript
-import { InputField, InputProps, ValueFieldComponent, DynamicText } from '@ng-forge/dynamic-forms';
+import { ValueFieldComponent, DynamicText } from '@ng-forge/dynamic-forms';
+import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
 
 /**
  * SuperUI-specific input properties
@@ -516,14 +517,14 @@ export class SuperUIErrorsComponent {
 **`src/lib/config/superui-field-config.ts`:**
 
 ```typescript
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
 import {
-  FieldTypeDefinition,
   valueFieldMapper,
   optionsFieldMapper,
   datepickerFieldMapper,
   checkboxFieldMapper,
   buttonFieldMapper,
-} from '@ng-forge/dynamic-forms';
+} from '@ng-forge/dynamic-forms/integration';
 
 export const SUPERUI_FIELD_TYPES: FieldTypeDefinition[] = [
   // ========== Input Field ==========
