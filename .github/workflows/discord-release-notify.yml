@@ -3,6 +3,12 @@ name: Discord Release Notification
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to (re)post (e.g. v0.8.0 or next/0.8.1-next.5). Used for backfill when an auto-fire was missed.'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -11,15 +17,17 @@ jobs:
   notify:
     name: Post release to Discord
     runs-on: ubuntu-latest
-    if: ${{ !github.event.release.draft }}
     steps:
       - name: Build payload and post to Discord
+        # Both triggers route through `gh release view` so the embed-building logic stays
+        # identical regardless of how we were fired. For release: published events we could
+        # use github.event.release.* directly, but going through the API also dodges subtle
+        # interpolation issues with bodies containing backticks or YAML-significant chars.
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          RELEASE_NAME: ${{ github.event.release.name || github.event.release.tag_name }}
-          RELEASE_URL: ${{ github.event.release.html_url }}
-          RELEASE_BODY: ${{ github.event.release.body }}
-          IS_PRERELEASE: ${{ github.event.release.prerelease }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag || github.event.release.tag_name }}
         run: |
           set -euo pipefail
 
@@ -28,8 +36,20 @@ jobs:
             exit 1
           fi
 
+          META=$(gh release view "${TAG}" --json name,tagName,body,isPrerelease,isDraft,url)
+
+          if [ "$(echo "$META" | jq -r '.isDraft')" = "true" ]; then
+            echo "::warning::Release ${TAG} is a draft — skipping Discord notification"
+            exit 0
+          fi
+
+          RELEASE_NAME=$(echo "$META" | jq -r '.name // .tagName')
+          RELEASE_URL=$(echo "$META" | jq -r '.url')
+          IS_PRERELEASE=$(echo "$META" | jq -r '.isPrerelease')
+          BODY=$(echo "$META" | jq -r '.body // empty')
+          BODY="${BODY:-_No release notes provided._}"
+
           # Discord embed description max is 4096 chars; trim with a notice if longer.
-          BODY="${RELEASE_BODY:-_No release notes provided._}"
           MAX=3900
           if [ "${#BODY}" -gt "$MAX" ]; then
             BODY="${BODY:0:$MAX}"$'\n\n'"… *truncated — see [full release notes](${RELEASE_URL}).*"
