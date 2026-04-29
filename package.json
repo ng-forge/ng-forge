@@ -101,7 +101,7 @@
     "openapi-types": "^12.1.3",
     "patch-package": "^8.0.1",
     "playwright": "1.59.1",
-    "postcss": "^8.4.5",
+    "postcss": "^8.5.10",
     "postcss-url": "~10.1.3",
     "prettier": "^3.8.2",
     "sass": "^1.98.0",
