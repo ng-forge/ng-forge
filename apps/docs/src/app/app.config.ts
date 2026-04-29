@@ -13,7 +13,7 @@ import { AdapterAwareUrlSerializer } from './serializers/adapter-url-serializer'
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideContent, withMarkdownRenderer } from '@analogjs/content';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideClientHydration, withEventReplay, withIncrementalHydration } from '@angular/platform-browser';
 import { provideAdapterRegistry, SandboxHarness } from '@ng-forge/sandbox-harness';
 import { DOCS_ADAPTERS } from './adapters/adapter-registrations';
 
@@ -47,7 +47,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch()),
     provideAnimationsAsync(),
     provideContent(withMarkdownRenderer()),
-    provideClientHydration(withEventReplay()),
+    provideClientHydration(withEventReplay(), withIncrementalHydration()),
     { provide: UrlSerializer, useClass: AdapterAwareUrlSerializer },
     {
       provide: APP_BASE_HREF,
