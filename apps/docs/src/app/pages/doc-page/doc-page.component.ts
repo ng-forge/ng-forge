@@ -40,19 +40,19 @@ import { decodeHtmlEntities } from '../../utils/decode-html-entities';
   ],
   template: `
     @if (isApiIndex()) {
-      @defer (when isApiIndex()) {
+      @defer (when isApiIndex(); hydrate on idle) {
         <docs-api-index />
       }
     } @else if (isApiDetail()) {
-      @defer (when isApiDetail()) {
+      @defer (when isApiDetail(); hydrate on idle) {
         <docs-api-detail />
       }
     } @else if (isExamplesIndex()) {
-      @defer (when isExamplesIndex()) {
+      @defer (when isExamplesIndex(); hydrate on idle) {
         <docs-examples-index />
       }
     } @else if (showNotFound()) {
-      @defer (when showNotFound()) {
+      @defer (when showNotFound(); hydrate on idle) {
         <docs-not-found />
       }
     } @else {
