@@ -6,7 +6,7 @@ import { defineConfig, type Plugin } from 'vite';
 import analog from '@analogjs/platform';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import * as sass from 'sass';
-import { apiDocsPlugin } from './plugins/vite-plugin-api-docs';
+import { apiDocsPlugin, getApiPackages } from './plugins/vite-plugin-api-docs';
 import { searchIndexPlugin } from './plugins/vite-plugin-search-index';
 import { ogImagePlugin } from './plugins/vite-plugin-og-images';
 
@@ -173,8 +173,30 @@ function collectContentSlugs(dir: string, base: string = dir): string[] {
 const PRERENDER_ADAPTERS = ['material', 'bootstrap', 'primeng', 'ionic', 'custom'];
 const contentSlugs = collectContentSlugs(resolve(__dirname, 'public/content'));
 
+/**
+ * API reference symbols are crawler-friendly only when prerendered. We render the
+ * canonical version under /material/api-reference/{symbol} for each symbol that
+ * appears in core or any adapter package — DocPageComponent emits a canonical link
+ * pointing to material, so non-material adapter URLs stay as SPA-resolved without
+ * SEO penalty. Per-adapter prerendering would multiply route count by 5x.
+ */
+function collectApiSymbols(): string[] {
+  try {
+    const packages = getApiPackages();
+    const names = new Set<string>();
+    for (const pkg of packages.values()) {
+      for (const decl of pkg.declarations) names.add(decl.name);
+    }
+    return [...names].sort();
+  } catch (err) {
+    console.warn('[prerender] Failed to extract API symbols, skipping api-reference prerender:', err);
+    return [];
+  }
+}
+
 function generatePrerenderRoutes(): string[] {
   const routes: string[] = ['/'];
+  const apiSymbols = collectApiSymbols();
   for (const adapter of PRERENDER_ADAPTERS) {
     routes.push(`/${adapter}/getting-started`);
     routes.push(`/${adapter}/examples`);
@@ -183,6 +205,10 @@ function generatePrerenderRoutes(): string[] {
       routes.push(`/${adapter}/${slug}`);
     }
   }
+  for (const symbol of apiSymbols) {
+    routes.push(`/material/api-reference/${symbol}`);
+  }
+  console.log(`[prerender] Generated ${routes.length} routes (${apiSymbols.length} API symbols on /material)`);
   return routes;
 }
 

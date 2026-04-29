@@ -2,6 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "NX_DAEMON=false pnpm run deploy:prep",
   "outputDirectory": "dist/deploy",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "git": {
     "deploymentEnabled": true
   },
@@ -15,12 +17,12 @@
   ],
   "rewrites": [
     {
-      "source": "/dynamic-forms/:path((?!.*\\.).+)",
-      "destination": "/dynamic-forms/index.html"
-    },
-    {
       "source": "/assets/:path*",
       "destination": "/dynamic-forms/assets/:path*"
+    },
+    {
+      "source": "/dynamic-forms/:path((?!.*\\.).+)",
+      "destination": "/dynamic-forms/index.html"
     }
   ],
   "headers": [
