@@ -219,6 +219,13 @@ function tryApplyArrayPropertyDerivation(entry: PropertyDerivationEntry, context
 /**
  * Creates an evaluation context for property derivation processing.
  *
+ * Note: `fieldState`/`formFieldState` are intentionally not populated here.
+ * Property derivations run against the form value signal and write to a
+ * separate override store; the applicator does not have access to the live
+ * `FieldTree` (no `rootForm` on `PropertyDerivationApplicatorContext`), so
+ * field-state snapshots cannot be read in this pipeline. Functions that need
+ * field state (e.g. `dirty()`, `touched()`) must use a regular derivation.
+ *
  * @internal
  */
 function createEvaluationContext(
