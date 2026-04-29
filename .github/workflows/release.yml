@@ -306,20 +306,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate GitHub App Token
-        # GITHUB_TOKEN cannot trigger downstream workflows (GitHub recursion safeguard),
-        # so releases created with it don't fire `release: published` — which is what
-        # discord-release-notify.yml listens for. Using a GitHub App-scoped token instead
-        # makes those events propagate normally.
-        # Gated to the same paths that consume the token (matches the old Configure Git
-        # step's condition) so a dry-run doesn't depend on the App secrets being present.
-        if: inputs.mode == 'publish' || github.event_name == 'schedule' || inputs.mode == 'next'
-        id: app-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ vars.RELEASE_APP_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
-
       - name: Install pnpm
         uses: pnpm/action-setup@v5
         with:
@@ -452,6 +438,24 @@ jobs:
             fi
             npm publish "dist/packages/$pkg" --access public --provenance --tag "$DIST_TAG"
           done
+
+      - name: Generate GitHub App Token
+        # GITHUB_TOKEN cannot trigger downstream workflows (GitHub recursion safeguard),
+        # so releases created with it don't fire `release: published` — which is what
+        # discord-release-notify.yml listens for. Using a GitHub App-scoped token instead
+        # makes those events propagate normally.
+        # Generated immediately before action-gh-release (not at job start) because App
+        # installation tokens have a 1-hour lifetime; build + npm publish can eat into
+        # that window on a slow run, so we always hand action-gh-release a fresh token.
+        # Gated to the same paths that consume it so a dry-run doesn't depend on the
+        # App secrets being present. The two action-gh-release steps below are mutually
+        # exclusive (publish vs schedule|next), so a single shared token is sufficient.
+        if: inputs.mode == 'publish' || github.event_name == 'schedule' || inputs.mode == 'next'
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
 
       - name: Create GitHub Release
         # action-gh-release creates the v${VERSION} tag at github.sha via the GitHub API
