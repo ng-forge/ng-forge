@@ -119,6 +119,7 @@ jobs:
       should_publish: ${{ steps.gate.outputs.should_publish == 'true' && steps.ci-check.outputs.ok != 'false' }}
       version: ${{ steps.gate.outputs.version }}
       sha: ${{ steps.gate.outputs.sha }}
+      base: ${{ steps.gate.outputs.base }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -132,15 +133,30 @@ jobs:
         run: |
           set -euo pipefail
 
-          LAST_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*next*' --exclude '*nightly*' 2>/dev/null || echo "")
+          LAST_STABLE=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*next*' --exclude '*nightly*' 2>/dev/null || echo "")
 
-          if [ -z "$LAST_TAG" ]; then
+          if [ -z "$LAST_STABLE" ]; then
             echo "::warning::No prior stable tag found — skipping next release"
             echo "should_publish=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          echo "Last stable tag: $LAST_TAG"
+          # Most recent next/* tag by commit date (empty if no nightlies have shipped yet).
+          LAST_NEXT=$(git for-each-ref --sort=-creatordate --format='%(refname:short)' 'refs/tags/next/*' | head -1 || true)
+
+          # Gate base: whichever of {last stable, last next} sits later in history.
+          # If LAST_STABLE is an ancestor of LAST_NEXT, the nightly is fresher (BASE = nightly).
+          # Otherwise the stable was tagged on a later commit (BASE = stable — typical right
+          # after a release cut). This single check replaces both the prior "commits since
+          # stable" gate and the SHA-idempotency lookup: when nothing relevant has landed
+          # since the most recent release, RELEVANT=0 and we skip.
+          if [ -n "$LAST_NEXT" ] && git merge-base --is-ancestor "$LAST_STABLE" "$LAST_NEXT"; then
+            BASE="$LAST_NEXT"
+          else
+            BASE="$LAST_STABLE"
+          fi
+
+          echo "Last stable: $LAST_STABLE; last next: ${LAST_NEXT:-none}; gate base: $BASE"
 
           # Bump-worthy commit types per nx.json release.conventionalCommits:
           # feat, fix, perf, revert. Everything else (docs/ci/chore/test/build/style/refactor)
@@ -148,7 +164,7 @@ jobs:
           # Disable pipefail for this pipeline so we can distinguish grep's "no matches"
           # (exit 1, fine) from a real grep error (exit ≥2, fail loud).
           set +o pipefail
-          RELEVANT=$(git log "${LAST_TAG}..HEAD" --pretty=format:'%s' \
+          RELEVANT=$(git log "${BASE}..HEAD" --pretty=format:'%s' \
             | grep -cE '^(feat|fix|perf|revert)(\([^)]+\))?!?: ')
           GREP_EXIT=$?
           set -o pipefail
@@ -157,10 +173,10 @@ jobs:
             exit 1
           fi
 
-          echo "Relevant commits since $LAST_TAG: $RELEVANT"
+          echo "Bump-worthy commits since $BASE: $RELEVANT"
 
           if [ "$RELEVANT" -eq 0 ]; then
-            echo "No version-bumping commits since last stable — skipping next release"
+            echo "No bump-worthy commits since last release — skipping next release"
             echo "should_publish=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -170,22 +186,7 @@ jobs:
           # version doesn't embed the SHA, so pinning the ref is our only defense.)
           FULL_SHA=$(git rev-parse HEAD)
 
-          # Idempotency: if this commit was already published as @next (see the
-          # post-publish "Tag the @next publish" step in the release job), skip.
-          # Cheap, git-native — no API calls. Tag-after-publish ordering means the
-          # worst case on failure is one duplicate publish (not a phantom tag that
-          # blocks forever).
-          # Fail loud if the fetch itself errors — a silent failure here would make
-          # us miss a recent `next/` tag and double-publish the same commit.
-          git fetch --tags origin --quiet
-          EXISTING_TAG=$(git tag --points-at "$FULL_SHA" | { grep '^next/' || true; } | head -1)
-          if [ -n "$EXISTING_TAG" ]; then
-            echo "::notice::$FULL_SHA already published as $EXISTING_TAG — skipping"
-            echo "should_publish=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          LAST_VERSION=${LAST_TAG#v}
+          LAST_VERSION=${LAST_STABLE#v}
           # Bump minor: @next always signals "the upcoming minor release", regardless
           # of whether the next stable ends up being a patch or a minor. This keeps
           # versions like 0.8.0-next.1, 0.8.0-next.2, … stable across a release cycle.
@@ -229,6 +230,7 @@ jobs:
           echo "should_publish=true" >> "$GITHUB_OUTPUT"
           echo "version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
           echo "sha=${FULL_SHA}" >> "$GITHUB_OUTPUT"
+          echo "base=${BASE}" >> "$GITHUB_OUTPUT"
 
       - name: Verify CI passed on the candidate commit
         # Skip @next publishes when main's CI is red. The stable path already has this
@@ -470,20 +472,49 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Tag the @next publish
-        # Idempotency marker: next-gate checks for tags under `next/` pointing at HEAD
-        # and skips if found, so re-runs on the same commit become no-ops.
-        # Tag-after-publish (not before): if the tag push fails, worst case is one
-        # duplicate publish on the next run — strictly better than the tag-first
-        # failure mode where a phantom tag could permanently block future publishes.
-        # continue-on-error makes the job succeed even if the tag push fails.
+      - name: Generate Nightly Release Notes
+        # Body for the @next GitHub prerelease. Reuses the gate's BASE (most recent of
+        # last stable / last nightly) so the changelog spans only commits added since
+        # the previous release of any kind — no duplicated detection logic.
         if: github.event_name == 'schedule' || inputs.mode == 'next'
-        continue-on-error: true
         env:
           NEXT_SHA: ${{ needs.next-gate.outputs.sha }}
+          BASE: ${{ needs.next-gate.outputs.base }}
         run: |
-          git tag -a "next/${VERSION}" -m "Published @next ${VERSION}" "${NEXT_SHA}"
-          git push origin "next/${VERSION}"
+          set -euo pipefail
+
+          CHANGELOG=$(git log "${BASE}..${NEXT_SHA}" --pretty=format:"- %s (%h)" --no-merges)
+
+          cat > NEXT_RELEASE_NOTES.md <<EOF
+          Nightly @next prerelease — published from \`main\`.
+
+          ## Changes since ${BASE}
+
+          ${CHANGELOG:-_No new commits._}
+          EOF
+
+      - name: Create GitHub Prerelease (@next)
+        # Replaces the prior manual `git tag` step. action-gh-release creates the
+        # `next/<version>` tag at the gate SHA via the GitHub API — same idempotency
+        # marker that next-gate looks up, so re-runs on the same commit still become no-ops.
+        # Tag-after-publish (not before): if this fails, worst case is one duplicate
+        # publish on the next run — strictly better than the tag-first failure mode where
+        # a phantom tag could permanently block future publishes.
+        # continue-on-error: makes the job succeed even if release creation flakes — npm
+        # is already published and rolling back that is worse than a missing GH release.
+        # Idempotent on retry: if the release already exists, action-gh-release updates it.
+        if: github.event_name == 'schedule' || inputs.mode == 'next'
+        continue-on-error: true
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: next/${{ env.VERSION }}
+          target_commitish: ${{ needs.next-gate.outputs.sha }}
+          name: Nightly v${{ env.VERSION }}
+          body_path: NEXT_RELEASE_NOTES.md
+          prerelease: true
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Summary
         run: |

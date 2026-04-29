@@ -1,0 +1,80 @@
+name: Discord Release Notification
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: Post release to Discord
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.release.draft }}
+    steps:
+      - name: Build payload and post to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RELEASE_NAME: ${{ github.event.release.name || github.event.release.tag_name }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          IS_PRERELEASE: ${{ github.event.release.prerelease }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${DISCORD_WEBHOOK_URL}" ]; then
+            echo "::error::DISCORD_WEBHOOK_URL secret is not set"
+            exit 1
+          fi
+
+          # Discord embed description max is 4096 chars; trim with a notice if longer.
+          BODY="${RELEASE_BODY:-_No release notes provided._}"
+          MAX=3900
+          if [ "${#BODY}" -gt "$MAX" ]; then
+            BODY="${BODY:0:$MAX}
+
+… [truncated — see [full release notes](${RELEASE_URL}))"
+          fi
+
+          # jq builds the JSON so any markdown / quotes / newlines in the body are escaped correctly.
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            PAYLOAD=$(jq -n \
+              --arg title "🌙 ${RELEASE_NAME}" \
+              --arg url "$RELEASE_URL" \
+              --arg description "$BODY" \
+              '{
+                embeds: [{
+                  title: $title,
+                  url: $url,
+                  description: $description,
+                  color: 15844367,
+                  fields: [{
+                    name: "Install",
+                    value: "```bash\npnpm add @ng-forge/dynamic-forms@next\n```"
+                  }],
+                  timestamp: now | todateiso8601
+                }]
+              }')
+          else
+            PAYLOAD=$(jq -n \
+              --arg title "$RELEASE_NAME" \
+              --arg url "$RELEASE_URL" \
+              --arg description "$BODY" \
+              '{
+                embeds: [{
+                  title: $title,
+                  url: $url,
+                  description: $description,
+                  color: 3066993,
+                  timestamp: now | todateiso8601
+                }]
+              }')
+          fi
+
+          # --fail makes curl exit non-zero on any 4xx/5xx so the step actually fails on bad webhook responses.
+          curl --fail --silent --show-error \
+            -H "Content-Type: application/json" \
+            -X POST \
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK_URL"
