@@ -4,6 +4,66 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.8.0](https://github.com/ng-forge/ng-forge/compare/v0.7.0...v0.8.0) (2026-04-29)
+
+### 🚀 Features
+
+- omit .js extensions in openapi-generator barrel exports by default ([#356](https://github.com/ng-forge/ng-forge/pull/356))
+- **dynamic-forms:** auto-wait for field input when mapper is present ([#314](https://github.com/ng-forge/ng-forge/pull/314))
+- **dynamic-forms:** field wrappers (custom chrome around fields) ([#339](https://github.com/ng-forge/ng-forge/pull/339))
+- **dynamic-forms:** added move array item event ([#343](https://github.com/ng-forge/ng-forge/pull/343))
+- **forms:** wrappers ([#335](https://github.com/ng-forge/ng-forge/pull/335))
+- **forms:** add nullable flag for first-class null support ([#344](https://github.com/ng-forge/ng-forge/pull/344))
+- **material:** add floatLabel and hideRequiredMarker support to form fields ([#340](https://github.com/ng-forge/ng-forge/pull/340))
+
+### 🐛 Bug Fixes
+
+- omit label on container fields in openapi-generator (group/array/page/row) ([#368](https://github.com/ng-forge/ng-forge/pull/368))
+- **config:** prevent docs SSR build OOM in CI ([#338](https://github.com/ng-forge/ng-forge/pull/338))
+- **docs:** prevent adapter props table from being clipped on wide screens ([#315](https://github.com/ng-forge/ng-forge/pull/315))
+- **docs:** normalize llms-full.txt section paths + cleanup stale integration refs ([#364](https://github.com/ng-forge/ng-forge/pull/364))
+- **dynamic-forms:** drop placeholder from props interfaces ([#345](https://github.com/ng-forge/ng-forge/pull/345))
+- **dynamic-forms:** wire slider range consistently across adapters ([#349](https://github.com/ng-forge/ng-forge/pull/349))
+- **dynamic-forms:** apply property derivation overrides on warm-cache resolution ([#365](https://github.com/ng-forge/ng-forge/pull/365))
+- **dynamic-forms:** prefix group keys on derivation paths ([#362](https://github.com/ng-forge/ng-forge/pull/362))
+- **dynamic-forms:** resolve leaf fieldValue and groupValue for array-item property derivations ([#366](https://github.com/ng-forge/ng-forge/pull/366))
+- **dynamic-forms:** wire textarea/input length attrs and prune redundant adapter props ([#367](https://github.com/ng-forge/ng-forge/pull/367))
+- **forms:** preserve adapter config when spreading fields ([#342](https://github.com/ng-forge/ng-forge/pull/342))
+- ⚠️ **forms:** rewrite row to container, drop 'row' from ComponentInitializedEvent ([#360](https://github.com/ng-forge/ng-forge/pull/360))
+- **release:** upgrade npm to 11.5.1 before publish for TP support ([993a0dc6d](https://github.com/ng-forge/ng-forge/commit/993a0dc6d))
+
+### ⚡ Performance Improvements
+
+- **docs:** improve landing page performance and add per-route OG images ([#317](https://github.com/ng-forge/ng-forge/pull/317))
+- **dynamic-forms:** phase 1 invisible bundle trim (~1.4 KB gz-min) ([#359](https://github.com/ng-forge/ng-forge/pull/359))
+- ⚠️ **dynamic-forms:** lazy-split container fields + provider scaffolding ([#361](https://github.com/ng-forge/ng-forge/pull/361))
+
+### ♻️ Code Refactoring
+
+- **dynamic-forms:** add simple array template restoration ([#346](https://github.com/ng-forge/ng-forge/pull/346))
+
+### 📚 Documentation
+
+- add options and datepicker field mappers ([#358](https://github.com/ng-forge/ng-forge/pull/358))
+- **docs:** add API-Driven Forms documentation page ([#320](https://github.com/ng-forge/ng-forge/pull/320))
+- **docs:** add Discord community link to README and docs site ([#337](https://github.com/ng-forge/ng-forge/pull/337))
+
+### 📦 Build System
+
+- **deps:** upgrade Node.js to 24 ([#354](https://github.com/ng-forge/ng-forge/pull/354))
+
+### ⚠️ Breaking Changes
+
+- **forms:** rewrite row to container, drop 'row' from ComponentInitializedEvent ([#360](https://github.com/ng-forge/ng-forge/pull/360))
+- **dynamic-forms:** lazy-split container fields + provider scaffolding ([#361](https://github.com/ng-forge/ng-forge/pull/361))
+
+### ❤️ Thank You
+
+- Antim Prisacaru @antimprisacaru
+- Derek Burgman
+- Francesco Raso @0xfraso
+- Mário Nunes
+
 ## [0.7.0](https://github.com/ng-forge/ng-forge/compare/v0.6.1...v0.7.0) (2026-03-27)
 
 ### 🚀 Features
