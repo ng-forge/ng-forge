@@ -9,6 +9,7 @@ import { getNestedValue } from '../expressions/value-utils';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import type { WarningTracker } from '../../utils/warning-tracker';
 import { computeValueFromEntry } from '../derivation/compute-derived-value';
+import { getParentPathInScope, resolveArrayItemScope } from '../derivation/evaluation-scope';
 import { PropertyDerivationCollection, PropertyDerivationEntry } from './property-derivation-types';
 import { PropertyOverrideStore } from './property-override-store';
 
@@ -252,19 +253,6 @@ function createEvaluationContext(
 }
 
 /**
- * Returns the path to the parent of the given field path. Drops the last
- * `.`-delimited segment. Returns `undefined` when the field has no parent
- * in scope (single-segment root key).
- *
- * @internal
- */
-function getParentPathInScope(fieldKey: string): string | undefined {
-  const lastDot = fieldKey.lastIndexOf('.');
-  if (lastDot <= 0) return undefined;
-  return fieldKey.slice(0, lastDot);
-}
-
-/**
  * Creates an evaluation context scoped to a specific array item.
  *
  * @internal
@@ -278,19 +266,7 @@ function createArrayItemEvaluationContext(
   context: PropertyDerivationApplicatorContext,
 ): EvaluationContext {
   const pathInfo = parseArrayPath(entry.fieldKey);
-
-  // groupValue inside an array item:
-  // - Field directly under the array item (no inner group): the array item
-  //   itself is the "nearest parent group".
-  // - Field inside an inner group within the item: the inner group's value.
-  // The relative path within the item is everything after `'.$.'`.
-  const relativePath = pathInfo.isArrayPath ? (pathInfo.relativePath ?? '') : '';
-  const innerParentPath = relativePath.includes('.') ? relativePath.slice(0, relativePath.lastIndexOf('.')) : '';
-  const groupValue = innerParentPath ? getNestedValue(arrayItem, innerParentPath) : arrayItem;
-  // Resolve fieldValue to the leaf value addressed by the entry's relative path
-  // within the array item. Without this, $self / fieldValue derivations inside
-  // arrays receive the whole array item instead of the field's own value.
-  const fieldValue = relativePath ? getNestedValue(arrayItem, relativePath) : arrayItem;
+  const { relativePath, groupValue, fieldValue } = resolveArrayItemScope(pathInfo, arrayItem);
 
   return {
     fieldValue,
