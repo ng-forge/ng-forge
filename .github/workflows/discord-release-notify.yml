@@ -34,7 +34,7 @@ jobs:
           if [ "${#BODY}" -gt "$MAX" ]; then
             BODY="${BODY:0:$MAX}
 
-… [truncated — see [full release notes](${RELEASE_URL}))"
+… *truncated — see [full release notes](${RELEASE_URL}).*"
           fi
 
           # jq builds the JSON so any markdown / quotes / newlines in the body are escaped correctly.
