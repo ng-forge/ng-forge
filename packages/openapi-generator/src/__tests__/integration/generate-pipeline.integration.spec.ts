@@ -181,9 +181,10 @@ describe('Nested Objects', () => {
     await generate('nested-objects.yaml');
 
     const form = await readGenerated(outputDir, 'forms', 'create-profile.form.ts');
-    // The address group should not carry a label (its children may).
-    const addressBlock = form.substring(form.indexOf("key: 'address'"), form.indexOf("key: 'street'"));
-    expect(addressBlock).not.toContain('label:');
+    // Anchored regex avoids the silently-passing-empty-substring trap if codegen
+    // ever reorders properties: a `label:` line MUST NOT appear between the
+    // `key: 'address'` and `type: 'group'` lines (with any whitespace in between).
+    expect(form).toMatch(/key: 'address',\s*type: 'group',\s*(?!label:)/);
   });
 
   it('should produce a form file that compiles against the published types (regression for #348)', async () => {
@@ -223,12 +224,10 @@ describe('Arrays', () => {
     await generate('arrays.yaml');
 
     const form = await readGenerated(outputDir, 'forms', 'create-team.form.ts');
-    // Outer array fields should not carry a label; their templates / children may.
-    const membersBlock = form.substring(form.indexOf("key: 'members'"), form.indexOf('template:'));
-    expect(membersBlock).not.toContain('label:');
-    const scoresBlock = form.substring(form.indexOf("key: 'scores'"));
-    const scoresHeader = scoresBlock.substring(0, scoresBlock.indexOf('template:'));
-    expect(scoresHeader).not.toContain('label:');
+    // Anchored regexes: outer array fields must not carry a `label:` between
+    // their `key`/`type` header (templates and child fields are allowed to).
+    expect(form).toMatch(/key: 'members',\s*type: 'array',\s*(?!label:)/);
+    expect(form).toMatch(/key: 'scores',\s*type: 'array',\s*(?!label:)/);
   });
 
   it('should produce a form file that compiles against the published types (regression for #348)', async () => {

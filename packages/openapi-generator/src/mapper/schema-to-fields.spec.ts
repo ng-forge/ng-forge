@@ -598,6 +598,8 @@ describe('mapSchemaToFields', () => {
 
     // Second field: dog variant group with logic.
     // Group fields declare `label?: never` (issue #348), so no label is emitted.
+    // Note: `toMatchObject` would silently pass if a label leaked back in — keep
+    // the explicit `toBeUndefined()` assertion below.
     expect(result.fields[1]).toMatchObject({
       key: 'dogVariant',
       type: 'group',
@@ -619,6 +621,8 @@ describe('mapSchemaToFields', () => {
 
     // Third field: cat variant group with logic.
     // Group fields declare `label?: never` (issue #348), so no label is emitted.
+    // Note: `toMatchObject` would silently pass if a label leaked back in — keep
+    // the explicit `toBeUndefined()` assertion below.
     expect(result.fields[2]).toMatchObject({
       key: 'catVariant',
       type: 'group',
@@ -1136,6 +1140,19 @@ describe('mapSchemaToFields', () => {
       const result = mapSchemaToFields(schema, []);
       expect(result.fields[0].type).toBe('input');
       expect(result.fields[0].label).toBe('Email Address');
+    });
+
+    it('should not emit label when x-ng-forge-type overrides to a container type', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          custom: { type: 'string', title: 'Custom', 'x-ng-forge-type': 'container' } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].type).toBe('container');
+      expect(result.fields[0].label).toBeUndefined();
     });
   });
 });

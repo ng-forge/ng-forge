@@ -19,8 +19,12 @@ const NULLABLE_SUPPORTED_FIELD_TYPES = new Set(['input', 'textarea', 'select', '
  * Field types whose runtime definition declares `label?: never` and therefore
  * rejects any `label` assignment under `as const satisfies FormConfig`. Emitting
  * a label on these types causes TS2322 in consumers (issue #348).
+ *
+ * `container` is included defensively: while the schema mapper never produces it
+ * directly, an `x-ng-forge-type: container` override can route through this code
+ * path, and `BaseContainerField` declares the same `label?: never` constraint.
  */
-const CONTAINER_FIELD_TYPES = new Set(['group', 'array', 'row', 'page']);
+const CONTAINER_FIELD_TYPES = new Set(['group', 'array', 'row', 'page', 'container']);
 
 function singularize(label: string): string {
   // Only strip trailing 's' if word is 4+ chars and doesn't end in 'ss'
@@ -339,8 +343,13 @@ function mapPropertyToField(
         const templateField: FieldConfig = {
           key: 'value',
           type: itemTypeResult.fieldType,
-          label: fieldLabel,
         };
+        // Container types declare `label?: never` (issue #348). `itemTypeResult.fieldType`
+        // is never a container today, but gate symmetrically with the property handler
+        // so future routing changes can't slip through.
+        if (!CONTAINER_FIELD_TYPES.has(itemTypeResult.fieldType)) {
+          templateField.label = fieldLabel;
+        }
         if (itemTypeResult.props && Object.keys(itemTypeResult.props).length > 0) {
           templateField.props = itemTypeResult.props;
         }
