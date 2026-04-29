@@ -311,6 +311,9 @@ jobs:
         # so releases created with it don't fire `release: published` — which is what
         # discord-release-notify.yml listens for. Using a GitHub App-scoped token instead
         # makes those events propagate normally.
+        # Gated to the same paths that consume the token (matches the old Configure Git
+        # step's condition) so a dry-run doesn't depend on the App secrets being present.
+        if: inputs.mode == 'publish' || github.event_name == 'schedule' || inputs.mode == 'next'
         id: app-token
         uses: actions/create-github-app-token@v2
         with:
