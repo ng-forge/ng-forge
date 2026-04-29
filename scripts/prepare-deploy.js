@@ -27,22 +27,28 @@ const deployRoot = join(rootDir, 'dist', 'deploy');
 const deployDir = join(deployRoot, 'dynamic-forms');
 const distDir = join(rootDir, 'dist');
 
-// Prefer pre-rendered output (SSG via Analog) over client-only SPA shell
-const docsAnalogDir = join(distDir, 'apps', 'docs', 'analog', 'public');
-const docsClientDir = join(distDir, 'apps', 'docs', 'client');
-const docsSourceDir = existsSync(docsAnalogDir) ? docsAnalogDir : docsClientDir;
+// Source priority: Vercel BOA static (when VERCEL env triggers Analog's preset
+// override) → Analog SSG output → client-only SPA shell. On Vercel, Analog's
+// vite-plugin-nitro auto-detects `process.env.VERCEL` and redirects prerender
+// output from `dist/apps/docs/analog/public/` to `.vercel/output/static/`,
+// so this script must look there first.
+const candidates = [
+  { path: join(rootDir, '.vercel', 'output', 'static'), label: 'pre-rendered (SSG) output from Vercel BOA' },
+  { path: join(distDir, 'apps', 'docs', 'analog', 'public'), label: 'pre-rendered (SSG) output from Analog' },
+  { path: join(distDir, 'apps', 'docs', 'client'), label: 'client-only SPA output (no pre-rendering)' },
+];
+const source = candidates.find((c) => existsSync(c.path));
 
-if (!existsSync(docsSourceDir)) {
+if (!source) {
   console.error('❌ Error: Docs app build output not found!');
+  console.error('   Searched:');
+  for (const c of candidates) console.error(`     - ${c.path}`);
   console.error('   Please run: pnpm nx build docs --configuration=production');
   process.exit(1);
 }
 
-if (docsSourceDir === docsAnalogDir) {
-  console.log('📦 Using pre-rendered (SSG) output from Analog...');
-} else {
-  console.log('📦 Using client-only SPA output (no pre-rendering)...');
-}
+console.log(`📦 Using ${source.label}...`);
+const docsSourceDir = source.path;
 
 // Clean deploy directory
 console.log('🧹 Cleaning deploy directory...');
