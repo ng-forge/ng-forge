@@ -1,5 +1,6 @@
 import { Type } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
+import { decodeHtmlEntities } from '../utils/decode-html-entities';
 
 export interface HtmlSegment {
   type: 'html';
@@ -53,7 +54,10 @@ function parseAttributes(tagHtml: string): Record<string, string> {
   while ((match = attrPattern.exec(attrString)) !== null) {
     const key = match[1];
     const value = match[2] ?? match[3] ?? '';
-    attrs[key] = value;
+    // Decode HTML entities — a real DOM parser would do this when reading
+    // attribute values, but our regex extracts the raw text as-is, leaving
+    // entities like `&quot;` to flow through to Shiki and render literally.
+    attrs[key] = decodeHtmlEntities(value);
   }
   return attrs;
 }

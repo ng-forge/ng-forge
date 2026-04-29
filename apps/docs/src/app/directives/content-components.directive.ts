@@ -68,6 +68,42 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
     defer: true,
     loadComponent: () => import('../components/derivation-flow/derivation-flow.component'),
   },
+  {
+    selector: 'docs-code-compare',
+    defer: true,
+    loadComponent: () => import('../components/code-compare/code-compare.component'),
+    extractInputs: (attrs) => ({
+      title: attrs['title'] ?? '',
+      formly: attrs['formly'] ?? '',
+      ngforge: attrs['ngforge'] ?? '',
+      lang: attrs['lang'] ?? 'typescript',
+    }),
+  },
+  {
+    selector: 'docs-dsl-shift',
+    defer: true,
+    loadComponent: () => import('../components/dsl-shift/dsl-shift.component'),
+  },
+  {
+    selector: 'docs-validator-pillars',
+    defer: true,
+    loadComponent: () => import('../components/validator-pillars/validator-pillars.component'),
+  },
+  {
+    selector: 'docs-hidden-field-flow',
+    defer: true,
+    loadComponent: () => import('../components/hidden-field-flow/hidden-field-flow.component'),
+  },
+  {
+    selector: 'docs-perf-pipeline',
+    defer: true,
+    loadComponent: () => import('../components/perf-pipeline/perf-pipeline.component'),
+  },
+  {
+    selector: 'docs-feature-overview',
+    defer: true,
+    loadComponent: () => import('../components/feature-overview/feature-overview.component'),
+  },
 ];
 
 /**

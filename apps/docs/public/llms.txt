@@ -87,6 +87,15 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - /recipes/custom-fields: Adding custom field types
 - /recipes/value-exclusion: Controlling which fields are included in submitted form values
 
+### Migration
+- /migrating-from-ngx-formly: Concept-by-concept migration guide from ngx-formly to ng-forge
+
+### Feature Overview
+- /feature-overview: Visual catalog of ng-forge capabilities (field types, validators, conditional logic, derivations, schema, layout, adapters)
+
+### Common Pitfalls
+- /pitfalls: Surprises and footguns — group vs container, hidden field values, validator messages, custom-fn dependencies, select option shape, derivation depth limits
+
 ### AI Integration
 - /ai-integration: MCP server for AI-assisted form schema generation
 

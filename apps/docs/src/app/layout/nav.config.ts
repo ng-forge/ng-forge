@@ -15,6 +15,7 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Getting Started', path: 'getting-started' },
+  { label: 'Feature Overview', path: 'feature-overview' },
   { label: 'Configuration', path: 'configuration' },
   { label: 'API-Driven Forms', path: 'api-driven-forms' },
   {
@@ -110,6 +111,8 @@ export const NAV_ITEMS: NavItem[] = [
       { label: 'Value Exclusion', path: 'recipes/value-exclusion' },
     ],
   },
+  { label: 'Common Pitfalls', path: 'pitfalls' },
+  { label: 'Migrating from ngx-formly', path: 'migrating-from-ngx-formly' },
   {
     label: 'AI Integration (MCP)',
     path: 'ai-integration',

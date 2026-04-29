@@ -203,9 +203,29 @@ export class ContentService {
   private async renderMarkdown(markdown: string): Promise<RenderedContent> {
     const headings: HeadingEntry[] = [];
 
+    // Pre-protect custom-element blocks whose authored content contains blank
+    // lines (e.g. `<docs-code-compare>` with multi-line code in attributes).
+    // Marked's HTML-block tokenizer ends a block on the first blank line, which
+    // would split the element open/close pair across paragraphs and emit the
+    // tag as escaped text. We swap each block for an opaque placeholder, run
+    // marked, then re-insert the originals after rendering.
+    const PROTECTED_TAG_PATTERN = /<(docs-code-compare)\b[\s\S]*?<\/\1>/g;
+    const protectedBlocks: string[] = [];
+    // Per-render token so doc content that happens to contain the literal
+    // marker text in prose can't collide with our placeholder substitution.
+    const protectedToken = `NGFORGEPROTECTED${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
+    const protectedMarkdown = markdown.replace(PROTECTED_TAG_PATTERN, (match) => {
+      const index = protectedBlocks.length;
+      protectedBlocks.push(match);
+      // Wrap each protected block in a paragraph-style placeholder marker that
+      // survives marked's block tokenizer: a unique text token (no surrounding
+      // tags). Marked wraps this in <p>...</p> which we strip on the way out.
+      return `${protectedToken}${index}END`;
+    });
+
     // Pass 1: Lex markdown, extract code tokens (block + inline), highlight with shiki
     const lexer = new Marked();
-    const tokens = lexer.lexer(markdown);
+    const tokens = lexer.lexer(protectedMarkdown);
     const codeTokens: Tokens.Code[] = [];
     const codespanTexts = new Set<string>();
 
@@ -319,7 +339,16 @@ export class ContentService {
     };
 
     const marked = new Marked({ renderer });
-    let html = await marked.parse(markdown);
+    let html = await marked.parse(protectedMarkdown);
+
+    // Re-insert protected blocks. Marked wraps the standalone text token in a
+    // <p>…</p>; strip that and any inline tokenisation that may have happened.
+    if (protectedBlocks.length > 0) {
+      const placeholderRe = new RegExp(`<p>\\s*${protectedToken}(\\d+)END\\s*</p>`, 'g');
+      const bareRe = new RegExp(`${protectedToken}(\\d+)END`, 'g');
+      html = html.replace(placeholderRe, (_, index: string) => protectedBlocks[Number(index)] ?? '');
+      html = html.replace(bareRe, (_, index: string) => protectedBlocks[Number(index)] ?? '');
+    }
 
     // Wrap each rendered <table> in a horizontally-scrolling container so
     // narrow viewports scroll the table rather than cramming every word
