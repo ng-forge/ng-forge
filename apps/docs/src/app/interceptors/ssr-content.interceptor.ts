@@ -52,6 +52,8 @@ export const ssrContentInterceptor: HttpInterceptorFn = (req, next) => {
   }
 };
 
+const MAX_WALK_UP_LEVELS = 8;
+
 let resolvedContentDir: string | null | undefined;
 let missLogged = false;
 
@@ -75,7 +77,7 @@ function candidatePaths(): string[] {
   // Walk up from the bundled file location looking for known content dir layouts.
   const walkUp: string[] = [];
   let current = dirName;
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < MAX_WALK_UP_LEVELS; i++) {
     walkUp.push(
       join(current, 'content'),
       join(current, 'public', 'content'),
