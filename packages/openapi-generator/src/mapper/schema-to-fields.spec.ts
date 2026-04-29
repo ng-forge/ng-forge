@@ -596,12 +596,13 @@ describe('mapSchemaToFields', () => {
     // First field: discriminator radio
     expect(result.fields[0]).toMatchObject({ key: 'petType', type: 'radio' });
 
-    // Second field: dog variant group with logic
+    // Second field: dog variant group with logic.
+    // Group fields declare `label?: never` (issue #348), so no label is emitted.
     expect(result.fields[1]).toMatchObject({
       key: 'dogVariant',
       type: 'group',
-      label: 'Dog',
     });
+    expect(result.fields[1].label).toBeUndefined();
     expect(result.fields[1].logic).toEqual([
       {
         type: 'hidden',
@@ -616,12 +617,13 @@ describe('mapSchemaToFields', () => {
     expect(result.fields[1].fields).toHaveLength(1);
     expect(result.fields[1].fields![0].key).toBe('breed');
 
-    // Third field: cat variant group with logic
+    // Third field: cat variant group with logic.
+    // Group fields declare `label?: never` (issue #348), so no label is emitted.
     expect(result.fields[2]).toMatchObject({
       key: 'catVariant',
       type: 'group',
-      label: 'Cat',
     });
+    expect(result.fields[2].label).toBeUndefined();
     expect(result.fields[2].logic).toEqual([
       {
         type: 'hidden',
@@ -1036,6 +1038,104 @@ describe('mapSchemaToFields', () => {
       const result = mapSchemaToFields(schema, []);
       // 'name' has no match, 'telephoneDescription' ends in 'Description' not 'telephone'
       expect(result.fields[0].props?.['type']).toBe('text');
+    });
+  });
+
+  // Regression tests for #348: container types declare `label?: never` in their TS
+  // definitions, so emitting a label causes TS2322 in consumers.
+  describe('container types: no label emitted (#348)', () => {
+    it('should not emit label on group fields', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          address: {
+            type: 'object',
+            title: 'Address',
+            properties: {
+              street: { type: 'string' },
+            },
+          } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].type).toBe('group');
+      expect(result.fields[0].label).toBeUndefined();
+    });
+
+    it('should not emit label on array fields (object items)', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          contacts: {
+            type: 'array',
+            title: 'Contacts',
+            items: {
+              type: 'object',
+              properties: { email: { type: 'string' } },
+            },
+          } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].type).toBe('array');
+      expect(result.fields[0].label).toBeUndefined();
+    });
+
+    it('should not emit label on array fields (primitive items)', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          tags: {
+            type: 'array',
+            title: 'Tags',
+            items: { type: 'string' },
+          } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].type).toBe('array');
+      expect(result.fields[0].label).toBeUndefined();
+    });
+
+    it('should not emit label on group fields produced by oneOf+discriminator nested schemas', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          payment: {
+            title: 'Payment',
+            discriminator: { propertyName: 'kind' },
+            oneOf: [
+              {
+                type: 'object',
+                properties: {
+                  kind: { type: 'string', enum: ['card'] },
+                  number: { type: 'string' },
+                },
+              } as SchemaObject,
+            ],
+          } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].type).toBe('group');
+      expect(result.fields[0].label).toBeUndefined();
+    });
+
+    it('should still emit label on value-bearing fields', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          email: { type: 'string', title: 'Email Address' } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].type).toBe('input');
+      expect(result.fields[0].label).toBe('Email Address');
     });
   });
 });

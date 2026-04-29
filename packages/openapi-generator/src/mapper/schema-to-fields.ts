@@ -15,6 +15,13 @@ import { logger } from '../utils/logger.js';
  */
 const NULLABLE_SUPPORTED_FIELD_TYPES = new Set(['input', 'textarea', 'select', 'radio', 'multi-checkbox', 'slider', 'datepicker']);
 
+/**
+ * Field types whose runtime definition declares `label?: never` and therefore
+ * rejects any `label` assignment under `as const satisfies FormConfig`. Emitting
+ * a label on these types causes TS2322 in consumers (issue #348).
+ */
+const CONTAINER_FIELD_TYPES = new Set(['group', 'array', 'row', 'page']);
+
 function singularize(label: string): string {
   // Only strip trailing 's' if word is 4+ chars and doesn't end in 'ss'
   if (label.length >= 4 && label.endsWith('s') && !label.endsWith('ss')) {
@@ -31,7 +38,7 @@ export interface LogicConfig {
 export interface FieldConfig {
   key: string;
   type: string;
-  label: string;
+  label?: string;
   value?: unknown;
   nullable?: boolean;
   placeholder?: string;
@@ -87,12 +94,12 @@ export function mapSchemaToFields(schema: SchemaObject, requiredFields: string[]
         ambiguousFields.push(...variantResult.ambiguousFields);
         warnings.push(...variantResult.warnings);
 
-        // Wrap variant fields in a group with logic for conditional visibility
+        // Wrap variant fields in a group with logic for conditional visibility.
+        // Group fields declare `label?: never` (issue #348), so no label is emitted.
         if (variantFields.length > 0) {
           fields.push({
             key: `${group.discriminatorValue}Variant`,
             type: 'group',
-            label: toEnumLabel(group.discriminatorValue),
             fields: variantFields,
             logic: [
               {
@@ -149,10 +156,10 @@ function mapPropertyToField(
     ambiguousFields.push(...innerResult.ambiguousFields);
     warnings.push(...innerResult.warnings);
 
+    // Group fields declare `label?: never` (issue #348), so no label is emitted.
     return {
       key: prop.name,
       type: 'group',
-      label: ((prop.schema as Record<string, unknown>)['title'] as string) ?? toLabel(prop.name),
       fields: innerResult.fields,
     };
   }
@@ -201,8 +208,12 @@ function mapPropertyToField(
   const field: FieldConfig = {
     key: prop.name,
     type: finalType,
-    label: ((prop.schema as Record<string, unknown>)['title'] as string) ?? toLabel(prop.name),
   };
+
+  // Container types declare `label?: never` (issue #348) — only emit on value-bearing types.
+  if (!CONTAINER_FIELD_TYPES.has(finalType)) {
+    field.label = ((prop.schema as Record<string, unknown>)['title'] as string) ?? toLabel(prop.name);
+  }
 
   // readOnly → disabled
   if ((prop.schema as Record<string, unknown>)['readOnly']) {

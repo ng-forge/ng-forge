@@ -397,4 +397,18 @@ describe('array template rendering', () => {
     expect(result).not.toContain('addButton');
     expect(result).not.toContain('removeButton');
   });
+
+  it('should omit label line when label is undefined (#348)', () => {
+    const fields: FieldConfig[] = [
+      {
+        key: 'address',
+        type: 'group',
+        fields: [{ key: 'street', type: 'input', label: 'Street' }],
+      },
+    ];
+
+    const result = generateFormConfig(fields, defaultOptions);
+    const addressBlock = result.substring(result.indexOf("key: 'address'"), result.indexOf("key: 'street'"));
+    expect(addressBlock).not.toContain('label:');
+  });
 });

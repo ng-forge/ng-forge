@@ -35,7 +35,9 @@ function generateFieldLines(field: FieldConfig, indent: string): string[] {
   lines.push(`${indent}{`);
   lines.push(`${indent}  key: '${escapeString(field.key)}',`);
   lines.push(`${indent}  type: '${escapeString(field.type)}',`);
-  lines.push(`${indent}  label: '${escapeString(field.label)}',`);
+  if (field.label !== undefined) {
+    lines.push(`${indent}  label: '${escapeString(field.label)}',`);
+  }
 
   if (field.value !== undefined) {
     lines.push(`${indent}  value: ${JSON.stringify(field.value)},`);
