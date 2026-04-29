@@ -306,6 +306,17 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate GitHub App Token
+        # GITHUB_TOKEN cannot trigger downstream workflows (GitHub recursion safeguard),
+        # so releases created with it don't fire `release: published` — which is what
+        # discord-release-notify.yml listens for. Using a GitHub App-scoped token instead
+        # makes those events propagate normally.
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
       - name: Install pnpm
         uses: pnpm/action-setup@v5
         with:
@@ -420,8 +431,8 @@ jobs:
 
       - name: Publish to npm
         # Real publish: workflow_dispatch mode=publish, workflow_dispatch mode=next, or schedule.
-        # Runs BEFORE git tag + GitHub release on the stable path (and @next tag below) so
-        # that the irreversible-first-so-reversible-second pattern holds: if npm fails, no
+        # Runs BEFORE the GitHub release/prerelease steps so that the
+        # irreversible-first-so-reversible-second pattern holds: if npm fails, no
         # stale tag/release is left behind. On re-run after a partial failure, the
         # per-package `npm view` check below skips packages already on npm so we don't 409.
         if: |
@@ -439,38 +450,22 @@ jobs:
             npm publish "dist/packages/$pkg" --access public --provenance --tag "$DIST_TAG"
           done
 
-      - name: Configure Git
-        # Git identity for the tag-creation steps below (stable and @next paths).
-        if: inputs.mode == 'publish' || github.event_name == 'schedule' || inputs.mode == 'next'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-      - name: Create Git Tag (stable)
-        # Runs AFTER npm publish so a failed publish doesn't leave a stale v* tag.
-        # If the tag step itself fails after a successful publish, re-running
-        # succeeds because the idempotency check in Publish skips the already-pushed
-        # packages. Manual recovery: re-dispatch mode=publish.
-        if: inputs.mode == 'publish'
-        run: |
-          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
-            echo "Tag v${{ env.VERSION }} already exists (likely from a retry after partial failure) — skipping create"
-          else
-            git tag -a "v${{ env.VERSION }}" -m "Release v${{ env.VERSION }}"
-            git push origin "v${{ env.VERSION }}"
-          fi
-
       - name: Create GitHub Release
+        # action-gh-release creates the v${VERSION} tag at github.sha via the GitHub API
+        # AND publishes the release in one step. Runs AFTER npm publish so a failed publish
+        # doesn't leave a stale tag/release behind. Idempotent on retry: if the release
+        # already exists, the action updates it. Manual recovery: re-dispatch mode=publish.
         if: inputs.mode == 'publish'
         uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ env.VERSION }}
+          target_commitish: ${{ github.sha }}
           name: Release v${{ env.VERSION }}
           body_path: RELEASE_NOTES.md
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Generate Nightly Release Notes
         # Body for the @next GitHub prerelease. Reuses the gate's BASE (most recent of
@@ -514,7 +509,7 @@ jobs:
           prerelease: true
           draft: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Summary
         run: |
