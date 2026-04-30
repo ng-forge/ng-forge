@@ -79,6 +79,7 @@ describe('BsInputField (String) - Exhaustive Whitelist', () => {
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
+    | 'addons'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -231,6 +232,7 @@ describe('BsInputField (Number) - Exhaustive Whitelist', () => {
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
+    | 'addons'
     | 'required'
     | 'email'
     | 'min'

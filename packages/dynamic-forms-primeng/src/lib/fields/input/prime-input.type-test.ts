@@ -71,6 +71,7 @@ describe('PrimeInputField (String) - Exhaustive Whitelist', () => {
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
+    | 'addons'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -223,6 +224,7 @@ describe('PrimeInputField (Number) - Exhaustive Whitelist', () => {
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
+    | 'addons'
     | 'required'
     | 'email'
     | 'min'
@@ -362,14 +364,12 @@ describe('PrimeInputField - addons', () => {
     expectTypeOf(field.addons[0].kind).toEqualTypeOf<'template'>();
   });
 
-  it('rejects an unknown addon kind on prime-input at compile time', () => {
-    // @ts-expect-error - 'rating' is not in PrimeInputAddon's kind union
-    const _bad = {
-      type: 'input',
-      key: 'q',
-      addons: [{ slot: 'prefix', kind: 'rating', value: 5 }],
-    } as const satisfies PrimeInputField;
-    void _bad;
+  it("constrains addon kind to PrimeInput's union (no 'rating', etc.)", () => {
+    // The addon-kind union is the contract; verify it positively. A 'rating'
+    // kind doesn't appear here, so a config using it would be rejected by
+    // TypeScript at the call site.
+    type AcceptedKinds = NonNullable<PrimeInputField['addons']>[number]['kind'];
+    expectTypeOf<AcceptedKinds>().toEqualTypeOf<'pi-icon' | 'pi-button' | 'text' | 'template'>();
   });
 
   it('accepts addons with optional reactive hidden flag', () => {

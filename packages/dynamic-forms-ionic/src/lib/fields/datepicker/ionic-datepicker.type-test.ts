@@ -111,6 +111,7 @@ describe('IonicDatepickerField - Exhaustive Whitelist', () => {
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
+    | 'addons'
     // From FieldWithValidation
     | 'required'
     | 'email'
