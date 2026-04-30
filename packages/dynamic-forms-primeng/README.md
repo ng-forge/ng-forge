@@ -101,6 +101,69 @@ provideDynamicForm(
 
 Input, Textarea, Select, Checkbox, Toggle, Radio, Multi-Checkbox, Datepicker, Slider, Button, Submit, Next, Previous
 
+## Addons (`prefix` / `suffix` slots on `prime-input`)
+
+Render icons, buttons, or static text inside an input's `<p-inputgroup>`. Opt
+in by adding `withPrimengAddons()` alongside `withPrimeNGFields()`:
+
+```ts
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withPrimeNGFields, withPrimengAddons } from '@ng-forge/dynamic-forms-primeng';
+
+provideDynamicForm(...withPrimeNGFields(), withPrimengAddons());
+```
+
+### Quickstart — clear button
+
+```ts
+{
+  type: 'input',
+  key: 'search',
+  label: 'Search',
+  addons: [
+    { slot: 'prefix', kind: 'pi-icon', icon: 'search', ariaLabel: 'Search' },
+    { slot: 'suffix', kind: 'pi-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' },
+  ],
+}
+```
+
+### Available kinds
+
+| Kind        | Renders                       | Notes                                                                                    |
+| ----------- | ----------------------------- | ---------------------------------------------------------------------------------------- |
+| `pi-icon`   | `<i class="pi pi-{icon}">`    | Bare PrimeIcons name. Add `ariaLabel` for non-decorative icons.                          |
+| `pi-button` | `<p-button>` with `[loading]` | Exactly one of `preset` / `actionRef` / `action`. Severity, label, icon all supported.   |
+| `text`      | `<span>` with `DynamicText`   | Universal; supports plain strings, signals, observables, i18n keys.                      |
+| `template`  | Named `<ng-template>`         | Reference by `templateKey`. JSON-safe — backend ships the key, FE supplies the template. |
+| `component` | Arbitrary Angular component   | Code-only — dropped from JSON-derived configs.                                           |
+
+### Built-in button presets
+
+`'clear'`, `'reset'`, `'submit'`, `'paste'`, `'copy'`, `'toggle-password-visibility'`. All JSON-safe.
+
+For custom actions, register named handlers via `provideAddonActions(...)` from `@ng-forge/dynamic-forms` and reference them with `actionRef`:
+
+```ts
+provideAddonActions({
+  openProfile: (ctx) => modal.open(ProfileModal, { data: ctx.value }),
+});
+
+// Backend then ships:
+// { kind: 'pi-button', actionRef: 'openProfile', label: 'View profile' }
+```
+
+### Reactive `hidden` / `disabled`
+
+Both fields accept `boolean | Signal<boolean> | Observable<boolean>`. Useful
+for "show clear button only when input has value" patterns:
+
+```ts
+const hasValue = computed(() => (formValue()?.search?.length ?? 0) > 0);
+
+{ slot: 'suffix', kind: 'pi-button', icon: 'times', ariaLabel: 'Clear',
+  preset: 'clear', hidden: computed(() => !hasValue()) }
+```
+
 ## Documentation
 
 - [PrimeNG Integration](https://ng-forge.com/dynamic-forms/ui-libs-integrations/primeng)
