@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, input, signal, Type } fro
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ComponentAddon } from '../models/addon/addon-def';
 import { resolveDefaultExport } from '../utils/wrapper-chain/wrapper-chain';
+import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
 /**
  * Renderer for the universal `component` addon kind.
@@ -25,6 +26,8 @@ import { resolveDefaultExport } from '../utils/wrapper-chain/wrapper-chain';
 })
 export class ComponentAddonComponent {
   readonly addon = input.required<ComponentAddon>();
+  /** Forwarded by `df-addon-slot`; not propagated to the user component (use `inputs` for that). */
+  readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   protected readonly inputs = computed(() => (this.addon().inputs ?? {}) as Record<string, unknown>);
 

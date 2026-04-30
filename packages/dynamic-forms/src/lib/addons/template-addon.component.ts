@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { TemplateAddon } from '../models/addon/addon-def';
 import { DF_FIELD_TEMPLATES } from '../models/addon/df-field-templates.token';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
 /**
  * Renderer for the universal `template` addon kind.
@@ -29,6 +30,8 @@ export class TemplateAddonComponent {
   private readonly logger = inject(DynamicFormLogger);
 
   readonly addon = input.required<TemplateAddon>();
+  /** Forwarded by `df-addon-slot`; templates that need field state read it via `let-` context binding. */
+  readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   protected readonly template = computed(() => {
     const map = this.templates?.();

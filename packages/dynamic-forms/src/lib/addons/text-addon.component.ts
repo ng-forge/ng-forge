@@ -2,6 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TextAddon } from '../models/addon/addon-def';
 import { DynamicTextPipe } from '../pipes/dynamic-text/dynamic-text.pipe';
+import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
 /**
  * Renderer for the universal `text` addon kind.
@@ -21,4 +22,6 @@ import { DynamicTextPipe } from '../pipes/dynamic-text/dynamic-text.pipe';
 })
 export class TextAddonComponent {
   readonly addon = input.required<TextAddon>();
+  /** Forwarded by `df-addon-slot`; unused by this kind but accepted for contract uniformity. */
+  readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 }
