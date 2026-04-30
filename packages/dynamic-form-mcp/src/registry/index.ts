@@ -202,3 +202,32 @@ export function getDocPage(id: string): DocPage | undefined {
 export function getDocPagesByCategory(category: string): DocPage[] {
   return DOCUMENTATION.filter((d) => d.category === category);
 }
+
+import { ADDON_KINDS, AddonKindInfo, FIELD_ADDON_SUPPORT, FieldAddonSupportInfo } from './addons.js';
+
+export type { AddonKindInfo, FieldAddonSupportInfo };
+
+/** Get every registered addon kind. */
+export function getAddonKinds(): AddonKindInfo[] {
+  return ADDON_KINDS;
+}
+
+/** Look up a single addon kind by its discriminant. */
+export function getAddonKind(kind: string): AddonKindInfo | undefined {
+  return ADDON_KINDS.find((k) => k.kind === kind);
+}
+
+/** Filter addon kinds by source (`'core'` / `'adapter'`). */
+export function getAddonKindsByCategory(category: 'core' | 'adapter'): AddonKindInfo[] {
+  return ADDON_KINDS.filter((k) => k.category === category);
+}
+
+/** Get the per-field-type addon support map. */
+export function getFieldAddonSupport(): FieldAddonSupportInfo[] {
+  return FIELD_ADDON_SUPPORT;
+}
+
+/** Look up addon support for a specific field type. */
+export function getAddonSupportForField(fieldType: string): FieldAddonSupportInfo | undefined {
+  return FIELD_ADDON_SUPPORT.find((f) => f.fieldType === fieldType);
+}
