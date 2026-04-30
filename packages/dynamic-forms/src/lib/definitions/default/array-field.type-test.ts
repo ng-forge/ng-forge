@@ -33,6 +33,7 @@ describe('ArrayField - Exhaustive Whitelist', () => {
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
+    | 'addons'
     | 'fields'
     | 'logic'
     | 'minLength'

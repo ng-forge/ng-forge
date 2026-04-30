@@ -37,6 +37,7 @@ describe('ContainerField - Exhaustive Whitelist', () => {
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
+    | 'addons'
     | 'logic';
 
   type ActualKeys = keyof ContainerField;
