@@ -40,7 +40,9 @@ type ExcludedKeys =
   // Wrappers are consumed by DfFieldOutlet / ContainerFieldComponent, not individual fields
   | 'wrappers'
   | 'skipAutoWrappers'
-  | 'skipDefaultWrappers';
+  | 'skipDefaultWrappers'
+  // Addons are an opt-in input — checkbox/toggle-style fields are Tier 3 and don't render them
+  | 'addons';
 
 export type CheckedFieldComponent<T extends BaseCheckedField<Record<string, unknown> | unknown>> = Prettify<
   WithInputSignals<Omit<T, ExcludedKeys>>

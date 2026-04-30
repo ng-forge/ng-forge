@@ -1,0 +1,28 @@
+import { AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import type { PiIconAddon } from '../types/addons';
+
+/**
+ * Renderer for the `pi-icon` addon kind.
+ *
+ * Outputs `<i class="pi pi-{icon}">`. The host is set `aria-hidden="true"`
+ * by default; if the addon supplies an `ariaLabel`, it is applied so the
+ * icon is announced by screen readers.
+ */
+@Component({
+  selector: 'df-pi-icon-addon',
+  imports: [AsyncPipe, DynamicTextPipe],
+  template: `<i [class]="iconClass()" [attr.aria-label]="ariaLabel() | dynamicText | async"></i>`,
+  host: {
+    '[attr.aria-hidden]': 'hasAriaLabel() ? null : "true"',
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class PiIconAddonComponent {
+  readonly addon = input.required<PiIconAddon>();
+
+  protected readonly iconClass = computed(() => `pi pi-${this.addon().icon}`);
+  protected readonly ariaLabel = computed(() => this.addon().ariaLabel ?? null);
+  protected readonly hasAriaLabel = computed(() => this.addon().ariaLabel !== undefined);
+}
