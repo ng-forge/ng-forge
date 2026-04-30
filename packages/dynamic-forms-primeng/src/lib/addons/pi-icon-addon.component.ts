@@ -23,6 +23,6 @@ export class PiIconAddonComponent {
   readonly addon = input.required<PiIconAddon>();
 
   protected readonly iconClass = computed(() => `pi pi-${this.addon().icon}`);
-  protected readonly ariaLabel = computed(() => this.addon().ariaLabel ?? null);
+  protected readonly ariaLabel = computed(() => this.addon().ariaLabel);
   protected readonly hasAriaLabel = computed(() => this.addon().ariaLabel !== undefined);
 }

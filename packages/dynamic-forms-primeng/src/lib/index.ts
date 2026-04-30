@@ -63,6 +63,13 @@ export type { PrimeFormProps, PrimeFormConfig } from './types/form-config';
 
 // Module augmentation for global types
 import './types/registry-augmentation';
+import './types/addons';
 
 // Providers
-export { withPrimeNGFields } from './providers/primeng-providers';
+export { withPrimeNGFields, withPrimengAddons } from './providers/primeng-providers';
+
+// Addon kinds
+export { PiIconAddonComponent } from './addons/pi-icon-addon.component';
+export { PiButtonAddonComponent } from './addons/pi-button-addon.component';
+export type { PiIconAddon, PiButtonAddon, PrimeAddon } from './types/addons';
+export { PRIME_INPUT_TYPE_OVERRIDE } from './tokens/input-type-override.token';

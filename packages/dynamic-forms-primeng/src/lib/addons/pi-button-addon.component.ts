@@ -5,9 +5,9 @@ import {
   AddonActionContext,
   DynamicFormLogger,
   DynamicTextPipe,
+  FIELD_SIGNAL_CONTEXT,
   resolveDynamicValue,
 } from '@ng-forge/dynamic-forms';
-import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms/integration';
 import { ButtonModule } from 'primeng/button';
 import { PRIME_INPUT_TYPE_OVERRIDE } from '../tokens/input-type-override.token';
 import type { PiButtonAddon } from '../types/addons';
@@ -57,8 +57,8 @@ export class PiButtonAddonComponent {
 
   readonly addon = input.required<PiButtonAddon>();
 
-  protected readonly label = computed(() => this.addon().label ?? null);
-  protected readonly ariaLabel = computed(() => this.addon().ariaLabel ?? null);
+  protected readonly label = computed(() => this.addon().label);
+  protected readonly ariaLabel = computed(() => this.addon().ariaLabel);
   protected readonly iconClass = computed(() => {
     const icon = this.addon().icon;
     return icon ? `pi pi-${icon}` : '';
@@ -105,19 +105,19 @@ export class PiButtonAddonComponent {
   }
 
   /**
-   * Build an AddonActionContext for handlers. Field reference and form
-   * tree come from FIELD_SIGNAL_CONTEXT when available; otherwise they're
-   * loose stand-ins so handlers don't crash.
+   * Build an AddonActionContext for handlers. Field reference and form tree
+   * come from FIELD_SIGNAL_CONTEXT when available; otherwise the addon was
+   * rendered outside a field component (rare) and handlers receive empty
+   * stand-ins.
    */
   private buildActionContext(): AddonActionContext {
-    const ctxValue = this.fieldContext?.value;
+    const ctx = this.fieldContext as { value?: () => unknown; form?: unknown } | null;
     return {
-      // The dispatcher does not currently pass the host FieldDef; consumers
-      // that need it can read FIELD_SIGNAL_CONTEXT directly. Provide a
-      // minimal stub so the type contract is honoured.
-      field: { key: '', type: '' },
-      form: this.fieldContext?.form ?? null,
-      value: ctxValue ? ctxValue() : undefined,
+      // The dispatcher does not currently pass the host FieldDef; handlers
+      // that need it can read FIELD_SIGNAL_CONTEXT directly via inject().
+      field: { key: '', type: '' } as AddonActionContext['field'],
+      form: ctx?.form ?? null,
+      value: ctx?.value?.(),
     };
   }
 }

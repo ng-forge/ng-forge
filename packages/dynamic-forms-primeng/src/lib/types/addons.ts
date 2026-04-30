@@ -40,8 +40,8 @@ export interface PiButtonAddon extends BaseAddon {
   readonly label?: DynamicText;
   /** Required at type level when icon-only (no `label`); used as `aria-label`. */
   readonly ariaLabel?: DynamicText;
-  /** PrimeNG button severity / colour variant. */
-  readonly severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'danger';
+  /** PrimeNG button severity / colour variant — mirrors PrimeNG's `ButtonSeverity`. */
+  readonly severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast';
   /** Reactive loading state — renders the button's native `[loading]` spinner. */
   readonly loading?: DynamicValue<boolean>;
 
