@@ -57,6 +57,33 @@ export { wrapperProps } from './wrappers/wrapper-props';
 export { createWrappers, isWrappersBundle } from './wrappers/create-wrappers';
 export type { WrapperRegistration, WrappersBundle, InferWrapperRegistry } from './wrappers/create-wrappers';
 
+// Addon Types
+export type {
+  AddonSlot,
+  AnyAddon,
+  BaseAddon,
+  CommonAddonSlot,
+  ComponentAddon,
+  DynamicFormAddonRegistry,
+  DynamicFormAddonSlotRegistry,
+  TemplateAddon,
+  TextAddon,
+} from './models';
+export type {
+  AddonActionContext,
+  AddonActionPreset,
+  AddonKindDefinition,
+  AddonKindSchema,
+  AddonShapeValidator,
+  CommonAddonActionPreset,
+  DynamicFormActionRegistry,
+  DynamicFormAddonActionPresetRegistry,
+  FieldAddonSupport,
+  RegisteredActionRef,
+} from './models';
+export { ADDON_KIND_REGISTRY, DF_FIELD_TEMPLATES } from './models';
+export type { DynamicValue } from './models';
+
 // Configuration Types
 export type { CustomFnConfig, FormConfig, FormOptions } from './models';
 export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from './models';
