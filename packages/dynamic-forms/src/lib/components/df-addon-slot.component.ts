@@ -103,7 +103,7 @@ export class DfAddonSlot {
         .then((cmp) => this.resolvedComponentSignal.set(cmp))
         .catch((error: unknown) => {
           this.logger.warn(
-            `[Dynamic Forms] Failed to load addon kind '${addon.kind}': ${String(error)}. ` +
+            `Failed to load addon kind '${addon.kind}': ${String(error)}. ` +
               `Registered kinds: ${this.registry.getKindNames().join(', ') || '(none)'}.`,
           );
           this.resolvedComponentSignal.set(undefined);

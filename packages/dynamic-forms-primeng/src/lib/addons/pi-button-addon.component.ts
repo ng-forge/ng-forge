@@ -88,7 +88,7 @@ export class PiButtonAddonComponent {
     const variantsSet = [addon.preset, addon.actionRef, addon.action].filter((v) => v !== undefined).length;
     if (variantsSet > 1) {
       this.logger.warn(
-        `[Dynamic Forms] pi-button: more than one of preset/actionRef/action configured — ` +
+        `pi-button: more than one of preset/actionRef/action configured — ` +
           `dispatching by precedence (preset > actionRef > action). Ship at most one to silence this.`,
       );
     }
@@ -109,7 +109,7 @@ export class PiButtonAddonComponent {
         handler(ctx);
       } else {
         this.logger.warn(
-          `[Dynamic Forms] pi-button: actionRef '${String(addon.actionRef)}' is not registered. ` +
+          `pi-button: actionRef '${String(addon.actionRef)}' is not registered. ` +
             `Did you call provideAddonActions({ ${String(addon.actionRef)}: ... })?`,
         );
       }

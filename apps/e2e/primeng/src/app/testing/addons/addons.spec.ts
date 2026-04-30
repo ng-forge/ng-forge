@@ -15,6 +15,8 @@ test.describe('Addons', () => {
       // pi-icon kind renders <i class="pi pi-search">
       const prefixIcon = scenario.locator('p-inputgroup-addon').first().locator('i.pi.pi-search');
       await expect(prefixIcon).toBeVisible();
+
+      await expect(scenario).toHaveScreenshot('icon-prefix.png');
     });
   });
 
@@ -32,6 +34,8 @@ test.describe('Addons', () => {
       // Suffix slot contains the clear <p-button> with aria-label 'Clear'
       const clearButton = scenario.locator('p-button[aria-label="Clear"] button').first();
       await expect(clearButton).toBeVisible();
+
+      await expect(scenario).toHaveScreenshot('clear-button-with-value.png');
     });
 
     test('clicking the clear button empties the input value', async ({ page, helpers }) => {
@@ -45,6 +49,8 @@ test.describe('Addons', () => {
       await expect(input).toHaveValue('initial value');
       await clearButton.click();
       await expect(input).toHaveValue('');
+
+      await expect(scenario).toHaveScreenshot('clear-button-after-clear.png');
     });
   });
 
@@ -60,6 +66,8 @@ test.describe('Addons', () => {
       // Prefix '$' first, suffix 'USD' last — array order = render order.
       await expect(addons.first()).toContainText('$');
       await expect(addons.last()).toContainText('USD');
+
+      await expect(scenario).toHaveScreenshot('text-currency.png');
     });
   });
 
@@ -73,8 +81,12 @@ test.describe('Addons', () => {
       const toggle = scenario.locator('p-button[aria-label="Toggle password visibility"] button').first();
 
       await expect(input).toHaveAttribute('type', 'password');
+      await expect(scenario).toHaveScreenshot('password-toggle-hidden.png');
+
       await toggle.click();
       await expect(input).toHaveAttribute('type', 'text');
+      await expect(scenario).toHaveScreenshot('password-toggle-visible.png');
+
       await toggle.click();
       await expect(input).toHaveAttribute('type', 'password');
     });

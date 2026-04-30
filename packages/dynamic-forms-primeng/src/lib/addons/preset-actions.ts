@@ -47,7 +47,7 @@ export async function runPiPresetAction(
         const text = await navigator.clipboard.readText();
         collaborators.fieldValueSetter?.(text);
       } catch (error) {
-        collaborators.logger.warn(`[Dynamic Forms] preset 'paste' clipboard read failed: ${String(error)}`);
+        collaborators.logger.warn(`preset 'paste' clipboard read failed: ${String(error)}`);
       }
       return;
     }
@@ -56,7 +56,7 @@ export async function runPiPresetAction(
       try {
         await navigator.clipboard.writeText(String(ctx.value ?? ''));
       } catch (error) {
-        collaborators.logger.warn(`[Dynamic Forms] preset 'copy' clipboard write failed: ${String(error)}`);
+        collaborators.logger.warn(`preset 'copy' clipboard write failed: ${String(error)}`);
       }
       return;
     }
@@ -64,7 +64,7 @@ export async function runPiPresetAction(
     case 'toggle-password-visibility': {
       const override = collaborators.typeOverride;
       if (!override) {
-        collaborators.logger.warn(`[Dynamic Forms] preset 'toggle-password-visibility' has no effect outside a 'prime-input' field.`);
+        collaborators.logger.warn(`preset 'toggle-password-visibility' has no effect outside a 'prime-input' field.`);
         return;
       }
       const current = override();
@@ -73,6 +73,6 @@ export async function runPiPresetAction(
     }
 
     default:
-      collaborators.logger.warn(`[Dynamic Forms] preset '${String(preset)}' is not implemented in the PrimeNG adapter.`);
+      collaborators.logger.warn(`preset '${String(preset)}' is not implemented in the PrimeNG adapter.`);
   }
 }

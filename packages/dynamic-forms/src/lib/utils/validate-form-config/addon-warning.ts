@@ -18,43 +18,45 @@ export type AddonWarning =
 /**
  * Render an `AddonWarning` to a developer-friendly message.
  *
+ * Returns the bare message — the `[Dynamic Forms]` prefix is added by the
+ * library's logger (`ConsoleLogger`) and by `DynamicFormError`. Pass the
+ * result of this function directly into `logger.warn(...)` to get the
+ * standard prefixed line; use `logAddonWarnings()` for direct
+ * `console.warn` output (which prefixes manually).
+ *
  * Messages are designed to be actionable: they enumerate the relevant set
  * (registered kinds, allowed slots) and suggest a likely fix.
  */
 export function formatAddonWarning(w: AddonWarning): string {
-  const prefix = '[Dynamic Forms]';
   switch (w.type) {
     case 'unknown-field-type':
-      return `${prefix} Field '${w.fieldKey}': unknown field type '${w.fieldType}'. Addons dropped.`;
+      return `Field '${w.fieldKey}': unknown field type '${w.fieldType}'. Addons dropped.`;
     case 'field-type-no-addon-support':
       return (
-        `${prefix} Field '${w.fieldKey}' (type: '${w.fieldType}'): this field type does not declare addon support. Addons dropped. ` +
+        `Field '${w.fieldKey}' (type: '${w.fieldType}'): this field type does not declare addon support. Addons dropped. ` +
         `If this is incorrect, add 'addons: { slots: [...] }' to the field type registration.`
       );
     case 'unknown-slot':
       return (
-        `${prefix} Field '${w.fieldKey}' (type: '${w.fieldType}'): slot '${w.slot}' is not supported. ` +
+        `Field '${w.fieldKey}' (type: '${w.fieldType}'): slot '${w.slot}' is not supported. ` +
         `Allowed: ${w.allowedSlots.join(', ')}. Addon dropped.`
       );
     case 'unknown-kind':
       return (
-        `${prefix} Field '${w.fieldKey}': addon kind '${w.kind}' is not registered. ` +
+        `Field '${w.fieldKey}': addon kind '${w.kind}' is not registered. ` +
         `Did you forget withCustomAddon({ kind: '${w.kind}', ... })? ` +
         `Currently registered: ${w.registeredKinds.join(', ') || '(none)'}. Addon dropped.`
       );
     case 'kind-not-allowed':
       return (
-        `${prefix} Field '${w.fieldKey}' (type: '${w.fieldType}'): addon kind '${w.kind}' is not in the allowed list. ` +
+        `Field '${w.fieldKey}' (type: '${w.fieldType}'): addon kind '${w.kind}' is not in the allowed list. ` +
         `Allowed: ${w.allowedKinds.join(', ')}. Addon dropped.`
       );
     case 'shape-violation':
-      return `${prefix} Field '${w.fieldKey}': addon kind '${w.kind}' shape invalid: ${w.reason}. Addon dropped.`;
+      return `Field '${w.fieldKey}': addon kind '${w.kind}' shape invalid: ${w.reason}. Addon dropped.`;
     case 'code-only-kind-in-json':
-      return (
-        `${prefix} Field '${w.fieldKey}': addon kind '${w.kind}' is code-only and cannot be used with JSON-derived configs. ` +
-        `Addon dropped.`
-      );
+      return `Field '${w.fieldKey}': addon kind '${w.kind}' is code-only and cannot be used with JSON-derived configs. ` + `Addon dropped.`;
     case 'code-only-action-in-json':
-      return `${prefix} Field '${w.fieldKey}': ${w.reason}. Use 'preset' or 'actionRef' instead. Addon dropped.`;
+      return `Field '${w.fieldKey}': ${w.reason}. Use 'preset' or 'actionRef' instead. Addon dropped.`;
   }
 }

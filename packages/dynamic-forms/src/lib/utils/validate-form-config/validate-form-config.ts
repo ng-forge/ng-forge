@@ -87,7 +87,10 @@ export function validateFormConfig(config: FormConfig, options: ValidateFormConf
  */
 export function logAddonWarnings(warnings: readonly AddonWarning[]): void {
   for (const w of warnings) {
-    console.warn(formatAddonWarning(w));
+    // Match the in-app logger output by prepending the standard prefix —
+    // formatAddonWarning() returns a bare message so it composes cleanly
+    // with `logger.warn(...)` too (which adds the prefix itself).
+    console.warn('[Dynamic Forms]', formatAddonWarning(w));
   }
 }
 

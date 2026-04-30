@@ -39,8 +39,7 @@ export class TemplateAddonComponent {
     const tpl = map?.get(key);
     if (!tpl) {
       this.logger.warn(
-        `[Dynamic Forms] Template addon: no <ng-template dfTemplate="${key}"> found. ` +
-          `Did you project it as a child of <df-dynamic-form>?`,
+        `Template addon: no <ng-template dfTemplate="${key}"> found. ` + `Did you project it as a child of <df-dynamic-form>?`,
       );
       return null;
     }
