@@ -13,7 +13,7 @@ export {
   PRIMENG_CONFIG,
   PrimeField,
   withPrimeNGFields,
-  withPrimengAddons,
+  withPrimeNGAddons,
   PiIconAddonComponent,
   PiButtonAddonComponent,
   PRIME_INPUT_TYPE_OVERRIDE,

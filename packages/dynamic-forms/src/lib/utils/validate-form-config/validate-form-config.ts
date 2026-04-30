@@ -14,14 +14,14 @@ export interface ValidateFormConfigOptions {
    * Whether the config originated from JSON (server-driven) or inline
    * TypeScript code.
    *
-   * - `'json'` (default for server-driven flows): drops code-only addon
-   *   kinds (`component`, inline `action: function`) with a warning, since
-   *   they cannot survive serialization.
-   * - `'inline'`: keeps everything; assumes the config is authored in code
-   *   and code-only constructs are intentional.
-   *
-   * Defaults to `'inline'` for safety — explicit opt-in to JSON-mode
-   * behaviour avoids accidentally stripping inline actions during dev.
+   * - `'inline'` (default): keeps everything; assumes the config is
+   *   authored in code and code-only constructs (inline `action`
+   *   functions, `component` kind) are intentional. The default avoids
+   *   silently stripping inline behaviour during in-process authoring.
+   * - `'json'`: drops code-only addon kinds (`component`, inline
+   *   `action: function`) with a warning, since they cannot survive
+   *   serialization. Use this when sanitising configs received from a
+   *   backend / form-builder UI.
    */
   source?: 'json' | 'inline';
 }
@@ -91,5 +91,30 @@ export function logAddonWarnings(warnings: readonly AddonWarning[]): void {
   }
 }
 
+/**
+ * DI-free variant of {@link validateFormConfig} for tooling that lives
+ * outside Angular's injector — build-time linters, MCP-side checks, CLI
+ * scripts.
+ *
+ * Caller passes the registries explicitly; the result has the same shape
+ * as the DI-bound version.
+ */
+export function validateFormConfigPure(
+  config: FormConfig,
+  fieldRegistry: ReadonlyMap<string, import('../../models/field-type').FieldTypeDefinition>,
+  kindRegistry: ReadonlyMap<string, import('../../models/addon/addon-kind').AddonKindDefinition>,
+  options: ValidateFormConfigOptions = {},
+): ValidatedFormConfig {
+  const source = options.source ?? 'inline';
+  const { fields, warnings } = walkAndValidateAddons(
+    (config.fields ?? []) as readonly FieldDef<unknown>[],
+    fieldRegistry,
+    kindRegistry,
+    source,
+  );
+  return { sanitized: { ...config, fields: fields as FormConfig['fields'] }, warnings };
+}
+
 export { formatAddonWarning } from './addon-warning';
 export type { AddonWarning } from './addon-warning';
+export { validateFieldAddons, walkAndValidateAddons } from './validate-field-addons';

@@ -124,14 +124,14 @@ type PrimeNGAddonsFeature = {
  * ```typescript
  * provideDynamicForm(
  *   ...withPrimeNGFields(),
- *   withPrimengAddons(),
+ *   withPrimeNGAddons(),
  * );
  * ```
  *
  * Adapter authors who need only a subset, or want to override a kind with a
  * customised renderer, should call `withCustomAddon(...)` directly instead.
  */
-export function withPrimengAddons(): PrimeNGAddonsFeature {
+export function withPrimeNGAddons(): PrimeNGAddonsFeature {
   return {
     ɵkind: 'addons',
     ɵproviders: [

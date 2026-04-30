@@ -34,18 +34,12 @@ export async function runPiPresetAction(
       return;
 
     case 'reset':
-      // Reset to empty for now — full default-value restoration is field-internal
-      // and would require coupling to FormStateManager. Acceptable MVP behaviour.
+      // No-default-restore today — empties the field, mirroring 'clear'.
+      // Restoring the configured default value requires `FormStateManager`
+      // integration; tracked as follow-up work. Documented in the addon
+      // README so users picking 'reset' for "restore default" aren't
+      // surprised.
       collaborators.fieldValueSetter?.('');
-      return;
-
-    case 'submit':
-      // Delegated to the form's existing submit pipeline by dispatching from
-      // the host field. The button-as-submit pattern is normally handled by
-      // the dedicated submit field; here we no-op with a hint.
-      collaborators.logger.warn(
-        `[Dynamic Forms] preset 'submit' on a button addon is not directly supported — ` + `use a 'submit' field type instead.`,
-      );
       return;
 
     case 'paste': {

@@ -22,7 +22,7 @@ export type AddonShapeValidator<T extends BaseAddon = BaseAddon> = (addon: T, fi
  * Per-kind registration metadata.
  *
  * Registered via `withCustomAddon(...)` features (or adapter feature
- * helpers like `withPrimengAddons()`); resolved at render time by
+ * helpers like `withPrimeNGAddons()`); resolved at render time by
  * `<df-addon-slot>`.
  */
 export interface AddonKindDefinition<T extends BaseAddon = BaseAddon> {
@@ -57,7 +57,7 @@ export interface FieldAddonSupport {
  * Global registry of addon kinds.
  *
  * Populated by `withCustomAddon(...)` features and adapter feature helpers
- * (e.g., `withPrimengAddons()`). Read by `<df-addon-slot>` to resolve a
+ * (e.g., `withPrimeNGAddons()`). Read by `<df-addon-slot>` to resolve a
  * kind discriminant to its renderer component.
  */
 export const ADDON_KIND_REGISTRY = new InjectionToken<Map<string, AddonKindDefinition>>('ADDON_KIND_REGISTRY', {

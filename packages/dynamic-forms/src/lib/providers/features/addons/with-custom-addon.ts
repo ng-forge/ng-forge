@@ -9,7 +9,7 @@ import { ADDON_KIND_DEFINITIONS } from './addon-kind-definitions.token';
  * The provided definition is added to `ADDON_KIND_REGISTRY` at form
  * initialisation, alongside the built-in `text` / `template` / `component`
  * kinds and any kinds contributed by adapter feature helpers
- * (`withPrimengAddons()` etc.).
+ * (`withPrimeNGAddons()` etc.).
  *
  * @example
  * ```typescript
@@ -17,8 +17,9 @@ import { ADDON_KIND_DEFINITIONS } from './addon-kind-definitions.token';
  *   ...withMaterialFields(),
  *   withCustomAddon({
  *     kind: 'lucide-icon',
- *     loadComponent: () => import('./lucide-icon-addon.component')
- *       .then((m) => m.LucideIconAddonComponent),
+ *     // Match how field types register: a default-exported component lets
+ *     // `loadComponent` return the import promise directly.
+ *     loadComponent: () => import('./lucide-icon-addon.component'),
  *     validate: (addon) => {
  *       if (typeof addon.icon !== 'string') {
  *         throw new Error('lucide-icon: icon string is required');

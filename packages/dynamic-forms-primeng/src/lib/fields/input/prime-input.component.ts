@@ -10,7 +10,15 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
-import { AnyAddon, DfAddonSlot, DynamicText, DynamicTextPipe, ValidationMessages, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import {
+  AnyAddon,
+  DfAddonSlot,
+  DynamicText,
+  DynamicTextPipe,
+  resolveDynamicValue,
+  ValidationMessages,
+  WrapperFieldInputs,
+} from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeInputAddon, PrimeInputComponent, PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
@@ -189,10 +197,20 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
    */
   readonly effectiveType = computed(() => this.typeOverride() ?? this.props()?.type ?? 'text');
 
-  /** Computed views over the addons array, filtered by slot. */
-  protected readonly hasAddons = computed(() => (this.addons()?.length ?? 0) > 0);
-  protected readonly prefixAddons = computed(() => (this.addons() ?? []).filter((a) => a.slot === 'prefix') as ReadonlyArray<AnyAddon>);
-  protected readonly suffixAddons = computed(() => (this.addons() ?? []).filter((a) => a.slot === 'suffix') as ReadonlyArray<AnyAddon>);
+  /**
+   * Computed views over the addons array, filtered by slot AND by resolved
+   * `hidden` state. An addon with `hidden: true` (or a hidden Signal that
+   * currently evaluates to true) is excluded — so the `<p-inputgroup>`
+   * wrapper drops out entirely when every addon is hidden, instead of
+   * rendering an empty group around the bare input.
+   */
+  protected readonly visibleAddons = computed(() => {
+    const addons = this.addons() ?? [];
+    return addons.filter((a) => !resolveDynamicValue(a.hidden, false)());
+  });
+  protected readonly hasAddons = computed(() => this.visibleAddons().length > 0);
+  protected readonly prefixAddons = computed(() => this.visibleAddons().filter((a) => a.slot === 'prefix') as ReadonlyArray<AnyAddon>);
+  protected readonly suffixAddons = computed(() => this.visibleAddons().filter((a) => a.slot === 'suffix') as ReadonlyArray<AnyAddon>);
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

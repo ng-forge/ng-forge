@@ -103,7 +103,14 @@ export { ADDON_ACTION_HANDLERS, ADDON_ACTION_REGISTRY } from './providers/featur
 export type { AddonActionHandler } from './providers/features/addons/addon-action-registry.token';
 
 // Addon Validation
-export { formatAddonWarning, logAddonWarnings, validateFormConfig } from './utils/validate-form-config/validate-form-config';
+export {
+  formatAddonWarning,
+  logAddonWarnings,
+  validateFieldAddons,
+  validateFormConfig,
+  validateFormConfigPure,
+  walkAndValidateAddons,
+} from './utils/validate-form-config/validate-form-config';
 export type { AddonWarning, ValidatedFormConfig, ValidateFormConfigOptions } from './utils/validate-form-config/validate-form-config';
 
 // Configuration Types

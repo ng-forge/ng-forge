@@ -21,10 +21,23 @@ export interface AddonActionContext<TValue = unknown> {
  * Built-in preset actions shared across adapters.
  *
  * Adapter kinds that accept a `preset` field render the corresponding
- * behaviour — `'clear'` empties the field, `'toggle-password-visibility'`
- * flips `type` between `password` and `text`, etc.
+ * behaviour:
+ *
+ * - `'clear'`: empties the field value.
+ * - `'reset'`: empties the field today; restoring the field's configured
+ *   default value requires `FormStateManager` integration that lands in a
+ *   follow-up. Treat as a no-default-restore alias for `'clear'` until
+ *   then.
+ * - `'paste'`: reads from the system clipboard and writes the result.
+ * - `'copy'`: writes the field's current value to the system clipboard.
+ * - `'toggle-password-visibility'`: flips a host input's `type` between
+ *   `password` and `text` (requires the host field to provide a type
+ *   override token, e.g., `PRIME_INPUT_TYPE_OVERRIDE`).
+ *
+ * Form submission is intentionally NOT exposed as a button-addon preset —
+ * use the dedicated `'submit'` field type instead.
  */
-export type CommonAddonActionPreset = 'clear' | 'reset' | 'submit' | 'paste' | 'copy' | 'toggle-password-visibility';
+export type CommonAddonActionPreset = 'clear' | 'reset' | 'paste' | 'copy' | 'toggle-password-visibility';
 
 /**
  * Module-augmentable registry of adapter-specific preset names.

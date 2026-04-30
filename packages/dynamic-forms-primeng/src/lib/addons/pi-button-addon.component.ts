@@ -80,6 +80,19 @@ export class PiButtonAddonComponent {
     const addon = this.addon();
     const ctx = this.buildActionContext();
 
+    // Defence-in-depth: the validator drops the addon entirely on multi-set,
+    // so reaching this branch with multiple variants configured means the
+    // validator was bypassed (or a kind was registered with no validator).
+    // Surface the precedence we apply (preset > actionRef > action) so the
+    // misconfigured config doesn't silently dispatch the wrong handler.
+    const variantsSet = [addon.preset, addon.actionRef, addon.action].filter((v) => v !== undefined).length;
+    if (variantsSet > 1) {
+      this.logger.warn(
+        `[Dynamic Forms] pi-button: more than one of preset/actionRef/action configured — ` +
+          `dispatching by precedence (preset > actionRef > action). Ship at most one to silence this.`,
+      );
+    }
+
     if (addon.preset !== undefined) {
       const writer = this.valueWriter;
       void runPiPresetAction(addon.preset, ctx, {

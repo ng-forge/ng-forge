@@ -61,12 +61,15 @@ export { PRIMENG_CONFIG } from './models';
 export { PrimeField, type PrimeFieldType } from './types/types';
 export type { PrimeFormProps, PrimeFormConfig } from './types/form-config';
 
-// Module augmentation for global types
+// IMPORTANT: side-effect imports — these augment global type registries
+// (DynamicFormFieldRegistry, DynamicFormAddonRegistry) so `type: 'input'`,
+// `kind: 'pi-icon'`, and similar resolve at the call site. Without these,
+// consumer typechecks fall back to the empty base registries.
 import './types/registry-augmentation';
 import './types/addons';
 
 // Providers
-export { withPrimeNGFields, withPrimengAddons } from './providers/primeng-providers';
+export { withPrimeNGFields, withPrimeNGAddons } from './providers/primeng-providers';
 
 // Addon kinds
 export { PiIconAddonComponent } from './addons/pi-icon-addon.component';

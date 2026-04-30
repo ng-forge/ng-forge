@@ -28,9 +28,16 @@ export interface PiIconAddon extends BaseAddon {
  * Interactive button addon for PrimeNG fields.
  *
  * Renders `<p-button>` with optional icon, label, severity, and reactive
- * loading state. Exactly one of `preset`, `actionRef`, or `action` may be
- * specified — if all three are omitted the button is decorative (no click
- * handler).
+ * loading state.
+ *
+ * Click handlers — at most one of `preset`, `actionRef`, or `action`. The
+ * runtime validator drops the addon (with a warning) if more than one is
+ * configured; if all three are omitted the button is decorative (no click
+ * handler). Type-level XOR enforcement is a follow-up.
+ *
+ * Accessibility — when an icon-only button is configured (no `label`),
+ * `ariaLabel` should be supplied; the runtime validator drops the addon
+ * (with a warning) if it isn't. Type-level enforcement is a follow-up.
  */
 export interface PiButtonAddon extends BaseAddon {
   readonly kind: 'pi-button';
@@ -38,14 +45,14 @@ export interface PiButtonAddon extends BaseAddon {
   readonly icon?: string;
   /** Visible button label; can be omitted for icon-only buttons. */
   readonly label?: DynamicText;
-  /** Required at type level when icon-only (no `label`); used as `aria-label`. */
+  /** Used as `aria-label`. Required (validated at runtime) when icon-only. */
   readonly ariaLabel?: DynamicText;
   /** PrimeNG button severity / colour variant — mirrors PrimeNG's `ButtonSeverity`. */
   readonly severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast';
   /** Reactive loading state — renders the button's native `[loading]` spinner. */
   readonly loading?: DynamicValue<boolean>;
 
-  // Click handler (XOR — exactly one):
+  // Click handler — at most one. Multiple set ⇒ validator drops the addon.
   /** Built-in preset action (e.g., `'clear'`, `'toggle-password-visibility'`). JSON-safe. */
   readonly preset?: AddonActionPreset;
   /** Reference to a handler registered via `provideAddonActions(...)`. JSON-safe. */

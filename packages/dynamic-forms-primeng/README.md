@@ -104,13 +104,13 @@ Input, Textarea, Select, Checkbox, Toggle, Radio, Multi-Checkbox, Datepicker, Sl
 ## Addons (`prefix` / `suffix` slots on `prime-input`)
 
 Render icons, buttons, or static text inside an input's `<p-inputgroup>`. Opt
-in by adding `withPrimengAddons()` alongside `withPrimeNGFields()`:
+in by adding `withPrimeNGAddons()` alongside `withPrimeNGFields()`:
 
 ```ts
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withPrimeNGFields, withPrimengAddons } from '@ng-forge/dynamic-forms-primeng';
+import { withPrimeNGFields, withPrimeNGAddons } from '@ng-forge/dynamic-forms-primeng';
 
-provideDynamicForm(...withPrimeNGFields(), withPrimengAddons());
+provideDynamicForm(...withPrimeNGFields(), withPrimeNGAddons());
 ```
 
 ### Quickstart — clear button
@@ -139,7 +139,15 @@ provideDynamicForm(...withPrimeNGFields(), withPrimengAddons());
 
 ### Built-in button presets
 
-`'clear'`, `'reset'`, `'submit'`, `'paste'`, `'copy'`, `'toggle-password-visibility'`. All JSON-safe.
+| Preset                         | Behaviour                                                                                                                                                                                                        |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'clear'`                      | Empties the field value.                                                                                                                                                                                         |
+| `'reset'`                      | Empties the field today (acts as `'clear'`). Restoring the configured default value requires `FormStateManager` integration that lands in a follow-up — pick `'clear'` if you want explicit empty semantics now. |
+| `'paste'`                      | Reads from the system clipboard and writes the result.                                                                                                                                                           |
+| `'copy'`                       | Writes the field's current value to the system clipboard.                                                                                                                                                        |
+| `'toggle-password-visibility'` | Flips a host input's `type` between `password` and `text`.                                                                                                                                                       |
+
+All presets are JSON-safe. For form submission, use the dedicated `'submit'` field type — it is intentionally not exposed as a button-addon preset.
 
 For custom actions, register named handlers via `provideAddonActions(...)` from `@ng-forge/dynamic-forms` and reference them with `actionRef`:
 
