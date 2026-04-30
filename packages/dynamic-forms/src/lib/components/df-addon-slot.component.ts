@@ -5,6 +5,7 @@ import { AnyAddon } from '../models/addon/addon-def';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { resolveDynamicValue } from '../utils/dynamic-value/resolve-dynamic-value';
 import { injectAddonKindRegistry } from '../utils/inject-addon-kind-registry/inject-addon-kind-registry';
+import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
 /**
  * Dispatcher component that renders an addon by looking up its `kind` in
@@ -56,6 +57,15 @@ export class DfAddonSlot {
   private readonly logger = inject(DynamicFormLogger);
 
   readonly addon = input.required<AnyAddon>();
+  /**
+   * Optional read-only view of the host field's mapped inputs — same shape
+   * wrappers receive (`field?: ReadonlyFieldTree`, `key`, `props`, etc.).
+   * Forwarded to kind components so they can read field state without
+   * re-injecting `FIELD_SIGNAL_CONTEXT` and rebuilding context themselves.
+   *
+   * `undefined` when the addon is rendered outside a field (rare).
+   */
+  readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   /** `slot` HTML attribute forwarded to host — needed for Ionic shadow projection. */
   protected readonly slotAttr = computed(() => this.addon().slot);
@@ -72,8 +82,11 @@ export class DfAddonSlot {
   private readonly resolvedComponentSignal = signal<Type<unknown> | undefined>(undefined);
   protected readonly resolvedComponent = this.resolvedComponentSignal.asReadonly();
 
-  /** Inputs passed to the kind component — at minimum, the addon itself. */
-  protected readonly kindInputs = computed(() => ({ addon: this.addon() }));
+  /** Inputs passed to the kind component — addon plus the wrapper-style host bag. */
+  protected readonly kindInputs = computed(() => ({
+    addon: this.addon(),
+    fieldInputs: this.fieldInputs(),
+  }));
 
   constructor() {
     // Resolve component when addon.kind changes; cache hits return synchronously.

@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
-import { AnyAddon, DfAddonSlot, DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { AnyAddon, DfAddonSlot, DynamicText, DynamicTextPipe, ValidationMessages, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeInputAddon, PrimeInputComponent, PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
@@ -36,7 +36,7 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       @if (hasAddons()) {
         <p-inputgroup>
           @for (a of prefixAddons(); track $index) {
-            <p-inputgroup-addon><df-addon-slot [addon]="a" /></p-inputgroup-addon>
+            <p-inputgroup-addon><df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" /></p-inputgroup-addon>
           }
           <input
             #inputRef
@@ -52,7 +52,7 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
             [class]="inputClasses()"
           />
           @for (a of suffixAddons(); track $index) {
-            <p-inputgroup-addon><df-addon-slot [addon]="a" /></p-inputgroup-addon>
+            <p-inputgroup-addon><df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" /></p-inputgroup-addon>
           }
         </p-inputgroup>
       } @else {
@@ -157,6 +157,12 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
    * `FieldDef.addons` by the runtime field mapper.
    */
   readonly addons = input<ReadonlyArray<PrimeInputAddon> | undefined>();
+  /**
+   * Wrapper-style host bag pushed by `DfFieldOutlet`. Forwarded to each
+   * `<df-addon-slot>` so kind components can read field state and resolve
+   * the form path without re-injecting `FIELD_SIGNAL_CONTEXT`.
+   */
+  readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   /** Per-instance type override populated by toggle-password-visibility preset. */
   private readonly typeOverride = inject(PRIME_INPUT_TYPE_OVERRIDE);

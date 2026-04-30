@@ -5,8 +5,8 @@ import {
   AddonActionContext,
   DynamicFormLogger,
   DynamicTextPipe,
-  FIELD_SIGNAL_CONTEXT,
   resolveDynamicValue,
+  WrapperFieldInputs,
 } from '@ng-forge/dynamic-forms';
 import { ButtonModule } from 'primeng/button';
 import { PRIME_INPUT_TYPE_OVERRIDE } from '../tokens/input-type-override.token';
@@ -51,11 +51,15 @@ export class PiButtonAddonComponent {
   private readonly actionRegistry = inject(ADDON_ACTION_REGISTRY);
   private readonly typeOverride = inject(PRIME_INPUT_TYPE_OVERRIDE, { optional: true });
   private readonly logger = inject(DynamicFormLogger);
-  // Optional — a button rendered outside an active field context (rare) just
-  // gets a no-op AddonActionContext.
-  private readonly fieldContext = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
 
   readonly addon = input.required<PiButtonAddon>();
+  /**
+   * Host field bag pushed by `<df-addon-slot>`. Carries a read-only view of
+   * the field tree, the resolved props, and the field key — everything a
+   * preset / actionRef / inline action needs to read state and locate the
+   * write target without re-deriving context.
+   */
+  readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   protected readonly label = computed(() => this.addon().label);
   protected readonly ariaLabel = computed(() => this.addon().ariaLabel);
@@ -105,19 +109,25 @@ export class PiButtonAddonComponent {
   }
 
   /**
-   * Build an AddonActionContext for handlers. Field reference and form tree
-   * come from FIELD_SIGNAL_CONTEXT when available; otherwise the addon was
-   * rendered outside a field component (rare) and handlers receive empty
-   * stand-ins.
+   * Build an AddonActionContext for handlers from the wrapper-style
+   * `fieldInputs` bag. When the addon is rendered outside a field (rare),
+   * handlers receive empty stand-ins so they don't crash.
    */
   private buildActionContext(): AddonActionContext {
-    const ctx = this.fieldContext as { value?: () => unknown; form?: unknown } | null;
+    const inputs = this.fieldInputs();
+    const fieldDef =
+      inputs?.key !== undefined
+        ? ({ key: inputs.key, type: '' } as AddonActionContext['field'])
+        : ({ key: '', type: '' } as AddonActionContext['field']);
     return {
-      // The dispatcher does not currently pass the host FieldDef; handlers
-      // that need it can read FIELD_SIGNAL_CONTEXT directly via inject().
-      field: { key: '', type: '' } as AddonActionContext['field'],
-      form: ctx?.form ?? null,
-      value: ctx?.value?.(),
+      // FieldDef.type isn't carried in WrapperFieldInputs; handlers needing
+      // type discrimination can inject FIELD_SIGNAL_CONTEXT for the full def.
+      field: fieldDef,
+      // Host's read-only field-tree view — handlers that mutate must use
+      // FIELD_SIGNAL_CONTEXT.form[key] directly (write surface excluded by
+      // contract, same as wrappers).
+      form: inputs?.field ?? null,
+      value: inputs?.field?.value() ?? undefined,
     };
   }
 }

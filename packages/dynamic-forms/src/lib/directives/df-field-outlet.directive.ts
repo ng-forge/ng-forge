@@ -18,7 +18,8 @@ import { DEFAULT_WRAPPERS } from '../models/field-signal-context.token';
 import { createWrapperAwareInjector, setInputIfDeclared } from '../utils/wrapper-chain/wrapper-chain';
 import { createWrapperChainController } from '../utils/wrapper-chain/wrapper-chain-controller';
 import { isSameWrapperChain, resolveWrappers } from '../utils/resolve-wrappers/resolve-wrappers';
-import { READONLY_FIELD_TREE_CACHE, toReadonlyFieldTreeCached } from '../core/field-tree-utils';
+import { READONLY_FIELD_TREE_CACHE } from '../core/field-tree-utils';
+import { buildFieldInputs } from '../utils/build-field-inputs/build-field-inputs';
 import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
 /**
@@ -108,7 +109,7 @@ export class DfFieldOutlet {
    * `rawInputs` identity so repeated emissions with the same underlying object
    * return the same view and don't cascade OnPush re-evaluations.
    */
-  private readonly fieldInputs = computed<WrapperFieldInputs>(() => this.buildFieldInputs(this.rawInputs()));
+  private readonly fieldInputs = computed<WrapperFieldInputs>(() => buildFieldInputs(this.rawInputs(), this.readonlyFieldCache));
 
   private readonly defaultEnvInjector = inject(EnvironmentInjector);
   /** Environment injector for the innermost field component — `[environmentInjector]` input takes precedence over the directive's own DI. */
@@ -221,22 +222,11 @@ export class DfFieldOutlet {
       if (last && last[key] === value) continue;
       setInputIfDeclared(ref, key, value);
     }
+    // Forward the same `fieldInputs` bag wrappers receive — the field
+    // component is free to declare `fieldInputs = input<WrapperFieldInputs>()`
+    // and pass it on to <df-addon-slot>. Idempotent / no-op when the input
+    // isn't declared (e.g., Tier 3 fields).
+    setInputIfDeclared(ref, 'fieldInputs', this.fieldInputs());
     this.lastPushedInputs = rawInputs;
-  }
-
-  private buildFieldInputs(rawInputs: Record<string, unknown>): WrapperFieldInputs {
-    const fieldTreeCandidate = rawInputs['field'];
-    // A FieldTree is a callable (() => FieldState). We expose it to wrappers via a narrow
-    // read-only view; raw FieldTree is still pushed to the innermost component for writes.
-    const readonlyField =
-      fieldTreeCandidate && typeof fieldTreeCandidate === 'function'
-        ? toReadonlyFieldTreeCached(this.readonlyFieldCache, fieldTreeCandidate as never)
-        : undefined;
-    // Shallow spread — relies on the mapper contract (see WrapperFieldInputs)
-    // that rawInputs are emitted as fresh snapshots, not mutated in place.
-    return {
-      ...(rawInputs as Record<string, unknown>),
-      field: readonlyField,
-    } as WrapperFieldInputs;
   }
 }
