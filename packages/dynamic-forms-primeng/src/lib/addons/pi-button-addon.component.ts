@@ -33,7 +33,7 @@ import { runPiPresetAction } from './preset-actions';
  * which renders the native PrimeNG spinner.
  */
 @Component({
-  selector: 'df-pi-button-addon',
+  selector: 'df-prime-button-addon',
   imports: [ButtonModule, DynamicTextPipe, AsyncPipe],
   template: `
     <p-button
@@ -81,9 +81,10 @@ export class PiButtonAddonComponent {
     const ctx = this.buildActionContext();
 
     if (addon.preset !== undefined) {
+      const writer = this.valueWriter;
       void runPiPresetAction(addon.preset, ctx, {
         typeOverride: this.typeOverride ?? undefined,
-        fieldValueSetter: this.valueWriter ? (v) => this.valueWriter!.write(v) : undefined,
+        fieldValueSetter: writer ? (v) => writer.write(v) : undefined,
         logger: this.logger,
       });
       return;

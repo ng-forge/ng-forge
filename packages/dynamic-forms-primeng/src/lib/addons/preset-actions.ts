@@ -1,5 +1,5 @@
-import { Signal, WritableSignal } from '@angular/core';
-import type { AddonActionContext, AddonActionPreset, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { WritableSignal } from '@angular/core';
+import type { AddonActionContext, AddonActionPreset } from '@ng-forge/dynamic-forms';
 import type { Logger } from '@ng-forge/dynamic-forms';
 
 /**

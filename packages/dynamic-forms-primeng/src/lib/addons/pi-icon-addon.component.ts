@@ -11,7 +11,7 @@ import type { PiIconAddon } from '../types/addons';
  * icon is announced by screen readers.
  */
 @Component({
-  selector: 'df-pi-icon-addon',
+  selector: 'df-prime-icon-addon',
   imports: [AsyncPipe, DynamicTextPipe],
   template: `<i [class]="iconClass()" [attr.aria-label]="ariaLabel() | dynamicText | async"></i>`,
   host: {
