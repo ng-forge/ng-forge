@@ -1,0 +1,41 @@
+import { AddonKindDefinition } from '../models/addon/addon-kind';
+
+/**
+ * Built-in addon kinds shipped by core.
+ *
+ * Universally adapter-independent: `text`, `template`, `component`. Adapters
+ * register their own kinds (e.g., `pi-icon`, `pi-button`) via
+ * `withCustomAddon(...)` features.
+ */
+export const BUILT_IN_ADDON_KINDS: readonly AddonKindDefinition[] = [
+  {
+    kind: 'text',
+    loadComponent: () => import('../addons/text-addon.component').then((m) => m.TextAddonComponent),
+    validate: (addon, fieldKey) => {
+      const text = (addon as { text?: unknown }).text;
+      if (text === undefined || text === null) {
+        throw new Error(`Addon kind 'text' requires a non-empty 'text' field (field: '${fieldKey}').`);
+      }
+    },
+  },
+  {
+    kind: 'template',
+    loadComponent: () => import('../addons/template-addon.component').then((m) => m.TemplateAddonComponent),
+    validate: (addon, fieldKey) => {
+      const key = (addon as { templateKey?: unknown }).templateKey;
+      if (typeof key !== 'string' || key.length === 0) {
+        throw new Error(`Addon kind 'template' requires a non-empty 'templateKey' string (field: '${fieldKey}').`);
+      }
+    },
+  },
+  {
+    kind: 'component',
+    loadComponent: () => import('../addons/component-addon.component').then((m) => m.ComponentAddonComponent),
+    validate: (addon, fieldKey) => {
+      const loader = (addon as { component?: unknown }).component;
+      if (typeof loader !== 'function') {
+        throw new Error(`Addon kind 'component' requires a 'component' loader function (field: '${fieldKey}').`);
+      }
+    },
+  },
+] as const;

@@ -95,6 +95,17 @@ export { ComponentAddonComponent } from './addons/component-addon.component';
 export { ADDON_KIND_COMPONENT_CACHE, injectAddonKindRegistry } from './utils/inject-addon-kind-registry/inject-addon-kind-registry';
 export { resolveDynamicValue } from './utils/dynamic-value/resolve-dynamic-value';
 
+// Addon Features (for adapter authors and end users)
+export { withCustomAddon } from './providers/features/addons/with-custom-addon';
+export { provideAddonActions } from './providers/features/addons/provide-addon-actions';
+export { ADDON_KIND_DEFINITIONS } from './providers/features/addons/addon-kind-definitions.token';
+export { ADDON_ACTION_HANDLERS, ADDON_ACTION_REGISTRY } from './providers/features/addons/addon-action-registry.token';
+export type { AddonActionHandler } from './providers/features/addons/addon-action-registry.token';
+
+// Addon Validation
+export { formatAddonWarning, logAddonWarnings, validateFormConfig } from './utils/validate-form-config/validate-form-config';
+export type { AddonWarning, ValidatedFormConfig, ValidateFormConfigOptions } from './utils/validate-form-config/validate-form-config';
+
 // Configuration Types
 export type { CustomFnConfig, FormConfig, FormOptions } from './models';
 export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from './models';
