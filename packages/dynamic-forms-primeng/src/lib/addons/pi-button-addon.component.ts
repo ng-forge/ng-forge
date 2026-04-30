@@ -10,6 +10,7 @@ import {
 } from '@ng-forge/dynamic-forms';
 import { ButtonModule } from 'primeng/button';
 import { PRIME_INPUT_TYPE_OVERRIDE } from '../tokens/input-type-override.token';
+import { PRIME_INPUT_VALUE_WRITER } from '../tokens/input-value-writer.token';
 import type { PiButtonAddon } from '../types/addons';
 import { runPiPresetAction } from './preset-actions';
 
@@ -50,6 +51,7 @@ import { runPiPresetAction } from './preset-actions';
 export class PiButtonAddonComponent {
   private readonly actionRegistry = inject(ADDON_ACTION_REGISTRY);
   private readonly typeOverride = inject(PRIME_INPUT_TYPE_OVERRIDE, { optional: true });
+  private readonly valueWriter = inject(PRIME_INPUT_VALUE_WRITER, { optional: true });
   private readonly logger = inject(DynamicFormLogger);
 
   readonly addon = input.required<PiButtonAddon>();
@@ -81,6 +83,7 @@ export class PiButtonAddonComponent {
     if (addon.preset !== undefined) {
       void runPiPresetAction(addon.preset, ctx, {
         typeOverride: this.typeOverride ?? undefined,
+        fieldValueSetter: this.valueWriter ? (v) => this.valueWriter!.write(v) : undefined,
         logger: this.logger,
       });
       return;

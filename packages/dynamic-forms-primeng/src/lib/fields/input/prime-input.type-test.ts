@@ -320,3 +320,64 @@ describe('PrimeInputField - Discriminated Union', () => {
     expectTypeOf(field.type).toEqualTypeOf<'input'>();
   });
 });
+
+// ============================================================================
+// PrimeInputField — Addons (compile-time)
+// ============================================================================
+
+describe('PrimeInputField - addons', () => {
+  it('accepts pi-icon addon with required `icon`', () => {
+    const field = {
+      type: 'input',
+      key: 'q',
+      addons: [{ slot: 'prefix', kind: 'pi-icon', icon: 'search' }],
+    } as const satisfies PrimeInputField;
+    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'pi-icon'>();
+  });
+
+  it('accepts pi-button addon with preset', () => {
+    const field = {
+      type: 'input',
+      key: 'q',
+      addons: [{ slot: 'suffix', kind: 'pi-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }],
+    } as const satisfies PrimeInputField;
+    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'pi-button'>();
+  });
+
+  it('accepts text addon with DynamicText', () => {
+    const field = {
+      type: 'input',
+      key: 'amount',
+      addons: [{ slot: 'prefix', kind: 'text', text: '$' }],
+    } as const satisfies PrimeInputField;
+    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'text'>();
+  });
+
+  it('accepts template addon with templateKey', () => {
+    const field = {
+      type: 'input',
+      key: 'q',
+      addons: [{ slot: 'suffix', kind: 'template', templateKey: 'mySlot' }],
+    } as const satisfies PrimeInputField;
+    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'template'>();
+  });
+
+  it('rejects an unknown addon kind on prime-input at compile time', () => {
+    // @ts-expect-error - 'rating' is not in PrimeInputAddon's kind union
+    const _bad = {
+      type: 'input',
+      key: 'q',
+      addons: [{ slot: 'prefix', kind: 'rating', value: 5 }],
+    } as const satisfies PrimeInputField;
+    void _bad;
+  });
+
+  it('accepts addons with optional reactive hidden flag', () => {
+    const field = {
+      type: 'input',
+      key: 'q',
+      addons: [{ slot: 'suffix', kind: 'pi-button', icon: 'x', ariaLabel: 'Clear', preset: 'clear', hidden: false }],
+    } as const satisfies PrimeInputField;
+    expectTypeOf(field.addons[0].hidden).toEqualTypeOf<false>();
+  });
+});

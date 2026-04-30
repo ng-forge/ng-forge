@@ -19,6 +19,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
 import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 import { PRIME_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
+import { createPrimeInputValueWriter, PRIME_INPUT_VALUE_WRITER } from '../../tokens/input-value-writer.token';
 import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
@@ -94,6 +95,10 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       provide: PRIME_INPUT_TYPE_OVERRIDE,
       useFactory: () => signal<string | undefined>(undefined),
     },
+    {
+      provide: PRIME_INPUT_VALUE_WRITER,
+      useFactory: createPrimeInputValueWriter,
+    },
   ],
   styles: [
     `
@@ -166,9 +171,14 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
 
   /** Per-instance type override populated by toggle-password-visibility preset. */
   private readonly typeOverride = inject(PRIME_INPUT_TYPE_OVERRIDE);
+  /** Per-instance value writer consumed by clear/reset/paste presets on button addons. */
+  private readonly valueWriter = inject(PRIME_INPUT_VALUE_WRITER);
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+    // Patch the sentinel writer now that DI has resolved. Calls happen at
+    // click-time (button addon onClick), by which point `field` is bound.
+    this.valueWriter.write = (value) => this.field()().value.set(value as string);
   }
 
   readonly effectiveSize = computed(() => this.props()?.size ?? this.primeNGConfig?.size);
