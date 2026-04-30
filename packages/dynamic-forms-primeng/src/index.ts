@@ -13,7 +13,15 @@ export {
   PRIMENG_CONFIG,
   PrimeField,
   withPrimeNGFields,
+  withPrimengAddons,
+  PiIconAddonComponent,
+  PiButtonAddonComponent,
+  PRIME_INPUT_TYPE_OVERRIDE,
+  PRIME_INPUT_VALUE_WRITER,
+  createPrimeInputValueWriter,
 } from './lib';
+
+export type { PiIconAddon, PiButtonAddon, PrimeAddon, PrimeInputAddon, PrimeInputValueWriter } from './lib';
 
 export type {
   PrimeButtonProps,

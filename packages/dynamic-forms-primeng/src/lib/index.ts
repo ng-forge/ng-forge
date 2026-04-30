@@ -72,4 +72,7 @@ export { withPrimeNGFields, withPrimengAddons } from './providers/primeng-provid
 export { PiIconAddonComponent } from './addons/pi-icon-addon.component';
 export { PiButtonAddonComponent } from './addons/pi-button-addon.component';
 export type { PiIconAddon, PiButtonAddon, PrimeAddon } from './types/addons';
+export type { PrimeInputAddon } from './fields/input/prime-input.type';
 export { PRIME_INPUT_TYPE_OVERRIDE } from './tokens/input-type-override.token';
+export { PRIME_INPUT_VALUE_WRITER, createPrimeInputValueWriter } from './tokens/input-value-writer.token';
+export type { PrimeInputValueWriter } from './tokens/input-value-writer.token';
