@@ -1,16 +1,29 @@
-import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
+import {
+  afterRenderEffect,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  input,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { AnyAddon, DfAddonSlot, DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
-import { PrimeInputComponent, PrimeInputProps } from './prime-input.type';
+import { PrimeInputAddon, PrimeInputComponent, PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
 import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
+import { PRIME_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
 import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-input',
-  imports: [InputText, DynamicTextPipe, AsyncPipe, FormField],
+  imports: [InputText, InputGroupModule, InputGroupAddonModule, DfAddonSlot, DynamicTextPipe, AsyncPipe, FormField],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -19,19 +32,45 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       @if (label()) {
         <label [for]="inputId()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
-      <input
-        #inputRef
-        pInputText
-        [id]="inputId()"
-        [formField]="f"
-        [type]="props()?.type ?? 'text'"
-        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid()"
-        [attr.aria-required]="ariaRequired()"
-        [attr.aria-describedby]="ariaDescribedBy()"
-        [class]="inputClasses()"
-      />
+
+      @if (hasAddons()) {
+        <p-inputgroup>
+          @for (a of prefixAddons(); track $index) {
+            <p-inputgroup-addon><df-addon-slot [addon]="a" /></p-inputgroup-addon>
+          }
+          <input
+            #inputRef
+            pInputText
+            [id]="inputId()"
+            [formField]="f"
+            [type]="effectiveType()"
+            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+            [attr.tabindex]="tabIndex()"
+            [attr.aria-invalid]="ariaInvalid()"
+            [attr.aria-required]="ariaRequired()"
+            [attr.aria-describedby]="ariaDescribedBy()"
+            [class]="inputClasses()"
+          />
+          @for (a of suffixAddons(); track $index) {
+            <p-inputgroup-addon><df-addon-slot [addon]="a" /></p-inputgroup-addon>
+          }
+        </p-inputgroup>
+      } @else {
+        <input
+          #inputRef
+          pInputText
+          [id]="inputId()"
+          [formField]="f"
+          [type]="effectiveType()"
+          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+          [attr.tabindex]="tabIndex()"
+          [attr.aria-invalid]="ariaInvalid()"
+          [attr.aria-required]="ariaRequired()"
+          [attr.aria-describedby]="ariaDescribedBy()"
+          [class]="inputClasses()"
+        />
+      }
+
       @if (errorsToDisplay()[0]; as error) {
         <small class="p-error" [id]="errorId()" role="alert">{{ error.message }}</small>
       } @else if (props()?.hint; as hint) {
@@ -46,6 +85,16 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
     '[class]': 'className()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
+  // Provide a per-instance PRIME_INPUT_TYPE_OVERRIDE so a `pi-button` addon
+  // configured with `preset: 'toggle-password-visibility'` can flip the
+  // input's type at runtime. Initial value undefined → effectiveType falls
+  // back to props().type.
+  providers: [
+    {
+      provide: PRIME_INPUT_TYPE_OVERRIDE,
+      useFactory: () => signal<string | undefined>(undefined),
+    },
+  ],
   styles: [
     `
       :host([hidden]) {
@@ -103,6 +152,14 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
   readonly meta = input<InputMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+  /**
+   * Addons rendered as siblings in a `<p-inputgroup>` wrapper. Mapped from
+   * `FieldDef.addons` by the runtime field mapper.
+   */
+  readonly addons = input<ReadonlyArray<PrimeInputAddon> | undefined>();
+
+  /** Per-instance type override populated by toggle-password-visibility preset. */
+  private readonly typeOverride = inject(PRIME_INPUT_TYPE_OVERRIDE);
 
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
@@ -110,6 +167,16 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
 
   readonly effectiveSize = computed(() => this.props()?.size ?? this.primeNGConfig?.size);
   readonly effectiveVariant = computed(() => this.props()?.variant ?? this.primeNGConfig?.variant);
+  /**
+   * Effective `type` attribute — override (set by addon presets like
+   * `'toggle-password-visibility'`) wins over the configured `props().type`.
+   */
+  readonly effectiveType = computed(() => this.typeOverride() ?? this.props()?.type ?? 'text');
+
+  /** Computed views over the addons array, filtered by slot. */
+  protected readonly hasAddons = computed(() => (this.addons()?.length ?? 0) > 0);
+  protected readonly prefixAddons = computed(() => (this.addons() ?? []).filter((a) => a.slot === 'prefix') as ReadonlyArray<AnyAddon>);
+  protected readonly suffixAddons = computed(() => (this.addons() ?? []).filter((a) => a.slot === 'suffix') as ReadonlyArray<AnyAddon>);
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

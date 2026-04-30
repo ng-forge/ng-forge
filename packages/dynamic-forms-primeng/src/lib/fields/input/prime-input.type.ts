@@ -1,5 +1,6 @@
-import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, TemplateAddon, TextAddon, ValueFieldComponent } from '@ng-forge/dynamic-forms';
 import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
+import type { PiButtonAddon, PiIconAddon } from '../../types/addons';
 
 export interface PrimeInputProps extends InputProps {
   /**
@@ -24,6 +25,18 @@ export interface PrimeInputProps extends InputProps {
   type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
 }
 
-export type PrimeInputField = InputField<PrimeInputProps>;
+/**
+ * Addon kinds accepted by `prime-input`.
+ *
+ * PrimeNG-specific kinds (`pi-icon`, `pi-button`) plus the universal `text`
+ * and `template` kinds. `component` is permitted at runtime via the broader
+ * `BaseAddon` union (and dropped in JSON-derived configs by the validator)
+ * but excluded here so the IDE narrows tightly to declarative shapes.
+ */
+export type PrimeInputAddon = PiIconAddon | PiButtonAddon | TextAddon | TemplateAddon;
+
+export type PrimeInputField = InputField<PrimeInputProps> & {
+  addons?: ReadonlyArray<PrimeInputAddon>;
+};
 
 export type PrimeInputComponent = ValueFieldComponent<PrimeInputField>;
