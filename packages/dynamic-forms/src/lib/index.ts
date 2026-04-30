@@ -84,6 +84,17 @@ export type {
 export { ADDON_KIND_REGISTRY, DF_FIELD_TEMPLATES } from './models';
 export type { DynamicValue } from './models';
 
+// Addon Components & Directives
+export { DfAddonSlot } from './components/df-addon-slot.component';
+export { DfTemplate } from './directives/df-template.directive';
+export { TextAddonComponent } from './addons/text-addon.component';
+export { TemplateAddonComponent } from './addons/template-addon.component';
+export { ComponentAddonComponent } from './addons/component-addon.component';
+
+// Addon Registry helpers (for adapter authors)
+export { ADDON_KIND_COMPONENT_CACHE, injectAddonKindRegistry } from './utils/inject-addon-kind-registry/inject-addon-kind-registry';
+export { resolveDynamicValue } from './utils/dynamic-value/resolve-dynamic-value';
+
 // Configuration Types
 export type { CustomFnConfig, FormConfig, FormOptions } from './models';
 export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from './models';
