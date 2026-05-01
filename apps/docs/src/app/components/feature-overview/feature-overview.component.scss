@@ -66,9 +66,11 @@
     position: absolute;
     inset: 0 0 auto 0;
     height: 220px;
+    /* Dark-mode-tuned opacity. 8% ember + 5% molten was visually invisible on
+       a near-black page background — needs roughly twice that to read as a glow. */
     background:
-      radial-gradient(ellipse at top, rgba($ember-core, 0.08) 0%, transparent 60%),
-      radial-gradient(ellipse at 70% top, rgba($molten, 0.05) 0%, transparent 50%);
+      radial-gradient(ellipse at top, rgba($ember-core, 0.18) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% top, rgba($molten, 0.1) 0%, transparent 50%);
     pointer-events: none;
     z-index: -1;
   }
@@ -826,10 +828,10 @@
     color: var(--forge-text, #{$steel});
   }
 
+  /* Light mode: drop the radial glow entirely. The dark-tuned opacities
+     read as muddy on white, and the user prefers a clean, neutral hero. */
   .overview__hero::after {
-    background:
-      radial-gradient(ellipse at top, rgba($ember-core, 0.04) 0%, transparent 55%),
-      radial-gradient(ellipse at 70% top, rgba($molten, 0.025) 0%, transparent 50%);
+    background: none;
   }
 }
 
@@ -842,9 +844,7 @@
     }
 
     .overview__hero::after {
-      background:
-        radial-gradient(ellipse at top, rgba($ember-core, 0.04) 0%, transparent 55%),
-        radial-gradient(ellipse at 70% top, rgba($molten, 0.025) 0%, transparent 50%);
+      background: none;
     }
   }
 }
