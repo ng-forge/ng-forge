@@ -440,10 +440,13 @@ export class DocPageComponent {
       // Per-route OG image
       const ogImageSlug = slug || 'default';
       const ogImageUrl = `${DocPageComponent.SITE_ORIGIN}/og/${ogImageSlug}.png`;
+      const ogImageAlt = title ? `${title} — ng-forge Dynamic Forms for Angular` : 'ng-forge — Dynamic Forms for Angular';
       this.metaService.updateTag({ property: 'og:image', content: ogImageUrl });
       this.metaService.updateTag({ property: 'og:image:width', content: '1200' });
       this.metaService.updateTag({ property: 'og:image:height', content: '630' });
+      this.metaService.updateTag({ property: 'og:image:alt', content: ogImageAlt });
       this.metaService.updateTag({ name: 'twitter:image', content: ogImageUrl });
+      this.metaService.updateTag({ name: 'twitter:image:alt', content: ogImageAlt });
 
       // Canonical URL for the current page
       const pageUrl = slug ? `${DocPageComponent.SITE_ORIGIN}/${adapter}/${slug}` : DocPageComponent.SITE_ORIGIN + '/';

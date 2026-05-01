@@ -4,6 +4,8 @@ slug: migrating-from-ngx-formly
 description: Concept-by-concept mapping from ngx-formly to ng-forge with side-by-side code and a list of gaps.
 ---
 
+# Migrating from ngx-formly to ng-forge
+
 A migration reference for moving an Angular dynamic-forms app from **ngx-formly** to **ng-forge**. Both libraries share the same shape — a config object describes the form, the library renders it — so most concepts map directly.
 
 ## Who this guide is for
@@ -606,7 +608,7 @@ An order that works for porting a non-trivial app:
 5. **Translate forms in dependency order.** Forms with no cross-form coupling first; complex multi-step / array-heavy ones last.
 6. **Remove formly when nothing imports `@ngx-formly/*`.** `pnpm uninstall @ngx-formly/core @ngx-formly/<theme>` and clean up `provideFormlyCore`.
 
-Plan an extra pass for performance verification on array-heavy forms.
+**Rough effort estimate.** Plan ~half a day per simple form (a login, a profile, a contact form), and ~1–2 days per non-trivial form (multi-step wizards, custom field types, schema-driven forms with non-trivial cross-field validators, anything with custom wrappers or extension hooks). Plus an extra pass for performance verification on array-heavy forms — this is one of the cases where you should see meaningful improvement coming from formly. There is no automated migration tool today; port manually.
 
 ## Next steps
 
