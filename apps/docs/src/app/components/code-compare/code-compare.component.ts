@@ -38,66 +38,72 @@ function plainCodeBlock(code: string, lang: string): string {
 @Component({
   selector: 'docs-code-compare',
   template: `
-    @if (title(); as t) {
-      <p class="code-compare__title">{{ t }}</p>
-    }
-
-    <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus, @angular-eslint/template/click-events-have-key-events -->
-    <nav class="code-compare__tabs" role="tablist" [attr.aria-label]="title() || 'Code comparison'" (keydown)="onKeydown($event)">
-      @for (tab of tabs; track tab.key; let i = $index) {
-        <button
-          #tabBtn
-          type="button"
-          role="tab"
-          class="code-compare__tab"
-          [class.code-compare__tab--active]="active() === tab.key"
-          [id]="tabId(tab.key)"
-          [attr.aria-selected]="active() === tab.key"
-          [attr.aria-controls]="panelId(tab.key)"
-          [attr.tabindex]="active() === tab.key ? 0 : -1"
-          [attr.data-index]="i"
-          (click)="select(tab.key)"
-        >
-          {{ tab.label }}
-        </button>
-      }
-    </nav>
-
-    @for (tab of tabs; track tab.key) {
-      <section
-        class="code-compare__panel"
-        role="tabpanel"
-        [id]="panelId(tab.key)"
-        [attr.aria-labelledby]="tabId(tab.key)"
-        [hidden]="active() !== tab.key"
-      >
-        <div class="code-block-wrapper">
-          <button
-            type="button"
-            class="code-copy-btn"
-            [class.copied]="copiedKey() === tab.key"
-            [attr.aria-label]="'Copy ' + tab.label + ' code'"
-            (click)="copy(tab.key)"
-            (mouseleave)="resetCopied(tab.key)"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+    <div class="code-compare">
+      <header class="code-compare__header">
+        @if (title(); as t) {
+          <span class="code-compare__title">{{ t }}</span>
+        }
+        <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus, @angular-eslint/template/click-events-have-key-events -->
+        <nav class="code-compare__tabs" role="tablist" [attr.aria-label]="title() || 'Code comparison'" (keydown)="onKeydown($event)">
+          @for (tab of tabs; track tab.key; let i = $index) {
+            <button
+              #tabBtn
+              type="button"
+              role="tab"
+              class="code-compare__tab"
+              [class.code-compare__tab--active]="active() === tab.key"
+              [class.code-compare__tab--formly]="tab.key === 'formly'"
+              [class.code-compare__tab--ngforge]="tab.key === 'ngforge'"
+              [id]="tabId(tab.key)"
+              [attr.aria-selected]="active() === tab.key"
+              [attr.aria-controls]="panelId(tab.key)"
+              [attr.tabindex]="active() === tab.key ? 0 : -1"
+              [attr.data-index]="i"
+              (click)="select(tab.key)"
             >
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
-          </button>
-          <div class="code-compare__code" [innerHTML]="highlightedFor(tab.key)"></div>
-        </div>
-      </section>
-    }
+              <span class="code-compare__tab-dot" aria-hidden="true"></span>
+              <span class="code-compare__tab-label">{{ tab.label }}</span>
+            </button>
+          }
+        </nav>
+      </header>
+
+      @for (tab of tabs; track tab.key) {
+        <section
+          class="code-compare__panel"
+          role="tabpanel"
+          [id]="panelId(tab.key)"
+          [attr.aria-labelledby]="tabId(tab.key)"
+          [hidden]="active() !== tab.key"
+        >
+          <div class="code-block-wrapper">
+            <button
+              type="button"
+              class="code-copy-btn"
+              [class.copied]="copiedKey() === tab.key"
+              [attr.aria-label]="'Copy ' + tab.label + ' code'"
+              (click)="copy(tab.key)"
+              (mouseleave)="resetCopied(tab.key)"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+            </button>
+            <div class="code-compare__code" [innerHTML]="highlightedFor(tab.key)"></div>
+          </div>
+        </section>
+      }
+    </div>
   `,
   styles: `
     @use 'tokens' as *;
@@ -107,57 +113,186 @@ function plainCodeBlock(code: string, lang: string): string {
       margin: $space-6 0;
     }
 
+    /* ==== Outer card ==== */
+    .code-compare {
+      position: relative;
+      border-radius: $radius-lg;
+      background: var(--forge-base-1, #131210);
+      border: 1px solid var(--forge-border-color, #2a2824);
+      overflow: hidden;
+      transition:
+        border-color 200ms ease,
+        box-shadow 200ms ease;
+
+      /* Animated ember accent line at top */
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba($ember-core, 0.3) 20%,
+          $ember-glow 50%,
+          rgba($ember-core, 0.3) 80%,
+          transparent 100%
+        );
+        opacity: 0.6;
+        transition: opacity 250ms ease;
+        z-index: 1;
+      }
+
+      &:hover {
+        border-color: rgba($ember-core, 0.3);
+        box-shadow: 0 8px 32px -12px rgba($ember-core, 0.15);
+
+        &::before {
+          opacity: 1;
+        }
+      }
+    }
+
+    /* ==== Tab strip header ==== */
+    .code-compare__header {
+      display: flex;
+      align-items: center;
+      gap: $space-4;
+      padding: $space-2 $space-3 0;
+      background: linear-gradient(180deg, rgba($ember-core, 0.04) 0%, transparent 100%);
+      border-bottom: 1px solid var(--forge-border-color, #2a2824);
+    }
+
     .code-compare__title {
-      margin: 0 0 $space-3;
+      flex: 1;
+      min-width: 0;
+      padding: $space-2 $space-2;
       font-family: $font-primary;
       font-size: $text-sm;
       font-weight: 600;
+      letter-spacing: 0.01em;
       color: var(--forge-text, #e8e4de);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      @media (max-width: 640px) {
+        display: none;
+      }
     }
 
     .code-compare__tabs {
       display: flex;
-      gap: $space-1;
-      border-bottom: 1px solid var(--forge-border-color, #2a2824);
-      margin-bottom: 0;
-      position: relative;
+      gap: 4px;
+      align-items: stretch;
+      margin-bottom: -1px; /* sits flush with the panel border */
     }
 
+    /* ==== Individual tab ==== */
     .code-compare__tab {
-      padding: $space-2 $space-4;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: $space-2;
+      padding: 9px $space-4 11px;
       font-size: $text-sm;
       font-family: $font-primary;
       font-weight: 500;
       color: var(--forge-text-muted, #9a958c);
       background: transparent;
-      border: none;
-      border-bottom: 2px solid transparent;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: $radius-md $radius-md 0 0;
       cursor: pointer;
-      margin-bottom: -1px;
       transition:
-        color $transition-fast,
-        border-color $transition-fast;
+        color 180ms ease,
+        background 180ms ease,
+        border-color 180ms ease,
+        transform 180ms ease;
+
+      /* Glow underline — only visible when active */
+      &::after {
+        content: '';
+        position: absolute;
+        left: $space-4;
+        right: $space-4;
+        bottom: -1px;
+        height: 2px;
+        border-radius: 2px;
+        background: linear-gradient(90deg, transparent 0%, $ember-core 20%, $ember-glow 50%, $ember-core 80%, transparent 100%);
+        opacity: 0;
+        transform: scaleX(0.6);
+        transition:
+          opacity 220ms ease,
+          transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
 
       &:hover {
         color: var(--forge-text, #e8e4de);
+        background: rgba($ember-core, 0.04);
+
+        .code-compare__tab-dot {
+          opacity: 0.7;
+          transform: scale(1.1);
+        }
       }
 
       &:focus-visible {
         outline: 2px solid $ember-glow;
-        outline-offset: 2px;
-        border-radius: 2px;
+        outline-offset: -2px;
       }
 
       &--active {
         color: $ember-glow;
-        border-bottom-color: $ember-glow;
+        background: var(--forge-base-1, #131210);
+        border-color: var(--forge-border-color, #2a2824);
+        z-index: 2;
+
+        &::after {
+          opacity: 1;
+          transform: scaleX(1);
+          box-shadow: 0 0 12px rgba($ember-core, 0.6);
+        }
+
+        .code-compare__tab-dot {
+          opacity: 1;
+          transform: scale(1);
+          box-shadow: 0 0 8px currentColor;
+        }
       }
     }
 
+    /* Library colour dot — formly cool, ng-forge ember */
+    .code-compare__tab-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      opacity: 0.4;
+      transform: scale(0.85);
+      transition:
+        opacity 180ms ease,
+        transform 180ms ease,
+        box-shadow 200ms ease;
+    }
+
+    .code-compare__tab--formly .code-compare__tab-dot {
+      background: #6db7ff;
+      color: #6db7ff;
+    }
+
+    .code-compare__tab--ngforge .code-compare__tab-dot {
+      background: $ember-core;
+      color: $ember-core;
+    }
+
+    .code-compare__tab-label {
+      font-variant-ligatures: none;
+    }
+
+    /* ==== Code panel ==== */
     .code-compare__panel {
-      border: 1px solid var(--forge-border-color, #2a2824);
-      border-top: none;
-      border-radius: 0 0 $radius-md $radius-md;
       background: var(--forge-base-1, #131210);
 
       &[hidden] {
@@ -175,26 +310,30 @@ function plainCodeBlock(code: string, lang: string): string {
 
     .code-copy-btn {
       position: absolute;
-      top: 8px;
-      right: 8px;
+      top: 10px;
+      right: 10px;
       z-index: 1;
       display: flex;
       align-items: center;
       justify-content: center;
       width: 32px;
       height: 32px;
-      border-radius: 6px;
-      border: none;
-      background: transparent;
+      border-radius: $radius-sm;
+      border: 1px solid transparent;
+      background: rgba(white, 0.02);
       color: var(--forge-text-muted, #9a958c);
       cursor: pointer;
       opacity: 0;
       transition:
-        opacity $transition-fast,
-        color $transition-fast;
+        opacity 180ms ease,
+        background 180ms ease,
+        border-color 180ms ease,
+        color 180ms ease;
 
       &:hover {
-        color: var(--forge-text, #e8e4de);
+        color: $ember-glow;
+        background: rgba($ember-core, 0.1);
+        border-color: rgba($ember-core, 0.3);
       }
 
       &:focus-visible {
@@ -206,6 +345,8 @@ function plainCodeBlock(code: string, lang: string): string {
       &.copied {
         opacity: 1;
         color: $ember-glow;
+        background: rgba($ember-core, 0.12);
+        border-color: rgba($ember-core, 0.4);
       }
 
       &.copied::after {
@@ -216,11 +357,12 @@ function plainCodeBlock(code: string, lang: string): string {
         font-size: 11px;
         font-weight: 600;
         color: #fff;
-        background: $ember-core;
+        background: linear-gradient(135deg, $ember-core 0%, $ember-hot 100%);
         padding: 4px 10px;
-        border-radius: 6px;
+        border-radius: $radius-sm;
         white-space: nowrap;
         pointer-events: none;
+        box-shadow: 0 4px 12px rgba($ember-core, 0.4);
         animation: code-compare-copy-toast-in 0.15s ease;
       }
     }
@@ -239,17 +381,29 @@ function plainCodeBlock(code: string, lang: string): string {
     .code-compare__code {
       ::ng-deep pre {
         margin: 0;
-        padding: $space-4;
+        padding: $space-5 $space-4;
         border: none;
-        border-radius: 0 0 $radius-md $radius-md;
+        border-radius: 0;
         background: transparent !important;
         overflow-x: auto;
         font-size: $text-sm;
+        line-height: 1.6;
       }
 
       ::ng-deep code {
         font-family: $font-mono;
         font-size: $text-sm;
+      }
+    }
+
+    /* Reduced-motion respect */
+    @media (prefers-reduced-motion: reduce) {
+      .code-compare,
+      .code-compare__tab,
+      .code-compare__tab::after,
+      .code-compare__tab-dot,
+      .code-copy-btn {
+        transition: none;
       }
     }
   `,

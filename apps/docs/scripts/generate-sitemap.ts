@@ -45,9 +45,8 @@ entries.push({ slug: 'material/getting-started', filePath: contentFile('getting-
 entries.push({ slug: 'material/feature-overview', filePath: contentFile('feature-overview') });
 entries.push({ slug: 'material/configuration', filePath: contentFile('configuration') });
 
-// Migration guide & pitfalls
+// Migration guide
 entries.push({ slug: 'material/migrating-from-ngx-formly', filePath: contentFile('migrating-from-ngx-formly') });
-entries.push({ slug: 'material/pitfalls', filePath: contentFile('pitfalls') });
 
 // API-Driven Forms
 entries.push({ slug: 'material/api-driven-forms', filePath: contentFile('api-driven-forms') });

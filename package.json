@@ -150,6 +150,7 @@
     "date-fns": "^4.1.0",
     "express": "^5.2.1",
     "front-matter": "^4.0.2",
+    "lucide-angular": "^1.0.0",
     "marked": "^15.0.12",
     "marked-gfm-heading-id": "^4.1.1",
     "marked-highlight": "^2.2.1",

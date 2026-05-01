@@ -80,11 +80,6 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
     }),
   },
   {
-    selector: 'docs-dsl-shift',
-    defer: true,
-    loadComponent: () => import('../components/dsl-shift/dsl-shift.component'),
-  },
-  {
     selector: 'docs-validator-pillars',
     defer: true,
     loadComponent: () => import('../components/validator-pillars/validator-pillars.component'),
