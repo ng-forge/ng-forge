@@ -437,9 +437,9 @@ export class DocPageComponent {
       this.metaService.updateTag({ name: 'twitter:title', content: fullTitle });
       this.metaService.updateTag({ name: 'twitter:description', content: desc });
 
-      // Per-route OG image
-      const ogImageSlug = slug || 'default';
-      const ogImageUrl = `${DocPageComponent.SITE_ORIGIN}/og/${ogImageSlug}.png`;
+      // OG image — single shared asset until per-route PNGs are authored.
+      // Per-route paths (`/og/${slug}.png`) 404 today and break Twitter / LinkedIn / Discord previews.
+      const ogImageUrl = `${DocPageComponent.SITE_ORIGIN}/og-image.png`;
       const ogImageAlt = title ? `${title} — ng-forge Dynamic Forms for Angular` : 'ng-forge — Dynamic Forms for Angular';
       this.metaService.updateTag({ property: 'og:image', content: ogImageUrl });
       this.metaService.updateTag({ property: 'og:image:width', content: '1200' });
