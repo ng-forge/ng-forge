@@ -1,20 +1,28 @@
-import { FieldDef } from '../../definitions/base/field-def';
+import { ReadonlyFieldTree } from '../../core/field-tree-utils';
 
 /**
  * Context handed to inline addon actions and registered handler functions.
  *
- * Lazily-typed today (`form` and `value` left `unknown`) so this lives in
- * the core model without coupling to `@angular/forms/signals` shape. The
- * dispatcher tightens these at construction time when the addon's host
- * field component is known.
+ * `field` carries the host field's identity (key + type discriminant);
+ * `form` is the same {@link ReadonlyFieldTree} view wrappers receive (no
+ * write surface — use `setValue` to mutate the host field's value);
+ * `setValue` is wired by adapter button kinds (e.g., `pi-button` plumbs
+ * its value-writer token through). When no writer is reachable (rare —
+ * addon rendered outside a field component) `setValue` is `undefined`.
  */
 export interface AddonActionContext<TValue = unknown> {
-  /** The field this addon is attached to. */
-  readonly field: FieldDef<unknown>;
-  /** Form-level handle (FieldTree from `@angular/forms/signals` at runtime). */
-  readonly form: unknown;
+  /** Identity of the host field this addon is attached to. */
+  readonly field: { readonly key: string; readonly type: string };
+  /** Read-only view of the host field's tree — same view wrappers receive. */
+  readonly form: ReadonlyFieldTree<TValue> | null;
   /** Current value of the host field at the time the action fires. */
   readonly value: TValue;
+  /**
+   * Push a new value into the host field. Wired by the adapter's button
+   * kind component (e.g., pi-button passes the field's value-writer
+   * token); `undefined` when no writer is reachable.
+   */
+  readonly setValue?: (next: TValue) => void;
 }
 
 /**
@@ -24,10 +32,9 @@ export interface AddonActionContext<TValue = unknown> {
  * behaviour:
  *
  * - `'clear'`: empties the field value.
- * - `'reset'`: empties the field today; restoring the field's configured
- *   default value requires `FormStateManager` integration that lands in a
- *   follow-up. Treat as a no-default-restore alias for `'clear'` until
- *   then.
+ * - `'reset'`: restores the field's configured default value (resolved
+ *   from the form's `defaultValues` map at click time); falls back to
+ *   empty when no default is reachable.
  * - `'paste'`: reads from the system clipboard and writes the result.
  * - `'copy'`: writes the field's current value to the system clipboard.
  * - `'toggle-password-visibility'`: flips a host input's `type` between

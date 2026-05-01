@@ -20,10 +20,15 @@ import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
  * @param rawInputs Mapper outputs (`{ key, label, props, field?: FieldTree, ... }`).
  * @param cache     `WeakMap<FieldTree, ReadonlyFieldTree>` provided via
  *                  {@link READONLY_FIELD_TREE_CACHE}.
+ * @param fieldType Optional field-type discriminant. Injected here (rather
+ *                  than via the field mapper) because `type` is the
+ *                  registry key, not a component input — but addons and
+ *                  wrappers legitimately need it.
  */
 export function buildFieldInputs(
   rawInputs: Record<string, unknown>,
   cache: WeakMap<FieldTree<unknown>, ReadonlyFieldTree<unknown>>,
+  fieldType?: string,
 ): WrapperFieldInputs {
   const fieldTreeCandidate = rawInputs['field'];
   // FieldTree is callable: `(): FieldState`. Anything else (undefined,
@@ -36,6 +41,7 @@ export function buildFieldInputs(
   // that rawInputs are emitted as fresh snapshots, not mutated in place.
   return {
     ...rawInputs,
+    type: fieldType,
     field: readonlyField,
   } as WrapperFieldInputs;
 }

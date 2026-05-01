@@ -380,4 +380,31 @@ describe('PrimeInputField - addons', () => {
     } as const satisfies PrimeInputField;
     expectTypeOf(field.addons[0].hidden).toEqualTypeOf<false>();
   });
+
+  it('rejects icon-only pi-button without ariaLabel via content XOR', () => {
+    // The PiButtonAddon content axis is `IconOnly` | `Labeled` | `Decorative`.
+    // An icon-only shape WITHOUT ariaLabel doesn't match any branch — assert
+    // that explicitly so a future regression that loosens the XOR fails this test.
+    type IconOnlyMissingAria = { slot: 'suffix'; kind: 'pi-button'; icon: 'times'; preset: 'clear' };
+    type AcceptedPiButtonShapes = Extract<NonNullable<PrimeInputField['addons']>[number], { kind: 'pi-button' }>;
+    expectTypeOf<IconOnlyMissingAria>().not.toMatchTypeOf<AcceptedPiButtonShapes>();
+  });
+
+  it('accepts labeled pi-button without ariaLabel', () => {
+    const field = {
+      type: 'input',
+      key: 'q',
+      addons: [{ slot: 'suffix', kind: 'pi-button', label: 'Clear', preset: 'clear' }],
+    } as const satisfies PrimeInputField;
+    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'pi-button'>();
+  });
+
+  it('accepts icon-only pi-button when ariaLabel is provided', () => {
+    const field = {
+      type: 'input',
+      key: 'q',
+      addons: [{ slot: 'suffix', kind: 'pi-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }],
+    } as const satisfies PrimeInputField;
+    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'pi-button'>();
+  });
 });

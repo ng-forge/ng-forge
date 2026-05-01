@@ -14,6 +14,8 @@ import { ReadonlyFieldTree } from '../core/field-tree-utils';
  */
 export interface WrapperFieldInputs {
   readonly key: string;
+  /** Field-type discriminant (mirrors `FieldDef.type`) — useful for kind-aware addons. */
+  readonly type?: string;
   readonly label?: string;
   readonly placeholder?: string;
   readonly className?: string;

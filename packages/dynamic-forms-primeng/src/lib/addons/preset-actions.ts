@@ -9,8 +9,15 @@ import type { Logger } from '@ng-forge/dynamic-forms';
 export interface PresetCollaborators {
   /** Per-field input-type override signal — populated only inside `prime-input`. */
   readonly typeOverride?: WritableSignal<string | undefined>;
-  /** Reactive view of the field's current value (when modifiable). */
+  /** Writer that pushes a value into the host field's tree. */
   readonly fieldValueSetter?: (next: unknown) => void;
+  /**
+   * Read the host field's configured default value (from the form's
+   * `defaultValues` map keyed by `field.key`). Used by the `'reset'`
+   * preset; absent when the addon is rendered outside an active field
+   * context, in which case `'reset'` falls back to clearing.
+   */
+  readonly fieldDefaultValueGetter?: () => unknown;
   /** Logger for warnings about presets that can't be fulfilled in this context. */
   readonly logger: Logger;
 }
@@ -33,14 +40,15 @@ export async function runPiPresetAction(
       collaborators.fieldValueSetter?.('');
       return;
 
-    case 'reset':
-      // No-default-restore today — empties the field, mirroring 'clear'.
-      // Restoring the configured default value requires `FormStateManager`
-      // integration; tracked as follow-up work. Documented in the addon
-      // README so users picking 'reset' for "restore default" aren't
-      // surprised.
-      collaborators.fieldValueSetter?.('');
+    case 'reset': {
+      // Restore to the field's configured default when the host field
+      // exposes one (via FIELD_SIGNAL_CONTEXT.defaultValues); fall back to
+      // empty when no default is reachable (e.g., addon rendered outside an
+      // active field context).
+      const defaultValue = collaborators.fieldDefaultValueGetter?.();
+      collaborators.fieldValueSetter?.(defaultValue !== undefined ? defaultValue : '');
       return;
+    }
 
     case 'paste': {
       try {

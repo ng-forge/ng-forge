@@ -16,7 +16,11 @@ export function buildBaseInputs(fieldDef: FieldDef<unknown>, defaultProps?: Reco
   const { key, label, className, tabIndex, props, meta, addons } = fieldDef;
   const inputs: Record<string, unknown> = {};
 
-  // Always include key - required by components for accessibility and identification
+  // Always include key — required by components for accessibility and identification.
+  // `type` is intentionally NOT propagated to the field component (it's the
+  // registry discriminant, not a component input); wrappers and addons read it
+  // from `WrapperFieldInputs.type` which is injected at the buildFieldInputs()
+  // boundary by `DfFieldOutlet`.
   inputs['key'] = key;
 
   if (label !== undefined) {

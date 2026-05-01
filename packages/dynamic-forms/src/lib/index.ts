@@ -93,6 +93,8 @@ export { ComponentAddonComponent } from './addons/component-addon.component';
 
 // Addon Registry helpers (for adapter authors)
 export { ADDON_KIND_COMPONENT_CACHE, injectAddonKindRegistry } from './utils/inject-addon-kind-registry/inject-addon-kind-registry';
+export { injectFieldsSupportingAddons } from './utils/inject-addon-kind-registry/inject-fields-supporting-addons';
+export type { FieldAddonSupportEntry } from './utils/inject-addon-kind-registry/inject-fields-supporting-addons';
 export { resolveDynamicValue } from './utils/dynamic-value/resolve-dynamic-value';
 
 // Addon Features (for adapter authors and end users)

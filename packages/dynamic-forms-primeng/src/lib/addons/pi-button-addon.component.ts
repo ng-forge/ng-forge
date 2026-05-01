@@ -5,6 +5,7 @@ import {
   AddonActionContext,
   DynamicFormLogger,
   DynamicTextPipe,
+  FIELD_SIGNAL_CONTEXT,
   resolveDynamicValue,
   WrapperFieldInputs,
 } from '@ng-forge/dynamic-forms';
@@ -52,6 +53,7 @@ export class PiButtonAddonComponent {
   private readonly actionRegistry = inject(ADDON_ACTION_REGISTRY);
   private readonly typeOverride = inject(PRIME_INPUT_TYPE_OVERRIDE, { optional: true });
   private readonly valueWriter = inject(PRIME_INPUT_VALUE_WRITER, { optional: true });
+  private readonly fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
   private readonly logger = inject(DynamicFormLogger);
 
   readonly addon = input.required<PiButtonAddon>();
@@ -95,9 +97,18 @@ export class PiButtonAddonComponent {
 
     if (addon.preset !== undefined) {
       const writer = this.valueWriter;
+      const context = this.fieldSignalContext;
+      const fieldKey = this.fieldInputs()?.key;
       void runPiPresetAction(addon.preset, ctx, {
         typeOverride: this.typeOverride ?? undefined,
         fieldValueSetter: writer ? (v) => writer.write(v) : undefined,
+        // Resolve the field's configured default from the form's defaultValues
+        // bag — used by the 'reset' preset. Only available when both the
+        // form context and the field key are reachable.
+        fieldDefaultValueGetter:
+          context && fieldKey !== undefined
+            ? () => (context.defaultValues() as Record<string, unknown> | undefined)?.[fieldKey]
+            : undefined,
         logger: this.logger,
       });
       return;
@@ -132,19 +143,22 @@ export class PiButtonAddonComponent {
    */
   private buildActionContext(): AddonActionContext {
     const inputs = this.fieldInputs();
-    const fieldDef =
-      inputs?.key !== undefined
-        ? ({ key: inputs.key, type: '' } as AddonActionContext['field'])
-        : ({ key: '', type: '' } as AddonActionContext['field']);
+    const writer = this.valueWriter;
     return {
-      // FieldDef.type isn't carried in WrapperFieldInputs; handlers needing
-      // type discrimination can inject FIELD_SIGNAL_CONTEXT for the full def.
-      field: fieldDef,
-      // Host's read-only field-tree view — handlers that mutate must use
-      // FIELD_SIGNAL_CONTEXT.form[key] directly (write surface excluded by
-      // contract, same as wrappers).
+      // Identity carried through from `fieldInputs` — both `key` and `type`
+      // are populated by the base mapper (see buildBaseInputs). Empty
+      // strings are a fallback for the rare case of an addon rendered
+      // outside an active field context.
+      field: {
+        key: inputs?.key ?? '',
+        type: inputs?.type ?? '',
+      },
+      // ReadonlyFieldTree view — same one wrappers receive. Read-only by
+      // contract; mutation goes through `setValue` below.
       form: inputs?.field ?? null,
       value: inputs?.field?.value() ?? undefined,
+      // Adapter-supplied value writer, when reachable.
+      setValue: writer ? (v: unknown) => writer.write(v) : undefined,
     };
   }
 }

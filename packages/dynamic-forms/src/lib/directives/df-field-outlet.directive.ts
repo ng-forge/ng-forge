@@ -109,7 +109,9 @@ export class DfFieldOutlet {
    * `rawInputs` identity so repeated emissions with the same underlying object
    * return the same view and don't cascade OnPush re-evaluations.
    */
-  private readonly fieldInputs = computed<WrapperFieldInputs>(() => buildFieldInputs(this.rawInputs(), this.readonlyFieldCache));
+  private readonly fieldInputs = computed<WrapperFieldInputs>(() =>
+    buildFieldInputs(this.rawInputs(), this.readonlyFieldCache, this.dfFieldOutlet().fieldDef.type),
+  );
 
   private readonly defaultEnvInjector = inject(EnvironmentInjector);
   /** Environment injector for the innermost field component — `[environmentInjector]` input takes precedence over the directive's own DI. */

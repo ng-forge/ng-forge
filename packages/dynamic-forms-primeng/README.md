@@ -139,13 +139,13 @@ provideDynamicForm(...withPrimeNGFields(), withPrimeNGAddons());
 
 ### Built-in button presets
 
-| Preset                         | Behaviour                                                                                                                                                                                                        |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `'clear'`                      | Empties the field value.                                                                                                                                                                                         |
-| `'reset'`                      | Empties the field today (acts as `'clear'`). Restoring the configured default value requires `FormStateManager` integration that lands in a follow-up — pick `'clear'` if you want explicit empty semantics now. |
-| `'paste'`                      | Reads from the system clipboard and writes the result.                                                                                                                                                           |
-| `'copy'`                       | Writes the field's current value to the system clipboard.                                                                                                                                                        |
-| `'toggle-password-visibility'` | Flips a host input's `type` between `password` and `text`.                                                                                                                                                       |
+| Preset                         | Behaviour                                                                                                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'clear'`                      | Empties the field value.                                                                                                                                      |
+| `'reset'`                      | Restores the field's configured default value from the form's `defaultValues` map (resolved at click time). Falls back to empty when no default is reachable. |
+| `'paste'`                      | Reads from the system clipboard and writes the result.                                                                                                        |
+| `'copy'`                       | Writes the field's current value to the system clipboard.                                                                                                     |
+| `'toggle-password-visibility'` | Flips a host input's `type` between `password` and `text`.                                                                                                    |
 
 All presets are JSON-safe. For form submission, use the dedicated `'submit'` field type — it is intentionally not exposed as a button-addon preset.
 
