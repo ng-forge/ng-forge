@@ -66,10 +66,11 @@
     position: absolute;
     inset: 0 0 auto 0;
     height: 220px;
-    /* Dark-mode-only ember glow. Base state is empty so the gradient never
-       shows on light. Dark variants below populate it via media query +
-       explicit-theme selector. */
-    background: none;
+    /* Theme-driven via the global `--feature-hero-glow` CSS variable —
+       set in styles.scss for `html[data-theme='dark']` and the
+       `auto + prefers-color-scheme: dark` combination. Light mode never
+       defines it, so the fallback `none` keeps the hero clean. */
+    background: var(--feature-hero-glow, none);
     pointer-events: none;
     z-index: -1;
   }
@@ -841,22 +842,9 @@
   }
 }
 
-/* Dark-mode hero glow. Two complementary code paths so it lights up in
-   *both* explicit dark and auto+prefers-dark, regardless of OS preference
-   or whether the user has flipped the theme manually. */
-$hero-glow:
-  radial-gradient(ellipse at top, rgba($ember-core, 0.22) 0%, transparent 60%),
-  radial-gradient(ellipse at 70% top, rgba($molten, 0.12) 0%, transparent 50%);
-
-:host-context(html[data-theme='dark']) .overview__hero::after {
-  background: $hero-glow;
-}
-
-@media (prefers-color-scheme: dark) {
-  :host-context(html[data-theme='auto']) .overview__hero::after {
-    background: $hero-glow;
-  }
-}
+/* Hero glow lives on the global `--feature-hero-glow` variable
+   (defined in src/styles.scss for dark + auto-with-prefers-dark).
+   Component just consumes the variable. */
 
 /* Reduced motion respect */
 @media (prefers-reduced-motion: reduce) {

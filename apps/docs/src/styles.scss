@@ -187,6 +187,14 @@ html[data-theme='dark'] {
   --forge-selection-bg: rgba(255, 140, 66, 0.2);
   --forge-sidebar-category-color: #{$ember-glow};
 
+  // Hero radial glow used by the feature-overview page. Light mode falls
+  // through to the global default below (`none`). The Sass-interpolated
+  // form is required: custom-property values are CSS token streams, so
+  // Sass doesn't run colour functions inside them — interpolation forces it.
+  --feature-hero-glow:
+    radial-gradient(ellipse at top, #{rgba($ember-core, 0.22)} 0%, transparent 60%),
+    radial-gradient(ellipse at 70% top, #{rgba($molten, 0.12)} 0%, transparent 50%);
+
   --forge-base-0: #{$bg-deep};
   --forge-base-1: #{$bg-surface};
   --forge-base-2: #{$bg-elevated};
@@ -308,6 +316,15 @@ html {
 
 *::-webkit-scrollbar-corner {
   background: #f0f0f0;
+}
+
+// Auto theme + system-dark inherits the dark theme's hero-glow.
+@media (prefers-color-scheme: dark) {
+  html[data-theme='auto'] {
+    --feature-hero-glow:
+      radial-gradient(ellipse at top, #{rgba($ember-core, 0.22)} 0%, transparent 60%),
+      radial-gradient(ellipse at 70% top, #{rgba($molten, 0.12)} 0%, transparent 50%);
+  }
 }
 
 // Dark scrollbar (auto)

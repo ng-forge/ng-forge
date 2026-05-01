@@ -41,7 +41,7 @@ describe('findBreadcrumbTrail', () => {
   it('should return full trail for a deeply nested item', () => {
     const trail = findBreadcrumbTrail('prebuilt/form-arrays/simplified');
     expect(trail).toEqual([
-      { label: 'Layout Components', path: 'prebuilt' },
+      { label: 'Layout', path: 'prebuilt' },
       { label: 'Form Arrays', path: 'prebuilt/form-arrays' },
       { label: 'Simplified API', path: 'prebuilt/form-arrays/simplified' },
     ]);
