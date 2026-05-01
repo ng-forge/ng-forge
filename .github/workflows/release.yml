@@ -161,10 +161,17 @@ jobs:
           # Bump-worthy commit types per nx.json release.conventionalCommits:
           # feat, fix, perf, revert. Everything else (docs/ci/chore/test/build/style/refactor)
           # is classified semverBump:none and should not trigger a next release.
+          #
+          # Path filter `-- packages/` further restricts to commits that actually touched
+          # the published library sources. A `feat(docs): …` or `fix(examples): …` no
+          # longer triggers a nightly because it doesn't change anything that ships to
+          # npm. Only changes under `packages/**` (the seven workspaces in
+          # LIBRARY_PACKAGES) qualify.
+          #
           # Disable pipefail for this pipeline so we can distinguish grep's "no matches"
           # (exit 1, fine) from a real grep error (exit ≥2, fail loud).
           set +o pipefail
-          RELEVANT=$(git log "${BASE}..HEAD" --pretty=format:'%s' \
+          RELEVANT=$(git log "${BASE}..HEAD" --pretty=format:'%s' -- packages/ \
             | grep -cE '^(feat|fix|perf|revert)(\([^)]+\))?!?: ')
           GREP_EXIT=$?
           set -o pipefail
@@ -173,7 +180,7 @@ jobs:
             exit 1
           fi
 
-          echo "Bump-worthy commits since $BASE: $RELEVANT"
+          echo "Bump-worthy commits touching packages/ since $BASE: $RELEVANT"
 
           if [ "$RELEVANT" -eq 0 ]; then
             echo "No bump-worthy commits since last release — skipping next release"
