@@ -53,7 +53,9 @@ Try it out — select a contact method and watch fields appear. Switch to the "C
 
 ## Next Steps
 
+- **[Feature overview](/feature-overview)** — Task-oriented map of the docs, plus a general FAQ and the most common pitfalls
 - **[Configuration](/configuration)** — Set global defaults with `withXxxFields({ ... })` and per-form `defaultProps`
 - **[Examples](/examples)** — Browse complete form examples
 - **[Field Types](/field-types/text-inputs)** — All available field types and their props
 - **[Building an Adapter](/building-an-adapter)** — Create your own adapter for any UI library
+- **[Migrating from ngx-formly](/migrating-from-ngx-formly)** — Side-by-side migration guide if you're coming from formly

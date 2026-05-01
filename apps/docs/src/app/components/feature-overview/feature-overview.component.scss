@@ -111,8 +111,17 @@
   -webkit-text-fill-color: transparent;
 }
 
-.overview__lead {
+.overview__subtitle {
   font-size: $text-lg;
+  font-weight: 500;
+  line-height: 1.4;
+  max-width: 65ch;
+  color: var(--forge-text, #{$steel});
+  margin: 0 0 $space-2;
+}
+
+.overview__lead {
+  font-size: $text-base;
   line-height: 1.6;
   max-width: 65ch;
   color: var(--forge-text-muted, #{$steel-mid});
@@ -374,6 +383,9 @@
   font-weight: 600;
   color: var(--forge-text, #{$steel});
   line-height: 1.3;
+  /* Allow long inline-code chips to wrap rather than overflow the card. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 
   code {
     font-family: $font-mono;
@@ -390,6 +402,8 @@
   font-size: $text-sm;
   line-height: 1.5;
   color: var(--forge-text-muted, #{$steel-mid});
+  overflow-wrap: anywhere;
+  word-break: break-word;
 
   code {
     font-family: $font-mono;
@@ -689,8 +703,23 @@
   display: flex;
   gap: $space-2;
   flex-wrap: wrap;
+  align-items: center;
   position: relative;
   z-index: 1;
+}
+
+/* Secondary CTAs (Discord + GitHub) stay grouped — both wrap to a new row
+   together when the parent runs out of space. */
+.cta__buttons-row {
+  display: flex;
+  gap: $space-2;
+  flex-wrap: wrap;
+}
+
+/* Discord brand SVG — sized + positioned to match the lucide icons. */
+.cta__btn-svg {
+  flex: none;
+  display: block;
 }
 
 .cta__btn {

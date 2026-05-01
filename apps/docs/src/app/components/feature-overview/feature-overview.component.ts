@@ -8,6 +8,7 @@ import {
   CircleCheck,
   Cloud,
   Code,
+  Github,
   Eye,
   FileCode,
   FileJson,
@@ -40,6 +41,7 @@ import {
   Type,
   Zap,
 } from 'lucide-angular';
+import { FEATURE_OVERVIEW_FAQ, type FaqEntry } from './feature-overview.data';
 
 interface NavCard {
   readonly icon: LucideIconData;
@@ -55,11 +57,6 @@ interface NavSection {
   readonly title: string;
   readonly subtitle: string;
   readonly cards: readonly NavCard[];
-}
-
-interface FaqItem {
-  readonly q: string;
-  readonly a: string;
 }
 
 interface Pitfall {
@@ -263,7 +260,7 @@ const NAV: readonly NavSection[] = [
       {
         icon: Tags,
         title: 'Type safety',
-        description: '`as const satisfies FormConfig` flows literal field shapes into the form value.',
+        description: 'Field shapes inferred end-to-end into the submitted form value.',
         href: '/recipes/type-safety',
       },
       {
@@ -291,49 +288,6 @@ const NAV: readonly NavSection[] = [
         href: '/migrating-from-ngx-formly',
       },
     ],
-  },
-];
-
-const FAQ: readonly FaqItem[] = [
-  {
-    q: 'How do I add a field type ng-forge does not ship?',
-    a: "`provideDynamicForm(...)` is variadic — it takes a list of field-type registrations. Spread an adapter's bundle (`...withMaterialFields()` registers all the built-in Material fields), then append your own: `{ name: 'rich-text', loadComponent: () => import('./rich-text'), mapper: valueFieldMapper }`. Your component is a plain standalone Angular component that receives Signal Forms' `FieldTree<T>` via `input.required()`. See [Adding custom fields](/recipes/custom-fields).",
-  },
-  {
-    q: 'How do I lazy-load select options from an API?',
-    a: "Use a `targetProperty: 'options'` derivation with `source: 'http'`. Pass the URL (or query params with field-value interpolation), a `responseExpression` that maps the response to `{ value, label }[]`, and `dependsOn` if it should re-fetch when another field changes. See [Async data](/dynamic-behavior/derivation).",
-  },
-  {
-    q: 'Can ng-forge run side by side with ngx-formly during a migration?',
-    a: 'Yes. Different package names, different injection tokens, different component selectors. Install ng-forge, port one form at a time, deprecate formly when nothing imports `@ngx-formly/*`.',
-  },
-  {
-    q: 'How do I share a config across multiple forms?',
-    a: "`FormConfig` is a plain TypeScript object — extract reusable pieces (a field, a validator entry, a default `props` object) as named consts and import them. For application-wide defaults, use `defaultProps` on the form or adapter-level providers like `withMaterialFields({ appearance: 'fill' })`.",
-  },
-  {
-    q: 'How do I localise labels and validation messages?',
-    a: 'Labels, placeholders, and hint text accept `string | Signal<string> | Observable<string>` — wire them to your i18n service. Validation `kind`s map to messages via per-field `validationMessages` or form-level `defaultValidationMessages`. See the [i18n guide](/dynamic-behavior/i18n).',
-  },
-  {
-    q: 'How do I export the submitted form value as plain JSON?',
-    a: 'The `(submitted)` event emits the form value directly — `JSON.stringify(value)` is enough. To strip hidden, disabled, or readonly fields, set `excludeValueIfHidden` (and the sibling options) on the form config or via `withValueExclusionDefaults()`. See [Value exclusion](/recipes/value-exclusion).',
-  },
-  {
-    q: 'Are hidden field values still in the submitted form value?',
-    a: "Yes by default — ng-forge keeps hidden values live so a hide/show toggle preserves what the user typed. Opt out with `excludeValueIfHidden: true` to strip them at submission output time, or wire a `derivation` that clears the value when the hide condition is true (formly's `resetOnHide` behaviour).",
-  },
-  {
-    q: 'How do I debounce a field, an HTTP derivation, or a custom condition?',
-    a: "Debouncing happens on the consumer side: set `trigger: 'debounced'` and `debounceMs` on the derivation, condition, or HTTP validator that reads the value. The Signal Forms substrate commits on every change — there is no `updateOn: 'blur'` equivalent today, so debouncing the consumers is the closest workaround for blur-style commit timing.",
-  },
-  {
-    q: 'Does ng-forge work without one of the four official UI adapters?',
-    a: 'Yes — every adapter is built on the same public surface, so you can ship a custom adapter for Kendo, NG-ZORRO, NativeScript, or an in-house design system. See [Building an adapter](/building-an-adapter).',
-  },
-  {
-    q: 'Does ng-forge use Reactive Forms (`FormGroup` / `FormControl`)?',
-    a: "No. ng-forge is built on Angular Signal Forms (`@angular/forms/signals`). The primitive is `FieldTree<T>` — a signal-native tree of value, validity, dirty/touched state, and errors. Reactive Forms still works in Angular, but the two systems don't share types or APIs.",
   },
 ];
 
@@ -383,10 +337,11 @@ const PITFALLS: readonly Pitfall[] = [
     <div class="overview">
       <header class="overview__hero">
         <span class="overview__eyebrow">Feature overview</span>
-        <h1 class="overview__title">Find your way around ng-forge</h1>
+        <h1 class="overview__title">ng-forge — dynamic forms for Angular</h1>
+        <p class="overview__subtitle">Find your way around — six task-shaped paths into the docs.</p>
         <p class="overview__lead">
-          Six task-shaped paths into the docs — pick what you're trying to do, jump straight to the page that answers it. A general FAQ and
-          the most common pitfalls are at the bottom.
+          Pick what you're trying to do, jump straight to the page that answers it. A general FAQ and the most common pitfalls are at the
+          bottom.
         </p>
       </header>
 
@@ -422,7 +377,7 @@ const PITFALLS: readonly Pitfall[] = [
         }
       </section>
 
-      <section class="overview__faq">
+      <section id="faq" class="overview__faq">
         <header class="overview__sectionhead">
           <span class="overview__sectionhead-icon overview__sectionhead-icon--cool">
             <lucide-icon [img]="LifeBuoy" size="20" />
@@ -447,7 +402,7 @@ const PITFALLS: readonly Pitfall[] = [
         </div>
       </section>
 
-      <section class="overview__pitfalls">
+      <section id="common-pitfalls" class="overview__pitfalls">
         <header class="overview__sectionhead">
           <span class="overview__sectionhead-icon overview__sectionhead-icon--warn">
             <lucide-icon [img]="Atom" size="20" />
@@ -489,12 +444,20 @@ const PITFALLS: readonly Pitfall[] = [
           </div>
           <div class="cta__buttons">
             <a class="cta__btn cta__btn--primary" href="/ai-integration"> <lucide-icon [img]="Sparkles" size="14" /> MCP server </a>
-            <a class="cta__btn" href="https://discord.gg/qpzzvFagj3" target="_blank" rel="noopener">
-              <lucide-icon [img]="MessagesSquare" size="14" /> Discord
-            </a>
-            <a class="cta__btn" href="https://github.com/ng-forge/ng-forge/issues" target="_blank" rel="noopener">
-              <lucide-icon [img]="Code" size="14" /> GitHub
-            </a>
+            <div class="cta__buttons-row">
+              <a class="cta__btn" href="https://discord.gg/qpzzvFagj3" target="_blank" rel="noopener">
+                <svg class="cta__btn-svg" viewBox="0 0 127.14 96.36" width="14" height="14" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M107.7 8.07A105.15 105.15 0 0 0 81.47 0a72.06 72.06 0 0 0-3.36 6.83 97.68 97.68 0 0 0-29.11 0A72.37 72.37 0 0 0 45.64 0a105.89 105.89 0 0 0-26.25 8.09C2.79 32.65-1.71 56.6.54 80.21a105.73 105.73 0 0 0 32.17 16.15 77.7 77.7 0 0 0 6.89-11.11 68.42 68.42 0 0 1-10.85-5.18c.91-.66 1.8-1.34 2.66-2a75.57 75.57 0 0 0 64.32 0c.87.71 1.76 1.39 2.66 2a68.68 68.68 0 0 1-10.87 5.19 77 77 0 0 0 6.89 11.1 105.25 105.25 0 0 0 32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15M42.45 65.69C36.18 65.69 31 60 31 53s5-12.74 11.43-12.74S54 46 53.89 53s-5.05 12.69-11.44 12.69m42.24 0C78.41 65.69 73.25 60 73.25 53s5-12.74 11.44-12.74S96.23 46 96.12 53s-5.04 12.69-11.43 12.69"
+                  />
+                </svg>
+                Discord
+              </a>
+              <a class="cta__btn" href="https://github.com/ng-forge/ng-forge/issues" target="_blank" rel="noopener">
+                <lucide-icon [img]="Github" size="14" /> GitHub
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -505,7 +468,7 @@ const PITFALLS: readonly Pitfall[] = [
 })
 export default class FeatureOverviewComponent {
   readonly nav = NAV;
-  readonly faq = FAQ;
+  readonly faq: readonly FaqEntry[] = FEATURE_OVERVIEW_FAQ;
   readonly pitfalls = PITFALLS;
 
   readonly ArrowRight = ArrowRight;
@@ -515,7 +478,7 @@ export default class FeatureOverviewComponent {
   readonly Box = Box;
   readonly Sparkles = Sparkles;
   readonly MessagesSquare = MessagesSquare;
-  readonly Code = Code;
+  readonly Github = Github;
 
   readonly openFaq = signal<number | null>(null);
 

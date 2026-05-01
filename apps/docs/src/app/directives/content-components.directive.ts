@@ -125,7 +125,7 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
       @if (segment.type === 'html') {
         <div class="content-html" [innerHTML]="segment.html"></div>
       } @else if (segment.defer && segment.component) {
-        @defer (on viewport; prefetch on idle) {
+        @defer (on viewport; prefetch on idle; hydrate on idle) {
           <ng-container [ngComponentOutlet]="segment.component" [ngComponentOutletInputs]="segment.inputs" />
         } @placeholder {
           <div class="skeleton-live-example">

@@ -290,7 +290,7 @@ Formly's `expressions` DSL — string-evaluated functions like `'!model.country'
 
 For genuinely complex expressions, ng-forge has an opt-in `javascript` condition (a string evaluated against `formValue`) — see [Conditional logic](/dynamic-behavior/conditional-logic).
 
-**Hidden field values work differently.** Formly defaults to actively *resetting* a field's value when it becomes hidden (via `resetOnHide`). ng-forge keeps the value live; the optional `excludeValueIfHidden` form option filters it out at submission time. If your code relied on the formly reset, port it as an explicit derivation that clears the value when the hide condition is true. See [Hidden fields](/prebuilt/hidden-fields) and the [common pitfalls section](/feature-overview).
+**Hidden field values work differently.** Formly defaults to actively *resetting* a field's value when it becomes hidden (via `resetOnHide`). ng-forge keeps the value live; the optional `excludeValueIfHidden` form option filters it out at submission time. If your code relied on the formly reset, port it as an explicit derivation that clears the value when the hide condition is true. See [Hidden fields](/prebuilt/hidden-fields) and the [common pitfalls](/feature-overview#common-pitfalls).
 
 ## Cross-field validation
 
@@ -566,7 +566,6 @@ If any of these are blockers, decide upfront before starting the migration.
 
 - **`FormlyJsonschema.toFieldConfig(schema)` as a runtime converter.** No 1:1. See [Schema validation](#schema-validation-and-json-driven-forms) for the three migration paths.
 - **A community plugin / extension ecosystem.** Formly has a long tail of community-built field types and extensions; ng-forge currently has only the four official UI adapters and the OpenAPI / MCP packages.
-- **Hot-swapping the form structure mid-edit.** Formly lets you replace `field.fieldGroup` at runtime. ng-forge's config is intended to be stable for the form's lifetime; structural changes happen via conditional logic or by re-creating the form with a new config.
 - **Two-or-more-dot prop paths in derivations.** Formly's `expressions: { 'props.config.foo': '…' }` lets you compute any nested prop. ng-forge supports up to one level (`options`, `label`, `disabled`, `props.minDate`, …) and **throws `DynamicFormError` at form-initialisation time** if the path goes deeper — restructure your prop shape so the dynamic value sits at the top of `props`, or move the dynamic computation into a custom field component.
 - **Custom `valueProp` / `labelProp` for selects.** ng-forge's `FieldOption` is fixed at `{ value, label, disabled? }`; remap source data with `.map()` or a `targetProperty: 'options'` derivation.
 - **`extensions` API for cross-cutting field-construction hooks.** Formly's extensions can mutate every field's config during construction. ng-forge has no public equivalent — those concerns become wrappers, custom field components, or build-time codegen.
