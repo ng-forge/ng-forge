@@ -577,7 +577,7 @@ If your formly forms are driven by an OpenAPI 3.x spec, `@ng-forge/openapi-gener
 
 ## Performance
 
-ng-forge is built on signals (not zone-driven change detection), uses stable `track` keys on every `@for`, preserves field-instance identity across config updates so unchanged fields don't re-render, defers non-adjacent pages in multi-step forms via `@defer (on idle)`, and updates arrays differentially (appending an item only renders the new one).
+ng-forge is **built for zoneless** — every default component runs `ChangeDetectionStrategy.OnPush` and the value/validity/dirty-tracking layer is signal-driven, so there is no whole-tree change-detection cycle on every input event the way zone.js + Reactive Forms triggers one. The renderer also uses stable `track` keys on every `@for`, preserves field-instance identity across config updates so unchanged fields don't re-render, defers non-adjacent pages in multi-step forms via `@defer (on idle)`, and updates arrays differentially (appending an item only renders the new one).
 
 <docs-perf-pipeline></docs-perf-pipeline>
 
