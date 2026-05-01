@@ -7,6 +7,27 @@
   --accent: #{$ember-core};
 }
 
+/* Lucide custom-element baseline fix: keep SVGs block-level so flex containers can center them. */
+:host ::ng-deep lucide-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+
+  svg {
+    display: block;
+  }
+}
+
+/* Card/button-style anchors must opt out of the global doc-page `a:hover { underline }` rule. */
+:host a {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
 /* ============================================================
    Layout shell
    ============================================================ */
@@ -698,8 +719,47 @@
     color: white;
 
     &:hover {
-      box-shadow: 0 4px 16px -4px rgba($ember-core, 0.5);
+      /* Override base &:hover background — keep the ember gradient, brighten it slightly. */
+      background: linear-gradient(135deg, $ember-hot 0%, $ember-glow 100%);
       border-color: $ember-glow;
+      color: white;
+      box-shadow: 0 4px 16px -4px rgba($ember-core, 0.5);
+    }
+  }
+}
+
+/* ============================================================
+   Light-mode overrides
+   The dark-mode hero shading (radial ember glow + steel→ember title gradient)
+   reads as muddy brown on white. Drop the gradient text and tone the radial
+   way down. Dark-mode treatment is preserved unchanged.
+   ============================================================ */
+:host-context(html[data-theme='light']) {
+  .overview__title {
+    background: none;
+    -webkit-text-fill-color: var(--forge-text, #{$steel});
+    color: var(--forge-text, #{$steel});
+  }
+
+  .overview__hero::after {
+    background:
+      radial-gradient(ellipse at top, rgba($ember-core, 0.04) 0%, transparent 55%),
+      radial-gradient(ellipse at 70% top, rgba($molten, 0.025) 0%, transparent 50%);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :host-context(html[data-theme='auto']) {
+    .overview__title {
+      background: none;
+      -webkit-text-fill-color: var(--forge-text, #{$steel});
+      color: var(--forge-text, #{$steel});
+    }
+
+    .overview__hero::after {
+      background:
+        radial-gradient(ellipse at top, rgba($ember-core, 0.04) 0%, transparent 55%),
+        radial-gradient(ellipse at 70% top, rgba($molten, 0.025) 0%, transparent 50%);
     }
   }
 }

@@ -363,7 +363,7 @@ const PITFALLS: readonly Pitfall[] = [
     href: '/dynamic-behavior/conditional-logic',
   },
   {
-    title: 'Select options blank — backend returns `id`/`name`',
+    title: 'Select options blank — backend returns `id` / `name` keys',
     symptom: 'Dropdown shows empty rows or `[object Object]`.',
     fix: "`FieldOption` is fixed at `{ value, label, disabled? }`. Remap once at the source, or inside a `targetProperty: 'options'` derivation with `responseExpression`.",
     href: '/field-types/selection',
