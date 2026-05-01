@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject, input, signal, viewChildren } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  Injectable,
+  input,
+  signal,
+  viewChildren,
+} from '@angular/core';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { derivedFrom } from 'ngxtension/derived-from';
@@ -6,6 +17,21 @@ import { from, pipe, switchMap } from 'rxjs';
 import { ShikiService } from '../../utils/shiki';
 
 type LibraryKey = 'formly' | 'ngforge';
+
+/**
+ * Per-application counter for generating unique <docs-code-compare> instance IDs.
+ *
+ * `providedIn: 'root'` makes the service per-application (per SSR request, per client
+ * bootstrap), so server and client produce the same sequence as they mount components
+ * in the same order — hydration matches without sharing state across requests.
+ */
+@Injectable({ providedIn: 'root' })
+class DocsCodeCompareIdGenerator {
+  private counter = 0;
+  generate(): string {
+    return `cc-${++this.counter}`;
+  }
+}
 
 interface LibraryTab {
   readonly key: LibraryKey;
@@ -429,6 +455,9 @@ export class DocsCodeCompareComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly tabButtons = viewChildren<ElementRef<HTMLButtonElement>>('tabBtn');
 
+  /** Stable per-instance prefix so multiple <docs-code-compare> on a page do not collide on `id`. */
+  private readonly instanceId = inject(DocsCodeCompareIdGenerator).generate();
+
   /** Plain SSR-safe markup — present in raw HTML for both panels before hydration. */
   private readonly plainHtml = computed(() => ({
     formly: this.trustHtml(plainCodeBlock(this.formly(), this.lang())),
@@ -469,11 +498,11 @@ export class DocsCodeCompareComponent {
   }
 
   protected tabId(key: LibraryKey): string {
-    return `code-compare-tab-${key}`;
+    return `${this.instanceId}-tab-${key}`;
   }
 
   protected panelId(key: LibraryKey): string {
-    return `code-compare-panel-${key}`;
+    return `${this.instanceId}-panel-${key}`;
   }
 
   protected select(key: LibraryKey): void {

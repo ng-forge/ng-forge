@@ -324,8 +324,8 @@ const FAQ: readonly FaqItem[] = [
     a: "Yes by default — ng-forge keeps hidden values live so a hide/show toggle preserves what the user typed. Opt out with `excludeValueIfHidden: true` to strip them at submission output time, or wire a `derivation` that clears the value when the hide condition is true (formly's `resetOnHide` behaviour).",
   },
   {
-    q: 'How do I debounce a field, or commit a value only on blur?',
-    a: "Debouncing happens on the consumer side: set `trigger: 'debounced'` and `debounceMs` on the derivation, condition, or HTTP validator that reads the value. **There is no `onBlur` / `updateOn: 'blur'` equivalent today** — the Signal Forms substrate commits on every change, and ng-forge's `LogicTrigger` only exposes `'onChange' | 'debounced'`. If formly's commit-on-blur was load-bearing for your form, debouncing is the closest workaround for now.",
+    q: 'How do I debounce a field, an HTTP derivation, or a custom condition?',
+    a: "Debouncing happens on the consumer side: set `trigger: 'debounced'` and `debounceMs` on the derivation, condition, or HTTP validator that reads the value. The Signal Forms substrate commits on every change — there is no `updateOn: 'blur'` equivalent today, so debouncing the consumers is the closest workaround for blur-style commit timing.",
   },
   {
     q: 'Does ng-forge work without one of the four official UI adapters?',
@@ -369,8 +369,8 @@ const PITFALLS: readonly Pitfall[] = [
     href: '/field-types/selection',
   },
   {
-    title: 'Two-or-more-dot derivation paths silently no-op',
-    symptom: "`targetProperty: 'props.config.minDate'` never updates.",
+    title: 'Deeper-than-one-level derivation paths throw at runtime',
+    symptom: "Setting `targetProperty: 'props.config.minDate'` throws a `DynamicFormError` when the form initialises.",
     fix: 'Up to one level of nesting is supported (`options`, `label`, `props.minDate`). Deeper paths require a custom field type that reads the value off a sibling field directly.',
     href: '/dynamic-behavior/derivation',
   },

@@ -977,6 +977,7 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
   table {
     width: 100%;
     border-spacing: 0;
+
     // Use a fixed-ish layout so columns size proportionally to the table
     // width (not to the longest unbreakable cell content). Combined with
     // `td > code { white-space: nowrap }` this keeps individual code
