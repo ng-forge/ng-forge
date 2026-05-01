@@ -49,6 +49,14 @@
   position: relative;
   padding: $space-8 0 $space-6;
   border-bottom: 1px solid var(--forge-border-color, #{$steel-dark});
+  // Hero-glow lives on the element's own background-image (not a z-index:-1
+  // pseudo-element) so there's no stacking-context risk of the gradient
+  // ending up behind the page background. Default state is no glow; the
+  // dark-mode selectors below populate the gradient.
+  background-image: none;
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: 100% 220px;
 
   &::before {
     content: '';
@@ -60,19 +68,23 @@
     background: linear-gradient(90deg, transparent 0%, $ember-core 30%, $molten 50%, $ember-core 70%, transparent 100%);
     opacity: 0.6;
   }
+}
 
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 220px;
-    /* Theme-driven via the global `--feature-hero-glow` CSS variable —
-       set in styles.scss for `html[data-theme='dark']` and the
-       `auto + prefers-color-scheme: dark` combination. Light mode never
-       defines it, so the fallback `none` keeps the hero clean. */
-    background: var(--feature-hero-glow, none);
-    pointer-events: none;
-    z-index: -1;
+// Dark-mode hero glow. Two selectors so the gradient applies in both:
+//   1. Explicit dark theme (html[data-theme='dark'])
+//   2. Auto theme + OS preference for dark
+// Light mode (no data-theme attribute, the docs default) never matches → no glow.
+$hero-glow:
+  radial-gradient(ellipse at top, rgba($ember-core, 0.22) 0%, transparent 60%),
+  radial-gradient(ellipse at 70% top, rgba($molten, 0.12) 0%, transparent 50%);
+
+:host-context(html[data-theme='dark']) .overview__hero {
+  background-image: $hero-glow;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context(html[data-theme='auto']) .overview__hero {
+    background-image: $hero-glow;
   }
 }
 
