@@ -297,7 +297,7 @@ const NAV: readonly NavSection[] = [
 const FAQ: readonly FaqItem[] = [
   {
     q: 'How do I add a field type ng-forge does not ship?',
-    a: "Author a standalone component, then register it via `provideDynamicForm({ name, loadComponent, mapper })` alongside `withMaterialFields()` (or your adapter). The component receives Angular Signal Forms' `FieldTree<T>` via an `input.required()`. See [Adding custom fields](/recipes/custom-fields).",
+    a: "`provideDynamicForm(...)` is variadic — it takes a list of field-type registrations. Spread an adapter's bundle (`...withMaterialFields()` registers all the built-in Material fields), then append your own: `{ name: 'rich-text', loadComponent: () => import('./rich-text'), mapper: valueFieldMapper }`. Your component is a plain standalone Angular component that receives Signal Forms' `FieldTree<T>` via `input.required()`. See [Adding custom fields](/recipes/custom-fields).",
   },
   {
     q: 'How do I lazy-load select options from an API?',
