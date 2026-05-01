@@ -24,7 +24,7 @@
   <a href="https://github.com/ng-forge/ng-forge/issues">🐛 Issues</a>
 </p>
 
-> **Migrating from [ngx-formly](https://formly.dev)?** ng-forge is the Signal-Forms-native successor — see the
+> **Coming from [ngx-formly](https://formly.dev)?** ng-forge is built on Angular Signal Forms — see the
 > [side-by-side migration guide](https://ng-forge.com/dynamic-forms/material/migrating-from-ngx-formly) for a
 > concept-by-concept mapping with full working code on both sides.
 
