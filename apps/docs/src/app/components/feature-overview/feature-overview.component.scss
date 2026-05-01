@@ -66,11 +66,10 @@
     position: absolute;
     inset: 0 0 auto 0;
     height: 220px;
-    /* Dark-mode-tuned opacity. 8% ember + 5% molten was visually invisible on
-       a near-black page background — needs roughly twice that to read as a glow. */
-    background:
-      radial-gradient(ellipse at top, rgba($ember-core, 0.18) 0%, transparent 60%),
-      radial-gradient(ellipse at 70% top, rgba($molten, 0.1) 0%, transparent 50%);
+    /* Dark-mode-only ember glow. Base state is empty so the gradient never
+       shows on light. Dark variants below populate it via media query +
+       explicit-theme selector. */
+    background: none;
     pointer-events: none;
     z-index: -1;
   }
@@ -821,31 +820,41 @@
    reads as muddy brown on white. Drop the gradient text and tone the radial
    way down. Dark-mode treatment is preserved unchanged.
    ============================================================ */
-:host-context(html[data-theme='light']) {
-  .overview__title {
+/* Title gradient is opt-out for light mode (the steel→ember blend reads
+   muddy brown on white). Same combo of explicit-light + auto+prefers-light. */
+:host-context(html[data-theme='light']) .overview__title,
+:host-context(html[data-theme='auto']) .overview__title {
+  /* (auto resolves to light via the media query below; this is the explicit-light part) */
+}
+
+:host-context(html[data-theme='light']) .overview__title {
+  background: none;
+  -webkit-text-fill-color: var(--forge-text, #{$steel});
+  color: var(--forge-text, #{$steel});
+}
+
+@media (prefers-color-scheme: light) {
+  :host-context(html[data-theme='auto']) .overview__title {
     background: none;
     -webkit-text-fill-color: var(--forge-text, #{$steel});
     color: var(--forge-text, #{$steel});
   }
-
-  /* Light mode: drop the radial glow entirely. The dark-tuned opacities
-     read as muddy on white, and the user prefers a clean, neutral hero. */
-  .overview__hero::after {
-    background: none;
-  }
 }
 
-@media (prefers-color-scheme: light) {
-  :host-context(html[data-theme='auto']) {
-    .overview__title {
-      background: none;
-      -webkit-text-fill-color: var(--forge-text, #{$steel});
-      color: var(--forge-text, #{$steel});
-    }
+/* Dark-mode hero glow. Two complementary code paths so it lights up in
+   *both* explicit dark and auto+prefers-dark, regardless of OS preference
+   or whether the user has flipped the theme manually. */
+$hero-glow:
+  radial-gradient(ellipse at top, rgba($ember-core, 0.22) 0%, transparent 60%),
+  radial-gradient(ellipse at 70% top, rgba($molten, 0.12) 0%, transparent 50%);
 
-    .overview__hero::after {
-      background: none;
-    }
+:host-context(html[data-theme='dark']) .overview__hero::after {
+  background: $hero-glow;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context(html[data-theme='auto']) .overview__hero::after {
+    background: $hero-glow;
   }
 }
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, Type } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, PendingTasks, Type } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -292,6 +292,14 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
 export class ContentSegmentsComponent {
   readonly contentHtml = input<string | null>(null);
   private readonly sanitizer = inject(DomSanitizer);
+  /**
+   * Register each lazy `loadComponent()` import as a pending task so
+   * Angular's SSR awaits the resolution before serialising the response.
+   * Without this, deferred segments are still null at render time and
+   * the placeholder ships in the prerendered HTML — making the content
+   * invisible to LLM crawlers that don't execute JS.
+   */
+  private readonly pendingTasks = inject(PendingTasks);
 
   /** Pre-bind the trust function so it can be passed to the pure parser. */
   private readonly trustHtml = (raw: string) => this.sanitizer.bypassSecurityTrustHtml(raw);
@@ -320,6 +328,7 @@ export class ContentSegmentsComponent {
   }
 
   private loadLazyComponent(loader: () => Promise<{ default: Type<unknown> }>, index: number): void {
+    const removeTask = this.pendingTasks.add();
     loader()
       .then((mod) => {
         this.resolvedSegments.update((segs) =>
@@ -329,6 +338,9 @@ export class ContentSegmentsComponent {
       .catch((err) => {
         console.error(`[ContentSegments] Failed to load lazy component at index ${index}:`, err);
         this.resolvedSegments.update((segs) => segs.filter((_, j) => j !== index));
+      })
+      .finally(() => {
+        removeTask();
       });
   }
 }

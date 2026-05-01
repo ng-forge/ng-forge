@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { ActiveAdapterService } from '../../services/active-adapter.service';
 import {
   ArrowRight,
   ArrowRightLeft,
@@ -332,7 +334,7 @@ const PITFALLS: readonly Pitfall[] = [
 
 @Component({
   selector: 'app-feature-overview',
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, RouterLink],
   template: `
     <div class="overview">
       <header class="overview__hero">
@@ -359,7 +361,7 @@ const PITFALLS: readonly Pitfall[] = [
             </header>
             <div class="panel__cards">
               @for (card of section.cards; track card.title) {
-                <a class="card" [href]="card.href">
+                <a class="card" [routerLink]="adapterPrefix() + card.href">
                   <span class="card__icon">
                     <lucide-icon [img]="card.icon" size="18" />
                   </span>
@@ -424,7 +426,9 @@ const PITFALLS: readonly Pitfall[] = [
                 <span class="pitfall__label pitfall__label--fix">Fix</span>
                 <span class="pitfall__text" [innerHTML]="renderInline(p.fix)"></span>
               </p>
-              <a class="pitfall__more" [href]="p.href"> Read the full guide <lucide-icon [img]="ArrowRight" size="14" /> </a>
+              <a class="pitfall__more" [routerLink]="adapterPrefix() + p.href">
+                Read the full guide <lucide-icon [img]="ArrowRight" size="14" />
+              </a>
             </article>
           }
         </div>
@@ -443,7 +447,10 @@ const PITFALLS: readonly Pitfall[] = [
             </p>
           </div>
           <div class="cta__buttons">
-            <a class="cta__btn cta__btn--primary" href="/ai-integration"> <lucide-icon [img]="Sparkles" size="14" /> MCP server </a>
+            <a class="cta__btn cta__btn--primary" [routerLink]="adapterPrefix() + '/ai-integration'">
+              <lucide-icon [img]="Sparkles" size="14" />
+              MCP server
+            </a>
             <div class="cta__buttons-row">
               <a class="cta__btn" href="https://discord.gg/qpzzvFagj3" target="_blank" rel="noopener">
                 <svg class="cta__btn-svg" viewBox="0 0 127.14 96.36" width="14" height="14" aria-hidden="true">
@@ -467,6 +474,12 @@ const PITFALLS: readonly Pitfall[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class FeatureOverviewComponent {
+  /** Active adapter slug, used to prefix internal links so RouterLink resolves them
+   *  on the SPA without depending on the doc-page click handler (which doesn't fire
+   *  reliably for cards inside the deferred component). */
+  private readonly adapter = inject(ActiveAdapterService);
+  protected readonly adapterPrefix = computed(() => '/' + this.adapter.adapter());
+
   readonly nav = NAV;
   readonly faq: readonly FaqEntry[] = FEATURE_OVERVIEW_FAQ;
   readonly pitfalls = PITFALLS;
