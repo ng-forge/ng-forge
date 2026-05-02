@@ -168,6 +168,47 @@ provideAddonActions({
 // { kind: 'pi-button', actionRef: 'openProfile', label: 'View profile' }
 ```
 
+### Custom kinds — runtime + type level
+
+Register a custom addon kind alongside the PrimeNG-shipped ones using
+`withCustomAddon(...)` from `@ng-forge/dynamic-forms`:
+
+```ts
+import { provideDynamicForm, withCustomAddon, type AddonKindDefinition } from '@ng-forge/dynamic-forms';
+import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
+
+interface RatingAddon {
+  kind: 'rating';
+  slot: 'prefix' | 'suffix';
+  value: number;
+}
+
+const RATING_KIND: AddonKindDefinition<RatingAddon> = {
+  kind: 'rating',
+  loadComponent: () => import('./rating-addon.component').then((m) => m.RatingAddonComponent),
+};
+
+provideDynamicForm(...withPrimeNGFields(), withCustomAddon(RATING_KIND));
+```
+
+To make the new kind type-safe inside `prime-input` configs, augment
+`PrimeInputAddonExtensions`:
+
+```ts
+declare module '@ng-forge/dynamic-forms-primeng' {
+  interface PrimeInputAddonExtensions {
+    'rating': RatingAddon;
+  }
+}
+
+// Now valid in TS — `kind: 'rating'` is part of the prime-input addon union.
+{ type: 'input', key: 'review', addons: [{ slot: 'suffix', kind: 'rating', value: 4 }] }
+```
+
+The runtime registration and the type-level augmentation are independent — use
+either or both. Without augmentation, custom kinds still work at runtime; users
+just lose IDE narrowing on the `addons` array.
+
 ### Reactive `hidden` / `disabled`
 
 Both fields accept `boolean | Signal<boolean> | Observable<boolean>`. Useful

@@ -4,7 +4,7 @@
 import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
-import type { PrimeInputProps, PrimeInputField } from './prime-input.type';
+import type { PrimeInputProps, PrimeInputField, PrimeInputAddonExtensions } from './prime-input.type';
 import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
@@ -364,12 +364,19 @@ describe('PrimeInputField - addons', () => {
     expectTypeOf(field.addons[0].kind).toEqualTypeOf<'template'>();
   });
 
-  it("constrains addon kind to PrimeInput's union (no 'rating', etc.)", () => {
-    // The addon-kind union is the contract; verify it positively. A 'rating'
-    // kind doesn't appear here, so a config using it would be rejected by
-    // TypeScript at the call site.
+  it("base addon kinds are present in PrimeInput's union", () => {
+    // Base kinds always appear; user augmentations via `PrimeInputAddonExtensions`
+    // extend the union further. We assert direction (base → accepted) so the
+    // test stays correct when extensions are added in user code.
     type AcceptedKinds = NonNullable<PrimeInputField['addons']>[number]['kind'];
-    expectTypeOf<AcceptedKinds>().toEqualTypeOf<'pi-icon' | 'pi-button' | 'text' | 'template'>();
+    expectTypeOf<'pi-icon' | 'pi-button' | 'text' | 'template'>().toMatchTypeOf<AcceptedKinds>();
+  });
+
+  it('PrimeInputAddonExtensions is empty by default — augmentable seam', () => {
+    // The interface itself ships empty so `keyof` resolves to `never` and the
+    // extension contributes nothing. Users can declare-module-augment it to
+    // bring custom kinds into the typed union.
+    expectTypeOf<keyof PrimeInputAddonExtensions>().toEqualTypeOf<never>();
   });
 
   it('accepts addons with optional reactive hidden flag', () => {

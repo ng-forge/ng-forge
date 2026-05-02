@@ -245,6 +245,5 @@ export const FIELD_ADDON_SUPPORT: FieldAddonSupportInfo[] = [
     fieldType: 'prime-input',
     adapter: 'primeng',
     slots: ['prefix', 'suffix'],
-    allowedKinds: ['pi-icon', 'pi-button', 'text', 'template'],
   },
 ];

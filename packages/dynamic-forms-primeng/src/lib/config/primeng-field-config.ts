@@ -32,12 +32,6 @@ export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
     scope: ['text-input', 'numeric'],
     addons: {
       slots: ['prefix', 'suffix'],
-      // Allowed kinds match the per-field-type union in PrimeInputAddon —
-      // pi-icon / pi-button are PrimeNG-specific; text / template are
-      // universal. `component` opts out here intentionally; users who need
-      // arbitrary Angular components in an input slot can switch to a
-      // wrapper or register a custom kind.
-      allowedKinds: ['pi-icon', 'pi-button', 'text', 'template'],
     },
   },
   {

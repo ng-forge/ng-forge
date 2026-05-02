@@ -21,7 +21,7 @@ export {
   createPrimeInputValueWriter,
 } from './lib';
 
-export type { PiIconAddon, PiButtonAddon, PrimeAddon, PrimeInputAddon, PrimeInputValueWriter } from './lib';
+export type { PiIconAddon, PiButtonAddon, PrimeAddon, PrimeInputAddon, PrimeInputAddonExtensions, PrimeInputValueWriter } from './lib';
 
 export type {
   PrimeButtonProps,
