@@ -26,7 +26,7 @@ export interface PiIconAddon extends BaseAddon {
 
 /**
  * Common shape of every `pi-button` addon — properties that don't
- * participate in the content XOR axis.
+ * participate in either XOR axis.
  */
 interface PiButtonBase extends BaseAddon {
   readonly kind: 'pi-button';
@@ -34,21 +34,54 @@ interface PiButtonBase extends BaseAddon {
   readonly severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast';
   /** Reactive loading state — renders the button's native `[loading]` spinner. */
   readonly loading?: DynamicValue<boolean>;
-
-  // Click handler — at most one of `preset` / `actionRef` / `action`.
-  // Type-level XOR on this axis confuses narrowing in the runtime
-  // branching code (the branches naturally read `addon.actionRef !==
-  // undefined` etc.); the runtime validator drops the addon with a clear
-  // warning when more than one is configured. Worth tightening at the
-  // type level later via destructuring helpers, but not at the cost of
-  // ugly internal casts today.
-  /** Built-in preset action (e.g., `'clear'`, `'toggle-password-visibility'`). JSON-safe. */
-  readonly preset?: AddonActionPreset;
-  /** Reference to a handler registered via `provideAddonActions(...)`. JSON-safe. */
-  readonly actionRef?: RegisteredActionRef;
-  /** Inline handler — code-only; dropped from JSON-derived configs. */
-  readonly action?: (ctx: AddonActionContext) => void;
 }
+
+/**
+ * Click axis — XOR enforced at type level so configurations that combine
+ * two click handlers (e.g., `preset` AND `actionRef`) are rejected by
+ * TypeScript. The four shapes:
+ *
+ * - `Preset`    — built-in preset action.
+ * - `ActionRef` — typed reference to a handler registered via `provideAddonActions(...)`.
+ * - `Action`    — inline handler (code-only; dropped from JSON-derived configs).
+ * - `None`      — decorative button with no handler.
+ *
+ * Runtime XOR validation stays as defence-in-depth for JSON-source configs
+ * that bypass the type checker.
+ */
+type PiButtonClickPreset = {
+  /** Built-in preset action (e.g., `'clear'`, `'toggle-password-visibility'`). JSON-safe. */
+  readonly preset: AddonActionPreset;
+  readonly actionRef?: never;
+  readonly action?: never;
+};
+/**
+ * Value type for the `actionRef` slot. When no actions have been registered
+ * via `provideAddonActions(...)`, `RegisteredActionRef` resolves to `never` —
+ * which would make this variant uninhabitable and break `addon.actionRef`
+ * narrowing in the renderer. Fall back to `string` so the variant stays
+ * usable; once the user augments `DynamicFormActionRegistry`, autocomplete
+ * tightens to the registered keys.
+ */
+type PiButtonActionRef = [RegisteredActionRef] extends [never] ? string : RegisteredActionRef;
+type PiButtonClickActionRef = {
+  readonly preset?: never;
+  /** Reference to a handler registered via `provideAddonActions(...)`. JSON-safe. */
+  readonly actionRef: PiButtonActionRef;
+  readonly action?: never;
+};
+type PiButtonClickAction = {
+  readonly preset?: never;
+  readonly actionRef?: never;
+  /** Inline handler — code-only; dropped from JSON-derived configs. */
+  readonly action: (ctx: AddonActionContext) => void;
+};
+type PiButtonClickNone = {
+  readonly preset?: never;
+  readonly actionRef?: never;
+  readonly action?: never;
+};
+type PiButtonClick = PiButtonClickPreset | PiButtonClickActionRef | PiButtonClickAction | PiButtonClickNone;
 
 /**
  * Content axis — XOR enforced at type level so an icon-only button is
@@ -90,11 +123,12 @@ type PiButtonContent = PiButtonContentIconOnly | PiButtonContentLabeled | PiButt
  * - **Content axis (XOR):** `IconOnly` (icon + required ariaLabel) |
  *   `Labeled` (label, icon optional) | `Decorative` (neither). The IDE
  *   rejects icon-only configs that omit `ariaLabel`.
- * - **Click axis (runtime XOR):** at most one of `preset` / `actionRef`
- *   / `action`. The runtime validator drops the addon with a clear
- *   warning when more than one is configured.
+ * - **Click axis (XOR):** exactly one of `preset` / `actionRef` / `action`,
+ *   or none. Combining two is rejected by TypeScript at the call site;
+ *   the runtime validator still drops the addon with a clear warning when
+ *   JSON-source configs slip a multi-set past the type checker.
  */
-export type PiButtonAddon = PiButtonBase & PiButtonContent;
+export type PiButtonAddon = PiButtonBase & PiButtonContent & PiButtonClick;
 
 /** Union of all PrimeNG-shipped addon kinds. */
 export type PrimeAddon = PiIconAddon | PiButtonAddon;

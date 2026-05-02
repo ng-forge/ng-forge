@@ -414,4 +414,67 @@ describe('PrimeInputField - addons', () => {
     } as const satisfies PrimeInputField;
     expectTypeOf(field.addons[0].kind).toEqualTypeOf<'pi-button'>();
   });
+
+  it('accepts pi-button with actionRef alone (click XOR)', () => {
+    const field = {
+      type: 'input',
+      key: 'q',
+      addons: [{ slot: 'suffix', kind: 'pi-button', label: 'Open', actionRef: 'openProfile' }],
+    } as const satisfies PrimeInputField;
+    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'pi-button'>();
+  });
+
+  it('accepts pi-button with inline action alone (click XOR)', () => {
+    const field = {
+      type: 'input',
+      key: 'q',
+      addons: [{ slot: 'suffix', kind: 'pi-button', label: 'Run', action: () => undefined }],
+    } as const satisfies PrimeInputField;
+    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'pi-button'>();
+  });
+
+  it('accepts decorative pi-button with no click handler', () => {
+    const field = {
+      type: 'input',
+      key: 'q',
+      addons: [{ slot: 'suffix', kind: 'pi-button', label: 'Static' }],
+    } as const satisfies PrimeInputField;
+    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'pi-button'>();
+  });
+
+  it('rejects pi-button combining preset + actionRef via click XOR', () => {
+    type PresetAndActionRef = {
+      slot: 'suffix';
+      kind: 'pi-button';
+      label: 'Bad';
+      preset: 'clear';
+      actionRef: 'openProfile';
+    };
+    type AcceptedPiButtonShapes = Extract<NonNullable<PrimeInputField['addons']>[number], { kind: 'pi-button' }>;
+    expectTypeOf<PresetAndActionRef>().not.toMatchTypeOf<AcceptedPiButtonShapes>();
+  });
+
+  it('rejects pi-button combining preset + inline action via click XOR', () => {
+    type PresetAndAction = {
+      slot: 'suffix';
+      kind: 'pi-button';
+      label: 'Bad';
+      preset: 'clear';
+      action: () => void;
+    };
+    type AcceptedPiButtonShapes = Extract<NonNullable<PrimeInputField['addons']>[number], { kind: 'pi-button' }>;
+    expectTypeOf<PresetAndAction>().not.toMatchTypeOf<AcceptedPiButtonShapes>();
+  });
+
+  it('rejects pi-button combining actionRef + inline action via click XOR', () => {
+    type ActionRefAndAction = {
+      slot: 'suffix';
+      kind: 'pi-button';
+      label: 'Bad';
+      actionRef: 'openProfile';
+      action: () => void;
+    };
+    type AcceptedPiButtonShapes = Extract<NonNullable<PrimeInputField['addons']>[number], { kind: 'pi-button' }>;
+    expectTypeOf<ActionRefAndAction>().not.toMatchTypeOf<AcceptedPiButtonShapes>();
+  });
 });
