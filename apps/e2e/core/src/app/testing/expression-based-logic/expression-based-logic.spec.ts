@@ -95,9 +95,11 @@ test.describe('Expression-Based Logic Tests', () => {
       const scenario = helpers.getScenario('readonly-logic-test');
       await expect(scenario).toBeVisible();
 
-      // Static readonly field should always have the readonly attribute
+      // Static readonly field should always have the readonly attribute.
+      // Use presence check (not exact-value) since adapters may set different
+      // attribute values (e.g. Material's matInput sets readonly="true").
       const staticReadonlyInput = scenario.locator('#staticReadonly input');
-      await expect(staticReadonlyInput).toHaveAttribute('readonly', '');
+      await expect(staticReadonlyInput).toHaveAttribute('readonly');
     });
 
     test('should make fields readonly using conditional logic', async ({ page, helpers }) => {
@@ -111,14 +113,14 @@ test.describe('Expression-Based Logic Tests', () => {
       const usernameInput = scenario.locator('#username input');
 
       // Verify the field has the readonly attribute when editMode is unchecked
-      await expect(usernameInput).toHaveAttribute('readonly', '');
+      await expect(usernameInput).toHaveAttribute('readonly');
 
       // Enable edit mode - readonly logic should no longer be active
       await scenario.locator('#editMode input[type="checkbox"]').check();
       await page.waitForTimeout(300);
 
       // Verify the field no longer has the readonly attribute
-      await expect(usernameInput).not.toHaveAttribute('readonly', '');
+      await expect(usernameInput).not.toHaveAttribute('readonly');
 
       // Now user should be able to edit the field
       await usernameInput.fill('new_username');
@@ -131,7 +133,7 @@ test.describe('Expression-Based Logic Tests', () => {
       await page.waitForTimeout(300);
 
       // Verify the field is readonly again
-      await expect(usernameInput).toHaveAttribute('readonly', '');
+      await expect(usernameInput).toHaveAttribute('readonly');
     });
   });
 
