@@ -15,21 +15,32 @@ type PrimeNGConfigFeature = {
   ɵproviders: Provider[];
 };
 
-type PrimeNGFieldsWithConfig = [...PrimeNGFieldTypes, PrimeNGConfigFeature];
+/**
+ * Default `withPrimeNGFields()` shape — field defs + the auto-included
+ * addons feature so `pi-icon` / `pi-button` work out of the box.
+ */
+type PrimeNGFieldsWithAddons = [...PrimeNGFieldTypes, PrimeNGAddonsFeature];
+
+type PrimeNGFieldsWithConfig = [...PrimeNGFieldTypes, PrimeNGAddonsFeature, PrimeNGConfigFeature];
 
 /**
- * Provides PrimeNG field type definitions for the dynamic form system.
+ * Provides PrimeNG field type definitions for the dynamic form system,
+ * with PrimeNG-shipped addon kinds (`pi-icon`, `pi-button`) auto-included
+ * so addons work out of the box.
  *
- * Use this function in your application providers to register PrimeNG field components.
+ * If you want field types WITHOUT addons (rare), pass them through
+ * `provideDynamicForm` directly and skip this helper. If you want addons
+ * WITHOUT the field types (also rare — e.g., adding addons to a form that
+ * uses custom fields), call `withPrimeNGAddons()` standalone.
  *
  * @param config - Optional global configuration for PrimeNG form fields
  *
  * @example
  * ```typescript
- * // Application-level setup
+ * // Application-level setup — addons (pi-icon, pi-button) ship in automatically
  * import { ApplicationConfig } from '@angular/core';
- * import { provideDynamicForm } from '@ng-forge/dynamic-form';
- * import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
+ * import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+ * import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
  *
  * export const appConfig: ApplicationConfig = {
  *   providers: [
@@ -53,26 +64,26 @@ type PrimeNGFieldsWithConfig = [...PrimeNGFieldTypes, PrimeNGConfigFeature];
  * };
  * ```
  *
- * @returns Array of field type definitions and optionally a config feature
+ * @returns Tuple of field type definitions, the addons feature, and
+ *   optionally a config feature.
  */
-export function withPrimeNGFields(): PrimeNGFieldTypes;
+export function withPrimeNGFields(): PrimeNGFieldsWithAddons;
 export function withPrimeNGFields(config: PrimeNGConfig): PrimeNGFieldsWithConfig;
-export function withPrimeNGFields(config: PrimeNGConfig | undefined): PrimeNGFieldTypes | PrimeNGFieldsWithConfig;
-export function withPrimeNGFields(config?: PrimeNGConfig): PrimeNGFieldTypes | PrimeNGFieldsWithConfig {
-  if (!config) {
-    return PRIMENG_FIELD_TYPES;
-  }
+export function withPrimeNGFields(config: PrimeNGConfig | undefined): PrimeNGFieldsWithAddons | PrimeNGFieldsWithConfig;
+export function withPrimeNGFields(config?: PrimeNGConfig): PrimeNGFieldsWithAddons | PrimeNGFieldsWithConfig {
+  // Always include the addons feature — pi-icon / pi-button are part of
+  // the canonical PrimeNG surface.
+  const base: unknown[] = [...PRIMENG_FIELD_TYPES, withPrimeNGAddons()];
 
-  const fieldsWithConfig = [
-    ...PRIMENG_FIELD_TYPES,
-    {
+  if (config) {
+    base.push({
       ɵkind: 'primeng-config',
       ɵproviders: [{ provide: PRIMENG_CONFIG, useValue: config }],
-    } satisfies PrimeNGConfigFeature,
-  ];
+    } satisfies PrimeNGConfigFeature);
+    return base as PrimeNGFieldsWithConfig;
+  }
 
-  // Safe: this preserves all PrimeNG field definitions and appends exactly one config feature.
-  return fieldsWithConfig as PrimeNGFieldsWithConfig;
+  return base as PrimeNGFieldsWithAddons;
 }
 
 /* -- PrimeNG addon kinds ----------------------------------------------- */
@@ -115,21 +126,25 @@ type PrimeNGAddonsFeature = {
 };
 
 /**
- * Register PrimeNG-shipped addon kinds (`pi-icon`, `pi-button`).
+ * Register PrimeNG-shipped addon kinds (`pi-icon`, `pi-button`) standalone.
  *
- * Compose alongside `withPrimeNGFields(...)` in `provideDynamicForm` to get
- * both kinds available to all PrimeNG fields that declare addon support.
+ * **Most users don't need this** — `withPrimeNGFields()` auto-includes
+ * these kinds. Call `withPrimeNGAddons()` directly only when you want
+ * PrimeNG addon kinds without the PrimeNG field types (e.g., a custom
+ * field set that wants to render `pi-icon` prefixes), or when you're
+ * stitching addons through a different DI scope.
  *
  * @example
  * ```typescript
+ * // Custom field types + PrimeNG addon kinds.
  * provideDynamicForm(
- *   ...withPrimeNGFields(),
+ *   ...myCustomFields(),
  *   withPrimeNGAddons(),
  * );
  * ```
  *
- * Adapter authors who need only a subset, or want to override a kind with a
- * customised renderer, should call `withCustomAddon(...)` directly instead.
+ * Adapter authors who need to override a kind with a customised renderer
+ * should call `withCustomAddon(...)` directly instead.
  */
 export function withPrimeNGAddons(): PrimeNGAddonsFeature {
   return {

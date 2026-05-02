@@ -103,14 +103,22 @@ Input, Textarea, Select, Checkbox, Toggle, Radio, Multi-Checkbox, Datepicker, Sl
 
 ## Addons (`prefix` / `suffix` slots on `prime-input`)
 
-Render icons, buttons, or static text inside an input's `<p-inputgroup>`. Opt
-in by adding `withPrimeNGAddons()` alongside `withPrimeNGFields()`:
+Render icons, buttons, or static text inside an input's `<p-inputgroup>`.
+The PrimeNG-shipped addon kinds (`pi-icon`, `pi-button`) are auto-included
+in `withPrimeNGFields()` — no extra setup needed.
 
 ```ts
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withPrimeNGFields, withPrimeNGAddons } from '@ng-forge/dynamic-forms-primeng';
+import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 
-provideDynamicForm(...withPrimeNGFields(), withPrimeNGAddons());
+provideDynamicForm(...withPrimeNGFields()); // pi-icon + pi-button work out of the box
+```
+
+If you need the addon kinds without the field types — e.g., a custom
+field set that wants PrimeNG addons — call `withPrimeNGAddons()` directly:
+
+```ts
+provideDynamicForm(...myCustomFields(), withPrimeNGAddons());
 ```
 
 ### Quickstart — clear button
