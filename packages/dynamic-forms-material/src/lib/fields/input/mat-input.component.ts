@@ -1,4 +1,4 @@
-import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
@@ -26,7 +26,6 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
         <mat-label>{{ label() | dynamicText | async }}</mat-label>
       }
       <input
-        #inputRef
         matInput
         [id]="inputId"
         [formField]="f"
@@ -79,47 +78,6 @@ export default class MatInputFieldComponent implements MatInputComponent {
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
   }
-
-  /**
-   * Reference to the native input element.
-   * Used to imperatively sync the readonly attribute since Angular Signal Forms'
-   * [field] directive doesn't sync FieldState.readonly() to the DOM.
-   */
-  private readonly inputRef = viewChild<ElementRef<HTMLInputElement>>('inputRef');
-
-  /**
-   * Computed signal that extracts the readonly state from the field.
-   * Used by the effect to reactively sync the readonly attribute to the DOM.
-   */
-  private readonly isReadonly = computed(() => this.field()().readonly());
-
-  /**
-   * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly
-   * attribute to the DOM, even though FieldState.readonly() returns the correct value.
-   * This effect imperatively sets/removes the readonly attribute on the native input
-   * element whenever the readonly state changes.
-   *
-   * Note: We cannot use [readonly] or [attr.readonly] bindings because Angular throws
-   * NG8022: "Binding to '[readonly]' is not allowed on nodes using the '[field]' directive"
-   *
-   * Uses afterRenderEffect to ensure DOM is ready before manipulating attributes.
-   *
-   * @see https://github.com/angular/angular/issues/65897
-   */
-  private readonly syncReadonlyToDom = afterRenderEffect({
-    write: () => {
-      const inputRef = this.inputRef();
-      const isReadonly = this.isReadonly();
-
-      if (inputRef?.nativeElement) {
-        if (isReadonly) {
-          inputRef.nativeElement.setAttribute('readonly', '');
-        } else {
-          inputRef.nativeElement.removeAttribute('readonly');
-        }
-      }
-    },
-  });
 
   readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
 
