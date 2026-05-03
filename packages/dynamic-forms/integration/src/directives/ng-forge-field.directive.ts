@@ -106,18 +106,18 @@ export class NgForgeField {
   // Error display
   // ───────────────────────────────────────────────────────────────────────────
 
-  // Internal cast for bridging utilities. The util signatures expect
-  // `Signal<FieldTree<T>>`, not the optional-typed input. Reading the cast
-  // signal happens only in reactive contexts (computed/effect), which run
-  // AFTER inputs have propagated, so the cast is sound at runtime.
-  private readonly fieldRef = this.field as Signal<FieldTree<unknown>>;
+  // The bridging utilities expect `Signal<FieldTree<T>>` but the input is
+  // typed as optional (see the input declarations above for context). Inline
+  // casts at each call site narrow the type. Runtime reads happen only in
+  // reactive contexts (computed/effect), which run AFTER inputs have
+  // propagated, so the cast is sound.
 
   readonly errors: Signal<ResolvedError[]> = createResolvedErrorsSignal(
-    this.fieldRef,
+    this.field as Signal<FieldTree<unknown>>,
     this.validationMessages,
     this.defaultValidationMessages,
   );
-  readonly showErrors: Signal<boolean> = shouldShowErrors(this.fieldRef);
+  readonly showErrors: Signal<boolean> = shouldShowErrors(this.field as Signal<FieldTree<unknown>>);
   readonly errorsToDisplay: Signal<ResolvedError[]> = computed(() => (this.showErrors() ? this.errors() : []));
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -128,12 +128,15 @@ export class NgForgeField {
   readonly hintId: Signal<string> = computed(() => `${this.key()}-hint`);
 
   readonly ariaInvalid: Signal<boolean> = computed(() => {
-    const state = this.fieldRef()();
+    const tree = this.field();
+    if (!tree) return false;
+    const state = tree();
     return state.invalid() && state.touched();
   });
 
   readonly ariaRequired: Signal<true | null> = computed(() => {
-    return this.fieldRef()().required?.() === true ? true : null;
+    const tree = this.field();
+    return tree && tree().required?.() === true ? true : null;
   });
 
   readonly ariaDescribedBy: Signal<string | null> = createAriaDescribedBySignal(this.errorsToDisplay, this.errorId, this.hintId, () =>
