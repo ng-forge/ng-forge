@@ -1,13 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
-import { PrimeToggleComponent, PrimeToggleProps } from './prime-toggle.type';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { FieldTree, FormField } from '@angular/forms/signals';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { PrimeToggleProps } from './prime-toggle.type';
 import { AsyncPipe } from '@angular/common';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 
@@ -15,40 +10,39 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
   selector: 'df-prime-toggle',
   imports: [ToggleSwitch, DynamicTextPipe, AsyncPipe, FormField],
   styleUrl: '../../styles/_form-field.scss',
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  providers: [provideMetaTarget('input[type="checkbox"]')],
   template: `
-    @let f = field();
-
     <div class="df-prime-field">
-      @if (label()) {
-        <label [for]="key()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
+      @if (field.label()) {
+        <label [for]="field.key()" class="df-prime-label">{{ field.label() | dynamicText | async }}</label>
       }
 
       <p-toggleSwitch
-        [id]="key()"
-        [formField]="f"
-        [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid()"
-        [attr.aria-required]="ariaRequired()"
-        [attr.aria-describedby]="ariaDescribedBy()"
+        [id]="field.key()"
+        [formField]="formFieldTree()"
+        [attr.tabindex]="field.tabIndex()"
+        [attr.aria-invalid]="field.ariaInvalid()"
+        [attr.aria-required]="field.ariaRequired()"
+        [attr.aria-describedby]="field.ariaDescribedBy()"
         [trueValue]="true"
         [falseValue]="false"
         [styleClass]="toggleClasses()"
       />
 
-      @if (errorsToDisplay()[0]; as error) {
-        <small class="p-error" [id]="errorId()" role="alert">{{ error.message }}</small>
+      @if (field.errorsToDisplay()[0]; as error) {
+        <small class="p-error" [id]="field.errorId()" role="alert">{{ error.message }}</small>
       } @else if (props()?.hint; as hint) {
-        <small class="p-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
+        <small class="p-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</small>
       }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[class]': 'className()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
   styles: [
     `
       :host([hidden]) {
@@ -57,71 +51,19 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
     `,
   ],
 })
-export default class PrimeToggleFieldComponent implements PrimeToggleComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
+export default class PrimeToggleFieldComponent {
+  protected readonly field = inject(NgForgeField);
 
-  readonly field = input.required<FieldTree<boolean>>();
-  readonly key = input.required<string>();
-
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
   readonly props = input<PrimeToggleProps>();
-  readonly meta = input<FieldMeta>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<boolean>);
 
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  constructor() {
-    // Apply meta attributes to the internal toggle input
-    setupMetaTracking(this.elementRef, this.meta, {
-      selector: 'input[type="checkbox"]',
-    });
-  }
-
-  readonly toggleClasses = computed(() => {
+  protected readonly toggleClasses = computed(() => {
     const classes: string[] = [];
-
     const styleClass = this.props()?.styleClass;
     if (styleClass) {
       classes.push(styleClass);
     }
-
-    // Note: p-invalid is handled by [invalid] input binding, not manual class
     return classes.join(' ');
   });
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Unique ID for the hint element, used for aria-describedby */
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-
-  /** Base ID for error elements, used for aria-describedby */
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  /** aria-invalid: true when field is invalid AND touched, false otherwise */
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  /** aria-required: true if field is required, null otherwise (to remove attribute) */
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
 }

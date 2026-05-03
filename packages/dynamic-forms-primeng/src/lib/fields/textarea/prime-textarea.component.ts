@@ -1,14 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  shouldShowErrors,
-  TextareaMeta,
-} from '@ng-forge/dynamic-forms/integration';
-import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { FieldTree, FormField } from '@angular/forms/signals';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeTextareaControlComponent } from './prime-textarea-control.component';
 
@@ -16,41 +10,40 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
   selector: 'df-prime-textarea',
   imports: [DynamicTextPipe, AsyncPipe, FormField, PrimeTextareaControlComponent],
   styleUrl: '../../styles/_form-field.scss',
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  providers: [provideMetaTarget('textarea')],
   template: `
-    @let f = field();
-
     <div class="df-prime-field">
-      @if (label()) {
-        <label [for]="inputId()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
+      @if (field.label()) {
+        <label [for]="inputId()" class="df-prime-label">{{ field.label() | dynamicText | async }}</label>
       }
 
       <df-prime-textarea-control
         [id]="inputId()"
-        [formField]="f"
-        [meta]="meta()"
-        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [formField]="formFieldTree()"
+        [meta]="field.meta()"
+        [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
-        [tabIndex]="tabIndex()"
+        [tabIndex]="field.tabIndex()"
         [autoResize]="props()?.autoResize ?? false"
-        [ariaDescribedBy]="ariaDescribedBy()"
+        [ariaDescribedBy]="field.ariaDescribedBy()"
         [styleClass]="textareaClasses()"
       />
 
-      @if (errorsToDisplay()[0]; as error) {
-        <small class="p-error" [id]="errorId()" role="alert">{{ error.message }}</small>
+      @if (field.errorsToDisplay()[0]; as error) {
+        <small class="p-error" [id]="field.errorId()" role="alert">{{ error.message }}</small>
       } @else if (props()?.hint; as hint) {
-        <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
+        <small class="df-prime-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</small>
       }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[class]': 'className()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
   styles: [
     `
       :host([hidden]) {
@@ -59,51 +52,15 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
     `,
   ],
 })
-export default class PrimeTextareaFieldComponent implements PrimeTextareaComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
+export default class PrimeTextareaFieldComponent {
+  protected readonly field = inject(NgForgeField);
 
-  readonly field = input.required<FieldTree<string>>();
-  readonly key = input.required<string>();
-
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
   readonly props = input<PrimeTextareaProps>();
-  readonly meta = input<TextareaMeta>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  constructor() {
-    setupMetaTracking(this.elementRef, this.meta, { selector: 'textarea' });
-  }
+  // Narrow FieldTree<unknown> to FieldTree<string> for the inner control's strict template type-check.
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
+  protected readonly textareaClasses = computed(() => this.props()?.styleClass ?? '');
 
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  // PrimeNG's [invalid] binding on the control component already manages the p-invalid
-  // class internally, so we only pass through user-specified styleClass here.
-  readonly textareaClasses = computed(() => this.props()?.styleClass ?? '');
-
-  readonly inputId = computed(() => `${this.key()}-textarea`);
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Unique ID for the hint element, used for aria-describedby */
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-
-  /** Base ID for error elements, used for aria-describedby */
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
+  protected readonly inputId = computed(() => `${this.field.key()}-textarea`);
 }
