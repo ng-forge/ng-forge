@@ -1,36 +1,39 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { IonCheckbox, IonItem, IonNote } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  isEqual,
-  setupMetaTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { isEqual, NgForgeField, provideSkipMetaTarget, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { IonicMultiCheckboxComponent, IonicMultiCheckboxProps } from './ionic-multi-checkbox.type';
+import { IonicMultiCheckboxProps } from './ionic-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ion-multi-checkbox',
   imports: [IonCheckbox, IonItem, IonNote, DynamicTextPipe, AsyncPipe],
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  // Skip directive-owned meta tracking; we set up manual tracking with `dependents: [this.options]`
+  // since the dynamic ion-checkbox elements need to be re-decorated when options change.
+  providers: [provideSkipMetaTarget()],
   template: `
-    @let f = field();
+    @let f = formFieldTree();
     @let checked = checkedValuesMap();
-    @if (label(); as label) {
+    @if (field.label(); as label) {
       <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
     <div
       class="checkbox-group"
       role="group"
-      [attr.aria-invalid]="ariaInvalid()"
-      [attr.aria-required]="ariaRequired()"
-      [attr.aria-describedby]="ariaDescribedBy()"
-      [class.ion-invalid]="showErrors()"
-      [class.ion-touched]="field()().touched()"
+      [attr.aria-invalid]="field.ariaInvalid()"
+      [attr.aria-required]="field.ariaRequired()"
+      [attr.aria-describedby]="field.ariaDescribedBy()"
+      [class.ion-invalid]="field.showErrors()"
+      [class.ion-touched]="f().touched()"
     >
       @for (option of options(); track option.value) {
         <ion-item lines="none">
@@ -48,10 +51,10 @@ import { AsyncPipe } from '@angular/common';
       }
     </div>
 
-    @if (errorsToDisplay()[0]; as error) {
-      <ion-note color="danger" class="df-ion-error" [id]="errorId()" role="alert">{{ error.message }}</ion-note>
+    @if (field.errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="field.errorId()" role="alert">{{ error.message }}</ion-note>
     } @else if (props()?.hint; as hint) {
-      <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
+      <ion-note class="df-ion-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -82,69 +85,21 @@ import { AsyncPipe } from '@angular/common';
       }
     `,
   ],
-  host: {
-    '[class]': 'className() || ""',
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class IonicMultiCheckboxFieldComponent implements IonicMultiCheckboxComponent {
+export default class IonicMultiCheckboxFieldComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<ValueType[]>>();
-  readonly key = input.required<string>();
-
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
+  protected readonly field = inject(NgForgeField);
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<IonicMultiCheckboxProps>();
-  readonly meta = input<FieldMeta>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
-
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Base ID for error elements */
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  /** Unique ID for the helper text element */
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-
-  /** Whether the field is currently in an invalid state (invalid AND touched) */
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  /** Whether the field has a required validator */
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<ValueType[]>);
 
   valueViewModel = linkedSignal<FieldOption<ValueType>[]>(
     () => {
-      const currentValues = this.field()().value();
+      const currentValues = this.formFieldTree()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
     },
     { equal: isEqual },
@@ -160,8 +115,9 @@ export default class IonicMultiCheckboxFieldComponent implements IonicMultiCheck
   });
 
   constructor() {
-    // Shadow DOM - apply meta to ion-checkbox elements, re-apply when options change
-    setupMetaTracking(this.elementRef, this.meta, {
+    // Manual meta tracking: dependents reference instance signals, which the
+    // declarative `provideMetaTarget` provider can't accept.
+    setupMetaTracking(this.elementRef, this.field.meta, {
       selector: 'ion-checkbox',
       dependents: [this.options],
     });
@@ -169,8 +125,8 @@ export default class IonicMultiCheckboxFieldComponent implements IonicMultiCheck
     explicitEffect([this.valueViewModel], ([selectedOptions]) => {
       const selectedValues = selectedOptions.map((option) => option.value);
 
-      if (!isEqual(selectedValues, this.field()().value())) {
-        this.field()().value.set(selectedValues);
+      if (!isEqual(selectedValues, this.formFieldTree()().value())) {
+        this.formFieldTree()().value.set(selectedValues);
       }
     });
 

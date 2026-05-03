@@ -1,22 +1,24 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonCheckbox, IonNote } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
-import { IonicCheckboxComponent, IonicCheckboxProps } from './ionic-checkbox.type';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { IonicCheckboxProps } from './ionic-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ion-checkbox',
   imports: [IonCheckbox, IonNote, FormField, DynamicTextPipe, AsyncPipe],
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  providers: [provideMetaTarget('ion-checkbox')],
   template: `
-    @let f = field();
-    @let checkboxId = key() + '-checkbox';
+    @let f = formFieldTree();
+    @let checkboxId = field.key() + '-checkbox';
 
     <ion-checkbox
       [id]="checkboxId"
@@ -25,18 +27,18 @@ import { AsyncPipe } from '@angular/common';
       [justify]="props()?.justify"
       [color]="props()?.color ?? 'primary'"
       [indeterminate]="props()?.indeterminate ?? false"
-      [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="ariaInvalid()"
-      [attr.aria-required]="ariaRequired()"
-      [attr.aria-describedby]="ariaDescribedBy()"
+      [attr.tabindex]="field.tabIndex()"
+      [attr.aria-invalid]="field.ariaInvalid()"
+      [attr.aria-required]="field.ariaRequired()"
+      [attr.aria-describedby]="field.ariaDescribedBy()"
     >
-      {{ label() | dynamicText | async }}
+      {{ field.label() | dynamicText | async }}
     </ion-checkbox>
 
-    @if (errorsToDisplay()[0]; as error) {
-      <ion-note color="danger" class="df-ion-error" [id]="errorId()" role="alert">{{ error.message }}</ion-note>
+    @if (field.errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="field.errorId()" role="alert">{{ error.message }}</ion-note>
     } @else if (props()?.hint; as hint) {
-      <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
+      <ion-note class="df-ion-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -51,68 +53,14 @@ import { AsyncPipe } from '@angular/common';
       }
     `,
   ],
-  host: {
-    '[class]': 'className()',
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class IonicCheckboxFieldComponent implements IonicCheckboxComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
+export default class IonicCheckboxFieldComponent {
+  protected readonly field = inject(NgForgeField);
 
-  readonly field = input.required<FieldTree<boolean>>();
-  readonly key = input.required<string>();
-
-  // Properties
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
   readonly props = input<IonicCheckboxProps>();
-  readonly meta = input<FieldMeta>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
-
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  constructor() {
-    // Shadow DOM - apply meta to ion-checkbox element
-    setupMetaTracking(this.elementRef, this.meta, {
-      selector: 'ion-checkbox',
-    });
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Base ID for error elements */
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  /** Unique ID for the helper text element */
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-
-  /** Whether the field is currently in an invalid state (invalid AND touched) */
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  /** Whether the field has a required validator */
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
+  // Narrow FieldTree<unknown> back to FieldTree<boolean> for the inner control's
+  // strict template type-check; runtime shape is correct.
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<boolean>);
 }

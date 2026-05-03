@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import {
   IonButton,
@@ -12,15 +12,9 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  InputMeta,
-  setupMetaTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
-import { IonicDatepickerComponent, IonicDatepickerProps } from './ionic-datepicker.type';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
 
@@ -40,37 +34,44 @@ import { format } from 'date-fns';
     DynamicTextPipe,
     AsyncPipe,
   ],
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  providers: [provideMetaTarget('ion-input')],
   template: `
-    @let f = field();
+    @let f = formFieldTree();
     @let dateValue = f().value();
-    @let inputId = key() + '-input';
+    @let inputId = field.key() + '-input';
 
     <ion-input
       [id]="inputId"
-      [label]="(label() | dynamicText | async) ?? undefined"
+      [label]="(field.label() | dynamicText | async) ?? undefined"
       [labelPlacement]="'stacked'"
-      [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+      [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
       [disabled]="f().disabled()"
       [value]="formatDisplayDate(dateValue)"
       [readonly]="true"
       [fill]="'outline'"
-      [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="ariaInvalid()"
-      [attr.aria-required]="ariaRequired()"
-      [attr.aria-describedby]="ariaDescribedBy()"
+      [attr.tabindex]="field.tabIndex()"
+      [attr.aria-invalid]="field.ariaInvalid()"
+      [attr.aria-required]="field.ariaRequired()"
+      [attr.aria-describedby]="field.ariaDescribedBy()"
       (click)="!f().disabled() && openModal()"
     />
-    @if (errorsToDisplay()[0]; as error) {
-      <ion-note color="danger" class="df-ion-error" [id]="errorId()" role="alert">{{ error.message }}</ion-note>
+    @if (field.errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="field.errorId()" role="alert">{{ error.message }}</ion-note>
     } @else if (props()?.hint; as hint) {
-      <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
+      <ion-note class="df-ion-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
 
     <ion-modal [isOpen]="isModalOpen()" (didDismiss)="closeModal()">
       <ng-template>
         <ion-header>
           <ion-toolbar>
-            <ion-title>{{ label() | dynamicText | async }}</ion-title>
+            <ion-title>{{ field.label() | dynamicText | async }}</ion-title>
             <ion-buttons slot="end">
               <ion-button (click)="closeModal()">Close</ion-button>
             </ion-buttons>
@@ -109,75 +110,20 @@ import { format } from 'date-fns';
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[class]': 'className()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
 })
-export default class IonicDatepickerFieldComponent implements IonicDatepickerComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
-
-  readonly field = input.required<FieldTree<Date | null>>();
-  readonly key = input.required<string>();
-
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
+export default class IonicDatepickerFieldComponent {
+  protected readonly field = inject(NgForgeField);
 
   readonly minDate = input<Date | null>(null);
   readonly maxDate = input<Date | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<IonicDatepickerProps>();
-  readonly meta = input<InputMeta>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
-
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+  // Narrow FieldTree<unknown> back to FieldTree<Date | null> for the inner control's
+  // strict template type-check; runtime shape is correct.
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<Date | null>);
 
   readonly isModalOpen = signal(false);
-
-  constructor() {
-    // Shadow DOM - apply meta to ion-input element
-    setupMetaTracking(this.elementRef, this.meta, {
-      selector: 'ion-input',
-    });
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Base ID for error elements */
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  /** Unique ID for the helper text element */
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-
-  /** Whether the field is currently in an invalid state (invalid AND touched) */
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  /** Whether the field has a required validator */
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
 
   openModal() {
     this.isModalOpen.set(true);
@@ -193,9 +139,9 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
     // to match the FieldTree<Date | null> type contract.
     if (value && typeof value === 'string' && value.length > 0) {
       const date = new Date(value);
-      this.field()().value.set(date);
+      this.formFieldTree()().value.set(date);
     } else {
-      this.field()().value.set(null);
+      this.formFieldTree()().value.set(null);
     }
     this.closeModal();
   }
