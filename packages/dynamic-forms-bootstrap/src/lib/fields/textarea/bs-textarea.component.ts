@@ -1,22 +1,23 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  shouldShowErrors,
-  TextareaMeta,
-} from '@ng-forge/dynamic-forms/integration';
-import { BsTextareaComponent, BsTextareaProps } from './bs-textarea.type';
+import { FieldTree, FormField } from '@angular/forms/signals';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { BsTextareaProps } from './bs-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-textarea',
   imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  providers: [provideMetaTarget('textarea')],
   template: `
-    @let f = field(); @let p = props(); @let textareaId = key() + '-textarea';
+    @let f = formFieldTree(); @let p = props(); @let textareaId = field.key() + '-textarea';
     @if (p?.floatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
@@ -24,11 +25,11 @@ import { AsyncPipe } from '@angular/common';
           #textareaRef
           [formField]="f"
           [id]="textareaId"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid()"
-          [attr.aria-required]="ariaRequired()"
-          [attr.aria-describedby]="ariaDescribedBy()"
+          [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
+          [attr.tabindex]="field.tabIndex()"
+          [attr.aria-invalid]="field.ariaInvalid()"
+          [attr.aria-required]="field.ariaRequired()"
+          [attr.aria-describedby]="field.ariaDescribedBy()"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"
@@ -36,36 +37,36 @@ import { AsyncPipe } from '@angular/common';
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
         ></textarea>
 
-        @if (label()) {
-          <label [for]="textareaId">{{ label() | dynamicText | async }}</label>
+        @if (field.label()) {
+          <label [for]="textareaId">{{ field.label() | dynamicText | async }}</label>
         }
         @if (p?.validFeedback && f().valid() && f().touched()) {
           <div class="valid-feedback d-block">
             {{ p?.validFeedback | dynamicText | async }}
           </div>
         }
-        @if (errorsToDisplay()[0]; as error) {
-          <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
+        @if (field.errorsToDisplay()[0]; as error) {
+          <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
         } @else if (p?.hint) {
-          <div class="form-text" [id]="hintId()">{{ p?.hint | dynamicText | async }}</div>
+          <div class="form-text" [id]="field.hintId()">{{ p?.hint | dynamicText | async }}</div>
         }
       </div>
     } @else {
       <!-- Standard variant -->
       <div class="mb-3">
-        @if (label()) {
-          <label [for]="textareaId" class="form-label">{{ label() | dynamicText | async }}</label>
+        @if (field.label()) {
+          <label [for]="textareaId" class="form-label">{{ field.label() | dynamicText | async }}</label>
         }
 
         <textarea
           #textareaRef
           [formField]="f"
           [id]="textareaId"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid()"
-          [attr.aria-required]="ariaRequired()"
-          [attr.aria-describedby]="ariaDescribedBy()"
+          [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
+          [attr.tabindex]="field.tabIndex()"
+          [attr.aria-invalid]="field.ariaInvalid()"
+          [attr.aria-required]="field.ariaRequired()"
+          [attr.aria-describedby]="field.ariaDescribedBy()"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"
@@ -78,21 +79,15 @@ import { AsyncPipe } from '@angular/common';
             {{ p?.validFeedback | dynamicText | async }}
           </div>
         }
-        @if (errorsToDisplay()[0]; as error) {
-          <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
+        @if (field.errorsToDisplay()[0]; as error) {
+          <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
         } @else if (p?.hint) {
-          <div class="form-text" [id]="hintId()">{{ p?.hint | dynamicText | async }}</div>
+          <div class="form-text" [id]="field.hintId()">{{ p?.hint | dynamicText | async }}</div>
         }
       </div>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[class]': 'className()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
   styles: [
     `
       :host([hidden]) {
@@ -101,20 +96,13 @@ import { AsyncPipe } from '@angular/common';
     `,
   ],
 })
-export default class BsTextareaFieldComponent implements BsTextareaComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
+export default class BsTextareaFieldComponent {
+  protected readonly field = inject(NgForgeField);
 
-  readonly field = input.required<FieldTree<string>>();
-  readonly key = input.required<string>();
-
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
   readonly props = input<BsTextareaProps>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
-  readonly meta = input<TextareaMeta>();
+
+  // Narrow FieldTree<unknown> to FieldTree<string> for the inner control's strict template type-check.
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   /**
    * Reference to the native textarea element.
@@ -126,7 +114,7 @@ export default class BsTextareaFieldComponent implements BsTextareaComponent {
   /**
    * Computed signal that extracts the readonly state from the field.
    */
-  private readonly isReadonly = computed(() => this.field()().readonly());
+  private readonly isReadonly = computed(() => this.formFieldTree()().readonly());
 
   /**
    * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly
@@ -146,36 +134,4 @@ export default class BsTextareaFieldComponent implements BsTextareaComponent {
       }
     },
   });
-
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
-
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  constructor() {
-    setupMetaTracking(this.elementRef, this.meta, { selector: 'textarea' });
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
 }

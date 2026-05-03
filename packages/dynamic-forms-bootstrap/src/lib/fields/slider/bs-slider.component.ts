@@ -1,14 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  InputMeta,
-  setupMetaTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
-import { BsSliderComponent, BsSliderProps } from './bs-slider.type';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { FieldTree, FormField } from '@angular/forms/signals';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { BsSliderProps } from './bs-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
 
@@ -16,11 +10,18 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   selector: 'df-bs-slider',
   imports: [FormField, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  providers: [provideMetaTarget('input')],
   template: `
-    @let f = field(); @let inputId = key() + '-input';
+    @let f = formFieldTree(); @let inputId = field.key() + '-input';
 
     <div class="mb-3">
-      @if (label(); as label) {
+      @if (field.label(); as label) {
         <label [for]="inputId" class="form-label">
           {{ label | dynamicText | async }}
           @if (props()?.showValue) {
@@ -37,17 +38,17 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
         [dfMin]="f().min?.() ?? props()?.min ?? min()"
         [dfMax]="f().max?.() ?? props()?.max ?? max()"
         [dfStep]="step() ?? props()?.step ?? 1"
-        [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid()"
-        [attr.aria-required]="ariaRequired()"
-        [attr.aria-describedby]="ariaDescribedBy()"
+        [attr.tabindex]="field.tabIndex()"
+        [attr.aria-invalid]="field.ariaInvalid()"
+        [attr.aria-required]="field.ariaRequired()"
+        [attr.aria-describedby]="field.ariaDescribedBy()"
         class="form-range"
       />
 
-      @if (errorsToDisplay()[0]; as error) {
-        <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
+      @if (field.errorsToDisplay()[0]; as error) {
+        <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
       } @else if (props()?.hint; as hint) {
-        <div class="form-text" [id]="hintId()">{{ hint | dynamicText | async }}</div>
+        <div class="form-text" [id]="field.hintId()">{{ hint | dynamicText | async }}</div>
       }
     </div>
   `,
@@ -62,64 +63,17 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
       }
     `,
   ],
-  host: {
-    '[class]': 'className()',
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class BsSliderFieldComponent implements BsSliderComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
-
-  readonly field = input.required<FieldTree<number>>();
-  readonly key = input.required<string>();
-
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
+export default class BsSliderFieldComponent {
+  protected readonly field = inject(NgForgeField);
 
   readonly min = input<number>(0);
   readonly max = input<number>(100);
   readonly step = input<number>();
 
   readonly props = input<BsSliderProps>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
-  readonly meta = input<InputMeta>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
-
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  constructor() {
-    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
+  // Narrow FieldTree<unknown> to FieldTree<number> for the inner control's strict template type-check.
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<number>);
 }

@@ -1,24 +1,26 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
-import { BsSelectComponent, BsSelectProps } from './bs-select.type';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { FieldTree, FormField } from '@angular/forms/signals';
+import { DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-forms';
+import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { BsSelectProps } from './bs-select.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-select',
   imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  providers: [provideMetaTarget('select')],
   template: `
-    @let f = field(); @let selectId = key() + '-select';
+    @let f = formFieldTree(); @let selectId = field.key() + '-select';
 
     <div class="mb-3">
-      @if (label(); as label) {
+      @if (field.label(); as label) {
         <label [for]="selectId" class="form-label">{{ label | dynamicText | async }}</label>
       }
       <select
@@ -30,11 +32,11 @@ import { AsyncPipe } from '@angular/common';
         [class.is-invalid]="f().invalid() && f().touched()"
         [multiple]="props()?.multiple || false"
         [size]="props()?.htmlSize"
-        [attr.aria-invalid]="ariaInvalid()"
-        [attr.aria-required]="ariaRequired()"
-        [attr.aria-describedby]="ariaDescribedBy()"
+        [attr.aria-invalid]="field.ariaInvalid()"
+        [attr.aria-required]="field.ariaRequired()"
+        [attr.aria-describedby]="field.ariaDescribedBy()"
       >
-        @if (placeholder(); as placeholder) {
+        @if (field.placeholder(); as placeholder) {
           <option value="" disabled [selected]="!f().value()">{{ placeholder | dynamicText | async }}</option>
         }
         @for (option of options(); track option.value) {
@@ -44,20 +46,14 @@ import { AsyncPipe } from '@angular/common';
         }
       </select>
 
-      @if (errorsToDisplay()[0]; as error) {
-        <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
+      @if (field.errorsToDisplay()[0]; as error) {
+        <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
       } @else if (props()?.hint; as hint) {
-        <div class="form-text" [id]="hintId()">{{ hint | dynamicText | async }}</div>
+        <div class="form-text" [id]="field.hintId()">{{ hint | dynamicText | async }}</div>
       }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[class]': 'className()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
   styles: [
     `
       :host([hidden]) {
@@ -66,32 +62,14 @@ import { AsyncPipe } from '@angular/common';
     `,
   ],
 })
-export default class BsSelectFieldComponent implements BsSelectComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
-
-  readonly field = input.required<FieldTree<string>>();
-  readonly key = input.required<string>();
-
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
+export default class BsSelectFieldComponent {
+  protected readonly field = inject(NgForgeField);
 
   readonly options = input<FieldOption<string>[]>([]);
   readonly props = input<BsSelectProps>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
-  readonly meta = input<FieldMeta>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
-
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  constructor() {
-    setupMetaTracking(this.elementRef, this.meta, { selector: 'select' });
-  }
+  // Narrow FieldTree<unknown> to FieldTree<string> for the inner control's strict template type-check.
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   defaultCompare = Object.is;
 
@@ -104,27 +82,4 @@ export default class BsSelectFieldComponent implements BsSelectComponent {
 
     return fieldValue !== null && compareWith(fieldValue, optionValue);
   }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
 }

@@ -1,34 +1,37 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
-import { MatRadioComponent, MatRadioProps } from './mat-radio.type';
+import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { NgForgeField, provideSkipMetaTarget, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { MatRadioProps } from './mat-radio.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-radio',
   imports: [MatRadioGroup, MatRadioButton, FormField, MatError, DynamicTextPipe, AsyncPipe],
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  // Manual meta tracking with dependents on `options`; opt out of directive-owned tracking.
+  providers: [provideSkipMetaTarget()],
   template: `
-    @let f = field();
-    @let radioGroupId = key() + '-radio-group';
+    @let f = formFieldTree();
+    @let radioGroupId = field.key() + '-radio-group';
 
-    @if (label()) {
-      <div class="radio-label">{{ label() | dynamicText | async }}</div>
+    @if (field.label()) {
+      <div class="radio-label">{{ field.label() | dynamicText | async }}</div>
     }
 
     <mat-radio-group
       [id]="radioGroupId"
       [formField]="f"
-      [attr.aria-invalid]="ariaInvalid()"
-      [attr.aria-required]="ariaRequired()"
-      [attr.aria-describedby]="ariaDescribedBy()"
+      [attr.aria-invalid]="field.ariaInvalid()"
+      [attr.aria-required]="field.ariaRequired()"
+      [attr.aria-describedby]="field.ariaDescribedBy()"
     >
       @for (option of options(); track option.value) {
         <mat-radio-button
@@ -42,78 +45,32 @@ import { AsyncPipe } from '@angular/common';
       }
     </mat-radio-group>
 
-    @if (errorsToDisplay()[0]; as error) {
-      <mat-error [id]="errorId()">{{ error.message }}</mat-error>
+    @if (field.errorsToDisplay()[0]; as error) {
+      <mat-error [id]="field.errorId()">{{ error.message }}</mat-error>
     } @else if (props()?.hint; as hint) {
-      <div class="mat-hint" [id]="hintId()">{{ hint | dynamicText | async }}</div>
+      <div class="mat-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</div>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
-  host: {
-    '[class]': 'className() || ""',
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class MatRadioFieldComponent implements MatRadioComponent {
+export default class MatRadioFieldComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<ValueType>>();
-  readonly key = input.required<string>();
-
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
+  protected readonly field = inject(NgForgeField);
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<MatRadioProps>();
-  readonly meta = input<FieldMeta>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
-
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+  // Narrow FieldTree<unknown> to FieldTree<ValueType> for the inner control's strict template type-check.
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<ValueType>);
 
   constructor() {
-    // Apply meta attributes to all radio inputs, re-apply when options change
-    setupMetaTracking(this.elementRef, this.meta, {
+    // Manual meta tracking: dependents reference instance signals, which the
+    // declarative `provideMetaTarget` provider can't accept.
+    setupMetaTracking(this.elementRef, this.field.meta, {
       selector: 'input[type="radio"]',
       dependents: [this.options],
     });
   }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Unique ID for the hint element, used for aria-describedby */
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-
-  /** Base ID for error elements, used for aria-describedby */
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  /** aria-invalid: true when field is invalid AND touched, false otherwise */
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  /** aria-required: true if field is required, null otherwise (to remove attribute) */
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
 }

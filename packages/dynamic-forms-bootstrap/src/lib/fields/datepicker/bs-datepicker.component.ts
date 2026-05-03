@@ -1,14 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  InputMeta,
-  setupMetaTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
-import { BsDatepickerComponent, BsDatepickerProps } from './bs-datepicker.type';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { FieldTree, FormField } from '@angular/forms/signals';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { BsDatepickerProps } from './bs-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
 
@@ -16,8 +10,15 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   selector: 'df-bs-datepicker',
   imports: [FormField, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  providers: [provideMetaTarget('input')],
   template: `
-    @let f = field(); @let p = props(); @let inputId = key() + '-input';
+    @let f = formFieldTree(); @let p = props(); @let inputId = field.key() + '-input';
     @if (p?.floatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
@@ -26,36 +27,36 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
           [formField]="f"
           [id]="inputId"
           type="date"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+          [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
           [dfMin]="minAsString()"
           [dfMax]="maxAsString()"
-          [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid()"
-          [attr.aria-required]="ariaRequired()"
-          [attr.aria-describedby]="ariaDescribedBy()"
+          [attr.tabindex]="field.tabIndex()"
+          [attr.aria-invalid]="field.ariaInvalid()"
+          [attr.aria-required]="field.ariaRequired()"
+          [attr.aria-describedby]="field.ariaDescribedBy()"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"
           [class.is-invalid]="f().invalid() && f().touched()"
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
         />
-        @if (label()) {
-          <label [for]="inputId">{{ label() | dynamicText | async }}</label>
+        @if (field.label()) {
+          <label [for]="inputId">{{ field.label() | dynamicText | async }}</label>
         }
         @if (p?.validFeedback && f().valid() && f().touched()) {
           <div class="valid-feedback d-block">
             {{ p?.validFeedback | dynamicText | async }}
           </div>
         }
-        @if (errorsToDisplay()[0]; as error) {
-          <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
+        @if (field.errorsToDisplay()[0]; as error) {
+          <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
         }
       </div>
     } @else {
       <!-- Standard variant -->
       <div class="mb-3">
-        @if (label()) {
-          <label [for]="inputId" class="form-label">{{ label() | dynamicText | async }}</label>
+        @if (field.label()) {
+          <label [for]="inputId" class="form-label">{{ field.label() | dynamicText | async }}</label>
         }
 
         <input
@@ -63,13 +64,13 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
           [formField]="f"
           [id]="inputId"
           type="date"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+          [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
           [dfMin]="minAsString()"
           [dfMax]="maxAsString()"
-          [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid()"
-          [attr.aria-required]="ariaRequired()"
-          [attr.aria-describedby]="ariaDescribedBy()"
+          [attr.tabindex]="field.tabIndex()"
+          [attr.aria-invalid]="field.ariaInvalid()"
+          [attr.aria-required]="field.ariaRequired()"
+          [attr.aria-describedby]="field.ariaDescribedBy()"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"
@@ -82,21 +83,15 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
             {{ p?.validFeedback | dynamicText | async }}
           </div>
         }
-        @if (errorsToDisplay()[0]; as error) {
-          <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
+        @if (field.errorsToDisplay()[0]; as error) {
+          <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
         } @else if (p?.hint) {
-          <div class="form-text" [id]="hintId()">{{ p?.hint | dynamicText | async }}</div>
+          <div class="form-text" [id]="field.hintId()">{{ p?.hint | dynamicText | async }}</div>
         }
       </div>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[class]': 'className()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
   styles: [
     `
       :host([hidden]) {
@@ -105,33 +100,16 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
     `,
   ],
 })
-export default class BsDatepickerFieldComponent implements BsDatepickerComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
-
-  readonly field = input.required<FieldTree<Date | string>>();
-  readonly key = input.required<string>();
-
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
+export default class BsDatepickerFieldComponent {
+  protected readonly field = inject(NgForgeField);
 
   readonly minDate = input<Date | string | null>(null);
   readonly maxDate = input<Date | string | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<BsDatepickerProps>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
-  readonly meta = input<InputMeta>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
-
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  constructor() {
-    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
-  }
+  // Narrow FieldTree<unknown> to FieldTree<Date | string> for the inner control's strict template type-check.
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<Date | string>);
 
   // Helper methods to convert Date to string for HTML attributes
   readonly minAsString = computed(() => {
@@ -143,27 +121,4 @@ export default class BsDatepickerFieldComponent implements BsDatepickerComponent
     const max = this.maxDate();
     return max instanceof Date ? max.toISOString().split('T')[0] : max;
   });
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
 }

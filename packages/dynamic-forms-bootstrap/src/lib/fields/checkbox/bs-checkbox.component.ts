@@ -1,21 +1,23 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
-import { BsCheckboxComponent, BsCheckboxProps } from './bs-checkbox.type';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { FieldTree, FormField } from '@angular/forms/signals';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { BsCheckboxProps } from './bs-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-checkbox',
   imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  providers: [provideMetaTarget('input[type="checkbox"]')],
   template: `
-    @let f = field(); @let checkboxId = key() + '-checkbox';
+    @let f = formFieldTree(); @let checkboxId = field.key() + '-checkbox';
 
     <div
       class="form-check"
@@ -31,20 +33,20 @@ import { AsyncPipe } from '@angular/common';
         [indeterminate]="props()?.indeterminate ?? false"
         class="form-check-input"
         [class.is-invalid]="f().invalid() && f().touched()"
-        [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid()"
-        [attr.aria-required]="ariaRequired()"
-        [attr.aria-describedby]="ariaDescribedBy()"
+        [attr.tabindex]="field.tabIndex()"
+        [attr.aria-invalid]="field.ariaInvalid()"
+        [attr.aria-required]="field.ariaRequired()"
+        [attr.aria-describedby]="field.ariaDescribedBy()"
       />
       <label [for]="checkboxId" class="form-check-label">
-        {{ label() | dynamicText | async }}
+        {{ field.label() | dynamicText | async }}
       </label>
     </div>
 
-    @if (errorsToDisplay()[0]; as error) {
-      <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
+    @if (field.errorsToDisplay()[0]; as error) {
+      <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
     } @else if (props()?.hint; as hint) {
-      <div class="form-text" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
+      <div class="form-text" [id]="field.hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
     }
   `,
   styles: [
@@ -58,58 +60,13 @@ import { AsyncPipe } from '@angular/common';
       }
     `,
   ],
-  host: {
-    '[class]': 'className()',
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class BsCheckboxFieldComponent implements BsCheckboxComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
+export default class BsCheckboxFieldComponent {
+  protected readonly field = inject(NgForgeField);
 
-  readonly field = input.required<FieldTree<boolean>>();
-  readonly key = input.required<string>();
-
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
   readonly props = input<BsCheckboxProps>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
-  readonly meta = input<FieldMeta>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
-
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  constructor() {
-    setupMetaTracking(this.elementRef, this.meta, { selector: 'input[type="checkbox"]' });
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
+  // Narrow FieldTree<unknown> to FieldTree<boolean> for the inner control's strict template type-check.
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<boolean>);
 }

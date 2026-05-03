@@ -1,28 +1,31 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  isEqual,
-  setupMetaTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { isEqual, NgForgeField, provideSkipMetaTarget, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { MatMultiCheckboxComponent, MatMultiCheckboxProps } from './mat-multi-checkbox.type';
+import { MatMultiCheckboxProps } from './mat-multi-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-multi-checkbox',
   imports: [MatCheckbox, MatError, DynamicTextPipe, AsyncPipe],
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  // Skip directive-owned meta tracking; we set up manual tracking with `dependents: [this.options]`
+  // since the dynamic checkbox inputs need to be re-decorated when options change.
+  providers: [provideSkipMetaTarget()],
   template: `
-    @let f = field();
-    @let checkboxGroupId = key() + '-checkbox-group';
+    @let f = formFieldTree();
+    @let checkboxGroupId = field.key() + '-checkbox-group';
     @let checked = checkedValuesMap();
 
-    @if (label(); as label) {
+    @if (field.label(); as label) {
       <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
@@ -30,9 +33,9 @@ import { AsyncPipe } from '@angular/common';
       [id]="checkboxGroupId"
       class="checkbox-group"
       role="group"
-      [attr.aria-invalid]="ariaInvalid()"
-      [attr.aria-required]="ariaRequired()"
-      [attr.aria-describedby]="ariaDescribedBy()"
+      [attr.aria-invalid]="field.ariaInvalid()"
+      [attr.aria-required]="field.ariaRequired()"
+      [attr.aria-describedby]="field.ariaDescribedBy()"
     >
       @for (option of options(); track option.value) {
         <mat-checkbox
@@ -47,40 +50,29 @@ import { AsyncPipe } from '@angular/common';
       }
     </div>
 
-    @if (errorsToDisplay()[0]; as error) {
-      <mat-error [id]="errorId()">{{ error.message }}</mat-error>
+    @if (field.errorsToDisplay()[0]; as error) {
+      <mat-error [id]="field.errorId()">{{ error.message }}</mat-error>
     } @else if (props()?.hint; as hint) {
-      <div class="mat-hint" [id]="hintId()">{{ hint | dynamicText | async }}</div>
+      <div class="mat-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</div>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
-  host: {
-    '[class]': 'className() || ""',
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class MatMultiCheckboxFieldComponent implements MatMultiCheckboxComponent {
+export default class MatMultiCheckboxFieldComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<ValueType[]>>();
-  readonly key = input.required<string>();
-
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
+  protected readonly field = inject(NgForgeField);
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<MatMultiCheckboxProps>();
-  readonly meta = input<FieldMeta>();
+
+  // Narrow FieldTree<unknown> to FieldTree<ValueType[]> for the inner control's strict template type-check.
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<ValueType[]>);
 
   valueViewModel = linkedSignal<FieldOption<ValueType>[]>(
     () => {
-      const currentValues = this.field()().value();
+      const currentValues = this.formFieldTree()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
     },
     { equal: isEqual },
@@ -96,8 +88,9 @@ export default class MatMultiCheckboxFieldComponent implements MatMultiCheckboxC
   });
 
   constructor() {
-    // Apply meta attributes to all checkbox inputs, re-apply when options change
-    setupMetaTracking(this.elementRef, this.meta, {
+    // Manual meta tracking: dependents reference instance signals, which the
+    // declarative `provideMetaTarget` provider can't accept.
+    setupMetaTracking(this.elementRef, this.field.meta, {
       selector: 'input[type="checkbox"]',
       dependents: [this.options],
     });
@@ -105,8 +98,8 @@ export default class MatMultiCheckboxFieldComponent implements MatMultiCheckboxC
     explicitEffect([this.valueViewModel], ([selectedOptions]) => {
       const selectedValues = selectedOptions.map((option) => option.value);
 
-      if (!isEqual(selectedValues, this.field()().value())) {
-        this.field()().value.set(selectedValues);
+      if (!isEqual(selectedValues, this.formFieldTree()().value())) {
+        this.formFieldTree()().value.set(selectedValues);
       }
     });
 
@@ -130,41 +123,4 @@ export default class MatMultiCheckboxFieldComponent implements MatMultiCheckboxC
       }
     });
   }
-
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
-
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
-
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Unique ID for the hint element, used for aria-describedby */
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-
-  /** Base ID for error elements, used for aria-describedby */
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  /** aria-invalid: true when field is invalid AND touched, false otherwise */
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  /** aria-required: true if field is required, null otherwise (to remove attribute) */
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
 }

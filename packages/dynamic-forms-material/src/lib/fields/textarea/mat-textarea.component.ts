@@ -2,24 +2,24 @@ import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, Elemen
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  setupMetaTracking,
-  shouldShowErrors,
-  TextareaMeta,
-} from '@ng-forge/dynamic-forms/integration';
-import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { MatTextareaProps } from './mat-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
 @Component({
   selector: 'df-mat-textarea',
   imports: [MatFormField, MatLabel, MatInput, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe],
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  providers: [provideMetaTarget('textarea')],
   template: `
-    @let f = field();
-    @let textareaId = key() + '-textarea';
+    @let textareaId = field.key() + '-textarea';
 
     <mat-form-field
       [appearance]="effectiveAppearance()"
@@ -27,27 +27,27 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       [floatLabel]="effectiveFloatLabel()"
       [hideRequiredMarker]="effectiveHideRequiredMarker()"
     >
-      @if (label()) {
-        <mat-label>{{ label() | dynamicText | async }}</mat-label>
+      @if (field.label()) {
+        <mat-label>{{ field.label() | dynamicText | async }}</mat-label>
       }
 
       <textarea
         #textareaRef
         matInput
         [id]="textareaId"
-        [formField]="f"
-        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid()"
-        [attr.aria-required]="ariaRequired()"
-        [attr.aria-describedby]="ariaDescribedBy()"
+        [formField]="formFieldTree()"
+        [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="field.tabIndex()"
+        [attr.aria-invalid]="field.ariaInvalid()"
+        [attr.aria-required]="field.ariaRequired()"
+        [attr.aria-describedby]="field.ariaDescribedBy()"
         [style.resize]="props()?.resize || 'vertical'"
       ></textarea>
 
-      @if (errorsToDisplay()[0]; as error) {
-        <mat-error [id]="errorId()">{{ error.message }}</mat-error>
+      @if (field.errorsToDisplay()[0]; as error) {
+        <mat-error [id]="field.errorId()">{{ error.message }}</mat-error>
       } @else if (props()?.hint; as hint) {
-        <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
+        <mat-hint [id]="field.hintId()">{{ hint | dynamicText | async }}</mat-hint>
       }
     </mat-form-field>
   `,
@@ -60,32 +60,16 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[class]': 'className()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
 })
-export default class MatTextareaFieldComponent implements MatTextareaComponent {
+export default class MatTextareaFieldComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<string>>();
-  readonly key = input.required<string>();
+  protected readonly field = inject(NgForgeField);
 
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
   readonly props = input<MatTextareaProps>();
-  readonly meta = input<TextareaMeta>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  constructor() {
-    setupMetaTracking(this.elementRef, this.meta, { selector: 'textarea' });
-  }
+  // Narrow FieldTree<unknown> to FieldTree<string> for the inner control's strict template type-check.
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   /**
    * Reference to the native textarea element.
@@ -98,7 +82,7 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
    * Computed signal that extracts the readonly state from the field.
    * Used by the effect to reactively sync the readonly attribute to the DOM.
    */
-  private readonly isReadonly = computed(() => this.field()().readonly());
+  private readonly isReadonly = computed(() => this.formFieldTree()().readonly());
 
   /**
    * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly
@@ -133,39 +117,5 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
   readonly effectiveFloatLabel = computed(() => this.props()?.floatLabel ?? this.materialConfig?.floatLabel ?? 'auto');
   readonly effectiveHideRequiredMarker = computed(
     () => this.props()?.hideRequiredMarker ?? this.materialConfig?.hideRequiredMarker ?? false,
-  );
-
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
-
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Unique ID for the hint element, used for aria-describedby */
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-
-  /** Base ID for error elements, used for aria-describedby */
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  /** aria-invalid: true when field is invalid AND touched, false otherwise */
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  /** aria-required: true if field is required, null otherwise (to remove attribute) */
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
   );
 }

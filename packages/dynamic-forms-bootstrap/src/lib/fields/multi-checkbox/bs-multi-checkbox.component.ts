@@ -1,25 +1,28 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  createAriaDescribedBySignal,
-  createResolvedErrorsSignal,
-  isEqual,
-  setupMetaTracking,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-forms/integration';
+import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { isEqual, NgForgeField, provideSkipMetaTarget, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { BsMultiCheckboxComponent, BsMultiCheckboxProps } from './bs-multi-checkbox.type';
+import { BsMultiCheckboxProps } from './bs-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-multi-checkbox',
   imports: [DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
+  hostDirectives: [
+    {
+      directive: NgForgeField,
+      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
+    },
+  ],
+  // Skip directive-owned meta tracking; we set up manual tracking with `dependents: [this.options]`
+  // since the dynamic checkbox inputs need to be re-decorated when options change.
+  providers: [provideSkipMetaTarget()],
   template: `
-    @let f = field();
+    @let f = formFieldTree();
     @let checked = checkedValuesMap();
-    @if (label(); as label) {
+    @if (field.label(); as label) {
       <div class="form-label">{{ label | dynamicText | async }}</div>
     }
 
@@ -33,28 +36,28 @@ import { AsyncPipe } from '@angular/common';
         >
           <input
             type="checkbox"
-            [id]="key() + '_' + i"
+            [id]="field.key() + '_' + i"
             [checked]="checked['' + option.value]"
             [disabled]="f().disabled() || option.disabled"
             (change)="onCheckboxChange(option, $event)"
             class="form-check-input"
             [class.is-invalid]="f().invalid() && f().touched()"
-            [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid()"
-            [attr.aria-required]="ariaRequired()"
-            [attr.aria-describedby]="ariaDescribedBy()"
+            [attr.tabindex]="field.tabIndex()"
+            [attr.aria-invalid]="field.ariaInvalid()"
+            [attr.aria-required]="field.ariaRequired()"
+            [attr.aria-describedby]="field.ariaDescribedBy()"
           />
-          <label [for]="key() + '_' + i" class="form-check-label">
+          <label [for]="field.key() + '_' + i" class="form-check-label">
             {{ option.label | dynamicText | async }}
           </label>
         </div>
       }
     </div>
 
-    @if (errorsToDisplay()[0]; as error) {
-      <div class="invalid-feedback d-block" [id]="errorId()" role="alert">{{ error.message }}</div>
+    @if (field.errorsToDisplay()[0]; as error) {
+      <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
     } @else if (props()?.hint; as hint) {
-      <div class="form-text" [id]="hintId()">{{ hint | dynamicText | async }}</div>
+      <div class="form-text" [id]="field.hintId()">{{ hint | dynamicText | async }}</div>
     }
   `,
   styles: [
@@ -72,36 +75,17 @@ import { AsyncPipe } from '@angular/common';
       }
     `,
   ],
-  host: {
-    '[class]': 'className() || ""',
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class BsMultiCheckboxFieldComponent implements BsMultiCheckboxComponent {
+export default class BsMultiCheckboxFieldComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<ValueType[]>>();
-  readonly key = input.required<string>();
-
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
+  protected readonly field = inject(NgForgeField);
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<BsMultiCheckboxProps>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
-  readonly meta = input<FieldMeta>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
-
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<ValueType[]>);
 
   /** Computed map of checked option values for O(1) lookup in template */
   readonly checkedValuesMap = computed(() => {
@@ -114,20 +98,25 @@ export default class BsMultiCheckboxFieldComponent implements BsMultiCheckboxCom
 
   valueViewModel = linkedSignal<FieldOption<ValueType>[]>(
     () => {
-      const currentValues = this.field()().value();
+      const currentValues = this.formFieldTree()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
     },
     { equal: isEqual },
   );
 
   constructor() {
-    setupMetaTracking(this.elementRef, this.meta, { selector: 'input[type="checkbox"]', dependents: [this.options] });
+    // Manual meta tracking: dependents reference instance signals, which the
+    // declarative `provideMetaTarget` provider can't accept.
+    setupMetaTracking(this.elementRef, this.field.meta, {
+      selector: 'input[type="checkbox"]',
+      dependents: [this.options],
+    });
 
     explicitEffect([this.valueViewModel], ([selectedOptions]: [FieldOption<ValueType>[]]) => {
       const selectedValues = selectedOptions.map((option: FieldOption<ValueType>) => option.value);
 
-      if (!isEqual(selectedValues, this.field()().value())) {
-        this.field()().value.set(selectedValues);
+      if (!isEqual(selectedValues, this.formFieldTree()().value())) {
+        this.formFieldTree()().value.set(selectedValues);
       }
     });
 
@@ -154,27 +143,4 @@ export default class BsMultiCheckboxFieldComponent implements BsMultiCheckboxCom
       }
     });
   }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
 }
