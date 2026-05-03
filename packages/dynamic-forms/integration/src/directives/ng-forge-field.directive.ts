@@ -56,34 +56,19 @@ import { MetaTargetConfig, NG_FORGE_FIELD_META_TARGET } from './meta-target.toke
  */
 @Directive({
   host: {
-    // The bindings tolerate `key`/`field` being undefined because host bindings
-    // on a hostDirective can evaluate before forwarded inputs propagate during
-    // NgComponentOutlet creation. Reading a `.required()` input in that window
-    // throws NG0950 and the throw breaks computed dependency tracking, so we
-    // declare these inputs as optional below — the host directive's `inputs:`
-    // array still enforces that consumers forward them at compile time.
-    '[id]': 'key() || null',
-    '[attr.data-testid]': 'key() || null',
+    '[id]': 'key()',
+    '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[attr.hidden]': '(field()?.()?.hidden?.() ?? false) || null',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
 })
 export class NgForgeField {
   // ───────────────────────────────────────────────────────────────────────────
   // Forwarded inputs (the 9 standard inputs that adapter mappers emit).
-  //
-  // `field` and `key` are typed as optional even though every consumer must
-  // forward them via the host directive's `inputs:` array. Marking them
-  // `.required()` would throw NG0950 in the brief window before forwarded
-  // inputs propagate during dynamic component creation; using
-  // `try/catch`-guarded computeds doesn't help either because the throw
-  // breaks Angular's reactive dependency tracking. Internal use casts
-  // through `fieldRef` below; external consumers narrow via their own
-  // `formFieldTree` accessors.
   // ───────────────────────────────────────────────────────────────────────────
 
-  readonly field = input<FieldTree<unknown>>();
-  readonly key = input<string>('');
+  readonly field = input.required<FieldTree<unknown>>();
+  readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();
@@ -106,22 +91,12 @@ export class NgForgeField {
   // Error display
   // ───────────────────────────────────────────────────────────────────────────
 
-  // The bridging utilities expect `Signal<FieldTree<T>>` but our input is
-  // typed as optional (see the input declarations above for context). The
-  // inner signals (`_errorsRaw`, `_showErrorsRaw`) take the cast input;
-  // their evaluation is gated by the outer computeds below, which short-
-  // circuit while the input is still undefined to avoid invoking a
-  // not-yet-bound signal as a function.
-
-  private readonly _errorsRaw: Signal<ResolvedError[]> = createResolvedErrorsSignal(
-    this.field as Signal<FieldTree<unknown>>,
+  readonly errors: Signal<ResolvedError[]> = createResolvedErrorsSignal(
+    this.field,
     this.validationMessages,
     this.defaultValidationMessages,
   );
-  private readonly _showErrorsRaw: Signal<boolean> = shouldShowErrors(this.field as Signal<FieldTree<unknown>>);
-
-  readonly errors: Signal<ResolvedError[]> = computed(() => (this.field() ? this._errorsRaw() : []));
-  readonly showErrors: Signal<boolean> = computed(() => (this.field() ? this._showErrorsRaw() : false));
+  readonly showErrors: Signal<boolean> = shouldShowErrors(this.field);
   readonly errorsToDisplay: Signal<ResolvedError[]> = computed(() => (this.showErrors() ? this.errors() : []));
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -132,15 +107,12 @@ export class NgForgeField {
   readonly hintId: Signal<string> = computed(() => `${this.key()}-hint`);
 
   readonly ariaInvalid: Signal<boolean> = computed(() => {
-    const tree = this.field();
-    if (!tree) return false;
-    const state = tree();
+    const state = this.field()();
     return state.invalid() && state.touched();
   });
 
   readonly ariaRequired: Signal<true | null> = computed(() => {
-    const tree = this.field();
-    return tree && tree().required?.() === true ? true : null;
+    return this.field()().required?.() === true ? true : null;
   });
 
   readonly ariaDescribedBy: Signal<string | null> = createAriaDescribedBySignal(this.errorsToDisplay, this.errorId, this.hintId, () =>

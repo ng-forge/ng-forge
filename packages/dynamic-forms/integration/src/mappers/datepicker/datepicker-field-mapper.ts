@@ -1,5 +1,5 @@
 import { computed, inject, Signal } from '@angular/core';
-import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES } from '@ng-forge/dynamic-forms';
+import { DEFAULT_PROPS } from '@ng-forge/dynamic-forms';
 import { DatepickerField } from '../../definitions';
 import { resolveValueFieldContext, buildValueFieldInputs } from '../value/value-field.mapper';
 
@@ -36,10 +36,9 @@ function toDate(value: Date | string | null | undefined): Date | null {
 export function datepickerFieldMapper<TProps>(fieldDef: DatepickerField<TProps>): Signal<Record<string, unknown>> {
   const ctx = resolveValueFieldContext();
   const defaultProps = inject(DEFAULT_PROPS);
-  const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES);
 
   return computed(() => {
-    const inputs = buildValueFieldInputs(fieldDef, ctx, defaultProps(), defaultValidationMessages());
+    const inputs = buildValueFieldInputs(fieldDef, ctx, defaultProps());
 
     // Add datepicker-specific properties, converting strings to Date objects
     if (fieldDef.minDate !== undefined) {

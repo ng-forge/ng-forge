@@ -2,7 +2,7 @@ import { BaseCheckedField } from '@ng-forge/dynamic-forms';
 import { FieldDef } from '@ng-forge/dynamic-forms';
 import { computed, inject, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { buildBaseInputs, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES } from '@ng-forge/dynamic-forms';
+import { buildBaseInputs, DEFAULT_PROPS } from '@ng-forge/dynamic-forms';
 import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
 import { omit } from '@ng-forge/dynamic-forms';
 
@@ -18,12 +18,10 @@ import { omit } from '@ng-forge/dynamic-forms';
 export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal<Record<string, unknown>> {
   const context = inject(FIELD_SIGNAL_CONTEXT);
   const defaultProps = inject(DEFAULT_PROPS);
-  const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES);
 
   return computed(() => {
     const omittedFields = omit(fieldDef, ['value']) as FieldDef<unknown>;
     const baseInputs = buildBaseInputs(omittedFields, defaultProps());
-    const validationMessages = defaultValidationMessages();
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
@@ -34,9 +32,8 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal
       inputs['placeholder'] = fieldDef.placeholder;
     }
 
-    if (validationMessages !== undefined) {
-      inputs['defaultValidationMessages'] = validationMessages;
-    }
+    // `defaultValidationMessages` is intentionally NOT emitted — the bridging
+    // directive (NgForgeField) reads it from `DEFAULT_VALIDATION_MESSAGES` DI.
 
     // Access form inside computed for reactivity and to handle cases where
     // form may not be immediately available (e.g., during array item initialization)

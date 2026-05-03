@@ -52,8 +52,7 @@ function getDeclaredInputs(componentType: Type<unknown>): Set<string> {
  * avoiding the reflection scan on each call is meaningful under heavy typing.
  */
 export function setInputIfDeclared(ref: ComponentRef<unknown>, inputName: string, value: unknown): void {
-  const declared = getDeclaredInputs(ref.componentType);
-  if (declared.has(inputName)) {
+  if (getDeclaredInputs(ref.componentType).has(inputName)) {
     ref.setInput(inputName, value);
   }
 }

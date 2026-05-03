@@ -1,10 +1,9 @@
 import { BaseValueField, FieldMeta } from '@ng-forge/dynamic-forms';
 import { computed, inject, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { buildBaseInputs, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES } from '@ng-forge/dynamic-forms';
+import { buildBaseInputs, DEFAULT_PROPS } from '@ng-forge/dynamic-forms';
 import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
 import { omit } from '@ng-forge/dynamic-forms';
-import { ValidationMessages } from '@ng-forge/dynamic-forms';
 
 /**
  * Context for value field mapping, containing the injected context reference.
@@ -66,14 +65,18 @@ export function resolveValueFieldContext(): ValueFieldContext {
  * @param fieldDef The value field definition
  * @param ctx The resolved value field context
  * @param defaultProps Default props from the form configuration (may be undefined if not configured)
- * @param defaultValidationMessages Default validation messages from the form configuration (may be undefined if not configured)
  * @returns Record of input names to values
+ *
+ * Note: `defaultValidationMessages` is intentionally NOT a parameter and NOT
+ * emitted in the result. Bridging directives (e.g. `NgForgeField`) read the
+ * `DEFAULT_VALIDATION_MESSAGES` token directly from DI. Emitting it as an
+ * input would force every consumer to declare a matching input or trigger
+ * NG0303 when `setInput` is called.
  */
 export function buildValueFieldInputs<TProps, TValue = unknown>(
   fieldDef: BaseValueField<TProps, TValue, FieldMeta, boolean>,
   ctx: ValueFieldContext,
   defaultProps?: Record<string, unknown>,
-  defaultValidationMessages?: ValidationMessages,
 ): Record<string, unknown> {
   const omittedFields = omit(fieldDef, ['value']);
   const baseInputs = buildBaseInputs(omittedFields, defaultProps);
@@ -85,10 +88,6 @@ export function buildValueFieldInputs<TProps, TValue = unknown>(
 
   if (fieldDef.placeholder !== undefined) {
     inputs['placeholder'] = fieldDef.placeholder;
-  }
-
-  if (defaultValidationMessages !== undefined) {
-    inputs['defaultValidationMessages'] = defaultValidationMessages;
   }
 
   // Resolve field tree reactively - this call is inside a computed,
@@ -127,13 +126,12 @@ export function valueFieldMapper<TProps = unknown, TValue = unknown>(
   // Get the context once at injection time (captures the FIELD_SIGNAL_CONTEXT reference)
   const ctx = resolveValueFieldContext();
   const defaultProps = inject(DEFAULT_PROPS);
-  const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES);
 
   // The computed calls ctx.getFieldTree(fieldDef.key) inside, which:
   // 1. Accesses context.form (triggering the getter for array items)
   // 2. Returns the field tree if available, or undefined if not yet
   // 3. Re-runs when the form structure updates (reactive dependency)
   return computed(() => {
-    return buildValueFieldInputs(fieldDef, ctx, defaultProps(), defaultValidationMessages());
+    return buildValueFieldInputs(fieldDef, ctx, defaultProps());
   });
 }

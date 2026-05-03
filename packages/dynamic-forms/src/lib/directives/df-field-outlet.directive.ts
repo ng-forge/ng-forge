@@ -15,7 +15,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ResolvedField } from '../utils/resolve-field/resolve-field';
 import { WRAPPER_AUTO_ASSOCIATIONS } from '../models/wrapper-type';
 import { DEFAULT_WRAPPERS } from '../models/field-signal-context.token';
-import { createWrapperAwareInjector, setInputIfDeclared } from '../utils/wrapper-chain/wrapper-chain';
+import { createWrapperAwareInjector } from '../utils/wrapper-chain/wrapper-chain';
 import { createWrapperChainController } from '../utils/wrapper-chain/wrapper-chain-controller';
 import { isSameWrapperChain, resolveWrappers } from '../utils/resolve-wrappers/resolve-wrappers';
 import { READONLY_FIELD_TREE_CACHE, toReadonlyFieldTreeCached } from '../core/field-tree-utils';
@@ -155,6 +155,13 @@ export class DfFieldOutlet {
         });
         this.fieldSlot = slot;
         this.pushRawInputs(this.fieldRef, this.rawInputs());
+        // Detect changes synchronously after inputs are pushed so the field's
+        // first CD cycle sees fully-bound inputs. Without this, the parent's
+        // cascading CD can run the field's template before pushRawInputs has
+        // propagated forwarded inputs onto host directives — surfacing as
+        // "field is not a function" or NG0950 in inputs read by host bindings
+        // / `[formField]` bindings on the inner control.
+        this.fieldRef.changeDetectorRef.detectChanges();
       },
     });
 
@@ -216,10 +223,19 @@ export class DfFieldOutlet {
 
   private pushRawInputs(ref: ComponentRef<unknown>, rawInputs: Record<string, unknown>): void {
     // Ref-identity dedupe per key — mappers must emit immutable snapshots.
+    //
+    // Use `ref.setInput` directly here (no `setInputIfDeclared` filter) because
+    // field components may consume forwarded inputs via `hostDirectives` and
+    // `reflectComponentType` does NOT include those (angular/angular#49734) —
+    // the filter would silently skip the directive's inputs entirely. The
+    // mapper-as-contract: every key the mapper emits must match a declared
+    // input on the component or one of its host directives. If a future mapper
+    // emits a key no consumer accepts, NG0303 surfaces immediately as an
+    // actionable error rather than a silent drop.
     const last = this.lastPushedInputs;
     for (const [key, value] of Object.entries(rawInputs)) {
       if (last && last[key] === value) continue;
-      setInputIfDeclared(ref, key, value);
+      ref.setInput(key, value);
     }
     this.lastPushedInputs = rawInputs;
   }
