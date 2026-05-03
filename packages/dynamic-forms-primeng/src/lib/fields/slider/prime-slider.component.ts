@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FormField } from '@angular/forms/signals';
+import { FieldTree, FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
 import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { PrimeSliderProps } from './prime-slider.type';
@@ -18,7 +18,7 @@ import { Slider } from 'primeng/slider';
   ],
   providers: [provideMetaTarget('input')],
   template: `
-    @let f = field.field();
+    @let f = formFieldTree();
 
     <div class="df-prime-field">
       @if (field.label(); as label) {
@@ -61,6 +61,8 @@ export default class PrimeSliderFieldComponent {
 
   readonly step = input<number>();
   readonly props = input<PrimeSliderProps>();
+
+  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<number>);
 
   protected readonly sliderClasses = computed(() => {
     const classes: string[] = [];

@@ -56,25 +56,34 @@ import { MetaTargetConfig, NG_FORGE_FIELD_META_TARGET } from './meta-target.toke
  */
 @Directive({
   host: {
-    // Bind to safe-accessor computeds (not the required-input getters directly)
-    // because host bindings on a hostDirective can evaluate before forwarded
-    // inputs are propagated during NgComponentOutlet creation. Reading
-    // `.required()` in that window throws NG0950. The accessors catch the
-    // pre-binding window and return null until the inputs land on the next
-    // CD cycle, at which point the bindings update with real values.
-    '[id]': 'hostId()',
-    '[attr.data-testid]': 'hostId()',
-    '[class]': 'hostClass()',
-    '[attr.hidden]': 'hostHidden()',
+    // The bindings tolerate `key`/`field` being undefined because host bindings
+    // on a hostDirective can evaluate before forwarded inputs propagate during
+    // NgComponentOutlet creation. Reading a `.required()` input in that window
+    // throws NG0950 and the throw breaks computed dependency tracking, so we
+    // declare these inputs as optional below — the host directive's `inputs:`
+    // array still enforces that consumers forward them at compile time.
+    '[id]': 'key() || null',
+    '[attr.data-testid]': 'key() || null',
+    '[class]': 'className()',
+    '[attr.hidden]': '(field()?.()?.hidden?.() ?? false) || null',
   },
 })
 export class NgForgeField {
   // ───────────────────────────────────────────────────────────────────────────
   // Forwarded inputs (the 9 standard inputs that adapter mappers emit).
+  //
+  // `field` and `key` are typed as optional even though every consumer must
+  // forward them via the host directive's `inputs:` array. Marking them
+  // `.required()` would throw NG0950 in the brief window before forwarded
+  // inputs propagate during dynamic component creation; using
+  // `try/catch`-guarded computeds doesn't help either because the throw
+  // breaks Angular's reactive dependency tracking. Internal use casts
+  // through `fieldRef` below; external consumers narrow via their own
+  // `formFieldTree` accessors.
   // ───────────────────────────────────────────────────────────────────────────
 
-  readonly field = input.required<FieldTree<unknown>>();
-  readonly key = input.required<string>();
+  readonly field = input<FieldTree<unknown>>();
+  readonly key = input<string>('');
 
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();
@@ -97,12 +106,18 @@ export class NgForgeField {
   // Error display
   // ───────────────────────────────────────────────────────────────────────────
 
+  // Internal cast for bridging utilities. The util signatures expect
+  // `Signal<FieldTree<T>>`, not the optional-typed input. Reading the cast
+  // signal happens only in reactive contexts (computed/effect), which run
+  // AFTER inputs have propagated, so the cast is sound at runtime.
+  private readonly fieldRef = this.field as Signal<FieldTree<unknown>>;
+
   readonly errors: Signal<ResolvedError[]> = createResolvedErrorsSignal(
-    this.field,
+    this.fieldRef,
     this.validationMessages,
     this.defaultValidationMessages,
   );
-  readonly showErrors: Signal<boolean> = shouldShowErrors(this.field);
+  readonly showErrors: Signal<boolean> = shouldShowErrors(this.fieldRef);
   readonly errorsToDisplay: Signal<ResolvedError[]> = computed(() => (this.showErrors() ? this.errors() : []));
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -113,45 +128,17 @@ export class NgForgeField {
   readonly hintId: Signal<string> = computed(() => `${this.key()}-hint`);
 
   readonly ariaInvalid: Signal<boolean> = computed(() => {
-    const state = this.field()();
+    const state = this.fieldRef()();
     return state.invalid() && state.touched();
   });
 
   readonly ariaRequired: Signal<true | null> = computed(() => {
-    return this.field()().required?.() === true ? true : null;
+    return this.fieldRef()().required?.() === true ? true : null;
   });
 
   readonly ariaDescribedBy: Signal<string | null> = createAriaDescribedBySignal(this.errorsToDisplay, this.errorId, this.hintId, () =>
     Boolean((this.props() as { hint?: unknown } | undefined)?.hint),
   );
-
-  // ───────────────────────────────────────────────────────────────────────────
-  // Host-binding accessors (NG0950-safe — see directive @host comment)
-  // ───────────────────────────────────────────────────────────────────────────
-
-  protected readonly hostId = computed(() => {
-    try {
-      return this.key();
-    } catch {
-      return null;
-    }
-  });
-
-  protected readonly hostClass = computed(() => {
-    try {
-      return this.className();
-    } catch {
-      return '';
-    }
-  });
-
-  protected readonly hostHidden = computed(() => {
-    try {
-      return this.field()().hidden() || null;
-    } catch {
-      return null;
-    }
-  });
 
   // ───────────────────────────────────────────────────────────────────────────
   // Meta-attribute forwarding
