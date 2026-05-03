@@ -10,8 +10,8 @@ import { MetaTargetConfig, NG_FORGE_FIELD_META_TARGET } from './meta-target.toke
 /**
  * `NgForgeField` is the canonical primitive for ng-forge value-field components.
  *
- * Apply via `hostDirectives: [{ directive: NgForgeField, inputs: [...] }]` to
- * consume the standard 9 inputs (`field`, `key`, `label`, `placeholder`,
+ * Apply via `hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }]`
+ * to consume the standard 9 inputs (`field`, `key`, `label`, `placeholder`,
  * `className`, `tabIndex`, `props`, `meta`, `validationMessages`) and the
  * directive's derived signals (errors, showErrors, errorsToDisplay, errorId,
  * hintId, ariaInvalid, ariaRequired, ariaDescribedBy). Read derived state via
@@ -24,13 +24,7 @@ import { MetaTargetConfig, NG_FORGE_FIELD_META_TARGET } from './meta-target.toke
  * @example
  * ```ts
  * \@Component({
- *   hostDirectives: [
- *     {
- *       directive: NgForgeField,
- *       inputs: ['field', 'key', 'label', 'placeholder', 'className',
- *                'tabIndex', 'props', 'meta', 'validationMessages'],
- *     },
- *   ],
+ *   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
  *   providers: [provideMetaTarget('mat-select')],
  *   template: `
  *     <label [for]="controlId()">{{ field.label() | dynamicText | async }}</label>
@@ -50,9 +44,12 @@ import { MetaTargetConfig, NG_FORGE_FIELD_META_TARGET } from './meta-target.toke
  * The directive is intentionally selector-less — usage is exclusively via
  * `hostDirectives`, never as a standalone selector match.
  *
- * Note: Angular's compiler requires the `hostDirectives` entry — both the
- * directive class reference and the `inputs` array — to be inlined as
- * literal expressions. Const-shared shapes are rejected (NG1010 / NG2019).
+ * Note: the `directive: NgForgeField` reference must be inlined at the call
+ * site — Angular's AOT compiler can't resolve a class reference fetched via
+ * property access on a const imported across package boundaries (NG1010).
+ * The `inputs` list, however, can be shared — `as const` preserves the literal
+ * tuple in the emitted `.d.ts`, so `[...NG_FORGE_FIELD_INPUTS]` produces an
+ * array literal that the compiler can statically resolve (NG2019 satisfied).
  */
 @Directive({
   host: {
@@ -138,3 +135,22 @@ export class NgForgeField {
     });
   }
 }
+
+/**
+ * The 9 standard inputs forwarded by `NgForgeField`.
+ *
+ * `as const` preserves the literal tuple in the emitted `.d.ts`, so consumers
+ * can spread it into a `hostDirectives` entry and Angular's AOT compiler can
+ * still see every input name at build time (NG2019 satisfied).
+ */
+export const NG_FORGE_FIELD_INPUTS = [
+  'field',
+  'key',
+  'label',
+  'placeholder',
+  'className',
+  'tabIndex',
+  'props',
+  'meta',
+  'validationMessages',
+] as const;

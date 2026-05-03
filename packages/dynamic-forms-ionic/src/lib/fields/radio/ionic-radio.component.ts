@@ -2,19 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonItem, IonNote, IonRadio, IonRadioGroup } from '@ionic/angular/standalone';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { NgForgeField, provideSkipMetaTarget, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideSkipMetaTarget, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { IonicRadioProps } from './ionic-radio.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ion-radio',
   imports: [IonRadioGroup, IonRadio, IonItem, IonNote, FormField, DynamicTextPipe, AsyncPipe],
-  hostDirectives: [
-    {
-      directive: NgForgeField,
-      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
-    },
-  ],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   // Manual meta tracking with dependents on `options`; opt out of directive-owned tracking.
   providers: [provideSkipMetaTarget()],
   template: `

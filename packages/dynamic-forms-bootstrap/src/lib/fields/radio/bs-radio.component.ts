@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { NgForgeField, provideSkipMetaTarget, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideSkipMetaTarget, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { BsRadioProps } from './bs-radio.type';
 import { AsyncPipe } from '@angular/common';
 import { BsRadioGroupComponent } from './bs-radio-group.component';
@@ -10,12 +10,7 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
   selector: 'df-bs-radio',
   imports: [BsRadioGroupComponent, FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [
-    {
-      directive: NgForgeField,
-      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
-    },
-  ],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   // Manual meta tracking with dependents on `options`; opt out of directive-owned tracking.
   providers: [provideSkipMetaTarget()],
   template: `

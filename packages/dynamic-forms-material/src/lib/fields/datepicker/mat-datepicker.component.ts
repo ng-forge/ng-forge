@@ -4,7 +4,7 @@ import { MatError, MatFormField, MatLabel, MatSuffix } from '@angular/material/f
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { MatDatepickerProps } from './mat-datepicker.type';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AsyncPipe } from '@angular/common';
@@ -26,12 +26,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
     DynamicTextPipe,
     AsyncPipe,
   ],
-  hostDirectives: [
-    {
-      directive: NgForgeField,
-      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
-    },
-  ],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
     @let inputId = field.key() + '-input';
 

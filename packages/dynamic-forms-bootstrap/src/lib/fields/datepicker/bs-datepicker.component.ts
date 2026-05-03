@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { BsDatepickerProps } from './bs-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
@@ -10,12 +10,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   selector: 'df-bs-datepicker',
   imports: [FormField, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [
-    {
-      directive: NgForgeField,
-      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
-    },
-  ],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('input')],
   template: `
     @let f = formFieldTree(); @let p = props(); @let inputId = field.key() + '-input';

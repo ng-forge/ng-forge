@@ -1,7 +1,7 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { BsTextareaProps } from './bs-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -9,12 +9,7 @@ import { AsyncPipe } from '@angular/common';
   selector: 'df-bs-textarea',
   imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [
-    {
-      directive: NgForgeField,
-      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
-    },
-  ],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('textarea')],
   template: `
     @let f = formFieldTree(); @let p = props(); @let textareaId = field.key() + '-textarea';

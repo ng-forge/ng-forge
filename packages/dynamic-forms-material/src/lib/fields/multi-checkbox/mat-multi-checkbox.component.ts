@@ -2,7 +2,13 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { isEqual, NgForgeField, provideSkipMetaTarget, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import {
+  isEqual,
+  NgForgeField,
+  NG_FORGE_FIELD_INPUTS,
+  provideSkipMetaTarget,
+  setupMetaTracking,
+} from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { MatMultiCheckboxProps } from './mat-multi-checkbox.type';
 import { MatError } from '@angular/material/input';
@@ -11,12 +17,7 @@ import { AsyncPipe } from '@angular/common';
 @Component({
   selector: 'df-mat-multi-checkbox',
   imports: [MatCheckbox, MatError, DynamicTextPipe, AsyncPipe],
-  hostDirectives: [
-    {
-      directive: NgForgeField,
-      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
-    },
-  ],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   // Skip directive-owned meta tracking; we set up manual tracking with `dependents: [this.options]`
   // since the dynamic checkbox inputs need to be re-decorated when options change.
   providers: [provideSkipMetaTarget()],

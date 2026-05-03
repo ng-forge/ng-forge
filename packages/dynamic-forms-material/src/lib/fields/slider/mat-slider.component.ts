@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { MatSliderProps } from './mat-slider.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
@@ -10,12 +10,7 @@ import { AsyncPipe } from '@angular/common';
 @Component({
   selector: 'df-mat-slider',
   imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe, FormField],
-  hostDirectives: [
-    {
-      directive: NgForgeField,
-      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
-    },
-  ],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('input')],
   template: `
     @let f = formFieldTree();

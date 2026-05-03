@@ -2,7 +2,7 @@ import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, Elemen
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 
 import { MatToggleProps } from './mat-toggle.type';
 import { MatError } from '@angular/material/input';
@@ -12,12 +12,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 @Component({
   selector: 'df-mat-toggle',
   imports: [MatSlideToggle, FormField, MatError, DynamicTextPipe, AsyncPipe],
-  hostDirectives: [
-    {
-      directive: NgForgeField,
-      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
-    },
-  ],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   // mat-slide-toggle uses <button role="switch"> instead of <input type="checkbox">
   providers: [provideMetaTarget('button[role="switch"]')],
   template: `

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { NgForgeField, provideHostMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideHostMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 import { PrimeSelectProps } from './prime-select.type';
 import { PrimeSelectControlComponent } from './prime-select-control.component';
@@ -10,12 +10,7 @@ import { PrimeSelectControlComponent } from './prime-select-control.component';
   selector: 'df-prime-select',
   imports: [FormField, PrimeSelectControlComponent, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [
-    {
-      directive: NgForgeField,
-      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
-    },
-  ],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideHostMetaTarget()],
   template: `
     <div class="df-prime-field">

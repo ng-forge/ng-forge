@@ -2,19 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonNote, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { IonicSelectProps } from './ionic-select.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ion-select',
   imports: [IonSelect, IonSelectOption, IonNote, FormField, DynamicTextPipe, AsyncPipe],
-  hostDirectives: [
-    {
-      directive: NgForgeField,
-      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
-    },
-  ],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('ion-select')],
   template: `
     @let f = formFieldTree();

@@ -3,7 +3,13 @@ import { FieldTree } from '@angular/forms/signals';
 import { FormsModule } from '@angular/forms';
 import { Checkbox, CheckboxChangeEvent } from 'primeng/checkbox';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { isEqual, NgForgeField, provideSkipMetaTarget, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import {
+  isEqual,
+  NgForgeField,
+  NG_FORGE_FIELD_INPUTS,
+  provideSkipMetaTarget,
+  setupMetaTracking,
+} from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PrimeMultiCheckboxProps } from './prime-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
@@ -12,12 +18,7 @@ import { AsyncPipe } from '@angular/common';
   selector: 'df-prime-multi-checkbox',
   imports: [Checkbox, FormsModule, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [
-    {
-      directive: NgForgeField,
-      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
-    },
-  ],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   // Skip directive-owned meta tracking; we set up manual tracking with `dependents: [this.options]`
   // since the dynamic radio-style inputs need to be re-decorated when options change.
   providers: [provideSkipMetaTarget()],

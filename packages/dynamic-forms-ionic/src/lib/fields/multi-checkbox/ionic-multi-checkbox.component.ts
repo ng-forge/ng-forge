@@ -2,7 +2,13 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FieldTree } from '@angular/forms/signals';
 import { IonCheckbox, IonItem, IonNote } from '@ionic/angular/standalone';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { isEqual, NgForgeField, provideSkipMetaTarget, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import {
+  isEqual,
+  NgForgeField,
+  NG_FORGE_FIELD_INPUTS,
+  provideSkipMetaTarget,
+  setupMetaTracking,
+} from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { IonicMultiCheckboxProps } from './ionic-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
@@ -10,12 +16,7 @@ import { AsyncPipe } from '@angular/common';
 @Component({
   selector: 'df-ion-multi-checkbox',
   imports: [IonCheckbox, IonItem, IonNote, DynamicTextPipe, AsyncPipe],
-  hostDirectives: [
-    {
-      directive: NgForgeField,
-      inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
-    },
-  ],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   // Skip directive-owned meta tracking; we set up manual tracking with `dependents: [this.options]`
   // since the dynamic ion-checkbox elements need to be re-decorated when options change.
   providers: [provideSkipMetaTarget()],
