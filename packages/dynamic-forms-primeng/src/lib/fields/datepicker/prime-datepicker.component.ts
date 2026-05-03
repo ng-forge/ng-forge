@@ -1,11 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { PrimeDatepickerComponent, PrimeDatepickerProps } from './prime-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeDatepickerControlComponent } from './prime-datepicker-control.component';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-datepicker',

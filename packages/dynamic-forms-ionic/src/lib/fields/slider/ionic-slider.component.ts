@@ -2,10 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonNote, IonRange } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { IonicSliderComponent, IonicSliderProps } from './ionic-slider.type';
 import { AsyncPipe } from '@angular/common';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-ion-slider',

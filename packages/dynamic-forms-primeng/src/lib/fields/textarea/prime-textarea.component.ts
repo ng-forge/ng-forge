@@ -1,11 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  shouldShowErrors,
+  TextareaMeta,
+} from '@ng-forge/dynamic-forms/integration';
 import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeTextareaControlComponent } from './prime-textarea-control.component';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-textarea',

@@ -1,11 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
 import { PrimeSelectControlComponent } from './prime-select-control.component';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-select',

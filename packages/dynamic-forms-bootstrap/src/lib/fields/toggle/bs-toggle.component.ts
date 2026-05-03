@@ -1,10 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { BsToggleComponent, BsToggleProps } from './bs-toggle.type';
 import { AsyncPipe } from '@angular/common';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-bs-toggle',

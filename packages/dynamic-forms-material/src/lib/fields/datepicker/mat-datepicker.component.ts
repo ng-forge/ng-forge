@@ -4,12 +4,17 @@ import { MatError, MatFormField, MatLabel, MatSuffix } from '@angular/material/f
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  InputMeta,
+  setupMetaTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { MatDatepickerComponent, MatDatepickerProps } from './mat-datepicker.type';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-datepicker',

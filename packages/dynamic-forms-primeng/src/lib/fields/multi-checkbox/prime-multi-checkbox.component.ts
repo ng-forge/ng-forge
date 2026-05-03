@@ -3,11 +3,16 @@ import { FieldTree } from '@angular/forms/signals';
 import { FormsModule } from '@angular/forms';
 import { Checkbox, CheckboxChangeEvent } from 'primeng/checkbox';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, isEqual, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  isEqual,
+  setupMetaTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PrimeMultiCheckboxComponent, PrimeMultiCheckboxProps } from './prime-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-multi-checkbox',

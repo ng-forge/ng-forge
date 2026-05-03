@@ -3,10 +3,15 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  InputMeta,
+  setupMetaTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { IonicInputComponent, IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 // Length-validator → DOM wiring (minlength/maxlength):

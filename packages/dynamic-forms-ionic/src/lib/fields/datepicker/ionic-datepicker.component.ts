@@ -13,11 +13,16 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  InputMeta,
+  setupMetaTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { IonicDatepickerComponent, IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-ion-datepicker',

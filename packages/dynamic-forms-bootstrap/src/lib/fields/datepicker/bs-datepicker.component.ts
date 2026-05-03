@@ -1,11 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  InputMeta,
+  setupMetaTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { BsDatepickerComponent, BsDatepickerProps } from './bs-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-bs-datepicker',

@@ -2,11 +2,15 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { IonicToggleComponent, IonicToggleProps } from './ionic-toggle.type';
 import { IonicToggleControlComponent } from './ionic-toggle-control.component';
 import { AsyncPipe } from '@angular/common';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-ion-toggle',

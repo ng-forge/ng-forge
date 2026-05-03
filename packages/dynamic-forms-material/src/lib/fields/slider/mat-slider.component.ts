@@ -2,11 +2,16 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  InputMeta,
+  setupMetaTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-slider',

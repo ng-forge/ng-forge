@@ -3,11 +3,16 @@ import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  shouldShowErrors,
+  TextareaMeta,
+} from '@ng-forge/dynamic-forms/integration';
 import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-textarea',

@@ -2,13 +2,17 @@ import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, Elemen
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import {
+  createAriaDescribedBySignal,
+  createResolvedErrorsSignal,
+  setupMetaTracking,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-forms/integration';
 
 import { MatToggleComponent, MatToggleProps } from './mat-toggle.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-toggle',

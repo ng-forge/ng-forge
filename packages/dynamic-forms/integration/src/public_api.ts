@@ -108,6 +108,20 @@ export { setupMetaTracking } from './utils';
 export type { MetaTrackingOptions } from './utils';
 
 // =============================================================================
+// Accessibility Utilities
+// =============================================================================
+
+export { createAriaDescribedBySignal } from './utils';
+
+// =============================================================================
+// Field Directive Primitive
+// =============================================================================
+
+export { NgForgeField, NG_FORGE_FIELD_HOST_DIRECTIVE } from './directives';
+export { NG_FORGE_FIELD_META_TARGET, provideMetaTarget, provideHostMetaTarget, provideSkipMetaTarget } from './directives';
+export type { MetaTargetConfig } from './directives';
+
+// =============================================================================
 // Non-Field Logic Resolvers (re-exported from @ng-forge/dynamic-forms)
 // =============================================================================
 
