@@ -106,18 +106,22 @@ export class NgForgeField {
   // Error display
   // ───────────────────────────────────────────────────────────────────────────
 
-  // The bridging utilities expect `Signal<FieldTree<T>>` but the input is
-  // typed as optional (see the input declarations above for context). Inline
-  // casts at each call site narrow the type. Runtime reads happen only in
-  // reactive contexts (computed/effect), which run AFTER inputs have
-  // propagated, so the cast is sound.
+  // The bridging utilities expect `Signal<FieldTree<T>>` but our input is
+  // typed as optional (see the input declarations above for context). The
+  // inner signals (`_errorsRaw`, `_showErrorsRaw`) take the cast input;
+  // their evaluation is gated by the outer computeds below, which short-
+  // circuit while the input is still undefined to avoid invoking a
+  // not-yet-bound signal as a function.
 
-  readonly errors: Signal<ResolvedError[]> = createResolvedErrorsSignal(
+  private readonly _errorsRaw: Signal<ResolvedError[]> = createResolvedErrorsSignal(
     this.field as Signal<FieldTree<unknown>>,
     this.validationMessages,
     this.defaultValidationMessages,
   );
-  readonly showErrors: Signal<boolean> = shouldShowErrors(this.field as Signal<FieldTree<unknown>>);
+  private readonly _showErrorsRaw: Signal<boolean> = shouldShowErrors(this.field as Signal<FieldTree<unknown>>);
+
+  readonly errors: Signal<ResolvedError[]> = computed(() => (this.field() ? this._errorsRaw() : []));
+  readonly showErrors: Signal<boolean> = computed(() => (this.field() ? this._showErrorsRaw() : false));
   readonly errorsToDisplay: Signal<ResolvedError[]> = computed(() => (this.showErrors() ? this.errors() : []));
 
   // ───────────────────────────────────────────────────────────────────────────
