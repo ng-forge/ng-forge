@@ -1,5 +1,5 @@
 import { computed, inject, Signal } from '@angular/core';
-import { DEFAULT_PROPS } from '@ng-forge/dynamic-forms';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES } from '@ng-forge/dynamic-forms';
 import { SliderField } from '../../definitions';
 import { resolveValueFieldContext, buildValueFieldInputs } from '../value/value-field.mapper';
 
@@ -17,9 +17,10 @@ import { resolveValueFieldContext, buildValueFieldInputs } from '../value/value-
 export function sliderFieldMapper<TProps>(fieldDef: SliderField<TProps>): Signal<Record<string, unknown>> {
   const ctx = resolveValueFieldContext();
   const defaultProps = inject(DEFAULT_PROPS);
+  const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES);
 
   return computed(() => {
-    const inputs = buildValueFieldInputs(fieldDef, ctx, defaultProps());
+    const inputs = buildValueFieldInputs(fieldDef, ctx, defaultProps(), defaultValidationMessages());
 
     // Add slider-specific properties (these are at field level, not in props)
     if (fieldDef.minValue !== undefined) {

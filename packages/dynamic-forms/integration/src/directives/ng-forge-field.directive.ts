@@ -74,14 +74,23 @@ export class NgForgeField {
   readonly props = input<unknown>();
   readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
+  // Forwarded form-level fallback. Mappers emit this from
+  // `inject(DEFAULT_VALIDATION_MESSAGES)` for back-compat with third-party
+  // components that consumed it as a direct input. The directive prefers this
+  // forwarded value, falling back to its own DI lookup so the bridging signals
+  // still work in non-mapper contexts (e.g. unit tests).
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
   // ───────────────────────────────────────────────────────────────────────────
   // Wiring
   // ───────────────────────────────────────────────────────────────────────────
 
   private readonly elementRef = inject(ElementRef<HTMLElement>);
-  private readonly defaultValidationMessages: Signal<ValidationMessages | undefined> =
+  private readonly defaultValidationMessagesFromDi: Signal<ValidationMessages | undefined> =
     inject(DEFAULT_VALIDATION_MESSAGES, { optional: true }) ?? signal(undefined);
+  private readonly effectiveDefaultValidationMessages: Signal<ValidationMessages | undefined> = computed(
+    () => this.defaultValidationMessages() ?? this.defaultValidationMessagesFromDi(),
+  );
   private readonly metaTarget: MetaTargetConfig | null = inject(NG_FORGE_FIELD_META_TARGET, { optional: true });
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -91,7 +100,7 @@ export class NgForgeField {
   readonly errors: Signal<ResolvedError[]> = createResolvedErrorsSignal(
     this.field,
     this.validationMessages,
-    this.defaultValidationMessages,
+    this.effectiveDefaultValidationMessages,
   );
   readonly showErrors: Signal<boolean> = shouldShowErrors(this.field);
   readonly errorsToDisplay: Signal<ResolvedError[]> = computed(() => (this.showErrors() ? this.errors() : []));
@@ -137,7 +146,7 @@ export class NgForgeField {
 }
 
 /**
- * The 9 standard inputs forwarded by `NgForgeField`.
+ * The 10 standard inputs forwarded by `NgForgeField`.
  *
  * `as const` preserves the literal tuple in the emitted `.d.ts`, so consumers
  * can spread it into a `hostDirectives` entry and Angular's AOT compiler can
@@ -153,4 +162,5 @@ export const NG_FORGE_FIELD_INPUTS = [
   'props',
   'meta',
   'validationMessages',
+  'defaultValidationMessages',
 ] as const;

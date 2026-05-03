@@ -774,11 +774,7 @@ describe('ArrayFieldComponent', () => {
       expect(inputs).toHaveProperty('field');
     });
 
-    it('should not emit defaultValidationMessages even when DI provides it', () => {
-      // Bridging directives (e.g. NgForgeField) read DEFAULT_VALIDATION_MESSAGES
-      // from DI directly, so mappers intentionally do not emit it as an input —
-      // emitting it would force every consumer to declare a matching input or
-      // hit NG0303 when ref.setInput is called for an unknown key.
+    it('should add defaultValidationMessages input when context provides it', () => {
       const valueSignal = signal<Record<string, unknown>>({ test: 'value' });
       const formInstance = runInInjectionContext(TestBed.inject(Injector), () => form(valueSignal));
       formInstance();
@@ -805,11 +801,11 @@ describe('ArrayFieldComponent', () => {
       const inputs = inputsSignal();
 
       // baseFieldMapper: label (1) + key (2) = 2
-      // valueFieldMapper: validationMessages (3) + field (4) = 2
-      // Total: 4 — defaultValidationMessages is NOT emitted
-      expect(Object.keys(inputs)).toHaveLength(4);
+      // valueFieldMapper: validationMessages (3) + defaultValidationMessages (4) + field (5) = 3
+      // Total: 5
+      expect(Object.keys(inputs)).toHaveLength(5);
       expect(inputs).toHaveProperty('field');
-      expect(inputs).not.toHaveProperty('defaultValidationMessages');
+      expect(inputs).toHaveProperty('defaultValidationMessages');
     });
   });
 
