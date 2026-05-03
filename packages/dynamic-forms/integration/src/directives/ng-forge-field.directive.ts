@@ -43,7 +43,14 @@ import { MetaTargetConfig, NG_FORGE_FIELD_META_TARGET } from './meta-target.toke
  * The directive is intentionally selector-less — it is only consumed via
  * `hostDirectives`, not as a standalone selector match.
  */
-@Directive({})
+@Directive({
+  host: {
+    '[id]': 'key()',
+    '[attr.data-testid]': 'key()',
+    '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
+  },
+})
 export class NgForgeField {
   // ───────────────────────────────────────────────────────────────────────────
   // Forwarded inputs (the 9 standard inputs that adapter mappers emit)
@@ -122,20 +129,28 @@ export class NgForgeField {
 }
 
 /**
- * Host-directive config that forwards the standard 9 ng-forge field inputs.
- *
- * Spread into a component's `hostDirectives` array to opt the component into
- * `NgForgeField`'s standard contract.
+ * Canonical opt-in shape for component authors:
  *
  * @example
  * ```ts
+ * import { NgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+ *
  * \@Component({
- *   hostDirectives: [NG_FORGE_FIELD_HOST_DIRECTIVE],
+ *   hostDirectives: [
+ *     {
+ *       directive: NgForgeField,
+ *       inputs: ['field', 'key', 'label', 'placeholder', 'className',
+ *                'tabIndex', 'props', 'meta', 'validationMessages'],
+ *     },
+ *   ],
  *   providers: [provideMetaTarget('input')],
  * })
+ * export class MyInputField {
+ *   protected readonly field = inject(NgForgeField);
+ * }
  * ```
+ *
+ * Note: Angular's compiler requires the `hostDirectives` entry — both the
+ * directive class reference and the `inputs` array — to be inlined as
+ * literal expressions. Const-shared shapes are rejected (NG1010 / NG2019).
  */
-export const NG_FORGE_FIELD_HOST_DIRECTIVE = {
-  directive: NgForgeField,
-  inputs: ['field', 'key', 'label', 'placeholder', 'className', 'tabIndex', 'props', 'meta', 'validationMessages'],
-} as const;

@@ -117,7 +117,7 @@ export { createAriaDescribedBySignal } from './utils';
 // Field Directive Primitive
 // =============================================================================
 
-export { NgForgeField, NG_FORGE_FIELD_HOST_DIRECTIVE } from './directives';
+export { NgForgeField } from './directives';
 export { NG_FORGE_FIELD_META_TARGET, provideMetaTarget, provideHostMetaTarget, provideSkipMetaTarget } from './directives';
 export type { MetaTargetConfig } from './directives';
 
