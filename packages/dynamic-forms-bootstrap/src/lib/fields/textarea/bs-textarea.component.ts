@@ -1,7 +1,7 @@
-import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
-import { FieldTree, FormField } from '@angular/forms/signals';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, input, viewChild } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { BsTextareaProps } from './bs-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -12,7 +12,7 @@ import { AsyncPipe } from '@angular/common';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('textarea')],
   template: `
-    @let f = formFieldTree(); @let p = props(); @let textareaId = field.key() + '-textarea';
+    @let f = field.field(); @let p = props(); @let textareaId = field.key() + '-textarea';
     @if (p?.floatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
@@ -92,12 +92,9 @@ import { AsyncPipe } from '@angular/common';
   ],
 })
 export default class BsTextareaFieldComponent {
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<string>();
 
   readonly props = input<BsTextareaProps>();
-
-  // Narrow FieldTree<unknown> to FieldTree<string> for the inner control's strict template type-check.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   /**
    * Reference to the native textarea element.
@@ -109,7 +106,7 @@ export default class BsTextareaFieldComponent {
   /**
    * Computed signal that extracts the readonly state from the field.
    */
-  private readonly isReadonly = computed(() => this.formFieldTree()().readonly());
+  private readonly isReadonly = computed(() => this.field.field()().readonly());
 
   /**
    * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly

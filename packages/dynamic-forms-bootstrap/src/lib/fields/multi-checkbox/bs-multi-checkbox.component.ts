@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, linkedSignal } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
 import {
+  injectNgForgeField,
   isEqual,
   NgForgeField,
   NG_FORGE_FIELD_INPUTS,
@@ -21,7 +21,7 @@ import { AsyncPipe } from '@angular/common';
   // since the dynamic checkbox inputs need to be re-decorated when options change.
   providers: [provideSkipMetaTarget()],
   template: `
-    @let f = formFieldTree();
+    @let f = field.field();
     @let checked = checkedValuesMap();
     @if (field.label(); as label) {
       <div class="form-label">{{ label | dynamicText | async }}</div>
@@ -81,12 +81,10 @@ import { AsyncPipe } from '@angular/common';
 export default class BsMultiCheckboxFieldComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<ValueType[]>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<BsMultiCheckboxProps>();
-
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<ValueType[]>);
 
   /** Computed map of checked option values for O(1) lookup in template */
   readonly checkedValuesMap = computed(() => {
@@ -99,7 +97,7 @@ export default class BsMultiCheckboxFieldComponent {
 
   valueViewModel = linkedSignal<FieldOption<ValueType>[]>(
     () => {
-      const currentValues = this.formFieldTree()().value();
+      const currentValues = this.field.field()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
     },
     { equal: isEqual },
@@ -116,8 +114,8 @@ export default class BsMultiCheckboxFieldComponent {
     explicitEffect([this.valueViewModel], ([selectedOptions]: [FieldOption<ValueType>[]]) => {
       const selectedValues = selectedOptions.map((option: FieldOption<ValueType>) => option.value);
 
-      if (!isEqual(selectedValues, this.formFieldTree()().value())) {
-        this.formFieldTree()().value.set(selectedValues);
+      if (!isEqual(selectedValues, this.field.field()().value())) {
+        this.field.field()().value.set(selectedValues);
       }
     });
 

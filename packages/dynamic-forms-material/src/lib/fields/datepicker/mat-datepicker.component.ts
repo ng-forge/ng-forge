@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
+import { FormField } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { MatDatepickerProps } from './mat-datepicker.type';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AsyncPipe } from '@angular/common';
@@ -44,7 +44,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         matInput
         [id]="inputId"
         [matDatepicker]="picker"
-        [formField]="formFieldTree()"
+        [formField]="field.field()"
         [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="field.tabIndex()"
         [min]="minDate()"
@@ -78,15 +78,12 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 export default class MatDatepickerFieldComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
 
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<string>();
 
   readonly minDate = input<Date | null>(null);
   readonly maxDate = input<Date | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<MatDatepickerProps>();
-
-  // Narrow FieldTree<unknown> to FieldTree<string> for the inner control's strict template type-check.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
 

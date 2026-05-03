@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
+import { FormField } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { MatInputProps } from './mat-input.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
@@ -28,7 +28,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       <input
         matInput
         [id]="inputId"
-        [formField]="formFieldTree()"
+        [formField]="field.field()"
         [type]="props()?.type ?? 'text'"
         [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="field.tabIndex()"
@@ -56,12 +56,9 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 export default class MatInputFieldComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
 
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<string>();
 
   readonly props = input<MatInputProps>();
-
-  // Narrow FieldTree<unknown> to FieldTree<string> for the inner control's strict template type-check.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
 

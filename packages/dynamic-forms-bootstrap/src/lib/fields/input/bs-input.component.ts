@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FieldTree, FormField } from '@angular/forms/signals';
+import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { BsInputProps } from './bs-input.type';
 import { AsyncPipe } from '@angular/common';
 import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
@@ -13,7 +13,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('input')],
   template: `
-    @let f = formFieldTree(); @let p = props(); @let inputId = field.key() + '-input';
+    @let f = field.field(); @let p = props(); @let inputId = field.key() + '-input';
     @if (effectiveFloatingLabel()) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
@@ -92,12 +92,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
 export default class BsInputFieldComponent {
   private bootstrapConfig = inject(BOOTSTRAP_CONFIG, { optional: true });
 
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<string>();
 
   readonly props = input<BsInputProps>();
-
-  // Narrow FieldTree<unknown> to FieldTree<string> for the inner control's strict template type-check.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   readonly effectiveSize = computed(() => this.props()?.size ?? this.bootstrapConfig?.size);
   readonly effectiveFloatingLabel = computed(() => this.props()?.floatingLabel ?? this.bootstrapConfig?.floatingLabel ?? false);

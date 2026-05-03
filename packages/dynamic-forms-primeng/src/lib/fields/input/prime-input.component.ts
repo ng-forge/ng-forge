@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FieldTree, FormField } from '@angular/forms/signals';
+import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
 import { InputText } from 'primeng/inputtext';
@@ -21,7 +21,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
       <input
         pInputText
         [id]="inputId()"
-        [formField]="formFieldTree()"
+        [formField]="field.field()"
         [type]="props()?.type ?? 'text'"
         [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="field.tabIndex()"
@@ -49,12 +49,9 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 export default class PrimeInputFieldComponent {
   private readonly primeNGConfig = inject(PRIMENG_CONFIG, { optional: true });
 
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<string>();
 
   readonly props = input<PrimeInputProps>();
-
-  // Narrow FieldTree<unknown> to FieldTree<string> for the inner control's strict template type-check.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   protected readonly effectiveSize = computed(() => this.props()?.size ?? this.primeNGConfig?.size);
   protected readonly effectiveVariant = computed(() => this.props()?.variant ?? this.primeNGConfig?.variant);

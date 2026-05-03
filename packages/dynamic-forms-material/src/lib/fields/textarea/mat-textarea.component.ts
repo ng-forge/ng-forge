@@ -1,9 +1,9 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
+import { FormField } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { MatTextareaProps } from './mat-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
@@ -30,7 +30,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         #textareaRef
         matInput
         [id]="textareaId"
-        [formField]="formFieldTree()"
+        [formField]="field.field()"
         [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="field.tabIndex()"
         [attr.aria-invalid]="field.ariaInvalid()"
@@ -59,12 +59,9 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 export default class MatTextareaFieldComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
 
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<string>();
 
   readonly props = input<MatTextareaProps>();
-
-  // Narrow FieldTree<unknown> to FieldTree<string> for the inner control's strict template type-check.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   /**
    * Reference to the native textarea element.
@@ -77,7 +74,7 @@ export default class MatTextareaFieldComponent {
    * Computed signal that extracts the readonly state from the field.
    * Used by the effect to reactively sync the readonly attribute to the DOM.
    */
-  private readonly isReadonly = computed(() => this.formFieldTree()().readonly());
+  private readonly isReadonly = computed(() => this.field.field()().readonly());
 
   /**
    * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly

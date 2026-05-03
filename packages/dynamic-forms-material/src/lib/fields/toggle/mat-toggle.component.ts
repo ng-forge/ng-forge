@@ -1,8 +1,8 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
+import { FormField } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 
 import { MatToggleProps } from './mat-toggle.type';
 import { MatError } from '@angular/material/input';
@@ -16,7 +16,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   // mat-slide-toggle uses <button role="switch"> instead of <input type="checkbox">
   providers: [provideMetaTarget('button[role="switch"]')],
   template: `
-    @let f = formFieldTree();
+    @let f = field.field();
     @let toggleId = field.key() + '-toggle';
 
     <mat-slide-toggle
@@ -47,12 +47,9 @@ export default class MatToggleFieldComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<boolean>();
 
   readonly props = input<MatToggleProps>();
-
-  // Narrow FieldTree<unknown> to FieldTree<boolean> for the inner control's strict template type-check.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<boolean>);
 
   readonly effectiveDisableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
 

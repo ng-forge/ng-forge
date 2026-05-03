@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FieldTree, FormField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { PrimeDatepickerProps } from './prime-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeDatepickerControlComponent } from './prime-datepicker-control.component';
@@ -19,7 +19,7 @@ import { PrimeDatepickerControlComponent } from './prime-datepicker-control.comp
       }
 
       <df-prime-datepicker-control
-        [formField]="formFieldTree()"
+        [formField]="field.field()"
         [inputId]="field.key()"
         [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
         [tabIndex]="field.tabIndex()"
@@ -57,14 +57,12 @@ import { PrimeDatepickerControlComponent } from './prime-datepicker-control.comp
   ],
 })
 export default class PrimeDatepickerFieldComponent {
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<string>();
 
   readonly minDate = input<Date | null>(null);
   readonly maxDate = input<Date | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<PrimeDatepickerProps>();
-
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   protected readonly datepickerClasses = computed(() => {
     const classes: string[] = [];

@@ -1,8 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, input } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideSkipMetaTarget, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import {
+  NgForgeField,
+  injectNgForgeField,
+  NG_FORGE_FIELD_INPUTS,
+  provideSkipMetaTarget,
+  setupMetaTracking,
+} from '@ng-forge/dynamic-forms/integration';
 import { MatRadioProps } from './mat-radio.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
@@ -14,7 +20,7 @@ import { AsyncPipe } from '@angular/common';
   // Manual meta tracking with dependents on `options`; opt out of directive-owned tracking.
   providers: [provideSkipMetaTarget()],
   template: `
-    @let f = formFieldTree();
+    @let f = field.field();
     @let radioGroupId = field.key() + '-radio-group';
 
     @if (field.label()) {
@@ -52,13 +58,10 @@ import { AsyncPipe } from '@angular/common';
 export default class MatRadioFieldComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<ValueType>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<MatRadioProps>();
-
-  // Narrow FieldTree<unknown> to FieldTree<ValueType> for the inner control's strict template type-check.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<ValueType>);
 
   constructor() {
     // Manual meta tracking: dependents reference instance signals, which the

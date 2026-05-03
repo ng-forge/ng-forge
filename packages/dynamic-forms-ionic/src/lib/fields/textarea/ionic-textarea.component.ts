@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, input } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { FormField, FieldTree } from '@angular/forms/signals';
+import { FormField } from '@angular/forms/signals';
 import { IonNote, IonTextarea } from '@ionic/angular/standalone';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { IonicTextareaProps } from './ionic-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -13,7 +13,7 @@ import { AsyncPipe } from '@angular/common';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('ion-textarea')],
   template: `
-    @let f = formFieldTree();
+    @let f = field.field();
     @let textareaId = field.key() + '-textarea';
 
     <ion-textarea
@@ -54,13 +54,11 @@ import { AsyncPipe } from '@angular/common';
 export default class IonicTextareaFieldComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<string>();
 
   readonly props = input<IonicTextareaProps>();
 
-  // Narrow FieldTree<unknown> back to FieldTree<string> for the inner control's
   // strict template type-check; runtime shape is correct.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   constructor() {
     // ion-textarea encapsulates a native <textarea> in shadow DOM and does not automatically

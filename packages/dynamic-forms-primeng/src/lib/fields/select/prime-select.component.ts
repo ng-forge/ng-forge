@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FieldTree, FormField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideHostMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideHostMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 import { PrimeSelectProps } from './prime-select.type';
 import { PrimeSelectControlComponent } from './prime-select-control.component';
@@ -19,7 +19,7 @@ import { PrimeSelectControlComponent } from './prime-select-control.component';
       }
 
       <df-prime-select-control
-        [formField]="formFieldTree()"
+        [formField]="field.field()"
         [inputId]="field.key()"
         [options]="options()"
         [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
@@ -50,14 +50,10 @@ import { PrimeSelectControlComponent } from './prime-select-control.component';
   ],
 })
 export default class PrimeSelectFieldComponent {
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<ValueType>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<PrimeSelectProps>();
-
-  // The directive holds field as FieldTree<unknown>. Narrow it back to ValueType
-  // for the inner control's strict template check; runtime shape matches.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<ValueType>);
 
   protected readonly isMultiple = computed(() => this.props()?.multiple ?? false);
 

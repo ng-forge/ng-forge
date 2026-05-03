@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FieldTree, FormField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { PrimeSliderProps } from './prime-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { Slider } from 'primeng/slider';
@@ -13,7 +13,7 @@ import { Slider } from 'primeng/slider';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('input')],
   template: `
-    @let f = formFieldTree();
+    @let f = field.field();
 
     <div class="df-prime-field">
       @if (field.label(); as label) {
@@ -52,12 +52,10 @@ import { Slider } from 'primeng/slider';
   ],
 })
 export default class PrimeSliderFieldComponent {
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<number>();
 
   readonly step = input<number>();
   readonly props = input<PrimeSliderProps>();
-
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<number>);
 
   protected readonly sliderClasses = computed(() => {
     const classes: string[] = [];

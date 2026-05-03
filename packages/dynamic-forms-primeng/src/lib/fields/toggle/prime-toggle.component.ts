@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FieldTree, FormField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { PrimeToggleProps } from './prime-toggle.type';
 import { AsyncPipe } from '@angular/common';
 import { ToggleSwitch } from 'primeng/toggleswitch';
@@ -20,7 +20,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 
       <p-toggleSwitch
         [id]="field.key()"
-        [formField]="formFieldTree()"
+        [formField]="field.field()"
         [attr.tabindex]="field.tabIndex()"
         [attr.aria-invalid]="field.ariaInvalid()"
         [attr.aria-required]="field.ariaRequired()"
@@ -47,11 +47,9 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
   ],
 })
 export default class PrimeToggleFieldComponent {
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<boolean>();
 
   readonly props = input<PrimeToggleProps>();
-
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<boolean>);
 
   protected readonly toggleClasses = computed(() => {
     const classes: string[] = [];

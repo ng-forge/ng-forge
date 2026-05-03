@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { IonNote, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { IonicSelectProps } from './ionic-select.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -12,7 +12,7 @@ import { AsyncPipe } from '@angular/common';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('ion-select')],
   template: `
-    @let f = formFieldTree();
+    @let f = field.field();
     @let selectId = field.key() + '-select';
 
     <ion-select
@@ -58,14 +58,12 @@ import { AsyncPipe } from '@angular/common';
   ],
 })
 export default class IonicSelectFieldComponent {
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<ValueType>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<IonicSelectProps>();
 
-  // Narrow FieldTree<unknown> back to FieldTree<ValueType> for the inner control's
   // strict template type-check; runtime shape is correct.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<ValueType>);
 
   defaultCompare = Object.is;
 }

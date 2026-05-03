@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { IonNote, IonRange } from '@ionic/angular/standalone';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideHostMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideHostMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { IonicSliderProps } from './ionic-slider.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -12,7 +12,7 @@ import { AsyncPipe } from '@angular/common';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideHostMetaTarget()],
   template: `
-    @let f = formFieldTree();
+    @let f = field.field();
     @let inputId = field.key() + '-input';
 
     <ion-range
@@ -56,14 +56,12 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicSliderFieldComponent {
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<number>();
 
   readonly step = input<number>();
   readonly props = input<IonicSliderProps>();
 
-  // Narrow FieldTree<unknown> back to FieldTree<number> for the inner control's
   // strict template type-check; runtime shape is correct.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<number>);
 
   protected defaultPinFormatter = (value: number) => String(value);
 }

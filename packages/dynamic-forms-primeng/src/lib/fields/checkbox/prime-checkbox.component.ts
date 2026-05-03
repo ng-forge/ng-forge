@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FieldTree, FormField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { PrimeCheckboxProps } from './prime-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -13,7 +13,7 @@ import { AsyncPipe } from '@angular/common';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('input[type="checkbox"]')],
   template: `
-    @let f = formFieldTree(); @let checkboxId = field.key() + '-checkbox';
+    @let f = field.field(); @let checkboxId = field.key() + '-checkbox';
 
     <div class="flex items-center">
       <p-checkbox
@@ -53,13 +53,11 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PrimeCheckboxFieldComponent {
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<boolean>();
 
   readonly props = input<PrimeCheckboxProps>();
 
-  // Narrow FieldTree<unknown> back to FieldTree<boolean> for the inner control's
   // strict template type-check; runtime shape is correct.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<boolean>);
 
   protected readonly checkboxClasses = computed(() => {
     const classes: string[] = [];

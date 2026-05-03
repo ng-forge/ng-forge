@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { FormField, FieldTree } from '@angular/forms/signals';
+import { FormField } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
@@ -33,7 +33,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('ion-input')],
   template: `
-    @let f = formFieldTree();
+    @let f = field.field();
     @let inputId = field.key() + '-input';
 
     <ion-input
@@ -75,13 +75,11 @@ export default class IonicInputFieldComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private ionicConfig = inject(IONIC_CONFIG, { optional: true });
 
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<string>();
 
   readonly props = input<IonicInputProps>();
 
-  // Narrow FieldTree<unknown> back to FieldTree<string> for the inner control's
   // strict template type-check; runtime shape is correct.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   protected readonly effectiveFill = computed(() => this.props()?.fill ?? this.ionicConfig?.fill ?? 'solid');
   protected readonly effectiveShape = computed(() => this.props()?.shape ?? this.ionicConfig?.shape);

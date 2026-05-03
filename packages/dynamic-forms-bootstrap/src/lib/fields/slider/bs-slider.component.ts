@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FieldTree, FormField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { BsSliderProps } from './bs-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
@@ -13,7 +13,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('input')],
   template: `
-    @let f = formFieldTree(); @let inputId = field.key() + '-input';
+    @let f = field.field(); @let inputId = field.key() + '-input';
 
     <div class="mb-3">
       @if (field.label(); as label) {
@@ -61,14 +61,11 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BsSliderFieldComponent {
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<number>();
 
   readonly min = input<number>(0);
   readonly max = input<number>(100);
   readonly step = input<number>();
 
   readonly props = input<BsSliderProps>();
-
-  // Narrow FieldTree<unknown> to FieldTree<number> for the inner control's strict template type-check.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<number>);
 }

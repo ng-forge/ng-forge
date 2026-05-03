@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import {
   IonButton,
   IonButtons,
@@ -13,7 +12,7 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, NG_FORGE_FIELD_INPUTS, injectNgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
@@ -37,7 +36,7 @@ import { format } from 'date-fns';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('ion-input')],
   template: `
-    @let f = formFieldTree();
+    @let f = field.field();
     @let dateValue = f().value();
     @let inputId = field.key() + '-input';
 
@@ -107,16 +106,12 @@ import { format } from 'date-fns';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicDatepickerFieldComponent {
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<Date | null>();
 
   readonly minDate = input<Date | null>(null);
   readonly maxDate = input<Date | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<IonicDatepickerProps>();
-
-  // Narrow FieldTree<unknown> back to FieldTree<Date | null> for the inner control's
-  // strict template type-check; runtime shape is correct.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<Date | null>);
 
   readonly isModalOpen = signal(false);
 
@@ -130,13 +125,13 @@ export default class IonicDatepickerFieldComponent {
 
   onDateChange(event: CustomEvent) {
     const value = event.detail.value;
-    // ion-datetime emits ISO 8601 strings internally; we convert to Date objects
-    // to match the FieldTree<Date | null> type contract.
+    // ion-datetime emits ISO 8601 strings internally; convert to Date | null
+    // to match the field tree's value type.
     if (value && typeof value === 'string' && value.length > 0) {
       const date = new Date(value);
-      this.formFieldTree()().value.set(date);
+      this.field.field()().value.set(date);
     } else {
-      this.formFieldTree()().value.set(null);
+      this.field.field()().value.set(null);
     }
     this.closeModal();
   }

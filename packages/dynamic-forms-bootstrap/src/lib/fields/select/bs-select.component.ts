@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FieldTree, FormField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { BsSelectProps } from './bs-select.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -12,7 +12,7 @@ import { AsyncPipe } from '@angular/common';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('select')],
   template: `
-    @let f = formFieldTree(); @let selectId = field.key() + '-select';
+    @let f = field.field(); @let selectId = field.key() + '-select';
 
     <div class="mb-3">
       @if (field.label(); as label) {
@@ -58,13 +58,10 @@ import { AsyncPipe } from '@angular/common';
   ],
 })
 export default class BsSelectFieldComponent {
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<string>();
 
   readonly options = input<FieldOption<string>[]>([]);
   readonly props = input<BsSelectProps>();
-
-  // Narrow FieldTree<unknown> to FieldTree<string> for the inner control's strict template type-check.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   defaultCompare = Object.is;
 

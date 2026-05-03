@@ -1,8 +1,8 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { FormField, FieldTree } from '@angular/forms/signals';
+import { FormField } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { MatCheckboxProps } from './mat-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
@@ -14,7 +14,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('input[type="checkbox"]')],
   template: `
-    @let f = formFieldTree();
+    @let f = field.field();
     @let checkboxId = field.key() + '-checkbox';
 
     <mat-checkbox
@@ -45,12 +45,9 @@ export default class MatCheckboxFieldComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<boolean>();
 
   readonly props = input<MatCheckboxProps>();
-
-  // Narrow FieldTree<unknown> to FieldTree<boolean> for the inner control's strict template type-check.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<boolean>);
 
   readonly effectiveDisableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
 

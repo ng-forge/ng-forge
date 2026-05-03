@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FieldTree, FormField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, NG_FORGE_FIELD_INPUTS, injectNgForgeField, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { BsDatepickerProps } from './bs-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
@@ -13,7 +13,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   providers: [provideMetaTarget('input')],
   template: `
-    @let f = formFieldTree(); @let p = props(); @let inputId = field.key() + '-input';
+    @let f = field.field(); @let p = props(); @let inputId = field.key() + '-input';
     @if (p?.floatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
@@ -96,15 +96,12 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   ],
 })
 export default class BsDatepickerFieldComponent {
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<Date | string>();
 
   readonly minDate = input<Date | string | null>(null);
   readonly maxDate = input<Date | string | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<BsDatepickerProps>();
-
-  // Narrow FieldTree<unknown> to FieldTree<Date | string> for the inner control's strict template type-check.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<Date | string>);
 
   // Helper methods to convert Date to string for HTML attributes
   readonly minAsString = computed(() => {

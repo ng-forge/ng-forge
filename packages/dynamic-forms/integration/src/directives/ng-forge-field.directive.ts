@@ -164,3 +164,31 @@ export const NG_FORGE_FIELD_INPUTS = [
   'validationMessages',
   'defaultValidationMessages',
 ] as const;
+
+/**
+ * `NgForgeField` typed for a specific value type. The directive itself stores
+ * `field` as `Signal<FieldTree<unknown>>` because Angular's `hostDirectives`
+ * doesn't propagate generics — `injectNgForgeField<T>()` narrows it at the
+ * inject site so consumers don't have to declare a separate cast computed.
+ */
+export type TypedNgForgeField<T> = Omit<NgForgeField, 'field'> & {
+  readonly field: Signal<FieldTree<T>>;
+};
+
+/**
+ * Typed wrapper around `inject(NgForgeField)`. The generic narrows the
+ * `field` signal to `Signal<FieldTree<T>>` for the calling component's value
+ * type. The cast is unchecked — the runtime contract is that mappers only
+ * forward a `field` whose value type matches the field-type definition. This
+ * is a stopgap until `FieldTypeDefinition` registration carries value-type
+ * information end-to-end.
+ *
+ * @example
+ * ```ts
+ * protected readonly field = injectNgForgeField<string>();
+ * // field.field() is Signal<FieldTree<string>>; field.errors() etc. unchanged
+ * ```
+ */
+export function injectNgForgeField<T = unknown>(): TypedNgForgeField<T> {
+  return inject(NgForgeField) as unknown as TypedNgForgeField<T>;
+}

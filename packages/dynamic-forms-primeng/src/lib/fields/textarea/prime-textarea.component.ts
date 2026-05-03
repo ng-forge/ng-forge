@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { FieldTree, FormField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
 import { PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeTextareaControlComponent } from './prime-textarea-control.component';
@@ -20,7 +20,7 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
 
       <df-prime-textarea-control
         [id]="inputId()"
-        [formField]="formFieldTree()"
+        [formField]="field.field()"
         [meta]="field.meta()"
         [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
@@ -48,12 +48,9 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
   ],
 })
 export default class PrimeTextareaFieldComponent {
-  protected readonly field = inject(NgForgeField);
+  protected readonly field = injectNgForgeField<string>();
 
   readonly props = input<PrimeTextareaProps>();
-
-  // Narrow FieldTree<unknown> to FieldTree<string> for the inner control's strict template type-check.
-  protected readonly formFieldTree = computed(() => this.field.field() as FieldTree<string>);
 
   protected readonly textareaClasses = computed(() => this.props()?.styleClass ?? '');
 
