@@ -459,7 +459,7 @@ jobs:
         # exclusive (publish vs schedule|next), so a single shared token is sufficient.
         if: inputs.mode == 'publish' || github.event_name == 'schedule' || inputs.mode == 'next'
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ vars.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
