@@ -362,13 +362,26 @@ describe('object-utils', () => {
       });
     });
 
-    it('should pass through object array elements that have no matching default', () => {
+    it('should return value as-is when value has more items than defaults', () => {
       const defaults = { items: [{ checkboxA: false, checkboxB: false }] };
       const value = { items: [{ checkboxA: true, checkboxB: true }, { checkboxA: true }] };
 
       expect(deepMergeDefaults(defaults, value)).toEqual({
         items: [{ checkboxA: true, checkboxB: true }, { checkboxA: true }],
       });
+    });
+
+    it('should preserve the value array reference for equal-length primitive arrays', () => {
+      // Regression: returning a fresh .map() result for primitive arrays hands
+      // Signal Forms a new reference on every call and rebuilds item FieldTrees
+      // needlessly.
+      const defaults = { tags: ['a', 'b'] };
+      const valueArr = ['x', 'y'];
+      const value = { tags: valueArr };
+
+      const result = deepMergeDefaults(defaults, value);
+
+      expect(result.tags).toBe(valueArr);
     });
 
     it('should replace, not merge, when one side of an array element is not a plain object', () => {

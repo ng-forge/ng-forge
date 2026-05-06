@@ -284,6 +284,11 @@ export function deepMergeDefaults<T extends Record<string, unknown>>(defaults: T
 function mergeArrayDefaults(defaults: readonly unknown[], value: readonly unknown[]): readonly unknown[] {
   if (defaults.length !== value.length) return value;
 
+  // Short-circuit when no element pair would be deep-merged. Returning a fresh
+  // .map() result for primitive arrays (e.g. tags: ['a', 'b']) hands Signal
+  // Forms a new reference on every call and rebuilds item FieldTrees needlessly.
+  if (!value.some((item, i) => isPlainObject(defaults[i]) && isPlainObject(item))) return value;
+
   return value.map((item, i) => {
     const defaultItem = defaults[i];
     if (isPlainObject(defaultItem) && isPlainObject(item)) {
