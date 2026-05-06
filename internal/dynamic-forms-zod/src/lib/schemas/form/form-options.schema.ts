@@ -87,6 +87,13 @@ export const FormOptionsSchema = z.object({
    * Overrides the global withValueExclusionDefaults() setting for this form.
    */
   excludeValueIfReadonly: z.boolean().optional(),
+
+  /**
+   * Whether to run validation while a field is hidden.
+   * Acts as the root inherited value for the form. Per-field
+   * validateWhenHidden overrides cascade through the field tree.
+   */
+  validateWhenHidden: z.boolean().optional(),
 });
 
 export type FormOptionsSchemaType = z.infer<typeof FormOptionsSchema>;

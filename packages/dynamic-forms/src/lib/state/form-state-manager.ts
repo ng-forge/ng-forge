@@ -364,6 +364,7 @@ export class FormStateManager<
         return createSchemaFromFields(setup.schemaFields, setup.registry, {
           crossFieldValidators: crossFieldCollection.validators,
           formLevelSchema: config.schema,
+          validateWhenHidden: config.options?.validateWhenHidden,
         }) as Schema<TModel>;
       }
 

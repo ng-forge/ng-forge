@@ -1,4 +1,6 @@
 import {
+  applyEach,
+  applyWhen,
   disabled,
   email,
   hidden,
@@ -9,10 +11,9 @@ import {
   pattern,
   readonly,
   required,
-  applyEach,
   schema,
 } from '@angular/forms/signals';
-import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
+import type { FieldContext, SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { FieldDef } from '../definitions/base/field-def';
 import { FieldWithValidation } from '../definitions/base/field-with-validation';
 import { applyValidator } from './validation/validator-factory';
@@ -25,6 +26,24 @@ import { isRowField } from '../definitions/default/row-field';
 import { isContainerTypedField } from '../definitions/default/container-field';
 import { getNormalizedArrayMetadata } from '../utils/array-field/normalized-array-metadata';
 import { DynamicFormError } from '../errors/dynamic-form-error';
+import { isStateLogicConfig, LogicConfig } from '../models/logic/logic-config';
+import {
+  combineAncestorHiddenLogics,
+  FieldTreeMappingContext,
+  resolveDescendantContext,
+  resolveFieldOwnContext,
+} from './field-tree-mapping-context';
+
+/**
+ * Default {@link FieldTreeMappingContext} used when no inherited context is provided.
+ * Mirrors the global token defaults so callers that bypass `createSchemaFromFields`
+ * (e.g. nested group forms) still get sensible behavior.
+ */
+const DEFAULT_FIELD_TREE_MAPPING_CONTEXT: FieldTreeMappingContext = {
+  validateWhenHidden: false,
+  ancestorAlwaysHidden: false,
+  ancestorHiddenLogics: [],
+};
 
 // Type alias for schema path parameters
 type AnySchemaPath = SchemaPath<unknown> | SchemaPathTree<unknown>;
@@ -128,28 +147,50 @@ function getNumberValidationConfig(fieldDef: FieldWithValidation): NumberValidat
  * which uses RootFormRegistryService.
  *
  * Cross-field validators are skipped at field level and applied at form level via validateTree.
+ *
+ * @param fieldDef Field definition to map
+ * @param fieldPath Schema path for this field
+ * @param inheritedContext Cascading mapping context from the parent. Field-level
+ *   overrides on `fieldDef` are merged on top and passed down to descendants. Defaults
+ *   to {@link DEFAULT_FIELD_TREE_MAPPING_CONTEXT} when omitted.
  */
-export function mapFieldToForm(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath): void {
-  // Layout containers (page, row, container) - flatten children to current level
+export function mapFieldToForm(
+  fieldDef: FieldDef<unknown>,
+  fieldPath: AnySchemaPath,
+  inheritedContext: FieldTreeMappingContext = DEFAULT_FIELD_TREE_MAPPING_CONTEXT,
+): void {
+  const ownContext = resolveFieldOwnContext(fieldDef, inheritedContext);
+
+  // Layout containers (page, row, container) - flatten children to current level.
+  // Layout containers have no schema path of their own, so any hidden state on them
+  // must be propagated to descendants through the cascade.
   if (isPageField(fieldDef) || isRowField(fieldDef) || isContainerTypedField(fieldDef)) {
-    mapContainerChildren(fieldDef.fields as FieldDef<unknown>[] | undefined, fieldPath);
+    const descendantContext = resolveDescendantContext(fieldDef, ownContext);
+    mapContainerChildren(fieldDef.fields as FieldDef<unknown>[] | undefined, fieldPath, descendantContext);
     return;
   }
 
-  // Group fields - map children under the group's path
+  // Group fields - map children under the group's path. Groups have a schema path,
+  // so Angular Signal Forms can propagate `hidden(path, ...)` calls to descendants —
+  // but groups don't currently apply their own hidden state, so we still propagate
+  // through the cascade as a belt-and-suspenders fallback.
   if (isGroupField(fieldDef)) {
-    mapContainerChildren(fieldDef.fields, fieldPath);
+    const descendantContext = resolveDescendantContext(fieldDef, ownContext);
+    mapContainerChildren(fieldDef.fields, fieldPath, descendantContext);
     return;
   }
 
-  // Array fields - use applyEach for item schema
+  // Array fields - use applyEach for item schema.
   if (isArrayField(fieldDef)) {
-    mapArrayFieldToForm(fieldDef, fieldPath);
+    const descendantContext = resolveDescendantContext(fieldDef, ownContext);
+    mapArrayFieldToForm(fieldDef, fieldPath, descendantContext);
     return;
   }
 
-  // Leaf field - apply validation, logic, and configuration
-  mapLeafField(fieldDef, fieldPath);
+  // Leaf field - apply validation, logic, and configuration. Use the field's OWN
+  // context (no descendant propagation) because the leaf's own hidden state is
+  // already exposed via `ctx.state.hidden()`.
+  mapLeafField(fieldDef, fieldPath, ownContext);
 }
 
 /**
@@ -161,14 +202,22 @@ export function mapFieldToForm(fieldDef: FieldDef<unknown>, fieldPath: AnySchema
  * leaf descendants. Group/array fields consume their key and look up their own
  * child path on `parentPath`.
  */
-function mapContainerChildren(fields: readonly FieldDef<unknown>[] | undefined, parentPath: AnySchemaPath): void {
+function mapContainerChildren(
+  fields: readonly FieldDef<unknown>[] | undefined,
+  parentPath: AnySchemaPath,
+  inheritedContext: FieldTreeMappingContext,
+): void {
   if (!fields) return;
 
   const pathRecord = parentPath as Record<string, AnySchemaPath>;
 
   for (const field of fields) {
     if (isPageField(field) || isRowField(field) || isContainerTypedField(field)) {
-      mapContainerChildren(field.fields as readonly FieldDef<unknown>[] | undefined, parentPath);
+      // Layout containers can still carry their own cascading overrides that flow
+      // down to their flattened descendants.
+      const layoutOwn = resolveFieldOwnContext(field, inheritedContext);
+      const layoutDescendant = resolveDescendantContext(field, layoutOwn);
+      mapContainerChildren(field.fields as readonly FieldDef<unknown>[] | undefined, parentPath, layoutDescendant);
       continue;
     }
 
@@ -176,43 +225,96 @@ function mapContainerChildren(fields: readonly FieldDef<unknown>[] | undefined, 
 
     const childPath = pathRecord[field.key];
     if (childPath) {
-      mapFieldToForm(field, childPath);
+      mapFieldToForm(field, childPath, inheritedContext);
     }
   }
 }
 
 /**
- * Maps a leaf field (value-bearing field) to the form schema.
+ * Returns true for state logic that contributes validation (currently only `required`).
+ * The other state logic types (`hidden`, `disabled`, `readonly`) must always apply,
+ * even on hidden fields, so they're not gated by `validateWhenHidden`.
  */
-function mapLeafField(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath): void {
+function isValidationStateLogic(config: LogicConfig): boolean {
+  return isStateLogicConfig(config) && config.type === 'required';
+}
+
+/**
+ * Maps a leaf field (value-bearing field) to the form schema.
+ *
+ * @param context Resolved cascading context for this field. When
+ *   `context.validateWhenHidden` is `false`, the field's validation block is wrapped
+ *   in `applyWhen` keyed off `!ctx.state.hidden()`.
+ */
+function mapLeafField(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath, context: FieldTreeMappingContext): void {
   const validationField = fieldDef as FieldDef<unknown> & FieldWithValidation;
   const path = fieldPath as SchemaPath<unknown>;
 
-  // Apply simple validation rules from field properties
-  applySimpleValidationRules(validationField, path);
+  // Always-applied: state logic (hidden/disabled/readonly), schemas, and value derivations.
+  // These must run regardless of hidden state — particularly the `hidden` logic itself,
+  // which establishes the very signal `applyWhen` reads below.
+  applyFieldState(fieldDef, path);
 
-  if (validationField.validators) {
-    for (const config of validationField.validators) {
-      applyValidator(config, fieldPath);
-    }
-  }
-
-  // Apply logic rules
   if (validationField.logic) {
     for (const config of validationField.logic) {
-      applyLogic(config, fieldPath);
+      if (!isValidationStateLogic(config)) {
+        applyLogic(config, fieldPath);
+      }
     }
   }
 
-  // Apply schemas
   if (validationField.schemas) {
     for (const config of validationField.schemas) {
       applySchema(config, fieldPath);
     }
   }
 
-  // Apply field state configuration
-  applyFieldState(fieldDef, path);
+  // Validation block — gated by `validateWhenHidden` when hidden.
+  const applyValidation = (validationPath: SchemaPath<unknown>): void => {
+    applySimpleValidationRules(validationField, validationPath);
+
+    if (validationField.validators) {
+      for (const config of validationField.validators) {
+        applyValidator(config, validationPath);
+      }
+    }
+
+    if (validationField.logic) {
+      for (const config of validationField.logic) {
+        if (isValidationStateLogic(config)) {
+          applyLogic(config, validationPath);
+        }
+      }
+    }
+  };
+
+  if (context.validateWhenHidden) {
+    applyValidation(path);
+    return;
+  }
+
+  // An ancestor is unconditionally hidden — there is no reactive case for the
+  // validators to ever fire, so we simply do not apply them.
+  if (context.ancestorAlwaysHidden) {
+    return;
+  }
+
+  // applyWhen conditionally applies a sub-schema. The gate combines:
+  // - the field's own `state.hidden()` (set by Angular Signal Forms whenever
+  //   `hidden(path, ...)` was called for this field or any ancestor with a
+  //   path); and
+  // - any ancestor dynamic hidden logic that does NOT live on a schema path
+  //   (layout containers — see field-tree-mapping-context for details).
+  const ancestorHiddenLogic = combineAncestorHiddenLogics(context.ancestorHiddenLogics);
+  applyWhen(
+    path,
+    (ctx: FieldContext<unknown>) => {
+      if (ctx.state.hidden()) return false;
+      if (ancestorHiddenLogic && ancestorHiddenLogic(ctx)) return false;
+      return true;
+    },
+    schema<unknown>((subPath) => applyValidation(subPath as SchemaPath<unknown>)),
+  );
 }
 
 /**
@@ -268,7 +370,7 @@ function applyFieldState(fieldDef: FieldDef<unknown>, path: SchemaPath<unknown>)
  * - Heterogeneous arrays - mixed primitives and objects
  * - Container templates (row, group, page) that wrap children
  */
-function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchemaPath): void {
+function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchemaPath, context: FieldTreeMappingContext): void {
   if (!isArrayField(arrayField)) {
     return;
   }
@@ -348,18 +450,22 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
     for (const templateField of allObjectFields) {
       if (isRowField(templateField) || isPageField(templateField) || isContainerTypedField(templateField)) {
         // Row/page/container templates flatten their children
-        mapContainerChildren(templateField.fields as FieldDef<unknown>[] | undefined, itemPath);
+        const layoutOwn = resolveFieldOwnContext(templateField, context);
+        const layoutDescendant = resolveDescendantContext(templateField, layoutOwn);
+        mapContainerChildren(templateField.fields as FieldDef<unknown>[] | undefined, itemPath, layoutDescendant);
       } else if (isGroupField(templateField)) {
         // Group template - access group's path first
         const groupKey = templateField.key;
+        const groupOwn = resolveFieldOwnContext(templateField, context);
+        const groupDescendant = resolveDescendantContext(templateField, groupOwn);
         if (groupKey) {
           const groupPath = pathRecord[groupKey];
           if (groupPath) {
-            mapContainerChildren(templateField.fields, groupPath);
+            mapContainerChildren(templateField.fields, groupPath, groupDescendant);
           }
         } else {
           // No group key - apply children directly (edge case)
-          mapContainerChildren(templateField.fields, itemPath);
+          mapContainerChildren(templateField.fields, itemPath, groupDescendant);
         }
       } else {
         // Simple field template - get the specific field's path
@@ -367,7 +473,7 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
         if (fieldKey) {
           const fieldPathForKey = pathRecord[fieldKey];
           if (fieldPathForKey) {
-            mapFieldToForm(templateField, fieldPathForKey);
+            mapFieldToForm(templateField, fieldPathForKey, context);
           }
         }
       }

@@ -33,6 +33,7 @@ describe('ContainerField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'validateWhenHidden'
     | 'fields'
     | 'wrappers'
     | 'skipAutoWrappers'

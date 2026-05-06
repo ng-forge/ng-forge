@@ -28,6 +28,7 @@ describe('FieldDef - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'validateWhenHidden'
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers';
@@ -66,6 +67,7 @@ describe('FieldDef - Exhaustive Whitelist', () => {
         | 'excludeValueIfHidden'
         | 'excludeValueIfDisabled'
         | 'excludeValueIfReadonly'
+        | 'validateWhenHidden'
         | 'wrappers'
         | 'skipAutoWrappers'
         | 'skipDefaultWrappers'
