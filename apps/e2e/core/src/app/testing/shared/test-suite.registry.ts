@@ -4,6 +4,7 @@ import { TestSuite } from './types';
 import { advancedValidationSuite } from '../advanced-validation/advanced-validation.suite';
 import { angularSchemaValidationSuite } from '../angular-schema-validation/angular-schema-validation.suite';
 import { asyncValidationSuite } from '../async-validation/async-validation.suite';
+import { cascadingValidationSuite } from '../cascading-validation/cascading-validation.suite';
 import { configChangeSuite } from '../config-change/config-change.suite';
 import { containerConditionalVisibilitySuite } from '../container-conditional-visibility/container-conditional-visibility.suite';
 import { containerNestingSuite } from '../container-nesting/container-nesting.suite';
@@ -32,6 +33,7 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   advancedValidationSuite,
   angularSchemaValidationSuite,
   asyncValidationSuite,
+  cascadingValidationSuite,
   configChangeSuite,
   containerConditionalVisibilitySuite,
   containerNestingSuite,
