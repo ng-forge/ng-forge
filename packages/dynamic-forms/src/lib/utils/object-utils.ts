@@ -216,12 +216,13 @@ export function mapValues<T, U>(obj: Record<string, T>, fn: (value: T, key: stri
  * matching keys are merged recursively; primitives, dates, and class instances
  * in `value` replace the corresponding default wholesale.
  *
- * Arrays are length-driven by `value` (the result has `value`'s length, never
- * `defaults`'s) but their elements are merged positionally: when both
- * `defaults[i]` and `value[i]` are plain objects, they are deep-merged; otherwise
- * `value[i]` is used as-is. This preserves nested-object defaults for partial
- * array element values (the form's partial-array-item case) while keeping
- * primitive arrays as straightforward replacement.
+ * Arrays whose lengths match between `defaults` and `value` are merged
+ * positionally: when both `defaults[i]` and `value[i]` are plain objects, they
+ * are deep-merged so partial array-item values don't drop sibling sub-field
+ * keys. When the lengths differ — the runtime add/insert/remove case — the
+ * value array is returned by reference so Signal Forms doesn't see a fresh
+ * array of fresh inner objects on every form-value write (which would rebuild
+ * item bindings and desync the rendered rows from their FieldTrees).
  *
  * Used by `FormStateManager.entity` so a partial input value (e.g. a nested
  * group object missing one of its declared sub-fields, or an array item missing
@@ -268,12 +269,21 @@ export function deepMergeDefaults<T extends Record<string, unknown>>(defaults: T
 
 /**
  * @internal
- * Merges a value array into a defaults array element-wise. The output length
- * matches `value` (extra defaults are dropped, extra value entries are kept
- * as-is). When `defaults[i]` and `value[i]` are both plain objects, they are
- * deep-merged so partial array-item values don't drop sibling sub-field keys.
+ * Merges a value array into a defaults array element-wise when their lengths
+ * match. When lengths differ — the runtime case: prepend, insert, append,
+ * remove — we return the value array reference as-is so we don't produce
+ * fresh inner object references for items that already have every declared
+ * sub-field key. Replacing references during the linkedSignal source
+ * recompute that runs after Signal Forms wrote the array would otherwise
+ * desync item FieldTrees from the rendered DOM rows.
+ *
+ * When lengths match (the declared/initial-value path the array fix targets)
+ * each `defaults[i]`/`value[i]` pair is deep-merged when both are plain
+ * objects so partial array-item values don't drop sibling sub-field keys.
  */
-function mergeArrayDefaults(defaults: readonly unknown[], value: readonly unknown[]): unknown[] {
+function mergeArrayDefaults(defaults: readonly unknown[], value: readonly unknown[]): readonly unknown[] {
+  if (defaults.length !== value.length) return value;
+
   return value.map((item, i) => {
     const defaultItem = defaults[i];
     if (isPlainObject(defaultItem) && isPlainObject(item)) {

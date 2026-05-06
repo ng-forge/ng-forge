@@ -378,6 +378,20 @@ describe('object-utils', () => {
       expect(deepMergeDefaults(defaults, value)).toEqual({ items: ['x', { a: 2 }] });
     });
 
+    it('should preserve the value array reference when its length differs from defaults (runtime prepend/insert/remove)', () => {
+      // Regression: positionally remerging arrays whose length grew (e.g. after
+      // a prepend) produced fresh inner object references for already-complete
+      // items. Signal Forms then rebuilt item FieldTrees on every form-value
+      // write, desyncing rendered rows from their FieldTrees.
+      const defaults = { items: [{ value: 'First' }, { value: 'Second' }] };
+      const valueArr = [{ value: '' }, { value: 'First' }, { value: 'Second' }];
+      const value = { items: valueArr };
+
+      const result = deepMergeDefaults(defaults, value);
+
+      expect(result.items).toBe(valueArr);
+    });
+
     it('should replace primitive overrides', () => {
       const defaults = { name: 'default', count: 0, ready: false };
       const value = { name: 'updated', count: 5, ready: true };
