@@ -35,17 +35,8 @@ export const NextButtonOptionsSchema = z.object({
 });
 
 /**
- * Schema for form options.
- *
- * Original interface:
- * ```typescript
- * interface FormOptions {
- *   disabled?: boolean;
- *   maxDerivationIterations?: number;
- *   submitButton?: SubmitButtonOptions;
- *   nextButton?: NextButtonOptions;
- * }
- * ```
+ * Schema for form options. Mirrors the `FormOptions` interface in
+ * `@ng-forge/dynamic-forms`.
  */
 export const FormOptionsSchema = z.object({
   /**

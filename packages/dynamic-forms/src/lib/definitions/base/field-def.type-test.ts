@@ -118,6 +118,10 @@ describe('FieldDef - Exhaustive Whitelist', () => {
       expectTypeOf<FieldDef<TestProps>['excludeValueIfReadonly']>().toEqualTypeOf<boolean | undefined>();
     });
 
+    it('validateWhenHidden', () => {
+      expectTypeOf<FieldDef<TestProps>['validateWhenHidden']>().toEqualTypeOf<boolean | undefined>();
+    });
+
     it('wrappers supports three states: undefined, null, or readonly WrapperConfig[]', () => {
       expectTypeOf<FieldDef<TestProps>['wrappers']>().toEqualTypeOf<readonly WrapperConfig[] | null | undefined>();
     });

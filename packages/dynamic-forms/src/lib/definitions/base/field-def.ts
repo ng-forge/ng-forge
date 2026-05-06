@@ -192,8 +192,10 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
   /**
    * Whether the field is hidden from view.
    *
-   * When true, the field is not rendered in the UI but still participates
-   * in form state and validation. Useful for conditional field display.
+   * When true, the field is not rendered in the UI. By default, validators on
+   * a hidden field are skipped — set {@link validateWhenHidden} to `true` (on
+   * the field, an ancestor, the form, or globally) to keep validation running
+   * while hidden. State logic and value derivations continue to apply.
    *
    * @value false
    */

@@ -7,9 +7,6 @@ import { TestScenario } from '../../shared/types';
  * and the empty required leaf would block submit. By overriding back to `false`
  * on the leaf itself, the leaf opts back into the default skip-when-hidden
  * behavior — submit stays enabled.
- *
- * Also tests the inverse: a sibling leaf that does NOT override the inherited
- * `true` keeps blocking submit, demonstrating that the cascade is per-subtree.
  */
 const config = {
   defaultValidationMessages: {

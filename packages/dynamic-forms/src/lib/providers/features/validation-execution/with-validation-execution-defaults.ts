@@ -1,4 +1,4 @@
-import { ValidationExecutionConfig } from '../../../models/validation-execution-config';
+import { ResolvedValidationExecutionConfig, ValidationExecutionConfig } from '../../../models/validation-execution-config';
 import { createFeature, DynamicFormFeature } from '../dynamic-form-feature';
 import { VALIDATION_EXECUTION_DEFAULTS } from './validation-execution.token';
 
@@ -38,7 +38,7 @@ import { VALIDATION_EXECUTION_DEFAULTS } from './validation-execution.token';
  * @public
  */
 export function withValidationExecutionDefaults(config?: Partial<ValidationExecutionConfig>): DynamicFormFeature<'validation-execution'> {
-  const resolved = {
+  const resolved: ResolvedValidationExecutionConfig = {
     validateWhenHidden: config?.validateWhenHidden ?? false,
   };
 
