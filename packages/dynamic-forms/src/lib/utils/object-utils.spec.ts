@@ -346,11 +346,63 @@ describe('object-utils', () => {
       expect(deepMergeDefaults(defaults, null)).not.toBe(defaults);
     });
 
-    it('should replace arrays wholesale rather than merging them', () => {
+    it('should length-drive primitive arrays from the value (extra defaults are dropped)', () => {
       const defaults = { tags: ['a', 'b', 'c'] };
       const value = { tags: ['x'] };
 
       expect(deepMergeDefaults(defaults, value)).toEqual({ tags: ['x'] });
+    });
+
+    it('should merge object array elements positionally so partial items keep declared sub-field defaults', () => {
+      const defaults = { items: [{ checkboxA: false, checkboxB: false }] };
+      const value = { items: [{ checkboxA: true }] };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual({
+        items: [{ checkboxA: true, checkboxB: false }],
+      });
+    });
+
+    it('should return value as-is when value has more items than defaults', () => {
+      const defaults = { items: [{ checkboxA: false, checkboxB: false }] };
+      const value = { items: [{ checkboxA: true, checkboxB: true }, { checkboxA: true }] };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual({
+        items: [{ checkboxA: true, checkboxB: true }, { checkboxA: true }],
+      });
+    });
+
+    it('should preserve the value array reference for equal-length primitive arrays', () => {
+      // Regression: returning a fresh .map() result for primitive arrays hands
+      // Signal Forms a new reference on every call and rebuilds item FieldTrees
+      // needlessly.
+      const defaults = { tags: ['a', 'b'] };
+      const valueArr = ['x', 'y'];
+      const value = { tags: valueArr };
+
+      const result = deepMergeDefaults(defaults, value);
+
+      expect(result.tags).toBe(valueArr);
+    });
+
+    it('should replace, not merge, when one side of an array element is not a plain object', () => {
+      const defaults = { items: [{ a: 1 }, 'fallback'] };
+      const value = { items: ['x', { a: 2 }] };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual({ items: ['x', { a: 2 }] });
+    });
+
+    it('should preserve the value array reference when its length differs from defaults (runtime prepend/insert/remove)', () => {
+      // Regression: positionally remerging arrays whose length grew (e.g. after
+      // a prepend) produced fresh inner object references for already-complete
+      // items. Signal Forms then rebuilt item FieldTrees on every form-value
+      // write, desyncing rendered rows from their FieldTrees.
+      const defaults = { items: [{ value: 'First' }, { value: 'Second' }] };
+      const valueArr = [{ value: '' }, { value: 'First' }, { value: 'Second' }];
+      const value = { items: valueArr };
+
+      const result = deepMergeDefaults(defaults, value);
+
+      expect(result.items).toBe(valueArr);
     });
 
     it('should replace primitive overrides', () => {
