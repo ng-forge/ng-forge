@@ -346,11 +346,36 @@ describe('object-utils', () => {
       expect(deepMergeDefaults(defaults, null)).not.toBe(defaults);
     });
 
-    it('should replace arrays wholesale rather than merging them', () => {
+    it('should length-drive primitive arrays from the value (extra defaults are dropped)', () => {
       const defaults = { tags: ['a', 'b', 'c'] };
       const value = { tags: ['x'] };
 
       expect(deepMergeDefaults(defaults, value)).toEqual({ tags: ['x'] });
+    });
+
+    it('should merge object array elements positionally so partial items keep declared sub-field defaults', () => {
+      const defaults = { items: [{ checkboxA: false, checkboxB: false }] };
+      const value = { items: [{ checkboxA: true }] };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual({
+        items: [{ checkboxA: true, checkboxB: false }],
+      });
+    });
+
+    it('should pass through object array elements that have no matching default', () => {
+      const defaults = { items: [{ checkboxA: false, checkboxB: false }] };
+      const value = { items: [{ checkboxA: true, checkboxB: true }, { checkboxA: true }] };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual({
+        items: [{ checkboxA: true, checkboxB: true }, { checkboxA: true }],
+      });
+    });
+
+    it('should replace, not merge, when one side of an array element is not a plain object', () => {
+      const defaults = { items: [{ a: 1 }, 'fallback'] };
+      const value = { items: ['x', { a: 2 }] };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual({ items: ['x', { a: 2 }] });
     });
 
     it('should replace primitive overrides', () => {

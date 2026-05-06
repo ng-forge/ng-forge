@@ -213,12 +213,20 @@ export function mapValues<T, U>(obj: Record<string, T>, fn: (value: T, key: stri
 /**
  * Deep-merges `value` into `defaults`, producing a new object that contains every
  * key from `defaults` plus any overrides from `value`. Plain-object values at
- * matching keys are merged recursively; arrays, dates, and primitives in `value`
- * replace the corresponding default wholesale.
+ * matching keys are merged recursively; primitives, dates, and class instances
+ * in `value` replace the corresponding default wholesale.
+ *
+ * Arrays are length-driven by `value` (the result has `value`'s length, never
+ * `defaults`'s) but their elements are merged positionally: when both
+ * `defaults[i]` and `value[i]` are plain objects, they are deep-merged; otherwise
+ * `value[i]` is used as-is. This preserves nested-object defaults for partial
+ * array element values (the form's partial-array-item case) while keeping
+ * primitive arrays as straightforward replacement.
  *
  * Used by `FormStateManager.entity` so a partial input value (e.g. a nested
- * group object missing one of its declared sub-fields) does not orphan the
- * absent sub-field in Angular Signal Forms' validation graph.
+ * group object missing one of its declared sub-fields, or an array item missing
+ * one of its declared sub-fields) does not orphan the absent sub-field in
+ * Angular Signal Forms' validation graph.
  *
  * @example
  * ```typescript
@@ -227,6 +235,12 @@ export function mapValues<T, U>(obj: Record<string, T>, fn: (value: T, key: stri
  *   { a: { line1: 'X', city: 'Y' }, b: 1 },
  * );
  * // { a: { line1: 'X', line2: '', city: 'Y' }, b: 1 }
+ *
+ * deepMergeDefaults(
+ *   { items: [{ checkboxA: false, checkboxB: false }] },
+ *   { items: [{ checkboxA: true }] },
+ * );
+ * // { items: [{ checkboxA: true, checkboxB: false }] }
  * ```
  */
 export function deepMergeDefaults<T extends Record<string, unknown>>(defaults: T, value: Record<string, unknown> | null | undefined): T {
@@ -242,12 +256,31 @@ export function deepMergeDefaults<T extends Record<string, unknown>>(defaults: T
 
     if (isPlainObject(existing) && isPlainObject(incoming)) {
       result[key] = deepMergeDefaults(existing, incoming);
+    } else if (Array.isArray(existing) && Array.isArray(incoming)) {
+      result[key] = mergeArrayDefaults(existing, incoming);
     } else {
       result[key] = incoming;
     }
   }
 
   return result as T;
+}
+
+/**
+ * @internal
+ * Merges a value array into a defaults array element-wise. The output length
+ * matches `value` (extra defaults are dropped, extra value entries are kept
+ * as-is). When `defaults[i]` and `value[i]` are both plain objects, they are
+ * deep-merged so partial array-item values don't drop sibling sub-field keys.
+ */
+function mergeArrayDefaults(defaults: readonly unknown[], value: readonly unknown[]): unknown[] {
+  return value.map((item, i) => {
+    const defaultItem = defaults[i];
+    if (isPlainObject(defaultItem) && isPlainObject(item)) {
+      return deepMergeDefaults(defaultItem, item);
+    }
+    return item;
+  });
 }
 
 /**

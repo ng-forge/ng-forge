@@ -1222,6 +1222,95 @@ describe('DynamicFormComponent', () => {
         }
       });
     });
+
+    // Regression: when a partial value is applied to an `array` field whose
+    // items are object templates (e.g. two checkboxes), the omitted item
+    // sub-fields must retain their declared defaults. Pre-fix, the array was
+    // replaced wholesale by the partial value, which removed the omitted
+    // sub-field from the form value and prevented its component from
+    // rendering (NG01902 from the Signal Forms validation graph).
+    describe('partial value applied to nested array of object items', () => {
+      // Disable auto-generated add/remove buttons so the simplified array's
+      // form value contains only the user-declared item fields. Without this
+      // the items would carry `__remove` keys + a Symbol id, masking the
+      // exact bug we're testing against.
+      const arrayWithObjectItemsConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'items',
+            type: 'array',
+            template: [
+              { key: 'checkboxA', type: 'checkbox', label: 'Checkbox A' },
+              { key: 'checkboxB', type: 'checkbox', label: 'Checkbox B' },
+            ],
+            value: [{ checkboxA: false, checkboxB: false }],
+            addButton: false,
+            removeButton: false,
+          } as any,
+        ],
+      };
+
+      const partialItemsValue = {
+        items: [{ checkboxA: true }],
+      };
+
+      const expectedSettledValue = {
+        items: [{ checkboxA: true, checkboxB: false }],
+      };
+
+      // NG01902 is emitted for orphan group sub-fields, NG01904 for orphan
+      // array elements — same root cause, distinct codes from Signal Forms.
+      const collectOrphanErrors = (errors: unknown[]): string[] =>
+        errors
+          .map((e) => (Array.isArray(e) ? e.map(String).join(' ') : String(e)))
+          .filter((msg) => msg.includes('NG01902') || msg.includes('NG01904') || msg.includes('Orphan field'));
+
+      // Angular Signal Forms attaches an internal `Symbol()` directive marker
+      // onto field values; JSON-roundtripping strips it so the assertion only
+      // sees the user-declared shape we care about.
+      const stripInternalSymbols = (v: unknown) => JSON.parse(JSON.stringify(v));
+
+      it('back-fills omitted item sub-field with default when partial value is set at construction', async () => {
+        const errors: unknown[] = [];
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation((...args) => errors.push(args));
+
+        try {
+          const { component, fixture } = createComponent(arrayWithObjectItemsConfig, partialItemsValue);
+          await waitForDynamicComponents(fixture);
+
+          expect(stripInternalSymbols(component.formValue())).toEqual(expectedSettledValue);
+          expect(collectOrphanErrors(errors)).toEqual([]);
+        } finally {
+          consoleSpy.mockRestore();
+        }
+      });
+
+      it('back-fills omitted item sub-field with default when partial value is set after render', async () => {
+        const errors: unknown[] = [];
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation((...args) => errors.push(args));
+
+        try {
+          const { component, fixture } = createComponent(arrayWithObjectItemsConfig);
+          await waitForDynamicComponents(fixture);
+
+          expect(stripInternalSymbols(component.formValue())).toEqual({
+            items: [{ checkboxA: false, checkboxB: false }],
+          });
+
+          fixture.componentRef.setInput('value', partialItemsValue);
+          await waitForDynamicComponents(fixture);
+
+          void component.valid();
+          void component.errors();
+          void component.formValue();
+
+          expect(stripInternalSymbols(component.formValue())).toEqual(expectedSettledValue);
+          expect(collectOrphanErrors(errors)).toEqual([]);
+        } finally {
+          consoleSpy.mockRestore();
+        }
+      });
+    });
   });
 
   describe('Form Validation State Changes', () => {
