@@ -502,7 +502,12 @@ export class FormStateManager<
   /**
    * Phase-aware field source that coordinates component lifecycle with form updates.
    * Teardown/Applying → intersection of old/new fields; Restoring → all new fields.
-   * Uses key+type equality to avoid spurious emissions during rapid transitions.
+   *
+   * Uses per-field reference equality to suppress spurious emissions when the same
+   * field definitions are returned (e.g. memoized intersections during transitions)
+   * while still triggering re-resolution when the underlying field definition
+   * references change (e.g. a config swap that updates options/props for a
+   * same-keyed field).
    */
   private readonly fieldsSource = computed(
     () => {
@@ -528,7 +533,7 @@ export class FormStateManager<
       equal: (a, b) => {
         if (a === b) return true;
         if (a.length !== b.length) return false;
-        return a.every((field, i) => field.key === b[i].key && field.type === b[i].type);
+        return a.every((field, i) => field === b[i]);
       },
     },
   );

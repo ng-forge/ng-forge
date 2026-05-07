@@ -5,8 +5,9 @@ import { delay } from '@ng-forge/utils';
 import { SimpleTestUtils } from '../../testing/src/simple-test-utils';
 import TestInputHarnessComponent from '../../testing/src/harnesses/test-input.harness';
 import TestCheckboxHarnessComponent from '../../testing/src/harnesses/test-checkbox.harness';
+import TestSelectHarnessComponent from '../../testing/src/harnesses/test-select.harness';
 import { FIELD_REGISTRY, FieldTypeDefinition } from './models/field-type';
-import { checkboxFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
+import { checkboxFieldMapper, optionsFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './providers/built-in-fields';
 import { FieldWrapperContract, WRAPPER_REGISTRY, WrapperTypeDefinition } from './models/wrapper-type';
 import { ARRAY_CONTEXT } from './models/field-signal-context.token';
@@ -26,6 +27,7 @@ type TestFormConfig = {
   fields: Array<
     | (BaseValueField<any, any> & { type: 'input' })
     | (BaseCheckedField<any> & { type: 'checkbox' })
+    | (BaseValueField<any, any> & { type: 'select'; options: Array<{ value: any; label: string }> })
     | { type: 'row'; key: string; label: string; fields: any[] }
     | { type: 'group'; key: string; label: string; fields: any[] }
     | { type: 'page'; key: string; label?: string; fields: any[] }
@@ -85,6 +87,11 @@ const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../../testing/src/harnesses/test-checkbox.harness').then((m) => m.default),
     mapper: checkboxFieldMapper,
   },
+  {
+    name: 'select',
+    loadComponent: () => import('../../testing/src/harnesses/test-select.harness').then((m) => m.default),
+    mapper: optionsFieldMapper as FieldTypeDefinition['mapper'],
+  },
 ];
 
 describe('DynamicFormComponent', () => {
@@ -114,6 +121,7 @@ describe('DynamicFormComponent', () => {
         DynamicForm,
         TestInputHarnessComponent,
         TestCheckboxHarnessComponent,
+        TestSelectHarnessComponent,
         TestParentWrapperComponent,
         TestChildWrapperComponent,
         TestArrayContextWrapperComponent,
@@ -737,6 +745,77 @@ describe('DynamicFormComponent', () => {
         firstName: 'John',
         lastName: 'Smith',
       });
+    });
+
+    it('should refresh select options when config changes for a field with the same key', async () => {
+      // Initial config: select field with empty options array.
+      const initialConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'country',
+            type: 'select',
+            label: 'Country',
+            options: [],
+          },
+        ],
+      };
+
+      const { fixture } = createComponent(initialConfig);
+      await waitForDynamicComponents(fixture);
+
+      // Sanity: the select harness rendered with no options.
+      let selectDe = fixture.debugElement.query((de: DebugElement) => de.componentInstance instanceof TestSelectHarnessComponent);
+      expect(selectDe).not.toBeNull();
+      let selectInstance = selectDe.componentInstance as TestSelectHarnessComponent;
+      expect(selectInstance.options()).toEqual([]);
+
+      // Swap config quickly: same key, same type, but now with options populated.
+      // This mimics a real-world flow where async data fills the options after the
+      // form has already been rendered with an empty list.
+      const newConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'country',
+            type: 'select',
+            label: 'Country',
+            options: [
+              { value: 'us', label: 'United States' },
+              { value: 'ca', label: 'Canada' },
+            ],
+          },
+        ],
+      };
+
+      fixture.componentRef.setInput('dynamic-form', newConfig);
+      // Config transitions go through multiple phases (config-change -> teardown ->
+      // applying -> restoring -> ready); allow each tick for the pipeline to settle.
+      await delay(10);
+      fixture.detectChanges();
+      TestBed.flushEffects();
+      await delay(10);
+      fixture.detectChanges();
+      TestBed.flushEffects();
+      await delay(10);
+      fixture.detectChanges();
+
+      // The harness's options input should reflect the new options.
+      // Regression test for prior bug: reconcileFields preserved the prior ResolvedField when
+      // key+component+injector matched, reusing a stale `inputs` signal whose options were
+      // captured by closure in optionsFieldMapper from the initial fieldDef — so the harness
+      // saw an empty options array. This assertion verifies the fix: selectInstance.options()
+      // must now reflect the new options after a same-key config change.
+      selectDe = fixture.debugElement.query((de: DebugElement) => de.componentInstance instanceof TestSelectHarnessComponent);
+      selectInstance = selectDe.componentInstance as TestSelectHarnessComponent;
+      expect(selectInstance.options()).toEqual([
+        { value: 'us', label: 'United States' },
+        { value: 'ca', label: 'Canada' },
+      ]);
+
+      // And the rendered DOM should reflect the new options too.
+      const renderedOptionLabels = Array.from(selectDe.nativeElement.querySelectorAll('option'))
+        .map((opt: Element) => opt.textContent?.trim())
+        .filter((label: string | undefined) => label && label !== 'Select...');
+      expect(renderedOptionLabels).toEqual(['United States', 'Canada']);
     });
   });
 
