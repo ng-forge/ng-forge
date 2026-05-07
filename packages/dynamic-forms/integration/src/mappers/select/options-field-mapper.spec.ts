@@ -5,8 +5,7 @@ import { optionsFieldMapper, FieldWithOptions } from './options-field-mapper';
 import { SelectField } from '../../definitions';
 import { RadioField } from '../../definitions';
 import { MultiCheckboxField } from '../../definitions';
-import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
-import { FieldSignalContext } from '../types';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FieldSignalContext } from '@ng-forge/dynamic-forms';
 
 describe('optionsFieldMapper', () => {
   let parentInjector: EnvironmentInjector;
@@ -31,7 +30,14 @@ describe('optionsFieldMapper', () => {
       form: testForm,
     };
 
-    return createEnvironmentInjector([{ provide: FIELD_SIGNAL_CONTEXT, useValue: mockContext }], parentInjector);
+    return createEnvironmentInjector(
+      [
+        { provide: FIELD_SIGNAL_CONTEXT, useValue: mockContext },
+        { provide: DEFAULT_PROPS, useValue: signal(undefined) },
+        { provide: DEFAULT_VALIDATION_MESSAGES, useValue: signal(undefined) },
+      ],
+      parentInjector,
+    );
   }
 
   function testMapper<T, TProps>(fieldDef: FieldWithOptions<T, TProps>, injector: EnvironmentInjector): Record<string, unknown> {

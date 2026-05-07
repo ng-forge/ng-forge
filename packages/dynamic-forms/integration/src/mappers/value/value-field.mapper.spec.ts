@@ -3,8 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { form } from '@angular/forms/signals';
 import { valueFieldMapper } from './value-field.mapper';
 import { BaseValueField } from '../../definitions';
-import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
-import { FieldSignalContext } from '../types';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FieldSignalContext } from '@ng-forge/dynamic-forms';
 
 describe('valueFieldMapper', () => {
   let parentInjector: EnvironmentInjector;
@@ -27,15 +26,13 @@ describe('valueFieldMapper', () => {
       value: initialValue,
       defaultValues: () => ({ [fieldKey]: '' }),
       form: testForm,
-      defaultValidationMessages: options?.defaultValidationMessages,
     };
 
     return createEnvironmentInjector(
       [
-        {
-          provide: FIELD_SIGNAL_CONTEXT,
-          useValue: mockContext,
-        },
+        { provide: FIELD_SIGNAL_CONTEXT, useValue: mockContext },
+        { provide: DEFAULT_PROPS, useValue: signal(undefined) },
+        { provide: DEFAULT_VALIDATION_MESSAGES, useValue: signal(options?.defaultValidationMessages) },
       ],
       parentInjector,
     );

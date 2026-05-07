@@ -52,12 +52,7 @@ export default defineConfig(({ mode }) => {
       hookTimeout: 1000,
       // Retry flaky tests due to browser mode module mocking inconsistencies
       retry: 2,
-      include: [
-        'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
-        // Integration directives only -- mapper specs in integration/src/mappers/
-        // have stale imports and are excluded pending separate cleanup.
-        'integration/src/directives/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
-      ],
+      include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}', 'integration/src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
       reporters: ['default'],
       coverage: {
         enabled: true,
