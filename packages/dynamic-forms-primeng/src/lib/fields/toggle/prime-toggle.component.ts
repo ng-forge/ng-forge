@@ -1,17 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { PrimeToggleProps } from './prime-toggle.type';
 import { AsyncPipe } from '@angular/common';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 
 @Component({
   selector: 'df-prime-toggle',
-  imports: [ToggleSwitch, DynamicTextPipe, AsyncPipe, FormField],
+  imports: [ToggleSwitch, DynamicTextPipe, AsyncPipe, FormField, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('input[type="checkbox"]')],
   template: `
     <div class="df-prime-field">
       @if (field.label()) {
@@ -19,6 +18,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
       }
 
       <p-toggleSwitch
+        ngForgeControl
         [id]="field.key()"
         [formField]="field.field()"
         [attr.tabindex]="field.tabIndex()"

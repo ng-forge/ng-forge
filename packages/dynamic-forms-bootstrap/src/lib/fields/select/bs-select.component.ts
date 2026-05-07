@@ -1,16 +1,15 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { BsSelectProps } from './bs-select.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-select',
-  imports: [FormField, DynamicTextPipe, AsyncPipe],
+  imports: [FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('select')],
   template: `
     @let f = field.field(); @let selectId = field.key() + '-select';
 
@@ -19,6 +18,7 @@ import { AsyncPipe } from '@angular/common';
         <label [for]="selectId" class="form-label">{{ label | dynamicText | async }}</label>
       }
       <select
+        ngForgeControl
         [formField]="f"
         [id]="selectId"
         class="form-select"

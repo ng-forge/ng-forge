@@ -4,16 +4,15 @@ import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatHint } from '@angular/material/input';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { MatSelectProps } from './mat-select.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
 @Component({
   selector: 'df-mat-select',
-  imports: [MatFormField, MatLabel, MatSelect, MatOption, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatFormField, MatLabel, MatSelect, MatOption, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('mat-select')],
   template: `
     @let selectId = field.key() + '-select';
 
@@ -28,6 +27,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       }
 
       <mat-select
+        ngForgeControl
         [id]="selectId"
         [formField]="field.field()"
         [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"

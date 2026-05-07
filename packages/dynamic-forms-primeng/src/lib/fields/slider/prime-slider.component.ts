@@ -1,17 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { PrimeSliderProps } from './prime-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { Slider } from 'primeng/slider';
 
 @Component({
   selector: 'df-prime-slider',
-  imports: [Slider, FormField, DynamicTextPipe, AsyncPipe],
+  imports: [Slider, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('input')],
   template: `
     @let f = field.field();
 
@@ -21,6 +20,7 @@ import { Slider } from 'primeng/slider';
       }
 
       <p-slider
+        ngForgeControl
         [id]="field.key()"
         [formField]="f"
         [min]="f().min?.() ?? props()?.min ?? 0"

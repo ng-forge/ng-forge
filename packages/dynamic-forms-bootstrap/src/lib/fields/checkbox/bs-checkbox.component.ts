@@ -1,16 +1,15 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { BsCheckboxProps } from './bs-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-checkbox',
-  imports: [FormField, DynamicTextPipe, AsyncPipe],
+  imports: [FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('input[type="checkbox"]')],
   template: `
     @let f = field.field(); @let checkboxId = field.key() + '-checkbox';
 
@@ -22,6 +21,7 @@ import { AsyncPipe } from '@angular/common';
       [attr.hidden]="f().hidden() || null"
     >
       <input
+        ngForgeControl
         type="checkbox"
         [formField]="f"
         [id]="checkboxId"

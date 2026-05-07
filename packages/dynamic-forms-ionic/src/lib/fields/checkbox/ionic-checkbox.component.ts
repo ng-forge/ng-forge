@@ -2,20 +2,20 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { IonCheckbox, IonNote } from '@ionic/angular/standalone';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { IonicCheckboxProps } from './ionic-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ion-checkbox',
-  imports: [IonCheckbox, IonNote, FormField, DynamicTextPipe, AsyncPipe],
+  imports: [IonCheckbox, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('ion-checkbox')],
   template: `
     @let f = field.field();
     @let checkboxId = field.key() + '-checkbox';
 
     <ion-checkbox
+      ngForgeControl
       [id]="checkboxId"
       [formField]="f"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"

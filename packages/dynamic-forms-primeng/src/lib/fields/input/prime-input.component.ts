@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
 import { InputText } from 'primeng/inputtext';
@@ -9,10 +9,9 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 
 @Component({
   selector: 'df-prime-input',
-  imports: [InputText, DynamicTextPipe, AsyncPipe, FormField],
+  imports: [InputText, DynamicTextPipe, AsyncPipe, FormField, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('input')],
   template: `
     <div class="df-prime-field">
       @if (field.label()) {
@@ -20,6 +19,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
       }
       <input
         pInputText
+        ngForgeControl
         [id]="inputId()"
         [formField]="field.field()"
         [type]="props()?.type ?? 'text'"

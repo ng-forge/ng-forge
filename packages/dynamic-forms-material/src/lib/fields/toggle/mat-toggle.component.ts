@@ -2,7 +2,7 @@ import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, Elemen
 import { FormField } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 
 import { MatToggleProps } from './mat-toggle.type';
 import { MatError } from '@angular/material/input';
@@ -11,15 +11,14 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
 @Component({
   selector: 'df-mat-toggle',
-  imports: [MatSlideToggle, FormField, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatSlideToggle, FormField, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  // mat-slide-toggle uses <button role="switch"> instead of <input type="checkbox">
-  providers: [provideMetaTarget('button[role="switch"]')],
   template: `
     @let f = field.field();
     @let toggleId = field.key() + '-toggle';
 
     <mat-slide-toggle
+      ngForgeControl
       [id]="toggleId"
       [formField]="f"
       [color]="props()?.color || 'primary'"

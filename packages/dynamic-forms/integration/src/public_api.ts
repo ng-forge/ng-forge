@@ -119,8 +119,7 @@ export { createAriaDescribedBySignal } from './utils';
 
 export { NgForgeField, NG_FORGE_FIELD_INPUTS, injectNgForgeField } from './directives';
 export type { TypedNgForgeField } from './directives';
-export { NG_FORGE_FIELD_META_TARGET, provideMetaTarget, provideHostMetaTarget, provideSkipMetaTarget } from './directives';
-export type { MetaTargetConfig } from './directives';
+export { NgForgeControl, NgForgeHostControl } from './directives';
 
 // =============================================================================
 // Non-Field Logic Resolvers (re-exported from @ng-forge/dynamic-forms)

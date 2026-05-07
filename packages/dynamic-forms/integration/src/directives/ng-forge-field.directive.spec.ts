@@ -2,34 +2,33 @@ import { ChangeDetectionStrategy, Component, EnvironmentInjector, runInInjection
 import { TestBed } from '@angular/core/testing';
 import { form, FieldTree } from '@angular/forms/signals';
 import { DEFAULT_VALIDATION_MESSAGES, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NG_FORGE_FIELD_HOST_DIRECTIVE } from './ng-forge-field.directive';
-import { provideMetaTarget, provideSkipMetaTarget } from './meta-target.token';
+import { NgForgeField, NG_FORGE_FIELD_INPUTS } from './ng-forge-field.directive';
+import { NgForgeControl, NgForgeHostControl } from './ng-forge-controls';
 
 @Component({
   selector: 'test-host',
   template: '<input class="target" />',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [NG_FORGE_FIELD_HOST_DIRECTIVE],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
 })
 class TestHostComponent {}
 
 @Component({
-  selector: 'test-host-with-target',
-  template: '<input class="target" />',
+  selector: 'test-host-with-control',
+  imports: [NgForgeControl],
+  template: '<input class="target" ngForgeControl />',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [NG_FORGE_FIELD_HOST_DIRECTIVE],
-  providers: [provideMetaTarget('input.target')],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
 })
-class TestHostWithTargetComponent {}
+class TestHostWithControlComponent {}
 
 @Component({
-  selector: 'test-host-skip',
+  selector: 'test-host-host-control',
   template: '<input class="target" />',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [NG_FORGE_FIELD_HOST_DIRECTIVE],
-  providers: [provideSkipMetaTarget()],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }, NgForgeHostControl],
 })
-class TestHostSkipComponent {}
+class TestHostHostControlComponent {}
 
 interface TestFormValue {
   username: string;
@@ -79,7 +78,7 @@ describe('NgForgeField', () => {
       expect(directive.errorsToDisplay()).toEqual([]);
     });
 
-    it('falls back to DEFAULT_VALIDATION_MESSAGES from DI when no validationMessages input is provided', () => {
+    it('falls back to DEFAULT_VALIDATION_MESSAGES from DI when no defaultValidationMessages input is provided', () => {
       const defaultMessages: ValidationMessages = { required: 'Default required' };
       TestBed.configureTestingModule({
         imports: [TestHostComponent],
@@ -93,9 +92,6 @@ describe('NgForgeField', () => {
       fixture.componentRef.setInput('key', 'username');
       fixture.detectChanges();
 
-      // Smoke check: the directive constructed and the default-messages signal is wired.
-      // (Resolved errors only appear when the field tree actually emits a validation error;
-      // ng-forge tests cover the resolution itself in createResolvedErrorsSignal's spec.)
       expect(directive.errors).toBeDefined();
     });
   });
@@ -155,40 +151,84 @@ describe('NgForgeField', () => {
     });
   });
 
-  describe('meta-target configuration', () => {
-    it('does not throw when no provider is supplied (default selector path)', () => {
+  describe('meta forwarding via NgForgeControl', () => {
+    it('forwards meta attributes onto the [ngForgeControl]-marked element', () => {
+      TestBed.configureTestingModule({ imports: [TestHostWithControlComponent] });
+      const fixture = TestBed.createComponent(TestHostWithControlComponent);
+      const { field } = setupField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('meta', { autocomplete: 'username' });
+      fixture.detectChanges();
+
+      const target = fixture.nativeElement.querySelector('input.target') as HTMLElement | null;
+      expect(target?.getAttribute('autocomplete')).toBe('username');
+    });
+
+    it('forwards meta attributes onto the host element when NgForgeHostControl is in hostDirectives', () => {
+      TestBed.configureTestingModule({ imports: [TestHostHostControlComponent] });
+      const fixture = TestBed.createComponent(TestHostHostControlComponent);
+      const { field } = setupField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('meta', { autocomplete: 'username' });
+      fixture.detectChanges();
+
+      const host = fixture.nativeElement as HTMLElement;
+      expect(host.getAttribute('autocomplete')).toBe('username');
+    });
+
+    it('does NOT apply meta when neither NgForgeControl nor NgForgeHostControl is used', () => {
       TestBed.configureTestingModule({ imports: [TestHostComponent] });
       const fixture = TestBed.createComponent(TestHostComponent);
       const { field } = setupField();
       fixture.componentRef.setInput('field', field);
       fixture.componentRef.setInput('key', 'username');
-      fixture.componentRef.setInput('meta', { 'data-testid': 'username-input' });
+      // Use `autocomplete` -- NOT in the directive's own host bindings, so it
+      // only appears if meta forwarding ran. (`data-testid` would be a false
+      // positive: the directive sets `[attr.data-testid]="key()"` directly.)
+      fixture.componentRef.setInput('meta', { autocomplete: 'off' });
+      fixture.detectChanges();
+
+      const host = fixture.nativeElement as HTMLElement;
+      const target = fixture.nativeElement.querySelector('input.target') as HTMLElement | null;
+      expect(host.getAttribute('autocomplete')).toBeNull();
+      expect(target?.getAttribute('autocomplete')).toBeNull();
+    });
+  });
+
+  describe('NG_FORGE_FIELD_INPUTS lockstep assertion (dev-mode)', () => {
+    // The directive throws on construction when its declared inputs drift from
+    // NG_FORGE_FIELD_INPUTS. Instantiating the host component triggers the
+    // assertion through the host-directive composition.
+    it('does not throw on construction when the tuple matches the declared inputs', () => {
+      TestBed.configureTestingModule({ imports: [TestHostComponent] });
+      expect(() => TestBed.createComponent(TestHostComponent)).not.toThrow();
+    });
+  });
+
+  // Locks down the contract for non-outlet consumers (TestBed, Storybook, manual
+  // standalone instantiation): set the required inputs BEFORE the first
+  // detectChanges. Skipping that order surfaces NG0950 from the host bindings
+  // ([id]/[attr.data-testid]/[attr.hidden]) on the first render.
+  describe('direct instantiation (no DfFieldOutlet)', () => {
+    it('renders without throwing when field/key are set BEFORE the first detectChanges', () => {
+      TestBed.configureTestingModule({ imports: [TestHostComponent] });
+      const fixture = TestBed.createComponent(TestHostComponent);
+      const { field } = setupField('alice');
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
       expect(() => fixture.detectChanges()).not.toThrow();
+      expect((fixture.nativeElement as HTMLElement).getAttribute('id')).toBe('username');
     });
 
-    it('honors a custom selector via provideMetaTarget()', () => {
-      TestBed.configureTestingModule({ imports: [TestHostWithTargetComponent] });
-      const fixture = TestBed.createComponent(TestHostWithTargetComponent);
-      const { field } = setupField();
-      fixture.componentRef.setInput('field', field);
-      fixture.componentRef.setInput('key', 'username');
-      fixture.componentRef.setInput('meta', { 'data-testid': 'username-input' });
-      fixture.detectChanges();
-      // Verify by checking the rendered DOM picked up the attribute.
-      const target = fixture.nativeElement.querySelector('input.target') as HTMLElement | null;
-      expect(target?.getAttribute('data-testid')).toBe('username-input');
-    });
-
-    it('does NOT apply meta when provideSkipMetaTarget() is used', () => {
-      TestBed.configureTestingModule({ imports: [TestHostSkipComponent] });
-      const fixture = TestBed.createComponent(TestHostSkipComponent);
-      const { field } = setupField();
-      fixture.componentRef.setInput('field', field);
-      fixture.componentRef.setInput('key', 'username');
-      fixture.componentRef.setInput('meta', { 'data-testid': 'should-not-apply' });
-      fixture.detectChanges();
-      const target = fixture.nativeElement.querySelector('input.target') as HTMLElement | null;
-      expect(target?.getAttribute('data-testid')).toBeNull();
+    it('throws NG0950 when detectChanges runs before the required inputs are bound', () => {
+      TestBed.configureTestingModule({ imports: [TestHostComponent] });
+      const fixture = TestBed.createComponent(TestHostComponent);
+      // Intentionally skip setInput. Host bindings on the directive read
+      // `key()` / `field()`, which are `input.required<...>()` and throw
+      // NG0950 on first read until set.
+      expect(() => fixture.detectChanges()).toThrow();
     });
   });
 });

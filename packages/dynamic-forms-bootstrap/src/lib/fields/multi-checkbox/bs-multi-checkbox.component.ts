@@ -1,25 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  injectNgForgeField,
-  isEqual,
-  NgForgeField,
-  NG_FORGE_FIELD_INPUTS,
-  provideSkipMetaTarget,
-  setupMetaTracking,
-} from '@ng-forge/dynamic-forms/integration';
+import { injectNgForgeField, isEqual, NgForgeControl, NgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { BsMultiCheckboxProps } from './bs-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-multi-checkbox',
-  imports: [DynamicTextPipe, AsyncPipe],
+  imports: [DynamicTextPipe, AsyncPipe, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  // Skip directive-owned meta tracking; we set up manual tracking with `dependents: [this.options]`
-  // since the dynamic checkbox inputs need to be re-decorated when options change.
-  providers: [provideSkipMetaTarget()],
   template: `
     @let f = field.field();
     @let checked = checkedValuesMap();
@@ -36,6 +26,7 @@ import { AsyncPipe } from '@angular/common';
           [class.form-check-reverse]="props()?.reverse"
         >
           <input
+            ngForgeControl
             type="checkbox"
             [id]="field.key() + '_' + i"
             [checked]="checked['' + option.value]"
@@ -79,8 +70,6 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BsMultiCheckboxFieldComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
-
   protected readonly field = injectNgForgeField<ValueType[]>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
@@ -104,13 +93,6 @@ export default class BsMultiCheckboxFieldComponent {
   );
 
   constructor() {
-    // Manual meta tracking: dependents reference instance signals, which the
-    // declarative `provideMetaTarget` provider can't accept.
-    setupMetaTracking(this.elementRef, this.field.meta, {
-      selector: 'input[type="checkbox"]',
-      dependents: [this.options],
-    });
-
     explicitEffect([this.valueViewModel], ([selectedOptions]: [FieldOption<ValueType>[]]) => {
       const selectedValues = selectedOptions.map((option: FieldOption<ValueType>) => option.value);
 

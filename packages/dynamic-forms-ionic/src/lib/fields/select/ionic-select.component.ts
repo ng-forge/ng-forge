@@ -2,20 +2,20 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { IonNote, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { IonicSelectProps } from './ionic-select.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ion-select',
-  imports: [IonSelect, IonSelectOption, IonNote, FormField, DynamicTextPipe, AsyncPipe],
+  imports: [IonSelect, IonSelectOption, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('ion-select')],
   template: `
     @let f = field.field();
     @let selectId = field.key() + '-select';
 
     <ion-select
+      ngForgeControl
       [id]="selectId"
       [formField]="f"
       [label]="(field.label() | dynamicText | async) ?? undefined"

@@ -4,7 +4,7 @@ import { MatError, MatFormField, MatLabel, MatSuffix } from '@angular/material/f
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { MatDatepickerProps } from './mat-datepicker.type';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AsyncPipe } from '@angular/common';
@@ -25,6 +25,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
     MatError,
     DynamicTextPipe,
     AsyncPipe,
+    NgForgeControl,
   ],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
@@ -42,6 +43,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
       <input
         matInput
+        ngForgeControl
         [id]="inputId"
         [matDatepicker]="picker"
         [formField]="field.field()"
@@ -72,7 +74,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       }
     `,
   ],
-  providers: [provideNativeDateAdapter(), provideMetaTarget('input')],
+  providers: [provideNativeDateAdapter()],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatDatepickerFieldComponent {

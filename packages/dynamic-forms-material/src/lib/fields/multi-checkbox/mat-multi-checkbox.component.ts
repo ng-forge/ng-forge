@@ -1,14 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  injectNgForgeField,
-  isEqual,
-  NgForgeField,
-  NG_FORGE_FIELD_INPUTS,
-  provideSkipMetaTarget,
-  setupMetaTracking,
-} from '@ng-forge/dynamic-forms/integration';
+import { injectNgForgeField, isEqual, NgForgeControl, NgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { MatMultiCheckboxProps } from './mat-multi-checkbox.type';
 import { MatError } from '@angular/material/input';
@@ -16,11 +9,8 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-multi-checkbox',
-  imports: [MatCheckbox, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatCheckbox, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  // Skip directive-owned meta tracking; we set up manual tracking with `dependents: [this.options]`
-  // since the dynamic checkbox inputs need to be re-decorated when options change.
-  providers: [provideSkipMetaTarget()],
   template: `
     @let f = field.field();
     @let checkboxGroupId = field.key() + '-checkbox-group';
@@ -40,6 +30,7 @@ import { AsyncPipe } from '@angular/common';
     >
       @for (option of options(); track option.value) {
         <mat-checkbox
+          ngForgeControl
           [checked]="checked['' + option.value]"
           [disabled]="f().disabled() || option.disabled"
           [color]="props()?.color || 'primary'"
@@ -61,8 +52,6 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatMultiCheckboxFieldComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
-
   protected readonly field = injectNgForgeField<ValueType[]>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
@@ -86,13 +75,6 @@ export default class MatMultiCheckboxFieldComponent {
   });
 
   constructor() {
-    // Manual meta tracking: dependents reference instance signals, which the
-    // declarative `provideMetaTarget` provider can't accept.
-    setupMetaTracking(this.elementRef, this.field.meta, {
-      selector: 'input[type="checkbox"]',
-      dependents: [this.options],
-    });
-
     explicitEffect([this.valueViewModel], ([selectedOptions]) => {
       const selectedValues = selectedOptions.map((option) => option.value);
 

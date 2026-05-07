@@ -1,23 +1,23 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { BsInputProps } from './bs-input.type';
 import { AsyncPipe } from '@angular/common';
 import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
 
 @Component({
   selector: 'df-bs-input',
-  imports: [FormField, DynamicTextPipe, AsyncPipe],
+  imports: [FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('input')],
   template: `
     @let f = field.field(); @let p = props(); @let inputId = field.key() + '-input';
     @if (effectiveFloatingLabel()) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
         <input
+          ngForgeControl
           [formField]="f"
           [id]="inputId"
           [type]="p?.type ?? 'text'"
@@ -52,6 +52,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
           <label [for]="inputId" class="form-label">{{ field.label() | dynamicText | async }}</label>
         }
         <input
+          ngForgeControl
           [formField]="f"
           [id]="inputId"
           [type]="p?.type ?? 'text'"

@@ -1,22 +1,22 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, input, viewChild } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { BsTextareaProps } from './bs-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-textarea',
-  imports: [FormField, DynamicTextPipe, AsyncPipe],
+  imports: [FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('textarea')],
   template: `
     @let f = field.field(); @let p = props(); @let textareaId = field.key() + '-textarea';
     @if (p?.floatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
         <textarea
+          ngForgeControl
           #textareaRef
           [formField]="f"
           [id]="textareaId"
@@ -54,6 +54,7 @@ import { AsyncPipe } from '@angular/common';
         }
 
         <textarea
+          ngForgeControl
           #textareaRef
           [formField]="f"
           [id]="textareaId"

@@ -2,21 +2,21 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { FormField } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { PrimeCheckboxProps } from './prime-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-prime-checkbox',
-  imports: [Checkbox, DynamicTextPipe, AsyncPipe, FormField],
+  imports: [Checkbox, DynamicTextPipe, AsyncPipe, FormField, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('input[type="checkbox"]')],
   template: `
     @let f = field.field(); @let checkboxId = field.key() + '-checkbox';
 
     <div class="flex items-center">
       <p-checkbox
+        ngForgeControl
         [formField]="f"
         [inputId]="checkboxId"
         [binary]="props()?.binary ?? true"

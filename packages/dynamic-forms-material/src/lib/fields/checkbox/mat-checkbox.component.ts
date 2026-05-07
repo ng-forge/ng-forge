@@ -2,7 +2,7 @@ import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, Elemen
 import { FormField } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { MatCheckboxProps } from './mat-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
@@ -10,14 +10,14 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
 @Component({
   selector: 'df-mat-checkbox',
-  imports: [MatCheckbox, FormField, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatCheckbox, FormField, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('input[type="checkbox"]')],
   template: `
     @let f = field.field();
     @let checkboxId = field.key() + '-checkbox';
 
     <mat-checkbox
+      ngForgeControl
       [id]="checkboxId"
       [formField]="f"
       [labelPosition]="props()?.labelPosition || 'after'"

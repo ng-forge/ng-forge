@@ -1,13 +1,7 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  NgForgeField,
-  injectNgForgeField,
-  NG_FORGE_FIELD_INPUTS,
-  provideSkipMetaTarget,
-  setupMetaTracking,
-} from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { BsRadioProps } from './bs-radio.type';
 import { AsyncPipe } from '@angular/common';
 import { BsRadioGroupComponent } from './bs-radio-group.component';
@@ -17,8 +11,6 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
   imports: [BsRadioGroupComponent, FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  // Manual meta tracking with dependents on `options`; opt out of directive-owned tracking.
-  providers: [provideSkipMetaTarget()],
   template: `
     @let f = field.field();
 
@@ -56,17 +48,8 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BsRadioFieldComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
-
   protected readonly field = injectNgForgeField<ValueType>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<BsRadioProps>();
-
-  constructor() {
-    setupMetaTracking(this.elementRef, this.field.meta, {
-      selector: 'input[type="radio"]',
-      dependents: [this.options],
-    });
-  }
 }

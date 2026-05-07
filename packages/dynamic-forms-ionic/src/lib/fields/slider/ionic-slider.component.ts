@@ -2,15 +2,14 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { IonNote, IonRange } from '@ionic/angular/standalone';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideHostMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, NgForgeHostControl, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { IonicSliderProps } from './ionic-slider.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ion-slider',
   imports: [IonRange, IonNote, FormField, DynamicTextPipe, AsyncPipe],
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideHostMetaTarget()],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }, NgForgeHostControl],
   template: `
     @let f = field.field();
     @let inputId = field.key() + '-input';

@@ -1,24 +1,16 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  NgForgeField,
-  injectNgForgeField,
-  NG_FORGE_FIELD_INPUTS,
-  provideSkipMetaTarget,
-  setupMetaTracking,
-} from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { MatRadioProps } from './mat-radio.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-radio',
-  imports: [MatRadioGroup, MatRadioButton, FormField, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatRadioGroup, MatRadioButton, FormField, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  // Manual meta tracking with dependents on `options`; opt out of directive-owned tracking.
-  providers: [provideSkipMetaTarget()],
   template: `
     @let f = field.field();
     @let radioGroupId = field.key() + '-radio-group';
@@ -36,6 +28,7 @@ import { AsyncPipe } from '@angular/common';
     >
       @for (option of options(); track option.value) {
         <mat-radio-button
+          ngForgeControl
           [value]="option.value"
           [disabled]="option.disabled || false"
           [color]="props()?.color || 'primary'"
@@ -56,19 +49,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatRadioFieldComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
-
   protected readonly field = injectNgForgeField<ValueType>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<MatRadioProps>();
-
-  constructor() {
-    // Manual meta tracking: dependents reference instance signals, which the
-    // declarative `provideMetaTarget` provider can't accept.
-    setupMetaTracking(this.elementRef, this.field.meta, {
-      selector: 'input[type="radio"]',
-      dependents: [this.options],
-    });
-  }
 }

@@ -3,7 +3,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FormField } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
@@ -29,14 +29,14 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
 // auto-wires. See packages/dynamic-forms-primeng/src/lib/fields/textarea/.
 @Component({
   selector: 'df-ion-input',
-  imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe],
+  imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('ion-input')],
   template: `
     @let f = field.field();
     @let inputId = field.key() + '-input';
 
     <ion-input
+      ngForgeControl
       [id]="inputId"
       [type]="props()?.type ?? 'text'"
       [formField]="f"

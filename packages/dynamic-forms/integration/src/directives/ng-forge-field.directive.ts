@@ -1,11 +1,9 @@
-import { computed, Directive, ElementRef, inject, input, Signal, signal } from '@angular/core';
+import { computed, Directive, inject, input, Signal, signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { DEFAULT_VALIDATION_MESSAGES, DynamicText, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createAriaDescribedBySignal } from '../utils/create-aria-described-by';
 import { createResolvedErrorsSignal, ResolvedError } from '../utils/create-resolved-errors-signal';
-import { setupMetaTracking } from '../utils/setup-meta-tracking';
 import { shouldShowErrors } from '../utils/should-show-errors';
-import { MetaTargetConfig, NG_FORGE_FIELD_META_TARGET } from './meta-target.token';
 
 /**
  * `NgForgeField` is the canonical primitive for ng-forge value-field components.
@@ -56,7 +54,7 @@ import { MetaTargetConfig, NG_FORGE_FIELD_META_TARGET } from './meta-target.toke
     '[id]': 'key()',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[attr.hidden]': 'field()().hidden() || null',
+    '[attr.hidden]': 'field()().hidden?.() || null',
   },
 })
 export class NgForgeField {
@@ -85,13 +83,11 @@ export class NgForgeField {
   // Wiring
   // ───────────────────────────────────────────────────────────────────────────
 
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly defaultValidationMessagesFromDi: Signal<ValidationMessages | undefined> =
     inject(DEFAULT_VALIDATION_MESSAGES, { optional: true }) ?? signal(undefined);
   private readonly effectiveDefaultValidationMessages: Signal<ValidationMessages | undefined> = computed(
     () => this.defaultValidationMessages() ?? this.defaultValidationMessagesFromDi(),
   );
-  private readonly metaTarget: MetaTargetConfig | null = inject(NG_FORGE_FIELD_META_TARGET, { optional: true });
 
   // ───────────────────────────────────────────────────────────────────────────
   // Error display
@@ -126,22 +122,28 @@ export class NgForgeField {
   );
 
   // ───────────────────────────────────────────────────────────────────────────
-  // Meta-attribute forwarding
+  // Dev-mode assertion: NG_FORGE_FIELD_INPUTS must stay in lockstep with the
+  // directive's `input()` declarations. Without this check, adding an input
+  // here without updating the tuple silently breaks consumer-side forwarding —
+  // the host directive simply doesn't expose the input and parents can't
+  // bind to it, with no compile error.
   // ───────────────────────────────────────────────────────────────────────────
 
   constructor() {
-    const config = this.metaTarget;
-    if (!config || config.kind === 'skip') {
-      return;
+    if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+      const declared = Object.keys((NgForgeField as unknown as { ɵdir?: { inputs?: Record<string, unknown> } }).ɵdir?.inputs ?? {});
+      const tupleSet = new Set<string>(NG_FORGE_FIELD_INPUTS as readonly string[]);
+      const missingFromTuple = declared.filter((name) => !tupleSet.has(name));
+      const extraInTuple = (NG_FORGE_FIELD_INPUTS as readonly string[]).filter((name) => !declared.includes(name));
+      if (missingFromTuple.length || extraInTuple.length) {
+        throw new Error(
+          `[NgForgeField] NG_FORGE_FIELD_INPUTS is out of sync with declared inputs.\n` +
+            (missingFromTuple.length ? `  Declared but missing from tuple: ${missingFromTuple.join(', ')}\n` : '') +
+            (extraInTuple.length ? `  In tuple but not declared: ${extraInTuple.join(', ')}\n` : '') +
+            `Update NG_FORGE_FIELD_INPUTS so consumers via hostDirectives can forward all declared inputs.`,
+        );
+      }
     }
-    if (config.kind === 'host') {
-      setupMetaTracking(this.elementRef, this.meta);
-      return;
-    }
-    setupMetaTracking(this.elementRef, this.meta, {
-      selector: config.selector,
-      dependents: config.dependents,
-    });
   }
 }
 

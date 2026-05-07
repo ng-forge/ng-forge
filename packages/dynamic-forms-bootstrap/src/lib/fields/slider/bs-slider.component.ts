@@ -1,17 +1,16 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS, provideMetaTarget } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { BsSliderProps } from './bs-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
 
 @Component({
   selector: 'df-bs-slider',
-  imports: [FormField, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
+  imports: [FormField, DynamicTextPipe, AsyncPipe, InputConstraintsDirective, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  providers: [provideMetaTarget('input')],
   template: `
     @let f = field.field(); @let inputId = field.key() + '-input';
 
@@ -26,6 +25,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
       }
 
       <input
+        ngForgeControl
         type="range"
         dfBsInputConstraints
         [formField]="f"

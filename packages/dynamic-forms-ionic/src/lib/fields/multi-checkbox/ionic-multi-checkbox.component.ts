@@ -1,25 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { IonCheckbox, IonItem, IonNote } from '@ionic/angular/standalone';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  injectNgForgeField,
-  isEqual,
-  NgForgeField,
-  NG_FORGE_FIELD_INPUTS,
-  provideSkipMetaTarget,
-  setupMetaTracking,
-} from '@ng-forge/dynamic-forms/integration';
+import { injectNgForgeField, isEqual, NgForgeControl, NgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { IonicMultiCheckboxProps } from './ionic-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ion-multi-checkbox',
-  imports: [IonCheckbox, IonItem, IonNote, DynamicTextPipe, AsyncPipe],
+  imports: [IonCheckbox, IonItem, IonNote, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
-  // Skip directive-owned meta tracking; we set up manual tracking with `dependents: [this.options]`
-  // since the dynamic ion-checkbox elements need to be re-decorated when options change.
-  providers: [provideSkipMetaTarget()],
   template: `
     @let f = field.field();
     @let checked = checkedValuesMap();
@@ -39,6 +29,7 @@ import { AsyncPipe } from '@angular/common';
       @for (option of options(); track option.value) {
         <ion-item lines="none">
           <ion-checkbox
+            ngForgeControl
             [checked]="checked['' + option.value]"
             [disabled]="f().disabled() || option.disabled"
             [labelPlacement]="props()?.labelPlacement ?? 'end'"
@@ -89,8 +80,6 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicMultiCheckboxFieldComponent {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
-
   protected readonly field = injectNgForgeField<ValueType[]>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
@@ -114,13 +103,6 @@ export default class IonicMultiCheckboxFieldComponent {
   });
 
   constructor() {
-    // Manual meta tracking: dependents reference instance signals, which the
-    // declarative `provideMetaTarget` provider can't accept.
-    setupMetaTracking(this.elementRef, this.field.meta, {
-      selector: 'ion-checkbox',
-      dependents: [this.options],
-    });
-
     explicitEffect([this.valueViewModel], ([selectedOptions]) => {
       const selectedValues = selectedOptions.map((option) => option.value);
 
