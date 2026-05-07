@@ -81,6 +81,8 @@ type ExcludedKeys =
   | 'excludeValueIfHidden'
   | 'excludeValueIfDisabled'
   | 'excludeValueIfReadonly'
+  // Validation execution config (schema-only, not component inputs)
+  | 'validateWhenHidden'
   // Wrappers are consumed by DfFieldOutlet / ContainerFieldComponent, not individual fields
   | 'wrappers'
   | 'skipAutoWrappers'

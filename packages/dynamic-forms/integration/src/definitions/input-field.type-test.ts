@@ -156,6 +156,7 @@ describe('InputField - Keys Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'validateWhenHidden'
     // BaseValueField
     | 'value'
     | 'placeholder'

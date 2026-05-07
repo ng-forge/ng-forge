@@ -35,17 +35,8 @@ export const NextButtonOptionsSchema = z.object({
 });
 
 /**
- * Schema for form options.
- *
- * Original interface:
- * ```typescript
- * interface FormOptions {
- *   disabled?: boolean;
- *   maxDerivationIterations?: number;
- *   submitButton?: SubmitButtonOptions;
- *   nextButton?: NextButtonOptions;
- * }
- * ```
+ * Schema for form options. Mirrors the `FormOptions` interface in
+ * `@ng-forge/dynamic-forms`.
  */
 export const FormOptionsSchema = z.object({
   /**
@@ -87,6 +78,13 @@ export const FormOptionsSchema = z.object({
    * Overrides the global withValueExclusionDefaults() setting for this form.
    */
   excludeValueIfReadonly: z.boolean().optional(),
+
+  /**
+   * Whether to run validation while a field is hidden.
+   * Acts as the root inherited value for the form. Per-field
+   * validateWhenHidden overrides cascade through the field tree.
+   */
+  validateWhenHidden: z.boolean().optional(),
 });
 
 export type FormOptionsSchemaType = z.infer<typeof FormOptionsSchema>;

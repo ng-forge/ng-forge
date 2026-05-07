@@ -31,6 +31,12 @@ export default [
     loadChildren: () => import('./async-validation/async-validation.routes'),
   },
 
+  // Cascading Validation Tests
+  {
+    path: 'cascading-validation',
+    loadChildren: () => import('./cascading-validation/cascading-validation.routes'),
+  },
+
   // Config Change Tests
   {
     path: 'config-change',

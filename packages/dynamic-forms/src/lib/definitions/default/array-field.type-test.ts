@@ -30,6 +30,7 @@ describe('ArrayField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'validateWhenHidden'
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'

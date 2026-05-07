@@ -74,6 +74,7 @@ describe('MatToggleField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'validateWhenHidden'
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'

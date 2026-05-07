@@ -711,6 +711,20 @@ export interface FormOptions {
   excludeValueIfReadonly?: boolean;
 
   /**
+   * Whether to run validation when a field is hidden.
+   *
+   * Acts as the root inherited value for the entire form — per-field
+   * `FieldDef.validateWhenHidden` overrides it for a subtree, and once
+   * overridden the new value is itself inherited by descendants unless
+   * they override in turn.
+   *
+   * Overrides the global `withValidationExecutionDefaults()` setting for this form.
+   *
+   * @default undefined (uses global setting, which defaults to `false`)
+   */
+  validateWhenHidden?: boolean;
+
+  /**
    * Whether to attach the current form value to all events dispatched through the EventBus.
    *
    * This per-form setting overrides the global `withEventFormValue()` feature:

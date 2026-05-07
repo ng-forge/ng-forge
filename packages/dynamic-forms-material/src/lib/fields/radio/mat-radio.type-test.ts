@@ -72,6 +72,7 @@ describe('MatRadioField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'validateWhenHidden'
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
