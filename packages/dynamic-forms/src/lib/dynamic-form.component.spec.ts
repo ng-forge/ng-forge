@@ -799,10 +799,11 @@ describe('DynamicFormComponent', () => {
       fixture.detectChanges();
 
       // The harness's options input should reflect the new options.
-      // BUG: reconcileFields preserves the prior ResolvedField when key+component+injector
-      // match, so the stale `inputs` signal (whose options were captured by closure in
-      // optionsFieldMapper from the initial fieldDef) is reused and the harness still
-      // sees an empty options array.
+      // Regression test for prior bug: reconcileFields preserved the prior ResolvedField when
+      // key+component+injector matched, reusing a stale `inputs` signal whose options were
+      // captured by closure in optionsFieldMapper from the initial fieldDef — so the harness
+      // saw an empty options array. This assertion verifies the fix: selectInstance.options()
+      // must now reflect the new options after a same-key config change.
       selectDe = fixture.debugElement.query((de: DebugElement) => de.componentInstance instanceof TestSelectHarnessComponent);
       selectInstance = selectDe.componentInstance as TestSelectHarnessComponent;
       expect(selectInstance.options()).toEqual([
