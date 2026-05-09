@@ -30,6 +30,17 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
+      # Vercel blocks prebuilt deploys whose HEAD commit author email cannot
+      # be matched to a GitHub account (Pro-plan contributor-seat check).
+      # Squash-merges preserve the PR author's GitHub noreply email, which
+      # often fails the match. Reattribute HEAD locally so the upload is
+      # billed to the repo owner; this only mutates the CI checkout.
+      - name: Reattribute commit author for Vercel seat check
+        run: |
+          git config user.email "antimpris@gmail.com"
+          git config user.name "antimprisacaru"
+          git commit --amend --reset-author --no-edit
+
       - name: Install pnpm
         uses: pnpm/action-setup@v5
         with:
