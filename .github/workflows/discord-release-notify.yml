@@ -3,6 +3,12 @@ name: Discord Release Notification
 on:
   release:
     types: [published]
+  workflow_run:
+    # Fires whenever release.yml finishes; the notify-failure job below filters to failures.
+    # Runs from main's copy of this file (workflow_run always uses the default branch),
+    # so changes here only take effect after merge.
+    workflows: ['Release']
+    types: [completed]
   workflow_dispatch:
     inputs:
       tag:
@@ -16,6 +22,9 @@ permissions:
 jobs:
   notify:
     name: Post release to Discord
+    # workflow_run firings are handled by notify-failure below; this job only handles
+    # the "release published" embed path.
+    if: github.event_name != 'workflow_run'
     runs-on: ubuntu-latest
     steps:
       - name: Build payload and post to Discord
@@ -91,6 +100,55 @@ jobs:
           fi
 
           # --fail makes curl exit non-zero on any 4xx/5xx so the step actually fails on bad webhook responses.
+          curl --fail --silent --show-error \
+            -H "Content-Type: application/json" \
+            -X POST \
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK_URL"
+
+  notify-failure:
+    name: Post release-workflow failure to Discord
+    # Catches the "nightly silently failed for N days" class of incident: a run that
+    # broke late (e.g. token-step misconfig) ships to npm but skips tag-write, so the
+    # gate keeps re-publishing every night. Without an alert, all 8 prior failures sat
+    # in the Actions tab unread for a week. Fires on any release.yml failure regardless
+    # of trigger — schedule, workflow_dispatch, push — so manual dispatches get the
+    # ping too.
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post failure to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          RUN_EVENT: ${{ github.event.workflow_run.event }}
+          RUN_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_TITLE: ${{ github.event.workflow_run.display_title }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${DISCORD_WEBHOOK_URL}" ]; then
+            echo "::error::DISCORD_WEBHOOK_URL secret is not set"
+            exit 1
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg url "$RUN_URL" \
+            --arg event "$RUN_EVENT" \
+            --arg branch "$RUN_BRANCH" \
+            --arg sha "${RUN_SHA:0:7}" \
+            --arg title "$RUN_TITLE" \
+            '{
+              embeds: [{
+                title: "❌ Release workflow failed",
+                url: $url,
+                description: ($title + "\n\nTrigger: `" + $event + "` on `" + $branch + "` (`" + $sha + "`)\n\n[Open run](" + $url + ")"),
+                color: 15158332,
+                timestamp: now | todateiso8601
+              }]
+            }')
+
           curl --fail --silent --show-error \
             -H "Content-Type: application/json" \
             -X POST \
