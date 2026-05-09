@@ -13,27 +13,27 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
     <div class="df-prime-field">
-      @if (field.label()) {
-        <label [for]="field.key()" class="df-prime-label">{{ field.label() | dynamicText | async }}</label>
+      @if (ngf.label()) {
+        <label [for]="ngf.key()" class="df-prime-label">{{ ngf.label() | dynamicText | async }}</label>
       }
 
       <p-toggleSwitch
         ngForgeControl
-        [id]="field.key()"
-        [formField]="field.field()"
-        [attr.tabindex]="field.tabIndex()"
-        [attr.aria-invalid]="field.ariaInvalid()"
-        [attr.aria-required]="field.ariaRequired()"
-        [attr.aria-describedby]="field.ariaDescribedBy()"
+        [id]="ngf.key()"
+        [formField]="ngf.field()"
+        [attr.tabindex]="ngf.tabIndex()"
+        [attr.aria-invalid]="ngf.ariaInvalid()"
+        [attr.aria-required]="ngf.ariaRequired()"
+        [attr.aria-describedby]="ngf.ariaDescribedBy()"
         [trueValue]="true"
         [falseValue]="false"
         [styleClass]="toggleClasses()"
       />
 
-      @if (field.errorsToDisplay()[0]; as error) {
-        <small class="p-error" [id]="field.errorId()" role="alert">{{ error.message }}</small>
+      @if (ngf.errorsToDisplay()[0]; as error) {
+        <small class="p-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</small>
       } @else if (props()?.hint; as hint) {
-        <small class="p-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</small>
+        <small class="p-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</small>
       }
     </div>
   `,
@@ -47,7 +47,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
   ],
 })
 export default class PrimeToggleFieldComponent {
-  protected readonly field = injectNgForgeField<boolean>();
+  protected readonly ngf = injectNgForgeField<boolean>();
 
   readonly props = input<PrimeToggleProps>();
 

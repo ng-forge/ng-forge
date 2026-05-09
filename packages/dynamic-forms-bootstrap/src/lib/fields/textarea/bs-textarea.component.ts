@@ -11,7 +11,7 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field(); @let p = props(); @let textareaId = field.key() + '-textarea';
+    @let f = ngf.field(); @let p = props(); @let textareaId = ngf.key() + '-textarea';
     @if (p?.floatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
@@ -20,11 +20,11 @@ import { AsyncPipe } from '@angular/common';
           #textareaRef
           [formField]="f"
           [id]="textareaId"
-          [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
-          [attr.tabindex]="field.tabIndex()"
-          [attr.aria-invalid]="field.ariaInvalid()"
-          [attr.aria-required]="field.ariaRequired()"
-          [attr.aria-describedby]="field.ariaDescribedBy()"
+          [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+          [attr.tabindex]="ngf.tabIndex()"
+          [attr.aria-invalid]="ngf.ariaInvalid()"
+          [attr.aria-required]="ngf.ariaRequired()"
+          [attr.aria-describedby]="ngf.ariaDescribedBy()"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"
@@ -32,25 +32,25 @@ import { AsyncPipe } from '@angular/common';
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
         ></textarea>
 
-        @if (field.label()) {
-          <label [for]="textareaId">{{ field.label() | dynamicText | async }}</label>
+        @if (ngf.label()) {
+          <label [for]="textareaId">{{ ngf.label() | dynamicText | async }}</label>
         }
         @if (p?.validFeedback && f().valid() && f().touched()) {
           <div class="valid-feedback d-block">
             {{ p?.validFeedback | dynamicText | async }}
           </div>
         }
-        @if (field.errorsToDisplay()[0]; as error) {
-          <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
+        @if (ngf.errorsToDisplay()[0]; as error) {
+          <div class="invalid-feedback d-block" [id]="ngf.errorId()" role="alert">{{ error.message }}</div>
         } @else if (p?.hint) {
-          <div class="form-text" [id]="field.hintId()">{{ p?.hint | dynamicText | async }}</div>
+          <div class="form-text" [id]="ngf.hintId()">{{ p?.hint | dynamicText | async }}</div>
         }
       </div>
     } @else {
       <!-- Standard variant -->
       <div class="mb-3">
-        @if (field.label()) {
-          <label [for]="textareaId" class="form-label">{{ field.label() | dynamicText | async }}</label>
+        @if (ngf.label()) {
+          <label [for]="textareaId" class="form-label">{{ ngf.label() | dynamicText | async }}</label>
         }
 
         <textarea
@@ -58,11 +58,11 @@ import { AsyncPipe } from '@angular/common';
           #textareaRef
           [formField]="f"
           [id]="textareaId"
-          [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
-          [attr.tabindex]="field.tabIndex()"
-          [attr.aria-invalid]="field.ariaInvalid()"
-          [attr.aria-required]="field.ariaRequired()"
-          [attr.aria-describedby]="field.ariaDescribedBy()"
+          [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+          [attr.tabindex]="ngf.tabIndex()"
+          [attr.aria-invalid]="ngf.ariaInvalid()"
+          [attr.aria-required]="ngf.ariaRequired()"
+          [attr.aria-describedby]="ngf.ariaDescribedBy()"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"
@@ -75,10 +75,10 @@ import { AsyncPipe } from '@angular/common';
             {{ p?.validFeedback | dynamicText | async }}
           </div>
         }
-        @if (field.errorsToDisplay()[0]; as error) {
-          <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
+        @if (ngf.errorsToDisplay()[0]; as error) {
+          <div class="invalid-feedback d-block" [id]="ngf.errorId()" role="alert">{{ error.message }}</div>
         } @else if (p?.hint) {
-          <div class="form-text" [id]="field.hintId()">{{ p?.hint | dynamicText | async }}</div>
+          <div class="form-text" [id]="ngf.hintId()">{{ p?.hint | dynamicText | async }}</div>
         }
       </div>
     }
@@ -93,7 +93,7 @@ import { AsyncPipe } from '@angular/common';
   ],
 })
 export default class BsTextareaFieldComponent {
-  protected readonly field = injectNgForgeField<string>();
+  protected readonly ngf = injectNgForgeField<string>();
 
   readonly props = input<BsTextareaProps>();
 
@@ -107,7 +107,7 @@ export default class BsTextareaFieldComponent {
   /**
    * Computed signal that extracts the readonly state from the field.
    */
-  private readonly isReadonly = computed(() => this.field.field()().readonly());
+  private readonly isReadonly = computed(() => this.ngf.field()().readonly());
 
   /**
    * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly

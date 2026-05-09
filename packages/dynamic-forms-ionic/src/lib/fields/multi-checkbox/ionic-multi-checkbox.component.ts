@@ -11,19 +11,19 @@ import { AsyncPipe } from '@angular/common';
   imports: [IonCheckbox, IonItem, IonNote, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
+    @let f = ngf.field();
     @let checked = checkedValuesMap();
-    @if (field.label(); as label) {
+    @if (ngf.label(); as label) {
       <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
     <div
       class="checkbox-group"
       role="group"
-      [attr.aria-invalid]="field.ariaInvalid()"
-      [attr.aria-required]="field.ariaRequired()"
-      [attr.aria-describedby]="field.ariaDescribedBy()"
-      [class.ion-invalid]="field.showErrors()"
+      [attr.aria-invalid]="ngf.ariaInvalid()"
+      [attr.aria-required]="ngf.ariaRequired()"
+      [attr.aria-describedby]="ngf.ariaDescribedBy()"
+      [class.ion-invalid]="ngf.showErrors()"
       [class.ion-touched]="f().touched()"
     >
       @for (option of options(); track option.value) {
@@ -43,10 +43,10 @@ import { AsyncPipe } from '@angular/common';
       }
     </div>
 
-    @if (field.errorsToDisplay()[0]; as error) {
-      <ion-note color="danger" class="df-ion-error" [id]="field.errorId()" role="alert">{{ error.message }}</ion-note>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</ion-note>
     } @else if (props()?.hint; as hint) {
-      <ion-note class="df-ion-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</ion-note>
+      <ion-note class="df-ion-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -80,14 +80,14 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicMultiCheckboxFieldComponent {
-  protected readonly field = injectNgForgeField<ValueType[]>();
+  protected readonly ngf = injectNgForgeField<ValueType[]>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<IonicMultiCheckboxProps>();
 
   valueViewModel = linkedSignal<FieldOption<ValueType>[]>(
     () => {
-      const currentValues = this.field.field()().value();
+      const currentValues = this.ngf.field()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
     },
     { equal: isEqual },
@@ -106,8 +106,8 @@ export default class IonicMultiCheckboxFieldComponent {
     explicitEffect([this.valueViewModel], ([selectedOptions]) => {
       const selectedValues = selectedOptions.map((option) => option.value);
 
-      if (!isEqual(selectedValues, this.field.field()().value())) {
-        this.field.field()().value.set(selectedValues);
+      if (!isEqual(selectedValues, this.ngf.field()().value())) {
+        this.ngf.field()().value.set(selectedValues);
       }
     });
 

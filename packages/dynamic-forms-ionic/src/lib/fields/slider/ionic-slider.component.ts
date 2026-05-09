@@ -11,13 +11,13 @@ import { AsyncPipe } from '@angular/common';
   imports: [IonRange, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }, NgForgeHostControl],
   template: `
-    @let f = field.field();
-    @let inputId = field.key() + '-input';
+    @let f = ngf.field();
+    @let inputId = ngf.key() + '-input';
 
     <ion-range
       [id]="inputId"
       [formField]="f"
-      [label]="(field.label() | dynamicText | async) ?? undefined"
+      [label]="(ngf.label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
       [min]="f().min?.() ?? props()?.min ?? 0"
       [max]="f().max?.() ?? props()?.max ?? 100"
@@ -28,16 +28,16 @@ import { AsyncPipe } from '@angular/common';
       [ticks]="props()?.ticks ?? false"
       [snaps]="props()?.snaps ?? false"
       [color]="props()?.color ?? 'primary'"
-      [attr.tabindex]="field.tabIndex()"
-      [attr.aria-invalid]="field.ariaInvalid()"
-      [attr.aria-required]="field.ariaRequired()"
-      [attr.aria-describedby]="field.ariaDescribedBy()"
+      [attr.tabindex]="ngf.tabIndex()"
+      [attr.aria-invalid]="ngf.ariaInvalid()"
+      [attr.aria-required]="ngf.ariaRequired()"
+      [attr.aria-describedby]="ngf.ariaDescribedBy()"
     />
 
-    @if (field.errorsToDisplay()[0]; as error) {
-      <ion-note color="danger" class="df-ion-error" [id]="field.errorId()" role="alert">{{ error.message }}</ion-note>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</ion-note>
     } @else if (props()?.hint; as hint) {
-      <ion-note class="df-ion-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</ion-note>
+      <ion-note class="df-ion-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -55,7 +55,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicSliderFieldComponent {
-  protected readonly field = injectNgForgeField<number>();
+  protected readonly ngf = injectNgForgeField<number>();
 
   readonly step = input<number>();
   readonly props = input<IonicSliderProps>();

@@ -13,15 +13,15 @@ import { PrimeDatepickerControlComponent } from './prime-datepicker-control.comp
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
     <div class="df-prime-field">
-      @if (field.label()) {
-        <label [for]="field.key()" class="df-prime-label">{{ field.label() | dynamicText | async }}</label>
+      @if (ngf.label()) {
+        <label [for]="ngf.key()" class="df-prime-label">{{ ngf.label() | dynamicText | async }}</label>
       }
 
       <df-prime-datepicker-control
-        [formField]="field.field()"
-        [inputId]="field.key()"
-        [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
-        [tabIndex]="field.tabIndex()"
+        [formField]="ngf.field()"
+        [inputId]="ngf.key()"
+        [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+        [tabIndex]="ngf.tabIndex()"
         [dateFormat]="props()?.dateFormat || 'mm/dd/yy'"
         [inline]="props()?.inline ?? false"
         [showIcon]="props()?.showIcon ?? true"
@@ -33,16 +33,16 @@ import { PrimeDatepickerControlComponent } from './prime-datepicker-control.comp
         [maxDate]="maxDate()"
         [defaultDate]="startAt()"
         [styleClass]="datepickerClasses()"
-        [meta]="field.meta()"
-        [ariaInvalid]="field.ariaInvalid()"
-        [ariaRequired]="field.ariaRequired()"
-        [ariaDescribedBy]="field.ariaDescribedBy()"
+        [meta]="ngf.meta()"
+        [ariaInvalid]="ngf.ariaInvalid()"
+        [ariaRequired]="ngf.ariaRequired()"
+        [ariaDescribedBy]="ngf.ariaDescribedBy()"
       />
 
-      @if (field.errorsToDisplay()[0]; as error) {
-        <small class="p-error" [id]="field.errorId()" role="alert">{{ error.message }}</small>
+      @if (ngf.errorsToDisplay()[0]; as error) {
+        <small class="p-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</small>
       } @else if (props()?.hint; as hint) {
-        <small class="df-prime-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</small>
+        <small class="df-prime-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</small>
       }
     </div>
   `,
@@ -56,7 +56,7 @@ import { PrimeDatepickerControlComponent } from './prime-datepicker-control.comp
   ],
 })
 export default class PrimeDatepickerFieldComponent {
-  protected readonly field = injectNgForgeField<string>();
+  protected readonly ngf = injectNgForgeField<string>();
 
   readonly minDate = input<Date | null>(null);
   readonly maxDate = input<Date | null>(null);

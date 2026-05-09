@@ -12,33 +12,33 @@ import { Slider } from 'primeng/slider';
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
+    @let f = ngf.field();
 
     <div class="df-prime-field">
-      @if (field.label(); as label) {
-        <label [for]="field.key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
+      @if (ngf.label(); as label) {
+        <label [for]="ngf.key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
       }
 
       <p-slider
         ngForgeControl
-        [id]="field.key()"
+        [id]="ngf.key()"
         [formField]="f"
         [min]="f().min?.() ?? props()?.min ?? 0"
         [max]="f().max?.() ?? props()?.max ?? 100"
         [step]="step() ?? props()?.step ?? 1"
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"
-        [attr.tabindex]="field.tabIndex()"
-        [attr.aria-invalid]="field.ariaInvalid()"
-        [attr.aria-required]="field.ariaRequired()"
-        [attr.aria-describedby]="field.ariaDescribedBy()"
+        [attr.tabindex]="ngf.tabIndex()"
+        [attr.aria-invalid]="ngf.ariaInvalid()"
+        [attr.aria-required]="ngf.ariaRequired()"
+        [attr.aria-describedby]="ngf.ariaDescribedBy()"
         [styleClass]="sliderClasses()"
       />
 
-      @if (field.errorsToDisplay()[0]; as error) {
-        <small class="p-error" [id]="field.errorId()" role="alert">{{ error.message }}</small>
+      @if (ngf.errorsToDisplay()[0]; as error) {
+        <small class="p-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</small>
       } @else if (props()?.hint; as hint) {
-        <small class="p-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</small>
+        <small class="p-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</small>
       }
     </div>
   `,
@@ -52,7 +52,7 @@ import { Slider } from 'primeng/slider';
   ],
 })
 export default class PrimeSliderFieldComponent {
-  protected readonly field = injectNgForgeField<number>();
+  protected readonly ngf = injectNgForgeField<number>();
 
   readonly step = input<number>();
   readonly props = input<PrimeSliderProps>();

@@ -11,9 +11,9 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
+    @let f = ngf.field();
     @let checked = checkedValuesMap();
-    @if (field.label(); as label) {
+    @if (ngf.label(); as label) {
       <div class="form-label">{{ label | dynamicText | async }}</div>
     }
 
@@ -28,28 +28,28 @@ import { AsyncPipe } from '@angular/common';
           <input
             ngForgeControl
             type="checkbox"
-            [id]="field.key() + '_' + i"
+            [id]="ngf.key() + '_' + i"
             [checked]="checked['' + option.value]"
             [disabled]="f().disabled() || option.disabled"
             (change)="onCheckboxChange(option, $event)"
             class="form-check-input"
             [class.is-invalid]="f().invalid() && f().touched()"
-            [attr.tabindex]="field.tabIndex()"
-            [attr.aria-invalid]="field.ariaInvalid()"
-            [attr.aria-required]="field.ariaRequired()"
-            [attr.aria-describedby]="field.ariaDescribedBy()"
+            [attr.tabindex]="ngf.tabIndex()"
+            [attr.aria-invalid]="ngf.ariaInvalid()"
+            [attr.aria-required]="ngf.ariaRequired()"
+            [attr.aria-describedby]="ngf.ariaDescribedBy()"
           />
-          <label [for]="field.key() + '_' + i" class="form-check-label">
+          <label [for]="ngf.key() + '_' + i" class="form-check-label">
             {{ option.label | dynamicText | async }}
           </label>
         </div>
       }
     </div>
 
-    @if (field.errorsToDisplay()[0]; as error) {
-      <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <div class="invalid-feedback d-block" [id]="ngf.errorId()" role="alert">{{ error.message }}</div>
     } @else if (props()?.hint; as hint) {
-      <div class="form-text" [id]="field.hintId()">{{ hint | dynamicText | async }}</div>
+      <div class="form-text" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</div>
     }
   `,
   styles: [
@@ -70,7 +70,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BsMultiCheckboxFieldComponent {
-  protected readonly field = injectNgForgeField<ValueType[]>();
+  protected readonly ngf = injectNgForgeField<ValueType[]>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<BsMultiCheckboxProps>();
@@ -86,7 +86,7 @@ export default class BsMultiCheckboxFieldComponent {
 
   valueViewModel = linkedSignal<FieldOption<ValueType>[]>(
     () => {
-      const currentValues = this.field.field()().value();
+      const currentValues = this.ngf.field()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
     },
     { equal: isEqual },
@@ -96,8 +96,8 @@ export default class BsMultiCheckboxFieldComponent {
     explicitEffect([this.valueViewModel], ([selectedOptions]: [FieldOption<ValueType>[]]) => {
       const selectedValues = selectedOptions.map((option: FieldOption<ValueType>) => option.value);
 
-      if (!isEqual(selectedValues, this.field.field()().value())) {
-        this.field.field()().value.set(selectedValues);
+      if (!isEqual(selectedValues, this.ngf.field()().value())) {
+        this.ngf.field()().value.set(selectedValues);
       }
     });
 

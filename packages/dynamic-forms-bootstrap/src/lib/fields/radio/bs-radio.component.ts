@@ -12,25 +12,25 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
+    @let f = ngf.field();
 
     <div class="mb-3">
-      @if (field.label(); as label) {
+      @if (ngf.label(); as label) {
         <div class="form-label">{{ label | dynamicText | async }}</div>
       }
 
       <df-bs-radio-group
         [formField]="f"
-        [label]="field.label()"
+        [label]="ngf.label()"
         [options]="options()"
         [properties]="props()"
-        [ariaDescribedBy]="field.ariaDescribedBy()"
+        [ariaDescribedBy]="ngf.ariaDescribedBy()"
       />
 
-      @if (field.errorsToDisplay()[0]; as error) {
-        <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
+      @if (ngf.errorsToDisplay()[0]; as error) {
+        <div class="invalid-feedback d-block" [id]="ngf.errorId()" role="alert">{{ error.message }}</div>
       } @else if (props()?.hint; as hint) {
-        <div class="form-text" [id]="field.hintId()">{{ hint | dynamicText | async }}</div>
+        <div class="form-text" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</div>
       }
     </div>
   `,
@@ -48,7 +48,7 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BsRadioFieldComponent {
-  protected readonly field = injectNgForgeField<ValueType>();
+  protected readonly ngf = injectNgForgeField<ValueType>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<BsRadioProps>();

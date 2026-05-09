@@ -13,29 +13,29 @@ import { PrimeSelectControlComponent } from './prime-select-control.component';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }, NgForgeHostControl],
   template: `
     <div class="df-prime-field">
-      @if (field.label(); as label) {
-        <label [for]="field.key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
+      @if (ngf.label(); as label) {
+        <label [for]="ngf.key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
       }
 
       <df-prime-select-control
-        [formField]="field.field()"
-        [inputId]="field.key()"
+        [formField]="ngf.field()"
+        [inputId]="ngf.key()"
         [options]="options()"
-        [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
+        [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
         [multiple]="isMultiple()"
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
         [styleClass]="selectClasses()"
-        [meta]="field.meta()"
-        [ariaInvalid]="field.ariaInvalid()"
-        [ariaRequired]="field.ariaRequired()"
-        [ariaDescribedBy]="field.ariaDescribedBy()"
+        [meta]="ngf.meta()"
+        [ariaInvalid]="ngf.ariaInvalid()"
+        [ariaRequired]="ngf.ariaRequired()"
+        [ariaDescribedBy]="ngf.ariaDescribedBy()"
       />
 
-      @if (field.errorsToDisplay()[0]; as error) {
-        <small class="p-error" [id]="field.errorId()" role="alert">{{ error.message }}</small>
+      @if (ngf.errorsToDisplay()[0]; as error) {
+        <small class="p-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</small>
       } @else if (props()?.hint; as hint) {
-        <small class="df-prime-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</small>
+        <small class="df-prime-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</small>
       }
     </div>
   `,
@@ -49,7 +49,7 @@ import { PrimeSelectControlComponent } from './prime-select-control.component';
   ],
 })
 export default class PrimeSelectFieldComponent {
-  protected readonly field = injectNgForgeField<ValueType>();
+  protected readonly ngf = injectNgForgeField<ValueType>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<PrimeSelectProps>();

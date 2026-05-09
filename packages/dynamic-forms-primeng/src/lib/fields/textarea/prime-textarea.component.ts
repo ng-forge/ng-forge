@@ -13,27 +13,27 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
     <div class="df-prime-field">
-      @if (field.label()) {
-        <label [for]="inputId()" class="df-prime-label">{{ field.label() | dynamicText | async }}</label>
+      @if (ngf.label()) {
+        <label [for]="inputId()" class="df-prime-label">{{ ngf.label() | dynamicText | async }}</label>
       }
 
       <df-prime-textarea-control
         [id]="inputId()"
-        [formField]="field.field()"
-        [meta]="field.meta()"
-        [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
+        [formField]="ngf.field()"
+        [meta]="ngf.meta()"
+        [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
-        [tabIndex]="field.tabIndex()"
+        [tabIndex]="ngf.tabIndex()"
         [autoResize]="props()?.autoResize ?? false"
-        [ariaDescribedBy]="field.ariaDescribedBy()"
+        [ariaDescribedBy]="ngf.ariaDescribedBy()"
         [styleClass]="textareaClasses()"
       />
 
-      @if (field.errorsToDisplay()[0]; as error) {
-        <small class="p-error" [id]="field.errorId()" role="alert">{{ error.message }}</small>
+      @if (ngf.errorsToDisplay()[0]; as error) {
+        <small class="p-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</small>
       } @else if (props()?.hint; as hint) {
-        <small class="df-prime-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</small>
+        <small class="df-prime-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</small>
       }
     </div>
   `,
@@ -47,11 +47,11 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
   ],
 })
 export default class PrimeTextareaFieldComponent {
-  protected readonly field = injectNgForgeField<string>();
+  protected readonly ngf = injectNgForgeField<string>();
 
   readonly props = input<PrimeTextareaProps>();
 
   protected readonly textareaClasses = computed(() => this.props()?.styleClass ?? '');
 
-  protected readonly inputId = computed(() => `${this.field.key()}-textarea`);
+  protected readonly inputId = computed(() => `${this.ngf.key()}-textarea`);
 }

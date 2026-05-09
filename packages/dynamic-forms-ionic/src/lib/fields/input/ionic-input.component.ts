@@ -32,17 +32,17 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
   imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
-    @let inputId = field.key() + '-input';
+    @let f = ngf.field();
+    @let inputId = ngf.key() + '-input';
 
     <ion-input
       ngForgeControl
       [id]="inputId"
       [type]="props()?.type ?? 'text'"
       [formField]="f"
-      [label]="(field.label() | dynamicText | async) ?? undefined"
+      [label]="(ngf.label() | dynamicText | async) ?? undefined"
       [labelPlacement]="effectiveLabelPlacement()"
-      [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
+      [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
       [clearInput]="props()?.clearInput ?? false"
       [counter]="props()?.counter ?? false"
       [minlength]="f().minLength?.()"
@@ -51,14 +51,14 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [fill]="effectiveFill()"
       [shape]="effectiveShape()"
       [readonly]="f().readonly()"
-      [helperText]="field.errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
-      [attr.tabindex]="field.tabIndex()"
-      [attr.aria-invalid]="field.ariaInvalid()"
-      [attr.aria-required]="field.ariaRequired()"
-      [attr.aria-describedby]="field.ariaDescribedBy()"
+      [helperText]="ngf.errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
+      [attr.tabindex]="ngf.tabIndex()"
+      [attr.aria-invalid]="ngf.ariaInvalid()"
+      [attr.aria-required]="ngf.ariaRequired()"
+      [attr.aria-describedby]="ngf.ariaDescribedBy()"
     />
-    @if (field.errorsToDisplay()[0]; as error) {
-      <ion-note color="danger" class="df-ion-error" [id]="field.errorId()" role="alert">{{ error.message }}</ion-note>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</ion-note>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,7 +75,7 @@ export default class IonicInputFieldComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private ionicConfig = inject(IONIC_CONFIG, { optional: true });
 
-  protected readonly field = injectNgForgeField<string>();
+  protected readonly ngf = injectNgForgeField<string>();
 
   readonly props = input<IonicInputProps>();
 
@@ -90,7 +90,7 @@ export default class IonicInputFieldComponent {
     // ion-input encapsulates a native <input> in shadow DOM and does not automatically
     // propagate aria-describedby to it. This effect imperatively syncs the attribute
     // after a microtask to ensure Ionic has resolved the internal element.
-    explicitEffect([this.field.ariaDescribedBy], ([describedBy]) => {
+    explicitEffect([this.ngf.ariaDescribedBy], ([describedBy]) => {
       queueMicrotask(() => {
         const ionInput = this.elementRef.nativeElement.querySelector('ion-input') as HTMLIonInputElement | null;
         if (ionInput?.getInputElement) {

@@ -14,8 +14,8 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   imports: [MatSlideToggle, FormField, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
-    @let toggleId = field.key() + '-toggle';
+    @let f = ngf.field();
+    @let toggleId = ngf.key() + '-toggle';
 
     <mat-slide-toggle
       ngForgeControl
@@ -26,17 +26,17 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       [hideIcon]="props()?.hideIcon || false"
       [disableRipple]="effectiveDisableRipple()"
       [required]="!!f().required()"
-      [attr.aria-describedby]="field.ariaDescribedBy()"
-      [attr.tabindex]="field.tabIndex()"
+      [attr.aria-describedby]="ngf.ariaDescribedBy()"
+      [attr.tabindex]="ngf.tabIndex()"
       class="toggle-container"
     >
-      {{ field.label() | dynamicText | async }}
+      {{ ngf.label() | dynamicText | async }}
     </mat-slide-toggle>
 
-    @if (field.errorsToDisplay()[0]; as error) {
-      <mat-error [id]="field.errorId()">{{ error.message }}</mat-error>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <mat-error [id]="ngf.errorId()">{{ error.message }}</mat-error>
     } @else if (props()?.hint; as hint) {
-      <div class="mat-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</div>
+      <div class="mat-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</div>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -46,7 +46,7 @@ export default class MatToggleFieldComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  protected readonly field = injectNgForgeField<boolean>();
+  protected readonly ngf = injectNgForgeField<boolean>();
 
   readonly props = input<MatToggleProps>();
 
@@ -59,7 +59,7 @@ export default class MatToggleFieldComponent {
    * Uses afterRenderEffect to ensure DOM is ready before querying internal elements.
    */
   private readonly syncAriaRequiredToDom = afterRenderEffect(() => {
-    const isRequired = this.field.ariaRequired();
+    const isRequired = this.ngf.ariaRequired();
     const buttonEl = this.elementRef.nativeElement.querySelector('button[role="switch"]');
     if (buttonEl) {
       if (isRequired) {
@@ -77,7 +77,7 @@ export default class MatToggleFieldComponent {
    * Uses afterRenderEffect to ensure DOM is ready before querying internal elements.
    */
   private readonly syncAriaDescribedByToDom = afterRenderEffect(() => {
-    const describedBy = this.field.ariaDescribedBy();
+    const describedBy = this.ngf.ariaDescribedBy();
     const buttonEl = this.elementRef.nativeElement.querySelector('button[role="switch"]');
     if (buttonEl) {
       if (describedBy) {

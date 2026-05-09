@@ -11,8 +11,8 @@ import { AsyncPipe } from '@angular/common';
   imports: [IonCheckbox, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
-    @let checkboxId = field.key() + '-checkbox';
+    @let f = ngf.field();
+    @let checkboxId = ngf.key() + '-checkbox';
 
     <ion-checkbox
       ngForgeControl
@@ -22,18 +22,18 @@ import { AsyncPipe } from '@angular/common';
       [justify]="props()?.justify"
       [color]="props()?.color ?? 'primary'"
       [indeterminate]="props()?.indeterminate ?? false"
-      [attr.tabindex]="field.tabIndex()"
-      [attr.aria-invalid]="field.ariaInvalid()"
-      [attr.aria-required]="field.ariaRequired()"
-      [attr.aria-describedby]="field.ariaDescribedBy()"
+      [attr.tabindex]="ngf.tabIndex()"
+      [attr.aria-invalid]="ngf.ariaInvalid()"
+      [attr.aria-required]="ngf.ariaRequired()"
+      [attr.aria-describedby]="ngf.ariaDescribedBy()"
     >
-      {{ field.label() | dynamicText | async }}
+      {{ ngf.label() | dynamicText | async }}
     </ion-checkbox>
 
-    @if (field.errorsToDisplay()[0]; as error) {
-      <ion-note color="danger" class="df-ion-error" [id]="field.errorId()" role="alert">{{ error.message }}</ion-note>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</ion-note>
     } @else if (props()?.hint; as hint) {
-      <ion-note class="df-ion-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</ion-note>
+      <ion-note class="df-ion-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -51,7 +51,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicCheckboxFieldComponent {
-  protected readonly field = injectNgForgeField<boolean>();
+  protected readonly ngf = injectNgForgeField<boolean>();
 
   readonly props = input<IonicCheckboxProps>();
 

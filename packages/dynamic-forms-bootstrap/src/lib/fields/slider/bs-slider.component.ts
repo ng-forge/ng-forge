@@ -12,10 +12,10 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field(); @let inputId = field.key() + '-input';
+    @let f = ngf.field(); @let inputId = ngf.key() + '-input';
 
     <div class="mb-3">
-      @if (field.label(); as label) {
+      @if (ngf.label(); as label) {
         <label [for]="inputId" class="form-label">
           {{ label | dynamicText | async }}
           @if (props()?.showValue) {
@@ -33,17 +33,17 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
         [dfMin]="f().min?.() ?? props()?.min ?? min()"
         [dfMax]="f().max?.() ?? props()?.max ?? max()"
         [dfStep]="step() ?? props()?.step ?? 1"
-        [attr.tabindex]="field.tabIndex()"
-        [attr.aria-invalid]="field.ariaInvalid()"
-        [attr.aria-required]="field.ariaRequired()"
-        [attr.aria-describedby]="field.ariaDescribedBy()"
+        [attr.tabindex]="ngf.tabIndex()"
+        [attr.aria-invalid]="ngf.ariaInvalid()"
+        [attr.aria-required]="ngf.ariaRequired()"
+        [attr.aria-describedby]="ngf.ariaDescribedBy()"
         class="form-range"
       />
 
-      @if (field.errorsToDisplay()[0]; as error) {
-        <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
+      @if (ngf.errorsToDisplay()[0]; as error) {
+        <div class="invalid-feedback d-block" [id]="ngf.errorId()" role="alert">{{ error.message }}</div>
       } @else if (props()?.hint; as hint) {
-        <div class="form-text" [id]="field.hintId()">{{ hint | dynamicText | async }}</div>
+        <div class="form-text" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</div>
       }
     </div>
   `,
@@ -61,7 +61,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BsSliderFieldComponent {
-  protected readonly field = injectNgForgeField<number>();
+  protected readonly ngf = injectNgForgeField<number>();
 
   readonly min = input<number>(0);
   readonly max = input<number>(100);

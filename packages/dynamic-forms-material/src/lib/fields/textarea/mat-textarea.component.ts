@@ -13,7 +13,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   imports: [MatFormField, MatLabel, MatInput, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let textareaId = field.key() + '-textarea';
+    @let textareaId = ngf.key() + '-textarea';
 
     <mat-form-field
       [appearance]="effectiveAppearance()"
@@ -21,8 +21,8 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       [floatLabel]="effectiveFloatLabel()"
       [hideRequiredMarker]="effectiveHideRequiredMarker()"
     >
-      @if (field.label()) {
-        <mat-label>{{ field.label() | dynamicText | async }}</mat-label>
+      @if (ngf.label()) {
+        <mat-label>{{ ngf.label() | dynamicText | async }}</mat-label>
       }
 
       <textarea
@@ -30,19 +30,19 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         #textareaRef
         matInput
         [id]="textareaId"
-        [formField]="field.field()"
-        [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
-        [attr.tabindex]="field.tabIndex()"
-        [attr.aria-invalid]="field.ariaInvalid()"
-        [attr.aria-required]="field.ariaRequired()"
-        [attr.aria-describedby]="field.ariaDescribedBy()"
+        [formField]="ngf.field()"
+        [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="ngf.tabIndex()"
+        [attr.aria-invalid]="ngf.ariaInvalid()"
+        [attr.aria-required]="ngf.ariaRequired()"
+        [attr.aria-describedby]="ngf.ariaDescribedBy()"
         [style.resize]="props()?.resize || 'vertical'"
       ></textarea>
 
-      @if (field.errorsToDisplay()[0]; as error) {
-        <mat-error [id]="field.errorId()">{{ error.message }}</mat-error>
+      @if (ngf.errorsToDisplay()[0]; as error) {
+        <mat-error [id]="ngf.errorId()">{{ error.message }}</mat-error>
       } @else if (props()?.hint; as hint) {
-        <mat-hint [id]="field.hintId()">{{ hint | dynamicText | async }}</mat-hint>
+        <mat-hint [id]="ngf.hintId()">{{ hint | dynamicText | async }}</mat-hint>
       }
     </mat-form-field>
   `,
@@ -59,7 +59,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 export default class MatTextareaFieldComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
 
-  protected readonly field = injectNgForgeField<string>();
+  protected readonly ngf = injectNgForgeField<string>();
 
   readonly props = input<MatTextareaProps>();
 
@@ -74,7 +74,7 @@ export default class MatTextareaFieldComponent {
    * Computed signal that extracts the readonly state from the field.
    * Used by the effect to reactively sync the readonly attribute to the DOM.
    */
-  private readonly isReadonly = computed(() => this.field.field()().readonly());
+  private readonly isReadonly = computed(() => this.ngf.field()().readonly());
 
   /**
    * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly

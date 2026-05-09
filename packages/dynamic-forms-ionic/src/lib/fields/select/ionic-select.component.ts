@@ -11,16 +11,16 @@ import { AsyncPipe } from '@angular/common';
   imports: [IonSelect, IonSelectOption, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
-    @let selectId = field.key() + '-select';
+    @let f = ngf.field();
+    @let selectId = ngf.key() + '-select';
 
     <ion-select
       ngForgeControl
       [id]="selectId"
       [formField]="f"
-      [label]="(field.label() | dynamicText | async) ?? undefined"
+      [label]="(ngf.label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
-      [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
+      [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
       [multiple]="props()?.multiple ?? false"
       [compareWith]="props()?.compareWith ?? defaultCompare"
       [interface]="props()?.interface ?? 'alert'"
@@ -30,10 +30,10 @@ import { AsyncPipe } from '@angular/common';
       [color]="props()?.color"
       [fill]="props()?.fill ?? 'outline'"
       [shape]="props()?.shape"
-      [attr.tabindex]="field.tabIndex()"
-      [attr.aria-invalid]="field.ariaInvalid()"
-      [attr.aria-required]="field.ariaRequired()"
-      [attr.aria-describedby]="field.ariaDescribedBy()"
+      [attr.tabindex]="ngf.tabIndex()"
+      [attr.aria-invalid]="ngf.ariaInvalid()"
+      [attr.aria-required]="ngf.ariaRequired()"
+      [attr.aria-describedby]="ngf.ariaDescribedBy()"
     >
       @for (option of options(); track option.value) {
         <ion-select-option [value]="option.value" [disabled]="option.disabled || false">
@@ -41,10 +41,10 @@ import { AsyncPipe } from '@angular/common';
         </ion-select-option>
       }
     </ion-select>
-    @if (field.errorsToDisplay()[0]; as error) {
-      <ion-note color="danger" class="df-ion-error" [id]="field.errorId()" role="alert">{{ error.message }}</ion-note>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</ion-note>
     } @else if (props()?.hint; as hint) {
-      <ion-note class="df-ion-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</ion-note>
+      <ion-note class="df-ion-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,7 +58,7 @@ import { AsyncPipe } from '@angular/common';
   ],
 })
 export default class IonicSelectFieldComponent {
-  protected readonly field = injectNgForgeField<ValueType>();
+  protected readonly ngf = injectNgForgeField<ValueType>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<IonicSelectProps>();

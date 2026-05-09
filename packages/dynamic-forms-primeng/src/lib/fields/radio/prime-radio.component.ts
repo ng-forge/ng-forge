@@ -12,23 +12,23 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
-    @if (field.label()) {
-      <div class="radio-label">{{ field.label() | dynamicText | async }}</div>
+    @let f = ngf.field();
+    @if (ngf.label()) {
+      <div class="radio-label">{{ ngf.label() | dynamicText | async }}</div>
     }
 
     <df-prime-radio-group
       [formField]="f"
       [options]="options()"
       [properties]="props()"
-      [meta]="field.meta()"
-      [attr.aria-describedby]="field.ariaDescribedBy()"
+      [meta]="ngf.meta()"
+      [attr.aria-describedby]="ngf.ariaDescribedBy()"
     />
 
-    @if (field.errorsToDisplay()[0]; as error) {
-      <small class="p-error" [id]="field.errorId()" role="alert">{{ error.message }}</small>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <small class="p-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</small>
     } @else if (props()?.hint; as hint) {
-      <small class="p-hint" [id]="field.hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
+      <small class="p-hint" [id]="ngf.hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
     }
   `,
   styles: [
@@ -50,7 +50,7 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PrimeRadioFieldComponent {
-  protected readonly field = injectNgForgeField<ValueType>();
+  protected readonly ngf = injectNgForgeField<ValueType>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<PrimeRadioProps>();

@@ -13,8 +13,8 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   imports: [MatCheckbox, FormField, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
-    @let checkboxId = field.key() + '-checkbox';
+    @let f = ngf.field();
+    @let checkboxId = ngf.key() + '-checkbox';
 
     <mat-checkbox
       ngForgeControl
@@ -25,17 +25,17 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       [color]="props()?.color || 'primary'"
       [disableRipple]="effectiveDisableRipple()"
       [required]="!!f().required()"
-      [attr.aria-describedby]="field.ariaDescribedBy()"
-      [attr.tabindex]="field.tabIndex()"
+      [attr.aria-describedby]="ngf.ariaDescribedBy()"
+      [attr.tabindex]="ngf.tabIndex()"
       [attr.hidden]="f().hidden() || null"
     >
-      {{ field.label() | dynamicText | async }}
+      {{ ngf.label() | dynamicText | async }}
     </mat-checkbox>
 
-    @if (field.errorsToDisplay()[0]; as error) {
-      <mat-error [id]="field.errorId()" [attr.hidden]="f().hidden() || null">{{ error.message }}</mat-error>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <mat-error [id]="ngf.errorId()" [attr.hidden]="f().hidden() || null">{{ error.message }}</mat-error>
     } @else if (props()?.hint; as hint) {
-      <div class="mat-hint" [id]="field.hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
+      <div class="mat-hint" [id]="ngf.hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -45,7 +45,7 @@ export default class MatCheckboxFieldComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  protected readonly field = injectNgForgeField<boolean>();
+  protected readonly ngf = injectNgForgeField<boolean>();
 
   readonly props = input<MatCheckboxProps>();
 
@@ -61,7 +61,7 @@ export default class MatCheckboxFieldComponent {
    * Uses afterRenderEffect to ensure DOM is ready before manipulating attributes.
    */
   private readonly syncAriaRequiredToDom = afterRenderEffect(() => {
-    const isRequired = this.field.ariaRequired();
+    const isRequired = this.ngf.ariaRequired();
     const inputEl = this.elementRef.nativeElement.querySelector('input[type="checkbox"]');
     if (inputEl) {
       if (isRequired) {
@@ -79,7 +79,7 @@ export default class MatCheckboxFieldComponent {
    * Uses afterRenderEffect to ensure DOM is ready before querying internal elements.
    */
   private readonly syncAriaDescribedByToDom = afterRenderEffect(() => {
-    const describedBy = this.field.ariaDescribedBy();
+    const describedBy = this.ngf.ariaDescribedBy();
     const inputEl = this.elementRef.nativeElement.querySelector('input[type="checkbox"]');
     if (inputEl) {
       if (describedBy) {

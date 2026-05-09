@@ -11,10 +11,10 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field(); @let selectId = field.key() + '-select';
+    @let f = ngf.field(); @let selectId = ngf.key() + '-select';
 
     <div class="mb-3">
-      @if (field.label(); as label) {
+      @if (ngf.label(); as label) {
         <label [for]="selectId" class="form-label">{{ label | dynamicText | async }}</label>
       }
       <select
@@ -27,11 +27,11 @@ import { AsyncPipe } from '@angular/common';
         [class.is-invalid]="f().invalid() && f().touched()"
         [multiple]="props()?.multiple || false"
         [size]="props()?.htmlSize"
-        [attr.aria-invalid]="field.ariaInvalid()"
-        [attr.aria-required]="field.ariaRequired()"
-        [attr.aria-describedby]="field.ariaDescribedBy()"
+        [attr.aria-invalid]="ngf.ariaInvalid()"
+        [attr.aria-required]="ngf.ariaRequired()"
+        [attr.aria-describedby]="ngf.ariaDescribedBy()"
       >
-        @if (field.placeholder(); as placeholder) {
+        @if (ngf.placeholder(); as placeholder) {
           <option value="" disabled [selected]="!f().value()">{{ placeholder | dynamicText | async }}</option>
         }
         @for (option of options(); track option.value) {
@@ -41,10 +41,10 @@ import { AsyncPipe } from '@angular/common';
         }
       </select>
 
-      @if (field.errorsToDisplay()[0]; as error) {
-        <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
+      @if (ngf.errorsToDisplay()[0]; as error) {
+        <div class="invalid-feedback d-block" [id]="ngf.errorId()" role="alert">{{ error.message }}</div>
       } @else if (props()?.hint; as hint) {
-        <div class="form-text" [id]="field.hintId()">{{ hint | dynamicText | async }}</div>
+        <div class="form-text" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</div>
       }
     </div>
   `,
@@ -58,7 +58,7 @@ import { AsyncPipe } from '@angular/common';
   ],
 })
 export default class BsSelectFieldComponent {
-  protected readonly field = injectNgForgeField<string>();
+  protected readonly ngf = injectNgForgeField<string>();
 
   readonly options = input<FieldOption<string>[]>([]);
   readonly props = input<BsSelectProps>();

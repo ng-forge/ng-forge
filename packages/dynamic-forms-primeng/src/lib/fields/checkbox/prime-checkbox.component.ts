@@ -12,7 +12,7 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field(); @let checkboxId = field.key() + '-checkbox';
+    @let f = ngf.field(); @let checkboxId = ngf.key() + '-checkbox';
 
     <div class="flex items-center">
       <p-checkbox
@@ -22,21 +22,21 @@ import { AsyncPipe } from '@angular/common';
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"
-        [attr.aria-invalid]="field.ariaInvalid()"
-        [attr.aria-required]="field.ariaRequired()"
-        [attr.aria-describedby]="field.ariaDescribedBy()"
+        [attr.aria-invalid]="ngf.ariaInvalid()"
+        [attr.aria-required]="ngf.ariaRequired()"
+        [attr.aria-describedby]="ngf.ariaDescribedBy()"
         [styleClass]="checkboxClasses()"
-        [attr.tabindex]="field.tabIndex()"
+        [attr.tabindex]="ngf.tabIndex()"
       />
-      @if (field.label(); as labelText) {
+      @if (ngf.label(); as labelText) {
         <label [for]="checkboxId" class="ml-2">{{ labelText | dynamicText | async }}</label>
       }
     </div>
 
-    @if (field.errorsToDisplay()[0]; as error) {
-      <small class="p-error" [id]="field.errorId()" role="alert">{{ error.message }}</small>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <small class="p-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</small>
     } @else if (props()?.hint; as hint) {
-      <small class="p-hint" [id]="field.hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
+      <small class="p-hint" [id]="ngf.hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
     }
   `,
   styles: [
@@ -53,7 +53,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PrimeCheckboxFieldComponent {
-  protected readonly field = injectNgForgeField<boolean>();
+  protected readonly ngf = injectNgForgeField<boolean>();
 
   readonly props = input<PrimeCheckboxProps>();
 

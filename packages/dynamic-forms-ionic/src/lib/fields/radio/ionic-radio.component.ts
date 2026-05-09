@@ -11,9 +11,9 @@ import { AsyncPipe } from '@angular/common';
   imports: [IonRadioGroup, IonRadio, IonItem, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
-    @let radioGroupId = field.key() + '-radio-group';
-    @if (field.label(); as label) {
+    @let f = ngf.field();
+    @let radioGroupId = ngf.key() + '-radio-group';
+    @if (ngf.label(); as label) {
       <div class="radio-label">{{ label | dynamicText | async }}</div>
     }
 
@@ -21,9 +21,9 @@ import { AsyncPipe } from '@angular/common';
       [id]="radioGroupId"
       [formField]="f"
       [compareWith]="props()?.compareWith || defaultCompare"
-      [attr.aria-invalid]="field.ariaInvalid()"
-      [attr.aria-required]="field.ariaRequired()"
-      [attr.aria-describedby]="field.ariaDescribedBy()"
+      [attr.aria-invalid]="ngf.ariaInvalid()"
+      [attr.aria-required]="ngf.ariaRequired()"
+      [attr.aria-describedby]="ngf.ariaDescribedBy()"
     >
       @for (option of options(); track option.value) {
         <ion-item [lines]="'none'">
@@ -41,10 +41,10 @@ import { AsyncPipe } from '@angular/common';
       }
     </ion-radio-group>
 
-    @if (field.errorsToDisplay()[0]; as error) {
-      <ion-note color="danger" class="df-ion-error" [id]="field.errorId()" role="alert">{{ error.message }}</ion-note>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</ion-note>
     } @else if (props()?.hint; as hint) {
-      <ion-note class="df-ion-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</ion-note>
+      <ion-note class="df-ion-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -69,7 +69,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicRadioFieldComponent {
-  protected readonly field = injectNgForgeField<ValueType>();
+  protected readonly ngf = injectNgForgeField<ValueType>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<IonicRadioProps>();

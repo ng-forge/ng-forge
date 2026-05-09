@@ -12,19 +12,19 @@ import { AsyncPipe } from '@angular/common';
   imports: [MatRadioGroup, MatRadioButton, FormField, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
-    @let radioGroupId = field.key() + '-radio-group';
+    @let f = ngf.field();
+    @let radioGroupId = ngf.key() + '-radio-group';
 
-    @if (field.label()) {
-      <div class="radio-label">{{ field.label() | dynamicText | async }}</div>
+    @if (ngf.label()) {
+      <div class="radio-label">{{ ngf.label() | dynamicText | async }}</div>
     }
 
     <mat-radio-group
       [id]="radioGroupId"
       [formField]="f"
-      [attr.aria-invalid]="field.ariaInvalid()"
-      [attr.aria-required]="field.ariaRequired()"
-      [attr.aria-describedby]="field.ariaDescribedBy()"
+      [attr.aria-invalid]="ngf.ariaInvalid()"
+      [attr.aria-required]="ngf.ariaRequired()"
+      [attr.aria-describedby]="ngf.ariaDescribedBy()"
     >
       @for (option of options(); track option.value) {
         <mat-radio-button
@@ -39,17 +39,17 @@ import { AsyncPipe } from '@angular/common';
       }
     </mat-radio-group>
 
-    @if (field.errorsToDisplay()[0]; as error) {
-      <mat-error [id]="field.errorId()">{{ error.message }}</mat-error>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <mat-error [id]="ngf.errorId()">{{ error.message }}</mat-error>
     } @else if (props()?.hint; as hint) {
-      <div class="mat-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</div>
+      <div class="mat-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</div>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatRadioFieldComponent {
-  protected readonly field = injectNgForgeField<ValueType>();
+  protected readonly ngf = injectNgForgeField<ValueType>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<MatRadioProps>();

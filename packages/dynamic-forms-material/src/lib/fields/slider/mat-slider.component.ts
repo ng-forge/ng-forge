@@ -12,10 +12,10 @@ import { AsyncPipe } from '@angular/common';
   imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe, FormField, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
-    @let inputId = field.key() + '-input';
+    @let f = ngf.field();
+    @let inputId = ngf.key() + '-input';
 
-    @if (field.label(); as label) {
+    @if (ngf.label(); as label) {
       <div class="slider-label">{{ label | dynamicText | async }}</div>
     }
 
@@ -33,17 +33,17 @@ import { AsyncPipe } from '@angular/common';
         ngForgeControl
         [id]="inputId"
         [formField]="f"
-        [attr.tabindex]="field.tabIndex()"
-        [attr.aria-invalid]="field.ariaInvalid()"
-        [attr.aria-required]="field.ariaRequired()"
-        [attr.aria-describedby]="field.ariaDescribedBy()"
+        [attr.tabindex]="ngf.tabIndex()"
+        [attr.aria-invalid]="ngf.ariaInvalid()"
+        [attr.aria-required]="ngf.ariaRequired()"
+        [attr.aria-describedby]="ngf.ariaDescribedBy()"
       />
     </mat-slider>
 
-    @if (field.errorsToDisplay()[0]; as error) {
-      <mat-error [id]="field.errorId()">{{ error.message }}</mat-error>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <mat-error [id]="ngf.errorId()">{{ error.message }}</mat-error>
     } @else if (props()?.hint; as hint) {
-      <div class="mat-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</div>
+      <div class="mat-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</div>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -57,7 +57,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatSliderFieldComponent {
-  protected readonly field = injectNgForgeField<number>();
+  protected readonly ngf = injectNgForgeField<number>();
 
   readonly step = input<number>();
 

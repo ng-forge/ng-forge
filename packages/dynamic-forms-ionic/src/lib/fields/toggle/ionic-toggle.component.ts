@@ -12,27 +12,27 @@ import { AsyncPipe } from '@angular/common';
   imports: [IonicToggleControlComponent, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }, NgForgeHostControl],
   template: `
-    @let f = field.field();
-    @let toggleId = field.key() + '-toggle';
+    @let f = ngf.field();
+    @let toggleId = ngf.key() + '-toggle';
 
     <df-ion-toggle-control
       [id]="toggleId"
       [formField]="f"
-      [meta]="field.meta()"
+      [meta]="ngf.meta()"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"
       [justify]="props()?.justify"
       [color]="props()?.color ?? 'primary'"
       [enableOnOffLabels]="props()?.enableOnOffLabels ?? false"
-      [tabIndex]="field.tabIndex()"
-      [ariaDescribedBy]="field.ariaDescribedBy()"
+      [tabIndex]="ngf.tabIndex()"
+      [ariaDescribedBy]="ngf.ariaDescribedBy()"
     >
-      {{ field.label() | dynamicText | async }}
+      {{ ngf.label() | dynamicText | async }}
     </df-ion-toggle-control>
 
-    @if (field.errorsToDisplay()[0]; as error) {
-      <ion-note color="danger" class="df-ion-error" [id]="field.errorId()" role="alert">{{ error.message }}</ion-note>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</ion-note>
     } @else if (props()?.hint; as hint) {
-      <ion-note class="df-ion-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</ion-note>
+      <ion-note class="df-ion-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -50,7 +50,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicToggleFieldComponent {
-  protected readonly field = injectNgForgeField<boolean>();
+  protected readonly ngf = injectNgForgeField<boolean>();
 
   readonly props = input<IonicToggleProps>();
 

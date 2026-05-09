@@ -36,37 +36,37 @@ import { format } from 'date-fns';
   ],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
+    @let f = ngf.field();
     @let dateValue = f().value();
-    @let inputId = field.key() + '-input';
+    @let inputId = ngf.key() + '-input';
 
     <ion-input
       ngForgeControl
       [id]="inputId"
-      [label]="(field.label() | dynamicText | async) ?? undefined"
+      [label]="(ngf.label() | dynamicText | async) ?? undefined"
       [labelPlacement]="'stacked'"
-      [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
+      [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
       [disabled]="f().disabled()"
       [value]="formatDisplayDate(dateValue)"
       [readonly]="true"
       [fill]="'outline'"
-      [attr.tabindex]="field.tabIndex()"
-      [attr.aria-invalid]="field.ariaInvalid()"
-      [attr.aria-required]="field.ariaRequired()"
-      [attr.aria-describedby]="field.ariaDescribedBy()"
+      [attr.tabindex]="ngf.tabIndex()"
+      [attr.aria-invalid]="ngf.ariaInvalid()"
+      [attr.aria-required]="ngf.ariaRequired()"
+      [attr.aria-describedby]="ngf.ariaDescribedBy()"
       (click)="!f().disabled() && openModal()"
     />
-    @if (field.errorsToDisplay()[0]; as error) {
-      <ion-note color="danger" class="df-ion-error" [id]="field.errorId()" role="alert">{{ error.message }}</ion-note>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</ion-note>
     } @else if (props()?.hint; as hint) {
-      <ion-note class="df-ion-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</ion-note>
+      <ion-note class="df-ion-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
 
     <ion-modal [isOpen]="isModalOpen()" (didDismiss)="closeModal()">
       <ng-template>
         <ion-header>
           <ion-toolbar>
-            <ion-title>{{ field.label() | dynamicText | async }}</ion-title>
+            <ion-title>{{ ngf.label() | dynamicText | async }}</ion-title>
             <ion-buttons slot="end">
               <ion-button (click)="closeModal()">Close</ion-button>
             </ion-buttons>
@@ -107,7 +107,7 @@ import { format } from 'date-fns';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicDatepickerFieldComponent {
-  protected readonly field = injectNgForgeField<Date | null>();
+  protected readonly ngf = injectNgForgeField<Date | null>();
 
   readonly minDate = input<Date | null>(null);
   readonly maxDate = input<Date | null>(null);
@@ -130,9 +130,9 @@ export default class IonicDatepickerFieldComponent {
     // to match the field tree's value type.
     if (value && typeof value === 'string' && value.length > 0) {
       const date = new Date(value);
-      this.field.field()().value.set(date);
+      this.ngf.field()().value.set(date);
     } else {
-      this.field.field()().value.set(null);
+      this.ngf.field()().value.set(null);
     }
     this.closeModal();
   }

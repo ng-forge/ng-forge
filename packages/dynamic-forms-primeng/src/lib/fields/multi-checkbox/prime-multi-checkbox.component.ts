@@ -13,31 +13,31 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field();
+    @let f = ngf.field();
     @let checked = checkedValuesMap();
-    @if (field.label(); as label) {
+    @if (ngf.label(); as label) {
       <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
-    <div class="checkbox-group" [class]="groupClasses()" [attr.aria-describedby]="field.ariaDescribedBy()">
+    <div class="checkbox-group" [class]="groupClasses()" [attr.aria-describedby]="ngf.ariaDescribedBy()">
       @for (option of options(); track option.value) {
         <div class="checkbox-option">
           <p-checkbox
             ngForgeControl
-            [inputId]="field.key() + '-' + option.value"
+            [inputId]="ngf.key() + '-' + option.value"
             [binary]="true"
             [ngModel]="checked['' + option.value] || false"
             (onChange)="onCheckboxChange(option, $event)"
             [disabled]="f().disabled() || option.disabled || false"
           />
-          <label [for]="field.key() + '-' + option.value" class="ml-2">{{ option.label | dynamicText | async }}</label>
+          <label [for]="ngf.key() + '-' + option.value" class="ml-2">{{ option.label | dynamicText | async }}</label>
         </div>
       }
     </div>
-    @if (field.errorsToDisplay()[0]; as error) {
-      <small class="p-error" [id]="field.errorId()" role="alert">{{ error.message }}</small>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <small class="p-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</small>
     } @else if (props()?.hint; as hint) {
-      <small class="p-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</small>
+      <small class="p-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</small>
     }
   `,
   styles: [
@@ -60,7 +60,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PrimeMultiCheckboxFieldComponent {
-  protected readonly field = injectNgForgeField<ValueType[]>();
+  protected readonly ngf = injectNgForgeField<ValueType[]>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<PrimeMultiCheckboxProps>();
@@ -71,7 +71,7 @@ export default class PrimeMultiCheckboxFieldComponent {
     if (styleClass) {
       classes.push(styleClass);
     }
-    if (this.field.errorsToDisplay().length > 0) {
+    if (this.ngf.errorsToDisplay().length > 0) {
       classes.push('p-invalid');
     }
     return classes.join(' ');
@@ -79,7 +79,7 @@ export default class PrimeMultiCheckboxFieldComponent {
 
   protected valueViewModel = linkedSignal<FieldOption<ValueType>[]>(
     () => {
-      const currentValues = this.field.field()().value();
+      const currentValues = this.ngf.field()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
     },
     { equal: isEqual },
@@ -110,8 +110,8 @@ export default class PrimeMultiCheckboxFieldComponent {
   constructor() {
     explicitEffect([this.valueViewModel], ([selectedOptions]: [FieldOption<ValueType>[]]) => {
       const selectedValues = selectedOptions.map((option: FieldOption<ValueType>) => option.value);
-      if (!isEqual(selectedValues, this.field.field()().value())) {
-        this.field.field()().value.set(selectedValues);
+      if (!isEqual(selectedValues, this.ngf.field()().value())) {
+        this.ngf.field()().value.set(selectedValues);
       }
     });
 

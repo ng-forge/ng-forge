@@ -14,26 +14,26 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
     <div class="df-prime-field">
-      @if (field.label()) {
-        <label [for]="inputId()" class="df-prime-label">{{ field.label() | dynamicText | async }}</label>
+      @if (ngf.label()) {
+        <label [for]="inputId()" class="df-prime-label">{{ ngf.label() | dynamicText | async }}</label>
       }
       <input
         pInputText
         ngForgeControl
         [id]="inputId()"
-        [formField]="field.field()"
+        [formField]="ngf.field()"
         [type]="props()?.type ?? 'text'"
-        [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
-        [attr.tabindex]="field.tabIndex()"
-        [attr.aria-invalid]="field.ariaInvalid()"
-        [attr.aria-required]="field.ariaRequired()"
-        [attr.aria-describedby]="field.ariaDescribedBy()"
+        [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="ngf.tabIndex()"
+        [attr.aria-invalid]="ngf.ariaInvalid()"
+        [attr.aria-required]="ngf.ariaRequired()"
+        [attr.aria-describedby]="ngf.ariaDescribedBy()"
         [class]="inputClasses()"
       />
-      @if (field.errorsToDisplay()[0]; as error) {
-        <small class="p-error" [id]="field.errorId()" role="alert">{{ error.message }}</small>
+      @if (ngf.errorsToDisplay()[0]; as error) {
+        <small class="p-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</small>
       } @else if (props()?.hint; as hint) {
-        <small class="df-prime-hint" [id]="field.hintId()">{{ hint | dynamicText | async }}</small>
+        <small class="df-prime-hint" [id]="ngf.hintId()">{{ hint | dynamicText | async }}</small>
       }
     </div>
   `,
@@ -49,7 +49,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 export default class PrimeInputFieldComponent {
   private readonly primeNGConfig = inject(PRIMENG_CONFIG, { optional: true });
 
-  protected readonly field = injectNgForgeField<string>();
+  protected readonly ngf = injectNgForgeField<string>();
 
   readonly props = input<PrimeInputProps>();
 
@@ -74,5 +74,5 @@ export default class PrimeInputFieldComponent {
     return classes.join(' ');
   });
 
-  protected readonly inputId = computed(() => `${this.field.key()}-input`);
+  protected readonly inputId = computed(() => `${this.ngf.key()}-input`);
 }

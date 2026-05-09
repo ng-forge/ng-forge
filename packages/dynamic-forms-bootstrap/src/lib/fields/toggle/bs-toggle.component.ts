@@ -11,7 +11,7 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let f = field.field(); @let inputId = field.key() + '-input';
+    @let f = ngf.field(); @let inputId = ngf.key() + '-input';
 
     <div
       class="form-check form-switch"
@@ -28,20 +28,20 @@ import { AsyncPipe } from '@angular/common';
         [id]="inputId"
         class="form-check-input"
         [class.is-invalid]="f().invalid() && f().touched()"
-        [attr.tabindex]="field.tabIndex()"
-        [attr.aria-invalid]="field.ariaInvalid()"
-        [attr.aria-required]="field.ariaRequired()"
-        [attr.aria-describedby]="field.ariaDescribedBy()"
+        [attr.tabindex]="ngf.tabIndex()"
+        [attr.aria-invalid]="ngf.ariaInvalid()"
+        [attr.aria-required]="ngf.ariaRequired()"
+        [attr.aria-describedby]="ngf.ariaDescribedBy()"
       />
       <label [for]="inputId" class="form-check-label">
-        {{ field.label() | dynamicText | async }}
+        {{ ngf.label() | dynamicText | async }}
       </label>
     </div>
 
-    @if (field.errorsToDisplay()[0]; as error) {
-      <div class="invalid-feedback d-block" [id]="field.errorId()" role="alert">{{ error.message }}</div>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <div class="invalid-feedback d-block" [id]="ngf.errorId()" role="alert">{{ error.message }}</div>
     } @else if (props()?.hint; as hint) {
-      <div class="form-text" [id]="field.hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
+      <div class="form-text" [id]="ngf.hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
     }
   `,
   styles: [
@@ -71,7 +71,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BsToggleFieldComponent {
-  protected readonly field = injectNgForgeField<boolean>();
+  protected readonly ngf = injectNgForgeField<boolean>();
 
   readonly props = input<BsToggleProps>();
 }

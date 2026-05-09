@@ -14,7 +14,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   imports: [MatFormField, MatLabel, MatSelect, MatOption, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let selectId = field.key() + '-select';
+    @let selectId = ngf.key() + '-select';
 
     <mat-form-field
       [appearance]="effectiveAppearance()"
@@ -22,20 +22,20 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       [floatLabel]="effectiveFloatLabel()"
       [hideRequiredMarker]="effectiveHideRequiredMarker()"
     >
-      @if (field.label(); as label) {
+      @if (ngf.label(); as label) {
         <mat-label>{{ label | dynamicText | async }}</mat-label>
       }
 
       <mat-select
         ngForgeControl
         [id]="selectId"
-        [formField]="field.field()"
-        [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
+        [formField]="ngf.field()"
+        [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
         [multiple]="props()?.multiple || false"
         [compareWith]="props()?.compareWith || defaultCompare"
-        [attr.aria-invalid]="field.ariaInvalid()"
-        [attr.aria-required]="field.ariaRequired()"
-        [attr.aria-describedby]="field.ariaDescribedBy()"
+        [attr.aria-invalid]="ngf.ariaInvalid()"
+        [attr.aria-required]="ngf.ariaRequired()"
+        [attr.aria-describedby]="ngf.ariaDescribedBy()"
       >
         @for (option of options(); track option.value) {
           <mat-option [value]="option.value" [disabled]="option.disabled || false">
@@ -44,10 +44,10 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         }
       </mat-select>
 
-      @if (field.errorsToDisplay()[0]; as error) {
-        <mat-error [id]="field.errorId()">{{ error.message }}</mat-error>
+      @if (ngf.errorsToDisplay()[0]; as error) {
+        <mat-error [id]="ngf.errorId()">{{ error.message }}</mat-error>
       } @else if (props()?.hint; as hint) {
-        <mat-hint [id]="field.hintId()">{{ hint | dynamicText | async }}</mat-hint>
+        <mat-hint [id]="ngf.hintId()">{{ hint | dynamicText | async }}</mat-hint>
       }
     </mat-form-field>
   `,
@@ -64,7 +64,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 export default class MatSelectFieldComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
 
-  protected readonly field = injectNgForgeField<ValueType>();
+  protected readonly ngf = injectNgForgeField<ValueType>();
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<MatSelectProps>();

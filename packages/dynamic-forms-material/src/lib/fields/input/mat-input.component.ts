@@ -13,7 +13,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   imports: [MatFormField, MatLabel, MatInput, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
-    @let inputId = field.key() + '-input';
+    @let inputId = ngf.key() + '-input';
 
     <mat-form-field
       [appearance]="effectiveAppearance()"
@@ -21,25 +21,25 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       [floatLabel]="effectiveFloatLabel()"
       [hideRequiredMarker]="effectiveHideRequiredMarker()"
     >
-      @if (field.label()) {
-        <mat-label>{{ field.label() | dynamicText | async }}</mat-label>
+      @if (ngf.label()) {
+        <mat-label>{{ ngf.label() | dynamicText | async }}</mat-label>
       }
       <input
         matInput
         ngForgeControl
         [id]="inputId"
-        [formField]="field.field()"
+        [formField]="ngf.field()"
         [type]="props()?.type ?? 'text'"
-        [placeholder]="(field.placeholder() | dynamicText | async) ?? ''"
-        [attr.tabindex]="field.tabIndex()"
-        [attr.aria-invalid]="field.ariaInvalid()"
-        [attr.aria-required]="field.ariaRequired()"
-        [attr.aria-describedby]="field.ariaDescribedBy()"
+        [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="ngf.tabIndex()"
+        [attr.aria-invalid]="ngf.ariaInvalid()"
+        [attr.aria-required]="ngf.ariaRequired()"
+        [attr.aria-describedby]="ngf.ariaDescribedBy()"
       />
-      @if (field.errorsToDisplay()[0]; as error) {
-        <mat-error [id]="field.errorId()">{{ error.message }}</mat-error>
+      @if (ngf.errorsToDisplay()[0]; as error) {
+        <mat-error [id]="ngf.errorId()">{{ error.message }}</mat-error>
       } @else if (props()?.hint; as hint) {
-        <mat-hint [id]="field.hintId()">{{ hint | dynamicText | async }}</mat-hint>
+        <mat-hint [id]="ngf.hintId()">{{ hint | dynamicText | async }}</mat-hint>
       }
     </mat-form-field>
   `,
@@ -56,7 +56,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 export default class MatInputFieldComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
 
-  protected readonly field = injectNgForgeField<string>();
+  protected readonly ngf = injectNgForgeField<string>();
 
   readonly props = input<MatInputProps>();
 
