@@ -4,90 +4,126 @@ slug: advanced/custom-fields
 description: 'Add custom field types like rich text editors or file uploaders to any ng-forge adapter without building a full integration from scratch.'
 ---
 
-Add a custom field type to any existing ng-forge adapter — no need to build a full adapter from scratch.
+Add a custom field type alongside an existing ng-forge adapter — Material, Bootstrap, PrimeNG, or Ionic — without writing a full adapter from scratch.
 
-## Scenario
+## When to use this vs build a full adapter
 
-You're using Material, Bootstrap, or another adapter and need a field type that the adapter doesn't provide — for example, a rich text editor, a file uploader, or a custom rating widget.
+- **One or two extra fields** alongside an existing adapter (a rich text editor, file uploader, signature pad, rating widget) → this recipe.
+- **A whole new design system** (Spartan, an internal kit, a custom theme with many field types) → see [Building an Adapter](/building-an-adapter).
 
-## 1. Create Your Field Component
+The mechanics are the same in both cases — every ng-forge field component composes the `NgForgeField` directive — but the recipe stays focused on registering one type alongside `withMaterialFields()` (or whichever adapter you already use).
 
-Implement `ValueFieldComponent<T>` from the core package:
+## 1. Create the field component
+
+Compose `NgForgeField` via `hostDirectives` and consume the standard inputs and derived signals through `injectNgForgeField<T>()`. The directive owns the universal contract: `field`/`key`/`label`/`placeholder`/`className`/`tabIndex`/`props`/`meta`/`validationMessages`/`defaultValidationMessages` inputs, `errors`/`errorsToDisplay`/`ariaInvalid`/`ariaRequired`/`ariaDescribedBy`/`errorId`/`hintId` derived signals, and `[id]`/`[class]`/`[data-testid]`/`[hidden]` host bindings.
 
 ```typescript name="rich-text-field.component.ts"
-import { ChangeDetectionStrategy, Component, output } from '@angular/core';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { injectNgForgeField, NgForgeControl, NgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
+import { AsyncPipe } from '@angular/common';
+
+interface RichTextProps extends Record<string, unknown> {
+  toolbar?: 'minimal' | 'full';
+  hint?: string;
+}
 
 @Component({
   selector: 'app-rich-text-field',
-  template: `<label [textContent]="field().label"></label>
-    <my-rich-editor [value]="field().value()" (valueChange)="valueChange.emit($event)" />`,
+  imports: [FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  template: `
+    @let f = ngf.field();
+    @let inputId = ngf.key() + '-rich-text';
+
+    @if (ngf.label()) {
+      <label [for]="inputId">{{ ngf.label() | dynamicText | async }}</label>
+    }
+
+    <my-rich-editor
+      ngForgeControl
+      [id]="inputId"
+      [formField]="f"
+      [toolbar]="props()?.toolbar ?? 'full'"
+      [attr.aria-invalid]="ngf.ariaInvalid()"
+      [attr.aria-required]="ngf.ariaRequired()"
+      [attr.aria-describedby]="ngf.ariaDescribedBy()"
+    />
+
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <div role="alert" [id]="ngf.errorId()">{{ error.message }}</div>
+    } @else if (props()?.hint; as hint) {
+      <div [id]="ngf.hintId()">{{ hint }}</div>
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RichTextFieldComponent implements ValueFieldComponent<string> {
-  // Injected by the form engine — contains value, label, props, errors, etc.
-  readonly field = input.required<ResolvedValueField<string>>();
-  readonly valueChange = output<string>();
+export default class RichTextFieldComponent {
+  protected readonly ngf = injectNgForgeField<string>();
+  readonly props = input<RichTextProps>();
 }
 ```
 
-## 2. Define the Field Type
+A few things to note:
 
-```typescript name="my-custom-fields.ts"
-import { FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
-import { RichTextFieldComponent } from './rich-text-field.component';
+- **No manual input declarations** for `field`/`key`/`label`/etc. The 10 standard inputs come in via `hostDirectives`; `injectNgForgeField<T>()` returns a typed view of the directive instance.
+- **No host bindings block** — `NgForgeField` already binds `[id]`/`[class]`/`[attr.data-testid]`/`[attr.hidden]` to the host element.
+- **`[ngForgeControl]`** on the canonical control element forwards meta attributes (`data-*`, `aria-*`, `autocomplete`) onto that element. For shadow-DOM wrappers where you can't reach the inner input, see [`NgForgeHostControl`](/building-an-adapter#meta-forwarding) in the integration guide.
+- **`injectNgForgeField<string>()`** narrows `ngf.field()` to `Signal<FieldTree<string>>`, so the `[formField]="f"` binding type-checks. Use the appropriate generic for your value type (`boolean` for checkboxes, `Date | null` for datepickers, `ValueType[]` for multi-selects, etc.).
 
-const richTextField: FieldTypeDefinition = {
-  type: 'rich-text',
-  loadComponent: () => RichTextFieldComponent,
+## 2. Register the field type
+
+Define a `FieldTypeDefinition` that points to your component and the appropriate built-in mapper. For value-bearing fields (anything that contributes to the form's value as a single value), `valueFieldMapper` is the right choice:
+
+```typescript name="rich-text-field.config.ts"
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
+
+export const richTextField: FieldTypeDefinition = {
+  name: 'rich-text',
+  loadComponent: () => import('./rich-text-field.component'),
   mapper: valueFieldMapper,
-  renderReadyWhen: ['field'],
 };
 ```
 
-## 3. Provide Alongside Your Adapter
+Other built-in mappers cover the common categories: `checkboxFieldMapper` for boolean fields, `optionsFieldMapper` for fields with an `options` array (select/radio/multi-checkbox), `datepickerFieldMapper` for date fields with min/max/startAt. See [the integration guide](/building-an-adapter#mappers) for the full list.
 
-Pass your custom field definition to `provideDynamicForm()` alongside the adapter's fields:
+## 3. Provide alongside your existing adapter
+
+Spread your custom field into `provideDynamicForm` after the adapter's existing types:
 
 ```typescript name="app.config.ts"
+import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
+import { richTextField } from './rich-text-field.config';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideDynamicForm(
-      ...withMaterialFields(), // all Material field types
-      richTextField, // your custom field
-    ),
-  ],
+  providers: [provideDynamicForm(...withMaterialFields(), richTextField)],
 };
 ```
 
-## 4. Use It in a Form
+The same shape works with `withBootstrapFields()`, `withPrimeNgFields()`, or `withIonicFields()`.
+
+## 4. Use it in a form
+
+Reference your custom field type by name in any `FormConfig`:
 
 ```typescript
 const config = {
   fields: [
-    { key: 'name', type: 'input', value: '', label: 'Name' },
+    { key: 'title', type: 'input', value: '', label: 'Title' },
     { key: 'body', type: 'rich-text', value: '', label: 'Content' },
     { key: 'submit', type: 'submit', label: 'Save' },
   ],
 } as const satisfies FormConfig;
 ```
 
-## Key Points
+Custom fields work with everything the built-in field types do — validation, derivations, conditional logic, dynamic text — without any extra wiring.
 
-- Custom fields work with all conditional logic, validation, and value derivation — no special handling needed
-- You can add as many custom fields as you need alongside any adapter
-- The `mapper` function translates the resolved field to your component's inputs — there are multiple available mappers like `valueFieldMapper` for standard value-based fields, `optionsFieldMapper` for option fields, `datepickerFieldMapper` for date fields, `checkboxFieldMapper` for boolean fields, and more. You can also write your own custom mapper if needed.
-- If your custom component declares `field = input.required(...)`, the renderer waits for `field` automatically when using a built-in mapper. Use explicit `renderReadyWhen: ['field']` only for custom mappers that supply other reactive inputs, or `renderReadyWhen: []` to opt out
+## Going further
 
-## Going Further
-
-If you need a completely custom adapter (no existing adapter as base), or want to implement the config cascade (`defaultProps`) for your custom fields, see the full [Custom Integrations](/building-an-adapter) guide.
-
-## Next Steps
-
-- **[Custom Integrations](/building-an-adapter)** — Build a complete adapter for any UI library from scratch
-- **[Type Safety](/recipes/type-safety)** — Leverage TypeScript inference for form values and field types
-- **[Events](/recipes/events)** — Dispatch and subscribe to form events from custom field components
+- [Building an Adapter](/building-an-adapter) — full guide for shipping an adapter with many field types, adapter-level configuration cascades, and module augmentation for type-safety.
+- [Type Safety](/recipes/type-safety) — register your custom field shape with `FieldRegistryLeaves` so `FormConfig` autocompletes against it.
+- [Events](/recipes/events) — dispatch and subscribe to events from custom field components.
