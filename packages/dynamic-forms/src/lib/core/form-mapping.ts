@@ -170,11 +170,20 @@ export function mapFieldToForm(
     return;
   }
 
-  // Group fields - map children under the group's path. Groups have a schema path,
-  // so Angular Signal Forms can propagate `hidden(path, ...)` calls to descendants —
-  // but groups don't currently apply their own hidden state, so we still propagate
-  // through the cascade as a belt-and-suspenders fallback.
+  // Group fields - apply state logic (hidden/disabled/readonly) so dynamic visibility
+  // can be detected by callers (e.g. value filtering). Static `hidden: true` is intentionally
+  // NOT applied here — that would propagate through Angular Signal Forms' descendant cascade
+  // and conflict with our own `validateWhenHidden` mechanism. Static state on groups is
+  // detected by reading the field def directly (see value-filter).
   if (isGroupField(fieldDef)) {
+    const groupLogic = (fieldDef as { logic?: readonly LogicConfig[] }).logic;
+    if (groupLogic) {
+      for (const config of groupLogic) {
+        if (!isValidationStateLogic(config)) {
+          applyLogic(config, fieldPath);
+        }
+      }
+    }
     const descendantContext = resolveDescendantContext(fieldDef, ownContext);
     mapContainerChildren(fieldDef.fields, fieldPath, descendantContext);
     return;

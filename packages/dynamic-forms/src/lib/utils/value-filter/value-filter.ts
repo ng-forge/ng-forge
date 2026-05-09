@@ -27,21 +27,25 @@ export function resolveExclusionConfig(
 }
 
 /**
- * Determines whether a field's value should be excluded based on its reactive state
+ * Determines whether a field's value should be excluded based on its reactive state,
+ * the field def's static state (for fields whose `state.hidden()` isn't wired — e.g. groups),
  * and the resolved exclusion config.
  */
-function shouldExcludeField(fieldState: FieldTree<unknown>, config: ResolvedValueExclusionConfig): boolean {
+function shouldExcludeField(field: FieldDef<unknown>, fieldState: FieldTree<unknown>, config: ResolvedValueExclusionConfig): boolean {
   const state = fieldState();
 
-  if (config.excludeValueIfHidden && state.hidden()) {
+  const isHidden = state.hidden() || field.hidden === true;
+  if (config.excludeValueIfHidden && isHidden) {
     return true;
   }
 
-  if (config.excludeValueIfDisabled && state.disabled()) {
+  const isDisabled = state.disabled() || field.disabled === true;
+  if (config.excludeValueIfDisabled && isDisabled) {
     return true;
   }
 
-  if (config.excludeValueIfReadonly && state.readonly()) {
+  const isReadonly = state.readonly() || field.readonly === true;
+  if (config.excludeValueIfReadonly && isReadonly) {
     return true;
   }
 
@@ -102,7 +106,7 @@ export function filterFormValue<T extends Record<string, unknown>>(
     const resolvedConfig = resolveExclusionConfig(globalDefaults, formOptions, fieldExclusion);
 
     // Check if this field should be excluded based on its state
-    if (shouldExcludeField(fieldState, resolvedConfig)) {
+    if (shouldExcludeField(field, fieldState, resolvedConfig)) {
       continue;
     }
 

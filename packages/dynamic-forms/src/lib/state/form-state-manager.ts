@@ -298,6 +298,28 @@ export class FormStateManager<
     return new Set(schemaFields.map((f) => f.key).filter((key): key is string => key !== undefined));
   });
 
+  /** Per-top-level-field hidden state, used to detect visible→hidden transitions. */
+  private readonly fieldVisibilitySnapshot = computed((): Record<string, boolean> => {
+    const setup = this.formSetup();
+    if (!setup.schemaFields || setup.schemaFields.length === 0) return {};
+
+    const fieldTreeRecord = asFieldTreeRecord(this.form());
+    const snapshot: Record<string, boolean> = {};
+
+    for (const field of setup.schemaFields) {
+      const key = field.key;
+      if (!key) continue;
+      const subtree = fieldTreeRecord[key];
+      if (!subtree || typeof subtree !== 'function') continue;
+      snapshot[key] = subtree().hidden();
+    }
+
+    return snapshot;
+  });
+
+  /** Captured values for fields currently hidden+excluded. Restored when they become visible again. */
+  private readonly hiddenValueStore = signal<Record<string, unknown>>({});
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Entity & Form
   // ─────────────────────────────────────────────────────────────────────────────
@@ -323,11 +345,14 @@ export class FormStateManager<
       const inputValue = this.deps.value();
       const defaults = this.defaultValues();
       const keys = this.validKeys();
+      const saved = this.hiddenValueStore();
 
       // Deep-merge so a partial nested object in `inputValue` (e.g. a group
       // value missing one of its declared sub-field keys) does not orphan
       // the absent sub-field in the Signal Forms validation graph.
-      const combined = deepMergeDefaults(defaults as Record<string, unknown>, inputValue as Record<string, unknown>);
+      // Layer order: defaults < saved (hidden+excluded restorations) < inputValue.
+      const withSaved = deepMergeDefaults(defaults as Record<string, unknown>, saved);
+      const combined = deepMergeDefaults(withSaved, inputValue as Record<string, unknown>);
 
       if (keys) {
         const filtered: Record<string, unknown> = {};
@@ -764,6 +789,7 @@ export class FormStateManager<
    * Resets the form to default values.
    */
   reset(): void {
+    this.hiddenValueStore.set({});
     const defaults = this.defaultValues();
     (this.form()().value as WritableSignal<TModel>).set(defaults);
     this.deps.value.set(defaults as Partial<TModel>);
@@ -773,6 +799,7 @@ export class FormStateManager<
    * Clears the form to empty state.
    */
   clear(): void {
+    this.hiddenValueStore.set({});
     const emptyValue = {} as TModel;
     (this.form()().value as WritableSignal<TModel>).set(emptyValue);
     this.deps.value.set(emptyValue);
@@ -801,12 +828,32 @@ export class FormStateManager<
       }
     });
 
-    // Outward sync: write entity changes back to deps.value (see entity JSDoc for full explanation).
-    // The isEqual guard prevents infinite ping-pong between this effect and the linkedSignal source.
-    explicitEffect([this.entity], ([currentEntity]) => {
+    // Save-on-hide: capture entity values right before write-back filters them out, so
+    // they can be restored when the field becomes visible again.
+    let prevVisibilitySnapshot: Record<string, boolean> = {};
+    explicitEffect([this.fieldVisibilitySnapshot], ([snapshot]) => {
+      const currentSaved = untracked(() => this.hiddenValueStore());
+      const currentEntity = untracked(() => this.entity()) as Record<string, unknown>;
+      const newSaved = { ...currentSaved };
+
+      for (const [key, isHidden] of Object.entries(snapshot)) {
+        if (isHidden && !prevVisibilitySnapshot[key]) {
+          const value = currentEntity[key];
+          if (value !== undefined) newSaved[key] = value;
+        }
+      }
+      prevVisibilitySnapshot = { ...snapshot };
+
+      if (!isEqual(newSaved, currentSaved)) {
+        this.hiddenValueStore.set(newSaved);
+      }
+    });
+
+    // Outward sync uses filteredFormValue (not entity) so excluded fields don't leak their defaults.
+    explicitEffect([this.filteredFormValue], ([currentFiltered]) => {
       const currentValue = this.deps.value();
-      if (!isEqual(currentEntity, currentValue)) {
-        this.deps.value.set(currentEntity);
+      if (!isEqual(currentFiltered, currentValue)) {
+        this.deps.value.set(currentFiltered as TModel);
       }
     });
 
