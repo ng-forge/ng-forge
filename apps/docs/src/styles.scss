@@ -777,20 +777,32 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
     vertical-align: baseline;
   }
 
-  // Inside table cells, keep short tokens intact (nowrap on the code).
-  // `'outline'` stays `'outline'` even in a narrow cell — if the whole row
-  // doesn't fit the viewport, the .table-scroll wrapper below scrolls the
-  // table horizontally instead of breaking tokens mid-character.
+  // Inside table cells (desktop): let short tokens stay whole and long
+  // ones break only when they would overflow. `break-word` is gentler than
+  // `anywhere` — it does not collapse the cell's intrinsic min-content
+  // width to one character, so columns keep reasonable proportions and
+  // tokens like `wrappers: ['form-field']` stay on one line when they fit.
   td > code,
   td *:not(pre) > code {
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: break-word;
   }
 
-  // Keep cells readable at narrow viewports — the .table-scroll wrapper
-  // handles horizontal overflow, so we don't need to crush padding.
   @media (max-width: 768px) {
+    // Mobile: cells get so narrow that `overflow-wrap: anywhere` causes
+    // ugly mid-character breaks (`addArrayI / tem`). Switch back to
+    // unbreakable tokens here and let `.table-scroll` provide horizontal
+    // scroll for tables that don't fit — tokens stay whole, page width
+    // is preserved.
+    td > code,
+    td *:not(pre) > code {
+      white-space: nowrap;
+      overflow-wrap: normal;
+    }
+
     table {
       font-size: 13px;
+      min-width: max-content;
     }
 
     th,
@@ -965,10 +977,13 @@ $doc-code-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, C
   table {
     width: 100%;
     border-spacing: 0;
-    // Force the table to claim at least its intrinsic width. Combined with
-    // nowrap on code cells, this means the wrapper scrolls when columns
-    // can't all fit, rather than cramming each word onto its own line.
-    min-width: max-content;
+
+    // Use a fixed-ish layout so columns size proportionally to the table
+    // width (not to the longest unbreakable cell content). Combined with
+    // `td > code { white-space: nowrap }` this keeps individual code
+    // tokens whole while letting prose + multi-token cells wrap onto
+    // multiple lines instead of pushing the column out.
+    table-layout: auto;
   }
 
   // Tables were rendering with a `<div class="table-scroll">` wrapper AND

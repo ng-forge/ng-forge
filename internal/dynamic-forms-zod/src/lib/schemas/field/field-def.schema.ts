@@ -93,6 +93,12 @@ export const BaseFieldDefSchema = z.object({
    * Overrides both the global and form-level settings.
    */
   excludeValueIfReadonly: z.boolean().optional(),
+
+  /**
+   * Whether to run validation when this field is hidden.
+   * Inherited from the parent field (and form/global defaults). Defaults to false.
+   */
+  validateWhenHidden: z.boolean().optional(),
 });
 
 /**

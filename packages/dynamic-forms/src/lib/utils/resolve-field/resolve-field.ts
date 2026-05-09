@@ -156,6 +156,11 @@ export function resolveFieldSync(fieldDef: FieldDef<unknown>, context: SyncResol
  * Reconciles previous and current resolved fields to preserve injector instances
  * for fields that haven't changed type, preventing unnecessary component recreation.
  *
+ * When a field's key, component, and injector all match the previous render but the
+ * underlying `fieldDef` has changed (e.g. updated options/props), the existing
+ * component/injector are preserved while the new `inputs` and `renderReady` signals
+ * are adopted so prop updates flow through to the rendered component.
+ *
  * @param prev - Previous resolved fields array
  * @param curr - Current resolved fields array
  * @returns Reconciled fields with preserved injectors where applicable
@@ -167,8 +172,21 @@ export function reconcileFields(prev: ResolvedField[], curr: ResolvedField[]): R
     const existing = prevMap.get(field.key);
 
     if (existing && existing.component === field.component && existing.injector === field.injector) {
-      // Truly unchanged - preserve object identity for signal stability
-      return existing;
+      if (existing.fieldDef === field.fieldDef) {
+        // Truly unchanged - preserve object identity for signal stability
+        return existing;
+      }
+
+      // Same component instance + injector, but the field definition changed.
+      // Preserve component identity (so ngComponentOutlet keeps the same instance)
+      // while swapping in the freshly-mapped inputs/renderReady signals so prop
+      // updates (e.g. select options) reach the component.
+      return {
+        ...existing,
+        fieldDef: field.fieldDef,
+        inputs: field.inputs,
+        renderReady: field.renderReady,
+      };
     }
 
     // New field, type changed, or context changed (new injector) - use new field

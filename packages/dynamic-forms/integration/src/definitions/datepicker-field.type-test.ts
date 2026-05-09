@@ -39,6 +39,7 @@ describe('DatepickerField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'validateWhenHidden'
     // BaseValueField
     | 'value'
     | 'placeholder'

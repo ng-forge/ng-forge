@@ -18,6 +18,8 @@ import { normalizeFieldsArray } from '../utils/object-utils';
 import { getNestedValue } from './expressions/value-utils';
 import { applyFormLevelSchema } from './form-schema-merger';
 import type { FormSchema } from '@ng-forge/dynamic-forms/schema';
+import { VALIDATION_EXECUTION_DEFAULTS } from '../providers/features/validation-execution/validation-execution.token';
+import { FieldTreeMappingContext, resolveDescendantContext, resolveFieldOwnContext } from './field-tree-mapping-context';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -83,6 +85,17 @@ export interface CreateSchemaOptions<TModel = unknown> {
    * ```
    */
   formLevelSchema?: FormSchema<TModel>;
+
+  /**
+   * Form-level `validateWhenHidden` setting (from `FormConfig.options.validateWhenHidden`).
+   *
+   * Acts as the root inherited value for the field tree. Per-field
+   * `FieldDef.validateWhenHidden` overrides it for a subtree, and the new value is
+   * inherited by descendants unless they override in turn.
+   *
+   * When `undefined`, the global `withValidationExecutionDefaults()` value is used.
+   */
+  validateWhenHidden?: boolean;
 }
 
 /**
@@ -108,6 +121,7 @@ export function createSchemaFromFields<TModel = unknown>(
   // These will be available because createSchemaFromFields is called within runInInjectionContext
   const functionRegistry = inject(FunctionRegistryService);
   const logger = inject(DynamicFormLogger);
+  const validationExecutionDefaults = inject(VALIDATION_EXECUTION_DEFAULTS);
 
   // Normalize options - support both old array signature and new options object
   const options: CreateSchemaOptions<TModel> = Array.isArray(optionsOrValidators)
@@ -115,6 +129,11 @@ export function createSchemaFromFields<TModel = unknown>(
     : (optionsOrValidators ?? {});
 
   const { crossFieldValidators, formLevelSchema } = options;
+  const rootContext: FieldTreeMappingContext = {
+    validateWhenHidden: options.validateWhenHidden ?? validationExecutionDefaults.validateWhenHidden,
+    ancestorAlwaysHidden: false,
+    ancestorHiddenLogics: [],
+  };
 
   return schema<TModel>((path) => {
     for (const fieldDef of fields) {
@@ -127,12 +146,17 @@ export function createSchemaFromFields<TModel = unknown>(
       }
 
       if (valueHandling === 'flatten' && hasChildFields(fieldDef)) {
+        // A flatten container can still set its own cascading overrides that flow
+        // down to its children — including its own hidden state which has no
+        // schema path of its own.
+        const flattenedOwn = resolveFieldOwnContext(fieldDef, rootContext);
+        const flattenedContext = resolveDescendantContext(fieldDef, flattenedOwn);
         for (const childField of normalizeFieldsArray(fieldDef.fields)) {
           if (!childField.key) continue;
 
           const childPath = (path as Record<string, SchemaPath<unknown>>)[childField.key];
           if (childPath) {
-            mapFieldToForm(childField, childPath);
+            mapFieldToForm(childField, childPath, flattenedContext);
           }
         }
         continue;
@@ -148,7 +172,7 @@ export function createSchemaFromFields<TModel = unknown>(
       // Use the new modular form mapping function
       // This will progressively apply validators, logic, and schemas
       // Cross-field logic is handled automatically via RootFormRegistryService
-      mapFieldToForm(fieldDef, fieldPath);
+      mapFieldToForm(fieldDef, fieldPath, rootContext);
     }
 
     // Apply cross-field validators using validateTree

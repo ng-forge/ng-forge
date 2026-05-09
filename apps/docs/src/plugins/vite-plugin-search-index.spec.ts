@@ -1,12 +1,17 @@
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import { searchIndexPlugin } from './vite-plugin-search-index';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Plugin } from 'vite';
 
-/**
- * Create a temporary directory with test markdown files.
- * Returns the root dir (which contains `public/content/`).
- */
+// Stub the workspace API scan so this spec tests markdown extraction in
+// isolation. The real `getApiPackages()` walks the repo via ts-morph (slow,
+// ~400 entries) and would otherwise leak into every assertion here.
+vi.mock('../../plugins/vite-plugin-api-docs', () => ({
+  getApiPackages: () => new Map(),
+}));
+
+import { searchIndexPlugin } from '../../plugins/vite-plugin-search-index';
+
 function createTempDir(id: string): string {
   const root = resolve(`/tmp/test-search-index-${id}-${Date.now()}`);
   const contentDir = join(root, 'public', 'content');
@@ -21,20 +26,14 @@ function writeContent(root: string, relativePath: string, content: string): void
   writeFileSync(fullPath, content, 'utf-8');
 }
 
-/**
- * Simulate the Vite plugin lifecycle: configResolved → generateBundle.
- * Returns the emitted assets.
- */
 function runPlugin(root: string): { fileName: string; source: string }[] {
   const plugin = searchIndexPlugin() as Plugin & {
     configResolved: (config: { root: string }) => void;
     generateBundle: (this: { emitFile: (file: unknown) => void }) => void;
   };
 
-  // Step 1: configResolved sets contentDir
   plugin.configResolved!({ root } as any);
 
-  // Step 2: generateBundle emits the asset
   const emitted: { fileName: string; source: string }[] = [];
   plugin.generateBundle!.call({
     emitFile(file: any) {
@@ -70,14 +69,10 @@ describe('vite-plugin-search-index', () => {
     return dir;
   }
 
-  // ─── Plugin metadata ──────────────────────────────────────────────────
-
   it('should return correct plugin name', () => {
     const plugin = searchIndexPlugin();
     expect(plugin.name).toBe('vite-plugin-search-index');
   });
-
-  // ─── generateBundle basics ────────────────────────────────────────────
 
   it('should emit __search-index.json asset', () => {
     const root = makeTempDir('emit');
@@ -102,8 +97,6 @@ describe('vite-plugin-search-index', () => {
     expect(entries).toEqual([]);
   });
 
-  // ─── Frontmatter extraction ───────────────────────────────────────────
-
   it('should extract title and slug from frontmatter', () => {
     const root = makeTempDir('frontmatter');
     writeContent(root, 'getting-started.md', '---\ntitle: Getting Started\nslug: getting-started\n---\nWelcome to the docs.');
@@ -126,8 +119,6 @@ describe('vite-plugin-search-index', () => {
     expect(slugs).toEqual(['alpha', 'beta']);
   });
 
-  // ─── Files without frontmatter ────────────────────────────────────────
-
   it('should use path-derived slug for files without frontmatter', () => {
     const root = makeTempDir('no-fm');
     writeContent(root, 'my-page.md', 'Just some content without frontmatter.');
@@ -135,7 +126,6 @@ describe('vite-plugin-search-index', () => {
     const entries = parseIndex(runPlugin(root));
     expect(entries).toHaveLength(1);
     expect(entries[0].slug).toBe('my-page');
-    // Title derived from slug: last segment with dashes replaced by spaces
     expect(entries[0].title).toBe('my page');
   });
 
@@ -145,9 +135,7 @@ describe('vite-plugin-search-index', () => {
 
     const entries = parseIndex(runPlugin(root));
     expect(entries).toHaveLength(1);
-    // No slug in frontmatter, derived from path
     expect(entries[0].slug).toBe('validation/basics');
-    // Title comes from frontmatter
     expect(entries[0].title).toBe('Basics');
   });
 
@@ -159,8 +147,6 @@ describe('vite-plugin-search-index', () => {
     expect(entries).toHaveLength(1);
     expect(entries[0].slug).toBe('section');
   });
-
-  // ─── Markdown stripping ───────────────────────────────────────────────
 
   it('should strip markdown headings from content', () => {
     const root = makeTempDir('headings');
@@ -235,8 +221,6 @@ describe('vite-plugin-search-index', () => {
     expect(entries[0].content).toContain('after.');
   });
 
-  // ─── Nested directories ───────────────────────────────────────────────
-
   it('should recursively collect files from subdirectories', () => {
     const root = makeTempDir('recursive');
     writeContent(root, 'top.md', '---\ntitle: Top\nslug: top\n---\nTop level.');
@@ -249,8 +233,6 @@ describe('vite-plugin-search-index', () => {
     expect(slugs).toEqual(['sub/deep/file', 'sub/nested', 'top']);
   });
 
-  // ─── Edge cases ───────────────────────────────────────────────────────
-
   it('should handle files with frontmatter but empty body', () => {
     const root = makeTempDir('empty-body');
     writeContent(root, 'empty.md', '---\ntitle: Empty\nslug: empty\n---\n');
@@ -262,7 +244,6 @@ describe('vite-plugin-search-index', () => {
   });
 
   it('should handle non-existent content directory gracefully', () => {
-    // Create a root with no public/content directory
     const root = resolve(`/tmp/test-search-index-nodir-${Date.now()}`);
     mkdirSync(root, { recursive: true });
     tempDirs.push(root);

@@ -48,6 +48,10 @@ export { hasFormValue } from './events/interfaces/form-event';
 export { withValueExclusionDefaults } from './providers/features/value-exclusion';
 export type { ValueExclusionConfig, ResolvedValueExclusionConfig } from './models/value-exclusion-config';
 
+// Validation Execution Feature
+export { withValidationExecutionDefaults } from './providers/features/validation-execution';
+export type { ValidationExecutionConfig, ResolvedValidationExecutionConfig } from './models/validation-execution-config';
+
 // Wrapper Types
 export type { WrapperTypeDefinition, FieldWrapperContract } from './models/wrapper-type';
 export { isWrapperTypeDefinition, WRAPPER_REGISTRY } from './models/wrapper-type';

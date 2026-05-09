@@ -193,8 +193,10 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
   /**
    * Whether the field is hidden from view.
    *
-   * When true, the field is not rendered in the UI but still participates
-   * in form state and validation. Useful for conditional field display.
+   * When true, the field is not rendered in the UI. By default, validators on
+   * a hidden field are skipped — set {@link validateWhenHidden} to `true` (on
+   * the field, an ancestor, the form, or globally) to keep validation running
+   * while hidden. State logic and value derivations continue to apply.
    *
    * @value false
    */
@@ -241,6 +243,24 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
    * @default undefined (uses form-level or global setting)
    */
   excludeValueIfReadonly?: boolean;
+
+  /**
+   * Whether to run validation when this field is hidden — statically (`hidden: true`),
+   * via a `hidden` logic rule, or via any hidden ancestor.
+   *
+   * When `false`, all validators on this field (built-in like `required`/`email`/`min`,
+   * custom `validate()`/expression validators, and `required` state logic) are skipped
+   * while the field is hidden. The hidden state, disabled state, readonly state, and
+   * value derivations continue to apply.
+   *
+   * Inherited from the parent field — once a field overrides this value, all of its
+   * descendants inherit the new value unless they override in turn. Form-level
+   * `FormOptions.validateWhenHidden` is the root inherited value, falling back to the
+   * global default.
+   *
+   * @default undefined — inherits from parent / form / global default (which is `false`)
+   */
+  validateWhenHidden?: boolean;
 
   /**
    * Column sizing configuration for responsive grid layout.

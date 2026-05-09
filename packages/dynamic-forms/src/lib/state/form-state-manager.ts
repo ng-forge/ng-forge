@@ -39,7 +39,7 @@ import { SchemaRegistryService } from '../core/registry/schema-registry.service'
 import { createSchemaFromFields } from '../core/schema-builder';
 import { createFormLevelSchema } from '../core/form-schema-merger';
 import { collectCrossFieldEntries } from '../core/cross-field/cross-field-collector';
-import { isEqual } from '../utils/object-utils';
+import { deepMergeDefaults, isEqual } from '../utils/object-utils';
 import { CONTAINER_FIELD_PROCESSORS } from '../utils/container-utils/container-field-processors';
 import { derivedFromDeferred } from '../utils/derived-from-deferred/derived-from-deferred';
 import { reconcileFields, ResolvedField, resolveField, resolveFieldSync } from '../utils/resolve-field/resolve-field';
@@ -324,7 +324,10 @@ export class FormStateManager<
       const defaults = this.defaultValues();
       const keys = this.validKeys();
 
-      const combined = { ...defaults, ...inputValue };
+      // Deep-merge so a partial nested object in `inputValue` (e.g. a group
+      // value missing one of its declared sub-field keys) does not orphan
+      // the absent sub-field in the Signal Forms validation graph.
+      const combined = deepMergeDefaults(defaults as Record<string, unknown>, inputValue as Record<string, unknown>);
 
       if (keys) {
         const filtered: Record<string, unknown> = {};
@@ -361,6 +364,7 @@ export class FormStateManager<
         return createSchemaFromFields(setup.schemaFields, setup.registry, {
           crossFieldValidators: crossFieldCollection.validators,
           formLevelSchema: config.schema,
+          validateWhenHidden: this.effectiveFormOptions().validateWhenHidden,
         }) as Schema<TModel>;
       }
 
@@ -498,7 +502,12 @@ export class FormStateManager<
   /**
    * Phase-aware field source that coordinates component lifecycle with form updates.
    * Teardown/Applying → intersection of old/new fields; Restoring → all new fields.
-   * Uses key+type equality to avoid spurious emissions during rapid transitions.
+   *
+   * Uses per-field reference equality to suppress spurious emissions when the same
+   * field definitions are returned (e.g. memoized intersections during transitions)
+   * while still triggering re-resolution when the underlying field definition
+   * references change (e.g. a config swap that updates options/props for a
+   * same-keyed field).
    */
   private readonly fieldsSource = computed(
     () => {
@@ -524,7 +533,7 @@ export class FormStateManager<
       equal: (a, b) => {
         if (a === b) return true;
         if (a.length !== b.length) return false;
-        return a.every((field, i) => field.key === b[i].key && field.type === b[i].type);
+        return a.every((field, i) => field === b[i]);
       },
     },
   );

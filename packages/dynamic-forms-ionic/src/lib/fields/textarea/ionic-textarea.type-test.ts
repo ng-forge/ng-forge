@@ -86,6 +86,7 @@ describe('IonicTextareaField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'validateWhenHidden'
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'

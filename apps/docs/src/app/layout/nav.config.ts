@@ -16,6 +16,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Getting Started', path: 'getting-started' },
   { label: 'Configuration', path: 'configuration' },
+  { label: 'Feature Overview', path: 'feature-overview' },
   { label: 'API-Driven Forms', path: 'api-driven-forms' },
   {
     label: 'Building an Adapter',
@@ -48,15 +49,15 @@ export const NAV_ITEMS: NavItem[] = [
       { label: 'Advanced', path: 'validation/advanced' },
       { label: 'Custom Validators', path: 'validation/custom-validators' },
       { label: 'Reference', path: 'validation/reference' },
-    ],
-  },
-  {
-    label: 'Schema Validation',
-    path: 'schema-validation',
-    children: [
-      { label: 'Overview', path: 'schema-validation/overview' },
-      { label: 'Angular Schema', path: 'schema-validation/angular-schema' },
-      { label: 'Zod Validation', path: 'schema-validation/zod' },
+      {
+        label: 'Schema Validation',
+        path: 'schema-validation',
+        children: [
+          { label: 'Overview', path: 'schema-validation/overview' },
+          { label: 'Angular Schema', path: 'schema-validation/angular-schema' },
+          { label: 'Zod Validation', path: 'schema-validation/zod' },
+        ],
+      },
     ],
   },
   {
@@ -70,7 +71,7 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'Layout Components',
+    label: 'Layout',
     path: 'prebuilt',
     children: [
       { label: 'Form Groups', path: 'prebuilt/form-groups' },
@@ -87,16 +88,16 @@ export const NAV_ITEMS: NavItem[] = [
       },
       { label: 'Hidden Fields', path: 'prebuilt/hidden-fields' },
       { label: 'Text Components', path: 'prebuilt/text-components' },
-    ],
-  },
-  {
-    label: 'Wrappers',
-    path: 'wrappers',
-    badge: 'NEW',
-    children: [
-      { label: 'Overview', path: 'wrappers/overview' },
-      { label: 'Writing a Wrapper', path: 'wrappers/writing-a-wrapper' },
-      { label: 'Registering and Applying', path: 'wrappers/registering-and-applying' },
+      {
+        label: 'Wrappers',
+        path: 'wrappers',
+        badge: 'NEW',
+        children: [
+          { label: 'Overview', path: 'wrappers/overview' },
+          { label: 'Writing a Wrapper', path: 'wrappers/writing-a-wrapper' },
+          { label: 'Registering and Applying', path: 'wrappers/registering-and-applying' },
+        ],
+      },
     ],
   },
   {
@@ -110,6 +111,7 @@ export const NAV_ITEMS: NavItem[] = [
       { label: 'Value Exclusion', path: 'recipes/value-exclusion' },
     ],
   },
+  { label: 'Migrating from ngx-formly', path: 'migrating-from-ngx-formly' },
   {
     label: 'AI Integration (MCP)',
     path: 'ai-integration',

@@ -64,6 +64,7 @@ describe('BsToggleField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'validateWhenHidden'
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'

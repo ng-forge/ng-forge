@@ -212,7 +212,9 @@ export class TocComponent {
 
     for (const heading of headingList) {
       const el = this.document.getElementById(heading.id);
-      if (!el) continue;
+      // SSR: server DOM may return a stub element that doesn't implement
+      // getBoundingClientRect. Skip rather than crash the prerender.
+      if (!el || typeof (el as Element).getBoundingClientRect !== 'function') continue;
       const top = el.getBoundingClientRect().top + scrollTop;
       const distance = Math.abs(top - selectionLine);
       if (!closest || distance < closest.distance) {

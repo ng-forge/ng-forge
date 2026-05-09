@@ -17,8 +17,21 @@ import { ApiDetailComponent } from '../api-detail/api-detail.component';
 import { NotFoundComponent } from '../../components/not-found/not-found.component';
 import { EXAMPLES_REGISTRY } from '../examples-index/examples.registry';
 import { findBreadcrumbTrail } from '../../layout/nav.config';
+import { FEATURE_OVERVIEW_FAQ, MIGRATION_CHECKLIST } from '../../components/feature-overview/feature-overview.data';
 import { findTabGroup } from '../../layout/tabs.config';
 import { decodeHtmlEntities } from '../../utils/decode-html-entities';
+
+/**
+ * Plain-text rendering for FAQ / HowTo answers shipped to JSON-LD.
+ * Drops `[label](url)` link wrappers, ` `code` ` chips, and `**bold**`
+ * markers — Google's structured-data validator wants prose, not markdown.
+ */
+function stripInlineMarkdown(text: string): string {
+  return text
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1');
+}
 
 /**
  * Generic documentation page component.
@@ -424,13 +437,16 @@ export class DocPageComponent {
       this.metaService.updateTag({ name: 'twitter:title', content: fullTitle });
       this.metaService.updateTag({ name: 'twitter:description', content: desc });
 
-      // Per-route OG image
-      const ogImageSlug = slug || 'default';
-      const ogImageUrl = `${DocPageComponent.SITE_ORIGIN}/og/${ogImageSlug}.png`;
+      // OG image — single shared asset until per-route PNGs are authored.
+      // Per-route paths (`/og/${slug}.png`) 404 today and break Twitter / LinkedIn / Discord previews.
+      const ogImageUrl = `${DocPageComponent.SITE_ORIGIN}/og-image.png`;
+      const ogImageAlt = title ? `${title} — ng-forge Dynamic Forms for Angular` : 'ng-forge — Dynamic Forms for Angular';
       this.metaService.updateTag({ property: 'og:image', content: ogImageUrl });
       this.metaService.updateTag({ property: 'og:image:width', content: '1200' });
       this.metaService.updateTag({ property: 'og:image:height', content: '630' });
+      this.metaService.updateTag({ property: 'og:image:alt', content: ogImageAlt });
       this.metaService.updateTag({ name: 'twitter:image', content: ogImageUrl });
+      this.metaService.updateTag({ name: 'twitter:image:alt', content: ogImageAlt });
 
       // Canonical URL for the current page
       const pageUrl = slug ? `${DocPageComponent.SITE_ORIGIN}/${adapter}/${slug}` : DocPageComponent.SITE_ORIGIN + '/';
@@ -444,7 +460,93 @@ export class DocPageComponent {
       if (link) {
         link.href = canonicalUrl;
       }
+
+      this.updateJsonLd(slug, adapter, pageUrl);
     });
+
+    this.destroyRef.onDestroy(() => {
+      this.removeJsonLd('jsonld-breadcrumb');
+      this.removeJsonLd('jsonld-faq');
+      this.removeJsonLd('jsonld-howto');
+    });
+  }
+
+  /**
+   * Emit / refresh schema.org JSON-LD for the current page.
+   *
+   * - Always: `BreadcrumbList` based on the visible breadcrumb trail. Helps
+   *   Google show the right hierarchy in SERP.
+   * - On `/feature-overview`: `FAQPage` with the visible FAQ entries
+   *   (question + plain-text answer). Eligible for FAQ rich-results.
+   * - On `/migrating-from-ngx-formly`: `HowTo` for the migration checklist.
+   */
+  private updateJsonLd(slug: string, adapter: string, pageUrl: string): void {
+    const trail = this.breadcrumbs();
+    if (trail.length > 0) {
+      this.setJsonLd('jsonld-breadcrumb', {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: trail.map((c, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: c.label,
+          item: `${DocPageComponent.SITE_ORIGIN}/${adapter}/${c.path}`,
+        })),
+      });
+    } else {
+      this.removeJsonLd('jsonld-breadcrumb');
+    }
+
+    if (slug === 'feature-overview') {
+      this.setJsonLd('jsonld-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: FEATURE_OVERVIEW_FAQ.map((entry) => ({
+          '@type': 'Question',
+          name: entry.q,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: stripInlineMarkdown(entry.a),
+          },
+        })),
+      });
+    } else {
+      this.removeJsonLd('jsonld-faq');
+    }
+
+    if (slug === 'migrating-from-ngx-formly') {
+      this.setJsonLd('jsonld-howto', {
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        name: 'Migrate from ngx-formly to ng-forge',
+        description: 'A pragmatic order to port a non-trivial Angular dynamic-forms app from ngx-formly to ng-forge.',
+        url: `${pageUrl}#migration-checklist`,
+        step: MIGRATION_CHECKLIST.map((s, i) => ({
+          '@type': 'HowToStep',
+          position: i + 1,
+          name: s.name,
+          text: s.text,
+        })),
+      });
+    } else {
+      this.removeJsonLd('jsonld-howto');
+    }
+  }
+
+  private setJsonLd(id: string, payload: Record<string, unknown>): void {
+    let el = this.document.getElementById(id) as HTMLScriptElement | null;
+    if (!el) {
+      el = this.document.createElement('script') as HTMLScriptElement;
+      el.id = id;
+      el.type = 'application/ld+json';
+      this.document.head.appendChild(el);
+    }
+    el.textContent = JSON.stringify(payload);
+  }
+
+  private removeJsonLd(id: string): void {
+    const el = this.document.getElementById(id);
+    if (el) el.remove();
   }
 
   /**
@@ -578,6 +680,13 @@ export class DocPageComponent {
         if (el) el.scrollIntoView({ behavior: 'smooth' });
         return;
       }
+      // Skip links whose resolved href already contains the adapter prefix.
+      // Custom components embedded in markdown (e.g. feature-overview nav cards
+      // and pitfall links) use routerLink, which Angular resolves to an absolute
+      // href that already starts with /{adapter}/. Prefixing again would
+      // produce a double-prefixed URL (e.g. /material/material/getting-started).
+      const adapterPrefix = `/${this.adapter.adapter()}/`;
+      if (href.startsWith(adapterPrefix)) return;
       // Root-relative paths — add adapter prefix for SPA navigation
       if (href.startsWith('/') && !href.startsWith('//')) {
         event.preventDefault();

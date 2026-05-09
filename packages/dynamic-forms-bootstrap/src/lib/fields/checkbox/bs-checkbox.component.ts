@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
-import { explicitEffect } from 'ngxtension/explicit-effect';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
@@ -22,10 +21,10 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       [attr.hidden]="f().hidden() || null"
     >
       <input
-        #checkboxInput
         type="checkbox"
         [formField]="f"
         [id]="checkboxId"
+        [indeterminate]="props()?.indeterminate ?? false"
         class="form-check-input"
         [class.is-invalid]="f().invalid() && f().touched()"
         [attr.tabindex]="tabIndex()"
@@ -83,20 +82,8 @@ export default class BsCheckboxFieldComponent implements BsCheckboxComponent {
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
-  readonly checkboxInput = viewChild<ElementRef<HTMLInputElement>>('checkboxInput');
-
   constructor() {
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input[type="checkbox"]' });
-
-    // Handle indeterminate state
-    explicitEffect([this.props, this.checkboxInput], ([props, checkboxInput]) => {
-      const indeterminate = props?.indeterminate;
-      const inputEl = checkboxInput?.nativeElement;
-
-      if (inputEl && indeterminate !== undefined) {
-        inputEl.indeterminate = indeterminate;
-      }
-    });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

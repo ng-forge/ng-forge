@@ -41,7 +41,6 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
       @if (label()) {
         <label [for]="inputId()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
-
       @if (hasAddons()) {
         <p-inputgroup>
           @for (a of prefixAddons(); track $index) {
@@ -79,7 +78,6 @@ import { createAriaDescribedBySignal } from '../../utils/create-aria-described-b
           [class]="inputClasses()"
         />
       }
-
       @if (errorsToDisplay()[0]; as error) {
         <small class="p-error" [id]="errorId()" role="alert">{{ error.message }}</small>
       } @else if (props()?.hint; as hint) {
@@ -122,40 +120,6 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
 
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
-
-  /**
-   * Reference to the native input element.
-   * Used to imperatively sync the readonly attribute since Angular Signal Forms'
-   * [field] directive doesn't sync FieldState.readonly() to the DOM.
-   */
-  private readonly inputRef = viewChild<ElementRef<HTMLInputElement>>('inputRef');
-
-  /**
-   * Computed signal that extracts the readonly state from the field.
-   * Used by the effect to reactively sync the readonly attribute to the DOM.
-   */
-  private readonly isReadonly = computed(() => this.field()().readonly());
-
-  /**
-   * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly
-   * attribute to the DOM. This effect imperatively sets/removes the readonly attribute
-   * on the native input element whenever the readonly state changes.
-   *
-   * Uses afterRenderEffect to ensure DOM is ready before manipulating attributes.
-   */
-  private readonly syncReadonlyToDom = afterRenderEffect({
-    write: () => {
-      const inputRef = this.inputRef();
-      const isReadonly = this.isReadonly();
-      if (inputRef?.nativeElement) {
-        if (isReadonly) {
-          inputRef.nativeElement.setAttribute('readonly', '');
-        } else {
-          inputRef.nativeElement.removeAttribute('readonly');
-        }
-      }
-    },
-  });
 
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();

@@ -42,7 +42,11 @@ entries.push({
 
 // Getting started & configuration
 entries.push({ slug: 'material/getting-started', filePath: contentFile('getting-started') });
+entries.push({ slug: 'material/feature-overview', filePath: contentFile('feature-overview') });
 entries.push({ slug: 'material/configuration', filePath: contentFile('configuration') });
+
+// Migration guide
+entries.push({ slug: 'material/migrating-from-ngx-formly', filePath: contentFile('migrating-from-ngx-formly') });
 
 // API-Driven Forms
 entries.push({ slug: 'material/api-driven-forms', filePath: contentFile('api-driven-forms') });
@@ -101,12 +105,21 @@ for (const page of [
   'form-rows',
   'form-arrays/simplified',
   'form-arrays/complete',
+  'container-field',
   'hidden-fields',
   'text-components',
 ]) {
   entries.push({
     slug: `material/prebuilt/${page}`,
     filePath: contentFile(`prebuilt/${page}`),
+  });
+}
+
+// Wrappers
+for (const page of ['overview', 'writing-a-wrapper', 'registering-and-applying']) {
+  entries.push({
+    slug: `material/wrappers/${page}`,
+    filePath: contentFile(`wrappers/${page}`),
   });
 }
 
@@ -120,6 +133,9 @@ for (const page of ['custom-fields', 'expression-parser', 'type-safety', 'events
 
 // AI integration
 entries.push({ slug: 'material/ai-integration', filePath: contentFile('ai-integration') });
+
+// OpenAPI generator
+entries.push({ slug: 'material/openapi-generator', filePath: contentFile('openapi-generator') });
 
 // API reference (no content file — use today's date)
 entries.push({ slug: 'material/api-reference', filePath: '' });

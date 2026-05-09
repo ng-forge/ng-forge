@@ -47,6 +47,12 @@ export const DOCUMENTATION: DocPage[] = [
     url: `${BASE_URL}/validation/custom-validators`,
   },
   { id: 'validation-reference', title: 'Validation Reference', category: 'validation', url: `${BASE_URL}/validation/reference` },
+  {
+    id: 'validation-hidden-fields',
+    title: 'Validation for Hidden Fields',
+    category: 'validation',
+    url: `${BASE_URL}/validation/hidden-fields`,
+  },
 
   // Dynamic Behavior
   { id: 'conditional-logic', title: 'Conditional Logic', category: 'dynamic-behavior', url: `${BASE_URL}/dynamic-behavior/overview` },

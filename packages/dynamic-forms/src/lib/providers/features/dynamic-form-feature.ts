@@ -15,11 +15,6 @@ export interface DynamicFormFeature<TKind extends string = string> {
 }
 
 /**
- * Known feature kinds for type safety
- */
-export type DynamicFormFeatureKind = 'logger' | 'event-form-value' | 'value-exclusion' | 'addons' | 'addon-actions';
-
-/**
  * Type guard to check if a value is a DynamicFormFeature
  */
 export function isDynamicFormFeature(value: unknown): value is DynamicFormFeature {
@@ -34,9 +29,13 @@ export function isDynamicFormFeature(value: unknown): value is DynamicFormFeatur
 }
 
 /**
- * Helper to create a feature with proper typing
+ * Helper to create a feature with proper typing.
+ *
+ * `kind` is the discriminant compared by string equality at the
+ * provider-resolution site (and in feature-specific type guards). Each
+ * feature module owns its own kind literal — no central registry.
  */
-export function createFeature<TKind extends DynamicFormFeatureKind>(kind: TKind, providers: Provider[]): DynamicFormFeature<TKind> {
+export function createFeature<TKind extends string>(kind: TKind, providers: Provider[]): DynamicFormFeature<TKind> {
   return {
     ɵkind: kind,
     ɵproviders: providers,

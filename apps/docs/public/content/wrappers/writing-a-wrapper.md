@@ -185,7 +185,7 @@ What this means for wrapper authors: don't put expensive setup in constructor / 
 
 ## 6. Style the wrapped field
 
-Wrappers are ordinary Angular components — view-encapsulated styles, `:host` selectors, and global styles all work as usual. The wrapper-specific concern is **reaching across the encapsulation boundary** to the inner field, since Angular 21 removes `::ng-deep` from new projects. Three patterns cover it:
+Wrappers are ordinary Angular components — view-encapsulated styles, `:host` selectors, and global styles all work as usual. The wrapper-specific concern is **reaching across the encapsulation boundary** to the inner field. `::ng-deep` works for this but pierces encapsulation globally and is awkward to reason about; three cleaner patterns cover it:
 
 - **CSS custom properties** — set something like `--field-spacing` on the wrapper host and read it in the field's stylesheet. Custom properties cross view encapsulation, so the field doesn't need to know a wrapper is even there.
 - **A class on the child** — set the field's own `className` property. The field applies it to its own host; the wrapper never has to cross the boundary.

@@ -1,0 +1,879 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+@use 'mixins' as mix;
+
+:host {
+  display: block;
+  --accent: #{$ember-core};
+}
+
+/* Lucide custom-element baseline fix: keep SVGs block-level so flex containers can center them. */
+:host ::ng-deep lucide-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+
+  svg {
+    display: block;
+  }
+}
+
+/* Card/button-style anchors must opt out of the global doc-page `a:hover { underline }` rule. */
+:host a {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+/* ============================================================
+   Layout shell
+   ============================================================ */
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: $space-12;
+  padding-bottom: $space-12;
+
+  @include mix.mobile {
+    gap: $space-10;
+  }
+}
+
+/* ============================================================
+   Hero header
+   ============================================================ */
+.overview__hero {
+  position: relative;
+  padding: $space-8 0 $space-6;
+  border-bottom: 1px solid var(--forge-border-color, #{$steel-dark});
+  // Hero-glow lives on the element's own background-image (not a z-index:-1
+  // pseudo-element) so there's no stacking-context risk of the gradient
+  // ending up behind the page background. Default state is no glow; the
+  // dark-mode selectors below populate the gradient.
+  background-image: none;
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: 100% 220px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, $ember-core 30%, $molten 50%, $ember-core 70%, transparent 100%);
+    opacity: 0.6;
+  }
+}
+
+// Dark-mode hero glow. Two selectors so the gradient applies in both:
+//   1. Explicit dark theme (html[data-theme='dark'])
+//   2. Auto theme + OS preference for dark
+// Light mode (no data-theme attribute, the docs default) never matches → no glow.
+$hero-glow:
+  radial-gradient(ellipse at top, rgba($ember-core, 0.22) 0%, transparent 60%),
+  radial-gradient(ellipse at 70% top, rgba($molten, 0.12) 0%, transparent 50%);
+
+:host-context(html[data-theme='dark']) .overview__hero {
+  background-image: $hero-glow;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context(html[data-theme='auto']) .overview__hero {
+    background-image: $hero-glow;
+  }
+}
+
+.overview__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-1 $space-3;
+  background: rgba($ember-core, 0.1);
+  border: 1px solid rgba($ember-core, 0.25);
+  border-radius: $radius-pill;
+  color: $ember-glow;
+  font-size: $text-xs;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $ember-core;
+    box-shadow: 0 0 8px rgba($ember-core, 0.8);
+  }
+}
+
+.overview__title {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: $space-5 0 $space-3;
+  color: var(--forge-text, #{$steel});
+  background: linear-gradient(135deg, var(--forge-text, #{$steel}) 0%, $ember-glow 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.overview__subtitle {
+  font-size: $text-lg;
+  font-weight: 500;
+  line-height: 1.4;
+  max-width: 65ch;
+  color: var(--forge-text, #{$steel});
+  margin: 0 0 $space-2;
+}
+
+.overview__lead {
+  font-size: $text-base;
+  line-height: 1.6;
+  max-width: 65ch;
+  color: var(--forge-text-muted, #{$steel-mid});
+  margin: 0;
+}
+
+/* ============================================================
+   Section heading (FAQ + pitfalls)
+   ============================================================ */
+.overview__sectionhead {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-4;
+  margin-bottom: $space-6;
+
+  @include mix.mobile {
+    gap: $space-3;
+    margin-bottom: $space-5;
+  }
+}
+
+.overview__sectionhead-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: $radius-md;
+  background: linear-gradient(135deg, rgba($ember-core, 0.15) 0%, rgba($ember-core, 0.05) 100%);
+  border: 1px solid rgba($ember-core, 0.25);
+  color: $ember-glow;
+  box-shadow: inset 0 1px 0 rgba(white, 0.04);
+
+  &--cool {
+    background: linear-gradient(135deg, rgba($info, 0.12) 0%, rgba($info, 0.04) 100%);
+    border-color: rgba($info, 0.25);
+    color: color-mix(in srgb, $info 75%, white 25%);
+  }
+
+  &--warn {
+    background: linear-gradient(135deg, rgba($molten, 0.15) 0%, rgba($molten, 0.05) 100%);
+    border-color: rgba($molten, 0.3);
+    color: $molten;
+  }
+}
+
+.overview__h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--forge-text, #{$steel});
+  margin: 0 0 $space-1;
+}
+
+.overview__h2-sub {
+  font-size: $text-sm;
+  color: var(--forge-text-muted, #{$steel-mid});
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   Navigator panels
+   ============================================================ */
+.overview__nav {
+  display: flex;
+  flex-direction: column;
+  gap: $space-8;
+}
+
+.panel {
+  position: relative;
+  padding: $space-6;
+  border-radius: $radius-xl;
+  background: linear-gradient(135deg, var(--forge-base-1, #{$bg-surface}) 0%, var(--forge-base-2, #{$bg-elevated}) 100%);
+  border: 1px solid var(--forge-border-color, #{$steel-dark});
+  overflow: hidden;
+  transition:
+    border-color 200ms ease,
+    transform 200ms ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, var(--accent) 0%, transparent 35%, transparent 65%, var(--accent) 100%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0.25;
+    transition: opacity 250ms ease;
+    pointer-events: none;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle at center, rgba(255, 77, 0, 0.06) 0%, transparent 60%);
+    background: radial-gradient(circle at center, color-mix(in srgb, var(--accent) 8%, transparent) 0%, transparent 60%);
+    pointer-events: none;
+    transition: opacity 300ms ease;
+  }
+
+  &:hover {
+    &::before {
+      opacity: 0.55;
+    }
+  }
+}
+
+.panel__head {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-4;
+  padding-bottom: $space-5;
+  margin-bottom: $space-5;
+  border-bottom: 1px solid var(--forge-border-color, #{$steel-dark});
+
+  @include mix.mobile {
+    gap: $space-3;
+    padding-bottom: $space-4;
+    margin-bottom: $space-4;
+  }
+}
+
+.panel__icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: $radius-md;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  color: var(--accent);
+  box-shadow:
+    inset 0 1px 0 rgba(white, 0.04),
+    0 0 24px color-mix(in srgb, var(--accent) 12%, transparent);
+
+  @include mix.mobile {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.panel__heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.panel__title {
+  font-size: $text-xl;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--forge-text, #{$steel});
+  margin: 0 0 $space-1;
+}
+
+.panel__subtitle {
+  font-size: $text-sm;
+  line-height: 1.55;
+  color: var(--forge-text-muted, #{$steel-mid});
+  margin: 0;
+}
+
+.panel__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: $space-3;
+
+  @include mix.mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   Cards inside panels
+   ============================================================ */
+.card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: flex-start;
+  gap: $space-3;
+  padding: $space-4;
+  border-radius: $radius-md;
+  background: var(--forge-base-2, #{$bg-elevated});
+  border: 1px solid transparent;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+    background: var(--forge-base-3, #{$bg-elevated});
+    box-shadow:
+      0 4px 24px -8px color-mix(in srgb, var(--accent) 30%, transparent),
+      inset 0 1px 0 rgba(white, 0.03);
+
+    .card__arrow {
+      transform: translateX(4px);
+      color: var(--accent);
+    }
+
+    .card__icon {
+      background: color-mix(in srgb, var(--accent) 22%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-sm;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--accent);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.card__title {
+  font-size: $text-base;
+  font-weight: 600;
+  color: var(--forge-text, #{$steel});
+  line-height: 1.3;
+  /* Allow long inline-code chips to wrap rather than overflow the card. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  code {
+    font-family: $font-mono;
+    font-size: 0.85em;
+    color: $ember-glow;
+    background: rgba($ember-core, 0.1);
+    padding: 1px 5px;
+    border-radius: $radius-sm;
+    font-weight: 500;
+  }
+}
+
+.card__desc {
+  font-size: $text-sm;
+  line-height: 1.5;
+  color: var(--forge-text-muted, #{$steel-mid});
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  code {
+    font-family: $font-mono;
+    font-size: 0.85em;
+    color: $ember-glow;
+    background: rgba($ember-core, 0.08);
+    padding: 1px 4px;
+    border-radius: $radius-sm;
+  }
+}
+
+.card__arrow {
+  flex: none;
+  color: var(--forge-text-muted, #{$steel-dim});
+  transition:
+    transform 180ms ease,
+    color 180ms ease;
+  margin-top: 9px;
+}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.faq__item {
+  border: 1px solid var(--forge-border-color, #{$steel-dark});
+  border-radius: $radius-md;
+  background: var(--forge-base-1, #{$bg-surface});
+  overflow: hidden;
+  transition: border-color 200ms ease;
+
+  &[open] {
+    border-color: color-mix(in srgb, $ember-core 40%, var(--forge-border-color, #{$steel-dark}));
+    background: var(--forge-base-2, #{$bg-elevated});
+
+    .faq__chevron {
+      transform: rotate(45deg);
+      background: rgba($ember-core, 0.18);
+      color: $ember-glow;
+    }
+  }
+
+  &:hover:not([open]) {
+    border-color: color-mix(in srgb, $ember-core 25%, var(--forge-border-color, #{$steel-dark}));
+  }
+}
+
+.faq__q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  padding: $space-4 $space-5;
+  font-size: $text-base;
+  font-weight: 600;
+  color: var(--forge-text, #{$steel});
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  transition: background 180ms ease;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  > span:first-child {
+    flex: 1;
+    line-height: 1.4;
+  }
+
+  code {
+    font-family: $font-mono;
+    font-size: 0.85em;
+    color: $ember-glow;
+    background: rgba($ember-core, 0.1);
+    padding: 1px 5px;
+    border-radius: $radius-sm;
+    font-weight: 500;
+  }
+}
+
+.faq__chevron {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--forge-base-2, #{$bg-elevated});
+  color: var(--forge-text-muted, #{$steel-mid});
+  transition:
+    transform 220ms ease,
+    background 200ms ease,
+    color 200ms ease;
+}
+
+.faq__a {
+  padding: 0 $space-5 $space-5;
+  font-size: $text-sm;
+  line-height: 1.7;
+  color: var(--forge-text-muted, #{$steel-mid});
+  border-top: 1px solid var(--forge-border-color, #{$steel-dark});
+  padding-top: $space-4;
+
+  code {
+    font-family: $font-mono;
+    font-size: 0.85em;
+    color: $ember-glow;
+    background: rgba($ember-core, 0.08);
+    padding: 1px 5px;
+    border-radius: $radius-sm;
+  }
+
+  a {
+    @include mix.link-inline;
+  }
+
+  strong {
+    color: var(--forge-text, #{$steel});
+  }
+}
+
+/* ============================================================
+   Pitfalls
+   ============================================================ */
+.pitfalls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: $space-4;
+
+  @include mix.mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pitfall {
+  position: relative;
+  padding: $space-5;
+  border-radius: $radius-lg;
+  background: var(--forge-base-1, #{$bg-surface});
+  border: 1px solid var(--forge-border-color, #{$steel-dark});
+  border-left: 3px solid $molten;
+  transition:
+    transform 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: rgba($molten, 0.4);
+    border-left-color: $molten;
+    box-shadow: 0 4px 24px -10px rgba($molten, 0.3);
+  }
+}
+
+.pitfall__title {
+  font-size: $text-base;
+  font-weight: 700;
+  color: var(--forge-text, #{$steel});
+  margin: 0 0 $space-3;
+  line-height: 1.4;
+
+  code {
+    font-family: $font-mono;
+    font-size: 0.85em;
+    color: $molten;
+    background: rgba($molten, 0.1);
+    padding: 1px 5px;
+    border-radius: $radius-sm;
+    font-weight: 500;
+  }
+}
+
+.pitfall__row {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  margin: 0 0 $space-3;
+  font-size: $text-sm;
+  line-height: 1.55;
+}
+
+.pitfall__label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $molten;
+
+  &--fix {
+    color: $success;
+  }
+}
+
+.pitfall__text {
+  color: var(--forge-text-muted, #{$steel-mid});
+
+  code {
+    font-family: $font-mono;
+    font-size: 0.85em;
+    color: $ember-glow;
+    background: rgba($ember-core, 0.08);
+    padding: 1px 4px;
+    border-radius: $radius-sm;
+  }
+}
+
+.pitfall__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: $space-2;
+  font-size: $text-sm;
+  font-weight: 500;
+  color: $ember-glow;
+  text-decoration: none;
+  transition:
+    gap 180ms ease,
+    color 180ms ease;
+
+  &:hover {
+    color: $ember-hot;
+    gap: 10px;
+  }
+}
+
+/* ============================================================
+   Closing CTA
+   ============================================================ */
+.cta {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: $space-5;
+  padding: $space-5 $space-6;
+  border-radius: $radius-xl;
+  background: linear-gradient(135deg, rgba($ember-core, 0.06) 0%, rgba($molten, 0.04) 100%), var(--forge-base-1, #{$bg-surface});
+  border: 1px solid color-mix(in srgb, $ember-core 25%, var(--forge-border-color, #{$steel-dark}));
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at left center, rgba($ember-core, 0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  @include mix.tablet {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+}
+
+.cta__icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: $radius-md;
+  background: linear-gradient(135deg, rgba($ember-core, 0.2) 0%, rgba($ember-core, 0.08) 100%);
+  border: 1px solid rgba($ember-core, 0.35);
+  color: $ember-glow;
+  position: relative;
+  z-index: 1;
+}
+
+.cta__copy {
+  position: relative;
+  z-index: 1;
+
+  h3 {
+    font-size: $text-lg;
+    font-weight: 700;
+    color: var(--forge-text, #{$steel});
+    margin: 0 0 4px;
+  }
+
+  p {
+    font-size: $text-sm;
+    line-height: 1.55;
+    color: var(--forge-text-muted, #{$steel-mid});
+    margin: 0;
+  }
+}
+
+.cta__buttons {
+  display: flex;
+  gap: $space-2;
+  flex-wrap: wrap;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* Secondary CTAs (Discord + GitHub) stay grouped — both wrap to a new row
+   together when the parent runs out of space. */
+.cta__buttons-row {
+  display: flex;
+  gap: $space-2;
+  flex-wrap: wrap;
+}
+
+/* Discord brand SVG — sized + positioned to match the lucide icons. */
+.cta__btn-svg {
+  flex: none;
+  display: block;
+}
+
+.cta__btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: $space-2 $space-4;
+  border-radius: $radius-md;
+  background: var(--forge-base-2, #{$bg-elevated});
+  border: 1px solid var(--forge-border-color, #{$steel-dark});
+  color: var(--forge-text, #{$steel});
+  font-size: $text-sm;
+  font-weight: 500;
+  text-decoration: none;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    color 220ms ease,
+    border-color 220ms ease,
+    transform 220ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 220ms ease;
+
+  /* Sweep highlight that crosses the button on hover */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba($ember-glow, 0.12) 50%, transparent 70%);
+    transform: translateX(-110%);
+    transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: -1;
+  }
+
+  lucide-icon {
+    color: var(--forge-text-muted, #{$steel-mid});
+    transition:
+      color 220ms ease,
+      transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  &:hover {
+    color: $ember-glow;
+    border-color: rgba($ember-core, 0.5);
+    transform: translateY(-2px);
+    box-shadow:
+      0 6px 20px -6px rgba($ember-core, 0.35),
+      0 0 0 1px rgba($ember-core, 0.15);
+
+    &::before {
+      transform: translateX(110%);
+    }
+
+    lucide-icon {
+      color: $ember-glow;
+      transform: scale(1.1) rotate(-4deg);
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+    transition-duration: 80ms;
+  }
+
+  &--primary {
+    background: linear-gradient(135deg, $ember-core 0%, $ember-hot 100%);
+    border-color: $ember-hot;
+    color: white;
+
+    /* Sweep is white-tinted, not ember (the gradient is already ember). */
+    &::before {
+      background: linear-gradient(120deg, transparent 30%, rgba(white, 0.18) 50%, transparent 70%);
+    }
+
+    lucide-icon {
+      color: white;
+    }
+
+    &:hover {
+      background: linear-gradient(135deg, $ember-hot 0%, $ember-glow 100%);
+      border-color: $ember-glow;
+      color: white;
+      box-shadow:
+        0 6px 20px -6px rgba($ember-core, 0.6),
+        0 0 0 1px rgba($ember-glow, 0.3);
+
+      lucide-icon {
+        color: white;
+      }
+    }
+  }
+}
+
+/* ============================================================
+   Light-mode overrides
+   The dark-mode hero shading (radial ember glow + steel→ember title gradient)
+   reads as muddy brown on white. Drop the gradient text and tone the radial
+   way down. Dark-mode treatment is preserved unchanged.
+   ============================================================ */
+/* Title gradient is opt-out for light mode (the steel→ember blend reads
+   muddy brown on white). Same combo of explicit-light + auto+prefers-light. */
+:host-context(html[data-theme='light']) .overview__title,
+:host-context(html[data-theme='auto']) .overview__title {
+  /* (auto resolves to light via the media query below; this is the explicit-light part) */
+}
+
+:host-context(html[data-theme='light']) .overview__title {
+  background: none;
+  -webkit-text-fill-color: var(--forge-text, #{$steel});
+  color: var(--forge-text, #{$steel});
+}
+
+@media (prefers-color-scheme: light) {
+  :host-context(html[data-theme='auto']) .overview__title {
+    background: none;
+    -webkit-text-fill-color: var(--forge-text, #{$steel});
+    color: var(--forge-text, #{$steel});
+  }
+}
+
+/* Hero glow lives on the global `--feature-hero-glow` variable
+   (defined in src/styles.scss for dark + auto-with-prefers-dark).
+   Component just consumes the variable. */
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .card,
+  .faq__item,
+  .pitfall,
+  .cta__btn,
+  .card__arrow,
+  .faq__chevron,
+  .pitfall__more {
+    transition: none;
+  }
+
+  .card:hover,
+  .pitfall:hover,
+  .cta__btn:hover {
+    transform: none;
+  }
+}

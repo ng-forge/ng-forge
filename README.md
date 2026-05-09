@@ -19,9 +19,14 @@
 <p align="center">
   <a href="https://ng-forge.com/dynamic-forms/">📚 Documentation</a> •
   <a href="https://ng-forge.com/dynamic-forms/installation">🚀 Getting Started</a> •
+  <a href="https://ng-forge.com/dynamic-forms/material/migrating-from-ngx-formly">🔁 Migrating from ngx-formly</a> •
   <a href="https://discord.gg/qpzzvFagj3">💬 Discord</a> •
   <a href="https://github.com/ng-forge/ng-forge/issues">🐛 Issues</a>
 </p>
+
+> **Coming from [ngx-formly](https://formly.dev)?** ng-forge is built on Angular Signal Forms — see the
+> [side-by-side migration guide](https://ng-forge.com/dynamic-forms/material/migrating-from-ngx-formly) for a
+> concept-by-concept mapping with full working code on both sides.
 
 ---
 
