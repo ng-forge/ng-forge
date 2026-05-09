@@ -36,9 +36,16 @@ jobs:
       # often fails the match. Reattribute HEAD locally so the upload is
       # billed to the repo owner; this only mutates the CI checkout.
       - name: Reattribute commit author for Vercel seat check
+        env:
+          DEPLOY_AUTHOR_EMAIL: ${{ secrets.VERCEL_DEPLOY_AUTHOR_EMAIL }}
+          DEPLOY_AUTHOR_NAME: ${{ secrets.VERCEL_DEPLOY_AUTHOR_NAME }}
         run: |
-          git config user.email "antimpris@gmail.com"
-          git config user.name "antimprisacaru"
+          if [ -z "$DEPLOY_AUTHOR_EMAIL" ] || [ -z "$DEPLOY_AUTHOR_NAME" ]; then
+            echo "::error::Repo secrets VERCEL_DEPLOY_AUTHOR_EMAIL and VERCEL_DEPLOY_AUTHOR_NAME must be set (Settings → Secrets and variables → Actions → Secrets)."
+            exit 1
+          fi
+          git config user.email "$DEPLOY_AUTHOR_EMAIL"
+          git config user.name "$DEPLOY_AUTHOR_NAME"
           git commit --amend --reset-author --no-edit
 
       - name: Install pnpm
