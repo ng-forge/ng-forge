@@ -1,4 +1,4 @@
-import { computed, Directive, inject, input, Signal, signal } from '@angular/core';
+import { computed, Directive, inject, input, InputSignal, InputSignalWithTransform, Signal, signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { DEFAULT_VALIDATION_MESSAGES, DynamicText, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createAriaDescribedBySignal } from '../utils/create-aria-described-by';
@@ -120,31 +120,6 @@ export class NgForgeField {
   readonly ariaDescribedBy: Signal<string | null> = createAriaDescribedBySignal(this.errorsToDisplay, this.errorId, this.hintId, () =>
     Boolean((this.props() as { hint?: unknown } | undefined)?.hint),
   );
-
-  // ───────────────────────────────────────────────────────────────────────────
-  // Dev-mode assertion: NG_FORGE_FIELD_INPUTS must stay in lockstep with the
-  // directive's `input()` declarations. Without this check, adding an input
-  // here without updating the tuple silently breaks consumer-side forwarding —
-  // the host directive simply doesn't expose the input and parents can't
-  // bind to it, with no compile error.
-  // ───────────────────────────────────────────────────────────────────────────
-
-  constructor() {
-    if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-      const declared = Object.keys((NgForgeField as unknown as { ɵdir?: { inputs?: Record<string, unknown> } }).ɵdir?.inputs ?? {});
-      const tupleSet = new Set<string>(NG_FORGE_FIELD_INPUTS as readonly string[]);
-      const missingFromTuple = declared.filter((name) => !tupleSet.has(name));
-      const extraInTuple = (NG_FORGE_FIELD_INPUTS as readonly string[]).filter((name) => !declared.includes(name));
-      if (missingFromTuple.length || extraInTuple.length) {
-        throw new Error(
-          `[NgForgeField] NG_FORGE_FIELD_INPUTS is out of sync with declared inputs.\n` +
-            (missingFromTuple.length ? `  Declared but missing from tuple: ${missingFromTuple.join(', ')}\n` : '') +
-            (extraInTuple.length ? `  In tuple but not declared: ${extraInTuple.join(', ')}\n` : '') +
-            `Update NG_FORGE_FIELD_INPUTS so consumers via hostDirectives can forward all declared inputs.`,
-        );
-      }
-    }
-  }
 }
 
 /**
@@ -166,6 +141,42 @@ export const NG_FORGE_FIELD_INPUTS = [
   'validationMessages',
   'defaultValidationMessages',
 ] as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Compile-time lockstep assertion: NG_FORGE_FIELD_INPUTS must equal the set of
+// `input()` properties declared on NgForgeField. Drift in either direction
+// (declared input missing from tuple, or tuple containing a name that isn't a
+// declared input) fails the build.
+//
+// Why this matters at compile time, not runtime:
+// - Adding an input here without updating the tuple silently breaks consumer
+//   forwarding — the host directive doesn't expose the input, parents can't
+//   bind to it, and there's no compile error from Angular itself.
+// - Removing/renaming an input without trimming the tuple leaves stale entries
+//   that mappers may still emit, hitting NG0303 at runtime instead of build.
+//
+// Pure type-level: no runtime cost, no internal Angular APIs (Angular doesn't
+// expose a public directive-reflection helper).
+// ─────────────────────────────────────────────────────────────────────────────
+
+type _InputSignalProps<T> = {
+  [K in keyof T]: T[K] extends InputSignal<any> | InputSignalWithTransform<any, any> ? K : never;
+}[keyof T];
+
+type _MissingFromTuple = Exclude<_InputSignalProps<NgForgeField>, (typeof NG_FORGE_FIELD_INPUTS)[number]>;
+type _ExtraInTuple = Exclude<(typeof NG_FORGE_FIELD_INPUTS)[number], _InputSignalProps<NgForgeField>>;
+
+// If either side is non-empty, the build fails on this constant. The branded
+// message types make the mismatch visible in the TS error: e.g.
+//   'NG_FORGE_FIELD_INPUTS is MISSING declared NgForgeField inputs: <names>'
+type _AssertTupleLockstep = [_MissingFromTuple] extends [never]
+  ? [_ExtraInTuple] extends [never]
+    ? true
+    : { 'NG_FORGE_FIELD_INPUTS contains entries that are not declared inputs on NgForgeField': _ExtraInTuple }
+  : { 'NG_FORGE_FIELD_INPUTS is MISSING declared NgForgeField inputs': _MissingFromTuple };
+
+const _NG_FORGE_FIELD_INPUTS_LOCKSTEP: _AssertTupleLockstep = true;
+void _NG_FORGE_FIELD_INPUTS_LOCKSTEP;
 
 /**
  * `NgForgeField` typed for a specific value type. The directive itself stores

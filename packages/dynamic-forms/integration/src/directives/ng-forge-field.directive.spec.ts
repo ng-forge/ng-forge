@@ -197,11 +197,13 @@ describe('NgForgeField', () => {
     });
   });
 
-  describe('NG_FORGE_FIELD_INPUTS lockstep assertion (dev-mode)', () => {
-    // The directive throws on construction when its declared inputs drift from
-    // NG_FORGE_FIELD_INPUTS. Instantiating the host component triggers the
-    // assertion through the host-directive composition.
-    it('does not throw on construction when the tuple matches the declared inputs', () => {
+  describe('NG_FORGE_FIELD_INPUTS lockstep with declared inputs', () => {
+    // The lockstep guarantee is enforced by a compile-time type assertion in
+    // ng-forge-field.directive.ts (see `_NG_FORGE_FIELD_INPUTS_LOCKSTEP`).
+    // Drift in either direction fails the build via tsc with a self-describing
+    // error. This test is the runtime smoke check that the host directive
+    // composition with the current tuple instantiates cleanly.
+    it('instantiates cleanly with the spread NG_FORGE_FIELD_INPUTS tuple', () => {
       TestBed.configureTestingModule({ imports: [TestHostComponent] });
       expect(() => TestBed.createComponent(TestHostComponent)).not.toThrow();
     });
