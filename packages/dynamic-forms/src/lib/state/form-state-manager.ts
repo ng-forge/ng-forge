@@ -21,6 +21,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FieldDef } from '../definitions/base/field-def';
 import { normalizeSimplifiedArrays } from '../utils/array-field/normalize-simplified-arrays';
 import { DynamicFormError } from '../errors/dynamic-form-error';
+import { isGroupField } from '../definitions/default/group-field';
 import { isPageField, PageField } from '../definitions/default/page-field';
 import { EventBus } from '../events/event.bus';
 import { FormClearEvent } from '../events/constants/form-clear.event';
@@ -86,6 +87,63 @@ export const FORM_STATE_DEPS = new InjectionToken<FormStateDeps>('FORM_STATE_DEP
  */
 function asFieldTreeRecord(tree: FieldTree<unknown>): Record<string, FieldTree<unknown>> {
   return tree as unknown as Record<string, FieldTree<unknown>>;
+}
+
+/**
+ * Recursively populates `out` with `dottedPath → hidden` for every keyed field reachable
+ * from `fields`, walking into groups so nested transitions can be detected. Arrays are
+ * treated as leaves (whole-array filtering only — see value-filter v1 limitation).
+ */
+function collectVisibilitySnapshot(
+  fields: readonly FieldDef<unknown>[],
+  treeRecord: Record<string, FieldTree<unknown>>,
+  pathParts: readonly string[],
+  out: Record<string, boolean>,
+): void {
+  for (const field of fields) {
+    const key = field.key;
+    if (!key) continue;
+    const subtree = treeRecord[key];
+    if (!subtree || typeof subtree !== 'function') continue;
+
+    const path = [...pathParts, key];
+    out[path.join('.')] = subtree().hidden();
+
+    if (isGroupField(field) && field.fields) {
+      collectVisibilitySnapshot(field.fields as readonly FieldDef<unknown>[], asFieldTreeRecord(subtree), path, out);
+    }
+  }
+}
+
+/**
+ * Reads a value from a nested object by dotted-path segments. Returns undefined
+ * if any intermediate segment is missing or non-object.
+ */
+function getValueAtPath(source: Record<string, unknown>, segments: readonly string[]): unknown {
+  let current: unknown = source;
+  for (const segment of segments) {
+    if (current === null || typeof current !== 'object') return undefined;
+    current = (current as Record<string, unknown>)[segment];
+  }
+  return current;
+}
+
+/**
+ * Returns a new object with `value` set at the path described by `segments`.
+ * Intermediate objects are cloned shallowly to preserve immutability of `target`.
+ */
+function setValueAtPath(target: Record<string, unknown>, segments: readonly string[], value: unknown): Record<string, unknown> {
+  if (segments.length === 0) return target;
+  const [head, ...rest] = segments;
+  const next = { ...target };
+  if (rest.length === 0) {
+    next[head] = value;
+  } else {
+    const child = target[head];
+    const childObj = child !== null && typeof child === 'object' ? (child as Record<string, unknown>) : {};
+    next[head] = setValueAtPath(childObj, rest, value);
+  }
+  return next;
 }
 
 /**
@@ -298,27 +356,25 @@ export class FormStateManager<
     return new Set(schemaFields.map((f) => f.key).filter((key): key is string => key !== undefined));
   });
 
-  /** Per-top-level-field hidden state, used to detect visible→hidden transitions. */
+  /**
+   * Per-field hidden state keyed by dotted path, used to detect visible→hidden transitions.
+   * Walks recursively into group fields so nested-leaf transitions are captured. Arrays are
+   * treated as leaves (whole-array preservation only) per the existing v1 filtering design.
+   */
   private readonly fieldVisibilitySnapshot = computed((): Record<string, boolean> => {
     const setup = this.formSetup();
     if (!setup.schemaFields || setup.schemaFields.length === 0) return {};
 
-    const fieldTreeRecord = asFieldTreeRecord(this.form());
     const snapshot: Record<string, boolean> = {};
-
-    for (const field of setup.schemaFields) {
-      const key = field.key;
-      if (!key) continue;
-      const subtree = fieldTreeRecord[key];
-      if (!subtree || typeof subtree !== 'function') continue;
-      snapshot[key] = subtree().hidden();
-    }
-
+    collectVisibilitySnapshot(setup.schemaFields, asFieldTreeRecord(this.form()), [], snapshot);
     return snapshot;
   });
 
   /** Captured values for fields currently hidden+excluded. Restored when they become visible again. */
   private readonly hiddenValueStore = signal<Record<string, unknown>>({});
+
+  /** Tracks per-path hidden state across save-effect runs to detect visible→hidden transitions. */
+  private prevVisibilitySnapshot: Record<string, boolean> = {};
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Entity & Form
@@ -829,23 +885,35 @@ export class FormStateManager<
     });
 
     // Save-on-hide: capture entity values right before write-back filters them out, so
-    // they can be restored when the field becomes visible again.
-    let prevVisibilitySnapshot: Record<string, boolean> = {};
+    // they can be restored when the field becomes visible again. Snapshot keys are dotted
+    // paths so nested-leaf transitions inside groups are also captured.
     explicitEffect([this.fieldVisibilitySnapshot], ([snapshot]) => {
-      const currentSaved = untracked(() => this.hiddenValueStore());
-      const currentEntity = untracked(() => this.entity()) as Record<string, unknown>;
-      const newSaved = { ...currentSaved };
+      const currentSaved = this.hiddenValueStore();
+      const currentEntity = this.entity() as Record<string, unknown>;
+      let newSaved = currentSaved;
 
-      for (const [key, isHidden] of Object.entries(snapshot)) {
-        if (isHidden && !prevVisibilitySnapshot[key]) {
-          const value = currentEntity[key];
-          if (value !== undefined) newSaved[key] = value;
+      for (const [path, isHidden] of Object.entries(snapshot)) {
+        if (isHidden && !this.prevVisibilitySnapshot[path]) {
+          const segments = path.split('.');
+          const value = getValueAtPath(currentEntity, segments);
+          if (value !== undefined) {
+            newSaved = setValueAtPath(newSaved, segments, value);
+          }
         }
       }
-      prevVisibilitySnapshot = { ...snapshot };
+      this.prevVisibilitySnapshot = { ...snapshot };
 
-      if (!isEqual(newSaved, currentSaved)) {
+      if (newSaved !== currentSaved && !isEqual(newSaved, currentSaved)) {
         this.hiddenValueStore.set(newSaved);
+      }
+    });
+
+    // Schema change (config swap, teardown/restore) resets the saved store + transition tracker
+    // so values from a stale schema can't leak into the new one.
+    explicitEffect([this.formSetup], () => {
+      this.prevVisibilitySnapshot = {};
+      if (Object.keys(this.hiddenValueStore()).length > 0) {
+        this.hiddenValueStore.set({});
       }
     });
 

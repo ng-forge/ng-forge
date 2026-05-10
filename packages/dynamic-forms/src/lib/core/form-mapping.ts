@@ -176,12 +176,9 @@ export function mapFieldToForm(
   // and conflict with our own `validateWhenHidden` mechanism. Static state on groups is
   // detected by reading the field def directly (see value-filter).
   if (isGroupField(fieldDef)) {
-    const groupLogic = (fieldDef as { logic?: readonly LogicConfig[] }).logic;
-    if (groupLogic) {
-      for (const config of groupLogic) {
-        if (!isValidationStateLogic(config)) {
-          applyLogic(config, fieldPath);
-        }
+    if (fieldDef.logic) {
+      for (const config of fieldDef.logic) {
+        applyLogic(config, fieldPath);
       }
     }
     const descendantContext = resolveDescendantContext(fieldDef, ownContext);

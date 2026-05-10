@@ -1138,6 +1138,58 @@ describe('FormStateManager', () => {
         const synced = valueSignal() as Record<string, unknown>;
         expect(synced.address).toEqual({ street: '123 Main', city: 'Springfield' });
       });
+
+      it('should preserve a nested field value when only that child field toggles hidden inside a visible group', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({
+          trigger: 'show',
+          address: { street: '123 Main', city: 'Springfield' },
+        });
+        initManager(
+          {
+            fields: [
+              { type: 'input', key: 'trigger', label: 'Trigger' },
+              {
+                type: 'group',
+                key: 'address',
+                fields: [
+                  {
+                    type: 'input',
+                    key: 'street',
+                    label: 'Street',
+                    excludeValueIfHidden: true,
+                    logic: [
+                      {
+                        type: 'hidden',
+                        condition: { type: 'fieldValue', fieldPath: 'trigger', operator: 'equals', value: 'hide' },
+                      },
+                    ],
+                  },
+                  { type: 'input', key: 'city', label: 'City' },
+                ],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        // Initially visible
+        expect((valueSignal() as Record<string, Record<string, unknown>>).address.street).toBe('123 Main');
+
+        // Hide street (group stays visible)
+        valueSignal.set({ trigger: 'hide', address: { street: '123 Main', city: 'Springfield' } });
+        TestBed.flushEffects();
+        const hiddenSynced = (valueSignal() as Record<string, Record<string, unknown>>).address;
+        expect(hiddenSynced).not.toHaveProperty('street');
+        expect(hiddenSynced.city).toBe('Springfield');
+
+        // Show again — street's previous value should be restored
+        valueSignal.set({ trigger: 'show', address: { city: 'Springfield' } });
+        TestBed.flushEffects();
+        const restored = (valueSignal() as Record<string, Record<string, unknown>>).address;
+        expect(restored.street).toBe('123 Main');
+        expect(restored.city).toBe('Springfield');
+      });
     });
   });
 });
