@@ -835,6 +835,23 @@ describe('FormStateManager', () => {
         expect(synced).not.toHaveProperty('myNum');
       });
 
+      it('should exclude a componentless field type (no FieldTree) when statically hidden + excludeValueIfHidden', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ hiddenField: 'secret' });
+        initManager(
+          {
+            fields: [
+              // The 'hidden' field type is componentless — schema-builder doesn't allocate a FieldTree
+              // path for it, so the value-filter's no-FieldTree fallback would otherwise leak the value.
+              { type: 'hidden', key: 'hiddenField', value: 'secret', hidden: true, excludeValueIfHidden: true },
+            ],
+          } as unknown as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        expect(valueSignal()).not.toHaveProperty('hiddenField');
+      });
+
       it('should still emit hidden-field value when excludeValueIfHidden is explicitly false', () => {
         const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
         initManager(

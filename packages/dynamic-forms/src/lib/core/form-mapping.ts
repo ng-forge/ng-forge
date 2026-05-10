@@ -170,12 +170,15 @@ export function mapFieldToForm(
     return;
   }
 
-  // Group fields - apply state logic (hidden/disabled/readonly) so dynamic visibility
+  // Group fields - apply static disabled/readonly + any state logic so visibility/state
   // can be detected by callers (e.g. value filtering). Static `hidden: true` is intentionally
-  // NOT applied here — that would propagate through Angular Signal Forms' descendant cascade
-  // and conflict with our own `validateWhenHidden` mechanism. Static state on groups is
-  // detected by reading the field def directly (see value-filter).
+  // NOT applied — that would propagate through Angular Signal Forms' descendant cascade and
+  // conflict with our `validateWhenHidden` mechanism. Static hidden on groups is detected
+  // by reading the field def directly in value-filter.
   if (isGroupField(fieldDef)) {
+    const path = fieldPath as SchemaPath<unknown>;
+    if (fieldDef.disabled) disabled(path);
+    if (fieldDef.readonly) readonly(path);
     if (fieldDef.logic) {
       for (const config of fieldDef.logic) {
         applyLogic(config, fieldPath);
