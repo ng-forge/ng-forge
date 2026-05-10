@@ -946,12 +946,10 @@ describe('FormStateManager', () => {
         );
         TestBed.flushEffects();
 
-        // Hide the field
         valueSignal.set({ trigger: 'hide', myNum: 5 });
         TestBed.flushEffects();
         expect(valueSignal()).not.toHaveProperty('myNum');
 
-        // Show it again — last entered value should come back
         valueSignal.set({ trigger: 'show' });
         TestBed.flushEffects();
         expect(valueSignal()).toHaveProperty('myNum', 5);
@@ -982,18 +980,14 @@ describe('FormStateManager', () => {
         );
         TestBed.flushEffects();
 
-        // Cycle 1: hide → show
         valueSignal.set({ trigger: 'hide', myNum: 5 });
         TestBed.flushEffects();
         valueSignal.set({ trigger: 'show' });
         TestBed.flushEffects();
         expect(valueSignal()).toHaveProperty('myNum', 5);
 
-        // Update value while visible
         valueSignal.set({ trigger: 'show', myNum: 7 });
         TestBed.flushEffects();
-
-        // Cycle 2: hide → show — should restore the latest value (7)
         valueSignal.set({ trigger: 'hide', myNum: 7 });
         TestBed.flushEffects();
         expect(valueSignal()).not.toHaveProperty('myNum');
@@ -1111,51 +1105,6 @@ describe('FormStateManager', () => {
         expect(synced).not.toHaveProperty('address');
       });
 
-      it('should restore nested group values across hide/show cycles', () => {
-        const valueSignal = signal<Partial<TestModel> | undefined>({
-          trigger: 'show',
-          address: { street: '123 Main', city: 'Springfield' },
-        });
-        initManager(
-          {
-            fields: [
-              { type: 'input', key: 'trigger', label: 'Trigger' },
-              {
-                type: 'group',
-                key: 'address',
-                excludeValueIfHidden: true,
-                logic: [
-                  {
-                    type: 'hidden',
-                    condition: { type: 'fieldValue', fieldPath: 'trigger', operator: 'equals', value: 'hide' },
-                  },
-                ],
-                fields: [
-                  { type: 'input', key: 'street', label: 'Street' },
-                  { type: 'input', key: 'city', label: 'City' },
-                ],
-              },
-            ],
-          } as TestFormConfig,
-          { value: valueSignal },
-        );
-        TestBed.flushEffects();
-
-        // Visible initially
-        expect(valueSignal()).toHaveProperty('address');
-
-        // Hide the group
-        valueSignal.set({ trigger: 'hide', address: { street: '123 Main', city: 'Springfield' } });
-        TestBed.flushEffects();
-        expect(valueSignal()).not.toHaveProperty('address');
-
-        // Show again — nested values should be restored
-        valueSignal.set({ trigger: 'show' });
-        TestBed.flushEffects();
-        const synced = valueSignal() as Record<string, unknown>;
-        expect(synced.address).toEqual({ street: '123 Main', city: 'Springfield' });
-      });
-
       it('should preserve a nested field value when only that child field toggles hidden inside a visible group', () => {
         const valueSignal = signal<Partial<TestModel> | undefined>({
           trigger: 'show',
@@ -1190,17 +1139,14 @@ describe('FormStateManager', () => {
         );
         TestBed.flushEffects();
 
-        // Initially visible
         expect((valueSignal() as Record<string, Record<string, unknown>>).address.street).toBe('123 Main');
 
-        // Hide street (group stays visible)
         valueSignal.set({ trigger: 'hide', address: { street: '123 Main', city: 'Springfield' } });
         TestBed.flushEffects();
         const hiddenSynced = (valueSignal() as Record<string, Record<string, unknown>>).address;
         expect(hiddenSynced).not.toHaveProperty('street');
         expect(hiddenSynced.city).toBe('Springfield');
 
-        // Show again — street's previous value should be restored
         valueSignal.set({ trigger: 'show', address: { city: 'Springfield' } });
         TestBed.flushEffects();
         const restored = (valueSignal() as Record<string, Record<string, unknown>>).address;

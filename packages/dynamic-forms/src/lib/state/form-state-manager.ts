@@ -89,9 +89,16 @@ function asFieldTreeRecord(tree: FieldTree<unknown>): Record<string, FieldTree<u
   return tree as unknown as Record<string, FieldTree<unknown>>;
 }
 
+/** All-false baseline for the outward two-way binding filter — see `boundFormValue`. */
+const BOUND_VALUE_EXCLUSION_BASELINE = {
+  excludeValueIfHidden: false,
+  excludeValueIfDisabled: false,
+  excludeValueIfReadonly: false,
+} as const;
+
 /**
  * Recursively populates `out` with `dottedPath → hidden` for every keyed field reachable
- * from `fields`, walking into groups so nested transitions can be detected. Arrays are
+ * from `fields`, walking into groups so nested-leaf transitions can be detected. Arrays are
  * treated as leaves (whole-array filtering only — see value-filter v1 limitation).
  */
 function collectVisibilitySnapshot(
@@ -357,9 +364,9 @@ export class FormStateManager<
   });
 
   /**
-   * Per-field hidden state keyed by dotted path, used to detect visible→hidden transitions.
-   * Walks recursively into group fields so nested-leaf transitions are captured. Arrays are
-   * treated as leaves (whole-array preservation only) per the existing v1 filtering design.
+   * Per-field hidden state keyed by dotted path. Drives the save-on-hide effect's
+   * transition detection. Walks recursively into groups so nested-leaf transitions
+   * are captured. Arrays are treated as leaves (whole-array preservation only).
    */
   private readonly fieldVisibilitySnapshot = computed((): Record<string, boolean> => {
     const setup = this.formSetup();
@@ -370,7 +377,12 @@ export class FormStateManager<
     return snapshot;
   });
 
-  /** Captured values for fields currently hidden+excluded. Restored when they become visible again. */
+  /**
+   * Captured values for fields actively excluded from the bound model (i.e. they have
+   * explicit `excludeValueIfHidden` and are currently hidden). Restored when the field
+   * becomes visible again. The save effect only writes here when the field is being
+   * filtered out by `boundFormValue` — fields without explicit opt-in never enter the store.
+   */
   private readonly hiddenValueStore = signal<Record<string, unknown>>({});
 
   /** Tracks per-path hidden state across save-effect runs to detect visible→hidden transitions. */
@@ -547,6 +559,46 @@ export class FormStateManager<
       fieldTreeRecord,
       setup.registry,
       this.valueExclusionDefaults,
+      formOptions,
+    );
+  });
+
+  /**
+   * Form value used for the outward two-way binding sync.
+   *
+   * Only honors *explicit* form-level and field-level `excludeValueIf*` settings — global
+   * defaults (`VALUE_EXCLUSION_DEFAULTS`) are intentionally ignored here. Rationale:
+   * - Original V1 behavior: the bound model carries all values regardless of visibility.
+   * - Bug fix: when a user explicitly sets `excludeValueIfHidden: true` on a field/form,
+   *   they expect that value to disappear from the bound model when hidden (e.g. NaN for
+   *   number inputs, see issue #394).
+   * - Without explicit opt-in, the bound model keeps the V1 contract.
+   * `filteredFormValue` (above) still applies the full Field > Form > Global hierarchy
+   * for the submission output.
+   */
+  private readonly boundFormValue = computed(() => {
+    const rawValue = this.formValue();
+    const setup = this.formSetup();
+    const options = this.effectiveFormOptions();
+
+    if (!setup.schemaFields || setup.schemaFields.length === 0) {
+      return rawValue;
+    }
+
+    const formTree = this.form();
+    const formOptions: ValueExclusionConfig = {
+      excludeValueIfHidden: options.excludeValueIfHidden,
+      excludeValueIfDisabled: options.excludeValueIfDisabled,
+      excludeValueIfReadonly: options.excludeValueIfReadonly,
+    };
+    const fieldTreeRecord = asFieldTreeRecord(formTree);
+
+    return filterFormValue(
+      rawValue as Record<string, unknown>,
+      setup.schemaFields,
+      fieldTreeRecord,
+      setup.registry,
+      BOUND_VALUE_EXCLUSION_BASELINE,
       formOptions,
     );
   });
@@ -884,20 +936,24 @@ export class FormStateManager<
       }
     });
 
-    // Save-on-hide: capture entity values right before write-back filters them out, so
-    // they can be restored when the field becomes visible again. Snapshot keys are dotted
-    // paths so nested-leaf transitions inside groups are also captured.
+    // Save-on-hide: capture entity values for fields that boundFormValue is actively filtering
+    // out (i.e. fields with explicit excludeValueIfHidden where hidden is true), so they can be
+    // restored when the field becomes visible again. Comparing entity vs bound at the path
+    // limits the store to fields that are actually being filtered — fields without explicit
+    // opt-in never enter the store and never participate in the entity merge.
     explicitEffect([this.fieldVisibilitySnapshot], ([snapshot]) => {
       const currentSaved = this.hiddenValueStore();
       const currentEntity = this.entity() as Record<string, unknown>;
+      const boundValue = this.boundFormValue() as Record<string, unknown>;
       let newSaved = currentSaved;
 
       for (const [path, isHidden] of Object.entries(snapshot)) {
         if (isHidden && !this.prevVisibilitySnapshot[path]) {
           const segments = path.split('.');
-          const value = getValueAtPath(currentEntity, segments);
-          if (value !== undefined) {
-            newSaved = setValueAtPath(newSaved, segments, value);
+          const inEntity = getValueAtPath(currentEntity, segments);
+          const inBound = getValueAtPath(boundValue, segments);
+          if (inEntity !== undefined && inBound === undefined) {
+            newSaved = setValueAtPath(newSaved, segments, inEntity);
           }
         }
       }
@@ -908,8 +964,8 @@ export class FormStateManager<
       }
     });
 
-    // Schema change (config swap, teardown/restore) resets the saved store + transition tracker
-    // so values from a stale schema can't leak into the new one.
+    // Schema change resets the saved store + transition tracker so values from a stale schema
+    // can't leak into the new one.
     explicitEffect([this.formSetup], () => {
       this.prevVisibilitySnapshot = {};
       if (Object.keys(this.hiddenValueStore()).length > 0) {
@@ -917,11 +973,12 @@ export class FormStateManager<
       }
     });
 
-    // Outward sync uses filteredFormValue (not entity) so excluded fields don't leak their defaults.
-    explicitEffect([this.filteredFormValue], ([currentFiltered]) => {
+    // Outward sync uses boundFormValue (honors only explicit excludeValueIf* opt-ins) so
+    // global defaults that target submission output don't reshape the host's bound model.
+    explicitEffect([this.boundFormValue], ([currentBound]) => {
       const currentValue = this.deps.value();
-      if (!isEqual(currentFiltered, currentValue)) {
-        this.deps.value.set(currentFiltered as TModel);
+      if (!isEqual(currentBound, currentValue)) {
+        this.deps.value.set(currentBound as TModel);
       }
     });
 
