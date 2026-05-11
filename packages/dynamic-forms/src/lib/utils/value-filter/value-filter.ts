@@ -27,21 +27,25 @@ export function resolveExclusionConfig(
 }
 
 /**
- * Determines whether a field's value should be excluded based on its reactive state
+ * Determines whether a field's value should be excluded based on its reactive state,
+ * the field def's static state (for fields whose `state.hidden()` isn't wired — e.g. groups),
  * and the resolved exclusion config.
  */
-function shouldExcludeField(fieldState: FieldTree<unknown>, config: ResolvedValueExclusionConfig): boolean {
+function shouldExcludeField(field: FieldDef<unknown>, fieldState: FieldTree<unknown>, config: ResolvedValueExclusionConfig): boolean {
   const state = fieldState();
 
-  if (config.excludeValueIfHidden && state.hidden()) {
+  const isHidden = state.hidden() || field.hidden === true;
+  if (config.excludeValueIfHidden && isHidden) {
     return true;
   }
 
-  if (config.excludeValueIfDisabled && state.disabled()) {
+  const isDisabled = state.disabled() || field.disabled === true;
+  if (config.excludeValueIfDisabled && isDisabled) {
     return true;
   }
 
-  if (config.excludeValueIfReadonly && state.readonly()) {
+  const isReadonly = state.readonly() || field.readonly === true;
+  if (config.excludeValueIfReadonly && isReadonly) {
     return true;
   }
 
@@ -83,16 +87,6 @@ export function filterFormValue<T extends Record<string, unknown>>(
     // If the key doesn't exist in the raw value, skip
     if (!(key in rawValue)) continue;
 
-    // Try to access the field state from the form tree
-    const fieldState = formTree[key] as FieldTree<unknown> | undefined;
-
-    // If no field state is available (e.g., componentless hidden fields),
-    // include the value as-is since we can't determine reactive state
-    if (!fieldState || typeof fieldState !== 'function') {
-      result[key] = rawValue[key];
-      continue;
-    }
-
     // Resolve per-field exclusion config
     const fieldExclusion: ValueExclusionConfig = {
       excludeValueIfHidden: field.excludeValueIfHidden,
@@ -101,8 +95,21 @@ export function filterFormValue<T extends Record<string, unknown>>(
     };
     const resolvedConfig = resolveExclusionConfig(globalDefaults, formOptions, fieldExclusion);
 
+    // Componentless field (no FieldTree) — decide from the static field def alone, then include if not excluded.
+    const fieldState = formTree[key] as FieldTree<unknown> | undefined;
+    if (!fieldState || typeof fieldState !== 'function') {
+      const staticallyExcluded =
+        (resolvedConfig.excludeValueIfHidden && field.hidden === true) ||
+        (resolvedConfig.excludeValueIfDisabled && field.disabled === true) ||
+        (resolvedConfig.excludeValueIfReadonly && field.readonly === true);
+      if (!staticallyExcluded) {
+        result[key] = rawValue[key];
+      }
+      continue;
+    }
+
     // Check if this field should be excluded based on its state
-    if (shouldExcludeField(fieldState, resolvedConfig)) {
+    if (shouldExcludeField(field, fieldState, resolvedConfig)) {
       continue;
     }
 
