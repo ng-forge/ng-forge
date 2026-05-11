@@ -996,6 +996,120 @@ describe('FormStateManager', () => {
         expect(valueSignal()).toHaveProperty('myNum', 7);
       });
 
+      it('should restore the previously entered value when an excluded-when-disabled field becomes enabled again', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'enabled', myNum: 42 });
+        initManager(
+          {
+            fields: [
+              { type: 'input', key: 'trigger', label: 'Trigger' },
+              {
+                type: 'input',
+                key: 'myNum',
+                label: 'Num',
+                props: { type: 'number' },
+                excludeValueIfDisabled: true,
+                logic: [
+                  {
+                    type: 'disabled',
+                    condition: { type: 'fieldValue', fieldPath: 'trigger', operator: 'equals', value: 'disable' },
+                  },
+                ],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        valueSignal.set({ trigger: 'disable', myNum: 42 });
+        TestBed.flushEffects();
+        expect(valueSignal()).not.toHaveProperty('myNum');
+
+        valueSignal.set({ trigger: 'enabled' });
+        TestBed.flushEffects();
+        expect(valueSignal()).toHaveProperty('myNum', 42);
+      });
+
+      it('should restore the previously entered value when an excluded-when-readonly field becomes editable again', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'editable', myNum: 99 });
+        initManager(
+          {
+            fields: [
+              { type: 'input', key: 'trigger', label: 'Trigger' },
+              {
+                type: 'input',
+                key: 'myNum',
+                label: 'Num',
+                props: { type: 'number' },
+                excludeValueIfReadonly: true,
+                logic: [
+                  {
+                    type: 'readonly',
+                    condition: { type: 'fieldValue', fieldPath: 'trigger', operator: 'equals', value: 'readonly' },
+                  },
+                ],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        valueSignal.set({ trigger: 'readonly', myNum: 99 });
+        TestBed.flushEffects();
+        expect(valueSignal()).not.toHaveProperty('myNum');
+
+        valueSignal.set({ trigger: 'editable' });
+        TestBed.flushEffects();
+        expect(valueSignal()).toHaveProperty('myNum', 99);
+      });
+
+      it('should preserve the saved value across overlapping axis transitions (hide then disable then re-show)', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ visibility: 'show', enabled: true, myNum: 5 });
+        initManager(
+          {
+            fields: [
+              { type: 'input', key: 'visibility', label: 'Visibility' },
+              { type: 'checkbox', key: 'enabled', label: 'Enabled' },
+              {
+                type: 'input',
+                key: 'myNum',
+                label: 'Num',
+                props: { type: 'number' },
+                excludeValueIfHidden: true,
+                excludeValueIfDisabled: true,
+                logic: [
+                  {
+                    type: 'hidden',
+                    condition: { type: 'fieldValue', fieldPath: 'visibility', operator: 'equals', value: 'hide' },
+                  },
+                  {
+                    type: 'disabled',
+                    condition: { type: 'fieldValue', fieldPath: 'enabled', operator: 'equals', value: false },
+                  },
+                ],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        // Hide → captured.
+        valueSignal.set({ visibility: 'hide', enabled: true, myNum: 5 });
+        TestBed.flushEffects();
+        // Pile on disabled while still hidden → already-excluded, no re-save.
+        valueSignal.set({ visibility: 'hide', enabled: false, myNum: 5 });
+        TestBed.flushEffects();
+        // Drop hidden but stay disabled → still excluded, still no re-save.
+        valueSignal.set({ visibility: 'show', enabled: false, myNum: 5 });
+        TestBed.flushEffects();
+        // Re-enable → re-included, value restored from store.
+        valueSignal.set({ visibility: 'show', enabled: true });
+        TestBed.flushEffects();
+        expect(valueSignal()).toHaveProperty('myNum', 5);
+      });
+
       it('should hide one field independently without affecting other fields', () => {
         const valueSignal = signal<Partial<TestModel> | undefined>({
           trigger: 'show',

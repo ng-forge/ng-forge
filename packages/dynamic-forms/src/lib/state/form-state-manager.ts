@@ -96,16 +96,28 @@ const BOUND_VALUE_EXCLUSION_BASELINE = {
   excludeValueIfReadonly: false,
 } as const;
 
+/** Per-field axes that can drive value exclusion. */
+interface FieldExclusionAxes {
+  readonly hidden: boolean;
+  readonly disabled: boolean;
+  readonly readonly: boolean;
+}
+
+/** True when any of the three exclusion axes is asserted (i.e. the field could be filtered out of the bound model). */
+function isFieldExcluded(axes: FieldExclusionAxes | undefined): boolean {
+  return !!axes && (axes.hidden || axes.disabled || axes.readonly);
+}
+
 /**
- * Recursively populates `out` with `dottedPath → hidden` for every keyed field reachable
+ * Recursively populates `out` with `dottedPath → exclusion axes` for every keyed field reachable
  * from `fields`, walking into groups so nested-leaf transitions can be detected. Arrays are
  * treated as leaves (whole-array filtering only — see value-filter v1 limitation).
  */
-function collectVisibilitySnapshot(
+function collectFieldStateSnapshot(
   fields: readonly FieldDef<unknown>[],
   treeRecord: Record<string, FieldTree<unknown>>,
   pathParts: readonly string[],
-  out: Record<string, boolean>,
+  out: Record<string, FieldExclusionAxes>,
 ): void {
   for (const field of fields) {
     const key = field.key;
@@ -113,11 +125,12 @@ function collectVisibilitySnapshot(
     const subtree = treeRecord[key];
     if (!subtree || typeof subtree !== 'function') continue;
 
+    const state = subtree();
     const path = [...pathParts, key];
-    out[path.join('.')] = subtree().hidden();
+    out[path.join('.')] = { hidden: state.hidden(), disabled: state.disabled(), readonly: state.readonly() };
 
     if (isGroupField(field) && field.fields) {
-      collectVisibilitySnapshot(field.fields as readonly FieldDef<unknown>[], asFieldTreeRecord(subtree), path, out);
+      collectFieldStateSnapshot(field.fields as readonly FieldDef<unknown>[], asFieldTreeRecord(subtree), path, out);
     }
   }
 }
@@ -373,29 +386,30 @@ export class FormStateManager<
   });
 
   /**
-   * Per-field hidden state keyed by dotted path. Drives the save-on-hide effect's
-   * transition detection. Walks recursively into groups so nested-leaf transitions
-   * are captured. Arrays are treated as leaves (whole-array preservation only).
+   * Per-field exclusion-axis state (hidden/disabled/readonly) keyed by dotted path. Drives the
+   * save-on-exclude effect's transition detection. Walks recursively into groups so nested-leaf
+   * transitions are captured. Arrays are treated as leaves (whole-array preservation only).
    */
-  private readonly fieldVisibilitySnapshot = computed((): Record<string, boolean> => {
+  private readonly fieldStateSnapshot = computed((): Record<string, FieldExclusionAxes> => {
     const setup = this.formSetup();
     if (!setup.schemaFields || setup.schemaFields.length === 0) return {};
 
-    const snapshot: Record<string, boolean> = {};
-    collectVisibilitySnapshot(setup.schemaFields, asFieldTreeRecord(this.form()), [], snapshot);
+    const snapshot: Record<string, FieldExclusionAxes> = {};
+    collectFieldStateSnapshot(setup.schemaFields, asFieldTreeRecord(this.form()), [], snapshot);
     return snapshot;
   });
 
   /**
-   * Captured values for fields actively excluded from the bound model (i.e. they have
-   * explicit `excludeValueIfHidden` and are currently hidden). Restored when the field
-   * becomes visible again. The save effect only writes here when the field is being
-   * filtered out by `boundFormValue` — fields without explicit opt-in never enter the store.
+   * Captured values for fields actively excluded from the bound model — either via
+   * `excludeValueIfHidden`, `excludeValueIfDisabled`, or `excludeValueIfReadonly`. Restored when
+   * the field becomes re-included (visible/enabled/editable). The save effect only writes here
+   * when the field is being filtered out by `boundFormValue` — fields without explicit opt-in
+   * never enter the store.
    */
-  private readonly hiddenValueStore = signal<Record<string, unknown>>({});
+  private readonly excludedValueStore = signal<Record<string, unknown>>({});
 
-  /** Tracks per-path hidden state across save-effect runs to detect visible→hidden transitions. */
-  private readonly prevVisibilitySnapshot = signal<Record<string, boolean>>({});
+  /** Tracks per-path exclusion state across save-effect runs to detect newly-excluded fields. */
+  private readonly prevFieldStateSnapshot = signal<Record<string, FieldExclusionAxes>>({});
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Entity & Form
@@ -422,12 +436,12 @@ export class FormStateManager<
       const inputValue = this.deps.value();
       const defaults = this.defaultValues();
       const keys = this.validKeys();
-      const saved = this.hiddenValueStore();
+      const saved = this.excludedValueStore();
 
       // Deep-merge so a partial nested object in `inputValue` (e.g. a group
       // value missing one of its declared sub-field keys) does not orphan
       // the absent sub-field in the Signal Forms validation graph.
-      // Layer order: defaults < saved (hidden+excluded restorations) < inputValue.
+      // Layer order: defaults < saved (excluded-field restorations) < inputValue.
       const withSaved = deepMergeDefaults(defaults as Record<string, unknown>, saved);
       const combined = deepMergeDefaults(withSaved, inputValue as Record<string, unknown>);
 
@@ -906,7 +920,7 @@ export class FormStateManager<
    * Resets the form to default values.
    */
   reset(): void {
-    this.hiddenValueStore.set({});
+    this.excludedValueStore.set({});
     const defaults = this.defaultValues();
     (this.form()().value as WritableSignal<TModel>).set(defaults);
     this.deps.value.set(defaults as Partial<TModel>);
@@ -916,7 +930,7 @@ export class FormStateManager<
    * Clears the form to empty state.
    */
   clear(): void {
-    this.hiddenValueStore.set({});
+    this.excludedValueStore.set({});
     const emptyValue = {} as TModel;
     (this.form()().value as WritableSignal<TModel>).set(emptyValue);
     this.deps.value.set(emptyValue);
@@ -945,22 +959,23 @@ export class FormStateManager<
       }
     });
 
-    // Save-on-hide: capture entity values for fields that boundFormValue is actively filtering
-    // out (i.e. fields with explicit excludeValueIfHidden where hidden is true), so they can be
-    // restored when the field becomes visible again. Comparing entity vs bound at the path
-    // limits the store to fields that are actually being filtered — fields without explicit
-    // opt-in never enter the store and never participate in the entity merge.
-    // NaN values are skipped: they're the number-input default and would defeat the bug fix
-    // by restoring NaN to the bound model when the field becomes visible again.
-    explicitEffect([this.fieldVisibilitySnapshot], ([snapshot]) => {
-      const currentSaved = this.hiddenValueStore();
+    // Save-on-exclude: capture entity values for fields that boundFormValue is actively
+    // filtering out via any of the three axes (hidden / disabled / readonly), so they can be
+    // restored when the field becomes re-included. The transition fires once per "no axis
+    // asserted → at least one axis asserted" edge; subsequent axis changes while still excluded
+    // are no-ops. Comparing entity vs bound at the path limits the store to fields that are
+    // actually being filtered — fields without explicit opt-in never enter the store and never
+    // participate in the entity merge. `NaN` values are skipped: they're the number-input default
+    // and would re-leak via the merge once the field becomes re-included.
+    explicitEffect([this.fieldStateSnapshot], ([snapshot]) => {
+      const currentSaved = this.excludedValueStore();
       const currentEntity = this.entity() as Record<string, unknown>;
       const boundValue = this.boundFormValue() as Record<string, unknown>;
-      const prev = this.prevVisibilitySnapshot();
+      const prev = this.prevFieldStateSnapshot();
       let newSaved = currentSaved;
 
-      for (const [path, isHidden] of Object.entries(snapshot)) {
-        if (isHidden && !prev[path]) {
+      for (const [path, axes] of Object.entries(snapshot)) {
+        if (isFieldExcluded(axes) && !isFieldExcluded(prev[path])) {
           const segments = path.split('.');
           const inEntity = getValueAtPath(currentEntity, segments);
           const inBound = getValueAtPath(boundValue, segments);
@@ -969,19 +984,19 @@ export class FormStateManager<
           }
         }
       }
-      this.prevVisibilitySnapshot.set({ ...snapshot });
+      this.prevFieldStateSnapshot.set({ ...snapshot });
 
       if (newSaved !== currentSaved && !isEqual(newSaved, currentSaved)) {
-        this.hiddenValueStore.set(newSaved);
+        this.excludedValueStore.set(newSaved);
       }
     });
 
     // Schema change resets the saved store + transition tracker so values from a stale schema
     // can't leak into the new one.
     explicitEffect([this.formSetup], () => {
-      this.prevVisibilitySnapshot.set({});
-      if (Object.keys(this.hiddenValueStore()).length > 0) {
-        this.hiddenValueStore.set({});
+      this.prevFieldStateSnapshot.set({});
+      if (Object.keys(this.excludedValueStore()).length > 0) {
+        this.excludedValueStore.set({});
       }
     });
 
