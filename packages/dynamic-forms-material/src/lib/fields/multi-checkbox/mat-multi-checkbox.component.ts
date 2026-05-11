@@ -30,7 +30,7 @@ import { AsyncPipe } from '@angular/common';
     >
       @for (option of options(); track option.value) {
         <mat-checkbox
-          ngForgeControl
+          ngForgeControl="input[type='checkbox']"
           [checked]="checked['' + option.value]"
           [disabled]="f().disabled() || option.disabled"
           [color]="props()?.color || 'primary'"

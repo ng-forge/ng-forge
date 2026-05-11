@@ -18,7 +18,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
     @let toggleId = ngf.key() + '-toggle';
 
     <mat-slide-toggle
-      ngForgeControl
+      ngForgeControl="button[role='switch']"
       [id]="toggleId"
       [formField]="f"
       [color]="props()?.color || 'primary'"

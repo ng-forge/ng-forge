@@ -23,7 +23,7 @@ import { AsyncPipe } from '@angular/common';
       @for (option of options(); track option.value) {
         <div class="checkbox-option">
           <p-checkbox
-            ngForgeControl
+            ngForgeControl="input[type='checkbox']"
             [inputId]="ngf.key() + '-' + option.value"
             [binary]="true"
             [ngModel]="checked['' + option.value] || false"

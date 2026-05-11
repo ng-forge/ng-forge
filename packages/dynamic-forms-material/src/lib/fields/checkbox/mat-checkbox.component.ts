@@ -17,7 +17,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
     @let checkboxId = ngf.key() + '-checkbox';
 
     <mat-checkbox
-      ngForgeControl
+      ngForgeControl="input[type='checkbox']"
       [id]="checkboxId"
       [formField]="f"
       [labelPosition]="props()?.labelPosition || 'after'"

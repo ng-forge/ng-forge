@@ -16,7 +16,7 @@ import { AsyncPipe } from '@angular/common';
 
     <div class="flex items-center">
       <p-checkbox
-        ngForgeControl
+        ngForgeControl="input[type='checkbox']"
         [formField]="f"
         [inputId]="checkboxId"
         [binary]="props()?.binary ?? true"

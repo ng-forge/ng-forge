@@ -30,6 +30,21 @@ class TestHostWithControlComponent {}
 })
 class TestHostHostControlComponent {}
 
+@Component({
+  selector: 'test-host-with-descendant-target',
+  imports: [NgForgeControl],
+  template: `
+    <div ngForgeControl="input.inner">
+      <span><input class="inner" /></span>
+      <span><input class="inner" /></span>
+      <span><input class="other" /></span>
+    </div>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+})
+class TestHostWithDescendantTargetComponent {}
+
 interface TestFormValue {
   username: string;
 }
@@ -176,6 +191,27 @@ describe('NgForgeField', () => {
 
       const host = fixture.nativeElement as HTMLElement;
       expect(host.getAttribute('autocomplete')).toBe('username');
+    });
+
+    it('forwards meta to descendants matching the selector when ngForgeControl="<selector>" is set', () => {
+      TestBed.configureTestingModule({ imports: [TestHostWithDescendantTargetComponent] });
+      const fixture = TestBed.createComponent(TestHostWithDescendantTargetComponent);
+      const { field } = setupField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('meta', { autocomplete: 'username' });
+      fixture.detectChanges();
+
+      const inner = Array.from(fixture.nativeElement.querySelectorAll('input.inner')) as HTMLElement[];
+      const other = fixture.nativeElement.querySelector('input.other') as HTMLElement | null;
+      const directiveHost = fixture.nativeElement.querySelector('div[ngForgeControl]') as HTMLElement | null;
+
+      expect(inner.length).toBe(2);
+      for (const el of inner) {
+        expect(el.getAttribute('autocomplete')).toBe('username');
+      }
+      expect(other?.getAttribute('autocomplete')).toBeNull();
+      expect(directiveHost?.getAttribute('autocomplete')).toBeNull();
     });
 
     it('does NOT apply meta when neither NgForgeControl nor NgForgeHostControl is used', () => {

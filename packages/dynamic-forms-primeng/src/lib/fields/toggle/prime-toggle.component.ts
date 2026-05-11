@@ -18,7 +18,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
       }
 
       <p-toggleSwitch
-        ngForgeControl
+        ngForgeControl="input[type='checkbox']"
         [id]="ngf.key()"
         [formField]="ngf.field()"
         [attr.tabindex]="ngf.tabIndex()"

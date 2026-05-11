@@ -1,26 +1,36 @@
-import { afterRenderEffect, Directive, ElementRef, inject } from '@angular/core';
+import { afterRenderEffect, Directive, ElementRef, inject, input } from '@angular/core';
 import { applyMetaToElement, FieldMeta, isEqual } from '@ng-forge/dynamic-forms';
 import { NgForgeField } from './ng-forge-field.directive';
 
 /**
- * Shared meta-forwarding effect. Reads the parent `NgForgeField`'s `meta`
- * signal and applies the resulting attributes (data-*, aria-*, autocomplete,
- * etc.) to a target DOM element. Handles add / update / remove via
- * `applyMetaToElement`, which receives the previously-applied attribute set
- * so stale attributes are cleared when `meta` changes.
+ * Apply meta to the directive's own host (when no target selector is set)
+ * or to all descendants matching the selector. Tracks applied attributes
+ * per element so changes to `meta` clear stale attributes.
  */
-function setupControlMetaEffect(host: ElementRef<HTMLElement>, parent: NgForgeField): void {
-  let appliedAttributes = new Set<string>();
+function setupControlMetaEffect(host: ElementRef<HTMLElement>, parent: NgForgeField, targetSelector: () => string | undefined): void {
+  const appliedByElement = new WeakMap<Element, Set<string>>();
   let previousMeta: FieldMeta | undefined;
 
   afterRenderEffect({
     write: () => {
       const currentMeta = parent.meta();
-      if (isEqual(currentMeta, previousMeta)) {
+      const selector = targetSelector()?.trim() || undefined;
+
+      // Re-query every effect run when a selector is set: late-rendered
+      // descendants (e.g. mat-radio-group children appearing on options
+      // change) must still pick up meta. For the host-only path we can
+      // short-circuit when meta hasn't changed.
+      if (!selector && isEqual(currentMeta, previousMeta)) {
         return;
       }
       previousMeta = currentMeta;
-      appliedAttributes = applyMetaToElement(host.nativeElement, currentMeta, appliedAttributes);
+
+      const targets: Element[] = selector ? Array.from(host.nativeElement.querySelectorAll(selector)) : [host.nativeElement];
+
+      for (const el of targets) {
+        const applied = appliedByElement.get(el) ?? new Set<string>();
+        appliedByElement.set(el, applyMetaToElement(el as HTMLElement, currentMeta, applied));
+      }
     },
   });
 }
@@ -28,28 +38,43 @@ function setupControlMetaEffect(host: ElementRef<HTMLElement>, parent: NgForgeFi
 /**
  * Marker directive applied to the canonical control element of an
  * `NgForgeField`-using component. Forwards the field's `meta` (data-*,
- * aria-*, autocomplete, etc.) onto its own host element.
+ * aria-*, autocomplete, etc.) onto a target element.
  *
- * @example Single control
+ * By default meta lands on the directive's own host element. For wrapped
+ * controls (e.g. `<mat-checkbox>`, `<p-toggleSwitch>`) where the canonical
+ * native input is rendered as a descendant inside the wrapper, pass a CSS
+ * selector through the input alias — the directive queries the host
+ * subtree and applies meta to every matching descendant on each render
+ * cycle, so descendants rendered later are still covered.
+ *
+ * @example Bare native control
  * ```html
- * <input ngForgeControl [formField]="field.field()" />
+ * <input ngForgeControl [formField]="ngf.field()" />
  * ```
  *
- * @example Dynamic option list (e.g. radio buttons)
+ * @example Wrapped control with inner native input
+ * ```html
+ * <mat-checkbox ngForgeControl="input[type='checkbox']" [formField]="ngf.field()">
+ *   {{ ngf.label() }}
+ * </mat-checkbox>
+ * ```
+ *
+ * @example Dynamic option list (radios rendered in @for)
  * ```html
  * @for (option of options(); track option.value) {
  *   <input type="radio" ngForgeControl [value]="option.value" />
  * }
  * ```
  *
- * Each iteration of `@for` instantiates its own directive — Angular's
- * structural lifecycle creates and destroys instances as the option list
- * changes, replacing the previous `dependents` plumbing.
+ * Each `@for` iteration creates its own directive instance; Angular's
+ * structural lifecycle handles add/remove naturally.
  */
 @Directive({ selector: '[ngForgeControl]' })
 export class NgForgeControl {
+  readonly target = input<string | undefined>(undefined, { alias: 'ngForgeControl' });
+
   constructor() {
-    setupControlMetaEffect(inject(ElementRef), inject(NgForgeField));
+    setupControlMetaEffect(inject(ElementRef), inject(NgForgeField), () => this.target());
   }
 }
 
@@ -74,6 +99,6 @@ export class NgForgeControl {
 @Directive({})
 export class NgForgeHostControl {
   constructor() {
-    setupControlMetaEffect(inject(ElementRef), inject(NgForgeField));
+    setupControlMetaEffect(inject(ElementRef), inject(NgForgeField), () => undefined);
   }
 }

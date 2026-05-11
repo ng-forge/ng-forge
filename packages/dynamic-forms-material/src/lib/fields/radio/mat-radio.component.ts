@@ -28,7 +28,7 @@ import { AsyncPipe } from '@angular/common';
     >
       @for (option of options(); track option.value) {
         <mat-radio-button
-          ngForgeControl
+          ngForgeControl="input[type='radio']"
           [value]="option.value"
           [disabled]="option.disabled || false"
           [color]="props()?.color || 'primary'"
