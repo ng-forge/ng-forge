@@ -1073,9 +1073,10 @@ describe('FormStateManager', () => {
         valueSignal.set({ trigger: 'show' });
         TestBed.flushEffects();
 
-        const synced = valueSignal() ?? {};
-        // After reset, myNum should either be absent or its default (NaN), but NOT 5
-        expect((synced as Record<string, unknown>).myNum).not.toBe(5);
+        // After reset, the field's default applies — for a number input, that's NaN, not the
+        // previously-saved 5. (Restored values would prove the store wasn't cleared.)
+        const myNum = (valueSignal() as Record<string, unknown> | undefined)?.['myNum'];
+        expect(Number.isNaN(myNum)).toBe(true);
       });
     });
 

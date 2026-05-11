@@ -136,6 +136,15 @@ function getValueAtPath(source: Record<string, unknown>, segments: readonly stri
 }
 
 /**
+ * Whether a value is worth capturing into the saved-hidden-value store. `NaN` (the number-input
+ * default) is excluded — restoring it would re-leak the default into the bound model when the
+ * field becomes visible again, defeating the bug fix.
+ */
+function isRestoreRelevant(value: unknown): boolean {
+  return !(typeof value === 'number' && Number.isNaN(value));
+}
+
+/**
  * Returns a new object with `value` set at the path described by `segments`.
  * Intermediate objects are cloned shallowly to preserve immutability of `target`.
  */
@@ -386,7 +395,7 @@ export class FormStateManager<
   private readonly hiddenValueStore = signal<Record<string, unknown>>({});
 
   /** Tracks per-path hidden state across save-effect runs to detect visible→hidden transitions. */
-  private prevVisibilitySnapshot: Record<string, boolean> = {};
+  private readonly prevVisibilitySnapshot = signal<Record<string, boolean>>({});
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Entity & Form
@@ -941,23 +950,26 @@ export class FormStateManager<
     // restored when the field becomes visible again. Comparing entity vs bound at the path
     // limits the store to fields that are actually being filtered — fields without explicit
     // opt-in never enter the store and never participate in the entity merge.
+    // NaN values are skipped: they're the number-input default and would defeat the bug fix
+    // by restoring NaN to the bound model when the field becomes visible again.
     explicitEffect([this.fieldVisibilitySnapshot], ([snapshot]) => {
       const currentSaved = this.hiddenValueStore();
       const currentEntity = this.entity() as Record<string, unknown>;
       const boundValue = this.boundFormValue() as Record<string, unknown>;
+      const prev = this.prevVisibilitySnapshot();
       let newSaved = currentSaved;
 
       for (const [path, isHidden] of Object.entries(snapshot)) {
-        if (isHidden && !this.prevVisibilitySnapshot[path]) {
+        if (isHidden && !prev[path]) {
           const segments = path.split('.');
           const inEntity = getValueAtPath(currentEntity, segments);
           const inBound = getValueAtPath(boundValue, segments);
-          if (inEntity !== undefined && inBound === undefined) {
+          if (inEntity !== undefined && inBound === undefined && isRestoreRelevant(inEntity)) {
             newSaved = setValueAtPath(newSaved, segments, inEntity);
           }
         }
       }
-      this.prevVisibilitySnapshot = { ...snapshot };
+      this.prevVisibilitySnapshot.set({ ...snapshot });
 
       if (newSaved !== currentSaved && !isEqual(newSaved, currentSaved)) {
         this.hiddenValueStore.set(newSaved);
@@ -967,7 +979,7 @@ export class FormStateManager<
     // Schema change resets the saved store + transition tracker so values from a stale schema
     // can't leak into the new one.
     explicitEffect([this.formSetup], () => {
-      this.prevVisibilitySnapshot = {};
+      this.prevVisibilitySnapshot.set({});
       if (Object.keys(this.hiddenValueStore()).length > 0) {
         this.hiddenValueStore.set({});
       }
