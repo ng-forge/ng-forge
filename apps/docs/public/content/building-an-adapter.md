@@ -25,7 +25,7 @@ Package entrypoints you'll import from:
 | `@ng-forge/dynamic-forms`             | Core types, `provideDynamicForm`, `FormConfig`, etc.          |
 | `@ng-forge/dynamic-forms/integration` | Field type definitions, mappers, the `NgForgeField` primitive |
 
-## The `NgForgeField` primitive
+## The NgForgeField primitive
 
 `NgForgeField` is a selector-less directive applied via `hostDirectives`. It receives the standard inputs from the form engine, exposes derived signals and host bindings, and lets your component focus on rendering.
 
@@ -116,7 +116,7 @@ What the component **does** declare:
 - The template, including `[ngForgeControl]` on the canonical control element so meta attributes (data-_, aria-_, autocomplete) reach the right place.
 - Any adapter-specific computeds (e.g. `effectiveSize`, `effectiveAppearance`) that resolve against optional adapter-level config tokens.
 
-### `injectNgForgeField<T>()`
+### Typed access via injectNgForgeField
 
 `injectNgForgeField<T>()` returns the `NgForgeField` instance with `field` narrowed to `Signal<FieldTree<T>>`. The cast is unchecked — the runtime contract is that the field-type registration matches the value type — but it lets `[formField]="ngf.field()"` type-check inside templates that need a strict generic.
 
@@ -126,7 +126,7 @@ For boolean fields you'd write `injectNgForgeField<boolean>()`, for `Date | null
 
 Field meta — the `meta` input on every field — carries native HTML attributes (`data-*`, `aria-*`, `autocomplete`, etc.) that should land on the actual control element, not the component's host wrapper. ng-forge ships two marker directives for this:
 
-### `[ngForgeControl]` — the common case
+### NgForgeControl — the common case
 
 A template attribute directive. Place it on the canonical control element in your template:
 
@@ -146,7 +146,7 @@ For dynamic option lists (radio buttons, multi-checkbox), put `ngForgeControl` i
 
 Each iteration spawns its own directive instance. Adding/removing options via Angular's structural lifecycle creates and destroys those instances naturally — no manual subscription, no `dependents` array.
 
-### `NgForgeHostControl` — for shadow-DOM wrappers
+### NgForgeHostControl — for shadow-DOM wrappers
 
 Some component libraries (Ionic web components, certain PrimeNG controls) wrap a native input inside shadow DOM that you can't reach with a template selector. In those cases the wrapper element itself is the canonical control from the user's perspective. Add `NgForgeHostControl` to your component's `hostDirectives` so meta lands on the host:
 
@@ -164,7 +164,7 @@ export default class IonicToggleField {
 
 ### Quick decision rule
 
-- The control element is in **your template** (`<input>`, `<select>`, `<my-component>`) → `[ngForgeControl]` on that element.
+- The control element is rendered in **your template** (an `input`, `select`, or any custom element) → `[ngForgeControl]` on that element.
 - The control element is the **component's host** (no inner element to mark, e.g. shadow-DOM wrapper) → `NgForgeHostControl` in `hostDirectives`.
 - Meta should not be applied at all → omit both.
 
@@ -226,7 +226,7 @@ export function weightedChoiceFieldMapper(fieldDef: WeightedChoiceField): Signal
 
 Reuse `buildValueFieldInputs` (exported from `/integration`) to get the standard 10 keys without rewriting them, then layer your extra keys on top.
 
-## Required-input forwarding & `renderReadyWhen`
+## Required-input forwarding & renderReadyWhen
 
 `NgForgeField` declares `field` and `key` as `input.required()`. The form engine guarantees both are bound before the component renders, but the contract is enforced via the `renderReadyWhen` mechanism on the `FieldTypeDefinition`.
 
@@ -370,7 +370,7 @@ Templates bind to the `effectiveX` computeds rather than reading `props` directl
 <input class="my-input" [class.my-input-lg]="effectiveSize() === 'lg'" />
 ```
 
-### `propsToMeta`
+### propsToMeta
 
 Some "props" are actually native HTML attributes — `type` on inputs, `rows`/`cols` on textareas, `autocomplete`. Listing them in `propsToMeta` on the field type definition causes the form engine to merge those values into `meta` before passing them to your component, which means they flow through `[ngForgeControl]` onto the actual control element automatically.
 

@@ -60,7 +60,7 @@ function extractSlug(route: Parameters<CanActivateFn>[0]): string {
 }
 
 /** Routes that are only meaningful under the "custom" adapter. */
-const CUSTOM_ONLY_ROUTES = new Set(['building-an-adapter']);
+export const CUSTOM_ONLY_ROUTES = new Set(['building-an-adapter']);
 
 export const contentRedirectGuard: CanActivateFn = (route) => {
   const slug = extractSlug(route);
