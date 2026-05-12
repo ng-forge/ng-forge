@@ -24,6 +24,7 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
         [label]="ngf.label()"
         [options]="options()"
         [properties]="props()"
+        [meta]="ngf.meta()"
         [ariaDescribedBy]="ngf.ariaDescribedBy()"
       />
 
