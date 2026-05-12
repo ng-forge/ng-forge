@@ -33,9 +33,6 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         [formField]="ngf.field()"
         [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="ngf.tabIndex()"
-        [attr.aria-invalid]="ngf.ariaInvalid()"
-        [attr.aria-required]="ngf.ariaRequired()"
-        [attr.aria-describedby]="ngf.ariaDescribedBy()"
         [style.resize]="props()?.resize || 'vertical'"
       ></textarea>
 

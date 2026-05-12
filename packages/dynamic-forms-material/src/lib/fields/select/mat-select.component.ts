@@ -33,9 +33,6 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
         [multiple]="props()?.multiple || false"
         [compareWith]="props()?.compareWith || defaultCompare"
-        [attr.aria-invalid]="ngf.ariaInvalid()"
-        [attr.aria-required]="ngf.ariaRequired()"
-        [attr.aria-describedby]="ngf.ariaDescribedBy()"
       >
         @for (option of options(); track option.value) {
           <mat-option [value]="option.value" [disabled]="option.disabled || false">

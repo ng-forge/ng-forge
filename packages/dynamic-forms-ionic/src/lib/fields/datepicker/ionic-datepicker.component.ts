@@ -51,9 +51,6 @@ import { format } from 'date-fns';
       [readonly]="true"
       [fill]="'outline'"
       [attr.tabindex]="ngf.tabIndex()"
-      [attr.aria-invalid]="ngf.ariaInvalid()"
-      [attr.aria-required]="ngf.ariaRequired()"
-      [attr.aria-describedby]="ngf.ariaDescribedBy()"
       (click)="!f().disabled() && openModal()"
     />
     @if (ngf.errorsToDisplay()[0]; as error) {

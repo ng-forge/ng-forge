@@ -29,9 +29,6 @@ import { Slider } from 'primeng/slider';
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"
         [attr.tabindex]="ngf.tabIndex()"
-        [attr.aria-invalid]="ngf.ariaInvalid()"
-        [attr.aria-required]="ngf.ariaRequired()"
-        [attr.aria-describedby]="ngf.ariaDescribedBy()"
         [styleClass]="sliderClasses()"
       />
 

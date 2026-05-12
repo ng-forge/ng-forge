@@ -22,9 +22,6 @@ import { AsyncPipe } from '@angular/common';
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"
-        [attr.aria-invalid]="ngf.ariaInvalid()"
-        [attr.aria-required]="ngf.ariaRequired()"
-        [attr.aria-describedby]="ngf.ariaDescribedBy()"
         [styleClass]="checkboxClasses()"
         [attr.tabindex]="ngf.tabIndex()"
       />

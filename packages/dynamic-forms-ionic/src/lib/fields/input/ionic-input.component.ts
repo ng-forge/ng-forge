@@ -53,9 +53,6 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [readonly]="f().readonly()"
       [helperText]="ngf.errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="ngf.tabIndex()"
-      [attr.aria-invalid]="ngf.ariaInvalid()"
-      [attr.aria-required]="ngf.ariaRequired()"
-      [attr.aria-describedby]="ngf.ariaDescribedBy()"
     />
     @if (ngf.errorsToDisplay()[0]; as error) {
       <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</ion-note>

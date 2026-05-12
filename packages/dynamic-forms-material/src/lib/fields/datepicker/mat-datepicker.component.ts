@@ -51,9 +51,6 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         [attr.tabindex]="ngf.tabIndex()"
         [min]="minDate()"
         [max]="maxDate()"
-        [attr.aria-invalid]="ngf.ariaInvalid()"
-        [attr.aria-required]="ngf.ariaRequired()"
-        [attr.aria-describedby]="ngf.ariaDescribedBy()"
       />
 
       <mat-datepicker-toggle matIconSuffix [for]="picker" />

@@ -34,9 +34,6 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
         [dfMax]="f().max?.() ?? props()?.max ?? max()"
         [dfStep]="step() ?? props()?.step ?? 1"
         [attr.tabindex]="ngf.tabIndex()"
-        [attr.aria-invalid]="ngf.ariaInvalid()"
-        [attr.aria-required]="ngf.ariaRequired()"
-        [attr.aria-describedby]="ngf.ariaDescribedBy()"
         class="form-range"
       />
 

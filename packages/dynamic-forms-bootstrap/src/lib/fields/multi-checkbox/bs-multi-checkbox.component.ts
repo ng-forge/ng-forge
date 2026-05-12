@@ -35,9 +35,6 @@ import { AsyncPipe } from '@angular/common';
             class="form-check-input"
             [class.is-invalid]="f().invalid() && f().touched()"
             [attr.tabindex]="ngf.tabIndex()"
-            [attr.aria-invalid]="ngf.ariaInvalid()"
-            [attr.aria-required]="ngf.ariaRequired()"
-            [attr.aria-describedby]="ngf.ariaDescribedBy()"
           />
           <label [for]="ngf.key() + '_' + i" class="form-check-label">
             {{ option.label | dynamicText | async }}

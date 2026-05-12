@@ -28,16 +28,7 @@ import { AsyncPipe } from '@angular/common';
       [color]="props()?.color || 'primary'"
       class="slider-container"
     >
-      <input
-        matSliderThumb
-        ngForgeControl
-        [id]="inputId"
-        [formField]="f"
-        [attr.tabindex]="ngf.tabIndex()"
-        [attr.aria-invalid]="ngf.ariaInvalid()"
-        [attr.aria-required]="ngf.ariaRequired()"
-        [attr.aria-describedby]="ngf.ariaDescribedBy()"
-      />
+      <input matSliderThumb ngForgeControl [id]="inputId" [formField]="f" [attr.tabindex]="ngf.tabIndex()" />
     </mat-slider>
 
     @if (ngf.errorsToDisplay()[0]; as error) {

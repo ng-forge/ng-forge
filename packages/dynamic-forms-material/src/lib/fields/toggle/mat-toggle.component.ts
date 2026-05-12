@@ -1,4 +1,4 @@
-import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
@@ -26,7 +26,6 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       [hideIcon]="props()?.hideIcon || false"
       [disableRipple]="effectiveDisableRipple()"
       [required]="!!f().required()"
-      [attr.aria-describedby]="ngf.ariaDescribedBy()"
       [attr.tabindex]="ngf.tabIndex()"
       class="toggle-container"
     >
@@ -44,47 +43,10 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 })
 export default class MatToggleFieldComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   protected readonly ngf = injectNgForgeField<boolean>();
 
   readonly props = input<MatToggleProps>();
 
   readonly effectiveDisableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
-
-  /**
-   * Workaround: Angular Material's MatSlideToggle does NOT propagate aria-required to its internal
-   * button element. This effect imperatively sets/removes aria-required on the internal button.
-   *
-   * Uses afterRenderEffect to ensure DOM is ready before querying internal elements.
-   */
-  private readonly syncAriaRequiredToDom = afterRenderEffect(() => {
-    const isRequired = this.ngf.ariaRequired();
-    const buttonEl = this.elementRef.nativeElement.querySelector('button[role="switch"]');
-    if (buttonEl) {
-      if (isRequired) {
-        buttonEl.setAttribute('aria-required', 'true');
-      } else {
-        buttonEl.removeAttribute('aria-required');
-      }
-    }
-  });
-
-  /**
-   * Workaround: Angular Material's MatSlideToggle does NOT propagate aria-describedby to its internal
-   * button element. This effect imperatively sets/removes aria-describedby on the internal button.
-   *
-   * Uses afterRenderEffect to ensure DOM is ready before querying internal elements.
-   */
-  private readonly syncAriaDescribedByToDom = afterRenderEffect(() => {
-    const describedBy = this.ngf.ariaDescribedBy();
-    const buttonEl = this.elementRef.nativeElement.querySelector('button[role="switch"]');
-    if (buttonEl) {
-      if (describedBy) {
-        buttonEl.setAttribute('aria-describedby', describedBy);
-      } else {
-        buttonEl.removeAttribute('aria-describedby');
-      }
-    }
-  });
 }

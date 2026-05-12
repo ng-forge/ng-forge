@@ -32,9 +32,6 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         [type]="props()?.type ?? 'text'"
         [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="ngf.tabIndex()"
-        [attr.aria-invalid]="ngf.ariaInvalid()"
-        [attr.aria-required]="ngf.ariaRequired()"
-        [attr.aria-describedby]="ngf.ariaDescribedBy()"
       />
       @if (ngf.errorsToDisplay()[0]; as error) {
         <mat-error [id]="ngf.errorId()">{{ error.message }}</mat-error>

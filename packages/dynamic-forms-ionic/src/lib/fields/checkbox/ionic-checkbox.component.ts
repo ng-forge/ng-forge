@@ -23,9 +23,6 @@ import { AsyncPipe } from '@angular/common';
       [color]="props()?.color ?? 'primary'"
       [indeterminate]="props()?.indeterminate ?? false"
       [attr.tabindex]="ngf.tabIndex()"
-      [attr.aria-invalid]="ngf.ariaInvalid()"
-      [attr.aria-required]="ngf.ariaRequired()"
-      [attr.aria-describedby]="ngf.ariaDescribedBy()"
     >
       {{ ngf.label() | dynamicText | async }}
     </ion-checkbox>
