@@ -154,14 +154,9 @@ export class DfFieldOutlet {
           injector: createWrapperAwareInjector(resolved.injector, slot.injector),
         });
         this.fieldSlot = slot;
+        // setInput dirties the signal synchronously; the next CD pass reads
+        // it. Safe outside CD — see wrapper-chain-controller scheduling.
         this.pushRawInputs(this.fieldRef, this.rawInputs());
-        // Detect changes synchronously after inputs are pushed so the field's
-        // first CD cycle sees fully-bound inputs. Without this, the parent's
-        // cascading CD can run the field's template before pushRawInputs has
-        // propagated forwarded inputs onto host directives — surfacing as
-        // "field is not a function" or NG0950 in inputs read by host bindings
-        // / `[formField]` bindings on the inner control.
-        this.fieldRef.changeDetectorRef.detectChanges();
       },
     });
 
