@@ -214,6 +214,63 @@ describe('NgForgeField', () => {
       expect(directiveHost?.getAttribute('autocomplete')).toBeNull();
     });
 
+    it('forwards aria attributes onto the [ngForgeControl] target alongside meta', () => {
+      TestBed.configureTestingModule({ imports: [TestHostWithControlComponent] });
+      const fixture = TestBed.createComponent(TestHostWithControlComponent);
+      const { field } = setupField('alice');
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('props', { hint: 'helpful tip' });
+      fixture.detectChanges();
+
+      const target = fixture.nativeElement.querySelector('input.target') as HTMLElement | null;
+      // ariaInvalid() is false when valid+untouched → attr "false".
+      expect(target?.getAttribute('aria-invalid')).toBe('false');
+      // ariaRequired() returns null when not required → attr absent.
+      expect(target?.hasAttribute('aria-required')).toBe(false);
+      // ariaDescribedBy() resolves to the hint id when props.hint is set.
+      expect(target?.getAttribute('aria-describedby')).toBe('username-hint');
+    });
+
+    it('forwards aria attributes onto the host when NgForgeHostControl is in hostDirectives', () => {
+      TestBed.configureTestingModule({ imports: [TestHostHostControlComponent] });
+      const fixture = TestBed.createComponent(TestHostHostControlComponent);
+      const { field } = setupField('alice');
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('props', { hint: 'helpful tip' });
+      fixture.detectChanges();
+
+      const host = fixture.nativeElement as HTMLElement;
+      expect(host.getAttribute('aria-invalid')).toBe('false');
+      expect(host.hasAttribute('aria-required')).toBe(false);
+      expect(host.getAttribute('aria-describedby')).toBe('username-hint');
+    });
+
+    it('forwards aria attributes onto every descendant matching the selector', () => {
+      TestBed.configureTestingModule({ imports: [TestHostWithDescendantTargetComponent] });
+      const fixture = TestBed.createComponent(TestHostWithDescendantTargetComponent);
+      const { field } = setupField('alice');
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('props', { hint: 'helpful tip' });
+      fixture.detectChanges();
+
+      const inner = Array.from(fixture.nativeElement.querySelectorAll('input.inner')) as HTMLElement[];
+      const other = fixture.nativeElement.querySelector('input.other') as HTMLElement | null;
+      const directiveHost = fixture.nativeElement as HTMLElement;
+
+      expect(inner.length).toBe(2);
+      for (const el of inner) {
+        expect(el.getAttribute('aria-describedby')).toBe('username-hint');
+        expect(el.getAttribute('aria-invalid')).toBe('false');
+      }
+      expect(other?.hasAttribute('aria-describedby')).toBe(false);
+      // The directive's own host doesn't get aria — aria lives on the marker target.
+      expect(directiveHost.hasAttribute('aria-describedby')).toBe(false);
+      expect(directiveHost.hasAttribute('aria-invalid')).toBe(false);
+    });
+
     it('does NOT apply meta when neither NgForgeControl nor NgForgeHostControl is used', () => {
       TestBed.configureTestingModule({ imports: [TestHostComponent] });
       const fixture = TestBed.createComponent(TestHostComponent);

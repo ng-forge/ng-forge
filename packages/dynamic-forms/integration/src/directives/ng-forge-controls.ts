@@ -2,34 +2,56 @@ import { afterRenderEffect, Directive, ElementRef, inject, input } from '@angula
 import { applyMetaToElement, FieldMeta, isEqual } from '@ng-forge/dynamic-forms';
 import { NgForgeField } from './ng-forge-field.directive';
 
+interface AriaSnapshot {
+  readonly 'aria-invalid': boolean;
+  // `undefined` (not `null`) matches FieldMeta's index signature — both
+  // `applyMetaToElement` and the merge below treat undefined as "no attr".
+  readonly 'aria-required': true | undefined;
+  readonly 'aria-describedby': string | undefined;
+}
+
 /**
- * Apply meta to the directive's own host (when no target selector is set)
- * or to all descendants matching the selector. Tracks applied attributes
- * per element so changes to `meta` clear stale attributes.
+ * Apply meta + aria to the directive's own host (when no target selector is
+ * set) or to all descendants matching the selector. Aria comes from the
+ * parent `NgForgeField`'s derived signals; meta comes from the parent's
+ * `meta` input. Parent-computed aria wins on key collision. Tracks applied
+ * attributes per element so transitions (e.g. aria-required true → null)
+ * clear the stale attr.
  */
 function setupControlMetaEffect(host: ElementRef<HTMLElement>, parent: NgForgeField, targetSelector: () => string | undefined): void {
   const appliedByElement = new WeakMap<Element, Set<string>>();
   let previousMeta: FieldMeta | undefined;
+  let previousAria: AriaSnapshot | undefined;
 
   afterRenderEffect({
     write: () => {
       const currentMeta = parent.meta();
+      const ariaRequired = parent.ariaRequired();
+      const ariaDescribedBy = parent.ariaDescribedBy();
+      const currentAria: AriaSnapshot = {
+        'aria-invalid': parent.ariaInvalid(),
+        'aria-required': ariaRequired === null ? undefined : ariaRequired,
+        'aria-describedby': ariaDescribedBy === null ? undefined : ariaDescribedBy,
+      };
       const selector = targetSelector()?.trim() || undefined;
 
       // Re-query every effect run when a selector is set: late-rendered
-      // descendants (e.g. mat-radio-group children appearing on options
-      // change) must still pick up meta. For the host-only path we can
-      // short-circuit when meta hasn't changed.
-      if (!selector && isEqual(currentMeta, previousMeta)) {
+      // descendants must still pick up attrs. For the host-only path we
+      // can short-circuit when neither meta nor aria changed.
+      if (!selector && isEqual(currentMeta, previousMeta) && isEqual(currentAria, previousAria)) {
         return;
       }
       previousMeta = currentMeta;
+      previousAria = currentAria;
+
+      // Parent-computed aria wins — merge order puts it last.
+      const combined: FieldMeta = { ...(currentMeta ?? {}), ...currentAria };
 
       const targets: Element[] = selector ? Array.from(host.nativeElement.querySelectorAll(selector)) : [host.nativeElement];
 
       for (const el of targets) {
         const applied = appliedByElement.get(el) ?? new Set<string>();
-        appliedByElement.set(el, applyMetaToElement(el as HTMLElement, currentMeta, applied));
+        appliedByElement.set(el, applyMetaToElement(el as HTMLElement, combined, applied));
       }
     },
   });
