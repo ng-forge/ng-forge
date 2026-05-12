@@ -168,6 +168,10 @@ export default class IonicToggleField {
 - The control element is the **component's host** (no inner element to mark, e.g. shadow-DOM wrapper) → `NgForgeHostControl` in `hostDirectives`.
 - Meta should not be applied at all → omit both.
 
+### Forwarding to a sub-component
+
+If your field component delegates rendering to a smaller sub-component (e.g. a `df-bs-radio-group` rendered inside `df-bs-radio`) and that sub-component owns its own meta forwarding via `setupMetaTracking`, **you must forward `[meta]="ngf.meta()"` to the sub-component's `meta` input**. Without this binding the sub-component's tracking runs with an empty signal and meta silently fails to land on the inner control. The compiler can't catch this — treat it as part of the authoring contract whenever you split a field into multiple components.
+
 ## Mappers
 
 A mapper translates a field definition (`FieldDef<...>`) into the inputs that flow into your component. It's a function called inside an injection context:

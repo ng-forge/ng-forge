@@ -550,6 +550,10 @@ export default class IonicToggleField {
 - The control element is the **component's host** (no inner element to mark, e.g. shadow-DOM wrapper) → `NgForgeHostControl` in `hostDirectives`.
 - Meta should not be applied at all → omit both.
 
+### Forwarding to a sub-component
+
+If your field component delegates rendering to a smaller sub-component (e.g. a `df-bs-radio-group` rendered inside `df-bs-radio`) and that sub-component owns its own meta forwarding via `setupMetaTracking`, **you must forward `[meta]="ngf.meta()"` to the sub-component's `meta` input**. Without this binding the sub-component's tracking runs with an empty signal and meta silently fails to land on the inner control. The compiler can't catch this — treat it as part of the authoring contract whenever you split a field into multiple components.
+
 ## Mappers
 
 A mapper translates a field definition (`FieldDef<...>`) into the inputs that flow into your component. It's a function called inside an injection context:
@@ -10821,6 +10825,21 @@ const config = {
 ```
 
 Custom fields work with everything the built-in field types do — validation, derivations, conditional logic, dynamic text — without any extra wiring.
+
+## Caveat: direct instantiation (TestBed, Storybook)
+
+The form engine's outlet always binds `field` and `key` before triggering the first change-detection pass. Components instantiated directly — in a unit test via `TestBed.createComponent`, in Storybook, in a sandbox — bypass that ordering, so `NgForgeField`'s host bindings hit `input.required<>()` on first read and throw NG0950.
+
+Bind both inputs **before** the first `detectChanges`:
+
+```typescript
+const fixture = TestBed.createComponent(MyFieldComponent);
+fixture.componentRef.setInput('field', field);
+fixture.componentRef.setInput('key', 'username');
+fixture.detectChanges(); // safe — required inputs are bound
+```
+
+The directive's own spec (`packages/dynamic-forms/integration/src/directives/ng-forge-field.directive.spec.ts`) is the canonical example.
 
 ## Going further
 

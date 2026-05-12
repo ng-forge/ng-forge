@@ -72,11 +72,10 @@ export class NgForgeField {
   readonly props = input<unknown>();
   readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
-  // Forwarded form-level fallback. Mappers emit this from
-  // `inject(DEFAULT_VALIDATION_MESSAGES)` for back-compat with third-party
-  // components that consumed it as a direct input. The directive prefers this
-  // forwarded value, falling back to its own DI lookup so the bridging signals
-  // still work in non-mapper contexts (e.g. unit tests).
+  // Back-compat forwarding seam. Canonical source is the
+  // `DEFAULT_VALIDATION_MESSAGES` DI token; mappers populate this input from
+  // that token. Bound values take precedence when set; otherwise the
+  // directive falls back to its own DI lookup (see effectiveDefaultValidationMessages).
   readonly defaultValidationMessages = input<ValidationMessages>();
 
   // ───────────────────────────────────────────────────────────────────────────

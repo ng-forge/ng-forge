@@ -122,6 +122,21 @@ const config = {
 
 Custom fields work with everything the built-in field types do — validation, derivations, conditional logic, dynamic text — without any extra wiring.
 
+## Caveat: direct instantiation (TestBed, Storybook)
+
+The form engine's outlet always binds `field` and `key` before triggering the first change-detection pass. Components instantiated directly — in a unit test via `TestBed.createComponent`, in Storybook, in a sandbox — bypass that ordering, so `NgForgeField`'s host bindings hit `input.required<>()` on first read and throw NG0950.
+
+Bind both inputs **before** the first `detectChanges`:
+
+```typescript
+const fixture = TestBed.createComponent(MyFieldComponent);
+fixture.componentRef.setInput('field', field);
+fixture.componentRef.setInput('key', 'username');
+fixture.detectChanges(); // safe — required inputs are bound
+```
+
+The directive's own spec (`packages/dynamic-forms/integration/src/directives/ng-forge-field.directive.spec.ts`) is the canonical example.
+
 ## Going further
 
 - [Building an Adapter](/building-an-adapter) — full guide for shipping an adapter with many field types, adapter-level configuration cascades, and module augmentation for type-safety.
