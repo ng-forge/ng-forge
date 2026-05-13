@@ -20,17 +20,17 @@ import { AsyncPipe } from '@angular/common';
     }
 
     <div class="checkbox-group" [class]="groupClasses()" [attr.aria-describedby]="ngf.ariaDescribedBy()">
-      @for (option of options(); track option.value; let i = $index) {
+      @for (option of options(); track option.value) {
         <div class="checkbox-option">
           <p-checkbox
             ngForgeControl="input[type='checkbox']"
-            [inputId]="ngf.key() + '_' + i"
+            [inputId]="ngf.key() + '-' + option.value"
             [binary]="true"
             [ngModel]="checked['' + option.value] || false"
             (onChange)="onCheckboxChange(option, $event)"
             [disabled]="f().disabled() || option.disabled || false"
           />
-          <label [for]="ngf.key() + '_' + i" class="ml-2">{{ option.label | dynamicText | async }}</label>
+          <label [for]="ngf.key() + '-' + option.value" class="ml-2">{{ option.label | dynamicText | async }}</label>
         </div>
       }
     </div>
