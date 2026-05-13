@@ -21,6 +21,11 @@ export interface PrimeRadioGroupProps {
 @Component({
   selector: 'df-prime-radio-group',
   imports: [RadioButton, FormsModule, DynamicTextPipe, AsyncPipe],
+  host: {
+    '[attr.aria-invalid]': 'parentField?.ariaInvalid() || null',
+    '[attr.aria-required]': 'parentField?.ariaRequired()',
+    '[attr.aria-describedby]': 'parentField?.ariaDescribedBy()',
+  },
   template: `
     <div class="radio-group">
       @for (option of options(); track option.value; let i = $index) {
@@ -70,7 +75,7 @@ export interface PrimeRadioGroupProps {
 // pattern used by the Bootstrap radio group adapter (BsRadioGroupComponent).
 export class PrimeRadioGroupComponent implements FormValueControl<ValueType | undefined> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
-  private readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
+  protected readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
 
   // Value model - FormField directive binds form value to this
   readonly value = model<ValueType | undefined>(undefined);
