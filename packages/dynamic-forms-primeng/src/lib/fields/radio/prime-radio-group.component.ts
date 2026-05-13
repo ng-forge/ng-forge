@@ -75,7 +75,7 @@ export interface PrimeRadioGroupProps {
 // pattern used by the Bootstrap radio group adapter (BsRadioGroupComponent).
 export class PrimeRadioGroupComponent implements FormValueControl<ValueType | undefined> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
-  protected readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
+  protected readonly parentField = inject(NgForgeField, { optional: true });
 
   // Value model - FormField directive binds form value to this
   readonly value = model<ValueType | undefined>(undefined);

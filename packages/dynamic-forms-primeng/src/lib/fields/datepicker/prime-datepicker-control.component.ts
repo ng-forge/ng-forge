@@ -45,7 +45,7 @@ import { DatePicker } from 'primeng/datepicker';
 })
 export class PrimeDatepickerControlComponent implements FormValueControl<string | null> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
-  private readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
+  private readonly parentField = inject(NgForgeField, { optional: true });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // FormValueControl implementation

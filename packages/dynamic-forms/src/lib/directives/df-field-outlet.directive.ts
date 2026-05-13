@@ -218,7 +218,9 @@ export class DfFieldOutlet {
 
   private pushRawInputs(ref: ComponentRef<unknown>, rawInputs: Record<string, unknown>): void {
     // setInput is lenient in Angular 21 — unknown keys silently drop (not NG0303).
-    // Mapper-as-contract is enforced by NG_FORGE_FIELD_INPUTS lockstep, not here.
+    // NG_FORGE_FIELD_INPUTS lockstep covers the standard 10-input surface at
+    // build time; custom mapper output keys are by convention against the
+    // component's own declared inputs.
     const last = this.lastPushedInputs;
     for (const [key, value] of Object.entries(rawInputs)) {
       if (last && last[key] === value) continue;

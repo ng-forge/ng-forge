@@ -36,7 +36,7 @@ import { TextareaModule } from 'primeng/textarea';
 })
 export class PrimeTextareaControlComponent implements FormValueControl<string> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
-  private readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
+  private readonly parentField = inject(NgForgeField, { optional: true });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // FormValueControl implementation
@@ -83,24 +83,16 @@ export class PrimeTextareaControlComponent implements FormValueControl<string> {
   protected readonly meta = computed<TextareaMeta | undefined>(() => this.parentField?.meta() as TextareaMeta | undefined);
   protected readonly ariaDescribedBy = computed<string | null>(() => this.parentField?.ariaDescribedBy() ?? null);
 
+  // Aria signals read from the ambient parent NgForgeField — matches the
+  // pattern in prime-datepicker-control / prime-select-control. Standalone
+  // use (no parent) lands false / null.
+  protected readonly ariaInvalid = computed<boolean>(() => this.parentField?.ariaInvalid() ?? false);
+  protected readonly ariaRequired = computed<true | null>(() => this.parentField?.ariaRequired() ?? null);
+
   constructor() {
     this.parentField?.markClaimed();
     setupMetaTracking(this.elementRef, this.meta, { selector: 'textarea' });
   }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Computed ARIA attributes
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** aria-invalid: true when field is invalid AND touched */
-  protected readonly ariaInvalid = computed(() => {
-    return this.invalid() && this.touched();
-  });
-
-  /** aria-required: true if field is required, null otherwise */
-  protected readonly ariaRequired = computed(() => {
-    return this.required() ? true : null;
-  });
 
   /** Marks the field as touched when textarea loses focus */
   onBlur(): void {

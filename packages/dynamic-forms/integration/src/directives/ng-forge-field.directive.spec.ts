@@ -119,12 +119,14 @@ describe('NgForgeField', () => {
       const fixture = TestBed.createComponent(TestHostComponent);
       const directive = fixture.componentRef.injector.get(NgForgeField);
 
-      const { field } = setupField();
+      const { field } = setupInvalidTouchedField();
       fixture.componentRef.setInput('field', field);
       fixture.componentRef.setInput('key', 'username');
       fixture.detectChanges();
 
-      expect(directive.errors).toBeDefined();
+      const errors = directive.errors();
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].message).toBe('Default required');
     });
   });
 

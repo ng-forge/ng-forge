@@ -63,7 +63,7 @@ import { MultiSelect, MultiSelectChangeEvent } from 'primeng/multiselect';
 })
 export class PrimeSelectControlComponent implements FormValueControl<ValueType> {
   // Ambient parent NgForgeField — feeds aria fallback for inner <p-select> bindings.
-  private readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
+  private readonly parentField = inject(NgForgeField, { optional: true });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // FormValueControl implementation
