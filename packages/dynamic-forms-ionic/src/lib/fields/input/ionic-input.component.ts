@@ -76,8 +76,6 @@ export default class IonicInputFieldComponent {
 
   readonly props = input<IonicInputProps>();
 
-  // strict template type-check; runtime shape is correct.
-
   protected readonly effectiveFill = computed(() => this.props()?.fill ?? this.ionicConfig?.fill ?? 'solid');
   protected readonly effectiveShape = computed(() => this.props()?.shape ?? this.ionicConfig?.shape);
   protected readonly effectiveLabelPlacement = computed(() => this.props()?.labelPlacement ?? this.ionicConfig?.labelPlacement ?? 'start');

@@ -60,7 +60,5 @@ export default class IonicSliderFieldComponent {
   readonly step = input<number>();
   readonly props = input<IonicSliderProps>();
 
-  // strict template type-check; runtime shape is correct.
-
   protected defaultPinFormatter = (value: number) => String(value);
 }

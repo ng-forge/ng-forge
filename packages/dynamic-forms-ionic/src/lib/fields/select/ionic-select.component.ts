@@ -60,7 +60,5 @@ export default class IonicSelectFieldComponent {
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<IonicSelectProps>();
 
-  // strict template type-check; runtime shape is correct.
-
   defaultCompare = Object.is;
 }

@@ -17,4 +17,5 @@ export interface BsDatepickerProps extends DatepickerProps {
 
 export type BsDatepickerField = DatepickerField<BsDatepickerProps>;
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type BsDatepickerComponent = ValueFieldComponent<BsDatepickerField>;

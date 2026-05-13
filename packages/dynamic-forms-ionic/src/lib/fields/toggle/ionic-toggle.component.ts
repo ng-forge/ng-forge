@@ -51,6 +51,4 @@ export default class IonicToggleFieldComponent {
   protected readonly ngf = injectNgForgeField<boolean>();
 
   readonly props = input<IonicToggleProps>();
-
-  // strict template type-check; runtime shape is correct.
 }

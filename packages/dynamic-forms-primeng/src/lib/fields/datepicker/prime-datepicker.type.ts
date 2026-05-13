@@ -42,4 +42,5 @@ export interface PrimeDatepickerProps extends DatepickerProps {
 
 export type PrimeDatepickerField = DatepickerField<PrimeDatepickerProps>;
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type PrimeDatepickerComponent = ValueFieldComponent<PrimeDatepickerField>;

@@ -55,8 +55,6 @@ export default class IonicTextareaFieldComponent {
 
   readonly props = input<IonicTextareaProps>();
 
-  // strict template type-check; runtime shape is correct.
-
   constructor() {
     // ion-textarea encapsulates a native <textarea> in shadow DOM and does not automatically
     // propagate aria-describedby to it. This effect imperatively syncs the attribute

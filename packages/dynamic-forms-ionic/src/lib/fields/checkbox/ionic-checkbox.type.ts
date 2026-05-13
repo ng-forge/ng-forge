@@ -11,4 +11,5 @@ export interface IonicCheckboxProps {
 
 export type IonicCheckboxField = CheckboxField<IonicCheckboxProps>;
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type IonicCheckboxComponent = CheckedFieldComponent<IonicCheckboxField>;

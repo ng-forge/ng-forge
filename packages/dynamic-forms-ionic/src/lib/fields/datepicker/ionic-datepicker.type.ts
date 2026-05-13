@@ -16,4 +16,5 @@ export interface IonicDatepickerProps extends DatepickerProps {
   hint?: DynamicText;
 }
 export type IonicDatepickerField = DatepickerField<IonicDatepickerProps>;
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type IonicDatepickerComponent = ValueFieldComponent<IonicDatepickerField>;

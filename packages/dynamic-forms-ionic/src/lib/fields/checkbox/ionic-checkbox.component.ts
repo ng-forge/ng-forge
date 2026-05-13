@@ -51,6 +51,4 @@ export default class IonicCheckboxFieldComponent {
   protected readonly ngf = injectNgForgeField<boolean>();
 
   readonly props = input<IonicCheckboxProps>();
-
-  // strict template type-check; runtime shape is correct.
 }

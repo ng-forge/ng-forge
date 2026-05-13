@@ -54,8 +54,6 @@ export default class PrimeCheckboxFieldComponent {
 
   readonly props = input<PrimeCheckboxProps>();
 
-  // strict template type-check; runtime shape is correct.
-
   protected readonly checkboxClasses = computed(() => {
     const classes: string[] = [];
     const styleClass = this.props()?.styleClass;

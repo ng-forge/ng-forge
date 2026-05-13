@@ -26,4 +26,5 @@ export interface PrimeCheckboxProps {
 
 export type PrimeCheckboxField = CheckboxField<PrimeCheckboxProps>;
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type PrimeCheckboxComponent = CheckedFieldComponent<PrimeCheckboxField>;

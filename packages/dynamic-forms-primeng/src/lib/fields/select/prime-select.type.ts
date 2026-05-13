@@ -33,4 +33,5 @@ export interface PrimeSelectProps extends SelectProps {
 
 export type PrimeSelectField<T> = SelectField<T, PrimeSelectProps>;
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type PrimeSelectComponent = ValueFieldComponent<PrimeSelectField<ValueType>>;

@@ -14,4 +14,5 @@ export interface PrimeMultiCheckboxProps {
 
 export type PrimeMultiCheckboxField<T> = MultiCheckboxField<T, PrimeMultiCheckboxProps>;
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type PrimeMultiCheckboxComponent = ValueFieldComponent<PrimeMultiCheckboxField<ValueType>>;
