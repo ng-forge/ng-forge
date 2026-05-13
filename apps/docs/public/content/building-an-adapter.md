@@ -31,7 +31,7 @@ Package entrypoints you'll import from:
 
 **Forwarded inputs** (the 10 names exported as `NG_FORGE_FIELD_INPUTS`):
 
-`field`, `key`, `label`, `placeholder`, `className`, `tabIndex`, `props`, `meta`, `validationMessages`, `defaultValidationMessages`.
+`field`, `key`, `label`, `placeholder`, `className`, `tabIndex`, `props`, `meta`, `validationMessages`, `defaultValidationMessages` (deprecated — prefer the `DEFAULT_VALIDATION_MESSAGES` DI token; removal targeted for v1).
 
 **Derived signals available via `inject(NgForgeField)` / `injectNgForgeField<T>()`:**
 
@@ -84,9 +84,6 @@ import { CustomInputProps } from './custom-input.type';
       [type]="props()?.type ?? 'text'"
       [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
       [attr.tabindex]="ngf.tabIndex()"
-      [attr.aria-invalid]="ngf.ariaInvalid()"
-      [attr.aria-required]="ngf.ariaRequired()"
-      [attr.aria-describedby]="ngf.ariaDescribedBy()"
     />
 
     @if (ngf.errorsToDisplay()[0]; as error) {
@@ -124,7 +121,7 @@ For boolean fields you'd write `injectNgForgeField<boolean>()`, for `Date | null
 
 ## Meta forwarding
 
-Field meta — the `meta` input on every field — carries native HTML attributes (`data-*`, `aria-*`, `autocomplete`, etc.) that should land on the actual control element, not the component's host wrapper. ng-forge ships two marker directives for this:
+Field meta — the `meta` input on every field — carries native HTML attributes (`data-*`, `autocomplete`, `inputmode`, etc.). Markers also forward the directive's derived aria signals (`aria-invalid`, `aria-required`, `aria-describedby`) onto the same target, so authors don't bind those manually. ng-forge ships two marker directives plus an ambient injection path for sub-components.
 
 ### NgForgeControl — the common case
 
@@ -134,7 +131,11 @@ A template attribute directive. Place it on the canonical control element in you
 <input ngForgeControl [formField]="f" ... />
 ```
 
-`NgForgeControl` injects the parent `NgForgeField`, reads `meta()`, and applies the resulting attributes to its own host element via Angular's renderer. It runs inside `afterRenderEffect`, so meta updates apply once the DOM is settled.
+`NgForgeControl` injects the parent `NgForgeField`, reads `meta()` and the aria signals, and applies the resulting attributes to its own host element. For wrapped controls where the canonical native input is rendered as a descendant inside the wrapper, pass a CSS selector through the input alias and the directive queries the host subtree:
+
+```html
+<mat-checkbox ngForgeControl="input[type='checkbox']" [formField]="f">{{ ngf.label() }}</mat-checkbox>
+```
 
 For dynamic option lists (radio buttons, multi-checkbox), put `ngForgeControl` inside the `@for`:
 
@@ -148,7 +149,7 @@ Each iteration spawns its own directive instance. Adding/removing options via An
 
 ### NgForgeHostControl — for shadow-DOM wrappers
 
-Some component libraries (Ionic web components, certain PrimeNG controls) wrap a native input inside shadow DOM that you can't reach with a template selector. In those cases the wrapper element itself is the canonical control from the user's perspective. Add `NgForgeHostControl` to your component's `hostDirectives` so meta lands on the host:
+Some component libraries (Ionic web components, certain PrimeNG controls) wrap a native input inside shadow DOM that you can't reach with a template selector. In those cases the wrapper element itself is the canonical control from the user's perspective. Add `NgForgeHostControl` to your component's `hostDirectives` so meta + aria land on the host:
 
 ```typescript
 @Component({
@@ -168,9 +169,29 @@ export default class IonicToggleField {
 - The control element is the **component's host** (no inner element to mark, e.g. shadow-DOM wrapper) → `NgForgeHostControl` in `hostDirectives`.
 - Meta should not be applied at all → omit both.
 
+If you set `meta()` on a field but no marker / ambient consumer claims it, ng-forge logs a dev-mode warning so the wiring gap surfaces immediately instead of failing silently.
+
 ### Forwarding to a sub-component
 
-If your field component delegates rendering to a smaller sub-component (e.g. a `df-bs-radio-group` rendered inside `df-bs-radio`) and that sub-component owns its own meta forwarding via `setupMetaTracking`, **you must forward `[meta]="ngf.meta()"` to the sub-component's `meta` input**. Without this binding the sub-component's tracking runs with an empty signal and meta silently fails to land on the inner control. The compiler can't catch this — treat it as part of the authoring contract whenever you split a field into multiple components.
+If your field component delegates rendering to a smaller sub-component (e.g. `df-bs-radio-group` inside `df-bs-radio`), the sub-component can pick up the parent's `NgForgeField` ambiently:
+
+```typescript
+export class BsRadioGroupComponent {
+  // Picks up the outer NgForgeField when present (e.g. mounted under df-bs-radio).
+  // Falls back to its own explicit `meta` input when used standalone.
+  private readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
+
+  readonly meta = input<FieldMeta>();
+  protected readonly effectiveMeta = computed<FieldMeta | undefined>(() => this.meta() ?? this.parentField?.meta());
+
+  constructor() {
+    this.parentField?.markClaimed();
+    setupMetaTracking(this.elementRef, this.effectiveMeta, { selector: 'input[type="radio"]' });
+  }
+}
+```
+
+No `[meta]="ngf.meta()"` binding on the parent side is needed — the sub-component reads the ambient field directly. The explicit `meta` input is the override path for standalone use (unit tests, Storybook). `markClaimed()` opts the sub-component into the dev-mode unclaimed-meta warning so the safety net keeps working.
 
 ## Mappers
 
@@ -184,14 +205,14 @@ The signal emits a record of input-name → value. The form engine reads each en
 
 ng-forge ships mappers for the standard field categories. You'll register field types against these, not write your own most of the time:
 
-| Mapper                  | For                                     | What it emits                                                                                                                       |
-| ----------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `valueFieldMapper`      | input, textarea, datepicker, slider, …  | `field`, `key`, `label`, `placeholder`, `className`, `tabIndex`, `props`, `meta`, `validationMessages`, `defaultValidationMessages` |
-| `checkboxFieldMapper`   | checkbox, toggle                        | same as `valueFieldMapper`                                                                                                          |
-| `optionsFieldMapper`    | select, radio, multi-checkbox           | adds `options`                                                                                                                      |
-| `datepickerFieldMapper` | datepicker                              | adds `minDate`, `maxDate`, `startAt` (string→Date conversion)                                                                       |
-| `buttonFieldMapper`     | plain buttons                           | `key`, `label`, `disabled`, `event`, `props`, `className`                                                                           |
-| Array button mappers    | `addArrayItem`, `removeArrayItem`, etc. | event + event-args wiring for array mutations                                                                                       |
+| Mapper                  | For                                     | What it emits                                                                                                                                                                                  |
+| ----------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `valueFieldMapper`      | input, textarea, datepicker, slider, …  | `field`, `key`, `label`, `placeholder`, `className`, `tabIndex`, `props`, `meta`, `validationMessages` (and `defaultValidationMessages` for back-compat — deprecated, removal targeted for v1) |
+| `checkboxFieldMapper`   | checkbox, toggle                        | same as `valueFieldMapper`                                                                                                                                                                     |
+| `optionsFieldMapper`    | select, radio, multi-checkbox           | adds `options`                                                                                                                                                                                 |
+| `datepickerFieldMapper` | datepicker                              | adds `minDate`, `maxDate`, `startAt` (string→Date conversion)                                                                                                                                  |
+| `buttonFieldMapper`     | plain buttons                           | `key`, `label`, `disabled`, `event`, `props`, `className`                                                                                                                                      |
+| Array button mappers    | `addArrayItem`, `removeArrayItem`, etc. | event + event-args wiring for array mutations                                                                                                                                                  |
 
 ### Mapper-as-contract
 

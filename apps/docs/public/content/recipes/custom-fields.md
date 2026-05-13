@@ -15,7 +15,7 @@ The mechanics are the same in both cases — every ng-forge field component comp
 
 ## 1. Create the field component
 
-Compose `NgForgeField` via `hostDirectives` and consume the standard inputs and derived signals through `injectNgForgeField<T>()`. The directive owns the universal contract: `field`/`key`/`label`/`placeholder`/`className`/`tabIndex`/`props`/`meta`/`validationMessages`/`defaultValidationMessages` inputs, `errors`/`errorsToDisplay`/`ariaInvalid`/`ariaRequired`/`ariaDescribedBy`/`errorId`/`hintId` derived signals, and `[id]`/`[class]`/`[data-testid]`/`[hidden]` host bindings.
+Compose `NgForgeField` via `hostDirectives` and consume the standard inputs and derived signals through `injectNgForgeField<T>()`. The directive owns the universal contract: `field`/`key`/`label`/`placeholder`/`className`/`tabIndex`/`props`/`meta`/`validationMessages` inputs (plus a deprecated `defaultValidationMessages` back-compat seam), `errors`/`errorsToDisplay`/`ariaInvalid`/`ariaRequired`/`ariaDescribedBy`/`errorId`/`hintId` derived signals, and `[id]`/`[class]`/`[data-testid]`/`[hidden]` host bindings.
 
 ```typescript name="rich-text-field.component.ts"
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
@@ -41,15 +41,7 @@ interface RichTextProps extends Record<string, unknown> {
       <label [for]="inputId">{{ ngf.label() | dynamicText | async }}</label>
     }
 
-    <my-rich-editor
-      ngForgeControl
-      [id]="inputId"
-      [formField]="f"
-      [toolbar]="props()?.toolbar ?? 'full'"
-      [attr.aria-invalid]="ngf.ariaInvalid()"
-      [attr.aria-required]="ngf.ariaRequired()"
-      [attr.aria-describedby]="ngf.ariaDescribedBy()"
-    />
+    <my-rich-editor ngForgeControl [id]="inputId" [formField]="f" [toolbar]="props()?.toolbar ?? 'full'" />
 
     @if (ngf.errorsToDisplay()[0]; as error) {
       <div role="alert" [id]="ngf.errorId()">{{ error.message }}</div>
@@ -69,7 +61,7 @@ A few things to note:
 
 - **No manual input declarations** for `field`/`key`/`label`/etc. The 10 standard inputs come in via `hostDirectives`; `injectNgForgeField<T>()` returns a typed view of the directive instance.
 - **No host bindings block** — `NgForgeField` already binds `[id]`/`[class]`/`[attr.data-testid]`/`[attr.hidden]` to the host element.
-- **`[ngForgeControl]`** on the canonical control element forwards meta attributes (`data-*`, `aria-*`, `autocomplete`) onto that element. For shadow-DOM wrappers where you can't reach the inner input, see [`NgForgeHostControl`](/building-an-adapter#meta-forwarding) in the integration guide.
+- **`[ngForgeControl]`** on the canonical control element forwards meta attributes (`data-*`, `autocomplete`, etc.) AND aria attributes (`aria-invalid`, `aria-required`, `aria-describedby` — derived from field state) onto that element. The author doesn't bind aria-\* manually — the marker absorbs it. For shadow-DOM wrappers where you can't reach the inner input, see [`NgForgeHostControl`](/building-an-adapter#meta-forwarding) in the integration guide.
 - **`injectNgForgeField<string>()`** narrows `ngf.field()` to `Signal<FieldTree<string>>`, so the `[formField]="f"` binding type-checks. Use the appropriate generic for your value type (`boolean` for checkboxes, `Date | null` for datepickers, `ValueType[]` for multi-selects, etc.).
 
 ## 2. Register the field type
