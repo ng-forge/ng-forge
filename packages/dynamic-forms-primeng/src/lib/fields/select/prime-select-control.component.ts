@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
 import { FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { Select, SelectChangeEvent } from 'primeng/select';
 import { MultiSelect, MultiSelectChangeEvent } from 'primeng/multiselect';
 
@@ -24,13 +24,13 @@ import { MultiSelect, MultiSelectChangeEvent } from 'primeng/multiselect';
         optionValue="value"
         [placeholder]="placeholder()"
         [disabled]="disabled()"
-        [invalid]="ariaInvalid()"
+        [invalid]="effectiveAriaInvalid()"
         [filter]="filter()"
         [showClear]="showClear()"
         [styleClass]="styleClass()"
-        [attr.aria-invalid]="ariaInvalid()"
-        [attr.aria-required]="ariaRequired()"
-        [attr.aria-describedby]="ariaDescribedBy()"
+        [attr.aria-invalid]="effectiveAriaInvalid()"
+        [attr.aria-required]="effectiveAriaRequired()"
+        [attr.aria-describedby]="effectiveAriaDescribedBy()"
         (onBlur)="onBlur()"
         (onHide)="onBlur()"
       />
@@ -44,13 +44,13 @@ import { MultiSelect, MultiSelectChangeEvent } from 'primeng/multiselect';
         optionValue="value"
         [placeholder]="placeholder()"
         [disabled]="disabled()"
-        [invalid]="ariaInvalid()"
+        [invalid]="effectiveAriaInvalid()"
         [filter]="filter()"
         [showClear]="showClear()"
         [styleClass]="styleClass()"
-        [attr.aria-invalid]="ariaInvalid()"
-        [attr.aria-required]="ariaRequired()"
-        [attr.aria-describedby]="ariaDescribedBy()"
+        [attr.aria-invalid]="effectiveAriaInvalid()"
+        [attr.aria-required]="effectiveAriaRequired()"
+        [attr.aria-describedby]="effectiveAriaDescribedBy()"
         (onBlur)="onBlur()"
         (onHide)="onBlur()"
       />
@@ -60,6 +60,7 @@ import { MultiSelect, MultiSelectChangeEvent } from 'primeng/multiselect';
 })
 export class PrimeSelectControlComponent implements FormValueControl<ValueType> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // FormValueControl implementation
@@ -94,19 +95,31 @@ export class PrimeSelectControlComponent implements FormValueControl<ValueType> 
   readonly filter = input<boolean>(false);
   readonly showClear = input<boolean>(false);
   readonly styleClass = input<string>('');
+  // Explicit override paths. Unset → fall back to ambient NgForgeField.
   readonly meta = input<FieldMeta>();
+  readonly ariaInvalid = input<boolean | undefined>(undefined);
+  readonly ariaRequired = input<boolean | null | undefined>(undefined);
+  readonly ariaDescribedBy = input<string | null | undefined>(undefined);
 
-  /** aria-invalid passed from parent (computed from field state) */
-  readonly ariaInvalid = input<boolean>(false);
-
-  /** aria-required passed from parent (computed from field state) */
-  readonly ariaRequired = input<boolean | null>(null);
-
-  /** aria-describedby IDs passed from parent */
-  readonly ariaDescribedBy = input<string | null>(null);
+  protected readonly effectiveMeta = computed<FieldMeta | undefined>(() => this.meta() ?? this.parentField?.meta());
+  protected readonly effectiveAriaInvalid = computed<boolean>(() => {
+    const own = this.ariaInvalid();
+    if (own !== undefined) return own;
+    return this.parentField?.ariaInvalid() ?? false;
+  });
+  protected readonly effectiveAriaRequired = computed<true | null>(() => {
+    const own = this.ariaRequired();
+    if (own !== undefined) return own === true ? true : null;
+    return this.parentField?.ariaRequired() ?? null;
+  });
+  protected readonly effectiveAriaDescribedBy = computed<string | null>(() => {
+    const own = this.ariaDescribedBy();
+    if (own !== undefined) return own;
+    return this.parentField?.ariaDescribedBy() ?? null;
+  });
 
   constructor() {
-    setupMetaTracking(this.elementRef, this.meta);
+    setupMetaTracking(this.elementRef, this.effectiveMeta);
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

@@ -19,14 +19,7 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
         <div class="form-label">{{ label | dynamicText | async }}</div>
       }
 
-      <df-bs-radio-group
-        [formField]="f"
-        [label]="ngf.label()"
-        [options]="options()"
-        [properties]="props()"
-        [meta]="ngf.meta()"
-        [ariaDescribedBy]="ngf.ariaDescribedBy()"
-      />
+      <df-bs-radio-group [formField]="f" [label]="ngf.label()" [options]="options()" [properties]="props()" />
 
       @if (ngf.errorsToDisplay()[0]; as error) {
         <div class="invalid-feedback d-block" [id]="ngf.errorId()" role="alert">{{ error.message }}</div>

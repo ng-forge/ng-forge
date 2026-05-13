@@ -26,10 +26,6 @@ import { PrimeSelectControlComponent } from './prime-select-control.component';
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
         [styleClass]="selectClasses()"
-        [meta]="ngf.meta()"
-        [ariaInvalid]="ngf.ariaInvalid()"
-        [ariaRequired]="ngf.ariaRequired()"
-        [ariaDescribedBy]="ngf.ariaDescribedBy()"
       />
 
       @if (ngf.errorsToDisplay()[0]; as error) {

@@ -18,13 +18,11 @@ import { AsyncPipe } from '@angular/common';
     <df-ion-toggle-control
       [id]="toggleId"
       [formField]="f"
-      [meta]="ngf.meta()"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"
       [justify]="props()?.justify"
       [color]="props()?.color ?? 'primary'"
       [enableOnOffLabels]="props()?.enableOnOffLabels ?? false"
       [tabIndex]="ngf.tabIndex()"
-      [ariaDescribedBy]="ngf.ariaDescribedBy()"
     >
       {{ ngf.label() | dynamicText | async }}
     </df-ion-toggle-control>

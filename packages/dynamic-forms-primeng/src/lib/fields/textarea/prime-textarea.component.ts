@@ -20,13 +20,11 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
       <df-prime-textarea-control
         [id]="inputId()"
         [formField]="ngf.field()"
-        [meta]="ngf.meta()"
         [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
         [tabIndex]="ngf.tabIndex()"
         [autoResize]="props()?.autoResize ?? false"
-        [ariaDescribedBy]="ngf.ariaDescribedBy()"
         [styleClass]="textareaClasses()"
       />
 

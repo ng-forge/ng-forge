@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { setupMetaTracking, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, setupMetaTracking, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { TextareaModule } from 'primeng/textarea';
 
 /**
@@ -27,7 +27,7 @@ import { TextareaModule } from 'primeng/textarea';
       [class]="styleClass()"
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-required]="ariaRequired()"
-      [attr.aria-describedby]="ariaDescribedBy()"
+      [attr.aria-describedby]="effectiveAriaDescribedBy()"
       (blur)="onBlur()"
     ></textarea>
   `,
@@ -35,6 +35,7 @@ import { TextareaModule } from 'primeng/textarea';
 })
 export class PrimeTextareaControlComponent implements FormValueControl<string> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // FormValueControl implementation
@@ -76,13 +77,21 @@ export class PrimeTextareaControlComponent implements FormValueControl<string> {
   readonly tabIndex = input<number | undefined>(undefined);
   readonly autoResize = input<boolean>(false);
   readonly styleClass = input<string>('');
+  // Explicit override paths. Unset → fall back to ambient NgForgeField.
   readonly meta = input<TextareaMeta>();
+  readonly ariaDescribedBy = input<string | null | undefined>(undefined);
 
-  /** aria-describedby IDs passed from parent */
-  readonly ariaDescribedBy = input<string | null>(null);
+  protected readonly effectiveMeta = computed<TextareaMeta | undefined>(
+    () => this.meta() ?? (this.parentField?.meta() as TextareaMeta | undefined),
+  );
+  protected readonly effectiveAriaDescribedBy = computed<string | null>(() => {
+    const own = this.ariaDescribedBy();
+    if (own !== undefined) return own;
+    return this.parentField?.ariaDescribedBy() ?? null;
+  });
 
   constructor() {
-    setupMetaTracking(this.elementRef, this.meta, { selector: 'textarea' });
+    setupMetaTracking(this.elementRef, this.effectiveMeta, { selector: 'textarea' });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

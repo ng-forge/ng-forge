@@ -33,10 +33,6 @@ import { PrimeDatepickerControlComponent } from './prime-datepicker-control.comp
         [maxDate]="maxDate()"
         [defaultDate]="startAt()"
         [styleClass]="datepickerClasses()"
-        [meta]="ngf.meta()"
-        [ariaInvalid]="ngf.ariaInvalid()"
-        [ariaRequired]="ngf.ariaRequired()"
-        [ariaDescribedBy]="ngf.ariaDescribedBy()"
       />
 
       @if (ngf.errorsToDisplay()[0]; as error) {

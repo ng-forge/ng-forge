@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
 import { DynamicTextPipe, FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 import { RadioButton } from 'primeng/radiobutton';
 
@@ -65,6 +65,7 @@ export interface PrimeRadioGroupProps {
 // pattern used by the Bootstrap radio group adapter (BsRadioGroupComponent).
 export class PrimeRadioGroupComponent implements FormValueControl<ValueType | undefined> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
 
   // Value model - FormField directive binds form value to this
   readonly value = model<ValueType | undefined>(undefined);
@@ -78,11 +79,14 @@ export class PrimeRadioGroupComponent implements FormValueControl<ValueType | un
   // Component-specific inputs
   readonly options = input.required<FieldOption<ValueType>[]>();
   readonly properties = input<PrimeRadioGroupProps>();
+  // Explicit override path. Unset → fall back to ambient NgForgeField.
   readonly meta = input<FieldMeta>();
+
+  protected readonly effectiveMeta = computed<FieldMeta | undefined>(() => this.meta() ?? this.parentField?.meta());
 
   constructor() {
     // Apply meta attributes to all radio inputs, re-apply when options change
-    setupMetaTracking(this.elementRef, this.meta, {
+    setupMetaTracking(this.elementRef, this.effectiveMeta, {
       selector: 'input[type="radio"]',
       dependents: [this.options],
     });

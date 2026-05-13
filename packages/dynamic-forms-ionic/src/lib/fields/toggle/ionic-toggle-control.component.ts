@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import type { FormCheckboxControl } from '@angular/forms/signals';
 import { IonToggle } from '@ionic/angular/standalone';
 import { FieldMeta } from '@ng-forge/dynamic-forms';
-import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 
 /**
  * A wrapper component for Ionic's ion-toggle that implements FormCheckboxControl.
@@ -28,7 +28,7 @@ import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-required]="ariaRequired()"
       [attr.aria-readonly]="ariaReadonly()"
-      [attr.aria-describedby]="ariaDescribedBy()"
+      [attr.aria-describedby]="effectiveAriaDescribedBy()"
     >
       <ng-content />
     </ion-toggle>
@@ -41,6 +41,7 @@ import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 })
 export class IonicToggleControlComponent implements FormCheckboxControl {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // FormCheckboxControl implementation
@@ -73,12 +74,20 @@ export class IonicToggleControlComponent implements FormCheckboxControl {
   readonly color = input<string>('primary');
   readonly enableOnOffLabels = input<boolean>(false);
   readonly tabIndex = input<number | undefined>(undefined);
+  // Explicit override paths. Unset → fall back to ambient NgForgeField.
   readonly meta = input<FieldMeta>();
-  readonly ariaDescribedBy = input<string | null>(null);
+  readonly ariaDescribedBy = input<string | null | undefined>(undefined);
+
+  protected readonly effectiveMeta = computed<FieldMeta | undefined>(() => this.meta() ?? this.parentField?.meta());
+  protected readonly effectiveAriaDescribedBy = computed<string | null>(() => {
+    const own = this.ariaDescribedBy();
+    if (own !== undefined) return own;
+    return this.parentField?.ariaDescribedBy() ?? null;
+  });
 
   constructor() {
     // Shadow DOM - apply meta to ion-toggle element
-    setupMetaTracking(this.elementRef, this.meta, {
+    setupMetaTracking(this.elementRef, this.effectiveMeta, {
       selector: 'ion-toggle',
     });
   }

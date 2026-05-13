@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 
 export interface BsRadioGroupProps {
@@ -42,7 +42,7 @@ export interface BsRadioGroupProps {
             [checked]="value() === option.value"
             (change)="onRadioChange(option.value)"
             [disabled]="disabled() || option.disabled || false"
-            [attr.aria-describedby]="ariaDescribedBy()"
+            [attr.aria-describedby]="effectiveAriaDescribedBy()"
             class="btn-check"
             [id]="name() + '_' + i"
             autocomplete="off"
@@ -67,7 +67,7 @@ export interface BsRadioGroupProps {
             [checked]="value() === option.value"
             (change)="onRadioChange(option.value)"
             [disabled]="disabled() || option.disabled || false"
-            [attr.aria-describedby]="ariaDescribedBy()"
+            [attr.aria-describedby]="effectiveAriaDescribedBy()"
             class="form-check-input"
             [id]="name() + '_' + i"
           />
@@ -89,6 +89,10 @@ export interface BsRadioGroupProps {
 })
 export class BsRadioGroupComponent implements FormValueControl<ValueType | undefined> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  // Ambient NgForgeField from the parent (e.g. df-bs-radio). When absent —
+  // standalone use, e.g. unit tests — meta / aria-describedby come purely
+  // from the explicit inputs.
+  private readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
 
   // Value model - FormField directive binds form value to this
   readonly value = model<ValueType | undefined>(undefined);
@@ -102,13 +106,20 @@ export class BsRadioGroupComponent implements FormValueControl<ValueType | undef
   readonly label = input<DynamicText>();
   readonly options = input.required<FieldOption<ValueType>[]>();
   readonly properties = input<BsRadioGroupProps>();
+  // Explicit override paths. Unset → fall back to ambient NgForgeField.
   readonly meta = input<FieldMeta>();
+  readonly ariaDescribedBy = input<string | null | undefined>(undefined);
 
-  // Accessibility - this will be provided by parent component through input
-  readonly ariaDescribedBy = input<string | null>(null);
+  // Explicit input beats ambient. Mirrors NgForgeField's effectiveDefaultValidationMessages pattern.
+  protected readonly effectiveMeta = computed<FieldMeta | undefined>(() => this.meta() ?? this.parentField?.meta());
+  protected readonly effectiveAriaDescribedBy = computed<string | null>(() => {
+    const own = this.ariaDescribedBy();
+    if (own !== undefined) return own;
+    return this.parentField?.ariaDescribedBy() ?? null;
+  });
 
   constructor() {
-    setupMetaTracking(this.elementRef, this.meta, { selector: 'input[type="radio"]', dependents: [this.options] });
+    setupMetaTracking(this.elementRef, this.effectiveMeta, { selector: 'input[type="radio"]', dependents: [this.options] });
   }
 
   /**

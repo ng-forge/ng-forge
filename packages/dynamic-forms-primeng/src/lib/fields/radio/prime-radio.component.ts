@@ -17,13 +17,7 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
       <div class="radio-label">{{ ngf.label() | dynamicText | async }}</div>
     }
 
-    <df-prime-radio-group
-      [formField]="f"
-      [options]="options()"
-      [properties]="props()"
-      [meta]="ngf.meta()"
-      [attr.aria-describedby]="ngf.ariaDescribedBy()"
-    />
+    <df-prime-radio-group [formField]="f" [options]="options()" [properties]="props()" />
 
     @if (ngf.errorsToDisplay()[0]; as error) {
       <small class="p-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</small>
