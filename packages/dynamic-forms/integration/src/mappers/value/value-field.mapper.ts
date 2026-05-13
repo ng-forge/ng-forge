@@ -66,14 +66,10 @@ export function resolveValueFieldContext(): ValueFieldContext {
  * @param fieldDef The value field definition
  * @param ctx The resolved value field context
  * @param defaultProps Default props from the form configuration (may be undefined if not configured)
- * @param defaultValidationMessages Default validation messages from the form configuration (may be undefined if not configured)
+ * @param defaultValidationMessages **Deprecated** back-compat seam. New consumers should rely on
+ *   the `DEFAULT_VALIDATION_MESSAGES` DI token — `NgForgeField` reads it directly. This emission
+ *   is scheduled for removal in v1.
  * @returns Record of input names to values
- *
- * @deprecated The `defaultValidationMessages` input emission on the
- * returned record is a back-compat seam for third-party adapter components
- * that consumed it as a direct binding. New consumers should `inject(DEFAULT_VALIDATION_MESSAGES)`
- * instead — `NgForgeField` falls back to that token automatically when its
- * own input is unbound. Scheduled for removal in v1.
  */
 export function buildValueFieldInputs<TProps, TValue = unknown>(
   fieldDef: BaseValueField<TProps, TValue, FieldMeta, boolean>,

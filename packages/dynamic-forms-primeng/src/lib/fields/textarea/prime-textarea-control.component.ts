@@ -28,7 +28,7 @@ import { TextareaModule } from 'primeng/textarea';
       [class]="styleClass()"
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-required]="ariaRequired()"
-      [attr.aria-describedby]="effectiveAriaDescribedBy()"
+      [attr.aria-describedby]="ariaDescribedBy()"
       (blur)="onBlur()"
     ></textarea>
   `,
@@ -78,22 +78,14 @@ export class PrimeTextareaControlComponent implements FormValueControl<string> {
   readonly tabIndex = input<number | undefined>(undefined);
   readonly autoResize = input<boolean>(false);
   readonly styleClass = input<string>('');
-  // Explicit override paths. Unset → fall back to ambient NgForgeField.
-  readonly meta = input<TextareaMeta>();
-  readonly ariaDescribedBy = input<string | null | undefined>(undefined);
 
-  protected readonly effectiveMeta = computed<TextareaMeta | undefined>(
-    () => this.meta() ?? (this.parentField?.meta() as TextareaMeta | undefined),
-  );
-  protected readonly effectiveAriaDescribedBy = computed<string | null>(() => {
-    const own = this.ariaDescribedBy();
-    if (own !== undefined) return own;
-    return this.parentField?.ariaDescribedBy() ?? null;
-  });
+  // Meta + aria-describedby read from the ambient parent NgForgeField.
+  protected readonly meta = computed<TextareaMeta | undefined>(() => this.parentField?.meta() as TextareaMeta | undefined);
+  protected readonly ariaDescribedBy = computed<string | null>(() => this.parentField?.ariaDescribedBy() ?? null);
 
   constructor() {
     this.parentField?.markClaimed();
-    setupMetaTracking(this.elementRef, this.effectiveMeta, { selector: 'textarea' });
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'textarea' });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

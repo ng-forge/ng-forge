@@ -327,7 +327,7 @@ describe('NgForgeField', () => {
       fixture.componentRef.setInput('meta', { autocomplete: 'username' });
       fixture.detectChanges();
 
-      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('[NgForgeField]')));
+      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('NgForgeField -')));
       expect(warning).toBeDefined();
     });
 
@@ -339,7 +339,7 @@ describe('NgForgeField', () => {
       fixture.componentRef.setInput('key', 'username');
       fixture.detectChanges();
 
-      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('[NgForgeField]')));
+      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('NgForgeField -')));
       expect(warning).toBeUndefined();
     });
 
@@ -352,7 +352,7 @@ describe('NgForgeField', () => {
       fixture.componentRef.setInput('meta', { autocomplete: 'username' });
       fixture.detectChanges();
 
-      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('[NgForgeField]')));
+      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('NgForgeField -')));
       expect(warning).toBeUndefined();
     });
 
@@ -365,7 +365,7 @@ describe('NgForgeField', () => {
       fixture.componentRef.setInput('meta', { autocomplete: 'username' });
       fixture.detectChanges();
 
-      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('[NgForgeField]')));
+      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('NgForgeField -')));
       expect(warning).toBeUndefined();
     });
 
@@ -382,7 +382,7 @@ describe('NgForgeField', () => {
       fixture.componentRef.setInput('meta', { autocomplete: 'username' });
       fixture.detectChanges();
 
-      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('[NgForgeField]')));
+      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('NgForgeField -')));
       expect(warning).toBeUndefined();
     });
   });
@@ -466,7 +466,7 @@ describe('NgForgeField', () => {
       fixture.componentRef.setInput('meta', { autocomplete: 'username' });
       fixture.detectChanges();
       // First-render warn fires here because no claim landed in time.
-      const earlyWarn = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('[NgForgeField]')));
+      const earlyWarn = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('NgForgeField -')));
       expect(earlyWarn).toBeDefined();
 
       // Late claim — typical of a sub-component constructed after the
@@ -477,7 +477,7 @@ describe('NgForgeField', () => {
       fixture.componentRef.setInput('meta', { autocomplete: 'off' });
       fixture.detectChanges();
 
-      const totalWarns = warnSpy.mock.calls.filter((args) => args.some((a) => String(a).includes('[NgForgeField]'))).length;
+      const totalWarns = warnSpy.mock.calls.filter((args) => args.some((a) => String(a).includes('NgForgeField -'))).length;
       expect(totalWarns).toBe(1);
     });
   });

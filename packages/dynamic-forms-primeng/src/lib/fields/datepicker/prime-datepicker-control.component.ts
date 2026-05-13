@@ -22,7 +22,7 @@ import { DatePicker } from 'primeng/datepicker';
       [placeholder]="placeholder()"
       [disabled]="disabled()"
       [readonlyInput]="readonly()"
-      [invalid]="effectiveAriaInvalid()"
+      [invalid]="ariaInvalid()"
       [dateFormat]="dateFormat()"
       [inline]="inline()"
       [showIcon]="showIcon()"
@@ -35,9 +35,9 @@ import { DatePicker } from 'primeng/datepicker';
       [defaultDate]="defaultDate()"
       [styleClass]="styleClass()"
       [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="effectiveAriaInvalid()"
-      [attr.aria-required]="effectiveAriaRequired()"
-      [attr.aria-describedby]="effectiveAriaDescribedBy()"
+      [attr.aria-invalid]="ariaInvalid()"
+      [attr.aria-required]="ariaRequired()"
+      [attr.aria-describedby]="ariaDescribedBy()"
       (onBlur)="onBlur()"
     />
   `,
@@ -87,34 +87,16 @@ export class PrimeDatepickerControlComponent implements FormValueControl<string 
   readonly defaultDate = input<Date | null>(null);
   readonly styleClass = input<string>('');
   readonly tabIndex = input<number | undefined>(undefined);
-  // Explicit override paths. Unset → fall back to ambient NgForgeField.
-  readonly meta = input<InputMeta>();
-  readonly ariaInvalid = input<boolean | undefined>(undefined);
-  readonly ariaRequired = input<boolean | null | undefined>(undefined);
-  readonly ariaDescribedBy = input<string | null | undefined>(undefined);
 
-  protected readonly effectiveMeta = computed<InputMeta | undefined>(
-    () => this.meta() ?? (this.parentField?.meta() as InputMeta | undefined),
-  );
-  protected readonly effectiveAriaInvalid = computed<boolean>(() => {
-    const own = this.ariaInvalid();
-    if (own !== undefined) return own;
-    return this.parentField?.ariaInvalid() ?? false;
-  });
-  protected readonly effectiveAriaRequired = computed<true | null>(() => {
-    const own = this.ariaRequired();
-    if (own !== undefined) return own === true ? true : null;
-    return this.parentField?.ariaRequired() ?? null;
-  });
-  protected readonly effectiveAriaDescribedBy = computed<string | null>(() => {
-    const own = this.ariaDescribedBy();
-    if (own !== undefined) return own;
-    return this.parentField?.ariaDescribedBy() ?? null;
-  });
+  // Meta + aria read from the ambient parent NgForgeField.
+  protected readonly meta = computed<InputMeta | undefined>(() => this.parentField?.meta() as InputMeta | undefined);
+  protected readonly ariaInvalid = computed<boolean>(() => this.parentField?.ariaInvalid() ?? false);
+  protected readonly ariaRequired = computed<true | null>(() => this.parentField?.ariaRequired() ?? null);
+  protected readonly ariaDescribedBy = computed<string | null>(() => this.parentField?.ariaDescribedBy() ?? null);
 
   constructor() {
     this.parentField?.markClaimed();
-    setupMetaTracking(this.elementRef, this.effectiveMeta, { selector: 'input' });
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

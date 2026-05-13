@@ -89,15 +89,13 @@ export class PrimeRadioGroupComponent implements FormValueControl<ValueType | un
   // Component-specific inputs
   readonly options = input.required<FieldOption<ValueType>[]>();
   readonly properties = input<PrimeRadioGroupProps>();
-  // Explicit override path. Unset → fall back to ambient NgForgeField.
-  readonly meta = input<FieldMeta>();
 
-  protected readonly effectiveMeta = computed<FieldMeta | undefined>(() => this.meta() ?? this.parentField?.meta());
+  // Meta reads from the ambient parent NgForgeField.
+  protected readonly meta = computed<FieldMeta | undefined>(() => this.parentField?.meta());
 
   constructor() {
     this.parentField?.markClaimed();
-    // Apply meta attributes to all radio inputs, re-apply when options change
-    setupMetaTracking(this.elementRef, this.effectiveMeta, {
+    setupMetaTracking(this.elementRef, this.meta, {
       selector: 'input[type="radio"]',
       dependents: [this.options],
     });

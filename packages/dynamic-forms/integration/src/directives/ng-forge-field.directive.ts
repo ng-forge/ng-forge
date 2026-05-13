@@ -149,7 +149,7 @@ export class NgForgeField {
           warned = true;
           const key = untracked(this.key);
           const message =
-            `[NgForgeField] meta() provided for field "${key}" but no NgForgeControl / NgForgeHostControl / ` +
+            `NgForgeField - meta() provided for field "${key}" but no NgForgeControl / NgForgeHostControl / ` +
             `ambient sub-component claimed it. Meta will not be applied. ` +
             `See https://ng-forge.dev/building-an-adapter#meta-forwarding`;
           if (this.logger) {

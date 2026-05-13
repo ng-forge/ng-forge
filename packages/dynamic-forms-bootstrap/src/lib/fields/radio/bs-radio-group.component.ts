@@ -47,7 +47,7 @@ export interface BsRadioGroupProps {
             [checked]="value() === option.value"
             (change)="onRadioChange(option.value)"
             [disabled]="disabled() || option.disabled || false"
-            [attr.aria-describedby]="effectiveAriaDescribedBy()"
+            [attr.aria-describedby]="ariaDescribedBy()"
             class="btn-check"
             [id]="name() + '_' + i"
             autocomplete="off"
@@ -72,7 +72,7 @@ export interface BsRadioGroupProps {
             [checked]="value() === option.value"
             (change)="onRadioChange(option.value)"
             [disabled]="disabled() || option.disabled || false"
-            [attr.aria-describedby]="effectiveAriaDescribedBy()"
+            [attr.aria-describedby]="ariaDescribedBy()"
             class="form-check-input"
             [id]="name() + '_' + i"
           />
@@ -94,9 +94,7 @@ export interface BsRadioGroupProps {
 })
 export class BsRadioGroupComponent implements FormValueControl<ValueType | undefined> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
-  // Ambient NgForgeField from the parent (e.g. df-bs-radio). When absent —
-  // standalone use, e.g. unit tests — meta / aria-describedby come purely
-  // from the explicit inputs.
+  // Ambient NgForgeField from the parent df-bs-radio host.
   private readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
 
   // Value model - FormField directive binds form value to this
@@ -111,21 +109,14 @@ export class BsRadioGroupComponent implements FormValueControl<ValueType | undef
   readonly label = input<DynamicText>();
   readonly options = input.required<FieldOption<ValueType>[]>();
   readonly properties = input<BsRadioGroupProps>();
-  // Explicit override paths. Unset → fall back to ambient NgForgeField.
-  readonly meta = input<FieldMeta>();
-  readonly ariaDescribedBy = input<string | null | undefined>(undefined);
 
-  // Explicit input beats ambient. Mirrors NgForgeField's effectiveDefaultValidationMessages pattern.
-  protected readonly effectiveMeta = computed<FieldMeta | undefined>(() => this.meta() ?? this.parentField?.meta());
-  protected readonly effectiveAriaDescribedBy = computed<string | null>(() => {
-    const own = this.ariaDescribedBy();
-    if (own !== undefined) return own;
-    return this.parentField?.ariaDescribedBy() ?? null;
-  });
+  // Meta + aria-describedby read from the ambient parent NgForgeField.
+  protected readonly meta = computed<FieldMeta | undefined>(() => this.parentField?.meta());
+  protected readonly ariaDescribedBy = computed<string | null>(() => this.parentField?.ariaDescribedBy() ?? null);
 
   constructor() {
     this.parentField?.markClaimed();
-    setupMetaTracking(this.elementRef, this.effectiveMeta, { selector: 'input[type="radio"]', dependents: [this.options] });
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input[type="radio"]', dependents: [this.options] });
   }
 
   /**
