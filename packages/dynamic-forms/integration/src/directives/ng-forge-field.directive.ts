@@ -18,48 +18,34 @@ import { createResolvedErrorsSignal, ResolvedError } from '../utils/create-resol
 import { shouldShowErrors } from '../utils/should-show-errors';
 
 /**
- * `NgForgeField` is the canonical primitive for ng-forge value-field components.
- *
- * Apply via `hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }]`
- * to consume the standard 9 inputs (`field`, `key`, `label`, `placeholder`,
- * `className`, `tabIndex`, `props`, `meta`, `validationMessages`) and the
- * directive's derived signals (errors, showErrors, errorsToDisplay, errorId,
- * hintId, ariaInvalid, ariaRequired, ariaDescribedBy). Read derived state via
- * `inject(NgForgeField)`.
- *
- * Meta-attribute forwarding (data-*, aria-*, autocomplete, etc.) is configured
- * via `provideMetaTarget(selector)` / `provideHostMetaTarget()` /
- * `provideSkipMetaTarget()` in the same `providers` array as the host directive.
+ * Canonical primitive for ng-forge value-field components. Applied via
+ * `hostDirectives` to provide the 10 standard inputs + derived error / aria
+ * signals + universal host bindings. Meta + aria are forwarded to a target
+ * element by the companion marker directives (`NgForgeControl` in templates,
+ * `NgForgeHostControl` in `hostDirectives`).
  *
  * @example
  * ```ts
  * \@Component({
  *   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
- *   providers: [provideMetaTarget('mat-select')],
+ *   imports: [NgForgeControl, FormField],
  *   template: `
- *     <label [for]="controlId()">{{ field.label() | dynamicText | async }}</label>
- *     <input [id]="controlId()" [formField]="field.field()"
- *            [attr.aria-describedby]="field.ariaDescribedBy()" />
- *     @if (field.errorsToDisplay()[0]; as e) {
- *       <span [id]="field.errorId()">{{ e.message }}</span>
+ *     <label [for]="ngf.key()">{{ ngf.label() | dynamicText | async }}</label>
+ *     <input ngForgeControl [id]="ngf.key()" [formField]="ngf.field()" />
+ *     @if (ngf.errorsToDisplay()[0]; as e) {
+ *       <span [id]="ngf.errorId()">{{ e.message }}</span>
  *     }
  *   `,
  * })
- * export class MySelectField {
- *   protected readonly field = inject(NgForgeField);
- *   protected readonly controlId = computed(() => `${this.field.key()}-select`);
+ * export class MyInputField {
+ *   protected readonly ngf = injectNgForgeField<string>();
  * }
  * ```
  *
- * The directive is intentionally selector-less — usage is exclusively via
- * `hostDirectives`, never as a standalone selector match.
- *
- * Note: the `directive: NgForgeField` reference must be inlined at the call
- * site — Angular's AOT compiler can't resolve a class reference fetched via
- * property access on a const imported across package boundaries (NG1010).
- * The `inputs` list, however, can be shared — `as const` preserves the literal
- * tuple in the emitted `.d.ts`, so `[...NG_FORGE_FIELD_INPUTS]` produces an
- * array literal that the compiler can statically resolve (NG2019 satisfied).
+ * Selectorless — usage is exclusively via `hostDirectives`. The
+ * `directive: NgForgeField` reference must be inlined at the call site (NG1010);
+ * `inputs: [...NG_FORGE_FIELD_INPUTS]` works because the `as const` tuple
+ * resolves statically.
  */
 @Directive({
   host: {

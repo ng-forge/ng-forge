@@ -5,8 +5,9 @@ import { NgForgeField, setupMetaTracking, TextareaMeta } from '@ng-forge/dynamic
 import { TextareaModule } from 'primeng/textarea';
 
 /**
- * A wrapper component for PrimeNG's textarea that implements FormValueControl.
- * This allows it to work with Angular's [field] directive from @angular/forms/signals.
+ * PrimeNG textarea wrapper implementing FormValueControl. Rendered inside
+ * `df-prime-textarea` — picks up meta + aria from the ambient parent
+ * NgForgeField via `setupMetaTracking` (selector: `'textarea'`).
  */
 @Component({
   selector: 'df-prime-textarea-control',

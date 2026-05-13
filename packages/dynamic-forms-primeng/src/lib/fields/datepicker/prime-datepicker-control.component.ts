@@ -5,10 +5,9 @@ import { NgForgeField, setupMetaTracking, InputMeta } from '@ng-forge/dynamic-fo
 import { DatePicker } from 'primeng/datepicker';
 
 /**
- * A wrapper component for PrimeNG's DatePicker that implements FormValueControl.
- * This allows it to work with Angular's [formField] directive from @angular/forms/signals.
- *
- * The value is stored as an ISO date string for consistency with other implementations.
+ * PrimeNG DatePicker wrapper implementing FormValueControl. Value is stored
+ * as an ISO date string. Rendered inside `df-prime-datepicker` — picks up
+ * meta + aria from the ambient parent NgForgeField (selector: `'input'`).
  */
 @Component({
   selector: 'df-prime-datepicker-control',

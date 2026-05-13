@@ -600,7 +600,7 @@ ng-forge ships mappers for the standard field categories. You'll register field 
 
 Every key a mapper emits must match a declared input on the component or one of its host directives. If your component exposes the standard 10 inputs (via `NgForgeField` `hostDirectives`) and accepts `props`, every key the built-in mappers emit lines up automatically.
 
-If you write a custom mapper that emits a key the consuming component doesn't declare, the form engine fails fast at runtime with a clear error pointing at the mismatch — there's no silent drop. So if you're authoring a new field category, treat the mapper output as the wire format and the component inputs as the schema.
+`ComponentRef.setInput` (used by the field outlet to push mapper output onto the rendered component) is **lenient** on unknown input names in Angular 21 — extra keys are silently dropped rather than throwing NG0303. So if a custom mapper emits a key the component doesn't declare, the input is lost without a runtime error. Composing `NgForgeField` via `hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }]` registers all 10 standard names on the component so built-in mapper output always lines up — that's the recommended migration shape for third-party adapters.
 
 ### Writing a custom mapper
 

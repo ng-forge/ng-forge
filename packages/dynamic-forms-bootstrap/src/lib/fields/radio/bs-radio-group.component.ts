@@ -27,6 +27,11 @@ export interface BsRadioGroupProps {
   hint?: DynamicText;
 }
 
+/**
+ * Bootstrap radio group implementing FormValueControl. Rendered inside
+ * `df-bs-radio` — picks up meta + aria from the ambient parent NgForgeField
+ * via `setupMetaTracking` (selector: `'input[type="radio"]'`).
+ */
 @Component({
   selector: 'df-bs-radio-group',
   imports: [DynamicTextPipe, AsyncPipe],

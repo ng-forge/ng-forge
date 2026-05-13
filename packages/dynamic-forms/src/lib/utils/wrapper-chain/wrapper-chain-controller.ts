@@ -74,6 +74,14 @@ export function createWrapperChainController(opts: WrapperChainControllerOptions
   const mounted = { value: null as MountedChain | null };
   let refs: ComponentRef<unknown>[] = [];
 
+  // INVARIANT: this subscription pipeline is driven by toObservable(state),
+  // which emits via microtask scheduling — emissions never fire synchronously
+  // inside a parent CD pass. Callers' `renderInnermost` therefore runs
+  // outside CD, so they can safely `setInput` on a freshly-created component
+  // without needing `detectChanges()` to flush before the parent's CD reaches
+  // the new view. If you ever swap toObservable for sync signal-effect
+  // wiring (e.g. `effect()`), reinstate the synchronous CD flush in
+  // df-field-outlet's renderInnermost or NG0950 surfaces on required inputs.
   buildEmissionStream(state, deps)
     .pipe(takeUntilDestroyed(deps.destroyRef))
     .subscribe((emission) => {

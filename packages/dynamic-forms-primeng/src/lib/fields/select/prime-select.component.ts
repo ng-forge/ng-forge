@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NgForgeHostControl, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 import { PrimeSelectProps } from './prime-select.type';
 import { PrimeSelectControlComponent } from './prime-select-control.component';
@@ -10,7 +10,7 @@ import { PrimeSelectControlComponent } from './prime-select-control.component';
   selector: 'df-prime-select',
   imports: [FormField, PrimeSelectControlComponent, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }, NgForgeHostControl],
+  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
     <div class="df-prime-field">
       @if (ngf.label(); as label) {

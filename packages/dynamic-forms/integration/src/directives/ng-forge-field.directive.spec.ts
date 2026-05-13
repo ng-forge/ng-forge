@@ -404,7 +404,9 @@ describe('NgForgeField', () => {
       // Intentionally skip setInput. Host bindings on the directive read
       // `key()` / `field()`, which are `input.required<...>()` and throw
       // NG0950 on first read until set.
-      expect(() => fixture.detectChanges()).toThrow();
+      // Match NG0950's "required" wording so the test fails meaningfully if
+      // Angular ever changes the error format.
+      expect(() => fixture.detectChanges()).toThrow(/required/i);
     });
   });
 });

@@ -13,6 +13,11 @@ export interface PrimeRadioGroupProps {
   styleClass?: string;
 }
 
+/**
+ * PrimeNG radio group implementing FormValueControl. Rendered inside
+ * `df-prime-radio` — picks up meta + aria from the ambient parent NgForgeField
+ * via `setupMetaTracking` (selector: `'input[type="radio"]'`).
+ */
 @Component({
   selector: 'df-prime-radio-group',
   imports: [RadioButton, FormsModule, DynamicTextPipe, AsyncPipe],

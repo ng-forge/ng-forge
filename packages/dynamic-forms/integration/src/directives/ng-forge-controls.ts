@@ -1,73 +1,18 @@
-import { afterRenderEffect, Directive, ElementRef, inject, input } from '@angular/core';
-import { applyMetaToElement, FieldMeta, isEqual } from '@ng-forge/dynamic-forms';
+import { Directive, ElementRef, inject, input } from '@angular/core';
+import { setupMarkerAttrTracking } from '../utils/setup-meta-tracking';
 import { NgForgeField } from './ng-forge-field.directive';
-
-interface AriaSnapshot {
-  readonly 'aria-invalid': boolean;
-  // `undefined` (not `null`) matches FieldMeta's index signature — both
-  // `applyMetaToElement` and the merge below treat undefined as "no attr".
-  readonly 'aria-required': true | undefined;
-  readonly 'aria-describedby': string | undefined;
-}
-
-/**
- * Apply meta + aria to the directive's own host (when no target selector is
- * set) or to all descendants matching the selector. Aria comes from the
- * parent `NgForgeField`'s derived signals; meta comes from the parent's
- * `meta` input. Parent-computed aria wins on key collision. Tracks applied
- * attributes per element so transitions (e.g. aria-required true → null)
- * clear the stale attr.
- */
-function setupControlMetaEffect(host: ElementRef<HTMLElement>, parent: NgForgeField, targetSelector: () => string | undefined): void {
-  const appliedByElement = new WeakMap<Element, Set<string>>();
-  let previousMeta: FieldMeta | undefined;
-  let previousAria: AriaSnapshot | undefined;
-
-  afterRenderEffect({
-    write: () => {
-      const currentMeta = parent.meta();
-      const ariaRequired = parent.ariaRequired();
-      const ariaDescribedBy = parent.ariaDescribedBy();
-      const currentAria: AriaSnapshot = {
-        'aria-invalid': parent.ariaInvalid(),
-        'aria-required': ariaRequired === null ? undefined : ariaRequired,
-        'aria-describedby': ariaDescribedBy === null ? undefined : ariaDescribedBy,
-      };
-      const selector = targetSelector()?.trim() || undefined;
-
-      // Re-query every effect run when a selector is set: late-rendered
-      // descendants must still pick up attrs. For the host-only path we
-      // can short-circuit when neither meta nor aria changed.
-      if (!selector && isEqual(currentMeta, previousMeta) && isEqual(currentAria, previousAria)) {
-        return;
-      }
-      previousMeta = currentMeta;
-      previousAria = currentAria;
-
-      // Parent-computed aria wins — merge order puts it last.
-      const combined: FieldMeta = { ...(currentMeta ?? {}), ...currentAria };
-
-      const targets: Element[] = selector ? Array.from(host.nativeElement.querySelectorAll(selector)) : [host.nativeElement];
-
-      for (const el of targets) {
-        const applied = appliedByElement.get(el) ?? new Set<string>();
-        appliedByElement.set(el, applyMetaToElement(el as HTMLElement, combined, applied));
-      }
-    },
-  });
-}
 
 /**
  * Marker directive applied to the canonical control element of an
- * `NgForgeField`-using component. Forwards the field's `meta` (data-*,
- * aria-*, autocomplete, etc.) onto a target element.
+ * `NgForgeField`-using component. Forwards the field's `meta` AND
+ * parent-derived aria signals (`aria-invalid`, `aria-required`,
+ * `aria-describedby`) onto a target element.
  *
- * By default meta lands on the directive's own host element. For wrapped
+ * By default attributes land on the directive's own host. For wrapped
  * controls (e.g. `<mat-checkbox>`, `<p-toggleSwitch>`) where the canonical
  * native input is rendered as a descendant inside the wrapper, pass a CSS
- * selector through the input alias — the directive queries the host
- * subtree and applies meta to every matching descendant on each render
- * cycle, so descendants rendered later are still covered.
+ * selector through the input alias — the directive caches the resolved
+ * descendant set and re-resolves only when the selector changes.
  *
  * @example Bare native control
  * ```html
@@ -97,7 +42,7 @@ export class NgForgeControl {
 
   constructor() {
     const parent = inject(NgForgeField);
-    setupControlMetaEffect(inject(ElementRef), parent, () => this.target());
+    setupMarkerAttrTracking(inject(ElementRef), parent, () => this.target());
     parent.markClaimed();
   }
 }
@@ -106,7 +51,13 @@ export class NgForgeControl {
  * Selectorless companion directive for shadow-DOM-encapsulated components
  * (PrimeNG `p-select`, Ionic web components, etc.) where no light-DOM child
  * is the canonical control. Added to the component's `hostDirectives` so the
- * field's `meta` lands on the component's own host element.
+ * field's `meta` + parent aria land on the component's own host element.
+ *
+ * For split parent/control components (e.g. `df-prime-select` rendering
+ * `df-prime-select-control` internally), place `NgForgeHostControl` on the
+ * INNER control component's `hostDirectives` — the inner element is the
+ * canonical control, and the marker's `inject(NgForgeField)` walks up the
+ * element-injector tree to find the parent's directive instance.
  *
  * @example
  * ```ts
@@ -124,7 +75,7 @@ export class NgForgeControl {
 export class NgForgeHostControl {
   constructor() {
     const parent = inject(NgForgeField);
-    setupControlMetaEffect(inject(ElementRef), parent, () => undefined);
+    setupMarkerAttrTracking(inject(ElementRef), parent, () => undefined);
     parent.markClaimed();
   }
 }

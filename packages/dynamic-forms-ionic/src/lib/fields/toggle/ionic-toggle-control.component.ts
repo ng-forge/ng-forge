@@ -1,21 +1,19 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
 import type { FormCheckboxControl } from '@angular/forms/signals';
 import { IonToggle } from '@ionic/angular/standalone';
-import { FieldMeta } from '@ng-forge/dynamic-forms';
-import { NgForgeField, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl } from '@ng-forge/dynamic-forms/integration';
 
 /**
- * A wrapper component for Ionic's ion-toggle that implements FormCheckboxControl.
- * This allows it to work with Angular's [field] directive from @angular/forms/signals.
- *
- * We use FormCheckboxControl because ion-toggle is a boolean checkbox-like control.
- * The Field directive binds to the `checked` model for checkbox controls.
+ * ion-toggle wrapper implementing FormCheckboxControl. Rendered inside
+ * `df-ion-toggle`. `NgForgeControl` on `<ion-toggle>` claims the ambient
+ * parent NgForgeField and routes meta + aria onto that element.
  */
 @Component({
   selector: 'df-ion-toggle-control',
-  imports: [IonToggle],
+  imports: [IonToggle, NgForgeControl],
   template: `
     <ion-toggle
+      ngForgeControl
       [checked]="isChecked()"
       (ionChange)="onToggleChange($event)"
       (ionBlur)="onBlur()"
@@ -25,10 +23,7 @@ import { NgForgeField, setupMetaTracking } from '@ng-forge/dynamic-forms/integra
       [enableOnOffLabels]="enableOnOffLabels()"
       [disabled]="isEffectivelyDisabled()"
       [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="ariaInvalid()"
-      [attr.aria-required]="ariaRequired()"
       [attr.aria-readonly]="ariaReadonly()"
-      [attr.aria-describedby]="effectiveAriaDescribedBy()"
     >
       <ng-content />
     </ion-toggle>
@@ -40,9 +35,6 @@ import { NgForgeField, setupMetaTracking } from '@ng-forge/dynamic-forms/integra
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IonicToggleControlComponent implements FormCheckboxControl {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
-  private readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
-
   // ─────────────────────────────────────────────────────────────────────────────
   // FormCheckboxControl implementation
   // ─────────────────────────────────────────────────────────────────────────────
@@ -74,43 +66,10 @@ export class IonicToggleControlComponent implements FormCheckboxControl {
   readonly color = input<string>('primary');
   readonly enableOnOffLabels = input<boolean>(false);
   readonly tabIndex = input<number | undefined>(undefined);
-  // Explicit override paths. Unset → fall back to ambient NgForgeField.
-  readonly meta = input<FieldMeta>();
-  readonly ariaDescribedBy = input<string | null | undefined>(undefined);
 
-  protected readonly effectiveMeta = computed<FieldMeta | undefined>(() => this.meta() ?? this.parentField?.meta());
-  protected readonly effectiveAriaDescribedBy = computed<string | null>(() => {
-    const own = this.ariaDescribedBy();
-    if (own !== undefined) return own;
-    return this.parentField?.ariaDescribedBy() ?? null;
-  });
-
-  constructor() {
-    this.parentField?.markClaimed();
-    // Shadow DOM - apply meta to ion-toggle element
-    setupMetaTracking(this.elementRef, this.effectiveMeta, {
-      selector: 'ion-toggle',
-    });
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Computed ARIA attributes
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** aria-invalid: true when field is invalid AND touched */
-  protected readonly ariaInvalid = computed(() => {
-    return this.invalid() && this.touched();
-  });
-
-  /** aria-required: true if field is required, null otherwise */
-  protected readonly ariaRequired = computed(() => {
-    return this.required() ? true : null;
-  });
-
-  /** aria-readonly: true if field is readonly, null otherwise */
-  protected readonly ariaReadonly = computed(() => {
-    return this.readonly() ? true : null;
-  });
+  // aria-invalid / aria-required / aria-describedby are written to <ion-toggle>
+  // by NgForgeControl. aria-readonly is Ionic-specific and stays template-side.
+  protected readonly ariaReadonly = computed(() => (this.readonly() ? true : null));
 
   /** Computed checked state - ensures proper boolean conversion for ion-toggle */
   protected readonly isChecked = computed(() => {
