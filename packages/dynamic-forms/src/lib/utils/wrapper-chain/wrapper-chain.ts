@@ -31,8 +31,7 @@ import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
  */
 const inputNamesCache = new WeakMap<Type<unknown>, Set<string>>();
 
-/** Declared input names (template aliases) on a component class, hostDirective inputs included. Cached per class. */
-export function getDeclaredInputs(componentType: Type<unknown>): Set<string> {
+function getDeclaredInputs(componentType: Type<unknown>): Set<string> {
   let inputs = inputNamesCache.get(componentType);
   if (!inputs) {
     const meta = reflectComponentType(componentType);
