@@ -222,11 +222,7 @@ export class DfFieldOutlet {
   private readonly warnedUnknownKeys = new WeakMap<Type<unknown>, Set<string>>();
 
   private pushRawInputs(ref: ComponentRef<unknown>, rawInputs: Record<string, unknown>): void {
-    // Filter on declared inputs (hostDirective forwarded inputs included in
-    // Angular 21+) so mapper output that doesn't line up with a real input is
-    // skipped instead of silently no-op'd via setInput's lenient path. In dev
-    // mode, surface unknown keys once per (component, key) so mapper typos are
-    // observable without flooding the console.
+    // Filter on declared inputs so mapper typos surface as a dev-mode warn instead of silently no-op'ing through setInput.
     const declared = getDeclaredInputs(ref.componentType);
     const last = this.lastPushedInputs;
     for (const [key, value] of Object.entries(rawInputs)) {

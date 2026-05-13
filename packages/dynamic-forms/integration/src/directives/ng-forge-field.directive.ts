@@ -136,9 +136,7 @@ export class NgForgeField {
           if (!meta || Object.keys(meta).length === 0) return;
           if (untracked(this._claimed)) return;
           warned = true;
-          // `key` is a required input on the injected Shell. `untracked` is
-          // safe here because afterRenderEffect.write runs after first CD,
-          // by which time host-directive inputs are bound — avoiding NG0950.
+          // `untracked` safe — afterRenderEffect.write runs after first CD, so Shell's required `key` is bound (no NG0950).
           const key = untracked(this.key);
           const message =
             `NgForgeField - meta() provided for field "${key}" but no NgForgeControl / NgForgeHostControl / ` +

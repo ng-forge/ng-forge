@@ -31,15 +31,7 @@ import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
  */
 const inputNamesCache = new WeakMap<Type<unknown>, Set<string>>();
 
-/**
- * Returns the set of declared input names (template aliases) on a component
- * class. Includes inputs forwarded from host directives (Angular 21+
- * `reflectComponentType` walks the hostDirective chain).
- *
- * Used by `pushRawInputs` in the field outlet to detect unknown mapper keys
- * in dev mode without paying the reflection cost on every push (the result
- * is cached per component class).
- */
+/** Declared input names (template aliases) on a component class, hostDirective inputs included. Cached per class. */
 export function getDeclaredInputs(componentType: Type<unknown>): Set<string> {
   let inputs = inputNamesCache.get(componentType);
   if (!inputs) {
