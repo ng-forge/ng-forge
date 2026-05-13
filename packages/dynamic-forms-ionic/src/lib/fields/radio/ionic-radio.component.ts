@@ -2,24 +2,14 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { IonItem, IonNote, IonRadio, IonRadioGroup } from '@ionic/angular/standalone';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import {
-  NgForgeControl,
-  injectNgForgeField,
-  NgForgeField,
-  NgForgeFieldShell,
-  NG_FORGE_FIELD_SHELL_INPUTS,
-  NG_FORGE_VALUE_FIELD_INPUTS,
-} from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { IonicRadioProps } from './ionic-radio.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ion-radio',
   imports: [IonRadioGroup, IonRadio, IonItem, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
-  hostDirectives: [
-    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
-    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
-  ],
+  hostDirectives: [NgForgeFieldHost],
   template: `
     @let f = ngf.field();
     @let radioGroupId = ngf.key() + '-radio-group';

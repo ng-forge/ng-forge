@@ -405,20 +405,14 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import {
   injectNgForgeField,
   NgForgeControl,
-  NgForgeField,
-  NgForgeFieldShell,
-  NG_FORGE_FIELD_SHELL_INPUTS,
-  NG_FORGE_VALUE_FIELD_INPUTS,
+  NgForgeFieldHost,
   type ${guide.fieldInterface},
 } from '@ng-forge/dynamic-forms/integration';
 
 @Component({
   selector: 'my-${name}',
   imports: [NgForgeControl],
-  hostDirectives: [
-    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
-    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
-  ],
+  hostDirectives: [NgForgeFieldHost],
   template: \`<!-- mark the control element with ngForgeControl so meta + aria land there -->\`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -440,22 +434,13 @@ export const ${className}Type: FieldTypeDefinition = {
     const pascal = name.replace(/(^|-)([a-z])/g, (_, __, c: string) => c.toUpperCase());
     const className = `My${pascal}`;
     return `// my-${name}.component.ts
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormEvent } from '@ng-forge/dynamic-forms';
-import {
-  injectNgForgeAction,
-  NgForgeAction,
-  NgForgeFieldShell,
-  NG_FORGE_ACTION_INPUTS,
-  NG_FORGE_FIELD_SHELL_INPUTS,
-} from '@ng-forge/dynamic-forms/integration';
+import { injectNgForgeAction, NgForgeActionHost } from '@ng-forge/dynamic-forms/integration';
 
 @Component({
   selector: 'my-${name}',
-  hostDirectives: [
-    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
-    { directive: NgForgeAction, inputs: [...NG_FORGE_ACTION_INPUTS] },
-  ],
+  hostDirectives: [NgForgeActionHost],
   template: \`
     <button type="button" [disabled]="action.disabled()" (click)="action.dispatch()">
       {{ action.label() }}

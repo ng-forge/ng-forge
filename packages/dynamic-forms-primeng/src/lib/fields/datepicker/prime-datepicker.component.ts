@@ -1,13 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import {
-  injectNgForgeField,
-  NgForgeField,
-  NgForgeFieldShell,
-  NG_FORGE_FIELD_SHELL_INPUTS,
-  NG_FORGE_VALUE_FIELD_INPUTS,
-} from '@ng-forge/dynamic-forms/integration';
+import { injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { PrimeDatepickerProps } from './prime-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeDatepickerControlComponent } from './prime-datepicker-control.component';
@@ -16,10 +10,7 @@ import { PrimeDatepickerControlComponent } from './prime-datepicker-control.comp
   selector: 'df-prime-datepicker',
   imports: [PrimeDatepickerControlComponent, FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [
-    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
-    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
-  ],
+  hostDirectives: [NgForgeFieldHost],
   template: `
     <div class="df-prime-field">
       @if (ngf.label()) {

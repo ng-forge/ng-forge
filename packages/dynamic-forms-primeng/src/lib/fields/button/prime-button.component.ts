@@ -2,22 +2,13 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { AsyncPipe } from '@angular/common';
 import { ButtonDirective } from 'primeng/button';
 import { DynamicTextPipe, FormEvent } from '@ng-forge/dynamic-forms';
-import {
-  injectNgForgeAction,
-  NgForgeAction,
-  NgForgeFieldShell,
-  NG_FORGE_ACTION_INPUTS,
-  NG_FORGE_FIELD_SHELL_INPUTS,
-} from '@ng-forge/dynamic-forms/integration';
+import { injectNgForgeAction, NgForgeActionHost } from '@ng-forge/dynamic-forms/integration';
 import { PrimeButtonProps } from './prime-button.type';
 
 @Component({
   selector: 'df-prime-button',
   imports: [ButtonDirective, DynamicTextPipe, AsyncPipe],
-  hostDirectives: [
-    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
-    { directive: NgForgeAction, inputs: [...NG_FORGE_ACTION_INPUTS] },
-  ],
+  hostDirectives: [NgForgeActionHost],
   template: `
     <button
       pButton

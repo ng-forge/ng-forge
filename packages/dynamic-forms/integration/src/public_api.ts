@@ -122,7 +122,7 @@ export { NgForgeField, NG_FORGE_VALUE_FIELD_INPUTS, injectNgForgeField } from '.
 export type { TypedNgForgeField } from './directives';
 export { NgForgeAction, NG_FORGE_ACTION_INPUTS, injectNgForgeAction } from './directives';
 export { NgForgeControl, NgForgeHostControl } from './directives';
-export { NG_FORGE_SHELL, NG_FORGE_FIELD, NG_FORGE_ACTION } from './directives';
+export { NgForgeFieldHost, NgForgeActionHost } from './directives';
 
 // =============================================================================
 // Non-Field Logic Resolvers (re-exported from @ng-forge/dynamic-forms)

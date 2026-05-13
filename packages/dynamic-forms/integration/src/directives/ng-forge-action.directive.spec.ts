@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { ARRAY_CONTEXT, EventBus, FormEvent } from '@ng-forge/dynamic-forms';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NgForgeAction } from './ng-forge-action.directive';
-import { NG_FORGE_ACTION } from './host-directive-presets';
+import { NgForgeActionHost } from './host-directive-presets';
 
 class TestSubmitEvent implements FormEvent {
   readonly type = 'test/submit';
@@ -22,7 +22,7 @@ class TestRemoveEvent implements FormEvent {
   selector: 'test-action-host',
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: NG_FORGE_ACTION,
+  hostDirectives: [NgForgeActionHost],
 })
 class TestActionHostComponent {}
 
@@ -164,7 +164,7 @@ describe('NgForgeAction', () => {
     // ng-forge-action.directive.ts (see `_NG_FORGE_ACTION_INPUTS_LOCKSTEP`).
     // This test is the runtime smoke check that the preset composition
     // instantiates cleanly.
-    it('instantiates cleanly with the NG_FORGE_ACTION preset', () => {
+    it('instantiates cleanly with the NgForgeActionHost wrapper', () => {
       TestBed.configureTestingModule({ imports: [TestActionHostComponent] });
       expect(() => TestBed.createComponent(TestActionHostComponent)).not.toThrow();
     });

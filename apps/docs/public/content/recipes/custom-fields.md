@@ -15,7 +15,7 @@ The mechanics are the same in both cases — every ng-forge field component comp
 
 ## 1. Create the field component
 
-Compose `NgForgeFieldShell` + `NgForgeField` via `hostDirectives` and consume the standard inputs and derived signals through `injectNgForgeField<T>()`. Shell owns the universal identity (`key`, `className`, plus `[id]`/`[attr.data-testid]`/`[class]` host bindings); `NgForgeField` owns `field`/`label`/`placeholder`/`tabIndex`/`props`/`meta`/`validationMessages`, the `errors`/`errorsToDisplay`/`ariaInvalid`/`ariaRequired`/`ariaDescribedBy`/`errorId`/`hintId` derived signals, and the `[attr.hidden]`/`[attr.aria-disabled]` host bindings driven by the field tree.
+Compose the `NgForgeFieldHost` wrapper directive via `hostDirectives` and consume the standard inputs and derived signals through `injectNgForgeField<T>()`. The wrapper bundles `NgForgeFieldShell` (universal `key`/`className` inputs + `[id]`/`[attr.data-testid]`/`[class]` host bindings) with `NgForgeField` (the value plumbing: `field`/`label`/`placeholder`/`tabIndex`/`props`/`meta`/`validationMessages` inputs, error/aria derived signals, meta-tracking, plus `[attr.hidden]`/`[attr.aria-disabled]` host bindings driven by the field tree).
 
 ```typescript
 // rich-text-field.component.ts
@@ -23,14 +23,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import {
-  injectNgForgeField,
-  NgForgeControl,
-  NgForgeField,
-  NgForgeFieldShell,
-  NG_FORGE_FIELD_SHELL_INPUTS,
-  NG_FORGE_VALUE_FIELD_INPUTS,
-} from '@ng-forge/dynamic-forms/integration';
+import { injectNgForgeField, NgForgeControl, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 
 interface RichTextProps extends Record<string, unknown> {
   toolbar?: 'minimal' | 'full';
@@ -40,10 +33,7 @@ interface RichTextProps extends Record<string, unknown> {
 @Component({
   selector: 'app-rich-text-field',
   imports: [FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
-  hostDirectives: [
-    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
-    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
-  ],
+  hostDirectives: [NgForgeFieldHost],
   template: `
     @let f = ngf.field();
     @let inputId = ngf.key() + '-rich-text';
@@ -70,7 +60,7 @@ export default class RichTextFieldComponent {
 
 A few things to note:
 
-- **No manual input declarations** for `field`/`key`/`label`/etc. The standard inputs come in via `hostDirectives` (Shell carries `key`/`className`; `NgForgeField` carries the rest); `injectNgForgeField<T>()` returns a typed view of the value-field directive instance and re-exposes `key()`/`className()` for templates.
+- **No manual input declarations** for `field`/`key`/`label`/etc. The standard inputs come in via the `NgForgeFieldHost` wrapper (Shell carries `key`/`className`; `NgForgeField` carries the rest); `injectNgForgeField<T>()` returns a typed view of the value-field directive instance and re-exposes `key()`/`className()` for templates.
 - **No host bindings block** — Shell binds `[id]`/`[attr.data-testid]`/`[class]` from `key()`/`className()`, and `NgForgeField` binds `[attr.hidden]`/`[attr.aria-disabled]` from the field tree.
 - **`[ngForgeControl]`** on the canonical control element forwards meta attributes (`data-*`, `autocomplete`, etc.) AND aria attributes (`aria-invalid`, `aria-required`, `aria-describedby` — derived from field state) onto that element. The author doesn't bind aria-\* manually — the marker absorbs it. For shadow-DOM wrappers where you can't reach the inner input, see [`NgForgeHostControl`](/building-an-adapter#meta-forwarding) in the integration guide.
 - **`injectNgForgeField<string>()`** narrows `ngf.field()` to `Signal<FieldTree<string>>`, so the `[formField]="f"` binding type-checks. Use the appropriate generic for your value type (`boolean` for checkboxes, `Date | null` for datepickers, `ValueType[]` for multi-selects, etc.).

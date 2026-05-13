@@ -6,13 +6,13 @@ import { ValidationMessages } from '../../../src/lib/models/validation-types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NgForgeField } from './ng-forge-field.directive';
 import { NgForgeControl, NgForgeHostControl } from './ng-forge-controls';
-import { NG_FORGE_FIELD } from './host-directive-presets';
+import { NgForgeFieldHost } from './host-directive-presets';
 
 @Component({
   selector: 'test-host',
   template: '<input class="target" />',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: NG_FORGE_FIELD,
+  hostDirectives: [NgForgeFieldHost],
 })
 class TestHostComponent {}
 
@@ -21,7 +21,7 @@ class TestHostComponent {}
   imports: [NgForgeControl],
   template: '<input class="target" ngForgeControl />',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: NG_FORGE_FIELD,
+  hostDirectives: [NgForgeFieldHost],
 })
 class TestHostWithControlComponent {}
 
@@ -29,7 +29,7 @@ class TestHostWithControlComponent {}
   selector: 'test-host-host-control',
   template: '<input class="target" />',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [...NG_FORGE_FIELD, NgForgeHostControl],
+  hostDirectives: [NgForgeFieldHost, NgForgeHostControl],
 })
 class TestHostHostControlComponent {}
 
@@ -44,7 +44,7 @@ class TestHostHostControlComponent {}
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: NG_FORGE_FIELD,
+  hostDirectives: [NgForgeFieldHost],
 })
 class TestHostWithDescendantTargetComponent {}
 
@@ -492,7 +492,7 @@ describe('NgForgeField', () => {
     // Drift in either direction fails the build via tsc with a self-describing
     // error. This test is the runtime smoke check that the host directive
     // composition with the current tuple instantiates cleanly.
-    it('instantiates cleanly with the NG_FORGE_FIELD preset', () => {
+    it('instantiates cleanly with the NgForgeFieldHost wrapper', () => {
       TestBed.configureTestingModule({ imports: [TestHostComponent] });
       expect(() => TestBed.createComponent(TestHostComponent)).not.toThrow();
     });

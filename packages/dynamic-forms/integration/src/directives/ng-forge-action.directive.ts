@@ -113,7 +113,6 @@ export const NG_FORGE_ACTION_INPUTS = ['label', 'disabled', 'hidden', 'tabIndex'
 // shell signals which aren't `InputSignal`).
 // ─────────────────────────────────────────────────────────────────────────────
 
- 
 type _InputSignalProps<T> = {
   [K in keyof T]: T[K] extends InputSignal<any> | InputSignalWithTransform<any, any> ? K : never;
 }[keyof T];

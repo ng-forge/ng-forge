@@ -1,23 +1,14 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { DynamicTextPipe, FormEvent } from '@ng-forge/dynamic-forms';
-import {
-  injectNgForgeAction,
-  NgForgeAction,
-  NgForgeFieldShell,
-  NG_FORGE_ACTION_INPUTS,
-  NG_FORGE_FIELD_SHELL_INPUTS,
-} from '@ng-forge/dynamic-forms/integration';
+import { injectNgForgeAction, NgForgeActionHost } from '@ng-forge/dynamic-forms/integration';
 import { BsButtonProps } from './bs-button.type';
 
 @Component({
   selector: 'df-bs-button',
   imports: [DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [
-    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
-    { directive: NgForgeAction, inputs: [...NG_FORGE_ACTION_INPUTS] },
-  ],
+  hostDirectives: [NgForgeActionHost],
   template: `
     @let buttonId = action.key() + '-button';
     <button

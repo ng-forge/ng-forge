@@ -2,22 +2,13 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { IonButton } from '@ionic/angular/standalone';
 import { AsyncPipe } from '@angular/common';
 import { DynamicTextPipe, FormEvent } from '@ng-forge/dynamic-forms';
-import {
-  injectNgForgeAction,
-  NgForgeAction,
-  NgForgeFieldShell,
-  NG_FORGE_ACTION_INPUTS,
-  NG_FORGE_FIELD_SHELL_INPUTS,
-} from '@ng-forge/dynamic-forms/integration';
+import { injectNgForgeAction, NgForgeActionHost } from '@ng-forge/dynamic-forms/integration';
 import { IonicButtonProps } from './ionic-button.type';
 
 @Component({
   selector: 'df-ion-button',
   imports: [IonButton, DynamicTextPipe, AsyncPipe],
-  hostDirectives: [
-    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
-    { directive: NgForgeAction, inputs: [...NG_FORGE_ACTION_INPUTS] },
-  ],
+  hostDirectives: [NgForgeActionHost],
   styles: [
     `
       :host([hidden]) {

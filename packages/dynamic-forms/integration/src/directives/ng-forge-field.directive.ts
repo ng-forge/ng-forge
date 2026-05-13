@@ -178,7 +178,6 @@ export const NG_FORGE_VALUE_FIELD_INPUTS = ['field', 'label', 'placeholder', 'ta
 // declared input) fails the build.
 // ─────────────────────────────────────────────────────────────────────────────
 
- 
 type _InputSignalProps<T> = {
   [K in keyof T]: T[K] extends InputSignal<any> | InputSignalWithTransform<any, any> ? K : never;
 }[keyof T];

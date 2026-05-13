@@ -409,11 +409,20 @@ Package entrypoints you'll import from:
 
 ## The directive primitives
 
-ng-forge ships three selectorless directives, each composed via `hostDirectives`. You pick the pair (or single) that matches your field shape:
+ng-forge ships three layered directives + two **wrapper** directives that bundle them for the two common shapes. In practice you'll compose just the wrapper.
+
+**Layers:**
 
 - **`NgForgeFieldShell`** — the universal base. Owns the `key` + `className` inputs and the identity host bindings (`[id]`, `[attr.data-testid]`, `[class]`). Every ng-forge component uses this.
 - **`NgForgeField`** — the **value** add-on. Injects Shell. Owns `field`/`label`/`placeholder`/`tabIndex`/`props`/`meta`/`validationMessages`, the error/aria derived signals, meta-tracking, and the `[attr.hidden]`/`[attr.aria-disabled]` host bindings driven by `field()()`.
 - **`NgForgeAction`** — the **action** add-on. Injects Shell. Owns `label`/`disabled`/`hidden`/`tabIndex`/`event`/`eventArgs`/`eventContext`/`props`, the `[attr.hidden]`/`[attr.aria-disabled]` host bindings driven by its own inputs, and a `dispatch()` method that resolves event-arg tokens and dispatches through `EventBus`.
+
+**Wrappers:**
+
+- **`NgForgeFieldHost`** — composes `NgForgeFieldShell` + `NgForgeField`. Use for value-bearing components.
+- **`NgForgeActionHost`** — composes `NgForgeFieldShell` + `NgForgeAction`. Use for button / action components.
+
+The wrappers exist because Angular's library partial-compilation can't resolve cross-package const references inside `hostDirectives:` — a wrapper directive's own `hostDirectives` IS resolvable at the integration package's compile time, so consumers compose a single class instead of writing the two-entry literal in every component.
 
 **Forwarded inputs** (per directive):
 
@@ -456,23 +465,13 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import {
-  injectNgForgeField,
-  NgForgeControl,
-  NgForgeField,
-  NgForgeFieldShell,
-  NG_FORGE_FIELD_SHELL_INPUTS,
-  NG_FORGE_VALUE_FIELD_INPUTS,
-} from '@ng-forge/dynamic-forms/integration';
+import { injectNgForgeField, NgForgeControl, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { CustomInputProps } from './custom-input.type';
 
 @Component({
   selector: 'custom-input',
   imports: [FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
-  hostDirectives: [
-    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
-    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
-  ],
+  hostDirectives: [NgForgeFieldHost],
   template: `
     @let f = ngf.field();
     @let inputId = ngf.key() + '-input';
@@ -531,21 +530,12 @@ Buttons, submits, navigation buttons, and array-mutation buttons all compose `Ng
 // custom-button.component.ts
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FormEvent } from '@ng-forge/dynamic-forms';
-import {
-  injectNgForgeAction,
-  NgForgeAction,
-  NgForgeFieldShell,
-  NG_FORGE_ACTION_INPUTS,
-  NG_FORGE_FIELD_SHELL_INPUTS,
-} from '@ng-forge/dynamic-forms/integration';
+import { injectNgForgeAction, NgForgeActionHost } from '@ng-forge/dynamic-forms/integration';
 import { CustomButtonProps } from './custom-button.type';
 
 @Component({
   selector: 'custom-button',
-  hostDirectives: [
-    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
-    { directive: NgForgeAction, inputs: [...NG_FORGE_ACTION_INPUTS] },
-  ],
+  hostDirectives: [NgForgeActionHost],
   template: `
     <button [type]="buttonType()" [disabled]="action.disabled()" (click)="onClick()">
       {{ action.label() }}
@@ -615,11 +605,7 @@ Some component libraries (Ionic web components, certain PrimeNG controls) wrap a
 
 ```typescript
 @Component({
-  hostDirectives: [
-    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
-    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
-    NgForgeHostControl,
-  ],
+  hostDirectives: [NgForgeFieldHost, NgForgeHostControl],
   template: `<ion-toggle [formField]="ngf.field()">{{ ngf.label() | dynamicText | async }}</ion-toggle>`,
 })
 export default class IonicToggleField {
@@ -694,7 +680,7 @@ ng-forge ships mappers for the standard field categories. You'll register field 
 
 Every key a mapper emits must match a declared input on the component or one of its host directives. If your component exposes the standard 10 inputs (via `NgForgeField` `hostDirectives`) and accepts `props`, every key the built-in mappers emit lines up automatically.
 
-`ComponentRef.setInput` (used by the field outlet to push mapper output onto the rendered component) is **lenient** on unknown input names in Angular 21 — extra keys are silently dropped rather than throwing NG0303. So if a custom mapper emits a key the component doesn't declare, the input is lost without a runtime error. Composing `NgForgeFieldShell` + `NgForgeField` via `hostDirectives` (with `NG_FORGE_FIELD_SHELL_INPUTS` + `NG_FORGE_VALUE_FIELD_INPUTS` spread into their respective `inputs:` arrays) registers all the standard names on the component so built-in mapper output always lines up — that's the recommended authoring shape for third-party adapters.
+`ComponentRef.setInput` (used by the field outlet to push mapper output onto the rendered component) is **lenient** on unknown input names in Angular 21 — extra keys are silently dropped rather than throwing NG0303. So if a custom mapper emits a key the component doesn't declare, the input is lost without a runtime error. Composing `NgForgeFieldHost` registers all the standard input names on the component (Shell's `key`/`className` + Field's `field`/`label`/`placeholder`/`tabIndex`/`props`/`meta`/`validationMessages`) so built-in mapper output always lines up — that's the recommended authoring shape for third-party adapters.
 
 ### Writing a custom mapper
 
@@ -10826,7 +10812,7 @@ The mechanics are the same in both cases — every ng-forge field component comp
 
 ## 1. Create the field component
 
-Compose `NgForgeFieldShell` + `NgForgeField` via `hostDirectives` and consume the standard inputs and derived signals through `injectNgForgeField<T>()`. Shell owns the universal identity (`key`, `className`, plus `[id]`/`[attr.data-testid]`/`[class]` host bindings); `NgForgeField` owns `field`/`label`/`placeholder`/`tabIndex`/`props`/`meta`/`validationMessages`, the `errors`/`errorsToDisplay`/`ariaInvalid`/`ariaRequired`/`ariaDescribedBy`/`errorId`/`hintId` derived signals, and the `[attr.hidden]`/`[attr.aria-disabled]` host bindings driven by the field tree.
+Compose the `NgForgeFieldHost` wrapper directive via `hostDirectives` and consume the standard inputs and derived signals through `injectNgForgeField<T>()`. The wrapper bundles `NgForgeFieldShell` (universal `key`/`className` inputs + `[id]`/`[attr.data-testid]`/`[class]` host bindings) with `NgForgeField` (the value plumbing: `field`/`label`/`placeholder`/`tabIndex`/`props`/`meta`/`validationMessages` inputs, error/aria derived signals, meta-tracking, plus `[attr.hidden]`/`[attr.aria-disabled]` host bindings driven by the field tree).
 
 ```typescript
 // rich-text-field.component.ts
@@ -10834,14 +10820,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import {
-  injectNgForgeField,
-  NgForgeControl,
-  NgForgeField,
-  NgForgeFieldShell,
-  NG_FORGE_FIELD_SHELL_INPUTS,
-  NG_FORGE_VALUE_FIELD_INPUTS,
-} from '@ng-forge/dynamic-forms/integration';
+import { injectNgForgeField, NgForgeControl, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 
 interface RichTextProps extends Record<string, unknown> {
   toolbar?: 'minimal' | 'full';
@@ -10851,10 +10830,7 @@ interface RichTextProps extends Record<string, unknown> {
 @Component({
   selector: 'app-rich-text-field',
   imports: [FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
-  hostDirectives: [
-    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
-    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
-  ],
+  hostDirectives: [NgForgeFieldHost],
   template: `
     @let f = ngf.field();
     @let inputId = ngf.key() + '-rich-text';
@@ -10881,7 +10857,7 @@ export default class RichTextFieldComponent {
 
 A few things to note:
 
-- **No manual input declarations** for `field`/`key`/`label`/etc. The standard inputs come in via `hostDirectives` (Shell carries `key`/`className`; `NgForgeField` carries the rest); `injectNgForgeField<T>()` returns a typed view of the value-field directive instance and re-exposes `key()`/`className()` for templates.
+- **No manual input declarations** for `field`/`key`/`label`/etc. The standard inputs come in via the `NgForgeFieldHost` wrapper (Shell carries `key`/`className`; `NgForgeField` carries the rest); `injectNgForgeField<T>()` returns a typed view of the value-field directive instance and re-exposes `key()`/`className()` for templates.
 - **No host bindings block** — Shell binds `[id]`/`[attr.data-testid]`/`[class]` from `key()`/`className()`, and `NgForgeField` binds `[attr.hidden]`/`[attr.aria-disabled]` from the field tree.
 - **`[ngForgeControl]`** on the canonical control element forwards meta attributes (`data-*`, `autocomplete`, etc.) AND aria attributes (`aria-invalid`, `aria-required`, `aria-describedby` — derived from field state) onto that element. The author doesn't bind aria-\* manually — the marker absorbs it. For shadow-DOM wrappers where you can't reach the inner input, see [`NgForgeHostControl`](/building-an-adapter#meta-forwarding) in the integration guide.
 - **`injectNgForgeField<string>()`** narrows `ngf.field()` to `Signal<FieldTree<string>>`, so the `[formField]="f"` binding type-checks. Use the appropriate generic for your value type (`boolean` for checkboxes, `Date | null` for datepickers, `ValueType[]` for multi-selects, etc.).
