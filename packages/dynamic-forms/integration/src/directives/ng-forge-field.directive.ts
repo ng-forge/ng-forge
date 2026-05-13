@@ -84,10 +84,13 @@ export class NgForgeField {
   readonly props = input<unknown>();
   readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
-  // Back-compat forwarding seam. Canonical source is the
-  // `DEFAULT_VALIDATION_MESSAGES` DI token; mappers populate this input from
-  // that token. Bound values take precedence when set; otherwise the
-  // directive falls back to its own DI lookup (see effectiveDefaultValidationMessages).
+  /**
+   * @deprecated Inject `DEFAULT_VALIDATION_MESSAGES` instead. Scheduled for
+   * removal in v1. The directive falls back to the DI token automatically when
+   * this input is unbound, so removing the binding is a safe migration. The
+   * mapper still emits this input for back-compat with third-party components
+   * that consumed it as a direct binding; that emission is deprecated too.
+   */
   readonly defaultValidationMessages = input<ValidationMessages>();
 
   // ───────────────────────────────────────────────────────────────────────────

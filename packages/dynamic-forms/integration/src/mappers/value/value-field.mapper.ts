@@ -69,10 +69,11 @@ export function resolveValueFieldContext(): ValueFieldContext {
  * @param defaultValidationMessages Default validation messages from the form configuration (may be undefined if not configured)
  * @returns Record of input names to values
  *
- * Note on `defaultValidationMessages`: emitted as an input for backward
- * compatibility with third-party adapter components that consumed it directly.
- * `NgForgeField` declares it as a forwarded input; the directive prefers the
- * forwarded value over its own DI lookup.
+ * @deprecated The `defaultValidationMessages` input emission on the
+ * returned record is a back-compat seam for third-party adapter components
+ * that consumed it as a direct binding. New consumers should `inject(DEFAULT_VALIDATION_MESSAGES)`
+ * instead — `NgForgeField` falls back to that token automatically when its
+ * own input is unbound. Scheduled for removal in v1.
  */
 export function buildValueFieldInputs<TProps, TValue = unknown>(
   fieldDef: BaseValueField<TProps, TValue, FieldMeta, boolean>,
@@ -92,6 +93,9 @@ export function buildValueFieldInputs<TProps, TValue = unknown>(
     inputs['placeholder'] = fieldDef.placeholder;
   }
 
+  // @deprecated Back-compat: emit defaultValidationMessages as a direct input
+  // for components that bound it explicitly. New components should rely on
+  // DEFAULT_VALIDATION_MESSAGES DI; removal targeted for v1.
   if (defaultValidationMessages !== undefined) {
     inputs['defaultValidationMessages'] = defaultValidationMessages;
   }
