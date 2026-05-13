@@ -30,8 +30,10 @@ import { shouldShowErrors } from '../utils/should-show-errors';
  *   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
  *   imports: [NgForgeControl, FormField],
  *   template: `
- *     <label [for]="ngf.key()">{{ ngf.label() | dynamicText | async }}</label>
- *     <input ngForgeControl [id]="ngf.key()" [formField]="ngf.field()" />
+ *     <!-- NgForgeField sets [id]="key()" on the host; the inner control needs
+ *          a distinct id so adapter components suffix it (-input / -select / …). -->
+ *     <label [for]="ngf.key() + '-input'">{{ ngf.label() | dynamicText | async }}</label>
+ *     <input ngForgeControl [id]="ngf.key() + '-input'" [formField]="ngf.field()" />
  *     @if (ngf.errorsToDisplay()[0]; as e) {
  *       <span [id]="ngf.errorId()">{{ e.message }}</span>
  *     }
@@ -52,7 +54,7 @@ import { shouldShowErrors } from '../utils/should-show-errors';
     '[id]': 'key()',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[attr.hidden]': 'field()().hidden?.() || null',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
 })
 export class NgForgeField {
@@ -71,11 +73,8 @@ export class NgForgeField {
   readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   /**
-   * @deprecated Inject `DEFAULT_VALIDATION_MESSAGES` instead. Scheduled for
-   * removal in v1. The directive falls back to the DI token automatically when
-   * this input is unbound, so removing the binding is a safe migration. The
-   * mapper still emits this input for back-compat with third-party components
-   * that consumed it as a direct binding; that emission is deprecated too.
+   * @deprecated Use the `DEFAULT_VALIDATION_MESSAGES` DI token; removal targeted for v1.
+   * Removal must trim NG_FORGE_FIELD_INPUTS and update the lockstep assertion in tandem.
    */
   readonly defaultValidationMessages = input<ValidationMessages>();
 

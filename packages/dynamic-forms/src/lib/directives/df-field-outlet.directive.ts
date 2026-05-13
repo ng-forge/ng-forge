@@ -217,16 +217,8 @@ export class DfFieldOutlet {
   }
 
   private pushRawInputs(ref: ComponentRef<unknown>, rawInputs: Record<string, unknown>): void {
-    // Ref-identity dedupe per key — mappers must emit immutable snapshots.
-    //
-    // Use `ref.setInput` directly here (no `setInputIfDeclared` filter) because
-    // field components may consume forwarded inputs via `hostDirectives` and
-    // `reflectComponentType` does NOT include those (angular/angular#49734) —
-    // the filter would silently skip the directive's inputs entirely. The
-    // mapper-as-contract: every key the mapper emits must match a declared
-    // input on the component or one of its host directives. If a future mapper
-    // emits a key no consumer accepts, NG0303 surfaces immediately as an
-    // actionable error rather than a silent drop.
+    // setInput is lenient in Angular 21 — unknown keys silently drop (not NG0303).
+    // Mapper-as-contract is enforced by NG_FORGE_FIELD_INPUTS lockstep, not here.
     const last = this.lastPushedInputs;
     for (const [key, value] of Object.entries(rawInputs)) {
       if (last && last[key] === value) continue;

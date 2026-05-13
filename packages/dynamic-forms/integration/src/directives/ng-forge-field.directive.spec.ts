@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { form, FieldTree } from '@angular/forms/signals';
+import { form, required, schema, FieldTree, type SchemaPath } from '@angular/forms/signals';
 import { DEFAULT_VALIDATION_MESSAGES, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NgForgeField, NG_FORGE_FIELD_INPUTS } from './ng-forge-field.directive';
@@ -55,6 +55,22 @@ function setupField(initialValue = ''): { field: FieldTree<string>; rootValue: R
   const injector = TestBed.inject(EnvironmentInjector);
   const root = runInInjectionContext(injector, () => form(rootValue));
   return { field: root.username, rootValue };
+}
+
+/** Builds a `FieldTree<string>` with a required validator, value '', and touched=true. */
+function setupInvalidTouchedField(): { field: FieldTree<string> } {
+  const rootValue = signal<TestFormValue>({ username: '' });
+  const injector = TestBed.inject(EnvironmentInjector);
+  const root = runInInjectionContext(injector, () =>
+    form(
+      rootValue,
+      schema<TestFormValue>((path) => {
+        required(path.username as SchemaPath<string>);
+      }),
+    ),
+  );
+  root.username().markAsTouched();
+  return { field: root.username };
 }
 
 describe('NgForgeField', () => {
@@ -368,6 +384,101 @@ describe('NgForgeField', () => {
 
       const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('[NgForgeField]')));
       expect(warning).toBeUndefined();
+    });
+  });
+
+  describe('aria-invalid true-path', () => {
+    it('writes aria-invalid="true" onto the marker target when the field is invalid AND touched', () => {
+      TestBed.configureTestingModule({ imports: [TestHostWithControlComponent] });
+      const fixture = TestBed.createComponent(TestHostWithControlComponent);
+      const { field } = setupInvalidTouchedField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.detectChanges();
+
+      const target = fixture.nativeElement.querySelector('input.target') as HTMLElement | null;
+      expect(target?.getAttribute('aria-invalid')).toBe('true');
+      expect(target?.getAttribute('aria-required')).toBe('true');
+    });
+  });
+
+  describe('validationMessages resolution through createResolvedErrorsSignal', () => {
+    it('uses the validationMessages input when resolving error messages', () => {
+      TestBed.configureTestingModule({ imports: [TestHostComponent] });
+      const fixture = TestBed.createComponent(TestHostComponent);
+      const directive = fixture.componentRef.injector.get(NgForgeField);
+      const { field } = setupInvalidTouchedField();
+      const messages: ValidationMessages = { required: 'Username is required' };
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('validationMessages', messages);
+      fixture.detectChanges();
+
+      const resolved = directive.errorsToDisplay();
+      expect(resolved.length).toBeGreaterThan(0);
+      expect(resolved.some((e) => e.message === 'Username is required')).toBe(true);
+    });
+  });
+
+  describe('meta() reactivity', () => {
+    it('removes stale attributes when meta() changes between renders', () => {
+      TestBed.configureTestingModule({ imports: [TestHostWithControlComponent] });
+      const fixture = TestBed.createComponent(TestHostWithControlComponent);
+      const { field } = setupField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('meta', { autocomplete: 'username' });
+      fixture.detectChanges();
+
+      const target = fixture.nativeElement.querySelector('input.target') as HTMLElement;
+      expect(target.getAttribute('autocomplete')).toBe('username');
+
+      // Swap meta to a different key set — autocomplete should be removed,
+      // inputmode added on the next render.
+      fixture.componentRef.setInput('meta', { inputmode: 'email' });
+      fixture.detectChanges();
+
+      expect(target.getAttribute('autocomplete')).toBeNull();
+      expect(target.getAttribute('inputmode')).toBe('email');
+    });
+  });
+
+  describe('unclaimed-meta warning race with late markClaimed', () => {
+    let warnSpy: ReturnType<typeof vi.spyOn>;
+    beforeEach(() => {
+      warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    });
+    afterEach(() => warnSpy.mockRestore());
+
+    it('does NOT warn even when markClaimed is called after the first detectChanges', () => {
+      // Regression for the ambient-marker race: a sub-component that injects
+      // its parent NgForgeField may run markClaimed AFTER the parent's
+      // afterRenderEffect.write fires. The warning effect must observe
+      // _claimed reactively (or untracked + re-check) so the late claim
+      // still suppresses the warning. Today: the warning runs once at first
+      // non-empty meta render. If _claimed flips later we still don't want
+      // to fire it again — `warned` latches.
+      TestBed.configureTestingModule({ imports: [TestHostComponent] });
+      const fixture = TestBed.createComponent(TestHostComponent);
+      const { field } = setupField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('meta', { autocomplete: 'username' });
+      fixture.detectChanges();
+      // First-render warn fires here because no claim landed in time.
+      const earlyWarn = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('[NgForgeField]')));
+      expect(earlyWarn).toBeDefined();
+
+      // Late claim — typical of a sub-component constructed after the
+      // parent's first render. Verifies the `warned` latch holds: no
+      // duplicate warning on subsequent renders.
+      const directive = fixture.componentRef.injector.get(NgForgeField);
+      directive.markClaimed();
+      fixture.componentRef.setInput('meta', { autocomplete: 'off' });
+      fixture.detectChanges();
+
+      const totalWarns = warnSpy.mock.calls.filter((args) => args.some((a) => String(a).includes('[NgForgeField]'))).length;
+      expect(totalWarns).toBe(1);
     });
   });
 

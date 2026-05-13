@@ -71,6 +71,7 @@ export class NgForgeControl {
  * export class IonicInputField { ... }
  * ```
  */
+// Empty `@Directive({})` is intentional — selectorless; used only via `hostDirectives`.
 @Directive({})
 export class NgForgeHostControl {
   constructor() {
