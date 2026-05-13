@@ -573,7 +573,9 @@ export class BsRadioGroupComponent {
 }
 ```
 
-No `[meta]="ngf.meta()"` binding on the parent side is needed — the sub-component reads the ambient field directly. The explicit `meta` input is the override path for standalone use (unit tests, Storybook). `markClaimed()` opts the sub-component into the dev-mode unclaimed-meta warning so the safety net keeps working.
+No `[meta]="ngf.meta()"` binding on the parent side is needed — the sub-component reads the ambient field directly. `markClaimed()` opts the sub-component into the dev-mode unclaimed-meta warning so the safety net keeps working.
+
+> **Warning-race note.** In a normal template-driven render, the sub-component constructs during the parent's template instantiation (so `markClaimed()` runs before `NgForgeField`'s `afterRenderEffect.write` fires). For programmatic late mounts (Storybook stories, mid-tree manual instantiation) the warning can fire once before the late claim lands — the latch ensures it doesn't repeat.
 
 ## Mappers
 
