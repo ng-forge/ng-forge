@@ -8,24 +8,28 @@ Non-input fields for displaying content and passing hidden data.
 
 ## text
 
-Renders static text content inside the form layout. Useful for instructions, section headings, or inline notes.
+Renders static text content inside the form layout. Useful for instructions, section headings, or inline notes. The text content comes from the field-level `label` (which goes through the `dynamicText` pipe, so it supports i18n strings, signals, or observables).
 
 ```typescript
 {
   key: 'notice',
   type: 'text',
+  label: 'Your data is encrypted and never shared.',
+  className: 'hint',     // optional CSS class on the rendered element
   props: {
-    content: 'Your data is encrypted and never shared.',
-    tag: 'p',          // HTML tag: 'p' | 'span' | 'h1'–'h6' (default: 'p')
-    className: 'hint', // optional CSS class
+    elementType: 'p',    // HTML element: 'p' | 'span' | 'h1'–'h6' (default: 'p')
   }
 }
 ```
 
-**Core Props:**
+**Core Properties:**
 
-- `content`: The text string to display
-- `tag`: HTML element to render (`'p'` | `'span'` | `'h1'`–`'h6'`)
+- `label`: The text to render (DynamicText — string, signal, or observable)
+- `className`: Optional CSS class applied to the rendered element
+
+**Props:**
+
+- `elementType`: Which HTML element to render (`'p'` | `'span'` | `'h1'` – `'h6'`)
 
 ## hidden
 

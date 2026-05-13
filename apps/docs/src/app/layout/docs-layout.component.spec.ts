@@ -86,19 +86,11 @@ describe('DocsLayoutComponent', () => {
   // ─── navItems filtering ──────────────────────────────────────────────
 
   describe('navItems', () => {
-    it('should filter out custom-only items when adapter is not "custom"', () => {
-      const { component } = setup({ adapter: 'material' });
-      const items = priv(component).navItems();
-      const customOnly = items.find((i: any) => i.cssClass === 'sidebar-link--custom-only');
-      expect(customOnly).toBeUndefined();
-    });
-
-    it('should include custom-only items when adapter is "custom"', () => {
-      const { component } = setup({ adapter: 'custom' });
-      const items = priv(component).navItems();
-      const customOnly = items.find((i: any) => i.cssClass === 'sidebar-link--custom-only');
-      expect(customOnly).toBeDefined();
-      expect(customOnly.label).toBe('Building an Adapter');
+    it('should always include "Building an Adapter" regardless of adapter', () => {
+      const matItems = priv(setup({ adapter: 'material' }).component).navItems();
+      const customItems = priv(setup({ adapter: 'custom' }).component).navItems();
+      expect(matItems.find((i: any) => i.path === 'building-an-adapter')).toBeDefined();
+      expect(customItems.find((i: any) => i.path === 'building-an-adapter')).toBeDefined();
     });
 
     it('should include non-custom items regardless of adapter', () => {
@@ -122,20 +114,20 @@ describe('DocsLayoutComponent', () => {
       expect(examples).toBeDefined();
     });
 
-    it('should reactively update when adapter changes', () => {
+    it('should reactively update Examples visibility when adapter changes', () => {
       const { component, adapterSignal } = setup({ adapter: 'material' });
       expect(
         priv(component)
           .navItems()
-          .find((i: any) => i.cssClass === 'sidebar-link--custom-only'),
-      ).toBeUndefined();
+          .find((i: any) => i.path === 'examples'),
+      ).toBeDefined();
 
       adapterSignal.set('custom');
       expect(
         priv(component)
           .navItems()
-          .find((i: any) => i.cssClass === 'sidebar-link--custom-only'),
-      ).toBeDefined();
+          .find((i: any) => i.path === 'examples'),
+      ).toBeUndefined();
     });
   });
 

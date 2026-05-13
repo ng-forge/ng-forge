@@ -51,7 +51,7 @@ Package entrypoints you'll import from:
 - `[id]` ← `key()`
 - `[attr.data-testid]` ← `key()`
 - `[class]` ← `className()`
-- `[attr.hidden]` ← `field()().hidden?.() || null`
+- `[attr.hidden]` ← `field()().hidden() || null`
 
 ## Anatomy of a field component
 
@@ -110,8 +110,8 @@ What the component **does** declare:
 
 - A typed `injectNgForgeField<T>()` so `ngf.field()` is a `Signal<FieldTree<T>>` rather than `FieldTree<unknown>`.
 - The `props` input (typed to your adapter's per-field props interface).
-- The template, including `[ngForgeControl]` on the canonical control element so meta attributes (data-_, aria-_, autocomplete) reach the right place.
-- Any adapter-specific computeds (e.g. `effectiveSize`, `effectiveAppearance`) that resolve against optional adapter-level config tokens.
+- The template, including `[ngForgeControl]` on the canonical control element so meta attributes (`data-*`, `aria-*`, `autocomplete`) reach the right place.
+- Any adapter-specific computeds (e.g. `size`, `appearance`) that resolve `props().X ?? adapterConfig?.X ?? defaultX`.
 
 ### Typed access via injectNgForgeField
 
@@ -173,27 +173,35 @@ If you set `meta()` on a field but no marker / ambient consumer claims it, ng-fo
 
 ### Forwarding to a sub-component
 
-If your field component delegates rendering to a smaller sub-component (e.g. `df-bs-radio-group` inside `df-bs-radio`), the sub-component can pick up the parent's `NgForgeField` ambiently:
+If your field component delegates rendering to a sub-component (e.g. `df-bs-radio-group` inside `df-bs-radio`), put `ngForgeControl` on the canonical control element in the sub-component's template — the marker walks the element-injector tree to find the parent's `NgForgeField` and absorbs meta + aria automatically. For per-iteration shapes (radio buttons, multi-checkbox options), one marker instance per `@for` iteration:
 
 ```typescript
+@Component({
+  selector: 'df-bs-radio-group',
+  imports: [NgForgeControl],
+  template: `
+    @for (option of options(); track option.value; let i = $index) {
+      <input
+        ngForgeControl
+        type="radio"
+        [name]="name()"
+        [value]="option.value"
+        [checked]="value() === option.value"
+        (change)="onRadioChange(option.value)"
+        [id]="name() + '_' + i"
+      />
+      <label [for]="name() + '_' + i">{{ option.label | dynamicText | async }}</label>
+    }
+  `,
+})
 export class BsRadioGroupComponent {
-  // Picks up the outer NgForgeField when present (e.g. mounted under df-bs-radio).
-  // Falls back to its own explicit `meta` input when used standalone.
-  private readonly parentField = inject(NgForgeField, { optional: true, skipSelf: true });
-
-  readonly meta = input<FieldMeta>();
-  protected readonly effectiveMeta = computed<FieldMeta | undefined>(() => this.meta() ?? this.parentField?.meta());
-
-  constructor() {
-    this.parentField?.markClaimed();
-    setupMetaTracking(this.elementRef, this.effectiveMeta, { selector: 'input[type="radio"]' });
-  }
+  /* FormValueControl props omitted */
 }
 ```
 
-No `[meta]="ngf.meta()"` binding on the parent side is needed — the sub-component reads the ambient field directly. `markClaimed()` opts the sub-component into the dev-mode unclaimed-meta warning so the safety net keeps working.
+No `[meta]="ngf.meta()"` binding on the parent side is needed and no `setupMetaTracking` call inside the sub-component — each marker instance claims the ambient field on construction. The dev-mode unclaimed-meta warning fires if `meta()` is non-empty and no marker / ambient consumer registered.
 
-> **Warning-race note.** In a normal template-driven render, the sub-component constructs during the parent's template instantiation (so `markClaimed()` runs before `NgForgeField`'s `afterRenderEffect.write` fires). For programmatic late mounts (Storybook stories, mid-tree manual instantiation) the warning can fire once before the late claim lands — the latch ensures it doesn't repeat.
+> **Warning-race note.** In a normal template-driven render, sub-components construct during the parent's template instantiation (so `markClaimed()` runs before `NgForgeField`'s `afterRenderEffect.write` fires). For programmatic late mounts (Storybook stories, mid-tree manual instantiation) the warning can fire once before the late claim lands — the latch ensures it doesn't repeat.
 
 ## Mappers
 
@@ -360,7 +368,7 @@ Most design systems have settings that should cascade across every field — app
 
 1. Define an injection token with the config shape.
 2. Make the config optional in your provider function.
-3. Each component injects the token (optional) and reads it through `effectiveX` computeds that fall back to the token, then a hard-coded default.
+3. Each component injects the token (optional) and resolves the value through a `computed` that falls back to the token, then a hard-coded default.
 
 ```typescript name="my-adapter-config.ts"
 export interface MyAdapterConfig {
@@ -387,14 +395,14 @@ export default class MyInputComponent {
   protected readonly ngf = injectNgForgeField<string>();
   readonly props = input<MyInputProps>();
 
-  readonly effectiveSize = computed(() => this.props()?.size ?? this.config?.size ?? 'md');
+  readonly size = computed(() => this.props()?.size ?? this.config?.size ?? 'md');
 }
 ```
 
-Templates bind to the `effectiveX` computeds rather than reading `props` directly:
+Templates bind the resolved computeds rather than reading `props` directly:
 
 ```html
-<input class="my-input" [class.my-input-lg]="effectiveSize() === 'lg'" />
+<input class="my-input" [class.my-input-lg]="size() === 'lg'" />
 ```
 
 ### propsToMeta
