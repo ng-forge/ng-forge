@@ -86,6 +86,7 @@ export class IonicToggleControlComponent implements FormCheckboxControl {
   });
 
   constructor() {
+    this.parentField?.markClaimed();
     // Shadow DOM - apply meta to ion-toggle element
     setupMetaTracking(this.elementRef, this.effectiveMeta, {
       selector: 'ion-toggle',

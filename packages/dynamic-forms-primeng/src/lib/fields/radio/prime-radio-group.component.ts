@@ -85,6 +85,7 @@ export class PrimeRadioGroupComponent implements FormValueControl<ValueType | un
   protected readonly effectiveMeta = computed<FieldMeta | undefined>(() => this.meta() ?? this.parentField?.meta());
 
   constructor() {
+    this.parentField?.markClaimed();
     // Apply meta attributes to all radio inputs, re-apply when options change
     setupMetaTracking(this.elementRef, this.effectiveMeta, {
       selector: 'input[type="radio"]',

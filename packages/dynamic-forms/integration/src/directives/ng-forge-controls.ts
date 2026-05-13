@@ -96,7 +96,9 @@ export class NgForgeControl {
   readonly target = input<string | undefined>(undefined, { alias: 'ngForgeControl' });
 
   constructor() {
-    setupControlMetaEffect(inject(ElementRef), inject(NgForgeField), () => this.target());
+    const parent = inject(NgForgeField);
+    setupControlMetaEffect(inject(ElementRef), parent, () => this.target());
+    parent.markClaimed();
   }
 }
 
@@ -121,6 +123,8 @@ export class NgForgeControl {
 @Directive({})
 export class NgForgeHostControl {
   constructor() {
-    setupControlMetaEffect(inject(ElementRef), inject(NgForgeField), () => undefined);
+    const parent = inject(NgForgeField);
+    setupControlMetaEffect(inject(ElementRef), parent, () => undefined);
+    parent.markClaimed();
   }
 }

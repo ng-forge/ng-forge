@@ -91,6 +91,7 @@ export class PrimeTextareaControlComponent implements FormValueControl<string> {
   });
 
   constructor() {
+    this.parentField?.markClaimed();
     setupMetaTracking(this.elementRef, this.effectiveMeta, { selector: 'textarea' });
   }
 

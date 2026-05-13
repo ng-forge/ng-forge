@@ -119,6 +119,7 @@ export class BsRadioGroupComponent implements FormValueControl<ValueType | undef
   });
 
   constructor() {
+    this.parentField?.markClaimed();
     setupMetaTracking(this.elementRef, this.effectiveMeta, { selector: 'input[type="radio"]', dependents: [this.options] });
   }
 

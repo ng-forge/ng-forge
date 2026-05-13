@@ -1,6 +1,18 @@
-import { computed, Directive, inject, input, InputSignal, InputSignalWithTransform, Signal, signal } from '@angular/core';
+import {
+  afterRenderEffect,
+  computed,
+  Directive,
+  inject,
+  input,
+  InputSignal,
+  InputSignalWithTransform,
+  isDevMode,
+  Signal,
+  signal,
+  untracked,
+} from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { DEFAULT_VALIDATION_MESSAGES, DynamicText, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DEFAULT_VALIDATION_MESSAGES, DynamicText, DynamicFormLogger, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createAriaDescribedBySignal } from '../utils/create-aria-described-by';
 import { createResolvedErrorsSignal, ResolvedError } from '../utils/create-resolved-errors-signal';
 import { shouldShowErrors } from '../utils/should-show-errors';
@@ -119,6 +131,48 @@ export class NgForgeField {
   readonly ariaDescribedBy: Signal<string | null> = createAriaDescribedBySignal(this.errorsToDisplay, this.errorId, this.hintId, () =>
     Boolean((this.props() as { hint?: unknown } | undefined)?.hint),
   );
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Claim tracking — markers and ambient sub-components flip this to true so
+  // dev-mode can warn when meta() is non-empty but nothing consumed it.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  private readonly _claimed = signal(false);
+
+  /** @internal Marker directives + ambient sub-components call this on construction. */
+  markClaimed(): void {
+    this._claimed.set(true);
+  }
+
+  private readonly logger = inject(DynamicFormLogger, { optional: true });
+
+  constructor() {
+    // Dev-mode safety net: a mapper or template-author binds meta() but no
+    // NgForgeControl / NgForgeHostControl / ambient sub-component is in
+    // place to consume it. Fires at most once per directive instance.
+    if (isDevMode()) {
+      let warned = false;
+      afterRenderEffect({
+        write: () => {
+          if (warned) return;
+          const meta = this.meta();
+          if (!meta || Object.keys(meta).length === 0) return;
+          if (untracked(this._claimed)) return;
+          warned = true;
+          const key = untracked(this.key);
+          const message =
+            `[NgForgeField] meta() provided for field "${key}" but no NgForgeControl / NgForgeHostControl / ` +
+            `ambient sub-component claimed it. Meta will not be applied. ` +
+            `See https://ng-forge.dev/building-an-adapter#meta-forwarding`;
+          if (this.logger) {
+            this.logger.warn(message);
+          } else {
+            console.warn(message);
+          }
+        },
+      });
+    }
+  }
 }
 
 /**

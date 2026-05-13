@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, EnvironmentInjector, runInInjection
 import { TestBed } from '@angular/core/testing';
 import { form, FieldTree } from '@angular/forms/signals';
 import { DEFAULT_VALIDATION_MESSAGES, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NgForgeField, NG_FORGE_FIELD_INPUTS } from './ng-forge-field.directive';
 import { NgForgeControl, NgForgeHostControl } from './ng-forge-controls';
 
@@ -287,6 +288,86 @@ describe('NgForgeField', () => {
       const target = fixture.nativeElement.querySelector('input.target') as HTMLElement | null;
       expect(host.getAttribute('autocomplete')).toBeNull();
       expect(target?.getAttribute('autocomplete')).toBeNull();
+    });
+  });
+
+  describe('unclaimed-meta dev warning', () => {
+    let warnSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    });
+
+    afterEach(() => {
+      warnSpy.mockRestore();
+    });
+
+    it('warns when meta is non-empty but no marker / ambient consumer is present', () => {
+      TestBed.configureTestingModule({ imports: [TestHostComponent] });
+      const fixture = TestBed.createComponent(TestHostComponent);
+      const { field } = setupField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('meta', { autocomplete: 'username' });
+      fixture.detectChanges();
+
+      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('[NgForgeField]')));
+      expect(warning).toBeDefined();
+    });
+
+    it('does NOT warn when meta is empty', () => {
+      TestBed.configureTestingModule({ imports: [TestHostComponent] });
+      const fixture = TestBed.createComponent(TestHostComponent);
+      const { field } = setupField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.detectChanges();
+
+      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('[NgForgeField]')));
+      expect(warning).toBeUndefined();
+    });
+
+    it('does NOT warn when NgForgeControl claims meta', () => {
+      TestBed.configureTestingModule({ imports: [TestHostWithControlComponent] });
+      const fixture = TestBed.createComponent(TestHostWithControlComponent);
+      const { field } = setupField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('meta', { autocomplete: 'username' });
+      fixture.detectChanges();
+
+      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('[NgForgeField]')));
+      expect(warning).toBeUndefined();
+    });
+
+    it('does NOT warn when NgForgeHostControl claims meta', () => {
+      TestBed.configureTestingModule({ imports: [TestHostHostControlComponent] });
+      const fixture = TestBed.createComponent(TestHostHostControlComponent);
+      const { field } = setupField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('meta', { autocomplete: 'username' });
+      fixture.detectChanges();
+
+      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('[NgForgeField]')));
+      expect(warning).toBeUndefined();
+    });
+
+    it('does NOT warn when an ambient sub-component calls markClaimed', () => {
+      TestBed.configureTestingModule({ imports: [TestHostComponent] });
+      const fixture = TestBed.createComponent(TestHostComponent);
+      const directive = fixture.componentRef.injector.get(NgForgeField);
+      // Simulates a sub-component injecting NgForgeField via { optional: true,
+      // skipSelf: true } and reporting back that it consumed the field's meta.
+      directive.markClaimed();
+      const { field } = setupField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('meta', { autocomplete: 'username' });
+      fixture.detectChanges();
+
+      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('[NgForgeField]')));
+      expect(warning).toBeUndefined();
     });
   });
 

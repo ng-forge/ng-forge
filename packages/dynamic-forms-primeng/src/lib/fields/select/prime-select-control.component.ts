@@ -119,6 +119,7 @@ export class PrimeSelectControlComponent implements FormValueControl<ValueType> 
   });
 
   constructor() {
+    this.parentField?.markClaimed();
     setupMetaTracking(this.elementRef, this.effectiveMeta);
   }
 
