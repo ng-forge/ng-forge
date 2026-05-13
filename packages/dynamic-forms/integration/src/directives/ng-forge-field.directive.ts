@@ -16,22 +16,26 @@ import { DEFAULT_VALIDATION_MESSAGES, DynamicText, DynamicFormLogger, FieldMeta,
 import { createAriaDescribedBySignal } from '../utils/create-aria-described-by';
 import { createResolvedErrorsSignal, ResolvedError } from '../utils/create-resolved-errors-signal';
 import { shouldShowErrors } from '../utils/should-show-errors';
+import { NgForgeFieldShell } from './ng-forge-field-shell.directive';
 
 /**
- * Canonical primitive for ng-forge value-field components. Applied via
- * `hostDirectives` to provide the 10 standard inputs + derived error / aria
- * signals + universal host bindings. Meta + aria are forwarded to a target
- * element by the companion marker directives (`NgForgeControl` in templates,
- * `NgForgeHostControl` in `hostDirectives`).
+ * Value-bearing add-on directive — composed alongside `NgForgeFieldShell` via
+ * the `NG_FORGE_FIELD` preset. Owns the value/validation/aria plumbing every
+ * value-bearing field needs.
+ *
+ * The Shell owns universal identity (`key`, `className`, `[id]`,
+ * `[attr.data-testid]`, `[class]`); this directive injects Shell and adds
+ * field-driven bindings (`[attr.hidden]`, `[attr.aria-disabled]`), the
+ * standard value-field inputs (`field`, `label`, `placeholder`, `tabIndex`,
+ * `props`, `meta`, `validationMessages`), the derived error/aria signals,
+ * and the meta-tracking claim contract.
  *
  * @example
  * ```ts
  * \@Component({
- *   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+ *   hostDirectives: NG_FORGE_FIELD,
  *   imports: [NgForgeControl, FormField],
  *   template: `
- *     <!-- NgForgeField sets [id]="key()" on the host; the inner control needs
- *          a distinct id so adapter components suffix it (-input / -select / …). -->
  *     <label [for]="ngf.key() + '-input'">{{ ngf.label() | dynamicText | async }}</label>
  *     <input ngForgeControl [id]="ngf.key() + '-input'" [formField]="ngf.field()" />
  *     @if (ngf.errorsToDisplay()[0]; as e) {
@@ -44,49 +48,45 @@ import { shouldShowErrors } from '../utils/should-show-errors';
  * }
  * ```
  *
- * Selectorless — usage is exclusively via `hostDirectives`. The
- * `directive: NgForgeField` reference must be inlined at the call site (NG1010);
- * `inputs: [...NG_FORGE_FIELD_INPUTS]` works because the `as const` tuple
- * resolves statically.
+ * Selectorless — usage is exclusively via `hostDirectives`. Prefer the
+ * `NG_FORGE_FIELD` preset over composing this directive manually.
  */
 @Directive({
   host: {
-    '[id]': 'key()',
-    '[attr.data-testid]': 'key()',
-    '[class]': 'className()',
     '[attr.hidden]': 'field()().hidden() || null',
+    '[attr.aria-disabled]': 'field()().disabled() || null',
   },
 })
 export class NgForgeField {
   // ───────────────────────────────────────────────────────────────────────────
-  // Forwarded inputs (the 9 standard inputs that adapter mappers emit).
+  // Shell-owned identity — re-exported so component templates keep using
+  // `ngf.key()` / `ngf.className()` without reaching for the Shell directly.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  private readonly shell = inject(NgForgeFieldShell);
+  /** Shell-owned key, re-exported as plain `Signal<string>` so it doesn't get flagged by the host-directive input-lockstep assertion. */
+  readonly key: Signal<string> = this.shell.key;
+  /** Shell-owned className, re-exported as plain `Signal<string>` for the same reason. */
+  readonly className: Signal<string> = this.shell.className;
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Forwarded inputs — the value-field-specific subset of mapper output.
   // ───────────────────────────────────────────────────────────────────────────
 
   readonly field = input.required<FieldTree<unknown>>();
-  readonly key = input.required<string>();
-
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();
-  readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<unknown>();
   readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
-  /**
-   * @deprecated Use the `DEFAULT_VALIDATION_MESSAGES` DI token; removal targeted for v1.
-   * Removal must trim NG_FORGE_FIELD_INPUTS and update the lockstep assertion in tandem.
-   */
-  readonly defaultValidationMessages = input<ValidationMessages>();
 
   // ───────────────────────────────────────────────────────────────────────────
   // Wiring
   // ───────────────────────────────────────────────────────────────────────────
 
-  private readonly defaultValidationMessagesFromDi: Signal<ValidationMessages | undefined> =
+  private readonly defaultValidationMessages: Signal<ValidationMessages | undefined> =
     inject(DEFAULT_VALIDATION_MESSAGES, { optional: true }) ?? signal(undefined);
-  private readonly effectiveDefaultValidationMessages: Signal<ValidationMessages | undefined> = computed(
-    () => this.defaultValidationMessages() ?? this.defaultValidationMessagesFromDi(),
-  );
 
   // ───────────────────────────────────────────────────────────────────────────
   // Error display
@@ -95,7 +95,7 @@ export class NgForgeField {
   readonly errors: Signal<ResolvedError[]> = createResolvedErrorsSignal(
     this.field,
     this.validationMessages,
-    this.effectiveDefaultValidationMessages,
+    this.defaultValidationMessages,
   );
   readonly showErrors: Signal<boolean> = shouldShowErrors(this.field);
   readonly errorsToDisplay: Signal<ResolvedError[]> = computed(() => (this.showErrors() ? this.errors() : []));
@@ -164,60 +164,36 @@ export class NgForgeField {
 }
 
 /**
- * The 10 standard inputs forwarded by `NgForgeField`.
- *
- * `as const` preserves the literal tuple in the emitted `.d.ts`, so consumers
- * can spread it into a `hostDirectives` entry and Angular's AOT compiler can
- * still see every input name at build time (NG2019 satisfied).
+ * Inputs forwarded onto `NgForgeField` via `hostDirectives`. Excludes
+ * `key` / `className` (forwarded to `NgForgeFieldShell` separately via
+ * `NG_FORGE_FIELD_SHELL_INPUTS`). Most consumers shouldn't reference this
+ * directly — use the `NG_FORGE_FIELD` preset.
  */
-export const NG_FORGE_FIELD_INPUTS = [
-  'field',
-  'key',
-  'label',
-  'placeholder',
-  'className',
-  'tabIndex',
-  'props',
-  'meta',
-  'validationMessages',
-  'defaultValidationMessages',
-] as const;
+export const NG_FORGE_VALUE_FIELD_INPUTS = ['field', 'label', 'placeholder', 'tabIndex', 'props', 'meta', 'validationMessages'] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Compile-time lockstep assertion: NG_FORGE_FIELD_INPUTS must equal the set of
-// `input()` properties declared on NgForgeField. Drift in either direction
+// Compile-time lockstep assertion: NG_FORGE_VALUE_FIELD_INPUTS must equal the
+// declared `input()` properties on NgForgeField. Drift in either direction
 // (declared input missing from tuple, or tuple containing a name that isn't a
 // declared input) fails the build.
-//
-// Why this matters at compile time, not runtime:
-// - Adding an input here without updating the tuple silently breaks consumer
-//   forwarding — the host directive doesn't expose the input, parents can't
-//   bind to it, and there's no compile error from Angular itself.
-// - Removing/renaming an input without trimming the tuple leaves stale entries
-//   that mappers may still emit, hitting NG0303 at runtime instead of build.
-//
-// Pure type-level: no runtime cost, no internal Angular APIs (Angular doesn't
-// expose a public directive-reflection helper).
 // ─────────────────────────────────────────────────────────────────────────────
 
+ 
 type _InputSignalProps<T> = {
   [K in keyof T]: T[K] extends InputSignal<any> | InputSignalWithTransform<any, any> ? K : never;
 }[keyof T];
 
-type _MissingFromTuple = Exclude<_InputSignalProps<NgForgeField>, (typeof NG_FORGE_FIELD_INPUTS)[number]>;
-type _ExtraInTuple = Exclude<(typeof NG_FORGE_FIELD_INPUTS)[number], _InputSignalProps<NgForgeField>>;
+type _MissingFromTuple = Exclude<_InputSignalProps<NgForgeField>, (typeof NG_FORGE_VALUE_FIELD_INPUTS)[number]>;
+type _ExtraInTuple = Exclude<(typeof NG_FORGE_VALUE_FIELD_INPUTS)[number], _InputSignalProps<NgForgeField>>;
 
-// If either side is non-empty, the build fails on this constant. The branded
-// message types make the mismatch visible in the TS error: e.g.
-//   'NG_FORGE_FIELD_INPUTS is MISSING declared NgForgeField inputs: <names>'
 type _AssertTupleLockstep = [_MissingFromTuple] extends [never]
   ? [_ExtraInTuple] extends [never]
     ? true
-    : { 'NG_FORGE_FIELD_INPUTS contains entries that are not declared inputs on NgForgeField': _ExtraInTuple }
-  : { 'NG_FORGE_FIELD_INPUTS is MISSING declared NgForgeField inputs': _MissingFromTuple };
+    : { 'NG_FORGE_VALUE_FIELD_INPUTS contains entries that are not declared inputs on NgForgeField': _ExtraInTuple }
+  : { 'NG_FORGE_VALUE_FIELD_INPUTS is MISSING declared NgForgeField inputs': _MissingFromTuple };
 
-const _NG_FORGE_FIELD_INPUTS_LOCKSTEP: _AssertTupleLockstep = true;
-void _NG_FORGE_FIELD_INPUTS_LOCKSTEP;
+const _NG_FORGE_VALUE_FIELD_INPUTS_LOCKSTEP: _AssertTupleLockstep = true;
+void _NG_FORGE_VALUE_FIELD_INPUTS_LOCKSTEP;
 
 /**
  * `NgForgeField` typed for a specific value type. The directive itself stores
@@ -233,14 +209,12 @@ export type TypedNgForgeField<T> = Omit<NgForgeField, 'field'> & {
  * Typed wrapper around `inject(NgForgeField)`. The generic narrows the
  * `field` signal to `Signal<FieldTree<T>>` for the calling component's value
  * type. The cast is unchecked — the runtime contract is that mappers only
- * forward a `field` whose value type matches the field-type definition. This
- * is a stopgap until `FieldTypeDefinition` registration carries value-type
- * information end-to-end.
+ * forward a `field` whose value type matches the field-type definition.
  *
  * @example
  * ```ts
- * protected readonly field = injectNgForgeField<string>();
- * // field.field() is Signal<FieldTree<string>>; field.errors() etc. unchanged
+ * protected readonly ngf = injectNgForgeField<string>();
+ * // ngf.field() is Signal<FieldTree<string>>; ngf.errors() etc. unchanged
  * ```
  */
 export function injectNgForgeField<T = unknown>(): TypedNgForgeField<T> {

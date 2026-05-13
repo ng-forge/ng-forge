@@ -131,10 +131,13 @@ export const appConfig: ApplicationConfig = {
     featuresTitle: 'What to Implement',
     features: [
       { name: 'FieldTypeDefinition', description: 'A field key, the Angular component to render, and an optional value mapper' },
-      { name: 'ValueFieldComponent', description: 'Implement value-based fields using the value() input and valueChange() output signals' },
       {
-        name: 'CheckedFieldComponent',
-        description: 'Implement checked-based fields (checkbox, toggle) via the checked() and checkedChange() signals',
+        name: 'NgForgeField',
+        description: 'Compose via hostDirectives — owns the 10 standard inputs + error/aria signals + universal host bindings',
+      },
+      {
+        name: 'NgForgeControl / NgForgeHostControl',
+        description: 'Marker directives that absorb meta + aria onto the canonical control element (template attr / hostDirectives)',
       },
       {
         name: 'withCustomFields()',

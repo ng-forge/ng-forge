@@ -53,6 +53,11 @@
 .adapter-props-code {
   @include mix.code-block;
   padding: $space-4;
+
+  // Browser default <pre> margin stacks with the container padding — remove it.
+  :where(pre) {
+    margin: 0;
+  }
 }
 
 .adapter-props-empty {

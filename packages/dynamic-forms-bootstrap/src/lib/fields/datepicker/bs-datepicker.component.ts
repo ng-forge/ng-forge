@@ -1,7 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeControl, NgForgeField, NG_FORGE_FIELD_INPUTS, injectNgForgeField } from '@ng-forge/dynamic-forms/integration';
+import {
+  NgForgeControl,
+  NgForgeField,
+  NgForgeFieldShell,
+  NG_FORGE_FIELD_SHELL_INPUTS,
+  NG_FORGE_VALUE_FIELD_INPUTS,
+  injectNgForgeField,
+} from '@ng-forge/dynamic-forms/integration';
 import { BsDatepickerProps } from './bs-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
@@ -10,7 +17,10 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   selector: 'df-bs-datepicker',
   imports: [FormField, DynamicTextPipe, AsyncPipe, InputConstraintsDirective, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  hostDirectives: [
+    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
+    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
+  ],
   template: `
     @let f = ngf.field(); @let p = props(); @let inputId = ngf.key() + '-input';
     @if (p?.floatingLabel) {
@@ -91,7 +101,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   ],
 })
 export default class BsDatepickerFieldComponent {
-  protected readonly ngf = injectNgForgeField<Date | string>();
+  protected readonly ngf = injectNgForgeField<string>();
 
   readonly minDate = input<Date | string | null>(null);
   readonly maxDate = input<Date | string | null>(null);

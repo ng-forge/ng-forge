@@ -1,7 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
+import {
+  injectNgForgeField,
+  NgForgeField,
+  NgForgeFieldShell,
+  NG_FORGE_FIELD_SHELL_INPUTS,
+  NG_FORGE_VALUE_FIELD_INPUTS,
+} from '@ng-forge/dynamic-forms/integration';
 import { PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeTextareaControlComponent } from './prime-textarea-control.component';
@@ -10,7 +16,10 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
   selector: 'df-prime-textarea',
   imports: [DynamicTextPipe, AsyncPipe, FormField, PrimeTextareaControlComponent],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  hostDirectives: [
+    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
+    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
+  ],
   template: `
     <div class="df-prime-field">
       @if (ngf.label()) {
@@ -18,7 +27,7 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
       }
 
       <df-prime-textarea-control
-        [id]="inputId()"
+        [inputId]="inputId()"
         [formField]="ngf.field()"
         [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"

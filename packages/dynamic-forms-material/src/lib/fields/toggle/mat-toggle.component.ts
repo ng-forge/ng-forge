@@ -2,7 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { FormField } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
+import {
+  NgForgeControl,
+  injectNgForgeField,
+  NgForgeField,
+  NgForgeFieldShell,
+  NG_FORGE_FIELD_SHELL_INPUTS,
+  NG_FORGE_VALUE_FIELD_INPUTS,
+} from '@ng-forge/dynamic-forms/integration';
 
 import { MatToggleProps } from './mat-toggle.type';
 import { MatError } from '@angular/material/input';
@@ -12,7 +19,10 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 @Component({
   selector: 'df-mat-toggle',
   imports: [MatSlideToggle, FormField, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  hostDirectives: [
+    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
+    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
+  ],
   template: `
     @let f = ngf.field();
     @let toggleId = ngf.key() + '-toggle';
@@ -26,7 +36,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       [hideIcon]="props()?.hideIcon || false"
       [disableRipple]="disableRipple()"
       [required]="!!f().required()"
-      [attr.tabindex]="ngf.tabIndex()"
+      [tabIndex]="ngf.tabIndex() ?? 0"
       class="toggle-container"
     >
       {{ ngf.label() | dynamicText | async }}

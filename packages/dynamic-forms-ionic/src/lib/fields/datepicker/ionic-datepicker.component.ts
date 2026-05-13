@@ -12,7 +12,14 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeControl, NgForgeField, NG_FORGE_FIELD_INPUTS, injectNgForgeField } from '@ng-forge/dynamic-forms/integration';
+import {
+  NgForgeControl,
+  NgForgeField,
+  NgForgeFieldShell,
+  NG_FORGE_FIELD_SHELL_INPUTS,
+  NG_FORGE_VALUE_FIELD_INPUTS,
+  injectNgForgeField,
+} from '@ng-forge/dynamic-forms/integration';
 import { IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
@@ -34,7 +41,10 @@ import { format } from 'date-fns';
     AsyncPipe,
     NgForgeControl,
   ],
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  hostDirectives: [
+    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
+    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
+  ],
   template: `
     @let f = ngf.field();
     @let dateValue = f().value();

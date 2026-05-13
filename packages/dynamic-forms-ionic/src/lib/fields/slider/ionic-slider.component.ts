@@ -2,14 +2,25 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { IonNote, IonRange } from '@ionic/angular/standalone';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeField, NgForgeHostControl, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
+import {
+  NgForgeHostControl,
+  injectNgForgeField,
+  NgForgeField,
+  NgForgeFieldShell,
+  NG_FORGE_FIELD_SHELL_INPUTS,
+  NG_FORGE_VALUE_FIELD_INPUTS,
+} from '@ng-forge/dynamic-forms/integration';
 import { IonicSliderProps } from './ionic-slider.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ion-slider',
   imports: [IonRange, IonNote, FormField, DynamicTextPipe, AsyncPipe],
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }, NgForgeHostControl],
+  hostDirectives: [
+    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
+    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
+    NgForgeHostControl,
+  ],
   template: `
     @let f = ngf.field();
     @let inputId = ngf.key() + '-input';
@@ -28,10 +39,6 @@ import { AsyncPipe } from '@angular/common';
       [ticks]="props()?.ticks ?? false"
       [snaps]="props()?.snaps ?? false"
       [color]="props()?.color ?? 'primary'"
-      [attr.tabindex]="ngf.tabIndex()"
-      [attr.aria-invalid]="ngf.ariaInvalid()"
-      [attr.aria-required]="ngf.ariaRequired()"
-      [attr.aria-describedby]="ngf.ariaDescribedBy()"
     />
 
     @if (ngf.errorsToDisplay()[0]; as error) {

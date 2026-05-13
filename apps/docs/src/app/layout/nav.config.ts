@@ -21,18 +21,12 @@ export const NAV_ITEMS: NavItem[] = [
   {
     label: 'Examples',
     path: 'examples',
-    /** Hidden when adapter === 'custom' — no example components exist for the custom adapter. */
-    cssClass: 'sidebar-link--not-custom',
   },
   {
     label: 'Building an Adapter',
     path: 'building-an-adapter',
-    /**
-     * Always visible. Clicking from a concrete adapter (Material / Bootstrap / …)
-     * redirects to `/custom/building-an-adapter` via the content guard — the
-     * page is custom-adapter-only by content, but the nav entry doesn't hide
-     * itself based on the active adapter.
-     */
+    /** Visible only when adapter === 'custom' — concrete adapters hide this entry. */
+    cssClass: 'sidebar-link--custom-only',
   },
   {
     label: 'Field Types',

@@ -3,14 +3,24 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FormField } from '@angular/forms/signals';
 import { IonNote, IonTextarea } from '@ionic/angular/standalone';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
+import {
+  NgForgeControl,
+  injectNgForgeField,
+  NgForgeField,
+  NgForgeFieldShell,
+  NG_FORGE_FIELD_SHELL_INPUTS,
+  NG_FORGE_VALUE_FIELD_INPUTS,
+} from '@ng-forge/dynamic-forms/integration';
 import { IonicTextareaProps } from './ionic-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ion-textarea',
   imports: [IonTextarea, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  hostDirectives: [
+    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
+    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
+  ],
   template: `
     @let f = ngf.field();
     @let textareaId = ngf.key() + '-textarea';

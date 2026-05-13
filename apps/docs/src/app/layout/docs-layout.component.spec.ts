@@ -86,10 +86,10 @@ describe('DocsLayoutComponent', () => {
   // ─── navItems filtering ──────────────────────────────────────────────
 
   describe('navItems', () => {
-    it('should always include "Building an Adapter" regardless of adapter', () => {
+    it('should hide "Building an Adapter" for non-custom adapters and show it for custom', () => {
       const matItems = priv(setup({ adapter: 'material' }).component).navItems();
       const customItems = priv(setup({ adapter: 'custom' }).component).navItems();
-      expect(matItems.find((i: any) => i.path === 'building-an-adapter')).toBeDefined();
+      expect(matItems.find((i: any) => i.path === 'building-an-adapter')).toBeUndefined();
       expect(customItems.find((i: any) => i.path === 'building-an-adapter')).toBeDefined();
     });
 
@@ -100,34 +100,27 @@ describe('DocsLayoutComponent', () => {
       expect(gettingStarted).toBeDefined();
     });
 
-    it('should hide not-custom items (Examples) when adapter is "custom"', () => {
-      const { component } = setup({ adapter: 'custom' });
-      const items = priv(component).navItems();
-      const examples = items.find((i: any) => i.path === 'examples');
-      expect(examples).toBeUndefined();
+    it('should always include Examples regardless of adapter', () => {
+      const matItems = priv(setup({ adapter: 'material' }).component).navItems();
+      const customItems = priv(setup({ adapter: 'custom' }).component).navItems();
+      expect(matItems.find((i: any) => i.path === 'examples')).toBeDefined();
+      expect(customItems.find((i: any) => i.path === 'examples')).toBeDefined();
     });
 
-    it('should show not-custom items (Examples) for non-custom adapters', () => {
-      const { component } = setup({ adapter: 'primeng' });
-      const items = priv(component).navItems();
-      const examples = items.find((i: any) => i.path === 'examples');
-      expect(examples).toBeDefined();
-    });
-
-    it('should reactively update Examples visibility when adapter changes', () => {
+    it('should reactively update Building an Adapter visibility when adapter changes', () => {
       const { component, adapterSignal } = setup({ adapter: 'material' });
       expect(
         priv(component)
           .navItems()
-          .find((i: any) => i.path === 'examples'),
-      ).toBeDefined();
+          .find((i: any) => i.path === 'building-an-adapter'),
+      ).toBeUndefined();
 
       adapterSignal.set('custom');
       expect(
         priv(component)
           .navItems()
-          .find((i: any) => i.path === 'examples'),
-      ).toBeUndefined();
+          .find((i: any) => i.path === 'building-an-adapter'),
+      ).toBeDefined();
     });
   });
 

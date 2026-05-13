@@ -60,7 +60,7 @@ function extractSlug(route: Parameters<CanActivateFn>[0]): string {
 }
 
 /** Routes that are only meaningful under the "custom" adapter. */
-export const CUSTOM_ONLY_ROUTES = new Set(['building-an-adapter']);
+export const CUSTOM_ONLY_ROUTES: readonly string[] = ['building-an-adapter'];
 
 export const contentRedirectGuard: CanActivateFn = (route) => {
   const slug = extractSlug(route);
@@ -76,7 +76,7 @@ export const contentRedirectGuard: CanActivateFn = (route) => {
     return inject(Router).parseUrl(`/${adapter}/${renameTarget}`);
   }
 
-  if (adapter !== 'custom' && CUSTOM_ONLY_ROUTES.has(slug)) {
+  if (adapter !== 'custom' && CUSTOM_ONLY_ROUTES.includes(slug)) {
     return inject(Router).parseUrl(`/custom/${slug}`);
   }
 

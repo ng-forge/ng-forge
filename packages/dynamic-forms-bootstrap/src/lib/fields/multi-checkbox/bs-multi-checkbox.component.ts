@@ -1,6 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { injectNgForgeField, isEqual, NgForgeControl, NgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
+import {
+  injectNgForgeField,
+  isEqual,
+  NgForgeControl,
+  NgForgeField,
+  NgForgeFieldShell,
+  NG_FORGE_FIELD_SHELL_INPUTS,
+  NG_FORGE_VALUE_FIELD_INPUTS,
+} from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { BsMultiCheckboxProps } from './bs-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
@@ -9,7 +17,10 @@ import { AsyncPipe } from '@angular/common';
   selector: 'df-bs-multi-checkbox',
   imports: [DynamicTextPipe, AsyncPipe, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  hostDirectives: [
+    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
+    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
+  ],
   template: `
     @let f = ngf.field();
     @let checked = checkedValuesMap();

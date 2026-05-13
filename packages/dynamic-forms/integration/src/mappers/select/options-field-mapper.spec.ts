@@ -5,7 +5,8 @@ import { optionsFieldMapper, FieldWithOptions } from './options-field-mapper';
 import { SelectField } from '../../definitions';
 import { RadioField } from '../../definitions';
 import { MultiCheckboxField } from '../../definitions';
-import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FieldSignalContext } from '@ng-forge/dynamic-forms';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT } from '../../../../src/lib/models/field-signal-context.token';
+import { FieldSignalContext } from '../../../../src/lib/mappers/types';
 
 describe('optionsFieldMapper', () => {
   let parentInjector: EnvironmentInjector;

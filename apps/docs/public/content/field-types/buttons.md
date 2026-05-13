@@ -32,9 +32,7 @@ Renders a submit button that triggers form submission. Automatically disabled wh
 
 <docs-adapter-props field="submit"></docs-adapter-props>
 
-#### Example
-
-<docs-live-example scenario="examples/button" hideForCustom="true"></docs-live-example>
+<docs-live-example scenario="examples/button" hideForCustom="true" showHeading="true"></docs-live-example>
 
 ## button
 

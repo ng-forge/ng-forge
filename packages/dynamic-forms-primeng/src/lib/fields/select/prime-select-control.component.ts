@@ -7,10 +7,10 @@ import { Select, SelectChangeEvent } from 'primeng/select';
 import { MultiSelect, MultiSelectChangeEvent } from 'primeng/multiselect';
 
 /**
- * PrimeNG Select/MultiSelect wrapper implementing FormValueControl. Intended
- * to be rendered inside `df-prime-select` — `NgForgeHostControl` claims the
- * ambient parent NgForgeField for meta/aria. Standalone use loses meta unless
- * the explicit ariaX inputs are bound.
+ * PrimeNG Select/MultiSelect wrapper implementing FormValueControl. Rendered
+ * inside `df-prime-select` — `NgForgeHostControl` claims the ambient parent
+ * NgForgeField for meta + aria. Standalone use lands `aria-invalid="false"`
+ * with no `aria-required` / `aria-describedby`.
  */
 @Component({
   selector: 'df-prime-select-control',

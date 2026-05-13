@@ -1,16 +1,18 @@
 import { ChangeDetectionStrategy, Component, EnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { form, required, schema, FieldTree, type SchemaPath } from '@angular/forms/signals';
-import { DEFAULT_VALIDATION_MESSAGES, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DEFAULT_VALIDATION_MESSAGES } from '../../../src/lib/models/field-signal-context.token';
+import { ValidationMessages } from '../../../src/lib/models/validation-types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { NgForgeField, NG_FORGE_FIELD_INPUTS } from './ng-forge-field.directive';
+import { NgForgeField } from './ng-forge-field.directive';
 import { NgForgeControl, NgForgeHostControl } from './ng-forge-controls';
+import { NG_FORGE_FIELD } from './host-directive-presets';
 
 @Component({
   selector: 'test-host',
   template: '<input class="target" />',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  hostDirectives: NG_FORGE_FIELD,
 })
 class TestHostComponent {}
 
@@ -19,7 +21,7 @@ class TestHostComponent {}
   imports: [NgForgeControl],
   template: '<input class="target" ngForgeControl />',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  hostDirectives: NG_FORGE_FIELD,
 })
 class TestHostWithControlComponent {}
 
@@ -27,7 +29,7 @@ class TestHostWithControlComponent {}
   selector: 'test-host-host-control',
   template: '<input class="target" />',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }, NgForgeHostControl],
+  hostDirectives: [...NG_FORGE_FIELD, NgForgeHostControl],
 })
 class TestHostHostControlComponent {}
 
@@ -42,7 +44,7 @@ class TestHostHostControlComponent {}
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  hostDirectives: NG_FORGE_FIELD,
 })
 class TestHostWithDescendantTargetComponent {}
 
@@ -484,13 +486,13 @@ describe('NgForgeField', () => {
     });
   });
 
-  describe('NG_FORGE_FIELD_INPUTS lockstep with declared inputs', () => {
+  describe('NG_FORGE_VALUE_FIELD_INPUTS lockstep with declared inputs', () => {
     // The lockstep guarantee is enforced by a compile-time type assertion in
-    // ng-forge-field.directive.ts (see `_NG_FORGE_FIELD_INPUTS_LOCKSTEP`).
+    // ng-forge-field.directive.ts (see `_NG_FORGE_VALUE_FIELD_INPUTS_LOCKSTEP`).
     // Drift in either direction fails the build via tsc with a self-describing
     // error. This test is the runtime smoke check that the host directive
     // composition with the current tuple instantiates cleanly.
-    it('instantiates cleanly with the spread NG_FORGE_FIELD_INPUTS tuple', () => {
+    it('instantiates cleanly with the NG_FORGE_FIELD preset', () => {
       TestBed.configureTestingModule({ imports: [TestHostComponent] });
       expect(() => TestBed.createComponent(TestHostComponent)).not.toThrow();
     });
@@ -517,9 +519,10 @@ describe('NgForgeField', () => {
       // Intentionally skip setInput. Host bindings on the directive read
       // `key()` / `field()`, which are `input.required<...>()` and throw
       // NG0950 on first read until set.
-      // Match NG0950's "required" wording so the test fails meaningfully if
-      // Angular ever changes the error format.
-      expect(() => fixture.detectChanges()).toThrow(/required/i);
+      // NG0950: required input not set before first read. Match either the
+      // stable error code or the "required" wording so the test fails if
+      // Angular ever changes the format.
+      expect(() => fixture.detectChanges()).toThrow(/NG0950|required/i);
     });
   });
 });

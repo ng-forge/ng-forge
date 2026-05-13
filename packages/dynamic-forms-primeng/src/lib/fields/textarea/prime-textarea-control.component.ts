@@ -15,6 +15,7 @@ import { TextareaModule } from 'primeng/textarea';
   template: `
     <textarea
       pInputTextarea
+      [id]="inputId()"
       [ngModel]="value()"
       (ngModelChange)="value.set($event)"
       [placeholder]="placeholder()"
@@ -64,6 +65,8 @@ export class PrimeTextareaControlComponent implements FormValueControl<string> {
   // PrimeNG-specific props
   // ─────────────────────────────────────────────────────────────────────────────
 
+  /** Id forwarded onto the inner <textarea> so the parent `<label [for]>` resolves correctly. */
+  readonly inputId = input<string>('');
   readonly placeholder = input<string>('');
   readonly rows = input<number>(4);
   readonly cols = input<number | undefined>(undefined);

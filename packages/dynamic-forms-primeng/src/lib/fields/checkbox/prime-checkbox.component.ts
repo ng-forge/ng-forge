@@ -2,7 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { FormField } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
+import {
+  NgForgeControl,
+  injectNgForgeField,
+  NgForgeField,
+  NgForgeFieldShell,
+  NG_FORGE_FIELD_SHELL_INPUTS,
+  NG_FORGE_VALUE_FIELD_INPUTS,
+} from '@ng-forge/dynamic-forms/integration';
 import { PrimeCheckboxProps } from './prime-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -10,7 +17,10 @@ import { AsyncPipe } from '@angular/common';
   selector: 'df-prime-checkbox',
   imports: [Checkbox, DynamicTextPipe, AsyncPipe, FormField, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  hostDirectives: [
+    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
+    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
+  ],
   template: `
     @let f = ngf.field(); @let checkboxId = ngf.key() + '-checkbox';
 
@@ -23,7 +33,7 @@ import { AsyncPipe } from '@angular/common';
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"
         [styleClass]="checkboxClasses()"
-        [attr.tabindex]="ngf.tabIndex()"
+        [tabindex]="ngf.tabIndex() ?? 0"
       />
       @if (ngf.label(); as labelText) {
         <label [for]="checkboxId" class="ml-2">{{ labelText | dynamicText | async }}</label>

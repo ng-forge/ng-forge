@@ -1,7 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { injectNgForgeField, isEqual, NgForgeControl, NgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
+import {
+  injectNgForgeField,
+  isEqual,
+  NgForgeControl,
+  NgForgeField,
+  NgForgeFieldShell,
+  NG_FORGE_FIELD_SHELL_INPUTS,
+  NG_FORGE_VALUE_FIELD_INPUTS,
+} from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { MatMultiCheckboxProps } from './mat-multi-checkbox.type';
 import { MatError } from '@angular/material/input';
@@ -10,7 +18,10 @@ import { AsyncPipe } from '@angular/common';
 @Component({
   selector: 'df-mat-multi-checkbox',
   imports: [MatCheckbox, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  hostDirectives: [
+    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
+    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
+  ],
   template: `
     @let f = ngf.field();
     @let checkboxGroupId = ngf.key() + '-checkbox-group';

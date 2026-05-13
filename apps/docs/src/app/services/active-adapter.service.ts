@@ -33,14 +33,21 @@ export class ActiveAdapterService {
 
   switchTo(name: AdapterName): void {
     if (!DOCS_ADAPTERS.has(name)) return;
-    const segments = this.router.url.split('/');
-    const currentPath = segments.slice(2).join('/') || 'getting-started';
+    // Parse via UrlTree so query/fragment text doesn't leak into the
+    // path comparison (router.url.split('/') would include them).
+    const tree = this.router.parseUrl(this.router.url);
+    const primarySegments = tree.root.children['primary']?.segments ?? [];
+    const currentPath =
+      primarySegments
+        .slice(1)
+        .map((s) => s.path)
+        .join('/') || 'getting-started';
     // If switching away from "custom" while on a custom-only page (e.g.
     // building-an-adapter), the redirect guard would bounce us straight
     // back to /custom/<page>. Land on a sensible page on the target adapter
     // instead. The custom-fields recipe is the closest analogue when the
     // origin was the building-an-adapter guide.
-    const path = name !== 'custom' && CUSTOM_ONLY_ROUTES.has(currentPath) ? 'recipes/custom-fields' : currentPath;
+    const path = name !== 'custom' && CUSTOM_ONLY_ROUTES.includes(currentPath) ? 'recipes/custom-fields' : currentPath;
 
     if (!this.isBrowser) {
       void this.router.navigateByUrl(`/${name}/${path}`);

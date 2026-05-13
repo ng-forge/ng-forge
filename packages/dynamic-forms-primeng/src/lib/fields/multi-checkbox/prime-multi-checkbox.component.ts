@@ -2,7 +2,15 @@ import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } fro
 import { FormsModule } from '@angular/forms';
 import { Checkbox, CheckboxChangeEvent } from 'primeng/checkbox';
 import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { injectNgForgeField, isEqual, NgForgeControl, NgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
+import {
+  injectNgForgeField,
+  isEqual,
+  NgForgeControl,
+  NgForgeField,
+  NgForgeFieldShell,
+  NG_FORGE_FIELD_SHELL_INPUTS,
+  NG_FORGE_VALUE_FIELD_INPUTS,
+} from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PrimeMultiCheckboxProps } from './prime-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
@@ -11,7 +19,10 @@ import { AsyncPipe } from '@angular/common';
   selector: 'df-prime-multi-checkbox',
   imports: [Checkbox, FormsModule, DynamicTextPipe, AsyncPipe, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  hostDirectives: [
+    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
+    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
+  ],
   template: `
     @let f = ngf.field();
     @let checked = checkedValuesMap();
@@ -20,17 +31,17 @@ import { AsyncPipe } from '@angular/common';
     }
 
     <div class="checkbox-group" [class]="groupClasses()" [attr.aria-describedby]="ngf.ariaDescribedBy()">
-      @for (option of options(); track option.value) {
+      @for (option of options(); track option.value; let i = $index) {
         <div class="checkbox-option">
           <p-checkbox
             ngForgeControl="input[type='checkbox']"
-            [inputId]="ngf.key() + '-' + option.value"
+            [inputId]="ngf.key() + '_' + i"
             [binary]="true"
             [ngModel]="checked['' + option.value] || false"
             (onChange)="onCheckboxChange(option, $event)"
             [disabled]="f().disabled() || option.disabled || false"
           />
-          <label [for]="ngf.key() + '-' + option.value" class="ml-2">{{ option.label | dynamicText | async }}</label>
+          <label [for]="ngf.key() + '_' + i" class="ml-2">{{ option.label | dynamicText | async }}</label>
         </div>
       }
     </div>

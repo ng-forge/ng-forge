@@ -1,7 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeControl, NgForgeField, injectNgForgeField, NG_FORGE_FIELD_INPUTS } from '@ng-forge/dynamic-forms/integration';
+import {
+  NgForgeControl,
+  injectNgForgeField,
+  NgForgeField,
+  NgForgeFieldShell,
+  NG_FORGE_FIELD_SHELL_INPUTS,
+  NG_FORGE_VALUE_FIELD_INPUTS,
+} from '@ng-forge/dynamic-forms/integration';
 import { PrimeSliderProps } from './prime-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { Slider } from 'primeng/slider';
@@ -10,18 +17,22 @@ import { Slider } from 'primeng/slider';
   selector: 'df-prime-slider',
   imports: [Slider, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
+  hostDirectives: [
+    { directive: NgForgeFieldShell, inputs: [...NG_FORGE_FIELD_SHELL_INPUTS] },
+    { directive: NgForgeField, inputs: [...NG_FORGE_VALUE_FIELD_INPUTS] },
+  ],
   template: `
     @let f = ngf.field();
+    @let inputId = ngf.key() + '-input';
 
     <div class="df-prime-field">
       @if (ngf.label(); as label) {
-        <label [for]="ngf.key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
+        <label [for]="inputId" class="df-prime-label">{{ label | dynamicText | async }}</label>
       }
 
       <p-slider
         ngForgeControl
-        [id]="ngf.key()"
+        [id]="inputId"
         [formField]="f"
         [min]="f().min?.() ?? props()?.min ?? 0"
         [max]="f().max?.() ?? props()?.max ?? 100"
@@ -29,7 +40,7 @@ import { Slider } from 'primeng/slider';
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"
         [attr.tabindex]="ngf.tabIndex()"
-        [styleClass]="sliderClasses()"
+        [styleClass]="props()?.styleClass ?? ''"
       />
 
       @if (ngf.errorsToDisplay()[0]; as error) {
@@ -53,13 +64,4 @@ export default class PrimeSliderFieldComponent {
 
   readonly step = input<number>();
   readonly props = input<PrimeSliderProps>();
-
-  protected readonly sliderClasses = computed(() => {
-    const classes: string[] = [];
-    const styleClass = this.props()?.styleClass;
-    if (styleClass) {
-      classes.push(styleClass);
-    }
-    return classes.join(' ');
-  });
 }
