@@ -1,7 +1,7 @@
 import type { InputSignal, InputSignalWithTransform } from '@angular/core';
 
 /** Property names on `T` whose values are `input()` / `input.required()` signals. `any` is required for conditional-type variance. */
- 
+
 export type InputSignalProps<T> = {
   [K in keyof T]: T[K] extends InputSignal<any> | InputSignalWithTransform<any, any> ? K : never;
 }[keyof T];
