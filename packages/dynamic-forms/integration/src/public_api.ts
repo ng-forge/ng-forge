@@ -130,3 +130,29 @@ export { NgForgeFieldHost, NgForgeActionHost } from './directives';
 
 export { resolveNonFieldHidden, resolveNonFieldDisabled } from '@ng-forge/dynamic-forms';
 export type { NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } from '@ng-forge/dynamic-forms';
+
+// =============================================================================
+// Wrapper Authoring (re-exported from @ng-forge/dynamic-forms)
+// =============================================================================
+
+export { createWrappers, isWrappersBundle, wrapperProps } from '@ng-forge/dynamic-forms';
+export type {
+  FieldWrapperContract,
+  WrapperFieldInputs,
+  WrapperRegistration,
+  WrappersBundle,
+  InferWrapperRegistry,
+  WrapperTypeDefinition,
+} from '@ng-forge/dynamic-forms';
+
+// =============================================================================
+// Testing Harness
+// =============================================================================
+
+export { createNgForgeFieldFixture, createNgForgeActionFixture, provideTestValidationMessages } from './testing';
+export type {
+  CreateNgForgeFieldFixtureOptions,
+  CreateNgForgeActionFixtureOptions,
+  NgForgeFieldFixture,
+  NgForgeActionFixture,
+} from './testing';

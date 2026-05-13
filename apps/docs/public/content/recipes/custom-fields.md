@@ -117,27 +117,55 @@ const config = {
 
 Custom fields work with everything the built-in field types do — validation, derivations, conditional logic, dynamic text — without any extra wiring.
 
-## Caveat: direct instantiation (TestBed, Storybook)
+## Testing a custom field
 
-The form engine's outlet always binds `field` and `key` before triggering the first change-detection pass. Components instantiated directly — in a unit test via `TestBed.createComponent`, in Storybook, in a sandbox — bypass that ordering, so `NgForgeField`'s host bindings hit `input.required<>()` on first read and throw NG0950.
+The form engine's outlet always binds `field` and `key` before triggering the first change-detection pass. Components instantiated directly — TestBed, Storybook, sandbox harnesses — bypass that ordering, so `NgForgeField`'s host bindings hit `input.required<>()` on first read and throw NG0950.
 
-Bind both inputs **before** the first `detectChanges`. Construct `field` from `form()` in the same injection context as your component:
+Use `createNgForgeFieldFixture` from `@ng-forge/dynamic-forms/integration` to build the fixture with `field` + `key` already bound. The harness wraps your value in a one-key form via `form()` in an injection context, sets the required inputs, and hands you back the fixture for assertions:
 
 ```typescript
-import { EnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
-import { form } from '@angular/forms/signals';
-import MyFieldComponent from './my-field.component';
+import { required } from '@angular/forms/signals';
+import { createNgForgeFieldFixture, provideTestValidationMessages } from '@ng-forge/dynamic-forms/integration';
+import RichTextFieldComponent from './rich-text-field.component';
 
-const rootValue = signal<{ username: string }>({ username: '' });
-const root = runInInjectionContext(TestBed.inject(EnvironmentInjector), () => form(rootValue));
-const fixture = TestBed.createComponent(MyFieldComponent);
-fixture.componentRef.setInput('field', root.username);
-fixture.componentRef.setInput('key', 'username');
-fixture.detectChanges(); // safe — required inputs are bound
+describe('RichTextFieldComponent', () => {
+  it('shows the required error after the user blurs an empty field', () => {
+    const { fixture, field } = createNgForgeFieldFixture(RichTextFieldComponent, {
+      key: 'body',
+      value: '',
+      schema: (path) => required(path),
+      touched: true,
+      providers: [provideTestValidationMessages({ required: 'Required' })],
+    });
+    fixture.detectChanges();
+
+    expect(field().invalid()).toBe(true);
+    // Assert against rendered DOM, ngf signals, etc.
+  });
+});
 ```
 
-The directive's own spec (`packages/dynamic-forms/integration/src/directives/ng-forge-field.directive.spec.ts`) is the canonical example.
+For action / button components there's a sibling `createNgForgeActionFixture`:
+
+```typescript
+import { createNgForgeActionFixture } from '@ng-forge/dynamic-forms/integration';
+import { SubmitEvent } from '@ng-forge/dynamic-forms';
+import SubmitButtonComponent from './my-submit-button.component';
+
+it('dispatches SubmitEvent through EventBus on click', () => {
+  const { fixture, eventBus } = createNgForgeActionFixture(SubmitButtonComponent, {
+    key: 'submit',
+    label: 'Save',
+    event: SubmitEvent,
+  });
+  const spy = vi.spyOn(eventBus, 'dispatch');
+  fixture.detectChanges();
+  fixture.nativeElement.querySelector('button').click();
+  expect(spy).toHaveBeenCalledWith(SubmitEvent);
+});
+```
+
+Both harnesses defer `detectChanges()` to the caller so you can set extra component-specific inputs between bind and render. Look at `create-field-fixture.spec.ts` in the integration package for the full surface.
 
 ## Going further
 
