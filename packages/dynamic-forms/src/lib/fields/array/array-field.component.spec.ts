@@ -774,7 +774,7 @@ describe('ArrayFieldComponent', () => {
       expect(inputs).toHaveProperty('field');
     });
 
-    it('should add defaultValidationMessages input when context provides it', () => {
+    it('should NOT emit defaultValidationMessages even when DEFAULT_VALIDATION_MESSAGES is provided — NgForgeField reads it from DI directly', () => {
       const valueSignal = signal<Record<string, unknown>>({ test: 'value' });
       const formInstance = runInInjectionContext(TestBed.inject(Injector), () => form(valueSignal));
       formInstance();
@@ -801,11 +801,11 @@ describe('ArrayFieldComponent', () => {
       const inputs = inputsSignal();
 
       // baseFieldMapper: label (1) + key (2) = 2
-      // valueFieldMapper: validationMessages (3) + defaultValidationMessages (4) + field (5) = 3
-      // Total: 5
-      expect(Object.keys(inputs)).toHaveLength(5);
+      // valueFieldMapper: validationMessages (3) + field (4) = 2
+      // Total: 4
+      expect(Object.keys(inputs)).toHaveLength(4);
       expect(inputs).toHaveProperty('field');
-      expect(inputs).toHaveProperty('defaultValidationMessages');
+      expect(inputs['defaultValidationMessages']).toBeUndefined();
     });
   });
 

@@ -1,4 +1,4 @@
-import { Directive, inject, input, InputSignal, InputSignalWithTransform, Signal } from '@angular/core';
+import { Directive, inject, input, Signal } from '@angular/core';
 import {
   ARRAY_CONTEXT,
   type ArrayItemContext,
@@ -9,6 +9,7 @@ import {
   resolveTokens,
 } from '@ng-forge/dynamic-forms';
 import type { EventArgs } from '../definitions/button-field';
+import type { AssertTupleLockstep } from './assert-input-lockstep';
 import { NgForgeFieldShell } from './ng-forge-field-shell.directive';
 
 /**
@@ -107,26 +108,9 @@ export class NgForgeAction<TEvent extends FormEvent = FormEvent> {
  */
 export const NG_FORGE_ACTION_INPUTS = ['label', 'disabled', 'hidden', 'tabIndex', 'event', 'eventArgs', 'eventContext', 'props'] as const;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Compile-time lockstep assertion: NG_FORGE_ACTION_INPUTS must equal the
-// declared `input()` properties on NgForgeAction (excluding the re-exported
-// shell signals which aren't `InputSignal`).
-// ─────────────────────────────────────────────────────────────────────────────
-
-type _InputSignalProps<T> = {
-  [K in keyof T]: T[K] extends InputSignal<any> | InputSignalWithTransform<any, any> ? K : never;
-}[keyof T];
-
-type _MissingFromTuple = Exclude<_InputSignalProps<NgForgeAction>, (typeof NG_FORGE_ACTION_INPUTS)[number]>;
-type _ExtraInTuple = Exclude<(typeof NG_FORGE_ACTION_INPUTS)[number], _InputSignalProps<NgForgeAction>>;
-
-type _AssertTupleLockstep = [_MissingFromTuple] extends [never]
-  ? [_ExtraInTuple] extends [never]
-    ? true
-    : { 'NG_FORGE_ACTION_INPUTS contains entries that are not declared inputs on NgForgeAction': _ExtraInTuple }
-  : { 'NG_FORGE_ACTION_INPUTS is MISSING declared NgForgeAction inputs': _MissingFromTuple };
-
-const _NG_FORGE_ACTION_INPUTS_LOCKSTEP: _AssertTupleLockstep = true;
+// Compile-time lockstep: NG_FORGE_ACTION_INPUTS must equal the declared
+// `input()` properties on NgForgeAction. Drift fails the build.
+const _NG_FORGE_ACTION_INPUTS_LOCKSTEP: AssertTupleLockstep<NgForgeAction, typeof NG_FORGE_ACTION_INPUTS, 'NG_FORGE_ACTION_INPUTS'> = true;
 void _NG_FORGE_ACTION_INPUTS_LOCKSTEP;
 
 /**

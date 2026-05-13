@@ -227,7 +227,7 @@ describe('valueFieldMapper', () => {
       });
     });
 
-    it('should include defaultValidationMessages from context', () => {
+    it('should NOT emit defaultValidationMessages — NgForgeField reads the DI token directly', () => {
       const fieldDef: BaseValueField<unknown, string> = {
         key: 'testField',
         type: 'input',
@@ -240,7 +240,7 @@ describe('valueFieldMapper', () => {
 
       const inputs = testMapper(fieldDef, injector);
 
-      expect(inputs['defaultValidationMessages']).toEqual({ required: 'Default required message' });
+      expect(inputs['defaultValidationMessages']).toBeUndefined();
     });
   });
 

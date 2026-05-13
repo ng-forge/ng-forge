@@ -14,12 +14,12 @@ import { PrimeSelectControlComponent } from './prime-select-control.component';
   template: `
     <div class="df-prime-field">
       @if (ngf.label(); as label) {
-        <label [for]="ngf.key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
+        <label [for]="ngf.key() + '-select'" class="df-prime-label">{{ label | dynamicText | async }}</label>
       }
 
       <df-prime-select-control
         [formField]="ngf.field()"
-        [inputId]="ngf.key()"
+        [inputId]="ngf.key() + '-select'"
         [options]="options()"
         [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
         [multiple]="isMultiple()"

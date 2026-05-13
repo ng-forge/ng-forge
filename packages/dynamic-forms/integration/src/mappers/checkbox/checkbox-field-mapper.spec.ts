@@ -154,7 +154,7 @@ describe('checkboxFieldMapper', () => {
       });
     });
 
-    it('should include defaultValidationMessages from context', () => {
+    it('should NOT emit defaultValidationMessages — NgForgeField reads the DI token directly', () => {
       const fieldDef: BaseCheckedField<unknown> = {
         key: 'agreeTerms',
         type: 'checkbox',
@@ -167,7 +167,7 @@ describe('checkboxFieldMapper', () => {
 
       const inputs = testMapper(fieldDef, injector);
 
-      expect(inputs['defaultValidationMessages']).toEqual({ required: 'This checkbox is required' });
+      expect(inputs['defaultValidationMessages']).toBeUndefined();
     });
   });
 

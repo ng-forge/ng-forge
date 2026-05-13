@@ -1,21 +1,10 @@
-import {
-  afterRenderEffect,
-  computed,
-  Directive,
-  inject,
-  input,
-  InputSignal,
-  InputSignalWithTransform,
-  isDevMode,
-  Signal,
-  signal,
-  untracked,
-} from '@angular/core';
+import { afterRenderEffect, computed, Directive, inject, input, isDevMode, Signal, signal, untracked } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { DEFAULT_VALIDATION_MESSAGES, DynamicText, DynamicFormLogger, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createAriaDescribedBySignal } from '../utils/create-aria-described-by';
 import { createResolvedErrorsSignal, ResolvedError } from '../utils/create-resolved-errors-signal';
 import { shouldShowErrors } from '../utils/should-show-errors';
+import type { AssertTupleLockstep } from './assert-input-lockstep';
 import { NgForgeFieldShell } from './ng-forge-field-shell.directive';
 
 /**
@@ -147,6 +136,9 @@ export class NgForgeField {
           if (!meta || Object.keys(meta).length === 0) return;
           if (untracked(this._claimed)) return;
           warned = true;
+          // `key` is a required input on the injected Shell. `untracked` is
+          // safe here because afterRenderEffect.write runs after first CD,
+          // by which time host-directive inputs are bound — avoiding NG0950.
           const key = untracked(this.key);
           const message =
             `NgForgeField - meta() provided for field "${key}" but no NgForgeControl / NgForgeHostControl / ` +
@@ -171,27 +163,13 @@ export class NgForgeField {
  */
 export const NG_FORGE_VALUE_FIELD_INPUTS = ['field', 'label', 'placeholder', 'tabIndex', 'props', 'meta', 'validationMessages'] as const;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Compile-time lockstep assertion: NG_FORGE_VALUE_FIELD_INPUTS must equal the
-// declared `input()` properties on NgForgeField. Drift in either direction
-// (declared input missing from tuple, or tuple containing a name that isn't a
-// declared input) fails the build.
-// ─────────────────────────────────────────────────────────────────────────────
-
-type _InputSignalProps<T> = {
-  [K in keyof T]: T[K] extends InputSignal<any> | InputSignalWithTransform<any, any> ? K : never;
-}[keyof T];
-
-type _MissingFromTuple = Exclude<_InputSignalProps<NgForgeField>, (typeof NG_FORGE_VALUE_FIELD_INPUTS)[number]>;
-type _ExtraInTuple = Exclude<(typeof NG_FORGE_VALUE_FIELD_INPUTS)[number], _InputSignalProps<NgForgeField>>;
-
-type _AssertTupleLockstep = [_MissingFromTuple] extends [never]
-  ? [_ExtraInTuple] extends [never]
-    ? true
-    : { 'NG_FORGE_VALUE_FIELD_INPUTS contains entries that are not declared inputs on NgForgeField': _ExtraInTuple }
-  : { 'NG_FORGE_VALUE_FIELD_INPUTS is MISSING declared NgForgeField inputs': _MissingFromTuple };
-
-const _NG_FORGE_VALUE_FIELD_INPUTS_LOCKSTEP: _AssertTupleLockstep = true;
+// Compile-time lockstep: NG_FORGE_VALUE_FIELD_INPUTS must equal the declared
+// `input()` properties on NgForgeField. Drift in either direction fails the build.
+const _NG_FORGE_VALUE_FIELD_INPUTS_LOCKSTEP: AssertTupleLockstep<
+  NgForgeField,
+  typeof NG_FORGE_VALUE_FIELD_INPUTS,
+  'NG_FORGE_VALUE_FIELD_INPUTS'
+> = true;
 void _NG_FORGE_VALUE_FIELD_INPUTS_LOCKSTEP;
 
 /**

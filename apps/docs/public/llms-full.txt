@@ -10921,10 +10921,13 @@ The form engine's outlet always binds `field` and `key` before triggering the fi
 Bind both inputs **before** the first `detectChanges`. Construct `field` from `form()` in the same injection context as your component:
 
 ```typescript
-import { runInInjectionContext, signal } from '@angular/core';
+import { EnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { form } from '@angular/forms/signals';
+import MyFieldComponent from './my-field.component';
 
-const root = runInInjectionContext(TestBed.inject(EnvironmentInjector), () => form(signal({ username: '' })));
+const rootValue = signal<{ username: string }>({ username: '' });
+const root = runInInjectionContext(TestBed.inject(EnvironmentInjector), () => form(rootValue));
 const fixture = TestBed.createComponent(MyFieldComponent);
 fixture.componentRef.setInput('field', root.username);
 fixture.componentRef.setInput('key', 'username');

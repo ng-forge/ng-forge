@@ -14,12 +14,12 @@ import { PrimeDatepickerControlComponent } from './prime-datepicker-control.comp
   template: `
     <div class="df-prime-field">
       @if (ngf.label()) {
-        <label [for]="ngf.key()" class="df-prime-label">{{ ngf.label() | dynamicText | async }}</label>
+        <label [for]="ngf.key() + '-datepicker'" class="df-prime-label">{{ ngf.label() | dynamicText | async }}</label>
       }
 
       <df-prime-datepicker-control
         [formField]="ngf.field()"
-        [inputId]="ngf.key()"
+        [inputId]="ngf.key() + '-datepicker'"
         [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
         [tabIndex]="ngf.tabIndex()"
         [dateFormat]="props()?.dateFormat || 'mm/dd/yy'"

@@ -6,6 +6,7 @@ import {
   EnvironmentInjector,
   inject,
   input,
+  isDevMode,
   Signal,
   signal,
   Type,
@@ -15,7 +16,8 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ResolvedField } from '../utils/resolve-field/resolve-field';
 import { WRAPPER_AUTO_ASSOCIATIONS } from '../models/wrapper-type';
 import { DEFAULT_WRAPPERS } from '../models/field-signal-context.token';
-import { createWrapperAwareInjector } from '../utils/wrapper-chain/wrapper-chain';
+import { createWrapperAwareInjector, getDeclaredInputs } from '../utils/wrapper-chain/wrapper-chain';
+import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { createWrapperChainController } from '../utils/wrapper-chain/wrapper-chain-controller';
 import { isSameWrapperChain, resolveWrappers } from '../utils/resolve-wrappers/resolve-wrappers';
 import { READONLY_FIELD_TREE_CACHE, toReadonlyFieldTreeCached } from '../core/field-tree-utils';
@@ -216,17 +218,43 @@ export class DfFieldOutlet {
     }
   }
 
+  private readonly logger = inject(DynamicFormLogger, { optional: true });
+  private readonly warnedUnknownKeys = new WeakMap<Type<unknown>, Set<string>>();
+
   private pushRawInputs(ref: ComponentRef<unknown>, rawInputs: Record<string, unknown>): void {
-    // setInput is lenient in Angular 21 — unknown keys silently drop (not NG0303).
-    // NG_FORGE_FIELD_INPUTS lockstep covers the standard 10-input surface at
-    // build time; custom mapper output keys are by convention against the
-    // component's own declared inputs.
+    // Filter on declared inputs (hostDirective forwarded inputs included in
+    // Angular 21+) so mapper output that doesn't line up with a real input is
+    // skipped instead of silently no-op'd via setInput's lenient path. In dev
+    // mode, surface unknown keys once per (component, key) so mapper typos are
+    // observable without flooding the console.
+    const declared = getDeclaredInputs(ref.componentType);
     const last = this.lastPushedInputs;
     for (const [key, value] of Object.entries(rawInputs)) {
+      if (!declared.has(key)) {
+        if (isDevMode()) this.warnUnknownInput(ref.componentType, key);
+        continue;
+      }
       if (last && last[key] === value) continue;
       ref.setInput(key, value);
     }
     this.lastPushedInputs = rawInputs;
+  }
+
+  private warnUnknownInput(componentType: Type<unknown>, key: string): void {
+    let warned = this.warnedUnknownKeys.get(componentType);
+    if (!warned) {
+      warned = new Set();
+      this.warnedUnknownKeys.set(componentType, warned);
+    }
+    if (warned.has(key)) return;
+    warned.add(key);
+    const name = componentType.name ?? '<anonymous>';
+    const message =
+      `[Dynamic Forms] Mapper for "${name}" emitted input "${key}" but the component does not declare it. ` +
+      `Skipping the push; the field will render without this input. Check that your mapper output matches ` +
+      `the component's declared inputs (including those forwarded via hostDirectives).`;
+    if (this.logger) this.logger.warn(message);
+    else console.warn(message);
   }
 
   private buildFieldInputs(rawInputs: Record<string, unknown>): WrapperFieldInputs {

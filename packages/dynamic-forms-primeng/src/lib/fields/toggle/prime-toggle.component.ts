@@ -14,12 +14,12 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
   template: `
     <div class="df-prime-field">
       @if (ngf.label()) {
-        <label [for]="ngf.key()" class="df-prime-label">{{ ngf.label() | dynamicText | async }}</label>
+        <label [for]="ngf.key() + '-toggle'" class="df-prime-label">{{ ngf.label() | dynamicText | async }}</label>
       }
 
       <p-toggleSwitch
         ngForgeControl="input[type='checkbox']"
-        [inputId]="ngf.key()"
+        [inputId]="ngf.key() + '-toggle'"
         [formField]="ngf.field()"
         [tabindex]="ngf.tabIndex() ?? 0"
         [trueValue]="true"
