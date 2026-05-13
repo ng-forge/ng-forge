@@ -7,6 +7,7 @@ import { FieldWithValidation } from '../definitions/base/field-with-validation';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService, SchemaRegistryService } from './registry';
 import { FormStateManager } from '../state/form-state-manager';
 import { mapFieldToForm } from './form-mapping';
+import { LogicFunctionCacheService } from './expressions/logic-function-cache.service';
 
 describe('form-mapping', () => {
   let injector: Injector;
@@ -21,6 +22,7 @@ describe('form-mapping', () => {
         FunctionRegistryService,
         FieldContextRegistryService,
         SchemaRegistryService,
+        LogicFunctionCacheService,
       ],
     });
 
@@ -1137,6 +1139,281 @@ describe('form-mapping', () => {
             formValue,
             schema<typeof formValue>((path) => {
               mapFieldToForm(fieldDef, path.code);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+    });
+
+    describe('validateWhenHidden cascade', () => {
+      const HIDDEN_CONTEXT = { validateWhenHidden: false, ancestorAlwaysHidden: false, ancestorHiddenLogics: [] } as const;
+      const VALIDATE_HIDDEN_CONTEXT = { validateWhenHidden: true, ancestorAlwaysHidden: false, ancestorHiddenLogics: [] } as const;
+
+      it('should skip required validation on a statically hidden field by default', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ name: '' });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'name',
+            type: 'input',
+            required: true,
+            hidden: true,
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.name);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('should run required validation on a non-hidden field with validateWhenHidden=true (control)', () => {
+        // validateWhenHidden=true means validators register unconditionally. When the
+        // field isn't hidden, those validators should fire normally.
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ name: '' });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'name',
+            type: 'input',
+            required: true,
+            validateWhenHidden: true,
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.name, HIDDEN_CONTEXT);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(false);
+        });
+      });
+
+      it('should let a hidden field opt out of inherited validateWhenHidden=true', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ name: '' });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'name',
+            type: 'input',
+            required: true,
+            hidden: true,
+            validateWhenHidden: false,
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.name, VALIDATE_HIDDEN_CONTEXT);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('should skip simple validators (email, minLength) on a hidden field by default', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ email: 'not-an-email' });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'email',
+            type: 'input',
+            email: true,
+            minLength: 50,
+            hidden: true,
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.email);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('should still run simple validators on a non-hidden field when default is to skip on hidden', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ email: 'not-an-email' });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'email',
+            type: 'input',
+            email: true,
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.email);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(false);
+        });
+      });
+
+      it('should propagate parent group validateWhenHidden=true to descendants without overrides', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ address: { street: '' } });
+          const groupField: FieldDef = {
+            key: 'address',
+            type: 'group',
+            hidden: true,
+            validateWhenHidden: true,
+            fields: [
+              {
+                key: 'street',
+                type: 'input',
+                required: true,
+              } as FieldDef & FieldWithValidation,
+            ],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(groupField, path.address);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // Group is hidden + group says validate-when-hidden, so child's required runs.
+          expect(formInstance().valid()).toBe(false);
+        });
+      });
+
+      it('should let a child override and become inert when its parent says validate-when-hidden', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ address: { street: '' } });
+          const groupField: FieldDef = {
+            key: 'address',
+            type: 'group',
+            hidden: true,
+            validateWhenHidden: true,
+            fields: [
+              {
+                key: 'street',
+                type: 'input',
+                required: true,
+                validateWhenHidden: false,
+              } as FieldDef & FieldWithValidation,
+            ],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(groupField, path.address);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('should inherit a middle override past the grandparent (parent=true, middle=false, leaf=undefined)', () => {
+        // Parent group says validate-when-hidden=true.
+        // Middle group overrides with validate-when-hidden=false.
+        // Leaf has no override — must inherit middle's false, NOT parent's true.
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ outer: { inner: { name: '' } } });
+          const grandparentField: FieldDef = {
+            key: 'outer',
+            type: 'group',
+            hidden: true,
+            validateWhenHidden: true,
+            fields: [
+              {
+                key: 'inner',
+                type: 'group',
+                validateWhenHidden: false,
+                fields: [
+                  {
+                    key: 'name',
+                    type: 'input',
+                    required: true,
+                  } as FieldDef & FieldWithValidation,
+                ],
+              },
+            ],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(grandparentField, path.outer);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // Outer is hidden, leaf inherits middle's false → leaf skips required.
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('should skip validators on a leaf with logic-based static hidden=true condition', () => {
+        // A logic condition of `true` resolves to "always hidden" through the
+        // cascade's ancestorAlwaysHidden short-circuit. The validator should never
+        // be applied at all.
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ name: '' });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'name',
+            type: 'input',
+            required: true,
+            logic: [
+              {
+                type: 'hidden',
+                condition: true,
+              },
+            ],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.name);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('should skip "required" state-logic validation on a hidden field by default', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ name: '' });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'name',
+            type: 'input',
+            hidden: true,
+            logic: [
+              {
+                type: 'required',
+                condition: true,
+              },
+            ],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.name);
             }),
           );
           mockFormSignal.set(formInstance);

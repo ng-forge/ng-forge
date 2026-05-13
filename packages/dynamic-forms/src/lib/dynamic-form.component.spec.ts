@@ -1,11 +1,13 @@
+import { vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { DynamicForm } from './dynamic-form.component';
 import { delay } from '@ng-forge/utils';
 import { SimpleTestUtils } from '../../testing/src/simple-test-utils';
 import TestInputHarnessComponent from '../../testing/src/harnesses/test-input.harness';
 import TestCheckboxHarnessComponent from '../../testing/src/harnesses/test-checkbox.harness';
+import TestSelectHarnessComponent from '../../testing/src/harnesses/test-select.harness';
 import { FIELD_REGISTRY, FieldTypeDefinition } from './models/field-type';
-import { checkboxFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
+import { checkboxFieldMapper, optionsFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './providers/built-in-fields';
 import { FieldWrapperContract, WRAPPER_REGISTRY, WrapperTypeDefinition } from './models/wrapper-type';
 import { ARRAY_CONTEXT } from './models/field-signal-context.token';
@@ -25,6 +27,7 @@ type TestFormConfig = {
   fields: Array<
     | (BaseValueField<any, any> & { type: 'input' })
     | (BaseCheckedField<any> & { type: 'checkbox' })
+    | (BaseValueField<any, any> & { type: 'select'; options: Array<{ value: any; label: string }> })
     | { type: 'row'; key: string; label: string; fields: any[] }
     | { type: 'group'; key: string; label: string; fields: any[] }
     | { type: 'page'; key: string; label?: string; fields: any[] }
@@ -84,6 +87,11 @@ const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../../testing/src/harnesses/test-checkbox.harness').then((m) => m.default),
     mapper: checkboxFieldMapper,
   },
+  {
+    name: 'select',
+    loadComponent: () => import('../../testing/src/harnesses/test-select.harness').then((m) => m.default),
+    mapper: optionsFieldMapper as FieldTypeDefinition['mapper'],
+  },
 ];
 
 describe('DynamicFormComponent', () => {
@@ -113,6 +121,7 @@ describe('DynamicFormComponent', () => {
         DynamicForm,
         TestInputHarnessComponent,
         TestCheckboxHarnessComponent,
+        TestSelectHarnessComponent,
         TestParentWrapperComponent,
         TestChildWrapperComponent,
         TestArrayContextWrapperComponent,
@@ -737,6 +746,77 @@ describe('DynamicFormComponent', () => {
         lastName: 'Smith',
       });
     });
+
+    it('should refresh select options when config changes for a field with the same key', async () => {
+      // Initial config: select field with empty options array.
+      const initialConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'country',
+            type: 'select',
+            label: 'Country',
+            options: [],
+          },
+        ],
+      };
+
+      const { fixture } = createComponent(initialConfig);
+      await waitForDynamicComponents(fixture);
+
+      // Sanity: the select harness rendered with no options.
+      let selectDe = fixture.debugElement.query((de: DebugElement) => de.componentInstance instanceof TestSelectHarnessComponent);
+      expect(selectDe).not.toBeNull();
+      let selectInstance = selectDe.componentInstance as TestSelectHarnessComponent;
+      expect(selectInstance.options()).toEqual([]);
+
+      // Swap config quickly: same key, same type, but now with options populated.
+      // This mimics a real-world flow where async data fills the options after the
+      // form has already been rendered with an empty list.
+      const newConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'country',
+            type: 'select',
+            label: 'Country',
+            options: [
+              { value: 'us', label: 'United States' },
+              { value: 'ca', label: 'Canada' },
+            ],
+          },
+        ],
+      };
+
+      fixture.componentRef.setInput('dynamic-form', newConfig);
+      // Config transitions go through multiple phases (config-change -> teardown ->
+      // applying -> restoring -> ready); allow each tick for the pipeline to settle.
+      await delay(10);
+      fixture.detectChanges();
+      TestBed.flushEffects();
+      await delay(10);
+      fixture.detectChanges();
+      TestBed.flushEffects();
+      await delay(10);
+      fixture.detectChanges();
+
+      // The harness's options input should reflect the new options.
+      // Regression test for prior bug: reconcileFields preserved the prior ResolvedField when
+      // key+component+injector matched, reusing a stale `inputs` signal whose options were
+      // captured by closure in optionsFieldMapper from the initial fieldDef — so the harness
+      // saw an empty options array. This assertion verifies the fix: selectInstance.options()
+      // must now reflect the new options after a same-key config change.
+      selectDe = fixture.debugElement.query((de: DebugElement) => de.componentInstance instanceof TestSelectHarnessComponent);
+      selectInstance = selectDe.componentInstance as TestSelectHarnessComponent;
+      expect(selectInstance.options()).toEqual([
+        { value: 'us', label: 'United States' },
+        { value: 'ca', label: 'Canada' },
+      ]);
+
+      // And the rendered DOM should reflect the new options too.
+      const renderedOptionLabels = Array.from(selectDe.nativeElement.querySelectorAll('option'))
+        .map((opt: Element) => opt.textContent?.trim())
+        .filter((label: string | undefined) => label && label !== 'Select...');
+      expect(renderedOptionLabels).toEqual(['United States', 'Canada']);
+    });
   });
 
   describe('User Interactions and Value Changes', () => {
@@ -1127,6 +1207,187 @@ describe('DynamicFormComponent', () => {
       expect(component.formValue()).toEqual({
         firstName: 'Jane',
         lastName: 'Smith',
+      });
+    });
+
+    // Regression: when a partial value is applied to a `group` field, the
+    // omitted sub-fields must retain their declared defaults. Pre-fix, the
+    // shallow merge in `FormStateManager.entity` replaced the full nested
+    // default object with the partial value, causing Angular Signal Forms
+    // to throw `NG01902: Orphan field` from its deep-signal validation graph.
+    describe('partial value applied to nested group field', () => {
+      const addressGroupConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'a',
+            type: 'group',
+            label: 'Address',
+            fields: [
+              { key: 'line1', type: 'input', label: 'Line 1', value: '' },
+              { key: 'line2', type: 'input', label: 'Line 2', value: '' },
+              { key: 'city', type: 'input', label: 'City', value: '' },
+              { key: 'state', type: 'input', label: 'State', value: '' },
+              { key: 'zip', type: 'input', label: 'ZIP', value: '' },
+            ],
+          },
+        ],
+      };
+
+      const partialAddressValue = {
+        a: {
+          line1: '701 Brazos St.',
+          city: 'Austin',
+          state: 'TX',
+          zip: '78701',
+          // line2 intentionally omitted
+        },
+      };
+
+      const expectedSettledValue = {
+        a: {
+          line1: '701 Brazos St.',
+          line2: '',
+          city: 'Austin',
+          state: 'TX',
+          zip: '78701',
+        },
+      };
+
+      const collectOrphanErrors = (errors: unknown[]): string[] =>
+        errors
+          .map((e) => (Array.isArray(e) ? e.map(String).join(' ') : String(e)))
+          .filter((msg) => msg.includes('NG01902') || msg.includes('Orphan field'));
+
+      it('back-fills omitted sub-field with default when partial value is set at construction', async () => {
+        const errors: unknown[] = [];
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation((...args) => errors.push(args));
+
+        try {
+          const { component, fixture } = createComponent(addressGroupConfig, partialAddressValue);
+          await waitForDynamicComponents(fixture);
+
+          expect(component.formValue()).toEqual(expectedSettledValue);
+          expect(collectOrphanErrors(errors)).toEqual([]);
+        } finally {
+          consoleSpy.mockRestore();
+        }
+      });
+
+      it('back-fills omitted sub-field with default when partial value is set after render', async () => {
+        const errors: unknown[] = [];
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation((...args) => errors.push(args));
+
+        try {
+          const { component, fixture } = createComponent(addressGroupConfig);
+          await waitForDynamicComponents(fixture);
+
+          expect(component.formValue()).toEqual({
+            a: { line1: '', line2: '', city: '', state: '', zip: '' },
+          });
+
+          fixture.componentRef.setInput('value', partialAddressValue);
+          await waitForDynamicComponents(fixture);
+
+          // Touch every signal that depends on the validation graph — pre-fix,
+          // any of these reads would trigger NG01902.
+          void component.valid();
+          void component.errors();
+          void component.formValue();
+
+          expect(component.formValue()).toEqual(expectedSettledValue);
+          expect(collectOrphanErrors(errors)).toEqual([]);
+        } finally {
+          consoleSpy.mockRestore();
+        }
+      });
+    });
+
+    // Regression: when a partial value is applied to an `array` field whose
+    // items are object templates (e.g. two checkboxes), the omitted item
+    // sub-fields must retain their declared defaults. Pre-fix, the array was
+    // replaced wholesale by the partial value, which removed the omitted
+    // sub-field from the form value and prevented its component from
+    // rendering (NG01902 from the Signal Forms validation graph).
+    describe('partial value applied to nested array of object items', () => {
+      // Disable auto-generated add/remove buttons so the simplified array's
+      // form value contains only the user-declared item fields. Without this
+      // the items would carry `__remove` keys + a Symbol id, masking the
+      // exact bug we're testing against.
+      const arrayWithObjectItemsConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'items',
+            type: 'array',
+            template: [
+              { key: 'checkboxA', type: 'checkbox', label: 'Checkbox A' },
+              { key: 'checkboxB', type: 'checkbox', label: 'Checkbox B' },
+            ],
+            value: [{ checkboxA: false, checkboxB: false }],
+            addButton: false,
+            removeButton: false,
+          } as any,
+        ],
+      };
+
+      const partialItemsValue = {
+        items: [{ checkboxA: true }],
+      };
+
+      const expectedSettledValue = {
+        items: [{ checkboxA: true, checkboxB: false }],
+      };
+
+      // NG01902 is emitted for orphan group sub-fields, NG01904 for orphan
+      // array elements — same root cause, distinct codes from Signal Forms.
+      const collectOrphanErrors = (errors: unknown[]): string[] =>
+        errors
+          .map((e) => (Array.isArray(e) ? e.map(String).join(' ') : String(e)))
+          .filter((msg) => msg.includes('NG01902') || msg.includes('NG01904') || msg.includes('Orphan field'));
+
+      // Angular Signal Forms attaches an internal `Symbol()` directive marker
+      // onto field values; JSON-roundtripping strips it so the assertion only
+      // sees the user-declared shape we care about.
+      const stripInternalSymbols = (v: unknown) => JSON.parse(JSON.stringify(v));
+
+      it('back-fills omitted item sub-field with default when partial value is set at construction', async () => {
+        const errors: unknown[] = [];
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation((...args) => errors.push(args));
+
+        try {
+          const { component, fixture } = createComponent(arrayWithObjectItemsConfig, partialItemsValue);
+          await waitForDynamicComponents(fixture);
+
+          expect(stripInternalSymbols(component.formValue())).toEqual(expectedSettledValue);
+          expect(collectOrphanErrors(errors)).toEqual([]);
+        } finally {
+          consoleSpy.mockRestore();
+        }
+      });
+
+      it('back-fills omitted item sub-field with default when partial value is set after render', async () => {
+        const errors: unknown[] = [];
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation((...args) => errors.push(args));
+
+        try {
+          const { component, fixture } = createComponent(arrayWithObjectItemsConfig);
+          await waitForDynamicComponents(fixture);
+
+          expect(stripInternalSymbols(component.formValue())).toEqual({
+            items: [{ checkboxA: false, checkboxB: false }],
+          });
+
+          fixture.componentRef.setInput('value', partialItemsValue);
+          await waitForDynamicComponents(fixture);
+
+          void component.valid();
+          void component.errors();
+          void component.formValue();
+
+          expect(stripInternalSymbols(component.formValue())).toEqual(expectedSettledValue);
+          expect(collectOrphanErrors(errors)).toEqual([]);
+        } finally {
+          consoleSpy.mockRestore();
+        }
       });
     });
   });

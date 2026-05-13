@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { omit, keyBy, mapValues, memoize } from './object-utils';
+import { deepMergeDefaults, omit, keyBy, mapValues, memoize } from './object-utils';
 
 describe('object-utils', () => {
   describe('omit', () => {
@@ -312,6 +312,165 @@ describe('object-utils', () => {
       // 'a' was evicted, needs recompute
       memoized({ key: 'a', data: 1 });
       expect(fn).toHaveBeenCalledTimes(5);
+    });
+  });
+
+  describe('deepMergeDefaults', () => {
+    it('should preserve nested keys missing from value', () => {
+      const defaults = { a: { line1: '', line2: '', city: '' }, b: 0 };
+      const value = { a: { line1: 'X', city: 'Y' }, b: 1 };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual({
+        a: { line1: 'X', line2: '', city: 'Y' },
+        b: 1,
+      });
+    });
+
+    it('should not mutate the input objects', () => {
+      const defaults = { a: { x: 1 } };
+      const value = { a: { y: 2 } };
+      const defaultsClone = JSON.parse(JSON.stringify(defaults));
+      const valueClone = JSON.parse(JSON.stringify(value));
+
+      deepMergeDefaults(defaults, value);
+
+      expect(defaults).toEqual(defaultsClone);
+      expect(value).toEqual(valueClone);
+    });
+
+    it('should return a clone of defaults when value is null or undefined', () => {
+      const defaults = { a: 1 };
+
+      expect(deepMergeDefaults(defaults, null)).toEqual(defaults);
+      expect(deepMergeDefaults(defaults, undefined)).toEqual(defaults);
+      expect(deepMergeDefaults(defaults, null)).not.toBe(defaults);
+    });
+
+    it('should length-drive primitive arrays from the value (extra defaults are dropped)', () => {
+      const defaults = { tags: ['a', 'b', 'c'] };
+      const value = { tags: ['x'] };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual({ tags: ['x'] });
+    });
+
+    it('should merge object array elements positionally so partial items keep declared sub-field defaults', () => {
+      const defaults = { items: [{ checkboxA: false, checkboxB: false }] };
+      const value = { items: [{ checkboxA: true }] };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual({
+        items: [{ checkboxA: true, checkboxB: false }],
+      });
+    });
+
+    it('should return value as-is when value has more items than defaults', () => {
+      const defaults = { items: [{ checkboxA: false, checkboxB: false }] };
+      const value = { items: [{ checkboxA: true, checkboxB: true }, { checkboxA: true }] };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual({
+        items: [{ checkboxA: true, checkboxB: true }, { checkboxA: true }],
+      });
+    });
+
+    it('should preserve the value array reference for equal-length primitive arrays', () => {
+      // Regression: returning a fresh .map() result for primitive arrays hands
+      // Signal Forms a new reference on every call and rebuilds item FieldTrees
+      // needlessly.
+      const defaults = { tags: ['a', 'b'] };
+      const valueArr = ['x', 'y'];
+      const value = { tags: valueArr };
+
+      const result = deepMergeDefaults(defaults, value);
+
+      expect(result.tags).toBe(valueArr);
+    });
+
+    it('should replace, not merge, when one side of an array element is not a plain object', () => {
+      const defaults = { items: [{ a: 1 }, 'fallback'] };
+      const value = { items: ['x', { a: 2 }] };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual({ items: ['x', { a: 2 }] });
+    });
+
+    it('should preserve the value array reference when its length differs from defaults (runtime prepend/insert/remove)', () => {
+      // Regression: positionally remerging arrays whose length grew (e.g. after
+      // a prepend) produced fresh inner object references for already-complete
+      // items. Signal Forms then rebuilt item FieldTrees on every form-value
+      // write, desyncing rendered rows from their FieldTrees.
+      const defaults = { items: [{ value: 'First' }, { value: 'Second' }] };
+      const valueArr = [{ value: '' }, { value: 'First' }, { value: 'Second' }];
+      const value = { items: valueArr };
+
+      const result = deepMergeDefaults(defaults, value);
+
+      expect(result.items).toBe(valueArr);
+    });
+
+    it('should replace primitive overrides', () => {
+      const defaults = { name: 'default', count: 0, ready: false };
+      const value = { name: 'updated', count: 5, ready: true };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual(value);
+    });
+
+    it('should merge multiple levels of nested plain objects', () => {
+      const defaults = {
+        outer: { inner: { a: 1, b: 2 }, sibling: 'kept' },
+      };
+      const value = {
+        outer: { inner: { a: 99 } },
+      };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual({
+        outer: { inner: { a: 99, b: 2 }, sibling: 'kept' },
+      });
+    });
+
+    it('should treat Date and class instances as opaque (replace, do not merge)', () => {
+      class Box {
+        constructor(public n: number) {}
+      }
+      const date = new Date('2026-01-01T00:00:00Z');
+      const defaults = { d: new Date('2024-01-01T00:00:00Z'), b: new Box(1) };
+      const value = { d: date, b: new Box(2) };
+
+      const result = deepMergeDefaults(defaults, value);
+
+      expect(result.d).toBe(date);
+      expect((result.b as Box).n).toBe(2);
+    });
+
+    it('should accept new keys present only in value', () => {
+      const defaults = { a: 1 };
+      const value = { a: 2, b: 3 } as Record<string, unknown>;
+
+      expect(deepMergeDefaults<Record<string, unknown>>(defaults, value)).toEqual({ a: 2, b: 3 });
+    });
+
+    it('should let an explicit null override a plain-object default', () => {
+      const defaults = { a: { x: 1 } };
+      const value: Record<string, unknown> = { a: null };
+
+      expect(deepMergeDefaults(defaults, value)).toEqual({ a: null });
+    });
+
+    it('should not be vulnerable to prototype pollution via __proto__', () => {
+      const defaults: Record<string, unknown> = { a: 1 };
+      const value = JSON.parse('{"__proto__": {"polluted": true}, "a": 2}') as Record<string, unknown>;
+
+      const result = deepMergeDefaults(defaults, value);
+
+      expect(result).toEqual({ a: 2 });
+      expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+      expect(Object.getPrototypeOf(result)).toBe(Object.prototype);
+    });
+
+    it('should not merge constructor or prototype keys', () => {
+      const defaults: Record<string, unknown> = { a: 1 };
+      const value: Record<string, unknown> = { constructor: { evil: true }, prototype: { evil: true }, a: 2 };
+
+      const result = deepMergeDefaults(defaults, value);
+
+      expect(result).toEqual({ a: 2 });
     });
   });
 });

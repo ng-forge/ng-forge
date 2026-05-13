@@ -211,6 +211,106 @@ export function mapValues<T, U>(obj: Record<string, T>, fn: (value: T, key: stri
 }
 
 /**
+ * Deep-merges `value` into `defaults`, producing a new object that contains every
+ * key from `defaults` plus any overrides from `value`. Plain-object values at
+ * matching keys are merged recursively; primitives, dates, and class instances
+ * in `value` replace the corresponding default wholesale.
+ *
+ * Arrays whose lengths match between `defaults` and `value` are merged
+ * positionally: when both `defaults[i]` and `value[i]` are plain objects, they
+ * are deep-merged so partial array-item values don't drop sibling sub-field
+ * keys. When the lengths differ — the runtime add/insert/remove case — the
+ * value array is returned by reference so Signal Forms doesn't see a fresh
+ * array of fresh inner objects on every form-value write (which would rebuild
+ * item bindings and desync the rendered rows from their FieldTrees).
+ *
+ * Used by `FormStateManager.entity` so a partial input value (e.g. a nested
+ * group object missing one of its declared sub-fields, or an array item missing
+ * one of its declared sub-fields) does not orphan the absent sub-field in
+ * Angular Signal Forms' validation graph.
+ *
+ * @example
+ * ```typescript
+ * deepMergeDefaults(
+ *   { a: { line1: '', line2: '', city: '' }, b: 0 },
+ *   { a: { line1: 'X', city: 'Y' }, b: 1 },
+ * );
+ * // { a: { line1: 'X', line2: '', city: 'Y' }, b: 1 }
+ *
+ * deepMergeDefaults(
+ *   { items: [{ checkboxA: false, checkboxB: false }] },
+ *   { items: [{ checkboxA: true }] },
+ * );
+ * // { items: [{ checkboxA: true, checkboxB: false }] }
+ * ```
+ */
+export function deepMergeDefaults<T extends Record<string, unknown>>(defaults: T, value: Record<string, unknown> | null | undefined): T {
+  if (value == null) return { ...defaults };
+
+  const result: Record<string, unknown> = { ...defaults };
+
+  for (const key of Object.keys(value)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+
+    const incoming = value[key];
+    const existing = result[key];
+
+    if (isPlainObject(existing) && isPlainObject(incoming)) {
+      result[key] = deepMergeDefaults(existing, incoming);
+    } else if (Array.isArray(existing) && Array.isArray(incoming)) {
+      result[key] = mergeArrayDefaults(existing, incoming);
+    } else {
+      result[key] = incoming;
+    }
+  }
+
+  return result as T;
+}
+
+/**
+ * @internal
+ * Merges a value array into a defaults array element-wise when their lengths
+ * match. When lengths differ — the runtime case: prepend, insert, append,
+ * remove — we return the value array reference as-is so we don't produce
+ * fresh inner object references for items that already have every declared
+ * sub-field key. Replacing references during the linkedSignal source
+ * recompute that runs after Signal Forms wrote the array would otherwise
+ * desync item FieldTrees from the rendered DOM rows.
+ *
+ * When lengths match (the declared/initial-value path the array fix targets)
+ * each `defaults[i]`/`value[i]` pair is deep-merged when both are plain
+ * objects so partial array-item values don't drop sibling sub-field keys.
+ */
+function mergeArrayDefaults(defaults: readonly unknown[], value: readonly unknown[]): readonly unknown[] {
+  if (defaults.length !== value.length) return value;
+
+  // Short-circuit when no element pair would be deep-merged. Returning a fresh
+  // .map() result for primitive arrays (e.g. tags: ['a', 'b']) hands Signal
+  // Forms a new reference on every call and rebuilds item FieldTrees needlessly.
+  if (!value.some((item, i) => isPlainObject(defaults[i]) && isPlainObject(item))) return value;
+
+  return value.map((item, i) => {
+    const defaultItem = defaults[i];
+    if (isPlainObject(defaultItem) && isPlainObject(item)) {
+      return deepMergeDefaults(defaultItem, item);
+    }
+    return item;
+  });
+}
+
+/**
+ * @internal
+ * Returns true for objects that should be deep-merged (plain objects produced
+ * by literals or `Object.create(null)`); false for arrays, Dates, RegExps,
+ * Maps, Sets, class instances, and primitives.
+ */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== 'object' || value === null) return false;
+  const proto = Object.getPrototypeOf(value);
+  return proto === null || proto === Object.prototype;
+}
+
+/**
  * Options for memoize function
  */
 /** Default maximum cache size for memoized functions */

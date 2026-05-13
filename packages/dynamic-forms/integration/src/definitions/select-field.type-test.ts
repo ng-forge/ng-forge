@@ -27,6 +27,7 @@ describe('SelectField - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'validateWhenHidden'
     // From BaseValueField
     | 'value'
     | 'placeholder'

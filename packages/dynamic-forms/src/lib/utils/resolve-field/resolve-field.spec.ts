@@ -336,6 +336,84 @@ describe('resolve-field', () => {
       expect(result[0].inputs).toBe(newInputs);
     });
 
+    it('should swap inputs and fieldDef when component/injector match but fieldDef changes', () => {
+      const oldFieldDef: FieldDef<unknown> = { type: 'select', key: 'country', options: [] } as FieldDef<unknown>;
+      const newFieldDef: FieldDef<unknown> = {
+        type: 'select',
+        key: 'country',
+        options: [{ value: 'us', label: 'US' }],
+      } as FieldDef<unknown>;
+      const oldInputs = computed(() => ({ options: [] }));
+      const newInputs = computed(() => ({ options: [{ value: 'us', label: 'US' }] }));
+      const oldRenderReady = computed(() => true);
+      const newRenderReady = computed(() => true);
+
+      const prev: ResolvedField[] = [
+        {
+          key: 'country',
+          fieldDef: oldFieldDef,
+          component: componentA,
+          injector: injector1,
+          inputs: oldInputs,
+          renderReady: oldRenderReady,
+        },
+      ];
+      const curr: ResolvedField[] = [
+        {
+          key: 'country',
+          fieldDef: newFieldDef,
+          component: componentA,
+          injector: injector1,
+          inputs: newInputs,
+          renderReady: newRenderReady,
+        },
+      ];
+
+      const result = reconcileFields(prev, curr);
+
+      expect(result).toHaveLength(1);
+      // Component and injector are preserved (same instance kept)
+      expect(result[0].component).toBe(componentA);
+      expect(result[0].injector).toBe(injector1);
+      // But the fieldDef, inputs, and renderReady signals come from the new resolution
+      expect(result[0].fieldDef).toBe(newFieldDef);
+      expect(result[0].inputs).toBe(newInputs);
+      expect(result[0].renderReady).toBe(newRenderReady);
+      // The returned object is NOT the previous one (since inputs were swapped)
+      expect(result[0]).not.toBe(prev[0]);
+    });
+
+    it('should preserve previous object identity when fieldDef reference is identical', () => {
+      const sharedFieldDef: FieldDef<unknown> = { type: 'input', key: 'name' };
+      const inputs = computed(() => ({}));
+      const renderReady = computed(() => true);
+
+      const prev: ResolvedField[] = [
+        {
+          key: 'name',
+          fieldDef: sharedFieldDef,
+          component: componentA,
+          injector: injector1,
+          inputs,
+          renderReady,
+        },
+      ];
+      const curr: ResolvedField[] = [
+        {
+          key: 'name',
+          fieldDef: sharedFieldDef,
+          component: componentA,
+          injector: injector1,
+          inputs: computed(() => ({})),
+          renderReady: computed(() => true),
+        },
+      ];
+
+      const result = reconcileFields(prev, curr);
+
+      expect(result[0]).toBe(prev[0]);
+    });
+
     it('should handle multiple fields with mixed scenarios', () => {
       const componentC = class ComponentC {} as Type<unknown>;
 

@@ -680,6 +680,13 @@ export class DocPageComponent {
         if (el) el.scrollIntoView({ behavior: 'smooth' });
         return;
       }
+      // Skip links whose resolved href already contains the adapter prefix.
+      // Custom components embedded in markdown (e.g. feature-overview nav cards
+      // and pitfall links) use routerLink, which Angular resolves to an absolute
+      // href that already starts with /{adapter}/. Prefixing again would
+      // produce a double-prefixed URL (e.g. /material/material/getting-started).
+      const adapterPrefix = `/${this.adapter.adapter()}/`;
+      if (href.startsWith(adapterPrefix)) return;
       // Root-relative paths — add adapter prefix for SPA navigation
       if (href.startsWith('/') && !href.startsWith('//')) {
         event.preventDefault();

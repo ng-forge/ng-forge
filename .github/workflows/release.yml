@@ -348,6 +348,25 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "📦 Releasing $VERSION (dist-tag: $DIST_TAG)"
 
+      - name: Generate GitHub App Token
+        # Generated up-front so the job fails before any irreversible action if App config
+        # is broken (missing/expired secret, App uninstalled, GH outage). Earlier placement
+        # after npm publish let broken-token runs ship to npm but skip the tag-write below,
+        # leaving the gate stuck on a stale BASE and re-publishing every night.
+        # GITHUB_TOKEN cannot trigger downstream workflows (GitHub recursion safeguard), so
+        # releases created with it don't fire `release: published` — which is what
+        # discord-release-notify.yml listens for. App-scoped tokens propagate normally.
+        # The 1-hour token lifetime comfortably covers build (~3 min) + npm publish (~2 min).
+        # Gated to the same paths that consume it so a dry-run doesn't depend on App secrets.
+        # The two action-gh-release steps below are mutually exclusive (publish vs
+        # schedule|next), so a single shared token is sufficient.
+        if: inputs.mode == 'publish' || github.event_name == 'schedule' || inputs.mode == 'next'
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
       - name: Build libraries
         # Build BEFORE bumping. Some packages (e.g. openapi-generator) declare
         # `manifestRootsToUpdate: ['{projectRoot}', 'dist/{projectRoot}']`, so
@@ -445,24 +464,6 @@ jobs:
             fi
             npm publish "dist/packages/$pkg" --access public --provenance --tag "$DIST_TAG"
           done
-
-      - name: Generate GitHub App Token
-        # GITHUB_TOKEN cannot trigger downstream workflows (GitHub recursion safeguard),
-        # so releases created with it don't fire `release: published` — which is what
-        # discord-release-notify.yml listens for. Using a GitHub App-scoped token instead
-        # makes those events propagate normally.
-        # Generated immediately before action-gh-release (not at job start) because App
-        # installation tokens have a 1-hour lifetime; build + npm publish can eat into
-        # that window on a slow run, so we always hand action-gh-release a fresh token.
-        # Gated to the same paths that consume it so a dry-run doesn't depend on the
-        # App secrets being present. The two action-gh-release steps below are mutually
-        # exclusive (publish vs schedule|next), so a single shared token is sufficient.
-        if: inputs.mode == 'publish' || github.event_name == 'schedule' || inputs.mode == 'next'
-        id: app-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ vars.RELEASE_APP_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
 
       - name: Create GitHub Release
         # action-gh-release creates the v${VERSION} tag at github.sha via the GitHub API

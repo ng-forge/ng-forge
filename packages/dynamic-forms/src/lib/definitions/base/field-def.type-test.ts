@@ -28,6 +28,7 @@ describe('FieldDef - Exhaustive Whitelist', () => {
     | 'excludeValueIfHidden'
     | 'excludeValueIfDisabled'
     | 'excludeValueIfReadonly'
+    | 'validateWhenHidden'
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers';
@@ -66,6 +67,7 @@ describe('FieldDef - Exhaustive Whitelist', () => {
         | 'excludeValueIfHidden'
         | 'excludeValueIfDisabled'
         | 'excludeValueIfReadonly'
+        | 'validateWhenHidden'
         | 'wrappers'
         | 'skipAutoWrappers'
         | 'skipDefaultWrappers'
@@ -114,6 +116,10 @@ describe('FieldDef - Exhaustive Whitelist', () => {
 
     it('excludeValueIfReadonly', () => {
       expectTypeOf<FieldDef<TestProps>['excludeValueIfReadonly']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('validateWhenHidden', () => {
+      expectTypeOf<FieldDef<TestProps>['validateWhenHidden']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('wrappers supports three states: undefined, null, or readonly WrapperConfig[]', () => {
