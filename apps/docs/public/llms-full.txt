@@ -587,14 +587,14 @@ The signal emits a record of input-name → value. The form engine reads each en
 
 ng-forge ships mappers for the standard field categories. You'll register field types against these, not write your own most of the time:
 
-| Mapper                  | For                                     | What it emits                                                                                                                       |
-| ----------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `valueFieldMapper`      | input, textarea, datepicker, slider, …  | `field`, `key`, `label`, `placeholder`, `className`, `tabIndex`, `props`, `meta`, `validationMessages` (and `defaultValidationMessages` for back-compat — deprecated, removal targeted for v1)         |
-| `checkboxFieldMapper`   | checkbox, toggle                        | same as `valueFieldMapper`                                                                                                          |
-| `optionsFieldMapper`    | select, radio, multi-checkbox           | adds `options`                                                                                                                      |
-| `datepickerFieldMapper` | datepicker                              | adds `minDate`, `maxDate`, `startAt` (string→Date conversion)                                                                       |
-| `buttonFieldMapper`     | plain buttons                           | `key`, `label`, `disabled`, `event`, `props`, `className`                                                                           |
-| Array button mappers    | `addArrayItem`, `removeArrayItem`, etc. | event + event-args wiring for array mutations                                                                                       |
+| Mapper                  | For                                     | What it emits                                                                                                                                                                                  |
+| ----------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `valueFieldMapper`      | input, textarea, datepicker, slider, …  | `field`, `key`, `label`, `placeholder`, `className`, `tabIndex`, `props`, `meta`, `validationMessages` (and `defaultValidationMessages` for back-compat — deprecated, removal targeted for v1) |
+| `checkboxFieldMapper`   | checkbox, toggle                        | same as `valueFieldMapper`                                                                                                                                                                     |
+| `optionsFieldMapper`    | select, radio, multi-checkbox           | adds `options`                                                                                                                                                                                 |
+| `datepickerFieldMapper` | datepicker                              | adds `minDate`, `maxDate`, `startAt` (string→Date conversion)                                                                                                                                  |
+| `buttonFieldMapper`     | plain buttons                           | `key`, `label`, `disabled`, `event`, `props`, `className`                                                                                                                                      |
+| Array button mappers    | `addArrayItem`, `removeArrayItem`, etc. | event + event-args wiring for array mutations                                                                                                                                                  |
 
 ### Mapper-as-contract
 
@@ -10766,12 +10766,7 @@ interface RichTextProps extends Record<string, unknown> {
       <label [for]="inputId">{{ ngf.label() | dynamicText | async }}</label>
     }
 
-    <my-rich-editor
-      ngForgeControl
-      [id]="inputId"
-      [formField]="f"
-      [toolbar]="props()?.toolbar ?? 'full'"
-    />
+    <my-rich-editor ngForgeControl [id]="inputId" [formField]="f" [toolbar]="props()?.toolbar ?? 'full'" />
 
     @if (ngf.errorsToDisplay()[0]; as error) {
       <div role="alert" [id]="ngf.errorId()">{{ error.message }}</div>
@@ -10791,7 +10786,7 @@ A few things to note:
 
 - **No manual input declarations** for `field`/`key`/`label`/etc. The 10 standard inputs come in via `hostDirectives`; `injectNgForgeField<T>()` returns a typed view of the directive instance.
 - **No host bindings block** — `NgForgeField` already binds `[id]`/`[class]`/`[attr.data-testid]`/`[attr.hidden]` to the host element.
-- **`[ngForgeControl]`** on the canonical control element forwards meta attributes (`data-*`, `autocomplete`, etc.) AND aria attributes (`aria-invalid`, `aria-required`, `aria-describedby` — derived from field state) onto that element. The author doesn't bind aria-* manually — the marker absorbs it. For shadow-DOM wrappers where you can't reach the inner input, see [`NgForgeHostControl`](/building-an-adapter#meta-forwarding) in the integration guide.
+- **`[ngForgeControl]`** on the canonical control element forwards meta attributes (`data-*`, `autocomplete`, etc.) AND aria attributes (`aria-invalid`, `aria-required`, `aria-describedby` — derived from field state) onto that element. The author doesn't bind aria-\* manually — the marker absorbs it. For shadow-DOM wrappers where you can't reach the inner input, see [`NgForgeHostControl`](/building-an-adapter#meta-forwarding) in the integration guide.
 - **`injectNgForgeField<string>()`** narrows `ngf.field()` to `Signal<FieldTree<string>>`, so the `[formField]="f"` binding type-checks. Use the appropriate generic for your value type (`boolean` for checkboxes, `Date | null` for datepickers, `ValueType[]` for multi-selects, etc.).
 
 ## 2. Register the field type
