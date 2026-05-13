@@ -140,12 +140,7 @@ describe('Array Button Mappers with Logic', () => {
         expect(inputs['hidden']).toBe(false);
       });
 
-      // TODO: enable once this spec is wired with TestBed + the expression
-      // evaluator services (FunctionRegistryService, LogicFunctionCacheService,
-      // FieldContextRegistryService, HttpConditionFunctionCacheService,
-      // DynamicValueFunctionCacheService). The fieldValue variants above
-      // already exercise the resolver end-to-end.
-      it.skip('should evaluate expression-based hidden logic', () => {
+      it('should evaluate expression-based hidden logic', () => {
         setRegistry({ maxItemsReached: true });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
@@ -158,7 +153,7 @@ describe('Array Button Mappers with Logic', () => {
           logic: [
             {
               type: 'hidden',
-              condition: { type: 'javascript', expression: 'maxItemsReached' },
+              condition: { type: 'javascript', expression: 'formValue.maxItemsReached' },
             },
           ],
         };
@@ -292,7 +287,7 @@ describe('Array Button Mappers with Logic', () => {
     }
 
     describe('hidden logic', () => {
-      it.skip('should return hidden=true when hidden logic condition is true', () => {
+      it('should return hidden=true when hidden logic condition is true', () => {
         setRegistry({ canDelete: false });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
@@ -304,7 +299,7 @@ describe('Array Button Mappers with Logic', () => {
           logic: [
             {
               type: 'hidden',
-              condition: { type: 'javascript', expression: '!canDelete' },
+              condition: { type: 'javascript', expression: '!formValue.canDelete' },
             },
           ],
         };
@@ -315,7 +310,7 @@ describe('Array Button Mappers with Logic', () => {
     });
 
     describe('disabled logic', () => {
-      it.skip('should return disabled=true when disabled logic condition is true', () => {
+      it('should return disabled=true when disabled logic condition is true', () => {
         setRegistry({ minItemsReached: true });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
@@ -327,7 +322,7 @@ describe('Array Button Mappers with Logic', () => {
           logic: [
             {
               type: 'disabled',
-              condition: { type: 'javascript', expression: 'minItemsReached' },
+              condition: { type: 'javascript', expression: 'formValue.minItemsReached' },
             },
           ],
         };
@@ -344,7 +339,7 @@ describe('Array Button Mappers with Logic', () => {
       return inputsSignal();
     }
 
-    it.skip('should evaluate hidden and disabled logic', () => {
+    it('should evaluate hidden and disabled logic', () => {
       setRegistry({ isAdmin: false, isFrozen: true });
       const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
@@ -355,8 +350,8 @@ describe('Array Button Mappers with Logic', () => {
         arrayKey: 'items',
         template: { key: 'name', type: 'input' },
         logic: [
-          { type: 'hidden', condition: { type: 'javascript', expression: '!isAdmin' } },
-          { type: 'disabled', condition: { type: 'javascript', expression: 'isFrozen' } },
+          { type: 'hidden', condition: { type: 'javascript', expression: '!formValue.isAdmin' } },
+          { type: 'disabled', condition: { type: 'javascript', expression: 'formValue.isFrozen' } },
         ],
       };
 
@@ -372,7 +367,7 @@ describe('Array Button Mappers with Logic', () => {
       return inputsSignal();
     }
 
-    it.skip('should evaluate hidden and disabled logic', () => {
+    it('should evaluate hidden and disabled logic', () => {
       setRegistry({ showPopButton: true, isEmpty: true });
       const injector = createTestInjector();
 
@@ -382,8 +377,8 @@ describe('Array Button Mappers with Logic', () => {
         label: 'Remove Last',
         arrayKey: 'items',
         logic: [
-          { type: 'hidden', condition: { type: 'javascript', expression: '!showPopButton' } },
-          { type: 'disabled', condition: { type: 'javascript', expression: 'isEmpty' } },
+          { type: 'hidden', condition: { type: 'javascript', expression: '!formValue.showPopButton' } },
+          { type: 'disabled', condition: { type: 'javascript', expression: 'formValue.isEmpty' } },
         ],
       };
 
@@ -399,7 +394,7 @@ describe('Array Button Mappers with Logic', () => {
       return inputsSignal();
     }
 
-    it.skip('should evaluate hidden and disabled logic', () => {
+    it('should evaluate hidden and disabled logic', () => {
       setRegistry({ showShiftButton: false, hasItems: false });
       const injector = createTestInjector();
 
@@ -409,8 +404,8 @@ describe('Array Button Mappers with Logic', () => {
         label: 'Remove First',
         arrayKey: 'items',
         logic: [
-          { type: 'hidden', condition: { type: 'javascript', expression: '!showShiftButton' } },
-          { type: 'disabled', condition: { type: 'javascript', expression: '!hasItems' } },
+          { type: 'hidden', condition: { type: 'javascript', expression: '!formValue.showShiftButton' } },
+          { type: 'disabled', condition: { type: 'javascript', expression: '!formValue.hasItems' } },
         ],
       };
 
