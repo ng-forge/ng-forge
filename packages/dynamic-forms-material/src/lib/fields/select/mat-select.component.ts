@@ -17,10 +17,10 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
     @let selectId = ngf.key() + '-select';
 
     <mat-form-field
-      [appearance]="effectiveAppearance()"
-      [subscriptSizing]="effectiveSubscriptSizing()"
-      [floatLabel]="effectiveFloatLabel()"
-      [hideRequiredMarker]="effectiveHideRequiredMarker()"
+      [appearance]="appearance()"
+      [subscriptSizing]="subscriptSizing()"
+      [floatLabel]="floatLabel()"
+      [hideRequiredMarker]="hideRequiredMarker()"
     >
       @if (ngf.label(); as label) {
         <mat-label>{{ label | dynamicText | async }}</mat-label>
@@ -66,15 +66,13 @@ export default class MatSelectFieldComponent {
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<MatSelectProps>();
 
-  readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
+  readonly appearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
 
-  readonly effectiveSubscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');
+  readonly subscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');
 
-  readonly effectiveFloatLabel = computed(() => this.props()?.floatLabel ?? this.materialConfig?.floatLabel ?? 'auto');
+  readonly floatLabel = computed(() => this.props()?.floatLabel ?? this.materialConfig?.floatLabel ?? 'auto');
 
-  readonly effectiveHideRequiredMarker = computed(
-    () => this.props()?.hideRequiredMarker ?? this.materialConfig?.hideRequiredMarker ?? false,
-  );
+  readonly hideRequiredMarker = computed(() => this.props()?.hideRequiredMarker ?? this.materialConfig?.hideRequiredMarker ?? false);
 
   defaultCompare = Object.is;
 }

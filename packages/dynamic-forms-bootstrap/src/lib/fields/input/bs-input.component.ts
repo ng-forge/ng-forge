@@ -13,7 +13,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
   hostDirectives: [{ directive: NgForgeField, inputs: [...NG_FORGE_FIELD_INPUTS] }],
   template: `
     @let f = ngf.field(); @let p = props(); @let inputId = ngf.key() + '-input';
-    @if (effectiveFloatingLabel()) {
+    @if (floatingLabel()) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
         <input
@@ -24,8 +24,8 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
           [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="ngf.tabIndex()"
           class="form-control"
-          [class.form-control-sm]="effectiveSize() === 'sm'"
-          [class.form-control-lg]="effectiveSize() === 'lg'"
+          [class.form-control-sm]="size() === 'sm'"
+          [class.form-control-lg]="size() === 'lg'"
           [class.form-control-plaintext]="p?.plaintext"
           [class.is-invalid]="f().invalid() && f().touched()"
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -56,8 +56,8 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
           [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="ngf.tabIndex()"
           class="form-control"
-          [class.form-control-sm]="effectiveSize() === 'sm'"
-          [class.form-control-lg]="effectiveSize() === 'lg'"
+          [class.form-control-sm]="size() === 'sm'"
+          [class.form-control-lg]="size() === 'lg'"
           [class.form-control-plaintext]="p?.plaintext"
           [class.is-invalid]="f().invalid() && f().touched()"
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -91,6 +91,6 @@ export default class BsInputFieldComponent {
 
   readonly props = input<BsInputProps>();
 
-  readonly effectiveSize = computed(() => this.props()?.size ?? this.bootstrapConfig?.size);
-  readonly effectiveFloatingLabel = computed(() => this.props()?.floatingLabel ?? this.bootstrapConfig?.floatingLabel ?? false);
+  readonly size = computed(() => this.props()?.size ?? this.bootstrapConfig?.size);
+  readonly floatingLabel = computed(() => this.props()?.floatingLabel ?? this.bootstrapConfig?.floatingLabel ?? false);
 }

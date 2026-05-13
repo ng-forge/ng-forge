@@ -16,10 +16,10 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
     @let inputId = ngf.key() + '-input';
 
     <mat-form-field
-      [appearance]="effectiveAppearance()"
-      [subscriptSizing]="effectiveSubscriptSizing()"
-      [floatLabel]="effectiveFloatLabel()"
-      [hideRequiredMarker]="effectiveHideRequiredMarker()"
+      [appearance]="appearance()"
+      [subscriptSizing]="subscriptSizing()"
+      [floatLabel]="floatLabel()"
+      [hideRequiredMarker]="hideRequiredMarker()"
     >
       @if (ngf.label()) {
         <mat-label>{{ ngf.label() | dynamicText | async }}</mat-label>
@@ -57,13 +57,11 @@ export default class MatInputFieldComponent {
 
   readonly props = input<MatInputProps>();
 
-  readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
+  readonly appearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
 
-  readonly effectiveSubscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');
+  readonly subscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');
 
-  readonly effectiveFloatLabel = computed(() => this.props()?.floatLabel ?? this.materialConfig?.floatLabel ?? 'auto');
+  readonly floatLabel = computed(() => this.props()?.floatLabel ?? this.materialConfig?.floatLabel ?? 'auto');
 
-  readonly effectiveHideRequiredMarker = computed(
-    () => this.props()?.hideRequiredMarker ?? this.materialConfig?.hideRequiredMarker ?? false,
-  );
+  readonly hideRequiredMarker = computed(() => this.props()?.hideRequiredMarker ?? this.materialConfig?.hideRequiredMarker ?? false);
 }

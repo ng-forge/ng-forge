@@ -41,15 +41,15 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [type]="props()?.type ?? 'text'"
       [formField]="f"
       [label]="(ngf.label() | dynamicText | async) ?? undefined"
-      [labelPlacement]="effectiveLabelPlacement()"
+      [labelPlacement]="labelPlacement()"
       [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
       [clearInput]="props()?.clearInput ?? false"
       [counter]="props()?.counter ?? false"
       [minlength]="f().minLength?.()"
       [maxlength]="f().maxLength?.()"
-      [color]="effectiveColor()"
-      [fill]="effectiveFill()"
-      [shape]="effectiveShape()"
+      [color]="color()"
+      [fill]="fill()"
+      [shape]="shape()"
       [readonly]="f().readonly()"
       [helperText]="ngf.errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="ngf.tabIndex()"
@@ -76,10 +76,10 @@ export default class IonicInputFieldComponent {
 
   readonly props = input<IonicInputProps>();
 
-  protected readonly effectiveFill = computed(() => this.props()?.fill ?? this.ionicConfig?.fill ?? 'solid');
-  protected readonly effectiveShape = computed(() => this.props()?.shape ?? this.ionicConfig?.shape);
-  protected readonly effectiveLabelPlacement = computed(() => this.props()?.labelPlacement ?? this.ionicConfig?.labelPlacement ?? 'start');
-  protected readonly effectiveColor = computed(() => this.props()?.color ?? this.ionicConfig?.color);
+  protected readonly fill = computed(() => this.props()?.fill ?? this.ionicConfig?.fill ?? 'solid');
+  protected readonly shape = computed(() => this.props()?.shape ?? this.ionicConfig?.shape);
+  protected readonly labelPlacement = computed(() => this.props()?.labelPlacement ?? this.ionicConfig?.labelPlacement ?? 'start');
+  protected readonly color = computed(() => this.props()?.color ?? this.ionicConfig?.color);
 
   constructor() {
     // ion-input encapsulates a native <input> in shadow DOM and does not automatically

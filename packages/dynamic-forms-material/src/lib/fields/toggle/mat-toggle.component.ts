@@ -24,7 +24,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       [color]="props()?.color || 'primary'"
       [labelPosition]="props()?.labelPosition || 'after'"
       [hideIcon]="props()?.hideIcon || false"
-      [disableRipple]="effectiveDisableRipple()"
+      [disableRipple]="disableRipple()"
       [required]="!!f().required()"
       [attr.tabindex]="ngf.tabIndex()"
       class="toggle-container"
@@ -48,5 +48,5 @@ export default class MatToggleFieldComponent {
 
   readonly props = input<MatToggleProps>();
 
-  readonly effectiveDisableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
+  readonly disableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
 }

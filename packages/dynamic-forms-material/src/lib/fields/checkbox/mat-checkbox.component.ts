@@ -23,7 +23,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       [labelPosition]="props()?.labelPosition || 'after'"
       [indeterminate]="props()?.indeterminate || false"
       [color]="props()?.color || 'primary'"
-      [disableRipple]="effectiveDisableRipple()"
+      [disableRipple]="disableRipple()"
       [required]="!!f().required()"
       [attr.tabindex]="ngf.tabIndex()"
       [attr.hidden]="f().hidden() || null"
@@ -47,5 +47,5 @@ export default class MatCheckboxFieldComponent {
 
   readonly props = input<MatCheckboxProps>();
 
-  readonly effectiveDisableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
+  readonly disableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
 }

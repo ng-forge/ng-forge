@@ -50,8 +50,8 @@ export default class PrimeInputFieldComponent {
 
   readonly props = input<PrimeInputProps>();
 
-  protected readonly effectiveSize = computed(() => this.props()?.size ?? this.primeNGConfig?.size);
-  protected readonly effectiveVariant = computed(() => this.props()?.variant ?? this.primeNGConfig?.variant);
+  protected readonly size = computed(() => this.props()?.size ?? this.primeNGConfig?.size);
+  protected readonly variant = computed(() => this.props()?.variant ?? this.primeNGConfig?.variant);
 
   protected readonly inputClasses = computed(() => {
     const classes: string[] = [];
@@ -59,13 +59,13 @@ export default class PrimeInputFieldComponent {
     if (styleClass) {
       classes.push(styleClass);
     }
-    const size = this.effectiveSize();
+    const size = this.size();
     if (size === 'small') {
       classes.push('p-inputtext-sm');
     } else if (size === 'large') {
       classes.push('p-inputtext-lg');
     }
-    if (this.effectiveVariant() === 'filled') {
+    if (this.variant() === 'filled') {
       classes.push('p-filled');
     }
     return classes.join(' ');
