@@ -1,4 +1,4 @@
-import { afterRenderEffect, ElementRef, Signal } from '@angular/core';
+import { afterRenderEffect, ElementRef, isDevMode, Signal } from '@angular/core';
 import { applyMetaToElement, FieldMeta, isEqual } from '@ng-forge/dynamic-forms';
 
 /**
@@ -53,6 +53,7 @@ function applyTrackedAttrsToTargets(
   let cachedTargets: Element[] = [];
   let previousAttrs: FieldMeta | undefined;
   let previousDeps: readonly unknown[] | undefined;
+  const warnedSelectors = isDevMode() ? new Set<string>() : undefined;
 
   afterRenderEffect({
     write: () => {
@@ -72,6 +73,21 @@ function applyTrackedAttrsToTargets(
       }
 
       previousDeps = currentDeps;
+
+      // Dev-mode safety net: selector typo or wrong descendant query leaves
+      // meta + aria unapplied. Warn the first time we'd apply non-empty attrs
+      // to zero matches for a given selector. Re-warns only when the selector
+      // string changes (so authors fixing one typo see the next).
+      if (warnedSelectors && selector && cachedTargets.length === 0 && attrs && Object.keys(attrs).length > 0) {
+        if (!warnedSelectors.has(selector)) {
+          warnedSelectors.add(selector);
+          const tag = elementRef.nativeElement.tagName.toLowerCase();
+          console.warn(
+            `[Dynamic Forms] ngForgeControl selector "${selector}" matched no descendants of <${tag}> — meta + aria attributes will not be applied. ` +
+              `Check the selector for typos, or supply 'dependents' if the target is rendered after a signal emits.`,
+          );
+        }
+      }
 
       // Bail when attrs unchanged AND nothing structural moved — keeps repeated
       // effect runs (driven by an unrelated tracked-signal flicker) cheap.

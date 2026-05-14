@@ -48,6 +48,19 @@ class TestHostHostControlComponent {}
 })
 class TestHostWithDescendantTargetComponent {}
 
+@Component({
+  selector: 'test-host-with-bad-selector',
+  imports: [NgForgeControl],
+  template: `
+    <div ngForgeControl="input[type='chekbox']">
+      <input type="checkbox" class="inner" />
+    </div>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  hostDirectives: [NgForgeFieldHost],
+})
+class TestHostWithBadSelectorComponent {}
+
 interface TestFormValue {
   username: string;
 }
@@ -308,6 +321,44 @@ describe('NgForgeField', () => {
       const target = fixture.nativeElement.querySelector('input.target') as HTMLElement | null;
       expect(host.getAttribute('autocomplete')).toBeNull();
       expect(target?.getAttribute('autocomplete')).toBeNull();
+    });
+  });
+
+  describe('selector-typo dev warning', () => {
+    let warnSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    });
+
+    afterEach(() => warnSpy.mockRestore());
+
+    it('warns when ngForgeControl selector matches zero descendants and meta is non-empty', () => {
+      TestBed.configureTestingModule({ imports: [TestHostWithBadSelectorComponent] });
+      const fixture = TestBed.createComponent(TestHostWithBadSelectorComponent);
+      const { field } = setupField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('meta', { autocomplete: 'username' });
+      fixture.detectChanges();
+
+      const warning = warnSpy.mock.calls.find((args) =>
+        args.some((a) => String(a).includes('ngForgeControl selector') && String(a).includes('chekbox')),
+      );
+      expect(warning).toBeDefined();
+    });
+
+    it('does NOT warn when the selector matches at least one descendant', () => {
+      TestBed.configureTestingModule({ imports: [TestHostWithDescendantTargetComponent] });
+      const fixture = TestBed.createComponent(TestHostWithDescendantTargetComponent);
+      const { field } = setupField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('meta', { autocomplete: 'username' });
+      fixture.detectChanges();
+
+      const warning = warnSpy.mock.calls.find((args) => args.some((a) => String(a).includes('ngForgeControl selector')));
+      expect(warning).toBeUndefined();
     });
   });
 
