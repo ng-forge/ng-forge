@@ -1,4 +1,4 @@
-import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
@@ -40,24 +40,11 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
     DynamicTextPipe,
     AsyncPipe,
     NgForgeControl,
-    NgTemplateOutlet,
     DfAddonSlot,
   ],
   hostDirectives: [NgForgeFieldHost, NgForgeAddons],
   template: `
     @let inputId = ngf.key() + '-input';
-
-    <ng-template #control>
-      <input
-        matInput
-        ngForgeControl
-        [id]="inputId"
-        [formField]="ngf.field()"
-        [type]="type()"
-        [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
-        [attr.tabindex]="ngf.tabIndex()"
-      />
-    </ng-template>
 
     <mat-form-field
       [appearance]="appearance()"
@@ -71,7 +58,15 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
       @for (a of ngfa.prefixAddons(); track $index) {
         <df-addon-slot matPrefix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
       }
-      <ng-container *ngTemplateOutlet="control" />
+      <input
+        matInput
+        ngForgeControl
+        [id]="inputId"
+        [formField]="ngf.field()"
+        [type]="type()"
+        [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="ngf.tabIndex()"
+      />
       @for (a of ngfa.suffixAddons(); track $index) {
         <df-addon-slot matSuffix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
       }
