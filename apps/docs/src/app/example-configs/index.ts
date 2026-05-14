@@ -1,5 +1,8 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
+import { addonClearButtonConfig } from './addon-clear-button.config';
+import { addonCurrencyConfig } from './addon-currency.config';
+import { addonPasswordToggleConfig } from './addon-password-toggle.config';
 import { ageConditionalFormConfig } from './age-conditional-form.config';
 import { arrayConfig } from './array.config';
 import { businessAccountFormConfig } from './business-account-form.config';
@@ -31,6 +34,9 @@ import { wrapperArrayActionsConfig } from './wrapper-array-actions.config';
 import { wrapperSectionConfig } from './wrapper-section.config';
 import { zodSchemaValidationConfig } from './zod-schema-validation.config';
 
+export { addonClearButtonConfig } from './addon-clear-button.config';
+export { addonCurrencyConfig } from './addon-currency.config';
+export { addonPasswordToggleConfig } from './addon-password-toggle.config';
 export { ageConditionalFormConfig } from './age-conditional-form.config';
 export { arrayConfig } from './array.config';
 export { businessAccountFormConfig } from './business-account-form.config';
@@ -63,10 +69,28 @@ export { wrapperSectionConfig } from './wrapper-section.config';
 export { zodSchemaValidationConfig } from './zod-schema-validation.config';
 
 /**
- * Map of scenario keys to FormConfig objects.
+ * Concrete adapter identifiers accepted by per-adapter config factories.
+ * Mirrors the four shipped UI adapters; the docs live-example component
+ * resolves `'custom'` to `'material'` before calling a factory.
+ */
+export type ConcreteAdapter = 'material' | 'bootstrap' | 'primeng' | 'ionic';
+
+/**
+ * Per-scenario config — either a static `FormConfig` (adapter-agnostic) or a
+ * factory that returns the right config for the active adapter. Used by
+ * `LiveExampleComponent.scenarioConfig` to resolve adapter-specific addon
+ * `kind` values without forcing one config per adapter.
+ */
+export type ExampleConfigValue = FormConfig | ((adapter: ConcreteAdapter) => FormConfig);
+
+/**
+ * Map of scenario keys to FormConfig objects or per-adapter factories.
  * Keys match the scenario identifiers used in docs-live-example elements.
  */
-export const EXAMPLE_CONFIGS: Record<string, FormConfig> = {
+export const EXAMPLE_CONFIGS: Record<string, ExampleConfigValue> = {
+  'addon-clear-button': addonClearButtonConfig,
+  'addon-currency': addonCurrencyConfig,
+  'addon-password-toggle': addonPasswordToggleConfig,
   login: loginConfig,
   'login-form': loginConfig,
   contact: contactConfig,

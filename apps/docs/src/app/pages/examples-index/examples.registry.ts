@@ -8,6 +8,27 @@ export interface ExampleItem {
 
 export const EXAMPLES_REGISTRY: ExampleItem[] = [
   {
+    id: 'addon-clear-button',
+    title: 'Addon Clear Button',
+    description: 'Canonical addon pattern — icon prefix + clear-preset button suffix, JSON-safe across all four adapters',
+    tags: ['Addons', 'Basic'],
+    path: '/examples/addon-clear-button',
+  },
+  {
+    id: 'addon-password-toggle',
+    title: 'Addon Password Toggle',
+    description: 'Toggle-password-visibility preset flips the input type between password and text',
+    tags: ['Addons', 'Basic'],
+    path: '/examples/addon-password-toggle',
+  },
+  {
+    id: 'addon-currency',
+    title: 'Addon Currency',
+    description: 'Universal text addons — dollar sign prefix and USD suffix on a numeric input',
+    tags: ['Addons', 'Basic'],
+    path: '/examples/addon-currency',
+  },
+  {
     id: 'login-form',
     title: 'Login Form',
     description: 'Simple authentication form with email validation and password masking',

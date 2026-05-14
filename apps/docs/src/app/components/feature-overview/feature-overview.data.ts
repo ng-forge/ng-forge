@@ -27,6 +27,10 @@ export const FEATURE_OVERVIEW_FAQ: readonly FaqEntry[] = [
     a: "`provideDynamicForm(...)` is variadic — it takes a list of field-type registrations. Spread an adapter's bundle (`...withMaterialFields()` registers all the built-in Material fields), then append your own: `{ name: 'rich-text', loadComponent: () => import('./rich-text'), mapper: valueFieldMapper }`. Your component is a plain standalone Angular component that receives Signal Forms' `FieldTree<T>` via `input.required()`. See [Adding custom fields](/recipes/custom-fields).",
   },
   {
+    q: 'How do I add icons, buttons, or text inside an input (prefix / suffix)?',
+    a: 'Use the **addons** array on the field. ng-forge ships `*-icon` and `*-button` kinds per adapter plus universal `text` / `template` kinds. Built-in presets cover `clear`, `reset`, `paste`, `copy`, and `toggle-password-visibility`. See the [Addons overview](/addons/overview) for examples.',
+  },
+  {
     q: 'How do I lazy-load select options from an API?',
     a: "Use a `targetProperty: 'options'` derivation with `source: 'http'`. Pass the URL (or query params with field-value interpolation), a `responseExpression` that maps the response to `{ value, label }[]`, and `dependsOn` if it should re-fetch when another field changes. See [Async data](/dynamic-behavior/derivation).",
   },

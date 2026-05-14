@@ -96,6 +96,16 @@ export const NAV_ITEMS: NavItem[] = [
           { label: 'Registering and Applying', path: 'wrappers/registering-and-applying' },
         ],
       },
+      {
+        label: 'Addons',
+        path: 'addons',
+        badge: 'NEW',
+        children: [
+          { label: 'Overview', path: 'addons/overview' },
+          { label: 'Presets and Actions', path: 'addons/presets-and-actions' },
+          { label: 'Custom Kinds', path: 'addons/custom-kinds' },
+        ],
+      },
     ],
   },
   {
