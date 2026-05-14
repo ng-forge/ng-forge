@@ -59,7 +59,7 @@ function coreProviders(): Provider[] {
     FunctionRegistryService,
     {
       provide: FORM_STATE_DEPS,
-      useFactory: (): FormStateDeps => ({ config: null, formOptions: null, value: null }),
+      useFactory: (): FormStateDeps => ({ config: null, formOptions: null, value: null, source: null }),
     },
     FormStateManager,
     {

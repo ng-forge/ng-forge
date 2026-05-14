@@ -19,6 +19,8 @@ import {
   getWrapper,
   getWrappersByCategory,
   WRAPPER_AUTHORING_CONTRACT,
+  getAddonKinds,
+  getAddonKindsByCategory,
 } from './index.js';
 
 describe('Registry', () => {
@@ -305,6 +307,56 @@ describe('Registry', () => {
             expect(typeof prop.required).toBe('boolean');
           }
         }
+      });
+    });
+
+    describe('Addon kind cross-check', () => {
+      // Staleness guard for the MCP-side `ADDON_KINDS` registry against the
+      // core-shipped `BUILT_IN_ADDON_KINDS`. The MCP package can't depend on
+      // `@ng-forge/dynamic-forms` source directly (it ships independently),
+      // so the contract is encoded here as a literal. When a new core kind
+      // is added to `BUILT_IN_ADDON_KINDS` in `dynamic-forms`, this list
+      // must be updated AND a matching `category: 'core'` entry must land
+      // in `addons.ts`. The dual update keeps AI-assisted form generators
+      // aware of new kinds.
+      const EXPECTED_CORE_KINDS: ReadonlyArray<{ readonly kind: string; readonly jsonSafe: boolean }> = [
+        { kind: 'text', jsonSafe: true },
+        { kind: 'template', jsonSafe: true },
+        { kind: 'component', jsonSafe: false },
+      ];
+
+      it('every core kind in BUILT_IN_ADDON_KINDS has a matching MCP entry', () => {
+        const coreEntries = getAddonKindsByCategory('core');
+        const coreKindNames = new Set(coreEntries.map((k) => k.kind));
+        for (const expected of EXPECTED_CORE_KINDS) {
+          expect(coreKindNames.has(expected.kind), `MCP registry missing core addon kind '${expected.kind}'`).toBe(true);
+        }
+      });
+
+      it('jsonSafe flag matches between core source and MCP registry', () => {
+        const byKind = new Map(getAddonKinds().map((k) => [k.kind, k]));
+        for (const expected of EXPECTED_CORE_KINDS) {
+          const entry = byKind.get(expected.kind);
+          expect(entry, `MCP entry missing for '${expected.kind}'`).toBeDefined();
+          expect(entry?.jsonSafe, `${expected.kind} jsonSafe mismatch`).toBe(expected.jsonSafe);
+        }
+      });
+
+      it('every addon-kind entry has required descriptive fields', () => {
+        for (const k of getAddonKinds()) {
+          expect(k.kind, `addon kind missing 'kind'`).toBeTruthy();
+          expect(k.category, `${k.kind} missing 'category'`).toBeTruthy();
+          expect(['core', 'adapter']).toContain(k.category);
+          expect(k.package, `${k.kind} missing 'package'`).toBeTruthy();
+          expect(k.description, `${k.kind} missing 'description'`).toBeTruthy();
+          expect(k.example, `${k.kind} missing 'example'`).toBeTruthy();
+          expect(typeof k.jsonSafe, `${k.kind} jsonSafe should be boolean`).toBe('boolean');
+        }
+      });
+
+      it('no duplicate addon-kind entries', () => {
+        const kinds = getAddonKinds().map((k) => k.kind);
+        expect(kinds.length).toBe(new Set(kinds).size);
       });
     });
   });

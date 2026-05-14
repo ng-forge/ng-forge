@@ -30,6 +30,9 @@ export const BUILT_IN_ADDON_KINDS: readonly AddonKindDefinition[] = [
   },
   {
     kind: 'component',
+    // The shape carries a function loader — not serialisable; dropped by the
+    // validator when the form config originated from JSON.
+    jsonSafe: false,
     loadComponent: () => import('../addons/component-addon.component').then((m) => m.ComponentAddonComponent),
     validate: (addon, fieldKey) => {
       const loader = (addon as { component?: unknown }).component;

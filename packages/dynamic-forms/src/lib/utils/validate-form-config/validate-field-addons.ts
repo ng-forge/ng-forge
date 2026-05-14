@@ -84,8 +84,9 @@ export function validateFieldAddons(
       continue;
     }
 
-    // Code-only kind dropped from JSON-source configs.
-    if (source === 'json' && kindDef.kind === 'component') {
+    // Code-only kind dropped from JSON-source configs. A kind opts out of
+    // JSON-safety via `AddonKindDefinition.jsonSafe: false` (defaults to true).
+    if (source === 'json' && kindDef.jsonSafe === false) {
       warnings.push({
         type: 'code-only-kind-in-json',
         fieldKey: field.key,

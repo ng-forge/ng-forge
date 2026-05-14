@@ -1,5 +1,5 @@
 import type {
-  AddonActionContext,
+  AddonActionHandler,
   AddonActionPreset,
   BaseAddon,
   DynamicText,
@@ -73,8 +73,8 @@ type PiButtonClickActionRef = {
 type PiButtonClickAction = {
   readonly preset?: never;
   readonly actionRef?: never;
-  /** Inline handler — code-only; dropped from JSON-derived configs. */
-  readonly action: (ctx: AddonActionContext) => void;
+  /** Inline handler — code-only; dropped from JSON-derived configs. Matches the generic `AddonActionHandler` shape used by `provideAddonActions(...)`. */
+  readonly action: AddonActionHandler;
 };
 type PiButtonClickNone = {
   readonly preset?: never;

@@ -10,7 +10,9 @@ import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
  *
  * Resolves the addon's `templateKey` against {@link DF_FIELD_TEMPLATES}
  * (populated by `<df-dynamic-form>` from `<ng-template dfTemplate="...">`
- * children) and renders via `NgTemplateOutlet`.
+ * children) and renders via `NgTemplateOutlet`. The wrapper-style host bag
+ * (`fieldInputs`) is forwarded as the template's implicit context — author
+ * the template as `<ng-template dfTemplate="..." let-fi>{{ fi.key }}</ng-template>`.
  *
  * If the key is unresolved, logs a warning and renders nothing — keeps the
  * form alive when a backend references a template the FE has not registered.
@@ -20,7 +22,7 @@ import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
   imports: [NgTemplateOutlet],
   template: `
     @if (template(); as tpl) {
-      <ng-container *ngTemplateOutlet="tpl" />
+      <ng-container *ngTemplateOutlet="tpl; context: outletContext()" />
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,7 +32,7 @@ export class TemplateAddonComponent {
   private readonly logger = inject(DynamicFormLogger);
 
   readonly addon = input.required<TemplateAddon>();
-  /** Forwarded by `df-addon-slot`; templates that need field state read it via `let-` context binding. */
+  /** Forwarded by `df-addon-slot`; surfaced to the template as its implicit `$implicit` context. */
   readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   protected readonly template = computed(() => {
@@ -38,11 +40,12 @@ export class TemplateAddonComponent {
     const key = this.addon().templateKey;
     const tpl = map?.get(key);
     if (!tpl) {
-      this.logger.warn(
-        `Template addon: no <ng-template dfTemplate="${key}"> found. ` + `Did you project it as a child of <df-dynamic-form>?`,
-      );
+      this.logger.warn(`Template addon: no <ng-template dfTemplate="${key}"> found. Did you project it as a child of <df-dynamic-form>?`);
       return null;
     }
     return tpl;
   });
+
+  /** Implicit context payload — template authors bind via `let-fi`. */
+  protected readonly outletContext = computed(() => ({ $implicit: this.fieldInputs() }));
 }

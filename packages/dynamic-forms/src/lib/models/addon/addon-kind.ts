@@ -8,8 +8,7 @@ import { AddonSlot } from './addon-slot';
  * shape to AI form generators. Manually authored per kind for MVP;
  * auto-extracted from TypeScript types in a follow-up.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON Schema is intentionally unconstrained
-export type AddonKindSchema = Record<string, any>;
+export type AddonKindSchema = Record<string, unknown>;
 
 /**
  * Optional shape validator a kind ships to enforce its required fields at
@@ -34,6 +33,15 @@ export interface AddonKindDefinition<T extends BaseAddon = BaseAddon> {
   readonly validate?: AddonShapeValidator<T>;
   /** Optional JSON Schema fragment for MCP / pre-flight tooling. */
   readonly schema?: AddonKindSchema;
+  /**
+   * Whether the kind survives `JSON.stringify` / `JSON.parse`. Kinds whose
+   * shape includes a function payload (e.g., the built-in `'component'`
+   * loader, inline `pi-button` `action` handlers) declare `jsonSafe: false`
+   * so the validator drops them when the config was loaded from a JSON
+   * source (`validateFormConfig(config, { source: 'json' })`). Defaults to
+   * `true` — kinds are JSON-safe unless explicitly opted out.
+   */
+  readonly jsonSafe?: boolean;
 }
 
 /**

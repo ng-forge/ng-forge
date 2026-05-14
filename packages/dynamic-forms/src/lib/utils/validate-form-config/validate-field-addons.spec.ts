@@ -14,7 +14,7 @@ const TEST_KINDS: ReadonlyArray<AddonKindDefinition> = [
       if (typeof icon !== 'string' || icon.length === 0) throw new Error("'icon' must be a non-empty string");
     },
   },
-  { kind: 'component', loadComponent: () => Promise.resolve(class {}) },
+  { kind: 'component', jsonSafe: false, loadComponent: () => Promise.resolve(class {}) },
 ];
 
 const TEST_FIELDS: ReadonlyArray<FieldTypeDefinition> = [

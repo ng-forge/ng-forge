@@ -26,12 +26,14 @@ function createFormStateDeps(
   overrides?: Partial<{
     formOptions: Signal<FormOptions | undefined>;
     value: WritableSignal<Partial<TestModel> | undefined>;
+    source: Signal<'inline' | 'json'> | null;
   }>,
 ): FormStateDeps {
   return {
     config: signal(config) as Signal<FormConfig<RegisteredFieldTypes[]>>,
     formOptions: overrides?.formOptions ?? (signal(undefined) as Signal<FormOptions | undefined>),
     value: overrides?.value ?? signal(undefined),
+    source: overrides?.source ?? null,
   };
 }
 

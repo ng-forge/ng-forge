@@ -47,6 +47,9 @@ import { reconcileFields, ResolvedField, resolveField, resolveFieldSync } from '
 import { FormModeValidator } from '../utils/form-validation/form-mode-validator';
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
 import { validateFormConfig } from '../utils/config-validation/config-validator';
+import { walkAndValidateAddons } from '../utils/validate-form-config/validate-field-addons';
+import { formatAddonWarning } from '../utils/validate-form-config/addon-warning';
+import { ADDON_KIND_REGISTRY } from '../models/addon/addon-kind';
 import { VALUE_EXCLUSION_DEFAULTS } from '../providers/features/value-exclusion/value-exclusion.token';
 import { filterFormValue } from '../utils/value-filter/value-filter';
 import { ValueExclusionConfig } from '../models/value-exclusion-config';
@@ -72,6 +75,12 @@ export interface FormStateDeps {
   config: Signal<FormConfig<RegisteredFieldTypes[]>> | null;
   formOptions: Signal<FormOptions | undefined> | null;
   value: WritableSignal<Partial<unknown> | undefined> | null;
+  /**
+   * Source mode forwarded to the addon validator at bootstrap. `'inline'`
+   * (default) keeps every kind; `'json'` drops code-only kinds. Optional —
+   * defaults to `'inline'` when omitted.
+   */
+  source: Signal<'inline' | 'json'> | null;
 }
 
 /** @internal */
@@ -207,10 +216,13 @@ export class FormStateManager<
       );
     }
     // Safe cast: DynamicForm populates FormStateDeps with its concrete signals.
+    // `source` is optional — `DynamicForm` always populates it, but other
+    // callers of `FormStateManager` (e.g., specs) may omit it.
     return raw as {
       readonly config: Signal<FormConfig<TFields>>;
       readonly formOptions: Signal<FormOptions | undefined>;
       readonly value: WritableSignal<Partial<TModel> | undefined>;
+      readonly source: Signal<'inline' | 'json'> | null;
     };
   })();
 
@@ -219,6 +231,8 @@ export class FormStateManager<
 
   /** Field registry for loading components. */
   private readonly fieldRegistry = injectFieldRegistry();
+  /** Addon-kind registry — feeds the addon validator at config-setup time. */
+  private readonly addonKindRegistry = inject(ADDON_KIND_REGISTRY);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // State Machine
@@ -1069,8 +1083,24 @@ export class FormStateManager<
     // Validate after normalization so simplified array templates are already expanded
     // into full ArrayField.fields and are reachable during traversal.
     validateFormConfig(normalizedFields, registry, this.logger);
-    const flattenedFields = this.fieldProcessors.memoizedFlattenFields(normalizedFields, registry);
-    const flattenedFieldsForRendering = this.fieldProcessors.memoizedFlattenFieldsForRendering(normalizedFields, registry);
+
+    // Addon pass — strip invalid / unsupported addon entries and log a warning
+    // for each one dropped. Lenient by design: the form keeps rendering even
+    // when a JSON-source config ships an addon the FE doesn't understand.
+    const source = this.deps.source?.() ?? 'inline';
+    const { fields: sanitizedFields, warnings: addonWarnings } = walkAndValidateAddons(
+      normalizedFields,
+      registry,
+      this.addonKindRegistry,
+      source,
+    );
+    for (const w of addonWarnings) {
+      this.logger.warn(formatAddonWarning(w));
+    }
+    const validatedFields = sanitizedFields as FieldDef<unknown>[];
+
+    const flattenedFields = this.fieldProcessors.memoizedFlattenFields(validatedFields, registry);
+    const flattenedFieldsForRendering = this.fieldProcessors.memoizedFlattenFieldsForRendering(validatedFields, registry);
     const fieldsById = this.fieldProcessors.memoizedKeyBy(flattenedFields);
     const defaultValues = this.fieldProcessors.memoizedDefaultValues(fieldsById, registry);
     const fieldsToRender = mode === 'paged' ? [] : flattenedFieldsForRendering;

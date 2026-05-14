@@ -6,17 +6,30 @@ import { InjectionToken } from '@angular/core';
  * kinds (notably `pi-button` with `preset: 'clear' | 'reset' | 'paste'`)
  * can mutate the field value without re-deriving the form path themselves.
  *
- * Implemented as a thin holder so the writer can be patched after DI runs
- * (the `field` input isn't bound at construction time). The field component
- * sets `write` in its constructor to delegate to its bound `FieldTree`.
+ * The host component calls `bind(sink)` once during construction to supply
+ * the writer with its `FieldTree`-aware sink — the closure stays internal
+ * to the writer rather than mutating a public field on it.
  */
 export interface PrimeInputValueWriter {
-  write: (value: unknown) => void;
+  /** Dispatch to the bound sink. No-op until `bind(...)` is called. */
+  write(value: unknown): void;
+  /**
+   * @internal — called by `PrimeInputFieldComponent.constructor` to wire
+   * the writer to the host's field signal. Calls happen at click time, by
+   * which point the field signal is bound.
+   */
+  bind(sink: (value: unknown) => void): void;
 }
 
-/** Factory used by `PrimeInputFieldComponent.providers`. Sentinel write is replaced at construction. */
+/** Factory used by `PrimeInputFieldComponent.providers`. Returns an unbound writer; the host binds it. */
 export function createPrimeInputValueWriter(): PrimeInputValueWriter {
-  return { write: () => undefined };
+  let sink: (value: unknown) => void = () => undefined;
+  return {
+    write: (value) => sink(value),
+    bind: (next) => {
+      sink = next;
+    },
+  };
 }
 
 export const PRIME_INPUT_VALUE_WRITER = new InjectionToken<PrimeInputValueWriter>('PRIME_INPUT_VALUE_WRITER');

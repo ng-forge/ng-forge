@@ -55,7 +55,7 @@ export function formatAddonWarning(w: AddonWarning): string {
     case 'shape-violation':
       return `Field '${w.fieldKey}': addon kind '${w.kind}' shape invalid: ${w.reason}. Addon dropped.`;
     case 'code-only-kind-in-json':
-      return `Field '${w.fieldKey}': addon kind '${w.kind}' is code-only and cannot be used with JSON-derived configs. ` + `Addon dropped.`;
+      return `Field '${w.fieldKey}': addon kind '${w.kind}' is code-only and cannot be used with JSON-derived configs. Addon dropped.`;
     case 'code-only-action-in-json':
       return `Field '${w.fieldKey}': ${w.reason}. Use 'preset' or 'actionRef' instead. Addon dropped.`;
   }

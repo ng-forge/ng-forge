@@ -3,13 +3,15 @@ import { ChangeDetectionStrategy, Component, computed, input, signal, Type } fro
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ComponentAddon } from '../models/addon/addon-def';
 import { resolveDefaultExport } from '../utils/wrapper-chain/wrapper-chain';
-import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
 /**
  * Renderer for the universal `component` addon kind.
  *
  * Loads the user-supplied component lazily (`addon.component()`) and renders
  * it via `NgComponentOutlet` with `addon.inputs` forwarded as input bindings.
+ * The wrapper-style `fieldInputs` bag is not propagated — user components
+ * receive only what `addon.inputs` declares. Authors that need field state
+ * should switch to the `template` kind or build a wrapper.
  *
  * @codeOnly The `component` loader is a function; this kind is dropped in
  * lenient validation when the config originated from JSON.
@@ -26,8 +28,6 @@ import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 })
 export class ComponentAddonComponent {
   readonly addon = input.required<ComponentAddon>();
-  /** Forwarded by `df-addon-slot`; not propagated to the user component (use `inputs` for that). */
-  readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   protected readonly inputs = computed(() => (this.addon().inputs ?? {}) as Record<string, unknown>);
 
