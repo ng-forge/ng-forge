@@ -40,7 +40,7 @@
     "type-test": {
       "executor": "@nx/vitest:test",
       "options": {
-        "configFile": "packages/dynamic-forms-material/vite.config.ts"
+        "configFile": "packages/dynamic-forms-material/vite.config.typecheck.ts"
       }
     }
   }

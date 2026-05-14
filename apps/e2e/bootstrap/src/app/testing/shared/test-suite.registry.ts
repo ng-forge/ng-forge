@@ -2,6 +2,7 @@ import { TestSuite } from './types';
 
 // Import all visual/UI test suites
 import { accessibilitySuite } from '../accessibility/accessibility.suite';
+import { addonsSuite } from '../addons/addons.suite';
 import { arrayFieldsSuite } from '../array-fields/array-fields.suite';
 import { bootstrapComponentsSuite } from '../bootstrap-components/bootstrap-components.suite';
 import { comprehensiveFieldTestsSuite } from '../comprehensive-field-tests/comprehensive-field-tests.suite';
@@ -17,6 +18,7 @@ import { wrapperFieldsSuite } from '../wrapper-fields/wrapper-fields.suite';
  */
 export const TEST_SUITE_REGISTRY: TestSuite[] = [
   accessibilitySuite,
+  addonsSuite,
   arrayFieldsSuite,
   bootstrapComponentsSuite,
   comprehensiveFieldTestsSuite,

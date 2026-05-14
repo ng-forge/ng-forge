@@ -13,6 +13,12 @@ export default [
     loadChildren: () => import('./accessibility/accessibility.routes'),
   },
 
+  // Addons Tests - prefix/suffix addon kinds (mat-icon, mat-button, text, presets)
+  {
+    path: 'addons',
+    loadChildren: () => import('./addons/addons.routes'),
+  },
+
   // Array Fields Tests
   {
     path: 'array-fields',
