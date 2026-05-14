@@ -10,23 +10,12 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 // Length-validator → DOM wiring (minlength/maxlength):
 //
-// On NATIVE form elements (<input>/<textarea>), Signal Forms's [formField] directive
-// auto-syncs minLength/maxLength HTML attributes via setNativeDomProperty (gated by
-// elementAcceptsNativeProperty). See the source in @angular/forms/signals.
-//
-// <ion-input> is a custom Ionic web component, not a native form element, so Signal
-// Forms's auto-sync does NOT apply here — it instead routes via setInputOnDirectives
-// looking up an exact camelCase input ('maxLength'). <ion-input>'s property is the
-// lowercase 'maxlength', which doesn't match. We therefore bind directly from the
-// FieldState signals.
-//
-// `f().maxLength?.()` — the optional `?.()` is required: FieldState.maxLength is
-// `Signal<number | undefined> | undefined` (the entire signal is missing if the
-// field has no maxLength validator). Same for minLength.
-//
-// PrimeNG textarea uses the alternate strategy: its control component declares
-// camelCase `maxLength` / `minLength` inputs so Signal Forms's setInputOnDirectives
-// auto-wires. See packages/dynamic-forms-primeng/src/lib/fields/textarea/.
+// <ion-input> is a custom Ionic web component, so Signal Forms's native-property
+// auto-sync (setNativeDomProperty) does not apply. Instead it routes via
+// setInputOnDirectives looking up exact camelCase inputs (`minLength`, `maxLength`)
+// on the directive class — which we declare below and then forward to ion-input's
+// lowercase `[minlength]` / `[maxlength]` attributes. Matches the strategy used by
+// the PrimeNG textarea control.
 @Component({
   selector: 'df-ion-input',
   imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
@@ -45,8 +34,8 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
       [clearInput]="props()?.clearInput ?? false"
       [counter]="props()?.counter ?? false"
-      [minlength]="f().minLength?.()"
-      [maxlength]="f().maxLength?.()"
+      [minlength]="minLength()"
+      [maxlength]="maxLength()"
       [color]="color()"
       [fill]="fill()"
       [shape]="shape()"
@@ -75,6 +64,13 @@ export default class IonicInputFieldComponent {
   protected readonly ngf = injectNgForgeField<string>();
 
   readonly props = input<IonicInputProps>();
+
+  // Length-validator → DOM wiring uses Signal Forms's setInputOnDirectives to copy
+  // FieldState.minLength / maxLength onto these camelCase-named inputs automatically.
+  // The match must be exact-case — renaming to lowercase would silently break the
+  // wiring. See the comment above the @Component decorator.
+  readonly minLength = input<number | undefined>(undefined);
+  readonly maxLength = input<number | undefined>(undefined);
 
   protected readonly fill = computed(() => this.props()?.fill ?? this.ionicConfig?.fill ?? 'solid');
   protected readonly shape = computed(() => this.props()?.shape ?? this.ionicConfig?.shape);
