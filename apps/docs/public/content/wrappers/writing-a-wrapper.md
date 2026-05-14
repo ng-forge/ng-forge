@@ -8,6 +8,8 @@ Build a custom wrapper component that decorates any dynamic form field. This pag
 
 The example here is a `section` wrapper that renders a titled card around any field.
 
+> **Authoring inside an adapter library?** Import the same types from `@ng-forge/dynamic-forms/integration` instead of the root entry point — it re-exports the wrapper-authoring API so an adapter package keeps one import path across its field and wrapper components. See [Building an Adapter](/building-an-adapter#custom-wrappers).
+
 ## 1. Implement the contract
 
 A wrapper is an Angular component whose template contains a `#fieldComponent` template reference pointing at a `ViewContainerRef`. The outlet creates the wrapper, finds the ref, and renders the next wrapper (or the field component) inside. Everything else — template, styling, DI — is yours.

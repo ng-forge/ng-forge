@@ -497,64 +497,23 @@ If `meta` and `props` both carry the same key, `meta` wins.
 
 ## Custom wrappers
 
-Wrappers are "chrome" around a field — sections, accordions, tooltips, badges. ng-forge ships a wrapper-chain registry separate from the field-type registry; adapters can ship their own wrappers alongside field types via the same provider entry point.
+Wrappers are "chrome" around a field — sections, accordions, tooltips, badges. ng-forge ships a wrapper-chain registry separate from the field-type registry, so adapters can register custom wrappers alongside field types from the same provider entry point.
 
-The wrapper-authoring surface re-exports from `@ng-forge/dynamic-forms/integration`:
+The complete wrapper-authoring guide lives in **[Writing a Wrapper](/wrappers/writing-a-wrapper)** (component shape, slot semantics, `WrapperFieldInputs`, error patterns) and **[Registering and Applying](/wrappers/registering-and-applying)** (the `createWrappers` bundle + module augmentation).
 
-- `FieldWrapperContract` — interface your wrapper component implements (just a `fieldComponent: viewChild.required(..., ViewContainerRef)` slot).
-- `WrapperFieldInputs` — the input shape your wrapper receives via `fieldInputs: input<WrapperFieldInputs>()`. Carries the wrapped field's mapper outputs (`key`, `label`, `props`, `field` view, etc.).
-- `WrapperTypeDefinition` — the registration shape, with `wrapperName` + `loadComponent` + optional `types` for auto-association.
-- `createWrappers`, `WrapperRegistration`, `WrappersBundle`, `InferWrapperRegistry` — bundle factory mirroring `with*Fields()` for wrapper providers.
-- `wrapperProps<T>()` — zero-cost type carrier so `InferWrapperRegistry<typeof yourBundle>` picks up your wrapper's config interface.
+For adapter library packaging, import the wrapper-authoring API from `@ng-forge/dynamic-forms/integration` rather than the root entry point — keeps a single import path across your field components and wrapper components:
 
 ```typescript
-// section-wrapper.component.ts
-import { ChangeDetectionStrategy, Component, input, viewChild, ViewContainerRef } from '@angular/core';
-import { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
-
-export interface SectionWrapper {
-  wrapperName: 'section';
-  header: string;
-  collapsed?: boolean;
-}
-
-@Component({
-  selector: 'app-section-wrapper',
-  template: `
-    <section class="app-section">
-      <header>{{ header() }}</header>
-      <div [hidden]="collapsed()">
-        <ng-container #fieldComponent />
-      </div>
-    </section>
-  `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export default class SectionWrapperComponent implements FieldWrapperContract {
-  readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
-  readonly fieldInputs = input<WrapperFieldInputs>();
-  readonly header = input.required<string>();
-  readonly collapsed = input<boolean>(false);
-}
+import {
+  createWrappers,
+  type FieldWrapperContract,
+  type InferWrapperRegistry,
+  type WrapperFieldInputs,
+  wrapperProps,
+} from '@ng-forge/dynamic-forms/integration';
 ```
 
-```typescript
-// my-adapter-wrappers.ts
-import { createWrappers, wrapperProps, InferWrapperRegistry } from '@ng-forge/dynamic-forms/integration';
-import type { SectionWrapper } from './section-wrapper.component';
-
-export const myWrappers = createWrappers({
-  wrapperName: 'section',
-  loadComponent: () => import('./section-wrapper.component'),
-  props: wrapperProps<SectionWrapper>(),
-});
-
-declare module '@ng-forge/dynamic-forms' {
-  interface FieldRegistryWrappers extends InferWrapperRegistry<typeof myWrappers> {}
-}
-```
-
-Consumers spread `myWrappers` into `provideDynamicForm(...)` alongside the field types.
+Functionally identical to the root entry — same symbols, same `declare module '@ng-forge/dynamic-forms'` augmentation. The integration re-export exists so adapter packages have one import path.
 
 ## Reference adapters
 
