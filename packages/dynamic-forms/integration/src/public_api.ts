@@ -121,8 +121,12 @@ export { NgForgeFieldShell, NG_FORGE_FIELD_SHELL_INPUTS } from './directives';
 export { NgForgeField, NG_FORGE_VALUE_FIELD_INPUTS, injectNgForgeField } from './directives';
 export type { TypedNgForgeField } from './directives';
 export { NgForgeAction, NG_FORGE_ACTION_INPUTS, injectNgForgeAction } from './directives';
-export { NgForgeAddons, NG_FORGE_ADDONS_INPUTS, injectNgForgeAddons } from './directives';
+export { NgForgeAddons, NgForgeAddonsBase, NG_FORGE_ADDONS_INPUTS, injectNgForgeAddons } from './directives';
 export type { TypedNgForgeAddons } from './directives';
+export { NgForgeAddonAction, NgForgeAddonActionBase, NG_FORGE_ADDON_ACTION_INPUTS, injectNgForgeAddonAction } from './directives';
+export type { TypedNgForgeAddonAction } from './directives';
+export { ADDON_PRESET_HANDLER } from './directives';
+export type { AddonPresetHandler } from './directives';
 export { NgForgeControl, NgForgeHostControl } from './directives';
 export { NgForgeFieldHost, NgForgeActionHost } from './directives';
 

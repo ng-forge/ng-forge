@@ -3,13 +3,13 @@ import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
 import type { AnyAddon, TextAddon, TemplateAddon } from '@ng-forge/dynamic-forms';
-import { NgForgeAddons, injectNgForgeAddons } from './ng-forge-addons.directive';
+import { NgForgeAddons, NgForgeAddonsBase, injectNgForgeAddons } from './ng-forge-addons.directive';
 
 @Component({
   selector: 'test-addons-host',
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [{ directive: NgForgeAddons, inputs: ['addons'] }],
+  hostDirectives: [NgForgeAddons],
 })
 class TestAddonsHostComponent {
   protected readonly addons = injectNgForgeAddons();
@@ -17,7 +17,7 @@ class TestAddonsHostComponent {
 
 function setupHost(addons?: ReadonlyArray<AnyAddon>): {
   fixture: ReturnType<typeof TestBed.createComponent<TestAddonsHostComponent>>;
-  directive: NgForgeAddons;
+  directive: NgForgeAddonsBase;
 } {
   TestBed.configureTestingModule({ imports: [TestAddonsHostComponent] });
   const fixture = TestBed.createComponent(TestAddonsHostComponent);
@@ -26,7 +26,7 @@ function setupHost(addons?: ReadonlyArray<AnyAddon>): {
   }
   fixture.detectChanges();
   // hostDirectives instances live on the component's injector, not the root one.
-  const directive = fixture.componentRef.injector.get(NgForgeAddons);
+  const directive = fixture.componentRef.injector.get(NgForgeAddonsBase);
   return { fixture, directive };
 }
 
@@ -110,7 +110,7 @@ describe('NgForgeAddons', () => {
   describe('inject helper', () => {
     it('resolves the same directive instance under the component injector', () => {
       const { fixture, directive } = setupHost([PREFIX_TEXT]);
-      const direct = fixture.componentRef.injector.get(NgForgeAddons);
+      const direct = fixture.componentRef.injector.get(NgForgeAddonsBase);
       expect(direct).toBe(directive);
       expect(direct.addons()).toEqual([PREFIX_TEXT]);
     });

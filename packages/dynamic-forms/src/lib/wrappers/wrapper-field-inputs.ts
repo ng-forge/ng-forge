@@ -23,5 +23,11 @@ export interface WrapperFieldInputs {
   readonly validationMessages?: Record<string, string>;
   readonly defaultValidationMessages?: Record<string, string>;
   readonly field?: ReadonlyFieldTree;
+  /**
+   * Write a value into the wrapped field's tree. Provided by `buildFieldInputs`
+   * when a `FieldTree` is present. Addons (e.g., `pi-button` presets) use this
+   * to mutate the host field; wrappers should treat the field as read-only.
+   */
+  readonly setValue?: (next: unknown) => void;
   readonly [key: string]: unknown;
 }

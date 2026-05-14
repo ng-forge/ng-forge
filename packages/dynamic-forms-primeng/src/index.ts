@@ -17,11 +17,9 @@ export {
   PiIconAddonComponent,
   PiButtonAddonComponent,
   PRIME_INPUT_TYPE_OVERRIDE,
-  PRIME_INPUT_VALUE_WRITER,
-  createPrimeInputValueWriter,
 } from './lib';
 
-export type { PiIconAddon, PiButtonAddon, PrimeAddon, PrimeInputAddon, PrimeInputAddonExtensions, PrimeInputValueWriter } from './lib';
+export type { PiIconAddon, PiButtonAddon, PrimeAddon, PrimeInputAddon, PrimeInputAddonExtensions } from './lib';
 
 export type {
   PrimeButtonProps,

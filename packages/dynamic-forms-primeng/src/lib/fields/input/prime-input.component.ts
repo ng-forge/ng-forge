@@ -1,7 +1,17 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
-import { DfAddonSlot, DynamicTextPipe, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 import {
+  AddonActionContext,
+  AddonActionPreset,
+  DfAddonSlot,
+  DynamicFormLogger,
+  DynamicTextPipe,
+  FIELD_SIGNAL_CONTEXT,
+  WrapperFieldInputs,
+} from '@ng-forge/dynamic-forms';
+import {
+  ADDON_PRESET_HANDLER,
+  AddonPresetHandler,
   injectNgForgeAddons,
   injectNgForgeField,
   NgForgeAddons,
@@ -12,9 +22,9 @@ import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
+import { runPiPresetAction } from '../../addons/preset-actions';
 import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 import { PRIME_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
-import { createPrimeInputValueWriter, PRIME_INPUT_VALUE_WRITER } from '../../tokens/input-value-writer.token';
 import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
 
 @Component({
@@ -31,7 +41,7 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
     NgTemplateOutlet,
   ],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [NgForgeFieldHost, { directive: NgForgeAddons, inputs: ['addons'] }],
+  hostDirectives: [NgForgeFieldHost, NgForgeAddons],
   template: `
     <ng-template #control>
       <input
@@ -39,7 +49,7 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
         ngForgeControl
         [id]="inputId()"
         [formField]="ngf.field()"
-        [type]="effectiveType()"
+        [type]="type()"
         [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="ngf.tabIndex()"
         [class]="inputClasses()"
@@ -80,8 +90,31 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
       useFactory: () => signal<string | undefined>(undefined),
     },
     {
-      provide: PRIME_INPUT_VALUE_WRITER,
-      useFactory: createPrimeInputValueWriter,
+      // Adapter-specific preset semantics for `pi-button` addons (clear /
+      // reset / paste / copy / toggle-password-visibility). The directive
+      // (`NgForgeAddonAction`) delegates here when an addon configures a
+      // `preset`. Per-prime-input-instance so the `typeOverride` signal is
+      // scoped to one field.
+      provide: ADDON_PRESET_HANDLER,
+      useFactory: (): AddonPresetHandler => {
+        const typeOverride = inject(PRIME_INPUT_TYPE_OVERRIDE);
+        const fsc = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
+        const logger = inject(DynamicFormLogger);
+        return {
+          run: (preset: string, ctx: AddonActionContext) => {
+            const fieldKey = ctx.field.key;
+            // The handler contract is `preset: string`; cast back to the
+            // narrow union at the runner's signature boundary.
+            return runPiPresetAction(preset as AddonActionPreset, ctx, {
+              typeOverride,
+              fieldValueSetter: ctx.setValue,
+              fieldDefaultValueGetter:
+                fsc && fieldKey ? () => (fsc.defaultValues() as Record<string, unknown> | undefined)?.[fieldKey] : undefined,
+              logger,
+            });
+          },
+        };
+      },
     },
   ],
   styles: [
@@ -103,29 +136,18 @@ export default class PrimeInputFieldComponent {
   /**
    * Wrapper-style host bag pushed by `DfFieldOutlet`. Declared at the
    * component level so `setInputIfDeclared` (which uses
-   * `reflectComponentType`) can write it — `reflectComponentType` misses
-   * host-directive-forwarded inputs.
+   * `reflectComponentType`) can write it.
    */
   readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
-  /** Per-instance type override populated by toggle-password-visibility preset. */
+  /** Per-instance type override populated by `toggle-password-visibility` preset. */
   private readonly typeOverride = inject(PRIME_INPUT_TYPE_OVERRIDE);
-  /** Per-instance value writer consumed by clear/reset/paste presets on button addons. */
-  private readonly valueWriter = inject(PRIME_INPUT_VALUE_WRITER);
-
-  constructor() {
-    this.valueWriter.bind((value) =>
-      this.ngf
-        .field()()
-        .value.set(value as string),
-    );
-  }
 
   protected readonly size = computed(() => this.props()?.size ?? this.primeNGConfig?.size);
   protected readonly variant = computed(() => this.props()?.variant ?? this.primeNGConfig?.variant);
 
   /** Override (set by `toggle-password-visibility` preset) wins over `props().type`. */
-  protected readonly effectiveType = computed(() => this.typeOverride() ?? this.props()?.type ?? 'text');
+  protected readonly type = computed(() => this.typeOverride() ?? this.props()?.type ?? 'text');
 
   protected readonly inputClasses = computed(() => {
     const classes: string[] = [];
