@@ -13,7 +13,14 @@ export {
   MATERIAL_CONFIG,
   MatField,
   withMaterialFields,
+  withMaterialAddons,
+  MatIconAddonComponent,
+  MatButtonAddonComponent,
+  MAT_INPUT_TYPE_OVERRIDE,
 } from './lib';
+
+export type { MatIconAddon, MatButtonAddon, MatAddon, MatInputAddon, MatInputAddonExtensions } from './lib';
+
 export type {
   MatButtonProps,
   MatButtonField,

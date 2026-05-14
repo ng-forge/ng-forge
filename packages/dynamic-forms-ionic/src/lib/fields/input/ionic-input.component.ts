@@ -1,12 +1,30 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { explicitEffect } from 'ngxtension/explicit-effect';
+import { AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, signal } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
-import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
-import { IonicInputProps } from './ionic-input.type';
-import { AsyncPipe } from '@angular/common';
+import {
+  AddonActionContext,
+  AddonActionPreset,
+  DfAddonSlot,
+  DynamicFormLogger,
+  DynamicTextPipe,
+  FIELD_SIGNAL_CONTEXT,
+  WrapperFieldInputs,
+} from '@ng-forge/dynamic-forms';
+import {
+  ADDON_PRESET_HANDLER,
+  AddonPresetHandler,
+  injectNgForgeAddons,
+  injectNgForgeField,
+  NgForgeAddons,
+  NgForgeControl,
+  NgForgeFieldHost,
+} from '@ng-forge/dynamic-forms/integration';
+import { explicitEffect } from 'ngxtension/explicit-effect';
+import { runIonicPresetAction } from '../../addons/preset-actions';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
+import { IONIC_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
+import { IonicInputAddon, IonicInputProps } from './ionic-input.type';
 
 // Length-validator → DOM wiring (minlength/maxlength):
 //
@@ -27,10 +45,18 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
 // PrimeNG textarea uses the alternate strategy: its control component declares
 // camelCase `maxLength` / `minLength` inputs so Signal Forms's setInputOnDirectives
 // auto-wires. See packages/dynamic-forms-primeng/src/lib/fields/textarea/.
+//
+// Addons (prefix / suffix):
+//
+// <ion-input> projects shadow-DOM slots `start` and `end`. We translate the
+// universal `prefix` / `suffix` slot model by rendering a wrapper element
+// with `slot="start"` / `slot="end"` as a direct child of <ion-input>; the
+// addon itself (carrying its own `slot` attribute via <df-addon-slot>) sits
+// inside the wrapper where its slot attribute is harmless.
 @Component({
   selector: 'df-ion-input',
-  imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
-  hostDirectives: [NgForgeFieldHost],
+  imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl, DfAddonSlot],
+  hostDirectives: [NgForgeFieldHost, NgForgeAddons],
   template: `
     @let f = ngf.field();
     @let inputId = ngf.key() + '-input';
@@ -38,7 +64,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
     <ion-input
       ngForgeControl
       [id]="inputId"
-      [type]="props()?.type ?? 'text'"
+      [type]="type()"
       [formField]="f"
       [label]="(ngf.label() | dynamicText | async) ?? undefined"
       [labelPlacement]="labelPlacement()"
@@ -53,13 +79,57 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [readonly]="f().readonly()"
       [helperText]="ngf.errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="ngf.tabIndex()"
-    />
+    >
+      @for (a of ngfa.prefixAddons(); track $index) {
+        <span slot="start">
+          <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        </span>
+      }
+      @for (a of ngfa.suffixAddons(); track $index) {
+        <span slot="end">
+          <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        </span>
+      }
+    </ion-input>
     @if (ngf.errorsToDisplay()[0]; as error) {
       <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</ion-note>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: '../../styles/_form-field.scss',
+  providers: [
+    {
+      provide: IONIC_INPUT_TYPE_OVERRIDE,
+      useFactory: () => signal<string | undefined>(undefined),
+    },
+    {
+      // Adapter-specific preset semantics for `ion-button` addons (clear /
+      // reset / paste / copy / toggle-password-visibility). The directive
+      // (`NgForgeAddonAction`) delegates here when an addon configures a
+      // `preset`. Per-ion-input-instance so the `typeOverride` signal is
+      // scoped to one field.
+      provide: ADDON_PRESET_HANDLER,
+      useFactory: (): AddonPresetHandler => {
+        const typeOverride = inject(IONIC_INPUT_TYPE_OVERRIDE);
+        const fsc = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
+        const logger = inject(DynamicFormLogger);
+        return {
+          run: (preset: string, ctx: AddonActionContext) => {
+            const fieldKey = ctx.field.key;
+            // The handler contract is `preset: string`; cast back to the
+            // narrow union at the runner's signature boundary.
+            return runIonicPresetAction(preset as AddonActionPreset, ctx, {
+              typeOverride,
+              fieldValueSetter: ctx.setValue,
+              fieldDefaultValueGetter:
+                fsc && fieldKey ? () => (fsc.defaultValues() as Record<string, unknown> | undefined)?.[fieldKey] : undefined,
+              logger,
+            });
+          },
+        };
+      },
+    },
+  ],
   styles: [
     `
       :host([hidden]) {
@@ -73,13 +143,27 @@ export default class IonicInputFieldComponent {
   private ionicConfig = inject(IONIC_CONFIG, { optional: true });
 
   protected readonly ngf = injectNgForgeField<string>();
+  protected readonly ngfa = injectNgForgeAddons<IonicInputAddon>();
 
   readonly props = input<IonicInputProps>();
+
+  /**
+   * Wrapper-style host bag pushed by `DfFieldOutlet`. Declared at the
+   * component level so `setInputIfDeclared` (which uses
+   * `reflectComponentType`) can write it.
+   */
+  readonly fieldInputs = input<WrapperFieldInputs | undefined>();
+
+  /** Per-instance type override populated by `toggle-password-visibility` preset. */
+  private readonly typeOverride = inject(IONIC_INPUT_TYPE_OVERRIDE);
 
   protected readonly fill = computed(() => this.props()?.fill ?? this.ionicConfig?.fill ?? 'solid');
   protected readonly shape = computed(() => this.props()?.shape ?? this.ionicConfig?.shape);
   protected readonly labelPlacement = computed(() => this.props()?.labelPlacement ?? this.ionicConfig?.labelPlacement ?? 'start');
   protected readonly color = computed(() => this.props()?.color ?? this.ionicConfig?.color);
+
+  /** Override (set by `toggle-password-visibility` preset) wins over `props().type`. */
+  protected readonly type = computed(() => this.typeOverride() ?? this.props()?.type ?? 'text');
 
   constructor() {
     // ion-input encapsulates a native <input> in shadow DOM and does not automatically

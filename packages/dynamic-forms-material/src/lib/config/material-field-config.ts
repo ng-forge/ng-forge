@@ -34,6 +34,9 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     mapper: valueFieldMapper,
     propsToMeta: ['type'],
     scope: ['text-input', 'numeric'],
+    addons: {
+      slots: ['prefix', 'suffix'],
+    },
   },
   {
     name: MatField.Select,

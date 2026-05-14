@@ -26,6 +26,9 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
     mapper: valueFieldMapper,
     propsToMeta: ['type'],
     scope: ['text-input', 'numeric'],
+    addons: {
+      slots: ['prefix', 'suffix'],
+    },
   },
   {
     name: BsField.Select,

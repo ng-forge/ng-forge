@@ -13,6 +13,10 @@ export {
   IONIC_CONFIG,
   IonicField,
   withIonicFields,
+  withIonicAddons,
+  IonIconAddonComponent,
+  IonButtonAddonComponent,
+  IONIC_INPUT_TYPE_OVERRIDE,
 } from './lib';
 export type {
   IonicButtonProps,
@@ -57,4 +61,9 @@ export type {
   IonicFieldType,
   IonicFormProps,
   IonicFormConfig,
+  IonicAddon,
+  IonicButtonAddon,
+  IonicIconAddon,
+  IonicInputAddon,
+  IonicInputAddonExtensions,
 } from './lib';

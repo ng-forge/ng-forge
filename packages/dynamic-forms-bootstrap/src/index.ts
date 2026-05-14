@@ -13,7 +13,13 @@ export {
   BOOTSTRAP_CONFIG,
   BsField,
   withBootstrapFields,
+  withBootstrapAddons,
+  BsIconAddonComponent,
+  BsButtonAddonComponent,
+  BS_INPUT_TYPE_OVERRIDE,
 } from './lib';
+
+export type { BsIconAddon, BsButtonAddon, BsAddon, BsInputAddon, BsInputAddonExtensions } from './lib';
 export type {
   BsButtonProps,
   BsButtonField,
