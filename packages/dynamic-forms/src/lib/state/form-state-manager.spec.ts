@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { signal, Signal, WritableSignal } from '@angular/core';
+import { computed, signal, Signal, WritableSignal } from '@angular/core';
+import { FieldTree } from '@angular/forms/signals';
 
 import { FormStateManager, FORM_STATE_DEPS, FormStateDeps } from './form-state-manager';
 import { FormConfig, FormOptions } from '../models/form-config';
@@ -9,6 +10,10 @@ import { EventBus } from '../events/event.bus';
 import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
 import { FunctionRegistryService } from '../core/registry/function-registry.service';
+import { FieldContextRegistryService } from '../core/registry/field-context-registry.service';
+import { LogicFunctionCacheService } from '../core/expressions/logic-function-cache.service';
+import { HttpConditionFunctionCacheService } from '../core/expressions/http-condition-function-cache.service';
+import { DynamicValueFunctionCacheService } from '../core/values/dynamic-value-function-cache.service';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { createMockLogger, MockLogger } from '../../../testing/src/mock-logger';
 
@@ -42,20 +47,33 @@ function initManager(
   mockLogger = createMockLogger();
   const deps = createFormStateDeps(config, overrides);
 
+  // Lazy wiring: RootFormRegistryService gets signals that defer reading FormStateManager
+  // until they're actually evaluated, breaking the construction-time cycle.
+  const stateManagerRef: { current: FormStateManager<TestFields, TestModel> | null } = { current: null };
+  const formValueSig = computed<Record<string, unknown>>(() => (stateManagerRef.current?.formValue() as Record<string, unknown>) ?? {});
+  const formSig = computed<FieldTree<Record<string, unknown>> | undefined>(
+    () => stateManagerRef.current?.form() as FieldTree<Record<string, unknown>> | undefined,
+  );
+
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
       { provide: FORM_STATE_DEPS, useValue: deps },
       FormStateManager,
       EventBus,
-      { provide: RootFormRegistryService, useValue: new RootFormRegistryService(signal({}), signal(undefined)) },
+      { provide: RootFormRegistryService, useValue: new RootFormRegistryService(formValueSig, formSig) },
       SchemaRegistryService,
       FunctionRegistryService,
+      FieldContextRegistryService,
+      LogicFunctionCacheService,
+      HttpConditionFunctionCacheService,
+      DynamicValueFunctionCacheService,
       { provide: DynamicFormLogger, useValue: mockLogger },
     ],
   });
 
   const stateManager = TestBed.inject(FormStateManager) as FormStateManager<TestFields, TestModel>;
+  stateManagerRef.current = stateManager;
   TestBed.flushEffects();
 
   return { stateManager, deps, mockLogger };
@@ -754,6 +772,502 @@ describe('FormStateManager', () => {
       } as TestFormConfig);
 
       expect(stateManager.resolvedFields()).toEqual([]);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────
+  // excludeValueIfHidden + outward value sync (issue #394)
+  // ─────────────────────────────────────────────────────────────────────
+  //
+  // Bug: when a field is hidden AND excludeValueIfHidden is true, the
+  // field's internal default (e.g. NaN for number inputs) still leaks
+  // into the host's two-way bound `deps.value`. The exclusion only filters
+  // the submission output (`filteredFormValue`) — it should also filter
+  // the outward sync from `entity` → `deps.value`.
+  //
+  // Acceptance: when a field is hidden+excluded, its key must be absent
+  // from `deps.value`. When the field becomes visible again, its previously
+  // entered value must be restored (not reset to its default).
+  // ─────────────────────────────────────────────────────────────────────
+
+  describe('excludeValueIfHidden + outward value sync', () => {
+    describe('static hidden fields', () => {
+      it('should not emit NaN for a hidden number field with field-level excludeValueIfHidden', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
+        initManager(
+          {
+            fields: [{ type: 'input', key: 'myNum', label: 'Num', props: { type: 'number' }, hidden: true, excludeValueIfHidden: true }],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        const synced = valueSignal();
+        expect(synced).not.toHaveProperty('myNum');
+      });
+
+      it('should omit a hidden input string field from deps.value when excludeValueIfHidden is true', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
+        initManager(
+          {
+            fields: [{ type: 'input', key: 'name', label: 'Name', value: 'hello', hidden: true, excludeValueIfHidden: true }],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        const synced = valueSignal();
+        expect(synced).not.toHaveProperty('name');
+      });
+
+      it('should respect form-level excludeValueIfHidden when field-level is unset', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
+        const formOptions = signal({ excludeValueIfHidden: true } as FormOptions | undefined);
+        initManager(
+          {
+            fields: [{ type: 'input', key: 'myNum', label: 'Num', props: { type: 'number' }, hidden: true }],
+          } as TestFormConfig,
+          { value: valueSignal, formOptions },
+        );
+        TestBed.flushEffects();
+
+        const synced = valueSignal();
+        expect(synced).not.toHaveProperty('myNum');
+      });
+
+      it('should exclude a componentless field type (no FieldTree) when statically hidden + excludeValueIfHidden', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ hiddenField: 'secret' });
+        initManager(
+          {
+            fields: [
+              // The 'hidden' field type is componentless — schema-builder doesn't allocate a FieldTree
+              // path for it, so the value-filter's no-FieldTree fallback would otherwise leak the value.
+              { type: 'hidden', key: 'hiddenField', value: 'secret', hidden: true, excludeValueIfHidden: true },
+            ],
+          } as unknown as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        expect(valueSignal()).not.toHaveProperty('hiddenField');
+      });
+
+      it('should still emit hidden-field value when excludeValueIfHidden is explicitly false', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
+        initManager(
+          {
+            fields: [{ type: 'input', key: 'myNum', label: 'Num', props: { type: 'number' }, hidden: true, excludeValueIfHidden: false }],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        // Field-level opt-out → key present even though hidden.
+        expect(valueSignal()).toHaveProperty('myNum');
+      });
+
+      it('should leave non-hidden sibling fields untouched in deps.value', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ visible: 'keep' });
+        initManager(
+          {
+            fields: [
+              { type: 'input', key: 'visible', label: 'Visible' },
+              { type: 'input', key: 'hiddenOne', label: 'Hidden', hidden: true, excludeValueIfHidden: true },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        const synced = valueSignal();
+        expect(synced).toHaveProperty('visible', 'keep');
+        expect(synced).not.toHaveProperty('hiddenOne');
+      });
+    });
+
+    describe('dynamic hidden fields (logic-driven)', () => {
+      it('should remove the key from deps.value when the field transitions visible → hidden', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'show', myNum: 5 });
+        initManager(
+          {
+            fields: [
+              { type: 'input', key: 'trigger', label: 'Trigger' },
+              {
+                type: 'input',
+                key: 'myNum',
+                label: 'Num',
+                props: { type: 'number' },
+                excludeValueIfHidden: true,
+                logic: [
+                  {
+                    type: 'hidden',
+                    condition: { type: 'fieldValue', fieldPath: 'trigger', operator: 'equals', value: 'hide' },
+                  },
+                ],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        // Field initially visible → value present
+        expect(valueSignal()).toHaveProperty('myNum', 5);
+
+        // Toggle trigger to hide myNum
+        valueSignal.set({ trigger: 'hide', myNum: 5 });
+        TestBed.flushEffects();
+
+        expect(valueSignal()).not.toHaveProperty('myNum');
+      });
+
+      it('should restore the previously entered value when the field becomes visible again', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'show', myNum: 5 });
+        initManager(
+          {
+            fields: [
+              { type: 'input', key: 'trigger', label: 'Trigger' },
+              {
+                type: 'input',
+                key: 'myNum',
+                label: 'Num',
+                props: { type: 'number' },
+                excludeValueIfHidden: true,
+                logic: [
+                  {
+                    type: 'hidden',
+                    condition: { type: 'fieldValue', fieldPath: 'trigger', operator: 'equals', value: 'hide' },
+                  },
+                ],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        valueSignal.set({ trigger: 'hide', myNum: 5 });
+        TestBed.flushEffects();
+        expect(valueSignal()).not.toHaveProperty('myNum');
+
+        valueSignal.set({ trigger: 'show' });
+        TestBed.flushEffects();
+        expect(valueSignal()).toHaveProperty('myNum', 5);
+      });
+
+      it('should preserve the last value across multiple hide/show cycles', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'show', myNum: 5 });
+        initManager(
+          {
+            fields: [
+              { type: 'input', key: 'trigger', label: 'Trigger' },
+              {
+                type: 'input',
+                key: 'myNum',
+                label: 'Num',
+                props: { type: 'number' },
+                excludeValueIfHidden: true,
+                logic: [
+                  {
+                    type: 'hidden',
+                    condition: { type: 'fieldValue', fieldPath: 'trigger', operator: 'equals', value: 'hide' },
+                  },
+                ],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        valueSignal.set({ trigger: 'hide', myNum: 5 });
+        TestBed.flushEffects();
+        valueSignal.set({ trigger: 'show' });
+        TestBed.flushEffects();
+        expect(valueSignal()).toHaveProperty('myNum', 5);
+
+        valueSignal.set({ trigger: 'show', myNum: 7 });
+        TestBed.flushEffects();
+        valueSignal.set({ trigger: 'hide', myNum: 7 });
+        TestBed.flushEffects();
+        expect(valueSignal()).not.toHaveProperty('myNum');
+        valueSignal.set({ trigger: 'show' });
+        TestBed.flushEffects();
+        expect(valueSignal()).toHaveProperty('myNum', 7);
+      });
+
+      it('should restore the previously entered value when an excluded-when-disabled field becomes enabled again', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'enabled', myNum: 42 });
+        initManager(
+          {
+            fields: [
+              { type: 'input', key: 'trigger', label: 'Trigger' },
+              {
+                type: 'input',
+                key: 'myNum',
+                label: 'Num',
+                props: { type: 'number' },
+                excludeValueIfDisabled: true,
+                logic: [
+                  {
+                    type: 'disabled',
+                    condition: { type: 'fieldValue', fieldPath: 'trigger', operator: 'equals', value: 'disable' },
+                  },
+                ],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        valueSignal.set({ trigger: 'disable', myNum: 42 });
+        TestBed.flushEffects();
+        expect(valueSignal()).not.toHaveProperty('myNum');
+
+        valueSignal.set({ trigger: 'enabled' });
+        TestBed.flushEffects();
+        expect(valueSignal()).toHaveProperty('myNum', 42);
+      });
+
+      it('should restore the previously entered value when an excluded-when-readonly field becomes editable again', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'editable', myNum: 99 });
+        initManager(
+          {
+            fields: [
+              { type: 'input', key: 'trigger', label: 'Trigger' },
+              {
+                type: 'input',
+                key: 'myNum',
+                label: 'Num',
+                props: { type: 'number' },
+                excludeValueIfReadonly: true,
+                logic: [
+                  {
+                    type: 'readonly',
+                    condition: { type: 'fieldValue', fieldPath: 'trigger', operator: 'equals', value: 'readonly' },
+                  },
+                ],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        valueSignal.set({ trigger: 'readonly', myNum: 99 });
+        TestBed.flushEffects();
+        expect(valueSignal()).not.toHaveProperty('myNum');
+
+        valueSignal.set({ trigger: 'editable' });
+        TestBed.flushEffects();
+        expect(valueSignal()).toHaveProperty('myNum', 99);
+      });
+
+      it('should preserve the saved value across overlapping axis transitions (hide then disable then re-show)', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ visibility: 'show', enabled: true, myNum: 5 });
+        initManager(
+          {
+            fields: [
+              { type: 'input', key: 'visibility', label: 'Visibility' },
+              { type: 'checkbox', key: 'enabled', label: 'Enabled' },
+              {
+                type: 'input',
+                key: 'myNum',
+                label: 'Num',
+                props: { type: 'number' },
+                excludeValueIfHidden: true,
+                excludeValueIfDisabled: true,
+                logic: [
+                  {
+                    type: 'hidden',
+                    condition: { type: 'fieldValue', fieldPath: 'visibility', operator: 'equals', value: 'hide' },
+                  },
+                  {
+                    type: 'disabled',
+                    condition: { type: 'fieldValue', fieldPath: 'enabled', operator: 'equals', value: false },
+                  },
+                ],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        // Hide → captured.
+        valueSignal.set({ visibility: 'hide', enabled: true, myNum: 5 });
+        TestBed.flushEffects();
+        // Pile on disabled while still hidden → already-excluded, no re-save.
+        valueSignal.set({ visibility: 'hide', enabled: false, myNum: 5 });
+        TestBed.flushEffects();
+        // Drop hidden but stay disabled → still excluded, still no re-save.
+        valueSignal.set({ visibility: 'show', enabled: false, myNum: 5 });
+        TestBed.flushEffects();
+        // Re-enable → re-included, value restored from store.
+        valueSignal.set({ visibility: 'show', enabled: true });
+        TestBed.flushEffects();
+        expect(valueSignal()).toHaveProperty('myNum', 5);
+      });
+
+      it('should hide one field independently without affecting other fields', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({
+          trigger: 'show',
+          numA: 1,
+          numB: 2,
+        });
+        initManager(
+          {
+            fields: [
+              { type: 'input', key: 'trigger', label: 'Trigger' },
+              {
+                type: 'input',
+                key: 'numA',
+                label: 'NumA',
+                props: { type: 'number' },
+                excludeValueIfHidden: true,
+                logic: [
+                  {
+                    type: 'hidden',
+                    condition: { type: 'fieldValue', fieldPath: 'trigger', operator: 'equals', value: 'hide' },
+                  },
+                ],
+              },
+              { type: 'input', key: 'numB', label: 'NumB', props: { type: 'number' } },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        valueSignal.set({ trigger: 'hide', numA: 1, numB: 2 });
+        TestBed.flushEffects();
+
+        const synced = valueSignal();
+        expect(synced).not.toHaveProperty('numA');
+        expect(synced).toHaveProperty('numB', 2);
+      });
+    });
+
+    describe('form reset clears saved hidden values', () => {
+      it('should not restore previously saved values after form reset', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'show', myNum: 5 });
+        const { stateManager } = initManager(
+          {
+            fields: [
+              { type: 'input', key: 'trigger', label: 'Trigger' },
+              {
+                type: 'input',
+                key: 'myNum',
+                label: 'Num',
+                props: { type: 'number' },
+                excludeValueIfHidden: true,
+                logic: [
+                  {
+                    type: 'hidden',
+                    condition: { type: 'fieldValue', fieldPath: 'trigger', operator: 'equals', value: 'hide' },
+                  },
+                ],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        // Hide while value present → store should capture 5
+        valueSignal.set({ trigger: 'hide', myNum: 5 });
+        TestBed.flushEffects();
+
+        // Reset — should clear the saved store
+        stateManager.reset();
+        TestBed.flushEffects();
+
+        // Show again — value should NOT be restored from the saved store
+        valueSignal.set({ trigger: 'show' });
+        TestBed.flushEffects();
+
+        // After reset, the field's default applies — for a number input, that's NaN, not the
+        // previously-saved 5. (Restored values would prove the store wasn't cleared.)
+        const myNum = (valueSignal() as Record<string, unknown> | undefined)?.['myNum'];
+        expect(Number.isNaN(myNum)).toBe(true);
+      });
+    });
+
+    describe('group fields', () => {
+      it('should omit a hidden + excluded group from deps.value', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
+        initManager(
+          {
+            fields: [
+              {
+                type: 'group',
+                key: 'address',
+                hidden: true,
+                excludeValueIfHidden: true,
+                fields: [
+                  { type: 'input', key: 'street', label: 'Street' },
+                  { type: 'input', key: 'city', label: 'City' },
+                ],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        const synced = valueSignal();
+        expect(synced).not.toHaveProperty('address');
+      });
+
+      it('should preserve a nested field value when only that child field toggles hidden inside a visible group', () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({
+          trigger: 'show',
+          address: { street: '123 Main', city: 'Springfield' },
+        });
+        initManager(
+          {
+            fields: [
+              { type: 'input', key: 'trigger', label: 'Trigger' },
+              {
+                type: 'group',
+                key: 'address',
+                fields: [
+                  {
+                    type: 'input',
+                    key: 'street',
+                    label: 'Street',
+                    excludeValueIfHidden: true,
+                    logic: [
+                      {
+                        type: 'hidden',
+                        condition: { type: 'fieldValue', fieldPath: 'trigger', operator: 'equals', value: 'hide' },
+                      },
+                    ],
+                  },
+                  { type: 'input', key: 'city', label: 'City' },
+                ],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        TestBed.flushEffects();
+
+        expect((valueSignal() as Record<string, Record<string, unknown>>).address.street).toBe('123 Main');
+
+        valueSignal.set({ trigger: 'hide', address: { street: '123 Main', city: 'Springfield' } });
+        TestBed.flushEffects();
+        const hiddenSynced = (valueSignal() as Record<string, Record<string, unknown>>).address;
+        expect(hiddenSynced).not.toHaveProperty('street');
+        expect(hiddenSynced.city).toBe('Springfield');
+
+        valueSignal.set({ trigger: 'show', address: { city: 'Springfield' } });
+        TestBed.flushEffects();
+        const restored = (valueSignal() as Record<string, Record<string, unknown>>).address;
+        expect(restored.street).toBe('123 Main');
+        expect(restored.city).toBe('Springfield');
+      });
     });
   });
 });

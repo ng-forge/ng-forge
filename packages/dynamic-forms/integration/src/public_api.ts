@@ -108,8 +108,51 @@ export { setupMetaTracking } from './utils';
 export type { MetaTrackingOptions } from './utils';
 
 // =============================================================================
+// Accessibility Utilities
+// =============================================================================
+
+export { createAriaDescribedBySignal } from './utils';
+
+// =============================================================================
+// Field Directive Primitives
+// =============================================================================
+
+export { NgForgeFieldShell, NG_FORGE_FIELD_SHELL_INPUTS } from './directives';
+export { NgForgeField, NG_FORGE_VALUE_FIELD_INPUTS, injectNgForgeField } from './directives';
+export type { TypedNgForgeField } from './directives';
+export { NgForgeAction, NG_FORGE_ACTION_INPUTS, injectNgForgeAction } from './directives';
+export { NgForgeControl, NgForgeHostControl } from './directives';
+export { NgForgeFieldHost, NgForgeActionHost } from './directives';
+
+// =============================================================================
 // Non-Field Logic Resolvers (re-exported from @ng-forge/dynamic-forms)
 // =============================================================================
 
 export { resolveNonFieldHidden, resolveNonFieldDisabled } from '@ng-forge/dynamic-forms';
 export type { NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } from '@ng-forge/dynamic-forms';
+
+// =============================================================================
+// Wrapper Authoring (re-exported from @ng-forge/dynamic-forms)
+// =============================================================================
+
+export { createWrappers, isWrappersBundle, wrapperProps } from '@ng-forge/dynamic-forms';
+export type {
+  FieldWrapper,
+  WrapperFieldInputs,
+  WrapperRegistration,
+  WrappersBundle,
+  InferWrapperRegistry,
+  WrapperTypeDefinition,
+} from '@ng-forge/dynamic-forms';
+
+// =============================================================================
+// Testing Harness
+// =============================================================================
+
+export { createNgForgeFieldFixture, createNgForgeActionFixture, provideTestValidationMessages } from './testing';
+export type {
+  CreateNgForgeFieldFixtureOptions,
+  CreateNgForgeActionFixtureOptions,
+  NgForgeFieldFixture,
+  NgForgeActionFixture,
+} from './testing';

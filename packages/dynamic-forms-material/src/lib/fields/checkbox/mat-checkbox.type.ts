@@ -12,4 +12,5 @@ export interface MatCheckboxProps {
 
 export type MatCheckboxField = CheckboxField<MatCheckboxProps>;
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type MatCheckboxComponent = CheckedFieldComponent<MatCheckboxField>;

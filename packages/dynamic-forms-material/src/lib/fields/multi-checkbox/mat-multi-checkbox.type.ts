@@ -11,4 +11,5 @@ export interface MatMultiCheckboxProps {
 
 export type MatMultiCheckboxField<T> = MultiCheckboxField<T, MatMultiCheckboxProps>;
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type MatMultiCheckboxComponent = ValueFieldComponent<MatMultiCheckboxField<ValueType>>;

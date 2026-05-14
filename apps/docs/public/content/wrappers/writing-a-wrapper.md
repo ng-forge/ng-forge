@@ -8,13 +8,15 @@ Build a custom wrapper component that decorates any dynamic form field. This pag
 
 The example here is a `section` wrapper that renders a titled card around any field.
 
+> **Authoring inside an adapter library?** Import the same types from `@ng-forge/dynamic-forms/integration` instead of the root entry point — it re-exports the wrapper-authoring API so an adapter package keeps one import path across its field and wrapper components. See [Building an Adapter](/building-an-adapter#custom-wrappers).
+
 ## 1. Implement the contract
 
 A wrapper is an Angular component whose template contains a `#fieldComponent` template reference pointing at a `ViewContainerRef`. The outlet creates the wrapper, finds the ref, and renders the next wrapper (or the field component) inside. Everything else — template, styling, DI — is yours.
 
 ```typescript name="section-wrapper.component.ts"
 import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild } from '@angular/core';
-import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import type { FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-section-wrapper',
@@ -30,8 +32,8 @@ import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class SectionWrapperComponent implements FieldWrapperContract {
-  // Required by FieldWrapperContract — the slot where the inner content renders.
+export default class SectionWrapperComponent implements FieldWrapper {
+  // Required by FieldWrapper — the slot where the inner content renders.
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
 
   // Config props arrive as regular Angular inputs (the `type` discriminant is stripped).
@@ -112,7 +114,7 @@ A validation-aware section wrapper reads the field's validity:
 
 ```typescript name="section-wrapper.component.ts"
 import { ChangeDetectionStrategy, Component, computed, input, ViewContainerRef, viewChild } from '@angular/core';
-import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import type { FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-section-wrapper',
@@ -131,7 +133,7 @@ import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class SectionWrapperComponent implements FieldWrapperContract {
+export default class SectionWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly title = input<string>();
   readonly fieldInputs = input<WrapperFieldInputs>();
@@ -155,14 +157,14 @@ This means a nested wrapper can `inject()` the wrapper that contains it. Precede
 
 ```typescript
 import { Component, inject, ViewContainerRef, viewChild } from '@angular/core';
-import { ARRAY_CONTEXT, FieldWrapperContract } from '@ng-forge/dynamic-forms';
+import { ARRAY_CONTEXT, FieldWrapper } from '@ng-forge/dynamic-forms';
 import { OuterWrapperComponent } from './outer-wrapper.component';
 
 @Component({
   selector: 'app-inner-wrapper',
   template: `<ng-container #fieldComponent></ng-container>`,
 })
-export default class InnerWrapperComponent implements FieldWrapperContract {
+export default class InnerWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
 
   // Both of these work — field injector checked first, outer wrappers fall through.

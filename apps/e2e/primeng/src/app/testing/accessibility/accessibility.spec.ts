@@ -108,41 +108,43 @@ test.describe('Accessibility Tests', () => {
       await expect(select).toHaveAttribute('aria-invalid', 'true', { timeout: 5000 });
     });
 
-    // Checkbox field tests - ARIA attrs are on p-checkbox element
+    // Checkbox field tests — NgForgeControl writes aria to the inner native input.
     test('checkbox field should have aria-required="true" when required', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('all-fields-aria');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      await page.waitForSelector('[data-testid="all-fields-aria"] #checkboxField p-checkbox', { state: 'visible', timeout: 10000 });
-      const checkbox = scenario.locator('#checkboxField p-checkbox');
-      await expect(checkbox).toHaveAttribute('aria-required', 'true', { timeout: 10000 });
+      const selector = '[data-testid="all-fields-aria"] #checkboxField p-checkbox input[type="checkbox"]';
+      await page.waitForSelector(selector, { state: 'attached', timeout: 10000 });
+      const checkboxInput = scenario.locator('#checkboxField p-checkbox input[type="checkbox"]');
+      await expect(checkboxInput).toHaveAttribute('aria-required', 'true', { timeout: 10000 });
     });
 
     test('checkbox field should have aria-describedby referencing hint', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('all-fields-aria');
-      await page.waitForSelector('[data-testid="all-fields-aria"] #checkboxField p-checkbox', { state: 'visible', timeout: 10000 });
-      const checkbox = scenario.locator('#checkboxField p-checkbox');
-      await expect(checkbox).toBeVisible({ timeout: 10000 });
-      const ariaDescribedBy = await checkbox.getAttribute('aria-describedby');
+      const selector = '[data-testid="all-fields-aria"] #checkboxField p-checkbox input[type="checkbox"]';
+      await page.waitForSelector(selector, { state: 'attached', timeout: 10000 });
+      const checkboxInput = scenario.locator('#checkboxField p-checkbox input[type="checkbox"]');
+      const ariaDescribedBy = await checkboxInput.getAttribute('aria-describedby');
       expect(ariaDescribedBy).toContain('checkboxField-hint');
     });
 
-    // Toggle field tests - ARIA attrs are on p-toggleSwitch element
+    // Toggle field tests — NgForgeControl writes aria to the inner native input.
     test('toggle field should have aria-required="true" when required', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('all-fields-aria');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      await page.waitForSelector('[data-testid="all-fields-aria"] #toggleField p-toggleSwitch', { state: 'visible', timeout: 10000 });
-      const toggle = scenario.locator('#toggleField p-toggleSwitch');
-      await expect(toggle).toHaveAttribute('aria-required', 'true', { timeout: 10000 });
+      const selector = '[data-testid="all-fields-aria"] #toggleField p-toggleswitch input[type="checkbox"]';
+      await page.waitForSelector(selector, { state: 'attached', timeout: 10000 });
+      const toggleInput = scenario.locator('#toggleField p-toggleswitch input[type="checkbox"]');
+      await expect(toggleInput).toHaveAttribute('aria-required', 'true', { timeout: 10000 });
     });
 
     test('toggle field should have aria-describedby referencing hint', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('all-fields-aria');
-      await page.waitForSelector('[data-testid="all-fields-aria"] #toggleField p-toggleSwitch', { state: 'visible', timeout: 10000 });
-      const toggle = scenario.locator('#toggleField p-toggleSwitch');
-      await expect(toggle).toBeVisible({ timeout: 10000 });
-      const ariaDescribedBy = await toggle.getAttribute('aria-describedby');
+      const selector = '[data-testid="all-fields-aria"] #toggleField p-toggleswitch input[type="checkbox"]';
+      await page.waitForSelector(selector, { state: 'attached', timeout: 10000 });
+      const toggleInput = scenario.locator('#toggleField p-toggleswitch input[type="checkbox"]');
+      const ariaDescribedBy = await toggleInput.getAttribute('aria-describedby');
       expect(ariaDescribedBy).toContain('toggleField-hint');
     });
 

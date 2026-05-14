@@ -157,6 +157,8 @@ export class DfFieldOutlet {
           injector: createWrapperAwareInjector(resolved.injector, slot.injector),
         });
         this.fieldSlot = slot;
+        // setInput dirties the signal synchronously; the next CD pass reads
+        // it. Safe outside CD — see wrapper-chain-controller scheduling.
         this.pushRawInputs(this.fieldRef, this.rawInputs());
       },
     });
@@ -218,11 +220,11 @@ export class DfFieldOutlet {
   }
 
   private pushRawInputs(ref: ComponentRef<unknown>, rawInputs: Record<string, unknown>): void {
-    // Ref-identity dedupe per key — mappers must emit immutable snapshots.
+    // setInput is lenient in Angular 21 — unknown keys silently drop (not NG0303). reflectComponentType does NOT include hostDirective forwarded inputs (angular/angular#49734), so a declared-input filter here would skip every value flowing through NgForgeFieldShell / NgForgeField / NgForgeAction. Mapper-as-contract is enforced by the *_INPUTS lockstep type assertions, not at runtime here.
     const last = this.lastPushedInputs;
     for (const [key, value] of Object.entries(rawInputs)) {
       if (last && last[key] === value) continue;
-      setInputIfDeclared(ref, key, value);
+      ref.setInput(key, value);
     }
     // Forward the same `fieldInputs` bag wrappers receive — the field
     // component is free to declare `fieldInputs = input<WrapperFieldInputs>()`

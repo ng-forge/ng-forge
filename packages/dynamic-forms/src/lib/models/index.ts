@@ -3,7 +3,6 @@ export type { CustomFnConfig, FormConfig, FormOptions, SubmitButtonOptions, Next
 export type { SubmissionConfig, SubmissionActionResult } from './submission-config';
 export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from './field-type';
 export { FIELD_REGISTRY, getFieldValueHandling } from './field-type';
-
 // Addons
 export type { AddonSlot, CommonAddonSlot, DynamicFormAddonSlotRegistry } from './addon/addon-slot';
 export type { AnyAddon, BaseAddon, ComponentAddon, DynamicFormAddonRegistry, TemplateAddon, TextAddon } from './addon/addon-def';
@@ -18,7 +17,7 @@ export type {
 export type { AddonKindDefinition, AddonKindSchema, AddonShapeValidator, FieldAddonSupport } from './addon/addon-kind';
 export { ADDON_KIND_REGISTRY } from './addon/addon-kind';
 export { DF_FIELD_TEMPLATES } from './addon/df-field-templates.token';
-export type { WrapperTypeDefinition, FieldWrapperContract, WrapperConfig } from './wrapper-type';
+export type { WrapperTypeDefinition, FieldWrapper, WrapperConfig } from './wrapper-type';
 export { isWrapperTypeDefinition, WRAPPER_REGISTRY, WRAPPER_COMPONENT_CACHE, WRAPPER_AUTO_ASSOCIATIONS } from './wrapper-type';
 export type { FieldOption } from './field-option';
 export {

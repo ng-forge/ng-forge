@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild } from '@angular/core';
-import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import type { FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 
 /**
  * Demo "section" wrapper used by the docs live examples.
@@ -28,7 +28,7 @@ import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic
   styleUrl: './section-wrapper.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class SectionWrapperComponent implements FieldWrapperContract {
+export default class SectionWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly title = input<string>();
   /** Accepted for contract consistency; this demo wrapper doesn't read it. */

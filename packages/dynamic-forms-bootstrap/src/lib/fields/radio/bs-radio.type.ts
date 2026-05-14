@@ -11,4 +11,5 @@ export interface BsRadioProps {
 
 export type BsRadioField<T> = RadioField<T, BsRadioProps>;
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type BsRadioComponent = ValueFieldComponent<BsRadioField<ValueType>>;

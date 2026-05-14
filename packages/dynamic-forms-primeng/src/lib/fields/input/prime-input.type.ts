@@ -61,4 +61,5 @@ export type PrimeInputField = InputField<PrimeInputProps> & {
   addons?: ReadonlyArray<PrimeInputAddon>;
 };
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type PrimeInputComponent = ValueFieldComponent<PrimeInputField>;

@@ -10,4 +10,5 @@ export interface BsMultiCheckboxProps {
 
 export type BsMultiCheckboxField<T> = MultiCheckboxField<T, BsMultiCheckboxProps>;
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type BsMultiCheckboxComponent = ValueFieldComponent<BsMultiCheckboxField<ValueType>>;

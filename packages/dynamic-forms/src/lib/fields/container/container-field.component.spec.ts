@@ -21,7 +21,7 @@ import { provideDynamicForm } from '../../providers';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { EventBus } from '../../events';
-import { FieldWrapperContract, WrapperTypeDefinition } from '../../models/wrapper-type';
+import { FieldWrapper, WrapperTypeDefinition } from '../../models/wrapper-type';
 import { applyValidator } from '../../core/validation/validator-factory';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
@@ -48,7 +48,7 @@ import { ConsoleLogger } from '../../providers/features/logger/console-logger';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestSectionWrapperComponent implements FieldWrapperContract {
+class TestSectionWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly header = input<string>();
 }
@@ -66,7 +66,7 @@ class TestSectionWrapperComponent implements FieldWrapperContract {
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestStyleWrapperComponent implements FieldWrapperContract {
+class TestStyleWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly wrapperClass = input<string>();
 }
@@ -87,7 +87,7 @@ class TestStyleWrapperComponent implements FieldWrapperContract {
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestValidationWrapperComponent implements FieldWrapperContract {
+class TestValidationWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly validClass = input<string>('is-valid');
   readonly invalidClass = input<string>('is-invalid');

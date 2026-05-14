@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { FormField, FieldTree } from '@angular/forms/signals';
+import { FormField } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
-import { IonicInputComponent, IonicInputProps } from './ionic-input.type';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
+import { IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
-import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 // Length-validator → DOM wiring (minlength/maxlength):
@@ -30,43 +29,36 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
 // auto-wires. See packages/dynamic-forms-primeng/src/lib/fields/textarea/.
 @Component({
   selector: 'df-ion-input',
-  imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe],
+  imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl],
+  hostDirectives: [NgForgeFieldHost],
   template: `
-    @let f = field();
-    @let inputId = key() + '-input';
+    @let f = ngf.field();
+    @let inputId = ngf.key() + '-input';
 
     <ion-input
+      ngForgeControl
       [id]="inputId"
       [type]="props()?.type ?? 'text'"
       [formField]="f"
-      [label]="(label() | dynamicText | async) ?? undefined"
-      [labelPlacement]="effectiveLabelPlacement()"
-      [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+      [label]="(ngf.label() | dynamicText | async) ?? undefined"
+      [labelPlacement]="labelPlacement()"
+      [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
       [clearInput]="props()?.clearInput ?? false"
       [counter]="props()?.counter ?? false"
       [minlength]="f().minLength?.()"
       [maxlength]="f().maxLength?.()"
-      [color]="effectiveColor()"
-      [fill]="effectiveFill()"
-      [shape]="effectiveShape()"
+      [color]="color()"
+      [fill]="fill()"
+      [shape]="shape()"
       [readonly]="f().readonly()"
-      [helperText]="errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
-      [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="ariaInvalid()"
-      [attr.aria-required]="ariaRequired()"
-      [attr.aria-describedby]="ariaDescribedBy()"
+      [helperText]="ngf.errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
+      [attr.tabindex]="ngf.tabIndex()"
     />
-    @if (errorsToDisplay()[0]; as error) {
-      <ion-note color="danger" class="df-ion-error" [id]="errorId()" role="alert">{{ error.message }}</ion-note>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</ion-note>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '[id]': '`${key()}`',
-    '[attr.data-testid]': 'key()',
-    '[class]': 'className()',
-    '[attr.hidden]': 'field()().hidden() || null',
-  },
   styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
@@ -76,42 +68,24 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
     `,
   ],
 })
-export default class IonicInputFieldComponent implements IonicInputComponent {
+export default class IonicInputFieldComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private ionicConfig = inject(IONIC_CONFIG, { optional: true });
 
-  readonly field = input.required<FieldTree<string>>();
-  readonly key = input.required<string>();
+  protected readonly ngf = injectNgForgeField<string>();
 
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
   readonly props = input<IonicInputProps>();
-  readonly meta = input<InputMeta>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly effectiveFill = computed(() => this.props()?.fill ?? this.ionicConfig?.fill ?? 'solid');
-  readonly effectiveShape = computed(() => this.props()?.shape ?? this.ionicConfig?.shape);
-  readonly effectiveLabelPlacement = computed(() => this.props()?.labelPlacement ?? this.ionicConfig?.labelPlacement ?? 'start');
-  readonly effectiveColor = computed(() => this.props()?.color ?? this.ionicConfig?.color);
-
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
-  readonly showErrors = shouldShowErrors(this.field);
-
-  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+  protected readonly fill = computed(() => this.props()?.fill ?? this.ionicConfig?.fill ?? 'solid');
+  protected readonly shape = computed(() => this.props()?.shape ?? this.ionicConfig?.shape);
+  protected readonly labelPlacement = computed(() => this.props()?.labelPlacement ?? this.ionicConfig?.labelPlacement ?? 'start');
+  protected readonly color = computed(() => this.props()?.color ?? this.ionicConfig?.color);
 
   constructor() {
-    // Shadow DOM - apply meta to ion-input element
-    setupMetaTracking(this.elementRef, this.meta, {
-      selector: 'ion-input',
-    });
-
     // ion-input encapsulates a native <input> in shadow DOM and does not automatically
     // propagate aria-describedby to it. This effect imperatively syncs the attribute
     // after a microtask to ensure Ionic has resolved the internal element.
-    explicitEffect([this.ariaDescribedBy], ([describedBy]) => {
+    explicitEffect([this.ngf.ariaDescribedBy], ([describedBy]) => {
       queueMicrotask(() => {
         const ionInput = this.elementRef.nativeElement.querySelector('ion-input') as HTMLIonInputElement | null;
         if (ionInput?.getInputElement) {
@@ -127,33 +101,4 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
       });
     });
   }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Accessibility
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Base ID for error elements */
-  protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  /** Unique ID for the helper text element */
-  protected readonly hintId = computed(() => `${this.key()}-hint`);
-
-  /** Whether the field is currently in an invalid state (invalid AND touched) */
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  /** Whether the field has a required validator */
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
-
-  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
-  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
-    this.errorsToDisplay,
-    this.errorId,
-    this.hintId,
-    () => !!this.props()?.hint,
-  );
 }

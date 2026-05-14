@@ -1,14 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { setupMetaTracking, InputMeta } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, setupMetaTracking, InputMeta } from '@ng-forge/dynamic-forms/integration';
 import { DatePicker } from 'primeng/datepicker';
 
 /**
- * A wrapper component for PrimeNG's DatePicker that implements FormValueControl.
- * This allows it to work with Angular's [formField] directive from @angular/forms/signals.
- *
- * The value is stored as an ISO date string for consistency with other implementations.
+ * PrimeNG DatePicker wrapper implementing FormValueControl. Value is stored
+ * as an ISO date string. Rendered inside `df-prime-datepicker` — picks up
+ * meta + aria from the ambient parent NgForgeField (selector: `'input'`).
  */
 @Component({
   selector: 'df-prime-datepicker-control',
@@ -46,6 +45,7 @@ import { DatePicker } from 'primeng/datepicker';
 })
 export class PrimeDatepickerControlComponent implements FormValueControl<string | null> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly parentField = inject(NgForgeField, { optional: true });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // FormValueControl implementation
@@ -87,18 +87,15 @@ export class PrimeDatepickerControlComponent implements FormValueControl<string 
   readonly defaultDate = input<Date | null>(null);
   readonly styleClass = input<string>('');
   readonly tabIndex = input<number | undefined>(undefined);
-  readonly meta = input<InputMeta>();
 
-  /** aria-invalid passed from parent (computed from field state) */
-  readonly ariaInvalid = input<boolean>(false);
-
-  /** aria-required passed from parent (computed from field state) */
-  readonly ariaRequired = input<boolean | null>(null);
-
-  /** aria-describedby IDs passed from parent */
-  readonly ariaDescribedBy = input<string | null>(null);
+  // Meta + aria read from the ambient parent NgForgeField.
+  protected readonly meta = computed<InputMeta | undefined>(() => this.parentField?.meta() as InputMeta | undefined);
+  protected readonly ariaInvalid = computed<boolean>(() => this.parentField?.ariaInvalid() ?? false);
+  protected readonly ariaRequired = computed<true | null>(() => this.parentField?.ariaRequired() ?? null);
+  protected readonly ariaDescribedBy = computed<string | null>(() => this.parentField?.ariaDescribedBy() ?? null);
 
   constructor() {
+    this.parentField?.markClaimed();
     setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
   }
 

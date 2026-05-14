@@ -6,6 +6,8 @@ description: 'Register custom wrappers with createWrappers(), augment FieldRegis
 
 Wrappers travel through the library as **registered types** — a `WrapperTypeDefinition` with a lazy-loaded component. Registration tells `provideDynamicForm(...)` how to resolve a config like `{ type: 'section' }` to your component class, and how to type-check wrapper configs in form definitions.
 
+> **Authoring inside an adapter library?** `createWrappers`, `wrapperProps`, and `InferWrapperRegistry` re-export from `@ng-forge/dynamic-forms/integration` — same symbols, same behavior. Use the integration import in adapter packages so field components and wrapper components share one import path. See [Building an Adapter](/building-an-adapter#custom-wrappers).
+
 ## 1. Register with `createWrappers`
 
 `createWrappers(...)` returns a branded bundle that `provideDynamicForm(...)` recognises:

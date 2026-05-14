@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
 import { DynamicTextPipe, FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 import { RadioButton } from 'primeng/radiobutton';
 
@@ -13,9 +13,19 @@ export interface PrimeRadioGroupProps {
   styleClass?: string;
 }
 
+/**
+ * PrimeNG radio group implementing FormValueControl. Rendered inside
+ * `df-prime-radio` — picks up meta + aria from the ambient parent NgForgeField
+ * via `setupMetaTracking` (selector: `'input[type="radio"]'`).
+ */
 @Component({
   selector: 'df-prime-radio-group',
   imports: [RadioButton, FormsModule, DynamicTextPipe, AsyncPipe],
+  host: {
+    '[attr.aria-invalid]': 'parentField?.ariaInvalid() || null',
+    '[attr.aria-required]': 'parentField?.ariaRequired()',
+    '[attr.aria-describedby]': 'parentField?.ariaDescribedBy()',
+  },
   template: `
     <div class="radio-group">
       @for (option of options(); track option.value; let i = $index) {
@@ -65,6 +75,7 @@ export interface PrimeRadioGroupProps {
 // pattern used by the Bootstrap radio group adapter (BsRadioGroupComponent).
 export class PrimeRadioGroupComponent implements FormValueControl<ValueType | undefined> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  protected readonly parentField = inject(NgForgeField, { optional: true });
 
   // Value model - FormField directive binds form value to this
   readonly value = model<ValueType | undefined>(undefined);
@@ -78,10 +89,12 @@ export class PrimeRadioGroupComponent implements FormValueControl<ValueType | un
   // Component-specific inputs
   readonly options = input.required<FieldOption<ValueType>[]>();
   readonly properties = input<PrimeRadioGroupProps>();
-  readonly meta = input<FieldMeta>();
+
+  // Meta reads from the ambient parent NgForgeField.
+  protected readonly meta = computed<FieldMeta | undefined>(() => this.parentField?.meta());
 
   constructor() {
-    // Apply meta attributes to all radio inputs, re-apply when options change
+    this.parentField?.markClaimed();
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'input[type="radio"]',
       dependents: [this.options],

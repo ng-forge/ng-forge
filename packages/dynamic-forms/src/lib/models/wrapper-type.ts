@@ -105,14 +105,14 @@ export function isWrapperTypeDefinition(value: unknown): value is WrapperTypeDef
  *     </dbx-section>
  *   `,
  * })
- * export class SectionWrapperComponent implements FieldWrapperContract {
+ * export class SectionWrapperComponent implements FieldWrapper {
  *   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
  *   readonly header = input<string>();
  *   readonly fieldInputs = input<WrapperFieldInputs>();
  * }
  * ```
  */
-export interface FieldWrapperContract {
+export interface FieldWrapper {
   /** ViewContainerRef slot where inner content is rendered */
   readonly fieldComponent: Signal<ViewContainerRef>;
 }

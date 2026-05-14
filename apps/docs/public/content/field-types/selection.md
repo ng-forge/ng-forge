@@ -37,9 +37,7 @@ Single or multi-select dropdown.
 
 <docs-adapter-props field="select"></docs-adapter-props>
 
-#### Example
-
-<docs-live-example scenario="examples/select" hideForCustom="true"></docs-live-example>
+<docs-live-example scenario="examples/select" hideForCustom="true" showHeading="true"></docs-live-example>
 
 ## radio
 
@@ -68,9 +66,7 @@ Single selection from multiple options.
 
 <docs-adapter-props field="radio"></docs-adapter-props>
 
-#### Example
-
-<docs-live-example scenario="examples/radio" hideForCustom="true"></docs-live-example>
+<docs-live-example scenario="examples/radio" hideForCustom="true" showHeading="true"></docs-live-example>
 
 ## checkbox
 
@@ -89,9 +85,7 @@ Boolean toggle control.
 
 <docs-adapter-props field="checkbox"></docs-adapter-props>
 
-#### Example
-
-<docs-live-example scenario="examples/checkbox" hideForCustom="true"></docs-live-example>
+<docs-live-example scenario="examples/checkbox" hideForCustom="true" showHeading="true"></docs-live-example>
 
 ## toggle
 
@@ -110,9 +104,7 @@ Boolean switch control. Similar to checkbox but with a switch UI.
 
 <docs-adapter-props field="toggle"></docs-adapter-props>
 
-#### Example
-
-<docs-live-example scenario="examples/toggle" hideForCustom="true"></docs-live-example>
+<docs-live-example scenario="examples/toggle" hideForCustom="true" showHeading="true"></docs-live-example>
 
 ## multi-checkbox
 
@@ -140,6 +132,4 @@ Multiple selection from a list of checkboxes. Value is an array of selected valu
 
 <docs-adapter-props field="multi-checkbox"></docs-adapter-props>
 
-#### Example
-
-<docs-live-example scenario="examples/multi-checkbox" hideForCustom="true"></docs-live-example>
+<docs-live-example scenario="examples/multi-checkbox" hideForCustom="true" showHeading="true"></docs-live-example>

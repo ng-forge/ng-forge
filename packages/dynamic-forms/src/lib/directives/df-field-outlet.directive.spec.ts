@@ -15,13 +15,7 @@ import {
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { DfFieldOutlet } from './df-field-outlet.directive';
 import { ResolvedField } from '../utils/resolve-field/resolve-field';
-import {
-  FieldWrapperContract,
-  WRAPPER_AUTO_ASSOCIATIONS,
-  WRAPPER_REGISTRY,
-  WrapperConfig,
-  WrapperTypeDefinition,
-} from '../models/wrapper-type';
+import { FieldWrapper, WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_REGISTRY, WrapperConfig, WrapperTypeDefinition } from '../models/wrapper-type';
 import { DEFAULT_WRAPPERS } from '../models/field-signal-context.token';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { NoopLogger } from '../providers/features/logger/noop-logger';
@@ -55,7 +49,7 @@ class TestRequiredKeyComponent {
   template: `<div class="section" [attr.data-title]="title()"><ng-container #fieldComponent></ng-container></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestSectionWrapper implements FieldWrapperContract {
+class TestSectionWrapper implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly title = input<string>();
 }
@@ -275,6 +269,23 @@ describe('DfFieldOutlet', () => {
     // No rebuild — same component instance, still mounted.
     expect(TestLeafComponent.instances).toBe(1);
     expect(fixture.nativeElement.querySelector('.leaf')).toBeTruthy();
+  });
+
+  it('silently drops mapper keys the field component does not declare (Angular 21 setInput leniency)', async () => {
+    // Regression pin: `setInput` is lenient on unknown input names in
+    // Angular 21 — `pushRawInputs` does NOT throw NG0303 for a mapper
+    // typo, so a stray key just no-ops. Documents the actual behavior;
+    // mapper-as-contract is enforced by NG_FORGE_FIELD_INPUTS lockstep,
+    // not at runtime here.
+    const envInjector = TestBed.inject(EnvironmentInjector);
+    fixture = TestBed.createComponent(OutletHostComponent);
+    const inputs = signal<Record<string, unknown>>({ label: 'A', nonExistentInput: 'oops' });
+    fixture.componentRef.setInput('field', buildResolvedField({ component: TestLeafComponent, inputs, injector: envInjector }));
+    expect(() => fixture.detectChanges()).not.toThrow();
+    await flush();
+    // TestLeafComponent declares `label` only; `nonExistentInput` was dropped.
+    const leaf = fixture.nativeElement.querySelector('.leaf');
+    expect(leaf?.getAttribute('data-label')).toBe('A');
   });
 
   it('destroys the field + wrappers when the host is destroyed (vcr.clear cascade)', async () => {

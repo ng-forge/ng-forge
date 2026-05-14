@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
-import { FieldWrapperContract, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
+import { FieldWrapper, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { hasDefaultExport, loadWrapperComponents, renderWrapperChain, resolveDefaultExport, setInputIfDeclared } from './wrapper-chain';
 
@@ -35,7 +35,7 @@ class TestInputComponent {
   template: `<div data-wrapper="a" [attr.data-title]="title()"><ng-container #fieldComponent></ng-container></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestWrapperA implements FieldWrapperContract {
+class TestWrapperA implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly title = input<string>();
 }
@@ -45,7 +45,7 @@ class TestWrapperA implements FieldWrapperContract {
   template: `<div data-wrapper="b"><ng-container #fieldComponent></ng-container></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestWrapperB implements FieldWrapperContract {
+class TestWrapperB implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
 }
 
@@ -55,7 +55,7 @@ class TestWrapperB implements FieldWrapperContract {
   template: `<div data-wrapper="b-nested"><ng-container #fieldComponent></ng-container></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestWrapperBNested implements FieldWrapperContract {
+class TestWrapperBNested implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly parent = inject(TestWrapperB);
 }
@@ -70,7 +70,7 @@ class TestWrapperBNested implements FieldWrapperContract {
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestWrapperBroken implements FieldWrapperContract {
+class TestWrapperBroken implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
 }
 

@@ -3,8 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { form } from '@angular/forms/signals';
 import { datepickerFieldMapper } from './datepicker-field-mapper';
 import { DatepickerField } from '../../definitions';
-import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
-import { FieldSignalContext } from '../types';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT } from '../../../../src/lib/models/field-signal-context.token';
+import { FieldSignalContext } from '../../../../src/lib/mappers/types';
 
 describe('datepickerFieldMapper', () => {
   let parentInjector: EnvironmentInjector;
@@ -29,7 +29,14 @@ describe('datepickerFieldMapper', () => {
       form: testForm,
     };
 
-    return createEnvironmentInjector([{ provide: FIELD_SIGNAL_CONTEXT, useValue: mockContext }], parentInjector);
+    return createEnvironmentInjector(
+      [
+        { provide: FIELD_SIGNAL_CONTEXT, useValue: mockContext },
+        { provide: DEFAULT_PROPS, useValue: signal(undefined) },
+        { provide: DEFAULT_VALIDATION_MESSAGES, useValue: signal(undefined) },
+      ],
+      parentInjector,
+    );
   }
 
   function testMapper(fieldDef: DatepickerField<unknown>, injector: EnvironmentInjector): Record<string, unknown> {

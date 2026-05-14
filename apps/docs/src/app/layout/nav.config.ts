@@ -19,16 +19,14 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Feature Overview', path: 'feature-overview' },
   { label: 'API-Driven Forms', path: 'api-driven-forms' },
   {
-    label: 'Building an Adapter',
-    path: 'building-an-adapter',
-    /** Only visible when adapter === 'custom' — placed before Examples so custom users see it early. */
-    cssClass: 'sidebar-link--custom-only',
-  },
-  {
     label: 'Examples',
     path: 'examples',
-    /** Hidden when adapter === 'custom' — no example components exist for the custom adapter. */
-    cssClass: 'sidebar-link--not-custom',
+  },
+  {
+    label: 'Building an Adapter',
+    path: 'building-an-adapter',
+    /** Visible only when adapter === 'custom' — concrete adapters hide this entry. */
+    cssClass: 'sidebar-link--custom-only',
   },
   {
     label: 'Field Types',

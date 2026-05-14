@@ -9,7 +9,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { catchError, forkJoin, from, map, Observable, of } from 'rxjs';
-import { FieldWrapperContract, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
+import { FieldWrapper, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
 
@@ -52,8 +52,7 @@ function getDeclaredInputs(componentType: Type<unknown>): Set<string> {
  * avoiding the reflection scan on each call is meaningful under heavy typing.
  */
 export function setInputIfDeclared(ref: ComponentRef<unknown>, inputName: string, value: unknown): void {
-  const declared = getDeclaredInputs(ref.componentType);
-  if (declared.has(inputName)) {
+  if (getDeclaredInputs(ref.componentType).has(inputName)) {
     ref.setInput(inputName, value);
   }
 }
@@ -239,7 +238,7 @@ function renderStep(
  * the actionable "wrapper missing fieldComponent" message.
  */
 function resolveInnerSlot(ref: ComponentRef<unknown>): ViewContainerRef | undefined {
-  const contract = ref.instance as FieldWrapperContract;
+  const contract = ref.instance as FieldWrapper;
   try {
     return contract.fieldComponent?.();
   } catch {

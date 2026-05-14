@@ -1,18 +1,21 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { NgForgeField, NgForgeHostControl } from '@ng-forge/dynamic-forms/integration';
 import { Select, SelectChangeEvent } from 'primeng/select';
 import { MultiSelect, MultiSelectChangeEvent } from 'primeng/multiselect';
 
 /**
- * A wrapper component for PrimeNG's Select/MultiSelect that implements FormValueControl.
- * This allows it to work with Angular's [formField] directive from @angular/forms/signals.
+ * PrimeNG Select/MultiSelect wrapper implementing FormValueControl. Rendered
+ * inside `df-prime-select` — `NgForgeHostControl` claims the ambient parent
+ * NgForgeField for meta + aria. Standalone use lands `aria-invalid="false"`
+ * with no `aria-required` / `aria-describedby`.
  */
 @Component({
   selector: 'df-prime-select-control',
   imports: [Select, MultiSelect, FormsModule],
+  hostDirectives: [NgForgeHostControl],
   template: `
     @if (multiple()) {
       <p-multiSelect
@@ -59,7 +62,8 @@ import { MultiSelect, MultiSelectChangeEvent } from 'primeng/multiselect';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PrimeSelectControlComponent implements FormValueControl<ValueType> {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
+  // Ambient parent NgForgeField — feeds aria fallback for inner <p-select> bindings.
+  private readonly parentField = inject(NgForgeField, { optional: true });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // FormValueControl implementation
@@ -94,20 +98,12 @@ export class PrimeSelectControlComponent implements FormValueControl<ValueType> 
   readonly filter = input<boolean>(false);
   readonly showClear = input<boolean>(false);
   readonly styleClass = input<string>('');
-  readonly meta = input<FieldMeta>();
 
-  /** aria-invalid passed from parent (computed from field state) */
-  readonly ariaInvalid = input<boolean>(false);
-
-  /** aria-required passed from parent (computed from field state) */
-  readonly ariaRequired = input<boolean | null>(null);
-
-  /** aria-describedby IDs passed from parent */
-  readonly ariaDescribedBy = input<string | null>(null);
-
-  constructor() {
-    setupMetaTracking(this.elementRef, this.meta);
-  }
+  // Aria signals read from the ambient parent NgForgeField. Standalone use
+  // (no parent) lands `false` / `null`.
+  protected readonly ariaInvalid = computed<boolean>(() => this.parentField?.ariaInvalid() ?? false);
+  protected readonly ariaRequired = computed<true | null>(() => this.parentField?.ariaRequired() ?? null);
+  protected readonly ariaDescribedBy = computed<string | null>(() => this.parentField?.ariaDescribedBy() ?? null);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Multi-select value handling

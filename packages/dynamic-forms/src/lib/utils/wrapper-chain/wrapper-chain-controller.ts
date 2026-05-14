@@ -74,6 +74,9 @@ export function createWrapperChainController(opts: WrapperChainControllerOptions
   const mounted = { value: null as MountedChain | null };
   let refs: ComponentRef<unknown>[] = [];
 
+  // INVARIANT: toObservable schedules emissions as microtasks, so `renderInnermost`
+  // runs outside any parent CD pass. Don't swap for sync signal wiring without
+  // restoring df-field-outlet's detectChanges — NG0950 would re-surface.
   buildEmissionStream(state, deps)
     .pipe(takeUntilDestroyed(deps.destroyRef))
     .subscribe((emission) => {

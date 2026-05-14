@@ -1,4 +1,5 @@
-import { Injector, runInInjectionContext, signal } from '@angular/core';
+import { Injector, runInInjectionContext, signal, WritableSignal } from '@angular/core';
+import { FieldTree } from '@angular/forms/signals';
 import {
   addArrayItemButtonMapper,
   removeArrayItemButtonMapper,
@@ -8,43 +9,55 @@ import {
   BaseArrayAddButtonField,
   BaseArrayRemoveButtonField,
 } from './array-button.mapper';
-import { ARRAY_CONTEXT, DEFAULT_PROPS, RootFormRegistryService, NonFieldLogicConfig } from '@ng-forge/dynamic-forms';
+import { ARRAY_CONTEXT, DEFAULT_PROPS, DynamicFormLogger, RootFormRegistryService, NonFieldLogicConfig } from '@ng-forge/dynamic-forms';
 import { vi } from 'vitest';
 
 describe('Array Button Mappers with Logic', () => {
-  let mockRootFormRegistry: {
-    getRootForm: ReturnType<typeof vi.fn>;
-    getFormValue: ReturnType<typeof vi.fn>;
-  };
-
-  // Create a mock form that satisfies the FieldTree interface
-  function createMockForm(formValue: Record<string, unknown> = {}) {
+  // Mock form: a callable that returns FieldState-like object (matches the
+  // shape consumed by resolveNonFieldHidden / resolveNonFieldDisabled).
+  function createMockForm(formValue: Record<string, unknown> = {}): FieldTree<Record<string, unknown>> {
     return vi.fn(() => ({
       value: vi.fn().mockReturnValue(formValue),
       valid: vi.fn().mockReturnValue(true),
       submitting: vi.fn().mockReturnValue(false),
-    }));
+    })) as unknown as FieldTree<Record<string, unknown>>;
   }
 
-  function createMockRegistry(formValue: Record<string, unknown> = {}) {
-    const mockForm = createMockForm(formValue);
-    mockRootFormRegistry.getRootForm.mockReturnValue(mockForm);
-    mockRootFormRegistry.getFormValue.mockReturnValue(formValue);
+  let rootFormSignal: WritableSignal<FieldTree<Record<string, unknown>> | undefined>;
+  let formValueSignal: WritableSignal<Record<string, unknown>>;
+
+  function setRegistry(formValue: Record<string, unknown> = {}): void {
+    formValueSignal.set(formValue);
+    rootFormSignal.set(createMockForm(formValue));
   }
 
   beforeEach(() => {
-    mockRootFormRegistry = {
-      getRootForm: vi.fn(),
-      getFormValue: vi.fn().mockReturnValue({}),
-    };
+    rootFormSignal = signal<FieldTree<Record<string, unknown>> | undefined>(undefined);
+    formValueSignal = signal<Record<string, unknown>>({});
   });
 
   function createTestInjector(arrayContext?: { arrayKey: string; index: number }): Injector {
+    // ARRAY_CONTEXT.index is a Signal<number>, formValue and field are also required.
+    const ctxValue = arrayContext
+      ? {
+          arrayKey: arrayContext.arrayKey,
+          index: signal(arrayContext.index),
+          formValue: {},
+          field: { key: arrayContext.arrayKey, type: 'array' },
+        }
+      : undefined;
     return Injector.create({
       providers: [
-        { provide: RootFormRegistryService, useValue: mockRootFormRegistry },
+        {
+          provide: RootFormRegistryService,
+          useValue: { formValue: formValueSignal, rootForm: rootFormSignal },
+        },
         { provide: DEFAULT_PROPS, useValue: signal(undefined) },
-        { provide: ARRAY_CONTEXT, useValue: arrayContext },
+        { provide: ARRAY_CONTEXT, useValue: ctxValue },
+        {
+          provide: DynamicFormLogger,
+          useValue: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+        },
       ],
     });
   }
@@ -57,7 +70,7 @@ describe('Array Button Mappers with Logic', () => {
 
     describe('hidden logic', () => {
       it('should return hidden=true when explicit hidden is true', () => {
-        createMockRegistry();
+        setRegistry();
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -74,7 +87,7 @@ describe('Array Button Mappers with Logic', () => {
       });
 
       it('should return hidden=true when hidden logic condition is true', () => {
-        createMockRegistry({ isReadOnly: true });
+        setRegistry({ isReadOnly: true });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -101,7 +114,7 @@ describe('Array Button Mappers with Logic', () => {
       });
 
       it('should return hidden=false when hidden logic condition is false', () => {
-        createMockRegistry({ isReadOnly: false });
+        setRegistry({ isReadOnly: false });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -128,7 +141,7 @@ describe('Array Button Mappers with Logic', () => {
       });
 
       it('should evaluate expression-based hidden logic', () => {
-        createMockRegistry({ maxItemsReached: true });
+        setRegistry({ maxItemsReached: true });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -140,7 +153,7 @@ describe('Array Button Mappers with Logic', () => {
           logic: [
             {
               type: 'hidden',
-              condition: { type: 'javascript', expression: 'maxItemsReached' },
+              condition: { type: 'javascript', expression: 'formValue.maxItemsReached' },
             },
           ],
         };
@@ -152,7 +165,7 @@ describe('Array Button Mappers with Logic', () => {
 
     describe('disabled logic', () => {
       it('should return disabled=true when explicit disabled is true', () => {
-        createMockRegistry();
+        setRegistry();
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -169,7 +182,7 @@ describe('Array Button Mappers with Logic', () => {
       });
 
       it('should return disabled=true when disabled logic condition is true', () => {
-        createMockRegistry({ isLocked: true });
+        setRegistry({ isLocked: true });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -196,7 +209,7 @@ describe('Array Button Mappers with Logic', () => {
       });
 
       it('should return disabled=false when disabled logic condition is false', () => {
-        createMockRegistry({ isLocked: false });
+        setRegistry({ isLocked: false });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayAddButtonField = {
@@ -225,7 +238,7 @@ describe('Array Button Mappers with Logic', () => {
 
     describe('combined hidden and disabled logic', () => {
       it('should independently evaluate hidden and disabled from same logic array', () => {
-        createMockRegistry({ status: 'locked' });
+        setRegistry({ status: 'locked' });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const logic: NonFieldLogicConfig[] = [
@@ -275,7 +288,7 @@ describe('Array Button Mappers with Logic', () => {
 
     describe('hidden logic', () => {
       it('should return hidden=true when hidden logic condition is true', () => {
-        createMockRegistry({ canDelete: false });
+        setRegistry({ canDelete: false });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayRemoveButtonField = {
@@ -286,7 +299,7 @@ describe('Array Button Mappers with Logic', () => {
           logic: [
             {
               type: 'hidden',
-              condition: { type: 'javascript', expression: '!canDelete' },
+              condition: { type: 'javascript', expression: '!formValue.canDelete' },
             },
           ],
         };
@@ -298,7 +311,7 @@ describe('Array Button Mappers with Logic', () => {
 
     describe('disabled logic', () => {
       it('should return disabled=true when disabled logic condition is true', () => {
-        createMockRegistry({ minItemsReached: true });
+        setRegistry({ minItemsReached: true });
         const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
         const fieldDef: BaseArrayRemoveButtonField = {
@@ -309,7 +322,7 @@ describe('Array Button Mappers with Logic', () => {
           logic: [
             {
               type: 'disabled',
-              condition: { type: 'javascript', expression: 'minItemsReached' },
+              condition: { type: 'javascript', expression: 'formValue.minItemsReached' },
             },
           ],
         };
@@ -327,7 +340,7 @@ describe('Array Button Mappers with Logic', () => {
     }
 
     it('should evaluate hidden and disabled logic', () => {
-      createMockRegistry({ isAdmin: false, isFrozen: true });
+      setRegistry({ isAdmin: false, isFrozen: true });
       const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
       const fieldDef: BaseArrayAddButtonField = {
@@ -337,8 +350,8 @@ describe('Array Button Mappers with Logic', () => {
         arrayKey: 'items',
         template: { key: 'name', type: 'input' },
         logic: [
-          { type: 'hidden', condition: { type: 'javascript', expression: '!isAdmin' } },
-          { type: 'disabled', condition: { type: 'javascript', expression: 'isFrozen' } },
+          { type: 'hidden', condition: { type: 'javascript', expression: '!formValue.isAdmin' } },
+          { type: 'disabled', condition: { type: 'javascript', expression: 'formValue.isFrozen' } },
         ],
       };
 
@@ -355,7 +368,7 @@ describe('Array Button Mappers with Logic', () => {
     }
 
     it('should evaluate hidden and disabled logic', () => {
-      createMockRegistry({ showPopButton: true, isEmpty: true });
+      setRegistry({ showPopButton: true, isEmpty: true });
       const injector = createTestInjector();
 
       const fieldDef: BaseArrayRemoveButtonField = {
@@ -364,8 +377,8 @@ describe('Array Button Mappers with Logic', () => {
         label: 'Remove Last',
         arrayKey: 'items',
         logic: [
-          { type: 'hidden', condition: { type: 'javascript', expression: '!showPopButton' } },
-          { type: 'disabled', condition: { type: 'javascript', expression: 'isEmpty' } },
+          { type: 'hidden', condition: { type: 'javascript', expression: '!formValue.showPopButton' } },
+          { type: 'disabled', condition: { type: 'javascript', expression: 'formValue.isEmpty' } },
         ],
       };
 
@@ -382,7 +395,7 @@ describe('Array Button Mappers with Logic', () => {
     }
 
     it('should evaluate hidden and disabled logic', () => {
-      createMockRegistry({ showShiftButton: false, hasItems: false });
+      setRegistry({ showShiftButton: false, hasItems: false });
       const injector = createTestInjector();
 
       const fieldDef: BaseArrayRemoveButtonField = {
@@ -391,8 +404,8 @@ describe('Array Button Mappers with Logic', () => {
         label: 'Remove First',
         arrayKey: 'items',
         logic: [
-          { type: 'hidden', condition: { type: 'javascript', expression: '!showShiftButton' } },
-          { type: 'disabled', condition: { type: 'javascript', expression: '!hasItems' } },
+          { type: 'hidden', condition: { type: 'javascript', expression: '!formValue.showShiftButton' } },
+          { type: 'disabled', condition: { type: 'javascript', expression: '!formValue.hasItems' } },
         ],
       };
 
@@ -404,7 +417,7 @@ describe('Array Button Mappers with Logic', () => {
 
   describe('fallback behavior when rootForm is not available', () => {
     it('should use static values when rootForm is undefined', () => {
-      mockRootFormRegistry.getRootForm.mockReturnValue(undefined);
+      rootFormSignal.set(undefined);
       const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
       const fieldDef: BaseArrayAddButtonField = {

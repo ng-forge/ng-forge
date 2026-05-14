@@ -21,6 +21,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FieldDef } from '../definitions/base/field-def';
 import { normalizeSimplifiedArrays } from '../utils/array-field/normalize-simplified-arrays';
 import { DynamicFormError } from '../errors/dynamic-form-error';
+import { isGroupField } from '../definitions/default/group-field';
 import { isPageField, PageField } from '../definitions/default/page-field';
 import { EventBus } from '../events/event.bus';
 import { FormClearEvent } from '../events/constants/form-clear.event';
@@ -86,6 +87,92 @@ export const FORM_STATE_DEPS = new InjectionToken<FormStateDeps>('FORM_STATE_DEP
  */
 function asFieldTreeRecord(tree: FieldTree<unknown>): Record<string, FieldTree<unknown>> {
   return tree as unknown as Record<string, FieldTree<unknown>>;
+}
+
+/** All-false baseline for the outward two-way binding filter — see `boundFormValue`. */
+const BOUND_VALUE_EXCLUSION_BASELINE = {
+  excludeValueIfHidden: false,
+  excludeValueIfDisabled: false,
+  excludeValueIfReadonly: false,
+} as const;
+
+/** Per-field axes that can drive value exclusion. */
+interface FieldExclusionAxes {
+  readonly hidden: boolean;
+  readonly disabled: boolean;
+  readonly readonly: boolean;
+}
+
+/** True when any of the three exclusion axes is asserted (i.e. the field could be filtered out of the bound model). */
+function isFieldExcluded(axes: FieldExclusionAxes | undefined): boolean {
+  return !!axes && (axes.hidden || axes.disabled || axes.readonly);
+}
+
+/**
+ * Recursively populates `out` with `dottedPath → exclusion axes` for every keyed field reachable
+ * from `fields`, walking into groups so nested-leaf transitions can be detected. Arrays are
+ * treated as leaves (whole-array filtering only — see value-filter v1 limitation).
+ */
+function collectFieldStateSnapshot(
+  fields: readonly FieldDef<unknown>[],
+  treeRecord: Record<string, FieldTree<unknown>>,
+  pathParts: readonly string[],
+  out: Record<string, FieldExclusionAxes>,
+): void {
+  for (const field of fields) {
+    const key = field.key;
+    if (!key) continue;
+    const subtree = treeRecord[key];
+    if (!subtree || typeof subtree !== 'function') continue;
+
+    const state = subtree();
+    const path = [...pathParts, key];
+    out[path.join('.')] = { hidden: state.hidden(), disabled: state.disabled(), readonly: state.readonly() };
+
+    if (isGroupField(field) && field.fields) {
+      collectFieldStateSnapshot(field.fields as readonly FieldDef<unknown>[], asFieldTreeRecord(subtree), path, out);
+    }
+  }
+}
+
+/**
+ * Reads a value from a nested object by dotted-path segments. Returns undefined
+ * if any intermediate segment is missing or non-object.
+ */
+function getValueAtPath(source: Record<string, unknown>, segments: readonly string[]): unknown {
+  let current: unknown = source;
+  for (const segment of segments) {
+    if (current === null || typeof current !== 'object') return undefined;
+    current = (current as Record<string, unknown>)[segment];
+  }
+  return current;
+}
+
+/**
+ * Whether a value is worth capturing into the saved-hidden-value store. `NaN` (the number-input
+ * default) is excluded — restoring it would re-leak the default into the bound model when the
+ * field becomes visible again, defeating the bug fix.
+ */
+function isRestoreRelevant(value: unknown): boolean {
+  return !(typeof value === 'number' && Number.isNaN(value));
+}
+
+/**
+ * Returns a new object with `value` set at the path described by `segments`.
+ * Intermediate objects are cloned shallowly to preserve immutability of `target`.
+ */
+function setValueAtPath(target: Record<string, unknown>, segments: readonly string[], value: unknown): Record<string, unknown> {
+  if (segments.length === 0) return target;
+  const [head, ...rest] = segments;
+  const next = { ...target };
+  if (rest.length === 0) {
+    next[head] = value;
+  } else {
+    const child = target[head];
+    const childObj = child !== null && typeof child === 'object' ? (child as Record<string, unknown>) : {};
+    next[head] = setValueAtPath(childObj, rest, value);
+  }
+  return next;
 }
 
 /**
@@ -298,6 +385,32 @@ export class FormStateManager<
     return new Set(schemaFields.map((f) => f.key).filter((key): key is string => key !== undefined));
   });
 
+  /**
+   * Per-field exclusion-axis state (hidden/disabled/readonly) keyed by dotted path. Drives the
+   * save-on-exclude effect's transition detection. Walks recursively into groups so nested-leaf
+   * transitions are captured. Arrays are treated as leaves (whole-array preservation only).
+   */
+  private readonly fieldStateSnapshot = computed((): Record<string, FieldExclusionAxes> => {
+    const setup = this.formSetup();
+    if (!setup.schemaFields || setup.schemaFields.length === 0) return {};
+
+    const snapshot: Record<string, FieldExclusionAxes> = {};
+    collectFieldStateSnapshot(setup.schemaFields, asFieldTreeRecord(this.form()), [], snapshot);
+    return snapshot;
+  });
+
+  /**
+   * Captured values for fields actively excluded from the bound model — either via
+   * `excludeValueIfHidden`, `excludeValueIfDisabled`, or `excludeValueIfReadonly`. Restored when
+   * the field becomes re-included (visible/enabled/editable). The save effect only writes here
+   * when the field is being filtered out by `boundFormValue` — fields without explicit opt-in
+   * never enter the store.
+   */
+  private readonly excludedValueStore = signal<Record<string, unknown>>({});
+
+  /** Tracks per-path exclusion state across save-effect runs to detect newly-excluded fields. */
+  private readonly prevFieldStateSnapshot = signal<Record<string, FieldExclusionAxes>>({});
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Entity & Form
   // ─────────────────────────────────────────────────────────────────────────────
@@ -323,11 +436,14 @@ export class FormStateManager<
       const inputValue = this.deps.value();
       const defaults = this.defaultValues();
       const keys = this.validKeys();
+      const saved = this.excludedValueStore();
 
       // Deep-merge so a partial nested object in `inputValue` (e.g. a group
       // value missing one of its declared sub-field keys) does not orphan
       // the absent sub-field in the Signal Forms validation graph.
-      const combined = deepMergeDefaults(defaults as Record<string, unknown>, inputValue as Record<string, unknown>);
+      // Layer order: defaults < saved (excluded-field restorations) < inputValue.
+      const withSaved = deepMergeDefaults(defaults as Record<string, unknown>, saved);
+      const combined = deepMergeDefaults(withSaved, inputValue as Record<string, unknown>);
 
       if (keys) {
         const filtered: Record<string, unknown> = {};
@@ -466,6 +582,46 @@ export class FormStateManager<
       fieldTreeRecord,
       setup.registry,
       this.valueExclusionDefaults,
+      formOptions,
+    );
+  });
+
+  /**
+   * Form value used for the outward two-way binding sync.
+   *
+   * Only honors *explicit* form-level and field-level `excludeValueIf*` settings — global
+   * defaults (`VALUE_EXCLUSION_DEFAULTS`) are intentionally ignored here. Rationale:
+   * - Original V1 behavior: the bound model carries all values regardless of visibility.
+   * - Bug fix: when a user explicitly sets `excludeValueIfHidden: true` on a field/form,
+   *   they expect that value to disappear from the bound model when hidden (e.g. NaN for
+   *   number inputs, see issue #394).
+   * - Without explicit opt-in, the bound model keeps the V1 contract.
+   * `filteredFormValue` (above) still applies the full Field > Form > Global hierarchy
+   * for the submission output.
+   */
+  private readonly boundFormValue = computed(() => {
+    const rawValue = this.formValue();
+    const setup = this.formSetup();
+    const options = this.effectiveFormOptions();
+
+    if (!setup.schemaFields || setup.schemaFields.length === 0) {
+      return rawValue;
+    }
+
+    const formTree = this.form();
+    const formOptions: ValueExclusionConfig = {
+      excludeValueIfHidden: options.excludeValueIfHidden,
+      excludeValueIfDisabled: options.excludeValueIfDisabled,
+      excludeValueIfReadonly: options.excludeValueIfReadonly,
+    };
+    const fieldTreeRecord = asFieldTreeRecord(formTree);
+
+    return filterFormValue(
+      rawValue as Record<string, unknown>,
+      setup.schemaFields,
+      fieldTreeRecord,
+      setup.registry,
+      BOUND_VALUE_EXCLUSION_BASELINE,
       formOptions,
     );
   });
@@ -764,6 +920,7 @@ export class FormStateManager<
    * Resets the form to default values.
    */
   reset(): void {
+    this.excludedValueStore.set({});
     const defaults = this.defaultValues();
     (this.form()().value as WritableSignal<TModel>).set(defaults);
     this.deps.value.set(defaults as Partial<TModel>);
@@ -773,6 +930,7 @@ export class FormStateManager<
    * Clears the form to empty state.
    */
   clear(): void {
+    this.excludedValueStore.set({});
     const emptyValue = {} as TModel;
     (this.form()().value as WritableSignal<TModel>).set(emptyValue);
     this.deps.value.set(emptyValue);
@@ -801,12 +959,53 @@ export class FormStateManager<
       }
     });
 
-    // Outward sync: write entity changes back to deps.value (see entity JSDoc for full explanation).
-    // The isEqual guard prevents infinite ping-pong between this effect and the linkedSignal source.
-    explicitEffect([this.entity], ([currentEntity]) => {
+    // Save-on-exclude: capture entity values for fields that boundFormValue is actively
+    // filtering out via any of the three axes (hidden / disabled / readonly), so they can be
+    // restored when the field becomes re-included. The transition fires once per "no axis
+    // asserted → at least one axis asserted" edge; subsequent axis changes while still excluded
+    // are no-ops. Comparing entity vs bound at the path limits the store to fields that are
+    // actually being filtered — fields without explicit opt-in never enter the store and never
+    // participate in the entity merge. `NaN` values are skipped: they're the number-input default
+    // and would re-leak via the merge once the field becomes re-included.
+    explicitEffect([this.fieldStateSnapshot], ([snapshot]) => {
+      const currentSaved = this.excludedValueStore();
+      const currentEntity = this.entity() as Record<string, unknown>;
+      const boundValue = this.boundFormValue() as Record<string, unknown>;
+      const prev = this.prevFieldStateSnapshot();
+      let newSaved = currentSaved;
+
+      for (const [path, axes] of Object.entries(snapshot)) {
+        if (isFieldExcluded(axes) && !isFieldExcluded(prev[path])) {
+          const segments = path.split('.');
+          const inEntity = getValueAtPath(currentEntity, segments);
+          const inBound = getValueAtPath(boundValue, segments);
+          if (inEntity !== undefined && inBound === undefined && isRestoreRelevant(inEntity)) {
+            newSaved = setValueAtPath(newSaved, segments, inEntity);
+          }
+        }
+      }
+      this.prevFieldStateSnapshot.set({ ...snapshot });
+
+      if (newSaved !== currentSaved && !isEqual(newSaved, currentSaved)) {
+        this.excludedValueStore.set(newSaved);
+      }
+    });
+
+    // Schema change resets the saved store + transition tracker so values from a stale schema
+    // can't leak into the new one.
+    explicitEffect([this.formSetup], () => {
+      this.prevFieldStateSnapshot.set({});
+      if (Object.keys(this.excludedValueStore()).length > 0) {
+        this.excludedValueStore.set({});
+      }
+    });
+
+    // Outward sync uses boundFormValue (honors only explicit excludeValueIf* opt-ins) so
+    // global defaults that target submission output don't reshape the host's bound model.
+    explicitEffect([this.boundFormValue], ([currentBound]) => {
       const currentValue = this.deps.value();
-      if (!isEqual(currentEntity, currentValue)) {
-        this.deps.value.set(currentEntity);
+      if (!isEqual(currentBound, currentValue)) {
+        this.deps.value.set(currentBound as TModel);
       }
     });
 

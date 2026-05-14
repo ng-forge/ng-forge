@@ -1,8 +1,14 @@
 @if (isCustomAdapter()) {
   @if (customGuide(); as guide) {
     <p class="adapter-props-empty">
-      Implement <code>{{ guide.contract }}&lt;{{ guide.fieldInterface }}&gt;</code>. See
-      <a href="/building-an-adapter">Building an Adapter</a> for the full guide.
+      @if (guide.kind === 'value') {
+        Compose <code>NgForgeField</code> via <code>hostDirectives</code> and register the field type with <code>{{ guide.mapper }}</code
+        >.
+      } @else {
+        Build a button component that injects <code>EventBus</code> and register it with <code>{{ guide.mapper }}</code
+        >.
+      }
+      See <a href="/building-an-adapter">Building an Adapter</a> for the full guide.
     </p>
     <div class="adapter-props-code">
       <div [codeHighlight]="customSnippet()"></div>

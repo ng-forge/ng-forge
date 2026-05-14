@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
-import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { NgForgeControl } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 
 export interface BsRadioGroupProps {
@@ -27,22 +27,27 @@ export interface BsRadioGroupProps {
   hint?: DynamicText;
 }
 
+/**
+ * Bootstrap radio group implementing FormValueControl. Rendered inside
+ * `df-bs-radio` — each `<input type="radio">` carries `ngForgeControl`, so
+ * the marker absorbs meta + aria from the ambient parent NgForgeField.
+ */
 @Component({
   selector: 'df-bs-radio-group',
-  imports: [DynamicTextPipe, AsyncPipe],
+  imports: [DynamicTextPipe, AsyncPipe, NgForgeControl],
   template: `
     @let props = properties();
     @if (props?.buttonGroup) {
       <div class="btn-group" role="group" [attr.aria-label]="label() | dynamicText | async">
         @for (option of options(); track option.value; let i = $index) {
           <input
+            ngForgeControl
             type="radio"
             [name]="name()"
             [value]="option.value"
             [checked]="value() === option.value"
             (change)="onRadioChange(option.value)"
             [disabled]="disabled() || option.disabled || false"
-            [attr.aria-describedby]="ariaDescribedBy()"
             class="btn-check"
             [id]="name() + '_' + i"
             autocomplete="off"
@@ -61,13 +66,13 @@ export interface BsRadioGroupProps {
       @for (option of options(); track option.value; let i = $index) {
         <div class="form-check" [class.form-check-inline]="props?.inline" [class.form-check-reverse]="props?.reverse">
           <input
+            ngForgeControl
             type="radio"
             [name]="name()"
             [value]="option.value"
             [checked]="value() === option.value"
             (change)="onRadioChange(option.value)"
             [disabled]="disabled() || option.disabled || false"
-            [attr.aria-describedby]="ariaDescribedBy()"
             class="form-check-input"
             [id]="name() + '_' + i"
           />
@@ -88,8 +93,6 @@ export interface BsRadioGroupProps {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BsRadioGroupComponent implements FormValueControl<ValueType | undefined> {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
-
   // Value model - FormField directive binds form value to this
   readonly value = model<ValueType | undefined>(undefined);
 
@@ -102,14 +105,6 @@ export class BsRadioGroupComponent implements FormValueControl<ValueType | undef
   readonly label = input<DynamicText>();
   readonly options = input.required<FieldOption<ValueType>[]>();
   readonly properties = input<BsRadioGroupProps>();
-  readonly meta = input<FieldMeta>();
-
-  // Accessibility - this will be provided by parent component through input
-  readonly ariaDescribedBy = input<string | null>(null);
-
-  constructor() {
-    setupMetaTracking(this.elementRef, this.meta, { selector: 'input[type="radio"]', dependents: [this.options] });
-  }
 
   /**
    * Handle radio button change event
