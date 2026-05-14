@@ -49,7 +49,7 @@ The wrapper component reads the array's key from `fieldInputs`, then injects `Ev
     </div>
   `,
 })
-export default class ArraySectionWrapper implements FieldWrapperContract {
+export default class ArraySectionWrapper implements FieldWrapper {
   private readonly eventBus = inject(EventBus);
 
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });

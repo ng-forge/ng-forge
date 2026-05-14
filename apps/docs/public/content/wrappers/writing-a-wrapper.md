@@ -16,7 +16,7 @@ A wrapper is an Angular component whose template contains a `#fieldComponent` te
 
 ```typescript name="section-wrapper.component.ts"
 import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild } from '@angular/core';
-import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import type { FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-section-wrapper',
@@ -32,8 +32,8 @@ import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class SectionWrapperComponent implements FieldWrapperContract {
-  // Required by FieldWrapperContract — the slot where the inner content renders.
+export default class SectionWrapperComponent implements FieldWrapper {
+  // Required by FieldWrapper — the slot where the inner content renders.
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
 
   // Config props arrive as regular Angular inputs (the `type` discriminant is stripped).
@@ -114,7 +114,7 @@ A validation-aware section wrapper reads the field's validity:
 
 ```typescript name="section-wrapper.component.ts"
 import { ChangeDetectionStrategy, Component, computed, input, ViewContainerRef, viewChild } from '@angular/core';
-import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import type { FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-section-wrapper',
@@ -133,7 +133,7 @@ import type { FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class SectionWrapperComponent implements FieldWrapperContract {
+export default class SectionWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly title = input<string>();
   readonly fieldInputs = input<WrapperFieldInputs>();
@@ -157,14 +157,14 @@ This means a nested wrapper can `inject()` the wrapper that contains it. Precede
 
 ```typescript
 import { Component, inject, ViewContainerRef, viewChild } from '@angular/core';
-import { ARRAY_CONTEXT, FieldWrapperContract } from '@ng-forge/dynamic-forms';
+import { ARRAY_CONTEXT, FieldWrapper } from '@ng-forge/dynamic-forms';
 import { OuterWrapperComponent } from './outer-wrapper.component';
 
 @Component({
   selector: 'app-inner-wrapper',
   template: `<ng-container #fieldComponent></ng-container>`,
 })
-export default class InnerWrapperComponent implements FieldWrapperContract {
+export default class InnerWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
 
   // Both of these work — field injector checked first, outer wrappers fall through.

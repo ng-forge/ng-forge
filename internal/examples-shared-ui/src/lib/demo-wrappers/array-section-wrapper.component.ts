@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input, ViewContainerRef, viewChild } from '@angular/core';
 import { EventBus, arrayEvent } from '@ng-forge/dynamic-forms';
-import type { FieldDef, FieldWrapperContract, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import type { FieldDef, FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 
 /**
  * Demo "arraySection" wrapper — wraps an array field in a titled card
@@ -41,7 +41,7 @@ import type { FieldDef, FieldWrapperContract, WrapperFieldInputs } from '@ng-for
   styleUrl: './section-wrapper.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class ArraySectionWrapperComponent implements FieldWrapperContract {
+export default class ArraySectionWrapperComponent implements FieldWrapper {
   private readonly eventBus = inject(EventBus);
 
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild } from '@angular/core';
-import { FieldWrapperContract } from '../../models/wrapper-type';
+import { FieldWrapper } from '../../models/wrapper-type';
 import { WrapperFieldInputs } from '../wrapper-field-inputs';
 
 /**
@@ -22,7 +22,7 @@ import { WrapperFieldInputs } from '../wrapper-field-inputs';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class RowWrapperComponent implements FieldWrapperContract {
+export default class RowWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
 
   /**

@@ -15,13 +15,7 @@ import {
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { DfFieldOutlet } from './df-field-outlet.directive';
 import { ResolvedField } from '../utils/resolve-field/resolve-field';
-import {
-  FieldWrapperContract,
-  WRAPPER_AUTO_ASSOCIATIONS,
-  WRAPPER_REGISTRY,
-  WrapperConfig,
-  WrapperTypeDefinition,
-} from '../models/wrapper-type';
+import { FieldWrapper, WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_REGISTRY, WrapperConfig, WrapperTypeDefinition } from '../models/wrapper-type';
 import { DEFAULT_WRAPPERS } from '../models/field-signal-context.token';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { NoopLogger } from '../providers/features/logger/noop-logger';
@@ -55,7 +49,7 @@ class TestRequiredKeyComponent {
   template: `<div class="section" [attr.data-title]="title()"><ng-container #fieldComponent></ng-container></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestSectionWrapper implements FieldWrapperContract {
+class TestSectionWrapper implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly title = input<string>();
 }

@@ -25,7 +25,7 @@ import type { WrapperInfo } from './index.js';
  */
 export const WRAPPER_AUTHORING_CONTRACT = `All wrapper components MUST:
 
-1. Implement \`FieldWrapperContract\` from \`@ng-forge/dynamic-forms\`.
+1. Implement \`FieldWrapper\` from \`@ng-forge/dynamic-forms\`.
 2. Expose \`readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });\`
    — this is the slot where the inner wrapper (or the field) is rendered
    imperatively by the outlet.

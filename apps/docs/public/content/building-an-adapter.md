@@ -575,7 +575,7 @@ For adapter library packaging, import the wrapper-authoring API from `@ng-forge/
 ```typescript
 import {
   createWrappers,
-  type FieldWrapperContract,
+  type FieldWrapper,
   type InferWrapperRegistry,
   type WrapperFieldInputs,
   wrapperProps,

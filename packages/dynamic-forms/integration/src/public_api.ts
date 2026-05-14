@@ -137,7 +137,7 @@ export type { NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } fro
 
 export { createWrappers, isWrappersBundle, wrapperProps } from '@ng-forge/dynamic-forms';
 export type {
-  FieldWrapperContract,
+  FieldWrapper,
   WrapperFieldInputs,
   WrapperRegistration,
   WrappersBundle,

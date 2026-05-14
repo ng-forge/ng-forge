@@ -15,13 +15,7 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 import { delay } from '@ng-forge/utils';
-import {
-  FieldWrapperContract,
-  WRAPPER_COMPONENT_CACHE,
-  WRAPPER_REGISTRY,
-  WrapperConfig,
-  WrapperTypeDefinition,
-} from '../../models/wrapper-type';
+import { FieldWrapper, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { NoopLogger } from '../../providers/features/logger/noop-logger';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
@@ -57,7 +51,7 @@ class TestLeafB {
   template: `<div class="wrap-x" [attr.data-tag]="tag()"><ng-container #fieldComponent></ng-container></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestWrapX implements FieldWrapperContract {
+class TestWrapX implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly tag = input<string>();
   readonly fieldInputs = input<WrapperFieldInputs>();
@@ -68,7 +62,7 @@ class TestWrapX implements FieldWrapperContract {
   template: `<div class="wrap-y"><ng-container #fieldComponent></ng-container></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestWrapY implements FieldWrapperContract {
+class TestWrapY implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly fieldInputs = input<WrapperFieldInputs>();
 }
