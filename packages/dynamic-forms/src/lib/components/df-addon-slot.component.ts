@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, Injector, input, signal, Type } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, Injector, input, Signal, signal, Type } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { AnyAddon } from '../models/addon/addon-def';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
@@ -67,13 +67,29 @@ export class DfAddonSlot {
    * `undefined` when the addon is rendered outside a field (rare).
    */
   readonly fieldInputs = input<WrapperFieldInputs | undefined>();
+  /**
+   * Pre-resolved `hidden` signal supplied by the host field. When provided,
+   * the dispatcher reads this instead of re-resolving `addon.hidden` —
+   * lets the host (e.g., `prime-input`) share a single subscription per
+   * Observable-typed `hidden` between its own visibility filter and the
+   * slot's `[style.display]` binding.
+   */
+  readonly hidden = input<Signal<boolean> | undefined>(undefined);
 
   /** `slot` HTML attribute forwarded to host — needed for Ionic shadow projection. */
   protected readonly slotAttr = computed(() => this.addon().slot);
   protected readonly className = computed(() => this.addon().className ?? null);
 
-  /** `hidden` resolved from `DynamicValue<boolean>` to a flat `Signal<boolean>`. */
-  protected readonly isHidden = computed(() => resolveDynamicValue(this.addon().hidden, false, this.hostInjector)());
+  /**
+   * `hidden` resolved from `DynamicValue<boolean>` to a flat `Signal<boolean>`.
+   * Uses the host-supplied signal when present (avoids duplicate `toSignal`
+   * subscriptions for Observable-typed `hidden`); otherwise resolves the
+   * addon's own `hidden` field with the component's injector.
+   */
+  protected readonly isHidden = computed(() => {
+    const pre = this.hidden();
+    return pre ? pre() : resolveDynamicValue(this.addon().hidden, false, this.hostInjector)();
+  });
 
   /** Kind component, resolved asynchronously from the registry. */
   private readonly resolvedComponentSignal = signal<Type<unknown> | undefined>(undefined);

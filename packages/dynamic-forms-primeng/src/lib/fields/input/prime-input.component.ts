@@ -46,11 +46,15 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
       @if (hasAddons()) {
         <p-inputgroup>
           @for (a of prefixAddons(); track $index) {
-            <p-inputgroup-addon><df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" /></p-inputgroup-addon>
+            <p-inputgroup-addon>
+              <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="hiddenSignalCache().get(a)" />
+            </p-inputgroup-addon>
           }
           <ng-container *ngTemplateOutlet="control" />
           @for (a of suffixAddons(); track $index) {
-            <p-inputgroup-addon><df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" /></p-inputgroup-addon>
+            <p-inputgroup-addon>
+              <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="hiddenSignalCache().get(a)" />
+            </p-inputgroup-addon>
           }
         </p-inputgroup>
       } @else {
@@ -136,11 +140,14 @@ export default class PrimeInputFieldComponent {
    * of the component. The cache itself is a `computed`, so it rebuilds when
    * the addons array changes by identity.
    */
-  private readonly hiddenSignalCache = computed<ReadonlyMap<PrimeInputAddon, Signal<boolean>>>(() => {
+  // Keyed by `AnyAddon` rather than `PrimeInputAddon` so the template can
+  // index it from the `prefixAddons` / `suffixAddons` computeds (which
+  // widen to `AnyAddon` for the `<df-addon-slot [addon]>` binding).
+  protected readonly hiddenSignalCache = computed<ReadonlyMap<AnyAddon, Signal<boolean>>>(() => {
     const addons = this.addons() ?? [];
-    const map = new Map<PrimeInputAddon, Signal<boolean>>();
+    const map = new Map<AnyAddon, Signal<boolean>>();
     for (const a of addons) {
-      map.set(a, resolveDynamicValue(a.hidden, false, this.hostInjector));
+      map.set(a as unknown as AnyAddon, resolveDynamicValue(a.hidden, false, this.hostInjector));
     }
     return map;
   });

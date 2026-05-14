@@ -233,6 +233,13 @@ export class FormStateManager<
   private readonly fieldRegistry = injectFieldRegistry();
   /** Addon-kind registry — feeds the addon validator at config-setup time. */
   private readonly addonKindRegistry = inject(ADDON_KIND_REGISTRY);
+  /**
+   * Fingerprints of addon warnings emitted by the last config setup.
+   * Used to skip re-logging warnings that already fired for the previous
+   * config — avoids spam when the form swaps config repeatedly but the
+   * addon issues haven't changed.
+   */
+  private lastAddonWarningKeys: Set<string> = new Set();
 
   // ─────────────────────────────────────────────────────────────────────────────
   // State Machine
@@ -1089,6 +1096,10 @@ export class FormStateManager<
     // Addon pass — strip invalid / unsupported addon entries and log a warning
     // for each one dropped. Lenient by design: the form keeps rendering even
     // when a JSON-source config ships an addon the FE doesn't understand.
+    //
+    // Warnings are deduped across consecutive config setups: a warning that
+    // already fired for the previous config is skipped, so swapping config
+    // back and forth doesn't spam the console.
     const source = this.deps.source?.() ?? 'inline';
     const { fields: sanitizedFields, warnings: addonWarnings } = walkAndValidateAddons(
       normalizedFields,
@@ -1096,9 +1107,15 @@ export class FormStateManager<
       this.addonKindRegistry,
       source,
     );
+    const nextKeys = new Set<string>();
     for (const w of addonWarnings) {
-      this.logger.warn(formatAddonWarning(w));
+      const key = formatAddonWarning(w);
+      nextKeys.add(key);
+      if (!this.lastAddonWarningKeys.has(key)) {
+        this.logger.warn(key);
+      }
     }
+    this.lastAddonWarningKeys = nextKeys;
     const validatedFields = sanitizedFields as FieldDef<unknown>[];
 
     const flattenedFields = this.fieldProcessors.memoizedFlattenFields(validatedFields, registry);
