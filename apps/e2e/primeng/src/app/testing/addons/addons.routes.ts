@@ -27,6 +27,41 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getAddonsScenario('password-toggle') },
   },
+  {
+    path: 'multi-addons',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAddonsScenario('multi-addons') },
+  },
+  {
+    path: 'severity-variants',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAddonsScenario('severity-variants') },
+  },
+  {
+    path: 'labelled-button',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAddonsScenario('labelled-button') },
+  },
+  {
+    path: 'disabled-addon',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAddonsScenario('disabled-addon') },
+  },
+  {
+    path: 'reset-preset',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAddonsScenario('reset-preset') },
+  },
+  {
+    path: 'decorative-button',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAddonsScenario('decorative-button') },
+  },
+  {
+    path: 'inline-action',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAddonsScenario('inline-action') },
+  },
 ];
 
 export default routes;

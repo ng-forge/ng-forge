@@ -1,7 +1,14 @@
 import { TestSuite } from '../shared/types';
 import { clearButtonScenario } from './scenarios/clear-button.scenario';
+import { decorativeButtonScenario } from './scenarios/decorative-button.scenario';
+import { disabledAddonScenario } from './scenarios/disabled-addon.scenario';
 import { iconPrefixScenario } from './scenarios/icon-prefix.scenario';
+import { inlineActionScenario } from './scenarios/inline-action.scenario';
+import { labelledButtonScenario } from './scenarios/labelled-button.scenario';
+import { multiAddonsScenario } from './scenarios/multi-addons.scenario';
 import { passwordToggleScenario } from './scenarios/password-toggle.scenario';
+import { resetPresetScenario } from './scenarios/reset-preset.scenario';
+import { severityVariantsScenario } from './scenarios/severity-variants.scenario';
 import { textCurrencyScenario } from './scenarios/text-currency.scenario';
 
 export const addonsSuite: TestSuite = {
@@ -9,7 +16,19 @@ export const addonsSuite: TestSuite = {
   title: 'Addons',
   description: 'Prefix / suffix addon kinds on prime-input — pi-icon, pi-button, text, presets.',
   path: '/test/addons',
-  scenarios: [iconPrefixScenario, clearButtonScenario, textCurrencyScenario, passwordToggleScenario],
+  scenarios: [
+    iconPrefixScenario,
+    clearButtonScenario,
+    textCurrencyScenario,
+    passwordToggleScenario,
+    multiAddonsScenario,
+    severityVariantsScenario,
+    labelledButtonScenario,
+    disabledAddonScenario,
+    resetPresetScenario,
+    decorativeButtonScenario,
+    inlineActionScenario,
+  ],
 };
 
 export function getAddonsScenario(testId: string) {
