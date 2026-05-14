@@ -133,6 +133,9 @@ export type { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from 
 // Logic & Expression Types
 export type { ConditionalExpression, HttpCondition, AsyncCondition, EvaluationContext, LogicConfig, StateLogicConfig } from './models';
 
+// Custom Function Types (sync — for inline fn alternatives + customFnConfig)
+export type { CustomFunction } from './core/expressions/custom-function-types';
+
 // Async Custom Function Types
 export type { AsyncDerivationFunction, AsyncConditionFunction } from './core/expressions/async-custom-function-types';
 

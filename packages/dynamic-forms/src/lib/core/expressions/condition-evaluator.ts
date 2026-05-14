@@ -22,7 +22,13 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
       return evaluateJavaScriptExpression(expression, context);
 
     case 'custom': {
-      const customFn = context.customFunctions?.[expression.functionName];
+      if (expression.fn && expression.functionName) {
+        context.logger.warn(
+          'Both "fn" and "functionName" are set on custom condition. Inline "fn" takes precedence; "functionName" is ignored.',
+        );
+      }
+
+      const customFn = expression.fn ?? (expression.functionName ? context.customFunctions?.[expression.functionName] : undefined);
       if (!customFn) {
         context.logger.error('Custom function not found:', expression.functionName);
         return false;
@@ -31,7 +37,7 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
       try {
         return !!customFn(context);
       } catch (error) {
-        context.logger.error('Error executing custom function:', expression.functionName, error);
+        context.logger.error('Error executing custom function:', expression.functionName ?? '<inline>', error);
         return false;
       }
     }

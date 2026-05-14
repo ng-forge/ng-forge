@@ -209,4 +209,103 @@ describe('createAsyncConditionLogicFunction', () => {
 
     expect(result).toBe(false);
   });
+
+  describe('inline asyncFn alternative', () => {
+    it('accepts an inline asyncFn returning a Promise', () => {
+      const inlineFn = vi.fn(async () => true);
+
+      const condition: AsyncCondition = {
+        type: 'async',
+        asyncFn: inlineFn,
+        pendingValue: false,
+      };
+
+      const result = runInInjectionContext(injector, () => {
+        const fn = createAsyncConditionLogicFunction(condition);
+        const ctx = createMockFieldContext('test');
+        return fn(ctx);
+      });
+
+      // Returns pendingValue synchronously — Promise not yet resolved
+      expect(result).toBe(false);
+    });
+
+    it('accepts an inline asyncFn returning an Observable', () => {
+      const inlineFn = vi.fn(() => of(true));
+
+      const condition: AsyncCondition = {
+        type: 'async',
+        asyncFn: inlineFn,
+        pendingValue: false,
+      };
+
+      const result = runInInjectionContext(injector, () => {
+        const fn = createAsyncConditionLogicFunction(condition);
+        const ctx = createMockFieldContext('test');
+        return fn(ctx);
+      });
+
+      expect(result).toBe(false);
+    });
+
+    it('does not require registration when asyncFn is set', () => {
+      // No registration call here — relies solely on inline asyncFn.
+      const inlineFn = vi.fn(async () => true);
+
+      const condition: AsyncCondition = {
+        type: 'async',
+        asyncFn: inlineFn,
+        pendingValue: true,
+      };
+
+      const result = runInInjectionContext(injector, () => {
+        const fn = createAsyncConditionLogicFunction(condition);
+        const ctx = createMockFieldContext('test');
+        return fn(ctx);
+      });
+
+      // Returns pendingValue; no "function not found" warning should be emitted.
+      expect(result).toBe(true);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('warns and prefers inline asyncFn when both forms are set', () => {
+      const registered = vi.fn(async () => false);
+      const inline = vi.fn(async () => true);
+      functionRegistry.registerAsyncConditionFunction('registered', registered);
+
+      // Cast — public XOR rejects this at compile time, but JSON-loaded configs
+      // can still produce both keys at runtime.
+      const condition = {
+        type: 'async',
+        asyncFunctionName: 'registered',
+        asyncFn: inline,
+        pendingValue: true,
+      } as unknown as AsyncCondition;
+
+      runInInjectionContext(injector, () => {
+        const fn = createAsyncConditionLogicFunction(condition);
+        const ctx = createMockFieldContext('test');
+        fn(ctx);
+      });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Both "asyncFn" and "asyncFunctionName" are set'));
+    });
+
+    it('does not return a cached LogicFn from a string-keyed sibling for inline asyncFn configs', () => {
+      // Two distinct inline functions in two distinct condition objects
+      // produce two distinct LogicFn instances — they must not collide in the cache.
+      const a = vi.fn(async () => true);
+      const b = vi.fn(async () => false);
+
+      const condA: AsyncCondition = { type: 'async', asyncFn: a, pendingValue: false };
+      const condB: AsyncCondition = { type: 'async', asyncFn: b, pendingValue: false };
+
+      const [fn1, fn2] = runInInjectionContext(injector, () => {
+        return [createAsyncConditionLogicFunction(condA), createAsyncConditionLogicFunction(condB)];
+      });
+
+      expect(fn1).not.toBe(fn2);
+    });
+  });
 });

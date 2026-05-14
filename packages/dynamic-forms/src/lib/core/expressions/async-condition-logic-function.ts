@@ -34,12 +34,22 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
   const pendingValue = condition.pendingValue ?? false;
   const debounceMs = condition.debounceMs ?? 300;
 
-  // Check function cache
-  const cacheKey = stableStringify(condition);
+  if (condition.asyncFn && condition.asyncFunctionName) {
+    logger.warn(
+      'Both "asyncFn" and "asyncFunctionName" are set on async condition. Inline "asyncFn" takes precedence; "asyncFunctionName" is ignored.',
+    );
+  }
 
-  const cached = cacheService.asyncConditionFunctionCache.get(cacheKey);
-  if (cached) {
-    return cached as LogicFn<TValue, boolean>;
+  // Skip cross-condition caching when an inline function is used: stableStringify
+  // cannot distinguish two different inline functions, which would cause cache hits
+  // to wrongly reuse a LogicFn closing over a different function reference.
+  const cacheKey = condition.asyncFn ? undefined : stableStringify(condition);
+
+  if (cacheKey !== undefined) {
+    const cached = cacheService.asyncConditionFunctionCache.get(cacheKey);
+    if (cached) {
+      return cached as LogicFn<TValue, boolean>;
+    }
   }
 
   // Each condition needs its own per-field signal store.
@@ -80,8 +90,11 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
         const asyncResource = rxResource({
           params: () => debouncedTrigger() ?? undefined,
           stream: ({ params: triggerKey }) => {
-            // Look up the async function at call time (fresh reference)
-            const asyncFn = functionRegistry.getAsyncConditionFunction(condition.asyncFunctionName);
+            // Inline `asyncFn` wins; otherwise look up the registered function at call time
+            // (fresh reference, in case the registry was updated after LogicFn creation).
+            const asyncFn =
+              condition.asyncFn ??
+              (condition.asyncFunctionName ? functionRegistry.getAsyncConditionFunction(condition.asyncFunctionName) : undefined);
             if (!asyncFn) {
               logger.warn(
                 `Async Condition - function '${condition.asyncFunctionName}' not found. ` +
@@ -150,6 +163,8 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
     return resultResource.value();
   };
 
-  cacheService.asyncConditionFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
+  if (cacheKey !== undefined) {
+    cacheService.asyncConditionFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
+  }
   return fn;
 }
