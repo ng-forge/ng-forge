@@ -267,7 +267,7 @@ function tryApplyDerivation(
   const { derivationLogger } = context;
 
   // HTTP and async entries are processed asynchronously in their own streams — skip in sync loop
-  if (entry.http || entry.asyncFunctionName) {
+  if (entry.http || entry.asyncFunctionName || entry.asyncFn) {
     return { applied: false, fieldKey: entry.fieldKey };
   }
 
@@ -628,9 +628,11 @@ function formatDerivationError(entry: DerivationEntry, phase: 'compute' | 'apply
     ? `expression: "${entry.expression.substring(0, 50)}${entry.expression.length > 50 ? '...' : ''}"`
     : entry.functionName
       ? `function: "${entry.functionName}"`
-      : entry.value !== undefined
-        ? 'static value'
-        : 'unknown source';
+      : entry.fn
+        ? 'inline fn'
+        : entry.value !== undefined
+          ? 'static value'
+          : 'unknown source';
 
   return `${ERROR_PREFIX} Failed to ${phase} derivation (field: ${entry.fieldKey}, ${source}): ${message}`;
 }
@@ -715,7 +717,7 @@ export function applyDerivationsForTrigger(
 ): DerivationProcessingResult {
   // Filter entries by trigger type, excluding HTTP and async entries (processed in async streams)
   const filteredEntries = collection.entries.filter((entry) => {
-    if (entry.http || entry.asyncFunctionName) return false;
+    if (entry.http || entry.asyncFunctionName || entry.asyncFn) return false;
     if (trigger === 'onChange') {
       return !entry.trigger || entry.trigger === 'onChange';
     }

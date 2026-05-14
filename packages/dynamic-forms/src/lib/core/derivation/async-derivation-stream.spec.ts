@@ -65,11 +65,13 @@ describe('createAsyncDerivationStream', () => {
   }
 
   function createAsyncEntry(fieldKey: string, options: Partial<DerivationEntry> = {}): DerivationEntry {
+    const useInline = options.asyncFn !== undefined;
     return {
       fieldKey,
       dependsOn: options.dependsOn ?? ['productId'],
       condition: options.condition ?? true,
-      asyncFunctionName: options.asyncFunctionName ?? 'fetchValue',
+      asyncFunctionName: options.asyncFunctionName ?? (useInline ? undefined : 'fetchValue'),
+      asyncFn: options.asyncFn,
       trigger: options.trigger ?? 'onChange',
       isShorthand: options.isShorthand ?? false,
       stopOnUserOverride: options.stopOnUserOverride,
@@ -465,6 +467,92 @@ describe('createAsyncDerivationStream', () => {
 
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('array field'));
       expect(emissions).toHaveLength(0);
+    });
+  });
+
+  describe('inline asyncFn alternative', () => {
+    it('calls and applies an inline asyncFn returning Observable', () => {
+      const { form, values } = createMockForm({ productId: 'abc', price: 0 });
+      const formValueSignal = signal<Record<string, unknown>>({ productId: 'abc', price: 0 });
+
+      const inlineFn = vi.fn().mockReturnValue(of(123));
+
+      const entry = createAsyncEntry('price', {
+        dependsOn: ['productId'],
+        asyncFn: inlineFn,
+      });
+
+      // No registration on context — relies solely on inline fn.
+      const context = createContext(form, formValueSignal, {
+        asyncDerivationFunctions: () => ({}),
+      });
+      const stream$ = createAsyncDerivationStream(entry, formValue$, context);
+      stream$.subscribe();
+
+      formValue$.next({ productId: 'abc', price: 0 });
+      formValue$.next({ productId: 'xyz', price: 0 });
+      vi.advanceTimersByTime(300);
+
+      expect(inlineFn).toHaveBeenCalledTimes(1);
+      expect(values.price).toBe(123);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('calls and applies an inline asyncFn returning a Promise', async () => {
+      const { form, values } = createMockForm({ productId: 'abc', price: 0 });
+      const formValueSignal = signal<Record<string, unknown>>({ productId: 'abc', price: 0 });
+
+      const inlineFn = vi.fn(async () => 77);
+
+      const entry = createAsyncEntry('price', {
+        dependsOn: ['productId'],
+        asyncFn: inlineFn,
+      });
+
+      const context = createContext(form, formValueSignal, {
+        asyncDerivationFunctions: () => ({}),
+      });
+      const stream$ = createAsyncDerivationStream(entry, formValue$, context);
+      stream$.subscribe();
+
+      formValue$.next({ productId: 'abc', price: 0 });
+      formValue$.next({ productId: 'xyz', price: 0 });
+      vi.advanceTimersByTime(300);
+
+      // Let the microtask flush the Promise resolution
+      await vi.runAllTimersAsync();
+
+      expect(inlineFn).toHaveBeenCalledTimes(1);
+      expect(values.price).toBe(77);
+    });
+
+    it('inline asyncFn wins and warns when both forms are set', () => {
+      const { form, values } = createMockForm({ productId: 'abc', price: 0 });
+      const formValueSignal = signal<Record<string, unknown>>({ productId: 'abc', price: 0 });
+
+      const inline = vi.fn().mockReturnValue(of(111));
+      const registered = vi.fn().mockReturnValue(of(222));
+
+      const entry = createAsyncEntry('price', {
+        dependsOn: ['productId'],
+        asyncFunctionName: 'registered',
+        asyncFn: inline,
+      });
+
+      const context = createContext(form, formValueSignal, {
+        asyncDerivationFunctions: () => ({ registered }),
+      });
+      const stream$ = createAsyncDerivationStream(entry, formValue$, context);
+      stream$.subscribe();
+
+      formValue$.next({ productId: 'abc', price: 0 });
+      formValue$.next({ productId: 'xyz', price: 0 });
+      vi.advanceTimersByTime(300);
+
+      expect(values.price).toBe(111);
+      expect(inline).toHaveBeenCalled();
+      expect(registered).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Both "asyncFn" and "asyncFunctionName" are set'));
     });
   });
 });

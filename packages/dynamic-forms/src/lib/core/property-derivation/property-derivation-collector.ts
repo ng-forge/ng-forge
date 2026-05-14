@@ -98,6 +98,7 @@ function createPropertyDerivationEntryFromDerivation(
     value: config.value,
     expression: config.expression,
     functionName: config.functionName,
+    fn: (config as { fn?: PropertyDerivationEntry['fn'] }).fn,
     trigger,
     debounceMs,
     debugName: config.debugName,

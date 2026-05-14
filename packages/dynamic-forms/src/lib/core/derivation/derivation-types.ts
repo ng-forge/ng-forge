@@ -1,5 +1,6 @@
 import type { FormFieldStateMap } from '../../models/expressions/field-state-context';
 import { HttpRequestConfig } from '../../models/http/http-request-config';
+import type { AsyncDerivationFunction } from '../expressions/async-custom-function-types';
 import { BaseDerivationEntry } from './derivation-entry-base';
 
 /**
@@ -28,10 +29,17 @@ export interface DerivationEntry extends BaseDerivationEntry {
   /**
    * Name of a registered async derivation function.
    *
-   * Mutually exclusive with `value`, `expression`, `functionName`, and `http`.
+   * Mutually exclusive with `value`, `expression`, `functionName`, `asyncFn`, and `http`.
    * Processed asynchronously in a dedicated RxJS stream, not in the sync loop.
    */
   asyncFunctionName?: string;
+
+  /**
+   * Inline async derivation function (code-only authoring).
+   * Mutually exclusive with `asyncFunctionName`. NOT JSON-serializable.
+   * Processed asynchronously in a dedicated RxJS stream, not in the sync loop.
+   */
+  asyncFn?: AsyncDerivationFunction;
 
   /**
    * Expression to extract the derived value from an HTTP response.

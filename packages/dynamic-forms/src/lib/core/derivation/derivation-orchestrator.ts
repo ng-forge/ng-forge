@@ -428,7 +428,7 @@ export class DerivationOrchestrator {
     toObservable(this.derivationCollection, { injector: this.injector })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((collection) => {
-        const asyncEntries = collection?.entries.filter((entry) => entry.asyncFunctionName) ?? [];
+        const asyncEntries = collection?.entries.filter((entry) => entry.asyncFunctionName || entry.asyncFn) ?? [];
 
         if (asyncEntries.length === 0) {
           this.teardownAsyncFunctionStreams();
@@ -486,10 +486,15 @@ export class DerivationOrchestrator {
    * Used for smart teardown comparison.
    */
   private computeAsyncEntryKeys(entries: DerivationEntry[]): Set<string> {
+    // For inline `asyncFn` entries, we generate a per-entry unique token so
+    // smart-teardown treats them as distinct identities — JSON.stringify on
+    // a function would otherwise produce `undefined`, collapsing distinct
+    // inline functions into a single key.
     return new Set(
-      entries.map((entry) => {
+      entries.map((entry, index) => {
         const config = {
           asyncFunctionName: entry.asyncFunctionName,
+          asyncFnId: entry.asyncFn ? `inline:${index}` : undefined,
           dependsOn: entry.dependsOn,
           debounceMs: entry.debounceMs,
           stopOnUserOverride: entry.stopOnUserOverride,
@@ -546,12 +551,13 @@ function warnAboutWildcardDependencies(logger: Logger, entries: DerivationEntry[
     (entry) =>
       !entry.http &&
       !entry.asyncFunctionName &&
-      entry.functionName &&
+      !entry.asyncFn &&
+      (entry.functionName || entry.fn) &&
       (!entry.originalConfig?.dependsOn || entry.originalConfig.dependsOn.length === 0),
   );
 
   if (implicitWildcards.length > 0) {
-    const derivationDescs = implicitWildcards.map((e) => `${e.fieldKey} (${e.functionName})`);
+    const derivationDescs = implicitWildcards.map((e) => `${e.fieldKey} (${e.functionName ?? '<inline fn>'})`);
     logger.warn(
       'Derivation: custom functions without explicit dependsOn detected. ' +
         `These run on EVERY form change, which may impact performance (form has ${fieldCount} fields). ` +

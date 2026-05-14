@@ -80,10 +80,18 @@ export function createAsyncDerivationStream(
     return EMPTY;
   }
 
-  if (!entry.asyncFunctionName) {
+  if (!entry.asyncFunctionName && !entry.asyncFn) {
     return EMPTY;
   }
 
+  if (entry.asyncFn && entry.asyncFunctionName) {
+    context.logger.warn(
+      `${LOG_PREFIX} Both "asyncFn" and "asyncFunctionName" are set on derivation for '${entry.fieldKey}'. ` +
+        `Inline "asyncFn" takes precedence; "asyncFunctionName" is ignored.`,
+    );
+  }
+
+  const inlineAsyncFn = entry.asyncFn;
   const asyncFunctionName = entry.asyncFunctionName;
   const debounceMs = entry.debounceMs ?? DEFAULT_ASYNC_DEBOUNCE_MS;
 
@@ -136,8 +144,8 @@ export function createAsyncDerivationStream(
         const asyncDerivationFunctions = context.asyncDerivationFunctions?.();
         const externalData = context.externalData?.();
 
-        // Look up the async function
-        const asyncFn = asyncDerivationFunctions?.[asyncFunctionName];
+        // Inline `asyncFn` wins; otherwise look up the registered function.
+        const asyncFn = inlineAsyncFn ?? (asyncFunctionName ? asyncDerivationFunctions?.[asyncFunctionName] : undefined);
         if (!asyncFn) {
           context.logger.warn(
             `${LOG_PREFIX} Async derivation function '${asyncFunctionName}' not found for field '${entry.fieldKey}'. ` +

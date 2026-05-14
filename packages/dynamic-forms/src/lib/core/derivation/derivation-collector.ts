@@ -4,6 +4,7 @@ import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { DerivationLogicConfig, hasTargetProperty, isDerivationLogicConfig } from '../../models/logic/logic-config';
 import { extractStringDependencies } from '../cross-field/cross-field-detector';
 import { topologicalSort } from './derivation-sorter';
+import type { BaseDerivationEntry } from './derivation-entry-base';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { extractDependenciesFromConfig } from './extract-dependencies';
 import { traverseFieldsWithContext } from './field-traversal';
@@ -331,9 +332,11 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
     value: config.value,
     expression: config.expression,
     functionName: config.functionName,
+    fn: (config as { fn?: BaseDerivationEntry['fn'] }).fn,
     http: config.http,
     responseExpression: config.responseExpression,
     asyncFunctionName: config.asyncFunctionName,
+    asyncFn: (config as { asyncFn?: DerivationEntry['asyncFn'] }).asyncFn,
     trigger,
     debounceMs,
     isShorthand: false,

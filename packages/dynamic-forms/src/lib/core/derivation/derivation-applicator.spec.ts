@@ -94,6 +94,9 @@ describe('derivation-applicator', () => {
       value: options.value,
       expression: options.expression,
       functionName: options.functionName,
+      fn: options.fn,
+      asyncFunctionName: options.asyncFunctionName,
+      asyncFn: options.asyncFn,
       trigger: options.trigger ?? 'onChange',
       isShorthand: options.isShorthand ?? false,
       stopOnUserOverride: options.stopOnUserOverride,
@@ -255,6 +258,76 @@ describe('derivation-applicator', () => {
 
         expect(result.errorCount).toBeGreaterThanOrEqual(1);
         expect(logger.error).toHaveBeenCalled();
+      });
+
+      describe('inline fn alternative', () => {
+        it('calls and applies inline fn result', () => {
+          const { form, values } = createMockForm({ country: 'Germany', currency: '' });
+          formValueSignal.set({ country: 'Germany', currency: '' });
+
+          const inlineFn = vi.fn().mockReturnValue('EUR');
+
+          const collection = createCollection([createEntry('currency', { fn: inlineFn })]);
+
+          const context: DerivationApplicatorContext = {
+            formValue: formValueSignal,
+            rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+            logger,
+            derivationLogger: createMockDerivationLogger(),
+          };
+
+          const result = applyDerivations(collection, context);
+
+          expect(inlineFn).toHaveBeenCalled();
+          expect(result.appliedCount).toBeGreaterThanOrEqual(1);
+          expect(values.currency).toBe('EUR');
+        });
+
+        it('inline fn does not require derivationFunctions registration', () => {
+          const { form, values } = createMockForm({ country: 'Germany', currency: '' });
+          formValueSignal.set({ country: 'Germany', currency: '' });
+
+          const collection = createCollection([createEntry('currency', { fn: () => 'EUR' })]);
+
+          // No derivationFunctions on context — should still work.
+          const context: DerivationApplicatorContext = {
+            formValue: formValueSignal,
+            rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+            logger,
+            derivationLogger: createMockDerivationLogger(),
+          };
+
+          const result = applyDerivations(collection, context);
+
+          expect(result.appliedCount).toBeGreaterThanOrEqual(1);
+          expect(values.currency).toBe('EUR');
+          expect(logger.error).not.toHaveBeenCalled();
+        });
+
+        it('inline fn wins and warns when both fn and functionName are set', () => {
+          const { form, values } = createMockForm({ country: 'Germany', currency: '' });
+          formValueSignal.set({ country: 'Germany', currency: '' });
+
+          const registered = vi.fn().mockReturnValue('USD');
+          const inline = vi.fn().mockReturnValue('EUR');
+
+          const collection = createCollection([createEntry('currency', { fn: inline, functionName: 'registered' })]);
+
+          const context: DerivationApplicatorContext = {
+            formValue: formValueSignal,
+            rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+            derivationFunctions: { registered },
+            logger,
+            derivationLogger: createMockDerivationLogger(),
+          };
+
+          applyDerivations(collection, context);
+
+          expect(values.currency).toBe('EUR');
+          expect(inline).toHaveBeenCalled();
+          expect(registered).not.toHaveBeenCalled();
+          expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Both "fn" and "functionName" are set'));
+        });
       });
     });
 
