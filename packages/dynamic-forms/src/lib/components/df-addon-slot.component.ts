@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, signal, Type } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, Injector, input, signal, Type } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { AnyAddon } from '../models/addon/addon-def';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
@@ -55,6 +55,7 @@ import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 export class DfAddonSlot {
   private readonly registry = injectAddonKindRegistry();
   private readonly logger = inject(DynamicFormLogger);
+  private readonly hostInjector = inject(Injector);
 
   readonly addon = input.required<AnyAddon>();
   /**
@@ -71,12 +72,8 @@ export class DfAddonSlot {
   protected readonly slotAttr = computed(() => this.addon().slot);
   protected readonly className = computed(() => this.addon().className ?? null);
 
-  /**
-   * `hidden` resolved from `DynamicValue<boolean>` to a `Signal<boolean>`.
-   * Re-resolves when the addon identity changes (e.g., reactive config update).
-   */
-  private readonly hiddenSignal = linkedSignal(() => resolveDynamicValue(this.addon().hidden, false));
-  protected readonly isHidden = computed(() => this.hiddenSignal()());
+  /** `hidden` resolved from `DynamicValue<boolean>` to a flat `Signal<boolean>`. */
+  protected readonly isHidden = computed(() => resolveDynamicValue(this.addon().hidden, false, this.hostInjector)());
 
   /** Kind component, resolved asynchronously from the registry. */
   private readonly resolvedComponentSignal = signal<Type<unknown> | undefined>(undefined);

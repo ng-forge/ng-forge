@@ -215,4 +215,23 @@ test.describe('Addons', () => {
       await expect(scenario).toHaveScreenshot('inline-action.png');
     });
   });
+
+  test.describe('actionRef (registered handler)', () => {
+    test('dispatches through the addon-action registry to the named handler', async ({ page, helpers }) => {
+      await page.goto('/#/test/addons/action-ref');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('action-ref');
+      const input = scenario.locator('input[pInputText]');
+      const starButton = scenario.locator('p-button[aria-label="Star"] button').first();
+
+      await expect(input).toHaveValue('');
+      await starButton.click();
+      await expect(input).toHaveValue('*');
+      await starButton.click();
+      await expect(input).toHaveValue('**');
+
+      await expect(scenario).toHaveScreenshot('action-ref.png');
+    });
+  });
 });

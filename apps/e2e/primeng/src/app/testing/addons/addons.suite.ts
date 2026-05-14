@@ -1,4 +1,5 @@
 import { TestSuite } from '../shared/types';
+import { actionRefScenario } from './scenarios/action-ref.scenario';
 import { clearButtonScenario } from './scenarios/clear-button.scenario';
 import { decorativeButtonScenario } from './scenarios/decorative-button.scenario';
 import { disabledAddonScenario } from './scenarios/disabled-addon.scenario';
@@ -28,6 +29,7 @@ export const addonsSuite: TestSuite = {
     resetPresetScenario,
     decorativeButtonScenario,
     inlineActionScenario,
+    actionRefScenario,
   ],
 };
 

@@ -62,6 +62,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getAddonsScenario('inline-action') },
   },
+  {
+    path: 'action-ref',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAddonsScenario('action-ref') },
+  },
 ];
 
 export default routes;

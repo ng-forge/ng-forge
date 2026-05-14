@@ -96,7 +96,10 @@ export function validateFieldAddons(
     }
 
     // Inline `action: () => void` dropped from JSON-source configs (function
-    // doesn't survive serialization).
+    // doesn't survive serialization). The stripped shape is NOT re-fed to
+    // `kindDef.validate(...)` — built-in kinds don't require `action`, so
+    // skipping the re-check matches their current contract. A future kind
+    // that DOES require `action` would need to declare `jsonSafe: false`.
     if (source === 'json') {
       const inlineAction = (addon as { action?: unknown }).action;
       if (typeof inlineAction === 'function') {
@@ -105,13 +108,10 @@ export function validateFieldAddons(
           fieldKey: field.key,
           reason: `inline 'action' function on kind '${kindDef.kind}'`,
         });
-        // Strip the function and keep the rest of the addon — usable if it
-        // also has a preset/actionRef, otherwise rendered as decorative.
         const sanitized = { ...addon } as Record<string, unknown>;
         delete sanitized.action;
         // Cast through unknown — the original AnyAddon shape minus a
-        // structural `action` key is still a valid addon shape at runtime;
-        // TS can't narrow this generically across the discriminated union.
+        // structural `action` key is still a valid addon shape at runtime.
         survivors.push(sanitized as unknown as AnyAddon);
         continue;
       }

@@ -1080,8 +1080,10 @@ export class FormStateManager<
 
   private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: FormMode, registry: Map<string, FieldTypeDefinition>): FormSetup {
     const normalizedFields = normalizeSimplifiedArrays(fields);
-    // Validate after normalization so simplified array templates are already expanded
-    // into full ArrayField.fields and are reachable during traversal.
+    // Two validation passes run after normalization so simplified array templates
+    // are already expanded into full ArrayField.fields and reachable during traversal:
+    // 1. Structural — duplicate keys, unknown field types, invalid regex patterns.
+    // 2. Addon pass below — strips invalid/unsupported addons with lenient warnings.
     validateFormConfig(normalizedFields, registry, this.logger);
 
     // Addon pass — strip invalid / unsupported addon entries and log a warning

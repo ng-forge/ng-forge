@@ -4,7 +4,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePrimeNG } from 'primeng/config';
 import { PRIMENG_EMBER_THEME } from '@ng-forge/styling';
 import { appRoutes } from './app.routes';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { provideAddonActions, provideDynamicForm, type AddonActionContext } from '@ng-forge/dynamic-forms';
 import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 import { DEMO_WRAPPERS } from '@ng-forge/examples-shared-ui';
 
@@ -17,6 +17,17 @@ export const appConfig: ApplicationConfig = {
     providePrimeNG({
       theme: PRIMENG_EMBER_THEME,
     }),
-    provideDynamicForm(...withPrimeNGFields(), ...DEMO_WRAPPERS),
+    provideDynamicForm(
+      ...withPrimeNGFields(),
+      ...DEMO_WRAPPERS,
+      provideAddonActions({
+        // Used by the `actionRef` e2e scenario: appends '*' to the field value
+        // so the dispatch is observable without needing real side effects.
+        appendStar: (ctx: AddonActionContext) => {
+          const current = typeof ctx.value === 'string' ? ctx.value : '';
+          ctx.setValue?.(`${current}*`);
+        },
+      }),
+    ),
   ],
 };

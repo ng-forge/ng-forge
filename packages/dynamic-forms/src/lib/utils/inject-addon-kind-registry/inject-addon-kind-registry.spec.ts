@@ -5,10 +5,10 @@ import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '../../models/addon/addon-kind';
 import { ADDON_KIND_COMPONENT_CACHE, injectAddonKindRegistry } from './inject-addon-kind-registry';
 
-@Component({ standalone: true, template: '' })
+@Component({ template: '' })
 class IconKindComponent {}
 
-@Component({ standalone: true, template: '' })
+@Component({ template: '' })
 class ButtonKindComponent {}
 
 function makeRegistryEntry<T extends AddonKindDefinition>(entry: T): T {

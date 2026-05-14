@@ -194,7 +194,7 @@ export const ADDON_KINDS: AddonKindInfo[] = [
       },
       preset: {
         name: 'preset',
-        type: "'clear' | 'reset' | 'submit' | 'paste' | 'copy' | 'toggle-password-visibility' | string",
+        type: "'clear' | 'reset' | 'paste' | 'copy' | 'toggle-password-visibility' | string",
         description: 'Built-in preset action. Mutually exclusive with `actionRef` and `action`. Adapters may extend the preset union.',
         required: false,
       },

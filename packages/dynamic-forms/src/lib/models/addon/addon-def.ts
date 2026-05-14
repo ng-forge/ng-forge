@@ -83,6 +83,13 @@ export interface TemplateAddon extends BaseAddon {
 /**
  * Renders an arbitrary Angular component as the addon body.
  *
+ * The loader returns either a component class directly or a module with a
+ * `default` export. For non-default exports, unwrap with `.then(m => m.X)`:
+ *
+ * ```ts
+ * { kind: 'component', component: () => import('./my').then(m => m.MyComponent) }
+ * ```
+ *
  * @codeOnly The `component` loader is a function and cannot survive
  * `JSON.stringify`/`parse`. The lenient validator drops this kind when the
  * config originated from JSON (set via `validateFormConfig({ source: 'json' })`).

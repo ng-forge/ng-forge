@@ -7,7 +7,7 @@ import { AnyAddon, TextAddon } from '../models/addon/addon-def';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { DfAddonSlot } from './df-addon-slot.component';
 
-@Component({ standalone: true, template: 'icon-rendered' })
+@Component({ template: 'icon-rendered' })
 class IconAddonStub {}
 
 interface LoggerCapture {
@@ -159,6 +159,42 @@ describe('DfAddonSlot — dispatcher', () => {
       await Promise.resolve();
       fixture.detectChanges();
       expect(el.style.display).toBe('');
+    });
+  });
+
+  describe('happy-path render', () => {
+    it('renders the resolved kind component and forwards inputs', async () => {
+      const { fixture, el } = setup({
+        kinds: [{ kind: 'text', loadComponent: () => Promise.resolve(IconAddonStub) }],
+        addon: TEXT_ADDON,
+      });
+      // Allow the loader microtask + the explicitEffect that captures it to settle.
+      await Promise.resolve();
+      await Promise.resolve();
+      fixture.detectChanges();
+
+      // The stub component renders 'icon-rendered' as its template.
+      expect(el.textContent).toContain('icon-rendered');
+    });
+
+    it('synchronously renders on a cache hit (no microtask gap)', async () => {
+      // Prime the loader once so the second slot uses the synchronous fast path
+      // in `<df-addon-slot>` (the `cached` branch at the top of the effect).
+      const { fixture: warmup } = setup({
+        kinds: [{ kind: 'text', loadComponent: () => Promise.resolve(IconAddonStub) }],
+        addon: TEXT_ADDON,
+      });
+      await Promise.resolve();
+      await Promise.resolve();
+      warmup.detectChanges();
+
+      // Second instance under the same TestBed (and thus the same root
+      // ADDON_KIND_COMPONENT_CACHE) hits the cache synchronously.
+      const fixture2 = TestBed.createComponent(DfAddonSlot);
+      fixture2.componentRef.setInput('addon', TEXT_ADDON);
+      fixture2.detectChanges();
+
+      expect((fixture2.nativeElement as HTMLElement).textContent).toContain('icon-rendered');
     });
   });
 

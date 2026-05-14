@@ -14,11 +14,15 @@ export const BUILT_IN_ADDON_KINDS: readonly AddonKindDefinition[] = [
     loadComponent: () => import('../addons/text-addon.component').then((m) => m.TextAddonComponent),
     validate: (addon, fieldKey) => {
       const text = (addon as { text?: unknown }).text;
-      // Empty strings are rejected too — a text addon with no rendered glyph
-      // would render an empty span. The validator drops the addon with a
-      // lenient warning so the form keeps rendering.
-      if (typeof text !== 'string' || text.length === 0) {
-        throw new DynamicFormError(`Addon kind 'text' requires a non-empty 'text' field (field: '${fieldKey}').`);
+      // Validates structural presence: rejects missing / null / non-string-non-callable,
+      // and rejects literal empty strings. DynamicText values that resolve to empty
+      // at runtime (signal/observable yielding '') are NOT caught here — they're
+      // legal as far as the config is concerned, just render an empty span.
+      if (text === undefined || text === null) {
+        throw new DynamicFormError(`Addon kind 'text' requires a 'text' field (field: '${fieldKey}').`);
+      }
+      if (typeof text === 'string' && text.length === 0) {
+        throw new DynamicFormError(`Addon kind 'text' requires a non-empty 'text' string (field: '${fieldKey}').`);
       }
     },
   },

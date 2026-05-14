@@ -51,6 +51,10 @@ export async function runPiPresetAction(
     }
 
     case 'paste': {
+      if (typeof navigator === 'undefined' || !navigator.clipboard) {
+        collaborators.logger.warn(`preset 'paste' requires a browser clipboard API (not available in this environment).`);
+        return;
+      }
       try {
         const text = await navigator.clipboard.readText();
         collaborators.fieldValueSetter?.(text);
@@ -61,6 +65,10 @@ export async function runPiPresetAction(
     }
 
     case 'copy': {
+      if (typeof navigator === 'undefined' || !navigator.clipboard) {
+        collaborators.logger.warn(`preset 'copy' requires a browser clipboard API (not available in this environment).`);
+        return;
+      }
       try {
         await navigator.clipboard.writeText(String(ctx.value ?? ''));
       } catch (error) {

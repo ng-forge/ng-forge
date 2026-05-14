@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, Injector, input } from '@angular/core';
 import {
   ADDON_ACTION_REGISTRY,
   AddonActionContext,
@@ -55,6 +55,7 @@ export class PiButtonAddonComponent {
   private readonly valueWriter = inject(PRIME_INPUT_VALUE_WRITER, { optional: true });
   private readonly fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
   private readonly logger = inject(DynamicFormLogger);
+  private readonly hostInjector = inject(Injector);
 
   readonly addon = input.required<PiButtonAddon>();
   /**
@@ -72,11 +73,9 @@ export class PiButtonAddonComponent {
     return icon ? `pi pi-${icon}` : '';
   });
 
-  // Reactive loading / disabled — DynamicValue<boolean> normalised through resolveDynamicValue.
-  private readonly loadingSignal = linkedSignal(() => resolveDynamicValue(this.addon().loading, false));
-  protected readonly isLoading = computed(() => this.loadingSignal()());
-  private readonly disabledSignal = linkedSignal(() => resolveDynamicValue(this.addon().disabled, false));
-  protected readonly isDisabled = computed(() => this.disabledSignal()());
+  // Reactive loading / disabled — DynamicValue<boolean> resolved to a flat Signal<boolean>.
+  protected readonly isLoading = computed(() => resolveDynamicValue(this.addon().loading, false, this.hostInjector)());
+  protected readonly isDisabled = computed(() => resolveDynamicValue(this.addon().disabled, false, this.hostInjector)());
 
   protected onClick(event: unknown): void {
     const addon = this.addon();
@@ -115,13 +114,13 @@ export class PiButtonAddonComponent {
     }
 
     if (addon.actionRef !== undefined) {
-      const handler = this.actionRegistry.get(addon.actionRef as string);
+      const handler = this.actionRegistry.get(addon.actionRef);
       if (handler) {
         handler(ctx);
       } else {
         this.logger.warn(
-          `pi-button: actionRef '${String(addon.actionRef)}' is not registered. ` +
-            `Did you call provideAddonActions({ ${String(addon.actionRef)}: ... })?`,
+          `pi-button: actionRef '${addon.actionRef}' is not registered. ` +
+            `Did you call provideAddonActions({ ${addon.actionRef}: ... })?`,
         );
       }
       return;

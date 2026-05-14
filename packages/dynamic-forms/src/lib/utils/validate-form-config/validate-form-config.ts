@@ -46,6 +46,12 @@ export interface ValidatedFormConfig {
  * thrown. The form keeps rendering even when the backend ships an addon the
  * FE doesn't understand.
  *
+ * `<df-dynamic-form>` already runs this internally at form init — calling
+ * the public helper AND passing the original config to the form will
+ * double-emit warnings. Use this entry point only when you need the
+ * sanitized config or warning list outside the form (e.g., admin-UI
+ * diagnostics, build-time lints).
+ *
  * Must be called within an Angular injection context — typically inside
  * an admin-UI component or a `runInInjectionContext()` block on the server.
  *
