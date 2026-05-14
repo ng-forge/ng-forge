@@ -131,9 +131,10 @@ test.describe('Addons', () => {
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('labelled-button');
-      const button = scenario.locator('p-button[aria-label="Search"], p-button:has-text("Search")').first();
+      const button = scenario.locator('p-button:has-text("Search")').first();
       await expect(button).toBeVisible();
-      await expect(button.locator('i.pi.pi-search')).toBeVisible();
+      // PrimeNG renders [icon] as a <span class="pi pi-search">, not <i>.
+      await expect(button.locator('.pi.pi-search')).toBeVisible();
       await expect(button).toContainText('Search');
 
       await expect(scenario).toHaveScreenshot('labelled-button.png');
