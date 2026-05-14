@@ -222,8 +222,20 @@ Each iteration spawns its own directive instance. Adding/removing options via An
 Some component libraries (Ionic web components, certain PrimeNG controls) wrap a native input inside shadow DOM that you can't reach with a template selector. In those cases the wrapper element itself is the canonical control from the user's perspective. Add `NgForgeHostControl` to your component's `hostDirectives` so meta + aria land on the host:
 
 ```typescript
+import { Component } from '@angular/core';
+import { injectNgForgeField, NgForgeFieldHost, NgForgeHostControl } from '@ng-forge/dynamic-forms/integration';
+
 @Component({
-  hostDirectives: [NgForgeFieldHost, NgForgeHostControl],
+  selector: 'df-ionic-toggle',
+  hostDirectives: [
+    // Order matters — NgForgeFieldHost must come first.
+    // NgForgeHostControl's constructor injects the parent NgForgeField,
+    // and Angular instantiates hostDirectives in array order on the same
+    // element injector. List Shell+Field (via NgForgeFieldHost) BEFORE
+    // NgForgeHostControl so the parent exists when the marker constructs.
+    NgForgeFieldHost,
+    NgForgeHostControl,
+  ],
   template: `<ion-toggle [formField]="ngf.field()">{{ ngf.label() | dynamicText | async }}</ion-toggle>`,
 })
 export default class IonicToggleField {
@@ -231,7 +243,7 @@ export default class IonicToggleField {
 }
 ```
 
-`NgForgeHostControl` is selectorless — it's only used via `hostDirectives`, never as a template attribute.
+`NgForgeHostControl` is selectorless — it's only used via `hostDirectives`, never as a template attribute. Reversing the order (`[NgForgeHostControl, NgForgeFieldHost]`) causes `inject(NgForgeField)` inside the marker's constructor to fail with NG0203 because the parent isn't on the element injector yet.
 
 ### Quick decision rule
 
@@ -330,6 +342,63 @@ export function weightedChoiceFieldMapper(fieldDef: WeightedChoiceField): Signal
 ```
 
 Reuse `buildValueFieldInputs` (exported from `/integration`) to get the standard 10 keys without rewriting them, then layer your extra keys on top.
+
+### Writing a custom action / button mapper
+
+Action fields (buttons, submits, array-mutation buttons) compose `NgForgeActionHost` instead of `NgForgeFieldHost`. Their mapper emits a different key set: `key`, `className`, `label`, `disabled`, `hidden`, `tabIndex`, `event`, `eventArgs`, `eventContext`, `props`. `NgForgeAction.dispatch()` reads `event` + `eventArgs` and resolves any tokens (`$key`, `$index`, `$arrayKey`, `formValue`) against the ambient `ARRAY_CONTEXT` injection token, falling back to the static `eventContext` input.
+
+The built-in `buttonFieldMapper` covers the generic case. For preconfigured events (submit, next/previous-page, array mutations) ng-forge ships `submitButtonFieldMapper`, `nextButtonFieldMapper`, `previousButtonFieldMapper`, `addArrayItemButtonMapper`, `prependArrayItemButtonMapper`, `insertArrayItemButtonMapper`, `removeArrayItemButtonMapper`, `popArrayItemButtonMapper`, `shiftArrayItemButtonMapper` — each one wires the `event` class internally so the field definition doesn't have to.
+
+You'd write a custom action mapper for a button that dispatches a custom `FormEvent` subclass with a non-standard payload shape, or for a button whose event-arg resolution differs from the built-in tokens.
+
+Example: a "save draft" button that dispatches a custom `SaveDraftEvent` with the current form value snapshot:
+
+```typescript
+import { computed, inject, Signal } from '@angular/core';
+import { ARRAY_CONTEXT, FieldDef, FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
+import { buildBaseInputs, DEFAULT_PROPS } from '@ng-forge/dynamic-forms';
+import type { ButtonField } from '@ng-forge/dynamic-forms/integration';
+import { SaveDraftEvent } from './events/save-draft.event';
+
+export function saveDraftButtonMapper<TProps>(fieldDef: ButtonField<TProps, SaveDraftEvent>): Signal<Record<string, unknown>> {
+  const defaultProps = inject(DEFAULT_PROPS);
+  const ctx = inject(FIELD_SIGNAL_CONTEXT);
+  // ARRAY_CONTEXT is optional — present when the button is rendered inside an array item.
+  const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+
+  return computed(() => {
+    const base = buildBaseInputs(fieldDef, defaultProps());
+    return {
+      ...base,
+      // The button-event surface — NgForgeAction reads these inputs verbatim.
+      event: SaveDraftEvent,
+      eventArgs: fieldDef.eventArgs,
+      // Provide a fallback context when the button is rendered outside any array.
+      // NgForgeAction prefers ARRAY_CONTEXT when present; eventContext is only
+      // consulted when ARRAY_CONTEXT is absent.
+      eventContext: arrayContext ? undefined : { key: fieldDef.key, formValue: ctx.value() },
+    };
+  });
+}
+```
+
+Three contracts the mapper must honor:
+
+- **The `event` input must be a class reference** (a `FormEventConstructor<TEvent>`), not an instance. `NgForgeAction.dispatch()` calls `new event(...args)` internally via `EventBus.dispatch`.
+- **`eventArgs` carries tokens, not resolved values.** Token resolution happens inside `dispatch()` at click time, using the current `ARRAY_CONTEXT.index()` signal so dispatched indices are always live. Resolving args at mapper time would freeze the index at the moment the mapper ran.
+- **`eventContext` is the fallback path.** When `ARRAY_CONTEXT` is provided (button is inside an array), it wins. When absent (button at form root), `NgForgeAction` falls back to `eventContext()`, then to `{ key: this.key() }`.
+
+Register with `valueHandling: 'exclude'` and `renderReadyWhen: []` since action fields don't carry a value or wait for `field` to bind:
+
+```typescript
+{
+  name: 'saveDraft',
+  loadComponent: () => import('./save-draft-button.component'),
+  mapper: saveDraftButtonMapper,
+  valueHandling: 'exclude',
+  renderReadyWhen: [],
+}
+```
 
 ## Required-input forwarding & renderReadyWhen
 
