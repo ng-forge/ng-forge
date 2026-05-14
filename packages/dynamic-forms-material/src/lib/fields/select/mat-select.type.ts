@@ -15,4 +15,5 @@ export interface MatSelectProps extends SelectProps {
 
 export type MatSelectField<T> = SelectField<T, MatSelectProps>;
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type MatSelectComponent = ValueFieldComponent<MatSelectField<ValueType>>;

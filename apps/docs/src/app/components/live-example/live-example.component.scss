@@ -6,6 +6,13 @@
   margin: 1.5rem 0;
 }
 
+.live-example-heading {
+  font-size: $text-lg;
+  font-weight: 600;
+  margin: 0 0 $space-3;
+  color: var(--text-primary);
+}
+
 // Wrapper keeps skeleton + container stacked.
 // overflow:visible is required — overlay panels (CDK datepickers, Ionic modals,
 // PrimeNG date/select overlays) render inside the shadow root and must escape

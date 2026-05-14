@@ -32,29 +32,30 @@ Renders a submit button that triggers form submission. Automatically disabled wh
 
 <docs-adapter-props field="submit"></docs-adapter-props>
 
-#### Example
-
-<docs-live-example scenario="examples/button" hideForCustom="true"></docs-live-example>
+<docs-live-example scenario="examples/button" hideForCustom="true" showHeading="true"></docs-live-example>
 
 ## button
 
-Generic action button for custom event handling.
+Generic action button. Dispatches a form `event` when clicked — subscribe to the event on the form to handle the click.
 
 ```typescript
+import { FormResetEvent } from '@ng-forge/dynamic-forms';
+
 {
   key: 'resetBtn',
   type: 'button',
   label: 'Reset',
+  event: FormResetEvent,
   props: {
-    onClick: (context) => context.form.reset(),
+    type: 'button',   // HTML button type: 'button' | 'submit' | 'reset'
   }
 }
 ```
 
-**Core Props:**
+**Core Properties:**
 
+- `event`: Form event constructor dispatched on click (e.g. `FormResetEvent`, `FormClearEvent`, or a custom `FormEvent` subclass) — **required**
 - `label`: Button text
-- `onClick`: Callback invoked when the button is clicked, receives the form context
 
 #### Adapter Props
 

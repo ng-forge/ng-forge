@@ -16,3 +16,4 @@ export { type TestFormConfig, type TestConfig, type TestResult, type ComponentTe
 export { default as TestInputHarnessComponent } from './harnesses/test-input.harness';
 export { default as TestCheckboxHarnessComponent } from './harnesses/test-checkbox.harness';
 export { default as TestSelectHarnessComponent } from './harnesses/test-select.harness';
+export { default as TestButtonHarnessComponent } from './harnesses/test-button.harness';

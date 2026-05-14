@@ -24,4 +24,5 @@ export interface PrimeTextareaProps extends TextareaProps {
  */
 export type PrimeTextareaField = TextareaField<PrimeTextareaProps>;
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type PrimeTextareaComponent = ValueFieldComponent<PrimeTextareaField>;

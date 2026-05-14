@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, Signal, ViewContainerRef, viewChild } from '@angular/core';
 import { pipe, switchMap } from 'rxjs';
 import { derivedFrom } from 'ngxtension/derived-from';
-import { FieldWrapperContract } from '../../models/wrapper-type';
+import { FieldWrapper } from '../../models/wrapper-type';
 import { DynamicText } from '../../models/types/dynamic-text';
 import { dynamicTextToObservable } from '../../utils/dynamic-text-to-observable';
 import { WrapperFieldInputs } from '../wrapper-field-inputs';
@@ -34,7 +34,7 @@ import { WrapperFieldInputs } from '../wrapper-field-inputs';
     '[class]': 'resolvedClasses()',
   },
 })
-export default class CssWrapperComponent implements FieldWrapperContract {
+export default class CssWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
 
   readonly cssClasses = input<DynamicText>();

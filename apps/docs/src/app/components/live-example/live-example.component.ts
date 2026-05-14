@@ -11,6 +11,9 @@ import { openInStackBlitz } from './stackblitz-project';
   selector: 'docs-live-example',
   template: `
     @if (!shouldHide()) {
+      @if (showHeading()) {
+        <h4 class="live-example-heading">Example</h4>
+      }
       <div class="live-example-wrapper">
         <div class="overlay-actions">
           @if (resolvedConfig()) {
@@ -65,6 +68,7 @@ import { openInStackBlitz } from './stackblitz-project';
 export class LiveExampleComponent {
   readonly scenario = input.required<string>();
   readonly hideForCustom = input(false, { transform: booleanAttribute });
+  readonly showHeading = input(false, { transform: booleanAttribute });
   protected readonly activeAdapter = inject(ActiveAdapterService);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 

@@ -62,13 +62,7 @@ import {
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { delay } from '@ng-forge/utils';
-import {
-  FieldWrapperContract,
-  WRAPPER_COMPONENT_CACHE,
-  WRAPPER_REGISTRY,
-  WrapperConfig,
-  WrapperTypeDefinition,
-} from '../../models/wrapper-type';
+import { FieldWrapper, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { NoopLogger } from '../../providers/features/logger/noop-logger';
@@ -107,7 +101,7 @@ class BenchLeaf {
   template: `<div class="wrap-a"><ng-container #fieldComponent></ng-container></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class BenchWrapA implements FieldWrapperContract {
+class BenchWrapA implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly title = input<string>();
   readonly fieldInputs = input<WrapperFieldInputs>();
@@ -118,7 +112,7 @@ class BenchWrapA implements FieldWrapperContract {
   template: `<div class="wrap-b"><ng-container #fieldComponent></ng-container></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class BenchWrapB implements FieldWrapperContract {
+class BenchWrapB implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly fieldInputs = input<WrapperFieldInputs>();
 }
@@ -128,7 +122,7 @@ class BenchWrapB implements FieldWrapperContract {
   template: `<div class="wrap-c"><ng-container #fieldComponent></ng-container></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class BenchWrapC implements FieldWrapperContract {
+class BenchWrapC implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly fieldInputs = input<WrapperFieldInputs>();
 }

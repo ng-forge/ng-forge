@@ -3,8 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { form } from '@angular/forms/signals';
 import { checkboxFieldMapper } from './checkbox-field-mapper';
 import { BaseCheckedField } from '../../definitions';
-import { FieldSignalContext } from '../types';
-import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FieldSignalContext } from '@ng-forge/dynamic-forms';
 
 describe('checkboxFieldMapper', () => {
   let parentInjector: EnvironmentInjector;
@@ -27,15 +26,13 @@ describe('checkboxFieldMapper', () => {
       value: initialValue,
       defaultValues: () => ({ [fieldKey]: false }),
       form: testForm,
-      defaultValidationMessages: options?.defaultValidationMessages,
     };
 
     return createEnvironmentInjector(
       [
-        {
-          provide: FIELD_SIGNAL_CONTEXT,
-          useValue: mockContext,
-        },
+        { provide: FIELD_SIGNAL_CONTEXT, useValue: mockContext },
+        { provide: DEFAULT_PROPS, useValue: signal(undefined) },
+        { provide: DEFAULT_VALIDATION_MESSAGES, useValue: signal(options?.defaultValidationMessages) },
       ],
       parentInjector,
     );
@@ -157,7 +154,7 @@ describe('checkboxFieldMapper', () => {
       });
     });
 
-    it('should include defaultValidationMessages from context', () => {
+    it('should NOT emit defaultValidationMessages — NgForgeField reads the DI token directly', () => {
       const fieldDef: BaseCheckedField<unknown> = {
         key: 'agreeTerms',
         type: 'checkbox',
@@ -170,7 +167,7 @@ describe('checkboxFieldMapper', () => {
 
       const inputs = testMapper(fieldDef, injector);
 
-      expect(inputs['defaultValidationMessages']).toEqual({ required: 'This checkbox is required' });
+      expect(inputs['defaultValidationMessages']).toBeUndefined();
     });
   });
 

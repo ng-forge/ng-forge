@@ -18,4 +18,5 @@ export interface PrimeRadioProps {
 
 export type PrimeRadioField<T> = RadioField<T, PrimeRadioProps>;
 
+/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
 export type PrimeRadioComponent = ValueFieldComponent<PrimeRadioField<ValueType>>;

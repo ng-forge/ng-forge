@@ -32,9 +32,7 @@ Numeric range selection.
 
 <docs-adapter-props field="slider"></docs-adapter-props>
 
-#### Example
-
-<docs-live-example scenario="examples/slider" hideForCustom="true"></docs-live-example>
+<docs-live-example scenario="examples/slider" hideForCustom="true" showHeading="true"></docs-live-example>
 
 ## datepicker
 
@@ -68,6 +66,4 @@ Date selection control.
 
 <docs-adapter-props field="datepicker"></docs-adapter-props>
 
-#### Example
-
-<docs-live-example scenario="examples/datepicker" hideForCustom="true"></docs-live-example>
+<docs-live-example scenario="examples/datepicker" hideForCustom="true" showHeading="true"></docs-live-example>

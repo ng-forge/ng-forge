@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Router, Scroll } from '@angular/router';
 import { filter, take } from 'rxjs';
 import { AdapterName } from '@ng-forge/sandbox-harness';
+import { CUSTOM_ONLY_ROUTES } from '../guards/content-redirect.guard';
 
 const DOCS_ADAPTERS = new Set<AdapterName>(['material', 'bootstrap', 'primeng', 'ionic', 'custom']);
 
@@ -32,27 +33,42 @@ export class ActiveAdapterService {
 
   switchTo(name: AdapterName): void {
     if (!DOCS_ADAPTERS.has(name)) return;
-    const segments = this.router.url.split('/');
-    const path = segments.slice(2).join('/') || 'getting-started';
+    // Parse via UrlTree so query/fragment text doesn't leak into the
+    // path comparison (router.url.split('/') would include them).
+    const tree = this.router.parseUrl(this.router.url);
+    const primarySegments = tree.root.children['primary']?.segments ?? [];
+    const currentPath =
+      primarySegments
+        .slice(1)
+        .map((s) => s.path)
+        .join('/') || 'getting-started';
+    // If switching away from "custom" while on a custom-only page (e.g.
+    // building-an-adapter), the redirect guard would bounce us straight
+    // back to /custom/<page>. Land on a sensible page on the target adapter
+    // instead. The custom-fields recipe is the closest analogue when the
+    // origin was the building-an-adapter guide.
+    const path = name !== 'custom' && CUSTOM_ONLY_ROUTES.includes(currentPath) ? 'recipes/custom-fields' : currentPath;
 
     if (!this.isBrowser) {
       void this.router.navigateByUrl(`/${name}/${path}`);
       return;
     }
 
-    // Preserve scroll position during adapter switch.
-    // The router's scrollPositionRestoration fires via the Scroll event, so we wait
-    // for it to complete, then restore our saved position in the next animation frame.
-    const scrollY = window.scrollY;
-
-    this.router.events
-      .pipe(
-        filter((e): e is Scroll => e instanceof Scroll),
-        take(1),
-      )
-      .subscribe(() => {
-        requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: 'instant' }));
-      });
+    // Preserve scroll position only when staying on the same page across
+    // adapters. If the target path differs (custom-only fallback above),
+    // the saved scrollY would point into a different document — let the
+    // router's default scroll-to-top behavior win.
+    if (path === currentPath) {
+      const scrollY = window.scrollY;
+      this.router.events
+        .pipe(
+          filter((e): e is Scroll => e instanceof Scroll),
+          take(1),
+        )
+        .subscribe(() => {
+          requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: 'instant' }));
+        });
+    }
 
     void this.router.navigateByUrl(`/${name}/${path}`);
   }

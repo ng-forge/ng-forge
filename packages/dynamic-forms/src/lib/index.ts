@@ -53,7 +53,7 @@ export { withValidationExecutionDefaults } from './providers/features/validation
 export type { ValidationExecutionConfig, ResolvedValidationExecutionConfig } from './models/validation-execution-config';
 
 // Wrapper Types
-export type { WrapperTypeDefinition, FieldWrapperContract } from './models/wrapper-type';
+export type { WrapperTypeDefinition, FieldWrapper } from './models/wrapper-type';
 export { isWrapperTypeDefinition, WRAPPER_REGISTRY } from './models/wrapper-type';
 
 // Wrapper Registration DX

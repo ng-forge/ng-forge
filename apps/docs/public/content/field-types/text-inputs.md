@@ -34,9 +34,7 @@ Text-based input with HTML5 type support.
 
 <docs-adapter-props field="input"></docs-adapter-props>
 
-#### Example
-
-<docs-live-example scenario="examples/input" hideForCustom="true"></docs-live-example>
+<docs-live-example scenario="examples/input" hideForCustom="true" showHeading="true"></docs-live-example>
 
 ## textarea
 
@@ -65,6 +63,4 @@ Multi-line text input.
 
 <docs-adapter-props field="textarea"></docs-adapter-props>
 
-#### Example
-
-<docs-live-example scenario="examples/textarea" hideForCustom="true"></docs-live-example>
+<docs-live-example scenario="examples/textarea" hideForCustom="true" showHeading="true"></docs-live-example>

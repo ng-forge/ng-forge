@@ -164,7 +164,7 @@ describe('Registry', () => {
 
     it('exposes the shared authoring contract string', () => {
       expect(WRAPPER_AUTHORING_CONTRACT).toBeTruthy();
-      expect(WRAPPER_AUTHORING_CONTRACT).toContain('FieldWrapperContract');
+      expect(WRAPPER_AUTHORING_CONTRACT).toContain('FieldWrapper');
       expect(WRAPPER_AUTHORING_CONTRACT).toContain("viewChild.required('fieldComponent'");
       expect(WRAPPER_AUTHORING_CONTRACT).toContain('@if');
       expect(WRAPPER_AUTHORING_CONTRACT).toContain('@defer');

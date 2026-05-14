@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { setupMetaTracking, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeField, setupMetaTracking, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { TextareaModule } from 'primeng/textarea';
 
 /**
- * A wrapper component for PrimeNG's textarea that implements FormValueControl.
- * This allows it to work with Angular's [field] directive from @angular/forms/signals.
+ * PrimeNG textarea wrapper implementing FormValueControl. Rendered inside
+ * `df-prime-textarea` — picks up meta + aria from the ambient parent
+ * NgForgeField via `setupMetaTracking` (selector: `'textarea'`).
  */
 @Component({
   selector: 'df-prime-textarea-control',
@@ -14,6 +15,7 @@ import { TextareaModule } from 'primeng/textarea';
   template: `
     <textarea
       pInputTextarea
+      [id]="inputId()"
       [ngModel]="value()"
       (ngModelChange)="value.set($event)"
       [placeholder]="placeholder()"
@@ -35,6 +37,7 @@ import { TextareaModule } from 'primeng/textarea';
 })
 export class PrimeTextareaControlComponent implements FormValueControl<string> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly parentField = inject(NgForgeField, { optional: true });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // FormValueControl implementation
@@ -62,6 +65,8 @@ export class PrimeTextareaControlComponent implements FormValueControl<string> {
   // PrimeNG-specific props
   // ─────────────────────────────────────────────────────────────────────────────
 
+  /** Id forwarded onto the inner <textarea> so the parent `<label [for]>` resolves correctly. */
+  readonly inputId = input<string>('');
   readonly placeholder = input<string>('');
   readonly rows = input<number>(4);
   readonly cols = input<number | undefined>(undefined);
@@ -76,28 +81,21 @@ export class PrimeTextareaControlComponent implements FormValueControl<string> {
   readonly tabIndex = input<number | undefined>(undefined);
   readonly autoResize = input<boolean>(false);
   readonly styleClass = input<string>('');
-  readonly meta = input<TextareaMeta>();
 
-  /** aria-describedby IDs passed from parent */
-  readonly ariaDescribedBy = input<string | null>(null);
+  // Meta + aria-describedby read from the ambient parent NgForgeField.
+  protected readonly meta = computed<TextareaMeta | undefined>(() => this.parentField?.meta() as TextareaMeta | undefined);
+  protected readonly ariaDescribedBy = computed<string | null>(() => this.parentField?.ariaDescribedBy() ?? null);
+
+  // Aria signals read from the ambient parent NgForgeField — matches the
+  // pattern in prime-datepicker-control / prime-select-control. Standalone
+  // use (no parent) lands false / null.
+  protected readonly ariaInvalid = computed<boolean>(() => this.parentField?.ariaInvalid() ?? false);
+  protected readonly ariaRequired = computed<true | null>(() => this.parentField?.ariaRequired() ?? null);
 
   constructor() {
+    this.parentField?.markClaimed();
     setupMetaTracking(this.elementRef, this.meta, { selector: 'textarea' });
   }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Computed ARIA attributes
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** aria-invalid: true when field is invalid AND touched */
-  protected readonly ariaInvalid = computed(() => {
-    return this.invalid() && this.touched();
-  });
-
-  /** aria-required: true if field is required, null otherwise */
-  protected readonly ariaRequired = computed(() => {
-    return this.required() ? true : null;
-  });
 
   /** Marks the field as touched when textarea loses focus */
   onBlur(): void {

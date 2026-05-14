@@ -189,7 +189,7 @@ describe('Lookup Tool', () => {
       expect(content).toContain('Registered Wrappers');
       expect(content).toContain('**css**');
       expect(content).toContain('Authoring Contract');
-      expect(content).toContain('FieldWrapperContract');
+      expect(content).toContain('FieldWrapper');
     });
 
     it('brief wrappers overview lists registered wrappers', async () => {

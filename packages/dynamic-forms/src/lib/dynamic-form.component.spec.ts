@@ -9,7 +9,7 @@ import TestSelectHarnessComponent from '../../testing/src/harnesses/test-select.
 import { FIELD_REGISTRY, FieldTypeDefinition } from './models/field-type';
 import { checkboxFieldMapper, optionsFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './providers/built-in-fields';
-import { FieldWrapperContract, WRAPPER_REGISTRY, WrapperTypeDefinition } from './models/wrapper-type';
+import { FieldWrapper, WRAPPER_REGISTRY, WrapperTypeDefinition } from './models/wrapper-type';
 import { ARRAY_CONTEXT } from './models/field-signal-context.token';
 import { ArrayContext } from './mappers/types';
 import { BaseCheckedField, BaseValueField } from './definitions';
@@ -43,7 +43,7 @@ type TestFormConfig = {
   template: `<div data-wrapper="parent"><ng-container #fieldComponent></ng-container></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestParentWrapperComponent implements FieldWrapperContract {
+class TestParentWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
 }
 
@@ -52,7 +52,7 @@ class TestParentWrapperComponent implements FieldWrapperContract {
   template: `<div data-wrapper="child" [attr.data-has-parent]="!!parent"><ng-container #fieldComponent></ng-container></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestChildWrapperComponent implements FieldWrapperContract {
+class TestChildWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly parent = inject(TestParentWrapperComponent);
 }
@@ -64,7 +64,7 @@ class TestChildWrapperComponent implements FieldWrapperContract {
   </div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestArrayContextWrapperComponent implements FieldWrapperContract {
+class TestArrayContextWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly arrayContext = inject(ARRAY_CONTEXT, { optional: true }) as ArrayContext | null;
 }

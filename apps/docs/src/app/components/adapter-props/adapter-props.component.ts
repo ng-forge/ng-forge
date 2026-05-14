@@ -337,21 +337,38 @@ const ADAPTER_PROPS_DATA = {
   shiftArrayItem: BUTTON_PROPS,
 } satisfies AdapterPropsData;
 
-interface CustomFieldGuide {
-  contract: 'ValueFieldComponent' | 'CheckedFieldComponent';
-  fieldInterface: string;
-}
+type CustomFieldGuide =
+  | {
+      kind: 'value';
+      mapper: 'valueFieldMapper' | 'checkboxFieldMapper' | 'optionsFieldMapper' | 'datepickerFieldMapper';
+      fieldInterface: string;
+      valueType: string;
+    }
+  | {
+      kind: 'button';
+      mapper: string;
+    };
 
 const CUSTOM_FIELD_GUIDES: Partial<Record<string, CustomFieldGuide>> = {
-  input: { contract: 'ValueFieldComponent', fieldInterface: 'InputField' },
-  textarea: { contract: 'ValueFieldComponent', fieldInterface: 'TextareaField' },
-  select: { contract: 'ValueFieldComponent', fieldInterface: 'SelectField' },
-  radio: { contract: 'ValueFieldComponent', fieldInterface: 'RadioField' },
-  checkbox: { contract: 'CheckedFieldComponent', fieldInterface: 'CheckboxField' },
-  toggle: { contract: 'CheckedFieldComponent', fieldInterface: 'ToggleField' },
-  'multi-checkbox': { contract: 'ValueFieldComponent', fieldInterface: 'MultiCheckboxField' },
-  slider: { contract: 'ValueFieldComponent', fieldInterface: 'SliderField' },
-  datepicker: { contract: 'ValueFieldComponent', fieldInterface: 'DatepickerField' },
+  input: { kind: 'value', mapper: 'valueFieldMapper', fieldInterface: 'InputField', valueType: 'string' },
+  textarea: { kind: 'value', mapper: 'valueFieldMapper', fieldInterface: 'TextareaField', valueType: 'string' },
+  select: { kind: 'value', mapper: 'optionsFieldMapper', fieldInterface: 'SelectField', valueType: 'unknown' },
+  radio: { kind: 'value', mapper: 'optionsFieldMapper', fieldInterface: 'RadioField', valueType: 'unknown' },
+  checkbox: { kind: 'value', mapper: 'checkboxFieldMapper', fieldInterface: 'CheckboxField', valueType: 'boolean' },
+  toggle: { kind: 'value', mapper: 'checkboxFieldMapper', fieldInterface: 'ToggleField', valueType: 'boolean' },
+  'multi-checkbox': { kind: 'value', mapper: 'optionsFieldMapper', fieldInterface: 'MultiCheckboxField', valueType: 'unknown[]' },
+  slider: { kind: 'value', mapper: 'valueFieldMapper', fieldInterface: 'SliderField', valueType: 'number' },
+  datepicker: { kind: 'value', mapper: 'datepickerFieldMapper', fieldInterface: 'DatepickerField', valueType: 'string' },
+  button: { kind: 'button', mapper: 'buttonFieldMapper' },
+  submit: { kind: 'button', mapper: 'submitButtonFieldMapper' },
+  next: { kind: 'button', mapper: 'nextButtonFieldMapper' },
+  previous: { kind: 'button', mapper: 'previousButtonFieldMapper' },
+  addArrayItem: { kind: 'button', mapper: 'addArrayItemButtonMapper' },
+  prependArrayItem: { kind: 'button', mapper: 'prependArrayItemButtonMapper' },
+  insertArrayItem: { kind: 'button', mapper: 'insertArrayItemButtonMapper' },
+  removeArrayItem: { kind: 'button', mapper: 'removeArrayItemButtonMapper' },
+  popArrayItem: { kind: 'button', mapper: 'popArrayItemButtonMapper' },
+  shiftArrayItem: { kind: 'button', mapper: 'shiftArrayItemButtonMapper' },
 };
 
 @Component({
@@ -380,27 +397,71 @@ export class DocsAdapterPropsComponent {
   readonly customSnippet = computed(() => {
     const guide = this.customGuide();
     if (!guide) return '';
-    const isChecked = guide.contract === 'CheckedFieldComponent';
-    const mapper = isChecked ? 'checkboxFieldMapper' : 'valueFieldMapper';
     const name = this.field();
-    const className = `My${guide.fieldInterface.replace('Field', '')}`;
-    return `import { Component, input } from '@angular/core';
-import type { ${guide.fieldInterface}, FieldMeta } from '@ng-forge/dynamic-forms/integration';
-import { ${mapper} } from '@ng-forge/dynamic-forms/integration';
-import type { ${guide.contract}, FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+    if (guide.kind === 'value') {
+      const className = `My${guide.fieldInterface.replace('Field', '')}`;
+      return `// my-${name}.component.ts
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  injectNgForgeField,
+  NgForgeControl,
+  NgForgeFieldHost,
+  type ${guide.fieldInterface},
+} from '@ng-forge/dynamic-forms/integration';
 
-@Component({ selector: 'my-${name}', template: '<!-- your template -->' })
-export default class ${className}Component implements ${guide.contract}<${guide.fieldInterface}> {
-  readonly field = input.required();
-  readonly key = input.required<string>();
+@Component({
+  selector: 'my-${name}',
+  imports: [NgForgeControl],
+  hostDirectives: [NgForgeFieldHost],
+  template: \`<!-- mark the control element with ngForgeControl so meta + aria land there -->\`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export default class ${className}Component {
+  protected readonly ngf = injectNgForgeField<${guide.valueType}>();
   readonly props = input<${guide.fieldInterface}['props']>();
-  readonly meta = input<FieldMeta>();
 }
+
+// my-${name}.type.ts
+import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { ${guide.mapper} } from '@ng-forge/dynamic-forms/integration';
 
 export const ${className}Type: FieldTypeDefinition = {
   name: '${name}',
-  loadComponent: () => import('./${name}.component'),
-  mapper: ${mapper},
+  loadComponent: () => import('./my-${name}.component'),
+  mapper: ${guide.mapper},
+};`;
+    }
+    const pascal = name.replace(/(^|-)([a-z])/g, (_, __, c: string) => c.toUpperCase());
+    const className = `My${pascal}`;
+    return `// my-${name}.component.ts
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { FormEvent } from '@ng-forge/dynamic-forms';
+import { injectNgForgeAction, NgForgeActionHost } from '@ng-forge/dynamic-forms/integration';
+
+@Component({
+  selector: 'my-${name}',
+  hostDirectives: [NgForgeActionHost],
+  template: \`
+    <button type="button" [disabled]="action.disabled()" (click)="action.dispatch()">
+      {{ action.label() }}
+    </button>
+  \`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export default class ${className}Component<TEvent extends FormEvent> {
+  protected readonly action = injectNgForgeAction<TEvent>();
+}
+
+// my-${name}.type.ts
+import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { ${guide.mapper} } from '@ng-forge/dynamic-forms/integration';
+
+export const ${className}Type: FieldTypeDefinition = {
+  name: '${name}',
+  loadComponent: () => import('./my-${name}.component'),
+  mapper: ${guide.mapper},
+  valueHandling: 'exclude',
+  renderReadyWhen: [],
 };`;
   });
 }
