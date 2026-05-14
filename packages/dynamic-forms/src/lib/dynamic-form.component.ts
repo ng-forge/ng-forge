@@ -105,16 +105,10 @@ export class DynamicForm<
   value = model<Partial<TModel> | undefined>(undefined);
 
   /**
-   * Where the form `config` originated — controls how lenient the
-   * addon-validator pass is on `config.fields[...].addons`.
-   *
-   * - `'inline'` (default): keeps every addon kind, including code-only
-   *   ones (`component`, inline `pi-button` `action: () => void`). Use
-   *   this for forms whose config is authored as TypeScript in the
-   *   application.
-   * - `'json'`: drops code-only kinds with a warning, because functions
-   *   don't survive `JSON.stringify` / `parse`. Use this when the config
-   *   was fetched from a backend or a form-builder UI.
+   * How lenient the addon validator is on `config.fields[...].addons`.
+   * `'inline'` (default) keeps everything; `'json'` drops code-only kinds
+   * with a warning. Read at form init and on every config swap — change
+   * `source` AND the config to force re-validation mid-flight.
    */
   source = input<'inline' | 'json'>('inline');
 

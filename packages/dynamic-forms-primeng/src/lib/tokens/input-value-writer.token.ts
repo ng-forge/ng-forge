@@ -1,33 +1,29 @@
-import { InjectionToken } from '@angular/core';
+import { inject, InjectionToken, isDevMode } from '@angular/core';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
 
 /**
- * Per-field writer that pushes a new value into the host input's
- * `FieldTree`. Provided at the `prime-input` field component level so addon
- * kinds (notably `pi-button` with `preset: 'clear' | 'reset' | 'paste'`)
- * can mutate the field value without re-deriving the form path themselves.
- *
- * The host component calls `bind(sink)` once during construction to supply
- * the writer with its `FieldTree`-aware sink — the closure stays internal
- * to the writer rather than mutating a public field on it.
+ * Per-field writer that pushes a value into the host input's `FieldTree`.
+ * `pi-button` presets (`clear` / `reset` / `paste`) call `write(...)`;
+ * the host component binds the sink once in its constructor.
  */
 export interface PrimeInputValueWriter {
-  /** Dispatch to the bound sink. No-op until `bind(...)` is called. */
   write(value: unknown): void;
-  /**
-   * @internal — called by `PrimeInputFieldComponent.constructor` to wire
-   * the writer to the host's field signal. Calls happen at click time, by
-   * which point the field signal is bound.
-   */
+  /** Single-bind. Last-write-wins; dev mode warns on double-bind. */
   bind(sink: (value: unknown) => void): void;
 }
 
-/** Factory used by `PrimeInputFieldComponent.providers`. Returns an unbound writer; the host binds it. */
 export function createPrimeInputValueWriter(): PrimeInputValueWriter {
+  const logger = inject(DynamicFormLogger, { optional: true });
   let sink: (value: unknown) => void = () => undefined;
+  let bound = false;
   return {
     write: (value) => sink(value),
     bind: (next) => {
+      if (isDevMode() && bound) {
+        logger?.warn('PrimeInputValueWriter.bind() called more than once — last sink wins.');
+      }
       sink = next;
+      bound = true;
     },
   };
 }
