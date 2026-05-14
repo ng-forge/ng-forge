@@ -3,6 +3,7 @@ import { FieldDef } from '../../definitions/base/field-def';
 import { ADDON_KIND_REGISTRY } from '../../models/addon/addon-kind';
 import { FormConfig } from '../../models/form-config';
 import { FIELD_REGISTRY } from '../../models/field-type';
+import { Logger } from '../../providers/features/logger/logger.interface';
 import { AddonWarning, formatAddonWarning } from './addon-warning';
 import { walkAndValidateAddons } from './validate-field-addons';
 
@@ -81,16 +82,18 @@ export function validateFormConfig(config: FormConfig, options: ValidateFormConf
 }
 
 /**
- * Default warning sink — emits each warning as a `console.warn` line. Adapter
- * tests / admin UIs can capture warnings from `validateFormConfig` directly
- * instead of relying on console output.
+ * Default warning sink. Pass a `DynamicFormLogger` to route through the
+ * form's configured logger (respects `NoopLogger` opt-out); omit it to
+ * fall back to `console.warn` for build-time / admin-UI use cases that
+ * run outside an Angular injection context.
  */
-export function logAddonWarnings(warnings: readonly AddonWarning[]): void {
+export function logAddonWarnings(warnings: readonly AddonWarning[], logger?: Logger): void {
   for (const w of warnings) {
-    // Match the in-app logger output by prepending the standard prefix —
-    // formatAddonWarning() returns a bare message so it composes cleanly
-    // with `logger.warn(...)` too (which adds the prefix itself).
-    console.warn('[Dynamic Forms]', formatAddonWarning(w));
+    if (logger) {
+      logger.warn(formatAddonWarning(w));
+    } else {
+      console.warn('[Dynamic Forms]', formatAddonWarning(w));
+    }
   }
 }
 
