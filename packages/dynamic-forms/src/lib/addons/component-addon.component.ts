@@ -4,6 +4,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ComponentAddon } from '../models/addon/addon-def';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { resolveDefaultExport } from '../utils/wrapper-chain/wrapper-chain';
+import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
 /**
  * Renderer for the universal `component` addon kind.
@@ -31,6 +32,8 @@ export class ComponentAddonComponent {
   private readonly logger = inject(DynamicFormLogger);
 
   readonly addon = input.required<ComponentAddon>();
+  /** Accepted for contract uniformity — `NgComponentOutlet` setInput is strict; every kind must declare it. */
+  readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   protected readonly inputs = computed(() => (this.addon().inputs ?? {}) as Record<string, unknown>);
 

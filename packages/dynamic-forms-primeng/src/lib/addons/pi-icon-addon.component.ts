@@ -1,6 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 import type { PiIconAddon } from '../types/addons';
 
 /**
@@ -21,6 +21,8 @@ import type { PiIconAddon } from '../types/addons';
 })
 export class PiIconAddonComponent {
   readonly addon = input.required<PiIconAddon>();
+  /** Accepted for contract uniformity — `NgComponentOutlet` setInput is strict; every kind must declare it. */
+  readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   protected readonly iconClass = computed(() => `pi pi-${this.addon().icon}`);
   protected readonly ariaLabel = computed(() => this.addon().ariaLabel);
