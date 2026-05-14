@@ -25,8 +25,8 @@ import { AsyncPipe } from '@angular/common';
       [rows]="props()?.rows ?? 4"
       [autoGrow]="props()?.autoGrow ?? false"
       [counter]="props()?.counter ?? false"
-      [minlength]="minLength()"
-      [maxlength]="maxLength()"
+      [minlength]="f().minLength?.()"
+      [maxlength]="f().maxLength?.()"
       [color]="props()?.color"
       [fill]="props()?.fill ?? 'outline'"
       [shape]="props()?.shape"
@@ -54,13 +54,6 @@ export default class IonicTextareaFieldComponent {
   protected readonly ngf = injectNgForgeField<string>();
 
   readonly props = input<IonicTextareaProps>();
-
-  // Length-validator → DOM wiring uses Signal Forms's setInputOnDirectives to copy
-  // FieldState.minLength / maxLength onto these camelCase-named inputs automatically.
-  // ion-textarea's underlying property is lowercase, so we forward via [minlength] /
-  // [maxlength] template bindings below. See the matching pattern in ionic-input.
-  readonly minLength = input<number | undefined>(undefined);
-  readonly maxLength = input<number | undefined>(undefined);
 
   constructor() {
     // ion-textarea encapsulates a native <textarea> in shadow DOM and does not automatically
