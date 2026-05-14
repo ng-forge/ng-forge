@@ -1,7 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, Injector, input, Signal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
-import { AnyAddon, DfAddonSlot, DynamicTextPipe, resolveDynamicValue, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
-import { injectNgForgeField, NgForgeControl, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
+import { DfAddonSlot, DynamicTextPipe, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import {
+  injectNgForgeAddons,
+  injectNgForgeField,
+  NgForgeAddons,
+  NgForgeControl,
+  NgForgeFieldHost,
+} from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
@@ -25,7 +31,7 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
     NgTemplateOutlet,
   ],
   styleUrl: '../../styles/_form-field.scss',
-  hostDirectives: [NgForgeFieldHost],
+  hostDirectives: [NgForgeFieldHost, { directive: NgForgeAddons, inputs: ['addons'] }],
   template: `
     <ng-template #control>
       <input
@@ -43,17 +49,17 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
       @if (ngf.label()) {
         <label [for]="inputId()" class="df-prime-label">{{ ngf.label() | dynamicText | async }}</label>
       }
-      @if (hasAddons()) {
+      @if (ngfa.hasAddons()) {
         <p-inputgroup>
-          @for (a of prefixAddons(); track $index) {
+          @for (a of ngfa.prefixAddons(); track $index) {
             <p-inputgroup-addon>
-              <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="hiddenSignalCache().get(a)" />
+              <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
             </p-inputgroup-addon>
           }
           <ng-container *ngTemplateOutlet="control" />
-          @for (a of suffixAddons(); track $index) {
+          @for (a of ngfa.suffixAddons(); track $index) {
             <p-inputgroup-addon>
-              <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="hiddenSignalCache().get(a)" />
+              <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
             </p-inputgroup-addon>
           }
         </p-inputgroup>
@@ -88,22 +94,17 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
 })
 export default class PrimeInputFieldComponent {
   private readonly primeNGConfig = inject(PRIMENG_CONFIG, { optional: true });
-  private readonly hostInjector = inject(Injector);
 
   protected readonly ngf = injectNgForgeField<string>();
+  protected readonly ngfa = injectNgForgeAddons<PrimeInputAddon>();
 
   readonly props = input<PrimeInputProps>();
 
   /**
-   * Addons rendered as siblings in a `<p-inputgroup>` wrapper. Mapped from
-   * `FieldDef.addons` by the runtime field mapper.
-   */
-  readonly addons = input<ReadonlyArray<PrimeInputAddon> | undefined>();
-
-  /**
-   * Wrapper-style host bag pushed by `DfFieldOutlet`. Forwarded to each
-   * `<df-addon-slot>` so kind components can read field state and resolve
-   * the form path without re-injecting `FIELD_SIGNAL_CONTEXT`.
+   * Wrapper-style host bag pushed by `DfFieldOutlet`. Declared at the
+   * component level so `setInputIfDeclared` (which uses
+   * `reflectComponentType`) can write it — `reflectComponentType` misses
+   * host-directive-forwarded inputs.
    */
   readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
@@ -113,9 +114,6 @@ export default class PrimeInputFieldComponent {
   private readonly valueWriter = inject(PRIME_INPUT_VALUE_WRITER);
 
   constructor() {
-    // Bind the writer to a sink that reads the current field signal at
-    // click time. The sink is held inside the writer (set via `bind()`,
-    // not by mutating a public field) so the writer surface stays clean.
     this.valueWriter.bind((value) =>
       this.ngf
         .field()()
@@ -125,51 +123,9 @@ export default class PrimeInputFieldComponent {
 
   protected readonly size = computed(() => this.props()?.size ?? this.primeNGConfig?.size);
   protected readonly variant = computed(() => this.props()?.variant ?? this.primeNGConfig?.variant);
-  /**
-   * Effective `type` attribute — override (set by addon presets like
-   * `'toggle-password-visibility'`) wins over the configured `props().type`.
-   */
+
+  /** Override (set by `toggle-password-visibility` preset) wins over `props().type`. */
   protected readonly effectiveType = computed(() => this.typeOverride() ?? this.props()?.type ?? 'text');
-
-  /**
-   * Per-addon `hidden` signal cache. `resolveDynamicValue` wraps Observable
-   * inputs in `toSignal` — and a fresh call inside a `computed` would create
-   * a new subscription on every re-evaluation. Caching keyed by addon
-   * identity guarantees each Observable is subscribed at most once per
-   * addon, and the host injector keeps the subscription alive for the life
-   * of the component. The cache itself is a `computed`, so it rebuilds when
-   * the addons array changes by identity.
-   */
-  // Keyed by `AnyAddon` rather than `PrimeInputAddon` so the template can
-  // index it from the `prefixAddons` / `suffixAddons` computeds (which
-  // widen to `AnyAddon` for the `<df-addon-slot [addon]>` binding).
-  protected readonly hiddenSignalCache = computed<ReadonlyMap<AnyAddon, Signal<boolean>>>(() => {
-    const addons = this.addons() ?? [];
-    const map = new Map<AnyAddon, Signal<boolean>>();
-    for (const a of addons) {
-      map.set(a as unknown as AnyAddon, resolveDynamicValue(a.hidden, false, this.hostInjector));
-    }
-    return map;
-  });
-
-  /**
-   * Computed views over the addons array, filtered by slot AND by resolved
-   * `hidden` state. An addon with `hidden: true` (or a hidden Signal that
-   * currently evaluates to true) is excluded — so the `<p-inputgroup>`
-   * wrapper drops out entirely when every addon is hidden, instead of
-   * rendering an empty group around the bare input.
-   */
-  protected readonly visibleAddons = computed(() => {
-    const addons = this.addons() ?? [];
-    const cache = this.hiddenSignalCache();
-    return addons.filter((a) => {
-      const isHidden = cache.get(a)?.() ?? false;
-      return !isHidden;
-    });
-  });
-  protected readonly hasAddons = computed(() => this.visibleAddons().length > 0);
-  protected readonly prefixAddons = computed(() => this.visibleAddons().filter((a) => a.slot === 'prefix') as ReadonlyArray<AnyAddon>);
-  protected readonly suffixAddons = computed(() => this.visibleAddons().filter((a) => a.slot === 'suffix') as ReadonlyArray<AnyAddon>);
 
   protected readonly inputClasses = computed(() => {
     const classes: string[] = [];
