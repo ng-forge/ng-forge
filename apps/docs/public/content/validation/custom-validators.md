@@ -52,6 +52,13 @@ ng-forge supports two patterns for custom validators:
 1. **Function-based** - Register reusable validator functions (best for complex logic, reusability)
 2. **Expression-based** - Inline JavaScript expressions (best for simple, one-off validations)
 
+Function-based validators have two interchangeable authoring forms:
+
+- **Registered (`functionName`)** — JSON-serializable; safe to ship in configs loaded from APIs, OpenAPI, or databases.
+- **Inline (`fn`)** — code-only, type-safe; skips the registry round-trip but cannot survive JSON serialization. `fn` and `functionName` are mutually exclusive — TypeScript rejects setting both, and at runtime an explicit warning is logged before the inline form wins.
+
+The same `fn` / `asyncFn` alternative is available on conditions and derivations — see [Inline functions vs registered names](#inline-functions-vs-registered-names) below.
+
 ## Expression-Based Validators
 
 For simple validation logic, use inline JavaScript expressions without registering functions.
@@ -205,6 +212,33 @@ const config = {
   },
 };
 ```
+
+### Inline Alternative (`fn`)
+
+For code-only projects, you can skip the registry round-trip and pass the validator directly:
+
+```typescript
+import { CustomValidator } from '@ng-forge/dynamic-forms';
+
+const noSpaces: CustomValidator = (ctx) => {
+  const value = ctx.value();
+  return typeof value === 'string' && value.includes(' ') ? { kind: 'noSpaces' } : null;
+};
+
+const config = {
+  fields: [
+    {
+      key: 'username',
+      type: 'input',
+      // No customFnConfig.validators entry required — the function lives on the validator config.
+      validators: [{ type: 'custom', fn: noSpaces }],
+      validationMessages: { noSpaces: 'Spaces are not allowed' },
+    },
+  ],
+};
+```
+
+`fn` and `functionName` are mutually exclusive (XOR at the type level). The inline form is **not** JSON-serializable — for configs loaded from APIs, OpenAPI, or databases, stick to `functionName`.
 
 ### FieldContext API
 
@@ -838,6 +872,26 @@ const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
 6. **Message Priority**: Use field-level messages for customization, form-level for common errors
 7. **Conditional Validation**: Use `when` property with `ConditionalExpression` for dynamic validators
 8. **Inverted Logic**: HTTP validators check validity, not data fetching success
+
+## Inline functions vs registered names
+
+Every validator/condition/derivation surface that accepts a `functionName` (or `asyncFunctionName`) also accepts an inline `fn` (or `asyncFn`):
+
+| Surface                       | Registered (JSON-safe)                                               | Inline (code-only)                                         |
+| ----------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Sync custom validator         | `{ type: 'custom', functionName }`                                   | `{ type: 'custom', fn }`                                   |
+| Async validator               | `{ type: 'async', functionName }`                                    | `{ type: 'async', fn }`                                    |
+| Function-based HTTP validator | `{ type: 'http', functionName }`                                     | `{ type: 'http', fn }`                                     |
+| Custom condition              | `{ type: 'custom', functionName }`                                   | `{ type: 'custom', fn }`                                   |
+| Async condition               | `{ type: 'async', asyncFunctionName }`                               | `{ type: 'async', asyncFn }`                               |
+| Function derivation           | `{ type: 'derivation', functionName }`                               | `{ type: 'derivation', fn }`                               |
+| Async function derivation     | `{ type: 'derivation', source: 'asyncFunction', asyncFunctionName }` | `{ type: 'derivation', source: 'asyncFunction', asyncFn }` |
+
+Rules of thumb:
+
+- Use **`functionName` / `asyncFunctionName`** for configs that travel over the wire — API responses, OpenAPI schemas, JSON files, database rows. The MCP server only emits the registered form.
+- Use **`fn` / `asyncFn`** for code-only configs in TypeScript when you don't need JSON serializability. The function reference is captured directly, with no registry indirection.
+- The two are **mutually exclusive**. TypeScript rejects setting both at compile time; if a JSON-loaded config sneaks both keys through at runtime, a warning is logged and the inline form wins.
 
 ## Related Documentation
 

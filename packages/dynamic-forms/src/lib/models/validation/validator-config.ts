@@ -1,3 +1,4 @@
+import type { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../../core/validation/validator-types';
 import { ConditionalExpression } from '../expressions/conditional-expression';
 import { HttpRequestConfig } from '../http/http-request-config';
 import { HttpValidationResponseMapping } from '../http/http-response-mapping';
@@ -25,12 +26,17 @@ export interface BuiltInValidatorConfig extends BaseValidatorConfig {
 }
 
 /**
- * Custom validator configuration using Angular's public FieldContext API
- * Returns ValidationError | ValidationError[] | null synchronously
+ * Custom validator configuration using Angular's public FieldContext API.
+ * Returns ValidationError | ValidationError[] | null synchronously.
  *
- * Supports two patterns:
- * 1. Function-based: { type: 'custom', functionName: 'myValidator' }
- * 2. Expression-based: { type: 'custom', expression: 'fieldValue === formValue.password', kind: 'passwordMismatch' }
+ * Three mutually exclusive authoring forms:
+ * 1. Registered function: `{ type: 'custom', functionName: 'myValidator' }`
+ * 2. Inline function (code-only): `{ type: 'custom', fn: (ctx) => ... }`
+ * 3. Expression-based: `{ type: 'custom', expression: 'fieldValue === formValue.password', kind: 'passwordMismatch' }`
+ *
+ * `fn` is NOT JSON-serializable — for code-only configs. For configs loaded from
+ * JSON / OpenAPI / databases, prefer `functionName` to reference a function
+ * registered in `customFnConfig.validators`.
  */
 export interface CustomValidatorConfig extends BaseValidatorConfig {
   /** Validator type identifier */
@@ -38,6 +44,12 @@ export interface CustomValidatorConfig extends BaseValidatorConfig {
 
   /** Name of registered validator function (function-based pattern) */
   functionName?: string;
+
+  /**
+   * Inline custom validator (code-only authoring).
+   * Mutually exclusive with `functionName`. NOT JSON-serializable.
+   */
+  fn?: CustomValidator;
 
   /** Optional parameters to pass to validator function */
   params?: Record<string, unknown>;
@@ -63,40 +75,92 @@ export interface CustomValidatorConfig extends BaseValidatorConfig {
 }
 
 /**
- * Async custom validator configuration using Angular's validateAsync API.
- * Returns Observable<ValidationError | ValidationError[] | null>.
+ * Shared fields for both branches of {@link AsyncValidatorConfig}.
  *
+ * @internal
  */
-export interface AsyncValidatorConfig extends BaseValidatorConfig {
+interface AsyncValidatorConfigShared extends BaseValidatorConfig {
   /** Validator type identifier. */
   type: 'async';
-
-  /** Name of registered async validator function */
-  functionName: string;
-
   /** Optional parameters to pass to validator function */
   params?: Record<string, unknown>;
 }
 
 /**
- * Function-based HTTP validator configuration — requires a registered function.
+ * Async custom validator configuration using Angular's `validateAsync` API.
+ * Returns Observable<ValidationError | ValidationError[] | null>.
  *
- * Uses Angular's `validateHttp` API. The function is registered via
- * `customFnConfig.httpValidators`.
+ * Two mutually exclusive authoring forms:
+ * - `functionName`: name of a function registered in `customFnConfig.asyncValidators`.
+ *   JSON-serializable; suitable for configs loaded from APIs, databases, or OpenAPI.
+ * - `fn`: inline async validator. NOT JSON-serializable; for code-only configs.
  *
- * Discriminated from `DeclarativeHttpValidatorConfig` by the presence of `functionName`.
- *
+ * Exactly one of `functionName` or `fn` must be set.
  */
-export interface FunctionHttpValidatorConfig extends BaseValidatorConfig {
+export type AsyncValidatorConfig =
+  | (AsyncValidatorConfigShared & {
+      /** Name of registered async validator function */
+      functionName: string;
+      /** Inline form is forbidden when `functionName` is set */
+      fn?: never;
+    })
+  | (AsyncValidatorConfigShared & {
+      /**
+       * Inline async validator. Mutually exclusive with `functionName`.
+       *
+       * NOT JSON-serializable — for code-only configs. For configs loaded
+       * from JSON / OpenAPI / databases, use `functionName` to reference
+       * a validator registered in `customFnConfig.asyncValidators`.
+       */
+      fn: AsyncCustomValidator;
+      /** Registered form is forbidden when `fn` is set */
+      functionName?: never;
+    });
+
+/**
+ * Shared fields for both branches of {@link FunctionHttpValidatorConfig}.
+ *
+ * @internal
+ */
+interface FunctionHttpValidatorConfigShared extends BaseValidatorConfig {
   /** Validator type identifier. */
   type: 'http';
-
-  /** Name of registered HTTP validator configuration */
-  functionName: string;
-
   /** Optional parameters to pass to HTTP validator */
   params?: Record<string, unknown>;
 }
+
+/**
+ * Function-based HTTP validator configuration. Uses Angular's `validateHttp` API.
+ *
+ * Two mutually exclusive authoring forms:
+ * - `functionName`: name of an HTTP validator registered in `customFnConfig.httpValidators`.
+ *   JSON-serializable.
+ * - `fn`: inline HTTP validator. NOT JSON-serializable; for code-only configs.
+ *
+ * Exactly one of `functionName` or `fn` must be set.
+ *
+ * Discriminated from `DeclarativeHttpValidatorConfig` by the presence of `functionName`
+ * or `fn` (and absence of `http` + `responseMapping`).
+ */
+export type FunctionHttpValidatorConfig =
+  | (FunctionHttpValidatorConfigShared & {
+      /** Name of registered HTTP validator configuration */
+      functionName: string;
+      /** Inline form is forbidden when `functionName` is set */
+      fn?: never;
+    })
+  | (FunctionHttpValidatorConfigShared & {
+      /**
+       * Inline HTTP validator. Mutually exclusive with `functionName`.
+       *
+       * NOT JSON-serializable — for code-only configs. For configs loaded
+       * from JSON / OpenAPI / databases, use `functionName` to reference
+       * an HTTP validator registered in `customFnConfig.httpValidators`.
+       */
+      fn: HttpCustomValidator;
+      /** Registered form is forbidden when `fn` is set */
+      functionName?: never;
+    });
 
 /**
  * Declarative HTTP validator configuration — fully JSON-serializable, no function registration required.
@@ -142,5 +206,5 @@ export type ValidatorConfig =
 export function isFunctionHttpValidator(
   config: FunctionHttpValidatorConfig | DeclarativeHttpValidatorConfig,
 ): config is FunctionHttpValidatorConfig {
-  return 'functionName' in config && !!config.functionName;
+  return ('functionName' in config && !!config.functionName) || ('fn' in config && typeof (config as { fn?: unknown }).fn === 'function');
 }

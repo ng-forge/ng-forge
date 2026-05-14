@@ -88,7 +88,7 @@ describe('BuiltInValidatorConfig - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('CustomValidatorConfig - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'type' | 'functionName' | 'params' | 'expression' | 'kind' | 'errorParams' | 'when';
+  type ExpectedKeys = 'type' | 'functionName' | 'fn' | 'params' | 'expression' | 'kind' | 'errorParams' | 'when';
   type ActualKeys = keyof CustomValidatorConfig;
 
   it('should have exactly the expected keys', () => {
@@ -130,6 +130,16 @@ describe('CustomValidatorConfig - Exhaustive Whitelist', () => {
       expectTypeOf<CustomValidatorConfig['when']>().toEqualTypeOf<ConditionalExpression | undefined>();
     });
   });
+
+  describe('inline fn alternative', () => {
+    it('accepts inline fn', () => {
+      const config = {
+        type: 'custom',
+        fn: () => null,
+      } as const satisfies CustomValidatorConfig;
+      expectTypeOf(config.fn).not.toBeUndefined();
+    });
+  });
 });
 
 // ============================================================================
@@ -137,7 +147,7 @@ describe('CustomValidatorConfig - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('AsyncValidatorConfig - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'type' | 'functionName' | 'params' | 'when';
+  type ExpectedKeys = 'type' | 'functionName' | 'fn' | 'params' | 'when';
   type ActualKeys = keyof AsyncValidatorConfig;
 
   it('should have exactly the expected keys', () => {
@@ -145,8 +155,10 @@ describe('AsyncValidatorConfig - Exhaustive Whitelist', () => {
   });
 
   describe('required keys', () => {
-    it('should have type and functionName as required', () => {
-      expectTypeOf<RequiredKeys<AsyncValidatorConfig>>().toEqualTypeOf<'type' | 'functionName'>();
+    // With XOR (functionName vs fn), neither alone is universally required —
+    // RequiredKeys for a union returns keys required in at least one member.
+    it('should have type, functionName, and fn as required-in-at-least-one-branch', () => {
+      expectTypeOf<RequiredKeys<AsyncValidatorConfig>>().toEqualTypeOf<'type' | 'functionName' | 'fn'>();
     });
   });
 
@@ -155,8 +167,8 @@ describe('AsyncValidatorConfig - Exhaustive Whitelist', () => {
       expectTypeOf<AsyncValidatorConfig['type']>().toEqualTypeOf<'async'>();
     });
 
-    it('functionName should be string', () => {
-      expectTypeOf<AsyncValidatorConfig['functionName']>().toEqualTypeOf<string>();
+    it('functionName should be string or undefined (XOR with fn)', () => {
+      expectTypeOf<AsyncValidatorConfig['functionName']>().toEqualTypeOf<string | undefined>();
     });
 
     it('params should be Record<string, unknown>', () => {
@@ -167,6 +179,37 @@ describe('AsyncValidatorConfig - Exhaustive Whitelist', () => {
       expectTypeOf<AsyncValidatorConfig['when']>().toEqualTypeOf<ConditionalExpression | undefined>();
     });
   });
+
+  describe('XOR shape', () => {
+    it('accepts the registered-name branch', () => {
+      const c: AsyncValidatorConfig = { type: 'async', functionName: 'check' };
+      expectTypeOf(c).toMatchTypeOf<AsyncValidatorConfig>();
+    });
+
+    it('accepts the inline-fn branch', () => {
+      const c: AsyncValidatorConfig = {
+        type: 'async',
+        fn: { params: () => ({}), factory: () => ({}) as never },
+      };
+      expectTypeOf(c).toMatchTypeOf<AsyncValidatorConfig>();
+    });
+
+    it('rejects both branches set simultaneously', () => {
+      // @ts-expect-error - cannot set both functionName and fn
+      const _bad: AsyncValidatorConfig = {
+        type: 'async',
+        functionName: 'check',
+        fn: { params: () => ({}), factory: () => ({}) as never },
+      };
+      void _bad;
+    });
+
+    it('rejects neither branch set', () => {
+      // @ts-expect-error - must set one of functionName or fn
+      const _bad: AsyncValidatorConfig = { type: 'async' };
+      void _bad;
+    });
+  });
 });
 
 // ============================================================================
@@ -174,7 +217,7 @@ describe('AsyncValidatorConfig - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('FunctionHttpValidatorConfig - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'type' | 'functionName' | 'params' | 'when';
+  type ExpectedKeys = 'type' | 'functionName' | 'fn' | 'params' | 'when';
   type ActualKeys = keyof FunctionHttpValidatorConfig;
 
   it('should have exactly the expected keys', () => {
@@ -182,8 +225,8 @@ describe('FunctionHttpValidatorConfig - Exhaustive Whitelist', () => {
   });
 
   describe('required keys', () => {
-    it('should have type and functionName as required', () => {
-      expectTypeOf<RequiredKeys<FunctionHttpValidatorConfig>>().toEqualTypeOf<'type' | 'functionName'>();
+    it('should have type, functionName, and fn as required-in-at-least-one-branch', () => {
+      expectTypeOf<RequiredKeys<FunctionHttpValidatorConfig>>().toEqualTypeOf<'type' | 'functionName' | 'fn'>();
     });
   });
 
@@ -192,8 +235,8 @@ describe('FunctionHttpValidatorConfig - Exhaustive Whitelist', () => {
       expectTypeOf<FunctionHttpValidatorConfig['type']>().toEqualTypeOf<'http'>();
     });
 
-    it('functionName should be string', () => {
-      expectTypeOf<FunctionHttpValidatorConfig['functionName']>().toEqualTypeOf<string>();
+    it('functionName should be string or undefined (XOR with fn)', () => {
+      expectTypeOf<FunctionHttpValidatorConfig['functionName']>().toEqualTypeOf<string | undefined>();
     });
 
     it('params should be Record<string, unknown>', () => {
@@ -202,6 +245,37 @@ describe('FunctionHttpValidatorConfig - Exhaustive Whitelist', () => {
 
     it('when should be ConditionalExpression', () => {
       expectTypeOf<FunctionHttpValidatorConfig['when']>().toEqualTypeOf<ConditionalExpression | undefined>();
+    });
+  });
+
+  describe('XOR shape', () => {
+    it('accepts the registered-name branch', () => {
+      const c: FunctionHttpValidatorConfig = { type: 'http', functionName: 'check' };
+      expectTypeOf(c).toMatchTypeOf<FunctionHttpValidatorConfig>();
+    });
+
+    it('accepts the inline-fn branch', () => {
+      const c: FunctionHttpValidatorConfig = {
+        type: 'http',
+        fn: { request: () => undefined, onSuccess: () => null },
+      };
+      expectTypeOf(c).toMatchTypeOf<FunctionHttpValidatorConfig>();
+    });
+
+    it('rejects both branches set simultaneously', () => {
+      // @ts-expect-error - cannot set both functionName and fn
+      const _bad: FunctionHttpValidatorConfig = {
+        type: 'http',
+        functionName: 'check',
+        fn: { request: () => undefined, onSuccess: () => null },
+      };
+      void _bad;
+    });
+
+    it('rejects neither branch set', () => {
+      // @ts-expect-error - must set one of functionName or fn
+      const _bad: FunctionHttpValidatorConfig = { type: 'http' };
+      void _bad;
     });
   });
 });

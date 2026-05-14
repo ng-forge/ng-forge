@@ -107,6 +107,35 @@ fields: [
 ],
 ```
 
+#### Inline alternative (`fn`)
+
+For code-only configs you can attach the function directly via `fn` and skip the `customFnConfig.derivations` registration. `fn` is mutually exclusive with `functionName` — TypeScript rejects setting both, and the runtime logs a warning + prefers `fn` if a JSON config sets both keys.
+
+```typescript
+import type { CustomFunction } from '@ng-forge/dynamic-forms';
+
+const calculateTax: CustomFunction = (ctx) => ctx.formValue.subtotal * getTaxRate(ctx.formValue.state);
+
+const config = {
+  fields: [
+    {
+      key: 'tax',
+      type: 'input',
+      readonly: true,
+      logic: [
+        {
+          type: 'derivation',
+          fn: calculateTax,
+          dependsOn: ['subtotal', 'state'],
+        },
+      ],
+    },
+  ],
+};
+```
+
+Use `functionName` when the config must survive JSON serialization (APIs, OpenAPI, databases, MCP). Use `fn` for code-only authoring where you'd rather not maintain a separate registry.
+
 ## Trigger Timing
 
 Control when derivations evaluate:

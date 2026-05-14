@@ -603,12 +603,30 @@ const formConfig = {
 
 **Async condition properties:**
 
-| Property            | Type      | Required | Default | Description                                         |
-| ------------------- | --------- | -------- | ------- | --------------------------------------------------- |
-| `type`              | `'async'` | Yes      | —       | Identifies this as an async condition               |
-| `asyncFunctionName` | `string`  | Yes      | —       | Name registered in `customFnConfig.asyncConditions` |
-| `pendingValue`      | `boolean` | No       | `false` | Value returned while the function is resolving      |
-| `debounceMs`        | `number`  | No       | `300`   | Debounce delay before re-evaluating (ms)            |
+| Property            | Type                     | Required | Default | Description                                               |
+| ------------------- | ------------------------ | -------- | ------- | --------------------------------------------------------- |
+| `type`              | `'async'`                | Yes      | —       | Identifies this as an async condition                     |
+| `asyncFunctionName` | `string`                 | XOR\*    | —       | Name registered in `customFnConfig.asyncConditions`       |
+| `asyncFn`           | `AsyncConditionFunction` | XOR\*    | —       | Inline async function (code-only — not JSON-serializable) |
+| `pendingValue`      | `boolean`                | No       | `false` | Value returned while the function is resolving            |
+| `debounceMs`        | `number`                 | No       | `300`   | Debounce delay before re-evaluating (ms)                  |
+
+\* Exactly one of `asyncFunctionName` or `asyncFn` must be set. The two are mutually exclusive at the type level; if both keys appear at runtime (e.g. a JSON config that hand-edited both in), the library logs a warning and the inline `asyncFn` wins.
+
+**Inline `asyncFn` example (code-only):**
+
+```typescript
+import { inject } from '@angular/core';
+
+{
+  type: 'async',
+  asyncFn: async (context) => {
+    // Same Angular DI context as registered functions — `inject()` works here.
+    return inject(PermissionsService).canEdit(context.formValue.resourceId as string);
+  },
+  pendingValue: false,
+}
+```
 
 **Choosing `pendingValue`:**
 

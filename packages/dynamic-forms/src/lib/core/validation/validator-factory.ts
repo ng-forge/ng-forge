@@ -168,11 +168,11 @@ function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPa
 
   if (config.expression) {
     validatorFn = createExpressionValidator(config);
-  } else if (config.functionName) {
+  } else if (config.fn || config.functionName) {
     validatorFn = createFunctionValidator(config);
   } else {
     const logger = inject(DynamicFormLogger);
-    logger.warn('Custom validator must have either "expression" or "functionName"');
+    logger.warn('Custom validator must have one of "expression", "functionName", or "fn"');
     return;
   }
 
@@ -187,6 +187,16 @@ function createFunctionValidator(
   config: CustomValidatorConfig,
 ): (ctx: FieldContext<unknown>) => ValidationError | ValidationError[] | null {
   const logger = inject(DynamicFormLogger);
+
+  if (config.fn && config.functionName) {
+    logger.warn('Both "fn" and "functionName" are set on custom validator. Inline "fn" takes precedence; "functionName" is ignored.');
+  }
+
+  if (config.fn) {
+    const inlineFn = config.fn;
+    return (ctx: FieldContext<unknown>) => inlineFn(ctx, config.params);
+  }
+
   const functionName = config.functionName;
   if (!functionName) {
     logger.warn('Custom validator missing functionName');
@@ -258,11 +268,20 @@ function createExpressionValidator(
  * - onError: Optional handler for resource errors
  */
 function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath<unknown>): void {
-  const registry = inject(FunctionRegistryService);
-  const validatorConfig = registry.getAsyncValidator(config.functionName);
+  if (config.fn && config.functionName) {
+    const logger = inject(DynamicFormLogger);
+    logger.warn('Both "fn" and "functionName" are set on async validator. Inline "fn" takes precedence; "functionName" is ignored.');
+  }
 
-  if (!validatorConfig) {
-    throw new DynamicFormError(`Async validator "${config.functionName}" not found. Register it with customFnConfig.asyncValidators.`);
+  let validatorConfig: ReturnType<FunctionRegistryService['getAsyncValidator']>;
+  if (config.fn) {
+    validatorConfig = config.fn;
+  } else {
+    const registry = inject(FunctionRegistryService);
+    validatorConfig = registry.getAsyncValidator(config.functionName);
+    if (!validatorConfig) {
+      throw new DynamicFormError(`Async validator "${config.functionName}" not found. Register it with customFnConfig.asyncValidators.`);
+    }
   }
 
   const whenLogic = createConditionalLogic(config.when);
@@ -303,11 +322,20 @@ function applyUnifiedHttpValidator(
  * - onError: Optional handler for HTTP errors
  */
 function applyFunctionHttpValidator(config: FunctionHttpValidatorConfig, fieldPath: SchemaPath<unknown>): void {
-  const registry = inject(FunctionRegistryService);
-  const httpValidatorConfig = registry.getHttpValidator(config.functionName);
+  if (config.fn && config.functionName) {
+    const logger = inject(DynamicFormLogger);
+    logger.warn('Both "fn" and "functionName" are set on HTTP validator. Inline "fn" takes precedence; "functionName" is ignored.');
+  }
 
-  if (!httpValidatorConfig) {
-    throw new DynamicFormError(`HTTP validator "${config.functionName}" not found. Register it with customFnConfig.httpValidators.`);
+  let httpValidatorConfig: ReturnType<FunctionRegistryService['getHttpValidator']>;
+  if (config.fn) {
+    httpValidatorConfig = config.fn;
+  } else {
+    const registry = inject(FunctionRegistryService);
+    httpValidatorConfig = registry.getHttpValidator(config.functionName);
+    if (!httpValidatorConfig) {
+      throw new DynamicFormError(`HTTP validator "${config.functionName}" not found. Register it with customFnConfig.httpValidators.`);
+    }
   }
 
   const whenLogic = createConditionalLogic(config.when);

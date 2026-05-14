@@ -426,6 +426,116 @@ describe('validator-factory', () => {
           mockFormSignal.set(formInstance);
         });
       });
+
+      it('accepts inline async validator via fn (no registration required)', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ username: 'test' });
+          const inline = {
+            params: () => ({}),
+            factory: () => ({ value: signal(null) }) as never,
+            onSuccess: () => null,
+          };
+          const config: ValidatorConfig = { type: 'async', fn: inline };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.username);
+              }).not.toThrow();
+            }),
+          );
+          mockFormSignal.set(formInstance);
+        });
+      });
+
+      it('accepts inline HTTP validator via fn (no registration required)', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ username: 'test' });
+          const inline = { request: () => '/api/check', onSuccess: () => null };
+          const config: ValidatorConfig = { type: 'http', fn: inline };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.username);
+              }).not.toThrow();
+            }),
+          );
+          mockFormSignal.set(formInstance);
+        });
+      });
+
+      it('warns when both fn and functionName are set on async validator', () => {
+        runInInjectionContext(injector, () => {
+          const registry = TestBed.inject(FunctionRegistryService);
+          registry.registerAsyncValidator('registered', {
+            params: () => ({}),
+            factory: () => ({ value: signal(null) }) as never,
+          });
+
+          const formValue = signal({ username: 'test' });
+          const inline = {
+            params: () => ({}),
+            factory: () => ({ value: signal(null) }) as never,
+          };
+          // Cast — the public XOR rejects this at compile time, but JSON-loaded
+          // configs can still produce both keys at runtime.
+          const config = { type: 'async', functionName: 'registered', fn: inline } as unknown as ValidatorConfig;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              applyValidator(config, path.username);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Both "fn" and "functionName" are set'));
+        });
+      });
+    });
+
+    describe('custom validator inline fn alternative', () => {
+      it('accepts inline fn validator without registration', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ username: 'test' });
+          const inline = vi.fn().mockReturnValue(null);
+          const config: ValidatorConfig = { type: 'custom', fn: inline };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.username);
+              }).not.toThrow();
+            }),
+          );
+          mockFormSignal.set(formInstance);
+        });
+      });
+
+      it('warns when both fn and functionName are set on custom validator', () => {
+        runInInjectionContext(injector, () => {
+          const registry = TestBed.inject(FunctionRegistryService);
+          registry.registerValidator('registered', () => null);
+
+          const formValue = signal({ username: 'test' });
+          const inline = vi.fn().mockReturnValue(null);
+          const config = { type: 'custom', functionName: 'registered', fn: inline } as unknown as ValidatorConfig;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              applyValidator(config, path.username);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Both "fn" and "functionName" are set'));
+        });
+      });
     });
 
     describe('declarative HTTP validator (type: http)', () => {
