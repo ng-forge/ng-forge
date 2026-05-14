@@ -44,6 +44,7 @@ import {
   PropertyDerivationOrchestratorConfig,
 } from '../core/property-derivation/property-derivation-orchestrator';
 import { FORM_INITIALIZER } from './form-initializer.token';
+import { ADDON_ACTION_REGISTRY, createAddonActionRegistry } from './features/addons/addon-action-registry.token';
 
 /**
  * Always-on providers for any DynamicForm: state machine, registries, signal-context tokens.
@@ -98,6 +99,11 @@ function coreProviders(): Provider[] {
       deps: [FormStateManager],
     },
     { provide: DEPRECATION_WARNING_TRACKER, useFactory: createWarningTracker },
+    // ADDON_ACTION_REGISTRY must live at form scope (not root) because the
+    // multi-provider source `ADDON_ACTION_HANDLERS` is contributed by
+    // `provideAddonActions(...)` features passed to `provideDynamicForm(...)`
+    // — those entries are only visible inside the form's own injector tree.
+    { provide: ADDON_ACTION_REGISTRY, useFactory: createAddonActionRegistry },
   ];
 }
 

@@ -1,7 +1,8 @@
 import { NgComponentOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, input, signal, Type } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal, Type } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ComponentAddon } from '../models/addon/addon-def';
+import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { resolveDefaultExport } from '../utils/wrapper-chain/wrapper-chain';
 
 /**
@@ -27,6 +28,8 @@ import { resolveDefaultExport } from '../utils/wrapper-chain/wrapper-chain';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ComponentAddonComponent {
+  private readonly logger = inject(DynamicFormLogger);
+
   readonly addon = input.required<ComponentAddon>();
 
   protected readonly inputs = computed(() => (this.addon().inputs ?? {}) as Record<string, unknown>);
@@ -39,7 +42,13 @@ export class ComponentAddonComponent {
     explicitEffect([this.addon], ([addon]) => {
       Promise.resolve(addon.component())
         .then((mod) => this.resolvedComponentSignal.set(resolveDefaultExport(mod) ?? undefined))
-        .catch(() => this.resolvedComponentSignal.set(undefined));
+        .catch((error: unknown) => {
+          // Surface the failure with the addon's slot for triage — silent
+          // failures here would leave users wondering why their component
+          // didn't render. Mirrors the dispatcher's behaviour for kind loaders.
+          this.logger.warn(`Failed to load component addon (slot: '${addon.slot}'): ${String(error)}`);
+          this.resolvedComponentSignal.set(undefined);
+        });
     });
   }
 }

@@ -13,5 +13,10 @@ export const addonsSuite: TestSuite = {
 };
 
 export function getAddonsScenario(testId: string) {
-  return addonsSuite.scenarios.find((s) => s.testId === testId);
+  const scenario = addonsSuite.scenarios.find((s) => s.testId === testId);
+  if (!scenario) {
+    const known = addonsSuite.scenarios.map((s) => s.testId).join(', ');
+    throw new Error(`Unknown addons scenario id '${testId}'. Known: ${known}.`);
+  }
+  return scenario;
 }

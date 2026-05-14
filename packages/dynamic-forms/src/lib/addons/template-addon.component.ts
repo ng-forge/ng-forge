@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { TemplateAddon } from '../models/addon/addon-def';
 import { DF_FIELD_TEMPLATES } from '../models/addon/df-field-templates.token';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
@@ -35,17 +36,26 @@ export class TemplateAddonComponent {
   /** Forwarded by `df-addon-slot`; surfaced to the template as its implicit `$implicit` context. */
   readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
+  // Pure computed: pure lookup, no side effects. Unresolved → null; the
+  // `@if` in the template skips the outlet and renders nothing.
   protected readonly template = computed(() => {
     const map = this.templates?.();
     const key = this.addon().templateKey;
-    const tpl = map?.get(key);
-    if (!tpl) {
-      this.logger.warn(`Template addon: no <ng-template dfTemplate="${key}"> found. Did you project it as a child of <df-dynamic-form>?`);
-      return null;
-    }
-    return tpl;
+    return map?.get(key) ?? null;
   });
 
   /** Implicit context payload — template authors bind via `let-fi`. */
   protected readonly outletContext = computed(() => ({ $implicit: this.fieldInputs() }));
+
+  constructor() {
+    // Logging side effect lives in an effect, not the computed — keeps
+    // the computed pure so signal-graph evaluations don't duplicate warnings.
+    explicitEffect([this.template, this.addon], ([tpl, addon]) => {
+      if (!tpl) {
+        this.logger.warn(
+          `Template addon: no <ng-template dfTemplate="${addon.templateKey}"> found. Did you project it as a child of <df-dynamic-form>?`,
+        );
+      }
+    });
+  }
 }

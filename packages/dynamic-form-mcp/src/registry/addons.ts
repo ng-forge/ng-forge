@@ -219,7 +219,7 @@ export const ADDON_KINDS: AddonKindInfo[] = [
   icon: 'times',
   ariaLabel: 'Clear',
   preset: 'clear',
-  hidden: '!field.value',
+  hidden: computed(() => formValue().search?.length === 0),
 }`,
     minimalExample: `{ slot: 'suffix', kind: 'pi-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }`,
   },

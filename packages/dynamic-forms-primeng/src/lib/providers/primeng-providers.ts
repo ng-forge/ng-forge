@@ -1,5 +1,5 @@
 import type { Provider } from '@angular/core';
-import { ADDON_KIND_DEFINITIONS, type AddonKindDefinition, type FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { ADDON_KIND_DEFINITIONS, DynamicFormError, type AddonKindDefinition, type FieldTypeDefinition } from '@ng-forge/dynamic-forms';
 import { PRIMENG_FIELD_TYPES } from '../config/primeng-field-config';
 import { PrimeNGConfig } from '../models/primeng-config';
 import { PRIMENG_CONFIG } from '../models/primeng-config.token';
@@ -93,7 +93,7 @@ const PI_ICON_KIND: AddonKindDefinition<PiIconAddon> = {
   loadComponent: () => import('../addons/pi-icon-addon.component').then((m) => m.PiIconAddonComponent),
   validate: (addon, fieldKey) => {
     if (typeof addon.icon !== 'string' || addon.icon.length === 0) {
-      throw new Error(`Addon kind 'pi-icon' requires a non-empty 'icon' string (field: '${fieldKey}').`);
+      throw new DynamicFormError(`Addon kind 'pi-icon' requires a non-empty 'icon' string (field: '${fieldKey}').`);
     }
   },
 };
@@ -106,11 +106,13 @@ const PI_BUTTON_KIND: AddonKindDefinition<PiButtonAddon> = {
     // (with warning) if the rule is violated.
     const set = [addon.preset, addon.actionRef, addon.action].filter((v) => v !== undefined);
     if (set.length > 1) {
-      throw new Error(`Addon kind 'pi-button' on field '${fieldKey}' has more than one of preset/actionRef/action — exactly one allowed.`);
+      throw new DynamicFormError(
+        `Addon kind 'pi-button' on field '${fieldKey}' has more than one of preset/actionRef/action — exactly one allowed.`,
+      );
     }
     // Icon-only buttons require ariaLabel for screen readers.
     if (addon.icon && !addon.label && !addon.ariaLabel) {
-      throw new Error(`Addon kind 'pi-button' on field '${fieldKey}' is icon-only — provide 'ariaLabel' for accessibility.`);
+      throw new DynamicFormError(`Addon kind 'pi-button' on field '${fieldKey}' is icon-only — provide 'ariaLabel' for accessibility.`);
     }
   },
 };

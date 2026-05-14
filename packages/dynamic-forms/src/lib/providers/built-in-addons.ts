@@ -1,3 +1,4 @@
+import { DynamicFormError } from '../errors/dynamic-form-error';
 import { AddonKindDefinition } from '../models/addon/addon-kind';
 
 /**
@@ -13,8 +14,11 @@ export const BUILT_IN_ADDON_KINDS: readonly AddonKindDefinition[] = [
     loadComponent: () => import('../addons/text-addon.component').then((m) => m.TextAddonComponent),
     validate: (addon, fieldKey) => {
       const text = (addon as { text?: unknown }).text;
-      if (text === undefined || text === null) {
-        throw new Error(`Addon kind 'text' requires a non-empty 'text' field (field: '${fieldKey}').`);
+      // Empty strings are rejected too — a text addon with no rendered glyph
+      // would render an empty span. The validator drops the addon with a
+      // lenient warning so the form keeps rendering.
+      if (typeof text !== 'string' || text.length === 0) {
+        throw new DynamicFormError(`Addon kind 'text' requires a non-empty 'text' field (field: '${fieldKey}').`);
       }
     },
   },
@@ -24,7 +28,7 @@ export const BUILT_IN_ADDON_KINDS: readonly AddonKindDefinition[] = [
     validate: (addon, fieldKey) => {
       const key = (addon as { templateKey?: unknown }).templateKey;
       if (typeof key !== 'string' || key.length === 0) {
-        throw new Error(`Addon kind 'template' requires a non-empty 'templateKey' string (field: '${fieldKey}').`);
+        throw new DynamicFormError(`Addon kind 'template' requires a non-empty 'templateKey' string (field: '${fieldKey}').`);
       }
     },
   },
@@ -37,7 +41,7 @@ export const BUILT_IN_ADDON_KINDS: readonly AddonKindDefinition[] = [
     validate: (addon, fieldKey) => {
       const loader = (addon as { component?: unknown }).component;
       if (typeof loader !== 'function') {
-        throw new Error(`Addon kind 'component' requires a 'component' loader function (field: '${fieldKey}').`);
+        throw new DynamicFormError(`Addon kind 'component' requires a 'component' loader function (field: '${fieldKey}').`);
       }
     },
   },
