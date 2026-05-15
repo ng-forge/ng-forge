@@ -4,7 +4,7 @@ slug: addons/presets-and-actions
 description: 'Wire button addons to behavior. Five built-in presets cover the common patterns (clear, reset, paste, copy, toggle-password-visibility). For custom behavior, register named handlers with provideAddonActions and reference them by string, or pass an inline action for code-only configs.'
 ---
 
-Button addons (`pi-button` / `mat-button` / `bs-button` / `ion-button`) accept exactly one click variant: `preset`, `actionRef`, or `action`. The variants are mutually exclusive at the type level — setting two is a compile error.
+Button addons accept exactly one click variant: `preset`, `actionRef`, or `action`. The variants are mutually exclusive at the type level — setting two is a compile error.
 
 ## The three variants
 
@@ -20,6 +20,8 @@ Button addons (`pi-button` / `mat-button` / `bs-button` / `ion-button`) accept e
 ```
 
 Pick the leftmost variant that covers your case. Most addon buttons map to a preset.
+
+> The `kind` value in the snippets above is adapter-specific. Use the kind for your active adapter — see [Addons / Overview](/addons/overview#available-kinds).
 
 ## Built-in presets
 
@@ -39,7 +41,9 @@ All presets are JSON-safe. For form submission, use the dedicated `'submit'` fie
 
 <docs-live-example scenario="examples/addon-password-toggle"></docs-live-example>
 
-The toggle works in every adapter — each one provides a per-field `*_INPUT_TYPE_OVERRIDE` token at the input field component scope. The preset writes to the override signal; the input reads `typeOverride() ?? props().type` to compute its effective `type` attribute.
+### Per-adapter wiring
+
+<docs-addon-info field="preset-handler-context"></docs-addon-info>
 
 ## Registered handlers (`actionRef`)
 
@@ -59,18 +63,14 @@ Wire the feature into `provideDynamicForm`:
 ```typescript name="app.config.ts"
 import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 import { appActions } from './app-actions';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withMaterialFields(), appActions)],
-};
+// import the with*Fields() helper for your adapter — see Provider setup on /addons/overview
 ```
 
 The backend can now ship configs like:
 
 ```json
-{ "kind": "mat-button", "icon": "send", "ariaLabel": "Send", "actionRef": "submitDraft" }
+{ "kind": "<adapter-button-kind>", "icon": "send", "ariaLabel": "Send", "actionRef": "submitDraft" }
 ```
 
 ### Type narrowing
@@ -94,7 +94,7 @@ For prototypes or scenarios where the handler can t live in JSON, pass a functio
 ```typescript
 {
   slot: 'suffix',
-  kind: 'mat-button',
+  kind: '<adapter-button-kind>',
   icon: 'add',
   ariaLabel: 'Append marker',
   action: (ctx) => {
@@ -110,7 +110,7 @@ The validator drops `action` from JSON-source configs (it can t serialise a func
 
 Button kinds expose both:
 
-- `loading?: DynamicValue<boolean>` — when truthy, the button shows the adapter s spinner state (Material spinner inside the button, Bootstrap `.spinner-border`, Ionic `<ion-spinner>`, PrimeNG `[loading]`). Implies disabled.
+- `loading?: DynamicValue<boolean>` — when truthy, the button shows the adapter s spinner state. Implies disabled.
 - `disabled?: DynamicValue<boolean>` — independent of loading; click is a no-op.
 
 ```typescript
@@ -118,7 +118,7 @@ const submitting = signal(false);
 
 {
   slot: 'suffix',
-  kind: 'mat-button',
+  kind: '<adapter-button-kind>',
   icon: 'send',
   ariaLabel: 'Send',
   actionRef: 'submitDraft',

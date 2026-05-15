@@ -452,6 +452,54 @@ export class SandboxHarness implements OnDestroy {
     style.id = `${STYLESHEET_ID_PREFIX}${registration.name}`;
     style.textContent = this.transformCssForShadowDom(rawCss);
     shadowRoot.appendChild(style);
+
+    // Mirror extra stylesheets (icon fonts, CDN CSS) into the shadow root.
+    // The shadow boundary blocks document-scope class rules from cascading in,
+    // so icon-font CSS has to be re-injected per shadow root for glyphs to
+    // render. @font-face declarations are deduped by the browser, so injecting
+    // them again is cheap.
+    const extras = registration.extraStylesheetUrls ?? [];
+    for (const url of extras) {
+      if (!this.cssCache.has(url)) {
+        const load = fetch(url, { signal: abortSignal })
+          .then((r) => r.text())
+          .catch((err) => {
+            this.cssCache.delete(url);
+            throw err;
+          });
+        this.cssCache.set(url, load);
+      }
+      const css = await this.cssCache.get(url)!;
+      // Resolve relative font URLs (e.g. `url(./fonts/x.woff2)`) against the
+      // stylesheet's origin so font files still load from the CDN.
+      const resolved = this.resolveCssRelativeUrls(css, url);
+      const extraStyle = this.document.createElement('style');
+      extraStyle.textContent = resolved;
+      shadowRoot.appendChild(extraStyle);
+    }
+  }
+
+  /**
+   * Rewrites `url(...)` references in a CSS string so relative paths resolve
+   * against the stylesheet's origin instead of the host document. Needed when
+   * inlining a CDN stylesheet whose @font-face `src: url(...)` points at sibling
+   * files (e.g. `bootstrap-icons.woff2`).
+   */
+  private resolveCssRelativeUrls(css: string, baseUrl: string): string {
+    try {
+      const base = new URL(baseUrl, this.document.baseURI ?? 'http://localhost/');
+      return css.replace(/url\((['"]?)([^'")]+)\1\)/g, (full, quote: string, ref: string) => {
+        if (/^(?:https?:|data:|\/)/i.test(ref)) return full;
+        try {
+          const resolved = new URL(ref, base).toString();
+          return `url(${quote}${resolved}${quote})`;
+        } catch {
+          return full;
+        }
+      });
+    } catch {
+      return css;
+    }
   }
 
   /**

@@ -1,0 +1,86 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+@use 'mixins' as mix;
+
+:host {
+  display: block;
+  margin: $space-4 0;
+}
+
+.addon-info-empty {
+  padding: $space-4;
+  border: 1px dashed var(--border);
+  border-radius: $space-2;
+  color: var(--text-secondary);
+  font-size: $text-sm;
+
+  p {
+    margin: 0;
+  }
+}
+
+.addon-code {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font-size: $text-sm;
+}
+
+.addon-prose {
+  margin: 0;
+  font-size: $text-sm;
+  color: var(--text-primary);
+  line-height: 1.6;
+
+  code {
+    font-family: $font-mono;
+    font-size: $text-xs;
+    padding: 0.1em 0.4em;
+    border-radius: $space-1;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+  }
+}
+
+.addon-table-wrap {
+  overflow-x: auto;
+}
+
+.addon-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $text-sm;
+
+  @include mix.mobile {
+    font-size: $text-xs;
+  }
+
+  th,
+  td {
+    padding: $space-2 $space-3;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+
+    @include mix.mobile {
+      padding: $space-1 $space-2;
+    }
+  }
+
+  th {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: $text-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  code {
+    font-family: $font-mono;
+    font-size: $text-xs;
+    padding: 0.1em 0.4em;
+    border-radius: $space-1;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+  }
+}

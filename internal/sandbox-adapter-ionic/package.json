@@ -11,6 +11,7 @@
     "@ng-forge/dynamic-forms": "*",
     "@ng-forge/dynamic-forms-ionic": "*",
     "@ng-forge/sandbox-harness": "*",
-    "@ionic/angular": "*"
+    "@ionic/angular": "*",
+    "ionicons": "*"
   }
 }

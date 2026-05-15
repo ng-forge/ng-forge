@@ -1,10 +1,10 @@
 ---
 title: Custom Kinds
 slug: addons/custom-kinds
-description: 'Register a custom addon kind component with withCustomAddon() and make it type-safe per field via the *InputAddonExtensions module-augmentation seam. Covers runtime validation, ARIA defaults, and dropping into per-adapter input fields.'
+description: 'Register a custom addon kind component with withCustomAddon() and make it type-safe per field via the InputAddonExtensions module-augmentation seam. Covers runtime validation, ARIA defaults, and dropping into per-adapter input fields.'
 ---
 
-When the built-in kinds (icon, button, text, template, component) don t cover your case — a rating widget in the prefix, a status pill in the suffix, a copy-to-clipboard component with bespoke styling — register a custom kind. Two independent steps: a runtime registration (`withCustomAddon`) and an optional type-level augmentation (`*InputAddonExtensions`).
+When the built-in kinds (icon, button, text, template, component) don t cover your case — a rating widget in the prefix, a status pill in the suffix, a copy-to-clipboard component with bespoke styling — register a custom kind. Two independent steps: a runtime registration (`withCustomAddon`) and an optional type-level augmentation.
 
 ## 1. Define the addon shape
 
@@ -55,8 +55,8 @@ The contract: declare `addon: input.required<TAddon>()`. The dispatcher (`<df-ad
 ```typescript name="app.config.ts"
 import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm, withCustomAddon, type AddonKindDefinition } from '@ng-forge/dynamic-forms';
-import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 import type { RatingAddon } from './rating-addon';
+// import the with*Fields() helper for your adapter (see Provider setup on /addons/overview)
 
 const RATING_KIND: AddonKindDefinition<RatingAddon> = {
   kind: 'rating',
@@ -68,9 +68,7 @@ const RATING_KIND: AddonKindDefinition<RatingAddon> = {
   },
 };
 
-export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withPrimeNGFields(), withCustomAddon(RATING_KIND))],
-};
+// Pass RATING_KIND through withCustomAddon alongside your adapter s with*Fields().
 ```
 
 `loadComponent` returns a Promise — the kind component is loaded lazily on first render and cached.
@@ -79,50 +77,11 @@ export const appConfig: ApplicationConfig = {
 
 ## 4. Type-level augmentation (optional but recommended)
 
-To make `kind: 'rating'` autocomplete inside the field s `addons` array, augment the per-adapter `*InputAddonExtensions` seam:
+To make `kind: 'rating'` autocomplete inside the field s `addons` array, augment the active adapter s addon-extension seam:
 
-```typescript
-declare module '@ng-forge/dynamic-forms-primeng' {
-  interface PrimeInputAddonExtensions {
-    rating: RatingAddon;
-  }
-}
-```
-
-Now this compiles cleanly without `as` casts:
-
-```typescript
-{
-  key: 'review',
-  type: 'input',
-  label: 'Your rating',
-  addons: [{ slot: 'suffix', kind: 'rating', value: 4 }],
-}
-```
-
-The extension seam exists per adapter — pick the one matching the field type the custom kind targets. Each adapter ships an analogous `*InputAddonExtensions` interface (`MatInputAddonExtensions`, `BsInputAddonExtensions`, `IonicInputAddonExtensions`, `PrimeInputAddonExtensions`).
+<docs-addon-info field="custom-extension-name"></docs-addon-info>
 
 The runtime registration and the type-level augmentation are independent — use either or both. Without augmentation, custom kinds still work at runtime; you lose IDE narrowing on the `addons` array.
-
-## Cross-adapter custom kinds
-
-If your custom kind is adapter-agnostic (it doesn t depend on Material / Bootstrap / etc. components), register it once and augment every adapter s extensions interface:
-
-```typescript
-declare module '@ng-forge/dynamic-forms-material' {
-  interface MatInputAddonExtensions {
-    rating: RatingAddon;
-  }
-}
-declare module '@ng-forge/dynamic-forms-bootstrap' {
-  interface BsInputAddonExtensions {
-    rating: RatingAddon;
-  }
-}
-// ... and so on
-```
-
-Adapter-specific custom kinds (e.g., a Material-themed rating widget that uses `<mat-icon>`) typically pin a single adapter s extension interface.
 
 ## When _not_ to use a custom kind
 
@@ -142,5 +101,5 @@ When you ship a custom kind:
 
 ## Where to next
 
-- **[Building an Adapter](/building-an-adapter#custom-addon-kinds)** — adapter authors registering bundled kinds.
+- **[Building an Adapter](/building-an-adapter)** — adapter authors registering bundled kinds.
 - **[Custom field types](/recipes/custom-fields)** — when the "addon" you re building is really a new field control.

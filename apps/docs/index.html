@@ -51,6 +51,16 @@
     <link rel="preload" as="font" type="font/woff2" href="fonts/jetbrains-mono-v24-latin-regular.woff2" crossorigin />
     <link rel="preload" as="font" type="font/woff2" href="fonts/jetbrains-mono-v24-latin-500.woff2" crossorigin />
 
+    <!-- Adapter icon fonts. @font-face declarations need to live in document scope —
+         when declared inside a sandbox shadow root, the browser font engine doesn't
+         apply them to rendered content. The per-shadow-root class rules (.material-icons,
+         .bi, .pi) are re-injected by SandboxHarnessService via extraStylesheetUrls.
+         Ionicons are SVG-based (no font) — Ionic Stencil components handle their own
+         loading from the configured icon path. -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/primeicons@7.0.0/primeicons.css" />
+
     <!-- Apply saved theme before first paint to prevent FOUC (white → dark flash) -->
     <script>
       (function () {
