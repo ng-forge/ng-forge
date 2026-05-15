@@ -20,6 +20,9 @@ export default defineConfig(({ mode }) => {
       }),
       nxViteTsPaths(),
     ],
+    optimizeDeps: {
+      include: ['@vitest/coverage-istanbul'],
+    },
     test: {
       globals: true,
       setupFiles: ['src/test-setup.ts'],
@@ -44,6 +47,12 @@ export default defineConfig(({ mode }) => {
       retry: 2,
       include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
       reporters: ['default'],
+      coverage: {
+        enabled: true,
+        reportsDirectory: '../../coverage/packages/dynamic-forms-ionic',
+        provider: 'istanbul',
+        reporter: ['text', 'html', 'lcov'],
+      },
     },
     define: {
       'import.meta.vitest': mode !== 'production',
