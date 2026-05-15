@@ -86,6 +86,14 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
       :host([hidden]) {
         display: none !important;
       }
+      /* matPrefix/matSuffix elements have no default spacing from the input —
+         add a small gap so icons don't touch the label/text. */
+      df-addon-slot[matprefix] {
+        margin-right: 0.5em;
+      }
+      df-addon-slot[matsuffix] {
+        margin-left: 0.5em;
+      }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

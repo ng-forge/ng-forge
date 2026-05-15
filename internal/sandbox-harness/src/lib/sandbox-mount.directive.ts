@@ -32,7 +32,8 @@ export class SandboxMountDirective {
   readonly styleIsolation = input<SandboxBootstrapOptions['styleIsolation']>(undefined);
   /**
    * Optional FormConfig injected via SANDBOX_FORM_CONFIG in the sub-app.
-   * Captured once when the slot is first created — later changes have no effect.
+   * Re-read on every mount, so adapter-specific factory configs (where the
+   * shape changes per adapter) take effect when the adapter input changes.
    */
   readonly config = input<FormConfig>();
 
@@ -67,8 +68,8 @@ export class SandboxMountDirective {
    * Note: resource() is currently experimental (Angular 19+) but provides native AbortSignal
    * integration and status tracking not yet available in stable APIs.
    */
-  readonly mount = resource<SandboxRef, { adapter: AdapterName; route: string }>({
-    params: () => ({ adapter: this.adapter(), route: this.route() }),
-    loader: ({ params, abortSignal }) => this.getSlot().mount(params.adapter, params.route, abortSignal),
+  readonly mount = resource<SandboxRef, { adapter: AdapterName; route: string; config: FormConfig | undefined }>({
+    params: () => ({ adapter: this.adapter(), route: this.route(), config: this.config() }),
+    loader: ({ params, abortSignal }) => this.getSlot().mount(params.adapter, params.route, abortSignal, params.config),
   });
 }

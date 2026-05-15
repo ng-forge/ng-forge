@@ -375,13 +375,20 @@ export class SandboxHarness implements OnDestroy {
 
     // Mirror data-theme from document.documentElement → shadow host so that
     // CSS selectors transformed to :host([data-theme='dark']) work correctly.
+    // Also mirror as data-bs-theme so Bootstrap 5.3+'s built-in dark theme
+    // (which scopes its CSS variables under [data-bs-theme="dark"]) applies
+    // to the bootstrap adapter — without this, .input-group-text, .btn, and
+    // other variable-driven components stay light in dark mode. The attribute
+    // is harmless for non-Bootstrap adapters.
     const syncTheme = (): void => {
       const isDark = resolveTheme() === 'dark';
       themeSignal.set(isDark ? 'dark' : 'light');
       if (isDark) {
         hostElement.setAttribute('data-theme', 'dark');
+        hostElement.setAttribute('data-bs-theme', 'dark');
       } else {
         hostElement.removeAttribute('data-theme');
+        hostElement.removeAttribute('data-bs-theme');
       }
     };
     syncTheme();
@@ -528,9 +535,11 @@ export class SandboxHarness implements OnDestroy {
         .replace(/(?<![.#[\w-])body(?![.#[\w(-])/g, ':host')
         // 5. bare :root — avoid matching :root-something
         .replace(/:root(?![\w(-])/g, ':host')
-        // 6. bare [data-theme=...] — not preceded by . # word-chars : - ( to avoid
-        //    re-transforming :host([data-theme=...]) or .element[data-theme=...]
-        .replace(/(?<![.#\w:\-(])\[data-theme([^\]]*)\]/g, ':host([data-theme$1])')
+        // 6. bare [data-theme=...] / [data-bs-theme=...] — not preceded by . # word-chars
+        //    : - ( to avoid re-transforming :host([data-theme=...]) or .x[data-theme=...].
+        //    Covers Bootstrap's own [data-bs-theme="dark"] dark-mode rules so they
+        //    fire when the harness sets data-bs-theme on the shadow host.
+        .replace(/(?<![.#\w:\-(])\[(data-(?:bs-)?theme)([^\]]*)\]/g, ':host([$1$2])')
     );
   }
 
