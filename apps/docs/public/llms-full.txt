@@ -5,7 +5,7 @@
 
 --- addons/custom-kinds ---
 
-When the built-in kinds (icon, button, text, template, component) don t cover your case — a rating widget in the prefix, a status pill in the suffix, a copy-to-clipboard component with bespoke styling — register a custom kind. Two independent steps: a runtime registration (`withCustomAddon`) and an optional type-level augmentation (`*InputAddonExtensions`).
+When the built-in kinds (icon, button, text, template, component) don t cover your case — a rating widget in the prefix, a status pill in the suffix, a copy-to-clipboard component with bespoke styling — register a custom kind. Two independent steps: a runtime registration (`withCustomAddon`) and an optional type-level augmentation.
 
 ## 1. Define the addon shape
 
@@ -56,8 +56,8 @@ The contract: declare `addon: input.required<TAddon>()`. The dispatcher (`<df-ad
 ```typescript name="app.config.ts"
 import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm, withCustomAddon, type AddonKindDefinition } from '@ng-forge/dynamic-forms';
-import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 import type { RatingAddon } from './rating-addon';
+// import the with*Fields() helper for your adapter (see Provider setup on /addons/overview)
 
 const RATING_KIND: AddonKindDefinition<RatingAddon> = {
   kind: 'rating',
@@ -69,9 +69,7 @@ const RATING_KIND: AddonKindDefinition<RatingAddon> = {
   },
 };
 
-export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withPrimeNGFields(), withCustomAddon(RATING_KIND))],
-};
+// Pass RATING_KIND through withCustomAddon alongside your adapter s with*Fields().
 ```
 
 `loadComponent` returns a Promise — the kind component is loaded lazily on first render and cached.
@@ -80,50 +78,11 @@ export const appConfig: ApplicationConfig = {
 
 ## 4. Type-level augmentation (optional but recommended)
 
-To make `kind: 'rating'` autocomplete inside the field s `addons` array, augment the per-adapter `*InputAddonExtensions` seam:
+To make `kind: 'rating'` autocomplete inside the field s `addons` array, augment the active adapter s addon-extension seam:
 
-```typescript
-declare module '@ng-forge/dynamic-forms-primeng' {
-  interface PrimeInputAddonExtensions {
-    rating: RatingAddon;
-  }
-}
-```
-
-Now this compiles cleanly without `as` casts:
-
-```typescript
-{
-  key: 'review',
-  type: 'input',
-  label: 'Your rating',
-  addons: [{ slot: 'suffix', kind: 'rating', value: 4 }],
-}
-```
-
-The extension seam exists per adapter — pick the one matching the field type the custom kind targets. Each adapter ships an analogous `*InputAddonExtensions` interface (`MatInputAddonExtensions`, `BsInputAddonExtensions`, `IonicInputAddonExtensions`, `PrimeInputAddonExtensions`).
+<docs-addon-info field="custom-extension-name"></docs-addon-info>
 
 The runtime registration and the type-level augmentation are independent — use either or both. Without augmentation, custom kinds still work at runtime; you lose IDE narrowing on the `addons` array.
-
-## Cross-adapter custom kinds
-
-If your custom kind is adapter-agnostic (it doesn t depend on Material / Bootstrap / etc. components), register it once and augment every adapter s extensions interface:
-
-```typescript
-declare module '@ng-forge/dynamic-forms-material' {
-  interface MatInputAddonExtensions {
-    rating: RatingAddon;
-  }
-}
-declare module '@ng-forge/dynamic-forms-bootstrap' {
-  interface BsInputAddonExtensions {
-    rating: RatingAddon;
-  }
-}
-// ... and so on
-```
-
-Adapter-specific custom kinds (e.g., a Material-themed rating widget that uses `<mat-icon>`) typically pin a single adapter s extension interface.
 
 ## When _not_ to use a custom kind
 
@@ -143,57 +102,34 @@ When you ship a custom kind:
 
 ## Where to next
 
-- **[Building an Adapter](/building-an-adapter#custom-addon-kinds)** — adapter authors registering bundled kinds.
+- **[Building an Adapter](/building-an-adapter)** — adapter authors registering bundled kinds.
 - **[Custom field types](/recipes/custom-fields)** — when the "addon" you re building is really a new field control.
 
 --- addons/overview ---
 
-Addons decorate a field with inline content — a search icon, a clear button, a currency symbol, a password-visibility toggle — placed in the field s `prefix` or `suffix` slot. They re typed, JSON-safe, and uniform across all four UI adapters.
+Addons decorate a field with inline content — a search icon, a clear button, a currency symbol, a password-visibility toggle — placed in the field s `prefix` or `suffix` slot. They re typed, JSON-safe, and ship as a first-class feature of every UI adapter.
 
-## Quick shape
+## Quickstart
 
-```typescript
-{
-  key: 'search',
-  type: 'input',
-  label: 'Search',
-  addons: [
-    { slot: 'prefix', kind: 'pi-icon', icon: 'search', ariaLabel: 'Search' },
-    { slot: 'suffix', kind: 'pi-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' },
-  ],
-}
-```
+<docs-addon-info field="quickstart"></docs-addon-info>
 
 ## Live example
 
 <docs-live-example scenario="examples/addon-clear-button"></docs-live-example>
 
-The same config shape works on every adapter — only the `kind` value changes (`mat-icon` / `mat-button` for Material, `bs-icon` / `bs-button` for Bootstrap, `ion-icon` / `ion-button` for Ionic, `pi-icon` / `pi-button` for PrimeNG). The library translates `slot: 'prefix' | 'suffix'` into the right rendering per adapter — Material uses `matPrefix` / `matSuffix` directives; Bootstrap switches to a `.input-group` wrapper; Ionic projects through shadow-DOM slots.
+## Available kinds
 
-## Built-in kinds
+<docs-addon-info field="kinds-table"></docs-addon-info>
 
-Every adapter accepts these universal kinds:
+## How addons render
 
-- **`text`** — static or reactive text inside a span. Works the same in every adapter:
+<docs-addon-info field="rendering-mechanism"></docs-addon-info>
 
-  ```typescript
-  { slot: 'prefix', kind: 'text', text: '$' }
-  ```
+The wrapper is dropped entirely when every addon is reactively hidden — no empty group element.
 
-- **`template`** — render content from a named `<ng-template>` declared in the host component. JSON-safe; the config carries the template key, the front-end supplies the template.
+## Provider setup
 
-- **`component`** — render an arbitrary Angular component. Code-only — dropped from JSON-derived configs by the validator.
-
-Each adapter additionally ships icon and button kinds:
-
-| Adapter   | Icon kind  | Button kind  | Icon source                                              |
-| --------- | ---------- | ------------ | -------------------------------------------------------- |
-| PrimeNG   | `pi-icon`  | `pi-button`  | PrimeIcons (`<i class="pi pi-search">`)                  |
-| Material  | `mat-icon` | `mat-button` | Material Icons ligatures (`<mat-icon>search</mat-icon>`) |
-| Bootstrap | `bs-icon`  | `bs-button`  | Bootstrap Icons (`<i class="bi bi-search">`)             |
-| Ionic     | `ion-icon` | `ion-button` | Ionicons (`<ion-icon name="search-outline">`)            |
-
-The icon and button kinds for the adapter you ve installed are pre-registered by `with{Adapter}Fields()` — no extra setup.
+<docs-addon-info field="provider-setup"></docs-addon-info>
 
 ## Reactive `hidden` and `disabled`
 
@@ -204,7 +140,7 @@ const hasValue = computed(() => (formValue()?.search?.length ?? 0) > 0);
 
 {
   slot: 'suffix',
-  kind: 'pi-button',
+  kind: 'pi-button', // or mat-button / bs-button / ion-button
   icon: 'times',
   ariaLabel: 'Clear',
   preset: 'clear',
@@ -214,35 +150,18 @@ const hasValue = computed(() => (formValue()?.search?.length ?? 0) > 0);
 
 When `hidden` resolves to `true` the addon stays in DOM but is `display: none` — cheaper than tearing down the component, and the reactive transition is instant.
 
-## Slot vocabulary
+## Accessibility
 
-Slot names are universal across adapters. Use `'prefix'` for the leading edge and `'suffix'` for the trailing edge. The adapter handles the translation internally:
-
-- Material: addons render as direct `<mat-form-field>` children with `matPrefix` / `matSuffix` attribute directives.
-- Bootstrap: the input switches to a `<div class="input-group">` wrapper when any addon is present; addons render in `<span class="input-group-text">` flanking the input. The floating-label branch nests `<div class="form-floating">` inside the group.
-- Ionic: addons render as `<span slot="start">` / `<span slot="end">` wrappers inside `<ion-input>` for shadow-DOM projection.
-- PrimeNG: the input switches to a `<p-inputgroup>` wrapper with `<p-inputgroup-addon>` flanking the input.
-
-The wrapper is **dropped entirely** when every addon is reactively hidden — no empty group element.
+Icon kinds emit `aria-hidden="true"` by default. When the icon conveys meaning (status, action), set `ariaLabel`. Icon-only button kinds (no `label`) require `ariaLabel` — TypeScript and the runtime validator both enforce this.
 
 ## Where to next
 
 1. **[Presets and Actions](/addons/presets-and-actions)** — built-in click presets (`clear`, `reset`, `paste`, `copy`, `toggle-password-visibility`), `actionRef` for registered handlers, and inline `action` for code-only behaviour.
-2. **[Custom Kinds](/addons/custom-kinds)** — register your own addon kind (rating widget, status pill, anything) with `withCustomAddon(...)` and augment the type-level `*InputAddonExtensions` seam.
-
-## Accessibility
-
-Icon kinds emit `aria-hidden="true"` by default. When the icon conveys meaning (status, action), set `ariaLabel`:
-
-```typescript
-{ slot: 'prefix', kind: 'mat-icon', icon: 'warning', ariaLabel: 'Validation warning' }
-```
-
-Icon-only button kinds (no `label`) require `ariaLabel` — TypeScript and the runtime validator both enforce this.
+2. **[Custom Kinds](/addons/custom-kinds)** — register your own addon kind (rating widget, status pill, anything) with `withCustomAddon(...)` and augment the type-level extensions seam.
 
 --- addons/presets-and-actions ---
 
-Button addons (`pi-button` / `mat-button` / `bs-button` / `ion-button`) accept exactly one click variant: `preset`, `actionRef`, or `action`. The variants are mutually exclusive at the type level — setting two is a compile error.
+Button addons accept exactly one click variant: `preset`, `actionRef`, or `action`. The variants are mutually exclusive at the type level — setting two is a compile error.
 
 ## The three variants
 
@@ -258,6 +177,8 @@ Button addons (`pi-button` / `mat-button` / `bs-button` / `ion-button`) accept e
 ```
 
 Pick the leftmost variant that covers your case. Most addon buttons map to a preset.
+
+> The `kind` value in the snippets above is adapter-specific. Use the kind for your active adapter — see [Addons / Overview](/addons/overview#available-kinds).
 
 ## Built-in presets
 
@@ -277,7 +198,9 @@ All presets are JSON-safe. For form submission, use the dedicated `'submit'` fie
 
 <docs-live-example scenario="examples/addon-password-toggle"></docs-live-example>
 
-The toggle works in every adapter — each one provides a per-field `*_INPUT_TYPE_OVERRIDE` token at the input field component scope. The preset writes to the override signal; the input reads `typeOverride() ?? props().type` to compute its effective `type` attribute.
+### Per-adapter wiring
+
+<docs-addon-info field="preset-handler-context"></docs-addon-info>
 
 ## Registered handlers (`actionRef`)
 
@@ -297,18 +220,14 @@ Wire the feature into `provideDynamicForm`:
 ```typescript name="app.config.ts"
 import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 import { appActions } from './app-actions';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withMaterialFields(), appActions)],
-};
+// import the with*Fields() helper for your adapter — see Provider setup on /addons/overview
 ```
 
 The backend can now ship configs like:
 
 ```json
-{ "kind": "mat-button", "icon": "send", "ariaLabel": "Send", "actionRef": "submitDraft" }
+{ "kind": "<adapter-button-kind>", "icon": "send", "ariaLabel": "Send", "actionRef": "submitDraft" }
 ```
 
 ### Type narrowing
@@ -332,7 +251,7 @@ For prototypes or scenarios where the handler can t live in JSON, pass a functio
 ```typescript
 {
   slot: 'suffix',
-  kind: 'mat-button',
+  kind: '<adapter-button-kind>',
   icon: 'add',
   ariaLabel: 'Append marker',
   action: (ctx) => {
@@ -348,7 +267,7 @@ The validator drops `action` from JSON-source configs (it can t serialise a func
 
 Button kinds expose both:
 
-- `loading?: DynamicValue<boolean>` — when truthy, the button shows the adapter s spinner state (Material spinner inside the button, Bootstrap `.spinner-border`, Ionic `<ion-spinner>`, PrimeNG `[loading]`). Implies disabled.
+- `loading?: DynamicValue<boolean>` — when truthy, the button shows the adapter s spinner state. Implies disabled.
 - `disabled?: DynamicValue<boolean>` — independent of loading; click is a no-op.
 
 ```typescript
@@ -356,7 +275,7 @@ const submitting = signal(false);
 
 {
   slot: 'suffix',
-  kind: 'mat-button',
+  kind: '<adapter-button-kind>',
   icon: 'send',
   ariaLabel: 'Send',
   actionRef: 'submitDraft',
@@ -4508,40 +4427,15 @@ export class MyFormComponent {
 
 --- examples/addon-clear-button ---
 
-The canonical addon pattern: a search icon in the prefix slot, a clear button in the suffix slot. The button uses the built-in `'clear'` preset — no handler code required. Switch the adapter at the top of the page and the same config renders through each adapter s native projection mechanism (`matPrefix` / `matSuffix` for Material, `.input-group` for Bootstrap, `slot="start|end"` for Ionic, `<p-inputgroup>` for PrimeNG).
+The canonical addon pattern: a search icon in the prefix slot, a clear button in the suffix slot. The button uses the built-in `'clear'` preset — no handler code required.
 
 ## Live Demo
 
 <docs-live-example scenario="examples/addon-clear-button"></docs-live-example>
 
-## Config
+## Config (for the active adapter)
 
-```typescript
-{
-  fields: [
-    {
-      key: 'search',
-      type: 'input',
-      label: 'Search',
-      value: 'initial value',
-      placeholder: 'Type to search…',
-      addons: [
-        { slot: 'prefix', kind: 'pi-icon',   icon: 'search', ariaLabel: 'Search' },
-        { slot: 'suffix', kind: 'pi-button', icon: 'times',  ariaLabel: 'Clear', preset: 'clear' },
-      ],
-    },
-  ],
-}
-```
-
-The `kind` strings (`pi-icon`, `pi-button`) are adapter-specific. Swap them per adapter:
-
-| Adapter   | Icon kind  | Button kind  | Icon `search`    | Icon `clear`    |
-| --------- | ---------- | ------------ | ---------------- | --------------- |
-| PrimeNG   | `pi-icon`  | `pi-button`  | `search`         | `times`         |
-| Material  | `mat-icon` | `mat-button` | `search`         | `close`         |
-| Bootstrap | `bs-icon`  | `bs-button`  | `search`         | `x`             |
-| Ionic     | `ion-icon` | `ion-button` | `search-outline` | `close-outline` |
+<docs-addon-info field="quickstart"></docs-addon-info>
 
 ## What to read next
 
@@ -4590,33 +4484,6 @@ The `'toggle-password-visibility'` preset flips the input s `type` attribute bet
 ## Live Demo
 
 <docs-live-example scenario="examples/addon-password-toggle"></docs-live-example>
-
-## Config
-
-```typescript
-{
-  fields: [
-    {
-      key: 'password',
-      type: 'input',
-      label: 'Password',
-      value: 'hunter2',
-      props: { type: 'password' },
-      addons: [
-        {
-          slot: 'suffix',
-          kind: 'pi-button',
-          icon: 'eye',
-          ariaLabel: 'Toggle password visibility',
-          preset: 'toggle-password-visibility',
-        },
-      ],
-    },
-  ],
-}
-```
-
-The preset is a no-op (warning logged) outside an input-style field that exposes a type-override token. Every shipping `*-input` field provides one — Material via `MAT_INPUT_TYPE_OVERRIDE`, Bootstrap via `BS_INPUT_TYPE_OVERRIDE`, Ionic via `IONIC_INPUT_TYPE_OVERRIDE`, PrimeNG via `PRIME_INPUT_TYPE_OVERRIDE`. Custom field types opting into the preset declare an analogous token.
 
 ## What to read next
 
