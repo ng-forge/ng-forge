@@ -1629,12 +1629,30 @@ const formConfig = {
 
 **Async condition properties:**
 
-| Property            | Type      | Required | Default | Description                                         |
-| ------------------- | --------- | -------- | ------- | --------------------------------------------------- |
-| `type`              | `'async'` | Yes      | —       | Identifies this as an async condition               |
-| `asyncFunctionName` | `string`  | Yes      | —       | Name registered in `customFnConfig.asyncConditions` |
-| `pendingValue`      | `boolean` | No       | `false` | Value returned while the function is resolving      |
-| `debounceMs`        | `number`  | No       | `300`   | Debounce delay before re-evaluating (ms)            |
+| Property            | Type                     | Required | Default | Description                                               |
+| ------------------- | ------------------------ | -------- | ------- | --------------------------------------------------------- |
+| `type`              | `'async'`                | Yes      | —       | Identifies this as an async condition                     |
+| `asyncFunctionName` | `string`                 | XOR\*    | —       | Name registered in `customFnConfig.asyncConditions`       |
+| `asyncFn`           | `AsyncConditionFunction` | XOR\*    | —       | Inline async function (code-only — not JSON-serializable) |
+| `pendingValue`      | `boolean`                | No       | `false` | Value returned while the function is resolving            |
+| `debounceMs`        | `number`                 | No       | `300`   | Debounce delay before re-evaluating (ms)                  |
+
+\* Exactly one of `asyncFunctionName` or `asyncFn` must be set. The two are mutually exclusive at the type level; if both keys appear at runtime (e.g. a JSON config that hand-edited both in), the library logs a warning and the inline `asyncFn` wins.
+
+**Inline `asyncFn` example (code-only):**
+
+```typescript
+import { inject } from '@angular/core';
+
+{
+  type: 'async',
+  asyncFn: async (context) => {
+    // Same Angular DI context as registered functions — `inject()` works here.
+    return inject(PermissionsService).canEdit(context.formValue.resourceId as string);
+  },
+  pendingValue: false,
+}
+```
 
 **Choosing `pendingValue`:**
 
@@ -2118,25 +2136,33 @@ interface HttpCondition {
   debounceMs?: number; // Default: 300
 }
 
-interface AsyncCondition {
-  type: 'async';
-  asyncFunctionName: string;
-  pendingValue?: boolean; // Default: false
-  debounceMs?: number; // Default: 300
-}
+// AsyncCondition is a discriminated XOR — exactly one of asyncFunctionName / asyncFn must be set.
+type AsyncCondition =
+  | {
+      type: 'async';
+      asyncFunctionName: string;
+      pendingValue?: boolean; // Default: false
+      debounceMs?: number; // Default: 300
+    }
+  | {
+      type: 'async';
+      asyncFn: AsyncConditionFunction; // Inline (code-only, not JSON-serializable)
+      pendingValue?: boolean;
+      debounceMs?: number;
+    };
 ```
 
 **Expression types summary:**
 
-| Type         | Sync/Async | Key properties                   | Purpose                                                               |
-| ------------ | ---------- | -------------------------------- | --------------------------------------------------------------------- |
-| `fieldValue` | Sync       | `fieldPath`, `operator`, `value` | Compare a specific field's value                                      |
-| `formValue`  | Sync       | `operator`, `value`              | Compare entire form object                                            |
-| `javascript` | Sync       | `expression`                     | Custom JS with `fieldValue`/`formValue`/`fieldState`/`formFieldState` |
-| `custom`     | Sync       | `expression`                     | Inline expression with `fieldValue`/`formValue` (safe member access)  |
-| `and`/`or`   | Sync       | `conditions`                     | Combine multiple conditions                                           |
-| `http`       | Async      | `http`, `responseExpression`     | Server-driven condition via HTTP request                              |
-| `async`      | Async      | `asyncFunctionName`              | Custom async function registered in config                            |
+| Type         | Sync/Async | Key properties                         | Purpose                                                               |
+| ------------ | ---------- | -------------------------------------- | --------------------------------------------------------------------- |
+| `fieldValue` | Sync       | `fieldPath`, `operator`, `value`       | Compare a specific field's value                                      |
+| `formValue`  | Sync       | `operator`, `value`                    | Compare entire form object                                            |
+| `javascript` | Sync       | `expression`                           | Custom JS with `fieldValue`/`formValue`/`fieldState`/`formFieldState` |
+| `custom`     | Sync       | `functionName` \| `fn` (XOR)           | Registered or inline custom function                                  |
+| `and`/`or`   | Sync       | `conditions`                           | Combine multiple conditions                                           |
+| `http`       | Async      | `http`, `responseExpression`           | Server-driven condition via HTTP request                              |
+| `async`      | Async      | `asyncFunctionName` \| `asyncFn` (XOR) | Registered or inline async function                                   |
 
 ## Common Patterns
 
@@ -2510,8 +2536,45 @@ The async function is only called when `enableLookup === true`.
 
 `source: 'asyncFunction'` requires:
 
-- **`asyncFunctionName: string`** — Name of the function registered in `customFnConfig.asyncDerivations`.
+- **One of `asyncFunctionName: string` or `asyncFn: AsyncDerivationFunction`** — see [Inline alternative](#inline-alternative-asyncfn) below. The two are mutually exclusive.
 - **`dependsOn: string[]`** — Explicit field dependencies. Without this, the function would re-run on every form change.
+
+### Inline alternative (`asyncFn`)
+
+When you don't need JSON-serializability, set `asyncFn` directly instead of registering the function in `customFnConfig.asyncDerivations`:
+
+```typescript
+import type { AsyncDerivationFunction, FormConfig } from '@ng-forge/dynamic-forms';
+import { inject } from '@angular/core';
+import { map } from 'rxjs';
+
+const lookupCity: AsyncDerivationFunction = (context) =>
+  inject(AddressService)
+    .lookup(context.formValue.zipCode as string)
+    .pipe(map((r) => r.city));
+
+const formConfig = {
+  fields: [
+    {
+      key: 'city',
+      type: 'input',
+      readonly: true,
+      logic: [
+        {
+          type: 'derivation',
+          source: 'asyncFunction',
+          asyncFn: lookupCity,
+          dependsOn: ['zipCode'],
+        },
+      ],
+    },
+  ],
+} as const satisfies FormConfig;
+```
+
+Inject Angular services inside `asyncFn` the same way you would inside a registered function — both run in the form's injection context.
+
+Use `asyncFunctionName` for configs loaded over the wire (APIs, OpenAPI, MCP); use `asyncFn` for code-only configs. TypeScript rejects setting both keys, and the runtime warns + prefers `asyncFn` if a JSON config sneaks both through.
 
 ## Stop On User Override
 
@@ -2629,7 +2692,13 @@ When the user changes the country, the phone prefix is auto-filled again — ove
   type: 'derivation';
   source: 'asyncFunction'; // Required — identifies async function mode
 
-  asyncFunctionName: string; // Required — name in customFnConfig.asyncDerivations
+  // Required — one of:
+  //   • asyncFunctionName: string — name in customFnConfig.asyncDerivations (JSON-safe)
+  //   • asyncFn: AsyncDerivationFunction — inline async function (code-only)
+  // The two are mutually exclusive (XOR) at the type level.
+  asyncFunctionName?: string;
+  asyncFn?: AsyncDerivationFunction;
+
   dependsOn: string[];       // Required — explicit field dependencies
 
   // Shared optional fields
@@ -3241,6 +3310,35 @@ fields: [
 ],
 ```
 
+#### Inline alternative (`fn`)
+
+For code-only configs you can attach the function directly via `fn` and skip the `customFnConfig.derivations` registration. `fn` is mutually exclusive with `functionName` — TypeScript rejects setting both, and the runtime logs a warning + prefers `fn` if a JSON config sets both keys.
+
+```typescript
+import type { CustomFunction } from '@ng-forge/dynamic-forms';
+
+const calculateTax: CustomFunction = (ctx) => ctx.formValue.subtotal * getTaxRate(ctx.formValue.state);
+
+const config = {
+  fields: [
+    {
+      key: 'tax',
+      type: 'input',
+      readonly: true,
+      logic: [
+        {
+          type: 'derivation',
+          fn: calculateTax,
+          dependsOn: ['subtotal', 'state'],
+        },
+      ],
+    },
+  ],
+};
+```
+
+Use `functionName` when the config must survive JSON serialization (APIs, OpenAPI, databases, MCP). Use `fn` for code-only authoring where you'd rather not maintain a separate registry.
+
 ## Trigger Timing
 
 Control when derivations evaluate:
@@ -3574,8 +3672,11 @@ interface DerivationLogicConfig {
   /** JavaScript expression (has access to formValue) */
   expression?: string;
 
-  /** Name of registered custom function */
+  /** Name of registered custom function. Mutually exclusive with `fn`. */
   functionName?: string;
+
+  /** Inline custom function (code-only). Mutually exclusive with `functionName`. */
+  fn?: CustomFunction;
 
   /** Explicit field dependencies */
   dependsOn?: string[];
@@ -14229,6 +14330,13 @@ ng-forge supports two patterns for custom validators:
 1. **Function-based** - Register reusable validator functions (best for complex logic, reusability)
 2. **Expression-based** - Inline JavaScript expressions (best for simple, one-off validations)
 
+Function-based validators have two interchangeable authoring forms:
+
+- **Registered (`functionName`)** — JSON-serializable; safe to ship in configs loaded from APIs, OpenAPI, or databases.
+- **Inline (`fn`)** — code-only, type-safe; skips the registry round-trip but cannot survive JSON serialization. `fn` and `functionName` are mutually exclusive — TypeScript rejects setting both, and at runtime an explicit warning is logged before the inline form wins.
+
+The same `fn` / `asyncFn` alternative is available on conditions and derivations — see [Inline functions vs registered names](#inline-functions-vs-registered-names) below.
+
 ## Expression-Based Validators
 
 For simple validation logic, use inline JavaScript expressions without registering functions.
@@ -14382,6 +14490,33 @@ const config = {
   },
 };
 ```
+
+### Inline Alternative (`fn`)
+
+For code-only projects, you can skip the registry round-trip and pass the validator directly:
+
+```typescript
+import { CustomValidator } from '@ng-forge/dynamic-forms';
+
+const noSpaces: CustomValidator = (ctx) => {
+  const value = ctx.value();
+  return typeof value === 'string' && value.includes(' ') ? { kind: 'noSpaces' } : null;
+};
+
+const config = {
+  fields: [
+    {
+      key: 'username',
+      type: 'input',
+      // No customFnConfig.validators entry required — the function lives on the validator config.
+      validators: [{ type: 'custom', fn: noSpaces }],
+      validationMessages: { noSpaces: 'Spaces are not allowed' },
+    },
+  ],
+};
+```
+
+`fn` and `functionName` are mutually exclusive (XOR at the type level). The inline form is **not** JSON-serializable — for configs loaded from APIs, OpenAPI, or databases, stick to `functionName`.
 
 ### FieldContext API
 
@@ -15015,6 +15150,26 @@ const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
 6. **Message Priority**: Use field-level messages for customization, form-level for common errors
 7. **Conditional Validation**: Use `when` property with `ConditionalExpression` for dynamic validators
 8. **Inverted Logic**: HTTP validators check validity, not data fetching success
+
+## Inline functions vs registered names
+
+Every validator/condition/derivation surface that accepts a `functionName` (or `asyncFunctionName`) also accepts an inline `fn` (or `asyncFn`):
+
+| Surface                       | Registered (JSON-safe)                                               | Inline (code-only)                                         |
+| ----------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Sync custom validator         | `{ type: 'custom', functionName }`                                   | `{ type: 'custom', fn }`                                   |
+| Async validator               | `{ type: 'async', functionName }`                                    | `{ type: 'async', fn }`                                    |
+| Function-based HTTP validator | `{ type: 'http', functionName }`                                     | `{ type: 'http', fn }`                                     |
+| Custom condition              | `{ type: 'custom', functionName }`                                   | `{ type: 'custom', fn }`                                   |
+| Async condition               | `{ type: 'async', asyncFunctionName }`                               | `{ type: 'async', asyncFn }`                               |
+| Function derivation           | `{ type: 'derivation', functionName }`                               | `{ type: 'derivation', fn }`                               |
+| Async function derivation     | `{ type: 'derivation', source: 'asyncFunction', asyncFunctionName }` | `{ type: 'derivation', source: 'asyncFunction', asyncFn }` |
+
+Rules of thumb:
+
+- Use **`functionName` / `asyncFunctionName`** for configs that travel over the wire — API responses, OpenAPI schemas, JSON files, database rows. The MCP server only emits the registered form.
+- Use **`fn` / `asyncFn`** for code-only configs in TypeScript when you don't need JSON serializability. The function reference is captured directly, with no registry indirection.
+- The two are **mutually exclusive**. TypeScript rejects setting both at compile time; if a JSON-loaded config sneaks both keys through at runtime, a warning is logged and the inline form wins.
 
 ## Related Documentation
 

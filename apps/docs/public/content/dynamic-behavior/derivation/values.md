@@ -469,8 +469,11 @@ interface DerivationLogicConfig {
   /** JavaScript expression (has access to formValue) */
   expression?: string;
 
-  /** Name of registered custom function */
+  /** Name of registered custom function. Mutually exclusive with `fn`. */
   functionName?: string;
+
+  /** Inline custom function (code-only). Mutually exclusive with `functionName`. */
+  fn?: CustomFunction;
 
   /** Explicit field dependencies */
   dependsOn?: string[];

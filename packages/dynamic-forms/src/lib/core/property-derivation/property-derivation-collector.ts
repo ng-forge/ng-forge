@@ -98,6 +98,9 @@ function createPropertyDerivationEntryFromDerivation(
     value: config.value,
     expression: config.expression,
     functionName: config.functionName,
+    // `fn` lives on the function-derivation variant of DerivationLogicConfig but isn't surfaced
+    // on the discriminated union after narrowing to `targetProperty`-bearing entries — cast to
+    // read it through. Read-only access, no widening.
     fn: (config as { fn?: PropertyDerivationEntry['fn'] }).fn,
     trigger,
     debounceMs,

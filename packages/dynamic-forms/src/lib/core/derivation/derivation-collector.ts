@@ -325,6 +325,9 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
   // The type system ensures debounceMs is only present when trigger is 'debounced'
   const debounceMs = trigger === 'debounced' ? (config as { debounceMs?: number }).debounceMs : undefined;
 
+  // `fn` / `asyncFn` only appear on the function-mode variants of the discriminated union, but
+  // we copy them through unconditionally — they'll just be `undefined` for other modes.
+  // Read-only access, no widening.
   return {
     fieldKey: effectiveFieldKey,
     dependsOn,

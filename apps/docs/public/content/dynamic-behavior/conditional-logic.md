@@ -1110,25 +1110,33 @@ interface HttpCondition {
   debounceMs?: number; // Default: 300
 }
 
-interface AsyncCondition {
-  type: 'async';
-  asyncFunctionName: string;
-  pendingValue?: boolean; // Default: false
-  debounceMs?: number; // Default: 300
-}
+// AsyncCondition is a discriminated XOR — exactly one of asyncFunctionName / asyncFn must be set.
+type AsyncCondition =
+  | {
+      type: 'async';
+      asyncFunctionName: string;
+      pendingValue?: boolean; // Default: false
+      debounceMs?: number; // Default: 300
+    }
+  | {
+      type: 'async';
+      asyncFn: AsyncConditionFunction; // Inline (code-only, not JSON-serializable)
+      pendingValue?: boolean;
+      debounceMs?: number;
+    };
 ```
 
 **Expression types summary:**
 
-| Type         | Sync/Async | Key properties                   | Purpose                                                               |
-| ------------ | ---------- | -------------------------------- | --------------------------------------------------------------------- |
-| `fieldValue` | Sync       | `fieldPath`, `operator`, `value` | Compare a specific field's value                                      |
-| `formValue`  | Sync       | `operator`, `value`              | Compare entire form object                                            |
-| `javascript` | Sync       | `expression`                     | Custom JS with `fieldValue`/`formValue`/`fieldState`/`formFieldState` |
-| `custom`     | Sync       | `expression`                     | Inline expression with `fieldValue`/`formValue` (safe member access)  |
-| `and`/`or`   | Sync       | `conditions`                     | Combine multiple conditions                                           |
-| `http`       | Async      | `http`, `responseExpression`     | Server-driven condition via HTTP request                              |
-| `async`      | Async      | `asyncFunctionName`              | Custom async function registered in config                            |
+| Type         | Sync/Async | Key properties                         | Purpose                                                               |
+| ------------ | ---------- | -------------------------------------- | --------------------------------------------------------------------- |
+| `fieldValue` | Sync       | `fieldPath`, `operator`, `value`       | Compare a specific field's value                                      |
+| `formValue`  | Sync       | `operator`, `value`                    | Compare entire form object                                            |
+| `javascript` | Sync       | `expression`                           | Custom JS with `fieldValue`/`formValue`/`fieldState`/`formFieldState` |
+| `custom`     | Sync       | `functionName` \| `fn` (XOR)           | Registered or inline custom function                                  |
+| `and`/`or`   | Sync       | `conditions`                           | Combine multiple conditions                                           |
+| `http`       | Async      | `http`, `responseExpression`           | Server-driven condition via HTTP request                              |
+| `async`      | Async      | `asyncFunctionName` \| `asyncFn` (XOR) | Registered or inline async function                                   |
 
 ## Common Patterns
 

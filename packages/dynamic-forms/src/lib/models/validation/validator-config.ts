@@ -29,10 +29,17 @@ export interface BuiltInValidatorConfig extends BaseValidatorConfig {
  * Custom validator configuration using Angular's public FieldContext API.
  * Returns ValidationError | ValidationError[] | null synchronously.
  *
- * Three mutually exclusive authoring forms:
+ * Three authoring forms (mutually exclusive at runtime, not enforced by TypeScript):
  * 1. Registered function: `{ type: 'custom', functionName: 'myValidator' }`
  * 2. Inline function (code-only): `{ type: 'custom', fn: (ctx) => ... }`
  * 3. Expression-based: `{ type: 'custom', expression: 'fieldValue === formValue.password', kind: 'passwordMismatch' }`
+ *
+ * Unlike `AsyncValidatorConfig` and `FunctionHttpValidatorConfig` (strict `fn` ↔
+ * `functionName` XOR via discriminated unions), this surface keeps a permissive
+ * interface — the historical expression-vs-functionName split was already
+ * runtime-checked, so adding `fn` follows the same precedent. The runtime
+ * resolver picks one source and warns if `fn` and `functionName` are both set;
+ * inline `fn` wins.
  *
  * `fn` is NOT JSON-serializable — for code-only configs. For configs loaded from
  * JSON / OpenAPI / databases, prefer `functionName` to reference a function

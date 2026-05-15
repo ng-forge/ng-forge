@@ -415,7 +415,13 @@ When the user changes the country, the phone prefix is auto-filled again — ove
   type: 'derivation';
   source: 'asyncFunction'; // Required — identifies async function mode
 
-  asyncFunctionName: string; // Required — name in customFnConfig.asyncDerivations
+  // Required — one of:
+  //   • asyncFunctionName: string — name in customFnConfig.asyncDerivations (JSON-safe)
+  //   • asyncFn: AsyncDerivationFunction — inline async function (code-only)
+  // The two are mutually exclusive (XOR) at the type level.
+  asyncFunctionName?: string;
+  asyncFn?: AsyncDerivationFunction;
+
   dependsOn: string[];       // Required — explicit field dependencies
 
   // Shared optional fields
