@@ -139,6 +139,21 @@ describe('CustomValidatorConfig - Exhaustive Whitelist', () => {
       } as const satisfies CustomValidatorConfig;
       expectTypeOf(config.fn).not.toBeUndefined();
     });
+
+    it('intentionally accepts BOTH fn and functionName at compile time (runtime-enforced XOR)', () => {
+      // CustomValidatorConfig is a permissive interface, not a discriminated union.
+      // The historical functionName-vs-expression split was already runtime-checked,
+      // so the inline `fn` follows the same precedent — mutual exclusivity is enforced
+      // at runtime (logger.warn + inline-wins resolution), not by TypeScript.
+      // AsyncValidatorConfig and FunctionHttpValidatorConfig encode strict XOR via
+      // discriminated unions; this surface intentionally does not.
+      const both = {
+        type: 'custom',
+        functionName: 'registered',
+        fn: () => null,
+      } as const satisfies CustomValidatorConfig;
+      expectTypeOf(both).toMatchTypeOf<CustomValidatorConfig>();
+    });
   });
 });
 

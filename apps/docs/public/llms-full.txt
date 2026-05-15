@@ -1411,6 +1411,29 @@ Advanced custom expressions with access to both field and form values.
 }
 ```
 
+#### Function-based forms (registered vs inline)
+
+For logic that doesn't fit cleanly into an expression — Angular service calls, complex predicates, closures over TS enums/constants — use the function form. Two mutually exclusive variants:
+
+- **Registered (`functionName`)** — JSON-serializable; references a function in `customFnConfig.customFunctions`. Use for configs loaded from APIs, OpenAPI, or databases.
+- **Inline (`fn`)** — code-only, type-safe; the function reference is captured directly with no registry indirection. NOT JSON-serializable.
+
+```typescript
+// Registered — config can travel over the wire
+{
+  type: 'custom',
+  functionName: 'isAdmin',
+}
+
+// Inline — code-only, no registration needed
+{
+  type: 'custom',
+  fn: (ctx) => ctx.formValue.role === 'admin',
+}
+```
+
+TypeScript rejects setting both `fn` and `functionName` at compile time (`?: never` XOR). If a JSON-loaded config sneaks both through at runtime, the library logs a warning once and the inline `fn` wins.
+
 ### Field State in Expressions
 
 `javascript` and `custom` expressions have access to two additional variables for querying field interaction state:
@@ -1653,6 +1676,8 @@ import { inject } from '@angular/core';
   pendingValue: false,
 }
 ```
+
+**See also:** the same XOR pattern applies to [sync](/dynamic-behavior/derivation/values#inline-alternative-fn) and [async derivations](/dynamic-behavior/derivation/async#inline-alternative-asyncfn), and to [validators](/validation/custom-validators#inline-functions-vs-registered-names). See [Configuration](/configuration) for `customFnConfig` setup.
 
 **Choosing `pendingValue`:**
 
@@ -2576,6 +2601,8 @@ Inject Angular services inside `asyncFn` the same way you would inside a registe
 
 Use `asyncFunctionName` for configs loaded over the wire (APIs, OpenAPI, MCP); use `asyncFn` for code-only configs. TypeScript rejects setting both keys, and the runtime warns + prefers `asyncFn` if a JSON config sneaks both through.
 
+**See also:** the same XOR pattern applies to [sync derivations (`fn`)](/dynamic-behavior/derivation/values#inline-alternative-fn), [conditions (`fn` / `asyncFn`)](/dynamic-behavior/conditional-logic#function-based-forms-registered-vs-inline), and [validators](/validation/custom-validators#inline-functions-vs-registered-names).
+
 ## Stop On User Override
 
 `stopOnUserOverride` turns a derivation into a "smart default" — the field is auto-filled initially, but derivation stops once the user manually edits it.
@@ -3317,6 +3344,8 @@ For code-only configs you can attach the function directly via `fn` and skip the
 ```typescript
 import type { CustomFunction } from '@ng-forge/dynamic-forms';
 
+// getTaxRate is a TS helper from your codebase — the inline fn closes over
+// it directly, no need to register or serialize it.
 const calculateTax: CustomFunction = (ctx) => ctx.formValue.subtotal * getTaxRate(ctx.formValue.state);
 
 const config = {
@@ -3329,7 +3358,7 @@ const config = {
         {
           type: 'derivation',
           fn: calculateTax,
-          dependsOn: ['subtotal', 'state'],
+          dependsOn: ['subtotal', 'state'], // see "Default dependencies" below
         },
       ],
     },
@@ -3337,7 +3366,11 @@ const config = {
 };
 ```
 
-Use `functionName` when the config must survive JSON serialization (APIs, OpenAPI, databases, MCP). Use `fn` for code-only authoring where you'd rather not maintain a separate registry.
+**Default dependencies for function derivations:** if you omit `dependsOn`, both `functionName` and `fn` derivations default to a wildcard (`'*'`), meaning the derivation re-runs on every form change. In development, the library logs a one-time `Derivation: custom functions without explicit dependsOn detected` warning so you can narrow it down. Specify `dependsOn` whenever you know the exact inputs to avoid this.
+
+Use `functionName` when the config must survive JSON serialization (APIs, OpenAPI, databases, MCP). Use `fn` for code-only authoring where you'd rather not maintain a separate registry — especially when the function closes over TS enums, constants, or class-scoped helpers that don't round-trip through a string registry.
+
+**See also:** the same XOR pattern applies to [async derivations (`asyncFn`)](/dynamic-behavior/derivation/async#inline-alternative-asyncfn), [conditions (`fn` / `asyncFn`)](/dynamic-behavior/conditional-logic#function-based-forms-registered-vs-inline), and [validators](/validation/custom-validators#inline-functions-vs-registered-names). See [Configuration](/configuration) for setting up `customFnConfig`.
 
 ## Trigger Timing
 
@@ -14460,7 +14493,7 @@ Best for validation that needs field value and access to other fields via FieldC
 ### Basic Example
 
 ```typescript
-import { CustomValidator } from '@ng-forge/dynamic-forms';
+import type { CustomValidator } from '@ng-forge/dynamic-forms';
 
 // ✅ RECOMMENDED: Return only kind
 const noSpaces: CustomValidator = (ctx) => {
@@ -14517,6 +14550,8 @@ const config = {
 ```
 
 `fn` and `functionName` are mutually exclusive (XOR at the type level). The inline form is **not** JSON-serializable — for configs loaded from APIs, OpenAPI, or databases, stick to `functionName`.
+
+**See also:** the same XOR pattern applies to [conditions](/dynamic-behavior/conditional-logic#function-based-forms-registered-vs-inline) and [derivations](/dynamic-behavior/derivation/values#inline-alternative-fn). See [Configuration](/configuration) for `customFnConfig` setup and [AI Integration (MCP)](/ai-integration) for the MCP server, which emits configs using `functionName` exclusively.
 
 ### FieldContext API
 
@@ -14864,6 +14899,37 @@ const config = {
 - Optimized for HTTP-specific validation
 
 **Important:** HTTP validators use "inverted logic" - `onSuccess` should return an error if validation fails, not if the HTTP request succeeds. You're checking validation status, not fetching data.
+
+### Inline Alternative (`fn`)
+
+For code-only projects, skip the `customFnConfig.httpValidators` registration and attach the validator inline. `FunctionHttpValidatorConfig.fn` is XOR with `functionName` — TypeScript rejects both keys at compile time, and the runtime warns + prefers inline if a JSON-loaded config sets them both.
+
+```typescript
+import type { HttpCustomValidator } from '@ng-forge/dynamic-forms';
+
+const checkEmailDomain: HttpCustomValidator = {
+  request: (ctx) => {
+    const email = ctx.value();
+    if (!email?.includes('@')) return undefined;
+    return { url: `/api/validate-domain`, method: 'POST', body: { domain: email.split('@')[1] } };
+  },
+  onSuccess: (response) => (response.valid ? null : { kind: 'invalidDomain' }),
+};
+
+const config = {
+  fields: [
+    {
+      key: 'email',
+      type: 'input',
+      // No customFnConfig.httpValidators entry required — the validator lives on the validator config.
+      validators: [{ type: 'http', fn: checkEmailDomain }],
+      validationMessages: { invalidDomain: 'This email domain is not allowed' },
+    },
+  ],
+};
+```
+
+Use `functionName` for configs loaded from JSON/APIs/OpenAPI; use `fn` for TS-authored configs where you'd rather not maintain a separate registry.
 
 ### Structure
 

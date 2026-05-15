@@ -114,6 +114,8 @@ For code-only configs you can attach the function directly via `fn` and skip the
 ```typescript
 import type { CustomFunction } from '@ng-forge/dynamic-forms';
 
+// getTaxRate is a TS helper from your codebase — the inline fn closes over
+// it directly, no need to register or serialize it.
 const calculateTax: CustomFunction = (ctx) => ctx.formValue.subtotal * getTaxRate(ctx.formValue.state);
 
 const config = {
@@ -126,7 +128,7 @@ const config = {
         {
           type: 'derivation',
           fn: calculateTax,
-          dependsOn: ['subtotal', 'state'],
+          dependsOn: ['subtotal', 'state'], // see "Default dependencies" below
         },
       ],
     },
@@ -134,7 +136,11 @@ const config = {
 };
 ```
 
-Use `functionName` when the config must survive JSON serialization (APIs, OpenAPI, databases, MCP). Use `fn` for code-only authoring where you'd rather not maintain a separate registry.
+**Default dependencies for function derivations:** if you omit `dependsOn`, both `functionName` and `fn` derivations default to a wildcard (`'*'`), meaning the derivation re-runs on every form change. In development, the library logs a one-time `Derivation: custom functions without explicit dependsOn detected` warning so you can narrow it down. Specify `dependsOn` whenever you know the exact inputs to avoid this.
+
+Use `functionName` when the config must survive JSON serialization (APIs, OpenAPI, databases, MCP). Use `fn` for code-only authoring where you'd rather not maintain a separate registry — especially when the function closes over TS enums, constants, or class-scoped helpers that don't round-trip through a string registry.
+
+**See also:** the same XOR pattern applies to [async derivations (`asyncFn`)](/dynamic-behavior/derivation/async#inline-alternative-asyncfn), [conditions (`fn` / `asyncFn`)](/dynamic-behavior/conditional-logic#function-based-forms-registered-vs-inline), and [validators](/validation/custom-validators#inline-functions-vs-registered-names). See [Configuration](/configuration) for setting up `customFnConfig`.
 
 ## Trigger Timing
 

@@ -486,15 +486,15 @@ export class DerivationOrchestrator {
    * Used for smart teardown comparison.
    */
   private computeAsyncEntryKeys(entries: DerivationEntry[]): Set<string> {
-    // For inline `asyncFn` entries, we generate a per-entry unique token so
-    // smart-teardown treats them as distinct identities — JSON.stringify on
-    // a function would otherwise produce `undefined`, collapsing distinct
-    // inline functions into a single key.
+    // For inline `asyncFn` entries we tag the key with the field path (the real
+    // identity, since derivations are self-targeting) rather than the array
+    // index. Index-based tagging churned identities whenever topologicalSort
+    // reordered entries, causing unnecessary teardown + re-subscribe.
     return new Set(
-      entries.map((entry, index) => {
+      entries.map((entry) => {
         const config = {
           asyncFunctionName: entry.asyncFunctionName,
-          asyncFnId: entry.asyncFn ? `inline:${index}` : undefined,
+          asyncFnId: entry.asyncFn ? `inline:${entry.fieldKey}` : undefined,
           dependsOn: entry.dependsOn,
           debounceMs: entry.debounceMs,
           stopOnUserOverride: entry.stopOnUserOverride,

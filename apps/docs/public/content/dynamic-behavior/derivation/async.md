@@ -299,6 +299,8 @@ Inject Angular services inside `asyncFn` the same way you would inside a registe
 
 Use `asyncFunctionName` for configs loaded over the wire (APIs, OpenAPI, MCP); use `asyncFn` for code-only configs. TypeScript rejects setting both keys, and the runtime warns + prefers `asyncFn` if a JSON config sneaks both through.
 
+**See also:** the same XOR pattern applies to [sync derivations (`fn`)](/dynamic-behavior/derivation/values#inline-alternative-fn), [conditions (`fn` / `asyncFn`)](/dynamic-behavior/conditional-logic#function-based-forms-registered-vs-inline), and [validators](/validation/custom-validators#inline-functions-vs-registered-names).
+
 ## Stop On User Override
 
 `stopOnUserOverride` turns a derivation into a "smart default" — the field is auto-filled initially, but derivation stops once the user manually edits it.

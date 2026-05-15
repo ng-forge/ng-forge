@@ -182,7 +182,7 @@ Best for validation that needs field value and access to other fields via FieldC
 ### Basic Example
 
 ```typescript
-import { CustomValidator } from '@ng-forge/dynamic-forms';
+import type { CustomValidator } from '@ng-forge/dynamic-forms';
 
 // ✅ RECOMMENDED: Return only kind
 const noSpaces: CustomValidator = (ctx) => {
@@ -239,6 +239,8 @@ const config = {
 ```
 
 `fn` and `functionName` are mutually exclusive (XOR at the type level). The inline form is **not** JSON-serializable — for configs loaded from APIs, OpenAPI, or databases, stick to `functionName`.
+
+**See also:** the same XOR pattern applies to [conditions](/dynamic-behavior/conditional-logic#function-based-forms-registered-vs-inline) and [derivations](/dynamic-behavior/derivation/values#inline-alternative-fn). See [Configuration](/configuration) for `customFnConfig` setup and [AI Integration (MCP)](/ai-integration) for the MCP server, which emits configs using `functionName` exclusively.
 
 ### FieldContext API
 
@@ -586,6 +588,37 @@ const config = {
 - Optimized for HTTP-specific validation
 
 **Important:** HTTP validators use "inverted logic" - `onSuccess` should return an error if validation fails, not if the HTTP request succeeds. You're checking validation status, not fetching data.
+
+### Inline Alternative (`fn`)
+
+For code-only projects, skip the `customFnConfig.httpValidators` registration and attach the validator inline. `FunctionHttpValidatorConfig.fn` is XOR with `functionName` — TypeScript rejects both keys at compile time, and the runtime warns + prefers inline if a JSON-loaded config sets them both.
+
+```typescript
+import type { HttpCustomValidator } from '@ng-forge/dynamic-forms';
+
+const checkEmailDomain: HttpCustomValidator = {
+  request: (ctx) => {
+    const email = ctx.value();
+    if (!email?.includes('@')) return undefined;
+    return { url: `/api/validate-domain`, method: 'POST', body: { domain: email.split('@')[1] } };
+  },
+  onSuccess: (response) => (response.valid ? null : { kind: 'invalidDomain' }),
+};
+
+const config = {
+  fields: [
+    {
+      key: 'email',
+      type: 'input',
+      // No customFnConfig.httpValidators entry required — the validator lives on the validator config.
+      validators: [{ type: 'http', fn: checkEmailDomain }],
+      validationMessages: { invalidDomain: 'This email domain is not allowed' },
+    },
+  ],
+};
+```
+
+Use `functionName` for configs loaded from JSON/APIs/OpenAPI; use `fn` for TS-authored configs where you'd rather not maintain a separate registry.
 
 ### Structure
 

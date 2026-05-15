@@ -385,6 +385,29 @@ Advanced custom expressions with access to both field and form values.
 }
 ```
 
+#### Function-based forms (registered vs inline)
+
+For logic that doesn't fit cleanly into an expression — Angular service calls, complex predicates, closures over TS enums/constants — use the function form. Two mutually exclusive variants:
+
+- **Registered (`functionName`)** — JSON-serializable; references a function in `customFnConfig.customFunctions`. Use for configs loaded from APIs, OpenAPI, or databases.
+- **Inline (`fn`)** — code-only, type-safe; the function reference is captured directly with no registry indirection. NOT JSON-serializable.
+
+```typescript
+// Registered — config can travel over the wire
+{
+  type: 'custom',
+  functionName: 'isAdmin',
+}
+
+// Inline — code-only, no registration needed
+{
+  type: 'custom',
+  fn: (ctx) => ctx.formValue.role === 'admin',
+}
+```
+
+TypeScript rejects setting both `fn` and `functionName` at compile time (`?: never` XOR). If a JSON-loaded config sneaks both through at runtime, the library logs a warning once and the inline `fn` wins.
+
 ### Field State in Expressions
 
 `javascript` and `custom` expressions have access to two additional variables for querying field interaction state:
@@ -627,6 +650,8 @@ import { inject } from '@angular/core';
   pendingValue: false,
 }
 ```
+
+**See also:** the same XOR pattern applies to [sync](/dynamic-behavior/derivation/values#inline-alternative-fn) and [async derivations](/dynamic-behavior/derivation/async#inline-alternative-asyncfn), and to [validators](/validation/custom-validators#inline-functions-vs-registered-names). See [Configuration](/configuration) for `customFnConfig` setup.
 
 **Choosing `pendingValue`:**
 

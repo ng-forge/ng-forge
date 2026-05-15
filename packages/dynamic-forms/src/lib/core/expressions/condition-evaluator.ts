@@ -22,22 +22,44 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
       return evaluateJavaScriptExpression(expression, context);
 
     case 'custom': {
-      if (expression.fn && expression.functionName) {
-        context.logger.warn(
-          'Both "fn" and "functionName" are set on custom condition. Inline "fn" takes precedence; "functionName" is ignored.',
-        );
+      // Read both keys via cast — the XOR type narrows to `never` when both
+      // would be truthy, but JSON-loaded configs can produce that state at
+      // runtime. We accept it here, warn once, and let inline win.
+      const bothSet = expression as { fn?: unknown; functionName?: string };
+      const inlineFn = bothSet.fn as ((ctx: EvaluationContext) => unknown) | undefined;
+      const registeredName = bothSet.functionName;
+
+      if (inlineFn && registeredName) {
+        // Dedupe via the DI-scoped deprecation tracker so authoring mistakes
+        // log once per form instance — not on every reactive re-evaluation.
+        // Falls back to a marker on the expression object if no tracker is
+        // wired (unit-test contexts that don't construct one).
+        const key = `custom-condition:${registeredName}:both-set`;
+        const tracker = context.deprecationTracker;
+        const marker = expression as { __warnedBothSet?: boolean };
+        const shouldWarn = tracker ? !tracker.warnedKeys.has(key) : !marker.__warnedBothSet;
+        if (shouldWarn) {
+          context.logger.warn(
+            'Both "fn" and "functionName" are set on custom condition. Inline "fn" takes precedence; "functionName" is ignored.',
+          );
+          if (tracker) {
+            tracker.warnedKeys.add(key);
+          } else {
+            marker.__warnedBothSet = true;
+          }
+        }
       }
 
-      const customFn = expression.fn ?? (expression.functionName ? context.customFunctions?.[expression.functionName] : undefined);
+      const customFn = inlineFn ?? (registeredName ? context.customFunctions?.[registeredName] : undefined);
       if (!customFn) {
-        context.logger.error('Custom function not found:', expression.functionName);
+        context.logger.error('Custom function not found:', registeredName);
         return false;
       }
 
       try {
         return !!customFn(context);
       } catch (error) {
-        context.logger.error('Error executing custom function:', expression.functionName ?? '<inline>', error);
+        context.logger.error('Error executing custom function:', registeredName ?? '<inline>', error);
         return false;
       }
     }
