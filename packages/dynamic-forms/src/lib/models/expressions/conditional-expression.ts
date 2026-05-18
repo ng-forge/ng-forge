@@ -1,3 +1,5 @@
+import type { CustomFunction } from '../../core/expressions/custom-function-types';
+import type { AsyncConditionFunction } from '../../core/expressions/async-custom-function-types';
 import type { HttpRequestConfig } from '../http/http-request-config';
 
 /**
@@ -33,17 +35,43 @@ export interface FieldValueCondition {
 }
 
 /**
- * Condition that invokes a registered custom function by name.
+ * Condition that invokes a custom function.
  *
- * Register functions via `customFnConfig.customFunctions`.
+ * Two mutually exclusive forms:
+ * - `functionName`: name of a function registered in `customFnConfig.customFunctions`.
+ *   JSON-serializable; suitable for configs loaded from APIs, databases, or OpenAPI.
+ * - `fn`: inline function. NOT JSON-serializable; for code-only configs.
+ *
+ * Exactly one of `functionName` or `fn` must be set.
+ *
+ * Encoded as a strict discriminated union (XOR via `?: never`). `CustomValidatorConfig`
+ * intentionally uses a permissive interface for the same `fn`/`functionName` split
+ * because validators have a third source (`expression`) and the historical interface
+ * was already runtime-checked — the asymmetry is by design, not an oversight.
  *
  * @public
  */
-export interface CustomCondition {
-  type: 'custom';
-  /** Name of the registered custom function to invoke */
-  functionName: string;
-}
+export type CustomCondition =
+  | {
+      type: 'custom';
+      /** Name of the registered custom function to invoke */
+      functionName: string;
+      /** Inline form is forbidden when `functionName` is set */
+      fn?: never;
+    }
+  | {
+      type: 'custom';
+      /**
+       * Inline custom function. Mutually exclusive with `functionName`.
+       *
+       * NOT JSON-serializable — for code-only configs. For configs loaded
+       * from JSON / OpenAPI / databases, use `functionName` to reference
+       * a function registered in `customFnConfig.customFunctions`.
+       */
+      fn: CustomFunction;
+      /** Registered form is forbidden when `fn` is set */
+      functionName?: never;
+    };
 
 /**
  * Condition that evaluates a JavaScript expression using the secure AST-based parser.
@@ -101,21 +129,12 @@ export interface HttpCondition {
 }
 
 /**
- * Condition that evaluates based on a registered async function.
+ * Shared fields for both branches of {@link AsyncCondition}.
  *
- * The function is resolved reactively — when dependent form values change,
- * the function is re-evaluated (with debouncing). The result is cached per
- * evaluation to avoid redundant calls.
- *
- * Since `LogicFn` must return `boolean` synchronously, this condition uses
- * a signal-based async resolution pattern internally.
- *
- * @public
+ * @internal
  */
-export interface AsyncCondition {
+interface AsyncConditionBase {
   type: 'async';
-  /** Name of the registered async condition function */
-  asyncFunctionName: string;
   /**
    * Value to return while async resolution is pending.
    *
@@ -133,6 +152,45 @@ export interface AsyncCondition {
    */
   debounceMs?: number;
 }
+
+/**
+ * Condition that resolves asynchronously via a custom function.
+ *
+ * Two mutually exclusive forms:
+ * - `asyncFunctionName`: name of a function registered in `customFnConfig.asyncConditions`.
+ *   JSON-serializable; suitable for configs loaded from APIs, databases, or OpenAPI.
+ * - `asyncFn`: inline async function. NOT JSON-serializable; for code-only configs.
+ *
+ * Exactly one of `asyncFunctionName` or `asyncFn` must be set.
+ *
+ * The function is resolved reactively — when dependent form values change,
+ * the function is re-evaluated (with debouncing). The result is cached per
+ * evaluation to avoid redundant calls.
+ *
+ * Since `LogicFn` must return `boolean` synchronously, this condition uses
+ * a signal-based async resolution pattern internally.
+ *
+ * @public
+ */
+export type AsyncCondition =
+  | (AsyncConditionBase & {
+      /** Name of the registered async condition function */
+      asyncFunctionName: string;
+      /** Inline form is forbidden when `asyncFunctionName` is set */
+      asyncFn?: never;
+    })
+  | (AsyncConditionBase & {
+      /**
+       * Inline async condition function. Mutually exclusive with `asyncFunctionName`.
+       *
+       * NOT JSON-serializable — for code-only configs. For configs loaded
+       * from JSON / OpenAPI / databases, use `asyncFunctionName` to reference
+       * a function registered in `customFnConfig.asyncConditions`.
+       */
+      asyncFn: AsyncConditionFunction;
+      /** Registered form is forbidden when `asyncFn` is set */
+      asyncFunctionName?: never;
+    });
 
 /**
  * Logical AND — all sub-conditions must be true.

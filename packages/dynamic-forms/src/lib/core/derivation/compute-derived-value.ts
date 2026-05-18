@@ -39,7 +39,7 @@ export interface ComputeValueOptions {
  * @internal
  */
 export function computeValueFromEntry(
-  entry: Pick<BaseDerivationEntry, 'value' | 'expression' | 'functionName'>,
+  entry: Pick<BaseDerivationEntry, 'value' | 'expression' | 'functionName' | 'fn'>,
   evalContext: EvaluationContext,
   options: ComputeValueOptions,
 ): unknown {
@@ -51,8 +51,13 @@ export function computeValueFromEntry(
     return ExpressionParser.evaluate(entry.expression, evalContext);
   }
 
-  if (entry.functionName) {
-    const fn = options.derivationFunctions?.[entry.functionName];
+  if (entry.fn || entry.functionName) {
+    if (entry.fn && entry.functionName) {
+      evalContext.logger.warn(
+        `Both "fn" and "functionName" are set on derivation for '${options.subject}'. Inline "fn" takes precedence; "functionName" is ignored.`,
+      );
+    }
+    const fn = entry.fn ?? (entry.functionName ? options.derivationFunctions?.[entry.functionName] : undefined);
     if (!fn) {
       const kind = options.functionKind ?? 'Derivation function';
       throw new DynamicFormError(`${kind} '${entry.functionName}' not found in customFnConfig.derivations`);
@@ -60,5 +65,7 @@ export function computeValueFromEntry(
     return fn(evalContext);
   }
 
-  throw new DynamicFormError(`Derivation for ${options.subject} has no value source. Specify 'value', 'expression', or 'functionName'.`);
+  throw new DynamicFormError(
+    `Derivation for ${options.subject} has no value source. Specify 'value', 'expression', 'functionName', or 'fn'.`,
+  );
 }

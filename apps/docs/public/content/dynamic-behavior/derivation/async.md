@@ -259,8 +259,47 @@ The async function is only called when `enableLookup === true`.
 
 `source: 'asyncFunction'` requires:
 
-- **`asyncFunctionName: string`** — Name of the function registered in `customFnConfig.asyncDerivations`.
+- **One of `asyncFunctionName: string` or `asyncFn: AsyncDerivationFunction`** — see [Inline alternative](#inline-alternative-asyncfn) below. The two are mutually exclusive.
 - **`dependsOn: string[]`** — Explicit field dependencies. Without this, the function would re-run on every form change.
+
+### Inline alternative (`asyncFn`)
+
+When you don't need JSON-serializability, set `asyncFn` directly instead of registering the function in `customFnConfig.asyncDerivations`:
+
+```typescript
+import type { AsyncDerivationFunction, FormConfig } from '@ng-forge/dynamic-forms';
+import { inject } from '@angular/core';
+import { map } from 'rxjs';
+
+const lookupCity: AsyncDerivationFunction = (context) =>
+  inject(AddressService)
+    .lookup(context.formValue.zipCode as string)
+    .pipe(map((r) => r.city));
+
+const formConfig = {
+  fields: [
+    {
+      key: 'city',
+      type: 'input',
+      readonly: true,
+      logic: [
+        {
+          type: 'derivation',
+          source: 'asyncFunction',
+          asyncFn: lookupCity,
+          dependsOn: ['zipCode'],
+        },
+      ],
+    },
+  ],
+} as const satisfies FormConfig;
+```
+
+Inject Angular services inside `asyncFn` the same way you would inside a registered function — both run in the form's injection context.
+
+Use `asyncFunctionName` for configs loaded over the wire (APIs, OpenAPI, MCP); use `asyncFn` for code-only configs. TypeScript rejects setting both keys, and the runtime warns + prefers `asyncFn` if a JSON config sneaks both through.
+
+**See also:** the same XOR pattern applies to [sync derivations (`fn`)](/dynamic-behavior/derivation/values#inline-alternative-fn), [conditions (`fn` / `asyncFn`)](/dynamic-behavior/conditional-logic#function-based-forms-registered-vs-inline), and [validators](/validation/custom-validators#inline-functions-vs-registered-names).
 
 ## Stop On User Override
 
@@ -378,7 +417,13 @@ When the user changes the country, the phone prefix is auto-filled again — ove
   type: 'derivation';
   source: 'asyncFunction'; // Required — identifies async function mode
 
-  asyncFunctionName: string; // Required — name in customFnConfig.asyncDerivations
+  // Required — one of:
+  //   • asyncFunctionName: string — name in customFnConfig.asyncDerivations (JSON-safe)
+  //   • asyncFn: AsyncDerivationFunction — inline async function (code-only)
+  // The two are mutually exclusive (XOR) at the type level.
+  asyncFunctionName?: string;
+  asyncFn?: AsyncDerivationFunction;
+
   dependsOn: string[];       // Required — explicit field dependencies
 
   // Shared optional fields

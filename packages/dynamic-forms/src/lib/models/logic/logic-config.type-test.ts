@@ -91,6 +91,7 @@ describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
     | 'value'
     | 'expression'
     | 'functionName'
+    | 'fn'
     | 'trigger'
     | 'debounceMs'
     | 'debugName'
@@ -100,7 +101,8 @@ describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
     | 'targetProperty'
     | 'http'
     | 'responseExpression'
-    | 'asyncFunctionName';
+    | 'asyncFunctionName'
+    | 'asyncFn';
   type ActualKeys = keyof DerivationLogicConfig;
 
   it('should have exactly the expected keys', () => {
@@ -109,15 +111,15 @@ describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
 
   describe('required keys', () => {
     // RequiredKeys<T> for a union = keys required in at least one member.
-    // With 10 mode × trigger variants, the required keys include:
+    // Mode/trigger × XOR (fn / functionName, asyncFn / asyncFunctionName) variants:
     // - type: required in all (SharedDerivationFields)
-    // - trigger: required in all 5 debounced variants
+    // - trigger: required in all debounced variants
     // - source: required in HTTP and asyncFunction variants
     // - http, dependsOn, responseExpression: required in HTTP variants
-    // - asyncFunctionName, dependsOn: required in asyncFunction variants
+    // - asyncFunctionName | asyncFn, dependsOn: required in asyncFunction variants
     // - expression: required in expression variants
     // - value: required in value variants
-    // - functionName: required in function variants
+    // - functionName | fn: required in function variants
     it('should have type, trigger, source, and all mode-specific required fields', () => {
       expectTypeOf<RequiredKeys<DerivationLogicConfig>>().toEqualTypeOf<
         | 'type'
@@ -127,9 +129,11 @@ describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
         | 'dependsOn'
         | 'responseExpression'
         | 'asyncFunctionName'
+        | 'asyncFn'
         | 'expression'
         | 'value'
         | 'functionName'
+        | 'fn'
       >();
     });
   });
@@ -254,13 +258,66 @@ describe('DerivationLogicConfig - source: asyncFunction required fields', () => 
   });
 
   it('should reject async derivation missing asyncFunctionName', () => {
-    // @ts-expect-error — asyncFunctionName is required for source: 'asyncFunction'
+    // @ts-expect-error — one of asyncFunctionName or asyncFn is required for source: 'asyncFunction'
     const _missing: DerivationLogicConfig = {
       type: 'derivation',
       source: 'asyncFunction',
       dependsOn: ['field1'],
     };
     void _missing;
+  });
+
+  it('should accept inline asyncFn instead of asyncFunctionName', () => {
+    const logic = {
+      type: 'derivation',
+      source: 'asyncFunction',
+      asyncFn: async () => 42,
+      dependsOn: ['productId'],
+    } as const satisfies DerivationLogicConfig;
+
+    expectTypeOf(logic.source).toEqualTypeOf<'asyncFunction'>();
+  });
+
+  it('should reject async derivation with both asyncFn and asyncFunctionName', () => {
+    // @ts-expect-error — asyncFn and asyncFunctionName are mutually exclusive
+    const _both: DerivationLogicConfig = {
+      type: 'derivation',
+      source: 'asyncFunction',
+      asyncFunctionName: 'fetchData',
+      asyncFn: async () => 1,
+      dependsOn: ['field1'],
+    };
+    void _both;
+  });
+});
+
+describe('DerivationLogicConfig - inline fn (sync) — XOR with functionName', () => {
+  it('should accept inline fn derivation', () => {
+    const logic = {
+      type: 'derivation',
+      fn: (ctx) => (ctx.formValue.country === 'USA' ? 'USD' : 'EUR'),
+    } as const satisfies DerivationLogicConfig;
+
+    expectTypeOf(logic.type).toEqualTypeOf<'derivation'>();
+  });
+
+  it('should reject derivation with both fn and functionName', () => {
+    // @ts-expect-error — fn and functionName are mutually exclusive
+    const _both: DerivationLogicConfig = {
+      type: 'derivation',
+      functionName: 'getCurrency',
+      fn: () => 'USD',
+    };
+    void _both;
+  });
+
+  it('should reject function-mode derivation with neither fn nor functionName', () => {
+    // @ts-expect-error — one of value / expression / functionName / fn is required
+    const _neither: DerivationLogicConfig = {
+      type: 'derivation',
+      dependsOn: ['country'],
+    };
+    void _neither;
   });
 });
 

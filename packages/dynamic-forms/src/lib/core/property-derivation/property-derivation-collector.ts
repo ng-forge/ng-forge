@@ -4,6 +4,7 @@ import { DerivationLogicConfig, isDerivationLogicConfig, hasTargetProperty } fro
 import { Logger } from '../../providers/features/logger/logger.interface';
 import type { WarningTracker } from '../../utils/warning-tracker';
 import { extractDependenciesFromConfig } from '../derivation/extract-dependencies';
+import { extractInlineFn } from '../derivation/extract-inline-fn';
 import { traverseFieldsWithContext } from '../derivation/field-traversal';
 import { buildPropertyOverrideKey, PLACEHOLDER_INDEX } from './property-override-key';
 import { PropertyDerivationCollection, PropertyDerivationEntry } from './property-derivation-types';
@@ -98,6 +99,7 @@ function createPropertyDerivationEntryFromDerivation(
     value: config.value,
     expression: config.expression,
     functionName: config.functionName,
+    fn: extractInlineFn(config),
     trigger,
     debounceMs,
     debugName: config.debugName,

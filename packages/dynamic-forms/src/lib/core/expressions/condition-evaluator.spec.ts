@@ -373,6 +373,81 @@ describe('condition-evaluator', () => {
         expect(result).toBe(true);
         expect(contextChecker).toHaveBeenCalledWith(contextWithChecker);
       });
+
+      describe('inline fn alternative', () => {
+        it('evaluates inline fn correctly', () => {
+          const inlineFn = vi.fn().mockReturnValue(true);
+          const expression: ConditionalExpression = {
+            type: 'custom',
+            fn: inlineFn,
+          };
+
+          const result = evaluateCondition(expression, mockContext);
+
+          expect(result).toBe(true);
+          expect(inlineFn).toHaveBeenCalledWith(mockContext);
+        });
+
+        it('coerces inline fn return value to boolean', () => {
+          const cases: Array<{ value: unknown; expected: boolean }> = [
+            { value: 1, expected: true },
+            { value: 0, expected: false },
+            { value: 'x', expected: true },
+            { value: '', expected: false },
+            { value: null, expected: false },
+            { value: undefined, expected: false },
+          ];
+
+          for (const { value, expected } of cases) {
+            const expression: ConditionalExpression = {
+              type: 'custom',
+              fn: () => value,
+            };
+            expect(evaluateCondition(expression, mockContext)).toBe(expected);
+          }
+        });
+
+        it('handles inline fn execution errors gracefully', () => {
+          const throwing = vi.fn(() => {
+            throw new Error('boom');
+          });
+
+          const expression: ConditionalExpression = {
+            type: 'custom',
+            fn: throwing,
+          };
+
+          const result = evaluateCondition(expression, mockContext);
+
+          expect(result).toBe(false);
+          expect(mockLogger.error).toHaveBeenCalledWith('Error executing custom function:', '<inline>', expect.any(Error));
+        });
+
+        it('inline fn wins and warns when both fn and functionName are set', () => {
+          const registered = vi.fn().mockReturnValue(false);
+          const inline = vi.fn().mockReturnValue(true);
+
+          // Use a type cast — the public XOR type rejects this at compile time,
+          // but the runtime guard must still cope with JSON-loaded configs.
+          const expression = {
+            type: 'custom',
+            functionName: 'registered',
+            fn: inline,
+          } as unknown as ConditionalExpression;
+
+          const context: EvaluationContext = {
+            ...mockContext,
+            customFunctions: { registered },
+          };
+
+          const result = evaluateCondition(expression, context);
+
+          expect(result).toBe(true);
+          expect(inline).toHaveBeenCalledTimes(1);
+          expect(registered).not.toHaveBeenCalled();
+          expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Both "fn" and "functionName" are set'));
+        });
+      });
     });
 
     describe('fieldValue with array-scoped context', () => {

@@ -103,7 +103,7 @@ export const VALIDATORS: ValidatorInfo[] = [
     type: 'custom',
     category: 'custom',
     description:
-      "Custom synchronous validator using registered function or expression. IMPORTANT: The validator returns { kind: 'errorKind' } on failure. The actual error MESSAGE is defined in 'validationMessages' at the FIELD level, NOT in the validator config.",
+      "Custom synchronous validator using registered function or expression. IMPORTANT: The validator returns { kind: 'errorKind' } on failure. The actual error MESSAGE is defined in 'validationMessages' at the FIELD level, NOT in the validator config. NOTE: TypeScript-authored configs may also use an inline `fn: CustomValidator` instead of `functionName` (XOR with `functionName`, code-only — not JSON-serializable); MCP-generated configs should use `functionName`.",
     parameters: {
       functionName: {
         name: 'functionName',
@@ -156,7 +156,7 @@ export const VALIDATORS: ValidatorInfo[] = [
     type: 'async',
     category: 'async',
     description:
-      'Async validator using registered async function (resource-based). Register the function via customFnConfig.asyncValidators.',
+      'Async validator using registered async function (resource-based). Register the function via customFnConfig.asyncValidators. NOTE: TypeScript-authored configs may also use an inline `fn: AsyncCustomValidator` instead of `functionName` (XOR with `functionName`, code-only — not JSON-serializable); MCP-generated configs should use `functionName`.',
     parameters: {
       functionName: {
         name: 'functionName',
@@ -180,7 +180,7 @@ export const VALIDATORS: ValidatorInfo[] = [
     type: 'http',
     category: 'http',
     description:
-      'HTTP validator — supports two modes: (1) Declarative (fully JSON-serializable, no function registration) using http + responseMapping properties, or (2) Function-based using functionName to reference a registered HTTP validator function. Query param values and (optionally) body values are expressions evaluated against the form context. Response mapping uses validWhen (truthy = valid) and errorKind (maps to field-level validationMessages).',
+      'HTTP validator — supports two modes: (1) Declarative (fully JSON-serializable, no function registration) using http + responseMapping properties, or (2) Function-based using functionName to reference a registered HTTP validator function. Query param values and (optionally) body values are expressions evaluated against the form context. Response mapping uses validWhen (truthy = valid) and errorKind (maps to field-level validationMessages). NOTE: TypeScript-authored configs may also use an inline `fn: HttpCustomValidator` instead of `functionName` (XOR with `functionName`, code-only — not JSON-serializable); MCP-generated configs should use `functionName` or declarative mode.',
     parameters: {
       functionName: {
         name: 'functionName',

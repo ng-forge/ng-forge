@@ -6,6 +6,7 @@ import { extractStringDependencies } from '../cross-field/cross-field-detector';
 import { topologicalSort } from './derivation-sorter';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { extractDependenciesFromConfig } from './extract-dependencies';
+import { extractInlineAsyncFn, extractInlineFn } from './extract-inline-fn';
 import { traverseFieldsWithContext } from './field-traversal';
 
 /**
@@ -331,9 +332,11 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
     value: config.value,
     expression: config.expression,
     functionName: config.functionName,
+    fn: extractInlineFn(config),
     http: config.http,
     responseExpression: config.responseExpression,
     asyncFunctionName: config.asyncFunctionName,
+    asyncFn: extractInlineAsyncFn(config),
     trigger,
     debounceMs,
     isShorthand: false,

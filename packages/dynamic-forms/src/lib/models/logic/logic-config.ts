@@ -1,3 +1,5 @@
+import type { AsyncDerivationFunction } from '../../core/expressions/async-custom-function-types';
+import type { CustomFunction } from '../../core/expressions/custom-function-types';
 import { ConditionalExpression } from '../expressions/conditional-expression';
 import { HttpRequestConfig } from '../http/http-request-config';
 
@@ -350,6 +352,10 @@ type DebouncedDerivationTrigger = { trigger: 'debounced'; debounceMs?: number };
 interface HttpDerivationBase extends SharedDerivationFields {
   /** Identifies this derivation as HTTP-driven. */
   source: 'http';
+  /** Forbidden on HTTP source */
+  fn?: never;
+  /** Forbidden on HTTP source */
+  asyncFn?: never;
   /**
    * HTTP request configuration for server-driven derivations.
    *
@@ -414,34 +420,15 @@ interface HttpDerivationBase extends SharedDerivationFields {
 // ============================================================================
 
 /**
- * Base for async function derivations. `source: 'asyncFunction'` is required.
- * TypeScript enforces `dependsOn` at the type level.
+ * Shared fields for both branches of {@link AsyncFunctionDerivationBase}.
  *
  * @internal
  */
-interface AsyncFunctionDerivationBase extends SharedDerivationFields {
+interface AsyncFunctionDerivationShared extends SharedDerivationFields {
   /** Identifies this derivation as async-function-driven. */
   source: 'asyncFunction';
-  /**
-   * Name of a registered async derivation function.
-   *
-   * The function receives the evaluation context and returns a Promise or Observable
-   * of the derived value. Register functions in `customFnConfig.asyncDerivations`.
-   *
-   * @example
-   * ```typescript
-   * {
-   *   key: 'suggestedPrice',
-   *   logic: [{
-   *     type: 'derivation',
-   *     source: 'asyncFunction',
-   *     asyncFunctionName: 'fetchSuggestedPrice',
-   *     dependsOn: ['productId', 'quantity'],
-   *   }]
-   * }
-   * ```
-   */
-  asyncFunctionName: string;
+  /** Forbidden on asyncFunction source */
+  fn?: never;
   /**
    * Explicit field dependencies. Required for async derivations to prevent
    * wildcard triggering on every form change.
@@ -461,6 +448,51 @@ interface AsyncFunctionDerivationBase extends SharedDerivationFields {
   responseExpression?: never;
 }
 
+/**
+ * Base for async function derivations. `source: 'asyncFunction'` is required.
+ * TypeScript enforces `dependsOn` at the type level, and `asyncFunctionName` /
+ * `asyncFn` are mutually exclusive (XOR).
+ *
+ * @internal
+ */
+type AsyncFunctionDerivationBase =
+  | (AsyncFunctionDerivationShared & {
+      /**
+       * Name of a registered async derivation function.
+       *
+       * The function receives the evaluation context and returns a Promise or Observable
+       * of the derived value. Register functions in `customFnConfig.asyncDerivations`.
+       *
+       * @example
+       * ```typescript
+       * {
+       *   key: 'suggestedPrice',
+       *   logic: [{
+       *     type: 'derivation',
+       *     source: 'asyncFunction',
+       *     asyncFunctionName: 'fetchSuggestedPrice',
+       *     dependsOn: ['productId', 'quantity'],
+       *   }]
+       * }
+       * ```
+       */
+      asyncFunctionName: string;
+      /** Inline form is forbidden when `asyncFunctionName` is set */
+      asyncFn?: never;
+    })
+  | (AsyncFunctionDerivationShared & {
+      /**
+       * Inline async derivation function. Mutually exclusive with `asyncFunctionName`.
+       *
+       * NOT JSON-serializable — for code-only configs. For configs loaded
+       * from JSON / OpenAPI / databases, use `asyncFunctionName` to reference
+       * a function registered in `customFnConfig.asyncDerivations`.
+       */
+      asyncFn: AsyncDerivationFunction;
+      /** Registered form is forbidden when `asyncFn` is set */
+      asyncFunctionName?: never;
+    });
+
 // ============================================================================
 // Sync derivation modes
 // ============================================================================
@@ -472,6 +504,10 @@ interface AsyncFunctionDerivationBase extends SharedDerivationFields {
  */
 interface ExpressionDerivationBase extends SharedDerivationFields {
   source?: never;
+  /** Forbidden on expression mode */
+  fn?: never;
+  /** Forbidden on expression mode */
+  asyncFn?: never;
   /**
    * JavaScript expression to evaluate for the derived value.
    *
@@ -522,6 +558,10 @@ interface ExpressionDerivationBase extends SharedDerivationFields {
  */
 interface ValueDerivationBase extends SharedDerivationFields {
   source?: never;
+  /** Forbidden on value mode */
+  fn?: never;
+  /** Forbidden on value mode */
+  asyncFn?: never;
   /**
    * Static value to set on this field.
    *
@@ -552,26 +592,14 @@ interface ValueDerivationBase extends SharedDerivationFields {
 }
 
 /**
- * Base for custom sync function derivations.
+ * Shared fields for both branches of {@link FunctionDerivationBase}.
  *
  * @internal
  */
-interface FunctionDerivationBase extends SharedDerivationFields {
+interface FunctionDerivationShared extends SharedDerivationFields {
   source?: never;
-  /**
-   * Name of a registered custom derivation function.
-   *
-   * The function receives the evaluation context and returns the derived value.
-   * Register functions in `customFnConfig.derivations`.
-   *
-   * @example
-   * ```typescript
-   * functionName: 'getCurrencyForCountry'
-   * functionName: 'calculateTax'
-   * functionName: 'formatPhoneNumber'
-   * ```
-   */
-  functionName: string;
+  /** Forbidden on function-derivation mode */
+  asyncFn?: never;
   /**
    * Explicit field dependencies for function derivations.
    *
@@ -600,6 +628,44 @@ interface FunctionDerivationBase extends SharedDerivationFields {
   asyncFunctionName?: never;
   responseExpression?: never;
 }
+
+/**
+ * Base for custom sync function derivations. `functionName` and `fn` are
+ * mutually exclusive (XOR).
+ *
+ * @internal
+ */
+type FunctionDerivationBase =
+  | (FunctionDerivationShared & {
+      /**
+       * Name of a registered custom derivation function.
+       *
+       * The function receives the evaluation context and returns the derived value.
+       * Register functions in `customFnConfig.derivations`.
+       *
+       * @example
+       * ```typescript
+       * functionName: 'getCurrencyForCountry'
+       * functionName: 'calculateTax'
+       * functionName: 'formatPhoneNumber'
+       * ```
+       */
+      functionName: string;
+      /** Inline form is forbidden when `functionName` is set */
+      fn?: never;
+    })
+  | (FunctionDerivationShared & {
+      /**
+       * Inline custom derivation function. Mutually exclusive with `functionName`.
+       *
+       * NOT JSON-serializable — for code-only configs. For configs loaded
+       * from JSON / OpenAPI / databases, use `functionName` to reference
+       * a function registered in `customFnConfig.derivations`.
+       */
+      fn: CustomFunction;
+      /** Registered form is forbidden when `fn` is set */
+      functionName?: never;
+    });
 
 /**
  * HTTP derivation that evaluates immediately on change (default).

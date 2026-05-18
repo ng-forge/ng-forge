@@ -1,5 +1,6 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { DerivationLogicConfig, LogicTrigger } from '../../models/logic/logic-config';
+import type { CustomFunction } from '../expressions/custom-function-types';
 
 /**
  * Common shape shared by `DerivationEntry` and `PropertyDerivationEntry`.
@@ -48,9 +49,15 @@ export interface BaseDerivationEntry {
 
   /**
    * Name of a registered custom derivation function.
-   * Mutually exclusive with `value` and `expression`.
+   * Mutually exclusive with `value`, `expression`, and `fn`.
    */
   functionName?: string;
+
+  /**
+   * Inline custom derivation function (code-only authoring).
+   * Mutually exclusive with `functionName`. NOT JSON-serializable.
+   */
+  fn?: CustomFunction;
 
   /**
    * When to evaluate the derivation.

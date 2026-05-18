@@ -73,21 +73,22 @@ const _asyncAsConditional: ConditionalExpression = asyncCondition;
 // ConditionalExpression discriminates type: 'async' correctly
 function handleAsyncCondition(expr: ConditionalExpression): void {
   if (expr.type === 'async') {
-    // Inside this block, expr is narrowed to AsyncCondition
-    const _fnName: string = expr.asyncFunctionName;
+    // Inside this block, expr is narrowed to AsyncCondition (a union of XOR branches),
+    // so name and inline-fn are each `T | undefined` until the branch is narrowed further.
+    const _fnName: string | undefined = expr.asyncFunctionName;
     const _pending: boolean | undefined = expr.pendingValue;
     const _debounce: number | undefined = expr.debounceMs;
     void [_fnName, _pending, _debounce];
   }
 }
 
-// Required properties only
+// Required properties only — registered-name branch
 const _asyncRequiredOnly: AsyncCondition = {
   type: 'async',
   asyncFunctionName: 'checkPermission',
 };
 
-// All optional properties
+// All optional properties — registered-name branch
 const _asyncAllProps: AsyncCondition = {
   type: 'async',
   asyncFunctionName: 'checkPermission',
@@ -95,31 +96,62 @@ const _asyncAllProps: AsyncCondition = {
   debounceMs: 500,
 };
 
+// Inline `asyncFn` branch
+const _asyncInline: AsyncCondition = {
+  type: 'async',
+  asyncFn: async () => true,
+  pendingValue: false,
+};
+
 // @ts-expect-error — type is required
 const _asyncMissingType: AsyncCondition = { asyncFunctionName: 'fn' };
 
-// @ts-expect-error — asyncFunctionName is required
+// @ts-expect-error — must supply one of asyncFunctionName or asyncFn
 const _asyncMissingFn: AsyncCondition = { type: 'async' };
+
+// @ts-expect-error — cannot set both asyncFunctionName and asyncFn
+const _asyncBothSet: AsyncCondition = {
+  type: 'async',
+  asyncFunctionName: 'check',
+  asyncFn: async () => true,
+};
 
 // ============================================================================
 // CustomCondition tests
 // ============================================================================
 
-// functionName field (required)
+// Registered-name branch
 const _customNew: CustomCondition = {
   type: 'custom',
   functionName: 'myValidator',
 };
 const _customNewAsConditional: ConditionalExpression = _customNew;
 
+// Inline `fn` branch
+const _customInline: CustomCondition = {
+  type: 'custom',
+  fn: (ctx) => !!ctx.fieldValue,
+};
+
 // ConditionalExpression discriminates type: 'custom' correctly
 function handleCustomCondition(expr: ConditionalExpression): void {
   if (expr.type === 'custom') {
-    // Inside this block, expr is narrowed to CustomCondition
-    const _fnName: string = expr.functionName;
+    // Narrowed to CustomCondition (a union of XOR branches) — name/fn are each
+    // `T | undefined` until the specific branch is narrowed further.
+    const _fnName: string | undefined = expr.functionName;
     void _fnName;
   }
 }
+
+// @ts-expect-error — must supply one of functionName or fn
+const _customNeither: CustomCondition = { type: 'custom' };
+
+// @ts-expect-error — cannot set both functionName and fn
+const _customBothSet: CustomCondition = {
+  type: 'custom',
+  functionName: 'myValidator',
+  fn: () => true,
+};
 
 void [
   _asConditional,
@@ -132,9 +164,14 @@ void [
   handleAsyncCondition,
   _asyncRequiredOnly,
   _asyncAllProps,
+  _asyncInline,
   _asyncMissingType,
   _asyncMissingFn,
+  _asyncBothSet,
   _customNew,
   _customNewAsConditional,
+  _customInline,
   handleCustomCondition,
+  _customNeither,
+  _customBothSet,
 ];
