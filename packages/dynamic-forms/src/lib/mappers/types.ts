@@ -45,6 +45,22 @@ export interface ArrayContext {
 }
 
 /**
+ * Group context for fields rendered inside `group` containers.
+ *
+ * Carries the dot-separated chain of group ancestors (including the current
+ * group). Used by `mapFieldToInputs` to scope DOM IDs of group children, so
+ * the same leaf key can appear inside different groups without producing
+ * duplicate `id` attributes (issue #401).
+ *
+ * Re-provided by every group's child injector — a nested group reads its
+ * parent's context and appends its own key.
+ */
+export interface GroupContext {
+  /** Dot-separated path of group ancestors, including the current group's key (e.g. `'address'` or `'user.address'`). */
+  groupPath: string;
+}
+
+/**
  * Mapper function that converts a field definition to component inputs.
  *
  * Mappers run within an injection context and can inject FIELD_SIGNAL_CONTEXT.

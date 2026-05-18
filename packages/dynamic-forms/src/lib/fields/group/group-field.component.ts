@@ -24,8 +24,8 @@ import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldTree, form } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions/base/field-def';
-import { FieldSignalContext } from '../../mappers/types';
-import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { FieldSignalContext, GroupContext } from '../../mappers/types';
+import { FIELD_SIGNAL_CONTEXT, GROUP_CONTEXT } from '../../models/field-signal-context.token';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { EventBus } from '../../events/event.bus';
 import { SubmitEvent } from '../../events/constants/submit.event';
@@ -65,6 +65,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
+  private readonly parentGroupContext = inject(GROUP_CONTEXT, { optional: true });
   private readonly injector = inject(Injector);
   protected readonly environmentInjector = inject(EnvironmentInjector);
   private readonly eventBus = inject(EventBus);
@@ -185,9 +186,33 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
     };
   })();
 
+  /**
+   * Group context propagated to descendants — carries the dot-separated path of
+   * group ancestors so child fields can scope their DOM IDs (issue #401).
+   * `groupPath` is computed lazily via a getter because it reads the required
+   * `field` input, which isn't bound at class-init time.
+   */
+  private readonly groupContext: GroupContext = (() => {
+    const fieldSignal = this.field;
+    const parent = this.parentGroupContext;
+    let cached: string | undefined;
+    return {
+      get groupPath(): string {
+        if (cached === undefined) {
+          const ownKey = untracked(() => fieldSignal().key);
+          cached = parent?.groupPath ? `${parent.groupPath}.${ownKey}` : ownKey;
+        }
+        return cached;
+      },
+    };
+  })();
+
   private readonly groupInjector = Injector.create({
     parent: this.injector,
-    providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: this.groupFieldSignalContext }],
+    providers: [
+      { provide: FIELD_SIGNAL_CONTEXT, useValue: this.groupFieldSignalContext },
+      { provide: GROUP_CONTEXT, useValue: this.groupContext },
+    ],
   });
 
   // ─────────────────────────────────────────────────────────────────────────────

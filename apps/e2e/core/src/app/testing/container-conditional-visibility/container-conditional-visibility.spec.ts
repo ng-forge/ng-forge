@@ -23,10 +23,10 @@ test.describe('Container Conditional Visibility Tests', () => {
       const personalRadio = scenario.locator('#accountType mat-radio-button:has-text("Personal")');
       const businessRadio = scenario.locator('#accountType mat-radio-button:has-text("Business")');
 
-      // Get business group fields
-      const companyNameInput = scenario.locator('#companyName input');
-      const taxIdInput = scenario.locator('#taxId input');
-      const employeeCountSelect = helpers.getSelect(scenario, 'employeeCount');
+      // Get business group fields (DOM IDs scoped through `businessDetails` group)
+      const companyNameInput = scenario.locator('#businessDetails_companyName input');
+      const taxIdInput = scenario.locator('#businessDetails_taxId input');
+      const employeeCountSelect = helpers.getSelect(scenario, 'businessDetails_employeeCount');
 
       // Common field should always be visible
       const emailInput = scenario.locator('#commonField input');
@@ -69,15 +69,17 @@ test.describe('Container Conditional Visibility Tests', () => {
 
       // Get controls
       const showPersonalCheckbox = helpers.getCheckbox(scenario, 'showPersonal');
-      const hasMiddleNameCheckbox = helpers.getCheckbox(scenario, 'hasMiddleName');
+      // hasMiddleName lives inside the `personal` group — DOM IDs are scoped.
+      const hasMiddleNameCheckbox = helpers.getCheckbox(scenario, 'personal_hasMiddleName');
       const emailRadio = scenario.locator('#personal mat-radio-button:has-text("Email")');
       const phoneRadio = scenario.locator('#personal mat-radio-button:has-text("Phone")');
 
       // Get fields
-      const firstNameInput = scenario.locator('#personal #firstName input');
-      const middleNameInput = scenario.locator('#personal #middleName input');
-      const emailInput = scenario.locator('#personal #email input');
-      const phoneInput = scenario.locator('#personal #phone input');
+      // Group children get DOM IDs scoped through the parent group key.
+      const firstNameInput = scenario.locator('#personal_firstName input');
+      const middleNameInput = scenario.locator('#personal_middleName input');
+      const emailInput = scenario.locator('#personal_email input');
+      const phoneInput = scenario.locator('#personal_phone input');
 
       // Initially group is visible (checkbox is checked by default)
       await expect(firstNameInput).toBeVisible({ timeout: 5000 });
@@ -131,13 +133,13 @@ test.describe('Container Conditional Visibility Tests', () => {
       const includeAddressCheckbox = helpers.getCheckbox(scenario, 'includeAddress');
       const includeBillingCheckbox = helpers.getCheckbox(scenario, 'includeBilling');
 
-      // Get address group fields
-      const streetInput = scenario.locator('#street input');
-      const cityInput = scenario.locator('#city input');
-      const stateSelect = helpers.getSelect(scenario, 'state');
+      // Get address group fields (DOM IDs scoped through parent group key)
+      const streetInput = scenario.locator('#address_street input');
+      const cityInput = scenario.locator('#address_city input');
+      const stateSelect = helpers.getSelect(scenario, 'address_state');
 
       // Get billing group fields
-      const billingStreetInput = scenario.locator('#billingStreet input');
+      const billingStreetInput = scenario.locator('#billing_billingStreet input');
 
       // Initially both groups should be hidden
       await expect(streetInput).not.toBeVisible({ timeout: 5000 });
@@ -627,8 +629,8 @@ test.describe('Container Conditional Visibility Tests', () => {
       const checkbox = helpers.getCheckbox(scenario, 'includeAddress');
       await checkbox.click();
 
-      // Wait for fields to hide
-      const streetInput = scenario.locator('#addressGroup #street input');
+      // Wait for fields to hide (group children get scoped DOM IDs)
+      const streetInput = scenario.locator('#addressGroup_street input');
       await expect(streetInput).not.toBeVisible({ timeout: 5000 });
 
       // Submit and check data
@@ -653,10 +655,10 @@ test.describe('Container Conditional Visibility Tests', () => {
       // Get controls
       const showAddressCheckbox = helpers.getCheckbox(scenario, 'showAddress');
 
-      // Get group child fields
-      const streetInput = scenario.locator('#street input');
-      const cityInput = scenario.locator('#city input');
-      const zipInput = scenario.locator('#zip input');
+      // Get group child fields (DOM IDs scoped through parent group key)
+      const streetInput = scenario.locator('#addressGroup_street input');
+      const cityInput = scenario.locator('#addressGroup_city input');
+      const zipInput = scenario.locator('#addressGroup_zip input');
 
       // Notes field should always be visible
       const notesInput = scenario.locator('#notes input');
@@ -820,9 +822,9 @@ test.describe('Container Conditional Visibility Tests', () => {
       const scenario = helpers.getScenario('container-level-submission');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      // Verify initial state - group is visible
-      const streetInput = scenario.locator('#street input');
-      const cityInput = scenario.locator('#city input');
+      // Verify initial state - group is visible (children scoped under addressGroup)
+      const streetInput = scenario.locator('#addressGroup_street input');
+      const cityInput = scenario.locator('#addressGroup_city input');
       await expect(streetInput).toBeVisible({ timeout: 5000 });
       await expect(streetInput).toHaveValue('123 Main St', { timeout: 5000 });
       await expect(cityInput).toHaveValue('Springfield', { timeout: 5000 });
@@ -846,8 +848,8 @@ test.describe('Container Conditional Visibility Tests', () => {
       const showAddressCheckbox = helpers.getCheckbox(scenario, 'showAddress');
       await showAddressCheckbox.click();
 
-      // Verify group is hidden
-      const streetInput = scenario.locator('#street input');
+      // Verify group is hidden (children scoped under addressGroup)
+      const streetInput = scenario.locator('#addressGroup_street input');
       await expect(streetInput).not.toBeVisible({ timeout: 5000 });
 
       // Submit and check data - child values should still be in submission (V1 behavior: CSS-only hiding)

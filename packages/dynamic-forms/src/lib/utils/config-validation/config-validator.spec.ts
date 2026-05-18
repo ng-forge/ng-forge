@@ -50,7 +50,41 @@ describe('validateFormConfig', () => {
       expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(/Duplicate field keys detected.*'a'.*'b'/s);
     });
 
-    it('should detect duplicates in nested containers', () => {
+    it('should not flag the same key in different group scopes', () => {
+      // Same leaf key inside two different groups produces distinct scoped paths
+      // (createADto.name vs createBDto.name) — no conflict at the form-value level.
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'createADto',
+          type: 'group',
+          fields: [{ key: 'name', type: 'input' }],
+        },
+        {
+          key: 'createBDto',
+          type: 'group',
+          fields: [{ key: 'name', type: 'input' }],
+        },
+      ];
+      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).not.toThrow();
+    });
+
+    it('should still flag duplicates within the same group scope', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'address',
+          type: 'group',
+          fields: [
+            { key: 'street', type: 'input' },
+            { key: 'street', type: 'input' },
+          ],
+        },
+      ];
+      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(DynamicFormError);
+      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow("'address.street'");
+    });
+
+    it('should not flag a leaf key shadowed by a same-named group child', () => {
+      // Top-level 'name' (path: name) and 'address.name' (path: address.name) — distinct scopes.
       const fields: FieldDef<unknown>[] = [
         { key: 'name', type: 'input' },
         {
@@ -59,7 +93,7 @@ describe('validateFormConfig', () => {
           fields: [{ key: 'name', type: 'input' }],
         },
       ];
-      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(DynamicFormError);
+      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).not.toThrow();
     });
 
     it('should not flag array item template keys as duplicates', () => {
@@ -102,6 +136,52 @@ describe('validateFormConfig', () => {
         { key: 'address', type: 'group', fields: [{ key: 'city', type: 'input' }] },
       ];
       expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(DynamicFormError);
+    });
+
+    it('should not flag duplicate button keys across pages (excluded from value)', () => {
+      // Buttons have valueHandling: 'exclude' — they don't bind to a form-value path,
+      // so the same `previous`/`submit` keys can repeat on every page (issue #401).
+      const registry = new Map<string, FieldTypeDefinition>([
+        ['page', { valueHandling: 'flatten' } as FieldTypeDefinition],
+        ['row', { valueHandling: 'flatten' } as FieldTypeDefinition],
+        ['group', { valueHandling: 'include' } as FieldTypeDefinition],
+        ['input', { valueHandling: 'include' } as FieldTypeDefinition],
+        ['previous', { valueHandling: 'exclude' } as FieldTypeDefinition],
+        ['submit', { valueHandling: 'exclude' } as FieldTypeDefinition],
+      ]);
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'aPage',
+          type: 'page',
+          fields: [
+            { key: 'createADto', type: 'group', fields: [{ key: 'name', type: 'input' }] },
+            {
+              key: 'aButtons',
+              type: 'row',
+              fields: [
+                { key: 'previous', type: 'previous' },
+                { key: 'submit', type: 'submit' },
+              ],
+            },
+          ],
+        },
+        {
+          key: 'bPage',
+          type: 'page',
+          fields: [
+            { key: 'createBDto', type: 'group', fields: [{ key: 'name', type: 'input' }] },
+            {
+              key: 'bButtons',
+              type: 'row',
+              fields: [
+                { key: 'previous', type: 'previous' },
+                { key: 'submit', type: 'submit' },
+              ],
+            },
+          ],
+        },
+      ];
+      expect(() => validateFormConfig(fields, registry, mockLogger())).not.toThrow();
     });
   });
 

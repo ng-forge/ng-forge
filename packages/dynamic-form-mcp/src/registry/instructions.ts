@@ -38,7 +38,7 @@ const config: FormConfig = {
 
 Every field MUST have:
 
-- \`key\`: Unique identifier (except for \`row\` type which is layout-only)
+- \`key\`: Identifier, unique within its group scope (the same leaf key may repeat inside different groups, e.g. \`createA.name\` and \`createB.name\`). Page/row/array containers do not introduce a scope. Buttons (which don't bind to form values) don't need unique keys.
 - \`type\`: One of the registered field types
 - \`label\`: Human-readable label (for accessibility)
 
@@ -412,7 +412,7 @@ Available adapters:
 
 1. **Missing labels** - Always include labels for accessibility
 2. **Missing validation messages** - Users need clear feedback
-3. **Duplicate keys** - Each key must be unique within its scope
+3. **Duplicate keys within a group scope** - Keys must be unique within the same group. Same key in different groups is fine (different scoped paths). Buttons are exempt.
 4. **Select without options** - Select/radio fields must have options
 5. **Array without fields** - Array fields need a fields template
 6. **Group without fields** - Group fields need child fields

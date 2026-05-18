@@ -1,7 +1,7 @@
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
-import { FieldTypeDefinition } from '../../models/field-type';
-import { hasChildFields } from '../../models/types/type-guards';
+import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';
+import { hasChildFields, isGroupField } from '../../models/types/type-guards';
 import { normalizeFieldsArray } from '../object-utils';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { Logger } from '../../providers/features/logger/logger.interface';
@@ -17,15 +17,31 @@ interface ConfigTraversalData {
  * Collects all field keys, types, and validates regex patterns from a field tree
  * by recursively traversing containers (page, row, group, array).
  *
- * @param collectKeys - Whether to add field keys to data.keys for duplicate detection.
- *   Set to false when inside an array container: array item fields share template keys
- *   across items by design (e.g. every item has 'name', 'email'), so they must not
- *   participate in global duplicate-key checking.
+ * Keys are scoped by their group ancestors (e.g. `address.city` instead of `city`),
+ * so the same leaf key can appear inside different groups without conflict. Page and
+ * row containers do not contribute to the path because they flatten their children
+ * into the parent scope. Array items are excluded entirely from key collection
+ * because they share template keys across items by design.
+ *
+ * Fields whose registered `valueHandling` is anything other than `include` (e.g.
+ * buttons with `exclude`, page/row with `flatten`) are not collected: they don't
+ * bind to a form-value path, so duplicate-key uniqueness isn't meaningful for them.
+ *
+ * @param collectKeys - When false, the entire subtree skips key collection (used
+ *   when descending into an array container).
  */
-function collectFieldData(fields: FieldDef<unknown>[], data: ConfigTraversalData, collectKeys = true): void {
+function collectFieldData(
+  fields: FieldDef<unknown>[],
+  data: ConfigTraversalData,
+  registry: Map<string, FieldTypeDefinition>,
+  pathPrefix: string,
+  collectKeys = true,
+): void {
   for (const field of fields) {
-    if (collectKeys && field.key) {
-      data.keys.push(field.key);
+    const valueHandling = field.type ? getFieldValueHandling(field.type, registry) : 'include';
+
+    if (collectKeys && field.key && valueHandling === 'include') {
+      data.keys.push(pathPrefix ? `${pathPrefix}.${field.key}` : field.key);
     }
     if (field.type) {
       data.types.add(field.type);
@@ -48,12 +64,15 @@ function collectFieldData(fields: FieldDef<unknown>[], data: ConfigTraversalData
       // Array item fields share template keys across items by design — stop collecting keys
       // once inside an array. Types and regex patterns are still validated.
       const childCollectKeys = collectKeys && field.type !== 'array';
+      // Only group containers extend the scoping path — page/row flatten into the parent
+      // scope, and array items use dynamic indices that aren't statically knowable.
+      const childPrefix = isGroupField(field) && field.key ? (pathPrefix ? `${pathPrefix}.${field.key}` : field.key) : pathPrefix;
       const children = normalizeFieldsArray(field.fields) as (FieldDef<unknown> | FieldDef<unknown>[])[];
       for (const child of children) {
         if (Array.isArray(child)) {
-          collectFieldData(child as FieldDef<unknown>[], data, childCollectKeys);
+          collectFieldData(child as FieldDef<unknown>[], data, registry, childPrefix, childCollectKeys);
         } else {
-          collectFieldData([child], data, childCollectKeys);
+          collectFieldData([child], data, registry, childPrefix, childCollectKeys);
         }
       }
     }
@@ -92,7 +111,9 @@ function validateNoDuplicateKeys(allKeys: string[]): void {
     const duplicateList = Array.from(duplicates)
       .map((k) => `'${k}'`)
       .join(', ');
-    throw new DynamicFormError(`Duplicate field keys detected: ${duplicateList}. Each field key must be unique within a form config.`);
+    throw new DynamicFormError(
+      `Duplicate field keys detected: ${duplicateList}. Field keys must be unique within their group scope (the same key may appear inside different groups).`,
+    );
   }
 }
 
@@ -140,7 +161,7 @@ export function validateFormConfig(fields: FieldDef<unknown>[], registry: Map<st
     regexErrors: [],
   };
 
-  collectFieldData(fields, data);
+  collectFieldData(fields, data, registry, '');
 
   validateNoDuplicateKeys(data.keys);
   validateFieldTypesRegistered(data.types, registry, logger);

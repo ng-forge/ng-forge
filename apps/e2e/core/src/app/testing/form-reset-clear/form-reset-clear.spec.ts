@@ -290,8 +290,9 @@ test.describe('Form Reset and Clear Events Tests', () => {
       const scenario = helpers.getScenario('reset-nested');
       await expect(scenario).toBeVisible();
 
-      const firstNameInput = scenario.locator('#firstName input');
-      const lastNameInput = scenario.locator('#lastName input');
+      // firstName/lastName live inside the `userInfo` group — DOM IDs are scoped.
+      const firstNameInput = scenario.locator('#userInfo_firstName input');
+      const lastNameInput = scenario.locator('#userInfo_lastName input');
 
       // Verify defaults
       expect(await firstNameInput.inputValue()).toBe('John');
@@ -363,8 +364,9 @@ test.describe('Form Reset and Clear Events Tests', () => {
       await expect(scenario).toBeVisible();
 
       const nameInput = scenario.locator('#name input');
-      const streetInput = scenario.locator('#address #street input');
-      const cityInput = scenario.locator('#address #city input');
+      // street/city are inside the `address` group — DOM IDs are scoped.
+      const streetInput = scenario.locator('#address_street input');
+      const cityInput = scenario.locator('#address_city input');
 
       // Verify default values
       expect(await nameInput.inputValue()).toBe('Default Name');

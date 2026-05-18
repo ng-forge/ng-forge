@@ -43,6 +43,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getMultiPageNavigationScenario('page-dynamic-navigation') },
   },
+  {
+    path: 'overlapping-group-keys',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMultiPageNavigationScenario('overlapping-group-keys') },
+  },
 ];
 
 export default routes;

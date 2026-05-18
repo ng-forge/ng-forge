@@ -1,5 +1,5 @@
 import { InjectionToken, Signal } from '@angular/core';
-import type { FieldSignalContext, ArrayContext } from '../mappers/types';
+import type { FieldSignalContext, ArrayContext, GroupContext } from '../mappers/types';
 import type { WrapperConfig } from './wrapper-type';
 import type { ValidationMessages } from './validation-types';
 import type { FormOptions } from './form-config';
@@ -79,6 +79,20 @@ export const FIELD_SIGNAL_CONTEXT = new InjectionToken<FieldSignalContext>('FIEL
  * ```
  */
 export const ARRAY_CONTEXT = new InjectionToken<ArrayContext>('ARRAY_CONTEXT');
+
+/**
+ * Injection token for providing group ancestry to mappers and components.
+ *
+ * Optionally provided by `GroupFieldComponent` in the child injector it builds
+ * for its descendants. Carries the dot-separated path of group ancestors
+ * (including the current group), used by `mapFieldToInputs` to scope DOM IDs
+ * so the same leaf key can appear inside different groups without producing
+ * duplicate `id` attributes.
+ *
+ * Inject with `{ optional: true }` because top-level fields (and fields inside
+ * page/row/array containers — none of which scope keys) won't have it.
+ */
+export const GROUP_CONTEXT = new InjectionToken<GroupContext>('GROUP_CONTEXT');
 
 /**
  * Injection token for form-level default props.
