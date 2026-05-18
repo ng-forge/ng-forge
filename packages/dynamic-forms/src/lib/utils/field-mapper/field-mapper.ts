@@ -200,7 +200,7 @@ export function mapFieldToInputs(
     // `{groupPath}_{key}_{index}` (e.g. `address_street_0`) — matching the
     // form-value path order: group → leaf → array index.
     if (hasGroupContext) {
-      inputs = applyGroupPrefix(inputs, (groupContext as GroupContext).groupPath);
+      inputs = applyGroupPrefix(inputs, (groupContext as GroupContext).groupPath());
     }
 
     // Apply index suffix for array items

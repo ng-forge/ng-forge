@@ -47,17 +47,17 @@ export interface ArrayContext {
 /**
  * Group context for fields rendered inside `group` containers.
  *
- * Carries the dot-separated chain of group ancestors (including the current
- * group). Used by `mapFieldToInputs` to scope DOM IDs of group children, so
- * the same leaf key can appear inside different groups without producing
- * duplicate `id` attributes (issue #401).
+ * Carries a reactive dot-separated chain of group ancestors (including the
+ * current group). Used by `mapFieldToInputs` to scope DOM IDs of group
+ * children, so the same leaf key can appear inside different groups without
+ * producing duplicate `id` attributes (issue #401).
  *
  * Re-provided by every group's child injector — a nested group reads its
- * parent's context and appends its own key.
+ * parent's context signal and composes its own path through `computed()`.
  */
 export interface GroupContext {
   /** Dot-separated path of group ancestors, including the current group's key (e.g. `'address'` or `'user.address'`). */
-  groupPath: string;
+  groupPath: Signal<string>;
 }
 
 /**

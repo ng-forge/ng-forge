@@ -189,23 +189,16 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   /**
    * Group context propagated to descendants — carries the dot-separated path of
    * group ancestors so child fields can scope their DOM IDs (issue #401).
-   * `groupPath` is computed lazily via a getter because it reads the required
-   * `field` input, which isn't bound at class-init time.
+   * Reactive via `computed()`: a nested group composes its path from the parent
+   * context signal + its own key, so the chain stays consistent if either changes.
    */
-  private readonly groupContext: GroupContext = (() => {
-    const fieldSignal = this.field;
-    const parent = this.parentGroupContext;
-    let cached: string | undefined;
-    return {
-      get groupPath(): string {
-        if (cached === undefined) {
-          const ownKey = untracked(() => fieldSignal().key);
-          cached = parent?.groupPath ? `${parent.groupPath}.${ownKey}` : ownKey;
-        }
-        return cached;
-      },
-    };
-  })();
+  private readonly groupContext: GroupContext = {
+    groupPath: computed(() => {
+      const ownKey = this.field().key;
+      const parentPath = this.parentGroupContext?.groupPath();
+      return parentPath ? `${parentPath}.${ownKey}` : ownKey;
+    }),
+  };
 
   private readonly groupInjector = Injector.create({
     parent: this.injector,
