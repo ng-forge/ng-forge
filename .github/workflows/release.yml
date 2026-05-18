@@ -476,6 +476,8 @@ jobs:
         # AND publishes the release in one step. Runs AFTER npm publish so a failed publish
         # doesn't leave a stale tag/release behind. Idempotent on retry: if the release
         # already exists, the action updates it. Manual recovery: re-dispatch mode=publish.
+        # `id` is consumed by the Notify Discord step below to gate on actual success.
+        id: gh-release
         if: inputs.mode == 'publish'
         uses: softprops/action-gh-release@v3
         with:
@@ -518,7 +520,12 @@ jobs:
         # a phantom tag could permanently block future publishes.
         # continue-on-error: makes the job succeed even if release creation flakes — npm
         # is already published and rolling back that is worse than a missing GH release.
+        # The Notify Discord step below uses `steps.gh-prerelease.outcome` (not job
+        # conclusion) to detect the flake and skip Discord — `outcome` is the value
+        # BEFORE continue-on-error is applied, so a failed creation still reads as
+        # 'failure' here even though the job succeeds overall.
         # Idempotent on retry: if the release already exists, action-gh-release updates it.
+        id: gh-prerelease
         if: github.event_name == 'schedule' || inputs.mode == 'next'
         continue-on-error: true
         uses: softprops/action-gh-release@v3
@@ -538,11 +545,14 @@ jobs:
         # event propagation, which doesn't fire reliably for App-token releases here.
         # continue-on-error: notifications are best-effort — npm+GH release already
         # succeeded, so a Discord hiccup must not fail the run.
-        # Skipped on dry-run (no real release was created to post about).
+        # Gated on the matching gh-* step's outcome so a flaky release-creation
+        # doesn't ping Discord about a non-existent tag. The two creation steps are
+        # mutually exclusive (publish vs schedule|next), so exactly one outcome will
+        # be 'success' on a valid run; the other will be 'skipped'. Dry-run skips
+        # both, so neither outcome fires.
         if: |
-          inputs.mode == 'publish' ||
-          github.event_name == 'schedule' ||
-          inputs.mode == 'next'
+          steps.gh-release.outcome == 'success' ||
+          steps.gh-prerelease.outcome == 'success'
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
