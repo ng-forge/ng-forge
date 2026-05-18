@@ -92,15 +92,13 @@ export const ARRAY_CONTEXT = new InjectionToken<ArrayContext>('ARRAY_CONTEXT');
  * Inject with `{ optional: true }` because top-level fields (and fields inside
  * page/row/array containers — none of which scope keys) won't have it.
  */
-export const GROUP_CONTEXT = new InjectionToken<GroupContext>('GROUP_CONTEXT', {
-  providedIn: null,
-  factory: () => {
-    throw new DynamicFormError(
-      'GROUP_CONTEXT was not provided. ' +
-        'Inject with { optional: true } — this token is only provided when a field is nested inside a group container.',
-    );
-  },
-});
+// No factory: GROUP_CONTEXT is optional-by-design (only provided inside group
+// descendants). Mirrors the ARRAY_CONTEXT pattern — consumers must inject with
+// `{ optional: true }` and handle the `null` case. Adding a throwing factory
+// here fires even when injected optionally (Angular still evaluates the
+// tree-shakable factory before honoring `optional`), so non-group fields would
+// crash on every render.
+export const GROUP_CONTEXT = new InjectionToken<GroupContext>('GROUP_CONTEXT');
 
 /**
  * Injection token for form-level default props.
