@@ -4,7 +4,7 @@ import { FieldWithValidation } from '../../definitions/base/field-with-validatio
 import { FieldMeta } from '../../definitions/base/field-meta';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { ARRAY_CONTEXT, GROUP_CONTEXT } from '../../models/field-signal-context.token';
-import { ArrayContext, GroupContext } from '../../mappers/types';
+import { ArrayContext } from '../../mappers/types';
 import { baseFieldMapper } from '../../mappers/base/base-field-mapper';
 import { PROPERTY_OVERRIDE_STORE } from '../../core/property-derivation/property-override-store';
 import { applyPropertyOverrides } from '../../core/property-derivation/apply-property-overrides';
@@ -200,7 +200,8 @@ export function mapFieldToInputs(
     // `{groupPath}_{key}_{index}` (e.g. `address_street_0`) — matching the
     // form-value path order: group → leaf → array index.
     if (hasGroupContext) {
-      inputs = applyGroupPrefix(inputs, (groupContext as GroupContext).groupPath());
+      // Non-null after the hasGroupContext guard.
+      inputs = applyGroupPrefix(inputs, groupContext!.groupPath());
     }
 
     // Apply index suffix for array items

@@ -8,7 +8,18 @@ import { Logger } from '../../providers/features/logger/logger.interface';
 
 /** Data collected during a single config traversal. */
 interface ConfigTraversalData {
+  /**
+   * Dot-scoped paths (e.g. `'address.street'`) — checked for form-value uniqueness:
+   * two leaves landing at the same form-value path are a real conflict.
+   */
   keys: string[];
+  /**
+   * Underscore-projected DOM-ID paths (e.g. `'address_street'`) — checked for
+   * DOM `id` / `data-testid` uniqueness. Catches the otherwise-silent collision
+   * where a top-level key like `'foo_bar'` would render the same DOM id as a
+   * leaf `'bar'` inside group `'foo'`.
+   */
+  domIds: string[];
   types: Set<string>;
   regexErrors: string[];
 }
@@ -38,10 +49,18 @@ function collectFieldData(
   collectKeys = true,
 ): void {
   for (const field of fields) {
+    // Defensively skip only known non-include modes — unexpected/missing
+    // valueHandling defaults back to participating in duplicate detection so a
+    // mis-registered field type doesn't silently drop from collision checks.
     const valueHandling = field.type ? getFieldValueHandling(field.type, registry) : 'include';
+    const participatesInValue = valueHandling !== 'exclude' && valueHandling !== 'flatten';
 
-    if (collectKeys && field.key && valueHandling === 'include') {
-      data.keys.push(pathPrefix ? `${pathPrefix}.${field.key}` : field.key);
+    if (collectKeys && field.key && participatesInValue) {
+      const scopedKey = pathPrefix ? `${pathPrefix}.${field.key}` : field.key;
+      data.keys.push(scopedKey);
+      // Project to the DOM-ID format (dots → underscores) so we can detect
+      // collisions like top-level `'foo_bar'` vs group `'foo'` + leaf `'bar'`.
+      data.domIds.push(scopedKey.replace(/\./g, '_'));
     }
     if (field.type) {
       data.types.add(field.type);
@@ -118,6 +137,42 @@ function validateNoDuplicateKeys(allKeys: string[]): void {
 }
 
 /**
+ * Validates that the underscore-projected DOM-ID namespace has no collisions.
+ *
+ * DOM IDs are built by underscore-joining the group ancestor path with the
+ * leaf key (e.g. `address_street`). Two scoped paths can land on the same
+ * DOM ID even when their form-value paths differ — e.g. a top-level key
+ * `'foo_bar'` and a leaf `'bar'` inside group `'foo'` both render as
+ * `id="foo_bar"`. The form-value-path check accepts this (paths are
+ * `'foo_bar'` vs `'foo.bar'` — distinct) but the rendered DOM would have
+ * duplicate IDs, breaking aria associations and CSS selectors.
+ *
+ * @throws {DynamicFormError} When two scoped paths project to the same DOM ID
+ */
+function validateNoDomIdCollisions(domIds: string[]): void {
+  const seen = new Set<string>();
+  const duplicates = new Set<string>();
+
+  for (const id of domIds) {
+    if (seen.has(id)) {
+      duplicates.add(id);
+    }
+    seen.add(id);
+  }
+
+  if (duplicates.size > 0) {
+    const duplicateList = Array.from(duplicates)
+      .map((k) => `'${k}'`)
+      .join(', ');
+    throw new DynamicFormError(
+      `DOM id collision detected for: ${duplicateList}. Group-nested keys are joined with '_' to form DOM ids ` +
+        `(e.g. group 'foo' + leaf 'bar' renders as id='foo_bar'). A separate top-level key like 'foo_bar' or a different ` +
+        `group/leaf pair that underscores to the same string will produce duplicate ids. Rename one of the colliding keys.`,
+    );
+  }
+}
+
+/**
  * Validates that every field type referenced in the config exists in the registry.
  * Logs a warning for unregistered types — unknown fields are skipped during rendering
  * rather than blocking the whole form (graceful degradation).
@@ -157,6 +212,7 @@ function validateFieldTypesRegistered(allTypes: Set<string>, registry: Map<strin
 export function validateFormConfig(fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>, logger: Logger): void {
   const data: ConfigTraversalData = {
     keys: [],
+    domIds: [],
     types: new Set<string>(),
     regexErrors: [],
   };
@@ -164,6 +220,7 @@ export function validateFormConfig(fields: FieldDef<unknown>[], registry: Map<st
   collectFieldData(fields, data, registry, '');
 
   validateNoDuplicateKeys(data.keys);
+  validateNoDomIdCollisions(data.domIds);
   validateFieldTypesRegistered(data.types, registry, logger);
 
   if (data.regexErrors.length > 0) {
