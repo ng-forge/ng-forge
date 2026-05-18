@@ -213,5 +213,6 @@ export type ValidatorConfig =
 export function isFunctionHttpValidator(
   config: FunctionHttpValidatorConfig | DeclarativeHttpValidatorConfig,
 ): config is FunctionHttpValidatorConfig {
-  return ('functionName' in config && !!config.functionName) || ('fn' in config && typeof (config as { fn?: unknown }).fn === 'function');
+  const c = config as { functionName?: unknown; fn?: unknown };
+  return typeof c.functionName === 'string' || (c.fn !== null && typeof c.fn === 'object');
 }

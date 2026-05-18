@@ -310,6 +310,15 @@ describe('DerivationLogicConfig - inline fn (sync) — XOR with functionName', (
     };
     void _both;
   });
+
+  it('should reject function-mode derivation with neither fn nor functionName', () => {
+    // @ts-expect-error — one of value / expression / functionName / fn is required
+    const _neither: DerivationLogicConfig = {
+      type: 'derivation',
+      dependsOn: ['country'],
+    };
+    void _neither;
+  });
 });
 
 describe('DerivationLogicConfig - sync sources (backwards compatible)', () => {

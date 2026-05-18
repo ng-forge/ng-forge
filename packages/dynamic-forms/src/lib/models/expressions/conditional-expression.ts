@@ -44,6 +44,11 @@ export interface FieldValueCondition {
  *
  * Exactly one of `functionName` or `fn` must be set.
  *
+ * Encoded as a strict discriminated union (XOR via `?: never`). `CustomValidatorConfig`
+ * intentionally uses a permissive interface for the same `fn`/`functionName` split
+ * because validators have a third source (`expression`) and the historical interface
+ * was already runtime-checked — the asymmetry is by design, not an oversight.
+ *
  * @public
  */
 export type CustomCondition =

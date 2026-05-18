@@ -81,6 +81,10 @@ export function createAsyncDerivationStream(
   }
 
   if (!entry.asyncFunctionName && !entry.asyncFn) {
+    context.logger.warn(
+      `${LOG_PREFIX} Derivation for '${entry.fieldKey}' has neither "asyncFunctionName" nor "asyncFn". ` +
+        `One of the two is required for source: 'asyncFunction'.`,
+    );
     return EMPTY;
   }
 

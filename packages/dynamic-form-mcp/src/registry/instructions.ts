@@ -305,6 +305,8 @@ Invokes a registered custom function by name:
 
 Register functions via \`customFnConfig.customFunctions\`.
 
+> **TypeScript-authored configs:** the same surface also accepts an inline \`fn: CustomFunction\` instead of \`functionName\` (XOR with \`functionName\`, code-only — not JSON-serializable). The MCP server emits \`functionName\` exclusively; consumers writing configs in TS may prefer \`fn\` when they don't need JSON round-tripping. Same caveat applies to async conditions (\`asyncFn\`), function derivations (\`fn\`), async function derivations (\`asyncFn\`), and validators (\`fn\`).
+
 #### Async Custom Condition
 
 Invokes a registered async function that returns \`Promise<boolean>\` or \`Observable<boolean>\`:

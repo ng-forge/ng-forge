@@ -4,9 +4,9 @@ import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { DerivationLogicConfig, hasTargetProperty, isDerivationLogicConfig } from '../../models/logic/logic-config';
 import { extractStringDependencies } from '../cross-field/cross-field-detector';
 import { topologicalSort } from './derivation-sorter';
-import type { BaseDerivationEntry } from './derivation-entry-base';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { extractDependenciesFromConfig } from './extract-dependencies';
+import { extractInlineAsyncFn, extractInlineFn } from './extract-inline-fn';
 import { traverseFieldsWithContext } from './field-traversal';
 
 /**
@@ -325,9 +325,6 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
   // The type system ensures debounceMs is only present when trigger is 'debounced'
   const debounceMs = trigger === 'debounced' ? (config as { debounceMs?: number }).debounceMs : undefined;
 
-  // `fn` / `asyncFn` only appear on the function-mode variants of the discriminated union, but
-  // we copy them through unconditionally — they'll just be `undefined` for other modes.
-  // Read-only access, no widening.
   return {
     fieldKey: effectiveFieldKey,
     dependsOn,
@@ -335,11 +332,11 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
     value: config.value,
     expression: config.expression,
     functionName: config.functionName,
-    fn: (config as { fn?: BaseDerivationEntry['fn'] }).fn,
+    fn: extractInlineFn(config),
     http: config.http,
     responseExpression: config.responseExpression,
     asyncFunctionName: config.asyncFunctionName,
-    asyncFn: (config as { asyncFn?: DerivationEntry['asyncFn'] }).asyncFn,
+    asyncFn: extractInlineAsyncFn(config),
     trigger,
     debounceMs,
     isShorthand: false,

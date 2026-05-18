@@ -495,6 +495,75 @@ describe('validator-factory', () => {
           expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Both "fn" and "functionName" are set'));
         });
       });
+
+      it('warns when both fn and functionName are set on HTTP validator', () => {
+        runInInjectionContext(injector, () => {
+          const registry = TestBed.inject(FunctionRegistryService);
+          registry.registerHttpValidator('registered', {
+            request: () => '/api/check',
+            onSuccess: () => null,
+          });
+
+          const formValue = signal({ username: 'test' });
+          const inline = { request: () => '/api/check', onSuccess: () => null };
+          // Cast — the public XOR rejects this at compile time, but JSON-loaded
+          // configs can still produce both keys at runtime.
+          const config = { type: 'http', functionName: 'registered', fn: inline } as unknown as ValidatorConfig;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              applyValidator(config, path.username);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Both "fn" and "functionName" are set'));
+        });
+      });
+
+      it('throws when neither fn nor functionName is set on async validator', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ username: 'test' });
+          // Cast — XOR rejects neither-set at compile time; JSON-loaded configs can produce it.
+          const config = { type: 'async' } as unknown as ValidatorConfig;
+
+          let caught: unknown;
+          form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              try {
+                applyValidator(config, path.username);
+              } catch (err) {
+                caught = err;
+              }
+            }),
+          );
+          expect(caught).toBeInstanceOf(Error);
+          expect(String(caught)).toMatch(/Async validator requires/);
+        });
+      });
+
+      it('throws when neither fn nor functionName is set on HTTP validator', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ username: 'test' });
+          const config = { type: 'http' } as unknown as ValidatorConfig;
+
+          let caught: unknown;
+          form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              try {
+                applyValidator(config, path.username);
+              } catch (err) {
+                caught = err;
+              }
+            }),
+          );
+          expect(caught).toBeInstanceOf(Error);
+          expect(String(caught)).toMatch(/HTTP validator requires/);
+        });
+      });
     });
 
     describe('custom validator inline fn alternative', () => {
