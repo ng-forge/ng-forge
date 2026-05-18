@@ -20,7 +20,7 @@ import type { IonButtonAddon } from '../types/addons';
   hostDirectives: [NgForgeAddonAction],
   template: `
     <ion-button
-      [color]="color()"
+      [attr.color]="color() ?? null"
       [fill]="fill()"
       [disabled]="action.disabled() || action.loading()"
       [attr.aria-label]="(ariaLabel() | dynamicText | async) || null"
@@ -47,7 +47,11 @@ export class IonButtonAddonComponent {
   protected readonly label = computed(() => this.addon().label);
   protected readonly ariaLabel = computed(() => this.addon().ariaLabel);
   protected readonly icon = computed(() => this.addon().icon);
-  protected readonly color = computed(() => this.addon().color ?? 'medium');
+  /** Default color is undefined so the button inherits the theme's text color
+   *  (Ionic's `medium` would force low-contrast grey, which fails WCAG on dark
+   *  surfaces). Consumers can still set `color: 'primary' | 'success' | ...`
+   *  explicitly when they want adapter-styled coloring. */
+  protected readonly color = computed(() => this.addon().color);
   protected readonly fill = computed(() => this.addon().fill ?? 'clear');
   /** Icon-only when there is an icon but no label — drives the `slot` choice. */
   protected readonly iconOnly = computed(() => this.icon() !== undefined && this.label() === undefined);

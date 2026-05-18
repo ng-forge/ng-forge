@@ -137,14 +137,13 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
       :host([hidden]) {
         display: none !important;
       }
-      /* ion-input projects shadow-DOM slots start and end. The default
-         gap between the slot wrapper and the input text is too tight for
-         icons, and end reserves too much trailing room. Derived from Ionic's
-         own --ion-padding token so it tracks the active theme; exposed as
-         a CSS custom property for consumer override. */
+      /* ion-input projects shadow-DOM slots start and end. The default gap
+         between the slot wrapper and the input text is too tight for icons.
+         Exposed as a CSS custom property so consumers can override; default
+         tracks Ionic's --ion-padding when present, otherwise falls back to 8px
+         (matches Ionic's own padding-medium scale). */
       :host {
-        --df-ion-addon-gap: calc(var(--ion-padding) / 2);
-        --df-ion-addon-trailing-pullback: calc(var(--df-ion-addon-gap) * -1);
+        --df-ion-addon-gap: 8px;
       }
       :host ::ng-deep ion-input > [slot='start'] {
         display: inline-flex;
@@ -155,7 +154,14 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
         display: inline-flex;
         align-items: center;
         margin-inline-start: var(--df-ion-addon-gap);
-        margin-inline-end: var(--df-ion-addon-trailing-pullback);
+      }
+      /* Make sure ion-icon inside addon-slots is readable on dark surfaces.
+         Ionic medium (low-contrast grey) is the default for icon buttons,
+         which fails WCAG on dark inputs. Inherit the input text color so
+         icons match whatever foreground Ionic resolves for the current
+         theme. */
+      :host ::ng-deep ion-input ion-icon {
+        color: inherit;
       }
     `,
   ],

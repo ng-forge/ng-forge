@@ -56,11 +56,7 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
         <mat-label>{{ ngf.label() | dynamicText | async }}</mat-label>
       }
       @for (a of ngfa.prefixAddons(); track $index) {
-        @if (a.kind === 'text') {
-          <df-addon-slot matTextPrefix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-        } @else {
-          <df-addon-slot matIconPrefix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-        }
+        <df-addon-slot matPrefix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
       }
       <input
         matInput
@@ -72,11 +68,7 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
         [attr.tabindex]="ngf.tabIndex()"
       />
       @for (a of ngfa.suffixAddons(); track $index) {
-        @if (a.kind === 'text') {
-          <df-addon-slot matTextSuffix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-        } @else {
-          <df-addon-slot matIconSuffix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-        }
+        <df-addon-slot matSuffix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
       }
       @if (ngf.errorsToDisplay()[0]; as error) {
         <mat-error [id]="ngf.errorId()">{{ error.message }}</mat-error>
@@ -94,10 +86,17 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
       :host([hidden]) {
         display: none !important;
       }
-      /* Spacing is handled by Material's own matIconPrefix / matTextPrefix
-         (and matIconSuffix / matTextSuffix) directives, picked per addon
-         kind at the template above. No custom CSS needed — themes track
-         Material's design tokens for free. */
+      /* matPrefix/matSuffix elements have no default Material spacing.
+         Pad the addon away from the form-field border (outer) and the input
+         text (inner). Em-based so it scales with the form-field's typography. */
+      df-addon-slot[matprefix] {
+        margin-left: 0.25em;
+        margin-right: 0.75em;
+      }
+      df-addon-slot[matsuffix] {
+        margin-left: 0.75em;
+        margin-right: 0.25em;
+      }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
