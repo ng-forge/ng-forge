@@ -52,6 +52,9 @@ import { SubmitEvent } from '../../events/constants/submit.event';
     '[class.disabled]': 'disabled()',
     '[class.df-container-hidden]': 'hidden()',
     '[attr.aria-hidden]': 'hidden() || null',
+    // The group element's own id is the plain `key()` — only its DESCENDANTS
+    // compose scoped ids via GROUP_CONTEXT (e.g. children of an `address`
+    // group render as `address_street`). The group selector is `#address`.
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },

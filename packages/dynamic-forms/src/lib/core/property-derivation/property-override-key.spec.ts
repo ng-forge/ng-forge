@@ -33,4 +33,26 @@ describe('buildPropertyOverrideKey', () => {
   it('should return just fieldKey when using PLACEHOLDER_INDEX without arrayKey', () => {
     expect(buildPropertyOverrideKey(undefined, PLACEHOLDER_INDEX, 'name')).toBe('name');
   });
+
+  it('should prefix the groupPath for top-level group fields', () => {
+    expect(buildPropertyOverrideKey(undefined, undefined, 'name', 'createADto')).toBe('createADto.name');
+  });
+
+  it('should distinguish overlapping leaf keys via groupPath (issue #401)', () => {
+    expect(buildPropertyOverrideKey(undefined, undefined, 'name', 'createADto')).not.toBe(
+      buildPropertyOverrideKey(undefined, undefined, 'name', 'createBDto'),
+    );
+  });
+
+  it('should join nested groupPath segments with dots', () => {
+    expect(buildPropertyOverrideKey(undefined, undefined, 'street', 'user.address')).toBe('user.address.street');
+  });
+
+  it('should place groupPath inside the array placeholder (group nested under array item)', () => {
+    expect(buildPropertyOverrideKey('contacts', PLACEHOLDER_INDEX, 'email', 'profile')).toBe('contacts.$.profile.email');
+  });
+
+  it('should ignore empty groupPath', () => {
+    expect(buildPropertyOverrideKey(undefined, undefined, 'name', '')).toBe('name');
+  });
 });

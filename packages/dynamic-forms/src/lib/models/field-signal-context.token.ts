@@ -83,21 +83,28 @@ export const ARRAY_CONTEXT = new InjectionToken<ArrayContext>('ARRAY_CONTEXT');
 /**
  * Injection token for providing group ancestry to mappers and components.
  *
- * Optionally provided by `GroupFieldComponent` in the child injector it builds
- * for its descendants. Carries the dot-separated path of group ancestors
- * (including the current group), used by `mapFieldToInputs` to scope DOM IDs
- * so the same leaf key can appear inside different groups without producing
- * duplicate `id` attributes.
+ * Re-provided in two places:
+ * 1. `GroupFieldComponent` provides a context whose `groupPath()` is the
+ *    parent path extended by its own key (e.g. `'address'` or `'user.address'`).
+ * 2. `createArrayItemInjector` provides a sentinel with an empty `groupPath`,
+ *    resetting the chain at array boundaries — descendants of an array item
+ *    that re-enter a group compose paths INSIDE the array item, matching the
+ *    property-derivation collector's keying.
  *
- * Inject with `{ optional: true }` because top-level fields (and fields inside
- * page/row/array containers — none of which scope keys) won't have it.
+ * `mapFieldToInputs` reads this to scope DOM IDs and override-store keys so
+ * the same leaf key can appear in different groups without colliding (#401).
+ *
+ * Inject with `{ optional: true }` because top-level fields with no group
+ * ancestor (and no enclosing array) won't have the token provided. The token
+ * IS present for fields inside an array even when no inner group exists — the
+ * array-boundary sentinel makes injection succeed with an empty `groupPath`.
  */
-// No factory: GROUP_CONTEXT is optional-by-design (only provided inside group
-// descendants). Mirrors the ARRAY_CONTEXT pattern — consumers must inject with
-// `{ optional: true }` and handle the `null` case. Adding a throwing factory
-// here fires even when injected optionally (Angular still evaluates the
-// tree-shakable factory before honoring `optional`), so non-group fields would
-// crash on every render.
+// No factory: GROUP_CONTEXT is optional-by-design — `GroupFieldComponent` and
+// `createArrayItemInjector` re-provide it where it makes sense, and consumers
+// inject with `{ optional: true }` to handle the top-level case. Mirrors the
+// ARRAY_CONTEXT pattern. Adding a throwing factory here fires even when
+// injected optionally (Angular still evaluates the tree-shakable factory
+// before honoring `optional`), so non-group fields would crash on every render.
 export const GROUP_CONTEXT = new InjectionToken<GroupContext>('GROUP_CONTEXT');
 
 /**

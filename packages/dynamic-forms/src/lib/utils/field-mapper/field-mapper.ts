@@ -99,7 +99,9 @@ function applyIndexSuffix(inputs: Record<string, unknown>, index: number): Recor
  * leaf key inside different groups produces distinct DOM IDs (issue #401).
  * Form-schema keys remain clean — only the rendered `key` input is rewritten.
  *
- * Dots in the path (group nesting) become underscores: `user.address` → `user_address_street`.
+ * Dots in the group path become underscores, then the original leaf key is
+ * appended: `(groupPath='user.address', inputs.key='street')` →
+ * `inputs.key = 'user_address_street'`.
  */
 function applyGroupPrefix(inputs: Record<string, unknown>, groupPath: string): Record<string, unknown> {
   const key = inputs['key'];
@@ -210,13 +212,27 @@ export function mapFieldToInputs(
       inputs = applyIndexSuffix(inputs, index);
     }
 
-    // Apply property overrides from the store (AFTER all static transformations)
+    // Apply property overrides from the store (AFTER all static transformations).
+    //
+    // INVARIANT: the store key MUST be built from `fieldDef.key` + the group/array
+    // ancestry (via buildPropertyOverrideKey) — NEVER from the DOM-scoped
+    // `inputs['key']` produced by applyGroupPrefix/applyIndexSuffix above. The
+    // collector (property-derivation-collector.ts) registers using the same
+    // shape; if these drift, overrides silently miss their target.
     if (hasOverrides) {
-      // Build the store key inside computed() so index signal read establishes reactive dependency
-      // Safe to access arrayContext/indexSignal directly — hasArrayContext already confirmed they exist
+      // Build inside computed() so the index/group signals establish reactive deps.
+      // GROUP_CONTEXT resets at array boundaries (see create-array-item-injector.ts),
+      // so groupPath() represents ancestors inside the current array item (or
+      // top-level groups when not in an array) — matching the collector.
+      const groupPath = hasGroupContext ? groupContext!.groupPath() : undefined;
       const key = hasArrayContext
-        ? buildPropertyOverrideKey((arrayContext as ArrayContext).arrayKey, (indexSignal as Signal<number>)(), fieldDef.key)
-        : fieldDef.key;
+        ? buildPropertyOverrideKey(
+            (arrayContext as ArrayContext).arrayKey,
+            (indexSignal as Signal<number>)(),
+            fieldDef.key,
+            groupPath || undefined,
+          )
+        : buildPropertyOverrideKey(undefined, undefined, fieldDef.key, groupPath || undefined);
       const overrides = store.getOverrides(key)();
       inputs = applyPropertyOverrides(inputs, overrides);
     }
