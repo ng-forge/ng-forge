@@ -224,7 +224,8 @@ describe('PageOrchestratorComponent', () => {
       await waitForFormInit(fixture, 1500);
 
       const section = fixture.nativeElement.querySelector('[data-testid="section"]');
-      const renderedRows = fixture.nativeElement.querySelectorAll('[data-testid^="row"]');
+      // Rows inside the `section` group are scoped — DOM IDs become `section_row_*`.
+      const renderedRows = fixture.nativeElement.querySelectorAll('[data-testid^="section_row"]');
 
       expect(section).toBeTruthy();
       expect(renderedRows).toHaveLength(rowCount);

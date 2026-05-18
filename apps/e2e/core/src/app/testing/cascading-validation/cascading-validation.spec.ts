@@ -112,8 +112,9 @@ test.describe('Cascading Validation Tests', () => {
 
       const submitButton = helpers.getSubmitButton(scenario);
       const showAddressCheckbox = helpers.getCheckbox(scenario, 'showAddress');
-      const streetInput = scenario.locator('#street input');
-      const cityInput = scenario.locator('#city input');
+      // street/city are inside the `address` group — DOM IDs are scoped.
+      const streetInput = scenario.locator('#address_street input');
+      const cityInput = scenario.locator('#address_city input');
 
       // Initially showAddress=false → group hidden → required leaves skip → submit enabled.
       await expect(streetInput).not.toBeVisible({ timeout: 5000 });

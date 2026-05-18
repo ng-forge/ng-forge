@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { computed, Signal } from '@angular/core';
+import { computed, Injector, Provider, runInInjectionContext, signal, Signal, Type } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { mapFieldToInputs } from './field-mapper';
 import { FieldDef } from '../../definitions/base';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { createPropertyOverrideStore, PROPERTY_OVERRIDE_STORE } from '../../core/property-derivation/property-override-store';
+import { ARRAY_CONTEXT, GROUP_CONTEXT } from '../../models/field-signal-context.token';
+import type { ArrayContext, GroupContext } from '../../mappers/types';
 
 describe('mapFieldToInputs', () => {
   let registry: Map<string, FieldTypeDefinition>;
@@ -319,6 +321,140 @@ describe('mapFieldToInputs', () => {
       expect(typeof resultSignal).toBe('function'); // Signal is a function
       const result = resultSignal();
       expect(typeof result).toBe('object');
+    });
+  });
+
+  /**
+   * Tests for the DOM-ID rewriting contract added for issue #401:
+   *  - inside a GROUP_CONTEXT, the `key` input is prefixed with the underscored ancestor path
+   *  - inside an ARRAY_CONTEXT, the `key` input is suffixed with `_${index}`
+   *  - when both apply, group prefix runs BEFORE array suffix → `{group}_{key}_{index}`
+   */
+  describe('key rewriting (issue #401 group + array scoping)', () => {
+    function runWithProviders<T>(providers: Provider[], fn: () => T): T {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [{ provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore }, ...providers],
+      });
+      return TestBed.runInInjectionContext(fn);
+    }
+
+    function groupCtx(path: string): GroupContext {
+      return { groupPath: signal(path) };
+    }
+
+    function arrayCtx(index: number, arrayKey = 'items'): ArrayContext {
+      return {
+        arrayKey,
+        index: signal(index),
+        formValue: null,
+        field: { type: 'array', key: arrayKey } as FieldDef<unknown>,
+      };
+    }
+
+    it('passes the key through unchanged when neither context is provided', () => {
+      const field: FieldDef<unknown> = { type: 'input', key: 'name' };
+      const result = run(() => mapFieldToInputs(field, registry));
+      expect(result!()['key']).toBe('name');
+    });
+
+    it('prefixes the key with the underscored group path when inside a group', () => {
+      const field: FieldDef<unknown> = { type: 'input', key: 'street' };
+      const result = runWithProviders([{ provide: GROUP_CONTEXT, useValue: groupCtx('address') }], () => mapFieldToInputs(field, registry));
+      expect(result!()['key']).toBe('address_street');
+    });
+
+    it('underscores nested group paths in the prefix', () => {
+      const field: FieldDef<unknown> = { type: 'input', key: 'street' };
+      const result = runWithProviders([{ provide: GROUP_CONTEXT, useValue: groupCtx('user.address') }], () =>
+        mapFieldToInputs(field, registry),
+      );
+      expect(result!()['key']).toBe('user_address_street');
+    });
+
+    it('appends the array index suffix when inside an array', () => {
+      const field: FieldDef<unknown> = { type: 'input', key: 'value' };
+      const result = runWithProviders([{ provide: ARRAY_CONTEXT, useValue: arrayCtx(2) }], () => mapFieldToInputs(field, registry));
+      expect(result!()['key']).toBe('value_2');
+    });
+
+    it('applies group prefix BEFORE array suffix (contract: {group}_{key}_{index})', () => {
+      // A group inside an array item — e.g. an `address` group inside each `users` item.
+      // Renders as `address_street_0` for the first item's street field.
+      const field: FieldDef<unknown> = { type: 'input', key: 'street' };
+      const result = runWithProviders(
+        [
+          { provide: GROUP_CONTEXT, useValue: groupCtx('address') },
+          { provide: ARRAY_CONTEXT, useValue: arrayCtx(0, 'users') },
+        ],
+        () => mapFieldToInputs(field, registry),
+      );
+      expect(result!()['key']).toBe('address_street_0');
+    });
+
+    it('skips the prefix when the group path is empty', () => {
+      const field: FieldDef<unknown> = { type: 'input', key: 'street' };
+      const result = runWithProviders([{ provide: GROUP_CONTEXT, useValue: groupCtx('') }], () => mapFieldToInputs(field, registry));
+      expect(result!()['key']).toBe('street');
+    });
+
+    it('leaves non-string keys untouched', () => {
+      // Custom mapper that returns a numeric `key` (escape hatch — must not be string-prefixed).
+      const customMapper = () => computed(() => ({ key: 42 as unknown as string, other: true }));
+      registry.set('custom', { component: {} as Type<unknown>, mapper: customMapper });
+      const field: FieldDef<unknown> = { type: 'custom', key: 'ignored' };
+      const result = runWithProviders([{ provide: GROUP_CONTEXT, useValue: groupCtx('address') }], () => mapFieldToInputs(field, registry));
+      expect(result!()['key']).toBe(42);
+    });
+  });
+
+  /**
+   * Regression test for issue #401: when two fields share the same leaf key
+   * inside different groups, their property-derivation override slots in the
+   * PropertyOverrideStore must remain distinct. Before this fix, both fields
+   * read/wrote the same `'name'` slot, so one derivation silently overwrote
+   * the other.
+   */
+  describe('property override store keys (issue #401 group scoping)', () => {
+    function makeGroupCtx(path: string): GroupContext {
+      return { groupPath: signal(path) };
+    }
+
+    it('uses distinct override-store slots for same leaf key in different groups', () => {
+      TestBed.resetTestingModule();
+      const store = createPropertyOverrideStore();
+      TestBed.configureTestingModule({
+        providers: [{ provide: PROPERTY_OVERRIDE_STORE, useValue: store }],
+      });
+
+      // Pre-populate per-group overrides for the SAME leaf key.
+      store.setOverride('createADto.name', 'label', 'A Label');
+      store.setOverride('createBDto.name', 'label', 'B Label');
+
+      const fieldDef: FieldDef<unknown> = {
+        type: 'input',
+        key: 'name',
+        logic: [{ type: 'derivation', targetProperty: 'label', value: 'static' }],
+      } as unknown as FieldDef<unknown>;
+
+      const rootInjector = TestBed.inject(Injector);
+
+      // Field rendered inside the `createADto` group.
+      const injA = Injector.create({
+        parent: rootInjector,
+        providers: [{ provide: GROUP_CONTEXT, useValue: makeGroupCtx('createADto') }],
+      });
+      const resultA = runInInjectionContext(injA, () => mapFieldToInputs(fieldDef, registry));
+
+      // Field rendered inside the `createBDto` group — same leaf key.
+      const injB = Injector.create({
+        parent: rootInjector,
+        providers: [{ provide: GROUP_CONTEXT, useValue: makeGroupCtx('createBDto') }],
+      });
+      const resultB = runInInjectionContext(injB, () => mapFieldToInputs(fieldDef, registry));
+
+      expect(resultA!()['label']).toBe('A Label');
+      expect(resultB!()['label']).toBe('B Label');
     });
   });
 });

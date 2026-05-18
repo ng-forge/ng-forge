@@ -6,6 +6,7 @@ import { pageTransitionsScenario } from './scenarios/page-transitions.scenario';
 import { validationNavigationScenario } from './scenarios/validation-navigation.scenario';
 import { pageConditionalVisibilityScenario } from './scenarios/page-conditional-visibility.scenario';
 import { pageDynamicNavigationScenario } from './scenarios/page-dynamic-navigation.scenario';
+import { overlappingGroupKeysScenario } from './scenarios/overlapping-group-keys.scenario';
 
 export const multiPageNavigationSuite: TestSuite = {
   id: 'multi-page-navigation',
@@ -23,6 +24,9 @@ export const multiPageNavigationSuite: TestSuite = {
     // Conditional Visibility
     pageConditionalVisibilityScenario,
     pageDynamicNavigationScenario,
+
+    // Regression: issue #401
+    overlappingGroupKeysScenario,
   ],
 };
 

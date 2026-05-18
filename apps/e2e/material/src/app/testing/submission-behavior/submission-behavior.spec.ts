@@ -395,8 +395,9 @@ test.describe('Submission Behavior Tests', () => {
       const scenario = helpers.getScenario('submit-inside-group');
       await expect(scenario).toBeVisible();
 
-      // Submit button inside group should be disabled initially (form is empty/invalid)
-      const submitButton = scenario.locator('#submitInGroup button');
+      // Submit button inside group should be disabled initially (form is empty/invalid).
+      // The button lives inside `actionsGroup` — DOM ID is scoped through the parent group.
+      const submitButton = scenario.locator('#actionsGroup_submitInGroup button');
       await expect(submitButton).toBeDisabled();
 
       // Fill one field (still invalid)
@@ -427,9 +428,9 @@ test.describe('Submission Behavior Tests', () => {
       const scenario = helpers.getScenario('hidden-field');
       await expect(scenario).toBeVisible();
 
-      // Fill the visible input fields
+      // Fill the visible input fields (description lives inside `metadata` group → scoped ID)
       await helpers.fillInput(helpers.getInput(scenario, 'name'), 'John Doe');
-      await helpers.fillInput(helpers.getInput(scenario, 'description'), 'Test description');
+      await helpers.fillInput(helpers.getInput(scenario, 'metadata_description'), 'Test description');
 
       // Hidden fields should not have any visible elements
       await expect(scenario.locator('[id="id"]')).not.toBeVisible();
@@ -437,9 +438,9 @@ test.describe('Submission Behavior Tests', () => {
       await expect(scenario.locator('[id="isActive"]')).not.toBeVisible();
       await expect(scenario.locator('[id="tagIds"]')).not.toBeVisible();
       await expect(scenario.locator('[id="labels"]')).not.toBeVisible();
-      // Hidden fields inside groups should also not be visible
-      await expect(scenario.locator('[id="createdBy"]')).not.toBeVisible();
-      await expect(scenario.locator('[id="source"]')).not.toBeVisible();
+      // Hidden fields inside groups should also not be visible (DOM IDs scoped through `metadata`)
+      await expect(scenario.locator('[id="metadata_createdBy"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="metadata_source"]')).not.toBeVisible();
 
       // Submit the form
       const submitButton = scenario.locator('#submitHidden button');

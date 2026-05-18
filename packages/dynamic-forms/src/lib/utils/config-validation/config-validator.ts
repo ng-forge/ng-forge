@@ -1,14 +1,25 @@
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
-import { FieldTypeDefinition } from '../../models/field-type';
-import { hasChildFields } from '../../models/types/type-guards';
+import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';
+import { hasChildFields, isGroupField } from '../../models/types/type-guards';
 import { normalizeFieldsArray } from '../object-utils';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { Logger } from '../../providers/features/logger/logger.interface';
 
 /** Data collected during a single config traversal. */
 interface ConfigTraversalData {
+  /**
+   * Dot-scoped paths (e.g. `'address.street'`) — checked for form-value uniqueness:
+   * two leaves landing at the same form-value path are a real conflict.
+   */
   keys: string[];
+  /**
+   * Underscore-projected DOM-ID paths (e.g. `'address_street'`) — checked for
+   * DOM `id` / `data-testid` uniqueness. Catches the otherwise-silent collision
+   * where a top-level key like `'foo_bar'` would render the same DOM id as a
+   * leaf `'bar'` inside group `'foo'`.
+   */
+  domIds: string[];
   types: Set<string>;
   regexErrors: string[];
 }
@@ -17,15 +28,39 @@ interface ConfigTraversalData {
  * Collects all field keys, types, and validates regex patterns from a field tree
  * by recursively traversing containers (page, row, group, array).
  *
- * @param collectKeys - Whether to add field keys to data.keys for duplicate detection.
- *   Set to false when inside an array container: array item fields share template keys
- *   across items by design (e.g. every item has 'name', 'email'), so they must not
- *   participate in global duplicate-key checking.
+ * Keys are scoped by their group ancestors (e.g. `address.city` instead of `city`),
+ * so the same leaf key can appear inside different groups without conflict. Page and
+ * row containers do not contribute to the path because they flatten their children
+ * into the parent scope. Array items are excluded entirely from key collection
+ * because they share template keys across items by design.
+ *
+ * Fields whose registered `valueHandling` is anything other than `include` (e.g.
+ * buttons with `exclude`, page/row with `flatten`) are not collected: they don't
+ * bind to a form-value path, so duplicate-key uniqueness isn't meaningful for them.
+ *
+ * @param collectKeys - When false, the entire subtree skips key collection (used
+ *   when descending into an array container).
  */
-function collectFieldData(fields: FieldDef<unknown>[], data: ConfigTraversalData, collectKeys = true): void {
+function collectFieldData(
+  fields: FieldDef<unknown>[],
+  data: ConfigTraversalData,
+  registry: Map<string, FieldTypeDefinition>,
+  pathPrefix: string,
+  collectKeys = true,
+): void {
   for (const field of fields) {
-    if (collectKeys && field.key) {
-      data.keys.push(field.key);
+    // Defensively skip only known non-include modes — unexpected/missing
+    // valueHandling defaults back to participating in duplicate detection so a
+    // mis-registered field type doesn't silently drop from collision checks.
+    const valueHandling = field.type ? getFieldValueHandling(field.type, registry) : 'include';
+    const participatesInValue = valueHandling !== 'exclude' && valueHandling !== 'flatten';
+
+    if (collectKeys && field.key && participatesInValue) {
+      const scopedKey = pathPrefix ? `${pathPrefix}.${field.key}` : field.key;
+      data.keys.push(scopedKey);
+      // Project to the DOM-ID format (dots → underscores) so we can detect
+      // collisions like top-level `'foo_bar'` vs group `'foo'` + leaf `'bar'`.
+      data.domIds.push(scopedKey.replace(/\./g, '_'));
     }
     if (field.type) {
       data.types.add(field.type);
@@ -48,12 +83,15 @@ function collectFieldData(fields: FieldDef<unknown>[], data: ConfigTraversalData
       // Array item fields share template keys across items by design — stop collecting keys
       // once inside an array. Types and regex patterns are still validated.
       const childCollectKeys = collectKeys && field.type !== 'array';
+      // Only group containers extend the scoping path — page/row flatten into the parent
+      // scope, and array items use dynamic indices that aren't statically knowable.
+      const childPrefix = isGroupField(field) && field.key ? (pathPrefix ? `${pathPrefix}.${field.key}` : field.key) : pathPrefix;
       const children = normalizeFieldsArray(field.fields) as (FieldDef<unknown> | FieldDef<unknown>[])[];
       for (const child of children) {
         if (Array.isArray(child)) {
-          collectFieldData(child as FieldDef<unknown>[], data, childCollectKeys);
+          collectFieldData(child as FieldDef<unknown>[], data, registry, childPrefix, childCollectKeys);
         } else {
-          collectFieldData([child], data, childCollectKeys);
+          collectFieldData([child], data, registry, childPrefix, childCollectKeys);
         }
       }
     }
@@ -92,7 +130,45 @@ function validateNoDuplicateKeys(allKeys: string[]): void {
     const duplicateList = Array.from(duplicates)
       .map((k) => `'${k}'`)
       .join(', ');
-    throw new DynamicFormError(`Duplicate field keys detected: ${duplicateList}. Each field key must be unique within a form config.`);
+    throw new DynamicFormError(
+      `Duplicate field keys detected: ${duplicateList}. Field keys must be unique within their group scope (the same key may appear inside different groups).`,
+    );
+  }
+}
+
+/**
+ * Validates that the underscore-projected DOM-ID namespace has no collisions.
+ *
+ * DOM IDs are built by underscore-joining the group ancestor path with the
+ * leaf key (e.g. `address_street`). Two scoped paths can land on the same
+ * DOM ID even when their form-value paths differ — e.g. a top-level key
+ * `'foo_bar'` and a leaf `'bar'` inside group `'foo'` both render as
+ * `id="foo_bar"`. The form-value-path check accepts this (paths are
+ * `'foo_bar'` vs `'foo.bar'` — distinct) but the rendered DOM would have
+ * duplicate IDs, breaking aria associations and CSS selectors.
+ *
+ * @throws {DynamicFormError} When two scoped paths project to the same DOM ID
+ */
+function validateNoDomIdCollisions(domIds: string[]): void {
+  const seen = new Set<string>();
+  const duplicates = new Set<string>();
+
+  for (const id of domIds) {
+    if (seen.has(id)) {
+      duplicates.add(id);
+    }
+    seen.add(id);
+  }
+
+  if (duplicates.size > 0) {
+    const duplicateList = Array.from(duplicates)
+      .map((k) => `'${k}'`)
+      .join(', ');
+    throw new DynamicFormError(
+      `DOM id collision detected for: ${duplicateList}. Group-nested keys are joined with '_' to form DOM ids ` +
+        `(e.g. group 'foo' + leaf 'bar' renders as id='foo_bar'). A separate top-level key like 'foo_bar' or a different ` +
+        `group/leaf pair that underscores to the same string will produce duplicate ids. Rename one of the colliding keys.`,
+    );
   }
 }
 
@@ -136,13 +212,15 @@ function validateFieldTypesRegistered(allTypes: Set<string>, registry: Map<strin
 export function validateFormConfig(fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>, logger: Logger): void {
   const data: ConfigTraversalData = {
     keys: [],
+    domIds: [],
     types: new Set<string>(),
     regexErrors: [],
   };
 
-  collectFieldData(fields, data);
+  collectFieldData(fields, data, registry, '');
 
   validateNoDuplicateKeys(data.keys);
+  validateNoDomIdCollisions(data.domIds);
   validateFieldTypesRegistered(data.types, registry, logger);
 
   if (data.regexErrors.length > 0) {

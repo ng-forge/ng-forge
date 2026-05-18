@@ -586,4 +586,46 @@ test.describe('Multi-Page Navigation Tests', () => {
       });
     });
   });
+
+  test.describe('Overlapping Group Keys (issue #401)', () => {
+    test('should accept the same leaf key inside different groups and preserve scoped values', async ({ page, helpers }) => {
+      await page.goto('/#/test/multi-page-navigation/overlapping-group-keys');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('overlapping-group-keys');
+      await expect(scenario).toBeVisible();
+
+      // Page 1: fill `createADto.name` and advance. With group-scoped DOM IDs,
+      // each `name` field gets a distinct `#{group}_name` selector.
+      const aName = scenario.locator('#createADto_name input');
+      await expect(aName).toBeVisible();
+      await aName.fill('Alpha');
+
+      // Page 1's `next` button shares the `submit` key with page 2's submit
+      // (rows don't add scope). The inner <button> data-testid is
+      // `${buttonType}-${key}` — disambiguate via the next type.
+      await scenario.locator('[data-testid="button-submit"]').click();
+
+      const bName = scenario.locator('#createBDto_name input');
+      await expect(bName).toBeVisible();
+      await bName.fill('Bravo');
+
+      // The shared `submitFormAndCapture` helper targets `#submit button`, which
+      // matches BOTH page 1's next-button and page 2's submit-button (same key).
+      // Disambiguate via data-testid (`{type}-{key}`) and inline the capture.
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener('formSubmitted', (event: Event) => resolve((event as CustomEvent).detail.data), { once: true });
+          }),
+      );
+      await scenario.locator('[data-testid="submit-submit"]').click();
+      const submittedData = (await submittedDataPromise) as Record<string, unknown>;
+
+      expect(submittedData).toMatchObject({
+        createADto: { name: 'Alpha' },
+        createBDto: { name: 'Bravo' },
+      });
+    });
+  });
 });

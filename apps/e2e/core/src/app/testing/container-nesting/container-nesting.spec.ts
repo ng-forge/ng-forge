@@ -53,9 +53,10 @@ test.describe('Container Nesting E2E Tests', () => {
       await expect(empNameInput).toBeVisible({ timeout: 5000 });
       await empNameInput.fill('Charlie');
 
-      // Fill address group inside array item (field IDs: street_0, city_0)
-      const streetInput = scenario.locator('#street_0 input');
-      const cityInput = scenario.locator('#city_0 input');
+      // Fill address group inside array item — group prefix + array index
+      // produce IDs like `address_street_0`.
+      const streetInput = scenario.locator('#address_street_0 input');
+      const cityInput = scenario.locator('#address_city_0 input');
       await expect(streetInput).toBeVisible({ timeout: 5000 });
       await streetInput.fill('123 Main St');
       await cityInput.fill('Springfield');
@@ -160,7 +161,8 @@ test.describe('Container Nesting E2E Tests', () => {
       const scenario = helpers.getScenario('container-inside-group');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      const stateInput = scenario.locator('#state input');
+      // DOM IDs of fields inside a group are scoped: `state` becomes `address_state`.
+      const stateInput = scenario.locator('#address_state input');
       await expect(stateInput).toBeVisible({ timeout: 5000 });
       await fillInput(stateInput, 'tx');
 
@@ -179,7 +181,7 @@ test.describe('Container Nesting E2E Tests', () => {
       const scenario = helpers.getScenario('container-inside-group-self');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      const stateInput = scenario.locator('#state input');
+      const stateInput = scenario.locator('#address_state input');
       await expect(stateInput).toBeVisible({ timeout: 5000 });
       await fillInput(stateInput, 'tx');
 
@@ -197,8 +199,8 @@ test.describe('Container Nesting E2E Tests', () => {
       const scenario = helpers.getScenario('container-inside-group-parent');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      const countryInput = scenario.locator('#country input');
-      const stateInput = scenario.locator('#state input');
+      const countryInput = scenario.locator('#address_country input');
+      const stateInput = scenario.locator('#address_state input');
       await expect(countryInput).toBeVisible({ timeout: 5000 });
 
       // $group resolves to 'address' — fires the derivation on any sibling change.

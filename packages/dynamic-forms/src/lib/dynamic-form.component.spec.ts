@@ -2285,7 +2285,8 @@ describe('DynamicFormComponent', () => {
       await waitForDynamicComponents(fixture);
 
       const groupElement = fixture.nativeElement.querySelector('[data-testid="contact"]');
-      const rowContainer = fixture.nativeElement.querySelector('[data-testid="name"]');
+      // Children of `contact` get DOM IDs scoped through the parent group key.
+      const rowContainer = fixture.nativeElement.querySelector('[data-testid="contact_name"]');
       const rowElement = rowContainer?.querySelector('df-row-wrapper');
 
       // Should create nested structure with group containing row-flattened fields
@@ -2408,7 +2409,8 @@ describe('DynamicFormComponent', () => {
       await waitForDynamicComponents(fixture);
 
       const groupElement = fixture.nativeElement.querySelector('[data-testid="contact"]');
-      const rowContainer = fixture.nativeElement.querySelector('[data-testid="nameRow"]');
+      // Row's DOM ID is scoped through the parent group key.
+      const rowContainer = fixture.nativeElement.querySelector('[data-testid="contact_nameRow"]');
       const rowElement = rowContainer?.querySelector('df-row-wrapper');
 
       expect(component.formValue()).toEqual({

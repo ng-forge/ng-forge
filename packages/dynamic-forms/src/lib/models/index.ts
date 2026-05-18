@@ -16,6 +16,7 @@ export {
   DEFAULT_WRAPPERS,
   FIELD_SIGNAL_CONTEXT,
   FORM_OPTIONS,
+  GROUP_CONTEXT,
 } from './field-signal-context.token';
 export type { ArrayTemplateRegistry } from './field-signal-context.token';
 export type { ValidationError, ValidationMessages } from './validation-types';

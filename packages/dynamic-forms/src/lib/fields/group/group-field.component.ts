@@ -24,8 +24,8 @@ import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldTree, form } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions/base/field-def';
-import { FieldSignalContext } from '../../mappers/types';
-import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { FieldSignalContext, GroupContext } from '../../mappers/types';
+import { FIELD_SIGNAL_CONTEXT, GROUP_CONTEXT } from '../../models/field-signal-context.token';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { EventBus } from '../../events/event.bus';
 import { SubmitEvent } from '../../events/constants/submit.event';
@@ -52,6 +52,9 @@ import { SubmitEvent } from '../../events/constants/submit.event';
     '[class.disabled]': 'disabled()',
     '[class.df-container-hidden]': 'hidden()',
     '[attr.aria-hidden]': 'hidden() || null',
+    // The group element's own id is the plain `key()` — only its DESCENDANTS
+    // compose scoped ids via GROUP_CONTEXT (e.g. children of an `address`
+    // group render as `address_street`). The group selector is `#address`.
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
@@ -65,6 +68,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
+  private readonly parentGroupContext = inject(GROUP_CONTEXT, { optional: true });
   private readonly injector = inject(Injector);
   protected readonly environmentInjector = inject(EnvironmentInjector);
   private readonly eventBus = inject(EventBus);
@@ -185,9 +189,26 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
     };
   })();
 
+  /**
+   * Group context propagated to descendants — carries the dot-separated path of
+   * group ancestors so child fields can scope their DOM IDs (issue #401).
+   * Reactive via `computed()`: a nested group composes its path from the parent
+   * context signal + its own key, so the chain stays consistent if either changes.
+   */
+  private readonly groupContext: GroupContext = {
+    groupPath: computed(() => {
+      const ownKey = this.field().key;
+      const parentPath = this.parentGroupContext?.groupPath();
+      return parentPath ? `${parentPath}.${ownKey}` : ownKey;
+    }),
+  };
+
   private readonly groupInjector = Injector.create({
     parent: this.injector,
-    providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: this.groupFieldSignalContext }],
+    providers: [
+      { provide: FIELD_SIGNAL_CONTEXT, useValue: this.groupFieldSignalContext },
+      { provide: GROUP_CONTEXT, useValue: this.groupContext },
+    ],
   });
 
   // ─────────────────────────────────────────────────────────────────────────────

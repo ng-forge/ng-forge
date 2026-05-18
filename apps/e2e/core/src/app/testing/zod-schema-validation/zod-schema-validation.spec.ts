@@ -194,12 +194,12 @@ test.describe('Zod Schema Validation E2E Tests', () => {
       const scenario = helpers.getScenario('comprehensive-validation-test');
 
       // Get nested email input (inside user group)
-      const emailInput = scenario.locator('#user #email input');
+      const emailInput = scenario.locator('#user_email input');
       await helpers.fillInput(emailInput, 'invalid-email');
       await helpers.blurInput(emailInput);
 
       // Verify error is displayed on email field
-      const errorElement = scenario.locator('#user #email mat-error').first();
+      const errorElement = scenario.locator('#user_email mat-error').first();
       await expect(errorElement).toContainText('Invalid email');
     });
 
@@ -210,12 +210,12 @@ test.describe('Zod Schema Validation E2E Tests', () => {
       const scenario = helpers.getScenario('comprehensive-validation-test');
 
       // Get firstName input inside user group
-      const firstNameInput = scenario.locator('#user #firstName input');
+      const firstNameInput = scenario.locator('#user_firstName input');
       await helpers.fillInput(firstNameInput, 'A');
       await helpers.blurInput(firstNameInput);
 
       // Verify error is displayed
-      const errorElement = scenario.locator('#user #firstName mat-error').first();
+      const errorElement = scenario.locator('#user_firstName mat-error').first();
       await expect(errorElement).toContainText('at least 2 characters');
     });
 
@@ -244,13 +244,13 @@ test.describe('Zod Schema Validation E2E Tests', () => {
       const submitButton = helpers.getSubmitButton(scenario);
 
       // Fill user info
-      const emailInput = scenario.locator('#user #email input');
+      const emailInput = scenario.locator('#user_email input');
       await helpers.fillInput(emailInput, 'test@example.com');
 
-      const firstNameInput = scenario.locator('#user #firstName input');
+      const firstNameInput = scenario.locator('#user_firstName input');
       await helpers.fillInput(firstNameInput, 'John');
 
-      const lastNameInput = scenario.locator('#user #lastName input');
+      const lastNameInput = scenario.locator('#user_lastName input');
       await helpers.fillInput(lastNameInput, 'Springfield');
 
       // Fill address with city matching last name (for cross-field validation)

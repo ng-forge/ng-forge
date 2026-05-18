@@ -1,5 +1,5 @@
 import { InjectionToken, Signal } from '@angular/core';
-import type { FieldSignalContext, ArrayContext } from '../mappers/types';
+import type { FieldSignalContext, ArrayContext, GroupContext } from '../mappers/types';
 import type { WrapperConfig } from './wrapper-type';
 import type { ValidationMessages } from './validation-types';
 import type { FormOptions } from './form-config';
@@ -79,6 +79,33 @@ export const FIELD_SIGNAL_CONTEXT = new InjectionToken<FieldSignalContext>('FIEL
  * ```
  */
 export const ARRAY_CONTEXT = new InjectionToken<ArrayContext>('ARRAY_CONTEXT');
+
+/**
+ * Injection token for providing group ancestry to mappers and components.
+ *
+ * Re-provided in two places:
+ * 1. `GroupFieldComponent` provides a context whose `groupPath()` is the
+ *    parent path extended by its own key (e.g. `'address'` or `'user.address'`).
+ * 2. `createArrayItemInjector` provides a sentinel with an empty `groupPath`,
+ *    resetting the chain at array boundaries — descendants of an array item
+ *    that re-enter a group compose paths INSIDE the array item, matching the
+ *    property-derivation collector's keying.
+ *
+ * `mapFieldToInputs` reads this to scope DOM IDs and override-store keys so
+ * the same leaf key can appear in different groups without colliding (#401).
+ *
+ * Inject with `{ optional: true }` because top-level fields with no group
+ * ancestor (and no enclosing array) won't have the token provided. The token
+ * IS present for fields inside an array even when no inner group exists — the
+ * array-boundary sentinel makes injection succeed with an empty `groupPath`.
+ */
+// No factory: GROUP_CONTEXT is optional-by-design — `GroupFieldComponent` and
+// `createArrayItemInjector` re-provide it where it makes sense, and consumers
+// inject with `{ optional: true }` to handle the top-level case. Mirrors the
+// ARRAY_CONTEXT pattern. Adding a throwing factory here fires even when
+// injected optionally (Angular still evaluates the tree-shakable factory
+// before honoring `optional`), so non-group fields would crash on every render.
+export const GROUP_CONTEXT = new InjectionToken<GroupContext>('GROUP_CONTEXT');
 
 /**
  * Injection token for form-level default props.
