@@ -9,8 +9,8 @@ const config = {
       label: 'Search',
       value: 'initial value',
       addons: [
-        { slot: 'prefix', kind: 'pi-icon', icon: 'search', ariaLabel: 'Search' },
-        { slot: 'suffix', kind: 'pi-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' },
+        { slot: 'prefix', kind: 'prime-icon', icon: 'search', ariaLabel: 'Search' },
+        { slot: 'suffix', kind: 'prime-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' },
       ],
     },
   ],
@@ -19,6 +19,6 @@ const config = {
 export const clearButtonScenario: TestScenario = {
   testId: 'clear-button',
   title: 'Addons — Clear button',
-  description: 'Canonical pattern: pi-icon prefix + pi-button suffix with preset:clear.',
+  description: 'Canonical pattern: prime-icon prefix + prime-button suffix with preset:clear.',
   config,
 };

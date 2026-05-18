@@ -1,25 +1,25 @@
 import { ADDON_ACTION_REGISTRY, ADDON_KIND_REGISTRY, type AddonKindDefinition, DynamicFormLogger } from '@ng-forge/dynamic-forms';
 import { createNgForgeFieldFixture, provideTestValidationMessages } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
-import { PiButtonAddonComponent } from '../../addons/pi-button-addon.component';
-import { PiIconAddonComponent } from '../../addons/pi-icon-addon.component';
-import type { PiButtonAddon, PiIconAddon } from '../../types/addons';
+import { PrimeButtonAddonComponent } from '../../addons/prime-button-addon.component';
+import { PrimeIconAddonComponent } from '../../addons/prime-icon-addon.component';
+import type { PrimeButtonAddon, PrimeIconAddon } from '../../types/addons';
 import type { PrimeInputAddon } from './prime-input.type';
 import PrimeInputFieldComponent from './prime-input.component';
 
 const PI_ICON_KIND: AddonKindDefinition = {
-  kind: 'pi-icon',
-  loadComponent: () => Promise.resolve(PiIconAddonComponent),
+  kind: 'prime-icon',
+  loadComponent: () => Promise.resolve(PrimeIconAddonComponent),
 };
 const PI_BUTTON_KIND: AddonKindDefinition = {
-  kind: 'pi-button',
-  loadComponent: () => Promise.resolve(PiButtonAddonComponent),
+  kind: 'prime-button',
+  loadComponent: () => Promise.resolve(PrimeButtonAddonComponent),
 };
 
 function makeKindRegistry(): ReadonlyMap<string, AddonKindDefinition> {
   return new Map<string, AddonKindDefinition>([
-    ['pi-icon', PI_ICON_KIND],
-    ['pi-button', PI_BUTTON_KIND],
+    ['prime-icon', PI_ICON_KIND],
+    ['prime-button', PI_BUTTON_KIND],
   ]);
 }
 
@@ -39,7 +39,7 @@ function createFixture(addons: ReadonlyArray<PrimeInputAddon>) {
 
 describe('PrimeInputFieldComponent — addon rendering', () => {
   it('wraps the input in <p-inputgroup> when a prefix addon is supplied', async () => {
-    const prefix: PiIconAddon = { kind: 'pi-icon', slot: 'prefix', icon: 'search' };
+    const prefix: PrimeIconAddon = { kind: 'prime-icon', slot: 'prefix', icon: 'search' };
     const { fixture } = createFixture([prefix]);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -51,14 +51,14 @@ describe('PrimeInputFieldComponent — addon rendering', () => {
     expect(prefixSlot).toBeTruthy();
   });
 
-  it('renders a suffix <p-inputgroup-addon> for a pi-button addon', async () => {
-    const suffix: PiButtonAddon = {
-      kind: 'pi-button',
+  it('renders a suffix <p-inputgroup-addon> for a prime-button addon', async () => {
+    const suffix: PrimeButtonAddon = {
+      kind: 'prime-button',
       slot: 'suffix',
       icon: 'times',
       ariaLabel: 'Clear',
       preset: 'clear',
-    } as PiButtonAddon;
+    } as PrimeButtonAddon;
     const { fixture } = createFixture([suffix]);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -76,8 +76,8 @@ describe('PrimeInputFieldComponent — addon rendering', () => {
 
   it('renders both prefix and suffix when both slots are supplied', async () => {
     const addons: PrimeInputAddon[] = [
-      { kind: 'pi-icon', slot: 'prefix', icon: 'search' } as PiIconAddon,
-      { kind: 'pi-button', slot: 'suffix', icon: 'times', ariaLabel: 'Clear', preset: 'clear' } as PiButtonAddon,
+      { kind: 'prime-icon', slot: 'prefix', icon: 'search' } as PrimeIconAddon,
+      { kind: 'prime-button', slot: 'suffix', icon: 'times', ariaLabel: 'Clear', preset: 'clear' } as PrimeButtonAddon,
     ];
     const { fixture } = createFixture(addons);
     fixture.detectChanges();

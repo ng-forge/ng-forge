@@ -3,8 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { ADDON_ACTION_REGISTRY, DynamicFormLogger } from '@ng-forge/dynamic-forms';
 import { ADDON_PRESET_HANDLER, type AddonPresetHandler } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
-import type { PiButtonAddon } from '../types/addons';
-import { PiButtonAddonComponent } from './pi-button-addon.component';
+import type { PrimeButtonAddon } from '../types/addons';
+import { PrimeButtonAddonComponent } from './prime-button-addon.component';
 
 interface LoggerStub {
   warn: ReturnType<typeof vi.fn>;
@@ -20,12 +20,12 @@ function makeLogger(): LoggerStub {
 // Hosts the component under test so we can supply `addon` via `setInput` on its hostDirective inputs.
 @Component({
   selector: 'df-prime-test-button-host',
-  imports: [PiButtonAddonComponent],
+  imports: [PrimeButtonAddonComponent],
   template: '<df-prime-button-addon [addon]="addon()" />',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestButtonHostComponent {
-  readonly addon = signal<PiButtonAddon>({ kind: 'pi-button', slot: 'suffix', label: 'Click' } as PiButtonAddon);
+  readonly addon = signal<PrimeButtonAddon>({ kind: 'prime-button', slot: 'suffix', label: 'Click' } as PrimeButtonAddon);
 }
 
 interface SetupOpts {
@@ -33,7 +33,7 @@ interface SetupOpts {
   readonly logger?: LoggerStub;
 }
 
-function setup(addon: PiButtonAddon, opts: SetupOpts = {}) {
+function setup(addon: PrimeButtonAddon, opts: SetupOpts = {}) {
   const logger = opts.logger ?? makeLogger();
   TestBed.configureTestingModule({
     imports: [TestButtonHostComponent],
@@ -51,9 +51,9 @@ function setup(addon: PiButtonAddon, opts: SetupOpts = {}) {
   return { fixture, logger };
 }
 
-describe('PiButtonAddonComponent', () => {
+describe('PrimeButtonAddonComponent', () => {
   it('renders <p-button> with the label-only branch', async () => {
-    const { fixture } = setup({ kind: 'pi-button', slot: 'suffix', label: 'Submit' } as PiButtonAddon);
+    const { fixture } = setup({ kind: 'prime-button', slot: 'suffix', label: 'Submit' } as PrimeButtonAddon);
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -64,11 +64,11 @@ describe('PiButtonAddonComponent', () => {
 
   it('forwards icon as `pi pi-{icon}` to <p-button>', async () => {
     const { fixture } = setup({
-      kind: 'pi-button',
+      kind: 'prime-button',
       slot: 'suffix',
       icon: 'times',
       ariaLabel: 'Clear',
-    } as PiButtonAddon);
+    } as PrimeButtonAddon);
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -78,11 +78,11 @@ describe('PiButtonAddonComponent', () => {
 
   it('forwards aria-label onto the <p-button> when set', async () => {
     const { fixture } = setup({
-      kind: 'pi-button',
+      kind: 'prime-button',
       slot: 'suffix',
       icon: 'times',
       ariaLabel: 'Clear field',
-    } as PiButtonAddon);
+    } as PrimeButtonAddon);
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -95,7 +95,7 @@ describe('PiButtonAddonComponent', () => {
   });
 
   it('defaults severity to "secondary" and applies the matching PrimeNG class', async () => {
-    const { fixture } = setup({ kind: 'pi-button', slot: 'suffix', label: 'Go' } as PiButtonAddon);
+    const { fixture } = setup({ kind: 'prime-button', slot: 'suffix', label: 'Go' } as PrimeButtonAddon);
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -106,11 +106,11 @@ describe('PiButtonAddonComponent', () => {
 
   it('renders the icon-only branch without error when ariaLabel is provided', async () => {
     const { fixture } = setup({
-      kind: 'pi-button',
+      kind: 'prime-button',
       slot: 'suffix',
       icon: 'search',
       ariaLabel: 'Search',
-    } as PiButtonAddon);
+    } as PrimeButtonAddon);
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -120,9 +120,12 @@ describe('PiButtonAddonComponent', () => {
 
   it('dispatches via the preset handler when a preset is configured', async () => {
     const run = vi.fn().mockResolvedValue(undefined);
-    const { fixture } = setup({ kind: 'pi-button', slot: 'suffix', icon: 'times', ariaLabel: 'Clear', preset: 'clear' } as PiButtonAddon, {
-      presetHandler: { run },
-    });
+    const { fixture } = setup(
+      { kind: 'prime-button', slot: 'suffix', icon: 'times', ariaLabel: 'Clear', preset: 'clear' } as PrimeButtonAddon,
+      {
+        presetHandler: { run },
+      },
+    );
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -135,7 +138,7 @@ describe('PiButtonAddonComponent', () => {
 
   it('dispatches via inline action() when configured', async () => {
     const action = vi.fn();
-    const { fixture } = setup({ kind: 'pi-button', slot: 'suffix', label: 'Run', action } as PiButtonAddon);
+    const { fixture } = setup({ kind: 'prime-button', slot: 'suffix', label: 'Run', action } as PrimeButtonAddon);
     await fixture.whenStable();
     fixture.detectChanges();
 

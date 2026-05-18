@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'pi-button',
+          kind: 'prime-button',
           icon: 'search',
           label: 'Search',
           severity: 'primary',
@@ -27,6 +27,6 @@ const config = {
 export const labelledButtonScenario: TestScenario = {
   testId: 'labelled-button',
   title: 'Addons — labelled button with icon',
-  description: 'pi-button addon with both `icon` and `label` — validates the Labeled content-axis branch.',
+  description: 'prime-button addon with both `icon` and `label` — validates the Labeled content-axis branch.',
   config,
 };

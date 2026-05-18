@@ -12,7 +12,7 @@ test.describe('Addons', () => {
       const scenario = helpers.getScenario('icon-prefix');
       await expect(scenario).toBeVisible();
 
-      // pi-icon kind renders <i class="pi pi-search">
+      // prime-icon kind renders <i class="pi pi-search">
       const prefixIcon = scenario.locator('p-inputgroup-addon').first().locator('i.pi.pi-search');
       await expect(prefixIcon).toBeVisible();
 
@@ -111,7 +111,7 @@ test.describe('Addons', () => {
     });
   });
 
-  test.describe('pi-button severity variants', () => {
+  test.describe('prime-button severity variants', () => {
     test('renders every PrimeNG severity colour', async ({ page, helpers }) => {
       await page.goto('/#/test/addons/severity-variants');
       await page.waitForLoadState('networkidle');
@@ -125,7 +125,7 @@ test.describe('Addons', () => {
     });
   });
 
-  test.describe('Labelled pi-button', () => {
+  test.describe('Labelled prime-button', () => {
     test('renders both icon and label on the same button', async ({ page, helpers }) => {
       await page.goto('/#/test/addons/labelled-button');
       await page.waitForLoadState('networkidle');

@@ -75,5 +75,5 @@ export { withMaterialFields, withMaterialAddons } from './providers/material-pro
 export { MatIconAddonComponent } from './addons/mat-icon-addon.component';
 export { MatButtonAddonComponent } from './addons/mat-button-addon.component';
 export type { MatIconAddon, MatButtonAddon, MatAddon } from './types/addons';
-export type { MatInputAddon, MatInputAddonExtensions } from './fields/input/mat-input.type';
+export type { MatInputAddon, MatAddonExtensions } from './fields/input/mat-input.type';
 export { MAT_INPUT_TYPE_OVERRIDE } from './tokens/input-type-override.token';

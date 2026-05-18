@@ -19,7 +19,7 @@ export interface MatInputProps extends InputProps {
  *
  * ```ts
  * declare module '@ng-forge/dynamic-forms-material' {
- *   interface MatInputAddonExtensions {
+ *   interface MatAddonExtensions {
  *     'my-rating': MyRatingAddon;
  *   }
  * }
@@ -29,9 +29,9 @@ export interface MatInputProps extends InputProps {
  * nothing to the union.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type -- Intentionally empty: module-augmentation seam
-export interface MatInputAddonExtensions {}
+export interface MatAddonExtensions {}
 
-type MatInputAddonExtension = MatInputAddonExtensions[keyof MatInputAddonExtensions];
+type MatAddonExtension = MatAddonExtensions[keyof MatAddonExtensions];
 
 /**
  * Addon kinds accepted by `mat-input`.
@@ -42,9 +42,9 @@ type MatInputAddonExtension = MatInputAddonExtensions[keyof MatInputAddonExtensi
  * validator) but excluded here so the IDE narrows tightly to declarative
  * shapes.
  *
- * To extend with custom kinds, augment `MatInputAddonExtensions`.
+ * To extend with custom kinds, augment `MatAddonExtensions`.
  */
-export type MatInputAddon = MatIconAddon | MatButtonAddon | TextAddon | TemplateAddon | MatInputAddonExtension;
+export type MatInputAddon = MatIconAddon | MatButtonAddon | TextAddon | TemplateAddon | MatAddonExtension;
 
 export type MatInputField = InputField<MatInputProps> & {
   addons?: ReadonlyArray<MatInputAddon>;

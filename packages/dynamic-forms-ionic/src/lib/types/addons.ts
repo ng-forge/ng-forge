@@ -8,18 +8,18 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 /**
- * Decorative icon addon for Ionic fields.
+ * Decorative icon addon for Ion fields.
  *
- * Renders `<ion-icon name="{icon}">` (Ionicons). The `icon` string is the
- * Ionicons name — e.g., `'search-outline'` produces
+ * Renders `<ion-icon name="{icon}">` (Ionons). The `icon` string is the
+ * Ionons name — e.g., `'search-outline'` produces
  * `<ion-icon name="search-outline">`.
  *
  * Add `ariaLabel` for icons that convey meaning; leave it omitted for
  * purely decorative icons (will be `aria-hidden="true"`).
  */
-export interface IonicIconAddon extends BaseAddon {
+export interface IonIconAddon extends BaseAddon {
   readonly kind: 'ion-icon';
-  /** Ionicons name (e.g., `'search-outline'`, `'close-outline'`). */
+  /** Ionons name (e.g., `'search-outline'`, `'close-outline'`). */
   readonly icon: string;
   /** Accessible label for icons that convey meaning. */
   readonly ariaLabel?: DynamicText;
@@ -28,23 +28,23 @@ export interface IonicIconAddon extends BaseAddon {
 /**
  * Ionic-supported button colour palette.
  */
-type IonicButtonColor = 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
+type IonButtonColor = 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
 
 /**
  * Ionic-supported button fill variants.
  */
-type IonicButtonFill = 'clear' | 'outline' | 'solid' | 'default';
+type IonButtonFill = 'clear' | 'outline' | 'solid' | 'default';
 
 /**
  * Common shape of every `ion-button` addon — properties that don't
  * participate in either XOR axis.
  */
-interface IonicButtonBase extends BaseAddon {
+interface IonButtonBase extends BaseAddon {
   readonly kind: 'ion-button';
-  /** Ionic button colour. */
-  readonly color?: IonicButtonColor;
-  /** Ionic button fill style. */
-  readonly fill?: IonicButtonFill;
+  /** Ion button colour. */
+  readonly color?: IonButtonColor;
+  /** Ion button fill style. */
+  readonly fill?: IonButtonFill;
   /** Reactive loading state — renders an `<ion-spinner>` when truthy. */
   readonly loading?: DynamicValue<boolean>;
 }
@@ -62,7 +62,7 @@ interface IonicButtonBase extends BaseAddon {
  * Runtime XOR validation stays as defence-in-depth for JSON-source configs
  * that bypass the type checker.
  */
-type IonicButtonClickPreset = {
+type IonButtonClickPreset = {
   /** Built-in preset action (e.g., `'clear'`, `'toggle-password-visibility'`). JSON-safe. */
   readonly preset: AddonActionPreset;
   readonly actionRef?: never;
@@ -76,25 +76,25 @@ type IonicButtonClickPreset = {
  * usable; once the user augments `DynamicFormActionRegistry`, autocomplete
  * tightens to the registered keys.
  */
-type IonicButtonActionRef = [RegisteredActionRef] extends [never] ? string : RegisteredActionRef;
-type IonicButtonClickActionRef = {
+type IonButtonActionRef = [RegisteredActionRef] extends [never] ? string : RegisteredActionRef;
+type IonButtonClickActionRef = {
   readonly preset?: never;
   /** Reference to a handler registered via `provideAddonActions(...)`. JSON-safe. */
-  readonly actionRef: IonicButtonActionRef;
+  readonly actionRef: IonButtonActionRef;
   readonly action?: never;
 };
-type IonicButtonClickAction = {
+type IonButtonClickAction = {
   readonly preset?: never;
   readonly actionRef?: never;
   /** Inline handler — code-only; dropped from JSON-derived configs. Matches the generic `AddonActionHandler` shape used by `provideAddonActions(...)`. */
   readonly action: AddonActionHandler;
 };
-type IonicButtonClickNone = {
+type IonButtonClickNone = {
   readonly preset?: never;
   readonly actionRef?: never;
   readonly action?: never;
 };
-type IonicButtonClick = IonicButtonClickPreset | IonicButtonClickActionRef | IonicButtonClickAction | IonicButtonClickNone;
+type IonButtonClick = IonButtonClickPreset | IonButtonClickActionRef | IonButtonClickAction | IonButtonClickNone;
 
 /**
  * Content axis — XOR enforced at type level so an icon-only button is
@@ -107,26 +107,26 @@ type IonicButtonClick = IonicButtonClickPreset | IonicButtonClickActionRef | Ion
  * Combining keys is rejected by TypeScript — `icon: 'x'` without either
  * `label` or `ariaLabel` doesn't satisfy any branch.
  */
-type IonicButtonContentIconOnly = {
+type IonButtonContentIconOnly = {
   readonly icon: string;
   readonly label?: never;
   /** REQUIRED: icon-only buttons must carry an accessible label. */
   readonly ariaLabel: DynamicText;
 };
-type IonicButtonContentLabeled = {
+type IonButtonContentLabeled = {
   readonly icon?: string;
   readonly label: DynamicText;
   readonly ariaLabel?: DynamicText;
 };
-type IonicButtonContentDecorative = {
+type IonButtonContentDecorative = {
   readonly icon?: never;
   readonly label?: never;
   readonly ariaLabel?: DynamicText;
 };
-type IonicButtonContent = IonicButtonContentIconOnly | IonicButtonContentLabeled | IonicButtonContentDecorative;
+type IonButtonContent = IonButtonContentIconOnly | IonButtonContentLabeled | IonButtonContentDecorative;
 
 /**
- * Interactive button addon for Ionic fields.
+ * Interactive button addon for Ion fields.
  *
  * Renders `<ion-button>` with optional icon (via `<ion-icon>`), label,
  * colour / fill variants, and a reactive loading state (rendered as
@@ -142,14 +142,14 @@ type IonicButtonContent = IonicButtonContentIconOnly | IonicButtonContentLabeled
  *   the runtime validator still drops the addon with a clear warning when
  *   JSON-source configs slip a multi-set past the type checker.
  */
-export type IonicButtonAddon = IonicButtonBase & IonicButtonContent & IonicButtonClick;
+export type IonButtonAddon = IonButtonBase & IonButtonContent & IonButtonClick;
 
-/** Union of all Ionic-shipped addon kinds. */
-export type IonicAddon = IonicIconAddon | IonicButtonAddon;
+/** Union of all Ion-shipped addon kinds. */
+export type IonAddon = IonIconAddon | IonButtonAddon;
 
 declare module '@ng-forge/dynamic-forms' {
   interface DynamicFormAddonRegistry {
-    'ion-icon': IonicIconAddon;
-    'ion-button': IonicButtonAddon;
+    'ion-icon': IonIconAddon;
+    'ion-button': IonButtonAddon;
   }
 }

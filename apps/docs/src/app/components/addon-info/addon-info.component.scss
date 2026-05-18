@@ -19,11 +19,26 @@
   }
 }
 
+/* Match the canonical `pre` styling from styles.scss so addon-rendered code
+   blocks blend with the rest of the docs site (Forge `--forge-code-bg` panel
+   + ember-friendly padding + Shiki-compatible inner code). */
 .addon-code {
   margin: 0;
-  padding: 0;
-  background: transparent;
+  border-radius: $radius-md;
+  overflow-x: auto;
+  background: var(--forge-code-bg);
+  border: none;
+  padding: $space-4 $space-6;
   font-size: $text-sm;
+
+  code {
+    display: block;
+    background: transparent;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    white-space: pre;
+  }
 }
 
 .addon-prose {

@@ -35,7 +35,7 @@ export function buildFieldInputs(
   // primitive) means the field is rendered before the form is bound.
   const hasFieldTree = fieldTreeCandidate !== undefined && typeof fieldTreeCandidate === 'function';
   const readonlyField = hasFieldTree ? toReadonlyFieldTreeCached(cache, fieldTreeCandidate as FieldTree<unknown>) : undefined;
-  // Lazy writer keyed on the raw FieldTree. Addons (e.g., `pi-button`
+  // Lazy writer keyed on the raw FieldTree. Addons (e.g., `prime-button`
   // presets) call this to mutate the host field without re-deriving the
   // path or trafficking through an adapter-specific writer token.
   const setValue = hasFieldTree ? (next: unknown) => (fieldTreeCandidate as FieldTree<unknown>)().value.set(next as never) : undefined;

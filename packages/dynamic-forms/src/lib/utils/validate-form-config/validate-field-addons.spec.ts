@@ -7,7 +7,7 @@ import { validateFieldAddons, walkAndValidateAddons } from './validate-field-add
 const TEST_KINDS: ReadonlyArray<AddonKindDefinition> = [
   { kind: 'text', loadComponent: () => Promise.resolve(class {}) },
   {
-    kind: 'pi-icon',
+    kind: 'prime-icon',
     loadComponent: () => Promise.resolve(class {}),
     validate: (a) => {
       const icon = (a as { icon?: unknown }).icon;
@@ -18,7 +18,7 @@ const TEST_KINDS: ReadonlyArray<AddonKindDefinition> = [
 ];
 
 const TEST_FIELDS: ReadonlyArray<FieldTypeDefinition> = [
-  { name: 'prime-input', addons: { slots: ['prefix', 'suffix'], allowedKinds: ['pi-icon', 'text'] } },
+  { name: 'prime-input', addons: { slots: ['prefix', 'suffix'], allowedKinds: ['prime-icon', 'text'] } },
   { name: 'prime-toggle' /* no addons → Tier 3 */ },
   { name: 'unrestricted-input', addons: { slots: ['prefix', 'suffix'] /* no allowedKinds whitelist */ } },
 ];
@@ -84,12 +84,12 @@ describe('validateFieldAddons', () => {
     expect(result.warnings[0]).toMatchObject({ type: 'unknown-kind', kind: 'rating' });
     if (result.warnings[0].type === 'unknown-kind') {
       expect(result.warnings[0].registeredKinds).toContain('text');
-      expect(result.warnings[0].registeredKinds).toContain('pi-icon');
+      expect(result.warnings[0].registeredKinds).toContain('prime-icon');
     }
   });
 
   it('drops addons whose kind is not in the per-field allowedKinds whitelist', () => {
-    // 'component' is registered globally but prime-input restricts to pi-icon + text.
+    // 'component' is registered globally but prime-input restricts to prime-icon + text.
     const field = {
       key: 'q',
       type: 'prime-input',
@@ -104,11 +104,11 @@ describe('validateFieldAddons', () => {
     const field = {
       key: 'q',
       type: 'prime-input',
-      addons: [{ slot: 'prefix', kind: 'pi-icon', icon: '' /* empty — fails */ }],
+      addons: [{ slot: 'prefix', kind: 'prime-icon', icon: '' /* empty — fails */ }],
     } as unknown as FieldDef<unknown>;
     const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
     expect(result.addons).toEqual([]);
-    expect(result.warnings[0]).toMatchObject({ type: 'shape-violation', kind: 'pi-icon' });
+    expect(result.warnings[0]).toMatchObject({ type: 'shape-violation', kind: 'prime-icon' });
   });
 
   it('keeps `kind: component` in inline mode but drops in JSON mode', () => {

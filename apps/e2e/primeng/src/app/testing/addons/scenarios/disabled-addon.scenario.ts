@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'pi-button',
+          kind: 'prime-button',
           icon: 'times',
           ariaLabel: 'Clear',
           preset: 'clear',
@@ -24,7 +24,7 @@ const config = {
 
 export const disabledAddonScenario: TestScenario = {
   testId: 'disabled-addon',
-  title: 'Addons — disabled pi-button',
-  description: 'pi-button addon with `disabled: true` — clear preset still wired but the button is non-interactive.',
+  title: 'Addons — disabled prime-button',
+  description: 'prime-button addon with `disabled: true` — clear preset still wired but the button is non-interactive.',
   config,
 };

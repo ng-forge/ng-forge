@@ -51,15 +51,13 @@ The contract: declare `addon: input.required<TAddon>()`. The dispatcher (`<df-ad
 
 ## 3. Register at the provider level
 
-`withCustomAddon(...)` returns a feature kind that `provideDynamicForm` recognises alongside the field types and existing addon features:
+Define the `AddonKindDefinition` next to the addon shape:
 
-```typescript name="app.config.ts"
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm, withCustomAddon, type AddonKindDefinition } from '@ng-forge/dynamic-forms';
+```typescript name="rating-addon.ts"
+import { DynamicFormError, type AddonKindDefinition } from '@ng-forge/dynamic-forms';
 import type { RatingAddon } from './rating-addon';
-// import the with*Fields() helper for your adapter (see Provider setup on /addons/overview)
 
-const RATING_KIND: AddonKindDefinition<RatingAddon> = {
+export const RATING_KIND: AddonKindDefinition<RatingAddon> = {
   kind: 'rating',
   loadComponent: () => import('./rating-addon.component').then((m) => m.RatingAddonComponent),
   validate: (addon, fieldKey) => {
@@ -68,13 +66,15 @@ const RATING_KIND: AddonKindDefinition<RatingAddon> = {
     }
   },
 };
-
-// Pass RATING_KIND through withCustomAddon alongside your adapter s with*Fields().
 ```
+
+Then pass it through `withCustomAddon(...)` to `provideDynamicForm` alongside your adapter s field bundle:
+
+<docs-addon-info field="custom-kind-invocation"></docs-addon-info>
 
 `loadComponent` returns a Promise — the kind component is loaded lazily on first render and cached.
 
-`validate` is optional; when provided, the runtime addon validator calls it at config init. Throwing `DynamicFormError` drops the addon with an actionable warning (lenient mode is the only mode shipped).
+`validate` is optional; when provided, the runtime addon validator calls it at config init. Throwing `DynamicFormError` drops the addon with an actionable warning and the form keeps rendering — `validate` is a sanitisation hook, not a hard fail.
 
 ## 4. Type-level augmentation (optional but recommended)
 
@@ -109,6 +109,8 @@ When you ship a custom kind:
 
 Addons decorate a field with inline content — a search icon, a clear button, a currency symbol, a password-visibility toggle — placed in the field s `prefix` or `suffix` slot. They re typed, JSON-safe, and ship as a first-class feature of every UI adapter.
 
+> **Prerequisites.** Addons attach to a field, not the form. You need a working ng-forge setup first: `provideDynamicForm(...with{Adapter}Fields())` at the application config and a `[dynamic-form]`-bearing form using a field type that supports addons (today: every adapter's `input`). See [Getting Started](/getting-started) if you re new to ng-forge.
+
 ## Quickstart
 
 <docs-addon-info field="quickstart"></docs-addon-info>
@@ -116,6 +118,10 @@ Addons decorate a field with inline content — a search icon, a clear button, a
 ## Live example
 
 <docs-live-example scenario="examples/addon-clear-button"></docs-live-example>
+
+A universal addon (works the same in every adapter, no per-kind branching):
+
+<docs-live-example scenario="examples/addon-currency"></docs-live-example>
 
 ## Available kinds
 
@@ -133,26 +139,34 @@ The wrapper is dropped entirely when every addon is reactively hidden — no emp
 
 ## Reactive `hidden` and `disabled`
 
-Both axes accept `boolean | Signal<boolean> | Observable<boolean>` (`DynamicValue<boolean>`). The classic "show clear button only when input has value" pattern:
+Both axes accept `DynamicValue<boolean>` — any of `boolean`, `Signal<boolean>`, or `Observable<boolean>`. Three equivalent shapes for the same toggle:
 
 ```typescript
-const hasValue = computed(() => (formValue()?.search?.length ?? 0) > 0);
-
-{
-  slot: 'suffix',
-  kind: 'pi-button', // or mat-button / bs-button / ion-button
-  icon: 'times',
-  ariaLabel: 'Clear',
-  preset: 'clear',
-  hidden: computed(() => !hasValue()),
-}
+{ ..., hidden: true }                              // Static — JSON-safe.
+{ ..., hidden: signal(false) }                     // Signal — code-only.
+{ ..., hidden: computed(() => !hasValue()) }       // Derived — code-only.
+{ ..., hidden: visibility$ }                       // Observable — code-only.
 ```
 
+The classic "show clear button only when input has value" pattern, in your active adapter:
+
+<docs-addon-info field="reactive-hidden-snippet"></docs-addon-info>
+
 When `hidden` resolves to `true` the addon stays in DOM but is `display: none` — cheaper than tearing down the component, and the reactive transition is instant.
+
+Authoring forms in JSON? Reactive values can't survive serialization — see [Reactive addons from JSON](/addons/presets-and-actions#reactive-from-json).
 
 ## Accessibility
 
 Icon kinds emit `aria-hidden="true"` by default. When the icon conveys meaning (status, action), set `ariaLabel`. Icon-only button kinds (no `label`) require `ariaLabel` — TypeScript and the runtime validator both enforce this.
+
+## Troubleshooting
+
+- **Addon doesn t render at all.** Check the console for `[Dynamic Forms]` warnings. Common causes: the active adapter s `with*Fields()` helper isn t in `provideDynamicForm`; the `kind` string belongs to a different adapter (e.g. `prime-button` in a Material form); the host field type doesn t support addons.
+- **Icon-only button has no `ariaLabel`.** TypeScript and the runtime validator both refuse this — set `ariaLabel`. For genuinely decorative icons, prefer `kind: 'text'` or the adapter s `*-icon` kind.
+- **`actionRef` warning at click time.** The handler name isn t registered. Did you call `provideAddonActions({ runSearch: ... })` for that name?
+- **Inline function silently dropped.** Configs with `source: 'json'` strip functions on `action`, `hidden`, `disabled`, `loading` at validation time — they cant round-trip through JSON. See [Reactive addons from JSON](/addons/presets-and-actions#reactive-from-json).
+- **Material `MatFormFieldControl` ContentChild missing.** Caused by wrapping the input in a template that breaks Material s content-projection query. Render `<input matInput>` directly inside `<mat-form-field>`.
 
 ## Where to next
 
@@ -165,20 +179,9 @@ Button addons accept exactly one click variant: `preset`, `actionRef`, or `actio
 
 ## The three variants
 
-```typescript
-// 1. Built-in preset — JSON-safe, no code required.
-{ slot: 'suffix', kind: 'pi-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }
-
-// 2. Registered handler — JSON-safe, looked up by name.
-{ slot: 'suffix', kind: 'pi-button', icon: 'send', ariaLabel: 'Send', actionRef: 'submitDraft' }
-
-// 3. Inline function — code-only, dropped from JSON-derived configs by the validator.
-{ slot: 'suffix', kind: 'pi-button', icon: 'plus', ariaLabel: 'Add', action: (ctx) => ctx.setValue?.((ctx.value ?? '') + '+') }
-```
+<docs-addon-info field="three-variants"></docs-addon-info>
 
 Pick the leftmost variant that covers your case. Most addon buttons map to a preset.
-
-> The `kind` value in the snippets above is adapter-specific. Use the kind for your active adapter — see [Addons / Overview](/addons/overview#available-kinds).
 
 ## Built-in presets
 
@@ -217,12 +220,7 @@ export const appActions = provideAddonActions({
 
 Wire the feature into `provideDynamicForm`:
 
-```typescript name="app.config.ts"
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { appActions } from './app-actions';
-// import the with*Fields() helper for your adapter — see Provider setup on /addons/overview
-```
+<docs-addon-info field="actions-wiring"></docs-addon-info>
 
 The backend can now ship configs like:
 
@@ -232,17 +230,62 @@ The backend can now ship configs like:
 
 ### Type narrowing
 
-`provideAddonActions(...)` augments the global `DynamicFormActionRegistry` interface so `actionRef` autocompletes to the registered names. Each handler receives the full `AddonActionContext`:
+`provideAddonActions(...)` returns a feature whose `__handlerKeys` phantom field captures the registered names — derive the global `DynamicFormActionRegistry` augmentation from it in one line so `actionRef` autocompletes everywhere:
 
 ```typescript
-interface AddonActionContext {
-  readonly field: { readonly key: string };
-  readonly value: unknown;
-  readonly setValue?: (next: unknown) => void;
+export const appActions = provideAddonActions({
+  runSearch: (ctx) => {
+    /* … */
+  },
+  submitDraft: (ctx) => {
+    /* … */
+  },
+});
+
+declare module '@ng-forge/dynamic-forms' {
+  interface DynamicFormActionRegistry extends Record<NonNullable<(typeof appActions)['__handlerKeys']>, true> {}
 }
 ```
 
-Use `ctx.setValue` to write back to the host field s value (same backing as `'clear'` / `'reset'`).
+Each handler receives a discriminated `AddonActionContext`:
+
+```typescript
+type AddonActionContext<TValue = unknown> =
+  | FieldBoundAddonActionContext<TValue> // form: ReadonlyFieldTree; setValue: required
+  | OrphanAddonActionContext<TValue>; // form: null;               setValue: absent
+
+interface FieldBoundAddonActionContext<TValue = unknown> {
+  readonly field: { readonly key: string; readonly type: string };
+  readonly form: ReadonlyFieldTree<TValue>;
+  readonly value: TValue | undefined;
+  readonly setValue: (next: TValue) => void; // <- non-optional once narrowed
+}
+```
+
+Narrow with the `isFieldBoundContext` guard so write-back handlers don t need `ctx.setValue?.(…)` everywhere:
+
+```typescript
+import { isFieldBoundContext, provideAddonActions } from '@ng-forge/dynamic-forms';
+
+provideAddonActions({
+  submit: (ctx) => {
+    if (!isFieldBoundContext(ctx)) return; // orphan — nothing to write to
+    myService.send(ctx.field.key, ctx.value, ctx.setValue);
+  },
+});
+```
+
+For broader field state, use the form-tree projection ng-forge already supplies to wrappers — `field.key` is intentionally the only stable identity surface across the addon contract.
+
+## JSON-safety quick reference
+
+| Click variant | JSON-safe? | Use when                                                                        |
+| ------------- | ---------- | ------------------------------------------------------------------------------- |
+| `preset`      | yes        | Behaviour matches one of the five built-ins.                                    |
+| `actionRef`   | yes        | Custom behaviour registered once via `provideAddonActions`.                     |
+| `action`      | code-only  | Prototypes / scenarios where the config is hand-authored and never round-trips. |
+
+Reactive axes are similarly tiered: `boolean` values are JSON-safe, `Signal<boolean>` / `Observable<boolean>` / function values are stripped from JSON-source configs by the validator (with a warning). See [Reactive addons from JSON](#reactive-from-json) below.
 
 ## Inline `action` (code-only)
 
@@ -287,6 +330,29 @@ const submitting = signal(false);
 ## Multi-set rule
 
 Exactly one of `preset` / `actionRef` / `action` may be set. The TypeScript types enforce this via an XOR union; the runtime validator additionally drops any addon that smuggles multiple values past the type checker (with an actionable warning). Decorative buttons that simply look like buttons but do nothing are valid — omit all three.
+
+## Reactive addons from JSON {#reactive-from-json}
+
+JSON cannot carry `Signal` / `Observable` / function values, so two questions come up when you ship configs from a backend:
+
+1. **How do I express `hidden`/`disabled`/`loading` reactivity?**
+2. **What survives the round-trip?**
+
+Three patterns, in order of preference:
+
+1. **Pre-process the JSON in app code.** Before passing the parsed config to `DynamicForm`, wrap reactive axes with `computed(...)` against your app's signals. This keeps the wire format JSON-safe and the runtime reactive — your bridge code is the only place that needs to know app state.
+
+   ```typescript
+   const config = enrichConfig(jsonFromApi, {
+     fields: { search: { addons: { suffix: { hidden: computed(() => !hasValue()) } } } },
+   });
+   ```
+
+2. **Express the gate as a form-level derivation or condition.** When the reactive axis depends on form values rather than out-of-band app state, model it as a derivation on the host field's `logic` block. The condition lives in JSON (it's a string-expression DSL) and the addon stays static.
+
+3. **Skip reactivity at the addon layer.** If the addon's visibility is purely a function of static form metadata, render it unconditionally and let the field's own validation/state hide the value semantically. Reach for this when (1) and (2) feel heavy.
+
+Functions on `hidden` / `disabled` / `loading` / `action` are stripped from JSON-source configs at validation time with a logged warning — you'll see them in the console if a config carries an inline function. `preset` and `actionRef` are the JSON-safe escape hatches for behaviour; `computed`/`Observable` are the code-side escape hatches for reactivity.
 
 ## Where to next
 
@@ -4470,7 +4536,7 @@ When the addon content is just text, use `kind: 'text'` — it works the same in
 }
 ```
 
-`text` is one of three universal kinds (alongside `template` and `component`) registered by core. The icon and button kinds — `mat-icon` / `pi-button` / etc. — are per-adapter, but for simple labels and currency markers the universal `text` kind is the lowest-friction choice.
+`text` is one of three universal kinds (alongside `template` and `component`) registered by core. The icon and button kinds — `mat-icon` / `prime-button` / etc. — are per-adapter, but for simple labels and currency markers the universal `text` kind is the lowest-friction choice.
 
 ## What to read next
 
@@ -8617,6 +8683,7 @@ ng-forge unifies all four adapters under one shape: `addons: [{ slot, kind, ... 
   addons: [
     { slot: 'prefix', kind: 'bs-icon', icon: 'currency-euro' },
     { slot: 'suffix', kind: 'text', text: 'EUR' },
+    // 'save' must be registered once via provideAddonActions({ save: (ctx) => ... }) — see /addons/presets-and-actions.
     { slot: 'suffix', kind: 'bs-button', icon: 'save', ariaLabel: 'Save', actionRef: 'save' },
   ],
 }">
@@ -8648,7 +8715,7 @@ ng-forge unifies all four adapters under one shape: `addons: [{ slot, kind, ... 
 **What's different:**
 
 - **JSON-safe by default.** ngx-formly's addon clicks are inline `onClick(field, $event) => void` functions — they can't live in JSON or a database. ng-forge addons are plain data; behavior is wired via `actionRef: 'name'` resolved against a registered handler map (`provideAddonActions({...})`), so configs round-trip through JSON.
-- **Typed `kind` per adapter.** ngx-formly addon props are typed loosely (`{ icon?, text?, class?, onClick? }`) and differ per adapter — Bootstrap uses `class`, Material's demo uses `icon` / `text`. ng-forge uses a discriminated union (`mat-icon | mat-button | bs-icon | bs-button | pi-icon | pi-button | ion-icon | ion-button` plus universal `text | template | component`) so the compiler knows which fields are valid for each adapter.
+- **Typed `kind` per adapter.** ngx-formly addon props are typed loosely (`{ icon?, text?, class?, onClick? }`) and differ per adapter — Bootstrap uses `class`, Material's demo uses `icon` / `text`. ng-forge uses a discriminated union (`mat-icon | mat-button | bs-icon | bs-button | prime-icon | prime-button | ion-icon | ion-button` plus universal `text | template | component`) so the compiler knows which fields are valid for each adapter.
 - **Universal slot vocabulary.** ngx-formly mixes `addonLeft` / `addonRight` (Bootstrap, Material demo) with adapter-native slot names. ng-forge uses universal `slot: 'prefix' | 'suffix'` everywhere; the adapter translates that internally.
 - **Preset actions.** ng-forge ships `clear`, `reset`, `paste`, `copy`, `toggle-password-visibility` as declarative `preset` values. ngx-formly has nothing equivalent — every action is a hand-written callback.
 - **First-class on all 4 adapters.** ngx-formly only ships addons for Bootstrap; Material is demo-only, PrimeNG / Ionic have nothing. ng-forge ships first-class addons for all four with a single config shape.

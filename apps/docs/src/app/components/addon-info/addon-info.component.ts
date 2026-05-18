@@ -11,7 +11,11 @@ type AddonInfoField =
   | 'rendering-mechanism'
   | 'provider-setup'
   | 'preset-handler-context'
-  | 'custom-extension-name';
+  | 'custom-extension-name'
+  | 'three-variants'
+  | 'reactive-hidden-snippet'
+  | 'actions-wiring'
+  | 'custom-kind-invocation';
 
 interface AddonAdapterData {
   iconKind: string;
@@ -43,7 +47,7 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
     withFieldsHelper: 'withMaterialFields',
     withAddonsHelper: 'withMaterialAddons',
     typeOverrideToken: 'MAT_INPUT_TYPE_OVERRIDE',
-    customExtensionInterface: 'MatInputAddonExtensions',
+    customExtensionInterface: 'MatAddonExtensions',
     presetRunner: 'runMatPresetAction',
     packageName: '@ng-forge/dynamic-forms-material',
     buttonShortName: 'mat-button',
@@ -61,7 +65,7 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
     withFieldsHelper: 'withBootstrapFields',
     withAddonsHelper: 'withBootstrapAddons',
     typeOverrideToken: 'BS_INPUT_TYPE_OVERRIDE',
-    customExtensionInterface: 'BsInputAddonExtensions',
+    customExtensionInterface: 'BsAddonExtensions',
     presetRunner: 'runBsPresetAction',
     packageName: '@ng-forge/dynamic-forms-bootstrap',
     buttonShortName: 'bs-button',
@@ -69,8 +73,8 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
       'The input switches to a <code>&lt;div class=&quot;input-group&quot;&gt;</code> wrapper when any addon is present; addons render in <code>&lt;span class=&quot;input-group-text&quot;&gt;</code> flanking the input. The floating-label branch nests <code>&lt;div class=&quot;form-floating&quot;&gt;</code> inside the group.',
   },
   primeng: {
-    iconKind: 'pi-icon',
-    buttonKind: 'pi-button',
+    iconKind: 'prime-icon',
+    buttonKind: 'prime-button',
     iconLibrary: 'PrimeIcons',
     iconRender: '<i class="pi pi-search">',
     searchIcon: 'search',
@@ -79,10 +83,10 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
     withFieldsHelper: 'withPrimeNGFields',
     withAddonsHelper: 'withPrimeNGAddons',
     typeOverrideToken: 'PRIME_INPUT_TYPE_OVERRIDE',
-    customExtensionInterface: 'PrimeInputAddonExtensions',
-    presetRunner: 'runPiPresetAction',
+    customExtensionInterface: 'PrimeAddonExtensions',
+    presetRunner: 'runPrimePresetAction',
     packageName: '@ng-forge/dynamic-forms-primeng',
-    buttonShortName: 'pi-button',
+    buttonShortName: 'prime-button',
     prefixSlotDescription:
       'The input switches to a <code>&lt;p-inputgroup&gt;</code> wrapper with <code>&lt;p-inputgroup-addon&gt;</code> flanking the input. The wrapper is dropped entirely when every addon is reactively hidden.',
   },
@@ -97,7 +101,7 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
     withFieldsHelper: 'withIonicFields',
     withAddonsHelper: 'withIonicAddons',
     typeOverrideToken: 'IONIC_INPUT_TYPE_OVERRIDE',
-    customExtensionInterface: 'IonicInputAddonExtensions',
+    customExtensionInterface: 'IonAddonExtensions',
     presetRunner: 'runIonicPresetAction',
     packageName: '@ng-forge/dynamic-forms-ionic',
     buttonShortName: 'ion-button',
@@ -193,6 +197,18 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
         @case ('custom-extension-name') {
           <pre class="addon-code"><code [codeHighlight]="extensionAugmentationCode()" language="typescript"></code></pre>
         }
+        @case ('three-variants') {
+          <pre class="addon-code"><code [codeHighlight]="threeVariantsCode()" language="typescript"></code></pre>
+        }
+        @case ('reactive-hidden-snippet') {
+          <pre class="addon-code"><code [codeHighlight]="reactiveHiddenCode()" language="typescript"></code></pre>
+        }
+        @case ('actions-wiring') {
+          <pre class="addon-code"><code [codeHighlight]="actionsWiringCode()" language="typescript"></code></pre>
+        }
+        @case ('custom-kind-invocation') {
+          <pre class="addon-code"><code [codeHighlight]="customKindInvocationCode()" language="typescript"></code></pre>
+        }
       }
     }
   `,
@@ -214,7 +230,7 @@ export class DocsAddonInfoComponent {
     const d = this.data();
     if (d.iconKind.startsWith('mat')) return '<button mat-button> / <button mat-icon-button>';
     if (d.iconKind.startsWith('bs')) return '<button class="btn btn-outline-{severity}">';
-    if (d.iconKind.startsWith('pi')) return '<p-button> with [loading]';
+    if (d.iconKind.startsWith('prime')) return '<p-button> with [loading]';
     return '<ion-button> with <ion-spinner>';
   });
 
@@ -253,5 +269,63 @@ provideDynamicForm(...${d.withFieldsHelper}());
 
 // Now valid in TS — \`kind: 'rating'\` is part of the ${d.inputComponentName} addon union.
 { type: 'input', key: 'review', addons: [{ slot: 'suffix', kind: 'rating', value: 4 }] }`;
+  });
+
+  protected readonly threeVariantsCode = computed(() => {
+    const d = this.data();
+    return `// 1. Built-in preset — JSON-safe, no code required.
+{ slot: 'suffix', kind: '${d.buttonKind}', icon: '${d.clearIcon}', ariaLabel: 'Clear', preset: 'clear' }
+
+// 2. Registered handler — JSON-safe, looked up by name.
+{ slot: 'suffix', kind: '${d.buttonKind}', icon: '${d.searchIcon}', ariaLabel: 'Search', actionRef: 'runSearch' }
+
+// 3. Inline function — code-only, dropped from JSON-derived configs by the validator.
+{ slot: 'suffix', kind: '${d.buttonKind}', icon: '${d.clearIcon}', ariaLabel: 'Append marker',
+  action: (ctx) => ctx.setValue?.(((typeof ctx.value === 'string' ? ctx.value : '') + '+')) }`;
+  });
+
+  protected readonly reactiveHiddenCode = computed(() => {
+    const d = this.data();
+    return `const hasValue = computed(() => (formValue()?.search?.length ?? 0) > 0);
+
+{
+  slot: 'suffix',
+  kind: '${d.buttonKind}',
+  icon: '${d.clearIcon}',
+  ariaLabel: 'Clear',
+  preset: 'clear',
+  hidden: computed(() => !hasValue()),
+}`;
+  });
+
+  protected readonly actionsWiringCode = computed(() => {
+    const d = this.data();
+    return `import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm, provideAddonActions } from '@ng-forge/dynamic-forms';
+import { ${d.withFieldsHelper} } from '${d.packageName}';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(...${d.withFieldsHelper}()),
+    provideAddonActions({
+      runSearch: (ctx) => mySearchService.search(ctx.value),
+      submitDraft: (ctx) => myDraftService.save(ctx.field.key, ctx.value),
+    }),
+  ],
+};`;
+  });
+
+  protected readonly customKindInvocationCode = computed(() => {
+    const d = this.data();
+    return `import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm, withCustomAddon } from '@ng-forge/dynamic-forms';
+import { ${d.withFieldsHelper} } from '${d.packageName}';
+import { RATING_KIND } from './rating-addon';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(...${d.withFieldsHelper}(), withCustomAddon(RATING_KIND)),
+  ],
+};`;
   });
 }

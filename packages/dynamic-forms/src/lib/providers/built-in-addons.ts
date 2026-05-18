@@ -5,7 +5,7 @@ import { AddonKindDefinition } from '../models/addon/addon-kind';
  * Built-in addon kinds shipped by core.
  *
  * Universally adapter-independent: `text`, `template`, `component`. Adapters
- * register their own kinds (e.g., `pi-icon`, `pi-button`) via
+ * register their own kinds (e.g., `prime-icon`, `prime-button`) via
  * `withCustomAddon(...)` features.
  */
 export const BUILT_IN_ADDON_KINDS: readonly AddonKindDefinition[] = [

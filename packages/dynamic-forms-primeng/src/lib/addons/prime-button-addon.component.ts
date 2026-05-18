@@ -3,10 +3,10 @@ import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
 import { ButtonModule } from 'primeng/button';
-import type { PiButtonAddon } from '../types/addons';
+import type { PrimeButtonAddon } from '../types/addons';
 
 /**
- * Renderer for the `pi-button` addon kind.
+ * Renderer for the `prime-button` addon kind.
  *
  * Wraps PrimeNG's `<p-button>`. Click dispatch (preset / actionRef /
  * action precedence, multi-set warning, `disabled` / `loading`
@@ -30,8 +30,8 @@ import type { PiButtonAddon } from '../types/addons';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PiButtonAddonComponent {
-  protected readonly action = injectNgForgeAddonAction<PiButtonAddon>();
+export class PrimeButtonAddonComponent {
+  protected readonly action = injectNgForgeAddonAction<PrimeButtonAddon>();
 
   /** Re-exposed for template binding — same signal stored on the directive. */
   protected readonly addon = this.action.addon;

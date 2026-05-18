@@ -28,7 +28,7 @@ export const ADDON_KIND_COMPONENT_CACHE = new InjectionToken<Map<string, Type<un
  * @example
  * ```typescript
  * const addonKinds = injectAddonKindRegistry();
- * const Component = await addonKinds.loadKindComponent('pi-icon');
+ * const Component = await addonKinds.loadKindComponent('prime-icon');
  * ```
  */
 export function injectAddonKindRegistry() {
@@ -81,8 +81,14 @@ export function injectAddonKindRegistry() {
       }
     },
 
-    /** Synchronous lookup of an already-loaded kind component, or undefined. */
+    /**
+     * Synchronous lookup of an already-loaded kind component, or undefined.
+     * Returns `undefined` when the kind isn't registered in this scope even
+     * if a prior scope cached a component under the same name — prevents
+     * cross-form cache hits when registrations diverge.
+     */
     getLoadedKindComponent(kind: string): Type<unknown> | undefined {
+      if (!registry.has(kind)) return undefined;
       return componentCache.get(kind);
     },
 

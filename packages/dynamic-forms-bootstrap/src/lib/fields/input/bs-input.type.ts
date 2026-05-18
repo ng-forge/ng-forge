@@ -18,7 +18,7 @@ export interface BsInputProps extends InputProps {
  *
  * ```ts
  * declare module '@ng-forge/dynamic-forms-bootstrap' {
- *   interface BsInputAddonExtensions {
+ *   interface BsAddonExtensions {
  *     'my-rating': MyRatingAddon;
  *   }
  * }
@@ -28,9 +28,9 @@ export interface BsInputProps extends InputProps {
  * nothing to the union.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type -- Intentionally empty: module-augmentation seam
-export interface BsInputAddonExtensions {}
+export interface BsAddonExtensions {}
 
-type BsInputAddonExtension = BsInputAddonExtensions[keyof BsInputAddonExtensions];
+type BsAddonExtension = BsAddonExtensions[keyof BsAddonExtensions];
 
 /**
  * Addon kinds accepted by `bs-input`.
@@ -40,9 +40,9 @@ type BsInputAddonExtension = BsInputAddonExtensions[keyof BsInputAddonExtensions
  * `BaseAddon` union (and dropped in JSON-derived configs by the validator)
  * but excluded here so the IDE narrows tightly to declarative shapes.
  *
- * To extend with custom kinds, augment `BsInputAddonExtensions`.
+ * To extend with custom kinds, augment `BsAddonExtensions`.
  */
-export type BsInputAddon = BsIconAddon | BsButtonAddon | TextAddon | TemplateAddon | BsInputAddonExtension;
+export type BsInputAddon = BsIconAddon | BsButtonAddon | TextAddon | TemplateAddon | BsAddonExtension;
 
 export type BsInputField = InputField<BsInputProps> & {
   addons?: ReadonlyArray<BsInputAddon>;

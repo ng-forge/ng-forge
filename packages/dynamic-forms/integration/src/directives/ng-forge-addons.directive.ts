@@ -51,11 +51,16 @@ export class NgForgeAddonsBase {
 
   constructor() {
     explicitEffect([this.addons], ([list]) => {
-      const map = new Map<AnyAddon, Signal<boolean>>();
+      // Reuse signals from the previous map keyed by addon-reference identity
+      // so retained addons don't accumulate new `toSignal` subscriptions on
+      // every array swap. Only freshly-added addons resolve a new signal.
+      const prev = this._hiddenSignalCache();
+      const next = new Map<AnyAddon, Signal<boolean>>();
       for (const a of list ?? []) {
-        map.set(a, resolveDynamicValue(a.hidden, false, this.hostInjector));
+        const cached = prev.get(a);
+        next.set(a, cached ?? resolveDynamicValue(a.hidden, false, this.hostInjector));
       }
-      this._hiddenSignalCache.set(map);
+      this._hiddenSignalCache.set(next);
     });
   }
 }

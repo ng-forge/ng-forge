@@ -12,7 +12,7 @@ const ICON_NAME: Record<ConcreteAdapter, string> = {
 const BUTTON_KIND: Record<ConcreteAdapter, string> = {
   material: 'mat-button',
   bootstrap: 'bs-button',
-  primeng: 'pi-button',
+  primeng: 'prime-button',
   ionic: 'ion-button',
 };
 

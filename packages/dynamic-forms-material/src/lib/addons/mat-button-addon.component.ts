@@ -24,7 +24,7 @@ import type { MatButtonAddon } from '../types/addons';
         mat-icon-button
         type="button"
         [color]="addon().color ?? null"
-        [disabled]="action.disabled()"
+        [disabled]="action.disabled() || action.loading()"
         [attr.aria-label]="(ariaLabel() | dynamicText | async) || null"
         (click)="action.dispatch()"
       >
@@ -35,7 +35,7 @@ import type { MatButtonAddon } from '../types/addons';
         mat-button
         type="button"
         [color]="addon().color ?? null"
-        [disabled]="action.disabled()"
+        [disabled]="action.disabled() || action.loading()"
         [attr.aria-label]="(ariaLabel() | dynamicText | async) || null"
         (click)="action.dispatch()"
       >

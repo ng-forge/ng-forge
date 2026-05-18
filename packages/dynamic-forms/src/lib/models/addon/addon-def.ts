@@ -32,14 +32,14 @@ export interface BaseAddon<TSlot extends AddonSlot = AddonSlot> {
  *
  * Each key is the kind discriminant; each value is the addon's full shape
  * (extending {@link BaseAddon}). Core ships `text`, `template`, and
- * `component`; adapters add their own (e.g., `pi-icon`, `pi-button`).
+ * `component`; adapters add their own (e.g., `prime-icon`, `prime-button`).
  *
  * @example
  * ```typescript
  * declare module '@ng-forge/dynamic-forms' {
  *   interface DynamicFormAddonRegistry {
- *     'pi-icon': PiIconAddon;
- *     'pi-button': PiButtonAddon;
+ *     'prime-icon': PrimeIconAddon;
+ *     'prime-button': PrimeButtonAddon;
  *   }
  * }
  * ```

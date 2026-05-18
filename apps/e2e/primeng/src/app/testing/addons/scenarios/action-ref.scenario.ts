@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'pi-button',
+          kind: 'prime-button',
           icon: 'star',
           ariaLabel: 'Star',
           severity: 'success',
@@ -27,6 +27,6 @@ const config = {
 export const actionRefScenario: TestScenario = {
   testId: 'action-ref',
   title: 'Addons — actionRef (registered handler)',
-  description: 'pi-button addon with a typed `actionRef` resolved against the form-scoped action registry.',
+  description: 'prime-button addon with a typed `actionRef` resolved against the form-scoped action registry.',
   config,
 };

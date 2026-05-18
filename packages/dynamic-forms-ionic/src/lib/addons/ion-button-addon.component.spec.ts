@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { ADDON_ACTION_REGISTRY, type AddonActionHandler } from '@ng-forge/dynamic-forms';
 import { describe, expect, it } from 'vitest';
-import type { IonicButtonAddon } from '../types/addons';
+import type { IonButtonAddon } from '../types/addons';
 import { IonButtonAddonComponent } from './ion-button-addon.component';
 
-function setup(addon: IonicButtonAddon, handlers: ReadonlyMap<string, AddonActionHandler> = new Map()) {
+function setup(addon: IonButtonAddon, handlers: ReadonlyMap<string, AddonActionHandler> = new Map()) {
   TestBed.configureTestingModule({
     imports: [IonButtonAddonComponent],
     providers: [{ provide: ADDON_ACTION_REGISTRY, useValue: handlers }],

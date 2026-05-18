@@ -1,7 +1,7 @@
 import { signal, type WritableSignal } from '@angular/core';
 import type { AddonActionContext, AddonActionPreset, Logger } from '@ng-forge/dynamic-forms';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { runPiPresetAction } from './preset-actions';
+import { runPrimePresetAction } from './preset-actions';
 
 interface LoggerStub extends Logger {
   warn: ReturnType<typeof vi.fn>;
@@ -43,7 +43,7 @@ function withClipboard(stub: Clipboard | undefined): () => void {
   };
 }
 
-describe('runPiPresetAction', () => {
+describe('runPrimePresetAction', () => {
   let logger: LoggerStub;
   let restoreClipboard: (() => void) | undefined;
 
@@ -59,13 +59,13 @@ describe('runPiPresetAction', () => {
   describe("preset 'clear'", () => {
     it('calls fieldValueSetter with empty string', async () => {
       const fieldValueSetter = vi.fn();
-      await runPiPresetAction('clear', makeCtx(), { fieldValueSetter, logger });
+      await runPrimePresetAction('clear', makeCtx(), { fieldValueSetter, logger });
       expect(fieldValueSetter).toHaveBeenCalledWith('');
     });
 
     it('is a no-op when no setter is provided', async () => {
       // Should not throw.
-      await runPiPresetAction('clear', makeCtx(), { logger });
+      await runPrimePresetAction('clear', makeCtx(), { logger });
       expect(logger.warn).not.toHaveBeenCalled();
     });
   });
@@ -73,7 +73,7 @@ describe('runPiPresetAction', () => {
   describe("preset 'reset'", () => {
     it('restores the field default when reachable', async () => {
       const fieldValueSetter = vi.fn();
-      await runPiPresetAction('reset', makeCtx(), {
+      await runPrimePresetAction('reset', makeCtx(), {
         fieldValueSetter,
         fieldDefaultValueGetter: () => 'foo',
         logger,
@@ -83,13 +83,13 @@ describe('runPiPresetAction', () => {
 
     it('falls back to empty string when no default is reachable (no getter)', async () => {
       const fieldValueSetter = vi.fn();
-      await runPiPresetAction('reset', makeCtx(), { fieldValueSetter, logger });
+      await runPrimePresetAction('reset', makeCtx(), { fieldValueSetter, logger });
       expect(fieldValueSetter).toHaveBeenCalledWith('');
     });
 
     it('falls back to empty string when getter returns undefined', async () => {
       const fieldValueSetter = vi.fn();
-      await runPiPresetAction('reset', makeCtx(), {
+      await runPrimePresetAction('reset', makeCtx(), {
         fieldValueSetter,
         fieldDefaultValueGetter: () => undefined,
         logger,
@@ -106,7 +106,7 @@ describe('runPiPresetAction', () => {
         writeText: vi.fn(),
       } as unknown as Clipboard);
 
-      await runPiPresetAction('paste', makeCtx(), { fieldValueSetter, logger });
+      await runPrimePresetAction('paste', makeCtx(), { fieldValueSetter, logger });
 
       expect(fieldValueSetter).toHaveBeenCalledWith('pasted');
       expect(logger.warn).not.toHaveBeenCalled();
@@ -116,7 +116,7 @@ describe('runPiPresetAction', () => {
       const fieldValueSetter = vi.fn();
       restoreClipboard = withClipboard(undefined);
 
-      await runPiPresetAction('paste', makeCtx(), { fieldValueSetter, logger });
+      await runPrimePresetAction('paste', makeCtx(), { fieldValueSetter, logger });
 
       expect(fieldValueSetter).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalled();
@@ -130,7 +130,7 @@ describe('runPiPresetAction', () => {
         writeText: vi.fn(),
       } as unknown as Clipboard);
 
-      await runPiPresetAction('paste', makeCtx(), { fieldValueSetter, logger });
+      await runPrimePresetAction('paste', makeCtx(), { fieldValueSetter, logger });
 
       expect(fieldValueSetter).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalled();
@@ -142,7 +142,7 @@ describe('runPiPresetAction', () => {
       const writeText = vi.fn().mockResolvedValue(undefined);
       restoreClipboard = withClipboard({ writeText, readText: vi.fn() } as unknown as Clipboard);
 
-      await runPiPresetAction('copy', makeCtx('hello'), { logger });
+      await runPrimePresetAction('copy', makeCtx('hello'), { logger });
 
       expect(writeText).toHaveBeenCalledWith('hello');
       expect(logger.warn).not.toHaveBeenCalled();
@@ -152,7 +152,7 @@ describe('runPiPresetAction', () => {
       const writeText = vi.fn().mockResolvedValue(undefined);
       restoreClipboard = withClipboard({ writeText, readText: vi.fn() } as unknown as Clipboard);
 
-      await runPiPresetAction('copy', makeCtx(null), { logger });
+      await runPrimePresetAction('copy', makeCtx(null), { logger });
 
       expect(writeText).toHaveBeenCalledWith('');
     });
@@ -160,7 +160,7 @@ describe('runPiPresetAction', () => {
     it('warns when clipboard API is unavailable', async () => {
       restoreClipboard = withClipboard(undefined);
 
-      await runPiPresetAction('copy', makeCtx('hello'), { logger });
+      await runPrimePresetAction('copy', makeCtx('hello'), { logger });
 
       expect(logger.warn).toHaveBeenCalled();
       expect(String(logger.warn.mock.calls[0][0])).toContain('copy');
@@ -170,7 +170,7 @@ describe('runPiPresetAction', () => {
       const writeText = vi.fn().mockRejectedValue(new Error('denied'));
       restoreClipboard = withClipboard({ writeText, readText: vi.fn() } as unknown as Clipboard);
 
-      await runPiPresetAction('copy', makeCtx('hello'), { logger });
+      await runPrimePresetAction('copy', makeCtx('hello'), { logger });
 
       expect(logger.warn).toHaveBeenCalled();
     });
@@ -179,25 +179,25 @@ describe('runPiPresetAction', () => {
   describe("preset 'toggle-password-visibility'", () => {
     it('flips password → text when current type is password', async () => {
       const typeOverride: WritableSignal<string | undefined> = signal<string | undefined>('password');
-      await runPiPresetAction('toggle-password-visibility', makeCtx(), { typeOverride, logger });
+      await runPrimePresetAction('toggle-password-visibility', makeCtx(), { typeOverride, logger });
       expect(typeOverride()).toBe('text');
     });
 
     it('flips text → password when current type is text', async () => {
       const typeOverride: WritableSignal<string | undefined> = signal<string | undefined>('text');
-      await runPiPresetAction('toggle-password-visibility', makeCtx(), { typeOverride, logger });
+      await runPrimePresetAction('toggle-password-visibility', makeCtx(), { typeOverride, logger });
       expect(typeOverride()).toBe('password');
     });
 
     it('flips an undefined initial type to text (the non-text branch)', async () => {
       // Implementation: current === 'text' ? 'password' : 'text' — undefined falls into the else branch.
       const typeOverride: WritableSignal<string | undefined> = signal<string | undefined>(undefined);
-      await runPiPresetAction('toggle-password-visibility', makeCtx(), { typeOverride, logger });
+      await runPrimePresetAction('toggle-password-visibility', makeCtx(), { typeOverride, logger });
       expect(typeOverride()).toBe('text');
     });
 
     it('warns when no typeOverride collaborator is provided', async () => {
-      await runPiPresetAction('toggle-password-visibility', makeCtx(), { logger });
+      await runPrimePresetAction('toggle-password-visibility', makeCtx(), { logger });
       expect(logger.warn).toHaveBeenCalled();
       expect(String(logger.warn.mock.calls[0][0])).toContain('toggle-password-visibility');
     });
@@ -206,7 +206,7 @@ describe('runPiPresetAction', () => {
   describe('unknown preset', () => {
     it('warns and does nothing', async () => {
       const fieldValueSetter = vi.fn();
-      await runPiPresetAction('not-a-preset' as AddonActionPreset, makeCtx(), { fieldValueSetter, logger });
+      await runPrimePresetAction('not-a-preset' as AddonActionPreset, makeCtx(), { fieldValueSetter, logger });
       expect(fieldValueSetter).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalled();
       expect(String(logger.warn.mock.calls[0][0])).toContain('not-a-preset');

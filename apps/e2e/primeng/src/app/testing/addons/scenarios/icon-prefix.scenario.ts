@@ -8,7 +8,7 @@ const config = {
       type: 'input',
       label: 'Search',
       placeholder: 'Type to search…',
-      addons: [{ slot: 'prefix', kind: 'pi-icon', icon: 'search', ariaLabel: 'Search' }],
+      addons: [{ slot: 'prefix', kind: 'prime-icon', icon: 'search', ariaLabel: 'Search' }],
     },
   ],
 } as const satisfies FormConfig;
@@ -16,6 +16,6 @@ const config = {
 export const iconPrefixScenario: TestScenario = {
   testId: 'icon-prefix',
   title: 'Addons — Icon prefix',
-  description: 'Renders a pi-icon in the input prefix slot.',
+  description: 'Renders a prime-icon in the input prefix slot.',
   config,
 };

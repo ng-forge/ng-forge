@@ -16,8 +16,8 @@ import type {
  * Add `ariaLabel` for icons that convey meaning (search, error, success);
  * leave it omitted for purely decorative icons (will be `aria-hidden="true"`).
  */
-export interface PiIconAddon extends BaseAddon {
-  readonly kind: 'pi-icon';
+export interface PrimeIconAddon extends BaseAddon {
+  readonly kind: 'prime-icon';
   /** PrimeIcons name without the `pi-` prefix (e.g., `'search'`, `'times'`). */
   readonly icon: string;
   /** Accessible label for icons that convey meaning. */
@@ -25,11 +25,11 @@ export interface PiIconAddon extends BaseAddon {
 }
 
 /**
- * Common shape of every `pi-button` addon — properties that don't
+ * Common shape of every `prime-button` addon — properties that don't
  * participate in either XOR axis.
  */
 interface PiButtonBase extends BaseAddon {
-  readonly kind: 'pi-button';
+  readonly kind: 'prime-button';
   /** PrimeNG button severity / colour variant — mirrors PrimeNG's `ButtonSeverity`. */
   readonly severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast';
   /** Reactive loading state — renders the button's native `[loading]` spinner. */
@@ -128,14 +128,14 @@ type PiButtonContent = PiButtonContentIconOnly | PiButtonContentLabeled | PiButt
  *   the runtime validator still drops the addon with a clear warning when
  *   JSON-source configs slip a multi-set past the type checker.
  */
-export type PiButtonAddon = PiButtonBase & PiButtonContent & PiButtonClick;
+export type PrimeButtonAddon = PiButtonBase & PiButtonContent & PiButtonClick;
 
 /** Union of all PrimeNG-shipped addon kinds. */
-export type PrimeAddon = PiIconAddon | PiButtonAddon;
+export type PrimeAddon = PrimeIconAddon | PrimeButtonAddon;
 
 declare module '@ng-forge/dynamic-forms' {
   interface DynamicFormAddonRegistry {
-    'pi-icon': PiIconAddon;
-    'pi-button': PiButtonAddon;
+    'prime-icon': PrimeIconAddon;
+    'prime-button': PrimeButtonAddon;
   }
 }

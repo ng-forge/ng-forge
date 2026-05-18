@@ -138,7 +138,7 @@ export const ADDON_KINDS: AddonKindInfo[] = [
 
   // ─── PrimeNG-shipped kinds ───────────────────────────────────────────────
   {
-    kind: 'pi-icon',
+    kind: 'prime-icon',
     category: 'adapter',
     package: '@ng-forge/dynamic-forms-primeng',
     adapter: 'primeng',
@@ -159,11 +159,11 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         required: false,
       },
     },
-    example: `{ slot: 'prefix', kind: 'pi-icon', icon: 'search', ariaLabel: 'Search' }`,
-    minimalExample: `{ slot: 'prefix', kind: 'pi-icon', icon: 'search' }`,
+    example: `{ slot: 'prefix', kind: 'prime-icon', icon: 'search', ariaLabel: 'Search' }`,
+    minimalExample: `{ slot: 'prefix', kind: 'prime-icon', icon: 'search' }`,
   },
   {
-    kind: 'pi-button',
+    kind: 'prime-button',
     category: 'adapter',
     package: '@ng-forge/dynamic-forms-primeng',
     adapter: 'primeng',
@@ -215,13 +215,13 @@ export const ADDON_KINDS: AddonKindInfo[] = [
     },
     example: `{
   slot: 'suffix',
-  kind: 'pi-button',
+  kind: 'prime-button',
   icon: 'times',
   ariaLabel: 'Clear',
   preset: 'clear',
   hidden: computed(() => formValue().search?.length === 0),
 }`,
-    minimalExample: `{ slot: 'suffix', kind: 'pi-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }`,
+    minimalExample: `{ slot: 'suffix', kind: 'prime-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }`,
   },
 ];
 

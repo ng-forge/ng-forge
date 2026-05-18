@@ -1,5 +1,5 @@
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input, signal } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import {
   AddonActionContext,
@@ -95,15 +95,23 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
         @if (ngfa.hasAddons()) {
           <div class="input-group">
             @for (a of ngfa.prefixAddons(); track $index) {
-              <span class="input-group-text">
+              @if (a.kind === 'bs-button') {
                 <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-              </span>
+              } @else {
+                <span class="input-group-text">
+                  <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+                </span>
+              }
             }
             <ng-container *ngTemplateOutlet="control" />
             @for (a of ngfa.suffixAddons(); track $index) {
-              <span class="input-group-text">
+              @if (a.kind === 'bs-button') {
                 <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-              </span>
+              } @else {
+                <span class="input-group-text">
+                  <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+                </span>
+              }
             }
           </div>
         } @else {
@@ -139,6 +147,7 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
         const typeOverride = inject(BS_INPUT_TYPE_OVERRIDE);
         const fsc = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
         const logger = inject(DynamicFormLogger);
+        const host = inject(forwardRef(() => BsInputFieldComponent));
         return {
           run: (preset: string, ctx: AddonActionContext) => {
             const fieldKey = ctx.field.key;
@@ -149,6 +158,7 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
               fieldValueSetter: ctx.setValue,
               fieldDefaultValueGetter:
                 fsc && fieldKey ? () => (fsc.defaultValues() as Record<string, unknown> | undefined)?.[fieldKey] : undefined,
+              baselineType: () => host.props()?.type,
               logger,
             });
           },

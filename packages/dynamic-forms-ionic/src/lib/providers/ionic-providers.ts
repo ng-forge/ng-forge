@@ -3,7 +3,7 @@ import { ADDON_KIND_DEFINITIONS, DynamicFormError, type AddonKindDefinition, typ
 import { IONIC_FIELD_TYPES } from '../config/ionic-field-config';
 import { IonicConfig } from '../models/ionic-config';
 import { IONIC_CONFIG } from '../models/ionic-config.token';
-import type { IonicButtonAddon, IonicIconAddon } from '../types/addons';
+import type { IonButtonAddon, IonIconAddon } from '../types/addons';
 
 /**
  * Field type definitions for Ionic components.
@@ -88,7 +88,7 @@ export function withIonicFields(config?: IonicConfig): IonicFieldsWithAddons | I
 
 /* -- Ionic addon kinds ------------------------------------------------- */
 
-const ION_ICON_KIND: AddonKindDefinition<IonicIconAddon> = {
+const ION_ICON_KIND: AddonKindDefinition<IonIconAddon> = {
   kind: 'ion-icon',
   loadComponent: () => import('../addons/ion-icon-addon.component').then((m) => m.IonIconAddonComponent),
   validate: (addon, fieldKey) => {
@@ -98,7 +98,7 @@ const ION_ICON_KIND: AddonKindDefinition<IonicIconAddon> = {
   },
 };
 
-const ION_BUTTON_KIND: AddonKindDefinition<IonicButtonAddon> = {
+const ION_BUTTON_KIND: AddonKindDefinition<IonButtonAddon> = {
   kind: 'ion-button',
   loadComponent: () => import('../addons/ion-button-addon.component').then((m) => m.IonButtonAddonComponent),
   validate: (addon, fieldKey) => {

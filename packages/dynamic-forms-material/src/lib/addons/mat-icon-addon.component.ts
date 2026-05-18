@@ -14,7 +14,7 @@ import type { MatIconAddon } from '../types/addons';
 @Component({
   selector: 'df-mat-icon-addon',
   imports: [MatIcon, AsyncPipe, DynamicTextPipe],
-  template: `<mat-icon [attr.aria-label]="ariaLabel() | dynamicText | async">{{ addon().icon }}</mat-icon>`,
+  template: `<mat-icon [attr.aria-label]="(ariaLabel() | dynamicText | async) || null">{{ addon().icon }}</mat-icon>`,
   host: {
     '[attr.aria-hidden]': 'hasAriaLabel() ? null : "true"',
   },

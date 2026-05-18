@@ -1,28 +1,74 @@
 import { ReadonlyFieldTree } from '../../core/field-tree-utils';
 
 /**
+ * Fields every addon-action context carries, regardless of whether the
+ * addon is bound to a host field or rendered orphaned.
+ */
+interface AddonActionContextBase<TValue> {
+  /**
+   * Identity of the host field this addon is attached to. Empty strings
+   * indicate the addon is rendered outside an active field context (rare).
+   * Use {@link isFieldBoundContext} or the `form !== null` check to
+   * narrow before relying on field identity.
+   */
+  readonly field: { readonly key: string; readonly type: string };
+  /**
+   * Current value of the host field at the time the action fires.
+   * `undefined` when the host field has no value yet (initial render before
+   * defaultValue resolution) or when the addon is rendered outside a field.
+   */
+  readonly value: TValue | undefined;
+}
+
+/**
+ * Field-bound variant — the addon is attached to a real field and has a
+ * working value-writer. The common case for `pi-button` / `mat-button` /
+ * `bs-button` / `ion-button` inside an adapter input field.
+ *
+ * `setValue` is non-optional here; the optional chain (`ctx.setValue?.()`)
+ * is unnecessary noise once you've narrowed via {@link isFieldBoundContext}.
+ */
+export interface FieldBoundAddonActionContext<TValue = unknown> extends AddonActionContextBase<TValue> {
+  /** Read-only view of the host field's tree — same view wrappers receive. */
+  readonly form: ReadonlyFieldTree<TValue>;
+  /** Push a new value into the host field. */
+  readonly setValue: (next: TValue) => void;
+}
+
+/**
+ * Orphan variant — the addon is rendered outside any field component (rare;
+ * happens when consumers compose `<df-addon-slot>` directly without a host
+ * field). No writer is reachable; reading `value` may also yield `undefined`.
+ */
+export interface OrphanAddonActionContext<TValue = unknown> extends AddonActionContextBase<TValue> {
+  readonly form: null;
+  /** Always absent in the orphan variant — distinguishes the union members. */
+  readonly setValue?: undefined;
+}
+
+/**
  * Context handed to inline addon actions and registered handler functions.
  *
- * `field` carries the host field's identity (key + type discriminant);
- * `form` is the same {@link ReadonlyFieldTree} view wrappers receive (no
- * write surface — use `setValue` to mutate the host field's value);
- * `setValue` is wired by adapter button kinds (e.g., `pi-button` plumbs
- * its value-writer token through). When no writer is reachable (rare —
- * addon rendered outside a field component) `setValue` is `undefined`.
+ * Discriminated by `form`: field-bound contexts have a non-null `form` and a
+ * required `setValue`; orphan contexts have `form: null` and no `setValue`.
+ * Use {@link isFieldBoundContext} when the handler needs to write back.
+ *
+ * @example
+ * ```typescript
+ * provideAddonActions({
+ *   submit: (ctx) => {
+ *     if (!isFieldBoundContext(ctx)) return;
+ *     // ctx.setValue is now `(next: TValue) => void` — no optional chain.
+ *     myService.send(ctx.field.key, ctx.value, ctx.setValue);
+ *   },
+ * });
+ * ```
  */
-export interface AddonActionContext<TValue = unknown> {
-  /** Identity of the host field this addon is attached to. */
-  readonly field: { readonly key: string; readonly type: string };
-  /** Read-only view of the host field's tree — same view wrappers receive. */
-  readonly form: ReadonlyFieldTree<TValue> | null;
-  /** Current value of the host field at the time the action fires. */
-  readonly value: TValue;
-  /**
-   * Push a new value into the host field. Wired by the adapter's button
-   * kind component (e.g., pi-button passes the field's value-writer
-   * token); `undefined` when no writer is reachable.
-   */
-  readonly setValue?: (next: TValue) => void;
+export type AddonActionContext<TValue = unknown> = FieldBoundAddonActionContext<TValue> | OrphanAddonActionContext<TValue>;
+
+/** Type guard narrowing {@link AddonActionContext} to its field-bound variant. */
+export function isFieldBoundContext<TValue>(ctx: AddonActionContext<TValue>): ctx is FieldBoundAddonActionContext<TValue> {
+  return ctx.form !== null;
 }
 
 /**

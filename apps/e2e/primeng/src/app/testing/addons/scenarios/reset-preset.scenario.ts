@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'pi-button',
+          kind: 'prime-button',
           icon: 'undo',
           ariaLabel: 'Reset',
           preset: 'reset',
@@ -25,6 +25,6 @@ export const resetPresetScenario: TestScenario = {
   testId: 'reset-preset',
   title: 'Addons — reset preset',
   description:
-    "pi-button with `preset: 'reset'`. Modifying the value then clicking the button restores the field's configured default (`value: 'default'`).",
+    "prime-button with `preset: 'reset'`. Modifying the value then clicking the button restores the field's configured default (`value: 'default'`).",
   config,
 };

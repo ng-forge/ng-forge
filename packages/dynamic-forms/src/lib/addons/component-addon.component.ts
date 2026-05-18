@@ -40,15 +40,19 @@ export class ComponentAddonComponent {
   private readonly resolvedComponentSignal = signal<Type<unknown> | undefined>(undefined);
   protected readonly resolvedComponent = this.resolvedComponentSignal.asReadonly();
 
+  /** Monotonic load-token guards against stale promises winning when addon swaps mid-load. */
+  private loadSeq = 0;
+
   constructor() {
-    // Re-resolve when the addon (and thus its loader) changes.
     explicitEffect([this.addon], ([addon]) => {
+      const seq = ++this.loadSeq;
       Promise.resolve(addon.component())
-        .then((mod) => this.resolvedComponentSignal.set(resolveDefaultExport(mod) ?? undefined))
+        .then((mod) => {
+          if (seq !== this.loadSeq) return;
+          this.resolvedComponentSignal.set(resolveDefaultExport(mod) ?? undefined);
+        })
         .catch((error: unknown) => {
-          // Surface the failure with the addon's slot for triage — silent
-          // failures here would leave users wondering why their component
-          // didn't render. Mirrors the dispatcher's behaviour for kind loaders.
+          if (seq !== this.loadSeq) return;
           this.logger.warn(`Failed to load component addon (slot: '${addon.slot}'): ${String(error)}`);
           this.resolvedComponentSignal.set(undefined);
         });

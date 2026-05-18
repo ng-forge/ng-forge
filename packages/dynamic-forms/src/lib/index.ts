@@ -83,9 +83,11 @@ export type {
   DynamicFormActionRegistry,
   DynamicFormAddonActionPresetRegistry,
   FieldAddonSupport,
+  FieldBoundAddonActionContext,
+  OrphanAddonActionContext,
   RegisteredActionRef,
 } from './models';
-export { ADDON_KIND_REGISTRY, DF_FIELD_TEMPLATES } from './models';
+export { ADDON_KIND_REGISTRY, DF_FIELD_TEMPLATES, isFieldBoundContext } from './models';
 export type { DynamicValue } from './models';
 
 // Addon Components & Directives
@@ -94,6 +96,8 @@ export { DfTemplate } from './directives/df-template.directive';
 export { TextAddonComponent } from './addons/text-addon.component';
 export { TemplateAddonComponent } from './addons/template-addon.component';
 export { ComponentAddonComponent } from './addons/component-addon.component';
+export { runPresetAction } from './addons/run-preset-action';
+export type { PresetCollaborators } from './addons/run-preset-action';
 
 // Addon Registry helpers (for adapter authors)
 export { ADDON_KIND_COMPONENT_CACHE, injectAddonKindRegistry } from './utils/inject-addon-kind-registry/inject-addon-kind-registry';
@@ -104,6 +108,7 @@ export { resolveDynamicValue } from './utils/dynamic-value/resolve-dynamic-value
 // Addon Features (for adapter authors and end users)
 export { withCustomAddon } from './providers/features/addons/with-custom-addon';
 export { provideAddonActions } from './providers/features/addons/provide-addon-actions';
+export type { AddonActionsFeature } from './providers/features/addons/provide-addon-actions';
 export { ADDON_KIND_DEFINITIONS } from './providers/features/addons/addon-kind-definitions.token';
 export { ADDON_ACTION_HANDLERS, ADDON_ACTION_REGISTRY } from './providers/features/addons/addon-action-registry.token';
 export type { AddonActionHandler } from './providers/features/addons/addon-action-registry.token';

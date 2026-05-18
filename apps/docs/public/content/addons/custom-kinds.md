@@ -50,15 +50,13 @@ The contract: declare `addon: input.required<TAddon>()`. The dispatcher (`<df-ad
 
 ## 3. Register at the provider level
 
-`withCustomAddon(...)` returns a feature kind that `provideDynamicForm` recognises alongside the field types and existing addon features:
+Define the `AddonKindDefinition` next to the addon shape:
 
-```typescript name="app.config.ts"
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm, withCustomAddon, type AddonKindDefinition } from '@ng-forge/dynamic-forms';
+```typescript name="rating-addon.ts"
+import { DynamicFormError, type AddonKindDefinition } from '@ng-forge/dynamic-forms';
 import type { RatingAddon } from './rating-addon';
-// import the with*Fields() helper for your adapter (see Provider setup on /addons/overview)
 
-const RATING_KIND: AddonKindDefinition<RatingAddon> = {
+export const RATING_KIND: AddonKindDefinition<RatingAddon> = {
   kind: 'rating',
   loadComponent: () => import('./rating-addon.component').then((m) => m.RatingAddonComponent),
   validate: (addon, fieldKey) => {
@@ -67,13 +65,15 @@ const RATING_KIND: AddonKindDefinition<RatingAddon> = {
     }
   },
 };
-
-// Pass RATING_KIND through withCustomAddon alongside your adapter s with*Fields().
 ```
+
+Then pass it through `withCustomAddon(...)` to `provideDynamicForm` alongside your adapter s field bundle:
+
+<docs-addon-info field="custom-kind-invocation"></docs-addon-info>
 
 `loadComponent` returns a Promise — the kind component is loaded lazily on first render and cached.
 
-`validate` is optional; when provided, the runtime addon validator calls it at config init. Throwing `DynamicFormError` drops the addon with an actionable warning (lenient mode is the only mode shipped).
+`validate` is optional; when provided, the runtime addon validator calls it at config init. Throwing `DynamicFormError` drops the addon with an actionable warning and the form keeps rendering — `validate` is a sanitisation hook, not a hard fail.
 
 ## 4. Type-level augmentation (optional but recommended)
 

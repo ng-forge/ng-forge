@@ -30,7 +30,7 @@ When the addon content is just text, use `kind: 'text'` — it works the same in
 }
 ```
 
-`text` is one of three universal kinds (alongside `template` and `component`) registered by core. The icon and button kinds — `mat-icon` / `pi-button` / etc. — are per-adapter, but for simple labels and currency markers the universal `text` kind is the lowest-friction choice.
+`text` is one of three universal kinds (alongside `template` and `component`) registered by core. The icon and button kinds — `mat-icon` / `prime-button` / etc. — are per-adapter, but for simple labels and currency markers the universal `text` kind is the lowest-friction choice.
 
 ## What to read next
 

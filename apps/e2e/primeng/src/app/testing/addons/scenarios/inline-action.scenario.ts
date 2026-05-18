@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'pi-button',
+          kind: 'prime-button',
           icon: 'plus',
           ariaLabel: 'Add',
           severity: 'success',
@@ -30,6 +30,6 @@ const config = {
 export const inlineActionScenario: TestScenario = {
   testId: 'inline-action',
   title: 'Addons — inline action',
-  description: 'pi-button addon with an inline `action` handler (code-only, dropped in JSON-source configs).',
+  description: 'prime-button addon with an inline `action` handler (code-only, dropped in JSON-source configs).',
   config,
 };

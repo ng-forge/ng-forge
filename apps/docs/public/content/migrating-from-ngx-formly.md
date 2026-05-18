@@ -359,6 +359,7 @@ ng-forge unifies all four adapters under one shape: `addons: [{ slot, kind, ... 
   addons: [
     { slot: 'prefix', kind: 'bs-icon', icon: 'currency-euro' },
     { slot: 'suffix', kind: 'text', text: 'EUR' },
+    // 'save' must be registered once via provideAddonActions({ save: (ctx) => ... }) — see /addons/presets-and-actions.
     { slot: 'suffix', kind: 'bs-button', icon: 'save', ariaLabel: 'Save', actionRef: 'save' },
   ],
 }">
@@ -390,7 +391,7 @@ ng-forge unifies all four adapters under one shape: `addons: [{ slot, kind, ... 
 **What's different:**
 
 - **JSON-safe by default.** ngx-formly's addon clicks are inline `onClick(field, $event) => void` functions — they can't live in JSON or a database. ng-forge addons are plain data; behavior is wired via `actionRef: 'name'` resolved against a registered handler map (`provideAddonActions({...})`), so configs round-trip through JSON.
-- **Typed `kind` per adapter.** ngx-formly addon props are typed loosely (`{ icon?, text?, class?, onClick? }`) and differ per adapter — Bootstrap uses `class`, Material's demo uses `icon` / `text`. ng-forge uses a discriminated union (`mat-icon | mat-button | bs-icon | bs-button | pi-icon | pi-button | ion-icon | ion-button` plus universal `text | template | component`) so the compiler knows which fields are valid for each adapter.
+- **Typed `kind` per adapter.** ngx-formly addon props are typed loosely (`{ icon?, text?, class?, onClick? }`) and differ per adapter — Bootstrap uses `class`, Material's demo uses `icon` / `text`. ng-forge uses a discriminated union (`mat-icon | mat-button | bs-icon | bs-button | prime-icon | prime-button | ion-icon | ion-button` plus universal `text | template | component`) so the compiler knows which fields are valid for each adapter.
 - **Universal slot vocabulary.** ngx-formly mixes `addonLeft` / `addonRight` (Bootstrap, Material demo) with adapter-native slot names. ng-forge uses universal `slot: 'prefix' | 'suffix'` everywhere; the adapter translates that internally.
 - **Preset actions.** ng-forge ships `clear`, `reset`, `paste`, `copy`, `toggle-password-visibility` as declarative `preset` values. ngx-formly has nothing equivalent — every action is a hand-written callback.
 - **First-class on all 4 adapters.** ngx-formly only ships addons for Bootstrap; Material is demo-only, PrimeNG / Ionic have nothing. ng-forge ships first-class addons for all four with a single config shape.

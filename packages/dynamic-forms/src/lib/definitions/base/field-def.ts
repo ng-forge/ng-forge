@@ -315,8 +315,8 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
    * @example
    * ```typescript
    * addons: [
-   *   { slot: 'prefix', kind: 'pi-icon', icon: 'search' },
-   *   { slot: 'suffix', kind: 'pi-button', preset: 'clear', ariaLabel: 'Clear' },
+   *   { slot: 'prefix', kind: 'prime-icon', icon: 'search' },
+   *   { slot: 'suffix', kind: 'prime-button', preset: 'clear', ariaLabel: 'Clear' },
    * ]
    * ```
    */

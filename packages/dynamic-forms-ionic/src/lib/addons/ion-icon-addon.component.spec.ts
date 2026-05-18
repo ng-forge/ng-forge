@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
-import type { IonicIconAddon } from '../types/addons';
+import type { IonIconAddon } from '../types/addons';
 import { IonIconAddonComponent } from './ion-icon-addon.component';
 
-function setup(addon: IonicIconAddon) {
+function setup(addon: IonIconAddon) {
   TestBed.configureTestingModule({ imports: [IonIconAddonComponent] });
   const fixture = TestBed.createComponent(IonIconAddonComponent);
   fixture.componentRef.setInput('addon', addon);
@@ -44,7 +44,7 @@ describe('IonIconAddonComponent', () => {
     let icon = fixture.nativeElement.querySelector('ion-icon') as HTMLElement & { name?: string };
     expect(icon.name).toBe('search-outline');
 
-    fixture.componentRef.setInput('addon', { kind: 'ion-icon', slot: 'prefix', icon: 'close-outline' } satisfies IonicIconAddon);
+    fixture.componentRef.setInput('addon', { kind: 'ion-icon', slot: 'prefix', icon: 'close-outline' } satisfies IonIconAddon);
     fixture.detectChanges();
 
     icon = fixture.nativeElement.querySelector('ion-icon') as HTMLElement & { name?: string };

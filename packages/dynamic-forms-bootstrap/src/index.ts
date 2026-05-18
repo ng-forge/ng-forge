@@ -19,7 +19,7 @@ export {
   BS_INPUT_TYPE_OVERRIDE,
 } from './lib';
 
-export type { BsIconAddon, BsButtonAddon, BsAddon, BsInputAddon, BsInputAddonExtensions } from './lib';
+export type { BsIconAddon, BsButtonAddon, BsAddon, BsInputAddon, BsAddonExtensions } from './lib';
 export type {
   BsButtonProps,
   BsButtonField,

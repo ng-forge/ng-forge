@@ -1,6 +1,6 @@
 import { DynamicText, TemplateAddon, TextAddon, ValueFieldComponent } from '@ng-forge/dynamic-forms';
 import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
-import type { IonicButtonAddon, IonicIconAddon } from '../../types/addons';
+import type { IonButtonAddon, IonIconAddon } from '../../types/addons';
 
 export interface IonicInputProps extends InputProps {
   fill?: 'solid' | 'outline';
@@ -19,7 +19,7 @@ export interface IonicInputProps extends InputProps {
  *
  * ```ts
  * declare module '@ng-forge/dynamic-forms-ionic' {
- *   interface IonicInputAddonExtensions {
+ *   interface IonAddonExtensions {
  *     'my-rating': MyRatingAddon;
  *   }
  * }
@@ -29,9 +29,9 @@ export interface IonicInputProps extends InputProps {
  * nothing to the union.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type -- Intentionally empty: module-augmentation seam
-export interface IonicInputAddonExtensions {}
+export interface IonAddonExtensions {}
 
-type IonicInputAddonExtension = IonicInputAddonExtensions[keyof IonicInputAddonExtensions];
+type IonAddonExtension = IonAddonExtensions[keyof IonAddonExtensions];
 
 /**
  * Addon kinds accepted by `ion-input`.
@@ -41,12 +41,12 @@ type IonicInputAddonExtension = IonicInputAddonExtensions[keyof IonicInputAddonE
  * `BaseAddon` union (and dropped in JSON-derived configs by the validator)
  * but excluded here so the IDE narrows tightly to declarative shapes.
  *
- * To extend with custom kinds, augment `IonicInputAddonExtensions`.
+ * To extend with custom kinds, augment `IonAddonExtensions`.
  */
-export type IonicInputAddon = IonicIconAddon | IonicButtonAddon | TextAddon | TemplateAddon | IonicInputAddonExtension;
+export type IonInputAddon = IonIconAddon | IonButtonAddon | TextAddon | TemplateAddon | IonAddonExtension;
 
 export type IonicInputField = InputField<IonicInputProps> & {
-  addons?: ReadonlyArray<IonicInputAddon>;
+  addons?: ReadonlyArray<IonInputAddon>;
 };
 
 /** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */

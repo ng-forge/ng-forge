@@ -75,5 +75,5 @@ export { withBootstrapFields, withBootstrapAddons } from './providers/bootstrap-
 export { BsIconAddonComponent } from './addons/bs-icon-addon.component';
 export { BsButtonAddonComponent } from './addons/bs-button-addon.component';
 export type { BsIconAddon, BsButtonAddon, BsAddon } from './types/addons';
-export type { BsInputAddon, BsInputAddonExtensions } from './fields/input/bs-input.type';
+export type { BsInputAddon, BsAddonExtensions } from './fields/input/bs-input.type';
 export { BS_INPUT_TYPE_OVERRIDE } from './tokens/input-type-override.token';

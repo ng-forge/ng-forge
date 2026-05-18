@@ -95,23 +95,58 @@ export function validateFieldAddons(
       continue;
     }
 
-    // Inline `action: () => void` dropped from JSON-source configs (function
-    // doesn't survive serialization). The stripped shape is NOT re-fed to
-    // `kindDef.validate(...)` — built-in kinds don't require `action`, so
-    // skipping the re-check matches their current contract. A future kind
-    // that DOES require `action` would need to declare `jsonSafe: false`.
+    // Inline `action`/`hidden`/`disabled`/`loading` functions dropped from
+    // JSON-source configs — functions don't survive serialization, and
+    // letting them through would crash at resolve-time. `preset`/`actionRef`/
+    // `action` multi-set is also stripped down to the first variant so JSON
+    // authoring tools that send both don't trigger the runtime precedence
+    // warning.
     if (source === 'json') {
-      const inlineAction = (addon as { action?: unknown }).action;
-      if (typeof inlineAction === 'function') {
+      let sanitized = addon as unknown as Record<string, unknown>;
+      let stripped = false;
+      const ensureCopy = () => {
+        if (!stripped) sanitized = { ...sanitized };
+        stripped = true;
+      };
+      const dropReactiveFn = (key: 'hidden' | 'disabled' | 'loading') => {
+        if (typeof sanitized[key] === 'function') {
+          ensureCopy();
+          delete sanitized[key];
+          warnings.push({
+            type: 'code-only-action-in-json',
+            fieldKey: field.key,
+            reason: `function '${key}' on kind '${kindDef.kind}' (use a signal/observable in code, or omit in JSON)`,
+          });
+        }
+      };
+      if (typeof sanitized.action === 'function') {
+        ensureCopy();
+        delete sanitized.action;
         warnings.push({
           type: 'code-only-action-in-json',
           fieldKey: field.key,
           reason: `inline 'action' function on kind '${kindDef.kind}'`,
         });
-        const sanitized = { ...addon } as Record<string, unknown>;
-        delete sanitized.action;
-        // Cast through unknown — the original AnyAddon shape minus a
-        // structural `action` key is still a valid addon shape at runtime.
+      }
+      dropReactiveFn('hidden');
+      dropReactiveFn('disabled');
+      dropReactiveFn('loading');
+
+      // Multi-set XOR — keep the first variant, strip the rest. Mirrors the
+      // runtime precedence (preset > actionRef > action) so the chosen
+      // handler matches what the dispatcher would have picked.
+      const variants = (['preset', 'actionRef', 'action'] as const).filter((k) => sanitized[k] !== undefined);
+      if (variants.length > 1) {
+        ensureCopy();
+        for (const k of variants.slice(1)) delete sanitized[k];
+        warnings.push({
+          type: 'code-only-action-in-json',
+          fieldKey: field.key,
+          reason: `multiple click variants on kind '${kindDef.kind}' (${variants.join(', ')}); kept '${variants[0]}'`,
+        });
+      }
+
+      if (stripped) {
         survivors.push(sanitized as unknown as AnyAddon);
         continue;
       }

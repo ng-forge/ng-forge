@@ -12,8 +12,11 @@ export type {
   CommonAddonActionPreset,
   DynamicFormActionRegistry,
   DynamicFormAddonActionPresetRegistry,
+  FieldBoundAddonActionContext,
+  OrphanAddonActionContext,
   RegisteredActionRef,
 } from './addon/addon-action';
+export { isFieldBoundContext } from './addon/addon-action';
 export type { AddonKindDefinition, AddonKindSchema, AddonShapeValidator, FieldAddonSupport } from './addon/addon-kind';
 export { ADDON_KIND_REGISTRY } from './addon/addon-kind';
 export { DF_FIELD_TEMPLATES } from './addon/df-field-templates.token';

@@ -13,7 +13,7 @@ export default [
     loadChildren: () => import('./accessibility/accessibility.routes'),
   },
 
-  // Addons - prefix/suffix addon kinds (pi-icon, pi-button, text, presets)
+  // Addons - prefix/suffix addon kinds (prime-icon, prime-button, text, presets)
   {
     path: 'addons',
     loadChildren: () => import('./addons/addons.routes'),

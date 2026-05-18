@@ -3,8 +3,8 @@ import { createNgForgeFieldFixture } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it } from 'vitest';
 import { IonButtonAddonComponent } from '../../addons/ion-button-addon.component';
 import { IonIconAddonComponent } from '../../addons/ion-icon-addon.component';
-import type { IonicButtonAddon, IonicIconAddon } from '../../types/addons';
-import type { IonicInputAddon } from './ionic-input.type';
+import type { IonButtonAddon, IonIconAddon } from '../../types/addons';
+import type { IonInputAddon } from './ionic-input.type';
 import IonicInputFieldComponent from './ionic-input.component';
 
 const ION_ICON_KIND: AddonKindDefinition = {
@@ -23,7 +23,7 @@ function makeKindRegistry(): ReadonlyMap<string, AddonKindDefinition> {
   ]);
 }
 
-function createFixture(addons: ReadonlyArray<IonicInputAddon>) {
+function createFixture(addons: ReadonlyArray<IonInputAddon>) {
   return createNgForgeFieldFixture<IonicInputFieldComponent, string>(IonicInputFieldComponent, {
     key: 'field-1',
     value: '',
@@ -48,7 +48,7 @@ describe('IonicInputFieldComponent — addon rendering', () => {
   });
 
   it('renders a <span slot="start"> wrapper for a prefix addon', async () => {
-    const prefix: IonicIconAddon = { kind: 'ion-icon', slot: 'prefix', icon: 'search-outline' };
+    const prefix: IonIconAddon = { kind: 'ion-icon', slot: 'prefix', icon: 'search-outline' };
     const { fixture } = createFixture([prefix]);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -65,13 +65,13 @@ describe('IonicInputFieldComponent — addon rendering', () => {
   });
 
   it('renders a <span slot="end"> wrapper for a suffix addon', async () => {
-    const suffix: IonicButtonAddon = {
+    const suffix: IonButtonAddon = {
       kind: 'ion-button',
       slot: 'suffix',
       icon: 'close-outline',
       ariaLabel: 'Clear',
       preset: 'clear',
-    } as IonicButtonAddon;
+    } as IonButtonAddon;
     const { fixture } = createFixture([suffix]);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -86,9 +86,9 @@ describe('IonicInputFieldComponent — addon rendering', () => {
   });
 
   it('renders both wrappers when both prefix and suffix addons are present', async () => {
-    const addons: IonicInputAddon[] = [
-      { kind: 'ion-icon', slot: 'prefix', icon: 'search-outline' } as IonicIconAddon,
-      { kind: 'ion-button', slot: 'suffix', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' } as IonicButtonAddon,
+    const addons: IonInputAddon[] = [
+      { kind: 'ion-icon', slot: 'prefix', icon: 'search-outline' } as IonIconAddon,
+      { kind: 'ion-button', slot: 'suffix', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' } as IonButtonAddon,
     ];
     const { fixture } = createFixture(addons);
     fixture.detectChanges();
@@ -101,7 +101,7 @@ describe('IonicInputFieldComponent — addon rendering', () => {
   });
 
   it('keeps the aria-describedby plumbing intact when addons are present', async () => {
-    const prefix: IonicIconAddon = { kind: 'ion-icon', slot: 'prefix', icon: 'search-outline' };
+    const prefix: IonIconAddon = { kind: 'ion-icon', slot: 'prefix', icon: 'search-outline' };
     const { fixture } = createFixture([prefix]);
     fixture.detectChanges();
     await fixture.whenStable();

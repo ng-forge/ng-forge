@@ -1,6 +1,6 @@
 import { DynamicText, TemplateAddon, TextAddon, ValueFieldComponent } from '@ng-forge/dynamic-forms';
 import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
-import type { PiButtonAddon, PiIconAddon } from '../../types/addons';
+import type { PrimeButtonAddon, PrimeIconAddon } from '../../types/addons';
 
 export interface PrimeInputProps extends InputProps {
   /**
@@ -31,7 +31,7 @@ export interface PrimeInputProps extends InputProps {
  *
  * ```ts
  * declare module '@ng-forge/dynamic-forms-primeng' {
- *   interface PrimeInputAddonExtensions {
+ *   interface PrimeAddonExtensions {
  *     'my-rating': MyRatingAddon;
  *   }
  * }
@@ -41,21 +41,21 @@ export interface PrimeInputProps extends InputProps {
  * nothing to the union.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type -- Intentionally empty: module-augmentation seam
-export interface PrimeInputAddonExtensions {}
+export interface PrimeAddonExtensions {}
 
-type PrimeInputAddonExtension = PrimeInputAddonExtensions[keyof PrimeInputAddonExtensions];
+type PrimeAddonExtension = PrimeAddonExtensions[keyof PrimeAddonExtensions];
 
 /**
  * Addon kinds accepted by `prime-input`.
  *
- * PrimeNG-specific kinds (`pi-icon`, `pi-button`) plus the universal `text`
+ * PrimeNG-specific kinds (`prime-icon`, `prime-button`) plus the universal `text`
  * and `template` kinds. `component` is permitted at runtime via the broader
  * `BaseAddon` union (and dropped in JSON-derived configs by the validator)
  * but excluded here so the IDE narrows tightly to declarative shapes.
  *
- * To extend with custom kinds, augment `PrimeInputAddonExtensions`.
+ * To extend with custom kinds, augment `PrimeAddonExtensions`.
  */
-export type PrimeInputAddon = PiIconAddon | PiButtonAddon | TextAddon | TemplateAddon | PrimeInputAddonExtension;
+export type PrimeInputAddon = PrimeIconAddon | PrimeButtonAddon | TextAddon | TemplateAddon | PrimeAddonExtension;
 
 export type PrimeInputField = InputField<PrimeInputProps> & {
   addons?: ReadonlyArray<PrimeInputAddon>;

@@ -9,10 +9,10 @@ const config = {
       label: 'Amount',
       value: '1234',
       addons: [
-        { slot: 'prefix', kind: 'pi-icon', icon: 'dollar', ariaLabel: 'USD' },
+        { slot: 'prefix', kind: 'prime-icon', icon: 'dollar', ariaLabel: 'USD' },
         { slot: 'prefix', kind: 'text', text: '$' },
         { slot: 'suffix', kind: 'text', text: 'USD' },
-        { slot: 'suffix', kind: 'pi-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' },
+        { slot: 'suffix', kind: 'prime-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' },
       ],
     },
   ],

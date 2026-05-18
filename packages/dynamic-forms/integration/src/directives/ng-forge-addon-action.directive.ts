@@ -14,7 +14,7 @@ import type { AssertTupleLockstep } from './assert-input-lockstep';
 
 /**
  * Permissive shape the directive reads from `addon()`. Adapter-specific
- * addon types (e.g., `PiButtonAddon`) narrow this at the inject site via
+ * addon types (e.g., `PrimeButtonAddon`) narrow this at the inject site via
  * `injectNgForgeAddonAction<T>()`.
  */
 interface ActionAddonShape extends BaseAddon {
@@ -31,7 +31,7 @@ interface ActionAddonShape extends BaseAddon {
  * `DynamicValue<boolean>`, action context construction, and the
  * `preset / actionRef / action` precedence dispatcher.
  *
- * Adapter button kinds (e.g., `pi-button`) compose `NgForgeAddonAction`
+ * Adapter button kinds (e.g., `prime-button`) compose `NgForgeAddonAction`
  * and read state via `injectNgForgeAddonAction<TAddon>()`. Preset semantics
  * are adapter-specific — register an `ADDON_PRESET_HANDLER` at the host
  * field scope to receive preset dispatches.
@@ -99,16 +99,25 @@ export class NgForgeAddonActionBase {
 
   /**
    * Build an `AddonActionContext` for handlers from the wrapper-style
-   * `fieldInputs` bag. When the addon is rendered outside a field (rare),
-   * handlers receive empty stand-ins so they don't crash.
+   * `fieldInputs` bag. Returns the field-bound variant when a host field
+   * is reachable, or the orphan variant otherwise. The discriminator is
+   * `form`: non-null implies a working `setValue`.
    */
   buildActionContext(): AddonActionContext {
     const inputs = this.fieldInputs();
+    const tree = inputs?.field;
+    if (tree && inputs?.setValue) {
+      return {
+        field: { key: inputs.key ?? '', type: inputs.type ?? '' },
+        form: tree,
+        value: tree.value() ?? undefined,
+        setValue: inputs.setValue,
+      };
+    }
     return {
       field: { key: inputs?.key ?? '', type: inputs?.type ?? '' },
-      form: inputs?.field ?? null,
-      value: inputs?.field?.value() ?? undefined,
-      setValue: inputs?.setValue,
+      form: null,
+      value: tree?.value() ?? undefined,
     };
   }
 }

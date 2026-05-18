@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input, signal } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
@@ -56,7 +56,11 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
         <mat-label>{{ ngf.label() | dynamicText | async }}</mat-label>
       }
       @for (a of ngfa.prefixAddons(); track $index) {
-        <df-addon-slot matPrefix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        @if (a.kind === 'text') {
+          <df-addon-slot matTextPrefix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        } @else {
+          <df-addon-slot matIconPrefix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        }
       }
       <input
         matInput
@@ -68,7 +72,11 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
         [attr.tabindex]="ngf.tabIndex()"
       />
       @for (a of ngfa.suffixAddons(); track $index) {
-        <df-addon-slot matSuffix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        @if (a.kind === 'text') {
+          <df-addon-slot matTextSuffix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        } @else {
+          <df-addon-slot matIconSuffix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        }
       }
       @if (ngf.errorsToDisplay()[0]; as error) {
         <mat-error [id]="ngf.errorId()">{{ error.message }}</mat-error>
@@ -86,14 +94,10 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
       :host([hidden]) {
         display: none !important;
       }
-      /* matPrefix/matSuffix elements have no default spacing from the input —
-         add a small gap so icons don't touch the label/text. */
-      df-addon-slot[matprefix] {
-        margin-right: 0.5em;
-      }
-      df-addon-slot[matsuffix] {
-        margin-left: 0.5em;
-      }
+      /* Spacing is handled by Material's own matIconPrefix / matTextPrefix
+         (and matIconSuffix / matTextSuffix) directives, picked per addon
+         kind at the template above. No custom CSS needed — themes track
+         Material's design tokens for free. */
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -113,6 +117,7 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
         const typeOverride = inject(MAT_INPUT_TYPE_OVERRIDE);
         const fsc = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
         const logger = inject(DynamicFormLogger);
+        const host = inject(forwardRef(() => MatInputFieldComponent));
         return {
           run: (preset: string, ctx: AddonActionContext) => {
             const fieldKey = ctx.field.key;
@@ -123,6 +128,7 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
               fieldValueSetter: ctx.setValue,
               fieldDefaultValueGetter:
                 fsc && fieldKey ? () => (fsc.defaultValues() as Record<string, unknown> | undefined)?.[fieldKey] : undefined,
+              baselineType: () => host.props()?.type,
               logger,
             });
           },

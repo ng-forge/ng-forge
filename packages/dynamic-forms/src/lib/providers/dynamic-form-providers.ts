@@ -1,8 +1,10 @@
 import { EnvironmentProviders, inject, makeEnvironmentProviders, Provider } from '@angular/core';
 import { provideSignalFormsConfig } from '@angular/forms/signals';
 import { NG_STATUS_CLASSES } from '@angular/forms/signals/compat';
+import { Type } from '@angular/core';
 import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '../models/addon/addon-kind';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
+import { ADDON_KIND_COMPONENT_CACHE } from '../utils/inject-addon-kind-registry/inject-addon-kind-registry';
 import { BUILT_IN_ADDON_KINDS } from './built-in-addons';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './built-in-fields';
 import { FieldDef } from '../definitions/base/field-def';
@@ -205,6 +207,10 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
         return registry;
       },
     },
+    // Form-scoped component cache. Overrides the `providedIn: 'root'` fallback
+    // so two forms registering different `loadComponent` factories for the
+    // same kind name (e.g. dev playgrounds) don't poison each other.
+    { provide: ADDON_KIND_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
     ...featureProviders,
   ]) as ProvideDynamicFormResult<ExtractFieldTypes<T> extends FieldTypeDefinition[] ? ExtractFieldTypes<T> : FieldTypeDefinition[]>;
 }

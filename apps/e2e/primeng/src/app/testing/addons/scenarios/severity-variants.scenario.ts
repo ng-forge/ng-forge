@@ -12,7 +12,7 @@ const config = {
     addons: [
       {
         slot: 'suffix' as const,
-        kind: 'pi-button' as const,
+        kind: 'prime-button' as const,
         label: severity,
         severity,
         action: () => {
@@ -26,7 +26,7 @@ const config = {
 
 export const severityVariantsScenario: TestScenario = {
   testId: 'severity-variants',
-  title: 'Addons — pi-button severity variants',
+  title: 'Addons — prime-button severity variants',
   description: 'Renders one input per PrimeNG severity (primary / secondary / success / info / warn / danger / help / contrast).',
   config,
 };

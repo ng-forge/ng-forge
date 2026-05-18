@@ -4,11 +4,47 @@ import { BaseAddon } from './addon-def';
 import { AddonSlot } from './addon-slot';
 
 /**
- * JSON Schema fragment used by the MCP server to surface an addon kind's
- * shape to AI form generators. Manually authored per kind for MVP;
- * auto-extracted from TypeScript types in a follow-up.
+ * Minimal JSON Schema fragment used by the MCP server to surface an addon
+ * kind's shape to AI form generators. Covers the common subset
+ * (`type`/`properties`/`required`/`enum`/etc.) without pulling in a full JSON
+ * Schema dependency. Extra keys are allowed via the `[key: string]` index so
+ * vendor-specific annotations (`x-foo`, `markdownDescription`) still typecheck.
  */
-export type AddonKindSchema = Record<string, unknown>;
+export interface AddonKindSchema {
+  readonly $ref?: string;
+  readonly $schema?: string;
+  readonly title?: string;
+  readonly description?: string;
+  readonly type?:
+    | 'object'
+    | 'array'
+    | 'string'
+    | 'number'
+    | 'integer'
+    | 'boolean'
+    | 'null'
+    | ReadonlyArray<'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null'>;
+  readonly enum?: ReadonlyArray<unknown>;
+  readonly const?: unknown;
+  readonly properties?: Readonly<Record<string, AddonKindSchema>>;
+  readonly required?: ReadonlyArray<string>;
+  readonly additionalProperties?: boolean | AddonKindSchema;
+  readonly items?: AddonKindSchema | ReadonlyArray<AddonKindSchema>;
+  readonly oneOf?: ReadonlyArray<AddonKindSchema>;
+  readonly anyOf?: ReadonlyArray<AddonKindSchema>;
+  readonly allOf?: ReadonlyArray<AddonKindSchema>;
+  readonly not?: AddonKindSchema;
+  readonly default?: unknown;
+  readonly examples?: ReadonlyArray<unknown>;
+  readonly minimum?: number;
+  readonly maximum?: number;
+  readonly minLength?: number;
+  readonly maxLength?: number;
+  readonly pattern?: string;
+  readonly format?: string;
+  /** Vendor extensions and unrecognised keywords pass through untyped. */
+  readonly [key: string]: unknown;
+}
 
 /**
  * Optional shape validator a kind ships to enforce its required fields at
@@ -36,7 +72,7 @@ export interface AddonKindDefinition<T extends BaseAddon = BaseAddon> {
   /**
    * Whether the kind survives `JSON.stringify` / `JSON.parse`. Kinds whose
    * shape includes a function payload (e.g., the built-in `'component'`
-   * loader, inline `pi-button` `action` handlers) declare `jsonSafe: false`
+   * loader, inline `prime-button` `action` handlers) declare `jsonSafe: false`
    * so the validator drops them when the config was loaded from a JSON
    * source (`validateFormConfig(config, { source: 'json' })`). Defaults to
    * `true` — kinds are JSON-safe unless explicitly opted out.

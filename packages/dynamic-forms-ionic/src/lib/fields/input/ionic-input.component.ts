@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, forwardRef, inject, input, signal } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
 import {
@@ -24,7 +24,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { runIonicPresetAction } from '../../addons/preset-actions';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
 import { IONIC_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
-import { IonicInputAddon, IonicInputProps } from './ionic-input.type';
+import { IonInputAddon, IonicInputProps } from './ionic-input.type';
 
 // Length-validator → DOM wiring (minlength/maxlength):
 //
@@ -113,6 +113,7 @@ import { IonicInputAddon, IonicInputProps } from './ionic-input.type';
         const typeOverride = inject(IONIC_INPUT_TYPE_OVERRIDE);
         const fsc = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
         const logger = inject(DynamicFormLogger);
+        const host = inject(forwardRef(() => IonicInputFieldComponent));
         return {
           run: (preset: string, ctx: AddonActionContext) => {
             const fieldKey = ctx.field.key;
@@ -123,6 +124,7 @@ import { IonicInputAddon, IonicInputProps } from './ionic-input.type';
               fieldValueSetter: ctx.setValue,
               fieldDefaultValueGetter:
                 fsc && fieldKey ? () => (fsc.defaultValues() as Record<string, unknown> | undefined)?.[fieldKey] : undefined,
+              baselineType: () => host.props()?.type,
               logger,
             });
           },
@@ -135,6 +137,26 @@ import { IonicInputAddon, IonicInputProps } from './ionic-input.type';
       :host([hidden]) {
         display: none !important;
       }
+      /* ion-input projects shadow-DOM slots start and end. The default
+         gap between the slot wrapper and the input text is too tight for
+         icons, and end reserves too much trailing room. Derived from Ionic's
+         own --ion-padding token so it tracks the active theme; exposed as
+         a CSS custom property for consumer override. */
+      :host {
+        --df-ion-addon-gap: calc(var(--ion-padding) / 2);
+        --df-ion-addon-trailing-pullback: calc(var(--df-ion-addon-gap) * -1);
+      }
+      :host ::ng-deep ion-input > [slot='start'] {
+        display: inline-flex;
+        align-items: center;
+        margin-inline-end: var(--df-ion-addon-gap);
+      }
+      :host ::ng-deep ion-input > [slot='end'] {
+        display: inline-flex;
+        align-items: center;
+        margin-inline-start: var(--df-ion-addon-gap);
+        margin-inline-end: var(--df-ion-addon-trailing-pullback);
+      }
     `,
   ],
 })
@@ -143,7 +165,7 @@ export default class IonicInputFieldComponent {
   private ionicConfig = inject(IONIC_CONFIG, { optional: true });
 
   protected readonly ngf = injectNgForgeField<string>();
-  protected readonly ngfa = injectNgForgeAddons<IonicInputAddon>();
+  protected readonly ngfa = injectNgForgeAddons<IonInputAddon>();
 
   readonly props = input<IonicInputProps>();
 
@@ -165,16 +187,21 @@ export default class IonicInputFieldComponent {
   /** Override (set by `toggle-password-visibility` preset) wins over `props().type`. */
   protected readonly type = computed(() => this.typeOverride() ?? this.props()?.type ?? 'text');
 
+  /** Set when the component is destroyed — guards async aria-describedby sync against teardown. */
+  private destroyed = false;
+
   constructor() {
+    inject(DestroyRef).onDestroy(() => (this.destroyed = true));
     // ion-input encapsulates a native <input> in shadow DOM and does not automatically
     // propagate aria-describedby to it. This effect imperatively syncs the attribute
     // after a microtask to ensure Ionic has resolved the internal element.
     explicitEffect([this.ngf.ariaDescribedBy], ([describedBy]) => {
       queueMicrotask(() => {
+        if (this.destroyed) return;
         const ionInput = this.elementRef.nativeElement.querySelector('ion-input') as HTMLIonInputElement | null;
         if (ionInput?.getInputElement) {
           ionInput.getInputElement().then((inputEl) => {
-            if (!inputEl) return;
+            if (this.destroyed || !inputEl) return;
             if (describedBy) {
               inputEl.setAttribute('aria-describedby', describedBy);
             } else {

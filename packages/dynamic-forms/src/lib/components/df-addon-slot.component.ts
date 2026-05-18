@@ -101,20 +101,27 @@ export class DfAddonSlot {
     fieldInputs: this.fieldInputs(),
   }));
 
+  /** Monotonic load-token guards against stale promises winning when addon.kind changes mid-load. */
+  private loadSeq = 0;
+
   constructor() {
-    // Resolve component when addon.kind changes; cache hits return synchronously.
     explicitEffect([this.addon], ([addon]) => {
       const cached = this.registry.getLoadedKindComponent(addon.kind);
       if (cached) {
+        this.loadSeq++;
         this.resolvedComponentSignal.set(cached);
         return;
       }
 
-      // Async path — load and cache.
+      const seq = ++this.loadSeq;
       this.registry
         .loadKindComponent(addon.kind)
-        .then((cmp) => this.resolvedComponentSignal.set(cmp))
+        .then((cmp) => {
+          if (seq !== this.loadSeq) return;
+          this.resolvedComponentSignal.set(cmp);
+        })
         .catch((error: unknown) => {
+          if (seq !== this.loadSeq) return;
           this.logger.warn(
             `Failed to load addon kind '${addon.kind}': ${String(error)}. ` +
               `Registered kinds: ${this.registry.getKindNames().join(', ') || '(none)'}.`,

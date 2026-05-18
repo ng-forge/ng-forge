@@ -8,20 +8,9 @@ Button addons accept exactly one click variant: `preset`, `actionRef`, or `actio
 
 ## The three variants
 
-```typescript
-// 1. Built-in preset — JSON-safe, no code required.
-{ slot: 'suffix', kind: 'pi-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }
-
-// 2. Registered handler — JSON-safe, looked up by name.
-{ slot: 'suffix', kind: 'pi-button', icon: 'send', ariaLabel: 'Send', actionRef: 'submitDraft' }
-
-// 3. Inline function — code-only, dropped from JSON-derived configs by the validator.
-{ slot: 'suffix', kind: 'pi-button', icon: 'plus', ariaLabel: 'Add', action: (ctx) => ctx.setValue?.((ctx.value ?? '') + '+') }
-```
+<docs-addon-info field="three-variants"></docs-addon-info>
 
 Pick the leftmost variant that covers your case. Most addon buttons map to a preset.
-
-> The `kind` value in the snippets above is adapter-specific. Use the kind for your active adapter — see [Addons / Overview](/addons/overview#available-kinds).
 
 ## Built-in presets
 
@@ -60,12 +49,7 @@ export const appActions = provideAddonActions({
 
 Wire the feature into `provideDynamicForm`:
 
-```typescript name="app.config.ts"
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { appActions } from './app-actions';
-// import the with*Fields() helper for your adapter — see Provider setup on /addons/overview
-```
+<docs-addon-info field="actions-wiring"></docs-addon-info>
 
 The backend can now ship configs like:
 
@@ -75,17 +59,62 @@ The backend can now ship configs like:
 
 ### Type narrowing
 
-`provideAddonActions(...)` augments the global `DynamicFormActionRegistry` interface so `actionRef` autocompletes to the registered names. Each handler receives the full `AddonActionContext`:
+`provideAddonActions(...)` returns a feature whose `__handlerKeys` phantom field captures the registered names — derive the global `DynamicFormActionRegistry` augmentation from it in one line so `actionRef` autocompletes everywhere:
 
 ```typescript
-interface AddonActionContext {
-  readonly field: { readonly key: string };
-  readonly value: unknown;
-  readonly setValue?: (next: unknown) => void;
+export const appActions = provideAddonActions({
+  runSearch: (ctx) => {
+    /* … */
+  },
+  submitDraft: (ctx) => {
+    /* … */
+  },
+});
+
+declare module '@ng-forge/dynamic-forms' {
+  interface DynamicFormActionRegistry extends Record<NonNullable<(typeof appActions)['__handlerKeys']>, true> {}
 }
 ```
 
-Use `ctx.setValue` to write back to the host field s value (same backing as `'clear'` / `'reset'`).
+Each handler receives a discriminated `AddonActionContext`:
+
+```typescript
+type AddonActionContext<TValue = unknown> =
+  | FieldBoundAddonActionContext<TValue> // form: ReadonlyFieldTree; setValue: required
+  | OrphanAddonActionContext<TValue>; // form: null;               setValue: absent
+
+interface FieldBoundAddonActionContext<TValue = unknown> {
+  readonly field: { readonly key: string; readonly type: string };
+  readonly form: ReadonlyFieldTree<TValue>;
+  readonly value: TValue | undefined;
+  readonly setValue: (next: TValue) => void; // <- non-optional once narrowed
+}
+```
+
+Narrow with the `isFieldBoundContext` guard so write-back handlers don t need `ctx.setValue?.(…)` everywhere:
+
+```typescript
+import { isFieldBoundContext, provideAddonActions } from '@ng-forge/dynamic-forms';
+
+provideAddonActions({
+  submit: (ctx) => {
+    if (!isFieldBoundContext(ctx)) return; // orphan — nothing to write to
+    myService.send(ctx.field.key, ctx.value, ctx.setValue);
+  },
+});
+```
+
+For broader field state, use the form-tree projection ng-forge already supplies to wrappers — `field.key` is intentionally the only stable identity surface across the addon contract.
+
+## JSON-safety quick reference
+
+| Click variant | JSON-safe? | Use when                                                                        |
+| ------------- | ---------- | ------------------------------------------------------------------------------- |
+| `preset`      | yes        | Behaviour matches one of the five built-ins.                                    |
+| `actionRef`   | yes        | Custom behaviour registered once via `provideAddonActions`.                     |
+| `action`      | code-only  | Prototypes / scenarios where the config is hand-authored and never round-trips. |
+
+Reactive axes are similarly tiered: `boolean` values are JSON-safe, `Signal<boolean>` / `Observable<boolean>` / function values are stripped from JSON-source configs by the validator (with a warning). See [Reactive addons from JSON](#reactive-from-json) below.
 
 ## Inline `action` (code-only)
 
@@ -130,6 +159,29 @@ const submitting = signal(false);
 ## Multi-set rule
 
 Exactly one of `preset` / `actionRef` / `action` may be set. The TypeScript types enforce this via an XOR union; the runtime validator additionally drops any addon that smuggles multiple values past the type checker (with an actionable warning). Decorative buttons that simply look like buttons but do nothing are valid — omit all three.
+
+## Reactive addons from JSON {#reactive-from-json}
+
+JSON cannot carry `Signal` / `Observable` / function values, so two questions come up when you ship configs from a backend:
+
+1. **How do I express `hidden`/`disabled`/`loading` reactivity?**
+2. **What survives the round-trip?**
+
+Three patterns, in order of preference:
+
+1. **Pre-process the JSON in app code.** Before passing the parsed config to `DynamicForm`, wrap reactive axes with `computed(...)` against your app's signals. This keeps the wire format JSON-safe and the runtime reactive — your bridge code is the only place that needs to know app state.
+
+   ```typescript
+   const config = enrichConfig(jsonFromApi, {
+     fields: { search: { addons: { suffix: { hidden: computed(() => !hasValue()) } } } },
+   });
+   ```
+
+2. **Express the gate as a form-level derivation or condition.** When the reactive axis depends on form values rather than out-of-band app state, model it as a derivation on the host field's `logic` block. The condition lives in JSON (it's a string-expression DSL) and the addon stays static.
+
+3. **Skip reactivity at the addon layer.** If the addon's visibility is purely a function of static form metadata, render it unconditionally and let the field's own validation/state hide the value semantically. Reach for this when (1) and (2) feel heavy.
+
+Functions on `hidden` / `disabled` / `loading` / `action` are stripped from JSON-source configs at validation time with a logged warning — you'll see them in the console if a config carries an inline function. `preset` and `actionRef` are the JSON-safe escape hatches for behaviour; `computed`/`Observable` are the code-side escape hatches for reactivity.
 
 ## Where to next
 

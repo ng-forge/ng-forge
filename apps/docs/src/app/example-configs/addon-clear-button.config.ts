@@ -12,14 +12,14 @@ const ICON_NAME: Record<ConcreteAdapter, { search: string; clear: string }> = {
 const ICON_KIND: Record<ConcreteAdapter, string> = {
   material: 'mat-icon',
   bootstrap: 'bs-icon',
-  primeng: 'pi-icon',
+  primeng: 'prime-icon',
   ionic: 'ion-icon',
 };
 
 const BUTTON_KIND: Record<ConcreteAdapter, string> = {
   material: 'mat-button',
   bootstrap: 'bs-button',
-  primeng: 'pi-button',
+  primeng: 'prime-button',
   ionic: 'ion-button',
 };
 

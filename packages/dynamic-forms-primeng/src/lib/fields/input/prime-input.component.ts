@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input, signal } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import {
   AddonActionContext,
@@ -22,7 +22,7 @@ import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
-import { runPiPresetAction } from '../../addons/preset-actions';
+import { runPrimePresetAction } from '../../addons/preset-actions';
 import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 import { PRIME_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
 import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
@@ -90,7 +90,7 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
       useFactory: () => signal<string | undefined>(undefined),
     },
     {
-      // Adapter-specific preset semantics for `pi-button` addons (clear /
+      // Adapter-specific preset semantics for `prime-button` addons (clear /
       // reset / paste / copy / toggle-password-visibility). The directive
       // (`NgForgeAddonAction`) delegates here when an addon configures a
       // `preset`. Per-prime-input-instance so the `typeOverride` signal is
@@ -100,16 +100,18 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
         const typeOverride = inject(PRIME_INPUT_TYPE_OVERRIDE);
         const fsc = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
         const logger = inject(DynamicFormLogger);
+        const host = inject(forwardRef(() => PrimeInputFieldComponent));
         return {
           run: (preset: string, ctx: AddonActionContext) => {
             const fieldKey = ctx.field.key;
             // The handler contract is `preset: string`; cast back to the
             // narrow union at the runner's signature boundary.
-            return runPiPresetAction(preset as AddonActionPreset, ctx, {
+            return runPrimePresetAction(preset as AddonActionPreset, ctx, {
               typeOverride,
               fieldValueSetter: ctx.setValue,
               fieldDefaultValueGetter:
                 fsc && fieldKey ? () => (fsc.defaultValues() as Record<string, unknown> | undefined)?.[fieldKey] : undefined,
+              baselineType: () => host.props()?.type,
               logger,
             });
           },
@@ -121,6 +123,16 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
     `
       :host([hidden]) {
         display: none !important;
+      }
+      /* Make p-inputgroup-addon inherit the input's theme tokens so it
+         matches the input surface in any PrimeNG theme (light/dark/custom).
+         PrimeNG's default tokens for inputgroup-addon don't always track the
+         input's surface — explicit binding via input-text vars keeps them
+         visually unified. */
+      :host ::ng-deep .p-inputgroup-addon {
+        background: var(--p-inputtext-background);
+        color: var(--p-inputtext-color);
+        border-color: var(--p-inputtext-border-color);
       }
     `,
   ],
