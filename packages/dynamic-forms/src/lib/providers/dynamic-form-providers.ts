@@ -13,7 +13,13 @@ import { ADDON_KIND_DEFINITIONS } from './features/addons/addon-kind-definitions
 import { DynamicFormLogger } from './features/logger/logger.token';
 import { ConsoleLogger } from './features/logger/console-logger';
 import type { InferFormValue as RealInferFormValue } from '../models/types/form-value-inference';
-import { isWrapperTypeDefinition, WrapperTypeDefinition, WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_REGISTRY, WrapperConfig } from '../models';
+import {
+  isWrapperTypeDefinition,
+  WrapperTypeDefinition,
+  WRAPPER_AUTO_ASSOCIATIONS,
+  WRAPPER_REGISTRY,
+  WrapperConfig,
+} from '../models/wrapper-type';
 import { isWrappersBundle, WrappersBundle } from '../wrappers/create-wrappers';
 
 // Re-export global types for module augmentation
