@@ -3,3 +3,4 @@ export * from './logger';
 export * from './event-form-value';
 export * from './value-exclusion';
 export * from './validation-execution';
+export * from './legacy-status-classes';
