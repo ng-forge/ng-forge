@@ -15,8 +15,6 @@ import { linkedSignal, Resource, ResourceSnapshot, resourceFromSnapshots } from 
  * );
  * // user.value() keeps the old user data during loading transitions
  * ```
- *
- * @experimental Uses Angular's experimental resource composition APIs.
  */
 export function withPreviousValue<T>(input: Resource<T>): Resource<T> {
   const derived = linkedSignal<ResourceSnapshot<T>, ResourceSnapshot<T>>({
