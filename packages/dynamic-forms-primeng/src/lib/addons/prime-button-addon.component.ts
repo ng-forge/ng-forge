@@ -23,7 +23,7 @@ import type { PrimeButtonAddon } from '../types/addons';
       [label]="(label() | dynamicText | async) ?? ''"
       [severity]="addon().severity ?? 'secondary'"
       [loading]="action.loading()"
-      [disabled]="action.disabled()"
+      [disabled]="action.disabled() || action.loading()"
       [attr.aria-label]="(ariaLabel() | dynamicText | async) || null"
       (onClick)="action.dispatch()"
     />

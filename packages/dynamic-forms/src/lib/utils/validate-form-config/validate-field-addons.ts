@@ -120,6 +120,13 @@ export function validateFieldAddons(
           });
         }
       };
+
+      // Snapshot which click variants the original config declared BEFORE
+      // we strip function-typed `action`. Stripping first then computing
+      // variants would underreport the multi-variant warning (`action`
+      // would silently vanish from the reported list).
+      const declaredVariants = (['preset', 'actionRef', 'action'] as const).filter((k) => sanitized[k] !== undefined);
+
       if (typeof sanitized.action === 'function') {
         ensureCopy();
         delete sanitized.action;
@@ -136,14 +143,13 @@ export function validateFieldAddons(
       // Multi-set XOR — keep the first variant, strip the rest. Mirrors the
       // runtime precedence (preset > actionRef > action) so the chosen
       // handler matches what the dispatcher would have picked.
-      const variants = (['preset', 'actionRef', 'action'] as const).filter((k) => sanitized[k] !== undefined);
-      if (variants.length > 1) {
+      if (declaredVariants.length > 1) {
         ensureCopy();
-        for (const k of variants.slice(1)) delete sanitized[k];
+        for (const k of declaredVariants.slice(1)) delete sanitized[k];
         warnings.push({
           type: 'code-only-action-in-json',
           fieldKey: field.key,
-          reason: `multiple click variants on kind '${kindDef.kind}' (${variants.join(', ')}); kept '${variants[0]}'`,
+          reason: `multiple click variants on kind '${kindDef.kind}' (${declaredVariants.join(', ')}); kept '${declaredVariants[0]}'`,
         });
       }
 

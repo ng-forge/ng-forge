@@ -36,7 +36,7 @@ The wrapper is dropped entirely when every addon is reactively hidden — no emp
 
 ## Reactive `hidden` and `disabled`
 
-Both axes accept `DynamicValue<boolean>` — any of `boolean`, `Signal<boolean>`, or `Observable<boolean>`. Three equivalent shapes for the same toggle:
+Both axes accept `DynamicValue<boolean>` — any of `boolean`, `Signal<boolean>`, or `Observable<boolean>`. Four equivalent shapes for the same toggle:
 
 ```typescript
 { ..., hidden: true }                              // Static — JSON-safe.

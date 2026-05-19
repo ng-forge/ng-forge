@@ -28,7 +28,7 @@ import type { MatButtonAddon } from '../types/addons';
         [attr.aria-label]="(ariaLabel() | dynamicText | async) || null"
         (click)="action.dispatch()"
       >
-        <mat-icon>{{ addon().icon }}</mat-icon>
+        <mat-icon aria-hidden="true">{{ addon().icon }}</mat-icon>
       </button>
     } @else {
       <button
@@ -40,7 +40,7 @@ import type { MatButtonAddon } from '../types/addons';
         (click)="action.dispatch()"
       >
         @if (addon().icon; as icon) {
-          <mat-icon>{{ icon }}</mat-icon>
+          <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
         }
         {{ label() | dynamicText | async }}
       </button>

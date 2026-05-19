@@ -16,13 +16,13 @@ Pick the leftmost variant that covers your case. Most addon buttons map to a pre
 
 Five presets ship with the library, available in every adapter:
 
-| Preset                         | Behaviour                                                                                                                                                          |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `'clear'`                      | Empties the field value (writes `''`).                                                                                                                             |
-| `'reset'`                      | Restores the field s configured default value from the form s `defaultValues` map (resolved at click time). Falls back to empty when no default is reachable.      |
-| `'paste'`                      | Reads from the system clipboard (`navigator.clipboard.readText()`) and writes the result to the field.                                                             |
-| `'copy'`                       | Writes the field s current value to the system clipboard (`navigator.clipboard.writeText`).                                                                        |
-| `'toggle-password-visibility'` | Flips the host input s `type` between `'password'` and `'text'`. No-op (warning logged) when used outside an input-style field that exposes a type-override token. |
+| Preset                         | Behaviour                                                                                                                                                                                       |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'clear'`                      | Empties the field value. Writes `''` for string fields and `undefined` for non-string fields (numeric, date, object) so the field's declared type is preserved.                                 |
+| `'reset'`                      | Restores the field s configured default value from the form s `defaultValues` map (resolved at click time). Falls back to `''` / `undefined` (matching `'clear'`) when no default is reachable. |
+| `'paste'`                      | Reads from the system clipboard (`navigator.clipboard.readText()`) and writes the result to the field.                                                                                          |
+| `'copy'`                       | Writes the field s current value to the system clipboard (`navigator.clipboard.writeText`).                                                                                                     |
+| `'toggle-password-visibility'` | Flips the host input s `type` between `'password'` and `'text'`. No-op (warning logged) when used outside an input-style field that exposes a type-override token.                              |
 
 All presets are JSON-safe. For form submission, use the dedicated `'submit'` field type — it is intentionally not exposed as a preset.
 
@@ -127,8 +127,9 @@ For prototypes or scenarios where the handler can t live in JSON, pass a functio
   icon: 'add',
   ariaLabel: 'Append marker',
   action: (ctx) => {
+    if (!isFieldBoundContext(ctx)) return; // orphan — nothing to write to
     const current = typeof ctx.value === 'string' ? ctx.value : '';
-    ctx.setValue?.(`${current}+`);
+    ctx.setValue(`${current}+`); // narrowed: no optional chain needed
   },
 }
 ```
@@ -169,12 +170,16 @@ JSON cannot carry `Signal` / `Observable` / function values, so two questions co
 
 Three patterns, in order of preference:
 
-1. **Pre-process the JSON in app code.** Before passing the parsed config to `DynamicForm`, wrap reactive axes with `computed(...)` against your app's signals. This keeps the wire format JSON-safe and the runtime reactive — your bridge code is the only place that needs to know app state.
+1. **Pre-process the JSON in app code.** Before passing the parsed config to `DynamicForm`, walk the parsed tree and replace reactive axes with `computed(...)` against your app's signals. This keeps the wire format JSON-safe and the runtime reactive — your bridge code is the only place that needs to know app state.
 
    ```typescript
-   const config = enrichConfig(jsonFromApi, {
-     fields: { search: { addons: { suffix: { hidden: computed(() => !hasValue()) } } } },
-   });
+   const config = JSON.parse(jsonFromApi) as FormConfig;
+   // Locate the target addon and overwrite its `hidden` axis with a Signal/Observable.
+   const search = config.fields?.find((f) => f.key === 'search');
+   const clearAddon = search?.addons?.find((a) => a.slot === 'suffix');
+   if (clearAddon) {
+     (clearAddon as { hidden: unknown }).hidden = computed(() => !hasValue());
+   }
    ```
 
 2. **Express the gate as a form-level derivation or condition.** When the reactive axis depends on form values rather than out-of-band app state, model it as a derivation on the host field's `logic` block. The condition lives in JSON (it's a string-expression DSL) and the addon stays static.

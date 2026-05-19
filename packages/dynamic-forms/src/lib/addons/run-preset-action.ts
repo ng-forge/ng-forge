@@ -59,12 +59,11 @@ export async function runPresetAction(
 ): Promise<void> {
   // Guard against orphan dispatches — none of the built-in presets do
   // anything useful without a host field, except `copy` and `paste` which
-  // only need the clipboard API. We use the field-key emptiness as the
-  // discriminator rather than `isFieldBoundContext` because callers (incl.
-  // unit-test fixtures) sometimes hand us a context with `form: null` plus
-  // a working `setValue` writer — orphan in form-tree terms but a perfectly
-  // valid mutate-the-field-value request.
-  if (ctx.field.key === '' && preset !== 'copy' && preset !== 'paste') {
+  // only need the clipboard API. `ctx.setValue` is the canonical orphan
+  // signal per the `AddonActionContext` discriminated union (orphan variant
+  // declares `setValue?: undefined`). Field-key emptiness is unreliable:
+  // a legitimate root-level keyless field would be misclassified.
+  if (typeof ctx.setValue !== 'function' && preset !== 'copy' && preset !== 'paste') {
     collaborators.logger.warn(`preset '${String(preset)}' fired without a host field context — ignoring.`);
     return;
   }
@@ -121,19 +120,20 @@ export async function runPresetAction(
         collaborators.logger.warn(`preset 'toggle-password-visibility' has no effect outside a '${fieldLabel}' field.`);
         return;
       }
-      // Refuse to flip non-password inputs into password. Without this guard
-      // an `email`/`number`/`tel` input silently becomes `password` on first
-      // click. Guard fires only when the adapter wires `baselineType` AND
-      // the override hasn't been touched yet — preserves backward compat
-      // when the adapter hasn't opted in.
+      // Refuse to flip non-password inputs. Re-check on EVERY dispatch (not
+      // just when override is undefined) because `props().type` can change
+      // reactively after the first toggle — e.g., 'password' → 'email'. Once
+      // the override is touched, only the override is canonical for the
+      // current visible/hidden state; the baseline still gates whether
+      // toggling makes semantic sense for this field.
       const baseline = collaborators.baselineType?.();
-      const current = override();
-      if (current === undefined && baseline !== undefined && baseline !== 'password') {
+      if (baseline !== undefined && baseline !== 'password') {
         collaborators.logger.warn(
           `preset 'toggle-password-visibility' refused: host '${fieldLabel}' has type '${baseline}', not 'password'.`,
         );
         return;
       }
+      const current = override();
       override.set(current === 'text' ? 'password' : 'text');
       return;
     }

@@ -94,8 +94,8 @@ export interface TemplateAddon extends BaseAddon {
  * `JSON.stringify`/`parse`. The lenient validator drops this kind when the
  * config originated from JSON (set via `validateFormConfig({ source: 'json' })`).
  */
-export interface ComponentAddon<TInputs = unknown> extends BaseAddon {
+export interface ComponentAddon extends BaseAddon {
   readonly kind: 'component';
   readonly component: () => Promise<Type<unknown> | { default: Type<unknown> }>;
-  readonly inputs?: TInputs;
+  readonly inputs?: Record<string, unknown>;
 }

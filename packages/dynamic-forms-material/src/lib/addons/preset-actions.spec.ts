@@ -3,12 +3,23 @@ import type { AddonActionContext } from '@ng-forge/dynamic-forms';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { type PresetCollaborators, runMatPresetAction } from './preset-actions';
 
-function makeCtx(value: unknown, setValue?: (next: unknown) => void): AddonActionContext {
+function makeCtx(value: unknown, setValue: (next: unknown) => void = () => undefined): AddonActionContext {
+  // Default ctx is field-bound (has `setValue`) so preset orphan-guard does
+  // NOT fire. Tests that want orphan behavior pass `undefined` explicitly
+  // via `makeOrphanCtx`.
   return {
     field: { key: 'q', type: 'input' },
     form: null,
     value,
     setValue,
+  } as unknown as AddonActionContext;
+}
+
+function makeOrphanCtx(value: unknown): AddonActionContext {
+  return {
+    field: { key: 'q', type: 'input' },
+    form: null,
+    value,
   };
 }
 
@@ -212,6 +223,37 @@ describe('runMatPresetAction', () => {
       await runMatPresetAction('toggle-password-visibility', makeCtx(''), collab);
       expect(logger.warn).toHaveBeenCalled();
       expect(String(logger.warn.mock.calls[0]?.[0] ?? '')).toContain('toggle-password-visibility');
+    });
+
+    it('refuses to flip non-password baseline types and leaves typeOverride untouched', async () => {
+      const typeOverride: WritableSignal<string | undefined> = signal<string | undefined>(undefined);
+      const { collab, logger } = makeCollaborators({
+        typeOverride,
+        baselineType: () => 'email',
+      });
+      await runMatPresetAction('toggle-password-visibility', makeCtx(''), collab);
+      expect(typeOverride()).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalled();
+      expect(String(logger.warn.mock.calls[0]?.[0] ?? '')).toContain('email');
+    });
+
+    it('re-checks baselineType on every dispatch (refuses flip after a prior toggle)', async () => {
+      // Baseline starts as 'password' → first toggle succeeds → baseline
+      // mutates to 'email' → second toggle must refuse without corrupting
+      // the override.
+      let baseline: string | undefined = 'password';
+      const typeOverride: WritableSignal<string | undefined> = signal<string | undefined>(undefined);
+      const { collab, logger } = makeCollaborators({
+        typeOverride,
+        baselineType: () => baseline,
+      });
+      await runMatPresetAction('toggle-password-visibility', makeCtx(''), collab);
+      expect(typeOverride()).toBe('text');
+
+      baseline = 'email';
+      await runMatPresetAction('toggle-password-visibility', makeCtx(''), collab);
+      expect(typeOverride()).toBe('text'); // unchanged
+      expect(logger.warn).toHaveBeenCalled();
     });
   });
 

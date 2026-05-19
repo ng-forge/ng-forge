@@ -20,6 +20,20 @@ export const ADDON_KIND_COMPONENT_CACHE = new InjectionToken<Map<string, Type<un
 });
 
 /**
+ * Public shape returned by {@link injectAddonKindRegistry}. Pinned explicitly
+ * so the API extractor doesn't churn between versions when the inner factory
+ * gets refactored.
+ */
+export interface AddonKindRegistryRef {
+  getKind(kind: string): AddonKindDefinition | undefined;
+  hasKind(kind: string): boolean;
+  getKindNames(): string[];
+  loadKindComponent(kind: string): Promise<Type<unknown>>;
+  getLoadedKindComponent(kind: string): Type<unknown> | undefined;
+  readonly raw: ReadonlyMap<string, AddonKindDefinition>;
+}
+
+/**
  * Injection function for accessing the addon kind registry.
  *
  * Usage parallels {@link injectFieldRegistry}: lookup, lazy load, cache.
@@ -31,7 +45,7 @@ export const ADDON_KIND_COMPONENT_CACHE = new InjectionToken<Map<string, Type<un
  * const Component = await addonKinds.loadKindComponent('prime-icon');
  * ```
  */
-export function injectAddonKindRegistry() {
+export function injectAddonKindRegistry(): AddonKindRegistryRef {
   const registry = inject(ADDON_KIND_REGISTRY);
   const componentCache = inject(ADDON_KIND_COMPONENT_CACHE);
 

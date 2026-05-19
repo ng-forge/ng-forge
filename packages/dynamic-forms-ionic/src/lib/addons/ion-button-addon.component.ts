@@ -53,6 +53,9 @@ export class IonButtonAddonComponent {
    *  explicitly when they want adapter-styled coloring. */
   protected readonly color = computed(() => this.addon().color);
   protected readonly fill = computed(() => this.addon().fill ?? 'clear');
-  /** Icon-only when there is an icon but no label — drives the `slot` choice. */
-  protected readonly iconOnly = computed(() => this.icon() !== undefined && this.label() === undefined);
+  /** Icon-only when there is an icon but no label — drives the `slot` choice.
+   *  Truthy check on `label` mirrors Material's heuristic; empty-string label
+   *  is treated as "no label" so the button doesn't render an invisible text
+   *  slot beside the icon. */
+  protected readonly iconOnly = computed(() => !!this.icon() && !this.label());
 }

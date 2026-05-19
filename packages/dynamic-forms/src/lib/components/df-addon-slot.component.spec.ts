@@ -50,12 +50,11 @@ describe('DfAddonSlot — dispatcher', () => {
   describe('registry miss', () => {
     it('logs an actionable warning when the addon kind is unregistered', async () => {
       const { logger, el } = setup({ kinds: [], addon: TEXT_ADDON });
-      // The explicit effect runs synchronously for cache hit; for misses it dispatches the loader and falls
-      // through to the catch branch. Allow microtasks to flush.
-      await Promise.resolve();
-      await Promise.resolve();
+      // The explicit effect dispatches the loader; the `.catch` handler runs
+      // outside any NgZone task, so `whenStable` returns immediately. Poll
+      // until the warning lands — robust to any number of microtask hops.
+      await vi.waitFor(() => expect(logger.warn).toHaveBeenCalled());
 
-      expect(logger.warn).toHaveBeenCalled();
       const message = String(logger.warn.mock.calls[0]?.[0] ?? '');
       expect(message).toContain("Failed to load addon kind 'text'");
       expect(message).toContain('Registered kinds: (none)');
@@ -68,10 +67,8 @@ describe('DfAddonSlot — dispatcher', () => {
         kinds: [{ kind: 'icon', loadComponent: () => Promise.resolve(IconAddonStub) }],
         addon: TEXT_ADDON,
       });
-      await Promise.resolve();
-      await Promise.resolve();
+      await vi.waitFor(() => expect(logger.warn).toHaveBeenCalled());
 
-      expect(logger.warn).toHaveBeenCalled();
       const message = String(logger.warn.mock.calls[0]?.[0] ?? '');
       expect(message).toContain('Registered kinds: icon');
     });
@@ -88,12 +85,8 @@ describe('DfAddonSlot — dispatcher', () => {
         ],
         addon: { kind: 'broken', slot: 'prefix' } as unknown as AnyAddon,
       });
-      // Wait for the loader promise + catch handler.
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
+      await vi.waitFor(() => expect(logger.warn).toHaveBeenCalled());
 
-      expect(logger.warn).toHaveBeenCalled();
       const message = String(logger.warn.mock.calls[0]?.[0] ?? '');
       expect(message).toContain("Failed to load addon kind 'broken'");
       expect(message).toMatch(/module not found/);
@@ -111,11 +104,8 @@ describe('DfAddonSlot — dispatcher', () => {
         ],
         addon: { kind: 'empty', slot: 'prefix' } as unknown as AnyAddon,
       });
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
+      await vi.waitFor(() => expect(logger.warn).toHaveBeenCalled());
 
-      expect(logger.warn).toHaveBeenCalled();
       const message = String(logger.warn.mock.calls[0]?.[0] ?? '');
       expect(message).toMatch(/resolved to null|DynamicFormError/);
     });
@@ -132,11 +122,7 @@ describe('DfAddonSlot — dispatcher', () => {
         ],
         addon: { kind: 'sync-throw', slot: 'prefix' } as unknown as AnyAddon,
       });
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
-
-      expect(logger.warn).toHaveBeenCalled();
+      await vi.waitFor(() => expect(logger.warn).toHaveBeenCalled());
     });
   });
 
@@ -146,7 +132,7 @@ describe('DfAddonSlot — dispatcher', () => {
         kinds: [{ kind: 'text', loadComponent: () => Promise.resolve(IconAddonStub) }],
         addon: { kind: 'text', slot: 'prefix', text: 'hi', hidden: true } as unknown as AnyAddon,
       });
-      await Promise.resolve();
+      await fixture.whenStable();
       fixture.detectChanges();
       expect(el.style.display).toBe('none');
     });
@@ -156,7 +142,7 @@ describe('DfAddonSlot — dispatcher', () => {
         kinds: [{ kind: 'text', loadComponent: () => Promise.resolve(IconAddonStub) }],
         addon: { kind: 'text', slot: 'prefix', text: 'hi', hidden: false } as unknown as AnyAddon,
       });
-      await Promise.resolve();
+      await fixture.whenStable();
       fixture.detectChanges();
       expect(el.style.display).toBe('');
     });
@@ -168,25 +154,25 @@ describe('DfAddonSlot — dispatcher', () => {
         kinds: [{ kind: 'text', loadComponent: () => Promise.resolve(IconAddonStub) }],
         addon: TEXT_ADDON,
       });
-      // Allow the loader microtask + the explicitEffect that captures it to settle.
-      await Promise.resolve();
-      await Promise.resolve();
-      fixture.detectChanges();
-
-      // The stub component renders 'icon-rendered' as its template.
-      expect(el.textContent).toContain('icon-rendered');
+      // Wait until the loader resolves and the dispatcher renders the stub
+      // (textContent flips from '' once `*ngComponentOutlet` mounts).
+      await vi.waitFor(() => {
+        fixture.detectChanges();
+        expect(el.textContent).toContain('icon-rendered');
+      });
     });
 
     it('synchronously renders on a cache hit (no microtask gap)', async () => {
       // Prime the loader once so the second slot uses the synchronous fast path
       // in `<df-addon-slot>` (the `cached` branch at the top of the effect).
-      const { fixture: warmup } = setup({
+      const { fixture: warmup, el: warmupEl } = setup({
         kinds: [{ kind: 'text', loadComponent: () => Promise.resolve(IconAddonStub) }],
         addon: TEXT_ADDON,
       });
-      await Promise.resolve();
-      await Promise.resolve();
-      warmup.detectChanges();
+      await vi.waitFor(() => {
+        warmup.detectChanges();
+        expect(warmupEl.textContent).toContain('icon-rendered');
+      });
 
       // Second instance under the same TestBed (and thus the same root
       // ADDON_KIND_COMPONENT_CACHE) hits the cache synchronously.
@@ -204,7 +190,7 @@ describe('DfAddonSlot — dispatcher', () => {
         kinds: [{ kind: 'text', loadComponent: () => Promise.resolve(IconAddonStub) }],
         addon: { kind: 'text', slot: 'suffix', text: 'hi' } as unknown as AnyAddon,
       });
-      await Promise.resolve();
+      await fixture.whenStable();
       fixture.detectChanges();
       expect(el.getAttribute('slot')).toBe('suffix');
     });
@@ -214,7 +200,7 @@ describe('DfAddonSlot — dispatcher', () => {
         kinds: [{ kind: 'text', loadComponent: () => Promise.resolve(IconAddonStub) }],
         addon: { kind: 'text', slot: 'prefix', text: 'hi', className: 'my-addon' } as unknown as AnyAddon,
       });
-      await Promise.resolve();
+      await fixture.whenStable();
       fixture.detectChanges();
       expect(el.getAttribute('class')).toBe('my-addon');
     });

@@ -213,15 +213,251 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         required: false,
       },
     },
-    example: `{
-  slot: 'suffix',
-  kind: 'prime-button',
-  icon: 'times',
-  ariaLabel: 'Clear',
-  preset: 'clear',
-  hidden: computed(() => formValue().search?.length === 0),
-}`,
+    example: `{ slot: 'suffix', kind: 'prime-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }`,
     minimalExample: `{ slot: 'suffix', kind: 'prime-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }`,
+  },
+
+  // ─── Material-shipped kinds ──────────────────────────────────────────────
+  {
+    kind: 'mat-icon',
+    category: 'adapter',
+    package: '@ng-forge/dynamic-forms-material',
+    adapter: 'material',
+    description: 'Renders `<mat-icon>{icon}</mat-icon>` — Material Icons ligature name.',
+    jsonSafe: true,
+    props: {
+      ...UNIVERSAL_BASE_PROPS,
+      icon: {
+        name: 'icon',
+        type: 'string',
+        description: 'Material Icons ligature (e.g., "search", "close", "visibility").',
+        required: true,
+      },
+      ariaLabel: {
+        name: 'ariaLabel',
+        type: 'DynamicText',
+        description: 'Accessible label for icons that convey meaning. Decorative icons omit this.',
+        required: false,
+      },
+    },
+    example: `{ slot: 'prefix', kind: 'mat-icon', icon: 'search', ariaLabel: 'Search' }`,
+    minimalExample: `{ slot: 'prefix', kind: 'mat-icon', icon: 'search' }`,
+  },
+  {
+    kind: 'mat-button',
+    category: 'adapter',
+    package: '@ng-forge/dynamic-forms-material',
+    adapter: 'material',
+    description:
+      'Renders `<button mat-icon-button>` (icon-only) or `<button mat-button>` (labeled) with optional color, reactive loading, and exactly one click handler (preset, actionRef, or action).',
+    jsonSafe: true,
+    props: {
+      ...UNIVERSAL_BASE_PROPS,
+      icon: { name: 'icon', type: 'string', description: 'Material Icons ligature.', required: false },
+      label: { name: 'label', type: 'DynamicText', description: 'Visible button label.', required: false },
+      ariaLabel: {
+        name: 'ariaLabel',
+        type: 'DynamicText',
+        description: 'REQUIRED when icon-only (no `label`). Used as `aria-label`.',
+        required: false,
+      },
+      color: {
+        name: 'color',
+        type: "'primary' | 'accent' | 'warn'",
+        description: 'Material button color variant.',
+        required: false,
+      },
+      loading: {
+        name: 'loading',
+        type: 'boolean | Signal<boolean> | Observable<boolean>',
+        description: 'Reactive loading state — disables the button when truthy.',
+        required: false,
+      },
+      preset: {
+        name: 'preset',
+        type: "'clear' | 'reset' | 'paste' | 'copy' | 'toggle-password-visibility' | string",
+        description: 'Built-in preset action. Mutually exclusive with `actionRef` and `action`.',
+        required: false,
+      },
+      actionRef: {
+        name: 'actionRef',
+        type: 'string',
+        description: 'Typed handle to a handler registered via `provideAddonActions(...)`. JSON-safe.',
+        required: false,
+      },
+      action: {
+        name: 'action',
+        type: '(ctx: AddonActionContext) => void',
+        description: 'Inline click handler (code-only — dropped from JSON-derived configs).',
+        required: false,
+      },
+    },
+    example: `{ slot: 'suffix', kind: 'mat-button', icon: 'close', ariaLabel: 'Clear', preset: 'clear' }`,
+    minimalExample: `{ slot: 'suffix', kind: 'mat-button', icon: 'close', ariaLabel: 'Clear', preset: 'clear' }`,
+  },
+
+  // ─── Bootstrap-shipped kinds ─────────────────────────────────────────────
+  {
+    kind: 'bs-icon',
+    category: 'adapter',
+    package: '@ng-forge/dynamic-forms-bootstrap',
+    adapter: 'bootstrap',
+    description: 'Renders `<i class="bi bi-{icon}">` — Bootstrap Icons name without the `bi-` prefix.',
+    jsonSafe: true,
+    props: {
+      ...UNIVERSAL_BASE_PROPS,
+      icon: {
+        name: 'icon',
+        type: 'string',
+        description: 'Bootstrap Icons name without the `bi-` prefix (e.g., "search", "x", "eye").',
+        required: true,
+      },
+      ariaLabel: {
+        name: 'ariaLabel',
+        type: 'DynamicText',
+        description: 'Accessible label for icons that convey meaning. Decorative icons omit this.',
+        required: false,
+      },
+    },
+    example: `{ slot: 'prefix', kind: 'bs-icon', icon: 'search', ariaLabel: 'Search' }`,
+    minimalExample: `{ slot: 'prefix', kind: 'bs-icon', icon: 'search' }`,
+  },
+  {
+    kind: 'bs-button',
+    category: 'adapter',
+    package: '@ng-forge/dynamic-forms-bootstrap',
+    adapter: 'bootstrap',
+    description:
+      'Renders `<button class="btn btn-outline-{severity}">` with optional icon, label, severity, and reactive loading (swaps to a spinner).',
+    jsonSafe: true,
+    props: {
+      ...UNIVERSAL_BASE_PROPS,
+      icon: { name: 'icon', type: 'string', description: 'Bootstrap Icons name without the `bi-` prefix.', required: false },
+      label: { name: 'label', type: 'DynamicText', description: 'Visible button label.', required: false },
+      ariaLabel: {
+        name: 'ariaLabel',
+        type: 'DynamicText',
+        description: 'REQUIRED when icon-only (no `label`). Used as `aria-label`.',
+        required: false,
+      },
+      severity: {
+        name: 'severity',
+        type: "'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'",
+        description: 'Bootstrap button variant (mapped to `btn-outline-{severity}`).',
+        required: false,
+      },
+      loading: {
+        name: 'loading',
+        type: 'boolean | Signal<boolean> | Observable<boolean>',
+        description: 'Reactive loading state — swaps the button content for a spinner.',
+        required: false,
+      },
+      preset: {
+        name: 'preset',
+        type: "'clear' | 'reset' | 'paste' | 'copy' | 'toggle-password-visibility' | string",
+        description: 'Built-in preset action. Mutually exclusive with `actionRef` and `action`.',
+        required: false,
+      },
+      actionRef: {
+        name: 'actionRef',
+        type: 'string',
+        description: 'Typed handle to a handler registered via `provideAddonActions(...)`. JSON-safe.',
+        required: false,
+      },
+      action: {
+        name: 'action',
+        type: '(ctx: AddonActionContext) => void',
+        description: 'Inline click handler (code-only — dropped from JSON-derived configs).',
+        required: false,
+      },
+    },
+    example: `{ slot: 'suffix', kind: 'bs-button', icon: 'x', ariaLabel: 'Clear', preset: 'clear' }`,
+    minimalExample: `{ slot: 'suffix', kind: 'bs-button', icon: 'x', ariaLabel: 'Clear', preset: 'clear' }`,
+  },
+
+  // ─── Ionic-shipped kinds ─────────────────────────────────────────────────
+  {
+    kind: 'ion-icon',
+    category: 'adapter',
+    package: '@ng-forge/dynamic-forms-ionic',
+    adapter: 'ionic',
+    description: 'Renders `<ion-icon name="{icon}">` — Ionicons name.',
+    jsonSafe: true,
+    props: {
+      ...UNIVERSAL_BASE_PROPS,
+      icon: {
+        name: 'icon',
+        type: 'string',
+        description: 'Ionicons name (e.g., "search-outline", "close-outline", "eye-outline").',
+        required: true,
+      },
+      ariaLabel: {
+        name: 'ariaLabel',
+        type: 'DynamicText',
+        description: 'Accessible label for icons that convey meaning. Decorative icons omit this.',
+        required: false,
+      },
+    },
+    example: `{ slot: 'prefix', kind: 'ion-icon', icon: 'search-outline', ariaLabel: 'Search' }`,
+    minimalExample: `{ slot: 'prefix', kind: 'ion-icon', icon: 'search-outline' }`,
+  },
+  {
+    kind: 'ion-button',
+    category: 'adapter',
+    package: '@ng-forge/dynamic-forms-ionic',
+    adapter: 'ionic',
+    description:
+      'Renders `<ion-button>` with optional icon, label, color, fill, and reactive loading (renders an `<ion-spinner>`). Interactive `ion-button` addons render OUTSIDE `<ion-input>` as flex siblings because Ionic shadow CSS forces zero-size on buttons projected through start/end slots.',
+    jsonSafe: true,
+    props: {
+      ...UNIVERSAL_BASE_PROPS,
+      icon: { name: 'icon', type: 'string', description: 'Ionicons name.', required: false },
+      label: { name: 'label', type: 'DynamicText', description: 'Visible button label.', required: false },
+      ariaLabel: {
+        name: 'ariaLabel',
+        type: 'DynamicText',
+        description: 'REQUIRED when icon-only (no `label`). Used as `aria-label`.',
+        required: false,
+      },
+      color: {
+        name: 'color',
+        type: "'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark'",
+        description: 'Ionic button color.',
+        required: false,
+      },
+      fill: {
+        name: 'fill',
+        type: "'clear' | 'outline' | 'solid' | 'default'",
+        description: 'Ionic button fill style.',
+        required: false,
+      },
+      loading: {
+        name: 'loading',
+        type: 'boolean | Signal<boolean> | Observable<boolean>',
+        description: 'Reactive loading state — renders an `<ion-spinner>`.',
+        required: false,
+      },
+      preset: {
+        name: 'preset',
+        type: "'clear' | 'reset' | 'paste' | 'copy' | 'toggle-password-visibility' | string",
+        description: 'Built-in preset action. Mutually exclusive with `actionRef` and `action`.',
+        required: false,
+      },
+      actionRef: {
+        name: 'actionRef',
+        type: 'string',
+        description: 'Typed handle to a handler registered via `provideAddonActions(...)`. JSON-safe.',
+        required: false,
+      },
+      action: {
+        name: 'action',
+        type: '(ctx: AddonActionContext) => void',
+        description: 'Inline click handler (code-only — dropped from JSON-derived configs).',
+        required: false,
+      },
+    },
+    example: `{ slot: 'suffix', kind: 'ion-button', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' }`,
+    minimalExample: `{ slot: 'suffix', kind: 'ion-button', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' }`,
   },
 ];
 
@@ -244,6 +480,21 @@ export const FIELD_ADDON_SUPPORT: FieldAddonSupportInfo[] = [
   {
     fieldType: 'prime-input',
     adapter: 'primeng',
+    slots: ['prefix', 'suffix'],
+  },
+  {
+    fieldType: 'mat-input',
+    adapter: 'material',
+    slots: ['prefix', 'suffix'],
+  },
+  {
+    fieldType: 'bs-input',
+    adapter: 'bootstrap',
+    slots: ['prefix', 'suffix'],
+  },
+  {
+    fieldType: 'ionic-input',
+    adapter: 'ionic',
     slots: ['prefix', 'suffix'],
   },
 ];

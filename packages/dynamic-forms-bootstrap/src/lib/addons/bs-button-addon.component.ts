@@ -27,7 +27,7 @@ import type { BsButtonAddon } from '../types/addons';
       @if (action.loading()) {
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
       } @else if (iconClass(); as ic) {
-        <i [class]="ic"></i>
+        <i [class]="ic" aria-hidden="true"></i>
       }
       @if (label(); as l) {
         <span>{{ l | dynamicText | async }}</span>

@@ -13,12 +13,15 @@ function makeLogger(): Logger {
 }
 
 function makeCtx(overrides: Partial<AddonActionContext> = {}): AddonActionContext {
+  // Default ctx is field-bound (has `setValue`) so preset orphan-guard does
+  // NOT fire. Tests that want orphan behavior pass `setValue: undefined`.
   return {
     field: { key: 'q', type: 'input' },
     form: null,
     value: 'hello',
+    setValue: () => undefined,
     ...overrides,
-  };
+  } as unknown as AddonActionContext;
 }
 
 describe('runBsPresetAction', () => {
