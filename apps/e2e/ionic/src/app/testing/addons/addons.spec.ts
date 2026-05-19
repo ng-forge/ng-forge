@@ -3,16 +3,13 @@ import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fix
 setupTestLogging();
 setupConsoleCheck();
 
-// Ionic-specific limitation flagged for follow-up:
-//
-// `<ion-input>` exposes shadow-DOM slots `start` / `end`, but they are
-// designed for decorative inline content (`<ion-icon>`). When `<ion-button>`
-// is projected through those slots, Ionic's shadow-DOM CSS forces the
-// button to zero-size / non-interactable — visibility checks fail, clicks
-// time out. Unit specs for ion-button-addon still verify the rendering
-// logic; the e2e suite covers the icon/text/decorative paths that do work.
-// Interactive button addons need to render OUTSIDE <ion-input> (sibling
-// flex layout) — tracked as a follow-up enhancement.
+// Ionic projects shadow-DOM `start` / `end` slots designed for decorative
+// inline content (ion-icon). Interactive ion-button addons render OUTSIDE
+// <ion-input> as flex siblings (df-ion-input-row) so Ionic's shadow CSS
+// doesn't force them to zero-size / non-interactable. Selectors use the
+// accessibility tree (getByRole) because Ionic's <ion-button> forwards
+// aria-label into its shadow DOM rather than exposing it as an HTML
+// attribute on the host.
 
 test.describe('Addons', () => {
   test.describe('Icon prefix', () => {
@@ -30,7 +27,7 @@ test.describe('Addons', () => {
   });
 
   test.describe('Clear button (canonical preset)', () => {
-    test.fixme('renders prefix icon and suffix button', async ({ page, helpers }) => {
+    test('renders prefix icon and suffix button', async ({ page, helpers }) => {
       await page.goto('/#/testing/addons/clear-button');
       await page.waitForLoadState('networkidle');
 
@@ -40,18 +37,17 @@ test.describe('Addons', () => {
       const input = scenario.locator('ion-input input');
       await expect(input).toHaveValue('initial value');
 
-      // Suffix slot contains the clear <ion-button> with aria-label 'Clear'.
-      const clearButton = scenario.locator('ion-input span[slot="end"] df-ion-button-addon ion-button[aria-label="Clear"]');
+      const clearButton = scenario.getByRole('button', { name: 'Clear' });
       await expect(clearButton).toBeVisible();
     });
 
-    test.fixme('clicking the clear button empties the input value', async ({ page, helpers }) => {
+    test('clicking the clear button empties the input value', async ({ page, helpers }) => {
       await page.goto('/#/testing/addons/clear-button');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('clear-button');
       const input = scenario.locator('ion-input input');
-      const clearButton = scenario.locator('ion-input span[slot="end"] df-ion-button-addon ion-button[aria-label="Clear"]');
+      const clearButton = scenario.getByRole('button', { name: 'Clear' });
 
       await expect(input).toHaveValue('initial value');
       await clearButton.click();
@@ -74,13 +70,13 @@ test.describe('Addons', () => {
   });
 
   test.describe('Password visibility toggle', () => {
-    test.fixme('input starts as type=password and flips on toggle', async ({ page, helpers }) => {
+    test('input starts as type=password and flips on toggle', async ({ page, helpers }) => {
       await page.goto('/#/testing/addons/password-toggle');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('password-toggle');
       const input = scenario.locator('ion-input input');
-      const toggle = scenario.locator('ion-input span[slot="end"] df-ion-button-addon ion-button[aria-label="Toggle password visibility"]');
+      const toggle = scenario.getByRole('button', { name: 'Toggle password visibility' });
 
       await expect(input).toHaveAttribute('type', 'password');
 
@@ -93,23 +89,26 @@ test.describe('Addons', () => {
   });
 
   test.describe('Multiple addons', () => {
-    test.fixme('renders prefix + suffix addons in declaration order', async ({ page, helpers }) => {
+    test('renders prefix + suffix addons in declaration order', async ({ page, helpers }) => {
       await page.goto('/#/testing/addons/multi-addons');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-addons');
       await expect(scenario).toBeVisible();
 
-      const prefixAddons = scenario.locator('ion-input span[slot="start"]');
-      const suffixAddons = scenario.locator('ion-input span[slot="end"]');
+      // Decorative addons (icon + text) stay inside ion-input slots; the
+      // interactive ion-button is rendered outside as a flex sibling.
+      const prefixDecorative = scenario.locator('ion-input span[slot="start"]');
+      const suffixDecorative = scenario.locator('ion-input span[slot="end"]');
 
-      await expect(prefixAddons).toHaveCount(2);
-      await expect(suffixAddons).toHaveCount(2);
+      await expect(prefixDecorative).toHaveCount(2);
+      await expect(prefixDecorative.nth(0).locator('ion-icon[name="cash-outline"]')).toBeVisible();
+      await expect(prefixDecorative.nth(1)).toContainText('$');
 
-      await expect(prefixAddons.nth(0).locator('ion-icon[name="cash-outline"]')).toBeVisible();
-      await expect(prefixAddons.nth(1)).toContainText('$');
-      await expect(suffixAddons.nth(0)).toContainText('USD');
-      await expect(suffixAddons.nth(1).locator('ion-button[aria-label="Clear"]')).toBeVisible();
+      await expect(suffixDecorative).toHaveCount(1);
+      await expect(suffixDecorative.first()).toContainText('USD');
+
+      await expect(scenario.getByRole('button', { name: 'Clear' })).toBeVisible();
     });
   });
 
@@ -120,8 +119,8 @@ test.describe('Addons', () => {
 
       const scenario = helpers.getScenario('severity-variants');
       await expect(scenario).toBeVisible();
-      // 9 colours → 9 inputs → 9 suffix buttons.
-      await expect(scenario.locator('ion-input span[slot="end"] df-ion-button-addon ion-button')).toHaveCount(9);
+      // 9 colours → 9 inputs → 9 suffix buttons rendered outside ion-input.
+      await expect(scenario.locator('df-ion-button-addon ion-button')).toHaveCount(9);
     });
   });
 
@@ -131,26 +130,26 @@ test.describe('Addons', () => {
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('labelled-button');
-      const button = scenario.locator('ion-input span[slot="end"] df-ion-button-addon ion-button');
+      const button = scenario.locator('df-ion-button-addon ion-button');
       await expect(button).toBeVisible();
-      // Labeled branch uses slot="start" for the icon, label as text.
+      // Labeled branch uses slot="start" for the icon (inside ion-button), label as text.
       await expect(button.locator('ion-icon[name="search-outline"][slot="start"]')).toBeVisible();
       await expect(button).toContainText('Search');
     });
   });
 
   test.describe('Disabled addon', () => {
-    test.fixme('renders the button in a disabled state and click is a no-op', async ({ page, helpers }) => {
+    test('renders the button in a disabled state and click is a no-op', async ({ page, helpers }) => {
       await page.goto('/#/testing/addons/disabled-addon');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('disabled-addon');
       const input = scenario.locator('ion-input input');
-      const button = scenario.locator('ion-input span[slot="end"] df-ion-button-addon ion-button[aria-label="Clear"]');
+      const button = scenario.getByRole('button', { name: 'Clear' });
 
       await expect(input).toHaveValue('locked');
-      // ion-button reflects disabled via aria-disabled / disabled property on the host.
-      await expect(button).toHaveAttribute('disabled', /.*/);
+      // ion-button reflects disabled via the disabled attribute on the host.
+      await expect(button).toBeDisabled();
 
       await button.click({ force: true }).catch(() => {
         /* disabled — click ignored */
@@ -160,13 +159,13 @@ test.describe('Addons', () => {
   });
 
   test.describe('Reset preset', () => {
-    test.fixme('clicking reset restores the configured default value', async ({ page, helpers }) => {
+    test('clicking reset restores the configured default value', async ({ page, helpers }) => {
       await page.goto('/#/testing/addons/reset-preset');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('reset-preset');
       const input = scenario.locator('ion-input input');
-      const resetButton = scenario.locator('ion-input span[slot="end"] df-ion-button-addon ion-button[aria-label="Reset"]');
+      const resetButton = scenario.getByRole('button', { name: 'Reset' });
 
       await expect(input).toHaveValue('default');
       await helpers.clearAndFill(input, 'changed');
@@ -183,7 +182,7 @@ test.describe('Addons', () => {
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('decorative-button');
-      const button = scenario.locator('ion-input span[slot="end"] df-ion-button-addon ion-button');
+      const button = scenario.locator('df-ion-button-addon ion-button');
       await expect(button).toBeVisible();
       await expect(button).toContainText('Info');
       await button.click();
@@ -192,13 +191,13 @@ test.describe('Addons', () => {
   });
 
   test.describe('Inline action', () => {
-    test.fixme('clicking the button runs the inline handler and mutates the value', async ({ page, helpers }) => {
+    test('clicking the button runs the inline handler and mutates the value', async ({ page, helpers }) => {
       await page.goto('/#/testing/addons/inline-action');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('inline-action');
       const input = scenario.locator('ion-input input');
-      const addButton = scenario.locator('ion-input span[slot="end"] df-ion-button-addon ion-button[aria-label="Add"]');
+      const addButton = scenario.getByRole('button', { name: 'Add' });
 
       await expect(input).toHaveValue('');
       await addButton.click();
@@ -209,13 +208,13 @@ test.describe('Addons', () => {
   });
 
   test.describe('actionRef (registered handler)', () => {
-    test.fixme('dispatches through the addon-action registry to the named handler', async ({ page, helpers }) => {
+    test('dispatches through the addon-action registry to the named handler', async ({ page, helpers }) => {
       await page.goto('/#/testing/addons/action-ref');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('action-ref');
       const input = scenario.locator('ion-input input');
-      const sendButton = scenario.locator('ion-input span[slot="end"] df-ion-button-addon ion-button[aria-label="Send"]');
+      const sendButton = scenario.getByRole('button', { name: 'Send' });
 
       await expect(input).toHaveValue('');
       await sendButton.click();
