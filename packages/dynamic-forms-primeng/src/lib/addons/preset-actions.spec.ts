@@ -15,22 +15,16 @@ function makeLogger(): LoggerStub {
 }
 
 function makeCtx<T = unknown>(value: T = '' as T): AddonActionContext<T> {
-  // Default ctx is field-bound (has `setValue`) so preset orphan-guard does
-  // NOT fire. Tests that want orphan behavior use `makeOrphanCtx` instead.
+  // Default ctx is field-bound (has `setValue`) so the preset orphan-guard
+  // does NOT fire. The `as unknown` cast bridges the discriminated union
+  // (form: null implies setValue?: undefined) — these tests deliberately
+  // exercise the writer in isolation from form-tree wiring.
   return {
     field: { key: 'host', type: 'input' },
     form: null,
     value,
     setValue: () => undefined,
   } as unknown as AddonActionContext<T>;
-}
-
-function makeOrphanCtx<T = unknown>(value: T = '' as T): AddonActionContext<T> {
-  return {
-    field: { key: 'host', type: 'input' },
-    form: null,
-    value,
-  };
 }
 
 /**

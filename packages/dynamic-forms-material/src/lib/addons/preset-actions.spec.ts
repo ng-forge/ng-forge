@@ -4,23 +4,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { type PresetCollaborators, runMatPresetAction } from './preset-actions';
 
 function makeCtx(value: unknown, setValue: (next: unknown) => void = () => undefined): AddonActionContext {
-  // Default ctx is field-bound (has `setValue`) so preset orphan-guard does
-  // NOT fire. Tests that want orphan behavior pass `undefined` explicitly
-  // via `makeOrphanCtx`.
+  // Default ctx is field-bound (has `setValue`) so the preset orphan-guard
+  // does NOT fire. The `as unknown` cast bridges the discriminated union
+  // (form: null implies setValue?: undefined) — these tests deliberately
+  // exercise the writer in isolation from form-tree wiring.
   return {
     field: { key: 'q', type: 'input' },
     form: null,
     value,
     setValue,
   } as unknown as AddonActionContext;
-}
-
-function makeOrphanCtx(value: unknown): AddonActionContext {
-  return {
-    field: { key: 'q', type: 'input' },
-    form: null,
-    value,
-  };
 }
 
 function makeCollaborators(overrides: Partial<PresetCollaborators> = {}): {
