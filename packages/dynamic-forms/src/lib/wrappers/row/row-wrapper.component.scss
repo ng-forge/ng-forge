@@ -26,7 +26,7 @@
 }
 
 :host-context(.df-gap-custom) {
-  --df-grid-gap: var(--row-custom-gap, 1rem);
+  --df-grid-gap: var(--df-row-custom-gap, 1rem);
 }
 
 :host-context(.df-row-mobile-stack) {

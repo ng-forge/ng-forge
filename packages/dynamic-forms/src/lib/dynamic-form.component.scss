@@ -14,7 +14,7 @@
 
   // Allow custom spacing for dynamic forms
   &.df-form-spacing-custom {
-    --df-grid-row-gap: var(--form-custom-spacing, 1.5rem);
+    --df-grid-row-gap: var(--df-form-custom-spacing, 1.5rem);
   }
 
   // Form-specific gap overrides
