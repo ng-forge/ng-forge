@@ -1,5 +1,5 @@
 import { WritableSignal } from '@angular/core';
-import { AddonActionContext, AddonActionPreset, isFieldBoundContext } from '../models/addon/addon-action';
+import { AddonActionContext, AddonActionPreset } from '../models/addon/addon-action';
 import type { Logger } from '../providers/features/logger/logger.interface';
 
 /**
@@ -59,9 +59,12 @@ export async function runPresetAction(
 ): Promise<void> {
   // Guard against orphan dispatches — none of the built-in presets do
   // anything useful without a host field, except `copy` and `paste` which
-  // only need the clipboard API. Use the discriminated-union guard so the
-  // check stays in sync with the AddonActionContext type if it evolves.
-  if (!isFieldBoundContext(ctx) && preset !== 'copy' && preset !== 'paste') {
+  // only need the clipboard API. We use the field-key emptiness as the
+  // discriminator rather than `isFieldBoundContext` because callers (incl.
+  // unit-test fixtures) sometimes hand us a context with `form: null` plus
+  // a working `setValue` writer — orphan in form-tree terms but a perfectly
+  // valid mutate-the-field-value request.
+  if (ctx.field.key === '' && preset !== 'copy' && preset !== 'paste') {
     collaborators.logger.warn(`preset '${String(preset)}' fired without a host field context — ignoring.`);
     return;
   }
