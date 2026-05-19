@@ -1,25 +1,25 @@
-// ============================================
-// MATERIAL FORM DEFAULTS
-// ============================================
-// Opinionated host-framework defaults for Material apps.
-//
-// Library SCSS uses `var(--df-name, structural-fallback)` for layout-essential
-// vars so forms render usefully without any opt-in. These mixins layer in
-// the rest — color, typography, focus accent — that a Material app expects.
-//
-// Usage (in your app's global stylesheet):
-//
-//   @use '@ng-forge/dynamic-forms-material/styles/defaults' as df;
-//
-//   :root {
-//     @include df.apply-material-form-defaults;
-//   }
-//
-//   @media (prefers-color-scheme: dark) {
-//     :root {
-//       @include df.form-material-defaults-dark;
-//     }
-//   }
+/*
+ * Material form defaults.
+ *
+ * Opinionated host-framework defaults for Material apps. Library SCSS uses
+ * `var(--df-name, structural-fallback)` for layout-essential vars so forms
+ * render usefully without any opt-in. These mixins layer in the rest —
+ * color, typography, focus accent — that a Material app expects.
+ *
+ * Usage (in your app's global stylesheet):
+ *
+ *   @use '@ng-forge/dynamic-forms-material/styles/defaults' as df;
+ *
+ *   :root {
+ *     @include df.apply-material-form-defaults;
+ *   }
+ *
+ *   @media (prefers-color-scheme: dark) {
+ *     :root {
+ *       @include df.form-material-defaults-dark;
+ *     }
+ *   }
+ */
 
 @mixin form-grid-defaults {
   --df-grid-columns: 12;

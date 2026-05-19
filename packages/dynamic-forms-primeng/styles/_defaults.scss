@@ -1,19 +1,19 @@
-// ============================================
-// PRIMENG FORM DEFAULTS
-// ============================================
-// Opinionated host-framework defaults for PrimeNG apps.
-//
-// Library SCSS uses `var(--df-name, structural-fallback)` for layout-essential
-// vars so forms render usefully without any opt-in. These mixins layer in
-// the rest — color, typography, focus accent — that a PrimeNG app expects.
-//
-// Usage (in your app's global stylesheet):
-//
-//   @use '@ng-forge/dynamic-forms-primeng/styles/defaults' as df;
-//
-//   :root {
-//     @include df.apply-primeng-form-defaults;
-//   }
+/*
+ * PrimeNG form defaults.
+ *
+ * Opinionated host-framework defaults for PrimeNG apps. Library SCSS uses
+ * `var(--df-name, structural-fallback)` for layout-essential vars so forms
+ * render usefully without any opt-in. These mixins layer in the rest —
+ * color, typography, focus accent — that a PrimeNG app expects.
+ *
+ * Usage (in your app's global stylesheet):
+ *
+ *   @use '@ng-forge/dynamic-forms-primeng/styles/defaults' as df;
+ *
+ *   :root {
+ *     @include df.apply-primeng-form-defaults;
+ *   }
+ */
 
 @mixin form-grid-defaults {
   --df-grid-columns: 12;

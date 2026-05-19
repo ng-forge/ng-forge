@@ -1,19 +1,19 @@
-// ============================================
-// IONIC FORM DEFAULTS
-// ============================================
-// Opinionated host-framework defaults for Ionic apps.
-//
-// Library SCSS uses `var(--df-name, structural-fallback)` for layout-essential
-// vars so forms render usefully without any opt-in. These mixins layer in
-// the rest — color, typography, focus accent — that an Ionic app expects.
-//
-// Usage (in your app's global stylesheet):
-//
-//   @use '@ng-forge/dynamic-forms-ionic/styles/defaults' as df;
-//
-//   :root {
-//     @include df.apply-ionic-form-defaults;
-//   }
+/*
+ * Ionic form defaults.
+ *
+ * Opinionated host-framework defaults for Ionic apps. Library SCSS uses
+ * `var(--df-name, structural-fallback)` for layout-essential vars so forms
+ * render usefully without any opt-in. These mixins layer in the rest —
+ * color, typography, focus accent — that an Ionic app expects.
+ *
+ * Usage (in your app's global stylesheet):
+ *
+ *   @use '@ng-forge/dynamic-forms-ionic/styles/defaults' as df;
+ *
+ *   :root {
+ *     @include df.apply-ionic-form-defaults;
+ *   }
+ */
 
 @mixin form-grid-defaults {
   --df-grid-columns: 12;
