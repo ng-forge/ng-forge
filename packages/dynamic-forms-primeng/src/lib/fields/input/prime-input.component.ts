@@ -62,15 +62,23 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
       @if (ngfa.hasAddons()) {
         <p-inputgroup>
           @for (a of ngfa.prefixAddons(); track $index) {
-            <p-inputgroup-addon>
+            @if (a.kind === 'prime-button') {
               <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-            </p-inputgroup-addon>
+            } @else {
+              <p-inputgroup-addon>
+                <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+              </p-inputgroup-addon>
+            }
           }
           <ng-container *ngTemplateOutlet="control" />
           @for (a of ngfa.suffixAddons(); track $index) {
-            <p-inputgroup-addon>
+            @if (a.kind === 'prime-button') {
               <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-            </p-inputgroup-addon>
+            } @else {
+              <p-inputgroup-addon>
+                <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+              </p-inputgroup-addon>
+            }
           }
         </p-inputgroup>
       } @else {
