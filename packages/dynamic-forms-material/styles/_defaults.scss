@@ -38,7 +38,7 @@
 
   --df-array-item-gap: var(--df-grid-row-gap);
 
-  --df-focus-color: #005fcc;
+  --df-focus-color: var(--mat-sys-primary, #6750a4);
 }
 
 @mixin form-page-defaults {

@@ -382,6 +382,53 @@ Available adapters:
 - \`@ng-forge/dynamic-forms-primeng\` - PrimeNG
 - \`@ng-forge/dynamic-forms-ionic\` - Ionic
 
+### Style Defaults (opt-in)
+
+Each adapter ships an opinionated Sass partial with host-framework colors/typography. Library SCSS uses \`var(--df-name, structural-fallback)\` so forms render usefully without any opt-in — only opt in if you want the adapter-themed look.
+
+\`\`\`scss
+@use '@ng-forge/dynamic-forms-material/styles/defaults' as df;
+
+:root {
+  @include df.apply-material-form-defaults;
+}
+\`\`\`
+
+Substitute \`material\` for \`bootstrap\`, \`primeng\`, or \`ionic\`. Material also ships \`form-material-defaults-dark\` for dark-mode hint/error colors. Ionic ships \`apply-ionic-legacy-error-styles\` that pairs with \`withLegacyStatusClasses()\` (see below).
+
+## Provider Features
+
+\`provideDynamicForm()\` accepts optional \`with*\` feature configurators alongside the adapter field bundle:
+
+### \`withLegacyStatusClasses()\` — opt into legacy ng-* CSS classes
+
+By default, Angular Signal Forms uses its modern class strategy. If your CSS targets \`.ng-touched\`, \`.ng-invalid\`, \`.ng-dirty\`, etc. on form-bound elements, add this feature to wire up the compat-class strategy:
+
+\`\`\`typescript
+import { provideDynamicForm, withLegacyStatusClasses } from '@ng-forge/dynamic-forms';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
+
+export const appConfig = {
+  providers: [
+    provideDynamicForm(
+      ...withMaterialFields(),
+      withLegacyStatusClasses(),
+    ),
+  ],
+};
+\`\`\`
+
+Recommended when consuming Ionic's \`apply-ionic-legacy-error-styles\` mixin, when using Bootstrap themes that style \`is-invalid.ng-touched\`, or any custom CSS that depends on the \`ng-*\` classes.
+
+### Other built-in features
+
+- \`withLoggerConfig(options?)\` — configure or disable the dynamic-form logger
+- \`withEventFormValue()\` — attach the current form value to every dispatched event
+- \`withValueExclusionDefaults(options)\` — set form-wide value exclusion defaults
+- \`withValidationExecutionDefaults(options)\` — set form-wide validation execution defaults (e.g. defer until touched)
+
+All features are exported from \`@ng-forge/dynamic-forms\`.
+
 ## Common Patterns
 
 ### Always End with Submit Button
