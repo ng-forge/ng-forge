@@ -2,62 +2,43 @@
  * Ionic Form Field Styling
  *
  * Customizable styles for Ionic form field components.
- * Override CSS variables to customize:
  *
- * --df-field-gap: gap between label, input, and hint (default: 0.5rem)
- * --df-label-font-weight: label font weight (default: 500)
- * --df-label-color: label text color (default: inherit)
- * --df-hint-color: hint text color (default: --ion-color-medium)
- * --df-hint-font-size: hint text size (default: 0.875rem)
- * --df-error-color: error text color (default: --ion-color-danger)
- * --df-error-font-size: error text size (default: 0.875rem)
+ * CSS variables (with structural fallbacks):
+ *   --df-field-gap          gap between label/input/hint (fallback: 0.5rem)
+ *   --df-label-font-weight  label font weight (fallback: 500)
+ *   --df-label-color        label text color (fallback: inherit)
+ *   --df-hint-color         hint text color (fallback: --ion-color-medium)
+ *   --df-hint-font-size     hint text size (fallback: 0.875rem)
+ *   --df-error-color        error text color (fallback: --ion-color-danger)
+ *   --df-error-font-size    error text size (fallback: 0.875rem)
+ *
+ * For Ionic-themed colors, opt in via
+ * `@use '@ng-forge/dynamic-forms-ionic/styles/defaults'`.
  */
-
-// ============================================
-// CSS Variables (Ionic-themed defaults)
-// ============================================
-
-:host {
-  --df-field-gap: 0.5rem;
-  --df-label-font-weight: 500;
-  --df-label-color: inherit;
-  --df-hint-color: var(--ion-color-medium, #92949c);
-  --df-hint-font-size: 0.875rem;
-  --df-error-color: var(--ion-color-danger, #eb445a);
-  --df-error-font-size: 0.875rem;
-}
-
-// ============================================
-// Field Layout
-// ============================================
 
 .df-ion-field {
   display: flex;
   flex-direction: column;
-  gap: var(--df-field-gap);
+  gap: var(--df-field-gap, 0.5rem);
   width: 100%;
 }
 
 .df-ion-label {
-  font-weight: var(--df-label-font-weight);
-  color: var(--df-label-color);
+  font-weight: var(--df-label-font-weight, 500);
+  color: var(--df-label-color, inherit);
 }
 
 .df-ion-hint {
   display: block;
-  color: var(--df-hint-color);
-  font-size: var(--df-hint-font-size);
+  color: var(--df-hint-color, var(--ion-color-medium, #92949c));
+  font-size: var(--df-hint-font-size, 0.875rem);
 }
 
 .df-ion-error {
   display: block;
-  color: var(--df-error-color);
-  font-size: var(--df-error-font-size);
+  color: var(--df-error-color, var(--ion-color-danger, #eb445a));
+  font-size: var(--df-error-font-size, 0.875rem);
 }
-
-// ============================================
-// Hidden State
-// ============================================
 
 :host([hidden]) {
   display: none !important;

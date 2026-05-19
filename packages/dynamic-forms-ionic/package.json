@@ -25,6 +25,9 @@
     "ng-forge"
   ],
   "sideEffects": true,
+  "exports": {
+    "./styles/defaults": "./styles/_defaults.scss"
+  },
   "engines": {
     "node": ">=20"
   },

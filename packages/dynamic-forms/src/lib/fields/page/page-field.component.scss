@@ -1,19 +1,26 @@
 @use '../../styles/grid-system.scss';
 
+/**
+ * Page field styling.
+ *
+ * Recognized CSS variables (with structural fallbacks):
+ *   --df-page-custom-spacing       row-gap when .df-page-spacing-custom (fallback: 1.5rem)
+ *   --df-page-transition-duration  visibility transition duration (fallback: 0.3s)
+ *   --df-page-transition-timing    visibility transition timing (fallback: ease-in-out)
+ *   --df-page-slide-offset         hidden-state X-offset (fallback: -10px)
+ */
+
 :host {
-  // Page grid layout
   display: grid;
   grid-template-columns: 1fr;
   width: 100%;
-  gap: var(--df-grid-row-gap);
+  gap: var(--df-grid-row-gap, 0.5rem);
   transition: opacity 0.2s ease-in-out;
 
-  // Allow custom spacing for pages
   &.df-page-spacing-custom {
-    --df-grid-row-gap: var(--page-custom-spacing, 1.5rem);
+    --df-grid-row-gap: var(--df-page-custom-spacing, 1.5rem);
   }
 
-  // Page visibility states
   &.df-page-visible {
     opacity: 1;
   }
@@ -25,18 +32,16 @@
   }
 }
 
-// Accessibility improvements
 :host[aria-hidden='true'] {
   pointer-events: none;
   visibility: hidden;
 }
 
-// Animation support (optional - can be overridden by consumers)
 @media (prefers-reduced-motion: no-preference) {
   :host {
     transition:
-      opacity 0.3s ease-in-out,
-      transform 0.3s ease-in-out;
+      opacity var(--df-page-transition-duration, 0.3s) var(--df-page-transition-timing, ease-in-out),
+      transform var(--df-page-transition-duration, 0.3s) var(--df-page-transition-timing, ease-in-out);
   }
 
   :host.df-page-visible {
@@ -44,11 +49,10 @@
   }
 
   :host.df-page-hidden {
-    transform: translateX(-10px);
+    transform: translateX(var(--df-page-slide-offset, -10px));
   }
 }
 
-// Ensure animations are disabled for users who prefer reduced motion
 @media (prefers-reduced-motion: reduce) {
   :host {
     transition: none;

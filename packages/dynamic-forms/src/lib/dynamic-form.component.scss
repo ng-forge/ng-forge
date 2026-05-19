@@ -4,7 +4,7 @@
   // Form grid layout
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--df-grid-row-gap);
+  gap: var(--df-grid-row-gap, 0.5rem);
   width: 100%;
 
   // Ensure each field takes full width by default

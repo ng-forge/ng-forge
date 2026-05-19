@@ -2,67 +2,50 @@
  * Material Form Field Styling
  *
  * Customizable styles for Material form field components.
- * Override CSS variables to customize:
  *
- * --df-field-gap: gap between label, input, and hint (default: 0.5rem)
- * --df-label-font-weight: label font weight (default: 500)
- * --df-label-color: label text color (default: inherit)
- * --df-hint-color: hint text color (default: rgba(0, 0, 0, 0.6))
- * --df-hint-font-size: hint text size (default: 0.875rem)
- * --df-error-color: error text color (default: #f44336)
- * --df-error-font-size: error text size (default: 0.875rem)
+ * CSS variables (with structural fallbacks):
+ *   --df-field-gap          gap between label, input, and hint (fallback: 0.5rem)
+ *   --df-label-font-weight  label font weight (fallback: 500)
+ *   --df-label-color        label text color (fallback: inherit)
+ *   --df-hint-color         hint text color (fallback: rgba(0, 0, 0, 0.6))
+ *   --df-hint-font-size     hint text size (fallback: 0.875rem)
+ *   --df-error-color        error text color (fallback: #f44336)
+ *   --df-error-font-size    error text size (fallback: 0.875rem)
+ *
+ * For Material-themed colors and dark-mode handling, opt in via
+ * `@use '@ng-forge/dynamic-forms-material/styles/defaults'`.
  *
  * Note: Material components primarily use Angular Material's native theming.
  * These variables provide additional customization for non-Material elements.
  */
 
-// ============================================
-// CSS Variables (Material-themed defaults)
-// ============================================
-
 :host {
-  --df-field-gap: 0.5rem;
-  --df-label-font-weight: 500;
-  --df-label-color: inherit;
-  --df-hint-color: rgba(0, 0, 0, 0.6);
-  --df-hint-font-size: 0.875rem;
-  --df-error-color: #f44336;
-  --df-error-font-size: 0.875rem;
-
   display: block;
   width: 100%;
 }
-
-// ============================================
-// Hidden State
-// ============================================
 
 :host([hidden]) {
   display: none !important;
 }
 
-// ============================================
-// Field Layout
-// ============================================
-
 .df-mat-field {
   display: flex;
   flex-direction: column;
-  gap: var(--df-field-gap);
+  gap: var(--df-field-gap, 0.5rem);
   width: 100%;
 }
 
 .df-mat-label {
-  font-weight: var(--df-label-font-weight);
-  color: var(--df-label-color);
+  font-weight: var(--df-label-font-weight, 500);
+  color: var(--df-label-color, inherit);
 }
 
 .df-mat-hint {
-  color: var(--df-hint-color);
-  font-size: var(--df-hint-font-size);
+  color: var(--df-hint-color, rgba(0, 0, 0, 0.6));
+  font-size: var(--df-hint-font-size, 0.875rem);
 }
 
 .df-mat-error {
-  color: var(--df-error-color);
-  font-size: var(--df-error-font-size);
+  color: var(--df-error-color, #f44336);
+  font-size: var(--df-error-font-size, 0.875rem);
 }

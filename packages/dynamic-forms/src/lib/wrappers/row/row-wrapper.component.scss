@@ -9,7 +9,7 @@
 :host {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--df-grid-gap);
+  gap: var(--df-grid-gap, 0.5rem);
   align-items: flex-start;
   width: 100%;
 
@@ -19,8 +19,8 @@
 
   @for $i from 1 through 12 {
     ::ng-deep > .df-col-#{$i} {
-      flex: 0 0 calc(#{math.percentage(math.div($i, 12))} - var(--df-grid-gap) * #{math.div((12 - $i), 12)});
-      max-width: calc(#{math.percentage(math.div($i, 12))} - var(--df-grid-gap) * #{math.div((12 - $i), 12)});
+      flex: 0 0 calc(#{math.percentage(math.div($i, 12))} - var(--df-grid-gap, 0.5rem) * #{math.div((12 - $i), 12)});
+      max-width: calc(#{math.percentage(math.div($i, 12))} - var(--df-grid-gap, 0.5rem) * #{math.div((12 - $i), 12)});
     }
   }
 }
@@ -41,8 +41,8 @@
 :host-context(.df-row-tablet-2col) {
   @media (min-width: 577px) and (max-width: 768px) {
     ::ng-deep > * {
-      flex: 0 0 calc(50% - var(--df-grid-gap) / 2);
-      max-width: calc(50% - var(--df-grid-gap) / 2);
+      flex: 0 0 calc(50% - var(--df-grid-gap, 0.5rem) / 2);
+      max-width: calc(50% - var(--df-grid-gap, 0.5rem) / 2);
     }
   }
 }

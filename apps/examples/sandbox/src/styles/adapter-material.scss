@@ -5,10 +5,29 @@
 @use '@angular/material' as mat;
 @use 'material' as ember-mat;
 @use 'tokens' as *;
+// End users: `@use '@ng-forge/dynamic-forms-material/styles/defaults' as df;`
+// In-workspace consumption uses the package-relative path via includePaths.
+@use 'dynamic-forms-material/styles/defaults' as df;
 
 @import '@angular/cdk/overlay-prebuilt.css';
 
 @include mat.core();
+
+// Opinionated --df-* defaults for Material apps
+:root {
+  @include df.apply-material-form-defaults;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]),
+  :root:not([data-theme]) {
+    @include df.form-material-defaults-dark;
+  }
+}
+
+[data-theme='dark'] {
+  @include df.form-material-defaults-dark;
+}
 
 // Apply ember-themed Material (light default)
 @include ember-mat.material-theme-light();

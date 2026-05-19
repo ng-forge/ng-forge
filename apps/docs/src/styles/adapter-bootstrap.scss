@@ -4,6 +4,8 @@
 
 @use 'ember-bs' as ember-bs;
 @use 'tokens' as *;
+// End users: `@use '@ng-forge/dynamic-forms-bootstrap/styles/defaults' as df;`
+@use 'dynamic-forms-bootstrap/styles/defaults' as df;
 
 // Import Bootstrap with our color overrides
 @use 'bootstrap/scss/bootstrap' with (
@@ -16,6 +18,11 @@
   $link-color: ember-bs.$bs-link-color,
   $link-hover-color: ember-bs.$bs-link-hover-color
 );
+
+// Opinionated --df-* defaults for Bootstrap apps
+:root {
+  @include df.apply-bootstrap-form-defaults;
+}
 
 // Light theme (default)
 :root {
