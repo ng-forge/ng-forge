@@ -17,8 +17,9 @@
  * Ionic doesn't auto-style components when `.ng-invalid` is set, so error
  * styling depends on the `.ng-touched` / `.ng-invalid` compat classes from
  * `withLegacyStatusClasses()`. If you opt into that feature, also include
- * `apply-ionic-legacy-error-styles` at any scope to color components in
- * error state:
+ * `apply-ionic-legacy-error-styles` once at the document level — the mixin
+ * emits unscoped `ion-*` selectors and matches globally regardless of where
+ * it's included:
  *
  *   provideDynamicForm(...withIonicFields(), withLegacyStatusClasses())
  *
@@ -69,40 +70,42 @@
 }
 
 // Error-state colors for Ionic components, keyed on the legacy ng-touched /
-// ng-invalid classes from `withLegacyStatusClasses()`. Include this mixin
-// at the document root (or any scope containing the form) to restore the
-// previous touched-aware invalid styling.
+// ng-invalid classes from `withLegacyStatusClasses()`. The selectors are
+// unscoped `ion-*` element matches — include once at the document level.
+// Fallback values match Ionic's documented defaults so the rules still
+// produce sensible colors if `--ion-color-danger` isn't defined for some
+// reason (e.g. Ionic CSS not loaded yet, or themed-out).
 @mixin apply-ionic-legacy-error-styles {
   ion-input.ng-invalid.ng-touched,
   ion-textarea.ng-invalid.ng-touched {
-    --highlight-color: var(--ion-color-danger);
-    --border-color: var(--ion-color-danger);
+    --highlight-color: var(--ion-color-danger, #eb445a);
+    --border-color: var(--ion-color-danger, #eb445a);
   }
 
   ion-select.ng-invalid.ng-touched {
-    --highlight-color: var(--ion-color-danger);
-    --border-color: var(--ion-color-danger);
+    --highlight-color: var(--ion-color-danger, #eb445a);
+    --border-color: var(--ion-color-danger, #eb445a);
   }
 
   ion-checkbox.ng-invalid.ng-touched {
-    --checkbox-background-checked: var(--ion-color-danger);
-    --border-color: var(--ion-color-danger);
-    --border-color-checked: var(--ion-color-danger);
+    --checkbox-background-checked: var(--ion-color-danger, #eb445a);
+    --border-color: var(--ion-color-danger, #eb445a);
+    --border-color-checked: var(--ion-color-danger, #eb445a);
   }
 
   ion-radio.ng-invalid.ng-touched {
-    --color: var(--ion-color-danger);
-    --color-checked: var(--ion-color-danger);
+    --color: var(--ion-color-danger, #eb445a);
+    --color-checked: var(--ion-color-danger, #eb445a);
   }
 
   ion-range.ng-invalid.ng-touched {
-    --bar-background: var(--ion-color-danger);
-    --knob-background: var(--ion-color-danger);
+    --bar-background: var(--ion-color-danger, #eb445a);
+    --knob-background: var(--ion-color-danger, #eb445a);
   }
 
   ion-toggle.ng-invalid.ng-touched {
-    --track-background: var(--ion-color-danger-tint);
-    --track-background-checked: var(--ion-color-danger);
-    --handle-background-checked: var(--ion-color-danger-contrast);
+    --track-background: var(--ion-color-danger-tint, #f4707d);
+    --track-background-checked: var(--ion-color-danger, #eb445a);
+    --handle-background-checked: var(--ion-color-danger-contrast, #ffffff);
   }
 }
