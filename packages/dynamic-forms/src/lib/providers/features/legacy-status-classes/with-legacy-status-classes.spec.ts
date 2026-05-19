@@ -16,8 +16,12 @@ describe('withLegacyStatusClasses', () => {
 
     // Walk every provider the feature contributes and assert at least one carries the
     // NG_STATUS_CLASSES reference. Catches refactors that swap the compat strategy
-    // for the modern one (current test passing means provideSignalFormsConfig was
-    // called with { classes: NG_STATUS_CLASSES }).
+    // for the modern one.
+    //
+    // Caveat: this probes the `{ useValue: { classes } }` envelope that
+    // `provideSignalFormsConfig` emits today. EnvironmentProviders is intentionally
+    // opaque — if Angular ever switches to a factory or multi-provider shape we'd
+    // need a TestBed-mounted form to assert the strategy via observed DOM behavior.
     const usesCompatClasses = feature.ɵproviders.some((p) => {
       const provider = p as { useValue?: { classes?: unknown } };
       return provider.useValue?.classes === NG_STATUS_CLASSES;
