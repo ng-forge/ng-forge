@@ -64,7 +64,10 @@ describe('IonicInputFieldComponent — addon rendering', () => {
     expect(ionInput.querySelector('span[slot="end"]')).toBeNull();
   });
 
-  it('renders a <span slot="end"> wrapper for a suffix addon', async () => {
+  it('renders ion-button suffix addons OUTSIDE <ion-input> as a flex sibling', async () => {
+    // Interactive ion-button addons render outside <ion-input> because Ionic's
+    // shadow CSS forces ion-button projected through start/end slots to
+    // zero-size / non-interactable. Decorative addons stay inside the slots.
     const suffix: IonButtonAddon = {
       kind: 'ion-button',
       slot: 'suffix',
@@ -79,13 +82,18 @@ describe('IonicInputFieldComponent — addon rendering', () => {
 
     const ionInput = fixture.nativeElement.querySelector('ion-input') as HTMLElement;
     expect(ionInput).toBeTruthy();
-    const slot = ionInput.querySelector('span[slot="end"]');
-    expect(slot).toBeTruthy();
-    expect(slot?.querySelector('df-addon-slot')).toBeTruthy();
+    // The button isn't inside the ion-input slots.
+    expect(ionInput.querySelector('span[slot="end"]')).toBeNull();
     expect(ionInput.querySelector('span[slot="start"]')).toBeNull();
+    // It IS rendered in the wrapping flex row as a sibling of ion-input.
+    const row = fixture.nativeElement.querySelector('.df-ion-input-row') as HTMLElement;
+    expect(row).toBeTruthy();
+    // df-addon-slot for the button is a direct child of the row, NOT nested inside ion-input.
+    const buttonSlots = Array.from(row.children).filter((el) => el.tagName.toLowerCase() === 'df-addon-slot');
+    expect(buttonSlots.length).toBe(1);
   });
 
-  it('renders both wrappers when both prefix and suffix addons are present', async () => {
+  it('renders decorative addons inside <ion-input> and interactive button addons outside', async () => {
     const addons: IonInputAddon[] = [
       { kind: 'ion-icon', slot: 'prefix', icon: 'search-outline' } as IonIconAddon,
       { kind: 'ion-button', slot: 'suffix', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' } as IonButtonAddon,
@@ -96,8 +104,14 @@ describe('IonicInputFieldComponent — addon rendering', () => {
     fixture.detectChanges();
 
     const ionInput = fixture.nativeElement.querySelector('ion-input') as HTMLElement;
+    // Decorative prefix icon stays inside the start slot.
     expect(ionInput.querySelectorAll('span[slot="start"]').length).toBe(1);
-    expect(ionInput.querySelectorAll('span[slot="end"]').length).toBe(1);
+    // Interactive suffix button does NOT live in the end slot — it's outside.
+    expect(ionInput.querySelectorAll('span[slot="end"]').length).toBe(0);
+    // The button is a sibling of ion-input in the flex row.
+    const row = fixture.nativeElement.querySelector('.df-ion-input-row') as HTMLElement;
+    const buttonSlots = Array.from(row.children).filter((el) => el.tagName.toLowerCase() === 'df-addon-slot');
+    expect(buttonSlots.length).toBe(1);
   });
 
   it('keeps the aria-describedby plumbing intact when addons are present', async () => {
